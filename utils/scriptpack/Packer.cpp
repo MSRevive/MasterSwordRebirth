@@ -1,9 +1,10 @@
 #include "stdafx.h"
-#include "../MSShared/encrypt.h"
 #include "iostream"
+#include "../../MSShared/encrypt.h"
+#include "../../MSShared/sharedutil.h"
+#include "../../MSShared/msfileio.h"
+
 using namespace std;
-#include "../MSShared/sharedutil.h"
-#include "../MSShared/msfileio.h"
 
 void StoreFile( char *pszCurrentDir, WIN32_FIND_DATA &wfd );
 //extern HANDLE g_resHandle;
@@ -22,20 +23,22 @@ void PackScriptDir( char *pszName )
 	GroupFile.Open( cWriteFile );
 
 	CMemFile InFile;
-	foreach( i, StoreFiles.size() )
+
+	int i;
+	for (i = 0; StoreFiles.size(); i++)
 	{
 		msstring &FullPath = StoreFiles[i];
-		if( InFile.ReadFromFile( FullPath ) )
+		if (InFile.ReadFromFile(FullPath))
 		{/*
-			CEncryptData1 Data;
-			Data.SetData( InFile.m_Buffer, InFile.m_BufferSize );
-			Data.Encrypt( );*/
+		 CEncryptData1 Data;
+		 Data.SetData( InFile.m_Buffer, InFile.m_BufferSize );
+		 Data.Encrypt( );*/
 
 			char cRelativePath[MAX_PATH];
-			strcpy( cRelativePath, &FullPath[strlen(pszRoot)+1] );
+			strcpy(cRelativePath, &FullPath[strlen(pszRoot) + 1]);
 
-			if( !GroupFile.WriteEntry( cRelativePath, InFile.m_Buffer, InFile.m_BufferSize ) )
-				Print( "Failed to write entry: %s\n", cRelativePath );
+			if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
+				Print("Failed to write entry: %s\n", cRelativePath);
 		}
 	}
 

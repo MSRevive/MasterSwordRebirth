@@ -15,7 +15,7 @@
 #include "windows.h"
 #include "stdio.h"
 #include "packer.h"
-#include "../MSShared/groupfile.h"
+#include "../../MSShared/groupfile.h"
 void Print( char *szFmt, ... );
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
