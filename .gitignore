@@ -168,6 +168,9 @@ UpgradeLog*.htm
 App_Data/*.mdf
 App_Data/*.ldf
 
+# Don't commit windows executables
+*.exe
+
 # =========================
 # Windows detritus
 # =========================
