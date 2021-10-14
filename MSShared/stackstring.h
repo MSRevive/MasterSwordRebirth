@@ -15,7 +15,9 @@ extern "C" char *strlwr(char *str);
 #endif
 
 //Deuplicated from msdebug.h
-#ifdef DEV_BUILD
+#ifdef NOT_HLDLL
+#define msnew new
+#elif DEV_BUILD
 void *operator new(size_t size, const char *pszSourceFile, int LineNum);
 void operator delete(void *ptr, const char *pszSourceFile, int LineNum);
 #define msnew new (__FILE__, __LINE__)

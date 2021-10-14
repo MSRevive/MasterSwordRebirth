@@ -1,0 +1,41 @@
+//-----------------------------------------------------------------------------
+//	SCRIPTPACK.VPC - Compiler which generates exe to generate sc.dll or sc.so!
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTBINDIR	"$SRCDIR\bin"
+
+$Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
+
+$Configuration
+{	
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.\;..\..\dlls;..\..\MSShared"
+		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
+		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
+	}
+}
+
+$Project "scriptpack"
+{
+	$Folder	"Source Files"
+	{
+		$File "..\..\MSShared\encrypt.cpp"
+		$File "..\..\MSShared\GroupFile.cpp"
+		$File "..\..\MSShared\msfileio.cpp"
+		$File "..\..\MSShared\stackstring.cpp"
+		$File "..\..\MSShared\encrypt.h"
+		$File "..\..\MSShared\GroupFile.h"
+		$File "packer.cpp"
+		$File "scriptpack.cpp"
+		$File "packer.h"
+		$File "cbase.h"
+	}
+}

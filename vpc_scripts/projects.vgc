@@ -22,3 +22,8 @@ $Project "dedicated"
 {
 	"dedicated\dedicated.vpc"
 }
+
+$Project "scriptpack"
+{
+	"utils\scriptpack\scriptpack.vpc"
+}
