@@ -83,7 +83,7 @@ void Print(char *szFmt, ...);
 //Groupfile... its just like a pakfile
 void CGroupFile::Open(char *pszFileName)
 {
-	 strncpy(m_FileName,  pszFileName, sizeof(m_FileName) );
+	strncpy(m_FileName,  pszFileName, sizeof(m_FileName) );
 	m_EntryList.clear();
 
 	CMemFile GroupFile;
@@ -121,6 +121,9 @@ void CGroupFile::Open(char *pszFileName)
 		}
 
 		m_IsOpen = true;
+	}
+	else{
+		throw "File not found";
 	}
 }
 

@@ -4,6 +4,7 @@
 */
 
 #include "inc_weapondefs.h"
+
 #include "Script.h"
 #include "../MSShared/GroupFile.h"
 #ifdef VALVE_DLL
@@ -11,6 +12,7 @@
 #include "../MSShared/Global.h"
 #include "MSCentral.h"
 bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
+
 #else
 #include "../cl_dll/MasterSword/CLGlobal.h"
 #include "../cl_dll/hud.h"
@@ -20,6 +22,14 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "../engine/studio.h"
 #include "logfile.h"
 #include "time.h"
+
+//[MiB] - for checking if the "Cheat Engine.exe" process is running
+#include <windows.h>
+#include <stdio.h>
+#include <tchar.h>
+#include <psapi.h>
+#pragma comment(lib, "Psapi")
+//[/MiB]
 
 #undef SCRIPTVAR
 #define SCRIPTVAR GetVar													//A script-wide or global variable
@@ -198,7 +208,14 @@ public:
 		{
 			char cGroupFilePath[MAX_PATH];
 			_snprintf(cGroupFilePath, MAX_PATH, "%s/dlls/sc.dll", EngineFunc::GetGameDir());
-			m_GroupFile.Open(cGroupFilePath);
+			try {
+				m_GroupFile.Open(cGroupFilePath);
+			}
+			catch(...)
+			{
+				MessageBox(NULL, "sc.dll not found", "FATAL ERROR", MB_OK | MB_ICONEXCLAMATION);
+				exit(-1);
+			}
 		}
 
 		m_TotalScripts++;
