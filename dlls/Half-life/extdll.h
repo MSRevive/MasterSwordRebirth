@@ -41,11 +41,12 @@
 #include "windows.h"
 #else // _WIN32
 #define FALSE 0
-#define TRUE (!FALSE)
+#define TRUE 1
 typedef unsigned long ULONG;
 typedef unsigned char BYTE;
+typedef unsigned short WORD;
 typedef int BOOL;
-#define MAX_PATH PATH_MAX
+#define MAX_PATH 260
 #include <limits.h>
 #include <stdarg.h>
 #ifndef min
