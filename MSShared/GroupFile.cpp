@@ -89,6 +89,9 @@ void CGroupFile::Open(char *pszFileName)
 	CMemFile GroupFile;
 	if (GroupFile.ReadFromFile(m_FileName))
 	{
+		int EncryptedHeaderSize;
+		GroupFile.ReadInt( EncryptedHeaderSize );
+
 		CEncryptData1 Data;
 		Data.SetData(GroupFile.m_Buffer, GroupFile.GetFileSize());
 		if (!Data.Decrypt())
@@ -197,9 +200,9 @@ bool CGroupFile::ReadEntry(const char *pszName, byte *pBuffer, unsigned long &Da
 {
 	DWORD dwFailReturn = (DWORD)-1;
 	HANDLE hFile = CreateFile( m_FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL );
-	if( hFile == INVALID_HANDLE_VALUE ) return dwFailReturn; 
+	if( hFile == INVALID_HANDLE_VALUE ) return dwFailReturn;
 	DWORD dwSize = GetFileSize( hFile, NULL ), dwBytesRead;
-	if( dwSize < sizeof(DWORD) ) 
+	if( dwSize < sizeof(DWORD) )
 		{ CloseHandle( hFile ); return dwFailReturn; }
 	DWORD groupEntries;
 	if( !ReadFile( hFile, &groupEntries, sizeof(DWORD), &dwBytesRead, NULL ) )
@@ -278,3 +281,150 @@ void CGroupFile::Flush()
 
 	GroupFile.WriteToFile(m_FileName);
 }
+
+#ifndef NOT_HLDLL
+#include "FileSystem_Shared.h"
+
+CGameGroupFile::CGameGroupFile(): m_hFile( FILESYSTEM_INVALID_HANDLE )
+{
+}
+
+CGameGroupFile::~CGameGroupFile()
+{
+	Close();
+}
+
+bool CGameGroupFile::Open( const char* pszFilename )
+{
+	Close();
+
+	//Load group files from config directories only (avoids loading downloaded content)
+	m_hFile = g_pFileSystem->Open( pszFilename, "rb", "GAMECONFIG" );
+
+	if( FILESYSTEM_INVALID_HANDLE == m_hFile )
+		return false;
+
+	int EncryptedHeaderSize = 0;
+
+	if( sizeof( int ) != g_pFileSystem->Read( &EncryptedHeaderSize, sizeof( int ), m_hFile ) )
+	{
+		Close();
+		return false;
+	}
+
+	/*
+	*	Helper to free memory automatically
+	*	TODO: Should use C++11 std::unique_ptr instead
+	*/
+	struct CleanupMemory
+	{
+		byte* pMemory;
+
+		CleanupMemory( byte* pMemory )
+			: pMemory( pMemory )
+		{
+		}
+
+		~CleanupMemory()
+		{
+			delete pMemory;
+		}
+	};
+
+	CMemFile DecryptedHeaders;
+
+	{
+		CleanupMemory EncryptedHeaderData( msnew byte[ EncryptedHeaderSize ] );
+
+		if( EncryptedHeaderSize != g_pFileSystem->Read( EncryptedHeaderData.pMemory, EncryptedHeaderSize, m_hFile ) )
+		{
+			return false;
+		}
+
+		CEncryptData1 HeaderData;
+		HeaderData.SetData( EncryptedHeaderData.pMemory, EncryptedHeaderSize );
+		if( !HeaderData.Decrypt( ) )
+			return false;
+
+		DecryptedHeaders.SetBuffer( HeaderData.GetData( ), HeaderData.GetDataSize() );
+	}
+
+	int HeaderEntries;
+
+	DecryptedHeaders.ReadInt( HeaderEntries );
+
+	//Read headers
+	for( int i = 0; HeaderEntries; i++ )
+	{
+		cachedentry_t Entry;
+		DecryptedHeaders.Read( &Entry, sizeof(groupheader_t) );
+
+		m_EntryList.add( Entry );
+	}
+
+	//Seek to head so we're not left dangling someplace where it might cause problems
+	g_pFileSystem->Seek( m_hFile, 0, FILESYSTEM_SEEK_HEAD );
+
+	return true;
+}
+
+void CGameGroupFile::Close()
+{
+	if( FILESYSTEM_INVALID_HANDLE != m_hFile )
+	{
+		g_pFileSystem->Close( m_hFile );
+		m_hFile = FILESYSTEM_INVALID_HANDLE;
+	}
+
+	m_EntryList.clear();
+}
+
+bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned long &DataSize )
+{
+	msstring EntryName = pszName;
+	ReplaceChar( EntryName, '\\', '/' );
+
+	for( int i = 0; m_EntryList.size(); i++ )
+	{
+		groupheader_t &Entry = m_EntryList[i];
+		if( Entry.FileName != EntryName )
+			continue;
+
+		DataSize = Entry.DataSize;
+
+		//Decrypt on demand
+		if( pBuffer )
+		{
+			g_pFileSystem->Seek( m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD );
+
+			byte* pEncryptedBuffer = msnew byte[ Entry.DataSizeEncrypted ];
+
+			bool bSuccess = false;
+
+			if( Entry.DataSizeEncrypted == g_pFileSystem->Read( pEncryptedBuffer, Entry.DataSizeEncrypted, m_hFile ) )
+			{
+				CEncryptData1 Data( pEncryptedBuffer, Entry.DataSizeEncrypted );
+
+				if( Data.Decrypt( ) )
+				{
+					//TODO: could check if DataSize matches Data.GetDataSize() here - Solokiller
+					memcpy( pBuffer, Data.GetData(), DataSize );
+
+					bSuccess = true;
+				}
+			}
+
+			delete pEncryptedBuffer;
+
+			//Seek to head so we're not left dangling someplace where it might cause problems
+			g_pFileSystem->Seek( m_hFile, 0, FILESYSTEM_SEEK_HEAD );
+
+			return bSuccess;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+#endif
