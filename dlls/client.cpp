@@ -483,6 +483,43 @@ void ClientCommand2(edict_t *pEntity)
 			pPlayer->Speak(Text, (speech_type)SayType);
 		}
 	}
+	else if (FStrEq(pcmd, CVAR_ALERTSERVER_CMD))
+	{
+		int vParm = 1;
+		msstring vsCvar = CMD_ARGV(vParm++);
+		msstring vsOldValue = CMD_ARGV(vParm++);
+		msstring vsNewValue = CMD_ARGV(vParm++);
+		bool bInit = atoi(CMD_ARGV(vParm++)) == 1;
+		int vType = atoi(CMD_ARGV(vParm++));
+
+		switch(vType)
+		{
+			case CVAR_ALERTSERVERTYPE_PLAYERSCRIPT:
+				CVAR_ALERTSCRIPT(pPlayer, vsCvar, vsOldValue, vsNewValue, bInit);
+				break;
+			case CVAR_ALERTTYPE_HARDCODE:
+				if (vsCvar == "ms_glowcolor")
+				{
+					#define FIX_COORD(v) min(max(v , 0), 255)
+					Vector vVec = StringToVec( vsNewValue );
+					Vector vFixed;
+
+					vFixed.x = FIX_COORD( vVec.x );
+					vFixed.y = FIX_COORD( vVec.y );
+					vFixed.z = FIX_COORD( vVec.z );
+
+					msstring vsFixed = VecToString( vFixed );
+					if (vFixed != vVec)
+					{
+						ClientPrint(pPlayer->pev, at_console, UTIL_VarArgs( "%s is an invalid color, using %s instead\n", VecToString(vVec), vsFixed.c_str()));
+					}
+
+					pPlayer->mGlowColor = vFixed;
+					#undef FIX_COORD
+				}
+				break;
+		}
+	}
 	else if (FStrEq(pcmd, "setsay"))
 	{
 		pPlayer->m_SayType = atoi(CMD_ARGV(1));
