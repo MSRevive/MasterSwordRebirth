@@ -14,6 +14,21 @@
 extern "C" char *strlwr(char *str);
 #endif
 
+#ifndef STD_MAP
+#define STD_MAP
+#include <map>
+#endif
+
+#ifndef STD_LIST
+#define STD_LIST
+#include <list>
+#endif
+
+#ifndef STD_SET
+#define STD_SET
+#include <set>
+#endif
+
 //Deuplicated from msdebug.h
 #ifdef NOT_HLDLL
 #define msnew new
@@ -150,6 +165,7 @@ public:
 //mstring - A fast string with features... no dynamic allocation
 //-Dogg
 #define MSSTRING_SIZE 256
+#define MSSTRING_MAXLEN (MSSTRING_SIZE-1)
 #define msstring_error ((size_t)-1)
 
 typedef const char *msstring_ref;
@@ -219,7 +235,7 @@ public:
 	str256( const msstring_ref a ) { init( ); msstring::operator = ( a ); }
 	str256( const msstring_ref a, size_t length ) { init( ); append( a, length ); }
 	str256( const msstring &a ) { init( ); msstring::operator = ( a ); }
-	
+
 	void init( ) { data = m_Data; }
 	char m_Data[256];
 };
@@ -667,5 +683,7 @@ private:
 		return -1;
 	}
 };
+
+typedef std::map<msstring,msstring> msstringstringhash;
 
 #endif STACKSTRING_H

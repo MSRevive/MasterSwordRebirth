@@ -52,6 +52,7 @@ msstring MSGlobals::MapTitle;						//Thothie SEP2007a
 msstring MSGlobals::MapDesc;						//Thothie SEP2007a
 msstring MSGlobals::MapWeather;						//Thothie SEP2007a
 msstring MSGlobals::HPWarn;							//Thothie SEP2007a
+int MSGlobals::SpawnLimit=0; //Thothie OCT2016_18 spawnlimiter
 float MSGlobals::maxviewdistance;					//Thothie JAN2010_23
 //int MSGlobals::FakeHP;	//DEC2007a (AUG2011_17 - switched to cvar)
 msstring MSGlobals::ServerName;

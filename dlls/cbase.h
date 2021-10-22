@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -247,6 +247,13 @@ public:
 	//Choice between inserting or overwriting
 };
 
+typedef msstringlist msscriptarray;
+typedef std::map<msstring,msscriptarray> msscriptarrayhash;
+typedef msstringstringhash msscripthash;
+typedef std::map<msstring,msscripthash> msscripthashhash;
+typedef std::set<msstring> msscriptset;
+typedef std::map<msstring,msscriptset> msscriptsethash;
+
 //MiB JAN2010_27
 struct scriptarray_t
 {
@@ -270,6 +277,10 @@ struct modelprecachelist_t
 	msstring PrecacheName;
 };
 
+msscriptarray * GetScriptedArrayFromHashMap(msscriptarrayhash & vArrayHashMap, msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL);
+msscripthash * GetScriptedHashMapFromHashMap(msscripthashhash & vHashMapHashMap, msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL);
+msscriptset * GetScriptedSetFromHashMap(msscriptsethash & vSetHashMap, msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL);
+
 class CBaseEntity
 {
 public:
@@ -280,7 +291,11 @@ public:
 	string_i ScriptFName;
 	mslist<scriptfile_t> filesOpen;		  //MiB FEB2008a - file i/o
 	mslist<scriptfile_t> filesOpenFN;	  //MiB FEB2008a - file i/o
-	mslist<scriptarray_t> scriptedArrays; //MiB JAN2010_27 - Arrays
+
+	msscriptarrayhash scriptedArrays; //MiB JAN2010_27 - Arrays new type.
+	msscripthashhash mScriptedHashes; // MiB SEP2019_23 - Scripted Hashes
+	msscriptsethash mScriptedSets; // MiB SEP2019_23 - Scripted sets
+
 	scriptflags_t m_scriptflags;		  //Thothie JAN2013_02 - Scripted Flags
 	virtual bool IsMSItem() { return false; }
 	virtual int MSProperties() { return 0; }														//Useful for identification
@@ -312,6 +327,22 @@ public:
 	virtual void StoreEntity(CBaseEntity *pEntity, enttype_e EntType);
 	virtual CBaseEntity *RetrieveEntity(enttype_e EntType);
 	virtual CBaseEntity *RetrieveEntity(const char *pszName);
+	Vector DetermineOrigin(msstring &vsOrigin);
+
+	msscriptarray * GetScriptedArray(msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL)
+	{
+			return GetScriptedArrayFromHashMap(scriptedArrays, vsName, bAllowCreate, pbExisted);
+	}
+
+	msscripthash * GetScriptedHashMap(msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL)
+	{
+			return GetScriptedHashMapFromHashMap(mScriptedHashes, vsName, bAllowCreate, pbExisted);
+	}
+
+	msscriptset * GetScriptedSet(msstring & vsName, bool bAllowCreate = false, bool * pbExisted = NULL)
+	{
+			return GetScriptedSetFromHashMap(mScriptedSets, vsName, bAllowCreate, pbExisted);
+	}
 
 	//Properties for both NPCs and weapons
 	float SndVolume, m_Volume, m_Weight;

@@ -4,8 +4,12 @@
 #include "time.h"
 
 #ifndef VALVE_DLL
+#include "../dlls/SVGlobals.h"
+#else
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
+#include "../dlls/Player/Player.h"
+extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
@@ -62,9 +66,9 @@ void CMSStream::open(msstring_ref FileName)
 
 void CMSStream::open(msstring_ref FileName, int mode)
 {
-	/* Mode:  
-	0 - Basic open  
-	1 - Appending open  
+	/* Mode:
+	0 - Basic open
+	1 - Appending open
 	*/
 	switch (mode)
 	{
@@ -364,6 +368,148 @@ extern "C" char *strlwr(char *str)
 #endif
 
 /*bool string_i::operator == ( msstring_ref a ) const
-{ 
-	return FStrEq( EngineFunc::GetString( m_string ), a ) ? true : false; 
+{
+	return FStrEq( EngineFunc::GetString( m_string ), a ) ? true : false;
 }*/
+
+void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
+{
+  	va_list argptr;
+  	static char	string[1024];
+
+  	va_start (argptr, szFmt);
+
+  	vsprintf (string, szFmt,argptr);
+  	va_end (argptr);
+
+    msstring vsShortTitle = "[";
+    vsShortTitle += vsUnqeTag + "] ";
+
+    #ifdef VALVE_DLL
+        vsShortTitle += "Server";
+    #else
+        vsShortTitle += "Client";
+    #endif
+
+    msstring vsTitle = "[MSC_ERROR]";
+    vsTitle += vsShortTitle;
+
+    msstring vsAsOne = vsTitle + ": " + string + "\n";
+    if (vFlags & ERRORPRINT_LOG)
+    {
+        logfile << vsAsOne << endl;
+    }
+    if (vFlags & ERRORPRINT_CONSOLE)
+    {
+        #ifndef VALVE_DLL
+		    ALERT( at_console, vsAsOne.c_str() );
+	    #else
+		    ConsolePrint( vsAsOne.c_str() );
+	    #endif
+    }
+    if (vFlags & ERRORPRINT_INFOMSG)
+    {
+        #ifndef VALVE_DLL
+		    SendHUDMsgAll(vsShortTitle, string);
+	    #else
+		    player.SendHUDMsg(vsShortTitle, string);
+	    #endif
+    }
+    if (vFlags & ERRORPRINT_CVAR)
+    {
+        CVAR_SET_STRING("ms_error_tracker", vsShortTitle + string);
+    }
+    if (vFlags & ERRORPRINT_POPUP)
+    {
+        MessageBox(NULL, string, vsShortTitle.c_str(), MB_OK);
+    }
+}
+
+//Needed to support sound.cpp
+//#include "talkmonster.h"
+//float	CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: used so that two NPCs don't talk at once
+
+msscriptarray * GetScriptedArrayFromHashMap(msscriptarrayhash &vArrayHashMap, msstring &vsName, bool bAllowCreate, bool *pbExisted)
+{
+    msscriptarrayhash::iterator iArray = vArrayHashMap.find( vsName );
+
+    if (iArray == vArrayHashMap.end())
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = false;
+        }
+        if (bAllowCreate)
+        {
+            msscriptarray               vArray;
+            vArrayHashMap[vsName] = vArray;
+            return &vArrayHashMap[vsName];
+        }
+    }
+    else
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = true;
+        }
+        return &iArray->second;
+    }
+
+    return NULL;
+}
+
+msscripthash * GetScriptedHashMapFromHashMap(msscripthashhash &vHashMapHashMap, msstring &vsName, bool bAllowCreate, bool *pbExisted)
+{
+    msscripthashhash::iterator iHash = vHashMapHashMap.find( vsName );
+    if (iHash == vHashMapHashMap.end())
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = false;
+        }
+        if (bAllowCreate)
+        {
+            msscripthash vHashMap;
+            vHashMapHashMap[vsName] = vHashMap;
+            return &vHashMapHashMap[vsName];
+        }
+    }
+    else
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = true;
+        }
+        return &iHash->second;
+    }
+
+    return NULL;
+}
+
+msscriptset * GetScriptedSetFromHashMap(msscriptsethash &vScriptHashMap, msstring &vsName, bool bAllowCreate, bool *pbExisted)
+{
+    msscriptsethash::iterator iSet = vScriptHashMap.find(vsName);
+    if (iSet == vScriptHashMap.end())
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = false;
+        }
+        if (bAllowCreate)
+        {
+            msscriptset vSet;
+            vScriptHashMap[vsName] = vSet;
+            return &vScriptHashMap[vsName];
+        }
+    }
+    else
+    {
+        if (pbExisted)
+        {
+            (*pbExisted) = true;
+        }
+        return &iSet->second;
+    }
+
+    return NULL;
+}

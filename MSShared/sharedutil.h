@@ -6,6 +6,16 @@
 //Extentions
 #define SCRIPT_EXT ".script"
 
+#ifdef WIN32
+#define DEFAULT_SO_EXT ".dll"
+#elif defined( __APPLE__ )
+#define DEFAULT_SO_EXT ".dylib"
+#elif defined( __linux__ )
+#define DEFAULT_SO_EXT ".so"
+#else
+#error "Unknown target platform, no known shared library extension"
+#endif
+
 typedef unsigned char  uchar;
 typedef unsigned short ushort;
 typedef unsigned int   uint;
@@ -31,17 +41,17 @@ public:
 	float r, g, b, a;
 };
 
-#define MACRO_CREATEITEM( item ) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)))
+#define MACRO_CREATEITEM(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)))
 //#define clrmem( a ) memset( &a, 0, sizeof(a) );
-int numofdigits( int x );
-void Print( char *szFmt, ... );
+int numofdigits(int x);
+void Print(char *szFmt, ...);
 #define FloatToString( a ) UTIL_VarArgs( "%.2f", a )
 #define IntToString( a ) UTIL_VarArgs( "%i", a )
 #ifndef max
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#define max(a,b) (((a) > (b)) ? (a) : (b))
 #endif
 #ifndef min
-#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
 #endif
 
 #ifndef _WIN32
@@ -53,7 +63,7 @@ void Print( char *szFmt, ... );
 #include "mem_encrypt.h"
 
 #ifdef VECTOR_H
-	msstring_ref VecToString( Vector &Vec );			//Converts a vector to a string of format "(x,y,z)"
+	msstring_ref VecToString( const Vector &Vec );			//Converts a vector to a string of format "(x,y,z)"
 	Vector StringToVec( msstring_ref String );			//Converts a string of the format "(x,y)" or "(x,y,z)" to a Vector class
 	Color4F StringToColor( msstring_ref String );		//Converts a string of the format "(r,g,b,a)" Color class
 	Vector GetRelativePos( Vector &Ang, Vector &Dir );	//Uses Dir.x for right-left, Dir.y for forward-back, and Dir.z as up-down, relative to the angle
@@ -85,5 +95,12 @@ void dbgtxt( msstring_ref Text );
 	};
 	#include <poppack.h>
 #endif
+
+#define ERRORPRINT_LOG      (1 << 0)
+#define ERRORPRINT_CONSOLE  (1 << 1)
+#define ERRORPRINT_INFOMSG  (1 << 2)
+#define ERRORPRINT_CVAR     (1 << 3)
+#define ERRORPRINT_POPUP    (1 << 4)
+void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...);
 
 #endif SHAREDUTIL_H

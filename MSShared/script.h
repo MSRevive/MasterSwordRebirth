@@ -181,7 +181,7 @@ public:
 	SCRIPTCMDSCPP_CMDS( GiveExp );
 	SCRIPTCMDSCPP_CMDS( GiveHPMP );
 	SCRIPTCMDSCPP_CMDS( Gravity );
-    SCRIPTCMDSCPP_CMDS( HashMap );
+  SCRIPTCMDSCPP_CMDS( HashMap );
 	SCRIPTCMDSCPP_CMDS( HelpTip );
 	SCRIPTCMDSCPP_CMDS( HitMulti );
 	SCRIPTCMDSCPP_CMDS( HudIcon );
@@ -190,7 +190,7 @@ public:
 	SCRIPTCMDSCPP_CMDS( ItemRestrict );
 	SCRIPTCMDSCPP_CMDS( Kill );
 	SCRIPTCMDSCPP_CMDS( LocalPanel ); // MiB MAR2015_01 [LOCAL_PANEL] - Function for local panel options
-    SCRIPTCMDSCPP_CMDS( MarkDmg );
+  SCRIPTCMDSCPP_CMDS( MarkDmg );
 	SCRIPTCMDSCPP_CMDS( MathSet );
 	SCRIPTCMDSCPP_CMDS( Message );
 	SCRIPTCMDSCPP_CMDS( MessageAll );
@@ -225,7 +225,7 @@ public:
 	//SCRIPTCMDSCPP_CMDS( SaveAllNow );
 	//SCRIPTCMDSCPP_CMDS( SaveNow );
 	SCRIPTCMDSCPP_CMDS( ServerCmd );
-    SCRIPTCMDSCPP_CMDS( Set );
+  SCRIPTCMDSCPP_CMDS( Set );
 	SCRIPTCMDSCPP_CMDS( SetAlive );
 	SCRIPTCMDSCPP_CMDS( SetAngle );
 	SCRIPTCMDSCPP_CMDS( SetAtkSpeed );
@@ -358,8 +358,8 @@ public:
 	SCRIPTCPP_GETTER( ReplaceOrInsert );
 	SCRIPTCPP_GETTER( ScanShape );
 	SCRIPTCPP_GETTER( SearchString );
-    SCRIPTCPP_GETTER( ShapeCylinder );
-    SCRIPTCPP_GETTER( ShapeRect );
+  SCRIPTCPP_GETTER( ShapeCylinder );
+  SCRIPTCPP_GETTER( ShapeRect );
 	SCRIPTCPP_GETTER( ShapeSphere );
 	SCRIPTCPP_GETTER( SortEntList );
 	SCRIPTCPP_GETTER( StrAdd );
@@ -394,15 +394,15 @@ public:
 
 #undef SCRIPTVAR
 #define SCRIPTVAR GetFirstScriptVar
-bool GetString( char *Return, const char *sentence, int start, char *endchars );
-void ReplaceChar( char *pString, char org, char dest );
-float GetNumeric( const char *pszText );
+bool GetString(char *Return, size_t size, const char *sentence, int start, char *endchars);
+void ReplaceChar(char *pString, char org, char dest);
+float GetNumeric(const char *pszText);
 
 
 //[MiB NOV2007a]
-void CheckIfUsingCE();
+//void CheckIfUsingCE();
 //static mslist<scriptarray_t> GlobalScriptArrays; // MiB JUN2010_25
-void CheckProcess( DWORD processID );
+//void CheckProcess( DWORD processID );
 //[/MiB]
 
 enum scriptconatiner_e {

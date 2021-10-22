@@ -1,7 +1,7 @@
 /***
 *
 *	Copyright (c) 2000, Kenneth "Dogg" Early.
-*	
+*
 *	Email kene@maverickdev.com or
 *		  l33tdogg@hotmail.com
 *
@@ -77,10 +77,10 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 }
 
 //CGenericItem *GetGenericItemByID( int ID ) { return CGenericItemMgr::GetGlobalGenericItemByID( ID ); }
-/*CGenericItem *CGenericItemMgr::GetGlobalGenericItemByID( int Type ) 
+/*CGenericItem *CGenericItemMgr::GetGlobalGenericItemByID( int Type )
 	{
-		 for (int i = 0; i < m_Items.size(); i++) 
-		{	
+		 for (int i = 0; i < m_Items.size(); i++)
+		{
 			GenItem_t &GlobalItem = m_Items[i];
 			if( GlobalItem.pItem->iWeaponType == Type )
 				return GlobalItem.pItem;
@@ -293,6 +293,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		m_ScriptCommands.add(scriptcmdname_t("listcontents"));
 		m_ScriptCommands.add(scriptcmdname_t("fall"));
 		m_ScriptCommands.add(scriptcmdname_t("setdmg"));
+		m_ScriptCommands.add(scriptcmdname_t("setmodelskin"));
 	}
 
 	dbg("Load Script items.txt");
@@ -312,13 +313,8 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 
 		//If Public build or /scripts/items.txt failed in the dev build, try /dlls/sc.dll
-		char cGameDir[MAX_PATH], cGroupFilePath[MAX_PATH];
-#ifdef VALVE_DLL
-		GET_GAME_DIR(cGameDir);
-#else
-		strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory(), MAX_PATH);
-#endif
-		_snprintf(cGroupFilePath, MAX_PATH, "%s/dlls/sc.dll", cGameDir);
+		char cGroupFilePath[MAX_PATH];
+		sprintf( cGroupFilePath, "dlls/sc.dll" );
 
 		//CGroupFile &GroupFile = *msnew CGroupFile();
 		CGroupFile GroupFile;
@@ -364,7 +360,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 	dbg("Load global items");
 
-	while (GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n"))
+	while (GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")) //GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
 	{
 		n = i;
 		i += strlen(cString) + 1;
@@ -385,13 +381,15 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		NewGlobalItem.Name = cString;
 
-		CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
+		CGenericItem *pNewItem = ::msnew CGenericItem;
+		NewGlobalItem.pItem = pNewItem;
+		//CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
 		//MSZeroClassMemory( &NewItem, sizeof(CGenericItem) ); New memory routines automaticly initialize memory
 
 		CGenericItemMgr::AddGlobalItem(NewGlobalItem);
 
 		//NewItem.iWeaponType = 99 + CGenericItemMgr::ItemCount( ); //First must be 100
-		 strncpy(NewItem.m_Name,  cString, sizeof(NewItem.m_Name) );
+		strncpy(NewItem.m_Name,  cString, sizeof(NewItem.m_Name) );
 		NewItem.ItemName = cString;
 
 		dbg(msstring("Load script: ") + cItemFileName);
@@ -788,7 +786,7 @@ void CGenericItem::Idle(void)
 #endif
 
 /*
-	GiveTo - Called whenever an item is transferred to a player from the 
+	GiveTo - Called whenever an item is transferred to a player from the
 			 ground, a corpse, or the hand or body of another player.
 */
 bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSound, bool fPutItemsAway)
@@ -2263,8 +2261,8 @@ CGenericItem *ReadGenericItem(bool fAllowCreateNew)
 		pItem->Spell_TimePrepare = READ_COORD();
 		pItem->Spell_CastSuccess = READ_BYTE() ? true : false;
 	}
-	/*logfile << "Server Caused Creation of New Item: " 
-          << MSString(pItem->DisplayName) << " (" << pItem->m_iId 
+	/*logfile << "Server Caused Creation of New Item: "
+          << MSString(pItem->DisplayName) << " (" << pItem->m_iId
          << ")\r\n";*/
 	return pItem;
 }

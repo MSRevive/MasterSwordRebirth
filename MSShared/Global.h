@@ -65,6 +65,7 @@ public:
 	static class IScripted *GameScript;		//Controls global events, like weather, etc
 	static char Buffer[32768];				//A huge buffer for text or anything else
 	static int ClEntities[CLPERMENT_TOTAL]; //Index of the permanent client entities.  Must be allocated on server & client
+	static int SpawnLimit; //Thothie OCT2016_18 spawnlimiter
 
 	static void DLLAttach(HINSTANCE hinstDLL); //Client & Server - Called on dll load
 	static void DLLDetach();				   //Client & Server - Called on new unload
