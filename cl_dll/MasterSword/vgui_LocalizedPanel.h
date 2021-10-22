@@ -41,7 +41,7 @@ public:
 	void SetServerEntString(msstring sEntString);	  // Set the server-side entity for callback, if needed
 	void SetClientScriptedEntity(IScripted *pEntity); // Set the client-side entity for callback, if needed
 
-	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData); // Add a button with given info
+	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData = ""); // Add a button with given info
 	void PositionButtons(void);																		   // Automatically positions all buttons based on the total number
 	void ClearButtons(void);																		   // Clear all buttons
 	void DoCallback(bool bDoClose, int callback, msstring sCallback, msstring sCallbackData = "");	// Handle button clicked
