@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -1000,6 +1000,11 @@ int __MsgFunc_SetProp(const char *pszName, int iSize, void *pbuf)
 		{
 			player.m_SpellList.clearitems();
 		}
+		break;
+	}
+	case PROP_ANIMSPEEDADJ:
+	{
+		player.m_AnimSpeedAdj = READ_FLOAT();
 		break;
 	}
 	}

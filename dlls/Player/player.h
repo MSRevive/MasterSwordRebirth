@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -280,6 +280,7 @@ enum propmsg_e
 	PROP_TITLE,
 	PROP_NAME,
 	PROP_SPELL,
+	PROP_ANIMSPEEDADJ,
 };
 
 //A genericitem struct that holds _all_ neccesary item info.
@@ -435,6 +436,7 @@ public:
 	int m_ClientAttackNum;					  //Current attack the player is performing
 	float m_GaitFramerateGauge;				  //If I'm moving at this speed, play my gait at normal (100%) fps. Otherwide adjust fps using a ratio
 	quickslot_t m_QuickSlots[MAX_QUICKSLOTS]; //Quickslots for spells, items
+	float m_AnimSpeedAdj;
 
 	//unused at the moment:
 	float m_TimeCanSteal;

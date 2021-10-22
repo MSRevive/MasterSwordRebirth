@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -149,7 +149,7 @@ void ClientDisconnect(edict_t *pEntity)
 
 	/*CSound *pSound;
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
-	// since this client isn't around to think anymore, reset their sound. 
+	// since this client isn't around to think anymore, reset their sound.
 	if ( pSound )
 		pSound->Reset();*/
 
@@ -516,6 +516,16 @@ void ClientCommand2(edict_t *pEntity)
 			pPlayer->CallScriptEvent(leapDir, &parms);
 		}
 	}
+	else if (FStrEq(pcmd, "dosetanimatkadj"))
+	{
+		if ( CMD_ARGC() == 2 )
+		{
+				pPlayer->m_AnimSpeedAdj = atof(CMD_ARGV(1));
+				msstringlist parms;
+				parms.add( msstring(CMD_ARGV(1)) );
+				pPlayer->CallScriptEvent( "game_cl_setatkspeed", &parms );
+		}
+	}
 	//MiB JUN2010_17 - Allow choosing of what arrow to fire
 	else if (FStrEq(pcmd, "choosingarrow"))
 	{
@@ -555,7 +565,7 @@ void ClientCommand2(edict_t *pEntity)
 
 	/*else if ( FStrEq(pcmd, "fullupdate" ) )
 	{
-		GetClassPtr((CBasePlayer *)pev)->ForceClientDllUpdate(); 
+		GetClassPtr((CBasePlayer *)pev)->ForceClientDllUpdate();
 	}*/
 	else if (FStrEq(pcmd, "char") && CMD_ARGV(1)) //JAN2010_09 Thothie - Fixed sploit here where other character could be accessed instant - may also fix dbl click bug
 	{
@@ -1035,7 +1045,7 @@ void ClientCommand2(edict_t *pEntity)
 			WRITE_BYTE( 50 ); // brightness
 			WRITE_BYTE( 10 ); // life
 			WRITE_BYTE( 1 );
-		MESSAGE_END();		
+		MESSAGE_END();
 	}*/
 
 	else if (FStrEq(pcmd, ATTACK_COMMAND))
@@ -1135,7 +1145,7 @@ void ClientCommand2(edict_t *pEntity)
 		//else
 		{
 			MSErrorConsoleText( "ClientCommand()", "'hand' cmd failed" );
-			//Switch hands failed... 
+			//Switch hands failed...
 			//Since it succeeded on the client, there's an inconsistancy.
 			//Fix it by forcing an update
 			pPlayer->m_ClientCurrentHand = -1;
@@ -1192,7 +1202,7 @@ void ClientCommand2(edict_t *pEntity)
 			{
 				static msstringlist Params;
 				Params.clearitems( );
-				 for (int i = 0; i < CMD_ARGC(); i++) 
+				 for (int i = 0; i < CMD_ARGC(); i++)
 				{
 					if ( i > 2 )
 					{
@@ -2243,8 +2253,8 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	//  make sure that we interpolate it's position on the client if it moves
 	/*if ( !player &&
 		 ent->v.animtime &&
-		 ent->v.velocity[ 0 ] == 0 && 
-		 ent->v.velocity[ 1 ] == 0 && 
+		 ent->v.velocity[ 0 ] == 0 &&
+		 ent->v.velocity[ 1 ] == 0 &&
 		 ent->v.velocity[ 2 ] == 0 )
 	{
 		state->eflags |= EFLAG_SLERP;
@@ -2453,7 +2463,7 @@ void Entity_FieldInit(struct delta_s *pFields)
 ==================
 Entity_Encode
 
-Callback for sending entity_state_t info over network. 
+Callback for sending entity_state_t info over network.
 FIXME:  Move to script
 ==================
 */
@@ -2560,7 +2570,7 @@ void Player_FieldInit(struct delta_s *pFields)
 ==================
 Player_Encode
 
-Callback for sending entity_state_t for players info over network. 
+Callback for sending entity_state_t for players info over network.
 ==================
 */
 //Dogg - decides WHAT NOT to send about a player entity
@@ -2643,7 +2653,7 @@ void Custom_Entity_FieldInit(struct delta_s *pFields)
 ==================
 Custom_Encode
 
-Callback for sending entity_state_t info ( for custom entities ) over network. 
+Callback for sending entity_state_t info ( for custom entities ) over network.
 FIXME:  Move to script
 ==================
 */
@@ -2930,7 +2940,7 @@ AllowLagCompensation
  The game .dll should return 1 if lag compensation should be allowed ( could also just set
   the sv_unlag cvar.
  Most games right now should return 0, until client-side weapon prediction code is written
-  and tested for them ( note you can predict weapons, but not do lag compensation, too, 
+  and tested for them ( note you can predict weapons, but not do lag compensation, too,
   if you want.
 ================================
 */

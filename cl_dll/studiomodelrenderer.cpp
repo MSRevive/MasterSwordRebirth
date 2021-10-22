@@ -111,7 +111,7 @@ CStudioModelRenderer::CStudioModelRenderer(void)
 	m_pRenderModel = NULL;
 	//m_MirrorRender		= false;
 	/*AngleMatrix( g_vecZero, m_FlipMatrix );
-	float scalemat[ 3 ][ 4 ] = 
+	float scalemat[ 3 ][ 4 ] =
 	{
 		-1,  0, 0, 0,
 		 0,  1, 0, 0,
@@ -321,7 +321,7 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion(int frame, float s, mstudiobo
 			{
 				if( angle[0] > M_PI ) angle[0] -= M_PI*2;
 				if( angle[0] < -M_PI ) angle[0] += M_PI*2;
-				 for (int j = 0; j < 2; j++) 
+				 for (int j = 0; j < 2; j++)
 					if( panim->offset[j+1+3] == 0 )
 					{
 						angle[j+1] *= -1;
@@ -614,7 +614,7 @@ void CStudioModelRenderer::StudioSetUpTransform(int trivial_accept)
 			Ent.baseline.vuser1 = g_vecZero;
 		}
 	}
-	/*else if ( Ent.curstate.movetype != MOVETYPE_NONE ) 
+	/*else if ( Ent.curstate.movetype != MOVETYPE_NONE )
 	{
 		VectorCopy( Ent.angles, angles );
 	}*/
@@ -1364,14 +1364,21 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			{
 				RenderEnt.curstate.sequence = pItem->m_ViewModelAnim;
 				RenderEnt.curstate.frame = 0;
-				if (!pItem->m_ViewModelAnimSpeed)
+				RenderEnt.curstate.framerate = 1.0f;
+				if (pItem->m_ViewModelAnimSpeed)
 				{
-					RenderEnt.curstate.framerate = 1.0f;
+					RenderEnt.curstate.framerate *= pItem->m_ViewModelAnimSpeed;
 				}
-				else
+
+				if (player.m_AnimSpeedAdj && player.m_AnimSpeedAdj != 1 && pItem->m_Scripts.size() && pItem->m_Scripts[0]->m.ScriptFile.len())
 				{
-					RenderEnt.curstate.framerate = pItem->m_ViewModelAnimSpeed;
+					msstring vsItemName = pItem->m_Scripts[0]->m.ScriptFile;
+					if (!vsItemName.starts_with("shield") && !vsItemName.starts_with("bow") && !vsItemName.starts_with("mana") && !vsItemName.starts_with("health") && !vsItemName.starts_with("item") && !atoi(pItem->GetFirstScriptVar("ITEM_IGNORE_SPEED_ADJUST"))
+					{
+						RenderEnt.curstate.framerate *= player.m_AnimSpeedAdj;
+					}
 				}
+
 				RenderEnt.curstate.animtime = m_clTime;
 				pItem->m_ViewModelAnim = -1; //Set to -1 so I keep using the same one next frame.  If the item sets this again, I'll restart my anim
 			}
@@ -1867,7 +1874,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t *pplayer)
 		//Manually draw the Viewmodel.  The engine doesn't draw it because MS always reports thirdperson for mirrors
 		m_pPlayerInfo = NULL;
 		DrawEnt = IEngineStudio.GetViewEntity();
-		StudioDrawModel( flags ); 
+		StudioDrawModel( flags );
 
 		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 		SetBits( m_pCurrentEntity->curstate.oldbuttons, MSRDR_SKIP );
@@ -2446,7 +2453,7 @@ void CStudioModelRenderer::StudioRenderFinal(void)
 /*
 ==================
 Dogg - FlipModel
-	
+
 Mirrors the model's X vertices across the axis and reverses the vertex order of every triangle
 Incidently, this slows down rendering because I have to destruct the original triange strips and triangle fans,
 replacing tem with my own triangle strips which only allows for one triangle per strip (slow).
@@ -2485,7 +2492,7 @@ void CStudioModelRenderer::FlipModel( bool Enable )
 		for( int n = 0; n < m_pmodel->numnorms; n++)	pstudionorms[n][0] *= -1;	//Flip the normals
 
 
-		 for (int m = 0; m < m_pmodel->nummesh; m++) 
+		 for (int m = 0; m < m_pmodel->nummesh; m++)
 		{
 			mstudiomesh_t *pmesh = (mstudiomesh_t *)((byte *)m_pStudioHeader + m_pmodel->meshindex) + m;
 			if( !Enable )
@@ -2515,8 +2522,8 @@ void CStudioModelRenderer::FlipModel( bool Enable )
 				{
 					short *Modifycmds = ptricmds;
 					Modifycmds += (2 * 4);
-					 for (int Triangle = 0; Triangle < NumTriangleCmds-2; Triangle++) 
-					{				
+					 for (int Triangle = 0; Triangle < NumTriangleCmds-2; Triangle++)
+					{
 						newComands[0] = 3;	//Num of cmds in new triangle (each command is 4 shorts long)
 						newComands++;		//Get ready to store commands
 

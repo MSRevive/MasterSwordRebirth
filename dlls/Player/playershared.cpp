@@ -27,6 +27,10 @@ void ShowWeaponDesc(CGenericItem *pItem);
 #include "MSCentral.h"
 #endif
 
+//NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017
+#include "game.h"
+//END NOTE
+
 char *ModelList[HUMAN_BODYPARTS][2] =
 	{
 		MODEL_HUMAN_HEAD,
@@ -97,7 +101,7 @@ title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
 	}
 
 	/*#ifndef VALVE_DLL
-	 for (int i = 0; i < SKILL_MAX_STATS; i++) 
+	 for (int i = 0; i < SKILL_MAX_STATS; i++)
 		Print( "Skill %i, [%i]%s (%i)\n", i, SortedSkills[i].Skill, SkillStatList[SortedSkills[i].Skill].Name, GetSkillName( SKILL_FIRSTSKILL + SortedSkills[i].Skill ) );
 #endif*/
 
@@ -156,51 +160,48 @@ title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
 
 const char *CBasePlayer::GetTitle()
 {
-	//Future way
-	/*
-	if( !CustomTitle.contains(" NONESET ") ) return CustomTitle; 
-	else return "Trainee";
-	*/
-
-	//Old Way
-	title_t *pTitle = CTitleManager::GetPlayerTitle(this);
-	if (pTitle)
-		return pTitle->Name;
-	return "Unknown";
+	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
+	if( !CustomTitle.contains("NONESET") )
+		return CustomTitle;
+	else
+	{
+		//Old Way
+		title_t *pTitle = CTitleManager::GetPlayerTitle( this );
+		if( pTitle ) return pTitle->Name;
+		return "Unknown";
+	}
 }
 
 const char *CBasePlayer::GetFullTitle()
 {
-	//future way
-	/*
-	if( !CustomTitle.contains(" NONESET ") ) 
-		return CustomTitle; 
-	else 
-		return "Trainee"; 
-	*/
-
-	//Old Way
-	title_t *pTitle = CTitleManager::GetPlayerTitle(this);
-	if (pTitle)
+	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
+	if( !CustomTitle.contains("NONESET") )
+		return CustomTitle;
+	else
 	{
-		static msstring Title; //Format: "<skilllevel> Title"
-
-		Title = "";
-
-		int SkillLevel = 0;
-		int SkillsReq = pTitle->SkillsReq.size();
-		if (SkillsReq) //Only add the skill level if this title requires skills
+		//Old Way
+		title_t *pTitle = CTitleManager::GetPlayerTitle( this );
+		if( pTitle )
 		{
-			for (int s = 0; s < SkillsReq; s++)
-				SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
-			SkillLevel /= SkillsReq;
+			static msstring Title;   //Format: "<skilllevel> Title"
 
-			Title += SkillLevel;
-			Title += " ";
+			Title = "";
+
+			int SkillLevel = 0;
+			int SkillsReq = pTitle->SkillsReq.size();
+			if( SkillsReq )   //Only add the skill level if this title requires skills
+			{
+				foreach( s, SkillsReq )
+				SkillLevel += GetSkillStat( pTitle->SkillsReq[s] );
+				SkillLevel /= SkillsReq;
+
+				Title += SkillLevel;
+				Title += " ";
+			}
+
+			Title += pTitle->Name;
+			return Title.c_str();
 		}
-
-		Title += pTitle->Name;
-		return Title.c_str();
 	}
 
 	return "Unknown";
@@ -244,6 +245,8 @@ void CBasePlayer::InitialSpawn(void)
 #ifndef VALVE_DLL
 	player.m_ChosenArrow = NULL;
 #endif
+
+	m_AnimSpeedAdj = 1;
 
 	//Reset char info
 	if (!m_CharInfo.size())
@@ -516,10 +519,10 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 	int MaxItems = THOTH_MAX_ITEMS;
 	int WarnItems = THOTH_MAX_ITEMS - 15;
 	/*
-	 for (int i = 0; i < Gear.size(); i++) 
+	 for (int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pPack = Gear[i];
-		 for (int n = 0; n < pPack->Container_ItemCount(); n++) 
+		 for (int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			++TotalItems;
 		}
@@ -598,11 +601,11 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 // SwitchItem - Specify an Item and this function finds a free hand,
 // ����������   places it in that hand, and uses it
 
-/*int CBasePlayer :: SwitchItem( CGenericItem *pItem, int iHand, bool bVerbose ) 
+/*int CBasePlayer :: SwitchItem( CGenericItem *pItem, int iHand, bool bVerbose )
 {
 	int iReturn = CMSMonster :: SwitchItem( pItem, iHand );
-	
-	if( iReturn == 5 && bVerbose ) SendInfoMsg( "No Hands free!\n" ); 
+
+	if( iReturn == 5 && bVerbose ) SendInfoMsg( "No Hands free!\n" );
 
 	if( iReturn == 1 )
 	{
@@ -733,12 +736,12 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 	}
 
 	/*dbg( "Remove weapon from sheath" );
-	if( DrawWeapon ) 
+	if( DrawWeapon )
 	{
 		//Try to find a weapon to pull out from a sheath
 
 		CGenericItem *pItem = NULL;
-		 for (int i = 0; i < Gear.size(); i++) 
+		 for (int i = 0; i < Gear.size(); i++)
 		{
 			CGenericItem *pPack = Gear[i];
 			if( !FBitSet(pPack->MSProperties(),ITEM_CONTAINER) || pPack->Container_Type() != CGenericItem::PACK_SHEATH || !pPack->Container_ItemCount() )
@@ -748,7 +751,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 			pPack = Gear[i];
 			break;
 		}
-		
+
 		if( pItem )
 		{
 			pItem->GiveTo( this, true, false );
@@ -874,7 +877,7 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 		#endif
 		return false;
 	}
-	
+
 	return DropItem( Hand(DropHand), ForceDrop, ForceDrop, vDropDir );
 }*/
 
@@ -1233,14 +1236,14 @@ void CBasePlayer::Deactivate()
 	m_Companions.clear();
 #ifdef VALVE_DLL
 	m_ClientItems.clear();
-	
+
 	if (CamEntity) // Delete this, if present. (fix mem leak if in death cam + disconnects)
 	{
 		CamEntity->SUB_Remove();
 		CamEntity = NULL;
 	}
 #endif
-	
+
 	CMSMonster::Deactivate();
 }
 
@@ -1284,7 +1287,7 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 /*	MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev );
 			WRITE_SHORT( SpellList.size() );					//Number of spells
 			WRITE_SHORT( fVerbose ? SpellList.size() : 0 );		//If Verbose: Which spell was learned (incremented by 1 | 0 = Non-verbose)
-			 for (int s = 0; s < SpellList.size(); s++) 
+			 for (int s = 0; s < SpellList.size(); s++)
 				WRITE_STRING( SpellList[s] );				//Spell scriptname
 		MESSAGE_END();		*/
 #else
