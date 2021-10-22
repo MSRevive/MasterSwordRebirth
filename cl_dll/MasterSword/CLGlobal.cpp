@@ -104,6 +104,7 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_doubletapdodge", "1", FCVAR_ARCHIVE);				// MiB MAR2012_05 -Enable/Disable double tapping to dodge
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
 	CVAR_CREATE("ms_didbloomcheck", "0", FCVAR_ARCHIVE);				// Thothie FEB2012_12 - Boom check tracker
+	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // MiB APR2019_10 [GLOW_COLOR] - Desired glow color
 	//CVAR_CREATE( "r_decals", "300" , FCVAR_CLIENTDLL );   // Thothie SEP2011_07 - allow tracking/reasonable default setting of r_decals (fail, doesn't override engine setting)
 
 	/*msstring DefaultLANID = "this_must_be_unique";
@@ -113,7 +114,7 @@ void MSCLGlobals::Initialize()
 	{
 		//If I'm still using the default ID, generate a random one
 		char ID[8];
-		 for (int i = 0; i < 6; i++) 
+		 for (int i = 0; i < 6; i++)
 		{
 			int CharType = RANDOM_LONG(0,2);
 			int Low, High;
@@ -409,7 +410,7 @@ BOOL WINAPI DllMain(
 			#else
 				pGameDir = "MS";
 			#endif
-			
+
 			//MessageBox( NULL, gEngfuncs.pfnGetGameDirectory(), "", MB_OK );
 			 _snprintf(cLogfile, sizeof(cLogfile),  "%s/log_cldll.txt",  pGameDir );
 			logfile.open( cLogfile );

@@ -97,6 +97,7 @@ void CBasePlayer::Spawn(void)
 	m_PrefHand = RIGHT_HAND;
 	m_CurrentHand = m_PrefHand;
 	//m_flNextAttack = 0;
+	mLastGlowColor[0] = 0;
 	pev->deadflag = DEAD_NO;
 
 	pev->nextthink = gpGlobals->time;
@@ -131,6 +132,13 @@ void CBasePlayer::Think(void)
 	pev->origin = clplayer->origin;
 	pev->angles = clplayer->angles;
 	pev->v_angle = clplayer->angles;
+
+	msstring vsGlowColor = CVAR_GET_STRING("ms_glowcolor");
+	if(!FStrEq(mLastGlowColor,vsGlowColor))
+	{
+		strncpy(mLastGlowColor, vsGlowColor, sizeof(mLastGlowColor));
+		ServerCmd(UTIL_VarArgs("SetGlowColor \"%s\"\n", vsGlowColor.c_str()));
+	}
 
 	//g_flHealth = m_HP; //For code that doesn't include entity headers
 
