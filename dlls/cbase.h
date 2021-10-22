@@ -25,7 +25,7 @@ CBaseEntity
 				CBasePlayer
 				CBaseGroup
 */
-
+#ifndef CBASE_H
 #define CBASE_H
 
 #define MAX_PATH_SIZE 10 // max number of nodes available for a path.
@@ -248,11 +248,11 @@ public:
 };
 
 typedef msstringlist msscriptarray;
-typedef std::map<msstring,msscriptarray> msscriptarrayhash;
+typedef std::map<msstring, msscriptarray> msscriptarrayhash;
 typedef msstringstringhash msscripthash;
-typedef std::map<msstring,msscripthash> msscripthashhash;
+typedef std::map<msstring, msscripthash> msscripthashhash;
 typedef std::set<msstring> msscriptset;
-typedef std::map<msstring,msscriptset> msscriptsethash;
+typedef std::map<msstring, msscriptset> msscriptsethash;
 
 //MiB JAN2010_27
 struct scriptarray_t
@@ -292,7 +292,7 @@ public:
 	mslist<scriptfile_t> filesOpen;		  //MiB FEB2008a - file i/o
 	mslist<scriptfile_t> filesOpenFN;	  //MiB FEB2008a - file i/o
 
-	msscriptarrayhash scriptedArrays; //MiB JAN2010_27 - Arrays new type.
+	msscriptarrayhash scriptedArrays; //MiB JAN2010_27 - Arrays, new type.
 	msscripthashhash mScriptedHashes; // MiB SEP2019_23 - Scripted Hashes
 	msscriptsethash mScriptedSets; // MiB SEP2019_23 - Scripted sets
 
@@ -1049,3 +1049,5 @@ typedef struct _SelAmmo
 	BYTE Ammo2Type;
 	BYTE Ammo2;
 } SelAmmo;
+
+#endif
