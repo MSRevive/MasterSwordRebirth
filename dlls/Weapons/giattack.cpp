@@ -1,7 +1,7 @@
 /***
 *
 *	Copyright (c) 2000, Kenneth "Dogg" Early.
-*	
+*
 *	Email kene@maverickdev.com or
 *		  kearly@crosswinds.net
 *
@@ -576,7 +576,7 @@ void CGenericItem::RegisterAttack()
 			attData.flAccBest = atof(Stats[1]);
 		}
 	}
-	/*else if( AttackType == "charge-strike" ) 
+	/*else if( AttackType == "charge-strike" )
 	{
 		//Must Charge to a percent before attacking
 		attData.Type = ATT_CHARGE_STRIKE;
@@ -805,7 +805,7 @@ void CGenericItem::StrikeLand()
 
 	Damage.ExpStat = CurrentAttack->StatExp; // MiB JUN2010_19 - Fixing exp for the off-hand.
 	Damage.ExpProp = CurrentAttack->PropExp; // Exp goes to the active weapon if it doesn't know where to go
-	Damage.ExpUseProps = true;				 // Make sure it knows where to go!
+	Damage.ExpUseProps = true; // Make sure it knows where to go!
 
 	hitent_list Hits;
 	DoDamage(Damage, Hits);
@@ -1138,7 +1138,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 //          ��������
 
 /*CBaseEntity *DoDamage( entvars_t *pInflictor, entvars_t *pAttacker, Vector &vecSrc,
-					  Vector &vecEnd, float flDamage, int iDamageType, 
+					  Vector &vecEnd, float flDamage, int iDamageType,
 					  float flHitPercentage, TraceResult *outTraceResult )
 {
 	damage_t Damage;
@@ -1171,7 +1171,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 	CBaseEntity *pEntityAttacker = MSInstance( pAttacker );
 	CBaseEntity *pEntityInflictor = MSInstance( pInflictor );
-	
+
 	char sz[256] = "";
 
 	if( !pEntityAttacker )
@@ -1184,7 +1184,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	if( pAttMonster && !pPlayerAttacker )
 	{	//if so, assign the player pointer correctly
 		CBaseEntity *pExpOwner = pAttMonster->RetrieveEntity( ENT_EXPOWNER );
-		if( pExpOwner && pExpOwner->IsPlayer() ) 
+		if( pExpOwner && pExpOwner->IsPlayer() )
 			pPlayerAttacker = (CBasePlayer *)pExpOwner;
 	}
 
@@ -1211,7 +1211,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 	//SetDebugProgress( ItemThinkProgress, "DoDamage - Check special power damage (rogue backstab)" );
 	//bActualHit: Did the combination of luck&skill produce a hit?
-	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE, 
+	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
 	//	fReportHit = FALSE, fDodged = FALSE;
 
 	SetDebugProgress( ItemThinkProgress, "DoDamage - Check hit" );
@@ -1247,7 +1247,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 				if( pVictim && pVictim->IsAlive() )
 				{
 					//If player is attacking himself, don't report
-					if( pPlayerAttacker == pVictim ) 
+					if( pPlayerAttacker == pVictim )
 						fReportHit = false;
 
 					//Check if your horrid skill or bad luck made you miss:
@@ -1260,7 +1260,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 							!pVictim->IsPlayer( ) )			//Only when attacking monsters...
 						{
 							//Advance your skill based on monster difficulty and num of swings
-						
+
 							int ExpStat = -1, ExpProp = -1;//Stat that increases from this attack
 
 							if( pPlayerAttacker->ActiveItem( ) )
@@ -1280,14 +1280,14 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 //								{
 //									AttackStat = GetStatByName( STRING(pItem->CurrentAttack->sAttackStat) );
 //									//I missed the monster, so learn about accuracy
-//									if( !bActualHit ) 
+//									if( !bActualHit )
 //										pPlayer->LearnSkill( AttackStat, STATPROP_BALANCE, pMonster->m_SkillLevel );
 //									//I hit the monster, so learn about damage
 //									else
 //										pPlayer->LearnSkill( AttackStat, STATPROP_POWER, pMonster->m_SkillLevel );
 //									//Always learn about proficiency
 //									pPlayer->LearnSkill( AttackStat, STATPROP_SKILL, pMonster->m_SkillLevel * max(pItem->CurrentAttack->iPriority,0.5) );
-//									
+//
 //								}
 //							}
 							//Keep track of damage
@@ -1316,15 +1316,15 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 				}
 
 			}
-			
+
 			SetDebugProgress( ItemThinkProgress, "DoDamage - Check if damage is dealt" );
 			bool fDodged = false;
-			if( Damage.AttackHit ) 
+			if( Damage.AttackHit )
 			{
 				//Hit sounds are now played from TraceAttack
 				ClearMultiDamage( );
 				Damage.AccuracyRoll = (flHitPercentage - iAccuracyRoll);
-				
+
 				if( pEntityInflictor ) pEntityInflictor->StoreEntity( pEntity, ENT_LASTSTRUCKBYME );
 				if( pAttMonster )
 				{
@@ -1337,7 +1337,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 						//Each script either sets a ratio of damage to be dealt or cancels the damage
 						msstringlist DamageRatios;
 						TokenizeString( pAttMonster->m_ReturnData, DamageRatios );
-						 for (int i = 0; i < DamageRatios.size(); i++) 
+						 for (int i = 0; i < DamageRatios.size(); i++)
 						{
 							if( DamageRatios[i] == "canceldamage" )
 							{
@@ -1350,11 +1350,11 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 					}
 				}
 
-				if( Damage.AttackHit ) 
+				if( Damage.AttackHit )
 				{
 					//Non-ranged attack
 					if( !pEntity->IsMSMonster( ) )
-						flDamage = pEntity->TraceAttack( pInflictor, pAttacker, flDamage, gpGlobals->v_forward, &Damage.outTraceResult, Damage.iDamageType, Damage.AccuracyRoll ); 
+						flDamage = pEntity->TraceAttack( pInflictor, pAttacker, flDamage, gpGlobals->v_forward, &Damage.outTraceResult, Damage.iDamageType, Damage.AccuracyRoll );
 					else
 						flDamage = ((CMSMonster *)pEntity)->TraceAttack( Damage );
 
@@ -1374,7 +1374,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 					}
 				}
 			}
-		
+
 			if( pVictim ) pVictim->Attacked( CBaseEntity::Instance( pAttacker ), Damage );
 
 			SetDebugProgress( ItemThinkProgress, "DoDamage - Report damage" );
@@ -1384,7 +1384,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 				 strncpy(szDamage,  Damage.AttackHit ? UTIL_VarArgs( " %.1f damage.",  flDamage ) : "", sizeof(szDamage) );
 				 strncpy(szHitMiss,  Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss) );
 				 _snprintf(szStats, sizeof(szStats),  "(%i/%i)",  (100-iAccuracyRoll),  int(100-flHitPercentage) );
-				
+
 				if( pPlayerAttacker )
 				{
 					 _snprintf(sz, sizeof(sz),  "You attack %s. %s %s%s",  						pEntity->DisplayName(),
@@ -1404,7 +1404,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 			pEntity->CounterEffect( pEntityInflictor, 0, (void *)&flDamage );
 			//if( fHitWorld )
 			//{
-			//	if( pEntity->MSProperties()&ITEM_SHIELD )	
+			//	if( pEntity->MSProperties()&ITEM_SHIELD )
 			//		pEntity->CounterEffect( MSInstance(ENT(pInflictor)), ITEM_SHIELD, (void *)&flDamage );
 			//}
 
@@ -1707,6 +1707,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				Params.add(EntToString(pTarget));
 				Params.add(UTIL_VarArgs("%f", Damage.flDamage));
 				Params.add(Damage.sDamageType.c_str());
+				Params.add(Damage.dodamage_event.len() > 0 ? Damage.dodamage_event.c_str() : "(none)"); //Thothie DEC2017_01 - see below
 				pAttMonster->CallScriptEvent("game_damaged_other", &Params);
 
 				if (pItemInflictor)
@@ -1716,6 +1717,8 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 						CallbackName = *Damage.ItemCallBackPrefix + "_damaged_other";
 					pItemInflictor->m_CurrentDamage = &Damage; //m_CurrentDamage used by script commands to change damage
 					pItemInflictor->CallScriptEvent(CallbackName, &Params);
+					if(Damage.ItemCallBackPrefix)
+						pItemInflictor->CallScriptEvent("weapon_damaged_other", &Params); //Thothie OCT2016_05 adding generic callback for weapon mods
 					pItemInflictor->m_CurrentDamage = NULL;
 				}
 
@@ -1765,55 +1768,13 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				{
 					//Advance your skill based on monster difficulty and num of swings
 					//Find the stat that increases from this attack
-					dbg("StoreXP->Enter Conditional");
-					int ExpStat = -1, ExpProp = -1;
-					//MiB DEC2007a Pass XPSkill via DoDamage (replaced above comment block)
-					dbg("StoreXP->Check_Item");
-					if (Damage.ExpUseProps)
+					if(Damage.ExpUseProps)
 					{
-						ExpStat = Damage.ExpStat;
-						ExpProp = Damage.ExpProp;
+						pVictim->MarkDamage(pPlayerAttacker, Damage.ExpStat, Damage.ExpProp, flDamage);
 					}
-					else if (pPlayerAttacker->ActiveItem())
+					else
 					{
-						CGenericItem *pItem = pPlayerAttacker->ActiveItem();
-						if (pItem->CurrentAttack)
-						{
-							ExpStat = pItem->CurrentAttack->StatExp;
-							ExpProp = pItem->CurrentAttack->PropExp;
-						}
-					}
-
-					if (ExpStat > -1)
-					{
-						//float flActualDamage = min(Damage.flDamage,pVictim->m_HP); MiB Mar2008a - This shouldn't be needed anymore
-
-						if (ExpProp < 0) //If ExpProp is negative, give the exp to a random property within ExpStat
-						{
-							dbg("StoreXP->FindStat");
-							ExpProp = 0; //Default 0, in case the ExpStat is invalid
-							CStat *pStat = pPlayerAttacker->FindStat(ExpStat);
-							if (pStat)
-								ExpProp = RANDOM_LONG(0, pStat->m_SubStats.size() - 1);
-						}
-
-						//MiB Mar2008a
-						dbg("MiB->Get Correct Exp Value");
-						//Keep track of the amount of total damage a player has done
-						//So as to stop uber exp from regenerating monsters
-						dbg("MiB->Get Correct Exp Value");
-						/*float tmpTotalDmg = pVictim->m_PlayerDamage[(pPlayerAttacker->entindex()-1)].dmgInTotal;
-						if( tmpTotalDmg + flDamage > pVictim->m_MaxHP )
-						{
-							flDamage = pVictim->m_MaxHP - tmpTotalDmg;
-							pVictim->m_PlayerDamage[(pPlayerAttacker->entindex()-1)].dmgInTotal = pVictim->m_MaxHP;
-						}
-						else*/
-						//MiB JUN2010_19 - Removed the above. Changing to have Exp be a percentage if they go over the MaxHP
-						pVictim->m_PlayerDamage[(pPlayerAttacker->entindex() - 1)].dmgInTotal += flDamage;
-
-						dbg("StoreXP->AddXP");
-						pVictim->m_PlayerDamage[(pPlayerAttacker->entindex() - 1)].dmg[ExpStat][ExpProp] += flDamage;
+						pVictim->MarkDamage(pPlayerAttacker, pPlayerAttacker->ActiveItem(), flDamage);
 					}
 				}
 
