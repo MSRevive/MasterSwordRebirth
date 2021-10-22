@@ -381,15 +381,15 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		NewGlobalItem.Name = cString;
 
-		CGenericItem *pNewItem = ::msnew CGenericItem;
-		NewGlobalItem.pItem = pNewItem;
-		//CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
+		//CGenericItem *pNewItem = ::msnew CGenericItem;
+		//NewGlobalItem.pItem = pNewItem;
+		CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
 		//MSZeroClassMemory( &NewItem, sizeof(CGenericItem) ); New memory routines automaticly initialize memory
 
 		CGenericItemMgr::AddGlobalItem(NewGlobalItem);
 
 		//NewItem.iWeaponType = 99 + CGenericItemMgr::ItemCount( ); //First must be 100
-		strncpy(NewItem.m_Name,  cString, sizeof(NewItem.m_Name) );
+		strncpy(NewItem.m_Name,  cString, sizeof(NewItem.m_Name));
 		NewItem.ItemName = cString;
 
 		dbg(msstring("Load script: ") + cItemFileName);
