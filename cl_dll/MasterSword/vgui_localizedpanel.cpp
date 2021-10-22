@@ -10,6 +10,8 @@
 #include "vgui_LocalizedPanel.h"
 #include "vgui_Stats.h"
 #include "../../MSShared/vgui_MenuDefsShared.h"
+#include "../../MSShared/IScript.h"
+#include "HUDScript.h"
 
 #define LOCAL_TRANSPARENCY 60
 #define LOCAL_MAINPANEL_RATIO (.875)
@@ -159,11 +161,11 @@ void CLocalizedPanel::SetPanelTitle(msstring title)
 	m_pTitle->setPos(LOCAL_SCROLLPANEL_X_SPACE_L, GetCenteredItem(LOCAL_SCROLLPANEL_Y_SPACE_T, h, 1, 0));
 }
 
-void CLocalizedPanel::AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback)
+void CLocalizedPanel::AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData)
 {
 	ClassButton *pButton = new ClassButton(0, Localized(sText), 0, LOCAL_BUTTON_Y, LOCAL_BUTTON_WIDTH, LOCAL_BUTTON_HEIGHT, !bEnabled);
 	pButton->setParent(m_pMainPanel);
-	pButton->addActionSignal(new CCallback_Signal(this, bCloseOnClick, cbType, sCallback));
+	pButton->addActionSignal(new CCallback_Signal(this, bCloseOnClick, cbType, sCallback, sCallbackData));
 	pButton->setContentAlignment(vgui::Label::Alignment::a_center);
 	pButton->setVisible(true);
 	pButton->setEnabled(bEnabled);
@@ -195,33 +197,60 @@ void CLocalizedPanel::ClearButtons(void)
 	m_iButtonTotal = 0;
 }
 
-void CLocalizedPanel::DoCallback(bool bDoClose, int cbType, msstring sCallback)
+void CLocalizedPanel::DoCallback(bool bDoClose, int cbType, msstring sCallback, msstring sCallbackData)
 {
 	if (bDoClose)
 		Hide();
 	if (cbType == 1)
-		CallbackServer(sCallback);
+		CallbackServer(sCallback, sCallbackData);
 	if (cbType == 2)
-		CallbackClient(sCallback);
+		CallbackClient(sCallback, sCallbackData);
 }
 
-void CLocalizedPanel::CallbackServer(msstring sCallback)
+void CLocalizedPanel::CallbackServer(msstring sCallback, msstring sCallbackData)
 {
 	msstring cmd = "localcb \"";
 	cmd += m_ServerEntString + "\" ";
-	cmd += sCallback + "\n";
+	cmd += sCallback;
+	if(sCallbackData.len())
+	{
+		cmd += msstring( " \"" ) + sCallbackData + "\"";
+	}
+	cmd += "\n";
 
 	ServerCmd(cmd.c_str());
 }
 
-void CLocalizedPanel::CallbackClient(msstring sCallback)
+void CLocalizedPanel::CallbackClient(msstring sCallback, msstring sCallbackData)
 {
-	if (m_pLocalScriptedEntity)
+	msstringlist Params;
+	Params.clear();
+  if (sCallbackData.len())
+  {
+    Params.add(sCallbackData);
+  }
+  gHUD.m_HUDScript->CallScriptEvent( sCallback, &Params );
+}
+
+void CLocalizedPanel::AddSubPanel( Panel *pPanel )
+{
+	pPanel->setParent( m_pTextPanel );
+	pPanel->setVisible( true );
+
+	m_SubPanelList.add( pPanel );
+	++m_iSubPanelTotal;
+}
+
+void CLocalizedPanel::ClearSubPanels( void )
+{
+	for( int i = 0; m_iSubPanelTotal; i++ )
 	{
-		static msstringlist Params;
-		Params.clear();
-		m_pLocalScriptedEntity->CallScriptEvent(sCallback, &Params);
+		m_pTextPanel->removeChild( m_SubPanelList[i] );
+		delete m_SubPanelList[i];
 	}
+	m_pTextPanel->setSize( m_pTextPanel->getWide() , LOCAL_TEXTPANEL_HEIGHT_MIN );
+	m_SubPanelList.clear();
+	m_iSubPanelTotal = 0;
 }
 
 void CLocalizedPanel::AddParagraph(const char *pszText)

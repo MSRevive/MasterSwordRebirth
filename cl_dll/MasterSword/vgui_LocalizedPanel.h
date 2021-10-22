@@ -41,12 +41,16 @@ public:
 	void SetServerEntString(msstring sEntString);	  // Set the server-side entity for callback, if needed
 	void SetClientScriptedEntity(IScripted *pEntity); // Set the client-side entity for callback, if needed
 
-	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback); // Add a button with given info
+	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData); // Add a button with given info
 	void PositionButtons(void);																		   // Automatically positions all buttons based on the total number
 	void ClearButtons(void);																		   // Clear all buttons
-	void DoCallback(bool bDoClose, int callback, msstring sCallback);								   // Handle button clicked
-	void CallbackServer(msstring sCallback);														   // Does callback on server entity
-	void CallbackClient(msstring sCallback);														   // Does callback on client entity
+	void DoCallback(bool bDoClose, int callback, msstring sCallback, msstring sCallbackData = "");	// Handle button clicked
+	void CallbackServer(msstring sCallback, msstring sCallbackData = "");	// Does callback on server entity
+	void CallbackClient(msstring sCallback, msstring sCallbackData = "");	// Does callback on client entity
+
+	void AddImage(const char *pszName, bool bIsTga, bool bBorder = false, int vFrame = 0);
+	void AddSubPanel(Panel *pPanel);
+	void ClearSubPanels(void);
 
 	void AddParagraph(const char *pszText);			  // Formats text and adds panel
 	void ClearParagraphs(void);						  // Clear all paragraphs
@@ -63,12 +67,13 @@ private:
 	msstring m_sCallback;
 
 public:
-	CCallback_Signal(CLocalizedPanel *pCallbackPanel, bool bCloseOnClick, int cbType, msstring sCallback)
+	CCallback_Signal(CLocalizedPanel *pCallbackPanel, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData = "")
 	{
 		m_pCallbackPanel = pCallbackPanel;
 		m_bCloseOnClick = bCloseOnClick;
 		m_cbType = cbType;
 		m_sCallback = sCallback;
+		m_sCallbackData = sCallbackData;
 	}
 
 	virtual void actionPerformed(Panel *panel)
