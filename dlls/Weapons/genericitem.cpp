@@ -64,14 +64,78 @@ globalscriptinfo_t g_MSScriptTypes[] =
 #endif
 
 // Global GenericItem retrieve functions
-CGenericItem *GetGenericItemByName(const char *pItemName) { return CGenericItemMgr::GetGlobalGenericItemByName(pItemName); }
-CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemName)
+// MiB APR2019_07 - $get_item_table
+CGenericItem *GetGenericItemByName(const char *pItemName, bool bCallSpawnIfNeeded = false)
+{
+	return CGenericItemMgr::GetGlobalGenericItemByName(pItemName, bCallSpawnIfNeeded);
+}
+CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemName, bool bCallSpawnIfNeeded)
 {
 	for (int i = 0; i < m_Items.size(); i++)
 	{
 		GenItem_t &GlobalItem = m_Items[i];
 		if (FStrEq(GlobalItem.Name.c_str(), pszItemName))
+		{
+			// MiB MAR2019_03 - [GET_ITEM_TABLE] Call game_spawn if it hasn't been done already
+			if(bCallSpawnIfNeeded && !GlobalItem.bCalledSpawn)
+			{
+				// Only create once, just a param to tell the spawn this
+				// is the global item in case there's anything it shouldn't
+				// do in the spawn event
+				msstringlist vParams;
+				vParams.add( "1" );
+				GlobalItem.bCalledSpawn = true;
+
+				// Create a temporary entvars. A lot of script commands expect
+				// this to exist, but I don't think it should do anything horrible
+				// if it's fake. If it causes any problems, turn off whatever
+				// command is causing it by utilizing PARAM1 being 1
+				bool bTempPev = GlobalItem.pItem->pev ? false : true;
+				if(bTempPev)
+					GlobalItem.pItem->pev = new entvars_t();
+
+				try
+				{
+					GlobalItem.pItem->CallScriptEvent( "game_spawn", &vParams );
+				}
+				catch(...)
+				{
+					CGenericItem *  pNewItem = NULL;
+					try
+					{
+						pNewItem = NewGenericItem(GlobalItem.pItem);
+						delete GlobalItem.pItem;
+						GlobalItem.pItem = pNewItem;
+						GlobalItem.pItem->SUB_Remove();
+						bTempPev = false;
+					}
+					catch( ... )
+					{
+					}
+					#if !TURN_OFF_ALERT
+							ErrorPrint( "GLBL_ITEM"
+												, ERRORPRINT_LOG|ERRORPRINT_CONSOLE|ERRORPRINT_INFOMSG
+												, "Error while spawning global item '%s'! %s"
+												, pszItemName
+												, pNewItem ? "Using a full item instead!"
+																	 : "Creating full item also failed, exiting game"
+												);
+							if ( !pNewItem )
+							{
+									exit(-1);
+							}
+					#endif
+				}
+
+				if ( bTempPev )
+				{
+					delete GlobalItem.pItem->pev;
+					GlobalItem.pItem->pev = NULL;
+				}
+			}
+			
 			return GlobalItem.pItem;
+		}
 	}
 	return NULL;
 }

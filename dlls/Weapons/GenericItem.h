@@ -1,7 +1,7 @@
 /***
 *
 *	Created by Kenneth "Dogg" Early.
-*	
+*
 *	Email kene@maverickdev.com or
 *		  l33tdogg@hotmail.com
 *
@@ -118,7 +118,8 @@ typedef struct GenItem_s
 class CGenericItemMgr
 {
 public:
-	static CGenericItem *GetGlobalGenericItemByName(const char *pszItemName);							 //Lookup by name
+	// MiB MAR2019_03 - [GET_ITEM_TABLE] Added bCallSpawnIfNeeded to call spawn event if it hasn't already been done
+	static CGenericItem *GetGlobalGenericItemByName(const char *pszItemName, bool bCallSpawnIfNeeded = false);
 	static CGenericItem *NewGenericItem(CGenericItem *pGlobalItem);										 //Copy a global item to a usable item
 	static CGenericItem *NewGenericItem(int idx);														 //[PackSwap]
 	static void AddGlobalItem(GenItem_t &NewGlobalItem);												 //Add a new global item
