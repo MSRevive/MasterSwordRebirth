@@ -189,6 +189,10 @@ public:
 	bool operator==(const char *a) const;
 	bool operator!=(char *a) const { return !operator==(a); }
 	bool operator!=(const char *a) const { return !operator==(a); }
+	bool operator<(char *a) const { return strcmp(data,a) < 0; }
+	bool operator<(const char *a) const { return strcmp(data,a) < 0; }
+	bool operator<(msstring& a) const { return strcmp(data,a.data) < 0; }
+	bool operator<(const msstring& a) const { return strcmp(data,a.data) < 0; }
 	operator char *();
 	operator void *() { return operator char *(); }
 	char *c_str();
