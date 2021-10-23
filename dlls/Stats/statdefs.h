@@ -82,7 +82,22 @@ const char *GetSkillName(int Skill);						 //Looks any skill
 struct playerdamage_t
 {
 	float dmg[SKILL_MAX_ATTACK][STATPROP_ALL_TOTAL]; //Record damage done with with each combat skill
-	float dmgInTotal;								 //MiB Mar2008a - For keeping track of all damage a player has done, regardless of what skill it was
+	float dmgInTotal; //MiB Mar2008a - For keeping track of all damage a player has done, regardless of what skill it was
+	char msId[32]; // MiB MAR2019_22 [SLOT_EXP] - Keep track of the steam id / slot to avoid passing exp to the wrong character
+
+	// MiB MAR2019_22 [SLOT_EXP] - Added because this is done in multiple places and shouldn't be written out...
+	void Clear()
+	{
+		for(int i = 0; i < SKILL_MAX_ATTACK; i++)
+		{
+			for(int j = 0; j < STATPROP_ALL_TOTAL; j++)
+			{
+				dmg[i][j] = 0;
+			}
+		}
+		dmgInTotal = 0;
+		msId[0] = 0;
+	}
 };
 
 #endif //STATDEFS_H
