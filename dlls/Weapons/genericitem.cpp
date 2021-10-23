@@ -100,11 +100,11 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 				}
 				catch(...)
 				{
-					CGenericItem *  pNewItem = NULL;
+					CGenericItem * pNewItem = NULL;
 					try
 					{
 						pNewItem = NewGenericItem(GlobalItem.pItem);
-						delete GlobalItem.pItem;
+						::delete (CGenericItem *)GlobalItem.pItem;
 						GlobalItem.pItem = pNewItem;
 						GlobalItem.pItem->SUB_Remove();
 						bTempPev = false;
@@ -133,7 +133,7 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 					GlobalItem.pItem->pev = NULL;
 				}
 			}
-			
+
 			return GlobalItem.pItem;
 		}
 	}

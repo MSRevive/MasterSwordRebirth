@@ -589,7 +589,7 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, CGenericItem * pItem, float 
 	{
 		return;
 	}
-	MarkDamage(pPlayer, pItem->CurrentAttack->StatExp, pItem->CurrentAttack->PropExp, vAmount)
+	MarkDamage(pPlayer, pItem->CurrentAttack->StatExp, pItem->CurrentAttack->PropExp, vAmount);
 }
 
 void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, msstring vsStat, float vAmount)
@@ -597,7 +597,7 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, msstring vsStat, float vAmou
 	int vStat;
 	int vProp;
 	GetStatIndices(vsStat, vStat, vProp);
-	MarkDamage(pPlayer, vStat, vProp, vAmount)
+	MarkDamage(pPlayer, vStat, vProp, vAmount);
 }
 
 void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float vAmount)
@@ -619,7 +619,7 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float 
 
 	playerdamage_t & vPlayerDamage = m_PlayerDamage[ (pPlayer->entindex()-1) ];
 	msstring vsId = pPlayer->AuthID() + "_" + pPlayer->m_CharacterNum;
-	if ( !FStrEq(vsId,vPlayerDamage.msId) )
+	if ( !FStrEq(vsId, vPlayerDamage.msId) )
 	{
 		vPlayerDamage.Clear();
 		strncpy( vPlayerDamage.msId, vsId, sizeof(vPlayerDamage.msId, vsId));

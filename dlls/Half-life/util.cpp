@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -699,33 +699,24 @@ float UTIL_StringToSecs(const char *timein)
 //returns "noarray" if size or getidx used on non-existent array
 char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation, const char *array_name, int subIdx)
 {
-	mslist<scriptarray_t> *ArrayList = &pEntity->scriptedArrays;
-	msstring ArrName = array_name;
-
-	int idx = -1;
-	for (int i = 0; i < ArrayList->size(); i++)
+	msscriptarray * pArray = pEntity->GetScriptedArray( msstring(array_name), false );
+	if ( !pArray )
 	{
-		if ((*ArrayList)[i].Name == ArrName)
-		{
-			idx = i;
-			break;
-		}
-	}
-
-	if (idx == -1)
-	{
-		if (strcmp(array_operation, "exists") == 0)
+		if ( !strcmp( array_operation, "exists" ) )
 			return "0";
-		else if ((strcmp(array_operation, "size") == 0) || (strcmp(array_operation, "getidx") == 0))
+		if ( !strcmp( array_operation, "size" ) )
 			return "noarray";
+		if ( !strcmp( array_operation, "getidx" ) )
+			return "noarray"
 	}
 	else
 	{
-		if (strcmp(array_operation, "exists") == 0)
+		if ( !strcmp( array_operation, "exists" ) )
 			return "1";
-		else if (strcmp(array_operation, "size") == 0)
-			return UTIL_VarArgs("%i", ArrayList[idx].size());
-		return (*ArrayList)[idx].Vals[subIdx].c_str();
+		if ( !strcmp( array_operation, "size" ) )
+			return UTIL_VarArgs( "%i", pArray->size() );
+
+		return (*pArray)[subIdx].c_str();
 	}
 
 	return "noarray"; //shouldn't get here, but compiler bitches
@@ -736,95 +727,65 @@ char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation
 
 void Util_ScriptArray(CBaseEntity *pEntity, const char *array_operation, const char *array_name, const char *array_value)
 {
-	mslist<scriptarray_t> *ArrayList = &pEntity->scriptedArrays;
-	msstring ArrName = array_name;
-	int subIdx = -1;
-	if (ArrName.contains(":"))
+	msstring vsArrayName = array_name;
+	msstring vsOp = array_operation;
+	bool bExisted;
+	int vSubIdx = -1;
+
+	if(vsArrayName.contains(":"))
 	{
-		subIdx = atoi(ArrName.substr(ArrName.findchar(":") + 1));
-		ArrName = ArrName.thru_char(":");
+		vSubIdx = atoi(vsArrayName.substr(vsArrayName.findchar(":") + 1));
+		vsArrayName = vsArrayName.thru_char(":");
 	}
 
-	int idx = -1;
-	for (int i = 0; i < ArrayList->size(); i++)
+	msscriptarray * pArray = pEntity->GetScriptedArray(vsArrayName, vsOp == "create", &bExisted);
+	if(vsOp == "create")
 	{
-		if ((*ArrayList)[i].Name == ArrName)
+		pArray->clearitems();
+	}
+	else
+	{
+		if(!bExisted)
 		{
-			idx = i;
-			break;
-		}
-	}
-
-	if (idx == -1 && (strcmp(array_operation, "create") != 0))
-	{
-		Print("Error: Util_ScriptArray %s - array %s not found\n", array_operation, ArrName.c_str());
-		return;
-	}
-
-	if (strcmp(array_operation, "create") == 0) //trying to create an existing array clears it instead
-	{
-		if (idx == -1)
-		{
-			scriptarray_t arr;
-			arr.Name = ArrName;
-			ArrayList->add(arr);
+			Print("Error: Util_ScriptArray %s - array %s not found\n",vsOp.c_str(),vsArrayName.c_str());
 			return;
 		}
-		else
-		{
-			array_operation = "clear";
-		}
-	}
 
-	if (strcmp(array_operation, "clear") == 0)
-	{
-		if ((*ArrayList)[idx].Vals.size() > 0)
+		if(vsOp == "clear")
 		{
-			for (int i = 0; i < (*ArrayList)[idx].Vals.size(); i++)
+			if(pArray->size())
 			{
-				if ((*ArrayList)[idx].Vals.size())
-					(*ArrayList)[idx].Vals.erase(0);
+				pArray->clearitems();
+			}
+			else
+			{
+				Print("Warning: Util_ScriptArray %s - array %s already empty\n",vsOp.c_str(),vsArrayName.c_str());
 			}
 		}
-		else
-		{
-			Print("Warning: Util_ScriptArray %s - array %s already empty\n", array_operation, ArrName.c_str());
-		}
-		return;
-	}
 
-	if (strcmp(array_operation, "add") == 0)
-	{
-		(*ArrayList)[idx].Vals.add(array_value);
-		return;
-	}
+		if(vsOp == "set")
+		{
+			if(vSubIdx < 0 || (unsigned)vSubIdx > pArray->size())
+			{
+				Print("Error: Util_ScriptArray %s - array %s has no index %i\n",vsOp.c_str(),vsArrayName.c_str(),vSubIdx);
+			}
+			else
+			{
+				(*pArray)[vSubIdx] = array_value;
+			}
+		}
 
-	int array_size = (*ArrayList)[idx].Vals.size() - 1;
-
-	if (strcmp(array_operation, "set") == 0)
-	{
-		if (subIdx < 0 || subIdx > array_size)
+		if(vsOp == "del")
 		{
-			Print("Error: Util_ScriptArray %s - array %s has no index %i\n", array_operation, ArrName.c_str(), subIdx);
+			if(vSubIdx < 0 || (unsigned)vSubIdx > pArray->size())
+			{
+				Print("Error: Util_ScriptArray %s - array %s has no index %i\n",vsOp.c_str(),vsArrayName.c_str(),vSubIdx);
+			}
+			else
+			{
+				pArray->erase( vSubIdx );
+			}
 		}
-		else
-		{
-			(*ArrayList)[idx].Vals[subIdx] = array_value;
-		}
-		return;
-	}
-
-	if (strcmp(array_operation, "del") == 0)
-	{
-		if (subIdx < 0 || subIdx > array_size)
-		{
-			Print("Error: Util_ScriptArray %s - array %s has no index %i\n", array_operation, ArrName.c_str(), subIdx);
-		}
-		else
-		{
-			(*ArrayList)[idx].Vals.erase(subIdx);
-		}
-		return;
 	}
 }
 

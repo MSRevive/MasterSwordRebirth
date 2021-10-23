@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -104,7 +104,7 @@ extern CGraph WorldGraph;
 //#define MAX_SAFE_FALL_UNITS			( PLAYER_MAX_SAFE_FALL_DIST * 12 )
 
 // Global Savedata for player
-/*TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] = 
+/*TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] =
 {
 //	DEFINE_FIELD( CBasePlayer, m_flFlashLightTime, FIELD_TIME ),
 //	DEFINE_FIELD( CBasePlayer, m_iFlashBattery, FIELD_INTEGER ),
@@ -132,7 +132,7 @@ extern CGraph WorldGraph;
 	DEFINE_ARRAY( CBasePlayer, m_rgpPlayerItems, FIELD_CLASSPTR, MAX_ITEM_TYPES ),
 	DEFINE_FIELD( CBasePlayer, m_pActiveItem, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CBasePlayer, m_pLastItem, FIELD_CLASSPTR ),
-	
+
 	DEFINE_ARRAY( CBasePlayer, m_rgAmmo, FIELD_INTEGER, MAX_AMMO_SLOTS ),
 	DEFINE_FIELD( CBasePlayer, m_idrowndmg, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_idrownrestored, FIELD_INTEGER ),
@@ -152,7 +152,7 @@ extern CGraph WorldGraph;
 	DEFINE_FIELD( CBasePlayer, m_pTank, FIELD_EHANDLE ),
 	DEFINE_FIELD( CBasePlayer, m_iHideHUD, FIELD_INTEGER ),
 	DEFINE_FIELD( CBasePlayer, m_iFOV, FIELD_INTEGER ),
-	
+
 	//DEFINE_FIELD( CBasePlayer, m_fDeadTime, FIELD_FLOAT ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_fGameHUDInitialized, FIELD_INTEGER ), // only used in multiplayer games
 	//DEFINE_FIELD( CBasePlayer, m_flStopExtraSoundTime, FIELD_TIME ),
@@ -179,7 +179,7 @@ extern CGraph WorldGraph;
 	//DEFINE_ARRAY( CBasePlayer, m_rgAmmoLast, FIELD_INTEGER, MAX_AMMO_SLOTS ), // Don't need to restore
 	//DEFINE_FIELD( CBasePlayer, m_fOnTarget, FIELD_BOOLEAN ), // Don't need to restore
 	//DEFINE_FIELD( CBasePlayer, m_nCustomSprayFrames, FIELD_INTEGER ), // Don't need to restore
-	
+
 };	*/
 
 int giPrecacheGrunt = 0;
@@ -298,17 +298,17 @@ LINK_ENTITY_TO_CLASS(player, CBasePlayer);
 {
 	float	flRndSound;//sound randomizer
 
-	flRndSound = RANDOM_FLOAT ( 0 , 1 ); 
-	
+	flRndSound = RANDOM_FLOAT ( 0 , 1 );
+
 	if ( flRndSound <= 0.33 )
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain5.wav", 1, ATTN_NORM);
-	else if ( flRndSound <= 0.66 )	
+	else if ( flRndSound <= 0.66 )
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain6.wav", 1, ATTN_NORM);
 	else
 		EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_pain7.wav", 1, ATTN_NORM);
 }*/
 
-/* 
+/*
  *
  */
 Vector VecVelocityForDamage(float flDamage)
@@ -421,13 +421,13 @@ float CBasePlayer ::TraceAttack(damage_t &Damage)
 		/*int iAttackNum = 0, iHand = 0;;
 		CGenericItem *pHandItem = FindParryWeapon( this, iHand, iAttackNum );
 
-		if( pHandItem ) 
+		if( pHandItem )
 		{
 			pHandItem->Script->RunScriptEventByName( "parry" );
 			//Removed switching to the parry weapon and moving the player's view to face the enemy.  Too annoying
 			pHandItem->CounterEffect( MSInstance(ENT(pevInflictor)), CE_SHIELDHIT, (void *)&flDamage );
 
-			if( iCurrentHand != iHand ) 
+			if( iCurrentHand != iHand )
 			{
 				if( CH && ((CGenericItem *)CH)->CurrentAttack )
 					((CGenericItem *)CH)->CancelAttack( );
@@ -455,7 +455,7 @@ float CBasePlayer ::TraceAttack(damage_t &Damage)
 }
 
 /*
-	Take some damage.  
+	Take some damage.
 	NOTE: each call to TakeDamage with bitsDamageType set to a time-based damage
 	type will cause the damage time countdown to be reset.  Thus the ongoing effects of poison, radiation
 	etc are implemented with subsequent calls to TakeDamage using DMG_GENERIC.
@@ -664,8 +664,8 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 			GiveGold(-TaxOut, false);
 
 			int highestSkill = 0;
-			/* for (int i = 0; i < GetSkillStatCount(); i++)  
-				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) ) 
+			/* for (int i = 0; i < GetSkillStatCount(); i++)
+				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) )
 					highestSkill = i;*/
 			(int)highestSkill = RANDOM_LONG(0, 7);
 
@@ -733,8 +733,8 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 			/*
 			int highestskill = 0;
-			 for (int i = 0; i < GetSkillStatCount(); i++)  
-				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) ) 
+			 for (int i = 0; i < GetSkillStatCount(); i++)
+				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) )
 					highestSkill = i;*/
 
 			CStat *pLargest = FindStat(SKILL_FIRSTSKILL + highestSkill);
@@ -1363,12 +1363,12 @@ void CBasePlayer::PlayerAction(msstring_ref Action)
 
 	EventScript->RunScriptEventByName("game_player_activate");
 }
-/*void CBasePlayer::Act( int iAction ) 
+/*void CBasePlayer::Act( int iAction )
 {
 	DoAction( iAction-1 );
 }
 void CBasePlayer::DoAction( int iAction ) {
-	switch( iAction ) 
+	switch( iAction )
 	{
 		case ACTION_SIT:		//If standing, sit
 		case ACTION_STAND:		//If sitting, stand
@@ -1376,7 +1376,7 @@ void CBasePlayer::DoAction( int iAction ) {
 
 			if( !FBitSet(m_StatusFlags,PLAYER_MOVE_SITTING) )		//Standing... try to sit
 			{
-				if( FBitSet(m_StatusFlags,PLAYER_MOVE_ATTACKING) ) 
+				if( FBitSet(m_StatusFlags,PLAYER_MOVE_ATTACKING) )
 				{
 					SendEventMsg( HUDEVENT_UNABLE, "You cannot sit right now.\n" );
 					return;
@@ -1757,7 +1757,7 @@ void CBasePlayer::PreThink(void)
 
 	enddbg;
 }
-/* Time based Damage works as follows: 
+/* Time based Damage works as follows:
 	1) There are several types of timebased damage:
 
 		#define DMG_PARALYZE		(1 << 14)	// slows affected creature down
@@ -1770,12 +1770,12 @@ void CBasePlayer::PreThink(void)
 		#define DMG_SLOWFREEZE		(1 << 21)	// in a subzero freezer
 
 	2) A new hit inflicting tbd restarts the tbd counter - each monster has an 8bit counter,
-		per damage type. The counter is decremented every second, so the maximum time 
+		per damage type. The counter is decremented every second, so the maximum time
 		an effect will last is 255/60 = 4.25 minutes.  Of course, staying within the radius
 		of a damaging effect like fire, nervegas, radiation will continually reset the counter to max.
 
 	3) Every second that a tbd counter is running, the player takes damage.  The damage
-		is determined by the type of tdb.  
+		is determined by the type of tdb.
 			Paralyze		- 1/2 movement rate, 30 second duration.
 			Nervegas		- 5 points per second, 16 second duration = 80 points max dose.
 			Poison			- 2 points per second, 25 second duration = 50 points max dose.
@@ -1798,8 +1798,8 @@ void CBasePlayer::PreThink(void)
 		Antitoxin Syringe	- Each syringe full provides protection vs one poisoning (nervegas or poison).
 		Health kit			- Immediate stop to acid/chemical, fire or freeze damage.
 		Radiation Shower	- Immediate stop to radiation damage, acid/chemical or fire damage.
-		
-	
+
+
 */
 
 // If player is taking time based damage, continue doing damage to player -
@@ -1933,17 +1933,17 @@ void CBasePlayer::CheckTimeBasedDamage()
 /*
 THE POWER SUIT
 
-The Suit provides 3 main functions: Protection, Notification and Augmentation. 
-Some functions are automatic, some require power. 
+The Suit provides 3 main functions: Protection, Notification and Augmentation.
+Some functions are automatic, some require power.
 The player gets the suit shortly after getting off the train in C1A0 and it stays
 with him for the entire game.
 
 Protection
 
 	Heat/Cold
-		When the player enters a hot/cold area, the heating/cooling indicator on the suit 
-		will come on and the battery will drain while the player stays in the area. 
-		After the battery is dead, the player starts to take damage. 
+		When the player enters a hot/cold area, the heating/cooling indicator on the suit
+		will come on and the battery will drain while the player stays in the area.
+		After the battery is dead, the player starts to take damage.
 		This feature is built into the suit and is automatically engaged.
 	Radiation Syringe
 		This will cause the player to be immune from the effects of radiation for N seconds. Single use item.
@@ -1956,45 +1956,45 @@ Protection
 		The armor works using energy to create a protective field that deflects a
 		percentage of damage projectile and explosive attacks. After the armor has been deployed,
 		it will attempt to recharge itself to full capacity with the energy reserves from the battery.
-		It takes the armor N seconds to fully charge. 
+		It takes the armor N seconds to fully charge.
 
 Notification (via the HUD)
 
 x	Health
-x	Ammo  
+x	Ammo
 x	Automatic Health Care
-		Notifies the player when automatic healing has been engaged. 
+		Notifies the player when automatic healing has been engaged.
 x	Geiger counter
-		Classic Geiger counter sound and status bar at top of HUD 
+		Classic Geiger counter sound and status bar at top of HUD
 		alerts player to dangerous levels of radiation. This is not visible when radiation levels are normal.
 x	Poison
 	Armor
-		Displays the current level of armor. 
+		Displays the current level of armor.
 
-Augmentation 
+Augmentation
 
 	Reanimation (w/adrenaline)
-		Causes the player to come back to life after he has been dead for 3 seconds. 
+		Causes the player to come back to life after he has been dead for 3 seconds.
 		Will not work if player was gibbed. Single use.
 	Long Jump
 		Used by hitting the ??? key(s). Caused the player to further than normal.
-	SCUBA	
-		Used automatically after picked up and after player enters the water. 
-		Works for N seconds. Single use.	
-	
+	SCUBA
+		Used automatically after picked up and after player enters the water.
+		Works for N seconds. Single use.
+
 Things powered by the battery
 
-	Armor		
+	Armor
 		Uses N watts for every M units of damage.
-	Heat/Cool	
+	Heat/Cool
 		Uses N watts for every second in hot/cold area.
-	Long Jump	
+	Long Jump
 		Uses N watts for every jump.
-	Alien Cloak	
+	Alien Cloak
 		Uses N watts for each use. Each use lasts M seconds.
-	Alien Shield	
+	Alien Shield
 		Augments armor. Reduces Armor drain by one half
- 
+
 */
 
 // if in range of radiation source, ping geiger counter
@@ -2730,7 +2730,7 @@ void CBasePlayer::Spawn(void)
 
 	UTIL_SetOrigin(pev, pev->origin);
 
-	/*if( !pentSpawnSpot ) 
+	/*if( !pentSpawnSpot )
 	{
 		//logfile << "\r\nSpawn spot was invalid" << (m_MapStatus == OLD_MAP ? " (Same map, so use coordinates)" : "") << "\r\n";
 		//If OLD_MAP, and first spawn, then a spawn spot wasn't selected
@@ -2823,7 +2823,7 @@ void CBasePlayer::Spawn(void)
 				CSubStat &SubStat = pStat->m_SubStats[p];
 				if(SubStat.Value > 26) {
 					MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_EXP], NULL, pev );
-					WRITE_BYTE( i ); 
+					WRITE_BYTE( i );
 					WRITE_BYTE( p );
 					WRITE_LONG( SubStat.Exp );
 					MESSAGE_END();
@@ -3132,7 +3132,7 @@ int CBasePlayer::Restore(CRestore &restore)
 
     g_ulModelRefHuman = pev->;
 
-	if ( FBitSet(pev->flags, FL_DUCKING) ) 
+	if ( FBitSet(pev->flags, FL_DUCKING) )
 	{
 		// Use the crouch HACK
 		// FixPlayerCrouchStuck( edict() );
@@ -3405,7 +3405,7 @@ void CBasePlayer::ImpulseCommands()
 		{
 			FlashlightTurnOff();
 		}
-        else 
+        else
 		{
 			FlashlightTurnOn();
 		}
@@ -3431,7 +3431,7 @@ void CBasePlayer::ImpulseCommands()
 
 		break;
 		/*	case    204:  //  Demo recording, update client dll specific data again.
-		ForceClientDllUpdate(); 
+		ForceClientDllUpdate();
 		break;*/
 	default:
 		// check all of the cheat impulse commands now
@@ -3794,7 +3794,7 @@ void CBasePlayer ::UpdateClientData(void)
 				fInCache = true;
 
 				/*bool Same = true;
-				 for (int b = 0; b < sizeof(clientitem_t); b++) 
+				 for (int b = 0; b < sizeof(clientitem_t); b++)
 				{
 					byte &SrcByte = ((byte *)&ClientItem)[b];
 					byte &DstByte = ((byte *)&m_ClientItems[n])[b];
@@ -4007,9 +4007,9 @@ void CBasePlayer ::UpdateClientData(void)
 	//Thothie - Yes, this is it what is causing the m_CharacterNum corruption, just no idea why
 	/*
 	float *pLastSent; //MiB JAN2010_26 - Slowing down how often these send
-	
+
 	//MiBJAN2010_17 - alterations to loop below
-	 for (int i = 0; i < 4; i++) 
+	 for (int i = 0; i < 4; i++)
 	{
 		switch( i )
 		{
@@ -4132,11 +4132,11 @@ void CBasePlayer ::UpdateClientData(void)
 			WRITE_COORD( damageOrigin.y );
 			WRITE_COORD( damageOrigin.z );
 		MESSAGE_END();
-	
+
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
 		m_bitsHUDDamage = m_bitsDamageType;
-		
+
 		// Clear off non-time-based damage indicators
 		m_bitsDamageType &= DMG_TIMEBASED;
 	}*/
@@ -4307,7 +4307,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 			 m_vecAutoAim.y != m_lasty )
 		{
 			SET_CROSSHAIRANGLE( edict(), -m_vecAutoAim.x, m_vecAutoAim.y );
-			
+
 			m_lastx = m_vecAutoAim.x;
 			m_lasty = m_vecAutoAim.y;
 		}
@@ -4349,7 +4349,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 	if ( tr.pHit && tr.pHit->v.takedamage != DAMAGE_NO)
 	{
 		// don't look through water
-		if (!((pev->waterlevel != 3 && tr.pHit->v.waterlevel == 3) 
+		if (!((pev->waterlevel != 3 && tr.pHit->v.waterlevel == 3)
 			|| (pev->waterlevel == 3 && tr.pHit->v.waterlevel == 0)))
 		{
 			if (tr.pHit->v.takedamage == DAMAGE_AIM)
@@ -4367,7 +4367,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 
 		if ( pEdict->free )	// Not in use
 			continue;
-		
+
 		if (pEdict->v.takedamage != DAMAGE_AIM)
 			continue;
 		if (pEdict == edict())
@@ -4385,7 +4385,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 			continue;
 
 		// don't look through water
-		if ((pev->waterlevel != 3 && pEntity->pev->waterlevel == 3) 
+		if ((pev->waterlevel != 3 && pEntity->pev->waterlevel == 3)
 			|| (pev->waterlevel == 3 && pEntity->pev->waterlevel == 0))
 			continue;
 
@@ -4397,7 +4397,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 		if (DotProduct (dir, gpGlobals->v_forward ) < 0)
 			continue;
 
-		dot = fabs( DotProduct (dir, gpGlobals->v_right ) ) 
+		dot = fabs( DotProduct (dir, gpGlobals->v_right ) )
 			+ fabs( DotProduct (dir, gpGlobals->v_up ) ) * 0.5;
 
 		// tweek for distance
@@ -4781,7 +4781,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 	}*/
 
 	/*if( StatusFlags&PLAYER_MOVE_SPECTATE ) ;
-	else if( StatusFlags&PLAYER_MOVE_SPECTATE_MOVE ) { 
+	else if( StatusFlags&PLAYER_MOVE_SPECTATE_MOVE ) {
 		//Effectively disable movement control
 		//pev->view_ofs = g_vecZero;//vecPosition - pev->origin;
 		//pev->angles = pev->v_angle = vecViewAngle;
@@ -5112,7 +5112,7 @@ void CBasePlayer::GetAnyItems()
 	itemtrans_t itItemTransaction;
 	memset(&itItemTransaction, 0, sizeof(itemtrans_t));
 
-	 strncpy(cItemList,  "Gather items:\n\n", sizeof(cItemList) );
+	strncpy(cItemList,  "Gather items:\n\n", sizeof(cItemList) );
 
 	while (pObject = UTIL_FindEntityInSphere(pObject, EyePosition(), SEARCH_DISTANCE))
 	{
@@ -5139,23 +5139,21 @@ void CBasePlayer::GetAnyItems()
 			continue;
 
 		bool ALLOW = true;
-		for (int i = 0; i < pObject->scriptedArrays.size(); i++)
+		// MiB SEP2019_23 - Rewrote this for new array stuff. Should be converted to set eventually
+		msscriptarray * pArray = pObject->GetScriptedArray( msstring("PICKUP_ALLOW_LIST"), false );
+		if(pArray)
 		{
-			if (pObject->scriptedArrays[i].Name == "PICKUP_ALLOW_LIST")
+			ALLOW = false;
+			for(int i = 0; pArray->size(); i++)
 			{
-				ALLOW = false;
-				for (int j = 0; j < pObject->scriptedArrays[i].Vals.size(); j++)
+				if (EntToString(this) == (*pArray)[i])
 				{
-					if (EntToString(this) == pObject->scriptedArrays[i].Vals[j])
-					{
-						ALLOW = true;
-						break;
-					}
+					ALLOW = true;
+					break;
 				}
-				break;
 			}
 		}
-
+		
 		if (!ALLOW)
 		{
 			CGenericItem *pItem = (CGenericItem *)pObject;
@@ -5312,13 +5310,13 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 
 	if( !pVictim ) strcpy( cItemList, "Steal from:\n\n" );
 	else strcpy( cItemList, "Steal:\n\n" );
-	
+
 	if( !pVictim )
 	{
 		while ((pObject = UTIL_FindEntityInSphere( pObject, Center(), SEARCH_DISTANCE )) != NULL)
 		{
-			if( !pObject->MyMonsterPointer() || pObject == this || 
-				FBitSet(pObject->pev->flags,FL_NOTARGET) || !FVisible(pObject) || 
+			if( !pObject->MyMonsterPointer() || pObject == this ||
+				FBitSet(pObject->pev->flags,FL_NOTARGET) || !FVisible(pObject) ||
 				!FInViewCone(pObject) ||
 				!pObject->IsAlive() ||
 				pObject->FInViewCone(&Center(),VIEW_FIELD_WIDE) ) continue;
@@ -5333,7 +5331,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 			//		if( pMonster->Hand[i] ) { fAddToList = true; break; }
 			if( pMonster->Gold ) fAddToList = true;
 			if( pMonster->Gear.size() ) fAddToList = true;
-			
+
 			if( !fAddToList ) continue;
 
 			 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  MenuCount+1,  pMonster->DisplayName() );
@@ -5358,8 +5356,8 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 		CMSMonster *pMonster = (CMSMonster *)pVictim;
 		itItemTransaction.pvExtra = (void *)pVictim->entindex();
 		//if( Class && Class->id == CLASS_ROGUE )
-		//	for( int i = 0; i < MAX_NPC_HANDS; i++ )	
-		//		if( pMonster->Hand[i] ) { 
+		//	for( int i = 0; i < MAX_NPC_HANDS; i++ )
+		//		if( pMonster->Hand[i] ) {
 		//			CGenericItem *pItem = (CGenericItem *)pMonster->Hand[i];
 		//			itemdesc_t *pItemDesc = &itItemTransaction.ItemList[itItemTransaction.ItemTotal];
 		//			pItemDesc->iEntIndex = pItem->entindex();
@@ -5400,7 +5398,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 	{
 		//List victim's pack items
 
-		CGenericItem *pItem = NULL, *pPack = (CGenericItem *)pVictim; 
+		CGenericItem *pItem = NULL, *pPack = (CGenericItem *)pVictim;
 		CMSMonster *pMonster = (CMSMonster *)pPack->m_pOwner;
 		if( pMonster ) {
 			itItemTransaction.pvExtra = (void *)pMonster->entindex();
@@ -6049,7 +6047,7 @@ bool CBasePlayer ::AcceptOffer()
 }
 BOOL CBasePlayer::SkinMonster(CMSMonster *pDeadMonster)
 {
-	/*if( !pDeadMonster->Skin ) 
+	/*if( !pDeadMonster->Skin )
 		return FALSE;
 
 	CGenericItem *pSkin = NULL;
@@ -6305,7 +6303,7 @@ void CBasePlayer::SetQuest(bool SetData, msstring_ref Name, msstring_ref Data)
 		ALERT( at_aiconsole, "Hard_Code-erasing quest data");
 		m_Quests.clearitems();
 		m_Quests.clear();
-		 for (int i = 0; i < m_Quests.size(); i++) 
+		 for (int i = 0; i < m_Quests.size(); i++)
 		{
 			m_Quests.erase(i);
 		}

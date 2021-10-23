@@ -1,7 +1,7 @@
 #include "inc_weapondefs.h"
 #include "scriptmgr.h"
 
-CGroupFile ScriptMgr::m_GroupFile;
+CGameGroupFile ScriptMgr::m_GroupFile;
 int ScriptMgr::m_TotalScripts = 0;
 
 void ScriptMgr::RegisterScript(CScript *NewScript)

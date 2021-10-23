@@ -56,7 +56,7 @@ CLocalizedPanel::CLocalizedPanel(Panel *pParent)
 	m_ServerEntString = "";
 
 	m_iButtonTotal = 0;
-	m_iParagraphTotal = 0;
+	m_iSubPanelTotal = 0;
 
 	int xMainPanel = GetCenteredItem(ScreenWidth, LOCAL_MAINPANEL_WIDTH, 1, 0);
 	int yMainPanel = GetCenteredItem(ScreenHeight, LOCAL_MAINPANEL_HEIGHT, 1, 0);
@@ -137,8 +137,23 @@ void CLocalizedPanel::Reset(void)
 {
 	Hide();
 	ClearButtons();
-	ClearParagraphs();
+	ClearSubPanels();
 	m_pScroll->setScrollValue(0, 0);
+}
+
+int CLocalizedPanel::GetNextY(void)
+{
+	int	xPos = 0;
+	int	yPos = 0;
+
+	if ( m_iSubPanelTotal )
+	{
+		Panel	*pLast = m_SubPanelList[m_iSubPanelTotal-1];
+		pLast->getPos( xPos, yPos );
+		yPos += pLast->getTall();
+	}
+
+	return yPos;
 }
 
 void CLocalizedPanel::SetServerEntString(msstring sEntString)
@@ -232,6 +247,31 @@ void CLocalizedPanel::CallbackClient(msstring sCallback, msstring sCallbackData)
   gHUD.m_HUDScript->CallScriptEvent( sCallback, &Params );
 }
 
+void CLocalizedPanel::AddImage(const char *pszName, bool bIsTga, bool bBorder, int vFrame)
+{
+	int	yPos = GetNextY();
+	int vPanelW	= m_pTextPanel->getWide();
+	CImageDelayed	*pImg;
+	Panel	*pWrapper;
+
+	pImg = new CImageDelayed( pszName, bIsTga, false, 0, 0 );
+	if ( !bIsTga )
+	{
+		pImg->SetFrame( vFrame );
+	}
+	if ( bBorder )
+	{
+		pImg->setBorder( new LineBorder( 2, Color(128, 128, 128, 128) ) );
+	}
+	pImg->setVisible( true );
+	pImg->setPos( (vPanelW - pImg->getWide()) / 2, 0 );
+
+	pWrapper = new Panel( 0, yPos, vPanelW, pImg->getTall() );
+	pWrapper->addChild( pImg );
+	AddSubPanel( pWrapper );
+	m_pScroll->validate();
+}
+
 void CLocalizedPanel::AddSubPanel( Panel *pPanel )
 {
 	pPanel->setParent( m_pTextPanel );
@@ -248,6 +288,7 @@ void CLocalizedPanel::ClearSubPanels( void )
 		m_pTextPanel->removeChild( m_SubPanelList[i] );
 		delete m_SubPanelList[i];
 	}
+
 	m_pTextPanel->setSize( m_pTextPanel->getWide() , LOCAL_TEXTPANEL_HEIGHT_MIN );
 	m_SubPanelList.clear();
 	m_iSubPanelTotal = 0;
@@ -255,50 +296,88 @@ void CLocalizedPanel::ClearSubPanels( void )
 
 void CLocalizedPanel::AddParagraph(const char *pszText)
 {
-	int xPos = 0, yPos = 0, w = 0, hParagraph = 0, hPanel;
-	TextPanel *pLast, *pParagraph;
+	int xPos = 0, yPos = 0, w = 0, hParagraph = 0, vStart = 0, hPanel;
+	TextPanel *pParagraph;
+	msstring vsFontName;
 
-	// TODO: Formatting tags
-	// <i>					- Italics
-	// <b>					- Bold
-	// <s>					- Strike-through
-	// <c num,num,num,num>	- Color (r,g,b,alpha)
-
-	if (m_iParagraphTotal)
+	if ( pszText[0] == '!' )
 	{
-		pLast = m_ParagraphList[m_iParagraphTotal - 1];
-		pLast->getPos(xPos, yPos);
-		yPos += pLast->getTall();
+		msstring vTest = msstring( pszText );
+
+		if ( vTest.starts_with( "!TGA" ) )
+		{
+			vTest = vTest.substr( 4 );
+			bool bBorder = false;
+			if ( vTest.starts_with( "_BORDER" ) )
+			{
+				vTest = vTest.substr( 7 );
+				bBorder = true;
+			}
+
+			msstring vImage = vTest.substr( 1 );
+			AddImage(vImage, true, bBorder);
+			return;
+		}
+
+		if ( vTest.starts_with( "!SPRITE" ) )
+		{
+			vTest = vTest.substr( 7 );
+			bool bBorder	= false;
+			int	vFrame = 0;
+			if ( vTest.starts_with( "_BORDER" ) )
+			{
+				vTest = vTest.substr( 7 );
+				bBorder	= true;
+			}
+
+			if ( vTest.starts_with( "_" ) )
+			{
+				int	vSpace = vTest.findchar( " " );
+				vFrame = atoi( vTest.substr( 1, vSpace - 1 ) );
+				vTest = vTest.substr( vSpace );
+			}
+
+			msstring	vImage = vTest.substr( 1 );
+			AddImage( vImage, false, bBorder, vFrame );
+			return;
+		}
+
+		if ( vTest.starts_with( "!FONT_" ) )
+		{
+			vTest = vTest.substr( 6 );
+			int	vSpace = vTest.findchar( " " );
+			if ( vSpace == msstring_error ) vSpace = vTest.len();
+			vsFontName = vTest.substr( 0, vSpace );
+			vStart += vSpace + 7;
+		}
 	}
 
 	pParagraph = new TextPanel(strlen(pszText) ? pszText : "\t" // Hack, without this blank lines have no size
 							   ,
 							   0, yPos, w = m_pTextPanel->getWide(), LOCAL_SCROLLPANEL_HEIGHT);
-	pParagraph->setParent(m_pTextPanel);
-	pParagraph->setBgColor(0, 0, 0, 255);
-	pParagraph->setFgColor(128, 128, 128, 0);
+	if(!vsFontName.len())
+	{
+		vsFontName = "Nrml";
+	}
 
-	pParagraph->setVisible(true);
-	pParagraph->getTextImage()->getTextSizeWrapped(w, hParagraph); // Auto-resize
+	CSchemeManager * pSchemes = gViewPort->GetSchemeManager();
+	SchemeHandle_t vSchemeHandle = pSchemes->getSchemeHandle( vsFontName );
+	int r,g,b,a;
+
+	pParagraph->setFont(pSchemes->getFont(vSchemeHandle));
+	pSchemes->getFgColor(vSchemeHandle, r, g, b, a);
+	pParagraph->setFgColor(r, g, b, a);
+	pSchemes->getBgColor(vSchemeHandle, r, g, b, a);
+	pParagraph->setBgColor(r, g, b, a);
+	AddSubPanel(pParagraph);
+
+	// Word-wrap and resize height
+	pParagraph->getTextImage()->getTextSizeWrapped(w, hParagraph);
 	pParagraph->setSize(w, hParagraph);
-
-	hPanel = max(LOCAL_TEXTPANEL_HEIGHT_MIN, yPos + hParagraph);
+	hPanel = max(LOCAL_TEXTPANEL_HEIGHT_MIN, yPos+hParagraph);
 	m_pTextPanel->setSize(m_pTextPanel->getWide(), hPanel);
 
-	m_ParagraphList.add(pParagraph);
-	++m_iParagraphTotal;
 	m_pScroll->validate();
-}
-
-void CLocalizedPanel::ClearParagraphs(void)
-{
-	for (int i = 0; i < m_iParagraphTotal; i++)
-	{
-		m_ParagraphList[i]->setVisible(false);
-	}
-	m_pTextPanel->setSize(m_pTextPanel->getWide(), LOCAL_TEXTPANEL_HEIGHT_MIN);
-	m_ParagraphList.clear();
-	m_iParagraphTotal = 0;
 }
 
 void CLocalizedPanel::ReadParagraphsFromLocalized(msstring title)

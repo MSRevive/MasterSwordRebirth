@@ -16,8 +16,8 @@ private:
 	mslist<ClassButton *> m_ButtonList; // List of all dynamic buttons
 	int m_iButtonTotal;					// Total number of buttons allocated
 
-	mslist<TextPanel *> m_ParagraphList; // List of all dynamic paragraphs
-	int m_iParagraphTotal;				 // Total number of paragraphs allocated
+	mslist<Panel *>	m_SubPanelList; // List of all dynamic sub-panels
+	int	m_iSubPanelTotal;		// Total number of sub-panels
 
 	CTFScrollPanel *m_pScroll; // Scrolling window
 	Panel *m_pTextPanel;	   // Panel inside scrolling window
@@ -37,18 +37,22 @@ public:
 	void Close(void); // Does the hiding of window and other closing things
 	void Reset(void); // Resets menu to default
 
-	void SetPanelTitle(msstring title);				  // Set title of the menu
-	void SetServerEntString(msstring sEntString);	  // Set the server-side entity for callback, if needed
+	int GetNextY(void);
+
+	void SetPanelTitle(msstring title);	// Set title of the menu
+	void SetServerEntString(msstring sEntString);	// Set the server-side entity for callback, if needed
 	void SetClientScriptedEntity(IScripted *pEntity); // Set the client-side entity for callback, if needed
 
-	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData = ""); // Add a button with given info
-	void PositionButtons(void);																		   // Automatically positions all buttons based on the total number
-	void ClearButtons(void);																		   // Clear all buttons
+	// Add a button with given info
+	void AddButton(msstring sText, bool bEnabled, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData = "");
+	void PositionButtons(void);	// Automatically positions all buttons based on the total number
+	void ClearButtons(void); // Clear all buttons
 	void DoCallback(bool bDoClose, int callback, msstring sCallback, msstring sCallbackData = "");	// Handle button clicked
 	void CallbackServer(msstring sCallback, msstring sCallbackData = "");	// Does callback on server entity
 	void CallbackClient(msstring sCallback, msstring sCallbackData = "");	// Does callback on client entity
 
 	void AddImage(const char *pszName, bool bIsTga, bool bBorder = false, int vFrame = 0);
+
 	void AddSubPanel(Panel *pPanel);
 	void ClearSubPanels(void);
 
