@@ -319,9 +319,9 @@ public:
 	CStore *OpenStore;					   //Current store I'm offering to someone
 	offerinfo_t m_OfferInfo;			   //The current offer from another player/monster
 	mslist<playerdamage_t> m_PlayerDamage; //Stats on who has damaged me
-	virtual void MarkDamage(CBasePlayer * pPlayer, CGenericItem * pItem, float vAmount)
-	virtual void MarkDamage(CBasePlayer * pPlayer, msstring vsStat, float vAmount)
-	virtual void MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float vAmount)
+	virtual void MarkDamage(CBasePlayer * pPlayer, CGenericItem * pItem, float vAmount);
+	virtual void MarkDamage(CBasePlayer * pPlayer, msstring vsStat, float vAmount);
+	virtual void MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float vAmount);
 
 	struct takedamagemodifier_t
 	{

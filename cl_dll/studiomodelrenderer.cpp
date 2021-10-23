@@ -19,6 +19,7 @@
 #include "cl_entity.h"
 #include "dlight.h"
 #include "triangleapi.h"
+#include "../MSShared/script.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -665,18 +666,9 @@ void CStudioModelRenderer::StudioSetUpTransform(int trivial_accept)
 		float s = Ent.curstate.scale;
 		float scalemat[3][4] =
 			{
-				s,
-				0,
-				0,
-				0,
-				0,
-				s,
-				0,
-				0,
-				0,
-				0,
-				s,
-				0,
+				s, 0, 0, 0,
+				0, s, 0, 0,
+				0, 0, s, 0,
 			};
 
 		ConcatTransforms((*m_protationmatrix), scalemat, (*m_protationmatrix));
@@ -1373,7 +1365,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				if (player.m_AnimSpeedAdj && player.m_AnimSpeedAdj != 1 && pItem->m_Scripts.size() && pItem->m_Scripts[0]->m.ScriptFile.len())
 				{
 					msstring vsItemName = pItem->m_Scripts[0]->m.ScriptFile;
-					if (!vsItemName.starts_with("shield") && !vsItemName.starts_with("bow") && !vsItemName.starts_with("mana") && !vsItemName.starts_with("health") && !vsItemName.starts_with("item") && !atoi(pItem->GetFirstScriptVar("ITEM_IGNORE_SPEED_ADJUST"))
+					if (!vsItemName.starts_with("shield") && !vsItemName.starts_with("bow") && !vsItemName.starts_with("mana") && !vsItemName.starts_with("health") && !vsItemName.starts_with("item") && !atoi(pItem->GetFirstScriptVar("ITEM_IGNORE_SPEED_ADJUST")))
 					{
 						RenderEnt.curstate.framerate *= player.m_AnimSpeedAdj;
 					}

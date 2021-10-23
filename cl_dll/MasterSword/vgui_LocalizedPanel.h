@@ -65,6 +65,7 @@ private:
 	bool m_bCloseOnClick;
 	int m_cbType;
 	msstring m_sCallback;
+	msstring m_sCallbackData;
 
 public:
 	CCallback_Signal(CLocalizedPanel *pCallbackPanel, bool bCloseOnClick, int cbType, msstring sCallback, msstring sCallbackData = "")
