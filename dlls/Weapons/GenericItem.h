@@ -106,10 +106,18 @@ typedef struct GenItem_s
 {
 	msstring Name;
 	CGenericItem *pItem;
+	bool bCalledSpawn; // MiB MAR2019_03 - [GET_ITEM_TABLE] Added to check if game_spawn has been called already
+	GenItem_s()
+	{
+		Name = "";
+		pItem = NULL;
+		bCalledSpawn = false;
+	}
 	void operator=(GenItem_s t)
 	{
 		Name = t.Name;
 		pItem = t.pItem;
+		bCalledSpawn = t.bCalledSpawn;
 	}
 } GenItem_t;
 
