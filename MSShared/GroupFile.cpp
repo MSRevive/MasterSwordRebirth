@@ -75,67 +75,10 @@ void operator delete(void *ptr, const char *pszSourceFile, int LineNum);
 
 void Print(char *szFmt, ...);
 
-//namespace GroupFile
-//{
-//	void ReplaceChar( char *pString, char org, char dest );
-//}
-
 //Groupfile... its just like a pakfile
 void CGroupFile::Open(char *pszFileName)
 {
-	strncpy(m_FileName,  pszFileName, sizeof(m_FileName));
-	m_EntryList.clear();
-
-	CMemFile GroupFile;
-	if (GroupFile.ReadFromFile(m_FileName))
-	{
-		int EncryptedHeaderSize;
-		GroupFile.ReadInt(EncryptedHeaderSize);
-
-		CEncryptData1 HeaderData;
-		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize);
-		if (!HeaderData.Decrypt())
-			return;
-		CMemFile DecryptedHeaders;
-		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
-
-		int HeaderEntries;
-		DecryptedHeaders.ReadInt(HeaderEntries);
-
-		//Read headers
-		for (int i = 0; i < HeaderEntries; i++)
-		{
-			cachedentry_t Entry;
-			DecryptedHeaders.Read(&Entry, sizeof(groupheader_t)); //Read only the groupheader_t part.  The cachedentry_t part is not stored
-			Entry.Data = NULL;
-
-			m_EntryList.add(Entry);
-		}
-
-		//Read existing data
-		for (int i = 0; i < m_EntryList.size(); i++)
-		{
-			CEncryptData1 Data;
-			cachedentry_t &Entry = m_EntryList[i];
-
-			Data.SetData(GroupFile.m_Buffer + Entry.DataOfs, Entry.DataSizeEncrypted);
-			if(!Data.Decrypt())
-				continue;
-
-			Entry.Data = msnew byte[Data.GetDataSize()];
-			memcpy(Entry.Data, Data.GetData(), Data.GetDataSize());
-		}
-
-		m_IsOpen = true;
-	}
-	else{
-		throw "file not found";
-	}
-}
-
-void CGroupFile::OpenNoFault(char *pszFileName)
-{
-	strncpy(m_FileName,  pszFileName, sizeof(m_FileName));
+	strncpy(m_FileName, pszFileName, sizeof(m_FileName));
 	m_EntryList.clear();
 
 	CMemFile GroupFile;
@@ -366,7 +309,7 @@ void CGroupFile::Flush()
 #ifndef NOT_HLDLL
 #include "FileSystem_Shared.h"
 
-CGameGroupFile::CGameGroupFile(): m_hFile( FILESYSTEM_INVALID_HANDLE )
+CGameGroupFile::CGameGroupFile(): m_hFile(FILESYSTEM_INVALID_HANDLE)
 {
 }
 
@@ -375,19 +318,19 @@ CGameGroupFile::~CGameGroupFile()
 	Close();
 }
 
-bool CGameGroupFile::Open( const char* pszFilename )
+bool CGameGroupFile::Open(const char* pszFilename)
 {
 	Close();
 
 	//Load group files from config directories only (avoids loading downloaded content)
-	m_hFile = g_pFileSystem->Open( pszFilename, "rb", "GAMECONFIG" );
+	m_hFile = g_pFileSystem->Open(pszFilename, "rb", "GAMECONFIG");
 
-	if( FILESYSTEM_INVALID_HANDLE == m_hFile )
+	if(FILESYSTEM_INVALID_HANDLE == m_hFile)
 		return false;
 
 	int EncryptedHeaderSize = 0;
 
-	if( sizeof( int ) != g_pFileSystem->Read( &EncryptedHeaderSize, sizeof( int ), m_hFile ) )
+	if(sizeof(int) != g_pFileSystem->Read(&EncryptedHeaderSize, sizeof(int), m_hFile))
 	{
 		Close();
 		return false;
@@ -401,8 +344,7 @@ bool CGameGroupFile::Open( const char* pszFilename )
 	{
 		byte* pMemory;
 
-		CleanupMemory( byte* pMemory )
-			: pMemory( pMemory )
+		CleanupMemory( byte* pMemory ): pMemory( pMemory )
 		{
 		}
 
@@ -413,29 +355,29 @@ bool CGameGroupFile::Open( const char* pszFilename )
 	};
 
 	CMemFile DecryptedHeaders;
-
+	
 	{
-		CleanupMemory EncryptedHeaderData( msnew byte[ EncryptedHeaderSize ] );
+		CleanupMemory EncryptedHeaderData(msnew byte[EncryptedHeaderSize]);
 
-		if( EncryptedHeaderSize != g_pFileSystem->Read( EncryptedHeaderData.pMemory, EncryptedHeaderSize, m_hFile ) )
+		if(EncryptedHeaderSize != g_pFileSystem->Read(EncryptedHeaderData.pMemory, EncryptedHeaderSize, m_hFile) )
 		{
 			return false;
 		}
 
 		CEncryptData1 HeaderData;
-		HeaderData.SetData( EncryptedHeaderData.pMemory, EncryptedHeaderSize );
-		if( !HeaderData.Decrypt( ) )
+		HeaderData.SetData(EncryptedHeaderData.pMemory, EncryptedHeaderSize);
+		if(!HeaderData.Decrypt())
 			return false;
 
-		DecryptedHeaders.SetBuffer( HeaderData.GetData( ), HeaderData.GetDataSize() );
+		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
 	}
 
 	int HeaderEntries;
 
-	DecryptedHeaders.ReadInt( HeaderEntries );
+	DecryptedHeaders.ReadInt(HeaderEntries);
 
 	//Read headers
-	for( int i = 0; HeaderEntries; i++ )
+	for(int i = 0; HeaderEntries; i++)
 	{
 		cachedentry_t Entry;
 		DecryptedHeaders.Read( &Entry, sizeof(groupheader_t) );
@@ -444,7 +386,7 @@ bool CGameGroupFile::Open( const char* pszFilename )
 	}
 
 	//Seek to head so we're not left dangling someplace where it might cause problems
-	g_pFileSystem->Seek( m_hFile, 0, FILESYSTEM_SEEK_HEAD );
+	g_pFileSystem->Seek(m_hFile, 0, FILESYSTEM_SEEK_HEAD);
 
 	return true;
 }
@@ -463,9 +405,9 @@ void CGameGroupFile::Close()
 bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned long &DataSize )
 {
 	msstring EntryName = pszName;
-	ReplaceChar( EntryName, '\\', '/' );
+	ReplaceChar(EntryName, '\\', '/');
 
-	for( int i = 0; m_EntryList.size(); i++ )
+	for(int i = 0; m_EntryList.size(); i++)
 	{
 		groupheader_t &Entry = m_EntryList[i];
 		if( Entry.FileName != EntryName )
@@ -474,22 +416,20 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 		DataSize = Entry.DataSize;
 
 		//Decrypt on demand
-		if( pBuffer )
+		if(pBuffer)
 		{
 			g_pFileSystem->Seek( m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD );
-
 			byte* pEncryptedBuffer = msnew byte[ Entry.DataSizeEncrypted ];
-
 			bool bSuccess = false;
 
-			if( Entry.DataSizeEncrypted == g_pFileSystem->Read( pEncryptedBuffer, Entry.DataSizeEncrypted, m_hFile ) )
+			if(Entry.DataSizeEncrypted == g_pFileSystem->Read(pEncryptedBuffer, Entry.DataSizeEncrypted, m_hFile))
 			{
-				CEncryptData1 Data( pEncryptedBuffer, Entry.DataSizeEncrypted );
+				CEncryptData1 Data(pEncryptedBuffer, Entry.DataSizeEncrypted);
 
-				if( Data.Decrypt( ) )
+				if( Data.Decrypt())
 				{
 					//TODO: could check if DataSize matches Data.GetDataSize() here - Solokiller
-					memcpy( pBuffer, Data.GetData(), DataSize );
+					memcpy(pBuffer, Data.GetData(), DataSize);
 
 					bSuccess = true;
 				}
@@ -508,4 +448,5 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 
 	return false;
 }
+
 #endif

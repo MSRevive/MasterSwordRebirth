@@ -15,7 +15,7 @@ void ScriptMgr::RegisterScript(CScript *NewScript)
 		}
 		catch(...)
 		{
-			MessageBox(NULL, "sc.dll could not be found", "FATAL ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, "failure loading sc.dll", "FATAL ERROR", MB_OK | MB_ICONEXCLAMATION);
 			exit(-1);
 		}
 	}

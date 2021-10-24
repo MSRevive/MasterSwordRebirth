@@ -37,7 +37,6 @@ protected:
 
 public:
 	void Open(char *pszFileName);
-	void OpenNoFault(char *pszFileName);
 	~CGroupFile() { Close(); }
 	void Close();
 	bool IsOpen() { return m_IsOpen; }
@@ -77,7 +76,7 @@ public:
 	*	@brief Loads the group file from a given file
 	*	If the group file was previously loaded, all data is first purged
 	*/
-	bool Open( const char* pszFilename );
+	bool Open(const char* pszFilename);
 
 	/**
 	*	@brief Manually close the file and purge all header data
@@ -86,7 +85,7 @@ public:
 
 	//Call Read() with pBuffer == NULL to just get the size
 	//Decrypts script data on demand, avoid calling more than once for any given script
-	bool ReadEntry( const char *pszName, byte *pBuffer, unsigned long &DataSize );
+	bool ReadEntry(const char *pszName, byte *pBuffer, unsigned long &DataSize);
 
 private:
 	FileHandle_t m_hFile;
