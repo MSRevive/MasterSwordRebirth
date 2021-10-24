@@ -8,8 +8,7 @@ typedef unsigned long ulong;
 struct groupheader_t
 {
 	msstring FileName;
-	ulong DataOfs, DataSize;
-	ulong DataSizeEncrypted;
+	ulong DataOfs, DataSize, DataSizeEncrypted;
 };
 
 /**
@@ -19,7 +18,7 @@ struct groupheader_t
 struct groupfileheader_t
 {
 	int TotalEntries;
-	groupheader_t Headers[ 1 ]; //[ TotalEntries ]
+	groupheader_t Headers[1]; //[ TotalEntries ]
 };
 
 struct cachedentry_t : groupheader_t

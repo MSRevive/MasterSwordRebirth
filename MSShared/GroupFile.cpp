@@ -83,30 +83,30 @@ void Print(char *szFmt, ...);
 //Groupfile... its just like a pakfile
 void CGroupFile::Open(char *pszFileName)
 {
-	strncpy(m_FileName,  pszFileName, sizeof(m_FileName) );
+	strncpy(m_FileName,  pszFileName, sizeof(m_FileName));
 	m_EntryList.clear();
 
 	CMemFile GroupFile;
 	if (GroupFile.ReadFromFile(m_FileName))
 	{
 		int EncryptedHeaderSize;
-		GroupFile.ReadInt( EncryptedHeaderSize );
+		GroupFile.ReadInt(EncryptedHeaderSize);
 
-		CEncryptData1 Data;
-		Data.SetData(GroupFile.m_Buffer, GroupFile.GetFileSize());
-		if (!Data.Decrypt())
+		CEncryptData1 HeaderData;
+		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize);
+		if (!HeaderData.Decrypt())
 			return;
-		CMemFile DecryptedFile;
-		DecryptedFile.SetBuffer(Data.GetData(), Data.GetDataSize());
+		CMemFile DecryptedHeaders;
+		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
 
 		int HeaderEntries;
+		DecryptedHeaders.ReadInt(HeaderEntries);
 
-		DecryptedFile.ReadInt(HeaderEntries);
 		//Read headers
 		for (int i = 0; i < HeaderEntries; i++)
 		{
 			cachedentry_t Entry;
-			DecryptedFile.Read(&Entry, sizeof(groupheader_t)); //Read only the groupheader_t part.  The cachedentry_t part is not stored
+			DecryptedHeaders.Read(&Entry, sizeof(groupheader_t)); //Read only the groupheader_t part.  The cachedentry_t part is not stored
 			Entry.Data = NULL;
 
 			m_EntryList.add(Entry);
@@ -115,18 +115,21 @@ void CGroupFile::Open(char *pszFileName)
 		//Read existing data
 		for (int i = 0; i < m_EntryList.size(); i++)
 		{
+			CEncryptData1 Data;
 			cachedentry_t &Entry = m_EntryList[i];
 
-			groupheader_t ReadEntry;
-			DecryptedFile.SetReadPtr(Entry.DataOfs);
-			Entry.Data = msnew byte[Entry.DataSize];
-			DecryptedFile.Read(Entry.Data, Entry.DataSize);
+			Data.SetData(GroupFile.m_Buffer + Entry.DataOfs, Entry.DataSizeEncrypted);
+			if(!Data.Decrypt())
+				continue;
+
+			Entry.Data = msnew byte[Data.GetDataSize()];
+			memcpy(Entry.Data, Data.GetData(), Data.GetDataSize());
 		}
 
 		m_IsOpen = true;
 	}
 	else{
-		throw "File not found";
+		throw "file not found";
 	}
 }
 
@@ -248,38 +251,67 @@ bool CGroupFile::DeleteEntry(const char *pszName)
 
 void CGroupFile::Flush()
 {
+	//Use an ofstream so we don't have to precalculate the file size - Solokiller
+	std::ofstream file(m_FileName, std::ios_base::out | std::ios_base::binary);
+
+	if(!file.is_open())
+		return;
+
+	int EncryptedHeaderSize = 0;
+
+	//Open has to know how large the header chunk is in encrypted form. Write a dummy value now, update later
+	//This replaces the use of the file size to decrypt the file, instead we know the size of the header and from that header get the sizes of the encrypted scripts
+	file.write(reinterpret_cast<char*>(&EncryptedHeaderSize), sizeof(int));
+
+	const size_t uiHeaderOffset = file.tellp();
 	int TotalEntries = m_EntryList.size();
-	int TotalSize = sizeof(int);
-	for (int i = 0; i < TotalEntries; i++)
-		TotalSize += sizeof(groupheader_t) + m_EntryList[i].DataSize;
+	const size_t uiTotalHeaderSize = sizeof(groupfileheader_t) - sizeof(groupheader_t) + (sizeof(groupheader_t) * TotalEntries);
+	groupfileheader_t* pHeaders = reinterpret_cast<groupfileheader_t*>(::operator new(uiTotalHeaderSize));
+	pHeaders->TotalEntries = TotalEntries;
 
-	CMemFile GroupFile(TotalSize);
-	GroupFile.WriteInt(TotalEntries); //[INT]
-
-	int Offset = sizeof(int) + TotalEntries * sizeof(groupheader_t);
-	for (int i = 0; i < TotalEntries; i++)
-	{
-		cachedentry_t &Entry = m_EntryList[i];
-
-		groupheader_t &Header = Entry;
-		Header.DataOfs = Offset;
-		GroupFile.Write(&Header, sizeof(groupheader_t)); //[X groupheader_t]
-		Offset += Header.DataSize;
-	}
-
-	for (int i = 0; i < TotalEntries; i++)
-	{
-		cachedentry_t &Entry = m_EntryList[i];
-		GroupFile.Write(Entry.Data, Entry.DataSize); //[X data]
-	}
-
-	//Encrypt whole file
-	CEncryptData1 Data;
-	Data.SetData(GroupFile.m_Buffer, GroupFile.GetFileSize());
+	//Write dummy data, update after script data has been written
+	/*CEncryptData1 Data;
+	Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
 	Data.Encrypt();
-	GroupFile.SetBuffer(Data.GetData(), Data.GetDataSize());
 
-	GroupFile.WriteToFile(m_FileName);
+	file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());*/
+
+	for(int i = 0; TotalEntries; i++)
+	{
+		cachedentry_t &Entry = m_EntryList[i];
+		Entry.DataOfs = static_cast<int>(file.tellp());
+
+		CEncryptData1 Data;
+		Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
+		Data.Encrypt();
+
+		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize()); //[X data]
+
+		//Update entry info
+		Entry.DataSizeEncrypted = Data.GetDataSize();
+	}
+
+	for(int i = 0; TotalEntries; i++)
+	{
+		pHeaders->Headers[i] = m_EntryList[i];
+	}
+
+	//Encrypt headers
+	CEncryptData1 Data;
+	Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
+	Data.Encrypt();
+
+	file.seekp(uiHeaderOffset);
+	file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());
+
+	file.seekp(0, std::ios_base::beg);
+
+	//Write the encrypted header size
+	EncryptedHeaderSize = Data.GetDataSize();
+	file.write(reinterpret_cast<char*>(&EncryptedHeaderSize), sizeof(int));
+
+	delete pHeaders;
+	file.close();
 }
 
 #ifndef NOT_HLDLL
