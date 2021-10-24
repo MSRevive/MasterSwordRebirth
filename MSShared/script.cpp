@@ -21,10 +21,9 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "../cl_dll/MasterSword/HUDScript.h"
 #endif
 #include "../engine/studio.h"
-//#include "../MSShared/md5/MapCheck.h" //Wishbone MAR2016 - Our CRC function.
 #include "logfile.h"
 #include "time.h"
-#include <map>
+//#include "../MSShared/md5/MapCheck.h" //Wishbone MAR2016 - Our CRC function.
 
 // //[MiB] - for checking if the "Cheat Engine.exe" process is running
 // //#include "winsani_in.h"
@@ -1286,7 +1285,7 @@ msstring CScript::ScriptGetter_Get( msstring& FullName, msstring& ParserName, ms
 //-- Return [ERROR_NO_ARRAY] if array not found (except: "exists", which returns 0)
 //-- Return [ERROR_MISSING_PARAMS] if not given enough Parameters.
 //- priority: high, scope: uncertain
-msstring CScript::ScriptGetter_GetArray( msstring& FullName, msstring& ParserName, msstringlist& Params )
+msstring CScript::ScriptGetter_GetArray(msstring &FullName, msstring &ParserName, msstringlist &Params)
 {
 	// MiB JAN2010_26	Scripted array functions
 	// MiB JUN2010_25 Added global functionality
@@ -1299,29 +1298,29 @@ msstring CScript::ScriptGetter_GetArray( msstring& FullName, msstring& ParserNam
 		$get_array_amt(<name>)								Returns number of elements in <name>   ( -1 if couldn't find array )
 	*/
 	msstring Return;
-    size_t                              vParam = 0;
-    bool                                bIsGlobal = ParserName.starts_with( "$g_get_array" );
-    CBaseEntity *                       pEnt = NULL;
-    bool                                bExisted;
+  size_t vParam = 0;
+  bool bIsGlobal = ParserName.starts_with( "$g_get_array" );
+  CBaseEntity * pEnt = NULL;
+  bool bExisted;
 	if ( Params.size() >= 1 )
 	{
 		msstring ArrName = Params[vParam++];
-        if ( !bIsGlobal && Params.size() > vParam )
+    if ( !bIsGlobal && Params.size() > vParam )
+    {
+        // Check if the first parameter is an entity
+        pEnt = RetrieveEntity( ArrName );
+        if ( pEnt )
         {
-            // Check if the first parameter is an entity
-            pEnt = RetrieveEntity( ArrName );
-            if ( pEnt )
-            {
-                ArrName = Params[vParam++];
-            }
+            ArrName = Params[vParam++];
         }
-        if ( !pEnt )
-        {
-            pEnt = m.pScriptedEnt;
-        }
+    }
+    if ( !pEnt )
+    {
+        pEnt = m.pScriptedEnt;
+    }
 
-        msscriptarrayhash & vArrayHash = bIsGlobal ? GlobalScriptArrays : pEnt->scriptedArrays;
-        msscriptarray * pArray = GetScriptedArrayFromHashMap( vArrayHash, ArrName, false, &bExisted);
+    msscriptarrayhash &vArrayHash = bIsGlobal ? GlobalScriptArrays : pEnt->scriptedArrays;
+    msscriptarray * pArray = GetScriptedArrayFromHashMap( vArrayHash, ArrName, false, &bExisted);
 
 		if ( !bExisted )
 		{
@@ -3708,23 +3707,19 @@ msstring CScript::ScriptGetter_RelVel( msstring& FullName, msstring& ParserName,
 
 // $shape_cylinder(<origin|entity>,<radius>[,pos_height[,neg_height]])
 msstring CScript::ScriptGetter_ShapeCylinder(
-  msstring &                            FullName
-, msstring &                            ParserName
-, msstringlist &                        Params
+  msstring & FullName
+, msstring & ParserName
+, msstringlist & Params
 )
 {
     if ( Params.size() > 1 )
     {
-        Vector                          vOrigin = DetermineOrigin( Params[0] );
-        float                           vRadius = atof( Params[1] );
-        float                           vPosZ = Params.size() > 2 ? atof( Params[2] ) : 0;
-        float                           vNegZ = Params.size() > 3 ? atof( Params[3] ) : 0;
+        Vector vOrigin = DetermineOrigin( Params[0] );
+        float vRadius = atof( Params[1] );
+        float vPosZ = Params.size() > 2 ? atof( Params[2] ) : 0;
+        float vNegZ = Params.size() > 3 ? atof( Params[3] ) : 0;
 
-        CCylinderFilter                 vFilter( vOrigin
-                                               , vRadius
-                                               , vPosZ
-                                               , vNegZ
-                                               );
+        CCylinderFilter vFilter(vOrigin, vRadius, vPosZ, vNegZ);
         return vFilter.AsString();
 
     }
@@ -3736,24 +3731,20 @@ msstring CScript::ScriptGetter_ShapeCylinder(
 // $shape_rect(<origin|entity>,<x_size>[,y_size[,z_size])
 //      If only x_size is provided, a cube with x_size sides
 //      If only x_size and y_size are provided, a square that doesn't check z
-msstring CScript::ScriptGetter_ShapeRect(
-  msstring &                            FullName
-, msstring &                            ParserName
-, msstringlist &                        Params
-)
+msstring CScript::ScriptGetter_ShapeRect(msstring & FullName, msstring & ParserName, msstringlist & Params)
 {
     if ( Params.size() > 1 )
     {
-        Vector                          vOrigin = DetermineOrigin( Params[0] );
-        float                           vHalfX;
-        float                           vHalfY;
-        float                           vHalfZ;
+        Vector vOrigin = DetermineOrigin( Params[0] );
+        float vHalfX;
+        float vHalfY;
+        float vHalfZ;
 
         if ( Params[1][0] == '(' )
         {
-            Vector                      vPointMin = vOrigin;
-            Vector                      vPointMax = StringToVec(Params[1]);
-            Vector                      vDelta = vPointMax - vPointMin;
+            Vector vPointMin = vOrigin;
+            Vector vPointMax = StringToVec(Params[1]);
+            Vector vDelta = vPointMax - vPointMin;
             vHalfX = vDelta.x / 2;
             vHalfY = vDelta.y / 2;
             vHalfZ = vDelta.z / 2;
@@ -3781,11 +3772,7 @@ msstring CScript::ScriptGetter_ShapeRect(
             }
         }
 
-        CRectangleFilter                vFilter( vOrigin
-                                               , vHalfX
-                                               , vHalfY
-                                               , vHalfZ
-                                               );
+        CRectangleFilter vFilter( vOrigin, vHalfX, vHalfY, vHalfZ );
         return vFilter.AsString();
     }
     return FullName;
@@ -6024,16 +6011,17 @@ void CScript::SendScript( scriptsendcmd_t &SendCmd )
 	}
 	#endif
 }
-CBaseEntity *CScript::RetrieveEntity( msstring_ref Name )
+
+CBaseEntity *CScript::RetrieveEntity(msstring_ref Name)
 {
-	return m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Name ) : StringToEnt( Name );
+	return m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Name) : StringToEnt(Name);
 }
-Vector CScript::DetermineOrigin(
- msstring &                             vsOrigin
-)
+
+Vector CScript::DetermineOrigin(msstring & vsOrigin)
 {
-	return m.pScriptedEnt ? m.pScriptedEnt->DetermineOrigin( vsOrigin ) : StringToVec( vsOrigin );
+	return m.pScriptedEnt ? m.pScriptedEnt->DetermineOrigin(vsOrigin) : StringToVec(vsOrigin);
 }
+
 void CScript::CallEventTimed( msstring_ref EventName, float Delay )
 {
 	float Time = gpGlobals->time + Delay;

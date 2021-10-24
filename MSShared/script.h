@@ -4,7 +4,7 @@
 
 */
 
-class CEventList : public mslist<SCRIPT_EVENT *>			//This class was created so I can store Events as pointers, but still access them as
+class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
 	CEventList() : mslist<SCRIPT_EVENT *>() {}
@@ -99,13 +99,11 @@ public:
 	scriptvar_t *SetVar( const char *pszVarName, float flValue, bool fGlobal = false );
 	Vector StringToVec( msstring_ref String );
 	void CopyAllData( CScript *pDestScript, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface );
-	int ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/ );
+	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/);
 	void SendScript( scriptsendcmd_t &SendCmd );	//Send script to client
 	CBaseEntity *RetrieveEntity( msstring_ref Name );
-    Vector DetermineOrigin(
-      msstring &                        vsOrigin
-    );
-	void CallEventTimed( msstring_ref EventName, float Delay );
+  Vector DetermineOrigin(msstring & vsOrigin);
+	void CallEventTimed(msstring_ref EventName, float Delay);
 
 	//IScripted - Don't make CScript a part of IScripted or they allocate each other in a recursive loop
 	//			  These functions are just imitating IScripted
@@ -114,14 +112,7 @@ public:
 	typedef std::map<msstring,scriptcmdscpp_cmdfunc_t> msfunchash_t;
 	static msfunchash_t m_GlobalCmdHash; // MiB 30NOV_2014 Hashed commands for ScriptCmds.cpp
 
-	void ErrorPrintCommand(
-		char *                        vsUniqueTag
-		, SCRIPT_EVENT *                vEvent
-		, msstring &                    vsCmdName
-		, msstringlist &                vParams
-		, int                           vParamStrt
-		, char *                        vsText
-		);
+	void ErrorPrintCommand(char * vsUniqueTag, SCRIPT_EVENT * vEvent, msstring & vsCmdName, msstringlist & vParams, int vParamStrt, char * vsText);
 
 	static void Script_Setup( );
 	static void ScriptGetterHash_Setup( ); // MiB 30NOV_2014 Function for adding functions to the Script.cpp hash
