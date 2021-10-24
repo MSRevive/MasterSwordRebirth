@@ -45,6 +45,8 @@
 #include "MSCentral.h"
 #include "versioncontrol.h"
 
+#include "../MSShared/CVarMonitor.h"
+
 extern void PlayerPrecache();
 
 // Temp

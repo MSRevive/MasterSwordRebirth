@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -435,7 +435,7 @@ int DispatchRestore(edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity)
 		pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 
 #if 0
-		if ( pEntity && pEntity->pev->globalname && globalEntity ) 
+		if ( pEntity && pEntity->pev->globalname && globalEntity )
 		{
 			ALERT( at_console, "Global %s is %s\n", STRING(pEntity->pev->globalname), STRING(pEntity->pev->model) );
 		}
