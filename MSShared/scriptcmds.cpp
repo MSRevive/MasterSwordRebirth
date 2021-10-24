@@ -1,7 +1,7 @@
 /*
 	Master Sword - A Half-life Total Conversion
 	Script.cpp - Parses & Executes script event files for NPCs or weapons
-	*/
+*/
 
 #include "inc_weapondefs.h"
 #include "animation.h"
@@ -228,7 +228,7 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["teleportdest"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_teleportdest); //Thothie OCT2015_18 - teleport to specific info_teleport_destination
 		m_GlobalCmdHash["syncitem"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_syncitem); //Thothie OCT2016_04 - sync item from server to client
 		m_GlobalCmdHash["displaydesc"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_syncitem); //Thothie OCT2016_04 - invoke item desc display on client
-		m_GlobalCmdHash["moditem"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_moditem); //Thothie OCT2016_18 Item Mods
+		//m_GlobalCmdHash["moditem"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_moditem); //Thothie OCT2016_18 Item Mods
 		m_GlobalCmdHash["endgame"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_endgame); //Thothie OCT2016_26 - exit command to deal with the fact we can't send the "quit" command anymore
 
 		m_GlobalCmdHash["localmenu.reset"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_LocalPanel); // MiB MAR2015_01 [LOCAL_PANEL] - Resets local menu
@@ -1398,7 +1398,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 #endif
 			//Thothie OCT2016_18 Item Mods
 #ifdef VALVE_DLL
-			else if( Prop == "modded" ) return FBitSet(pItem->Properties,ITEM_MODDED) ? "1" : "0";
+			/*else if( Prop == "modded" ) return FBitSet(pItem->Properties,ITEM_MODDED) ? "1" : "0";
 			else if( Prop == "mods" )
 			{
 				if ( FBitSet(pItem->Properties,ITEM_MODDED) )
@@ -1409,7 +1409,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 				{
 					return "0";
 				}
-			}
+			}*/
 #endif
 		} //end if ( pItem )
 		else if (pMonster)
@@ -2458,7 +2458,7 @@ bool CScript::ScriptCmd_ClearPlayerHits(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 		{
 			if ( Params[1] == "all" )
 			{
-				for(int p = 0; MAXPLAYERS; i++)
+				for(int p = 0; MAXPLAYERS; p++)
 				{
 					pMons->m_PlayerDamage[p].Clear(); // MiB MAR2019_22 [SLOT_EXP] - Use new clear function
 				}
@@ -6490,6 +6490,7 @@ bool CScript::ScriptCmd_setquantity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 //moditem <item> <mod_str>
 //- Stores item mods, and flags item as modded
 //Thothie OCT2016_18 Item Mods
+/*
 bool CScript::ScriptCmd_moditem(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
@@ -6510,7 +6511,7 @@ bool CScript::ScriptCmd_moditem(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	else ERROR_MISSING_PARMS;
 #endif
 	return true;
-}
+}*/
 
 
 //syncitem <target_item> <target_player>
@@ -6691,7 +6692,7 @@ bool CScript::ScriptCmd_SetTrans(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
 		if( pPlayer )
 		{
-			strcpy(pPlayer->m_SpawnTransition, Params[1], 32);
+			strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
 		}
 		else
 		{
@@ -7194,7 +7195,7 @@ bool CScript::ScriptCmd_ToSpawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
 		if( pPlayer )
 		{
-			if ( Params.size() >= 2 ) strcpy(pPlayer->m_SpawnTransition, Params[1], 32);
+			if ( Params.size() >= 2 ) strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
 			pPlayer->m_JoinType = 2;
 			CBaseEntity *pSpawnSpot = pPlayer->FindSpawnSpot();
 			UTIL_SetOrigin( pPlayer->pev, pSpawnSpot->pev->origin );
@@ -7695,7 +7696,7 @@ bool CScript::Script_ExecuteCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		return fParentSuccess;
 
 	bool bFound = false;
-	msfunchash_t::iterator       iCmd = m_GlobalCmdHash.find(Cmd.Name());
+	msfunchash_t::iterator iCmd = m_GlobalCmdHash.find(Cmd.Name());
 	if (iCmd != m_GlobalCmdHash.end())
 	{
 		return (this->*(iCmd->second.GetFunc()))(Event, Cmd, Params);
@@ -7827,7 +7828,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwri
 
 
 //Easy way to open files
-scriptfile_t &scriptfile_t::operator = (const msstring_ref a)
+scriptfile_t &scriptfile_t::operator=(const msstring_ref a)
 {
 	/* Example:
 		scriptfile_t file;
