@@ -1,15 +1,6 @@
 #ifndef STACKSTRING_H
 #define STACKSTRING_H
 
-#define clrmem(a) memset(&a, 0, sizeof(a));
-
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 #ifndef _WIN32
 extern "C" char *strlwr(char *str);
 #endif
@@ -27,6 +18,15 @@ extern "C" char *strlwr(char *str);
 #ifndef STD_SET
 #define STD_SET
 #include <set>
+#endif
+
+#define clrmem(a) memset(&a, 0, sizeof(a));
+
+#ifndef max
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 //Deuplicated from msdebug.h
@@ -297,47 +297,6 @@ public:
 	operator float() { return m_Float; }
 	operator msstring_ref() { return m_String.c_str(); }
 };
-
-//MiB NOV2014_19 - individualized trigger cooldown [begin]
-// TODO: Remove this and update references to use mshash instead
-template <class itemtype_key, class itemtype_val>
-class mshashentry
-{
-private:
-	itemtype_key mKey;
-	itemtype_val mVal;
-
-public:
-	mshashentry(){};
-	mshashentry(const itemtype_key rKey, const itemtype_val rVal)
-	{
-		mKey = rKey;
-		mVal = rVal;
-	}
-
-	mshashentry &operator=(mshashentry a)
-	{
-		mKey = a.mKey;
-		mVal = a.mVal;
-		return *this;
-	}
-
-	const itemtype_key GetKey(void)
-	{
-		return mKey;
-	}
-
-	const itemtype_val GetVal(void)
-	{
-		return mVal;
-	}
-
-	void SetVal(const itemtype_val rVal)
-	{
-		mVal = rVal;
-	}
-};
-//MiB NOV2014_19 - individualized trigger cooldown [end]
 
 // MiB 30NOV_2014 List of 1000 primes
 #define MAX_HASH_INT 1000

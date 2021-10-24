@@ -585,7 +585,9 @@ public:
 
 	// MiB NOV2014_18, individualized trigger cooldown. [begin]
 	bool bNdvCdwn;											   // Flag whether to use it or not
-	mslist<class mshashentry<msstring, long>> hEntityCooldown; // Pairings of entities to their next available trigger time
+	typedef std::map<msstring,long> mscooldownhash;
+	mscooldownhash hEntityCooldown;
+	//mslist<class mshashentry<msstring, long>> hEntityCooldown; // Pairings of entities to their next available trigger time
 	// MiB NOV2014_18, individualized trigger cooldown. [end]
 
 	//Thothie NOV2014_19 - application of the above
@@ -1336,7 +1338,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 
 	//MiB NOV2014_19 - individualized trigger cooldown [begin]
 	msstring entString = EntToString(pActivator);
-	int hCooldownIdx;
+	//int hCooldownIdx;
 	bool trig_secondary_activation = false;
 	if (bNdvCdwn)
 	{
@@ -1346,24 +1348,13 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 			//Print("DEBUG: On Cooldown Activate\n");
 			trig_secondary_activation = true;
 		}
-		for (hCooldownIdx = hEntityCooldown.size() - 1; hCooldownIdx >= 0; --hCooldownIdx)
+		
+		mscooldownhash::iterator iCooldown = hEntityCooldown.find( entString );
+		if (iCooldown != hEntityCooldown.end())
 		{
-			mshashentry<msstring, long> entry = hEntityCooldown[hCooldownIdx];
-			if (entry.GetKey() == entString)
+			if (gpGlobals->time < iCooldown->second)
 			{
-				if (gpGlobals->time >= entry.GetVal())
-				{
-					break; // Proceed, cooldown is done
-				}
-				else
-				{
-					return; // Don't go further for this entity, it's done
-				}
-			}
-			else if (gpGlobals->time >= entry.GetVal())
-			{
-				// Keep the list small by pruning outstanding entities as we go through them
-				hEntityCooldown.erase(hCooldownIdx);
+				return; // Don't go further for this entity, it's done
 			}
 		}
 	}
@@ -1557,14 +1548,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		long nextthink = gpGlobals->time + m_flWait;
 		if (bNdvCdwn)
 		{
-			if (hCooldownIdx >= 0)
-			{
-				hEntityCooldown[hCooldownIdx].SetVal(nextthink);
-			}
-			else
-			{
-				hEntityCooldown.add(mshashentry<msstring, long>(entString, nextthink));
-			}
+			hEntityCooldown[entString] = nextthink;
 		}
 		// Original code, used when not individual cooldowns
 		else
