@@ -1539,18 +1539,25 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 	//example:
 	else if (Params[0] == "ce")
 	{
-		msstring sTemp = "ce";
-		for (int i = 0; i < Params.size() - 1; i++)
+		//Thothie SEP2019_26 - cleffect ce security effort
+		if ( Params.size() >= 3 )
 		{
-			if (i > 0)
+			if(Params[2].contains("clmsg"))
 			{
-				if (i)
-					sTemp += " ";
-				sTemp += Params[i];
+				msstring sTemp = "ce";
+				for (int i = 0; i < Params.size() - 1; i++)
+				{
+					if (i > 0)
+					{
+						if (i)
+							sTemp += " ";
+						sTemp += Params[i];
+					}
+				}
+				sTemp += "\n";
+				ServerCmd(sTemp.c_str());
 			}
 		}
-		sTemp += "\n";
-		ServerCmd(sTemp.c_str());
 	}
 	//Thothie AUG2013_09 - Clientcmd work around
 	//cleffect clientcmd <command_string>
@@ -1583,21 +1590,31 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 	//Thothie SEP2011_07 - Client Side Decals (Attempt2)
 	else if (Params[0] == "decal")
 	{
-		//cleffect decal <index> <origin>
-		int thoth_decalindex = atoi(Params[1]);
-		Vector thoth_trace_start = StringToVec(Params[2]);
-		Vector thoth_trace_end = StringToVec(Params[3]);
-
-		//int thoth_testidx = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName( "{bigblood1" );
-		//gEngfuncs.pEfxAPI->R_DecalShoot( thoth_testidx, 0, 0, thoth_decal_org, 0 );
-		//gEngfuncs.pEfxAPI->Draw_DecalIndex( 17);
-		int iFlags = 0;
-		SetBits(iFlags, PM_WORLD_ONLY);
-		pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)&thoth_trace_start[0], (float *)&thoth_trace_end[0], iFlags, 2, iFlags);
-
-		gEngfuncs.pEfxAPI->R_DecalShoot(
+		if(Params[1] == "clearall")
+		{
+			//gEngfuncs.pEfxAPI->R_DecalRemoveAll( atoi(Params[2]) ); //prob needs to be local player
+			//eff it, borrowing form NS:
+			for ( int har = 0; har < 300; har++ )
+			{
+				gEngfuncs.pEfxAPI->R_DecalRemoveAll( har );
+			}
+		}else{
+			//cleffect decal <index> <origin>
+			int thoth_decalindex = atoi(Params[1]);
+			Vector thoth_trace_start = StringToVec(Params[2]);
+			Vector thoth_trace_end = StringToVec(Params[3]);
+	
+			//int thoth_testidx = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName( "{bigblood1" );
+			//gEngfuncs.pEfxAPI->R_DecalShoot( thoth_testidx, 0, 0, thoth_decal_org, 0 );
+			//gEngfuncs.pEfxAPI->Draw_DecalIndex( 17);
+			int iFlags = 0;
+			SetBits(iFlags, PM_WORLD_ONLY);
+			pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)&thoth_trace_start[0], (float *)&thoth_trace_end[0], iFlags, 2, iFlags);
+	
+			gEngfuncs.pEfxAPI->R_DecalShoot(
 			gEngfuncs.pEfxAPI->Draw_DecalIndex(thoth_decalindex),
 			gEngfuncs.pEventAPI->EV_IndexFromTrace(&pmtr), 0, thoth_trace_end, 0);
+		}
 	}
 }
 
