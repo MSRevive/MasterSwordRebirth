@@ -29,7 +29,7 @@ void PackScriptDir(char *pszName)
 
 	CMemFile InFile;
 
-	for (int i = 0; i < StoreFiles.size(); i++)
+	for (size_t i = 0; i < StoreFiles.size(); i++)
 	{
 		msstring &FullPath = StoreFiles[i];
 		if (InFile.ReadFromFile(FullPath))
