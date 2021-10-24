@@ -707,7 +707,7 @@ char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation
 		if ( !strcmp( array_operation, "size" ) )
 			return "noarray";
 		if ( !strcmp( array_operation, "getidx" ) )
-			return "noarray"
+			return "noarray";
 	}
 	else
 	{
