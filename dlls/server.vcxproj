@@ -60,7 +60,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>if EXIST ..\bin\.\$(TargetFileName) for /f &quot;delims=&quot; %%A in (&apos;attrib &quot;..\bin\.\$(TargetFileName)&quot;&apos;) do set valveTmpIsReadOnly=&quot;%%A&quot;&#x0D;&#x0A;set valveTmpIsReadOnlyLetter=%valveTmpIsReadOnly:~6,1%&#x0D;&#x0A;if &quot;%valveTmpIsReadOnlyLetter%&quot;==&quot;R&quot; del /q &quot;$(TargetDir)&quot;$(TargetFileName)&#x0D;&#x0A;if exist &quot;..\devtools\bin\vpc.exe&quot; &quot;..\devtools\bin\vpc.exe&quot; -crc2 &quot;server.vcxproj&quot;&#x0D;&#x0A;if ERRORLEVEL 1 exit /b 1&#x0D;&#x0A;</Command>
+      <Command>if EXIST ..\bin\.\$(TargetFileName) for /f "delims=" %%A in ('attrib "..\bin\.\$(TargetFileName)"') do set valveTmpIsReadOnly="%%A"
+set valveTmpIsReadOnlyLetter=%valveTmpIsReadOnly:~6,1%
+if "%valveTmpIsReadOnlyLetter%"=="R" del /q "$(TargetDir)"$(TargetFileName)
+if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
+if ERRORLEVEL 1 exit /b 1
+</Command>
     </PreBuildEvent>
     <ClCompile>
       <AdditionalOptions>/Zm200 /Gw /Zc:inline</AdditionalOptions>
@@ -110,7 +115,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(IntDir)/$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
-      <BaseAddress> </BaseAddress>
+      <BaseAddress>
+      </BaseAddress>
       <TargetMachine>MachineX86</TargetMachine>
       <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -128,14 +134,31 @@
     </Bscmake>
     <PostBuildEvent>
       <Message>Publishing to ..\bin\.</Message>
-      <Command>if not exist &quot;..\bin\.&quot; mkdir &quot;..\bin\.&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;..\bin\.\$(TargetFileName)&quot;&#x0D;&#x0A;if ERRORLEVEL 1 goto BuildEventFailed&#x0D;&#x0A;if exist &quot;$(TargetDir)$(TargetName).map&quot; copy &quot;$(TargetDir)$(TargetName).map&quot; ..\bin\.\$(TargetName).map&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).pdb&quot; ..\bin\.\$(TargetName).pdb&#x0D;&#x0A;if ERRORLEVEL 1 goto BuildEventFailed&#x0D;&#x0A;goto BuildEventOK&#x0D;&#x0A;:BuildEventFailed&#x0D;&#x0A;echo *** ERROR! PostBuildStep FAILED for $(ProjectName)! EXE or DLL is probably running. ***&#x0D;&#x0A;del /q &quot;$(TargetDir)$(TargetFileName)&quot;&#x0D;&#x0A;exit 1&#x0D;&#x0A;:BuildEventOK&#x0D;&#x0A;</Command>
+      <Command>if not exist "..\bin\." mkdir "..\bin\."
+copy "$(TargetDir)$(TargetFileName)" "..\bin\.\$(TargetFileName)"
+if ERRORLEVEL 1 goto BuildEventFailed
+if exist "$(TargetDir)$(TargetName).map" copy "$(TargetDir)$(TargetName).map" ..\bin\.\$(TargetName).map
+copy "$(TargetDir)$(TargetName).pdb" ..\bin\.\$(TargetName).pdb
+if ERRORLEVEL 1 goto BuildEventFailed
+goto BuildEventOK
+:BuildEventFailed
+echo *** ERROR! PostBuildStep FAILED for $(ProjectName)! EXE or DLL is probably running. ***
+del /q "$(TargetDir)$(TargetFileName)"
+exit 1
+:BuildEventOK
+</Command>
     </PostBuildEvent>
     <CustomBuildStep>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>if EXIST ..\bin\.\$(TargetFileName) for /f &quot;delims=&quot; %%A in (&apos;attrib &quot;..\bin\.\$(TargetFileName)&quot;&apos;) do set valveTmpIsReadOnly=&quot;%%A&quot;&#x0D;&#x0A;set valveTmpIsReadOnlyLetter=%valveTmpIsReadOnly:~6,1%&#x0D;&#x0A;if &quot;%valveTmpIsReadOnlyLetter%&quot;==&quot;R&quot; del /q &quot;$(TargetDir)&quot;$(TargetFileName)&#x0D;&#x0A;if exist &quot;..\devtools\bin\vpc.exe&quot; &quot;..\devtools\bin\vpc.exe&quot; -crc2 &quot;server.vcxproj&quot;&#x0D;&#x0A;if ERRORLEVEL 1 exit /b 1&#x0D;&#x0A;</Command>
+      <Command>if EXIST ..\bin\.\$(TargetFileName) for /f "delims=" %%A in ('attrib "..\bin\.\$(TargetFileName)"') do set valveTmpIsReadOnly="%%A"
+set valveTmpIsReadOnlyLetter=%valveTmpIsReadOnly:~6,1%
+if "%valveTmpIsReadOnlyLetter%"=="R" del /q "$(TargetDir)"$(TargetFileName)
+if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
+if ERRORLEVEL 1 exit /b 1
+</Command>
     </PreBuildEvent>
     <ClCompile>
       <AdditionalOptions>/Zm200 /Zo /Gw /Zc:inline</AdditionalOptions>
@@ -190,7 +213,8 @@
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
-      <BaseAddress> </BaseAddress>
+      <BaseAddress>
+      </BaseAddress>
       <TargetMachine>MachineX86</TargetMachine>
       <LinkErrorReporting>PromptImmediately</LinkErrorReporting>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -208,7 +232,19 @@
     </Bscmake>
     <PostBuildEvent>
       <Message>Publishing to ..\bin\.</Message>
-      <Command>if not exist &quot;..\bin\.&quot; mkdir &quot;..\bin\.&quot;&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetFileName)&quot; &quot;..\bin\.\$(TargetFileName)&quot;&#x0D;&#x0A;if ERRORLEVEL 1 goto BuildEventFailed&#x0D;&#x0A;if exist &quot;$(TargetDir)$(TargetName).map&quot; copy &quot;$(TargetDir)$(TargetName).map&quot; ..\bin\.\$(TargetName).map&#x0D;&#x0A;copy &quot;$(TargetDir)$(TargetName).pdb&quot; ..\bin\.\$(TargetName).pdb&#x0D;&#x0A;if ERRORLEVEL 1 goto BuildEventFailed&#x0D;&#x0A;goto BuildEventOK&#x0D;&#x0A;:BuildEventFailed&#x0D;&#x0A;echo *** ERROR! PostBuildStep FAILED for $(ProjectName)! EXE or DLL is probably running. ***&#x0D;&#x0A;del /q &quot;$(TargetDir)$(TargetFileName)&quot;&#x0D;&#x0A;exit 1&#x0D;&#x0A;:BuildEventOK&#x0D;&#x0A;</Command>
+      <Command>if not exist "..\bin\." mkdir "..\bin\."
+copy "$(TargetDir)$(TargetFileName)" "..\bin\.\$(TargetFileName)"
+if ERRORLEVEL 1 goto BuildEventFailed
+if exist "$(TargetDir)$(TargetName).map" copy "$(TargetDir)$(TargetName).map" ..\bin\.\$(TargetName).map
+copy "$(TargetDir)$(TargetName).pdb" ..\bin\.\$(TargetName).pdb
+if ERRORLEVEL 1 goto BuildEventFailed
+goto BuildEventOK
+:BuildEventFailed
+echo *** ERROR! PostBuildStep FAILED for $(ProjectName)! EXE or DLL is probably running. ***
+del /q "$(TargetDir)$(TargetFileName)"
+exit 1
+:BuildEventOK
+</Command>
     </PostBuildEvent>
     <CustomBuildStep>
     </CustomBuildStep>
@@ -216,6 +252,13 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\MSShared\CVarMonitor.h" />
+    <ClInclude Include="..\MSShared\Filesystem_Shared.h" />
+    <ClInclude Include="..\MSShared\FindEntities.h" />
+    <ClInclude Include="..\MSShared\script.h" />
+    <ClInclude Include="..\MSShared\scriptmgr.h" />
+    <ClInclude Include="..\public\FileSystem.h" />
+    <ClInclude Include="..\public\interface.h" />
     <ClInclude Include="basemonster.h" />
     <ClInclude Include="cbase.h" />
     <ClInclude Include="cdll_dll.h" />
@@ -228,6 +271,7 @@
     <ClInclude Include="..\pm_shared\pm_defs.h" />
     <ClInclude Include="..\pm_shared\pm_movevars.h" />
     <ClInclude Include="..\engine\progdefs.h" />
+    <ClInclude Include="ServerFindEntities.h" />
     <ClInclude Include="shurispritedefs.h" />
     <ClInclude Include="half-life\soundent.h" />
     <ClInclude Include="half-life\util.h" />
@@ -271,7 +315,6 @@
     <ClInclude Include="..\msshared\msdebug.h" />
     <ClInclude Include="..\msshared\msfileio.h" />
     <ClInclude Include="..\msshared\msnetcode.h" />
-    <ClInclude Include="..\msshared\script.h" />
     <ClInclude Include="..\msshared\scriptedeffects.h" />
     <ClInclude Include="..\msshared\sharedutil.h" />
     <ClInclude Include="..\msshared\stackstring.h" />
@@ -280,6 +323,11 @@
     <ClInclude Include="..\msshared\vgui_menudefsshared.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\MSShared\CVarMonitor.cpp" />
+    <ClCompile Include="..\MSShared\Filesystem_Shared.cpp" />
+    <ClCompile Include="..\MSShared\FindEntities.cpp" />
+    <ClCompile Include="..\MSShared\scriptmgr.cpp" />
+    <ClCompile Include="..\public\interface.cpp" />
     <ClCompile Include="half-life\animating.cpp" />
     <ClCompile Include="half-life\animation.cpp" />
     <ClCompile Include="bmodels.cpp" />
@@ -314,6 +362,7 @@
     <ClCompile Include="half-life\soundent.cpp" />
     <ClCompile Include="half-life\spectator.cpp" />
     <ClCompile Include="half-life\subs.cpp" />
+    <ClCompile Include="ServerFindEntities.cpp" />
     <ClCompile Include="triggers.cpp" />
     <ClCompile Include="half-life\util.cpp" />
     <ClCompile Include="..\game_shared\voice_gamemgr.cpp" />
@@ -376,18 +425,22 @@
   <ItemGroup>
     <CustomBuild Include="..\public\tier0\pointeroverride.asm">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compiling pointeroverride.asm</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">&quot;$(VCInstallDir)bin\ml.exe&quot; /safeseh /c /Cp /Zi /Fo&quot;$(IntDir)\%(Filename).obj&quot; &quot;%(FullPath)&quot;</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(VCInstallDir)bin\ml.exe" /safeseh /c /Cp /Zi /Fo"$(IntDir)\%(Filename).obj" "%(FullPath)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)\%(Filename).obj</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compiling pointeroverride.asm</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">&quot;$(VCInstallDir)bin\ml.exe&quot; /safeseh /c /Cp /Zi /Fo&quot;$(IntDir)\%(Filename).obj&quot; &quot;%(FullPath)&quot;</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(VCInstallDir)bin\ml.exe" /safeseh /c /Cp /Zi /Fo"$(IntDir)\%(Filename).obj" "%(FullPath)"</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)\%(Filename).obj</Outputs>
     </CustomBuild>
     <CustomBuild Include="server.vpc">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Running VPC CRC Check - server.vpc</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist &quot;..\devtools\bin\vpc.exe&quot; &quot;..\devtools\bin\vpc.exe&quot; -crc2 &quot;server.vcxproj&quot;&#x0D;&#x0A;if ERRORLEVEL 1 exit /b 1&#x0D;&#x0A;echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
+if ERRORLEVEL 1 exit /b 1
+echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Running VPC CRC Check - server.vpc</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist &quot;..\devtools\bin\vpc.exe&quot; &quot;..\devtools\bin\vpc.exe&quot; -crc2 &quot;server.vcxproj&quot;&#x0D;&#x0A;if ERRORLEVEL 1 exit /b 1&#x0D;&#x0A;echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
+if ERRORLEVEL 1 exit /b 1
+echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Outputs>
     </CustomBuild>
   </ItemGroup>

@@ -24,6 +24,7 @@ void CBaseEntity::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExt
 	//Let the object know it hit a wall
 	pInflictor->CounterEffect(this, CE_HITWORLD, NULL);
 }
+
 void CBaseEntity::SetFollow(CBaseEntity *pTarget, int Flags)
 {
 	if (pTarget)
@@ -52,11 +53,13 @@ void CBaseEntity::SetFollow(CBaseEntity *pTarget, int Flags)
 		m_AttachToEnt = NULL;
 	}
 }
+
 bool CBaseEntity::CanDamage(CBaseEntity *pOther)
 {
 	return (pOther->pev->takedamage > DAMAGE_NO) &&	   //The entity can take damage
 		   (!FBitSet(pOther->pev->flags, FL_GODMODE)); //The entity is not invulnerable;
 }
+
 void CBaseEntity::SUB_FadeOut(float FadeDuration)
 {
 	m_FadeDuration = FadeDuration;
@@ -65,7 +68,7 @@ void CBaseEntity::SUB_FadeOut(float FadeDuration)
 	pev->nextthink = gpGlobals->time + 0.1f;
 }
 
-void CBaseEntity ::Think_FadeOut(void)
+void CBaseEntity::Think_FadeOut(void)
 {
 	float Duration = gpGlobals->time - m_TimeFadeStart;
 	if (Duration >= m_FadeDuration)

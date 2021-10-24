@@ -97,8 +97,10 @@ inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin = NUL
 #define TURN_OFF_ALERT 0
 #if !TURN_OFF_ALERT
 #define ALERT (*g_engfuncs.pfnAlertMessage)
+#define SPAWN_GLOBAL_ITEMS 1
 #else
 #define ALERT
+#define SPAWN_GLOBAL_ITEMS 0
 #endif
 
 #define ENGINE_FPRINTF (*g_engfuncs.pfnEngineFprintf)

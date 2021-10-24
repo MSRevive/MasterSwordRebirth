@@ -17,6 +17,7 @@
 #else
 #include "Global.h"
 #endif
+#include "../MSShared/CVarMonitor.h"
 
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
@@ -117,7 +118,19 @@ void MSGlobals::NewMap()
 		//GameScript should have been deleted by EndMap() before NewMap() is called
 		MSErrorConsoleText("MSGlobals::NewMap", "MSGlobals::GameScript already allocated!");
 	}
-
+	
+	CVarMonitorManager::Reset();
+#if SPAWN_GLOBAL_ITEMS
+	for(int i = 0; CGenericItemMgr::ItemCount(); i++)
+	{
+		GenItem_t * pGenItem = CGenericItemMgr::Item(i);
+		if (pGenItem) // Paranoid
+		{
+				CGenericItemMgr::GetGlobalGenericItemByName(pGenItem->Name, true);
+		}
+	}
+#endif
+	
 	//This global script controls all continuous global events
 	MSGlobals::GameScript = msnew IScripted;
 #ifdef VALVE_DLL
@@ -293,22 +306,26 @@ entityinfo_t::entityinfo_t(CBaseEntity *pEntity)
 	entindex = pEntity->entindex();
 	pvPrivData = pEntity;
 }
+
 entityinfo_t &entityinfo_t::operator=(CBaseEntity *pEntity)
 {
 	entindex = (pEntity ? pEntity->entindex() : 0);
 	pvPrivData = pEntity;
 	return *this;
 }
+
 entityinfo_t::operator bool()
 {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(INDEXENT(entindex));
 	return pvPrivData == pEntity;
 }
+
 CBaseEntity *entityinfo_t::Entity()
 {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(INDEXENT(entindex));
 	return pvPrivData == pEntity ? pEntity : NULL;
 }
+
 void CBaseEntity::StoreEntity(CBaseEntity *pEntity, enttype_e EntType)
 {
 #ifdef VALVE_DLL
@@ -316,6 +333,7 @@ void CBaseEntity::StoreEntity(CBaseEntity *pEntity, enttype_e EntType)
 	m_EntityList[EntType].pvPrivData = pEntity ? pEntity : NULL;
 #endif
 }
+
 CBaseEntity *CBaseEntity::RetrieveEntity(enttype_e EntType)
 {
 #ifdef VALVE_DLL
@@ -328,6 +346,7 @@ CBaseEntity *CBaseEntity::RetrieveEntity(enttype_e EntType)
 #endif
 	return NULL;
 }
+
 CBaseEntity *CBaseEntity::RetrieveEntity(const char *pszName)
 {
 	CBaseEntity *pEntity = StringToEnt(pszName);
@@ -344,6 +363,26 @@ CBaseEntity *CBaseEntity::RetrieveEntity(const char *pszName)
 		return pEntity;
 #endif
 	return NULL;
+}
+
+Vector CBaseEntity::DetermineOrigin(msstring & vsOrigin)
+{
+	if (!vsOrigin.len())
+	{
+			return Vector();
+	}
+	
+#ifdef VALVE_DLL
+	CBaseEntity * pEntity = RetrieveEntity(vsOrigin);
+	if (pEntity) 
+		return pEntity->pev->origin;
+#else
+	int vEntIndx = vsOrigin[0] == '(' ? -1 : atoi(vsOrigin);
+	cl_entity_t * pEntity = vEntIndx > -1 ? gEngfuncs.GetEntityByIndex( vEntIndx ) : NULL;
+	if (pEntity) 
+		return pEntity->origin;
+#endif
+	return StringToVec(vsOrigin);
 }
 
 //	CScriptedEnt - Any entity with a script
@@ -827,6 +866,7 @@ void MemMgr::Think()
 
 	m_HighestAllocations = m_TotalAllocations;
 }
+
 void MemMgr::EndMap()
 {
 	m_TimePrintAllocations = 0;
