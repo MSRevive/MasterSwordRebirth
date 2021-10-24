@@ -270,6 +270,8 @@ enum netmsg_e
 	NETMSG_EXP,
 	NETMSG_CLXPLAY,	   //MAR2012_28 - client side sound message
 	NETMSG_LOCALPANEL, // MiB MAR2015_01 [LOCAL_PANEL] - Index of local panel message
+	NETMSG_UPDATEITEM, // OCT2016_18 - Thothie Update Item
+	NETMSG_ALERTCVARCHANGE,
 	NETMSG_NUM,
 };
 extern int g_netmsg[NETMSG_NUM];
