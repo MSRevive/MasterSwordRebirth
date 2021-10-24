@@ -37,6 +37,7 @@ protected:
 
 public:
 	void Open(char *pszFileName);
+	void OpenNoFault(char *pszFileName);
 	~CGroupFile() { Close(); }
 	void Close();
 	bool IsOpen() { return m_IsOpen; }

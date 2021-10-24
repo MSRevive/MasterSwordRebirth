@@ -133,6 +133,55 @@ void CGroupFile::Open(char *pszFileName)
 	}
 }
 
+void CGroupFile::OpenNoFault(char *pszFileName)
+{
+	strncpy(m_FileName,  pszFileName, sizeof(m_FileName));
+	m_EntryList.clear();
+
+	CMemFile GroupFile;
+	if (GroupFile.ReadFromFile(m_FileName))
+	{
+		int EncryptedHeaderSize;
+		GroupFile.ReadInt(EncryptedHeaderSize);
+
+		CEncryptData1 HeaderData;
+		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize);
+		if (!HeaderData.Decrypt())
+			return;
+		CMemFile DecryptedHeaders;
+		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
+
+		int HeaderEntries;
+		DecryptedHeaders.ReadInt(HeaderEntries);
+
+		//Read headers
+		for (int i = 0; i < HeaderEntries; i++)
+		{
+			cachedentry_t Entry;
+			DecryptedHeaders.Read(&Entry, sizeof(groupheader_t)); //Read only the groupheader_t part.  The cachedentry_t part is not stored
+			Entry.Data = NULL;
+
+			m_EntryList.add(Entry);
+		}
+
+		//Read existing data
+		for (int i = 0; i < m_EntryList.size(); i++)
+		{
+			CEncryptData1 Data;
+			cachedentry_t &Entry = m_EntryList[i];
+
+			Data.SetData(GroupFile.m_Buffer + Entry.DataOfs, Entry.DataSizeEncrypted);
+			if(!Data.Decrypt())
+				continue;
+
+			Entry.Data = msnew byte[Data.GetDataSize()];
+			memcpy(Entry.Data, Data.GetData(), Data.GetDataSize());
+		}
+
+		m_IsOpen = true;
+	}
+}
+
 void CGroupFile::Close()
 {
 	for (int i = 0; i < m_EntryList.size(); i++)
