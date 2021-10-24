@@ -3,7 +3,7 @@
 #include "logfile.h"
 #include "time.h"
 
-#ifndef VALVE_DLL
+#ifdef VALVE_DLL
 #include "../dlls/SVGlobals.h"
 #else
 #include "../cl_dll/hud.h"
@@ -149,7 +149,7 @@ CBaseEntity *StringToEnt(msstring_ref EntString) //Converts an string of format 
 	return pEntity;
 }
 
-msstring_ref VecToString(Vector &Vec)
+msstring_ref VecToString(const Vector &Vec)
 {
 	static char RetString[128];
 	_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
@@ -401,7 +401,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {
-        #ifndef VALVE_DLL
+      #ifdef VALVE_DLL
 		    ALERT( at_console, vsAsOne.c_str() );
 	    #else
 		    ConsolePrint( vsAsOne.c_str() );
@@ -409,7 +409,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_INFOMSG)
     {
-        #ifndef VALVE_DLL
+      #ifdef VALVE_DLL
 		    SendHUDMsgAll(vsShortTitle, string);
 	    #else
 		    player.SendHUDMsg(vsShortTitle, string);
@@ -441,7 +441,7 @@ msscriptarray * GetScriptedArrayFromHashMap(msscriptarrayhash &vArrayHashMap, ms
         }
         if (bAllowCreate)
         {
-            msscriptarray               vArray;
+            msscriptarray vArray;
             vArrayHashMap[vsName] = vArray;
             return &vArrayHashMap[vsName];
         }
