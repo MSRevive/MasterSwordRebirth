@@ -1266,10 +1266,11 @@ int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
 		 for (int i = 0; i < GearItems; i++) 
 		{
 			gearinfo_t GearInfo;
-			GearInfo.Flags = READ_BYTE( );
-			GearInfo.Model = READ_SHORT( );
-			GearInfo.Body = READ_SHORT( );
-			GearInfo.Anim = READ_BYTE( );
+			GearInfo.Flags = READ_BYTE();
+			GearInfo.Model = READ_SHORT();
+			GearInfo.Body = READ_SHORT();
+			GearInfo.Skin = READ_SHORT();
+			GearInfo.Anim = READ_BYTE();
 
 			CharSlot.GearInfo.add( GearInfo );
 		}
@@ -1379,6 +1380,7 @@ void CRenderChar::Render( )
 			ItemEnt.model = IEngineStudio.GetModelByIndex( GearInfo.Model );
 			ItemEnt.curstate.modelindex = GearInfo.Model;
 			ItemEnt.curstate.body = GearInfo.Body;
+			ItemEnt.curstate.skin = GearInfo.Skin;
 			ItemEnt.PlayAnim( GearInfo.Anim );
 
 			 for (int i = 0; i < HUMAN_BODYPARTS; i++) 
