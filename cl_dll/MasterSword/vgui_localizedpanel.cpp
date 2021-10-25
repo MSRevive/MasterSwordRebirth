@@ -283,7 +283,7 @@ void CLocalizedPanel::AddSubPanel( Panel *pPanel )
 
 void CLocalizedPanel::ClearSubPanels( void )
 {
-	for( int i = 0; m_iSubPanelTotal; i++ )
+	for(int i = 0; i < m_iSubPanelTotal; i++)
 	{
 		m_pTextPanel->removeChild( m_SubPanelList[i] );
 		delete m_SubPanelList[i];

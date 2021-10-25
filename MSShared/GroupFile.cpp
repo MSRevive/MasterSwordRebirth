@@ -88,7 +88,7 @@ void CGroupFile::Open(char *pszFileName)
 		GroupFile.ReadInt(EncryptedHeaderSize);
 
 		CEncryptData1 HeaderData;
-		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize);
+		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetReadPtr(), EncryptedHeaderSize); //GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize
 		if (!HeaderData.Decrypt())
 			return;
 		CMemFile DecryptedHeaders;
@@ -262,19 +262,20 @@ void CGroupFile::Flush()
 	pHeaders->TotalEntries = TotalEntries;
 
 	//Write dummy data, update after script data has been written
-	/*CEncryptData1 Data;
-	Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
-	Data.Encrypt();
+	{
+		CEncryptData1 Data;
+		Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
+		Data.Encrypt();
+		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());
+	}
 
-	file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());*/
-
-	for(int i = 0; TotalEntries; i++)
+	for(int i = 0; i < TotalEntries; i++)
 	{
 		cachedentry_t &Entry = m_EntryList[i];
 		Entry.DataOfs = static_cast<int>(file.tellp());
 
 		CEncryptData1 Data;
-		Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
+		Data.SetData(Entry.Data, Entry.DataSize);
 		Data.Encrypt();
 
 		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize()); //[X data]
@@ -283,7 +284,7 @@ void CGroupFile::Flush()
 		Entry.DataSizeEncrypted = Data.GetDataSize();
 	}
 
-	for(int i = 0; TotalEntries; i++)
+	for(int i = 0; i < TotalEntries; i++)
 	{
 		pHeaders->Headers[i] = m_EntryList[i];
 	}
@@ -377,7 +378,7 @@ bool CGameGroupFile::Open(const char* pszFilename)
 	DecryptedHeaders.ReadInt(HeaderEntries);
 
 	//Read headers
-	for(int i = 0; HeaderEntries; i++)
+	for(int i = 0; i < HeaderEntries; i++)
 	{
 		cachedentry_t Entry;
 		DecryptedHeaders.Read( &Entry, sizeof(groupheader_t) );
@@ -407,7 +408,7 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 	msstring EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
 
-	for(int i = 0; m_EntryList.size(); i++)
+	for(int i = 0; i < m_EntryList.size(); i++)
 	{
 		groupheader_t &Entry = m_EntryList[i];
 		if( Entry.FileName != EntryName )

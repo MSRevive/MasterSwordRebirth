@@ -55,7 +55,7 @@ struct gearinfo_t
 #define GEARFL_COVER_LEGS (1 << 3)
 #define GEARFL_WEARING (1 << 4)
 	byte Flags;
-	ushort Model, Body, Anim;
+	ushort Model, Body, Skin, Anim;
 };
 
 struct charinfo_t : charinfo_base_t

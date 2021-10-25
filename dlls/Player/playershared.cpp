@@ -191,7 +191,7 @@ const char *CBasePlayer::GetFullTitle()
 			int SkillsReq = pTitle->SkillsReq.size();
 			if( SkillsReq )   //Only add the skill level if this title requires skills
 			{
-				for( int s = 0; SkillsReq; s++ )
+				for( int s = 0; s < SkillsReq; s++ )
 				{
 					SkillLevel += GetSkillStat( pTitle->SkillsReq[s] );
 				}

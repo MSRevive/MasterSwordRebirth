@@ -357,7 +357,7 @@ bool GetNextDebugEntity(
 
 				CBaseEntity * vList[30];
 				int vNumFound = UTIL_MonstersInSphere( vList, 30, pCaller->pev->origin, 128 );
-				for(int i = 0; vNumFound; i++ )
+				for(int i = 0; i < vNumFound; i++ )
 				{
 					rDebugInfo.mpFoundEntity = vList[i];
 					if (  pCaller->entindex() == rDebugInfo.mpFoundEntity->entindex()
@@ -533,7 +533,7 @@ bool CScript::ScriptCmd_DebugEntities(
 		return true;
 	}
 
-	for(int i = 0; Params.size() - 1; i++ )
+	for(int i = 0; i < Params.size() - 1; i++ )
 	{
 		if (Params[i + 1].starts_with("PARAM"))
 			break;
@@ -738,7 +738,7 @@ bool DoDebugEntities(
 				vGetPropParams.add( EntToString(vDebugInfo.mpFoundEntity) );
 				vGetPropParams.add( vDebugInfo.msVarName );
 
-				for(int i = 0; 2; i++)
+				for(int i = 0; i < 2; i++)
 				{
 					if ( i )
 					{
@@ -772,7 +772,7 @@ bool DoDebugEntities(
 					msstringlist        vSubParams;
 					vSubParams.add( msstring() + pSubEntity->entindex() );
 
-					for( int i = 0; vDebugInfo.mSubParams.size(); i++ )
+					for( int i = 0; i < vDebugInfo.mSubParams.size(); i++ )
 						vSubParams.add( vDebugInfo.mSubParams[i] );
 
 					vsOutAppend += "->";
@@ -855,7 +855,7 @@ bool DoDebugEntities(
 
 		if ( vDebugInfo.mbDumpArray && pScriptArray )
 		{
-			for( int i = 0; pScriptArray->size(); i++ )
+			for( int i = 0; i < pScriptArray->size(); i++ )
 			{
 				vPrintParams.clear();
 				vPrintParams.add( msstring( "#" )
@@ -885,7 +885,7 @@ msstring CScript::ScriptGetter_GetItemTable(msstring& FullName, msstring& Parser
 		{
 			msstring vProp = Params[1];
 			msstringlist vSubParams;
-			for(int i = 0; Params.size() - 2; i++)
+			for(int i = 0; i < Params.size() - 2; i++)
 			{
 				vSubParams.add(Params[i + 2]);
 			}
@@ -1325,7 +1325,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 		{
 			if (Params.size() >= 3)
 			{
-				for(int i = 0; pScripted->m_Scripts.size(); i++) // Check each
+				for(int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each
 				{
 					if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect
 					if (strcmp(pScripted->m_Scripts[i]->GetVar("game.effect.id"), Params[2].c_str()) == 0) return "1";
@@ -1903,7 +1903,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 			Parameters.clearitems();
 			Parameters.add( Cmd.Name() );
 			Parameters.add( EntToString(m.pScriptedEnt) );
-			for(int i = 0; Params.size(); i++)
+			for(int i = 0; i < Params.size(); i++)
 			{
 				if ( i > 0 ) Parameters.add( Params[i] );
 			}
@@ -1916,7 +1916,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 					static msstringlist Tokens;
 					Tokens.clearitems();
 					TokenizeString( rdata, Tokens );
-					for(int i = 0; Tokens.size(); i++)
+					for(int i = 0; i < Tokens.size(); i++)
 					{
 						if ( Tokens[i] == "redirect" )
 						{
@@ -1938,7 +1938,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 				//Check if I has script
 				msstring search_script = Params[1].c_str();
 				msstring check_script;
-				for( int i = 0; pScripted->m_Scripts.size(); i++ ) // Check each
+				for( int i = 0; i < pScripted->m_Scripts.size(); i++ ) // Check each
 				{
 					check_script = pScripted->m_Scripts[i]->m.ScriptFile.c_str();
 					if ( search_script == check_script )
@@ -1952,7 +1952,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 			if ( thoth_applyeffect )
 			{
 				msstringlist Parameters;
-				for( int i = 0; Params.size() - 2; i++ )
+				for( int i = 0; i < Params.size() - 2; i++ )
 					Parameters.add( Params[i+2] );
 				CGlobalScriptedEffects::ApplyEffect( Params[1], pScripted, pEntity, &Parameters );
 			}
@@ -2033,7 +2033,7 @@ bool CScript::ScriptCmd_Array(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 					msstring vsDest = Params[vParam++];
 					msscriptarray * pLocalArray = m.pScriptedEnt->GetScriptedArray(vsDest, true);
 
-					for(int i = 0; pArray->size(); i++)
+					for(int i = 0; i < pArray->size(); i++)
 					{
 						pLocalArray->add((*pArray)[i]);
 					}
@@ -2054,7 +2054,7 @@ bool CScript::ScriptCmd_Array(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 				{
 					msstring sTemp = Params[vParam++];
 					bool bFoundEntry = false;
-					for(int i = 0; pArray->size(); i++)
+					for(int i = 0; i < pArray->size(); i++)
 					{
 						msstring vsCur = (*pArray)[i];
 						if (vsCur == sTemp)
@@ -2231,7 +2231,7 @@ bool CScript::ScriptCmd_CallClItemEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 			WRITE_STRING( EventName.c_str() );
 			WRITE_BYTE( NumParams );
 
-			for( int i = 0; NumParams; i++ )
+			for( int i = 0; i < NumParams; i++ )
 				WRITE_STRING( Params[2+i].c_str() );
 
 			MESSAGE_END();
@@ -2298,7 +2298,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 
 			if (Params.size() > NextParm)
 			{
-				for(int i = 0; (Params.size() - NextParm); i++)		//Parameters to pass
+				for(int i = 0; i < (Params.size() - NextParm); i++)		//Parameters to pass
 					Parameters.add(Params[i + NextParm]);
 			}
 
@@ -2328,7 +2328,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			{
 				SetVar("MSC_RESET_LOOP", "-5"); //Thothie SEP2019_08 - resetloop
 				int SaveIteration = m.m_Iteration;
-				for(int i = 0; Loops; i++)
+				for(int i = 0; i < Loops; i++)
 				{
 					m.m_Iteration = i;
 					RunScriptEventByName(EventName, Parameters.size() ? &Parameters : NULL);
@@ -2414,7 +2414,7 @@ bool CScript::ScriptCmd_ChatLog(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	msstring sTemp;
 	if( Params.size() >= 1 )
 	{
-		for(int i = 0; Params.size(); i++ )
+		for(int i = 0; i < Params.size(); i++ )
 		{
 			if( i ) sTemp += " ";
 			sTemp += Params[i];
@@ -2458,7 +2458,7 @@ bool CScript::ScriptCmd_ClearPlayerHits(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 		{
 			if ( Params[1] == "all" )
 			{
-				for(int p = 0; MAXPLAYERS; p++)
+				for(int p = 0; p < MAXPLAYERS; p++)
 				{
 					pMons->m_PlayerDamage[p].Clear(); // MiB MAR2019_22 [SLOT_EXP] - Use new clear function
 				}
@@ -2553,7 +2553,7 @@ bool CScript::ScriptCmd_ClientCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	msstring sTemp;
 	if( Params.size() >= 2 )
 	{
-		for( int i = 0; Params.size()-1; i++ )
+		for( int i = 0; i < Params.size()-1; i++ )
 		{
 			if( i ) sTemp += " ";
 			sTemp += Params[i+1];
@@ -2636,7 +2636,7 @@ bool CScript::ScriptCmd_ClientEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		SendCmd.MsgTarget = Params[1];
 		if( Params.size() >= 4 )
 		{
-			for( int p = 0; Params.size() - 3; p++ )
+			for( int p = 0; p < Params.size() - 3; p++ )
 				SendCmd.Params.add( Params[p+3] );
 		}
 
@@ -2645,7 +2645,7 @@ bool CScript::ScriptCmd_ClientEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		else if( Params[0] == "remove" )
 		{
 			//Stop event from persisting after "clientevent remove" is called on it
-			for(int e = 0; m.PersistentSendCmds.size( ); e++)
+			for(int e = 0; e < m.PersistentSendCmds.size( ); e++)
 			{
 					if( m.PersistentSendCmds[e].UniqueID == SendCmd.UniqueID )
 					{
@@ -2673,7 +2673,7 @@ bool CScript::ScriptCmd_CloseFNFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	if( Params.size() >= 1 )
 	{
 		msstring fileName = Params[0];
-		for( int i = 0; m.pScriptedEnt->filesOpenFN.size(); i++ )
+		for( int i = 0; i < m.pScriptedEnt->filesOpenFN.size(); i++ )
 		{
 			if( m.pScriptedEnt->filesOpenFN[i].fileName == fileName )
 			{
@@ -2709,7 +2709,7 @@ bool CScript::ScriptCmd_Companion(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 				if( Params[0] == "add" )
 				{
 					bool CanAdd = true;
-					for( int i = 0; pPlayer->m_Companions.size(); i++ )
+					for( int i = 0; i < pPlayer->m_Companions.size(); i++ )
 					{
 							if( pPlayer->m_Companions[i].Entity.Entity() == pCompanion )
 							{
@@ -2733,7 +2733,7 @@ bool CScript::ScriptCmd_Companion(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 				}
 				else //"remove"
 				{
-					for( int i = 0; pPlayer->m_Companions.size(); i++ )
+					for( int i = 0; i < pPlayer->m_Companions.size(); i++ )
 					{
 						if( pPlayer->m_Companions[i].Entity.Entity() == pCompanion )
 						{
@@ -2777,23 +2777,23 @@ bool CScript::ScriptCmd_ConflictCheck(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 		if (!cc_noglobals)
 		{
 			Print("GLOBALS in %s:\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
-			for(int i = 0; m_gVariables.size(); i++)
+			for(int i = 0; i < m_gVariables.size(); i++)
 			{
 				Print("setvarg: %s %s\n", m_gVariables[i].Name.c_str(), m_gVariables[i].Value.c_str());
 			}
 		}
 		Print("CONSTANTS in %s:\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
-		for(int s = 0; pScripted->m_Scripts.size(); s++)
+		for(int s = 0; s < pScripted->m_Scripts.size(); s++)
 		{
-			for(int i = 0; pScripted->m_Scripts[s]->m_Constants.size(); i++)
+			for(int i = 0; i < pScripted->m_Scripts[s]->m_Constants.size(); i++)
 			{
 				Print("const: %s %s\n", pScripted->m_Scripts[s]->m_Constants[i].Name.c_str(), pScripted->m_Scripts[s]->m_Constants[i].Value.c_str());
 			}
 		}
 		Print("SETVARDS in %s:\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
-		for(int s = 0; pScripted->m_Scripts.size(); s++)
+		for(int s = 0; s < pScripted->m_Scripts.size(); s++)
 		{
-			for(int i = 0; pScripted->m_Scripts[s]->m_Constants.size(); i++)
+			for(int i = 0; i < pScripted->m_Scripts[s]->m_Constants.size(); i++)
 			{
 				Print("setvard: %s %s\n", pScripted->m_Scripts[s]->m_Variables[i].Name.c_str(), pScripted->m_Scripts[s]->m_Variables[i].Value.c_str());
 			}
@@ -2805,11 +2805,11 @@ bool CScript::ScriptCmd_ConflictCheck(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 
 		//This will never find a conflict, as the variables cross reference is broken when they are set
 
-		for(int s = 0; pScripted->m_Scripts.size(); s++)
+		for(int s = 0; s < pScripted->m_Scripts.size(); s++)
 		{
-			for(int i = 0; pScripted->m_Scripts[s]->m_Variables.size(); i++)
+			for(int i = 0; i < pScripted->m_Scripts[s]->m_Variables.size(); i++)
 			{
-				for(int c = 0; pScripted->m_Scripts[s]->m_Constants.size(); c++)
+				for(int c = 0; c < pScripted->m_Scripts[s]->m_Constants.size(); c++)
 				{
 					if (pScripted->m_Scripts[s]->m_Constants[c].Name == pScripted->m_Scripts[s]->m_Variables[i].Name)
 					{
@@ -2872,7 +2872,7 @@ bool CScript::ScriptCmd_Create(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 				//Eveything starting from param 3 is passed to the created entity as PARAM1 PARAM2, etc.
 				static msstringlist Params2;
 				Params2.clearitems( );
-				for( int i = 0; Params.size() - 2; i++ )
+				for( int i = 0; i < Params.size() - 2; i++ )
 					Params2.add( Params[i+2] );
 
 				pScript->CallScriptEvent( "game_dynamically_created", &Params2 );
@@ -2912,7 +2912,7 @@ bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 {
 #if !TURN_OFF_ALERT
 	msstring sTemp;
-	for(int i = 0; Params.size(); i++)
+	for(int i = 0; i < Params.size(); i++)
 		sTemp += (i ? msstring(" ") : msstring("")) + Params[i];
 
 	//Thothie MAR2008a - prevent dbg overflows
@@ -2998,7 +2998,7 @@ bool CScript::ScriptCmd_Desc(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 	msstring sTemp;
 	if (Params.size() >= 1)
 	{
-		for(int i = 0; Params.size(); i++)
+		for(int i = 0; i < Params.size(); i++)
 		{
 			if (i) sTemp += " ";  sTemp += Params[i];
 		}
@@ -3162,7 +3162,7 @@ bool CScript::ScriptCmd_EraseFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 
 
 		if( clearFromHere ) //Remove from the filesOpen list unless specified otherwise.
-			for( int i = 0; m.pScriptedEnt->filesOpen.size(); i++ )
+			for( int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++ )
 		{
 				if( m.pScriptedEnt->filesOpen[i].fileName == fname )
 				{
@@ -3189,7 +3189,7 @@ bool CScript::ScriptCmd_ErrorMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	//Thothie JUN2007a - send pop up message and exit
 	//Thothie FEB2009_21 - merging "errormessage" and "popup" to save elseif blocks
 	msstring sTemp;
-	for(int i = 0; Params.size(); i++)
+	for(int i = 0; i < Params.size(); i++)
 		sTemp += (i ? msstring(" ") : msstring("")) + Params[i];
 
 	//Print( "* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str() );
@@ -3257,7 +3257,7 @@ bool CScript::ScriptCmd_GetEnts(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	int count = UTIL_MonstersInSphere( pList, 255, StartPos, thoth_boxsize);
 
 	int thoth_curstore = 0;
-	for(int i = 0; count; i++)
+	for(int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 		if ( !pEnt->IsAlive() ) continue;
@@ -3308,7 +3308,7 @@ bool CScript::ScriptCmd_GetItemArray(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 			pArray = pPlayer->GetScriptedArray( ArrayName, true, &bExisted );
 
 			pArray->clearitems();
-			for(int i = 0; pPlayer->Gear.size(); i++)
+			for(int i = 0; i < pPlayer->Gear.size(); i++)
 			{
 				CGenericItem *cur_item = pPlayer->Gear[i];
 				if ( cur_item->IsWorn() )
@@ -3320,7 +3320,7 @@ bool CScript::ScriptCmd_GetItemArray(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 						CGenericItem *pPack = pPlayer->Gear[i];
 						if ( pPack->Container_ItemCount() )
 						{
-							for(int n = 0; pPack->Container_ItemCount(); n++)
+							for(int n = 0; n < pPack->Container_ItemCount(); n++)
 							{
 								pArray->add( EntToString(pPack->Container_GetItem(n)) );
 							}
@@ -3667,7 +3667,7 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	if( Params.size() >= 4 )
 	{
 		MSGlobals::Buffer[0] = 0;
-		for(int i = 0; Params.size() - 3; i++)
+		for(int i = 0; i < Params.size() - 3; i++)
 			strncat(MSGlobals::Buffer, Params[i + 3], Params[i + 3].len());
 		if ( Params[0] != "all" )
 		{
@@ -4139,7 +4139,7 @@ bool CScript::ScriptCmd_InfoMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 				Title = Title.substr(0, 120); //Thothie DEC2010_04 - prevent overflows
 				Title += "*\n";
 			}
-			for(int i = 0; Params.size() - 2; i++)
+			for(int i = 0; i < Params.size() - 2; i++)
 			{
 				if (i) sTemp += " ";
 				sTemp += Params[i + 2];
@@ -4308,7 +4308,7 @@ bool CScript::ScriptCmd_Message(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBaseEntity *pEntity = RetrieveEntity(Params[0]);
 		if (pEntity && pEntity->IsPlayer())
 		{
-			for(int i = 0; Params.size() - 1; i++)
+			for(int i = 0; i < Params.size() - 1; i++)
 			{
 				if (i) sTemp += " ";
 				sTemp += Params[i + 1];
@@ -4382,7 +4382,7 @@ bool CScript::ScriptCmd_MessageAll(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	{
 		msstring thoth_color = Params[0];
 
-		for(int i = 0; Params.size()-1; i++)
+		for(int i = 0; i < Params.size()-1; i++)
 		{
 			if( i ) sTemp += " ";
 			sTemp += Params[i+1];
@@ -4438,7 +4438,7 @@ bool CScript::ScriptCmd_Name(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 	{
 		if (m.pScriptedEnt && !m.pScriptedEnt->IsPlayer())	//Don't rename players
 		{
-			for(int i = 0; Params.size(); i++)
+			for(int i = 0; i < Params.size(); i++)
 				sTemp += (i ? msstring(" ") : msstring("")) + Params[i];
 
 			int barloc = 0;
@@ -4779,7 +4779,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 0 );
 			WRITE_BYTE( t_Songs.size() );
-			for( int s = 0; t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
+			for( int s = 0; s < t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
 			{
 				WRITE_STRING( t_Songs[s].Name );
 				WRITE_FLOAT( t_Songs[s].Length );
@@ -5018,7 +5018,7 @@ bool CScript::ScriptCmd_Quest(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 				qd_outline = UTIL_VarArgs("Dumping Quest Data for %s:\n",pEntity->m_DisplayName.c_str());
 				Print ("%s",qd_outline.c_str());
 				logfile << qd_outline.c_str();
-				for(int i = 0; pPlayer->m_Quests.size(); i++)
+				for(int i = 0; i < pPlayer->m_Quests.size(); i++)
 				{
 					qd_outline = UTIL_VarArgs("#%i name: %s data: %s\n",i,pPlayer->m_Quests[i].Name.c_str(),pPlayer->m_Quests[i].Data.c_str());
 					Print ("%s",qd_outline.c_str());
@@ -5126,7 +5126,7 @@ bool CScript::ScriptCmd_RegisterTexture(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 	//Reflection settings
 	NewTexture.Mirror.Blending = atoi(SCRIPTVAR("reg.texture.reflect.blend")) ? true : false;
 	TokenizeString(SCRIPTVAR("reg.texture.reflect.color"), ColorParts);
-	for(int i = 0; ColorParts.size(); i++)
+	for(int i = 0; i < ColorParts.size(); i++)
 	{
 		if (i == 4) break;	//Too many elements specified - a color only has 4 elements
 		NewTexture.Mirror.Color[i] = atof(ColorParts[i]);
@@ -5165,7 +5165,7 @@ bool CScript::ScriptCmd_RegisterTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 			Skills.clearitems();
 			TokenizeString(Params[1], Skills);
 			bool SkillSuccess = true;
-			for(int s = 0; Skills.size(); s++)
+			for(int s = 0; s < Skills.size(); s++)
 			{
 				int Skill = GetSkillStatByName(SCRIPTVAR(Skills[s]));
 				if (Skill == -1)
@@ -5218,7 +5218,7 @@ bool CScript::ScriptCmd_RemoveEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 		IScripted *pScripted = pTarget ? pTarget->GetScripted() : NULL; // UScripted? IScripted.
 		if ( pScripted )
 		{
-			for(int i = 0; pScripted->m_Scripts.size(); i++) // Check each
+			for(int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each
 			if( pScripted->m_Scripts[i]->VarExists("game.effect.id") ) //This is an effect
 			if( strcmp( pScripted->m_Scripts[i]->GetVar("game.effect.id"), Params[1].c_str() ) == 0) //If the effect is SUPPOSED to be removed
 			{
@@ -5284,7 +5284,7 @@ bool CScript::ScriptCmd_Respawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 				PlayerList.add( (CBasePlayer *)pEntity );
 		}
 
-		for(int i = 0; PlayerList.size(); i++)
+		for(int i = 0; i < PlayerList.size(); i++)
 			PlayerList[i]->MoveToSpawnSpot( );
 	}
 	else ERROR_MISSING_PARMS;
@@ -5395,7 +5395,7 @@ bool CScript::ScriptCmd_Return(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 #endif
 			// =============
 			if (m.pScriptedInterface->m_ReturnData[0]) m.pScriptedInterface->m_ReturnData += ";";
-			for(int i = 0; Params.size(); i++)
+			for(int i = 0; i < Params.size(); i++)
 			{
 				if (i) m.pScriptedInterface->m_ReturnData += " ";
 				m.pScriptedInterface->m_ReturnData += Params[i];
@@ -5494,7 +5494,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 				//such flags should have an expire time
 				if ( !Params[2].contains("stack") ) //Thothie SEP2019_11 - switching this to contains for ease of use
 				{
-					for(int i = 0; pEntity->m_scriptflags.names.size(); i++)
+					for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 					{
 						if ( pEntity->m_scriptflags.names[i] == Params[2] )
 						{
@@ -5528,7 +5528,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 				//though, looking back on it, adding one of the same name should have the same effect - meh.
 				//scriptflags <target> edit <name> <type> [value] [expiretime] [expiremsg]
 				int sfidx = -1;
-				for(int i = 0; pEntity->m_scriptflags.names.size(); i++)
+				for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 				{
 					if ( pEntity->m_scriptflags.names[i] == Params[2] ) sfidx = i;
 				}
@@ -5552,7 +5552,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 			if ( Params[1] == "remove" )
 			{
-				for(int i = 0; pEntity->m_scriptflags.names.size(); i++)
+				for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 				{
 					if ( pEntity->m_scriptflags.names[i] == Params[2] )
 					{
@@ -5572,7 +5572,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 			if ( Params[1] == "remove_expired" )
 			{
-				for(int i = 0; pEntity->m_scriptflags.names.size(); i++)
+				for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 				{
 					float sf_time_to_expire = atof(pEntity->m_scriptflags.expiretimes[i]);
 
@@ -5606,7 +5606,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 			if ( Params[1] == "cleartype" )
 			{
-				for(int i = 0; pEntity->m_scriptflags.names.size(); i++)
+				for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 				{
 					if ( pEntity->m_scriptflags.types[i] == Params[2] )
 					{
@@ -5626,7 +5626,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 			if ( Params[1] == "clearall" )
 			{
-				for(int i = 0; pEntity->m_scriptflags.names.size(); i++ )
+				for(int i = 0; i < pEntity->m_scriptflags.names.size(); i++ )
 				{
 					if( pPlayer )
 					{
@@ -5670,7 +5670,7 @@ bool CScript::ScriptCmd_ServerCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	msstring sTemp;
 	if( Params.size() >= 1 )
 	{
-		for(int i = 0; Params.size(); i++)
+		for(int i = 0; i < Params.size(); i++)
 		{
 			if( i ) sTemp += " ";
 			sTemp += Params[i];
@@ -6257,7 +6257,7 @@ bool CScript::ScriptCmd_SetModelBody(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 			if ( pPlayer->pev->deadflag == DEAD_NO )
 			{
 				bool found = false;
-				for(int i = 0; pPlayer->m_Quests.size(); i++)
+				for(int i = 0; i < pPlayer->m_Quests.size(); i++)
 				{
 					if ( pPlayer->m_Quests[i].Name == "BODY" )
 					{
@@ -6729,7 +6729,7 @@ bool CScript::ScriptCmd_SetVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 		if (Params.size() >= 3)	//Add strings together
 		{
 			sTemp = "";
-			for(int i = 0; Params.size() - 1; i++)
+			for(int i = 0; i < Params.size() - 1; i++)
 				sTemp += Params[i + 1];
 			VarValue = sTemp;
 		}
@@ -6827,7 +6827,7 @@ bool CScript::ScriptCmd_SetWearPos(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			else if (Params.size() >= 2)
 			{
 				wearpos_t *pWearPos = NULL;
-				for(int i = 0; pPlayer->m_WearPositions.size(); i++)
+				for(int i = 0; i < pPlayer->m_WearPositions.size(); i++)
 				{
 					if (Params[0] != pPlayer->m_WearPositions[i].Name)
 						continue;
@@ -6978,7 +6978,7 @@ bool CScript::ScriptCmd_StrConc(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	if (Params.size() >= 2)
 	{
 		sTemp += Params[0];
-		for(int i = 0; Params.size() - 1; i++)
+		for(int i = 0; i < Params.size() - 1; i++)
 		{
 			if (i) sTemp += " ";
 			sTemp += Params[i + 1];
@@ -7056,7 +7056,7 @@ bool CScript::ScriptCmd_TokenDel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		{
 			Tokens.erase(DelItem);
 
-			for(int i = 0; Tokens.size(); i++)
+			for(int i = 0; i < Tokens.size(); i++)
 			{
 				if (TokenStr.len())	TokenStr += ";";
 				TokenStr += Tokens[i];
@@ -7086,7 +7086,7 @@ bool CScript::ScriptCmd_TokenScramble(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 
 		int n_loops = Tokens.size();
 
-		for(int i = 0; n_loops; i++)
+		for(int i = 0; i < n_loops; i++)
 		{
 			int r = RANDOM_LONG(0, Tokens.size() - 1);
 			new_tokens += Tokens[r];
@@ -7121,7 +7121,7 @@ bool CScript::ScriptCmd_TokenSet(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 
 		if (ChgItem >= 0 && ChgItem < (signed)Tokens.size())
 		{
-			for(int i = 0; Tokens.size(); i++)
+			for(int i = 0; i < Tokens.size(); i++)
 			{
 				if (TokenStr.len()) TokenStr += ";";
 
@@ -7216,7 +7216,7 @@ bool CScript::ScriptCmd_UseTrigger(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 	if( Params.size() >= 1 )
 	{
-		for(int i = 0; Params.size(); i++)
+		for(int i = 0; i < Params.size(); i++)
 			FireTargets( Params[i], m.pScriptedEnt, m.pScriptedEnt, USE_TOGGLE, 0 );
 	}
 	else ERROR_MISSING_PARMS;
@@ -7476,7 +7476,7 @@ bool CScript::ScriptCmd_WriteFNFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		bool o = Cmd.Name() == "writefnfile" && Params.size() >= 4 && Params[3] == "o";
 
 		//Check to see if we have this file open
-		for(int i = 0; m.pScriptedEnt->filesOpenFN.size(); i++)
+		for(int i = 0; i < m.pScriptedEnt->filesOpenFN.size(); i++)
 		{
 			if( m.pScriptedEnt->filesOpenFN[i].fileName == fileName )
 			{
@@ -7510,7 +7510,7 @@ bool CScript::ScriptCmd_WriteLine(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 		msstring lineToWrite = Params[1];
 
 		int ref = -1;
-		for(int i = 0; m.pScriptedEnt->filesOpen.size(); i++)
+		for(int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++)
 		{
 			if (fileName == m.pScriptedEnt->filesOpen[i].fileName)
 			{
@@ -7594,7 +7594,7 @@ bool CScript::ScriptCmd_XDoDamage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			//process flags (currently only flag is dmgevent:<prefix>)
 			msstringlist dflags;
 			TokenizeString(Params[8],dflags);
-			for(int i = 0; dflags.size(); i++)
+			for(int i = 0; i < dflags.size(); i++)
 			{
 				msstring dflag = dflags[i].c_str();
 				if ( dflag.starts_with("dmgevent:") )
@@ -7815,7 +7815,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwri
 	AddLine(line, lineNum, overwrite);
 
 	//Write all the lines to the specified file
-	for(int i = 0; Lines.size(); i++)
+	for(int i = 0; i < Lines.size(); i++)
 	{
 		mibfile << Lines[i]; //<< ";"; //Add the necessary ';' for rereads
 		if (i != (signed)Lines.size() - 1) //If this isn't the last line
@@ -7900,7 +7900,7 @@ void scriptfile_t::AddLine(msstring line, int lineNum, bool overwrite)
 			//Insert the line
 			int lineNumTemp = lineNum;
 			msstringlist LinesTemp;
-			for(int i = 0; Lines.size(); i++)
+			for(int i = 0; i < Lines.size(); i++)
 			{
 				if (i == lineNumTemp) //You've found the correct line
 				{

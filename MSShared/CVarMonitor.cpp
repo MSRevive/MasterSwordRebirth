@@ -43,7 +43,7 @@ void CVarMonitorManager::Think()
         Init();
     }
     
-    for(int i = 0; mMonitorList.size(); i++)
+    for(int i = 0; i < mMonitorList.size(); i++)
     {
         mMonitorList[i]->Think( bDidInit );
     }
@@ -52,7 +52,7 @@ void CVarMonitorManager::Think()
 void CVarMonitorManager::Reset(
 )
 {
-    for(int i = 0; mMonitorList.size(); i++)
+    for(int i = 0; i < mMonitorList.size(); i++)
     {
         delete mMonitorList[i];
     }
@@ -63,7 +63,7 @@ void CVarMonitorManager::Reset(
 #ifdef VALVE_DLL
 void CVarMonitorManager::ClientConnect(CBasePlayer *  pPlayer)
 {
-    for(int i = 0; mMonitorList.size(); i++)
+    for(int i = 0; i < mMonitorList.size(); i++)
     {
         mMonitorList[i]->ClientConnect( pPlayer );
     }
@@ -79,7 +79,7 @@ CVarMonitor::CVarMonitor(msstring vsName, float vThinkDelay)
 
 CVarMonitor::~CVarMonitor()
 {
-    for(int i = 0; mListenerList.size(); i++)
+    for(int i = 0; i < mListenerList.size(); i++)
     {
         delete mListenerList[i];
     }
@@ -106,7 +106,7 @@ void CVarMonitor::Think(bool bInit)
 
 void CVarMonitor::ValueChange(bool bInit, msstring sOldValue, msstring sNewValue, CBasePlayer * pPlayer)
 {
-    for(int i = 0; mListenerList.size(); i++)
+    for(int i = 0; i < mListenerList.size(); i++)
     {
         #ifdef VALVE_DLL
             if ( mListenerList[i]->IsClient() )

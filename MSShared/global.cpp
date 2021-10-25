@@ -121,7 +121,7 @@ void MSGlobals::NewMap()
 	
 	CVarMonitorManager::Reset();
 #if SPAWN_GLOBAL_ITEMS
-	for(int i = 0; CGenericItemMgr::ItemCount(); i++)
+	for(int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
 		GenItem_t * pGenItem = CGenericItemMgr::Item(i);
 		if (pGenItem) // Paranoid
