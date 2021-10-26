@@ -37,6 +37,9 @@ extern "C"
 
 #include "vgui_TeamFortressViewport.h"
 
+#include "FileSystem_Shared.h"
+#include "scriptmgr.h"
+
 extern "C"
 {
 	struct kbutton_s DLLEXPORT *KB_Find(const char *name);
@@ -1102,6 +1105,9 @@ void DLLEXPORT HUD_Shutdown(void)
 {
 	DBG_INPUT;
 	startdbg;
+
+	ScriptMgr::GameShutdown();
+	FileSystem_Shutdown();
 
 	ShutdownInput();
 	enddbg;

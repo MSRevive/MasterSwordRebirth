@@ -15,13 +15,13 @@ int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>&
 	bool bValid;
 	bool bFilterFail;
 	bool bCheckMax = vMax > 0;
-	for (int i; MAX_SEARCH_ENTITIES; i++)
+	for (int i = 0; i < MAX_SEARCH_ENTITIES; i++)
 	{
 		CFindEntity vEntity = CFindEntity::GetEntity(i, bValid);
 		if (!bValid || vEntity.GetWrapped() == pIgnoreEntity) continue;
 
 		bFilterFail = false;
-		for (int j; vFilters.size(); j++)
+		for (int j = 0; j < vFilters.size(); j++)
 		{
 			if (!vFilters[j]->Allow(vEntity))
 			{
@@ -115,12 +115,7 @@ bool CTraceLineFilter::Allow(
 {
 #ifdef VALVE_DLL
 	TraceResult                         tr;
-	UTIL_TraceLine( mOrigin
-		, vEntity.Center()
-		, ignore_monsters
-		, mpIgnoreEntity ? mpIgnoreEntity->edict() : NULL
-		, &tr
-		);
+	UTIL_TraceLine(mOrigin, vEntity.Center(), ignore_monsters, mpIgnoreEntity ? mpIgnoreEntity->edict() : NULL, &tr);
 	return tr.flFraction == 1;
 #else
 	pmtrace_s pTrace = *gEngfuncs.PM_TraceLine((float *)&mOrigin, (float *)&vEntity.Center(), PM_TRACELINE_PHYSENTSONLY, 2, ignore_monsters);
@@ -197,7 +192,7 @@ CShapeFilter *CShapeFilter::CreateFromString(const msstring & vsShape, bool  bTr
 				pIgnoreEntity,
 #endif
 				pShape->GetOrigin()
-				));
+			));
 		}
 	}
 	catch (...)

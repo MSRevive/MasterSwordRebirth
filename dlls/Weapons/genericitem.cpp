@@ -69,6 +69,7 @@ CGenericItem *GetGenericItemByName(const char *pItemName, bool bCallSpawnIfNeede
 {
 	return CGenericItemMgr::GetGlobalGenericItemByName(pItemName, bCallSpawnIfNeeded);
 }
+
 CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemName, bool bCallSpawnIfNeeded)
 {
 	for (int i = 0; i < m_Items.size(); i++)
@@ -153,7 +154,10 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 	}*/
 
 //Create a new CGenericItem ent from one of the global templates (GenItem_t)
-CGenericItem *NewGenericItem(CGenericItem *pGlobalItem) { return CGenericItemMgr::NewGenericItem(pGlobalItem); }
+CGenericItem *NewGenericItem(CGenericItem *pGlobalItem) { 
+	return CGenericItemMgr::NewGenericItem(pGlobalItem); 
+}
+
 CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 {
 	startdbg;
@@ -224,11 +228,21 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 }
 
 //CGenericItem *NewGenericItem( int iD ) { return NewGenericItem( CGenericItemMgr::GetGlobalGenericItemByID(iD) ); }
-CGenericItem *NewGenericItem(const char *pszItemName) { return NewGenericItem(GetGenericItemByName(pszItemName)); }
+CGenericItem *NewGenericItem(const char *pszItemName) { 
+	return NewGenericItem(GetGenericItemByName(pszItemName)); 
+}
 
-void CGenericItemMgr::AddGlobalItem(GenItem_t &NewGlobalItem) { m_Items.add(NewGlobalItem); }
-int CGenericItemMgr::ItemCount() { return m_Items.size(); }
-GenItem_t *CGenericItemMgr::Item(int idx) { return &m_Items[idx]; }
+void CGenericItemMgr::AddGlobalItem(GenItem_t &NewGlobalItem) { 
+	m_Items.add(NewGlobalItem); 
+}
+
+int CGenericItemMgr::ItemCount() { 
+	return m_Items.size(); 
+}
+
+GenItem_t *CGenericItemMgr::Item(int idx) { 
+	return &m_Items[idx]; 
+}
 
 // MiB MAR2012_10 - Get item_name's index in the global array
 int CGenericItemMgr::LookUpItemIdx(msstring item_name)
@@ -257,6 +271,7 @@ void CGenericItemMgr::DeleteItem(CGenericItem *pItem)
 		if (m_Items[i].pItem == pItem)
 			DeleteItem(i);
 }
+
 void CGenericItemMgr::DeleteItem(int idx)
 {
 	GenItem_t &GlobalItem = m_Items[idx];
@@ -264,6 +279,7 @@ void CGenericItemMgr::DeleteItem(int idx)
 	::delete (CGenericItem *)GlobalItem.pItem; //Must delete using global function
 	m_Items.erase(idx);
 }
+
 void CGenericItemMgr::DeleteItems()
 {
 	startdbg;
@@ -299,6 +315,7 @@ msstring_ref CGenericItemMgr::GetItemDisplayName(msstring_ref ItemName, bool Cap
 //GenericItemPrecache
 //Cache all items from file into memory
 scriptcmdname_list CGenericItemMgr::m_ScriptCommands;
+std::map<msstring, msstring> CGenericItemMgr::mItemAlias;
 
 void CGenericItemMgr::GenericItemPrecache(void)
 {
@@ -378,10 +395,10 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		//If Public build or /scripts/items.txt failed in the dev build, try /dlls/sc.dll
 		char cGroupFilePath[MAX_PATH];
-		sprintf( cGroupFilePath, "dlls/sc.dll" );
+		sprintf(cGroupFilePath, "dlls/sc.dll");
 
 		//CGroupFile &GroupFile = *msnew CGroupFile();
-		CGroupFile GroupFile;
+		CGameGroupFile GroupFile;
 		GroupFile.Open(cGroupFilePath);
 		ulong FileSize;
 		if (GroupFile.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
@@ -423,8 +440,9 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif*/
 
 	dbg("Load global items");
-
-	while (GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")) //GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
+	
+	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
+	while (GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")) 
 	{
 		n = i;
 		i += strlen(cString) + 1;
@@ -434,8 +452,18 @@ void CGenericItemMgr::GenericItemPrecache(void)
 			continue; //comment
 		if (!cString[0] || cString[0] == '\r' || cString[0] == '\n')
 			continue;
+			
+		if(cString == strstr(cString,"#swap "))
+		{
+			msstring vsLine = msstring(&cString[6]);
+			int vSpacePos = vsLine.find( " " );
+			msstring vsSrcName = vsLine.substr(0, vSpacePos);
+			msstring vsDestName = vsLine.substr(vSpacePos + 1);
+			CGenericItemMgr::mItemAlias[vsSrcName] = vsDestName;
+			continue;
+		}
 
-		 _snprintf(cItemFileName, sizeof(cItemFileName),  "items/%s",  cString );
+		 _snprintf(cItemFileName, sizeof(cItemFileName),  "items/%s",  cString);
 
 		logfileopt << "  (Precache) Creating item " << cString << "...";
 		//Create a new Global Item
@@ -444,7 +472,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		GenItem_t NewGlobalItem;
 
 		NewGlobalItem.Name = cString;
-
+		
 		//CGenericItem *pNewItem = ::msnew CGenericItem;
 		//NewGlobalItem.pItem = pNewItem;
 		CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
@@ -453,20 +481,25 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		CGenericItemMgr::AddGlobalItem(NewGlobalItem);
 
 		//NewItem.iWeaponType = 99 + CGenericItemMgr::ItemCount( ); //First must be 100
-		strncpy(NewItem.m_Name,  cString, sizeof(NewItem.m_Name));
+		strncpy(NewItem.m_Name, cString, sizeof(NewItem.m_Name)); //NewItem.m_Name
 		NewItem.ItemName = cString;
 
 		dbg(msstring("Load script: ") + cItemFileName);
-
+		Log(cItemFileName);
+		
 		bool fSuccess = NewItem.Script_Add(cItemFileName, &NewItem) ? true : false;
+		Log("try adding new item scripts");
 		if (fSuccess)
+		{
+			Log("run script events");
 			NewItem.RunScriptEvents(); //Slows down game load, but needed for the precachefile command
+		}
 
 		if (!fSuccess)
 		{
 //Couldn't load the item's script, don't load the item
 #ifdef DEV_BUILD
-			CGenericItemMgr::DeleteItem(&NewItem);
+			CGenericItemMgr::DeleteItem(&pNewItem);
 			logfileopt << " FAILED\r\n";
 #else
 #ifdef RELEASE_LOCKDOWN

@@ -1,5 +1,6 @@
 #ifdef _WIN32
 #include "windows.h"
+#include "logfile.h"
 #else
 #include <ctype.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 #include <sys/stat.h>
 #include <linux/sys.h>
 
-//      typedef void *HANDLE;
+// typedef void *HANDLE;
 typedef unsigned long DWORD;
 typedef unsigned int uint;
 typedef short int sint;
@@ -319,18 +320,24 @@ CGameGroupFile::~CGameGroupFile()
 	Close();
 }
 
-bool CGameGroupFile::Open(const char* pszFilename)
+bool CGameGroupFile::Open(const char *pszFilename)
 {
 	Close();
 
 	//Load group files from config directories only (avoids loading downloaded content)
+	if (!g_pFileSystem->FileExists(pszFilename))
+	{
+		return false;
+	}
+	
 	m_hFile = g_pFileSystem->Open(pszFilename, "rb", "GAMECONFIG");
 
 	if(FILESYSTEM_INVALID_HANDLE == m_hFile)
+	{
 		return false;
-
+	}
+	
 	int EncryptedHeaderSize = 0;
-
 	if(sizeof(int) != g_pFileSystem->Read(&EncryptedHeaderSize, sizeof(int), m_hFile))
 	{
 		Close();
@@ -354,9 +361,8 @@ bool CGameGroupFile::Open(const char* pszFilename)
 			delete pMemory;
 		}
 	};
-
-	CMemFile DecryptedHeaders;
 	
+	CMemFile DecryptedHeaders;
 	{
 		CleanupMemory EncryptedHeaderData(msnew byte[EncryptedHeaderSize]);
 
@@ -369,7 +375,7 @@ bool CGameGroupFile::Open(const char* pszFilename)
 		HeaderData.SetData(EncryptedHeaderData.pMemory, EncryptedHeaderSize);
 		if(!HeaderData.Decrypt())
 			return false;
-
+			
 		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
 	}
 
@@ -381,9 +387,9 @@ bool CGameGroupFile::Open(const char* pszFilename)
 	for(int i = 0; i < HeaderEntries; i++)
 	{
 		cachedentry_t Entry;
-		DecryptedHeaders.Read( &Entry, sizeof(groupheader_t) );
+		DecryptedHeaders.Read(&Entry, sizeof(groupheader_t));
 
-		m_EntryList.add( Entry );
+		m_EntryList.add(Entry);
 	}
 
 	//Seek to head so we're not left dangling someplace where it might cause problems
@@ -399,7 +405,7 @@ void CGameGroupFile::Close()
 		g_pFileSystem->Close( m_hFile );
 		m_hFile = FILESYSTEM_INVALID_HANDLE;
 	}
-
+	
 	m_EntryList.clear();
 }
 

@@ -143,6 +143,8 @@ public:
 
 	static ulong m_LastDestroyedItemID;
 	static scriptcmdname_list m_ScriptCommands;
+	
+	static msstringstringhash mItemAlias; // MiB APR2019_25 - Items that are hotswapping scripts
 
 private:
 	static mslist<GenItem_t> m_Items;

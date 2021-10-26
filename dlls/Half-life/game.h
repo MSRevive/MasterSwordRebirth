@@ -17,6 +17,7 @@
 #define GAME_H
 
 extern void GameDLLInit(void);
+void GameDLLShutdown();
 
 extern cvar_t displaysoundlist;
 /*extern cvar_t	mapcyclefile;

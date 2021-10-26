@@ -73,6 +73,7 @@ class CRestore
 
 extern "C" EXPORT int GetEntityAPI(DLL_FUNCTIONS *pFunctionTable, int interfaceVersion);
 extern "C" EXPORT int GetEntityAPI2(DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion);
+extern "C" EXPORT int GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion);
 
 extern int DispatchSpawn(edict_t *pent);
 extern void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd);
@@ -285,7 +286,14 @@ class CBaseEntity
 {
 public:
 	typedef CBaseEntity BaseClass;
-
+	
+	/**
+	*	Virtual destructor method
+	*	Used to clean up per-entity resources when the entity gets removed
+	*	Note: don't use EHANDLEs or attempt to access other entities here
+	*/
+	virtual void OnDestroy() {}
+	
 	//MasterSword
 	//MiB DEC2007a
 	string_i ScriptFName;

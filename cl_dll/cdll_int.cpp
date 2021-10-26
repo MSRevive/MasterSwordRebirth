@@ -43,6 +43,7 @@ extern "C"
 #include "vgui_int.h"
 #include "interface.h"
 #include "voice_status.h"
+#include "FileSystem_Shared.h"
 
 #define DLLEXPORT __declspec(dllexport)
 
@@ -255,6 +256,12 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 
 	EV_HookEvents();
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
+	
+	if(!FileSystem_Init())
+	{
+		logfile << "[DLLEXPORT Initialize: Failed to initialize filesystem]" << endl;
+		return 0;
+	}
 
 	logfile << "[DLLEXPORT Initialize: Complete]" << endl;
 

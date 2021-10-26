@@ -15,20 +15,20 @@ IFileSystem* g_pFileSystem = NULL;
 
 bool FileSystem_Init()
 {
-// Determine which filesystem to use.
+	// Determine which filesystem to use.
 	const char* szFsModule = "filesystem_stdio" DEFAULT_SO_EXT;
 
-	char szFSDir[ MAX_PATH ];
-	szFSDir[ 0 ] = '\0';
+	char szFSDir[MAX_PATH];
+	szFSDir[0] = '\0';
 
 #ifdef ISCLIENT
-	if( gEngfuncs.COM_ExpandFilename( szFsModule, szFSDir, sizeof( szFSDir ) ) == FALSE )
+	if(gEngfuncs.COM_ExpandFilename(szFsModule, szFSDir, sizeof(szFSDir)) == FALSE)
 	{
 		return false;
 	}
 #else
 	//Just use the filename for the server. No COM_ExpandFilename here.
-	strcpy( szFSDir, szFsModule );
+	strcpy(szFSDir, szFsModule);
 #endif
 
 	// Get filesystem interface.

@@ -108,6 +108,16 @@ static DLL_FUNCTIONS gFunctionTable =
 		AllowLagCompensation,	  //pfnAllowLagCompensation
 };
 
+void OnFreeEntPrivateData(edict_t* pEnt);
+int ShouldCollide(edict_t* pentTouched, edict_t* pentOther);
+
+NEW_DLL_FUNCTIONS gNewDLLFunctions = 
+{
+	&OnFreeEntPrivateData,
+	&GameDLLShutdown,
+	&ShouldCollide
+};
+
 static void SetObjectCollisionBox(entvars_t *pev);
 
 int GetEntityAPI(DLL_FUNCTIONS *pFunctionTable, int interfaceVersion)
@@ -133,6 +143,18 @@ int GetEntityAPI2(DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
 	}
 
 	memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
+	return TRUE;
+}
+
+int GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
+{
+	if(!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+	{
+		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+		return FALSE;
+	}
+	
+	memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
 	return TRUE;
 }
 
@@ -723,6 +745,26 @@ void SetObjectCollisionBox(entvars_t *pev)
 	pev->absmax.x += 1;
 	pev->absmax.y += 1;
 	pev->absmax.z += 1;
+}
+
+void OnFreeEntPrivateData(edict_t* pEnt)
+{
+	if(pEnt)
+	{
+		CBaseEntity* pEntity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(pEnt));
+		
+		if(pEntity)
+		{
+			pEntity->OnDestroy();
+			//TODO: adding this can have unexpected problems, add a virtual destructor to CBaseEntity and check if this causes any crashes before enabling - Solokiller
+			//pEntity->~CBaseEntity();
+		}
+	}
+}
+
+int ShouldCollide(edict_t* pentTouched, edict_t* pentOther)
+{
+	return true;
 }
 
 void CBaseEntity::SetObjectCollisionBox(void)

@@ -17,6 +17,9 @@
 
 #include "SVGlobals.h"
 
+#include "FileSystem_Shared.h"
+#include "ScriptMgr.h"
+
 #ifdef LINUX
 #include <unistd.h>
 #endif
@@ -107,5 +110,19 @@ void GameDLLInit(void)
 	//CVAR_REGISTER (&defaultteam);
 
 	//CVAR_REGISTER (&mp_chattime);
-	return;
+	
+	if(!FileSystem_Init())
+	{
+		//Queue up a shutdown command so we don't wind up crashing later on - Solokiller
+		//Don't call g_engfuncs.pfnServerExecute; the engine is still initializing, let it finish
+		UTIL_LogPrintf("Failed to initialize filesystem\n");
+		g_engfuncs.pfnServerCommand("exit\n");
+		return;
+	}
+}
+
+void GameDLLShutdown()
+{
+	ScriptMgr::GameShutdown();
+	FileSystem_Shutdown();
 }

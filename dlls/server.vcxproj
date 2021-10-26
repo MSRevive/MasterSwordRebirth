@@ -71,7 +71,7 @@ if ERRORLEVEL 1 exit /b 1
       <AdditionalOptions>/Zm200 /Gw /Zc:inline</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\common;..\public;..\public\tier0;..\public\tier1;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VPC;RAD_TELEMETRY_DISABLED;_HAS_ITERATOR_DEBUGGING=0;WIN32;_WIN32;_DEBUG;DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_ALLOW_RUNTIME_LIBRARY_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;_ALLOW_MSC_VER_MISMATCH;%(PreprocessorDefinitions);COMPILER_MSVC32;COMPILER_MSVC32;COMPILER_MSVC;_DLL_EXT=.dll;DLLNAME=ms;BINK_VIDEO;AVI_VIDEO;WMV_VIDEO;;FRAME_POINTER_OMISSION_DISABLED;VALVE_DLL;_EXTERNAL_DLL_EXT=.dll;VPCGAMECAPS=MSC;PROJECTDIR=E:\Cloud\GIT\MasterSwordClassic\dlls;_DLL_EXT=.dll;VPCGAME=msc;SOURCE1=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VPC;RAD_TELEMETRY_DISABLED;_HAS_ITERATOR_DEBUGGING=0;WIN32;_WIN32;_DEBUG;DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_ALLOW_RUNTIME_LIBRARY_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;_ALLOW_MSC_VER_MISMATCH;%(PreprocessorDefinitions);COMPILER_MSVC32;COMPILER_MSVC32;COMPILER_MSVC;_DLL_EXT=.dll;DLLNAME=ms;BINK_VIDEO;AVI_VIDEO;WMV_VIDEO;;FRAME_POINTER_OMISSION_DISABLED;VALVE_DLL;_EXTERNAL_DLL_EXT=.dll;VPCGAMECAPS=MSC;PROJECTDIR=.\MasterSwordRebirth\dlls;_DLL_EXT=.dll;VPCGAME=msc;SOURCE1=1</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -167,7 +167,7 @@ if ERRORLEVEL 1 exit /b 1
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\common;..\public;..\public\tier0;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>VPC;RAD_TELEMETRY_DISABLED;WIN32;_WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_ALLOW_RUNTIME_LIBRARY_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;_ALLOW_MSC_VER_MISMATCH;%(PreprocessorDefinitions);COMPILER_MSVC32;COMPILER_MSVC32;COMPILER_MSVC;_DLL_EXT=.dll;DLLNAME=ms;BINK_VIDEO;AVI_VIDEO;WMV_VIDEO;;FRAME_POINTER_OMISSION_DISABLED;VALVE_DLL;_EXTERNAL_DLL_EXT=.dll;VPCGAMECAPS=MSC;PROJECTDIR=E:\Cloud\GIT\MasterSwordClassic\dlls;_DLL_EXT=.dll;VPCGAME=msc;SOURCE1=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>VPC;RAD_TELEMETRY_DISABLED;WIN32;_WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_ALLOW_RUNTIME_LIBRARY_MISMATCH;_ALLOW_ITERATOR_DEBUG_LEVEL_MISMATCH;_ALLOW_MSC_VER_MISMATCH;%(PreprocessorDefinitions);COMPILER_MSVC32;COMPILER_MSVC32;COMPILER_MSVC;_DLL_EXT=.dll;DLLNAME=ms;BINK_VIDEO;AVI_VIDEO;WMV_VIDEO;;FRAME_POINTER_OMISSION_DISABLED;VALVE_DLL;_EXTERNAL_DLL_EXT=.dll;VPCGAMECAPS=MSC;PROJECTDIR=.\MasterSwordRebirth\dlls;_DLL_EXT=.dll;VPCGAME=msc;SOURCE1=1</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -435,13 +435,13 @@ exit 1
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Running VPC CRC Check - server.vpc</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
 if ERRORLEVEL 1 exit /b 1
-echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Outputs>
+echo crc_complete &gt; .\MasterSwordRebith\dlls\server.vpc.sentinel</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\MasterSwordRebirth\dlls\server.vpc.sentinel</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Running VPC CRC Check - server.vpc</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">if exist "..\devtools\bin\vpc.exe" "..\devtools\bin\vpc.exe" -crc2 "server.vcxproj"
 if ERRORLEVEL 1 exit /b 1
-echo crc_complete &gt; E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">E:\Cloud\GIT\MasterSwordClassic\dlls\server.vpc.sentinel</Outputs>
+echo crc_complete &gt; .\MasterSwordRebirth\dlls\server.vpc.sentinel</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\MasterSwordRebirth\dlls\server.vpc.sentinel</Outputs>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

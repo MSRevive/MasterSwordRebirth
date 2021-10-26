@@ -4163,7 +4163,7 @@ msstring CScript::ScriptGetter_StrAdd( msstring& FullName, msstring& ParserName,
 	//Add strings together
 	//priority: moderate, scope: shared
 	msstring Return;
-	for(int i; i < Params.size(); i++)
+	for(int i = 0; i < Params.size(); i++)
 		Return += Params[i];
 
 	return Return;
@@ -4928,9 +4928,16 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
 	if( !m.AllowDupInclude )
+	{
 		for(int i = 0; i < m_Dependencies.size(); i++ )
+		{
 			if( !stricmp(m_Dependencies[i],Filename) )
+			{
 				return true;	//Return true here, so its a 'fake' successful.  This should only happen on #includes
+			}
+		}
+	}		
+	
 	m_Dependencies.add( Filename );
 
 	//Localize these for later reference
@@ -5034,12 +5041,17 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	#ifdef VALVE_DLL
 		CSVGlobals::LogScript( ScriptName, m.pScriptedEnt, m_Dependencies.size(), m.PrecacheOnly, true );
 	#endif
-
-	if( m.pScriptedInterface ) m.pScriptedInterface->Script_Setup( );
+	
+	if( m.pScriptedInterface )
+	{
+		m.pScriptedInterface->Script_Setup( );
+	}
+	
 	fReturn = ParseScriptFile( ScriptData );	//Parse events
-
+	
 	delete ScriptData;  //Deallocate script data
-
+	
+	Log("game precache");
 	RunScriptEventByName( "game_precache" );	//Run precache event
 
 	return fReturn;
@@ -5156,10 +5168,14 @@ bool CScript::ParseScriptFile( const char *pszScriptData )
 			//ParseLine() updates CurrentEvent
 			int ret = ParseLine( BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds );
 		}
+		
 		while( 0 );
 
 		LineNum++;
+		
+		Log("help me.");
 	}
+	Log("p post loop");
 
 	if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
 		int stop = 0;
@@ -6044,16 +6060,21 @@ void IScripted::Deactivate( )
 	m_Scripts.clear( );		//explicitly delete the list, to reclaim the memory
 
 }
-CScript *IScripted::Script_Add( string_i ScriptName, CBaseEntity *pEntity )
+CScript *IScripted::Script_Add(string_i ScriptName, CBaseEntity *pEntity)
 {
 	//Adds a new script to the list
-	CScript *Script = msnew CScript( );
+	CScript *Script = msnew CScript();
 
-	bool fSuccess = Script->Spawn( ScriptName, pEntity, this );
-
-	if( fSuccess ) m_Scripts.add( Script );
+	bool fSuccess = Script->Spawn(ScriptName, pEntity, this);
+	
+	if(fSuccess) 
+		m_Scripts.add(Script);
 	else
-		{ if( Script ) delete Script; Script = NULL; }
+		{ 
+			if(Script) 
+				delete Script; 
+				Script = NULL; 
+		}
 
 	return Script;
 }

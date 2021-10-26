@@ -15,6 +15,10 @@
 #include "sys/io.h"
 #endif
 
+//NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017
+#include "game.h"
+//END NOTE
+
 void CBasePlayer::CreateChar(createchar_t &CharData)
 {
 	//Create a new character, using the options the user specified.
@@ -386,6 +390,12 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 	if (!strlen(cTemp))
 		return false;
 	outItem.Name = cTemp;
+	
+	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(outItem.Name);
+	if (iAlias != CGenericItemMgr::mItemAlias.end())
+	{
+		outItem.Name = iAlias->second;
+	}
 
 	//It is now possible to read an item from file correctly, but not be able to spawn that item.
 	//Be sure that, even if the item can't be created, all of the item's data is read from file properly
