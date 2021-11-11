@@ -38,7 +38,10 @@ public:
 //A script command name
 struct scriptcmdname_t
 {
-	scriptcmdname_t() { m_Conditional = false; }
+	scriptcmdname_t() 
+	{ 
+		m_Conditional = false; 
+	}
 	scriptcmdname_t(msstring_ref Name)
 	{
 		m_Name = Name;
@@ -66,13 +69,19 @@ struct scriptcmd_t
 		m_Params.add(Name);
 		m_Conditional = Conditional;
 	}
-	inline void init() { m_Conditional = m_AddingElseCmds = m_NewConditional = false; }
+	inline void init() 
+	{ 
+		m_Conditional = m_AddingElseCmds = m_NewConditional = false; }
+		
 	inline msstring &Name()
 	{
 		static msstring NoName;
 		return m_Params.size() ? m_Params[0] : NoName;
 	}
-	inline int Params() { return m_Params.size() - 1; }
+	inline int Params() 
+	{ 
+		return m_Params.size() - 1; 
+	}
 
 	bool m_Conditional;	   //Whether this is a conditional command or normal command
 	bool m_AddingElseCmds; //Whether I'm currently adding child cmds (executed when true) or else cmds (executed when false)
@@ -174,14 +183,12 @@ struct scriptcmdbase_t
 {
 private:
 	bool m_Conditional;
-	unsigned long referenced;
 	P pFunc;
 
 	void Init(P func, bool Conditional)
 	{
 		m_Conditional = Conditional;
 		pFunc = func;
-		referenced = 0;
 	}
 
 public:

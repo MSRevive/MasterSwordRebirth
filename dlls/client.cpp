@@ -1768,6 +1768,23 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();
 
+	//If the game master hasn't been created yet, create it now - Solokiller
+	CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
+
+	if( !pGameMasterEnt )
+	{
+		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
+		CMSMonster *NewMonster = (CMSMonster *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
+		if( NewMonster ) {
+			NewMonster->pev->origin = Vector( 20000,-10000,-20000 );
+			NewMonster->Spawn( "game_master" );	
+
+			msstringlist params;
+
+			NewMonster->CallScriptEvent( "game_dynamically_created", &params );
+		}
+	}
+
 	CSVGlobals::WriteScriptLog();
 	Log("World Activate END");
 

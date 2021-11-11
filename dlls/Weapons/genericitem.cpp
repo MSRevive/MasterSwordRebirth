@@ -485,13 +485,13 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		NewItem.ItemName = cString;
 
 		dbg(msstring("Load script: ") + cItemFileName);
-		Log(cItemFileName);
+		//Log(cItemFileName);
 		
 		bool fSuccess = NewItem.Script_Add(cItemFileName, &NewItem) ? true : false;
-		Log("try adding new item scripts");
+		//Log("try adding new item scripts");
 		if (fSuccess)
 		{
-			Log("run script events");
+			//Log("run script events");
 			NewItem.RunScriptEvents(); //Slows down game load, but needed for the precachefile command
 		}
 

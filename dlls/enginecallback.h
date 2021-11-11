@@ -116,6 +116,7 @@ inline void *GET_PRIVATE(edict_t *pent)
 //#define ALLOC_STRING	(*g_engfuncs.pfnAllocString)
 #ifdef VALVE_DLL
 int ALLOC_STRING(const char *szValue); //Master Sword - Keep track of all string allocations on server
+void ClearStringPool();
 #else
 #define ALLOC_STRING (*g_engfuncs.pfnAllocString)
 #endif

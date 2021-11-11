@@ -4990,7 +4990,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 				#else
 					strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory( ), MAX_PATH);
 				#endif
-				_snprintf( cScriptFile, MAX_PATH, "test_scripts/%s", ScriptName.c_str() ); //Thothie FEB2010_06 - attempting to fix other folks not being able to use test_scripts folder
+					_snprintf( cScriptFile, MAX_PATH, "test_scripts/%s", ScriptName.c_str() ); //Thothie FEB2010_06 - attempting to fix other folks not being able to use test_scripts folder
 
 				int iFileSize;
 				byte *pMemFile = LOAD_FILE_FOR_ME( cScriptFile, &iFileSize );
@@ -5117,10 +5117,10 @@ void CScript::RunScriptEventByName( msstring_ref pszEventName, msstringlist *Par
 	m.CurrentEvent = CurrentEvent;	//Restore the current event
 }
 
-bool CScript::ParseScriptFile( const char *pszScriptData )
+bool CScript::ParseScriptFile(const char *pszScriptData)
 {
 	startdbg;
-
+	
 	dbg( "Begin" );
 	if( !m.ScriptFile.len() || !pszScriptData )
 		return false;
@@ -5129,18 +5129,20 @@ bool CScript::ParseScriptFile( const char *pszScriptData )
 	ALERT( at_console, "Loading Script file: %s...\n", STRING(ScriptFile) );
 #endif
 
-	SCRIPT_EVENT *CurrentEvent = NULL;			//Current event
-	scriptcmd_list *CurrentCmds = NULL;			//Current command list within event
-	mslist<scriptcmd_list *> ParentCmds;		//List of all my parent command lists, top to bottom
+	SCRIPT_EVENT *CurrentEvent = NULL; //Current event
+	scriptcmd_list *CurrentCmds = NULL;	//Current command list within event
+	mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
 	int LineNum = 1;
 	char cSpaces[128];
-	while( *pszScriptData )
+	
+	while(*pszScriptData)
 	{
 		char cBuf[768];
-		cBuf[0] = 0;
-		if( GetString(cBuf, min(strlen(pszScriptData), sizeof(cBuf)), pszScriptData, 0, "\r\n") )
-			pszScriptData += strlen( cBuf );
-		else pszScriptData += strlen( cBuf );
+		//cBuf[0] = 0;
+		if (GetString(cBuf, min(strlen(pszScriptData), sizeof(cBuf)), pszScriptData, 0, "\r\n"))
+			pszScriptData += strlen(cBuf);
+		else
+			pszScriptData += strlen(cBuf);
 
 		// skip over the carriage return
 		if( sscanf( pszScriptData, "%2[\r\n]", cSpaces ) > 0 )
@@ -5167,21 +5169,19 @@ bool CScript::ParseScriptFile( const char *pszScriptData )
 			//Parse this line and store any commands
 			//ParseLine() updates CurrentEvent
 			int ret = ParseLine( BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds );
+			Log((char*)ret);
 		}
+		while(0);
 		
-		while( 0 );
-
 		LineNum++;
-		
-		Log("help me.");
 	}
 	Log("p post loop");
 
-	if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
-		int stop = 0;
-
-	if( MSGlobals::IsServer && m.ScriptFile == "items/bows_longbow" )
-		int stop = 0;
+	// if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
+	// 	int stop = 0;
+	// 
+	// if( MSGlobals::IsServer && m.ScriptFile == "items/bows_longbow" )
+	// 	int stop = 0;
 
 	enddbg( "CSript::ParseScriptFile()" );
 //  Uncomment to print out all this function gathered from the script file

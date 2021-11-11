@@ -87,7 +87,7 @@ bool CEncryptData1::Decrypt()
 	//Allocate a buffer for the original data
 	byte *Decrypted = msnew byte[m_DataSize];
 	memcpy(Decrypted, m_pData, m_DataSize); //Copy encrypted data to new buffer
-	delete[] m_pData;						//Delete old data
+	delete []m_pData;						//Delete old data
 	m_pData = Decrypted;					//Set pointer to new buffer
 
 	//Decrypt new data

@@ -10,6 +10,8 @@
 #include "Store.h"
 #include "MSCentral.h"
 #include "versioncontrol.h"
+#include "CStringPool.h"
+#include "../MSShared/CVarMonitor.h"
 
 ofstream modelout;
 int HighestPrecache = -1;
@@ -176,6 +178,12 @@ void MSWorldSpawn()
 	//Force items.txt to be unmodified --- Undone, servers need to be updated
 	//PRECACHE_GENERIC("dlls/sc.dll");
 	//ENGINE_FORCE_UNMODIFIED(force_exactfile,NULL,NULL,"dlls/sc.dll");
+	
+	//Force the client to use the same client lib as the server. - Solokiller
+	//This ensures that clients don't replace their client and send exploit commands.
+	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.dll" );
+	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.so" );
+	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.dylib" );
 }
 
 //Called every frame
@@ -196,13 +204,31 @@ void MSGameEnd()
 {
 	startdbg;
 	MSCentral::GameEnd();
-
+	
+	if(MSGlobals::GameScript)
+	{
+		//Moved here from MSGlobals::EndMap because commands can access entities that are freed below - Solokiller 3/10/2017
+		MSGlobals::GameScript->CallScriptEvent( "game_end" );
+	}
+	
+	//Save all characters now - Solokiller 5/10/2017
+	for(int i = 1; i <= gpGlobals->maxClients; ++i)
+	{
+		CBasePlayer *pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
+		//TODO: make sure player is actually connected and in valid state (i.e. not missing inventory) - Solokiller
+		if(pPlayer)
+		{
+			pPlayer->SaveChar();
+			if(!MSGlobals::ServerSideChar) pPlayer->m_TimeCharLastSent = 0;
+		}
+	}
+	
 	//Thothie MAR2012_27 - clear duplicate precaches for next map
 	gSoundPrecacheList.clearitems();
 	gModelPrecacheList.clearitems();
 	gModelPrecacheCount = 0;
 	gSoundPrecacheCount = 0;
-
+	
 	dbg("Call Deactivate on all Entities");
 	//Deallocate any 'extra' memory the mod allocated for any entity
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(0);
@@ -255,6 +281,10 @@ void MSGameEnd()
 	HighestPrecache = -1;
 	TotalModelPrecaches = 1;
 	CSVGlobals::LogScripts = true;
+	
+	//Clear the string pool now, after any references to its strings have been released.
+	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.
+	ClearStringPool();
 
 	enddbg;
 }
@@ -369,9 +399,15 @@ int PRECACHE_MODEL(const char *pszModelname)
 
 	return LastModel;
 }
+
 int ALLOC_STRING(const char *szValue) //Master Sword - Keep track of all string allocations
 {
 	return (*g_engfuncs.pfnAllocString)(szValue);
+}
+
+void ClearStringPool()
+{
+	g_StringPool.Clear();
 }
 
 void CSVGlobals::LogScript(msstring_ref ScriptName, CBaseEntity *pOwner, int includelevel, bool PrecacheOnly, bool Sucess)
