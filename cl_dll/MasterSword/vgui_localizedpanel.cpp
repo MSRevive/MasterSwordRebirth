@@ -10,7 +10,7 @@
 #include "vgui_LocalizedPanel.h"
 #include "vgui_Stats.h"
 #include "../../MSShared/vgui_MenuDefsShared.h"
-#include "../../MSShared/IScript.h"
+#include "../../MSShared/iscript.h"
 #include "HUDScript.h"
 
 #define LOCAL_TRANSPARENCY 60
