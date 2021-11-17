@@ -252,6 +252,7 @@ exit 1
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\cstringpool.h" />
     <ClInclude Include="..\MSShared\CVarMonitor.h" />
     <ClInclude Include="..\MSShared\Filesystem_Shared.h" />
     <ClInclude Include="..\MSShared\FindEntities.h" />
@@ -323,6 +324,7 @@ exit 1
     <ClInclude Include="..\msshared\vgui_menudefsshared.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\common\cstringpool.cpp" />
     <ClCompile Include="..\MSShared\CVarMonitor.cpp" />
     <ClCompile Include="..\MSShared\Filesystem_Shared.cpp" />
     <ClCompile Include="..\MSShared\FindEntities.cpp" />

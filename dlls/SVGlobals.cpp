@@ -27,6 +27,8 @@ int gSoundPrecacheCount = 0;
 mslist<modelprecachelist_t> gModelPrecacheList;
 mslist<modelprecachelist_t> gSoundPrecacheList;
 
+CStringPool g_StringPool;
+
 //Master Sword CVARs
 /*
 cvar_t	debug			= {"ms_debug","0", FCVAR_SERVER };
