@@ -746,6 +746,10 @@ public:
 
 	void MusicTouch(CBaseEntity *pOther)
 	{
+		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
+		if( m_Songs.size() == 0 )
+			return;
+		
 		if (!pOther->IsPlayer())
 			return;
 
