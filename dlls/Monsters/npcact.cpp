@@ -11,7 +11,7 @@
 //  ����������
 #include "MSDLLHeaders.h"
 #include "Monsters/MSMonster.h"
-#include "Script.h"
+#include "script.h"
 
 enum
 {

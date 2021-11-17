@@ -19,7 +19,7 @@
 #endif
 
 #include "inc_weapondefs.h"
-#include "Script.h"
+#include "script.h"
 #include "Effects/MSEffects.h"
 #include "GroupFile.h"
 #include "Stats/statdefs.h"
@@ -200,7 +200,7 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 	//pItem->iWeaponType = pGlobalItem->iWeaponType;
 	pItem->ItemName = pGlobalItem->ItemName;
 	pItem->m_iId = (int)pItem; //RANDOM_LONG(0,32765);
-	 strncpy(pItem->m_Name,  pGlobalItem->m_Name, sizeof(pItem->m_Name) );
+	 strncpy(pItem->m_Name,  pGlobalItem->m_Name, sizeof(pItem->m_Name));
 	if (pGlobalItem->m_Scripts[0]) //This should ALWAYS be true!
 	{
 		dbg("Copy script data from global item");

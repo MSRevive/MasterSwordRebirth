@@ -31,7 +31,7 @@
 #include "HUDScript.h"
 #include "Fatigue.h"
 #include "CLGlobal.h"
-#include "Script.h"
+#include "script.h"
 #include "Menu.h"
 #include "Stats\stats.h"
 #include "logfile.h"

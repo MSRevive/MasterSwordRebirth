@@ -64,7 +64,7 @@
 //Master Sword
 #include "logfile.h"
 #include "CLGlobal.h"
-#include "Script.h"
+#include "script.h"
 #include "../vgui_ScorePanel.h"
 #include "vgui_HUD.h"
 #include "vgui_MSControls.h"

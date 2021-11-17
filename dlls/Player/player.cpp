@@ -40,7 +40,7 @@
 #include "Stats/Races.h"
 #include "Player.h"
 #include "Weapons/GenericItem.h"
-#include "Script.h"
+#include "script.h"
 //#include "Monsters/Bodyparts/Bodyparts_Human.h"
 #include "Monsters/Corpse.h"
 #include "SVGlobals.h"

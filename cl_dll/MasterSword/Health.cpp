@@ -25,7 +25,7 @@
 #include "CLGlobal.h"
 #include "logfile.h"
 #include "MSCharacter.h"
-#include "Script.h"
+#include "script.h"
 
 //HUD stuff
 #include "..\inc_huditem.h"

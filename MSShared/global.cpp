@@ -3,7 +3,7 @@
 */
 
 #include "inc_weapondefs.h"
-#include "Script.h"
+#include "script.h"
 #include "Titles.h"
 #include "ScriptedEffects.h"
 #include "logfile.h"

@@ -5,7 +5,7 @@
 #include "../dlls/Half-Life/extdll.h"
 #include "../engine/eiface.h"
 #include "../dlls/Half-Life/util.h"
-#include "IScript.h"
+#include "iscript.h"
 
 #ifndef VALVE_DLL
     #include "../cl_dll/hud_iface.h"

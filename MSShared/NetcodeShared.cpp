@@ -11,7 +11,7 @@
 #include "Magic.h"
 #include "ScriptedEffects.h"
 #include "MSCharacter.h"
-#include "Script.h"
+#include "script.h"
 #include "Global.h"
 #include "logfile.h"
 

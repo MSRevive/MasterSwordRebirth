@@ -26,7 +26,7 @@
 #include "inc_weapondefs.h"
 #include "MasterSword/HUDScript.h"
 #include "MasterSword/CLGlobal.h"
-#include "Script.h"
+#include "script.h"
 #include "logfile.h"
 
 #undef DLLEXPORT //Master Sword

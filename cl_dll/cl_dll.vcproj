@@ -1329,10 +1329,10 @@
 				RelativePath="..\dlls\Stats\Races.cpp">
 			</File>
 			<File
-				RelativePath="..\MSShared\Script.cpp">
+				RelativePath="..\MSShared\script.cpp">
 			</File>
 			<File
-				RelativePath="..\MSShared\Script.h">
+				RelativePath="..\MSShared\script.h">
 			</File>
 			<File
 				RelativePath="..\MSShared\ScriptCmds.cpp">

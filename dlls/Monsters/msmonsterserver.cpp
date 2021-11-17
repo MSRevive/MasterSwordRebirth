@@ -11,7 +11,7 @@
 #include "animation.h"
 #include "soundent.h"
 
-#include "../MSShared/Script.h"
+#include "../MSShared/script.h"
 
 #include "Stats/Stats.h"
 #include "Stats/Races.h"

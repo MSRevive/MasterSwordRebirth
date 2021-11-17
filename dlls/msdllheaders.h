@@ -1,7 +1,7 @@
 #include "../MSShared/buildcontrol.h"
 #include "Half-life/extdll.h"
 #include "Half-life/util.h"
-#include "../MSShared/IScript.h"	//MS scripted interface
+#include "../MSShared/iscript.h"	//MS scripted interface
 #include "../MSShared/sharedutil.h" //MS generic utility functions
 #include "cbase.h"
 #ifndef _WIN32

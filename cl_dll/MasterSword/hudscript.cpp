@@ -19,7 +19,7 @@
 
 //Player functionality
 #include "inc_weapondefs.h"
-#include "Script.h"
+#include "script.h"
 #include "pm_defs.h"
 #include "cl_entity.h"
 #include "event_api.h"

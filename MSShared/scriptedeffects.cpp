@@ -1,5 +1,5 @@
 #include "MSDLLHeaders.h"
-#include "Script.h"
+#include "script.h"
 #include "ScriptedEffects.h"
 #include "logfile.h"
 

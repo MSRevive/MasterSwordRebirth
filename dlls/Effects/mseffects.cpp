@@ -1,5 +1,5 @@
 #include "inc_weapondefs.h"
-#include "Script.h"
+#include "script.h"
 #include "MSEffects.h"
 #include "shake.h"
 #include "logfile.h"

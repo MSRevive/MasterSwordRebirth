@@ -9,7 +9,7 @@
 #include "logfile.h"
 #include "MSCharacter.h"
 #include "../MSShared/Magic.h"
-#include "../MSShared/Script.h"
+#include "../MSShared/script.h"
 
 #ifndef _WIN32
 #include "sys/io.h"

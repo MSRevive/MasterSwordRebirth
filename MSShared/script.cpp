@@ -5051,7 +5051,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	
 	delete ScriptData;  //Deallocate script data
 	
-	Log("game precache");
+	//Log("game precache");
 	RunScriptEventByName( "game_precache" );	//Run precache event
 
 	return fReturn;

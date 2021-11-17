@@ -1,6 +1,6 @@
 #include "MSDLLHeaders.h"
 
-#include "Script.h"
+#include "script.h"
 #include "Weapons/GenericItem.h"
 #include "Store.h"
 #include "Stats/statdefs.h"

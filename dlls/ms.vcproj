@@ -1202,7 +1202,7 @@ rem copy $(TargetPath) \\Miniagnus3\hlds\msc\dlls\
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\MSShared\IScript.h">
+				RelativePath="..\MSShared\iscript.h">
 			</File>
 			<File
 				RelativePath=".\logfile.h">
@@ -1286,7 +1286,7 @@ rem copy $(TargetPath) \\Miniagnus3\hlds\msc\dlls\
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\MSShared\Script.h">
+				RelativePath="..\MSShared\script.h">
 			</File>
 			<File
 				RelativePath="..\MSShared\ScriptCmds.cpp">
