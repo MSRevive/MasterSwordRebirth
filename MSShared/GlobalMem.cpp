@@ -66,7 +66,8 @@ void *operator new(size_t size)
 			//Use breakpoints here to track down leaking memory
 			//Have them output to file, then trace them here by
 			//their ID
-			//if( allocid == 128027 )
+			if( allocid == 128027 )
+				int stop = 0;
 
 			MemAlloc.Index = allocid++;
 			if (MemAlloc.Index > allochighest)
@@ -74,6 +75,7 @@ void *operator new(size_t size)
 			if (allocid >= ARRAYSIZE(Allocations))
 			{
 				logfile << "Error: Alloc New Memory: Allocations exceed max debug size (" << ARRAYSIZE(Allocations) << ")" << endl;
+				int stop = 0;
 				exit(1);
 				return NULL;
 			}
@@ -91,7 +93,17 @@ void *operator new(size_t size)
 	}
 	catch (...)
 	{
-		MS_FATAL_ERROR_MEM("Unhandled Exception While Allocating Memory")
+		//MS_FATAL_ERROR_MEM("Unhandled Exception While Allocating Memory")
+		//MS_FATAL_ERROR_MEM( "Unhandled Exception While Allocating Memory" )
+		//Thothie NOV2015_24 (post release) disable alloc memory pop-up
+		#ifndef VALVE_DLL
+			msstring erloc="client";
+		#else
+			msstring erloc="server";
+			chatlog << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << endl;
+		#endif
+		Print( "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) [%s]\n", erloc.c_str() );
+		logfile << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << endl;
 	}
 	return NULL;
 }
@@ -115,6 +127,8 @@ void operator delete(void *ptr)
 
 					//Use this to track a certain memory deletion
 					//if( Allocations[i]->Index == 127750 )
+					if( Allocations[i]->Index == 127750 )
+						int stop = 0;
 
 					delete Allocations[i];
 					if (i < alloctotal - 1)
@@ -139,7 +153,16 @@ void operator delete(void *ptr)
 	}
 	catch (...)
 	{
-		MS_FATAL_ERROR_MEM("Unhandled Exception While Deallocating Memory")
+		//MS_FATAL_ERROR_MEM( "Unhandled Exception While Deallocating Memory" )
+		//Thothie NOV2015_24 (post release) disable alloc memory pop-up
+		#ifndef VALVE_DLL
+			msstring erloc="client";
+		#else
+			msstring erloc="server";
+			chatlog << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << endl;
+		#endif
+		Print( "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) [%s]\n", erloc.c_str() );
+		logfile << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << endl;
 	}
 }
 

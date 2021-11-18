@@ -53,7 +53,7 @@ globalscriptinfo_t g_MSScriptTypes[] =
 		MS_SCRIPT_DIR,
 		"/scripts",
 },
-				   *g_MSScriptInfo = &g_MSScriptTypes[0];
+*g_MSScriptInfo = &g_MSScriptTypes[0];
 
 //#define LOG_ITEMHANDLING
 
@@ -200,7 +200,7 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 	//pItem->iWeaponType = pGlobalItem->iWeaponType;
 	pItem->ItemName = pGlobalItem->ItemName;
 	pItem->m_iId = (int)pItem; //RANDOM_LONG(0,32765);
-	 strncpy(pItem->m_Name,  pGlobalItem->m_Name, sizeof(pItem->m_Name));
+	strncpy(pItem->m_Name, pGlobalItem->m_Name, sizeof(pItem->m_Name));
 	if (pGlobalItem->m_Scripts[0]) //This should ALWAYS be true!
 	{
 		dbg("Copy script data from global item");
