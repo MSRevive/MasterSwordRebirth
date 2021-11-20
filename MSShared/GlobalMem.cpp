@@ -66,8 +66,8 @@ void *operator new(size_t size)
 			//Use breakpoints here to track down leaking memory
 			//Have them output to file, then trace them here by
 			//their ID
-			if( allocid == 128027 )
-				int stop = 0;
+			// if( allocid == 128027 )
+			// 	int stop = 0;
 
 			MemAlloc.Index = allocid++;
 			if (MemAlloc.Index > allochighest)
@@ -75,7 +75,7 @@ void *operator new(size_t size)
 			if (allocid >= ARRAYSIZE(Allocations))
 			{
 				logfile << "Error: Alloc New Memory: Allocations exceed max debug size (" << ARRAYSIZE(Allocations) << ")" << endl;
-				int stop = 0;
+				//int stop = 0;
 				exit(1);
 				return NULL;
 			}
@@ -127,8 +127,8 @@ void operator delete(void *ptr)
 
 					//Use this to track a certain memory deletion
 					//if( Allocations[i]->Index == 127750 )
-					if( Allocations[i]->Index == 127750 )
-						int stop = 0;
+					// if( Allocations[i]->Index == 127750 )
+					// 	int stop = 0;
 
 					delete Allocations[i];
 					if (i < alloctotal - 1)

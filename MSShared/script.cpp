@@ -5175,8 +5175,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 		
 		LineNum++;
 	}
-	Log("p post loop");
-
+	
 	// if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
 	// 	int stop = 0;
 	// 
