@@ -5169,7 +5169,6 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			//Parse this line and store any commands
 			//ParseLine() updates CurrentEvent
 			int ret = ParseLine( BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds );
-			Log((char*)ret);
 		}
 		while(0);
 		
