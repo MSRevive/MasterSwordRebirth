@@ -2955,7 +2955,6 @@ bool CScript::ScriptCmd_DeleteEntity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	}
 	else if (Params.size() >= 1)
 	{
-
 		CBaseEntity *pEntity = m.pScriptedEnt->RetrieveEntity(Params[0]);
 		if (pEntity && !pEntity->IsPlayer())
 		{

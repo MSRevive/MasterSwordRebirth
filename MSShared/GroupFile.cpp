@@ -60,6 +60,8 @@ uint GetFileSize(FHANDLE file, int null)
 
 #endif
 
+#include <fstream>
+
 #include "encrypt.h"
 #include "GroupFile.h"
 #include "msfileio.h"
@@ -92,6 +94,7 @@ void CGroupFile::Open(char *pszFileName)
 		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetReadPtr(), EncryptedHeaderSize); //GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize
 		if (!HeaderData.Decrypt())
 			return;
+			
 		CMemFile DecryptedHeaders;
 		DecryptedHeaders.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
 
@@ -358,7 +361,7 @@ bool CGameGroupFile::Open(const char *pszFilename)
 
 		~CleanupMemory()
 		{
-			delete pMemory;
+			delete[] pMemory;
 		}
 	};
 	
@@ -419,14 +422,13 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 		groupheader_t &Entry = m_EntryList[i];
 		if( Entry.FileName != EntryName )
 			continue;
-
+			
 		DataSize = Entry.DataSize;
-
 		//Decrypt on demand
 		if(pBuffer)
 		{
-			g_pFileSystem->Seek( m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD );
-			byte* pEncryptedBuffer = msnew byte[ Entry.DataSizeEncrypted ];
+			g_pFileSystem->Seek(m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD);
+			byte* pEncryptedBuffer = msnew byte[Entry.DataSizeEncrypted];
 			bool bSuccess = false;
 
 			if(Entry.DataSizeEncrypted == g_pFileSystem->Read(pEncryptedBuffer, Entry.DataSizeEncrypted, m_hFile))
@@ -442,7 +444,7 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 				}
 			}
 
-			delete pEncryptedBuffer;
+			delete[] pEncryptedBuffer;
 
 			//Seek to head so we're not left dangling someplace where it might cause problems
 			g_pFileSystem->Seek( m_hFile, 0, FILESYSTEM_SEEK_HEAD );

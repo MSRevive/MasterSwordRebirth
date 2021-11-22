@@ -4998,15 +4998,16 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 				{
 					ScriptData = msnew(char[iFileSize+1]);
 					memcpy( ScriptData, pMemFile, iFileSize );
-					ScriptData[iFileSize] = 0;
+					ScriptData[iFileSize] = '\0';
 					FREE_FILE( pMemFile );
 				}
 			}
 			else if( ScriptMgr::m_GroupFile.ReadEntry( ScriptName, NULL, ScriptSize ) )
 			{
 				ScriptData = msnew(char[ScriptSize+1]);
-				ScriptMgr::m_GroupFile.ReadEntry( ScriptName, (byte *)ScriptData, ScriptSize );
-				ScriptData[ScriptSize] = 0;
+				ScriptMgr::m_GroupFile.ReadEntry(ScriptName, (byte *)ScriptData, ScriptSize);
+				ScriptData[ScriptSize] = '\0';
+				Log(ScriptData);
 			}
 			else
 			{
@@ -5049,9 +5050,9 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	
 	fReturn = ParseScriptFile( ScriptData );	//Parse events
 	
-	delete ScriptData;  //Deallocate script data
+	delete[] ScriptData;  //Deallocate script data
 	
-	//Log("game precache");
+	Log("game precache");
 	RunScriptEventByName( "game_precache" );	//Run precache event
 
 	return fReturn;
@@ -5135,7 +5136,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	int LineNum = 1;
 	char cSpaces[128];
 	
-	while(*pszScriptData)
+	while(*pszScriptData != '\0')
 	{
 		char cBuf[768];
 		//cBuf[0] = 0;
@@ -5149,7 +5150,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			pszScriptData += strlen(cSpaces);
 
 		#define BufferPos &cBuf[ofs]
-
+		
 		int ofs = 0;
 		do
 		{
@@ -5174,6 +5175,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 		
 		LineNum++;
 	}
+	Log("outside loop");
 	
 	// if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
 	// 	int stop = 0;
@@ -5234,9 +5236,9 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 	TmpLineOfs = LineOfs;
 	msstring Line = CmdLineTmp;
 	//ALERT( at_console, "CommandFound: %s\n", TestCommand );
-
+	
 	//Check if this word is a pre-command.
-	if( !stricmp(TestCommand,	"{"		) )
+	if( !stricmp(TestCommand,	"{") )
 	{
 		if( !*pCurrentEvent )
 		{
@@ -5383,7 +5385,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			ParentCmds.erase( ParentCmds.size() - 1 );
 		}
 	}
-	else if( !stricmp(msstring(TestCommand).substr(0,2),"if") )
+	else if( !stricmp(msstring(TestCommand).substr(0,2), "if") )
 	{
 		//This could be a new-style if or an old-style if
 		if( !strstr(TestCommand,"(") && *CmdLineTmp != '(' ) //Old: if var == var
@@ -5438,7 +5440,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 				MSErrorConsoleText( "SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n" );
 		}
 	}
-	else if( !stricmp(TestCommand,	"else"			) )
+	else if( !stricmp(TestCommand, "else") )
 	{
 		scriptcmd_t &ParentCmd = CurrentCmds.m_Cmds[CurrentCmds.m_Cmds.size()-1];
 		if( ParentCmd.m_Conditional )
@@ -5461,7 +5463,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 		}
 		else MSErrorConsoleText( "CSript::ParseLine", UTIL_VarArgs("Script: %s, Line: %i - %s \"else\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer) );
 	}
-	else if( !stricmp(TestCommand,	"eventname"		) )
+	else if( !stricmp(TestCommand, "eventname") )
 	{
 		//Set a name for the current event
 		sscanf(CmdLineTmp, "%s", cBuffer );
@@ -5660,7 +5662,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			if( strstr(TestCommand,"sprite") || strstr(TestCommand,"model") || strstr(TestCommand,"setshield") || SndType == 1 ) break;	//If a sprite or model, only use the first parameter
 			pSearchLine = "%[ \t\r\n]%s";
 		}
-
+		
 		for(int i = 0; i < Resources.size(); i++)
 		{
 			msstring &FileName = Resources[i];
@@ -5747,13 +5749,11 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 	{
 		//Check if this word is a command
 		scriptcmdname_t Command( TestCommand );
-        msfunchash_t::iterator          iFunc = m_GlobalCmdHash.find( msstring(TestCommand) );
+    msfunchash_t::iterator iFunc = m_GlobalCmdHash.find( msstring(TestCommand) );
 		bool fFoundCmd = iFunc != m_GlobalCmdHash.end();
 
 		//Create the command
-        scriptcmd_t &ScriptCmd = scriptcmd_t( msstring(TestCommand)
-                                            , fFoundCmd ? iFunc->second.GetConditional() : false
-                                            );
+    scriptcmd_t &ScriptCmd = scriptcmd_t( msstring(TestCommand), fFoundCmd ? iFunc->second.GetConditional() : false );
 		if( !fFoundCmd )
 		{
 			//First word was not a command
@@ -5768,7 +5768,6 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 					ALERT( at_console, "Script: %s, Line: %i - Command \"%s\" NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, TestCommand );
 				return 0;
 			}
-
 		}
 
 		//Add all the command's parameters
