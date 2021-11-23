@@ -182,7 +182,7 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 	// a <paramName name> of "SchemeName" signals a new scheme is being described
 	//
 
-	const static int numTmpSchemes = 64;
+	const static int numTmpSchemes = 192;
 	static CScheme tmpSchemes[numTmpSchemes];
 	memset(tmpSchemes, 0, sizeof(tmpSchemes));
 	int currentScheme = -1;
