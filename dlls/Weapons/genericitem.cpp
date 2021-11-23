@@ -394,8 +394,13 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 
 		//If Public build or /scripts/items.txt failed in the dev build, try /dlls/sc.dll
-		char cGroupFilePath[MAX_PATH];
-		sprintf(cGroupFilePath, "dlls/sc.dll");
+		char cGameDir[MAX_PATH], cGroupFilePath[MAX_PATH];
+#ifdef VALVE_DLL
+		GET_GAME_DIR(cGameDir);
+#else
+		strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory(), MAX_PATH);
+#endif
+		_snprintf(cGroupFilePath, MAX_PATH, "dlls/sc.dll", cGameDir);
 
 		//CGroupFile &GroupFile = *msnew CGroupFile();
 		CGameGroupFile GroupFile;
@@ -512,6 +517,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		else
 			logfileopt << " SUCCESS\r\n";
 	}
+
 	if (pMemFile)
 		FREE_FILE(pMemFile);
 	else

@@ -71,7 +71,8 @@ struct scriptcmd_t
 	}
 	inline void init() 
 	{ 
-		m_Conditional = m_AddingElseCmds = m_NewConditional = false; }
+		m_Conditional = m_AddingElseCmds = m_NewConditional = false; 
+	}
 		
 	inline msstring &Name()
 	{

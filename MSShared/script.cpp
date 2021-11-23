@@ -4998,7 +4998,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 				{
 					ScriptData = msnew(char[iFileSize+1]);
 					memcpy( ScriptData, pMemFile, iFileSize );
-					ScriptData[iFileSize] = '\0';
+					ScriptData[iFileSize] = 0;
 					FREE_FILE( pMemFile );
 				}
 			}
@@ -5006,8 +5006,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 			{
 				ScriptData = msnew(char[ScriptSize+1]);
 				ScriptMgr::m_GroupFile.ReadEntry(ScriptName, (byte *)ScriptData, ScriptSize);
-				ScriptData[ScriptSize] = '\0';
-				Log(ScriptData);
+				ScriptData[ScriptSize] = 0;
 			}
 			else
 			{
@@ -5085,8 +5084,7 @@ void CScript::RunScriptEvents( bool fOnlyRunNamedEvents )
 			Event.fNextExecutionTime = -1;
 		}
 
-
-		for(int e = 0; e < Event.TimedExecutions.size(); i++ )
+		for(int e = 0; e < Event.TimedExecutions.size(); e++ )
 		{
 			if( gpGlobals->time < Event.TimedExecutions[e] )
 				continue;
@@ -5096,9 +5094,12 @@ void CScript::RunScriptEvents( bool fOnlyRunNamedEvents )
 			Event.TimedExecutions.erase( e-- );
 		}
 
-		for(int e = 0; e < CachedExecutions.size(); i++ )
+		for(int e = 0; e < CachedExecutions.size(); e++ )
+		{
 			Script_ExecuteEvent( Event );
+		}
 	}
+	
 	enddbg;
 }
 void CScript::RunScriptEventByName( msstring_ref pszEventName, msstringlist *Parameters )
@@ -5121,7 +5122,7 @@ void CScript::RunScriptEventByName( msstring_ref pszEventName, msstringlist *Par
 bool CScript::ParseScriptFile(const char *pszScriptData)
 {
 	startdbg;
-	
+
 	dbg( "Begin" );
 	if( !m.ScriptFile.len() || !pszScriptData )
 		return false;
@@ -5135,12 +5136,12 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
 	int LineNum = 1;
 	char cSpaces[128];
-	
-	while(*pszScriptData != '\0')
+
+	while(*pszScriptData != 0)
 	{
 		char cBuf[768];
 		//cBuf[0] = 0;
-		if (GetString(cBuf, min(strlen(pszScriptData), sizeof(cBuf)), pszScriptData, 0, "\r\n"))
+		if (GetString(cBuf, min(strlen(pszScriptData)+1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
 			pszScriptData += strlen(cBuf);
 		else
 			pszScriptData += strlen(cBuf);
@@ -5150,7 +5151,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			pszScriptData += strlen(cSpaces);
 
 		#define BufferPos &cBuf[ofs]
-		
+
 		int ofs = 0;
 		do
 		{
@@ -5159,7 +5160,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 				ofs += strlen(cSpaces);
 
 			//Exclude the end-of-line comments
-			char *pszCommentsStart = strstr(cBuf,"//");
+			char *pszCommentsStart = strstr(cBuf, "//");
 			if( pszCommentsStart )
 				*pszCommentsStart = 0;
 
@@ -5169,14 +5170,14 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 
 			//Parse this line and store any commands
 			//ParseLine() updates CurrentEvent
+			//Log(BufferPos);
 			int ret = ParseLine( BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds );
 		}
 		while(0);
-		
+
 		LineNum++;
 	}
-	Log("outside loop");
-	
+
 	// if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
 	// 	int stop = 0;
 	// 
@@ -5204,6 +5205,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 //#endif
 	return true;
 }
+
 int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/,
 					   scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/ )
 {
@@ -5236,7 +5238,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 	TmpLineOfs = LineOfs;
 	msstring Line = CmdLineTmp;
 	//ALERT( at_console, "CommandFound: %s\n", TestCommand );
-	
+
 	//Check if this word is a pre-command.
 	if( !stricmp(TestCommand,	"{") )
 	{
@@ -5662,7 +5664,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			if( strstr(TestCommand,"sprite") || strstr(TestCommand,"model") || strstr(TestCommand,"setshield") || SndType == 1 ) break;	//If a sprite or model, only use the first parameter
 			pSearchLine = "%[ \t\r\n]%s";
 		}
-		
+
 		for(int i = 0; i < Resources.size(); i++)
 		{
 			msstring &FileName = Resources[i];
@@ -6107,28 +6109,33 @@ int IScripted::Script_ParseLine( CScript *Script, msstring_ref pszCommandLine, s
 
 	return 0;
 }
+
 void IScripted::RunScriptEvents( bool fOnlyRunNamedEvents )
 {
 	for(int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript *Script = m_Scripts[i];
+		
 		if( !Script->m.RemoveNextFrame )
+		{
 			Script->RunScriptEvents( fOnlyRunNamedEvents );
+		}
 		else
 		{
-			delete Script;
+			delete[] Script;
 
 			m_Scripts.erase( i );
 			i--;
 		}
-
 	}
 }
+
 void IScripted::CallScriptEventTimed( msstring_ref EventName, float Delay )
 {
 	for(int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->CallEventTimed( EventName, Delay );
 }
+
 void IScripted::CallScriptEvent( msstring_ref EventName, msstringlist *Parameters )
 {
 	m_ReturnData[0] = 0;
