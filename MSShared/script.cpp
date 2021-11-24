@@ -4,37 +4,26 @@
 */
 
 #include "inc_weapondefs.h"
-
 #include "script.h"
 #include "scriptmgr.h"
 #include "../MSShared/GroupFile.h"
+
 #ifdef VALVE_DLL
 #include "SVGlobals.h"
 #include "../MSShared/Global.h"
 #include "MSCentral.h"
 bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
-
 #else
 #include "../cl_dll/MasterSword/CLGlobal.h"
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
 #include "../cl_dll/MasterSword/HUDScript.h"
 #endif
+
 #include "../engine/studio.h"
 #include "logfile.h"
 #include "time.h"
 #include "../MSShared/crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
-
-// //[MiB] - for checking if the "Cheat Engine.exe" process is running
-// //#include "winsani_in.h"
-// #include <windows.h>
-// //#include "winsani_out.h"
-// #include <stdio.h>
-// #include <tchar.h>
-// #include <psapi.h>
-// #pragma comment(lib, "Psapi")
-// //[/MiB]
-
 #include "FindEntities.h"
 
 #undef SCRIPTVAR
@@ -1840,12 +1829,12 @@ msstring CScript::ScriptGetter_get_random_token( msstring& FullName, msstring& P
 	{
 		static msstringlist Tokens;
 		Tokens.clearitems();
-		msstring &TokenAdd = Params[1];
+		//msstring &TokenAdd = Params[1];
 
 		msstring TokenString = GetVar(Params[0]);
 		TokenizeString( TokenString, Tokens );
 
-		int token_found_at = -1;
+		//int token_found_at = -1;
 
 		//int max_token = Tokens.size()-1; //Thothie SEP2019_04 Never seems to return 0 token
 		int rnd_token_idx = (RANDOM_LONG( 1, Tokens.size() ))-1;
@@ -4706,7 +4695,7 @@ msstring_ref CScript::GetVar( msstring_ref pszText )
 			}
 			else if( Name.starts_with("map.") )
 			{
-				bool Type[2] = { false };
+				//bool Type[2] = { false };
 				msstring Prop = Name.substr( 4 );
 				if( Prop == "name" ) return MSGlobals::MapName;
 				else if( Prop == "skyname" ) return EngineFunc::CVAR_GetString( "sv_skyname" );
