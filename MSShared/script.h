@@ -304,7 +304,7 @@ public:
 	SCRIPTCPP_GETTER( GetConst );
 	SCRIPTCPP_GETTER( GetContents );
 	SCRIPTCPP_GETTER( GetCVar );
-	//SCRIPTCPP_GETTER( FileHash ); //Wishbone MAR2016 - get a file's hash.
+	SCRIPTCPP_GETTER( FileHash ); //Wishbone MAR2016 - get a file's hash.
 	SCRIPTCPP_GETTER( GetFileLine );
 	SCRIPTCPP_GETTER( GetFindToken );
 	SCRIPTCPP_GETTER( GetFNFileLine );

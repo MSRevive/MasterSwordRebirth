@@ -23,7 +23,7 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "../engine/studio.h"
 #include "logfile.h"
 #include "time.h"
-//#include "../MSShared/md5/MapCheck.h" //Wishbone MAR2016 - Our CRC function.
+#include "../MSShared/crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 
 // //[MiB] - for checking if the "Cheat Engine.exe" process is running
 // //#include "winsani_in.h"
@@ -159,7 +159,7 @@ void CScript::ScriptGetterHash_Setup( )
         m_GlobalGetterHash["$getcl_tsphere"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetClTSphere);
         m_GlobalGetterHash["$getcl_beam"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_getcl_beam); //Thothie DEC2014_10 - beam_update
         m_GlobalGetterHash["$clcol"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_clcol); //Thothie DEC2014_10 - $clcol - somewhat better client<->server color matching
-        //m_GlobalGetterHash["$filehash"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_FileHash); //Wishbone MAR2016 - get a file's hash.
+        m_GlobalGetterHash["$filehash"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_FileHash); //Wishbone MAR2016 - get a file's hash.
         m_GlobalGetterHash["$inrange"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_inrange); //Thothie APR2016_15 $inrange
         m_GlobalGetterHash["$inset_string"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_inrange); //Thothie APR2016_28 $inset
         m_GlobalGetterHash["$inset_num"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_inrange); //Thothie APR2016_28 $inset
@@ -4430,48 +4430,50 @@ $filehash(<string|file_path>, <string|crc>)
 - Should return an int. Returns 0 if no parameter specified.
 - priority: low, scope: shared
 */
-// msstring CScript::ScriptGetter_FileHash( msstring& FullName, msstring& ParserName, msstringlist& Params )
-// {
-//    msstring fcrc;
-//
-//    //Wishbone MAR2016 - File hash.
-//    if( Params.size() >= 1 )
-//    {
-//       char cfileName[MAX_PATH];
-//       #ifdef VALVE_DLL
-//          GET_GAME_DIR( cfileName );
-//       #else
-//          strcpy( cfileName, gEngfuncs.pfnGetGameDirectory( ) );
-//       #endif
-//
-//       msstring filePath = cfileName;
-//       filePath += "/";
-//       filePath += Params[0];
-//       ifstream file;
-//       file.open(filePath);
-//       if(file.is_open())
-//       {
-//          sprintf( fcrc, "%i", GetFileCRCHash(filePath) );
-//       }else{
-//          return "-1";
-//       }
-//
-//       if( Params.size() == 2 )
-//       {
-//          if( fcrc == Params[1] )
-//          {
-//             return "1"; //true
-//          }else{
-//             return "0";
-//          }
-//       }else{
-//          return fcrc;
-//       }
-//
-//    }else{
-//       return "0";
-//    }
-// }
+msstring CScript::ScriptGetter_FileHash( msstring& FullName, msstring& ParserName, msstringlist& Params )
+{
+   msstring fcrc;
+
+   //Wishbone MAR2016 - File hash.
+   if( Params.size() >= 1 )
+   {
+      char cfileName[MAX_PATH];
+      #ifdef VALVE_DLL
+         GET_GAME_DIR( cfileName );
+      #else
+         strncpy(cfileName, gEngfuncs.pfnGetGameDirectory(), sizeof(cfileName));
+      #endif
+
+      msstring filePath = cfileName;
+      filePath += "/";
+      filePath += Params[0];
+      ifstream file;
+      file.open(filePath);
+      if(file.is_open())
+      {
+				sprintf(fcrc, "%i", GetFileCheckSum(filePath));
+				file.close();
+      }else{
+				file.close();
+        return "-1";
+      }
+
+      if( Params.size() == 2 )
+      {
+         if( fcrc == Params[1] )
+         {
+            return "1"; //true
+         }else{
+            return "0";
+         }
+      }else{
+         return fcrc;
+      }
+
+   }else{
+      return "0";
+   }
+}
 
 msstring_ref CScript::GetVar( msstring_ref pszText )
 {

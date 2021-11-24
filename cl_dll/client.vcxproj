@@ -260,6 +260,8 @@ exit 1
     <Library Include="..\lib\public\vgui.lib" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\MSShared\crc\crchash.h" />
+    <ClInclude Include="..\MSShared\crc\xxhash32.h" />
     <ClInclude Include="..\MSShared\CVarMonitor.h" />
     <ClInclude Include="..\MSShared\Filesystem_Shared.h" />
     <ClInclude Include="..\MSShared\FindEntities.h" />
@@ -435,6 +437,7 @@ exit 1
     <ClInclude Include="..\msshared\votedefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\MSShared\crc\crchash.cpp" />
     <ClCompile Include="..\MSShared\CVarMonitor.cpp" />
     <ClCompile Include="..\MSShared\Filesystem_Shared.cpp" />
     <ClCompile Include="..\MSShared\FindEntities.cpp" />
