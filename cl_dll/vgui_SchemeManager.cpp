@@ -350,8 +350,8 @@ buildDefaultFont:
 	if (currentScheme < 0)
 	{
 		currentScheme = 0;
-		 strncpy(tmpSchemes[0].schemeName,  "Default Scheme", sizeof(tmpSchemes[0].schemeName) );
-		 strncpy(tmpSchemes[0].fontName,  "Courier", sizeof(tmpSchemes[0].fontName) );
+		strncpy(tmpSchemes[0].schemeName, "Default Scheme", sizeof(tmpSchemes[0].schemeName));
+		strncpy(tmpSchemes[0].fontName, "Courier", sizeof(tmpSchemes[0].fontName));
 		tmpSchemes[0].fontSize = 0;
 		tmpSchemes[0].fgColor[0] = tmpSchemes[0].fgColor[1] = tmpSchemes[0].fgColor[2] = tmpSchemes[0].fgColor[3] = 255;
 		tmpSchemes[0].armedFgColor[0] = tmpSchemes[0].armedFgColor[1] = tmpSchemes[0].armedFgColor[2] = tmpSchemes[0].armedFgColor[3] = 255;
@@ -409,7 +409,10 @@ buildDefaultFont:
 				false,
 				false,
 				false);
-
+			
+			//Don't leak memory. - Solokiller
+			gEngfuncs.COM_FreeFile(pFontData);
+			
 			m_pSchemeList[i].ownFontPointer = true;
 		}
 

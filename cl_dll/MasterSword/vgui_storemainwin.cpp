@@ -87,6 +87,7 @@ void CStorePanel::Update()
 void CStorePanel::Close()
 {
 	ClientCmd("trade stop");
+	StoreItems.clear();
 	VGUI_ContainerPanel::Close();
 }
 
