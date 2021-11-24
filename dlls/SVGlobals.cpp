@@ -183,9 +183,11 @@ void MSWorldSpawn()
 	
 	//Force the client to use the same client lib as the server. - Solokiller
 	//This ensures that clients don't replace their client and send exploit commands.
-	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.dll" );
-	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.so" );
-	//ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, "cl_dlls/client.dylib" );
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dll");
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.so");
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
+	
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 }
 
 //Called every frame
