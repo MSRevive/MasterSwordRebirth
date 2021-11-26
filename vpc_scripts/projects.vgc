@@ -27,3 +27,8 @@ $Project "scriptpack"
 {
 	"utils\scriptpack\scriptpack.vpc"
 }
+
+$Project "maphash"
+{
+	"utils\maphash\maphash.vpc"
+}
