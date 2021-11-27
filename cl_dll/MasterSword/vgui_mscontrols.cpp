@@ -252,7 +252,7 @@ static COLOR	EnabledColor = COLOR( 255, 255, 255, 0 ),
 
 containeritem_t::containeritem_t( genericitem_t &Item )
 {
-	CGenericItem *pItem = NewGenericItem( Item.Name );
+	CGenericItem *pItem = CGenericItemMgr::GetGlobalGenericItemByName( Item.Name, true );
 	init( pItem );
 	pItem->SUB_Remove( );
 	

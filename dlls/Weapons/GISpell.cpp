@@ -34,7 +34,7 @@ void CGenericItem::RegisterSpell()
 
 bool CGenericItem::Spell_LearnSpell(const char *pszSpellName)
 {
-	CGenericItem *pSpell = NewGenericItem(pszSpellName);
+	CGenericItem *pSpell = CGenericItemMgr::GetGlobalGenericItemByName( pszSpellName, true );
 	bool fSuccess = false;
 	if (!pSpell)
 		return false;

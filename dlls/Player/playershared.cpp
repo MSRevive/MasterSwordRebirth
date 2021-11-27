@@ -1295,7 +1295,7 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 #else
 	if (fVerbose)
 	{
-		CGenericItem *pTempSpell = NewGenericItem(pszSpellScript);
+		CGenericItem *pTempSpell = CGenericItemMgr::GetGlobalGenericItemByName( pszSpellScript, true );
 		if (pTempSpell)
 		{
 			SendEventMsg(HUDEVENT_NORMAL, msstring("You memorize the ") + pTempSpell->DisplayName() + " spell");

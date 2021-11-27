@@ -650,7 +650,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	dbg( msstring("Init Weapon Buttons (") + (int)WEAPONPANEL_MAINBTNS + ")" );
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), WEAPON_BTN_SIZEX, 3, CHOOSE_BTNSPACERX );
 	int WeaponPanelSizeY = m_WeaponPanel->getTall( );
-	 for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
+	for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
 	{
 		if( i >= WEAPONPANEL_MAINBTNMAX )
 			break;							//Max of 9 starting weapon choices
@@ -660,7 +660,9 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 			iw = WEAPON_BTN_SIZEX,
 			ih = WEAPON_BTN_SIZEY;
 		dbg( msstring("Create Weapon") + MSGlobals::DefaultWeapons[i] );
-		CGenericItem *ptmpItem = NewGenericItem( MSGlobals::DefaultWeapons[i] );
+		
+		// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table
+		CGenericItem *ptmpItem = CGenericItemMgr::GetGlobalGenericItemByName( MSGlobals::DefaultWeapons[i], true );
 		if( !ptmpItem )
 		{
 			dbg( msstring("Weapon ") + MSGlobals::DefaultWeapons[i] + " Not found" );

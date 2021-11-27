@@ -116,7 +116,7 @@ int __MsgFunc_StoreItem(const char *pszName, int iSize, void *pbuf)
 		if ((signed)CStorePanel::StoreItems.size() < CStorePanel::StoreItemMsgCount)
 		{
 			string_t ItemName = ALLOC_STRING(READ_STRING());
-			CGenericItem *pItem = NewGenericItem(STRING(ItemName));
+			CGenericItem *pItem = CGenericItemMgr::GetGlobalGenericItemByName( STRING(ItemName), true );
 			if (!pItem)
 				return 0;
 
