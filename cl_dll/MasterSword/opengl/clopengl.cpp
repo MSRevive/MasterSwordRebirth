@@ -116,8 +116,9 @@ void CRender::RT_BindTexture()
 
 	if (!wglBindTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
-		MessageBox(NULL, "Could not bind p-buffer to render texture!",
-				   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		//MessageBox(NULL, "Could not bind p-buffer to render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		logfile << "Error: Could not bind p-buffer to render texture!" << endl;
+		Print("Could not bind p-buffer to render texture!");
 		//exit(-1);
 	}
 }
@@ -130,8 +131,7 @@ void CRender::RT_ReleaseTexture()
 
 	if (!wglReleaseTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
-		MessageBox(NULL, "Could not release p-buffer from render texture!",
-				   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, "Could not release p-buffer from render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 }
@@ -201,8 +201,7 @@ void CRender::SetRenderTarget(bool ToTexture, bool ClearDepth)
 	{
 		if (!wglMakeCurrent(g_pbuffer.hDC, g_pbuffer.hRC))
 		{
-			MessageBox(NULL, "Could not make the p-buffer's context current!",
-					   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 			//exit(-1);
 		}
 		if (ClearDepth)
@@ -238,8 +237,7 @@ void CRender::SetRenderTarget(bool ToTexture, bool ClearDepth)
 
 		if (!wglMakeCurrent(OldhDC, OldhRC))
 		{
-			MessageBox(NULL, "Could not make the normal half-life context current!",
-					   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			MessageBox(NULL, "Could not make the normal half-life context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 			//exit(-1);
 		}
 	}
@@ -263,8 +261,7 @@ bool CMirrorMgr::InitMirrors()
 
 	if (atof(VersionString) < 1.1) //Not high enough OpenGL version
 	{
-		logfile << "" << endl
-				<< "OpenGL Version Not High Enough For Mirrors (Needs 1.1)!" << endl;
+		logfile << "" << endl << "OpenGL Version Not High Enough For Mirrors (Needs 1.1)!" << endl;
 		return false;
 	}
 
@@ -281,12 +278,9 @@ bool CMirrorMgr::InitMirrors()
 	const char *wglExtensions = wglGetExtensionsStringARB(wglGetCurrentDC());
 
 	//Set up wgl extensions
-	if (!strstr(wglExtensions, "WGL_ARB_pbuffer") || !strstr(wglExtensions, "WGL_ARB_pixel_format") || !strstr(wglExtensions, "WGL_ARB_render_texture")
-
-	)
+	if (!strstr(wglExtensions, "WGL_ARB_pbuffer") || !strstr(wglExtensions, "WGL_ARB_pixel_format") || !strstr(wglExtensions, "WGL_ARB_render_texture"))
 	{
-		logfile << "" << endl
-				<< "OpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!" << endl;
+		logfile << "" << endl << "OpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!" << endl;
 		return false;
 	}
 
@@ -330,8 +324,7 @@ bool CMirrorMgr::InitMirrors()
 
 	if (count == 0)
 	{
-		MessageBox(NULL, "Could not find an acceptable pixel format!",
-				   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, "Could not find an acceptable pixel format!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 
@@ -398,8 +391,7 @@ bool CMirrorMgr::InitMirrors()
 
 	if (!wglMakeCurrent(g_pbuffer.hDC, g_pbuffer.hRC))
 	{
-		MessageBox(NULL, "Could not make the p-buffer's context current!",
-				   "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 
