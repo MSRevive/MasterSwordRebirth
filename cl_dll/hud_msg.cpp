@@ -168,6 +168,25 @@ int CHud ::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
+int CHud::MsgFunc_ViewModel( const char *pszName, int iSize, void *pbuf )
+{
+  BEGIN_READ(pbuf, iSize);
+  cl_entity_t *view = gEngfuncs.GetViewModel();
+  if ( view )
+  {
+    view->curstate.rendermode       = READ_BYTE();
+    view->curstate.renderfx         = READ_BYTE();
+    view->curstate.rendercolor.r    = READ_BYTE();
+    view->curstate.rendercolor.g    = READ_BYTE();
+    view->curstate.rendercolor.b    = READ_BYTE();
+    view->curstate.renderamt        = READ_BYTE();
+    view->curstate.skin             = READ_BYTE();
+    view->curstate.body             = READ_BYTE();
+  }
+	
+	return 1;
+}
+
 /*int CHud :: MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );

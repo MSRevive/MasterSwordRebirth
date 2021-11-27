@@ -243,9 +243,17 @@ int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 		return gViewPort->MsgFunc_AllowSpec(pszName, iSize, pbuf);
 	return 0;
 }
+
+int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
+{
+  gHUD.MsgFunc_ViewModel(pszName, iSize, pbuf);
+  return 1;
+}
+
 #define SetMSHUD(ptr, type) \
 	ptr = new (type);       \
-	 strncpy(ptr->Name,  #type, 32 )
+	strncpy(ptr->Name,  #type, 32 )
+	 
 // This is called every time the DLL is loaded
 void CHud ::Init(void)
 {
@@ -297,6 +305,7 @@ void CHud ::Init(void)
 	HOOK_MESSAGE(Anim);		  //MiB DEC2007 //weirdness splayviewanim
 	HOOK_MESSAGE(CLXPlay);	  //MiB DEC2007 //weirdness splayviewanim
 	HOOK_MESSAGE(LocalPanel); // MiB MAR2015_01 [LOCAL_PANEL] - Hook for message
+	HOOK_MESSAGE(ViewModel); //Allow us to change the view model properties.
 	// -------------------------
 
 	//HOOK_MESSAGE( Logo );
