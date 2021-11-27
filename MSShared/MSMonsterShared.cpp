@@ -359,7 +359,10 @@ bool CMSMonster::RemoveItem(CGenericItem *pItem)
 
 	//If it was the active hand, call holster
 	if (IsActiveItem && pItem->CanHolster())
+	{
+		pItem->m_Location = ITEMPOS_NONE;
 		pItem->Holster();
+	}
 
 	pItem->RemoveFromOwner();
 
