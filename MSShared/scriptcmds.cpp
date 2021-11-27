@@ -7846,7 +7846,7 @@ void scriptfile_t::Open(msstring_ref a)
 #ifdef VALVE_DLL
 	GET_GAME_DIR( cFileName );
 #else
-	strcpy(cFileName, gEngfuncs.pfnGetGameDirectory());
+	strncpy(cFileName, gEngfuncs.pfnGetGameDirectory(), sizeof(cFileNameF));
 #endif
 	msstring                            vsFullPath = cFileName;
 	vsFullPath += "/";
