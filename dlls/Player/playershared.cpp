@@ -1299,7 +1299,6 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 		if (pTempSpell)
 		{
 			SendEventMsg(HUDEVENT_NORMAL, msstring("You memorize the ") + pTempSpell->DisplayName() + " spell");
-			pTempSpell->SUB_Remove();
 		}
 	}
 #endif

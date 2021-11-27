@@ -121,7 +121,6 @@ int __MsgFunc_StoreItem(const char *pszName, int iSize, void *pbuf)
 				return 0;
 
 			storeitem_t StoreItem(pItem);
-			pItem->SUB_Remove();
 
 			//Need this reminder, because people forget to set the trade sprite
 			if (!StoreItem.SpriteName)

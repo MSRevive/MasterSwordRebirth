@@ -254,7 +254,6 @@ containeritem_t::containeritem_t( genericitem_t &Item )
 {
 	CGenericItem *pItem = CGenericItemMgr::GetGlobalGenericItemByName( Item.Name, true );
 	init( pItem );
-	pItem->SUB_Remove( );
 	
 	ID = Item.ID;
 	Properties = Item.Properties;

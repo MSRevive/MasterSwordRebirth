@@ -676,7 +676,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 		msstring Name = ptmpItem->DisplayName( );
 
 		Weapon_MainBtnImg[i]->SetFrame( ptmpItem->SpriteFrame ); //Shuriken FEB2008
-		ptmpItem->SUB_Remove( );
 
 		Weapon_MainBtnImg[i]->setParent( m_WeaponPanel );
 
