@@ -375,6 +375,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		m_ScriptCommands.add(scriptcmdname_t("fall"));
 		m_ScriptCommands.add(scriptcmdname_t("setdmg"));
 		m_ScriptCommands.add(scriptcmdname_t("setmodelskin"));
+		m_ScriptCommands.add(scriptcmdname_t("setviewmodelskin"));
 	}
 
 	dbg("Load Script items.txt");
@@ -2183,6 +2184,15 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 	{
 		if (Params.size() >= 1)
 			m_ClEntNormal.curstate.skin = atoi(Params[0]);
+		return false;
+	}
+	else if (Cmd.Name() == "setviewmodelskin")
+	{
+		if (Params.size() >= 1)
+		{
+			cl_entity_t *view = gEngfuncs.GetViewModel();
+			view->curstate.skin = atoi(Params[0]);
+		}
 		return false;
 	}
 #endif
