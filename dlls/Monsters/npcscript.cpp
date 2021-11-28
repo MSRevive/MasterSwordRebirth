@@ -155,7 +155,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect
 				{
-					if (strcmp(pScripted->m_Scripts[i]->GetVar("game.effect.removeondeath"), "1") == 0) //If the effect is SUPPOSED to be removed
+					if (strcmp(pScripted->m_Scripts[i]->GetVar("game.effect.removeondeath"), "1") == 0 || !pScripted->m_Scripts[i]->VarExists("EFFECT_IGNORE_CLEARFX")) //If the effect is SUPPOSED to be removed
 					{
 						pScripted->m_Scripts[i]->RunScriptEventByName("effect_die"); //Call this effect's die function
 						pScripted->m_Scripts[i]->m.RemoveNextFrame = true;
@@ -407,12 +407,13 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			for (int p = 0; p < m_PlayerDamage.size(); p++)
 			{
-				for (int r = 0; r < SKILL_MAX_ATTACK; r++)
-				{
-					for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
-						m_PlayerDamage[p].dmg[r][s] = 0;
-				}
-				m_PlayerDamage[p].dmgInTotal = 0;
+				// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
+				// {
+				// 	for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
+				// 		m_PlayerDamage[p].dmg[r][s] = 0;
+				// }
+				// m_PlayerDamage[p].dmgInTotal = 0;
+				m_PlayerDamage[p].Clear(); // MiB MAR2019_22 [SLOT_EXP] - Use new clear function
 			}
 			m_SkillLevel = atoi(Params[0]);
 		}
@@ -438,12 +439,13 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				//first, wipe player hits, otherwise, we'll have problems
 				for (int p = 0; p < m_PlayerDamage.size(); p++)
 				{
-					for (int r = 0; r < SKILL_MAX_ATTACK; r++)
-					{
-						for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
-							m_PlayerDamage[p].dmg[r][s] = 0;
-					}
-					m_PlayerDamage[p].dmgInTotal = 0;
+					// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
+					// {
+					// 	for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
+					// 		m_PlayerDamage[p].dmg[r][s] = 0;
+					// }
+					// m_PlayerDamage[p].dmgInTotal = 0;
+					m_PlayerDamage[p].Clear(); // MiB MAR2019_22 [SLOT_EXP] - Use new clear function
 				}
 
 				if (Params[0].contains("."))
@@ -538,11 +540,13 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			byte Type = atoi(Params[0]);
 			if (Type)
 			{
+				SetScriptVar("NPC_INVINCIBLE", 1); //Thothie OCT2015_30 - since we've no reliable way to pull invincibility
 				SetBits(pev->flags, FL_GODMODE);
 				//if( Type == 1 )	SetConditions( MONSTER_REFLECTIVEDMG ); //AUG2013_21 Thothie - appears to be a hold over from times of yor
 			}
 			else
 			{
+				SetScriptVar("NPC_INVINCIBLE", 0); //Thothie OCT2015_30 - since we've no reliable way to pull invincibility
 				ClearBits(pev->flags, FL_GODMODE);
 				//ClearConditions( MONSTER_REFLECTIVEDMG );
 			}
@@ -1109,6 +1113,14 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				if (thoth_final_val != 1 && thoth_final_val > 0)
 					SetScriptVar(thoth_var, flModifier);
 			}
+			
+			//Thothie DEC2017_13 - game_set_takedmg sets a base for later temporary adjustments
+			msstringlist Parameters;
+			Parameters.add(Params[0].c_str());
+			Parameters.add(UTIL_VarArgs("%f", flModifier));
+			if (Params.size() >= 3)
+				Parameters.add( Params[2].c_str() ); //'adjust' tells the element adjust system in externals_shared.script not to register as base
+			CallScriptEvent("game_set_takedmg", &Parameters);
 		}
 		else
 			ERROR_MISSING_PARMS;
