@@ -12,7 +12,7 @@
     #include "../cl_dll/wrect.h"
     #include "../engine/cdll_int.h"
     #include "../common/cl_entity.h"
-    extern cl_enginefunc_t              gEngfuncs;
+    extern cl_enginefunc_t gEngfuncs;
 #endif
 
 // Wrapper class to make dealing with client/server
@@ -58,8 +58,8 @@ int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>&
 class CScriptFilter : public CEntityFilter
 {
 protected:
-    IScripted *                         mpScripted;
-    msstring                            msEventName;
+    IScripted *mpScripted;
+    msstring msEventName;
 public:
     CScriptFilter(IScripted * pScripted, const msstring & vsEventName);
     virtual bool Allow(CFindEntity & vEntity);
@@ -75,10 +75,8 @@ protected:
 public:
     CTraceLineFilter(const Vector& vOrigin);
     #ifdef VALVE_DLL
-        CTraceLineFilter(
-              CFindEntity::YWrapType * pEntity);
-        CTraceLineFilter(
-              CFindEntity::YWrapType * pEntity, const Vector& vOrigin);
+        CTraceLineFilter(CFindEntity::YWrapType * pEntity);
+        CTraceLineFilter(CFindEntity::YWrapType * pEntity, const Vector& vOrigin);
     #endif
     virtual bool Allow(CFindEntity & vEntity) const;
 };

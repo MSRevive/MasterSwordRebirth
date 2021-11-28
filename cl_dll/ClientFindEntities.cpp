@@ -1,66 +1,51 @@
 #include "../MSShared/FindEntities.h"
 
-Vector CFindEntity::GetAbsMin(
-)
+Vector CFindEntity::GetAbsMin()
 {
     return GetWrapped()->curstate.mins;
 }
 
-Vector CFindEntity::GetAbsMax(
-)
+Vector CFindEntity::GetAbsMax()
 {
     return GetWrapped()->curstate.maxs;
 }
 
-Vector CFindEntity::GetOrigin(
-)
+Vector CFindEntity::GetOrigin()
 {
     return GetWrapped()->origin;
 }
 
-BOOL CFindEntity::IsPlayer(
-)
+BOOL CFindEntity::IsPlayer()
 {
     return GetWrapped()->player;
 }
 
-int CFindEntity::GetEntIndex(
-)
+int CFindEntity::GetEntIndex()
 {
     return GetWrapped()->index;
 }
 
-msstring CFindEntity::AsString(
-)
+msstring CFindEntity::AsString()
 {
     char pszRet[16];
-    sprintf( pszRet
-           , "%i"
-           , GetEntIndex()
-           );
+    sprintf(pszRet, "%i", GetEntIndex());
     return msstring(pszRet);
 }
 
-Vector CFindEntity::GetTraceLineSource(
-)
+Vector CFindEntity::GetTraceLineSource()
 {
     return GetOrigin();
 }
 
-CEntityTypeFilter::CEntityTypeFilter(
-  bool                                  bAllowPlayer
-)
+CEntityTypeFilter::CEntityTypeFilter(bool bAllowPlayer)
 {
     mbAllowPlayer = bAllowPlayer;
 }
 
-CFindEntity CFindEntity::GetEntity(
-  int                                   vIndx
-, bool &                                bValid
-)
+CFindEntity CFindEntity::GetEntity(int vIndx, bool &bValid)
 {
-    cl_entity_s *                       pEntity = gEngfuncs.GetEntityByIndex( vIndx );
-    CFindEntity                         vEntity( pEntity );
+    cl_entity_s *pEntity = gEngfuncs.GetEntityByIndex( vIndx );
+    CFindEntity vEntity( pEntity );
     bValid = pEntity != NULL;
     return vEntity;
 }

@@ -109,12 +109,10 @@ CTraceLineFilter::CTraceLineFilter(CFindEntity::YWrapType * pEntity, const Vecto
 }
 #endif
 
-bool CTraceLineFilter::Allow(
-	CFindEntity &                         vEntity
-	) const
+bool CTraceLineFilter::Allow(CFindEntity &vEntity) const
 {
 #ifdef VALVE_DLL
-	TraceResult                         tr;
+	TraceResult tr;
 	UTIL_TraceLine(mOrigin, vEntity.Center(), ignore_monsters, mpIgnoreEntity ? mpIgnoreEntity->edict() : NULL, &tr);
 	return tr.flFraction == 1;
 #else
@@ -131,7 +129,8 @@ CShapeFilter::CShapeFilter()
 
 CShapeFilter::~CShapeFilter()
 {
-	if (mpTraceLine) delete mpTraceLine;
+	if (mpTraceLine) 
+		delete mpTraceLine;
 }
 
 void CShapeFilter::ResetStringCache()
@@ -205,7 +204,9 @@ CShapeFilter *CShapeFilter::CreateFromString(const msstring & vsShape, bool  bTr
 
 void CShapeFilter::SetTraceLine(CTraceLineFilter * pTraceLineFilter)
 {
-	if (mpTraceLine) delete mpTraceLine;
+	if (mpTraceLine) 
+		delete mpTraceLine;
+		
 	mpTraceLine = pTraceLineFilter;
 }
 
