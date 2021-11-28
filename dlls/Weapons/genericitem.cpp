@@ -1250,7 +1250,10 @@ bool CGenericItem::PutInPack(CGenericItem *pContainer)
 	CallScriptEvent("game_putinpack");
 
 	if (m_pOwner)
+	{
+		//StoreEntity(m_pOwner, ENT_OWNER); //Thothie OCT2016_22 - items not storing owner propers when in pack (not cutting it)
 		m_pOwner->RemoveItem(this);
+	}
 	else
 		RemoveFromOwner();
 
@@ -1906,6 +1909,9 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 		}
 		else
 			ERROR_MISSING_PARMS;
+#else
+		//Thothie JAN2020_04 - need method to pull viewmodel server side
+		if( Params.size( ) >= 1 ) SetScriptVar("ITEM_VIEWMODEL", Params[0].c_str());
 #endif
 	}
 	//***************************** SETWORLDMODEL *************************

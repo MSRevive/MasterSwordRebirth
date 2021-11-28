@@ -801,6 +801,10 @@ msstring_ref CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 		RETURN_INT(ent.curstate.modelindex)
 	else if (Prop == "anim")
 		RETURN_INT(ent.curstate.sequence)
+	else if (Prop == "height")
+		RETURN_FLOAT((ent.curstate.maxs.z) - (ent.curstate.mins.z)) //Thothie SEP2018_15 - return height/width for $getcl
+	else if (Prop == "weight")
+		RETURN_FLOAT((ent.curstate.maxs.x) - (ent.curstate.mins.x)) //Thothie SEP2018_15 - return height/width for $getcl
 	else if (Prop == "frame")
 		RETURN_INT(ent.curstate.frame)
 	else if (Prop == "framerate")
@@ -1545,7 +1549,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			if(Params[2].contains("clmsg"))
 			{
 				msstring sTemp = "ce";
-				for (int i = 0; i < Params.size() - 1; i++)
+				for (int i = 0; Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
 				{
 					if (i > 0)
 					{
@@ -1590,7 +1594,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 	//Thothie SEP2011_07 - Client Side Decals (Attempt2)
 	else if (Params[0] == "decal")
 	{
-		if(Params[1] == "clearall")
+		if(Params[1] == "clearall") //Thothie OCT2019_10 - clear all decal option
 		{
 			//gEngfuncs.pEfxAPI->R_DecalRemoveAll( atoi(Params[2]) ); //prob needs to be local player
 			//eff it, borrowing form NS:
