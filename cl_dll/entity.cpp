@@ -1549,7 +1549,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			if(Params[2].contains("clmsg"))
 			{
 				msstring sTemp = "ce";
-				for (int i = 0; Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
+				for (int i = 0; i < Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
 				{
 					if (i > 0)
 					{
