@@ -1546,7 +1546,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		//Thothie SEP2019_26 - cleffect ce security effort
 		if ( Params.size() >= 3 )
 		{
-			if(Params[2].contains("clmsg"))
+			/*if(Params[2].contains("clmsg"))
 			{
 				msstring sTemp = "ce";
 				for (int i = 0; i < Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
@@ -1560,7 +1560,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 				}
 				sTemp += "\n";
 				ServerCmd(sTemp.c_str());
-			}
+			}*/
 		}
 	}
 	//Thothie AUG2013_09 - Clientcmd work around

@@ -1194,7 +1194,7 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "ce"))
 	{
 		//clcmd <player|GM> <event> <params> - called by client-side script command clcmd
-		IScripted *pScripted = NULL;
+		/*IScripted *pScripted = NULL;
 		if (!strcmp(CMD_ARGV(1), "GM"))
 		{
 			ALERT(at_console, "DEBUG: ce - requested GM as target\n");
@@ -1230,7 +1230,7 @@ void ClientCommand2(edict_t *pEntity)
 			}
 			Params.add(CMD_ARGV(i + 1));
 			pScripted->CallScriptEvent(CMD_ARGV(2), &Params);
-		}
+		}*/
 
 		/*
 		CBaseEntity *pEntity = StringToEnt( CMD_ARGV(1) );
