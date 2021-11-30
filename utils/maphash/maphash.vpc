@@ -23,7 +23,7 @@ $Configuration
 	}
 }
 
-$Project "scriptpack"
+$Project "maphash"
 {
 	$Folder	"Source Files"
 	{
