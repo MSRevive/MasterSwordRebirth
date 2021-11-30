@@ -49,14 +49,3 @@ public:
 	void Encrypt();
 	bool Decrypt();
 };
-
-//Class that uses CEncryptBase but with no encryption functions for backwards compat.
-class CData : public CEncryptBase
-{
-public:
-	CData() : CEncryptBase(){};
-	CData(const byte pData[], const size_t Size) : CEncryptBase(pData, Size){}
-	
-	void Encrypt() {};
-	bool Decrypt() { return true; };
-};

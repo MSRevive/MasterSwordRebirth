@@ -79,11 +79,6 @@ void operator delete(void *ptr, const char *pszSourceFile, int LineNum);
 void Print(char *szFmt, ...);
 
 //Groupfile... its just like a pakfile
-CGroupFile::CGroupFile(bool encrypt)
-{
-	m_Encrypt = encrypt;
-}
-
 void CGroupFile::Open(char *pszFileName)
 {
 	strncpy(m_FileName, pszFileName, sizeof(m_FileName));
@@ -94,11 +89,8 @@ void CGroupFile::Open(char *pszFileName)
 	{
 		int EncryptedHeaderSize;
 		GroupFile.ReadInt(EncryptedHeaderSize);
-		
-		CData HeaderData;
-		if (m_Encrypt)
-			CEncryptData1 HeaderData;
-				
+
+		CEncryptData1 HeaderData;
 		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetReadPtr(), EncryptedHeaderSize); //GroupFile.m_Buffer + GroupFile.GetFileSize(), EncryptedHeaderSize
 		if (!HeaderData.Decrypt())
 			return;
@@ -122,12 +114,9 @@ void CGroupFile::Open(char *pszFileName)
 		//Read existing data
 		for (int i = 0; i < m_EntryList.size(); i++)
 		{
-			CData Data;
-			if (m_Encrypt)
-				CEncryptData1 Data;
-			
+			CEncryptData1 Data;
 			cachedentry_t &Entry = m_EntryList[i];
-				
+
 			Data.SetData(GroupFile.m_Buffer + Entry.DataOfs, Entry.DataSizeEncrypted);
 			if(!Data.Decrypt())
 				continue;
@@ -145,13 +134,10 @@ void CGroupFile::Close()
 	for (int i = 0; i < m_EntryList.size(); i++)
 	{
 		cachedentry_t &Entry = m_EntryList[i];
-		
 		if (Entry.Data)
 			delete Entry.Data;
-			
 		Entry.Data = NULL;
 	}
-	
 	m_EntryList.clear();
 	m_IsOpen = false;
 }
@@ -247,12 +233,10 @@ bool CGroupFile::DeleteEntry(const char *pszName)
 	for (int i = 0; i < m_EntryList.size(); i++)
 	{
 		cachedentry_t &Entry = m_EntryList[i];
-		
 		if (Entry.FileName == pszName)
 		{
 			if (Entry.Data)
 				delete Entry.Data;
-				
 			m_EntryList.erase(i);
 			return true;
 		}
@@ -283,10 +267,7 @@ void CGroupFile::Flush()
 
 	//Write dummy data, update after script data has been written
 	{
-		CData Data;
-		if (m_Encrypt)
-			CEncryptData1 Data;
-			
+		CEncryptData1 Data;
 		Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
 		Data.Encrypt();
 		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());
@@ -296,11 +277,8 @@ void CGroupFile::Flush()
 	{
 		cachedentry_t &Entry = m_EntryList[i];
 		Entry.DataOfs = static_cast<int>(file.tellp());
-		
-		CData Data;
-		if (m_Encrypt)
-			CEncryptData1 Data;
-			
+
+		CEncryptData1 Data;
 		Data.SetData(Entry.Data, Entry.DataSize);
 		Data.Encrypt();
 
@@ -316,10 +294,7 @@ void CGroupFile::Flush()
 	}
 
 	//Encrypt headers
-	CData Data;
-	if (m_Encrypt)
-		CEncryptData1 Data;
-		
+	CEncryptData1 Data;
 	Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
 	Data.Encrypt();
 
@@ -339,9 +314,8 @@ void CGroupFile::Flush()
 #ifndef NOT_HLDLL
 #include "FileSystem_Shared.h"
 
-CGameGroupFile::CGameGroupFile(bool encrypt): m_hFile(FILESYSTEM_INVALID_HANDLE)
+CGameGroupFile::CGameGroupFile(): m_hFile(FILESYSTEM_INVALID_HANDLE)
 {
-	m_Encrypt = encrypt;
 }
 
 CGameGroupFile::~CGameGroupFile()
@@ -399,11 +373,8 @@ bool CGameGroupFile::Open(const char *pszFilename)
 		{
 			return false;
 		}
-		
-		CData HeaderData;
-		if (m_Encrypt)
-			CEncryptData1 HeaderData;
-			
+
+		CEncryptData1 HeaderData;
 		HeaderData.SetData(EncryptedHeaderData.pMemory, EncryptedHeaderSize);
 		if(!HeaderData.Decrypt())
 			return false;
@@ -412,6 +383,7 @@ bool CGameGroupFile::Open(const char *pszFilename)
 	}
 
 	int HeaderEntries;
+
 	DecryptedHeaders.ReadInt(HeaderEntries);
 
 	//Read headers
@@ -461,11 +433,9 @@ bool CGameGroupFile::ReadEntry( const char *pszName, byte *pBuffer, unsigned lon
 
 			if(Entry.DataSizeEncrypted == g_pFileSystem->Read(pEncryptedBuffer, Entry.DataSizeEncrypted, m_hFile))
 			{
-				CData Data(pEncryptedBuffer, Entry.DataSizeEncrypted);
-				if (m_Encrypt)
-					CEncryptData1 Data(pEncryptedBuffer, Entry.DataSizeEncrypted);
+				CEncryptData1 Data(pEncryptedBuffer, Entry.DataSizeEncrypted);
 
-				if(Data.Decrypt())
+				if( Data.Decrypt())
 				{
 					//TODO: could check if DataSize matches Data.GetDataSize() here - Solokiller
 					memcpy(pBuffer, Data.GetData(), DataSize);

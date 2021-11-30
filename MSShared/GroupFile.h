@@ -26,37 +26,35 @@ struct cachedentry_t : groupheader_t
 	byte *Data;
 };
 
-// Class for file operations with encryption
 class CGroupFile
 {
+
 protected:
 	char m_FileName[MAX_PATH];
 	//unsigned long FindHeader( const char *pszName, groupheader_t &GroupHeader );
 	bool DeleteEntry(const char *pszName);
 	bool m_IsOpen;
-	bool m_Encrypt;
 
 public:
-	CGroupFile(bool encrypt = true);
-	~CGroupFile() { Close(); };
 	void Open(char *pszFileName);
-	bool IsOpen() { return m_IsOpen; };
+	~CGroupFile() { Close(); }
 	void Close();
+	bool IsOpen() { return m_IsOpen; }
 	bool WriteEntry(const char *pszName, byte *pData, unsigned long DataSize);
 
 	//Call Read() with pBuffer == NULL to just get the size
 	bool ReadEntry(const char *pszName, byte *pBuffer, unsigned long &DataSize);
 	void Flush();
 
-private:
 	mslist<cachedentry_t> m_EntryList;
 };
 
 /*Format:
+
   [DWORD] Number of Headers
   [groupheader_t * X] X Amount of Headers
   [DATA] All data
-*/
+ */
 
 #ifndef NOT_HLDLL
 #include "FileSystem.h"
@@ -68,10 +66,8 @@ private:
 */
 class CGameGroupFile
 {
-protected:
-	bool m_Encrypt;
 public:
-	CGameGroupFile(bool encrypt = false);
+	CGameGroupFile();
 	~CGameGroupFile();
 
 	bool IsOpen() const { return FILESYSTEM_INVALID_HANDLE != m_hFile; }
@@ -93,6 +89,7 @@ public:
 
 private:
 	FileHandle_t m_hFile;
+
 	mslist<groupheader_t> m_EntryList;
 };
 
