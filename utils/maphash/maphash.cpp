@@ -13,12 +13,6 @@
 
 using namespace std;
 
-//Simple struct to return from lsfiles
-struct List {
-	vector<string> files;
-	vector<string> folders;
-};
-
 string getFileExt(string fileName)
 {
 	size_t perd = fileName.find_last_of(".");
@@ -28,14 +22,15 @@ string getFileExt(string fileName)
 }
 
 //All of the hard work
-struct List lsfiles(string folder)  //(c) http://stackoverflow.com/a/20847429/1009816
+vector<string> lsfiles(string folder)  //(c) http://stackoverflow.com/a/20847429/1009816
 {
-  vector<string> files; //Will be added to List
-	vector<string> folders; //Will be added to List
   char search_path[200];
   sprintf_s(search_path, "%s*.*", folder.c_str());
+	
+	vector<string> files;
   WIN32_FIND_DATA fd; 
-  HANDLE hFind = ::FindFirstFile(search_path, &fd); 
+  HANDLE hFind = ::FindFirstFile(search_path, &fd);
+	
   if(hFind != INVALID_HANDLE_VALUE) 
   { 
     do 
@@ -44,44 +39,58 @@ struct List lsfiles(string folder)  //(c) http://stackoverflow.com/a/20847429/10
       if(!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) 
       {
       	files.push_back(fd.cFileName);
-      } else 
-			{
-				//Put folders into vector
-				folders.push_back(fd.cFileName);
-			}
+      }
      }while(::FindNextFile(hFind, &fd)); 
       ::FindClose(hFind); 
-  } 
-	List me;
-	me.files = files;
-	me.folders = folders;
+  }
 	
-  return me;
+  return files;
 }
 
 int main(int argc, char *argv[])
 {
 	string where;
-	if(argc > 1)
-	{
-		where = argv[1] + string("\\");
-	}else
-	{
-		where = "";
-	}
-	List you = lsfiles(where); //Get contents of directory
+	string output;
 	
-	ofstream hashFile("maphash.txt"); //we open the maphash.txt file to write to.
-
-	vector<string>::iterator files_begin = you.files.begin();
-	vector<string>::iterator files_end = you.files.end();
-	for(; files_begin != files_end; files_begin++)
+	for (int i = 0; i < argc; i++)
 	{
-		if(getFileExt(*files_begin) == "bsp")
+		if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "--dir"))
+			where = argv[i+1] + string("\\");
+			
+		if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--out"))
+			output = argv[i+1] + string("\\");
+	}
+	
+	if (where.empty())
+		where = "";
+		
+	if (output.empty())
+		output = "";
+	
+	vector<string> list = lsfiles(where); //Get contents of directory
+	
+	ofstream hashFile(output+"maphash.txt"); //we open the maphash.txt file to write to.
+
+	// vector<string>::iterator filesBegin = list.files.begin();
+	// vector<string>::iterator filesEnd = list.files.end();
+	// 
+	// for(; filesBegin != filesEnd; filesBegin++)
+	// {
+	// 	if(getFileExt(*filesBegin) == "bsp")
+	// 	{
+	// 		string s(*filesBegin);
+	// 		cout << "Writing file hash for: " << *filesBegin << endl; //we write to via text file our file hashes.
+	// 		cout << "file loc: " << *filesEnd << endl;
+	// 		hashFile << *filesBegin << " " << GetFileCheckSumSize(s.c_str()) << endl;
+	// 	}
+	// }
+	for(vector<string>::iterator t = list.begin(); t != list.end(); ++t)
+	{
+		if(getFileExt(t->c_str()) == "bsp")
 		{
-			string s(*files_begin);
-			cout << "Writing file hash for: " << *files_begin << endl; //we write to via text file our file hashes.
-			hashFile << *files_begin << " " << GetFileCheckSumSize(s.c_str()) << endl;
+			string fullpath = where+t->c_str();
+			cout << "Writing file hash for: " << t->c_str() << endl;
+			hashFile << t->c_str() << " " << GetFileCheckSumSize(fullpath.c_str()) << endl;
 		}
 	}
 	
@@ -89,6 +98,7 @@ int main(int argc, char *argv[])
 	
 	cout << "\n";
 	cout << "Operation has finished. It is safe to close now." << endl;
+	cout << "File Located in: " << output+"maphash.txt" << endl;
 	cout << "\n";
 	cout << "Press 'enter' to close." << endl;
 	cin.ignore();
