@@ -71,19 +71,6 @@ int main(int argc, char *argv[])
 	
 	ofstream hashFile(output+"maphash.txt"); //we open the maphash.txt file to write to.
 
-	// vector<string>::iterator filesBegin = list.files.begin();
-	// vector<string>::iterator filesEnd = list.files.end();
-	// 
-	// for(; filesBegin != filesEnd; filesBegin++)
-	// {
-	// 	if(getFileExt(*filesBegin) == "bsp")
-	// 	{
-	// 		string s(*filesBegin);
-	// 		cout << "Writing file hash for: " << *filesBegin << endl; //we write to via text file our file hashes.
-	// 		cout << "file loc: " << *filesEnd << endl;
-	// 		hashFile << *filesBegin << " " << GetFileCheckSumSize(s.c_str()) << endl;
-	// 	}
-	// }
 	for(vector<string>::iterator t = list.begin(); t != list.end(); ++t)
 	{
 		if(getFileExt(t->c_str()) == "bsp")
