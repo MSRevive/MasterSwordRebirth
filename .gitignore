@@ -189,6 +189,3 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
-
-# No need to upload the project files since we're using VPC scripts.
-*.vcxproj
