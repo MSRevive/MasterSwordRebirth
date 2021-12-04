@@ -1303,7 +1303,10 @@ void ChooseChar_Interface::UpdateCharScreenUpload( )
 #define TIME_MINIDLE 6
 #define TIME_MAXIDLE 60
 #define CHAR_SCALE 0.025f
-void CRenderChar::Init( int Idx ) { Init( Idx, MODEL_HUMAN_REF ); } // MIB FEB2015_21 [RACE_MENU] - Changed this to pass-through, allows model as optional parm
+void CRenderChar::Init( int Idx ) 
+{ 
+	Init( Idx, MODEL_HUMAN_REF ); 
+} // MIB FEB2015_21 [RACE_MENU] - Changed this to pass-through, allows model as optional parm
 void CRenderChar::Init( int Idx, msstring model )
 {
 	clrmem( m_Ent );
@@ -1322,8 +1325,9 @@ void CRenderChar::Init( int Idx, msstring model )
 	
 	m_Gender = GENDER_MALE;
 
-	 for (int i = 0; i < 4; i++) 
+	for (int i = 0; i < 4; i++) 
 		m_Ent.latched.prevcontroller[i] = m_Ent.curstate.controller[i] = 127;
+		
  	m_Ent.curstate.gaitsequence = 0;
 	m_TimeRandomIdle = gpGlobals->time + RANDOM_FLOAT(TIME_MINIDLE,TIME_MAXIDLE);
 	SetActive( false );
@@ -1368,7 +1372,8 @@ void CRenderChar::Render( )
 		m_GearItems.clearitems( );
 		m_Gear.clearitems( );
 		uint BodyParts[HUMAN_BODYPARTS] = { 0 };
-		 for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
+		
+		for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 		{
 			gearinfo_t &GearInfo = player.m_CharInfo[m_Idx].GearInfo[i];
 			CGenericItem *pItem = ::msnew CGenericItem();
@@ -1384,9 +1389,11 @@ void CRenderChar::Render( )
 			ItemEnt.curstate.skin = GearInfo.Skin;
 			ItemEnt.PlayAnim( GearInfo.Anim );
 
-			 for (int i = 0; i < HUMAN_BODYPARTS; i++) 
+			for (int i = 0; i < HUMAN_BODYPARTS; i++)
+			{
 				if( FBitSet( GearInfo.Flags, (1<<i) ) )
 					BodyParts[i] = 1;
+			}
 
 			//ItemEnt.curstate.frame = 0;
 			//ItemEnt.curstate.impacttime = CHAR_SCALE;
@@ -1407,7 +1414,7 @@ void CRenderChar::Render( )
 			pItem->SUB_Remove();
 			//delete pItem; ERROR ERROR ?!?!
 		}
-		 for (int i = 0; i < m_GearItems.size(); i++) 
+		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.add( &m_GearItems[i] );
 	}
 
@@ -1444,7 +1451,6 @@ void CRenderChar::Render( )
 	}
 	else
 	{
-
 		if ( m_Gender == GENDER_MALE )
 		{
 			m_Ent.SetBody(0,1);
