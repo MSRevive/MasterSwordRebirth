@@ -141,6 +141,8 @@ $Project "Client"
 		$File ".\inputw32.cpp"
 		$File "..\common\mathlib.h"
 		$File ".\view.cpp"
+		$File ".\ClientFindEntities.cpp"
+		$File ".\ClientFindEntities.h"
 		
 		$Folder	"Headers"
 		{
@@ -398,6 +400,21 @@ $Project "Client"
 		$File "..\dlls\weapons\weapons.cpp"
 		$File ".\mastersword\vgui_localizedpanel.h"
 		$File ".\vgui_status.h"
+		$File "..\msshared\scriptmgr.cpp"
+		$File "..\msshared\scriptmgr.h"
+		$File "..\msshared\FindEntities.cpp"
+		$File "..\msshared\FindEntities.h"
+		$File "..\msshared\Filesystem_Shared.cpp"
+		$File "..\msshared\Filesystem_Shared.h"
+		$File "..\msshared\CVarMonitor.cpp"
+		$File "..\msshared\CVarMonitor.h"
+		
+		$Folder	"CRC"
+		{
+			$File "..\msshared\crc\crchash.cpp"
+			$File "..\msshared\crc\crchash.h"
+			$File "..\msshared\crc\xxhash32.h"
+		}
 	}
 	
 	$Folder	"Link Libraries"
@@ -406,7 +423,7 @@ $Project "Client"
 		$ImpLib     cgGL
 		$ImpLib     glut32
 		$ImpLib     Glaux
-		$ImpLib		game_controls
+		$ImpLib			game_controls
 		$ImpLib     vgui
 		$ImpLib     SDL2
 		$ImpLib     procinfo
