@@ -12,8 +12,6 @@
 #include "camera.h"
 #include "in_defs.h"
 
-#include "windows.h"
-
 #include "logfile.h"
 
 //#define LATER

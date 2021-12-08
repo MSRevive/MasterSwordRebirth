@@ -24,7 +24,6 @@
 
 //#include "D3dx8tex.h"
 
-#include <windows.h> // Header File For Windows
 //#include <gl/glext.h>
 
 //Thothie TWHL project JUN2010_22 - http://twhl.co.za/articulator.php?art=170&form=old
