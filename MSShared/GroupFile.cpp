@@ -1,5 +1,5 @@
 #ifdef _WIN32
-#include "windows.h"
+//#include "windows.h"
 #include "logfile.h"
 #else
 #include <ctype.h>

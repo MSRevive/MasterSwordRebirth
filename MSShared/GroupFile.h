@@ -28,9 +28,8 @@ struct cachedentry_t : groupheader_t
 
 class CGroupFile
 {
-
 protected:
-	char m_FileName[MAX_PATH];
+	char m_FileName[260]; //was MAX_PATH which is 260?
 	//unsigned long FindHeader( const char *pszName, groupheader_t &GroupHeader );
 	bool DeleteEntry(const char *pszName);
 	bool m_IsOpen;
