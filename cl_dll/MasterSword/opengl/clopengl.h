@@ -1,4 +1,3 @@
-#include <windows.h>
 #include <stdlib.h>
 #include <mmsystem.h>
 #include <GL/gl.h>
