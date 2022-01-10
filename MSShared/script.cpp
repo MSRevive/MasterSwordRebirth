@@ -1014,85 +1014,12 @@ msstring CScript::ScriptGetter_Func( msstring& FullName, msstring& ParserName, m
 			}
 		}
 	}
-
-//==============
-	//Thothie APR2016_07 - allow instanced versions of returndata for each func
-#ifdef VALVE_DLL
-	//The array system is server side, so only the server can have access to instanced $funcs
-	int func_idx = 0;
-
-	if ( !strcmp( Util_ScriptArrayGetProps( m.pScriptedEnt, "exists", "SPECARRAY_FUNC_NAMES", 0 ), "0" ) )
-	{
-		//function array not setup for this script yet, initiate
-		Util_ScriptArray(m.pScriptedEnt,"create","SPECARRAY_FUNC_NAMES","0");
-		Util_ScriptArray(m.pScriptedEnt,"create","SPECARRAY_FUNC_RETURNS","0");
-
-		Util_ScriptArray(m.pScriptedEnt,"add","SPECARRAY_FUNC_NAMES",func_event.c_str());
-		Util_ScriptArray(m.pScriptedEnt,"add","SPECARRAY_FUNC_RETURNS","[[UNSET]]");
-
-		int func_idx = atoi( Util_ScriptArrayGetProps(m.pScriptedEnt,"size","SPECARRAY_FUNC_NAMES",0) ) -1;
-
-		//Print("XEBUG: func array did not exist, made new @idx #%i\n", func_idx);
-	}
-	else
-	{
-		//func array already exists, check and see if this one's been used before
-		//if not, add, otherwise, reset data
-		//. wdebug darray SPECARRAY_FUNC_NAMES
-		int func_array_size = atoi( Util_ScriptArrayGetProps(m.pScriptedEnt,"size","SPECARRAY_FUNC_NAMES",0) );
-		bool found_existing = false;
-		for( int i = 0; i < func_array_size; i++ )
-		{
-			msstring array_check = Util_ScriptArrayGetProps(m.pScriptedEnt,"getidx","SPECARRAY_FUNC_NAMES",i);
-			//Print( "XEBUG: checkmatch %s vs %s siz %i match %i\n", array_check.c_str(), func_event.c_str(), func_array_size, ( FStrEq(array_check.c_str(),func_event.c_str()) ) ? 1 : 0 );
-			if ( FStrEq(array_check.c_str(),func_event.c_str()) )
-			{
-				found_existing = true;
-				func_idx = i;
-				break;
-			}
-		}
-
-		if ( found_existing )
-		{
-			//Util_ScriptArray(<entity>,<operation:create|clear|add|set|del>,<array_name[:idx]>,<value|"0">)
-			msstring array_name_widx = "SPECARRAY_FUNC_RETURNS";
-			array_name_widx.append(UTIL_VarArgs(":%i",func_idx));
-			Util_ScriptArray(m.pScriptedEnt,"set",array_name_widx.c_str(),"[[UNSET]]");
-			//Print("XEBUG: func %s exists, set [[UNSET]]\n", func_event.c_str());
-		}
-		else
-		{
-			//Print("XEBUG: func %s does not exist in func_array, creating.\n", func_event.c_str());
-			Util_ScriptArray(m.pScriptedEnt,"add","SPECARRAY_FUNC_NAMES",func_event.c_str());
-			Util_ScriptArray(m.pScriptedEnt,"add","SPECARRAY_FUNC_RETURNS","[[UNSET]]");
-		}
-	}
-	//the above works so far, trick is returning it now
-	//also two other problems: intellisense is buggered and you can't commit this until MiB commits
-#endif
-//==============
+	
 	m.pScriptedInterface->CallScriptEvent( func_event.c_str(), &OutParams );
 
-	msstring mreturn = m.pScriptedInterface->m_ReturnData.c_str();
-
-//==============
-#ifdef VALVE_DLL
-	//Thothie APR2016_07 - allow instanced versions of returndata for each func
-	//check if data was added to this specific func
-	//if so, return that data instead
-	msstring elmreturn = Util_ScriptArrayGetProps(m.pScriptedEnt,"getidx","SPECARRAY_FUNC_RETURNS",func_idx);
-	if ( elmreturn != "[[UNSET]]" )
+	if (m.pScriptedInterface->m_ReturnData.len()) 
 	{
-		//Print("XEBUG: Using func_array return\n");
-		mreturn = elmreturn;
-	}
-#endif
-//==============
-
-	if( mreturn.len() )
-	{
-		return mreturn.c_str();
+		return m.pScriptedInterface->m_ReturnData.c_str();
 	}
 	else
 	{
@@ -5872,100 +5799,38 @@ void CScript::ErrorPrintCommand(char * vsUniqueTag, SCRIPT_EVENT * pEvent, msstr
 }
 bool CScript::Script_ExecuteCmds( SCRIPT_EVENT &Event, scriptcmd_list &Cmdlist )
 {
-	for(int c = 0; c < Cmdlist.m_Cmds.size(); c++)
+	for (int c = 0; c < Cmdlist.m_Cmds.size(); c++)
 	{
-		    scriptcmd_t &Cmd = Cmdlist.m_Cmds[c];
-				//Convert the variable parameters
-				msstringlist Params;
-				int icmd = 0;
-        try
-        {
-		    for( icmd; icmd < Cmd.m_Params.size() -1; icmd++ )
-			    Params.add( GetVar(Event.GetLocal(Cmd.m_Params[icmd+1])) );
-        }
-        catch( ... )
-        {
-            ErrorPrintCommand( "PARAM_CONV"
-                             , &Event
-                             , Cmd.Name()
-                             , Cmd.m_Params
-                             , 1
-                             , UTIL_VarArgs( "Error converting parameter %i: %s", icmd, Cmd.m_Params[icmd+1].c_str() )
-                             );
-            throw;
-        }
+		scriptcmd_t &Cmd = Cmdlist.m_Cmds[c];
 
-        bool bExecRslt = false;
-
-        try
-        {
-		    // if Script_ExecuteCmd returns false, break execution of the event
-		    bExecRslt = Script_ExecuteCmd( Event, Cmd, Params );
-        }
-        catch( ... )
-        {
-            ErrorPrintCommand( "EXEC_CMD"
-                             , &Event
-                             , Cmd.Name()
-                             , Cmd.m_Params
-                             , 1
-                             , "Error while executing command"
-                             );
-            throw;
-        }
+		//Convert the variable parameters
+		msstringlist Params;
+		for (int icmd = 0; icmd < Cmd.m_Params.size() - 1; icmd++)
+			Params.add(GetVar(Event.GetLocal(Cmd.m_Params[icmd + 1])));
 
 		// if Script_ExecuteCmd returns false, break execution of the event
-        if ( Cmd.m_Conditional )
-        {
-		    if( bExecRslt )
-		    {
-                try
-                {
-			        if( Cmd.m_Conditional )
-			            //This command was a conditional command and the conditions were met, execute the child commands
-				        Script_ExecuteCmds( Event, Cmd.m_IfCmds );
-                }
-                catch( ... )
-                {
-                    ErrorPrintCommand( "EXEC_TRUE"
-                                     , &Event
-                                     , Cmd.Name()
-                                     , Cmd.m_Params
-                                     , 1
-                                     , "Error while executing true-block"
-                                     );
-                    throw;
-                }
-		    }
-		    else
-		    {
-			    if( !Cmd.m_NewConditional )
-				    break;		//Old if command.  Breaks event execution on failure
-								int e = 0;
-                try
-                {
-			        		for( e; e < Cmd.m_ElseCmds.size(); e++ )								//Parse all else statements
-				        	if( Script_ExecuteCmds( Event, Cmd.m_ElseCmds[e] ) ) break;	//As soon as one returns true, don't parse any more
-                }
-                catch( ... )
-                {
-                    ErrorPrintCommand( "EXEC_ELSE"
-                                     , &Event
-                                     , Cmd.Name()
-                                     , Cmd.m_Params
-                                     , 1
-                                     , UTIL_VarArgs("Error while executing else-block %i", e)
-                                     );
-                    throw;
-                }
+		if (Script_ExecuteCmd(Event, Cmd, Params))
+		{
+			if (Cmd.m_Conditional)
+				//This command was a conditional command and the conditions were met, execute the child commands
+				Script_ExecuteCmds(Event, Cmd.m_IfCmds);
+		}
+		else if (Cmd.m_Conditional)
+		{
+			if (!Cmd.m_NewConditional)
+				break; //Old if command.  Breaks event execution on failure
 
-			    if( Cmdlist.m_Cmds.size() == 1 )	//This is an event with only one conditional statment or
-				    return false;		//An else if statement.  This statment failed so return false to try the remaining else statements
-            }
-        }
+			for (int e = 0; e < Cmd.m_ElseCmds.size(); e++) // Parse all else statements
+				if (Script_ExecuteCmds(Event, Cmd.m_ElseCmds[e]))
+					break; //As soon as one returns true, don't parse any more
 
-        if ( Event.bFullStop ) return false; // MiB 07DEC_2014 - "exit" command
-    }
+			if (Cmdlist.m_Cmds.size() == 1) //This is an event with only one conditional statment or
+				return false;				//An else if statement.  This statment failed so return false to try the remaining else statements
+		}
+
+		if (Event.bFullStop)
+			return false; // MiB 07DEC_2014 - "exit" command
+	}
 
 	return true;
 }
@@ -6132,6 +5997,7 @@ void IScripted::CallScriptEvent( msstring_ref EventName, msstringlist *Parameter
 	for(int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->RunScriptEventByName( EventName, Parameters );
 }
+
 void IScripted::Script_InitHUD( CBasePlayer *pPlayer )
 {
 	for(int i = 0; i < m_Scripts.size(); i++)

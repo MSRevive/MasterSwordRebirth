@@ -5310,90 +5310,9 @@ bool CScript::ScriptCmd_Return(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 				m.pScriptedInterface->m_ReturnData = "";
 				return true; //handled
 			}
-			// =============
-#ifdef VALVE_DLL
-			else if( Params[0].starts_with("**") && Params.size() > 1 )
-			{
-				//Thothie APR2016_08 - allow sending return data to specific $func via **<eventname>
-				//also may clear data tied to specific func via **<evetname> **clear
-				//(Util_ScriptArray funcs only operate on server so this must be ifdef)
-				msstring dest_elm = Params[0].skip("**");
-				//Print("XEBUG: Think element is %s\n",dest_elm.c_str());
-
-				//see if $func array exists
-				if ( Util_ScriptArrayGetProps(m.pScriptedEnt,"exists","SPECARRAY_FUNC_NAMES",0) == "0" )
-				{
-					ALERT( at_console, "WARNING: Script: %s, return: Attempted $func spec return with no initial $func.\n", m.ScriptFile.c_str() );
-					return true; //bugger
-				}
-
-				//see if this specific $func element exists
-				int func_array_size = atoi( Util_ScriptArrayGetProps(m.pScriptedEnt,"size","SPECARRAY_FUNC_NAMES",0) );
-				int func_idx = 0;
-				bool found_existing = false;
-				for( int i = 0; i <= func_array_size; i++ )
-				{
-					msstring array_check = Util_ScriptArrayGetProps(m.pScriptedEnt,"getidx","SPECARRAY_FUNC_NAMES",i);
-					if ( FStrEq(array_check.c_str(),dest_elm.c_str()) )
-					{
-						found_existing = true;
-						func_idx = i;
-						break;
-					}
-				}
-
-				if ( found_existing )
-				{
-					msstring array_name_widx;
-
-					if ( Params[1].starts_with("**clear") )
-					{
-						//clear this specific element (yeah, we wasted some time back there, but meh)
-						array_name_widx = "SPECARRAY_FUNC_RETURNS";
-						array_name_widx.append(UTIL_VarArgs(":%i",func_idx));
-						//Print("XEBUG: Clearing %s\n",array_name_widx.c_str());
-						Util_ScriptArray(m.pScriptedEnt,"set",array_name_widx.c_str(),"[[UNSET]]");
-						return true; //handled
-					}
-
-					msstring stemp = Util_ScriptArrayGetProps(m.pScriptedEnt,"getprop","SPECARRAY_FUNC_RETURNS",func_idx);
-					if ( stemp == "[[UNSET]]" )
-					{
-						//Print("XEBUG: Adding to fresh return data\n");
-						stemp = "";
-					}
-					else
-					{
-						//Print("XEBUG: Adding to existing return data\n");
-						stemp.append(";");
-					}
-
-					//Print("XEBUG: Params: %s %s\n",Params[0].c_str(),Params[1].c_str());
-
-					int t=Params.size();
-					for( int i = 0; i < t; i++ )
-					{
-						if ( i > 0 )
-						{
-							stemp.append(Params[i].c_str());
-							if ( i < t - 1 ) stemp.append(";");
-						}
-					}
-					//Print("XEBUG: Return string is now: %s\n");
-					array_name_widx = "SPECARRAY_FUNC_RETURNS";
-					array_name_widx.append(UTIL_VarArgs(":%i",func_idx));
-					Util_ScriptArray(m.pScriptedEnt,"set",array_name_widx.c_str(),stemp.c_str());
-					return true; //handled
-				}
-				else
-				{
-					ALERT( at_console, "WARNING: Script: %s, return: could not find $func with eventname %s.\n", m.ScriptFile.c_str(), dest_elm.c_str() );
-					return true; //bugger
-				}
-			}
-#endif
-			// =============
+			
 			if (m.pScriptedInterface->m_ReturnData[0]) m.pScriptedInterface->m_ReturnData += ";";
+			
 			for(int i = 0; i < Params.size(); i++)
 			{
 				if (i) m.pScriptedInterface->m_ReturnData += " ";
