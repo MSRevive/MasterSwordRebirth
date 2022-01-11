@@ -1910,7 +1910,8 @@ EndDamage:
 			if (dmgevent.starts_with("*"))
 			{
 				dmgevent = dmgevent.substr(1);
-				pItemInflictor->CallScriptEvent(dmgevent.c_str(), &Parameters);
+				if (pItemInflictor) pItemInflictor->CallScriptEvent(dmgevent.c_str(), &Parameters);
+				else if (pEntityInflictor) pEntityInflictor->GetScripted()->CallScriptEvent(dmgevent.c_str(), &Parameters); //Allows dmgevent for non-item scripts
 			}
 			else
 			{
