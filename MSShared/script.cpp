@@ -993,7 +993,7 @@ msstring CScript::ScriptGetter_Pass( msstring& FullName, msstring& ParserName, m
 //- calls eventname, replaces itself with return value
 //- return doesn't actually stop code execution - if multiple returns are encountered, items will be tokenized
 //- priority: moderate, scope: shared
-msstring CScript::ScriptGetter_Func( msstring& FullName, msstring& ParserName, msstringlist& Params )
+msstring CScript::ScriptGetter_Func( msstring& FullName, msstring& ParserName, msstringlist &Params )
 {
 	//AUG2013_27 Thothie - new function function
 	//$func(<eventname>,[params...])
@@ -3264,11 +3264,6 @@ msstring CScript::ScriptGetter_MapExists( msstring& FullName, msstring& ParserNa
 	return FullName;
 }
 
-//$math("add|multiply|subtract|divide|sqrt|mod|intdivide",<amt|var>,[amt|var])
-//$math("vectoradd|vectormultiply",<vec>,<x|y|z|float|vec>,[vec])
-//- returns result, does not modify vars
-//- todo: add more functions
-//- priority: high, scope: shared
 msstring CScript::ScriptGetter_MathReturn( msstring& FullName, msstring& ParserName, msstringlist& Params )
 {
 	//NOV2014_20 Thothie - Math macro
@@ -5991,9 +5986,9 @@ void IScripted::CallScriptEventTimed( msstring_ref EventName, float Delay )
 		m_Scripts[i]->CallEventTimed( EventName, Delay );
 }
 
-void IScripted::CallScriptEvent( msstring_ref EventName, msstringlist *Parameters )
+void IScripted::CallScriptEvent( msstring_ref EventName, msstringlist* Parameters )
 {
-	m_ReturnData[0] = 0;
+	m_ReturnData = "";
 	for(int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->RunScriptEventByName( EventName, Parameters );
 }

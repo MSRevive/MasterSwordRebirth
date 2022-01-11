@@ -170,7 +170,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["dplayermessage"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_Message); //Thothie - MAR2007
 		m_GlobalCmdHash["consolemsg"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_Message);
 		m_GlobalCmdHash["infomsg"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_InfoMessage);
-		m_GlobalCmdHash["returndata"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_Return);
 		m_GlobalCmdHash["return"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_Return); //Thothie - AUG2013_27 - alias
 		m_GlobalCmdHash["emitsound"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_EmitSound);
 		m_GlobalCmdHash["companion"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_Companion);
@@ -5300,12 +5299,13 @@ bool CScript::ScriptCmd_Respawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 //- Does not stop code execution - if multiple instances of return are encountered in the same event, the results are tokenized.
 bool CScript::ScriptCmd_Return(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
+	Log("return called!");
 	if (Params.size() >= 1)
 	{
 		if (m.pScriptedInterface)
 		{
 			//Thothie APR2016_08 - allow clearing of return data
-			if (Params[0].starts_with("**clear"))
+			if (Params[0] == "**clear")
 			{
 				m.pScriptedInterface->m_ReturnData = "";
 				return true; //handled
@@ -6651,6 +6651,7 @@ bool CScript::ScriptCmd_SetVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 				sTemp += Params[i + 1];
 			VarValue = sTemp;
 		}
+
 		if (Cmd.Name() == "local")
 			Event.SetLocal(VarName, VarValue);
 		else if (Cmd.Name() == "setvarg")
