@@ -1079,12 +1079,34 @@ public:
 			CBaseEntity::KeyValue(pkvd);
 	}
 
+	//Thothie OCT2016_18 spawnlimiter
+	bool SpawnLimitReached()
+	{
+		msstring sTemp = STRING(pev->targetname);
+		if ( sTemp.starts_with("crit") ) return false;
+
+		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
+		IScripted *pGMScript = pGameMasterEnt->GetScripted();
+		if ( pGMScript )
+		{
+			if ( atoi(pGMScript->GetFirstScriptVar("GM_DISABLE_SPAWNS")) == 1 ) return true;
+			int tlimit = atoi(pGMScript->GetFirstScriptVar("GM_SPAWN_LIMIT"));
+			if ( tlimit == 0 ) return false;
+			int tcount = atoi(pGMScript->GetFirstScriptVar("GM_SPAWN_COUNT"));
+			if ( tcount >= tlimit ) return true;
+		}
+
+		return false;
+	}
+
 	void RespawnMonster(monster_data_t *pMonsterData)
 	{
 		if (pMonsterData->spawned)
 		{
 			return;
 		}
+
+		if ( SpawnLimitReached() ) return; //Thothie OCT2016_18 spawnlimiter
 
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonsterData->m_nRndMobs > 0)
@@ -1215,6 +1237,8 @@ public:
 	}
 	void SpawnMonsters()
 	{
+		if ( SpawnLimitReached() ) return; //Thothie OCT2016_18 spawnlimiter
+		
 		int i = 0, iDeadMonsters = 0;
 		CMSMonster *pMonster;
 		for (i = 0; i < iMonstersToSpawn; i++)

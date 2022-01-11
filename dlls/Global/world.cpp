@@ -745,6 +745,10 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 	{
 		MSGlobals::map_music_combat_length = pkvd->szValue;
 	}
+	else if ( FStrEq(pkvd->szKeyName, "spawnlimit") )
+	{
+		MSGlobals::SpawnLimit = atoi(pkvd->szValue); //Thothie OCT2016_18 spawnlimiter
+	}
 	else
 		CBaseEntity::KeyValue(pkvd);
 }

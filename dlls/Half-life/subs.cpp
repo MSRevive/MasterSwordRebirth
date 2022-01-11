@@ -117,6 +117,10 @@ void CBaseEntity::UpdateOnRemove(void)
 // Convenient way to delay removing oneself
 void CBaseEntity ::SUB_Remove(void)
 {
+	//Thothie OCT2016_12 - notification of removal
+	IScripted *pScripted = GetScripted();
+	if ( pScripted ) pScripted->CallScriptEvent("game_deleted");
+	
 	UpdateOnRemove();
 	/*if (pev->health > 0)
 	{
