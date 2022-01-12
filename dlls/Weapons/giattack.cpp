@@ -1841,25 +1841,64 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				else if (dtype_code.starts_with("earth"))
 					 strncpy(element_code,  " earth", sizeof(element_code) );
 
-				 strncpy(szDamage,  Damage.AttackHit ? UTIL_VarArgs(" %.1f%s damage.",  Damage.flDamage,  element_code) : "", sizeof(szDamage) );
-				 strncpy(szHitMiss,  Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss) );
-				 _snprintf(szStats, sizeof(szStats),  "(%i/%i)",  (100 - iAccuracyRoll),  int(100 - Damage.flHitPercentage) );
+				 strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
+				 strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss) );
+				 _snprintf(szStats, sizeof(szStats), "(%i/%i)",  (100 - iAccuracyRoll),  int(100 - Damage.flHitPercentage) );
 
 				if (pPlayerAttacker)
 				{
-					 _snprintf(sz, sizeof(sz),  "You attack %s %s. %s %s%s",  							pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
+					 _snprintf(sz, sizeof(sz), "You attack %s %s. %s %s%s",
+					 		pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
 							pTarget->DisplayName(),
 							szStats, szHitMiss, szDamage);
 					pPlayerAttacker->SendEventMsg(HUDEVENT_ATTACK, sz);
 				}
+				
+				//Thothie SEP2019_22 - report resistance BEGIN
+				bool tdm_found_entry = false;
+				float tdm_modifier;
+				if (pVictim)
+				{
+					for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
+					{
+						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
+						msstring tdm_damage_type = TDM.DamageType;
+						if (tdm_damage_type.contains(dtype_code))
+						{
+							tdm_modifier = TDM.modifier;
+							tdm_found_entry = true;
+							break;
+						}
+					}
+				}
+				
+				msstring tdm_engrish = " ";
+				if ( tdm_found_entry )
+				{
+					if ( tdm_modifier < 1 )
+					{
+						tdm_engrish = UTIL_VarArgs("[%i%% resistant]",INT((1 - tdm_modifier)*100));
+					}
+					else if ( tdm_modifier > 1 )
+					{
+						tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]",INT((tdm_modifier-1)*100));
+					}
+				}
+				//Thothie SEP2019_22 - report resistance END	
+				
 				if (pVictim && pVictim->IsPlayer() && pEntityAttacker && pVictim != pEntityAttacker)
 				{
 					CMSMonster *pMonster = (CMSMonster *)pEntityAttacker;
 					CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
-
-					 _snprintf(sz, sizeof(sz),  "%s attacks you. %s %s%s",  							SPEECH::NPCName(pMonster, true),
-							//pEntityAttacker->DisplayName(),
-							szStats, szHitMiss, szDamage);
+					
+				 _snprintf(sz, sizeof(sz), "%s attacks you. %s %s %s %s", 
+				 		SPEECH::NPCName(pMonster, true),
+						szStats, 
+						szHitMiss, 
+						szDamage,
+						tdm_engrish.c_str()
+					);
+						
 					pPlayer->SendEventMsg(HUDEVENT_ATTACKED, sz);
 				}
 			} //endif Damage.flDamage > 0
@@ -1900,7 +1939,7 @@ EndDamage:
 		Parameters.add(VecToString(EndPos));
 		Parameters.add(Damage.sDamageType.c_str());
 		char szDamage[32];
-		 strncpy(szDamage,  Damage.AttackHit ? UTIL_VarArgs(" %.1f damage.",  Damage.flDamage) : "0", sizeof(szDamage) );
+		strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs(" %.1f damage.",  Damage.flDamage) : "0", sizeof(szDamage) );
 		Parameters.add(szDamage);
 		pAttMonster->CallScriptEvent("game_dodamage", &Parameters);
 		if (Damage.dodamage_event.len() > 0)
