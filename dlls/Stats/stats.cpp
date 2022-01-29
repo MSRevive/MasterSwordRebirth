@@ -4,50 +4,51 @@
 #include <math.h>
 #include <string.h>
 
-statinfo_t NatStatList[255] =
-	{
-		"Strength",
-		"Agility",
-		"Concentration",
-		"Awareness",
-		"Fitness",
-		"Wisdom",
+statinfo_t NatStatList[6] =
+{
+	"Strength",
+	"Agility",
+	"Concentration",
+	"Awareness",
+	"Fitness",
+	"Wisdom",
 };
 
-skillstatinfo_t SkillStatList[255] =
-	{
-		"Swordsmanship", "swordsmanship", STATPROP_TOTAL,
-		"Martial Arts", "martialarts", STATPROP_TOTAL,
-		"Small Arms", "smallarms", STATPROP_TOTAL,
-		"Axe Handling", "axehandling", STATPROP_TOTAL,
-		"Blunt Arms", "bluntarms", STATPROP_TOTAL,
-		"Archery", "archery", STATPROP_TOTAL,
-		//	"Shield handling",
-		//	"Two-handed weapons",
-		//	"Dual weapons",
-		"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL,
-		"Parry", "parry", 1,
-		"Pole Arms", "polearms", STATPROP_TOTAL, //MiB JUL2010_02 - Pole Arms!
-		//	"Spell Preparation",
-		//	"Swimming",
-		//	"Pickpocket", true,
+skillstatinfo_t SkillStatList[9] =
+{
+	"Swordsmanship", "swordsmanship", STATPROP_TOTAL,
+	"Martial Arts", "martialarts", STATPROP_TOTAL,
+	"Small Arms", "smallarms", STATPROP_TOTAL,
+	"Axe Handling", "axehandling", STATPROP_TOTAL,
+	"Blunt Arms", "bluntarms", STATPROP_TOTAL,
+	"Archery", "archery", STATPROP_TOTAL,
+	//	"Shield handling",
+	//	"Two-handed weapons",
+	//	"Dual weapons",
+	"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL,
+	"Parry", "parry", 1,
+	"Pole Arms", "polearms", STATPROP_TOTAL, //MiB JUL2010_02 - Pole Arms!
+	//	"Spell Preparation",
+	//	"Swimming",
+	//	"Pickpocket", true,
 };
 
 char *SkillTypeList[] =
-	{
-		"Proficiency",
-		"Balance",
-		"Power"};
+{
+	"Proficiency",
+	"Balance",
+	"Power"
+};
 
 char *SpellTypeList[] =
-	{
-		"Fire",
-		"Ice",
-		"Lightning",
-		"unused", //Thothie: was summoning
-		"unused", //Thothie: was protection
-		"Divination",
-		"Affliction",
+{
+	"Fire",
+	"Ice",
+	"Lightning",
+	"unused", //Thothie: was summoning
+	"unused", //Thothie: was protection
+	"Divination",
+	"Affliction",
 };
 
 int GetSkillStatByName(const char *pszName) //Index lookup by name (Skill stats only)

@@ -73,6 +73,7 @@ struct statinfo_t
 {
 	char *Name;
 };
+
 struct skillstatinfo_t
 {
 	const char *Name;
@@ -80,9 +81,9 @@ struct skillstatinfo_t
 	int StatCount;
 };
 
-extern statinfo_t NatStatList[255];
-extern skillstatinfo_t SkillStatList[255];
-extern char *SkillTypeList[255];
-extern char *SpellTypeList[255];
+extern statinfo_t NatStatList[6];
+extern skillstatinfo_t SkillStatList[9];
+extern char *SkillTypeList[3];
+extern char *SpellTypeList[7];
 
 #endif STATS_H
