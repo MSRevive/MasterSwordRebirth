@@ -45,8 +45,6 @@ char *SpellTypeList[] =
 	"Fire",
 	"Ice",
 	"Lightning",
-	"unused", //Thothie: was summoning
-	"unused", //Thothie: was protection
 	"Divination",
 	"Affliction",
 };
