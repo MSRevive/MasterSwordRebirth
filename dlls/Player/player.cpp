@@ -3644,7 +3644,7 @@ extern cvar_t msallowkickvote;
 extern cvar_t msallowtimevote;
 extern cvar_t ms_serverchar;
 
-void CBasePlayer ::UpdateClientData(void)
+void CBasePlayer::UpdateClientData(void)
 {
 	startdbg;
 	dbg("Begin");
@@ -3905,17 +3905,6 @@ void CBasePlayer ::UpdateClientData(void)
 		MESSAGE_END();
 
 		m_ClientGender = m_Gender;
-	}
-
-	// MIB FEB2015_21 [RACE_MENU] - Send client race, if needed
-	if (m_Race != m_ClientRace)
-	{
-		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
-		WRITE_BYTE(11);
-		WRITE_STRING(m_Race);
-		MESSAGE_END();
-
-		m_ClientRace = m_Race;
 	}
 
 	if (m_iHideHUD != m_iClientHideHUD)
@@ -6411,7 +6400,6 @@ void CBasePlayer::Think_SendCharData()
 			WRITE_STRING(CharInfo.NextMap);	 //New map char wants to enter
 			WRITE_STRING(CharInfo.NewTrans); //New trans at new map
 			WRITE_SHORT(CharInfo.body);		 //MIB JAN2010_27 - Char Selection Fix - Body the model should use
-			WRITE_STRING(CharInfo.Race);	 // MIB FEB2015_21 [RACE_MENU] - Send character race
 
 			//jointype_e JoinType = MSChar_Interface::CanJoinThisMap( CharInfo, VisitedMaps );
 

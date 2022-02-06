@@ -219,8 +219,6 @@ bool CBasePlayer::CreateStats()
 	//	CStat::InitStatList( m_ClStats );
 	//#endif
 
-	 strncpy(m_Race,  RACE_HUMAN, sizeof(m_Race) );
-
 	m_CharacterState = CHARSTATE_UNLOADED; //1 == Stats Created but character not loaded
 
 	return true;
@@ -1422,7 +1420,6 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, char *pData, int
 		OldTrans = CharData.OldTrans;
 		NextMap = CharData.NextMap;
 		NewTrans = CharData.NewTrans;
-		strncpy(Race, CharData.Race, MSSTRING_SIZE); // MIB FEB2015_21 [RACE_MENU] - Copy the race over
 
 		//MiB JAN2010_27 - Char Selection Fix
 		//Find last body used
@@ -1460,7 +1457,6 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, char *pData, int
 			//MiB - But we do have CharData :)
 			static msstringlist Params;
 			Params.clearitems();
-			Params.add(CharData.Race);
 			Params.add((CharData.Gender == GENDER_MALE) ? "male" : "female");
 			Params.add("char_menu");
 			pItem->CallScriptEvent("game_wear", &Params);

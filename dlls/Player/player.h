@@ -223,7 +223,6 @@ struct createchar_t
 	int iChar;		  //Index of char
 	msstring Name;	  //Name
 	int Gender;		  //Gender
-	msstring Race;	  // MIB FEB2015_21 [RACE_MENU] - Race name
 	msstring Weapon;  //Starting Wepaon
 	msstring SteamID; //SteamID (server-side characters)
 };
@@ -395,8 +394,7 @@ public:
 	CGenericItem *PlayerHands;	 //Special item - Player hands
 	CGenericItem *m_ChosenArrow; //MiB JUN2010 - Arrow selection
 	byte m_PrefHand;			 //O = left 1 = right
-	float TimeUpdateIDInfo,
-		CheckAreaTime, ForWardPressedTime;
+	float TimeUpdateIDInfo, CheckAreaTime, ForWardPressedTime;
 	//RoundTime: Time to wear/use/wield/cast/etc.
 	//FatigueTime: Time to decrease the amount of iFatigue.
 	CBaseEntity *CurrentTransArea;
@@ -494,7 +492,6 @@ public:
 	float m_ClTimeWaitedToForgetKill;
 	float m_ClTimeWaitedToForgetSteal;
 	int m_ClientGender;
-	msstring m_ClientRace; // MIB FEB2015_21 [RACE_MENU] - Race the client has
 	//---------------
 	scoreinfo_t m_ScoreInfoCache;
 	CTeam *m_pTeam,	  //My current party

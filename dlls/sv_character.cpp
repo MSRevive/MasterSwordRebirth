@@ -30,7 +30,6 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 	memset(&Data, 0, sizeof(savedata_t));
 
 	strncpy(Data.Name, CharData.Name, sizeof(Data.Name));
-	strncpy(Data.Race, CharData.Race, sizeof(Data.Race)); // MIB FEB2015_21 [RACE_MENU] - Create with given race
 	strncpy(Data.MapName, MSGlobals::MapName, sizeof(Data.MapName));
 	Data.Gender = CharData.Gender;
 	Data.Gold = MSGlobals::DefaultGold;
@@ -527,7 +526,6 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	if (!pData)
 	{
 		strncpy(Data.Name, pPlayer->m_DisplayName, sizeof(Data.Name)); // Store actual character name (DisplayName() is servername, and will have a (#) at the end if there are duplicates on the server)
-		strncpy(Data.Race, pPlayer->m_Race, sizeof(Data.Race));
 		strncpy(Data.Party, pPlayer->GetPartyName(), sizeof(Data.Party));
 		Data.PartyID = pPlayer->GetPartyID();
 

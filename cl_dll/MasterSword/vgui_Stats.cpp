@@ -230,7 +230,7 @@ void CStatPanel::Update()
 			 _snprintf(cDisplayText, sizeof(cDisplayText),  "Gender: %s\n",  GenderList[player.m_Gender] );
 			break;
 		case 2:
-			 _snprintf(cDisplayText, sizeof(cDisplayText),  "%s %s\n",  player.m_Race,  player.GetTitle() );
+			 _snprintf(cDisplayText, sizeof(cDisplayText),  "%s %s\n", "human",  player.GetTitle() );
 			break;
 		case 3:
 			cDisplayText[0] = 0;
@@ -523,10 +523,6 @@ int __MsgFunc_SetStat(const char *pszName, int iSize, void *pbuf)
 	else if (iStatType == 10) //Gender msg
 	{
 		player.m_Gender = READ_BYTE();
-	}
-	else if (iStatType == 11) // MIB FEB2015_21 [RACE_MENU] - Allow setting race
-	{
-		 strncpy(player.m_Race,  READ_STRING(), sizeof(player.m_Race) );
 	}
 
 	UpdateVGUIStats();

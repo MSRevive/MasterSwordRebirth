@@ -65,8 +65,6 @@ struct charinfo_t : charinfo_base_t
 	jointype_e JoinType;
 	charloc_e Location;
 
-	msstring Race; // MIB FEB2015_21 [RACE_MENU] - Race name
-
 	//Char current Game Status, loaded from file header or sent from server
 	int body; //MiB FEB2010a (JAN2010_27) - For sending what 'body' the char-selection model should use.
 	bool IsElite;

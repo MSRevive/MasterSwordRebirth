@@ -317,8 +317,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	CLIENT_COMMAND(edict(), "name %s\n", Data.Name);
 	//g_engfuncs.pfnSetClientKeyValue( entindex(), g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "name", (char *)Data.Name );
 
-	strncpy(m_Race, Data.Race, 16);
-
 	dbg("Read Stats");
 	m_Gold = Data.Gold;
 
@@ -328,12 +326,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	WRITE_BYTE(3);
 	WRITE_BYTE(0);
 	WRITE_LONG(m_Gold);
-	MESSAGE_END();
-
-	// MIB FEB2015_21 [RACE_MENU] - Send race
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
-	WRITE_BYTE(11);
-	WRITE_STRING(m_Race);
 	MESSAGE_END();
 
 	if (Data.HP > 0)

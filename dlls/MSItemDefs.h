@@ -107,8 +107,4 @@ enum
 //Corpse
 #define CLASS_CORPSE "corpse"
 
-//Player race
-#define RACE_HUMAN "Human"
-#define RACE_DWARF "Dwarf"
-
 #endif //MSITEMDEFS

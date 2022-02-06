@@ -85,18 +85,6 @@ char *GenderPanel_MainBtnText[] =
 	"#CHOOSECHAR_GENDER_MALE",
 	"#CHOOSECHAR_GENDER_FEMALE"
 };
-char *RacePanel_MainBtnText[] =
-{
-	"#CHOOSECHAR_RACE_HUMAN",
-	"#CHOOSECHAR_RACE_DWARF",
-	"#CHOOSECHAR_RACE_ELF"
-};
-char *RacePanel_MainBtnModels[] =
-{
-	MODEL_HUMAN_REF,
-	MODEL_DWARF_REF,
-	MODEL_ELF_REF
-};
 char *g_CharImgName[] = 
 {
 	"char_male",
@@ -166,7 +154,6 @@ public:
 				//New char screen
 				m_NewChar.iChar = m_Value;
 				MSCLGlobals::CreatingCharacter = true;
-
 			}
 			/*else if( RestoreAll( m_Value ) )			//Client chars
 			{
@@ -179,20 +166,6 @@ public:
 		case STG_CHOOSEGENDER:
 			m_NewChar.Gender = m_Value;
 			m_NewChar.Name = m_pPanel->Gender_Name;
-
-			 for (int i = 0; i < RACEPANEL_MAINBTNS; i++) 
-			{
-				m_pPanel->Race_CharEnts[i].SetActive( true );
-				m_pPanel->Race_CharEnts[i].m_Gender = (gender_e)m_Value;
-			}
-			break;
-		case STG_CHOOSERACE: // MIB FEB2015_21 [RACE_MENU] - Converts numerical race to English
-			if ( !m_Value )
-				m_NewChar.Race = "Human";
-			else if ( m_Value == 1 )
-				m_NewChar.Race = "Dwarf";
-			else if ( m_Value == 2 )
-				m_NewChar.Race = "Elf";
 			break;
 		case STG_CHOOSEWEAPON:
 			//if( MSGlobals::ServerSideChar )
@@ -202,7 +175,6 @@ public:
 				NewCharCmd += m_NewChar.iChar; NewCharCmd += " \"";						//1: Char index
 				NewCharCmd += m_NewChar.Name; NewCharCmd += "\" ";				//2: Char name
 				NewCharCmd += m_NewChar.Gender; NewCharCmd += " ";						//3: Char Gender
-				NewCharCmd += m_NewChar.Race; NewCharCmd += " ";						// 4: Char Race - MIB FEB2015_21 [RACE_MENU]
 				NewCharCmd += MSGlobals::DefaultWeapons[m_Value].c_str(); NewCharCmd += "\n";	//5: Char Starting weapon
 				ServerCmd( NewCharCmd );
 			}
@@ -588,8 +560,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Gender_NameOK->setText( Localized("Submit Name") );
 	//old: Gender_NameOK->setText( Localized("#CHOOSECHAR_GENDEROK") );
 
-
-
 	Gender_GenderLabel = new MSLabel( m_GenderPanel, Localized( "#CHOOSECHAR_GENDERLBL" ), XRES(75), YRES(30) );
 	Gender_GenderLabel->SetFGColorRGB( NewCharColor );
 	Gender_GenderLabel->setFont( g_FontID );
@@ -611,30 +581,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	}
 
 	Gender_SelectItem( 0 );
-
-	// MIB FEB2015_21 [RACE_MENU] - Set up Choose Race panel
-	m_RacePanel = new CTransparentPanel( 255, 0, 0, CHOOSE_SIZEX, GENDER_SIZEY );
-	m_RacePanel->setParent( m_pScrollPanel->getClient() );
-	Race_MainLabel = new TextPanel( Localized( "#CHOOSECHAR_RACE" ), XRES(120), MAINLABEL_TOP_Y, LABEL_ITEMNAME_SIZE_X, LABEL_ITEMNAME_SIZE_Y );
-	Race_MainLabel->setParent( m_RacePanel );
-	Race_MainLabel->setFont( g_FontSml );
-	Race_MainLabel->SetFGColorRGB( NewCharColor );
-	Race_MainLabel->SetBGColorRGB( Color_Transparent );
- 
-	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), CHOOSE_BTNWIDTH, RACEPANEL_MAINBTNS, XRES(32) );
-	 for (int i = 0; i < RACEPANEL_MAINBTNS; i++) 
-	{
-		int ix = StartX + (i * (CHOOSE_BTNWIDTH + CHOOSE_BTNSPACERX));
-		int iy = CHOOSE_BTNY + CHOOSE_CHARHANDLING_H;
-
-		MSButton &RaceBtn	= *(Race_MainBtn[i] = new MSButton( m_RacePanel, "", ix, iy, CHOOSE_BTNWIDTH, CHOOSE_BTNHEIGHT ));
-		Race_MainActionSig[i] = new CAction_SelectOption( this, STG_CHOOSERACE, i );
-		RaceBtn.addActionSignal( Race_MainActionSig[i] );
-		RaceBtn.setText( Localized(RacePanel_MainBtnText[i]) );
-		RaceBtn.setContentAlignment( Label::a_center );
-		RaceBtn.SetArmedColor( NewCharColor );
-		RaceBtn.SetDisabledColor( DisabledColor );
-	}
 
 	//Weapon panel setup
 
@@ -727,8 +673,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	enddbg;
 }
 
-
-
 // Update
 void CNewCharacterPanel::Update( )
 {
@@ -739,11 +683,10 @@ void CNewCharacterPanel::Update( )
  
 	m_ChoosePanel->setVisible( false );
 	m_GenderPanel->setVisible( false );
-	m_RacePanel->setVisible( false );
 	m_WeaponPanel->setVisible( false );
 
 	char cTemp[128], cTemp2[512];
-	 strncpy(cTemp2,  MSGlobals::MapName, sizeof(cTemp2) );
+	strncpy(cTemp2, MSGlobals::MapName, sizeof(cTemp2) );
 	cTemp2[0] = toupper(cTemp2[0]);
 
 	_snprintf(cTemp, sizeof(cTemp), Localized("#CHOOSECHAR_ENTERING"), cTemp2);		//Entering: <mapname>
@@ -837,24 +780,8 @@ void CNewCharacterPanel::Update( )
 				if( player.m_CharSend.Status != CSS_DORMANT ) GreyedOut = true;
 
 				msstring model = MODEL_HUMAN_REF;
-				msstring lower = msstring( strlwr(CharSlot.Race.c_str()) );
-				if ( lower == "human" )
-				{
-					model = MODEL_HUMAN_REF;
-					m_CharEnts[i].m_zAdj = MODEL_HUMAN_Z_ADJ;
-				}
-				else if ( lower == "dwarf" )
-				{
-					model = MODEL_DWARF_REF;
-					m_CharEnts[i].m_zAdj = MODEL_DWARF_Z_ADJ;
-				}
-				else if ( lower == "elf" )
-				{
-					model = MODEL_ELF_REF;
-					m_CharEnts[i].m_zAdj = MODEL_ELF_Z_ADJ;
-				}
 
-				m_CharEnts[i].Init( i , model ); // MIB FEB2015_21 [RACE_MENU] - Re-init with correct race model
+				//m_CharEnts[i].Init( i , model ); // MIB FEB2015_21 [RACE_MENU] - Re-init with correct race model
 
 				if( GreyedOut )
 				{
@@ -899,13 +826,6 @@ void CNewCharacterPanel::Update( )
 		m_BackBtn->setVisible( true );
 		m_pTitleLabel->setText( Localized("#CHOOSECHAR_PANE_NEW") );
 		iButtons = GENDERPANEL_MAINBTNS;
-		break;
-	case STG_CHOOSERACE: // MIB FEB2015_21 [RACE_MENU] - Race Menu
-		m_RacePanel->setVisible( true );
-
-		m_BackBtn->setVisible( true );
-		m_pTitleLabel->setText( Localized("#CHOOSECHAR_PANE_NEW") );
-		iButtons = RACEPANEL_MAINBTNS;
 		break;
 	case STG_CHOOSEWEAPON:
 		 for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
@@ -1021,13 +941,6 @@ void CNewCharacterPanel::Close( void )
 		CharEnt.UnRegister( );
 	}
 
-	// MIB FEB2015_21 [RACE_MENU] - UnRegister Race Menu models
-	 for (int i = 0; i < RACEPANEL_MAINBTNS; i++) 
-	{
-		CRenderChar &CharEnt = Race_CharEnts[i];
-		CharEnt.UnRegister( );
-	}
-
 	m_SpawnBox.UnRegister( );
 
 	int i;
@@ -1096,13 +1009,6 @@ bool CNewCharacterPanel::SlotInput( int iSlot )
 				Choose_MainBtn[ iSlot ]->fireActionSignal();
 				return true;
 			}
-		case STG_CHOOSERACE: // MIB FEB2015_21 [RACE_MENU] - Race menu action
-			if( !Race_MainBtn[ iSlot ] || Race_MainBtn[ iSlot ]->IsNotValid() )
-				return false;
-			else {
-				Race_MainBtn[ iSlot ]->fireActionSignal();
-				return true;
-			}
 		case STG_CHOOSEGENDER:
 			if( !Gender_MainBtn[ iSlot ] || Gender_MainBtn[ iSlot ]->IsNotValid() )
 				return false;
@@ -1151,21 +1057,6 @@ void CNewCharacterPanel::Open( void )
 		CharEnt.Register( );
 		CharEnt.Init( i );
 	}
-
-	dbg( "Init Race 3D models" );
-	for (int i = 0; i < RACEPANEL_MAINBTNS; i++) // MIB FEB2015_21 [RACE_MENU] - Intialize Race Menu models
-	{
-		CRenderChar &CharEnt = Race_CharEnts[i];
-		CharEnt.m_Stage = STG_CHOOSERACE;
-		if ( !i ) CharEnt.m_zAdj = MODEL_HUMAN_Z_ADJ;
-		else if ( i == 1 ) CharEnt.m_zAdj = MODEL_DWARF_Z_ADJ;
-		else if ( i == 2 ) CharEnt.m_zAdj = MODEL_ELF_Z_ADJ;
-		CharEnt.Register( );
-		CharEnt.Init( i, RacePanel_MainBtnModels[i] );
-		CharEnt.SetActive( true );
-	}
-
-	m_SpawnBox.Init( );
 
 	dbg( "Call Update" );
 	Update( );
@@ -1245,7 +1136,7 @@ int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
 		CharSlot.NextMap = READ_STRING( );
 		CharSlot.NewTrans = READ_STRING( );
 		CharSlot.body = READ_SHORT( ); //MiB JAN2010_27 - Char Selection Fix
-		CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
+		//CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
 		byte CharFlags = READ_BYTE();
 		CharSlot.IsElite = FBitSet( CharFlags, (1<<0) );
 		CharSlot.Gender = FBitSet( CharFlags, (1<<1) ) ? GENDER_FEMALE : GENDER_MALE;
@@ -1355,10 +1246,6 @@ void CRenderChar::Render( )
 		m_Ent.origin += (vRight * 2 * (m_Idx-1));
 	else if( m_Stage == STG_CHOOSEGENDER )
 		m_Ent.origin += (vRight * -1.3 + vRight * 2 * (m_Idx));
-	else if( m_Stage == STG_CHOOSERACE ) // MIB FEB2015_21 [RACE_MENU] - Model spacing
-		m_Ent.origin += (vRight * -1.3 + vRight * 2 * (m_Idx));
-
-	m_Ent.origin.z += m_zAdj; // MIB FEB2015_21 [RACE_MENU] - Adjust origins (doesn't work perfectly)
 
 	m_Ent.angles = Vector( ViewMgr.Angles.x, ViewMgr.Angles.y + 180, 0 );
 	m_Ent.curstate.angles = m_Ent.angles;
@@ -1367,7 +1254,7 @@ void CRenderChar::Render( )
 
 	//Handle gear
 	//Thothie FEB2011_02 - don't figure gear for gender entries, or will inherit from other slots
-	if( m_Stage != STG_CHOOSEGENDER && m_Stage != STG_CHOOSERACE ) // MIB [RACE_MENU]
+	if( m_Stage != STG_CHOOSEGENDER )
 	{
 		m_GearItems.clearitems( );
 		m_Gear.clearitems( );
@@ -1445,7 +1332,7 @@ void CRenderChar::Render( )
 	m_Ent.SetBody( 1 , BodyParts[0] + BodyParts[2] ); //Set the body*/
 	//MIB JAN2010_27 - Char Selection Fix
 	//Thothie FEB2011_02 - fixing gender bender
-	if ( m_Stage != STG_CHOOSEGENDER && m_Stage != STG_CHOOSERACE ) // MIB [RACE_MENU]
+	if ( m_Stage != STG_CHOOSEGENDER)
 	{
 		m_Ent.curstate.body = player.m_CharInfo[m_Idx].body;
 	}

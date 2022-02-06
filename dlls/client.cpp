@@ -622,7 +622,7 @@ void ClientCommand2(edict_t *pEntity)
 				else
 					pPlayer->LoadCharacter(atoi(CMD_ARGV(1)));
 			}
-			else if (CMD_ARGC() == 6) //Create character
+			else if (CMD_ARGC() == 5) //Create character
 			{
 				if (MSGlobals::CanCreateCharOnMap)
 				{
@@ -632,8 +632,7 @@ void ClientCommand2(edict_t *pEntity)
 					NewChar.iChar = atoi(CMD_ARGV(1));
 					NewChar.Name = CMD_ARGV(2);
 					NewChar.Gender = atoi(CMD_ARGV(3));
-					NewChar.Race = CMD_ARGV(4); // MIB FEB2015_21 [RACE_MENU] - Read character race
-					NewChar.Weapon = CMD_ARGV(5);
+					NewChar.Weapon = CMD_ARGV(4);
 					pPlayer->CreateChar(NewChar);
 				}
 				else

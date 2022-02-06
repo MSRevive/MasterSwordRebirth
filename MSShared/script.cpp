@@ -1532,7 +1532,7 @@ msstring CScript::ScriptGetter_GetCl( msstring& FullName, msstring& ParserName, 
 			msstring Prop = Params[0];
 
 			if ( Prop == "gender" ) return player.m_Gender == GENDER_MALE ? "male" : "female";
-			else if ( Prop == "race" ) return player.m_Race;
+			else if ( Prop == "race" ) return "human";
 		}
 		else
 			return "0";

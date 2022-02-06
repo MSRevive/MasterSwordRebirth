@@ -10,14 +10,12 @@ class CMenuHandler_PutInPack;
 #define GENDERPANEL_MAINBTNS 2
 #define WEAPONPANEL_MAINBTNMAX 9
 #define WEAPONPANEL_MAINBTNS (signed)(MSGlobals::DefaultWeapons.size())
-#define RACEPANEL_MAINBTNS 2 // MIB FEB2015_21 [RACE_MENU] - Number of races
 
 enum stage_e
 {
 	STG_FIRST,
 	STG_CHOOSECHAR = STG_FIRST,
 	STG_CHOOSEGENDER,
-	STG_CHOOSERACE,
 	STG_CHOOSEWEAPON,
 	STG_LAST = STG_CHOOSEWEAPON
 };
@@ -81,7 +79,6 @@ public:
 
 	CTransparentPanel *m_ChoosePanel,
 		*m_GenderPanel,
-		*m_RacePanel, // MIB FEB2015_21 [RACE_MENU] - Choose race panel
 		*m_WeaponPanel;
 
 	MSButton *m_BackBtn;
@@ -110,14 +107,6 @@ public:
 	CRenderChar Gender_CharEnts[GENDERPANEL_MAINBTNS];
 	int Gender_Item;
 	MSButton *Gender_NameOK;
-
-	// MIB FEB2015_21 [RACE_MENU] - Choose race elements
-	TextPanel *Race_MainLabel;
-	MSButton *Race_MainBtn[RACEPANEL_MAINBTNS];
-	ActionSignal *Race_MainActionSig[RACEPANEL_MAINBTNS];
-	Label *Race_BtnLabel[RACEPANEL_MAINBTNS];
-	CRenderChar Race_CharEnts[RACEPANEL_MAINBTNS];
-	int Race_Item;
 
 	TextPanel *Weapon_MainLabel;
 	class WeaponButton *Weapon_MainBtn[WEAPONPANEL_MAINBTNMAX];
