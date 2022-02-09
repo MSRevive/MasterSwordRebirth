@@ -2198,40 +2198,43 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	startdbg;
 	dbg("Begin");
 
-	int i;
-
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
-
-	// don't send if flagged for NODRAW and it's not the host getting the message
-	if ((ent->v.effects == EF_NODRAW) &&
-		(ent != host))
-		return 0;
-
-	// Ignore ents without valid / visible models
-	if (!ent->v.modelindex || !STRING(ent->v.model))
-		return 0;
-
-	// Don't send spectators to other players
-	if ((ent->v.flags & FL_SPECTATOR) && (ent != host))
+	
+	// if entity isn't flagged for force send then go through checks.
+	if (!(ent->v.flags & FL_ENTFORCESEND))
 	{
-		return 0;
-	}
-
-	// Ignore if not the host and not touching a PVS/PAS leaf
-	// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-	if (ent != host && !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
-	{
-		if (!ENGINE_CHECK_VISIBILITY((const struct edict_s *)ent, pSet))
+		// don't send if flagged for NODRAW and it's not the host getting the message
+		if ((ent->v.effects == EF_NODRAW) && (ent != host))
+			return 0;	
+		
+		// Ignore ents without valid / visible models
+		if (!ent->v.modelindex || !STRING(ent->v.model))
+			return 0;
+		
+		// Don't send entities with flag NOSEND or using null.mdl
+		if ((STRING(ent->v.model) == "null.mdl") || (ent->v.flags & FL_ENTNOSEND))
+			return 0;
+	
+		// Don't send spectators to other players
+		if ((ent->v.flags & FL_SPECTATOR) && (ent != host))
+			return 0;
+	
+		// Ignore if not the host and not touching a PVS/PAS leaf
+		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
+		if (ent != host && !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 		{
-			return 0;
+			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s *)ent, pSet))
+			{
+				return 0;
+			}
 		}
-	}
-
-	// Don't send entity to local client if the client says it's predicting the entity itself.
-	if (ent->v.flags & FL_SKIPLOCALHOST)
-	{
-		if ((hostflags & 1) && (ent->v.owner == host))
-			return 0;
+	
+		// Don't send entity to local client if the client says it's predicting the entity itself.
+		if (ent->v.flags & FL_SKIPLOCALHOST)
+		{
+			if ((hostflags & 1) && (ent->v.owner == host))
+				return 0;
+		}
 	}
 
 	if (host->v.groupinfo)
@@ -2334,7 +2337,8 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	state->sequence = ent->v.sequence;
 	state->framerate = ent->v.framerate;
 	state->body = ent->v.body;
-
+	
+	int i;
 	for (i = 0; i < 4; i++)
 		state->controller[i] = ent->v.controller[i];
 

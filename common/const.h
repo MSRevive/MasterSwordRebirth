@@ -54,6 +54,9 @@
 #define FL_KILLME (1 << 30)		  // This entity is marked for death -- This allows the engine to kill ents at the appropriate time
 #define FL_DORMANT (1 << 31)	  // Entity is dormant, no updates to client
 
+#define FL_ENTNOSEND (1 << 32) // Don't send entity to client.
+#define FL_ENTFORCESEND (1 << 33) // Force send the entity to via client.
+
 // Goes into globalvars_t.trace_flags
 #define FTRACE_SIMPLEBOX (1 << 0) // Traceline with a simple box
 
