@@ -5297,7 +5297,6 @@ bool CScript::ScriptCmd_Respawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 //- Does not stop code execution - if multiple instances of return are encountered in the same event, the results are tokenized.
 bool CScript::ScriptCmd_Return(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-	Log("return called!");
 	if (Params.size() >= 1)
 	{
 		if (m.pScriptedInterface)
