@@ -4875,7 +4875,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	if ( MapperScript )
 	{
 		ScriptName = ScriptName.substr(13); //Get rid of the *EXT/
-		m.ScriptFile = ScriptName.thru_char(".").c_str();
+		m.ScriptFile = ScriptName; //.thru_char(".").c_str();
 	}
 
 	#ifndef SCRIPT_LOCKDOWN
@@ -4893,62 +4893,64 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 		}
 		else
 	#endif
+		unsigned long ScriptSize;
+		if ( MapperScript && !MSGlobals::CentralEnabled )
 		{
-			unsigned long ScriptSize;
-			if ( MapperScript && !MSGlobals::CentralEnabled )
-			{
-				char cScriptFile[MAX_PATH], cGameDir[MAX_PATH];
-				#ifdef VALVE_DLL
-					GET_GAME_DIR( cGameDir );
-				#else
-					strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory( ), MAX_PATH);
-				#endif
-					_snprintf( cScriptFile, MAX_PATH, "test_scripts/%s", ScriptName.c_str() ); //Thothie FEB2010_06 - attempting to fix other folks not being able to use test_scripts folder
+			char cScriptFile[MAX_PATH], cGameDir[MAX_PATH];
+			#ifdef VALVE_DLL
+				GET_GAME_DIR( cGameDir );
+			#else
+				strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory( ), MAX_PATH);
+			#endif
+				
+			_snprintf( cScriptFile, MAX_PATH, "test_scripts/%s", ScriptName.c_str() ); //Thothie FEB2010_06 - attempting to fix other folks not being able to use test_scripts folder
 
-				int iFileSize;
-				byte *pMemFile = LOAD_FILE_FOR_ME( cScriptFile, &iFileSize );
-				if( pMemFile )
-				{
-					ScriptData = msnew(char[iFileSize+1]);
-					memcpy( ScriptData, pMemFile, iFileSize );
-					ScriptData[iFileSize] = 0;
-					FREE_FILE( pMemFile );
-				}
-			}
-			else if( ScriptMgr::m_GroupFile.ReadEntry( ScriptName, NULL, ScriptSize ) )
+			int iFileSize;
+			byte *pMemFile = LOAD_FILE_FOR_ME(cScriptFile, &iFileSize);
+
+			if (!pMemFile)
 			{
-				ScriptData = msnew(char[ScriptSize+1]);
-				ScriptMgr::m_GroupFile.ReadEntry(ScriptName, (byte *)ScriptData, ScriptSize);
-				ScriptData[ScriptSize] = 0;
-			}
-			else
-			{
-				if( !Casual )
-				{
-					#ifndef SCRIPT_LOCKDOWN
-						#ifdef VALVE_DLL
-							CSVGlobals::LogScript( ScriptName, m.pScriptedEnt, m_Dependencies.size(), m.PrecacheOnly, false );
-						#endif
-							ALERT( at_notice, "Script file: \"%s\" NOT FOUND!\n", ScriptName.c_str() ); //thothie - moved to at_notice in hopes of getting bogus script reports
-					#else
-						#ifndef RELEASE_LOCKDOWN
-#ifdef VALVE_DLL
-							logfile << "ERROR: Script not found: " << ScriptName.c_str() << endl;
-							MessageBox( NULL, msstring("Script not found: ") + ScriptName + "\r\n\r\nThis is probably caused by a script using #include on a non-existant script.", "FIX THIS QUICK!", MB_OK );
-#endif
-						#else
-							//In the release build, this is a fatal error
-							//SERVER_COMMAND( "exit\n" ); This crashes the game, currently
-	//server side so we can retain ability to add server side only scripts
-#ifdef VALVE_DLL
-						MessageBox( NULL, msstring("Script not found: ") + ScriptName, "MAP SCRIPT ERROR", MB_OK ); //Thothie - JUN2007 Trying to get script bugs to report
-						//exit( 0 ); //MAR2008a Thothie - making non-fatal so it can report multiple
-#endif
-						#endif
-					#endif
-				}
 				return false;
 			}
+
+			ScriptData = msnew(char[iFileSize+1]);
+			memcpy( ScriptData, pMemFile, iFileSize );
+			ScriptData[iFileSize] = 0;
+			FREE_FILE(pMemFile);
+		}
+		else if( ScriptMgr::m_GroupFile.ReadEntry( ScriptName, NULL, ScriptSize ) )
+		{
+			ScriptData = msnew(char[ScriptSize+1]);
+			ScriptMgr::m_GroupFile.ReadEntry(ScriptName, (byte *)ScriptData, ScriptSize);
+			ScriptData[ScriptSize] = 0;
+		}
+		else
+		{
+			if( !Casual )
+			{
+				#ifndef SCRIPT_LOCKDOWN
+					#ifdef VALVE_DLL
+						CSVGlobals::LogScript( ScriptName, m.pScriptedEnt, m_Dependencies.size(), m.PrecacheOnly, false );
+					#endif
+						ALERT( at_notice, "Script file: \"%s\" NOT FOUND!\n", ScriptName.c_str() ); //thothie - moved to at_notice in hopes of getting bogus script reports
+				#else
+					#ifndef RELEASE_LOCKDOWN
+#ifdef VALVE_DLL
+						logfile << "ERROR: Script not found: " << ScriptName.c_str() << endl;
+						MessageBox( NULL, msstring("Script not found: ") + ScriptName + "\r\n\r\nThis is probably caused by a script using #include on a non-existant script.", "FIX THIS QUICK!", MB_OK );
+#endif
+					#else
+						//In the release build, this is a fatal error
+						//SERVER_COMMAND( "exit\n" ); This crashes the game, currently
+//server side so we can retain ability to add server side only scripts
+#ifdef VALVE_DLL
+					MessageBox( NULL, msstring("Script not found: ") + ScriptName, "MAP SCRIPT ERROR", MB_OK ); //Thothie - JUN2007 Trying to get script bugs to report
+					//exit( 0 ); //MAR2008a Thothie - making non-fatal so it can report multiple
+#endif
+					#endif
+				#endif
+			}
+			return false;
 		}
 
 	#ifdef VALVE_DLL
