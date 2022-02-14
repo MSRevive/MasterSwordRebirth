@@ -2212,7 +2212,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			return 0;
 		
 		// Don't send entities with flag NOSEND or using null.mdl
-		if (strcmp(STRING(ent->v.model),"models/null.mdl") == 0 || (ent->v.flags & FL_ENTNOSEND))
+		if ((STRING(ent->v.model) == "null.mdl") || (ent->v.flags & FL_ENTNOSEND))
 			return 0;
 	
 		// Don't send spectators to other players
