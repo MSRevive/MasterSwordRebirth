@@ -5974,7 +5974,7 @@ void IScripted::RunScriptEvents( bool fOnlyRunNamedEvents )
 		}
 		else
 		{
-			delete[] Script;
+			delete Script;
 
 			m_Scripts.erase( i );
 			i--;
