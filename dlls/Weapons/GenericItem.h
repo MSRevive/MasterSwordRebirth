@@ -327,7 +327,7 @@ public:
 
 	//Projectiles
 	virtual void RegisterProjectile();
-	virtual void TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage = -99999.0f);
+	virtual void TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage = -99999.0f, int iStat = 0, int iProp = 0);
 	virtual void ProjectileTouch(CBaseEntity *pOther);
 	virtual void Projectile_Move();
 	virtual void Projectile_Solidify();

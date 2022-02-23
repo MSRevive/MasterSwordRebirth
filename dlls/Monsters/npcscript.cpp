@@ -1255,12 +1255,12 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	//************************** TOSSPROJECTILE ***************************
 	else if (Cmd.Name() == "tossprojectile")
 	{
-		//Parameters: <"view"/target/origin> <range> <damage> <accuracy> <projectile scriptname> [start offset]
-		if (Params.size() >= 4)
+		//Parameters: <projectile scriptname> <"view"|(src_origin)> <target|(targ_origin)> <speed> <damage> <cof> <skill|none>
+		if (Params.size() >= 7)
 		{
-			float flRange = atof(Params[1]),
-				  flDamage = atof(Params[2]),
-				  flAccuracy = atof(Params[3]);
+			float flRange = atof(Params[3]),
+				  flDamage = atof(Params[4]),
+				  flAccuracy = atof(Params[5]);
 
 			//Thothie SEP2007a - make dmg multipliers internal
 			if (m_DMGMulti > 0)
@@ -1271,37 +1271,27 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool fLocation = false;
 			Vector Location;
 
-			if (Params[0][0] == '(')
+			if (Params[2][0] == '(')
 			{
-				Location = StringToVec(Params[0]); //Specified origin to shoot at
+				Location = StringToVec(Params[2]); //Specified origin to shoot at
 				fLocation = true;				   //MIB JUL2010_23 - fix tossing at specific location - Dogg forgot to set this
 			}
 			else
-				pAttackEnt = RetrieveEntity(Params[0]);
+				pAttackEnt = RetrieveEntity(Params[2]);
 
 			if (fAttack)
 			{
-				CGenericItem *pProjectile = NewGenericItem(Params[4]);
+				CGenericItem *pProjectile = NewGenericItem(Params[0]);
 				if (pProjectile)
 				{
 					Vector vAngle = pev->v_angle, //Default fire angle
 						vForward,
-						   vStartPos = EyePosition(); //Default start position if not specified
+						vStartPos;
 
-					//Thothie JAN2013_15 - allow tossing projectile from specific location, rather than relative
-					if (Params.size() >= 6)
-					{
-						if (Params.size() >= 7)
-						{
-							if (Params[6] == "notoffset")
-								vStartPos = StringToVec(Params[5]);
-						}
-						else
-						{
-							Vector vTemp = StringToVec(Params[5]);
-							vStartPos = pev->origin + GetRelativePos(pev->angles, vTemp); //x = right-left, y = forward-back, z = up-down
-						}
-					}
+					if (Params[1] == "view")
+						vStartPos = EyePosition(); //Default start position if not specified
+					else
+						vStartPos = StringToVec(Params[1]);
 
 					if (fLocation)
 					{
@@ -1320,7 +1310,14 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 					UTIL_MakeVectorsPrivate(vAngle, vForward, NULL, NULL);
 
 					Vector vTemp = vForward * flRange;
-					pProjectile->TossProjectile(this, vStartPos, vTemp, flDamage);
+
+					int Stat = 0, Prop = 0;
+					if (IsPlayer())
+					{
+						GetStatIndices(Params[6], Stat, Prop);
+					}
+
+					pProjectile->TossProjectile(this, vStartPos, vTemp, flDamage, Stat, Prop);
 				}
 			}
 		}

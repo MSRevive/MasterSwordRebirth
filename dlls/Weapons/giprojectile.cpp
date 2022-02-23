@@ -55,7 +55,7 @@ void CGenericItem::RegisterProjectile()
 	ProjectileData->IgnoreNPC = atoi(GetFirstScriptVar("reg.proj.ignorenpc")) ? true : false;	  //Thothie DEC2007a - for certain magic projectiles that pass through models
 	ProjectileData->IgnoreWorld = atoi(GetFirstScriptVar("reg.proj.ignoreworld")) ? true : false; //Thothie FEB2009_16 - float through walls
 }
-void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage)
+void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage, int iStat, int iProp)
 {
 	TypeCheck;
 	if (!pTossDevice)
@@ -86,6 +86,13 @@ void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vec
 	{
 		if (pTossDevice->IsMSMonster())
 		{
+			if (iStat)
+			{
+				ProjectileData->StatPower = iStat;
+				ProjectileData->PropPower = iProp;
+				ProjectileData->StatExp = iStat;
+				ProjectileData->PropExp = iProp;
+			}
 			CBaseEntity *pOwner = pTossDevice->RetrieveEntity(ENT_EXPOWNER);
 			if (pOwner)
 				StoreEntity(pOwner, ENT_EXPOWNER);
