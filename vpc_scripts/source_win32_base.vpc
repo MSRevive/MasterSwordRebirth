@@ -31,10 +31,33 @@ $Configuration
 	{
 		$MultiProcessorCompilation "True"
 
-		// warning C4316: object allocated on the heap may not be aligned 16
-		$DisableSpecificWarnings	"$BASE;4316" [!$VS2022 && $VS2013]
-		
-		// warning C4316: object allocated on the heap may not be aligned 16
+		// Remove warnings from warning level 4.
+		// 4316  warning object allocated on the heap may not be aligned 16
+		// 4514  warning C4514: 'acosl' : unreferenced inline function has been removed
+		// 4100  warning C4100: 'hwnd' : unreferenced formal parameter
+		// 4127  warning C4127: conditional expression is constant
+		// 4512  warning C4512: 'InFileRIFF' : assignment operator could not be generated
+		// 4611  warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
+		// 4710  warning C4710: function 'x' not inlined
+		// 4702  warning C4702: unreachable code
+		// 4505  unreferenced local function has been removed
+		// 4239  nonstandard extension used : 'argument' ( conversion from class Vector to class Vector& 
+		// 4097  typedef-name 'BaseClass' used as synonym for class-name 'CFlexCycler::CBaseFlex'
+		// 4324  Padding was added at the end of a structure
+		// 4244  type conversion warning.
+		// 4305  truncation from 'const double ' to 'float '
+		// 4786  Disable warnings about long symbol names
+		// 4250  'X' : inherits 'Y::Z' via dominance
+		// 4201  nonstandard extension used : nameless struct/union
+		// 4481  warning C4481: nonstandard extension used: override specifier 'override'
+		// 4748  warning C4748: /GS can not protect parameters and local variables from local buffer overrun because optimizations are disabled in function
+		// 4511 Disable warnings about private copy constructors
+		// 4121 warning C4121: 'symbol' : alignment of a member was sensitive to packing
+		// 4530 warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc (disabled due to std headers having exception syntax
+		// 4996 functions declared deprecated
+		// 4267 conversion from 'size_t' to 'int', possible loss of data
+		// 4311 pointer truncation from 'char *' to 'int'
+		// 4312 conversion from 'unsigned int' to 'memhandle_t' of greater size
 		// warning C4838: conversion from 'x' to 'y' requires a narrowing conversion
 		// warning C4456: declaration of 'x' hides previous local declaration
 		// warning C4457: declaration of 'x' hides function parameter
@@ -44,8 +67,10 @@ $Configuration
 		// warning C6031: return value ignored
 		// warning C28251: Inconsistent annotation (???)
 		// warning C28252: Inconsistent annotation (???)
-		// warning C5205: delete of an abstract class 'x' that has a non-virtual destructor results in undefined behavior
-		$DisableSpecificWarnings	"$BASE;4316;4838;4456;4457;4458;4459;26495;6031;28251;28252;5205" [$VS2022]
+		// warning C5205: delete of an abstract class 'x' that has a non-virtual destructor results in undefined behavior		
+		
+		$DisableSpecificWarnings	"$BASE;4316;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312" [!$VS2022 && $VS2013]
+		$DisableSpecificWarnings	"$BASE;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312;4838;4456;4457;4458;4459;26495;6031;28251;28252;5205" [$VS2022]
 
 		// Having lots of warnings makes it harder to notice new, and possibly
 		// important warnings, both on buildbot and in the output window. Lots

@@ -46,6 +46,7 @@
 #include "versioncontrol.h"
 
 #include "../MSShared/CVarMonitor.h"
+#include "FnDataHandler.h"
 
 extern void PlayerPrecache();
 
@@ -242,6 +243,10 @@ void ClientPutInServer(edict_t *pEntity)
 			MSErrorConsoleText("ClientPutInServer", "Player already has Address");
 		}
 	}
+
+	// Read Profile from FN, if possible.
+	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
+	FnDataHandler::LoadCharacter(pPlayer);
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();

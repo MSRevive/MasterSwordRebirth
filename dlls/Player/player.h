@@ -848,7 +848,8 @@ public:
 	char m_SbarString1[SBAR_STRING_SIZE];
 
 	float m_flNextChatTime;
-	//--------------------------
+
+	unsigned long long steamID64;
 };
 
 #ifndef VALVE_DLL
