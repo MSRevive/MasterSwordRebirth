@@ -693,7 +693,7 @@ msstring CScript::ScriptGetter_clcol( msstring& FullName, msstring& ParserName, 
 			if ( fcolor.z > 0 ) fcolor.z /= 255;
 			//Thothie OCT2015_29 - tweaking this to actually work proper (had no alpha def)
 			char RetString[128];
-			sprintf( RetString, "(%f,%f,%f,1.0)", fcolor.x, fcolor.y, fcolor.z );
+			_snprintf(RetString, 128, "(%f,%f,%f,1.0)", fcolor.x, fcolor.y, fcolor.z);
 			return RetString;
 		}
 		else
@@ -4341,49 +4341,52 @@ $filehash(<string|file_path>, <string|crc>)
 - Should return an int. Returns 0 if no parameter specified.
 - priority: low, scope: shared
 */
-msstring CScript::ScriptGetter_FileHash( msstring& FullName, msstring& ParserName, msstringlist& Params )
+msstring CScript::ScriptGetter_FileHash(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
-   msstring fcrc;
+	msstring fcrc;
 
-   //Wishbone MAR2016 - File hash.
-   if( Params.size() >= 1 )
-   {
-      char cfileName[MAX_PATH];
-      #ifdef VALVE_DLL
-         GET_GAME_DIR( cfileName );
-      #else
-         strncpy(cfileName, gEngfuncs.pfnGetGameDirectory(), sizeof(cfileName));
-      #endif
+	//Wishbone MAR2016 - File hash.
+	if (Params.size() >= 1)
+	{
+		char cfileName[MAX_PATH];
+#ifdef VALVE_DLL
+		GET_GAME_DIR(cfileName);
+#else
+		strncpy(cfileName, gEngfuncs.pfnGetGameDirectory(), sizeof(cfileName));
+#endif
 
-      msstring filePath = cfileName;
-      filePath += "/";
-      filePath += Params[0];
-      ifstream file;
-      file.open(filePath);
-      if(file.is_open())
-      {
-				sprintf(fcrc, "%i", GetFileCheckSum(filePath));
-				file.close();
-      }else{
-				file.close();
-        return "-1";
-      }
+		msstring filePath = cfileName;
+		filePath += "/";
+		filePath += Params[0];
+		ifstream file;
+		file.open(filePath);
+		if (file.is_open())
+		{
+			_snprintf(fcrc, MSSTRING_SIZE, "%i", GetFileCheckSum(filePath));
+			file.close();
+		}
+		else {
+			file.close();
+			return "-1";
+		}
 
-      if( Params.size() == 2 )
-      {
-         if( fcrc == Params[1] )
-         {
-            return "1"; //true
-         }else{
-            return "0";
-         }
-      }else{
-         return fcrc;
-      }
-
-   }else{
-      return "0";
-   }
+		if (Params.size() == 2)
+		{
+			if (fcrc == Params[1])
+			{
+				return "1"; //true
+			}
+			else {
+				return "0";
+			}
+		}
+		else {
+			return fcrc;
+		}
+	}
+	else {
+		return "0";
+	}
 }
 
 msstring_ref CScript::GetVar( msstring_ref pszText )

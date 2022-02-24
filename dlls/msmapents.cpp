@@ -1359,7 +1359,7 @@ public:
 
 			//Log( "Start" );
 			//msstring LogStr;
-			//sprintf( LogStr.c_str(), "[Spawn monster] %s from %s at %s", pMonster->DisplayName(), STRING(pev->targetname), VecToString(pMonster->pev->origin) );
+			//_snprintf( LogStr.c_str(), MSS_STRING_SIZE, "[Spawn monster] %s from %s at %s", pMonster->DisplayName(), STRING(pev->targetname), VecToString(pMonster->pev->origin) );
 			//ALERT( at_console, "%s\n", LogStr.c_str() );
 			//Log( "%s\n", LogStr.c_str() );
 			//Log( "End" );

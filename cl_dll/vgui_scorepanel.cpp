@@ -753,9 +753,7 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					//UNDONE -- Don't use the displayname, because the actual name on the server
 					//might have been changed due to duplicate names
-					//if( Info.thisplayer )
-					//	sprintf(sz, "%s", STRING(player.DisplayName));
-					 _snprintf(sz, sizeof(sz),  "%s",  Info.name );
+					_snprintf(sz, sizeof(sz), "%s", Info.name);
 					break;
 				/*case COLUMN_SKILL:
 					{

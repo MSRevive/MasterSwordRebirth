@@ -6,7 +6,6 @@
 #include "util.h"
 #else
 #include "../MSShared/sharedutil.h"
-#define msnew new
 #define STRING(a) ""
 #define LOAD_FILE_FOR_ME(a, b) 0
 
@@ -17,7 +16,7 @@ using namespace std;
 //
 //	Implementation of CGameFile and CPlayer_DataBuffer
 //  ���������������������������������������������
-bool CGameFile::OpenWrite(const char *pszFileName)
+bool CGameFile::OpenWrite(const char* pszFileName)
 {
 	m_File.open(pszFileName, ios_base::out | ios_base::binary);
 	if (!m_File.is_open())
@@ -26,7 +25,8 @@ bool CGameFile::OpenWrite(const char *pszFileName)
 	Reset();
 	return true;
 }
-bool CGameFile::OpenRead(const char *pszFileName)
+
+bool CGameFile::OpenRead(const char* pszFileName)
 {
 	m_File.open(pszFileName, ios_base::in | ios_base::binary);
 	if (!m_File.is_open())
@@ -35,25 +35,28 @@ bool CGameFile::OpenRead(const char *pszFileName)
 	Reset();
 	return true;
 }
+
 void CGameFile::Close()
 {
 	m_File.flush();
 	m_File.close();
 }
-void CGameFile::Write(void *pvData, size_t Size)
+
+void CGameFile::Write(void* pvData, size_t Size)
 {
-	m_File.write((const char *)pvData, Size);
+	m_File.write((const char*)pvData, Size);
 }
-bool CGameFile::Read(void *pvData, size_t Size)
+
+bool CGameFile::Read(void* pvData, size_t Size)
 {
 	if (Size)
-		((char *)pvData)[0] = 0;
-	m_File.read((char *)pvData, Size);
+		((char*)pvData)[0] = 0;
+	m_File.read((char*)pvData, Size);
 	//size_t retSize = fread( pvData, Size, 1, m_pFile );
 	//return (retSize > 0) ? true : false;
 	return !m_File.bad();
 }
-void CGameFile::ReadString(char *Data)
+void CGameFile::ReadString(char* Data)
 {
 	byte ReadIn;
 	ReadIn = 0;
@@ -82,17 +85,20 @@ CMemFile::CMemFile(int Alloc)
 	init();
 	Open(Alloc);
 }
+
 void CMemFile::Open(int iAlloc)
 {
 	m_ReadOffset = m_WriteOffset = 0;
 	Alloc(iAlloc);
 }
+
 void CMemFile::Alloc(int Alloc)
 {
 	Dealloc();
-	m_Buffer = msnew byte[Alloc];
+	m_Buffer = new byte[Alloc];
 	m_BufferSize = Alloc;
 }
+
 void CMemFile::Dealloc()
 {
 	if (m_Buffer)
@@ -100,28 +106,33 @@ void CMemFile::Dealloc()
 	m_Buffer = NULL;
 	m_BufferSize = 0;
 }
-void CMemFile::SetBuffer(byte *pNewBuffer, size_t Size)
+
+void CMemFile::SetBuffer(byte* pNewBuffer, size_t Size)
 {
 	Dealloc();
 	Alloc(Size);
 	memcpy(m_Buffer, pNewBuffer, Size);
 }
+
 void CMemFile::Close()
 {
 	Dealloc();
 	m_ReadOffset = m_WriteOffset = 0;
 }
+
 void CMemFile::Reset()
 {
 	m_ReadOffset = m_WriteOffset = 0;
 }
-void CMemFile::Write(void *pvData, size_t Size)
+
+void CMemFile::Write(void* pvData, size_t Size)
 {
 	memcpy(&m_Buffer[m_WriteOffset], pvData, Size);
 	m_WriteOffset += Size;
 	//m_BufferSize += Size;
 }
-bool CMemFile::Read(void *pvData, size_t Size)
+
+bool CMemFile::Read(void* pvData, size_t Size)
 {
 	if (m_ReadOffset + Size > m_BufferSize)
 		return false;
@@ -129,29 +140,32 @@ bool CMemFile::Read(void *pvData, size_t Size)
 	m_ReadOffset += Size;
 	return true;
 }
-void CMemFile::WriteToFile(const char *pszFileName)
+
+void CMemFile::WriteToFile(const char* pszFileName)
 {
 	CGameFile::OpenWrite(pszFileName);
 	CGameFile::Write(m_Buffer, m_BufferSize);
 	CGameFile::Close();
 }
-bool CMemFile::ReadFromGameFile(const char *pszFileName)
+
+bool CMemFile::ReadFromGameFile(const char* pszFileName)
 {
 	//Load a half-life engine file - could be compressed in a package
 
 	int Size = 0;
-	byte *pBuffer = LOAD_FILE_FOR_ME((char *)pszFileName, &Size);
+	byte* pBuffer = LOAD_FILE_FOR_ME((char*)pszFileName, &Size);
 
 	if (!pBuffer)
 		return false;
 
 	Dealloc();
 	m_BufferSize = Size;
-	m_Buffer = msnew byte[m_BufferSize];
+	m_Buffer = new byte[m_BufferSize];
 	memcpy(m_Buffer, pBuffer, m_BufferSize);
 	return true;
 }
-bool CMemFile::ReadFromFile(const char *pszFileName)
+
+bool CMemFile::ReadFromFile(const char* pszFileName)
 {
 	bool Success = CGameFile::OpenRead(pszFileName);
 	if (!Success)
@@ -159,24 +173,27 @@ bool CMemFile::ReadFromFile(const char *pszFileName)
 
 	Dealloc();
 	m_BufferSize = CGameFile::GetFileSize();
-	m_Buffer = msnew byte[m_BufferSize];
+	m_Buffer = new byte[m_BufferSize];
 	if (!CGameFile::Read(m_Buffer, m_BufferSize))
 		return false;
 	CGameFile::Close();
 	return true;
 }
+
 size_t CMemFile::GetFileSize()
 {
 	return m_BufferSize;
 }
-void CPlayer_DataBuffer::WriteToFile(const char *pszFileName, const char *OpenFlags, bool WriteBackup)
+
+void CPlayer_DataBuffer::WriteToFile(const char* pszFileName, const char* OpenFlags, bool WriteBackup)
 {
 	//Print( "WriteToFile Size: %i\n", m_BufferSize );
 	CMemFile::WriteToFile(pszFileName);
 	if (WriteBackup) //Write backup
 		CMemFile::WriteToFile(BACKUP_NAME(pszFileName));
 }
-bool CPlayer_DataBuffer::ReadFromFile(const char *pszFileName, const char *OpenFlags, bool ReadBackup)
+
+bool CPlayer_DataBuffer::ReadFromFile(const char* pszFileName, const char* OpenFlags, bool ReadBackup)
 {
 	//Print( "ReadFromFile Size: %i\n", CGameFile::GetFileSize( ) );
 	bool Success = CMemFile::ReadFromFile(pszFileName);
@@ -184,15 +201,12 @@ bool CPlayer_DataBuffer::ReadFromFile(const char *pszFileName, const char *OpenF
 		Success = CMemFile::ReadFromFile(BACKUP_NAME(pszFileName));
 	return Success;
 }
+
 void CPlayer_DataBuffer::Encrypt(int Encrypt)
 {
-	CEncryptBase *pEncrpytion;
-	if (Encrypt == 0)
-		pEncrpytion = msnew(CEncryptData1);
-	else if (Encrypt == 1)
-		pEncrpytion = msnew(CEncryptData2);
-	else
-		return;
+	CEncryptBase* pEncrpytion;
+	pEncrpytion = new(CData);
+
 	pEncrpytion->SetData(m_Buffer, m_BufferSize);
 	pEncrpytion->Encrypt();
 	Alloc(pEncrpytion->GetDataSize());
@@ -200,15 +214,12 @@ void CPlayer_DataBuffer::Encrypt(int Encrypt)
 	//m_BufferSize = pEncrpytion->GetDataSize( );
 	delete pEncrpytion;
 }
+
 bool CPlayer_DataBuffer::Decrypt(int Encrypt)
 {
-	CEncryptBase *pEncrpytion;
-	if (Encrypt == 0)
-		pEncrpytion = msnew(CEncryptData1);
-	else if (Encrypt == 1)
-		pEncrpytion = msnew(CEncryptData2);
-	else
-		return false;
+	CEncryptBase* pEncrpytion;
+	pEncrpytion = new(CData);
+
 	pEncrpytion->SetData(m_Buffer, m_BufferSize);
 	if (!pEncrpytion->Decrypt())
 	{

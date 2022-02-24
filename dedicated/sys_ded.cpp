@@ -90,7 +90,7 @@ long Sys_LoadLibrary( char *lib )
     if (cwd[strlen(cwd)-1] == '/')
         cwd[strlen(cwd)-1] = 0;
         
-    sprintf(absolute_lib, "%s/%s", cwd, lib);
+	_snprintf(absolute_lib, sizeof(absolute_lib), "%s/%s", cwd, lib);
     
     hDll = dlopen( absolute_lib, RTLD_NOW );
     if ( !hDll )
@@ -163,7 +163,7 @@ void UpdateStatus( int force )
 
 	tLast = tCurrent;
 
-	sprintf( szPrompt, "%.1f fps %2i(%2i spec)/%2i on %16s", (float)fps, n, spec, nMax, szMap);
+	_snprintf(szPrompt, sizeof(szPrompt), "%.1f fps %2i(%2i spec)/%2i on %16s", (float)fps, n, spec, nMax, szMap);
 
 	WriteStatusText( szPrompt );
 }
@@ -555,7 +555,7 @@ void ProcessConsoleInput( void )
 		if (s)
 		{
 			char szBuf[ 256 ];
-			sprintf( szBuf, "%s\n", s );
+			_snprintf(szBuf, sizeof(szBuf), "%s\n", s);
 			engineapi.Cbuf_AddText ( szBuf );
 		}
 	} while (s);

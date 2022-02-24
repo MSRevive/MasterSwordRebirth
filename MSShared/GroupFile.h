@@ -23,37 +23,62 @@ struct groupfileheader_t
 
 struct cachedentry_t : groupheader_t
 {
-	byte *Data;
+	byte* Data;
 };
 
-class CGroupFile
+// Class for file operations with encryption
+class CEGroupFile
 {
 protected:
-	char m_FileName[260]; //was MAX_PATH which is 260?
+	char m_FileName[MAX_PATH];
 	//unsigned long FindHeader( const char *pszName, groupheader_t &GroupHeader );
-	bool DeleteEntry(const char *pszName);
+	bool DeleteEntry(const char* pszName);
 	bool m_IsOpen;
 
 public:
-	void Open(char *pszFileName);
-	~CGroupFile() { Close(); }
+	~CEGroupFile() { Close(); };
+	void Open(char* pszFileName);
+	bool IsOpen() { return m_IsOpen; };
 	void Close();
-	bool IsOpen() { return m_IsOpen; }
-	bool WriteEntry(const char *pszName, byte *pData, unsigned long DataSize);
+	bool WriteEntry(const char* pszName, byte* pData, unsigned long DataSize);
 
 	//Call Read() with pBuffer == NULL to just get the size
-	bool ReadEntry(const char *pszName, byte *pBuffer, unsigned long &DataSize);
+	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
 	void Flush();
 
+private:
+	mslist<cachedentry_t> m_EntryList;
+};
+
+// Class for file operations
+class CGroupFile
+{
+protected:
+	char m_FileName[MAX_PATH];
+	//unsigned long FindHeader( const char *pszName, groupheader_t &GroupHeader );
+	bool DeleteEntry(const char* pszName);
+	bool m_IsOpen;
+
+public:
+	~CGroupFile() { Close(); };
+	void Open(char* pszFileName);
+	bool IsOpen() { return m_IsOpen; };
+	void Close();
+	bool WriteEntry(const char* pszName, byte* pData, unsigned long DataSize);
+
+	//Call Read() with pBuffer == NULL to just get the size
+	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
+	void Flush();
+
+private:
 	mslist<cachedentry_t> m_EntryList;
 };
 
 /*Format:
-
   [DWORD] Number of Headers
   [groupheader_t * X] X Amount of Headers
   [DATA] All data
- */
+*/
 
 #ifndef NOT_HLDLL
 #include "FileSystem.h"
@@ -84,11 +109,10 @@ public:
 
 	//Call Read() with pBuffer == NULL to just get the size
 	//Decrypts script data on demand, avoid calling more than once for any given script
-	bool ReadEntry(const char *pszName, byte *pBuffer, unsigned long &DataSize);
+	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
 
 private:
 	FileHandle_t m_hFile;
-
 	mslist<groupheader_t> m_EntryList;
 };
 

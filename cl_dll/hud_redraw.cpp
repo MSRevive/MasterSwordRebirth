@@ -392,8 +392,6 @@ int CHud ::DrawHudStringSML(int x, int y, char *pcString, int r, int g, int b, i
 			SPR_Set(GetSprite(m_HUD_char_slashSML), r, g, b);
 			SPR_DrawAdditive(0, ix, y, &GetSpriteRect(m_HUD_char_slashSML));
 			ix += iWidth;
-			/*			sprintf( a, "index = %i", m_HUD_char_slashSML );
-			ConsolePrint( a );*/
 		}
 		else if (pcString[i] == ':')
 		{

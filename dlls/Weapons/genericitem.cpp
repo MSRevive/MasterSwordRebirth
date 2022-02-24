@@ -395,17 +395,9 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 
 		//If Public build or /scripts/items.txt failed in the dev build, try /dlls/sc.dll
-		char cGameDir[MAX_PATH], cGroupFilePath[MAX_PATH];
-#ifdef VALVE_DLL
-		GET_GAME_DIR(cGameDir);
-#else
-		strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory(), MAX_PATH);
-#endif
-		_snprintf(cGroupFilePath, MAX_PATH, "%s/dlls/sc.dll", cGameDir);
-
 		//CGroupFile &GroupFile = *msnew CGroupFile();
 		CGameGroupFile GroupFile;
-		GroupFile.Open(cGroupFilePath);
+		GroupFile.Open("dlls/sc.dll");
 		ulong FileSize;
 		if (GroupFile.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
 		{

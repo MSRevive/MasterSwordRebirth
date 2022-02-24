@@ -8,7 +8,7 @@ typedef unsigned int size_t;
 class CEncryptBase
 {
 protected:
-	byte *m_pData;
+	byte* m_pData;
 	size_t m_DataSize;
 
 public:
@@ -21,8 +21,8 @@ public:
 	}
 
 	void SetData(const byte pData[], const size_t Size);
-	void GetData(byte *pData) const;
-	byte *GetData() const;
+	void GetData(byte* pData) const;
+	byte* GetData() const;
 	size_t GetDataSize() const { return m_DataSize; }
 
 	virtual void Encrypt() {}
@@ -32,7 +32,7 @@ public:
 class CEncryptData1 : public CEncryptBase
 {
 public:
-	CEncryptData1() : CEncryptBase(){};
+	CEncryptData1() : CEncryptBase() {};
 	CEncryptData1(const byte pData[], const size_t Size) : CEncryptBase(pData, Size) {}
 
 	void Encrypt();
@@ -43,9 +43,17 @@ public:
 class CEncryptData2 : public CEncryptBase
 {
 public:
-	CEncryptData2() : CEncryptBase(){};
+	CEncryptData2() : CEncryptBase() {};
 	CEncryptData2(const byte pData[], const size_t Size) : CEncryptBase(pData, Size) {}
 
 	void Encrypt();
 	bool Decrypt();
+};
+
+//Class that uses CEncryptBase but with no encryption functions for backwards compat.
+class CData : public CEncryptBase
+{
+public:
+	CData() : CEncryptBase() {};
+	CData(const byte pData[], const size_t Size) : CEncryptBase(pData, Size) {}
 };
