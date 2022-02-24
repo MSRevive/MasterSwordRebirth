@@ -401,7 +401,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #else
 		strncpy(cGameDir, gEngfuncs.pfnGetGameDirectory(), MAX_PATH);
 #endif
-		_snprintf(cGroupFilePath, MAX_PATH, "dlls/sc.dll", cGameDir);
+		_snprintf(cGroupFilePath, MAX_PATH, "%s/dlls/sc.dll", cGameDir);
 
 		//CGroupFile &GroupFile = *msnew CGroupFile();
 		CGameGroupFile GroupFile;

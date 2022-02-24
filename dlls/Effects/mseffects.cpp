@@ -201,6 +201,7 @@ public:
 		pev->movetype = MOVETYPE_FLY;
 		pev->effects = EF_NODRAW;
 	}
+
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		CBasePlayer *pPlayer = NULL;
@@ -210,7 +211,8 @@ public:
 		else if (pCaller && pCaller->IsPlayer())
 			pPlayer = (CBasePlayer *)pCaller;
 
-		pPlayer->pev->maxspeed = 0;
+		if (pPlayer)
+			pPlayer->pev->maxspeed = 0;
 	}
 };
 

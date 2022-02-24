@@ -28,6 +28,9 @@
 *.ipch
 vc100.pdb
 
+*.VC.*
+*.FileListAbsolute.txt
+
 # Version Controlling
 *.hg
 /.hg

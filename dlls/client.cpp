@@ -234,7 +234,7 @@ void ClientPutInServer(edict_t *pEntity)
 
 			if (strstr(pPlayer->m_ClientAddress, "loopback") ||
 				strstr(pPlayer->m_ClientAddress, "127.0.0.1"))
-				_snprintf(pPlayer->m_ClientAddress, 128, "%s:%i", g_NetCode.m.HostIP.c_str(), Port.c_str()); //If local player, use local address
+				_snprintf(pPlayer->m_ClientAddress, 128, "%s:%s", g_NetCode.m.HostIP.c_str(), Port.c_str()); //If local player, use local address
 			bool fEntryFound = false;
 		}
 		else
@@ -1134,7 +1134,7 @@ void ClientCommand2(edict_t *pEntity)
 					pItem->CallScriptEvent("game_setchargepercent", &parms);
 				}
 			}
-			else
+			else if (pItem)
 			{
 				//NOV2014_15 - Think we accidentally undid this :O
 				pItem->ClientAttacking = true;

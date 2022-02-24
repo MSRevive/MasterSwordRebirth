@@ -570,27 +570,23 @@ int GameInit(void)
 {
 	char *p;
 #ifdef _WIN32
-	MEMORYSTATUS Buffer;
+	MEMORYSTATUSEX Buffer;
 
 	memset( &Buffer, 0, sizeof( Buffer ) );
 	Buffer.dwLength = sizeof( MEMORYSTATUS );
 	
-	GlobalMemoryStatus ( &Buffer );
+	GlobalMemoryStatusEx ( &Buffer );
 
 	// take the greater of all the available memory or half the total memory,
 	// but at least 10 Mb and no more than 32 Mb, unless they explicitly
 	// request otherwise
-	giMemSize = Buffer.dwTotalPhys;
+	giMemSize = Buffer.ullTotalPhys;
 
-	if ( giMemSize < FIFTEEN_MEGS )
-	{
-		return 0;
-	}
+	if ( giMemSize < FIFTEEN_MEGS )	
+		return 0;	
 
-	if ( giMemSize < (int)( Buffer.dwTotalPhys >> 1 ) )
-	{
-		giMemSize = (int)( Buffer.dwTotalPhys >> 1 );
-	}
+	if ( giMemSize < (int)( Buffer.ullTotalPhys >> 1 ) )	
+		giMemSize = (int)( Buffer.ullTotalPhys >> 1 );	
 
 	// At least 10 mb, even if we have to swap a lot.
 	if (giMemSize <= MINIMUM_WIN_MEMORY)
@@ -620,28 +616,13 @@ int GameInit(void)
 	gpMemBase = (unsigned char *)::GlobalAlloc( GMEM_FIXED, giMemSize );
 #else
 	gpMemBase = (unsigned char *)malloc( giMemSize );
+
 #endif
+
 	if (!gpMemBase)
 	{
 		return 0;
 	}
-
-#ifdef _WIN32
-	// Check that we are running on Win32
-	OSVERSIONINFO	vinfo;
-	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
-
-	if ( !GetVersionEx ( &vinfo ) )
-	{
-		return 0;
-	}
-
-	if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32s )
-	{
-		return 0;
-	}
-	
-#endif
 
 	if ( !Eng_Load( gpszCmdLine, &ef, giMemSize, gpMemBase, g_pszengine, DLL_NORMAL ) )
 	{

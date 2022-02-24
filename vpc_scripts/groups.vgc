@@ -12,7 +12,7 @@ $Group "msc"
 {
 	"client"
 	"server"
-	//"dedicated"
+	"dedicated"
 	"scriptpack"
 	"maphash"
 }
