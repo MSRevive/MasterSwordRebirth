@@ -1109,6 +1109,10 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 					ClearBits(p->flags, FTENT_GRAVITY);
 				}
 			}
+			else if (Cmd == "sequence")
+			{
+				p->entity.curstate.sequence = atoi(Value);
+			}
 			else if (p->entity.curstate.weaponanim)
 			{
 				if (Cmd == "timer")
