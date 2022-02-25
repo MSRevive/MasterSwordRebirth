@@ -236,7 +236,7 @@ void CStatPanel::Update()
 			cDisplayText[0] = 0;
 			break;
 		case 4:
-			 _snprintf(cDisplayText, sizeof(cDisplayText),  "Gold: %i\n",  (int)player.m_Gold );
+			 _snprintf(cDisplayText, sizeof(cDisplayText),  "Gold: %i\n",  player.m_Gold );
 			break;
 		case 5:
 			 _snprintf(cDisplayText, sizeof(cDisplayText),  "Player Kills: %i\n",  player.m_PlayersKilled );

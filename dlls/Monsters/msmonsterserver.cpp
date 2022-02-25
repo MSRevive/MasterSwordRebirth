@@ -131,6 +131,8 @@ void CMSMonster::Activate()
 }
 void CMSMonster::Spawn()
 {
+	m_OldGold = 0;
+
 	//startdbg;
 	//SUB_Remove( ); return;
 	//DelayedRemove( );

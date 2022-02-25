@@ -223,7 +223,7 @@ void CHudMisc::SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
 		}
 
 		if (m_OfferInfo.GoldScreen)
-			gHUD.m_Menu->ShowMenu(pow(2, 10) - 1, UTIL_VarArgs("You have %i gold coins.\n\nOffer gold: %i\n", (int)player.m_Gold, m_OfferInfo.GoldAmt), CHudMisc_SelectMenuItem, MENU_OFFER);
+			gHUD.m_Menu->ShowMenu(pow(2, 10) - 1, UTIL_VarArgs("You have %i gold coins.\n\nOffer gold: %i\n", player.m_Gold, m_OfferInfo.GoldAmt), CHudMisc_SelectMenuItem, MENU_OFFER);
 
 		break;
 	}

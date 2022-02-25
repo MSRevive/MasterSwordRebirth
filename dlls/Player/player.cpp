@@ -3894,14 +3894,14 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//MiB Modded JAN2010_15 - Gold Change on Spawn.rtf
-	if (m_Gold.m_Changed)
+	if (m_OldGold != m_Gold)
 	{
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
 		WRITE_BYTE(3);
 		WRITE_BYTE(1);
 		WRITE_LONG(m_Gold);
 		MESSAGE_END();
-		m_Gold.m_Changed = false;
+		m_OldGold = m_Gold;
 	}
 
 	if (m_Gender != m_ClientGender)
@@ -5232,7 +5232,7 @@ void CBasePlayer::GetAnyItems()
 			//Gather corpse gold
 			CMSMonster *pMonster = (CMSMonster *)pEnt;
 			//Thothie - AUG2007b - minor hud color change
-			SendEventMsg(HUDEVENT_GREEN, UTIL_VarArgs("You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster)));
+			SendEventMsg(HUDEVENT_GREEN, UTIL_VarArgs("You pick up %i gold coins from %s", pMonster->m_Gold, SPEECH::NPCName(pMonster)));
 			//SendInfoMsg( "You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster) );
 			GiveGold(pMonster->m_Gold, false);
 			pMonster->m_Gold = 0;
@@ -5524,7 +5524,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 		{
 			//Gather corpse gold
 			CMSMonster *pMonster = (CMSMonster *)pEnt;
-			SendInfoMsg("You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster));
+			SendInfoMsg("You pick up %i gold coins from %s", pMonster->m_Gold, SPEECH::NPCName(pMonster));
 			GiveGold(pMonster->m_Gold, false);
 			pMonster->m_Gold = 0;
 			break;

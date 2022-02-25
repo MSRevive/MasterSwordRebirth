@@ -246,7 +246,9 @@ public:
 		m_MaxHP, //m_MaxHP/m_MaxMP should not be read for determining max amounts.  Use MaxHP() and MaxHP()
 		m_MaxMP; //The functions factor in status ailments, and player skills.  Players dont even use m_MaxHP/m_MaxMP
 
-	safevar(int, m_Gold);	//Amount of gold I'm carrying
+	int m_Gold;	// Amount of gold I'm carrying
+	int m_OldGold; // Last Gold Value - for updating
+
 	byte m_Gender;			//My Gender (default male)
 	bool m_fSpawnOnTrigger, //Spawn only when triggered?
 		m_UseExpStat;		//Whether m_ExpStat & m_ExpProp are valid

@@ -60,7 +60,6 @@ void Print(char *szFmt, ...);
 
 #include "stackstring.h"
 #include "msdebug.h"
-#include "mem_encrypt.h"
 
 #ifdef VECTOR_H
 	msstring_ref VecToString( const Vector &Vec );			//Converts a vector to a string of format "(x,y,z)"
