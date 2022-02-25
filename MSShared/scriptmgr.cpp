@@ -7,23 +7,16 @@ int ScriptMgr::m_TotalScripts = 0;
 
 void ScriptMgr::RegisterScript(CScript *NewScript)
 {
-	if(!m_GroupFile.IsOpen())
-	{
-		char cGroupFilePath[MAX_PATH];
-		sprintf(cGroupFilePath, "dlls/sc.dll");
-		m_GroupFile.Open(cGroupFilePath);
-	}
-
+	if (!m_GroupFile.IsOpen())
+		m_GroupFile.Open("dlls/sc.dll");
 	m_TotalScripts++;
 }
 
 void ScriptMgr::UnRegisterScript(CScript *NewScript)
 {
 	m_TotalScripts--;
-	if( m_TotalScripts == 0 )
-	{
-		m_GroupFile.Close();
-	}
+	if( m_TotalScripts == 0 )	
+		m_GroupFile.Close();	
 }
 
 void ScriptMgr::GameShutdown()

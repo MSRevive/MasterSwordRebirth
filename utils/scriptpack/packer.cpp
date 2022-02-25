@@ -1,6 +1,5 @@
 #include "cbase.h"
 #include "iostream"
-#include "../../MSShared/encrypt.h"
 #include "../../MSShared/sharedutil.h"
 #include "../../MSShared/msfileio.h"
 

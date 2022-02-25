@@ -709,7 +709,6 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	dbg("Encrypt");
 	gFile.m_BufferSize = gFile.GetWritePtr();
-	gFile.Encrypt(ENCRYPTION_TYPE);
 
 	//#ifdef VALVE_DLL
 	if (MSCentral::Enabled())

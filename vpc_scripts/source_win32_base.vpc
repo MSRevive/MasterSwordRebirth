@@ -32,6 +32,7 @@ $Configuration
 		$MultiProcessorCompilation "True"
 
 		// Remove warnings from warning level 4.
+		// 4018  signed unsigned mismatch
 		// 4316  warning object allocated on the heap may not be aligned 16
 		// 4514  warning C4514: 'acosl' : unreferenced inline function has been removed
 		// 4100  warning C4100: 'hwnd' : unreferenced formal parameter
@@ -69,8 +70,8 @@ $Configuration
 		// warning C28252: Inconsistent annotation (???)
 		// warning C5205: delete of an abstract class 'x' that has a non-virtual destructor results in undefined behavior		
 		
-		$DisableSpecificWarnings	"$BASE;4316;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312" [!$VS2022 && $VS2013]
-		$DisableSpecificWarnings	"$BASE;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312;4838;4456;4457;4458;4459;26495;6031;28251;28252;5205" [$VS2022]
+		$DisableSpecificWarnings	"$BASE;4316;4018;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312" [!$VS2022 && $VS2013]
+		$DisableSpecificWarnings	"$BASE;4100;4018;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312;4838;4456;4457;4458;4459;26495;6031;28251;28252;5205" [$VS2022]
 
 		// Having lots of warnings makes it harder to notice new, and possibly
 		// important warnings, both on buildbot and in the output window. Lots

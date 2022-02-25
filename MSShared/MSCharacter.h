@@ -118,8 +118,6 @@ struct spellskillstat_t
 #define SAVECHAR_VERSION SAVECHAR_DEV_VERSION
 #endif
 
-#define ENCRYPTION_TYPE 0
-
 #define LAST_VERSION_DATA_SIZE 648
 #define CURRENT_VERSION_DATA_SIZE 648
 

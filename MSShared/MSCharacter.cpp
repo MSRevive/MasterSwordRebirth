@@ -96,42 +96,37 @@ bool DeleteChar(int iCharacter)
 
 savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps)
 {
-	CPlayer_DataBuffer gFile;
 	static savedata_t Data;
+	CPlayer_DataBuffer gFile;
+
 	bool fCharLoaded = gFile.ReadFromFile(pszFileName, "rb", true);
 	if (fCharLoaded)
 	{
-		fCharLoaded = gFile.Decrypt(ENCRYPTION_TYPE);
-		if (fCharLoaded)
+		memset(&Data, 0, sizeof(savedata_t));
+		gFile.Read(&Data, sizeof(savedata_t));
+
+		if (IsValidCharVersion(Data.Version))
 		{
-			memset(&Data, 0, sizeof(savedata_t));
-			gFile.Read(&Data, sizeof(savedata_t));
+			//Also read the visited maps -- This is used to determine whether you can spawn on this map
+			//The visited maps must come DIRECTLY after the main data
+			int Maps = 0;
+			gFile.ReadInt(Maps); //[INT]
 
-			if (IsValidCharVersion(Data.Version))
+			char cTemp[256];
+			VisitedMaps.clear();
+			for (int m = 0; m < Maps; m++)
 			{
-				//Also read the visited maps -- This is used to determine whether you can spawn on this map
-				//The visited maps must come DIRECTLY after the main data
-				int Maps = 0;
-				gFile.ReadInt(Maps); //[INT]
-
-				char cTemp[256];
-				VisitedMaps.clear();
-				for (int m = 0; m < Maps; m++)
-				{
-					gFile.ReadString(cTemp); //[STRING]
-					VisitedMaps.add(cTemp);
-				}
+				gFile.ReadString(cTemp); //[STRING]
+				VisitedMaps.add(cTemp);
 			}
-			else
-				fCharLoaded = false;
-
-			gFile.Close();
 		}
+		else
+			fCharLoaded = false;
+
+		gFile.Close();
 	}
 
-	if (fCharLoaded)
-		return &Data;
-	return NULL;
+	return (fCharLoaded ? &Data : NULL);
 }
 
 bool MSChar_Interface::ReadCharData(void *pData, ulong Size, chardata_t *CharData)
@@ -148,9 +143,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 
 	CPlayer_DataBuffer m_File(Size);
 	m_File.Write(pData, Size);
-	if (!m_File.Decrypt(ENCRYPTION_TYPE))
-		return false;
-
 	byte DataID = CHARDATA_UNKNOWN;
 
 	do

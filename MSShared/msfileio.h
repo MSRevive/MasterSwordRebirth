@@ -79,11 +79,9 @@ class CPlayer_DataBuffer : public CMemFile
 public:
 	CPlayer_DataBuffer() : CMemFile() {}
 	CPlayer_DataBuffer(int Alloc) : CMemFile(Alloc) {}
-	void WriteToFile(const char *pszFileName, const char *OpenFlags, bool WriteBackup);
-	void Encrypt(int Encrypt);
-	bool Decrypt(int Encrypt);
 
-	bool ReadFromFile(const char *pszFileName, const char *OpenFlags, bool ReadBackup);
+	void WriteToFile(const char* pszFileName, const char* OpenFlags, bool WriteBackup);
+	bool ReadFromFile(const char* pszFileName, const char* OpenFlags, bool ReadBackup);
 };
 
 #define BACKUP_NAME(a) (msstring(a) + ".backup")

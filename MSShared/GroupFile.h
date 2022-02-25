@@ -26,28 +26,50 @@ struct cachedentry_t : groupheader_t
 	byte* Data;
 };
 
-// Class for file operations with encryption
-class CEGroupFile
+class CData
 {
-protected:
-	char m_FileName[MAX_PATH];
-	//unsigned long FindHeader( const char *pszName, groupheader_t &GroupHeader );
-	bool DeleteEntry(const char* pszName);
-	bool m_IsOpen;
-
 public:
-	~CEGroupFile() { Close(); };
-	void Open(char* pszFileName);
-	bool IsOpen() { return m_IsOpen; };
-	void Close();
-	bool WriteEntry(const char* pszName, byte* pData, unsigned long DataSize);
+	CData()
+	{
+		m_pData = NULL;
+	}
 
-	//Call Read() with pBuffer == NULL to just get the size
-	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
-	void Flush();
+	CData(const byte pData[], const size_t Size)
+	{
+		SetData(pData, Size);
+	}
 
-private:
-	mslist<cachedentry_t> m_EntryList;
+	virtual ~CData()
+	{
+		if (m_pData)
+			delete m_pData;
+	}
+
+	void SetData(const byte pData[], const size_t Size)
+	{
+		m_pData = new byte[Size];
+		m_DataSize = Size;
+		memcpy(m_pData, pData, m_DataSize);
+	}
+
+	void GetData(byte* pData) const
+	{
+		memcpy(pData, m_pData, m_DataSize);
+	}
+
+	byte* GetData() const
+	{
+		return m_pData;
+	}
+
+	size_t GetDataSize() const
+	{
+		return m_DataSize;
+	}
+
+protected:
+	byte* m_pData;
+	size_t m_DataSize;
 };
 
 // Class for file operations

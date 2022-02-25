@@ -1,5 +1,4 @@
 #include "msfileio.h"
-#include "encrypt.h"
 
 #ifndef NOT_HLDLL
 #include "extdll.h"
@@ -200,35 +199,4 @@ bool CPlayer_DataBuffer::ReadFromFile(const char* pszFileName, const char* OpenF
 	if ((!Success || !CMemFile::GetFileSize()) && ReadBackup) //File doesn't exist or is zero length, try reading backup file
 		Success = CMemFile::ReadFromFile(BACKUP_NAME(pszFileName));
 	return Success;
-}
-
-void CPlayer_DataBuffer::Encrypt(int Encrypt)
-{
-	CEncryptBase* pEncrpytion;
-	pEncrpytion = new(CData);
-
-	pEncrpytion->SetData(m_Buffer, m_BufferSize);
-	pEncrpytion->Encrypt();
-	Alloc(pEncrpytion->GetDataSize());
-	pEncrpytion->GetData(m_Buffer);
-	//m_BufferSize = pEncrpytion->GetDataSize( );
-	delete pEncrpytion;
-}
-
-bool CPlayer_DataBuffer::Decrypt(int Encrypt)
-{
-	CEncryptBase* pEncrpytion;
-	pEncrpytion = new(CData);
-
-	pEncrpytion->SetData(m_Buffer, m_BufferSize);
-	if (!pEncrpytion->Decrypt())
-	{
-		delete pEncrpytion;
-		return false;
-	}
-	Alloc(pEncrpytion->GetDataSize());
-	pEncrpytion->GetData(m_Buffer);
-	//m_BufferSize = pEncrpytion->GetDataSize( );
-	delete pEncrpytion;
-	return true;
 }
