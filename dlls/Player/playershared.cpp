@@ -24,7 +24,7 @@ void ShowWeaponDesc(CGenericItem *pItem);
 #include "../cl_dll/MasterSword/CLGlobal.h"
 #else
 #include "Global.h"
-#include "MSCentral.h"
+#include "FnDataHandler.h"
 #endif
 
 //NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017
@@ -1350,18 +1350,15 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	if (!MSGlobals::ServerSideChar)
 		return;
 
-	if (MSCentral::Enabled())
+	if (FnDataHandler::IsEnabled())
 	{
-		//Send a request to retrieve the player's info from a central server.
-		//Once the player file is downloaded, m_CharInfo will be updated with the info
+		// Send a request to retrieve the player's info from a central server.
+		// Once the player file is downloaded, m_CharInfo will be updated with the info
+		// TODO - check CDS_LOADING?
 		if (CharIdx == -1)
-		{
-			for (int i = 0; i < MAX_CHARSLOTS; i++)
-				if (m_CharInfo[i].Status != CDS_LOADING)
-					MSCentral::RetrieveChar(AuthID(), i);
-		}
-		else if (m_CharInfo[CharIdx].Status != CDS_LOADING)
-			MSCentral::RetrieveChar(AuthID(), CharIdx);
+			FnDataHandler::LoadCharacter(this);
+		else
+			FnDataHandler::LoadCharacter(this, CharIdx);
 	}
 	else
 	{

@@ -8,10 +8,10 @@
 #include "Weapons/GenericItem.h"
 #include "gamerules/gamerules.h"
 #include "Store.h"
-#include "MSCentral.h"
 #include "versioncontrol.h"
 #include "CStringPool.h"
 #include "../MSShared/CVarMonitor.h"
+#include "FnDataHandler.h"
 
 ofstream modelout;
 int HighestPrecache = -1;
@@ -62,10 +62,6 @@ cvar_t ms_central_enabled = {"ms_central_enabled", "0", FCVAR_SERVER};
 cvar_t ms_fake_hp = {"ms_fake_hp", "0", FCVAR_SERVER};			 //Thothie AUG2011_17 - moving Fakehp to cvar for use with triggers
 cvar_t ms_fake_players = {"ms_fake_players", "0", FCVAR_SERVER}; //Thothie DEC2013_07 - for returning false # of players for some functions during testing
 cvar_t ms_central_addr = {"ms_central_addr", "0", FCVAR_PROTECTED};
-cvar_t ms_central_pass = {"ms_central_pass", "0", FCVAR_PROTECTED};
-cvar_t ms_central_pulse = {"ms_central_pulse", "6", 0};
-cvar_t ms_central_tag = {"ms_central_tag", "[OFFLINE] ", 0};
-cvar_t ms_central_online = {"ms_central_online", "0", 0};
 cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 
 #ifdef DEV_BUILD
@@ -109,10 +105,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_ban_to_cfg);
 	CVAR_REGISTER(&ms_central_enabled);
 	CVAR_REGISTER(&ms_central_addr);
-	CVAR_REGISTER(&ms_central_pass);
-	CVAR_REGISTER(&ms_central_pulse);
-	CVAR_REGISTER(&ms_central_tag);
-	CVAR_REGISTER(&ms_central_online);
 	CVAR_REGISTER(&ms_debug_mem);
 	CVAR_REGISTER(&ms_fake_hp);		 //AUG2011_17 Thothie - moving fakehp functions to cvar
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
@@ -132,8 +124,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	logfile << "Initialize network... ";
 
 	CNetCode::InitNetCode();
-
-	MSCentral::Startup();
 
 	logfile << "DONE\r\n";
 
@@ -157,10 +147,6 @@ void MSWorldSpawn()
 	MSGlobals::CanCreateCharOnMap = false;
 	MSGlobals::ServerSideChar = ms_serverchar.value ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
-
-	//Get the Central Server network name and MOTD
-	MSCentral::NewLevel();
-	MSCentral::RetrieveInfo();
 
 #ifndef RELEASE_LOCKDOWN
 	UTIL_LogPrintf("***************************************\n");
@@ -194,10 +180,8 @@ void MSWorldSpawn()
 void MSGameThink()
 {
 	startdbg;
-	dbg("Call MSCentral::Think");
-
-	MSCentral::Think();
-
+	dbg("Call FnDataHandler::Think");
+	FnDataHandler::Think();
 	enddbg;
 }
 
@@ -207,7 +191,6 @@ void MSGameThink()
 void MSGameEnd()
 {
 	startdbg;
-	MSCentral::GameEnd();
 	
 	if(MSGlobals::GameScript)
 	{

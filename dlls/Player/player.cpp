@@ -54,8 +54,8 @@
 #include "Global.h"
 #include "MSCharacter.h"
 #include "Magic.h"
-#include "MSCentral.h"
 #include "logfile.h"
+#include "FnDataHandler.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
@@ -3721,14 +3721,7 @@ void CBasePlayer::UpdateClientData(void)
 			//Central server info (on/off, name)
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 			WRITE_BYTE(6);
-			if (MSCentral::Enabled())
-			{
-				WRITE_BYTE(1);
-				WRITE_BYTE(MSCentral::m_Online ? 1 : 0);
-				WRITE_STRING(MSCentral::m_NetworkName);
-			}
-			else
-				WRITE_BYTE(0);
+			WRITE_BYTE(FnDataHandler::IsEnabled() ? 1 : 0);
 			MESSAGE_END();
 
 			m_fGameHUDInitialized = TRUE;
@@ -6365,6 +6358,7 @@ void CBasePlayer::Central_ReceivedChar(int CharIndex, char *Data, int DataLen)
 	charinfo_t &Char = m_CharInfo[CharIndex];
 	Char.AssignChar(CharIndex, LOC_CENTRAL, Data, DataLen, this);
 }
+
 void CBasePlayer::Central_UpdateChar(int CharIndex, chardatastatus_e Status)
 {
 	//Update the retrieval status information about a char

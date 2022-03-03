@@ -6,59 +6,135 @@
 
 #include "MSDLLHeaders.h"
 #include "Player.h"
+#include "Global.h"
 #include "FnDataHandler.h"
 #include "HTTPRequestHandler.h"
 #include "rapidjson/document_safe.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include "base64/base64.h"
 
-#define FN_TEST_URL "http://fn.msrebirth.net:27520" // TODO: Move this to a CVAR!
+using namespace rapidjson;
+
+static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS)); }
+
+static const char* GetFnUrl(char* fmt, ...)
+{
+	static char requestUrl[REQUEST_URL_SIZE], string[REQUEST_URL_SIZE];
+
+	va_list argptr;
+	va_start(argptr, fmt);
+	vsnprintf(string, sizeof(string), fmt, argptr);
+	va_end(argptr);
+
+	_snprintf(requestUrl, REQUEST_URL_SIZE, "%s/", CVAR_GET_STRING("ms_central_addr"));
+	strncat(requestUrl, string, REQUEST_URL_SIZE - strlen(requestUrl) - 1);
+	
+	return requestUrl;
+}
 
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL)) return;
 
-	char pchRequestUrl[REQUEST_URL_SIZE];
-	_snprintf(pchRequestUrl, sizeof(pchRequestUrl), "%s/api/v1/character/%llu", FN_TEST_URL, pPlayer->steamID64);
-
-	const JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(pchRequestUrl);
+	const JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/character/%llu", pPlayer->steamID64));
 	if (pDoc == NULL) return;
 
-	char printBuffer[180];
-	_snprintf(printBuffer, sizeof(printBuffer), "id - %llu\n", pPlayer->steamID64);
-	UTIL_ClientPrintAll(2, printBuffer);
-
 	const JSONDocument& doc = *pDoc;
-	for (const JSONValue& val : doc["data"].GetArray())
+	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
 	{
-		_snprintf(printBuffer, 180, "IDs: %s\n", val["steamid"].GetString());
-		UTIL_ClientPrintAll(2, printBuffer);
+		int slot = val["slot"].GetInt();
+		if (!IsSlotValid(slot)) continue; // Invalid slot!
+		
+		int size = val["size"].GetInt();
+		charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+		CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CENTRAL, (char*)base64_decode(val["data"].GetString()).c_str(), size, pPlayer);
 	}
 
-	HTTPRequestHandler::PrintJSONDocument(pDoc);
 	delete pDoc;
 }
 
-// Save character profile X for SteamID y.
-void FnDataHandler::SaveCharacter(CBasePlayer* pPlayer)
+// Load a specific character!
+void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (pPlayer->m_CharacterState == CHARSTATE_UNLOADED)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot)) return;
 
-	// TODO - Use Rapid JSON document writer -> Get the document as string then use this string as the body.
-	const char* body =
-		"{ \"steamid\": \"76561198092541770\", \"slot\":3, \"name\": \"Cancifer\", \"gender\":1, \"race\":\"human\", \"flags\":\"{}\", \"quickslots\":\"{}\", \"quests\":\"{}\", \"skills\":\"{}\", \"pets\":\"{}\", \"health\":500, \"mana\": 500, \"equipped\":\"{}\", \"spells\":\"{}\", \"spellbook\":\"{}\", \"bags\":\"{}\", \"sheaths\":\"{}\" }";
+	const JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, slot));
+	if (pDoc == NULL) return;
 
-	HTTPRequestHandler::PostRequest("api/v1/character/", body);
+	const JSONDocument& doc = *pDoc;
+	const JSONValue& val = doc["data"];
+
+	int size = val["size"].GetInt();
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+	CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CENTRAL, (char*)base64_decode(val["data"].GetString()).c_str(), size, pPlayer);
+
+	delete pDoc;
 }
 
-// Create a new character, if possible.
-void FnDataHandler::CreateCharacter(CBasePlayer* pPlayer, unsigned char profile, const char* race, unsigned char gender, unsigned char* type)
+// Create or Update character.
+void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const char* data, int size, bool bIsUpdate)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (data == NULL) || (size <= 0) || !IsSlotValid(slot)) return; // Quick validation - steamId is vital.
 
-	// Create default char + send back to plr!
-	// TODO
+	if (bIsUpdate && (pPlayer->m_CharacterState == CHARSTATE_UNLOADED)) return; // You cannot update your char (save) if there is no char loaded.
+
+	StringBuffer s;
+	Writer<StringBuffer> writer(s);
+
+	writer.StartObject();
+
+	writer.Key("steamid");
+	writer.String(pPlayer->steamID64String);
+
+	writer.Key("slot");
+	writer.Int(slot);
+
+	writer.Key("size");
+	writer.Int(size);
+
+	writer.Key("data");
+	writer.String(base64_encode((const unsigned char*)data, size).c_str());
+
+	writer.EndObject();
+
+	// todo -- assign for slot?
+
+	if (bIsUpdate)
+	{
+		HTTPRequestHandler::PutRequest(GetFnUrl("api/v1/character/%s", "1111-1111-guid-here-2222"), s.GetString());
+		return;
+	}
+
+	JSONDocument* pResponse = HTTPRequestHandler::PostRequestAsJson(GetFnUrl("api/v1/character/"), s.GetString());
+	if (pResponse)
+	{
+		// (*pResponse)["value"]["data"].GetString();
+		// note the UUID / GUID << STORE SOMEWHERE..
+	}
+
+	delete pResponse;
+}
+
+void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
+{
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (pPlayer->m_CharacterState != CHARSTATE_LOADED) || !IsSlotValid(slot)) return;
+
+	HTTPRequestHandler::DeleteRequest(GetFnUrl("api/v1/character/%s", "guid-here-pls"));
+	// todo - unload char?
+}
+
+// Handle thinking, if necessary?
+// TODO: Add proper multi threading - check queue system here later?
+void FnDataHandler::Think(void)
+{
+
+}
+
+bool FnDataHandler::IsEnabled(void)
+{
+	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
 // We store 64-bit SteamIDs, convert from old 32-bit string based ID to 64-bit numeric.

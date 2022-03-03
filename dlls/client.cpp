@@ -42,7 +42,6 @@
 #include "MSNetCode.h"
 #include "MSCharacter.h"
 #include "Global.h"
-#include "MSCentral.h"
 #include "versioncontrol.h"
 
 #include "../MSShared/CVarMonitor.h"
@@ -246,7 +245,8 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
-	FnDataHandler::LoadCharacter(pPlayer);
+	_snprintf(pPlayer->steamID64String, MSSTRING_SIZE, "%llu", pPlayer->steamID64);
+	//FnDataHandler::LoadCharacter(pPlayer); // TEST
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -2027,12 +2027,7 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 const char *GetGameDescription()
 {
 	DBG_INPUT;
-	msstring CentralSVTag = (MSCentral::Enabled() &&
-							 !MSCentral::m_Online)
-								? CVAR_GET_STRING("ms_central_tag")
-								: "";
-
-	static msstring GameDesc = UTIL_VarArgs("%sMS:C %s", CentralSVTag.c_str(), MS_VERSION);
+	static msstring GameDesc = UTIL_VarArgs("MS:R %s", MS_VERSION);
 	return GameDesc;
 }
 

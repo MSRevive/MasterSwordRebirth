@@ -298,7 +298,6 @@ public:
 	//MiB DEC2007a
 	string_i ScriptFName;
 	mslist<scriptfile_t> filesOpen;		  //MiB FEB2008a - file i/o
-	mslist<scriptfile_t> filesOpenFN;	  //MiB FEB2008a - file i/o
 
 	msscriptarrayhash scriptedArrays; //MiB JAN2010_27 - Arrays, new type.
 	msscripthashhash mScriptedHashes; // MiB SEP2019_23 - Scripted Hashes
@@ -363,12 +362,12 @@ public:
 	bool m_Brush;
 //----------------
 #ifdef VALVE_DLL
-	virtual bool FInViewCone(CBaseEntity *pEntity, float m_flFieldOfView) STUB_CLIENT
-		virtual bool FInViewCone(Vector &Origin, float m_flFieldOfView) STUB_CLIENT
-		virtual bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
+	virtual bool FInViewCone(CBaseEntity* pEntity, float m_flFieldOfView) STUB_CLIENT
+		virtual bool FInViewCone(Vector& Origin, float m_flFieldOfView) STUB_CLIENT
+		virtual bool CanDamage(CBaseEntity* pOther); //Can I damage this entity?
 	virtual void SUB_FadeOut(float FadeDuration);
 	virtual void Think_FadeOut(void);
-	virtual float TraceAttack(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, int AccuracyRoll = 0);
+	virtual float TraceAttack(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType, int AccuracyRoll = 0);
 
 	float m_FadeDuration;
 	float m_TimeFadeStart;

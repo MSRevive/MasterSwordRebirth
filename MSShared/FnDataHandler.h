@@ -6,8 +6,11 @@ class CBasePlayer;
 namespace FnDataHandler
 {
 	void LoadCharacter(CBasePlayer* pPlayer);
-	void SaveCharacter(CBasePlayer* pPlayer);
-	void CreateCharacter(CBasePlayer* pPlayer, unsigned char profile, const char* race, unsigned char gender, unsigned char* type);
+	void LoadCharacter(CBasePlayer* pPlayer, int slot);
+	void CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const char* data, int size, bool bIsUpdate);
+	void DeleteCharacter(CBasePlayer* pPlayer, int slot);
+	void Think(void);
+	bool IsEnabled(void);
 	unsigned long long GetSteamID64(const char* id);
 }
 

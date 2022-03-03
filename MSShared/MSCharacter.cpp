@@ -6,7 +6,7 @@
 #include "Stats/Stats.h"
 #ifdef VALVE_DLL
 #include "../MSShared/Global.h"
-#include "MSCentral.h"
+#include "FnDataHandler.h"
 #else
 #include "../cl_dll/inc_huditem.h"
 #include "../cl_dll/MasterSword/CLGlobal.h"
@@ -55,7 +55,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 		FileID = msstring("LAN_") + g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
 	else
 		FileID = GETPLAYERAUTHID(pPlayer->edict());
-	msstring Prefix = MSCentral::Enabled() ? CENTRAL_FILEPREFIX : "";
+	msstring Prefix = FnDataHandler::IsEnabled() ? "central_" : "";
 
 	//Thothie MAR2010_08 emergency work around
 	//iCharacter = pPlayer->m_CharacterNum;

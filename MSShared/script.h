@@ -144,7 +144,6 @@ public:
 	SCRIPTCMDSCPP_CMDS( ClEffect );
 	SCRIPTCMDSCPP_CMDS( ClientCmd );
 	SCRIPTCMDSCPP_CMDS( ClientEvent );
-	SCRIPTCMDSCPP_CMDS( CloseFNFile );
 	SCRIPTCMDSCPP_CMDS( Companion );
 	SCRIPTCMDSCPP_CMDS( ConflictCheck );
 	SCRIPTCMDSCPP_CMDS( Create );
@@ -265,7 +264,6 @@ public:
 	SCRIPTCMDSCPP_CMDS( Weight );
 	SCRIPTCMDSCPP_CMDS( WipeSpell );
 	SCRIPTCMDSCPP_CMDS( WriteLine );
-	SCRIPTCMDSCPP_CMDS( WriteFNFile );
 	SCRIPTCMDSCPP_CMDS( XDoDamage );
 	SCRIPTCMDSCPP_CMDS( DebugEntities ); //MiB MAR2019_28 Internal Script Debug
 #undef SCRIPTCMDSCPP_CMDS
@@ -307,7 +305,6 @@ public:
 	SCRIPTCPP_GETTER( FileHash ); //Wishbone MAR2016 - get a file's hash.
 	SCRIPTCPP_GETTER( GetFileLine );
 	SCRIPTCPP_GETTER( GetFindToken );
-	SCRIPTCPP_GETTER( GetFNFileLine );
 	SCRIPTCPP_GETTER( GetGroundHeight );
 	SCRIPTCPP_GETTER( GetHashMap );
 	SCRIPTCPP_GETTER( GetInSphere );

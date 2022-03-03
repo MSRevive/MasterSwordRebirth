@@ -850,6 +850,7 @@ public:
 	float m_flNextChatTime;
 
 	unsigned long long steamID64;
+	char steamID64String[MSSTRING_SIZE];
 };
 
 #ifndef VALVE_DLL

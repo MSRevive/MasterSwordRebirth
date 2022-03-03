@@ -5,11 +5,11 @@
 #include "inc_weapondefs.h"
 #include "Stats/Stats.h"
 #include "../MSShared/Global.h"
-#include "MSCentral.h"
 #include "logfile.h"
 #include "MSCharacter.h"
 #include "../MSShared/Magic.h"
 #include "../MSShared/script.h"
+#include "FnDataHandler.h"
 
 #ifndef _WIN32
 #include "sys/io.h"
@@ -106,7 +106,7 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 
 #ifdef VALVE_DLL
 	//Update player's character list, so the new char is sent down to client
-	if (!MSCentral::Enabled())
+	if (!FnDataHandler::IsEnabled())
 		PreLoadChars();
 #endif
 }
@@ -114,9 +114,9 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 {
 #ifdef VALVE_DLL
-	if (MSCentral::Enabled())
+	if (FnDataHandler::IsEnabled())
 	{
-		MSCentral::RemoveChar(pPlayer->AuthID(), iCharacter);
+		FnDataHandler::DeleteCharacter(pPlayer, iCharacter);
 		return true;
 	}
 #endif
@@ -711,10 +711,10 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	gFile.m_BufferSize = gFile.GetWritePtr();
 
 	//#ifdef VALVE_DLL
-	if (MSCentral::Enabled())
+	if (FnDataHandler::IsEnabled())
 	{
-		//If Central Server is enabled, save to the Central Server instead of locally
-		MSCentral::SaveChar(GETPLAYERAUTHID(pPlayer->edict()), pPlayer->m_CharacterNum, (const char *)gFile.m_Buffer, gFile.GetFileSize(), pData != NULL);
+		// If Central Server is enabled, save to the Central Server instead of locally
+		FnDataHandler::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, (const char*)gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
 		gFile.Close();
 		return;
 	}

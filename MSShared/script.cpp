@@ -11,7 +11,6 @@
 #ifdef VALVE_DLL
 #include "SVGlobals.h"
 #include "../MSShared/Global.h"
-#include "MSCentral.h"
 bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #else
 #include "../cl_dll/MasterSword/CLGlobal.h"
@@ -115,7 +114,6 @@ void CScript::ScriptGetterHash_Setup( )
         m_GlobalGetterHash["$int"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_Int);
         m_GlobalGetterHash["$get_scriptflag"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetScriptFlag);
         m_GlobalGetterHash["$mid"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_Mid);
-        m_GlobalGetterHash["$get_fnfileline"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetFNFileLine);
         m_GlobalGetterHash["$get_tbox"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetTSphereAndBox);
         m_GlobalGetterHash["$get_tbox_abs"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetTSphereAndBox); //Thothie OCT2016_11
         m_GlobalGetterHash["$g_get_array"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetArray);
@@ -1802,52 +1800,6 @@ msstring CScript::ScriptGetter_random_of_set( msstring& FullName, msstring& Pars
 		return Params[rnd_idx].c_str();
 	}
 	else return "-1";
-}
-//$get_fnfileline(<fileName>)
-//- experimental: If the file is ready to read, returns the current line, otherwise returns "[NOT_READY_FOR_READ]"
-//- priority: very low, scope: server
-msstring CScript::ScriptGetter_GetFNFileLine( msstring& FullName, msstring& ParserName, msstringlist& Params )
-{
-	//MiB Feb2008a
-	//$get_fnfileline(<fileName>) - If the file is ready to read, returns the line, otherwise warns the script that it's not ready to be read
-	//priority: very low, scope: server
-#ifdef VALVE_DLL
-	if( Params.size() >= 1 )
-	{
-		msstring fileName = Params[0];
-		for(int i = 0; i < m.pScriptedEnt->filesOpenFN.size(); i++)
-		{
-			if( m.pScriptedEnt->filesOpenFN[i].fileName == fileName )
-			{
-				if( m.pScriptedEnt->filesOpenFN[i].readyForRead )
-				{
-					if( Params.size() >= 2 )
-						return m.pScriptedEnt->filesOpenFN[i].ScriptFile_ReadLine( atoi( Params[1] )); //Read specific line
-					else
-						return m.pScriptedEnt->filesOpenFN[i].ScriptFile_ReadLine(); //Read next line
-				}
-				else
-				{
-					return "[NOT_READY_FOR_READ]";
-				}
-			}
-		}
-
-		//We've made it here, thus we don't have the file yet
-		scriptfile_t File;
-		File.fileName = fileName;
-		File.readyForRead = false;
-		m.pScriptedEnt->filesOpenFN.add( File );
-
-		MSCentral::ReadFNFile( fileName, EntToString(m.pScriptedEnt) );
-
-		return "[NOT_READY_FOR_READ]";
-
-	}
-	else return 0;
-#endif
-
-	return FullName;
 }
 
 //$get_ground_height(<origin>)
@@ -4505,17 +4457,10 @@ msstring_ref CScript::GetVar( msstring_ref pszText )
 				// MiB DEC2014_07 - FN time (when server side, us FN time, if possible)
 				time_t curTime;
 #ifdef VALVE_DLL
-				if ( MSCentral::Enabled() )
-				{
-					//Print("XEBUG: Using FN time.\n");
-					curTime = MSCentral::m_CentralTime + (time(NULL) - MSCentral::m_CentralTimeLastRecd);
-				}
-				else
-				{
-					time( &curTime );
-				}
+				// if ( MSCentral::Enabled() ) << use central time?
+				time(&curTime);
 #else
-				time( &curTime );
+				time(&curTime);
 #endif
 
 				struct tm* TheTime = localtime( &curTime );

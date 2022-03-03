@@ -27,7 +27,6 @@
 #else
 #include "SVGlobals.h"
 #include "../MSShared/Global.h"
-#include "MSCentral.h"
 #endif
 
 #undef SCRIPTVAR
@@ -67,9 +66,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["settrans"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_SetTrans); //Thothie APR2008b set character transition
 		m_GlobalCmdHash["setviewmodelprop"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_SetViewModelProp); //Shuriken MAR2008
 		m_GlobalCmdHash["gagplayer"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_GagPlayer); //Thothie FEB2008b - for admin_gag function
-		m_GlobalCmdHash["closefnfile"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_CloseFNFile); //MIB FEB2008a - close open FN file (untested)
-		m_GlobalCmdHash["appendfnfile"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_WriteFNFile); //MIB FEB2008a - write file to FN (untested)
-		m_GlobalCmdHash["writefnfile"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_WriteFNFile); //MIB FEB2008a - write file to FN (untested)
 		m_GlobalCmdHash["setpvp"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_SetPVP); //Thothie FEB2008a - direct setting of PVP for Votepvp
 		m_GlobalCmdHash["strconc"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_StrConc); //Thothie FEB2008a - simpler string concatenation
 		m_GlobalCmdHash["messageall"] = scriptcmdscpp_cmdfunc_t(&ScriptCmd_MessageAll); //playermessage for all huds
@@ -2654,31 +2650,6 @@ bool CScript::ScriptCmd_ClientEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		//}  //end if fxfloodlevel > 20 else
 	} //end if  Params.size() >= 3
 	else ERROR_MISSING_PARMS;
-#endif
-
-	return true;
-}
-
-//closefnfile <filename>
-//- scope: server
-//- experimental: closes an FN file handle
-bool CScript::ScriptCmd_CloseFNFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-{
-	//MiB Feb2008a
-	//closefnfile <fileName>
-#ifdef VALVE_DLL
-	if( Params.size() >= 1 )
-	{
-		msstring fileName = Params[0];
-		for( int i = 0; i < m.pScriptedEnt->filesOpenFN.size(); i++ )
-		{
-			if( m.pScriptedEnt->filesOpenFN[i].fileName == fileName )
-			{
-				m.pScriptedEnt->filesOpenFN.erase( i );
-				break;
-			}
-		}
-	}
 #endif
 
 	return true;
@@ -7369,46 +7340,6 @@ bool CScript::ScriptCmd_WipeSpell(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	}
 	else ERROR_MISSING_PARMS;
 #endif
-	return true;
-}
-
-//writefnfile <fileName> <line> <lineNum> [o/i]
-//appendfnfile <fileName> <line>
-//- scope: server
-//- Experimental: write or append to FN file.
-//- (Why does append require a line#?)
-bool CScript::ScriptCmd_WriteFNFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-{
-	//MiB Feb2008a
-	//writefnfile <fileName> <line> <lineNum> [o/i]
-	//appendfnfile <fileName> <line>
-#ifdef VALVE_DLL
-	if( Params.size() >= 2 )
-	{
-		msstring fileName = Params[0];
-		msstring line = Params[1];
-
-		int lineNum = Cmd.Name() == "writefnfile" ? atoi( Params[2] ) : -1;
-		bool o = Cmd.Name() == "writefnfile" && Params.size() >= 4 && Params[3] == "o";
-
-		//Check to see if we have this file open
-		for(int i = 0; i < m.pScriptedEnt->filesOpenFN.size(); i++)
-		{
-			if( m.pScriptedEnt->filesOpenFN[i].fileName == fileName )
-			{
-				m.pScriptedEnt->filesOpenFN[i].AddLine( line, lineNum, o );
-				break;
-			}
-		}
-
-		if( Cmd.Name() == "appendfnfile" )
-			MSCentral::WriteFNFile( fileName, line, "a" );
-		else
-			MSCentral::WriteFNFile( fileName, line, o? "o":"i", lineNum );
-
-	}
-#endif
-
 	return true;
 }
 

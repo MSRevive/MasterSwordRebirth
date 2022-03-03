@@ -134,7 +134,6 @@ $Project "Server"
 		$File	".\entity.cpp"
 		$File	".\magic.cpp"
 		$File	".\monsters\monsteranimation.cpp"
-		$File	".\mscentraltransaction_dll.cpp"
 		$File	".\effects\mseffects.cpp"
 		$File	"msmapents.cpp"
 		$File	".\monsters\msmonsterserver.cpp"
@@ -177,7 +176,6 @@ $Project "Server"
 			$File	"..\msshared\groupfile.h"
 			$File	".\player\modeldefs.h"
 			$File	".\monsters\monsteranimation.h"
-			$File	".\mscentral.h"
 			$File	"..\msshared\mscharacter.h"
 			$File	"..\msshared\mscharacterheader.h"
 			$File	"msdllheaders.h"
@@ -251,6 +249,12 @@ $Project "Server"
 			$File "..\msshared\crc\crchash.cpp"
 			$File "..\msshared\crc\crchash.h"
 			$File "..\msshared\crc\xxhash32.h"
+		}
+
+		$Folder "base64"
+		{
+			$File "..\thirdparty\base64\base64.cpp"
+			$File "..\thirdparty\base64\base64.h"
 		}
 	}
 

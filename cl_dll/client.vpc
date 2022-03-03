@@ -411,6 +411,12 @@ $Project "Client"
 			$File "..\msshared\crc\crchash.h"
 			$File "..\msshared\crc\xxhash32.h"
 		}
+
+		$Folder "base64"
+		{
+			$File "..\thirdparty\base64\base64.cpp"
+			$File "..\thirdparty\base64\base64.h"
+		}
 	}
 	
 	$Folder	"Link Libraries"

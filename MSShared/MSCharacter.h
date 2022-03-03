@@ -191,9 +191,6 @@ class ChooseChar_Interface
 public:
 	static int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
 	static bool CentralServer;
-	static bool CentralOnline;
-	static msstring CentralNetworkName;
-	static char CentralNetworkMOTD[4096]; //string, because it can be up to 4096 chars
 	static void UpdateCharScreen();
 	static void UpdateCharScreenUpload();
 };
