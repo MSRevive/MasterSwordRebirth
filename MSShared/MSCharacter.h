@@ -11,10 +11,8 @@
 enum chardatastatus_e
 {
 	CDS_UNLOADED,
-	CDS_LOADING,
 	CDS_LOADED,
-	CDS_NOTFOUND,
-	CDS_ERROR
+	CDS_NOTFOUND
 };
 enum charloc_e
 {
@@ -70,11 +68,13 @@ struct charinfo_t : charinfo_base_t
 	bool IsElite;
 	enum gender_e Gender;
 	msstring Name, MapName, OldTrans, NextMap, NewTrans;
+	char Guid[MSSTRING_SIZE];
 	mslist<gearinfo_t> GearInfo;
 
-	charinfo_t() { Data = NULL; }
-	void AssignChar(int CharIndex, charinfo_t::charloc_e Location, char *Data, int DataLen, class CBasePlayer *pPlayer);
+	charinfo_t() { Data = NULL; Guid[0] = 0; }
 	~charinfo_t();
+
+	void AssignChar(int CharIndex, charloc_e Location, const char* Data, int DataLen, class CBasePlayer* pPlayer);
 };
 
 struct charsendinfo_t : charinfo_base_t

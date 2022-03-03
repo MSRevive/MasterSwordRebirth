@@ -96,7 +96,7 @@ JSONDocument* HTTPRequestHandler::ParseJSON(const char* data)
 
 	JSONDocument* document = new JSONDocument;
 	document->Parse(data);
-	if (document->HasParseError() || (document->Size() <= 0))
+	if (document->HasParseError())
 	{
 		delete document;
 		return NULL;

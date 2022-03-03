@@ -131,6 +131,7 @@ bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 
 	return (!ret) ? true : false;
 }
+
 void MSChar_Interface::AutoSave(CBasePlayer *pPlayer)
 {
 	if (gpGlobals->time > pPlayer->m_TimeNextSave)

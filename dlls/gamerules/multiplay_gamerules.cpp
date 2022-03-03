@@ -289,11 +289,6 @@ bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap( )
 			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 			if( !pPlayer ) continue;
 
-			//Somebody is still loading a character from the Central Server.  Wait for success or an error
-			 for (int c = 0; c < pPlayer->m_CharInfo.size(); c++) 
-				if( pPlayer->m_CharInfo[c].Status == CDS_LOADING ) 
-					{ Allowed = true; break; }
-
 			//If one person has a character that can join the map, then don't switch the map
 			if( pPlayer->m_CanJoin ) { Allowed = true; break; }
 		}

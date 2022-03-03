@@ -732,9 +732,6 @@ void CNewCharacterPanel::Update( )
 				else {
 					//Choose_MainBtn[i]->SetBGColorRGB( DisabledColor );
 					//Choose_MainBtn[i]->SetFGColorRGB( DisabledColor );
-					if( CharSlot.Status == CDS_LOADING )
-						Choose_MainBtn[i]->setText( Localized("#CHOOSECHAR_LOADING") );
-
 					Choose_MainBtn[i]->setEnabled( false );
 					//Choose_ImageCover[i]->setVisible( true );
 				}

@@ -606,7 +606,6 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "say_team"))
 	{
 	}
-
 	/*else if ( FStrEq(pcmd, "fullupdate" ) )
 	{
 		GetClassPtr((CBasePlayer *)pev)->ForceClientDllUpdate();

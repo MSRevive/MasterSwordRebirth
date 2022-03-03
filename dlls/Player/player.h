@@ -527,8 +527,6 @@ public:
 	void SUB_Remove(void);
 	bool LoadCharacter(int Num); //Load a server-side character
 	void Think_SendCharData();	 //Send info about a Char, if not already sent
-	void Central_ReceivedChar(int CharIndex, char *Data, int DataLen);
-	void Central_UpdateChar(int CharIndex, chardatastatus_e Status);
 	void SaveChar();
 #endif
 	int MSProperties()

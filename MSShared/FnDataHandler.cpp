@@ -33,10 +33,31 @@ static const char* GetFnUrl(char* fmt, ...)
 	return requestUrl;
 }
 
+// Load single char details.
+static bool LoadCharacter(CBasePlayer* pPlayer, const JSONValue& val)
+{
+	const int slot = val["slot"].GetInt();
+	const int size = val["size"].GetInt();
+
+	if (!IsSlotValid(slot)) return false; // Invalid slot!
+
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+	strncpy(CharInfo.Guid, val["id"].GetString(), MSSTRING_SIZE);
+	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)base64_decode(val["data"].GetString()).c_str(), size, pPlayer);
+
+	return true;
+}
+
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL)) return;
+
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	{
+		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
+		pPlayer->m_CharInfo[i].Status = CDS_NOTFOUND;
+	}
 
 	const JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/character/%llu", pPlayer->steamID64));
 	if (pDoc == NULL) return;
@@ -44,12 +65,7 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 	const JSONDocument& doc = *pDoc;
 	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
 	{
-		int slot = val["slot"].GetInt();
-		if (!IsSlotValid(slot)) continue; // Invalid slot!
-		
-		int size = val["size"].GetInt();
-		charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
-		CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CENTRAL, (char*)base64_decode(val["data"].GetString()).c_str(), size, pPlayer);
+		LoadCharacter(pPlayer, val);
 	}
 
 	delete pDoc;
@@ -60,15 +76,18 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot)) return;
 
+	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
+	pPlayer->m_CharInfo[slot].Status = CDS_NOTFOUND;
+
 	const JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, slot));
 	if (pDoc == NULL) return;
 
 	const JSONDocument& doc = *pDoc;
-	const JSONValue& val = doc["data"];
-
-	int size = val["size"].GetInt();
-	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
-	CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CENTRAL, (char*)base64_decode(val["data"].GetString()).c_str(), size, pPlayer);
+	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
+	{
+		LoadCharacter(pPlayer, val);
+		break;
+	}
 
 	delete pDoc;
 }
@@ -99,19 +118,18 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 
 	writer.EndObject();
 
-	// todo -- assign for slot?
-
 	if (bIsUpdate)
 	{
-		HTTPRequestHandler::PutRequest(GetFnUrl("api/v1/character/%s", "1111-1111-guid-here-2222"), s.GetString());
+		HTTPRequestHandler::PutRequest(GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid), s.GetString());
 		return;
 	}
 
 	JSONDocument* pResponse = HTTPRequestHandler::PostRequestAsJson(GetFnUrl("api/v1/character/"), s.GetString());
 	if (pResponse)
-	{
-		// (*pResponse)["value"]["data"].GetString();
-		// note the UUID / GUID << STORE SOMEWHERE..
+	{		
+		charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+		strncpy(CharInfo.Guid, (*pResponse)["data"]["id"].GetString(), MSSTRING_SIZE);
+		CharInfo.AssignChar(slot, LOC_CENTRAL, data, size, pPlayer);
 	}
 
 	delete pResponse;
@@ -121,15 +139,16 @@ void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (pPlayer->m_CharacterState != CHARSTATE_LOADED) || !IsSlotValid(slot)) return;
 
-	HTTPRequestHandler::DeleteRequest(GetFnUrl("api/v1/character/%s", "guid-here-pls"));
-	// todo - unload char?
+	HTTPRequestHandler::DeleteRequest(GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid));
+
+	pPlayer->m_CharInfo[slot].Status = CDS_NOTFOUND;
+	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 }
 
 // Handle thinking, if necessary?
 // TODO: Add proper multi threading - check queue system here later?
 void FnDataHandler::Think(void)
 {
-
 }
 
 bool FnDataHandler::IsEnabled(void)

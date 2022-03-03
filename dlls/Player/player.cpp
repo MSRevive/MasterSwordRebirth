@@ -6349,28 +6349,6 @@ void CBasePlayer::SUB_Remove()
 	CBaseMonster::SUB_Remove();
 }
 
-void CBasePlayer::Central_ReceivedChar(int CharIndex, char *Data, int DataLen)
-{
-	//Load a character from the Central Server
-	if (CharIndex >= (signed)m_CharInfo.size())
-		return;
-
-	charinfo_t &Char = m_CharInfo[CharIndex];
-	Char.AssignChar(CharIndex, LOC_CENTRAL, Data, DataLen, this);
-}
-
-void CBasePlayer::Central_UpdateChar(int CharIndex, chardatastatus_e Status)
-{
-	//Update the retrieval status information about a char
-	if (CharIndex >= (signed)m_CharInfo.size())
-		return;
-
-	charinfo_t &Char = m_CharInfo[CharIndex];
-	Char.Index = CharIndex;
-	Char.Status = Status;
-	Char.m_CachedStatus = CDS_UNLOADED; //force an update
-}
-
 void CBasePlayer::Think_SendCharData()
 {
 	//If it's time, then send info about a character

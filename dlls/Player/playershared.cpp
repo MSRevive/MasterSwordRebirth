@@ -1354,7 +1354,6 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	{
 		// Send a request to retrieve the player's info from a central server.
 		// Once the player file is downloaded, m_CharInfo will be updated with the info
-		// TODO - check CDS_LOADING?
 		if (CharIdx == -1)
 			FnDataHandler::LoadCharacter(this);
 		else
@@ -1364,7 +1363,7 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	{
 		charloc_e Location = LOC_SERVER;
 #else
-	charloc_e Location = LOC_CLIENT;
+		charloc_e Location = LOC_CLIENT;
 #endif
 
 		//Load all characters from file, locally
@@ -1386,7 +1385,8 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	m_TimeSendCharInfo = gpGlobals->time;
 #endif
 }
-void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, char *pData, int iDataLen, CBasePlayer *pPlayer)
+
+void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char *pData, int iDataLen, CBasePlayer *pPlayer)
 {
 	if (Data)
 	{
