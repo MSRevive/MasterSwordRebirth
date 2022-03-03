@@ -29,7 +29,7 @@ static const char* GetFnUrl(char* fmt, ...)
 
 	_snprintf(requestUrl, REQUEST_URL_SIZE, "%s/", CVAR_GET_STRING("ms_central_addr"));
 	strncat(requestUrl, string, REQUEST_URL_SIZE - strlen(requestUrl) - 1);
-	
+
 	return requestUrl;
 }
 
@@ -126,7 +126,7 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 
 	JSONDocument* pResponse = HTTPRequestHandler::PostRequestAsJson(GetFnUrl("api/v1/character/"), s.GetString());
 	if (pResponse)
-	{		
+	{
 		charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 		strncpy(CharInfo.Guid, (*pResponse)["data"]["id"].GetString(), MSSTRING_SIZE);
 		CharInfo.AssignChar(slot, LOC_CENTRAL, data, size, pPlayer);
@@ -137,7 +137,7 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 
 void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (pPlayer->m_CharacterState != CHARSTATE_LOADED) || !IsSlotValid(slot)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot)) return;
 
 	HTTPRequestHandler::DeleteRequest(GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid));
 
