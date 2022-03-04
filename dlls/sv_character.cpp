@@ -132,13 +132,12 @@ bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 	return (!ret) ? true : false;
 }
 
-void MSChar_Interface::AutoSave(CBasePlayer *pPlayer)
+void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 {
-	if (gpGlobals->time > pPlayer->m_TimeNextSave)
-	{
-		SaveChar(pPlayer, NULL);
-		pPlayer->m_TimeNextSave = gpGlobals->time + 3.0f;
-	}
+	if (gpGlobals->time <= pPlayer->m_TimeNextSave) return;
+
+	SaveChar(pPlayer, NULL); // Don't auto save too often when using FN.
+	pPlayer->m_TimeNextSave = gpGlobals->time + (FnDataHandler::IsEnabled() ? RANDOM_FLOAT(15.0f, 30.0f) : 3.0f);
 }
 
 //

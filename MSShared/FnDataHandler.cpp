@@ -63,10 +63,8 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 	if (pDoc == NULL) return;
 
 	const JSONDocument& doc = *pDoc;
-	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
-	{
+	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.	
 		LoadCharacter(pPlayer, val);
-	}
 
 	delete pDoc;
 }
@@ -85,8 +83,8 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 	const JSONDocument& doc = *pDoc;
 	for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
 	{
-		LoadCharacter(pPlayer, val);
-		break;
+		if (LoadCharacter(pPlayer, val))
+			break;
 	}
 
 	delete pDoc;
