@@ -6328,7 +6328,7 @@ void CBasePlayer::SetQuest(bool SetData, msstring_ref Name, msstring_ref Data)
 }
 bool CBasePlayer::LoadCharacter(int Num)
 {
-	if (Num >= (signed)m_CharInfo.size())
+	if (Num >= MAX_CHARSLOTS)
 		return false;
 
 	charinfo_t &Char = m_CharInfo[Num];
@@ -6358,7 +6358,7 @@ void CBasePlayer::Think_SendCharData()
 
 	msstringlist VisitedMaps;
 
-	for (int i = 0; i < m_CharInfo.size(); i++)
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{
 		charinfo_t &CharInfo = m_CharInfo[i];
 

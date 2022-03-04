@@ -126,7 +126,7 @@ bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 	remove(BACKUP_NAME(pszCharFileName)); //Delete backup
 
 	//Update player's char list
-	if (iCharacter < (signed)pPlayer->m_CharInfo.size())
+	if (iCharacter < MAX_CHARSLOTS)
 		pPlayer->m_CharInfo[iCharacter].Status = CDS_NOTFOUND;
 
 	return (!ret) ? true : false;

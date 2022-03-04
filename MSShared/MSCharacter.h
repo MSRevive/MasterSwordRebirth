@@ -74,6 +74,7 @@ struct charinfo_t : charinfo_base_t
 	charinfo_t() { Data = NULL; Guid[0] = 0; }
 	~charinfo_t();
 
+	void Destroy();
 	void AssignChar(int CharIndex, charloc_e Location, const char* Data, int DataLen, class CBasePlayer* pPlayer);
 };
 

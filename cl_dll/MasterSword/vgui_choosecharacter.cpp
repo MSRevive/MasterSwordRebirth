@@ -1102,7 +1102,7 @@ int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
 
 	byte CharIndex = READ_BYTE( );						//Which char the info describes
 
-	if( CharIndex >= player.m_CharInfo.size() )
+	if (CharIndex >= MAX_CHARSLOTS)
 		return 0;
 
 	charinfo_t &CharSlot = player.m_CharInfo[CharIndex];

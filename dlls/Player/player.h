@@ -387,7 +387,7 @@ public:
 	//Master Sword
 	charsendinfo_t m_CharSend; //Info about the char being transmitted (to server or to client)
 	float m_TimeCharLastSent;  //Time the server last sent the char down to client
-	mslist<charinfo_t> m_CharInfo;
+	charinfo_t m_CharInfo[MAX_CHARSLOTS];
 	bool m_fDropAllItems; //Drop items upon death?
 	int m_SayType;
 	int m_iFatigue, m_iMaxFatigue;
