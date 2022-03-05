@@ -1,0 +1,41 @@
+//-----------------------------------------------------------------------------
+//	CHARIMPORT.VPC - Imports encrypted charfiles from the old FN system!
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro OUTBINDIR	"$SRCDIR\bin"
+
+$Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
+
+$Configuration
+{	
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;.\;..\..\dlls;..\..\MSShared;..\..\thirdparty"
+		$PreprocessorDefinitions		"$BASE;NOT_HLDLL;CURL_STATICLIB"
+		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
+	}
+}
+
+$Project "charimport"
+{
+	$Folder	"Source Files"
+	{
+		$File "..\..\MSShared\msfileio.cpp"
+		$File "..\..\MSShared\stackstring.cpp"
+		$File "..\..\thirdparty\base64\base64.cpp"
+		$File "..\..\msshared\HTTPRequestHandler.cpp"
+		$File "charimport.cpp"
+	}
+	
+	$Folder	"Link Libraries" 
+	{
+		$Lib			"$SRCDIR/lib/public/libcurl" [$WIN32]
+	}
+}

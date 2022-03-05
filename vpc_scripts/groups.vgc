@@ -15,4 +15,5 @@ $Group "msc"
 	"dedicated"
 	"scriptpack"
 	"maphash"
+	"charimport"
 }

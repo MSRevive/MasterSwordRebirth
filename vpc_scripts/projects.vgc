@@ -32,3 +32,8 @@ $Project "maphash"
 {
 	"utils\maphash\maphash.vpc" [$WIN32]
 }
+
+$Project "charimport"
+{
+	"utils\charimport\charimport.vpc" [$WIN32]
+}
