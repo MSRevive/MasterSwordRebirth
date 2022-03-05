@@ -193,8 +193,6 @@ unsigned long long GetSteamID64(const char* id)
 
 static bool WriteCharToFN(const char* steamID, int slot, const char* data, int size)
 {
-	return true;
-
 	StringBuffer s;
 	Writer<StringBuffer> writer(s);
 
