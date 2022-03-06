@@ -7,6 +7,7 @@ struct savedata_t
 	//Player info
 	int Version;
 	char Name[32],
+		Race[16],
 		MapName[16], 
 		NextMap[32], 
 		OldTrans[32], 

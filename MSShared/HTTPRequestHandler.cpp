@@ -7,23 +7,24 @@
 #include "rapidjson/document_safe.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include <string>
 
 #if defined(_WIN32) && defined(USE_VS2022)
 FILE _iob[] = { *stdin, *stdout, *stderr };
 extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
 #endif
 
-static char g_pDataBuffer[REQUEST_BUFFER_SIZE];
+static std::string g_pDataBuffer;
 
 static size_t DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
-	strncat(g_pDataBuffer, buf, REQUEST_BUFFER_SIZE - strlen(g_pDataBuffer) - 1);
+	g_pDataBuffer.append(buf, size * nmemb);
 	return (size * nmemb);
 }
 
 bool HTTPRequestHandler::GetRequest(const char* url)
 {
-	g_pDataBuffer[0] = 0;
+	g_pDataBuffer.clear();
 
 	CURL* curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -38,7 +39,7 @@ bool HTTPRequestHandler::GetRequest(const char* url)
 
 bool HTTPRequestHandler::PostRequest(const char* url, const char* body)
 {
-	g_pDataBuffer[0] = 0;
+	g_pDataBuffer.clear();
 
 	CURL* curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -55,7 +56,7 @@ bool HTTPRequestHandler::PostRequest(const char* url, const char* body)
 
 bool HTTPRequestHandler::PutRequest(const char* url, const char* body)
 {
-	g_pDataBuffer[0] = 0;
+	g_pDataBuffer.clear();
 
 	CURL* curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -72,7 +73,7 @@ bool HTTPRequestHandler::PutRequest(const char* url, const char* body)
 
 bool HTTPRequestHandler::DeleteRequest(const char* url)
 {
-	g_pDataBuffer[0] = 0;
+	g_pDataBuffer.clear();
 
 	CURL* curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -86,7 +87,7 @@ bool HTTPRequestHandler::DeleteRequest(const char* url)
 	return (result == CURLE_OK);
 }
 
-const char* HTTPRequestHandler::GetRequestResponse(void) { return g_pDataBuffer; }
+const char* HTTPRequestHandler::GetRequestResponse(void) { return g_pDataBuffer.c_str(); }
 
 // Parses a JSON formatted char array, returns a JSON document, see https://rapidjson.org/index.html for documentation!
 JSONDocument* HTTPRequestHandler::ParseJSON(const char* data)
@@ -107,22 +108,22 @@ JSONDocument* HTTPRequestHandler::ParseJSON(const char* data)
 
 JSONDocument* HTTPRequestHandler::GetRequestAsJson(const char* url)
 {
-	return (GetRequest(url) ? ParseJSON(g_pDataBuffer) : NULL);
+	return (GetRequest(url) ? ParseJSON(g_pDataBuffer.c_str()) : NULL);
 }
 
 JSONDocument* HTTPRequestHandler::PostRequestAsJson(const char* url, const char* body)
 {
-	return (PostRequest(url, body) ? ParseJSON(g_pDataBuffer) : NULL);
+	return (PostRequest(url, body) ? ParseJSON(g_pDataBuffer.c_str()) : NULL);
 }
 
 JSONDocument* HTTPRequestHandler::PutRequestAsJson(const char* url, const char* body)
 {
-	return (PutRequest(url, body) ? ParseJSON(g_pDataBuffer) : NULL);
+	return (PutRequest(url, body) ? ParseJSON(g_pDataBuffer.c_str()) : NULL);
 }
 
 JSONDocument* HTTPRequestHandler::DeleteRequestAsJson(const char* url)
 {
-	return (DeleteRequest(url) ? ParseJSON(g_pDataBuffer) : NULL);
+	return (DeleteRequest(url) ? ParseJSON(g_pDataBuffer.c_str()) : NULL);
 }
 
 void HTTPRequestHandler::PrintJSONDocument(const JSONDocument* pDocument)

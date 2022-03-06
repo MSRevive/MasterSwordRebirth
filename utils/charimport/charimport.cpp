@@ -28,7 +28,7 @@ class CEncryptData
 {
 public:
 	CEncryptData() { m_pData = NULL; }
-	CEncryptData(const byte pData[], const size_t Size) { SetData(pData, Size); }
+	CEncryptData(const byte* pData, const size_t Size) { SetData(pData, Size); }
 
 	~CEncryptData()
 	{
@@ -37,7 +37,7 @@ public:
 		m_pData = NULL;
 	}
 
-	void SetData(const byte pData[], const size_t Size)
+	void SetData(const byte* pData, const size_t Size)
 	{
 		m_pData = msnew(byte[Size]);
 		m_DataSize = Size;
@@ -94,10 +94,10 @@ public:
 		}
 
 		//Store checksum
-		Encrypted[m_DataSize + 0] = (byte)(CheckSum / static_cast<int>(pow(256.0f, 3)));
-		Encrypted[m_DataSize + 1] = (byte)(CheckSum / static_cast<int>(pow(256.0f, 2)));
-		Encrypted[m_DataSize + 2] = (byte)(CheckSum / static_cast<int>(pow(256.0f, 1)));
-		Encrypted[m_DataSize + 3] = (byte)((int)CheckSum % (int)pow(256.0f, 1));
+		Encrypted[m_DataSize + 0] = (byte)(CheckSum / pow(256, 3));
+		Encrypted[m_DataSize + 1] = (byte)(CheckSum / pow(256, 2));
+		Encrypted[m_DataSize + 2] = (byte)(CheckSum / pow(256, 1));
+		Encrypted[m_DataSize + 3] = (byte)((int)CheckSum % (int)pow(256, 1));
 		m_DataSize += MS_SIZE_LONG; //Set the new size of the data
 	}
 
@@ -111,15 +111,15 @@ public:
 
 		//Retrieve checksum
 		FileCheckSum += m_pData[CheckSumPos + 3];
-		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 2] * static_cast<int>(pow(256.0f, 1)));
-		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 1] * static_cast<int>(pow(256.0f, 2)));
-		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 0] * static_cast<int>(pow(256.0f, 3)));
+		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 2] * pow(256, 1));
+		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 1] * pow(256, 2));
+		FileCheckSum += (unsigned long)(m_pData[CheckSumPos + 0] * pow(256, 3));
 		m_DataSize -= MS_SIZE_LONG; //Set the size of the data buffer
 
 		//Allocate a buffer for the original data
 		byte* Decrypted = msnew byte[m_DataSize];
 		memcpy(Decrypted, m_pData, m_DataSize); //Copy encrypted data to new buffer
-		delete[]m_pData;						//Delete old data
+		delete[] m_pData;						//Delete old data
 		m_pData = Decrypted;					//Set pointer to new buffer
 
 		//Decrypt new data
@@ -258,7 +258,8 @@ static void ImportOldCharacter(const char* file)
 	}
 
 	// Decrypt character file
-	CEncryptData* pEncrpytion = new CEncryptData(gFile.m_Buffer, gFile.m_BufferSize);
+	CEncryptData* pEncrpytion = new CEncryptData;
+	pEncrpytion->SetData(gFile.m_Buffer, gFile.m_BufferSize);
 
 	if (!pEncrpytion->Decrypt())
 	{

@@ -45,6 +45,8 @@ char *SpellTypeList[] =
 	"Fire",
 	"Ice",
 	"Lightning",
+	"unused", // LEGACY
+	"unused", // LEGACY
 	"Divination",
 	"Affliction",
 };
