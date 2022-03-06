@@ -6,6 +6,7 @@
 #include "windows.h"
 #include "stdio.h"
 #include "iostream"
+#include <conio.h>
 #include "GroupFile.h"
 #include "msfileio.h"
 #include "HTTPRequestHandler.h"
@@ -18,8 +19,10 @@ using namespace rapidjson;
 
 #define FN_TARGET_URL "http://fn.msrebirth.net:27520/api/v1/character/"
 #define MS_SIZE_LONG 4
+#define MS_CHAR_SIZE 5
 
-static int g_iNumFilesProcessed = 0;
+static size_t g_iNumFilesProcessed = 0;
+static size_t g_iRootSize = 0;
 
 class CEncryptData
 {
@@ -163,7 +166,7 @@ unsigned long long GetSteamID64(const char* id)
 
 	for (size_t i = 0; i < size; i++)
 	{
-		if (pchSteamID[i] == ':') // Skip the first part.
+		if (pchSteamID[i] == '-') // Skip the first part.
 		{
 			pStart += (i + 1);
 			strncpy(pchSteamID, pStart, sizeof(pchSteamID)); // Removes STEAM_X:, WE ONLY CARE ABOUT Y:Z part!
@@ -177,7 +180,7 @@ unsigned long long GetSteamID64(const char* id)
 
 	for (size_t i = 0; i < size; i++)
 	{
-		if (pchSteamID[i] == ':') // split
+		if (pchSteamID[i] == '-') // split
 		{
 			strncpy(pchArg1, pStart, sizeof(pchArg1));
 			pchArg1[i] = '\0';
@@ -220,27 +223,29 @@ static void ImportOldCharacter(const char* file)
 	if (!(file && file[0])) return; // Empty file str?
 
 	// Parse SteamID + slot from file name
-	char pchTempStr[MAX_PATH], pchSteamID[MAX_PATH], pchSlot[16];
+	char pchTempStr[MAX_PATH], pchSteamID[MAX_PATH], pchSlot[32];
 	pchSteamID[0] = 0; pchSlot[0] = 0;
-	strncpy(pchTempStr, file, MAX_PATH);
+	strncpy(pchTempStr, file + g_iRootSize, MAX_PATH);
 
 	for (int i = (strlen(pchTempStr) - 1); i >= 0; --i)
 	{
 		if (pchTempStr[i] == '_')
 		{
-			strncpy(pchSteamID, file, MAX_PATH);
-			strncpy(pchSlot, (file + i + 1), sizeof(pchSlot));
+			strncpy(pchSteamID, (file + g_iRootSize), MAX_PATH);
+			strncpy(pchSlot, (file + g_iRootSize + i + 1), sizeof(pchSlot));
 			pchSteamID[i] = 0;
+			pchSlot[strlen(pchSlot) - MS_CHAR_SIZE] = 0;
 			break;
 		}
 	}
 
-	_snprintf(pchSteamID, MAX_PATH, "%llu", GetSteamID64(pchSteamID));
-	int slot = atoi(pchSlot) - 1;
+	const unsigned long long steamID = GetSteamID64(pchSteamID);
+	const int slot = (atoi(pchSlot) - 1);
+	_snprintf(pchSteamID, MAX_PATH, "%llu", steamID);
 
 	if ((slot < 0) || (slot >= 3))
 	{
-		printf("File '%s' has an invalid slot: %i\n", file, slot);
+		printf("File '%s' has an invalid slot: %i (%s)\n", pchTempStr, slot, pchSlot);
 		return;
 	}
 
@@ -248,7 +253,7 @@ static void ImportOldCharacter(const char* file)
 	CPlayer_DataBuffer gFile;
 	if (!gFile.ReadFromFile(file, "rb", false))
 	{
-		printf("Unable to read file: %s\n", file);
+		printf("Unable to read file: %s\n", pchTempStr);
 		return;
 	}
 
@@ -258,7 +263,7 @@ static void ImportOldCharacter(const char* file)
 	if (!pEncrpytion->Decrypt())
 	{
 		delete pEncrpytion;
-		printf("Unable to decrypt file: %s\n", file);
+		printf("Unable to decrypt file: %s\n", pchTempStr);
 		return;
 	}
 
@@ -270,19 +275,20 @@ static void ImportOldCharacter(const char* file)
 	// Write decrypted data for plr X to FN!
 	if (!WriteCharToFN(pchSteamID, slot, (char*)gFile.m_Buffer, gFile.m_BufferSize))
 	{
-		printf("Unable to write contents of decryped file '%s' (size: %i) to FN!\n", file, gFile.m_BufferSize);
+		printf("Unable to write contents of decryped file '%s' (size: %i) to FN!\n", pchTempStr, gFile.m_BufferSize);
 		return;
 	}
 
 	gFile.Close();
 	g_iNumFilesProcessed++;
-	printf("Wrote file '%s' to FN!\n", file);
+	printf("Wrote file '%s' to FN!\n", pchTempStr);
 }
 
 int main(int argc, char** argv)
 {
 	char root[MAX_PATH], searchPath[MAX_PATH], filePath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, root);
+	g_iRootSize = (strlen(root) + 1);
 	_snprintf(searchPath, MAX_PATH, "%s\\*.char", root);
 	printf("Scanning folder: %s\n", searchPath);
 
@@ -305,6 +311,14 @@ int main(int argc, char** argv)
 	} while (FindNextFile(findHandle, &wfd));
 
 	FindClose(findHandle);
-	printf("Completed importing %i characters\n", g_iNumFilesProcessed);
+	printf("\nCompleted importing %i characters\n", g_iNumFilesProcessed);
+	printf("Press any key to exit...\n");
+
+	while (1)
+	{
+		if (kbhit())
+			break;
+	}
+
 	return 0;
 }
