@@ -1663,10 +1663,8 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 					else if (Prop.contains(".fire"))			SubSkill = 0;	//Magic
 					else if (Prop.contains(".ice"))			SubSkill = 1;
 					else if (Prop.contains(".lightning"))		SubSkill = 2;
-					//else if (Prop.contains(".unused1"))		SubSkill = 3;
-					//else if (Prop.contains(".unused2"))		SubSkill = 4;
-					else if (Prop.contains(".divination"))		SubSkill = 5;
-					else if (Prop.contains(".affliction"))		SubSkill = 6;
+					else if (Prop.contains(".divination"))		SubSkill = 3;
+					else if (Prop.contains(".affliction"))		SubSkill = 4;
 
 					int Max = (SubSkill > -1) ? (int)STATPROP_MAX_VALUE : (int)STAT_MAX_VALUE;
 

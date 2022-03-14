@@ -30,7 +30,7 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 	memset(&Data, 0, sizeof(savedata_t));
 
 	strncpy(Data.Name, CharData.Name, sizeof(Data.Name));
-	strncpy(Data.Race, "", sizeof(Data.Race)); // LEGACY
+	strncpy(Data.Race, "Human", sizeof(Data.Race)); // LEGACY
 	strncpy(Data.MapName, MSGlobals::MapName, sizeof(Data.MapName));
 	Data.Gender = CharData.Gender;
 	Data.Gold = MSGlobals::DefaultGold;
@@ -170,38 +170,59 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 	startdbg;
 	if (DataID == CHARDATA_SKILLS1)
 	{
-		//Read skills
+		// Read skills
 		CStat::InitStatList(m_Stats);
-		byte Stats = 0;			//[CHUNK - STATS]
-		m_File.ReadByte(Stats); //[BYTE]
+
+		CStat* pStat = NULL;
+		CSubStat* pSubStat = NULL;
+
+		byte Stats = 0;
+		m_File.ReadByte(Stats);
+
 		for (int i = 0; i < Stats; i++)
 		{
-			if (i >= (signed)m_Stats.size())
-				break;
-			CStat &Stat = m_Stats[i];
+			pStat = GetStat(i);
 			byte SubStats = 0;
-			m_File.ReadByte(SubStats); //[BYTE]
+			m_File.ReadByte(SubStats);
 
 			for (int r = 0; r < SubStats; r++)
 			{
-				if (r >= (signed)Stat.m_SubStats.size())
-					break;
 				short Value = 0;
 				int Exp = 0;
 				m_File.ReadShort(Value); //[SHORT]
 				m_File.ReadInt(Exp);	 //[INT]
 
-				Stat.m_SubStats[r].Value = Value;
-				Stat.m_SubStats[r].Exp = Exp;
+				pSubStat = (pStat ? pStat->GetSubStat(r) : NULL);
+
+				// Handle legacy loading, hacky & messy:
+				if ((Version == SAVECHAR_VERSION_MSC) && (i == SKILL_SPELLCASTING))
+				{
+					switch (r)
+					{
+					case 5: // Used to be DIVINATION
+						pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_DIVINATION) : NULL);
+						break;
+
+					case 6: // Used to be AFFLICTION
+						pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_AFFLICTION) : NULL);
+						break;
+					}
+				}
+
+				if (pStat && pSubStat)
+				{
+					pSubStat->Value = Value;
+					pSubStat->Exp = Exp;
+				}
 			}
 		}
 
 		// MiB JUL2010_02 - Hacky, but if we add more stats and we load a character that doesn't have said stat in the file
 		//		we set it to the default new stat value (level 0 in Prof and Balance, 1 in Power)
-		int StatsRemaining = m_Stats.size() - Stats;
+		int StatsRemaining = (m_Stats.size() - Stats);
 		for (int i = 0; i < StatsRemaining; i++)
 		{
-			CStat &Stat = m_Stats[i + Stats];
+			CStat& Stat = m_Stats[i + Stats];
 			Stat.m_SubStats[Stat.m_SubStats.size() - 1].Value = 1;
 		}
 	}
@@ -387,15 +408,13 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 
 	char cTemp[128];
 	Data.ReadString(cTemp); //[STRING]
-	if (!strlen(cTemp))
+	if (!cTemp || !cTemp[0])
 		return false;
-	outItem.Name = cTemp;
-	
+
+	outItem.Name = cTemp;	
 	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(outItem.Name);
-	if (iAlias != CGenericItemMgr::mItemAlias.end())
-	{
-		outItem.Name = iAlias->second;
-	}
+	if (iAlias != CGenericItemMgr::mItemAlias.end())	
+		outItem.Name = iAlias->second;	
 
 	//It is now possible to read an item from file correctly, but not be able to spawn that item.
 	//Be sure that, even if the item can't be created, all of the item's data is read from file properly
@@ -527,7 +546,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	if (!pData)
 	{
 		strncpy(Data.Name, pPlayer->m_DisplayName, sizeof(Data.Name)); // Store actual character name (DisplayName() is servername, and will have a (#) at the end if there are duplicates on the server)
-		strncpy(Data.Race, "", sizeof(Data.Race)); // LEGACY
+		strncpy(Data.Race, "Human", sizeof(Data.Race)); // LEGACY
 		strncpy(Data.Party, pPlayer->GetPartyName(), sizeof(Data.Party));
 		Data.PartyID = pPlayer->GetPartyID();
 

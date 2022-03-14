@@ -63,10 +63,18 @@ public:
 	void OutDate(); //Makes sure a change is sent next frame
 	void Update();	//Sets status to current - No updates sent
 
+	CSubStat* GetSubStat(int index)
+	{
+		if ((index < 0) || (index >= m_SubStats.size()))
+			return NULL;
+		return &m_SubStats[index];
+	}
+
 	static void InitStatList(mslist<CStat> &Stats);
 };
 
 typedef mslist<CStat> statlist;
+
 //A caching structure for CStat.  Allows you to do numerous lookups without calling
 //Value() each time.  Used in TitleManager::GetPlayerTitle()
 struct skillcache_t
@@ -90,6 +98,6 @@ struct skillstatinfo_t
 extern statinfo_t NatStatList[6];
 extern skillstatinfo_t SkillStatList[9];
 extern char *SkillTypeList[3];
-extern char *SpellTypeList[7];
+extern char *SpellTypeList[5];
 
 #endif STATS_H

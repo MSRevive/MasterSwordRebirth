@@ -33,20 +33,18 @@ skillstatinfo_t SkillStatList[9] =
 	//	"Pickpocket", true,
 };
 
-char *SkillTypeList[] =
+char *SkillTypeList[3] =
 {
 	"Proficiency",
 	"Balance",
 	"Power"
 };
 
-char *SpellTypeList[] =
+char *SpellTypeList[5] =
 {
 	"Fire",
 	"Ice",
 	"Lightning",
-	"unused", // LEGACY
-	"unused", // LEGACY
 	"Divination",
 	"Affliction",
 };
@@ -208,7 +206,6 @@ bool CStat::operator!=(const CStat &Other)
 
 void CStat::InitStatList(statlist &Stats)
 {
-	//Due to memory encryption, these must be allocated all at once.  It's faster too
 	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
 	for (int i = 0; i < STATS_TOTAL; i++)
 	{

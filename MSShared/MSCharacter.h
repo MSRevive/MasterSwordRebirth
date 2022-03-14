@@ -7,7 +7,7 @@
 #include "MSCharacterHeader.h"
 #include "buildcontrol.h"
 
-//Char Files
+// Char Files
 enum chardatastatus_e
 {
 	CDS_UNLOADED,
@@ -100,31 +100,15 @@ struct spellskillstat_t
 	long Exp[STATPROP_TOTAL];
 };
 
-//These determine how much space is going to be used
-//in the file for stats.  They're defined separately
-//from SKILL_MAX_STATS and NATURAL_MAX_STATS so they
-//don't change everytime a skill is added/removed
-//and the save file size won't have to change.
-#define NATSTAT_FILE_MAX 12
-#define SKILLSTAT_FILE_MAX 12
+#define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
+#define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
 
-#define SAVECHAR_LASTVERSION 2
-#define SAVECHAR_DEV_VERSION 10
-#define SAVECHAR_REL_VERSION SAVECHAR_DEV_VERSION + 1
-#ifdef RELEASE_LOCKDOWN
-//Define the release build 1 higher than the debug buid
-//so that the beta testers can't retain their dev characters
-#define SAVECHAR_VERSION SAVECHAR_REL_VERSION
-#else
-#define SAVECHAR_VERSION SAVECHAR_DEV_VERSION
-#endif
-
-#define LAST_VERSION_DATA_SIZE 648
-#define CURRENT_VERSION_DATA_SIZE 648
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
 
 //The types of headers.  Each time the save file is revised, a new header is added.
 //The old headers are kept so the game knows when it is encountering an old save file
 //and can call the legacy code for converison to the new format.
+
 enum
 {
 	CHARDATA_HEADER1 = 0,

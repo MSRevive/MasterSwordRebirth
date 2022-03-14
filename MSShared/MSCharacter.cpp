@@ -29,18 +29,7 @@ void ReplaceChar(char *pString, char org, char dest);
 
 bool IsValidCharVersion(int Version)
 {
-	//logfile << "Check char version: " << Version << "\r\n";
-	if (Version == SAVECHAR_VERSION || Version == SAVECHAR_LASTVERSION)
-		return true;
-
-	if (Version == SAVECHAR_DEV_VERSION || Version == SAVECHAR_REL_VERSION) //hack to get somebody's char back
-		return true;
-
-#ifndef RELEASE_LOCKDOWN
-	if (Version == SAVECHAR_REL_VERSION)
-		return true;
-#endif
-	return false;
+	return (Version == SAVECHAR_VERSION_MSC) || (Version == SAVECHAR_VERSION_MSR) || (Version == SAVECHAR_VERSION);
 }
 
 const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
@@ -156,6 +145,7 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 
 		if (ReadHeader1(DataID, m_File))
 			ValidVersion = true;
+
 #ifdef VALVE_DLL
 		ReadMaps1(DataID, m_File);
 		ReadSkills1(DataID, m_File);

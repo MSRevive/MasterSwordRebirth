@@ -379,6 +379,13 @@ struct chardata_t : savedata_t
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File);
 #endif
+
+	CStat* GetStat(int index)
+	{
+		if ((index < 0) || (index >= m_Stats.size()))
+			return NULL;
+		return &m_Stats[index];
+	}
 };
 
 class CBasePlayer : public CMSMonster
