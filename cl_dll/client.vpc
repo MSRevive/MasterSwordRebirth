@@ -38,7 +38,7 @@ $Configuration
 
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	".\;$BASE;../thirdparty/nvidia/include;./;../utils/vgui/include;../engine;../common;../pm_shared;../dlls;../dlls/Half-life;../game_shared;../MSShared;./MasterSword"
+		$AdditionalIncludeDirectories	".\;$BASE;../thirdparty/nvidia/include;./;../utils/vgui/include;../engine;../common;../pm_shared;../dlls;../dlls/Half-life;../game_shared;../MSShared;./MasterSword;$SRCDIR\thirdparty\xxhash"
 		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS"
 		
 		// Remove warnings from warning level 4.
