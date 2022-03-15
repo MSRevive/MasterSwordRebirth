@@ -29,6 +29,7 @@ $Project "maphash"
 	{
 		$File "..\..\MSShared\crc\crchash.cpp"
     $File "..\..\MSShared\crc\crchash.h"
+		$File "..\..\thirdparty\xxhash\xxhash32.h"
 		$File "maphash.cpp"
 	}
 }
