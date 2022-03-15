@@ -33,14 +33,14 @@ skillstatinfo_t SkillStatList[9] =
 	//	"Pickpocket", true,
 };
 
-char *SkillTypeList[] =
+char *SkillTypeList[3] =
 {
 	"Proficiency",
 	"Balance",
 	"Power"
 };
 
-char *SpellTypeList[] =
+char *SpellTypeList[5] =
 {
 	"Fire",
 	"Ice",
@@ -100,27 +100,13 @@ void GetStatIndices(const char *Name, int &Stat, int &Prop)
 
 CSubStat::~CSubStat()
 {
-	//Value.UnRegister( );
-	//Exp.UnRegister( );
 }
+
 CSubStat &CSubStat::operator=(const CSubStat &Other)
 {
-#ifdef MEM_ENCRYPT
-	Value.Set(Other.Value.Get());
-	Exp.Set(Other.Exp.Get());
-#else
 	Value = Other.Value;
 	Exp = Other.Exp;
-#endif
 	return *this;
-}
-bool CSubStat::Changed()
-{
-#ifdef MEM_ENCRYPT
-	return Value.m_Changed || Exp.m_Changed;
-#else
-	return (Value != m_OldValue) || (Exp != m_OldExp);
-#endif
 }
 
 int CStat::operator=(int Equals)
@@ -142,6 +128,7 @@ int CStat::operator=(int Equals)
 
 	return Value();
 }
+
 int CStat::operator+=(int Add)
 {
 	for (Add; abs(Add) > 0; Add -= Add / abs(Add))
@@ -154,6 +141,7 @@ int CStat::operator+=(int Add)
 	}
 	return Value();
 }
+
 int CStat::Value()
 {
 	int Total = 0;
@@ -164,6 +152,7 @@ int CStat::Value()
 	int iVal = (Total / iSubStats) + ((Total % iSubStats) ? 1 : 0);
 	return iVal;
 }
+
 int CStat::Value(int StatProperty)
 {
 	if (StatProperty >= (signed)m_SubStats.size())
@@ -171,47 +160,32 @@ int CStat::Value(int StatProperty)
 
 	return m_SubStats[StatProperty].Value;
 }
-void CStat::OutDate()
-{
-//Makes sure an update will be sent next frame
-#ifdef MEM_ENCRYPT
-	for (int i = 0; i < m_SubStats.size(); i++)
-	{
-		m_SubStats[i].Value.m_Changed = true;
-		m_SubStats[i].Exp.m_Changed = true;
-	}
-#else
-	for (int i = 0; i < m_SubStats.size(); i++)
-	{
-		m_SubStats[i].m_OldValue = !m_SubStats[i].Value;
-		m_SubStats[i].m_OldExp = !m_SubStats[i].Exp;
-	}
-#endif
-}
-void CStat::Update()
-{
-	//Updates the stat to current - no updates sent
 
-#ifdef MEM_ENCRYPT
-	for (int i = 0; i < m_SubStats.size(); i++)
-	{
-		m_SubStats[i].Value.m_Changed = false;
-		m_SubStats[i].Exp.m_Changed = false;
-	}
-#else
-	for (int i = 0; i < m_SubStats.size(); i++)
-	{
-		m_SubStats[i].m_OldValue = m_SubStats[i].Value;
-		m_SubStats[i].m_OldExp = m_SubStats[i].Exp;
-	}
-#endif
+void CStat::OutDate() // Makes sure an update will be sent next frame
+{
+	bNeedsUpdate = true;
 }
+
+void CStat::Update() // Updates the stat to current - no updates sent
+{	
+	bNeedsUpdate = false;
+
+	for (int i = 0; i < m_SubStats.size(); i++)
+	{
+		m_SubStats[i].OldValue = m_SubStats[i].Value;
+		m_SubStats[i].OldExp = m_SubStats[i].Exp;
+	}
+}
+
 bool CStat::Changed()
 {
-	//Check if the Changed bit is set on any substats
+	if (bNeedsUpdate) return true;
+
+	// If any values changed -> update.
 	for (int i = 0; i < m_SubStats.size(); i++)
-		if (m_SubStats[i].Changed())
+		if ((m_SubStats[i].Exp != m_SubStats[i].OldExp) || (m_SubStats[i].Value != m_SubStats[i].OldValue))
 			return true;
+
 	return false;
 }
 
@@ -232,7 +206,6 @@ bool CStat::operator!=(const CStat &Other)
 
 void CStat::InitStatList(statlist &Stats)
 {
-	//Due to memory encryption, these must be allocated all at once.  It's faster too
 	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
 	for (int i = 0; i < STATS_TOTAL; i++)
 	{

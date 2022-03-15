@@ -54,8 +54,11 @@
 #include "Global.h"
 #include "MSCharacter.h"
 #include "Magic.h"
-#include "MSCentral.h"
 #include "logfile.h"
+#include "FnDataHandler.h"
+
+#define MAX_ENTITIES_TO_SEARCH 4096
+static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
 
 clientitem_t::clientitem_t(class CGenericItem *pItem) : genericitem_t(pItem)
 {
@@ -498,9 +501,14 @@ int CBasePlayer ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	// reset damage time countdown for each type of time based damage player just sustained
 
 	{
-		for (int i = 0; i < DMG_TIMEBASED; i++)
-			if (bitsDamageType & (DMG_PARALYZE << i))
+		static int damageTypes[CDMG_TIMEBASED] = {
+			DMG_PARALYZE, DMG_NERVEGAS, DMG_POISON, DMG_RADIATION, DMG_DROWNRECOVER, DMG_ACID, DMG_SLOWBURN, DMG_SLOWFREEZE
+		};
+		for (int i = 0; i < CDMG_TIMEBASED; i++)
+		{
+			if (bitsDamageType & damageTypes[i])
 				m_rgbTimeBasedDamage[i] = 0;
+		}
 	}
 
 	// tell director about it
@@ -660,14 +668,14 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 			float DeathTax = 0.01;
 			int TaxOut = m_Gold;
 
-			(int)TaxOut *= DeathTax;
+			TaxOut *= DeathTax;
 			GiveGold(-TaxOut, false);
 
 			int highestSkill = 0;
 			/* for (int i = 0; i < GetSkillStatCount(); i++)
 				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) )
 					highestSkill = i;*/
-			(int)highestSkill = RANDOM_LONG(0, 7);
+			highestSkill = RANDOM_LONG(0, 7);
 
 			if (highestSkill == 6)
 				highestSkill = 7; //spellcasting hits causing crash
@@ -2328,12 +2336,11 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 	float Range = 72;
 	Vector vMinBounds = pSpot->pev->origin - Vector(Range, Range, Range);
 	Vector vMaxBounds = pSpot->pev->origin + Vector(Range, Range, Range);
-	CBaseEntity *pList[4096];
-	int count = UTIL_EntitiesInBox(pList, 4096, vMinBounds, vMaxBounds, 0);
+	int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
 	for (int i = 0; i < count; i++)
 	{
-		CBaseEntity *pSightEnt = pList[i];
-		if (pSightEnt->pev->solid == SOLID_NOT ||
+		CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
+		if (!pSightEnt || pSightEnt->pev->solid == SOLID_NOT ||
 			pSightEnt->pev->solid == SOLID_TRIGGER || pSightEnt == pPlayer)
 			continue;
 
@@ -2487,7 +2494,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 
 	//Find all valid spots
 	CBaseEntity *pSpot = NULL;
-	spawnspot_e Status;
+	spawnspot_e Status = SS_NOSPOT;
 
 	if (m_CharacterState == CHARSTATE_UNLOADED)
 	{
@@ -3714,14 +3721,7 @@ void CBasePlayer::UpdateClientData(void)
 			//Central server info (on/off, name)
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 			WRITE_BYTE(6);
-			if (MSCentral::Enabled())
-			{
-				WRITE_BYTE(1);
-				WRITE_BYTE(MSCentral::m_Online ? 1 : 0);
-				WRITE_STRING(MSCentral::m_NetworkName);
-			}
-			else
-				WRITE_BYTE(0);
+			WRITE_BYTE(FnDataHandler::IsEnabled() ? 1 : 0);
 			MESSAGE_END();
 
 			m_fGameHUDInitialized = TRUE;
@@ -3887,14 +3887,14 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//MiB Modded JAN2010_15 - Gold Change on Spawn.rtf
-	if (m_Gold.m_Changed)
+	if (m_OldGold != m_Gold)
 	{
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
 		WRITE_BYTE(3);
 		WRITE_BYTE(1);
 		WRITE_LONG(m_Gold);
 		MESSAGE_END();
-		m_Gold.m_Changed = false;
+		m_OldGold = m_Gold;
 	}
 
 	if (m_Gender != m_ClientGender)
@@ -4660,11 +4660,12 @@ void CBasePlayer::UpdateMiscPositions(void)
 		float Range = 1024;
 		Vector vMinBounds = pev->origin - Vector(Range, Range, Range);
 		Vector vMaxBounds = pev->origin + Vector(Range, Range, Range);
-		CBaseEntity *pList[4096];
-		int count = UTIL_EntitiesInBox(pList, 4096, vMinBounds, vMaxBounds, 0);
+
+		int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
 		for (int i = 0; i < count && EntriesSent < 2; i++) //only send 2 at a time now
 		{
-			CBaseEntity *pSightEnt = pList[i];
+			CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
+
 			if (!pSightEnt ||
 				pSightEnt == this ||
 				pSightEnt->pev->movetype == MOVETYPE_FOLLOW)
@@ -5224,7 +5225,7 @@ void CBasePlayer::GetAnyItems()
 			//Gather corpse gold
 			CMSMonster *pMonster = (CMSMonster *)pEnt;
 			//Thothie - AUG2007b - minor hud color change
-			SendEventMsg(HUDEVENT_GREEN, UTIL_VarArgs("You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster)));
+			SendEventMsg(HUDEVENT_GREEN, UTIL_VarArgs("You pick up %i gold coins from %s", pMonster->m_Gold, SPEECH::NPCName(pMonster)));
 			//SendInfoMsg( "You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster) );
 			GiveGold(pMonster->m_Gold, false);
 			pMonster->m_Gold = 0;
@@ -5516,7 +5517,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 		{
 			//Gather corpse gold
 			CMSMonster *pMonster = (CMSMonster *)pEnt;
-			SendInfoMsg("You pick up %i gold coins from %s", (int)pMonster->m_Gold, SPEECH::NPCName(pMonster));
+			SendInfoMsg("You pick up %i gold coins from %s", pMonster->m_Gold, SPEECH::NPCName(pMonster));
 			GiveGold(pMonster->m_Gold, false);
 			pMonster->m_Gold = 0;
 			break;
@@ -6327,7 +6328,7 @@ void CBasePlayer::SetQuest(bool SetData, msstring_ref Name, msstring_ref Data)
 }
 bool CBasePlayer::LoadCharacter(int Num)
 {
-	if (Num >= (signed)m_CharInfo.size())
+	if (Num >= MAX_CHARSLOTS)
 		return false;
 
 	charinfo_t &Char = m_CharInfo[Num];
@@ -6348,27 +6349,6 @@ void CBasePlayer::SUB_Remove()
 	CBaseMonster::SUB_Remove();
 }
 
-void CBasePlayer::Central_ReceivedChar(int CharIndex, char *Data, int DataLen)
-{
-	//Load a character from the Central Server
-	if (CharIndex >= (signed)m_CharInfo.size())
-		return;
-
-	charinfo_t &Char = m_CharInfo[CharIndex];
-	Char.AssignChar(CharIndex, LOC_CENTRAL, Data, DataLen, this);
-}
-void CBasePlayer::Central_UpdateChar(int CharIndex, chardatastatus_e Status)
-{
-	//Update the retrieval status information about a char
-	if (CharIndex >= (signed)m_CharInfo.size())
-		return;
-
-	charinfo_t &Char = m_CharInfo[CharIndex];
-	Char.Index = CharIndex;
-	Char.Status = Status;
-	Char.m_CachedStatus = CDS_UNLOADED; //force an update
-}
-
 void CBasePlayer::Think_SendCharData()
 {
 	//If it's time, then send info about a character
@@ -6378,7 +6358,7 @@ void CBasePlayer::Think_SendCharData()
 
 	msstringlist VisitedMaps;
 
-	for (int i = 0; i < m_CharInfo.size(); i++)
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{
 		charinfo_t &CharInfo = m_CharInfo[i];
 

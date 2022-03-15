@@ -1257,40 +1257,10 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 		Player_UseStamina(READ_LONG());
 	}
 	break;
-	case 6: //This server connected to a Central Server
+	case 6: // This server connected to a Central Server
 	{
 		int Type = READ_BYTE();
-		if (!Type)
-		{
-			//Not using Central Server
-			ChooseChar_Interface::CentralServer = false;
-		}
-		else if (Type == 1)
-		{
-			//Server name and online status
-			ChooseChar_Interface::CentralServer = true;
-			int OnlineStatus = READ_BYTE();
-			ChooseChar_Interface::CentralOnline = OnlineStatus ? true : false;
-			ChooseChar_Interface::CentralNetworkName = READ_STRING();
-
-			if (OnlineStatus == 1) //Server was connected when player joined
-				player.SendHUDMsg("#CENTRALSV_TITLE", "#CENTRALSV_ONLINE");
-			else if (OnlineStatus == 2) //Server *just* reconnected after a lost connection
-				player.SendHUDMsg("#CENTRALSV_TITLE", "#CENTRALSV_RECONNECTED");
-			else
-				player.SendHUDMsg("#CENTRALSV_TITLE", "#CENTRALSV_OFFLINE");
-		}
-		else if (Type == 2)
-		{
-			//Server online status
-			ChooseChar_Interface::CentralServer = true;
-			ChooseChar_Interface::CentralOnline = READ_BYTE() ? true : false;
-			if (ChooseChar_Interface::CentralOnline)
-				player.SendHUDMsg("#CENTRALSV_TITLE", "#CENTRALSV_RECONNECTED");
-			else
-				player.SendHUDMsg("#CENTRALSV_TITLE", "#CENTRALSV_DISCONNECTED");
-		}
-
+		ChooseChar_Interface::CentralServer = (Type >= 1);
 		ChooseChar_Interface::UpdateCharScreen();
 	}
 	break;

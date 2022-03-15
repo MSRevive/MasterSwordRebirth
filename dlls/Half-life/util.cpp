@@ -416,9 +416,7 @@ int UTIL_EntitiesInBox(CBaseEntity **pList, int listMax, const Vector &mins, con
 
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(startIndex);
 	CBaseEntity *pEntity;
-	int count;
-
-	count = 0;
+	int count = 0;
 
 	if (!pEdict || !pEdict->pvPrivateData) //MAR2008b - attempt to fix the revenge of the chatbug
 	{

@@ -90,7 +90,7 @@ long Sys_LoadLibrary( char *lib )
     if (cwd[strlen(cwd)-1] == '/')
         cwd[strlen(cwd)-1] = 0;
         
-    sprintf(absolute_lib, "%s/%s", cwd, lib);
+	_snprintf(absolute_lib, sizeof(absolute_lib), "%s/%s", cwd, lib);
     
     hDll = dlopen( absolute_lib, RTLD_NOW );
     if ( !hDll )
@@ -163,7 +163,7 @@ void UpdateStatus( int force )
 
 	tLast = tCurrent;
 
-	sprintf( szPrompt, "%.1f fps %2i(%2i spec)/%2i on %16s", (float)fps, n, spec, nMax, szMap);
+	_snprintf(szPrompt, sizeof(szPrompt), "%.1f fps %2i(%2i spec)/%2i on %16s", (float)fps, n, spec, nMax, szMap);
 
 	WriteStatusText( szPrompt );
 }
@@ -555,7 +555,7 @@ void ProcessConsoleInput( void )
 		if (s)
 		{
 			char szBuf[ 256 ];
-			sprintf( szBuf, "%s\n", s );
+			_snprintf(szBuf, sizeof(szBuf), "%s\n", s);
 			engineapi.Cbuf_AddText ( szBuf );
 		}
 	} while (s);
@@ -570,27 +570,23 @@ int GameInit(void)
 {
 	char *p;
 #ifdef _WIN32
-	MEMORYSTATUS Buffer;
+	MEMORYSTATUSEX Buffer;
 
 	memset( &Buffer, 0, sizeof( Buffer ) );
 	Buffer.dwLength = sizeof( MEMORYSTATUS );
 	
-	GlobalMemoryStatus ( &Buffer );
+	GlobalMemoryStatusEx ( &Buffer );
 
 	// take the greater of all the available memory or half the total memory,
 	// but at least 10 Mb and no more than 32 Mb, unless they explicitly
 	// request otherwise
-	giMemSize = Buffer.dwTotalPhys;
+	giMemSize = Buffer.ullTotalPhys;
 
-	if ( giMemSize < FIFTEEN_MEGS )
-	{
-		return 0;
-	}
+	if ( giMemSize < FIFTEEN_MEGS )	
+		return 0;	
 
-	if ( giMemSize < (int)( Buffer.dwTotalPhys >> 1 ) )
-	{
-		giMemSize = (int)( Buffer.dwTotalPhys >> 1 );
-	}
+	if ( giMemSize < (int)( Buffer.ullTotalPhys >> 1 ) )	
+		giMemSize = (int)( Buffer.ullTotalPhys >> 1 );	
 
 	// At least 10 mb, even if we have to swap a lot.
 	if (giMemSize <= MINIMUM_WIN_MEMORY)
@@ -620,28 +616,13 @@ int GameInit(void)
 	gpMemBase = (unsigned char *)::GlobalAlloc( GMEM_FIXED, giMemSize );
 #else
 	gpMemBase = (unsigned char *)malloc( giMemSize );
+
 #endif
+
 	if (!gpMemBase)
 	{
 		return 0;
 	}
-
-#ifdef _WIN32
-	// Check that we are running on Win32
-	OSVERSIONINFO	vinfo;
-	vinfo.dwOSVersionInfoSize = sizeof(vinfo);
-
-	if ( !GetVersionEx ( &vinfo ) )
-	{
-		return 0;
-	}
-
-	if ( vinfo.dwPlatformId == VER_PLATFORM_WIN32s )
-	{
-		return 0;
-	}
-	
-#endif
 
 	if ( !Eng_Load( gpszCmdLine, &ef, giMemSize, gpMemBase, g_pszengine, DLL_NORMAL ) )
 	{

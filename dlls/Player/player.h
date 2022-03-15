@@ -379,6 +379,13 @@ struct chardata_t : savedata_t
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File);
 #endif
+
+	CStat* GetStat(int index)
+	{
+		if ((index < 0) || (index >= m_Stats.size()))
+			return NULL;
+		return &m_Stats[index];
+	}
 };
 
 class CBasePlayer : public CMSMonster
@@ -387,7 +394,7 @@ public:
 	//Master Sword
 	charsendinfo_t m_CharSend; //Info about the char being transmitted (to server or to client)
 	float m_TimeCharLastSent;  //Time the server last sent the char down to client
-	mslist<charinfo_t> m_CharInfo;
+	charinfo_t m_CharInfo[MAX_CHARSLOTS];
 	bool m_fDropAllItems; //Drop items upon death?
 	int m_SayType;
 	int m_iFatigue, m_iMaxFatigue;
@@ -527,8 +534,6 @@ public:
 	void SUB_Remove(void);
 	bool LoadCharacter(int Num); //Load a server-side character
 	void Think_SendCharData();	 //Send info about a Char, if not already sent
-	void Central_ReceivedChar(int CharIndex, char *Data, int DataLen);
-	void Central_UpdateChar(int CharIndex, chardatastatus_e Status);
 	void SaveChar();
 #endif
 	int MSProperties()
@@ -848,7 +853,9 @@ public:
 	char m_SbarString1[SBAR_STRING_SIZE];
 
 	float m_flNextChatTime;
-	//--------------------------
+
+	unsigned long long steamID64;
+	char steamID64String[MSSTRING_SIZE];
 };
 
 #ifndef VALVE_DLL

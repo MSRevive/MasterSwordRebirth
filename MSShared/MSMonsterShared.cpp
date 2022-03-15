@@ -460,10 +460,6 @@ void CMSMonster::DeleteStats()
 
 	m_PlayerDamage.clear();
 	m_Stats.clear();
-
-#ifdef MEM_ENCRYPT
-	m_Gold.UnRegister();
-#endif
 }
 
 int CMSMonster::GetSkillStat(msstring_ref StatName, int StatProperty)

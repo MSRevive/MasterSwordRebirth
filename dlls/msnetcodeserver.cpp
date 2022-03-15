@@ -318,10 +318,10 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//g_engfuncs.pfnSetClientKeyValue( entindex(), g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "name", (char *)Data.Name );
 
 	dbg("Read Stats");
-	m_Gold = Data.Gold;
+	m_OldGold = m_Gold = Data.Gold;
 
 	//MiB JAN2010_15 Gold Change on Spawn.rtf
-	m_Gold.m_Changed = false;
+	
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
 	WRITE_BYTE(3);
 	WRITE_BYTE(0);
@@ -461,7 +461,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//Make sure an update is sent from UpdateClientData ASAP
 	for (int i = 0; i < m_Stats.size(); i++)
 		m_Stats[i].OutDate();
-	//	m_Gold.m_Changed = true;
 
 	m_CharacterState = CHARSTATE_LOADED;
 

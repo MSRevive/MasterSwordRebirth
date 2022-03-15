@@ -27,11 +27,9 @@ $Project "scriptpack"
 {
 	$Folder	"Source Files"
 	{
-		$File "..\..\MSShared\encrypt.cpp"
 		$File "..\..\MSShared\GroupFile.cpp"
 		$File "..\..\MSShared\msfileio.cpp"
 		$File "..\..\MSShared\stackstring.cpp"
-		$File "..\..\MSShared\encrypt.h"
 		$File "..\..\MSShared\GroupFile.h"
 		$File "packer.cpp"
 		$File "scriptpack.cpp"

@@ -6,7 +6,7 @@
 #include "Stats/Stats.h"
 #ifdef VALVE_DLL
 #include "../MSShared/Global.h"
-#include "MSCentral.h"
+#include "FnDataHandler.h"
 #else
 #include "../cl_dll/inc_huditem.h"
 #include "../cl_dll/MasterSword/CLGlobal.h"
@@ -29,18 +29,7 @@ void ReplaceChar(char *pString, char org, char dest);
 
 bool IsValidCharVersion(int Version)
 {
-	//logfile << "Check char version: " << Version << "\r\n";
-	if (Version == SAVECHAR_VERSION || Version == SAVECHAR_LASTVERSION)
-		return true;
-
-	if (Version == SAVECHAR_DEV_VERSION || Version == SAVECHAR_REL_VERSION) //hack to get somebody's char back
-		return true;
-
-#ifndef RELEASE_LOCKDOWN
-	if (Version == SAVECHAR_REL_VERSION)
-		return true;
-#endif
-	return false;
+	return (Version == SAVECHAR_VERSION_MSC) || (Version == SAVECHAR_VERSION_MSR) || (Version == SAVECHAR_VERSION);
 }
 
 const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
@@ -55,7 +44,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 		FileID = msstring("LAN_") + g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
 	else
 		FileID = GETPLAYERAUTHID(pPlayer->edict());
-	msstring Prefix = MSCentral::Enabled() ? CENTRAL_FILEPREFIX : "";
+	msstring Prefix = FnDataHandler::IsEnabled() ? "central_" : "";
 
 	//Thothie MAR2010_08 emergency work around
 	//iCharacter = pPlayer->m_CharacterNum;
@@ -96,42 +85,37 @@ bool DeleteChar(int iCharacter)
 
 savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps)
 {
-	CPlayer_DataBuffer gFile;
 	static savedata_t Data;
+	CPlayer_DataBuffer gFile;
+
 	bool fCharLoaded = gFile.ReadFromFile(pszFileName, "rb", true);
 	if (fCharLoaded)
 	{
-		fCharLoaded = gFile.Decrypt(ENCRYPTION_TYPE);
-		if (fCharLoaded)
+		memset(&Data, 0, sizeof(savedata_t));
+		gFile.Read(&Data, sizeof(savedata_t));
+
+		if (IsValidCharVersion(Data.Version))
 		{
-			memset(&Data, 0, sizeof(savedata_t));
-			gFile.Read(&Data, sizeof(savedata_t));
+			//Also read the visited maps -- This is used to determine whether you can spawn on this map
+			//The visited maps must come DIRECTLY after the main data
+			int Maps = 0;
+			gFile.ReadInt(Maps); //[INT]
 
-			if (IsValidCharVersion(Data.Version))
+			char cTemp[256];
+			VisitedMaps.clear();
+			for (int m = 0; m < Maps; m++)
 			{
-				//Also read the visited maps -- This is used to determine whether you can spawn on this map
-				//The visited maps must come DIRECTLY after the main data
-				int Maps = 0;
-				gFile.ReadInt(Maps); //[INT]
-
-				char cTemp[256];
-				VisitedMaps.clear();
-				for (int m = 0; m < Maps; m++)
-				{
-					gFile.ReadString(cTemp); //[STRING]
-					VisitedMaps.add(cTemp);
-				}
+				gFile.ReadString(cTemp); //[STRING]
+				VisitedMaps.add(cTemp);
 			}
-			else
-				fCharLoaded = false;
-
-			gFile.Close();
 		}
+		else
+			fCharLoaded = false;
+
+		gFile.Close();
 	}
 
-	if (fCharLoaded)
-		return &Data;
-	return NULL;
+	return (fCharLoaded ? &Data : NULL);
 }
 
 bool MSChar_Interface::ReadCharData(void *pData, ulong Size, chardata_t *CharData)
@@ -148,9 +132,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 
 	CPlayer_DataBuffer m_File(Size);
 	m_File.Write(pData, Size);
-	if (!m_File.Decrypt(ENCRYPTION_TYPE))
-		return false;
-
 	byte DataID = CHARDATA_UNKNOWN;
 
 	do
@@ -164,6 +145,7 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 
 		if (ReadHeader1(DataID, m_File))
 			ValidVersion = true;
+
 #ifdef VALVE_DLL
 		ReadMaps1(DataID, m_File);
 		ReadSkills1(DataID, m_File);

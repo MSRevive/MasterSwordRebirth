@@ -289,11 +289,6 @@ bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap( )
 			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 			if( !pPlayer ) continue;
 
-			//Somebody is still loading a character from the Central Server.  Wait for success or an error
-			 for (int c = 0; c < pPlayer->m_CharInfo.size(); c++) 
-				if( pPlayer->m_CharInfo[c].Status == CDS_LOADING ) 
-					{ Allowed = true; break; }
-
 			//If one person has a character that can join the map, then don't switch the map
 			if( pPlayer->m_CanJoin ) { Allowed = true; break; }
 		}
@@ -1808,7 +1803,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				else if( iNameLen + PTYNAME_EXT_SML <= MAX_TEAMNAME_LEN )
 					 _snprintf(Name, sizeof(Name),  "%s pty",  pPlayer->DisplayName() );
 				else
-					sprintf( Name, "pty %s", pPlayer->DisplayName() );*/
+					_snprintf( Name, sizeof(Name), "pty %s", pPlayer->DisplayName() );*/
 				msstring PartyName = msstring(pPlayer->DisplayName()) + "'s party";
 
 				strncpy( Name, PartyName.c_str(), MAX_TEAMNAME_LEN );		//Truncate the final name
@@ -1973,7 +1968,7 @@ void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *info
 	if ( stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
 	{
 		g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "model", PLAYERMODEL_HUMAN_MALE1 );
-		//sprintf( text, "* Unkwnown forces prevent you from shapeshifting...\n" );
+		//_snprintf( text, sizeof(text), "* Unkwnown forces prevent you from shapeshifting...\n" );
 		//UTIL_SayText( text, pPlayer );
 		return;
 	}

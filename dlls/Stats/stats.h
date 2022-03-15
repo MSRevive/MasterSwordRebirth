@@ -8,25 +8,29 @@ class CSubStat
 public:
 	CSubStat(int iValue, int iExp)
 	{
-		Value = iValue;
-		Exp = iExp;
+		Value = OldValue = iValue;
+		Exp = OldExp = iExp;
 	}
+
 	CSubStat() { Clear(); }
+
 	~CSubStat();
+
 	void Clear()
 	{
-		Value = 0;
-		Exp = 0;
+		Value = OldValue = 0;
+		Exp = OldExp = 0;
 	}
+
 	CSubStat &operator=(const CSubStat &Other);
-	//int Value;  //Level of the skill
-	//ulong Exp;  //Total Experience in this skill
-	safevar(int, Value); //Level of the skill
-	safevar(ulong, Exp); //Total Experience in this skill
-	int m_OldValue;
-	ulong m_OldExp;
-	bool Changed();
+
+	int Value; // Level of the skill
+	int OldValue;
+
+	ulong Exp; // Total Experience in this skill
+	ulong OldExp;	
 };
+
 class CStat
 {
 public:
@@ -34,17 +38,19 @@ public:
 								 //For spellcasting, there is more
 								 //For parry, there is only one
 	string_i m_Name;
+	bool bNeedsUpdate;
 	enum skilltype_e
 	{
 		STAT_NAT,
 		STAT_SKILL
 	} m_Type; //Stat type
 
-	CStat() {}
+	CStat() { bNeedsUpdate = true; }
 	CStat(msstring_ref Name, skilltype_e Type)
 	{
 		m_Name = Name;
 		m_Type = Type;
+		bNeedsUpdate = true;
 	}
 	bool operator==(CStat &CompareStat);
 	operator int() { return Value(); }
@@ -57,10 +63,18 @@ public:
 	void OutDate(); //Makes sure a change is sent next frame
 	void Update();	//Sets status to current - No updates sent
 
+	CSubStat* GetSubStat(int index)
+	{
+		if ((index < 0) || (index >= m_SubStats.size()))
+			return NULL;
+		return &m_SubStats[index];
+	}
+
 	static void InitStatList(mslist<CStat> &Stats);
 };
 
 typedef mslist<CStat> statlist;
+
 //A caching structure for CStat.  Allows you to do numerous lookups without calling
 //Value() each time.  Used in TitleManager::GetPlayerTitle()
 struct skillcache_t
@@ -84,6 +98,6 @@ struct skillstatinfo_t
 extern statinfo_t NatStatList[6];
 extern skillstatinfo_t SkillStatList[9];
 extern char *SkillTypeList[3];
-extern char *SpellTypeList[7];
+extern char *SpellTypeList[5];
 
 #endif STATS_H

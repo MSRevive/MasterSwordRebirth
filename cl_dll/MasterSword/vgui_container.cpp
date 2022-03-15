@@ -380,7 +380,7 @@ void VGUI_ContainerPanel::Update()
 	m_pCancelButton->setParent(this);
 
 	msstring sGold;
-	_snprintf(sGold, MSSTRING_SIZE, Localized("#PLAYER_GOLD"), (int)player.m_Gold);
+	_snprintf(sGold, MSSTRING_SIZE, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
 }
 void VGUI_ContainerPanel::AddInventoryItems()

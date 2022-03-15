@@ -339,7 +339,6 @@ $Project "Client"
 			$File ".\mastersword\clenv.h"
 			$File "mastersword\clglobal.h"
 			$File ".\mastersword\clrender.h"
-			$File "..\msshared\encrypt.h"
 			$File "..\msshared\global.h"
 			$File "..\msshared\groupfile.h"
 			$File ".\mastersword\health.h"
@@ -364,14 +363,11 @@ $Project "Client"
 	{
 		$File "..\msshared\buildcontrol.h"
 		$File "..\msshared\dbginputs.cpp"
-		$File "..\msshared\encrypt.cpp"
 		$File "..\dlls\genitemlist.cpp"
 		$File "..\msshared\global.cpp"
 		$File "..\msshared\globalmem.cpp"
 		$File "..\msshared\groupfile.cpp"
 		$File "..\dlls\logfile.h"
-		$File "..\msshared\mem_encrypt.cpp"
-		$File "..\msshared\mem_encrypt.h"
 		$File "..\msshared\msbasic.h"
 		$File "..\msshared\mscharacter.cpp"
 		$File "..\msshared\msdebug.h"
@@ -414,6 +410,12 @@ $Project "Client"
 			$File "..\msshared\crc\crchash.cpp"
 			$File "..\msshared\crc\crchash.h"
 			$File "..\msshared\crc\xxhash32.h"
+		}
+
+		$Folder "base64"
+		{
+			$File "..\thirdparty\base64\base64.cpp"
+			$File "..\thirdparty\base64\base64.h"
 		}
 	}
 	

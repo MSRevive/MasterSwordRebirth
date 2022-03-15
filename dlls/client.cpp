@@ -42,10 +42,10 @@
 #include "MSNetCode.h"
 #include "MSCharacter.h"
 #include "Global.h"
-#include "MSCentral.h"
 #include "versioncontrol.h"
 
 #include "../MSShared/CVarMonitor.h"
+#include "FnDataHandler.h"
 
 extern void PlayerPrecache();
 
@@ -234,7 +234,7 @@ void ClientPutInServer(edict_t *pEntity)
 
 			if (strstr(pPlayer->m_ClientAddress, "loopback") ||
 				strstr(pPlayer->m_ClientAddress, "127.0.0.1"))
-				_snprintf(pPlayer->m_ClientAddress, 128, "%s:%i", g_NetCode.m.HostIP.c_str(), Port.c_str()); //If local player, use local address
+				_snprintf(pPlayer->m_ClientAddress, 128, "%s:%s", g_NetCode.m.HostIP.c_str(), Port.c_str()); //If local player, use local address
 			bool fEntryFound = false;
 		}
 		else
@@ -242,6 +242,11 @@ void ClientPutInServer(edict_t *pEntity)
 			MSErrorConsoleText("ClientPutInServer", "Player already has Address");
 		}
 	}
+
+	// Read Profile from FN, if possible.
+	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
+	_snprintf(pPlayer->steamID64String, MSSTRING_SIZE, "%llu", pPlayer->steamID64);
+	//FnDataHandler::LoadCharacter(pPlayer); // TEST
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -601,7 +606,6 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "say_team"))
 	{
 	}
-
 	/*else if ( FStrEq(pcmd, "fullupdate" ) )
 	{
 		GetClassPtr((CBasePlayer *)pev)->ForceClientDllUpdate();
@@ -1134,7 +1138,7 @@ void ClientCommand2(edict_t *pEntity)
 					pItem->CallScriptEvent("game_setchargepercent", &parms);
 				}
 			}
-			else
+			else if (pItem)
 			{
 				//NOV2014_15 - Think we accidentally undid this :O
 				pItem->ClientAttacking = true;
@@ -2022,12 +2026,7 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 const char *GetGameDescription()
 {
 	DBG_INPUT;
-	msstring CentralSVTag = (MSCentral::Enabled() &&
-							 !MSCentral::m_Online)
-								? CVAR_GET_STRING("ms_central_tag")
-								: "";
-
-	static msstring GameDesc = UTIL_VarArgs("%sMS:C %s", CentralSVTag.c_str(), MS_VERSION);
+	static msstring GameDesc = UTIL_VarArgs("MS:R %s", MS_VERSION);
 	return GameDesc;
 }
 

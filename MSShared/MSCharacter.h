@@ -7,14 +7,12 @@
 #include "MSCharacterHeader.h"
 #include "buildcontrol.h"
 
-//Char Files
+// Char Files
 enum chardatastatus_e
 {
 	CDS_UNLOADED,
-	CDS_LOADING,
 	CDS_LOADED,
-	CDS_NOTFOUND,
-	CDS_ERROR
+	CDS_NOTFOUND
 };
 enum charloc_e
 {
@@ -70,11 +68,14 @@ struct charinfo_t : charinfo_base_t
 	bool IsElite;
 	enum gender_e Gender;
 	msstring Name, MapName, OldTrans, NextMap, NewTrans;
+	char Guid[MSSTRING_SIZE];
 	mslist<gearinfo_t> GearInfo;
 
-	charinfo_t() { Data = NULL; }
-	void AssignChar(int CharIndex, charinfo_t::charloc_e Location, char *Data, int DataLen, class CBasePlayer *pPlayer);
+	charinfo_t() { Data = NULL; Guid[0] = 0; }
 	~charinfo_t();
+
+	void Destroy();
+	void AssignChar(int CharIndex, charloc_e Location, const char* Data, int DataLen, class CBasePlayer* pPlayer);
 };
 
 struct charsendinfo_t : charinfo_base_t
@@ -99,33 +100,15 @@ struct spellskillstat_t
 	long Exp[STATPROP_TOTAL];
 };
 
-//These determine how much space is going to be used
-//in the file for stats.  They're defined separately
-//from SKILL_MAX_STATS and NATURAL_MAX_STATS so they
-//don't change everytime a skill is added/removed
-//and the save file size won't have to change.
-#define NATSTAT_FILE_MAX 12
-#define SKILLSTAT_FILE_MAX 12
+#define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
+#define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
 
-#define SAVECHAR_LASTVERSION 2
-#define SAVECHAR_DEV_VERSION 10
-#define SAVECHAR_REL_VERSION SAVECHAR_DEV_VERSION + 1
-#ifdef RELEASE_LOCKDOWN
-//Define the release build 1 higher than the debug buid
-//so that the beta testers can't retain their dev characters
-#define SAVECHAR_VERSION SAVECHAR_REL_VERSION
-#else
-#define SAVECHAR_VERSION SAVECHAR_DEV_VERSION
-#endif
-
-#define ENCRYPTION_TYPE 0
-
-#define LAST_VERSION_DATA_SIZE 648
-#define CURRENT_VERSION_DATA_SIZE 648
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
 
 //The types of headers.  Each time the save file is revised, a new header is added.
 //The old headers are kept so the game knows when it is encountering an old save file
 //and can call the legacy code for converison to the new format.
+
 enum
 {
 	CHARDATA_HEADER1 = 0,
@@ -193,9 +176,6 @@ class ChooseChar_Interface
 public:
 	static int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
 	static bool CentralServer;
-	static bool CentralOnline;
-	static msstring CentralNetworkName;
-	static char CentralNetworkMOTD[4096]; //string, because it can be up to 4096 chars
 	static void UpdateCharScreen();
 	static void UpdateCharScreenUpload();
 };

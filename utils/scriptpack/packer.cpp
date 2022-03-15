@@ -1,6 +1,5 @@
 #include "cbase.h"
 #include "iostream"
-#include "../../MSShared/encrypt.h"
 #include "../../MSShared/sharedutil.h"
 #include "../../MSShared/msfileio.h"
 
@@ -15,7 +14,7 @@ void PackScriptDir(char *pszName)
 	PackDirectory(pszName);
 
 	char cWriteFile[MAX_PATH];
-	sprintf(cWriteFile, "%s\\sc.dll", pszRoot);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", pszRoot);
 
 	CGroupFile GroupFile;
 	try {
@@ -23,7 +22,7 @@ void PackScriptDir(char *pszName)
 	}
 	catch(...)
 	{
-		Print("Failed to create %s\n", cWriteFile);
+		printf("Failed to create %s\n", cWriteFile);
 		exit(-1);
 	}
 
@@ -35,10 +34,10 @@ void PackScriptDir(char *pszName)
 		if (InFile.ReadFromFile(FullPath))
 		{
 			char cRelativePath[MAX_PATH];
-			strcpy(cRelativePath, &FullPath[strlen(pszRoot) + 1]);
+			strncpy(cRelativePath, &FullPath[strlen(pszRoot) + 1], MAX_PATH);
 
 			if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-				Print("Failed to write entry: %s\n", cRelativePath);
+				printf("Failed to write entry: %s\n", cRelativePath);
 		}
 	}
 
@@ -52,7 +51,7 @@ void PackDirectory(char *pszName)
 	HANDLE findHandle;
 	char cSearchString[MAX_PATH];
 	
-	sprintf(cSearchString, "%s\\*.*", pszName);
+	_snprintf(cSearchString, MAX_PATH, "%s\\*.*", pszName);
 	if ((findHandle = FindFirstFile(cSearchString, &wfd)) == INVALID_HANDLE_VALUE) 
 		return;
 
@@ -67,15 +66,12 @@ void PackDirectory(char *pszName)
 void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd)
 {
 	char cFullPath[MAX_PATH];
-	sprintf(cFullPath, "%s\\%s", pszCurrentDir, wfd.cFileName);
+	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
 
 	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{
-		//Braces are neccesary
-		if (wfd.cFileName[0] != '.') PackDirectory(cFullPath);
+	{		
+		if (wfd.cFileName[0] != '.') PackDirectory(cFullPath); // Braces are neccesary
 	}
-	else if (strlen(wfd.cFileName) > strlen(".script") && !stricmp(&wfd.cFileName[strlen(wfd.cFileName) - strlen(".script")], ".script") || !stricmp(wfd.cFileName, "items.txt"))
-	{
+	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
 		StoreFiles.add(cFullPath);
-	}
 }

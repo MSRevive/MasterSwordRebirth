@@ -26,9 +26,6 @@
 #define SCRIPT_LOCKDOWN //Automatic, with lockdown mode
 #endif
 
-//Encrypt memory
-#define MEM_ENCRYPT
-
 // SILENCE SOME WARNINGS
 
 #ifdef _WIN32

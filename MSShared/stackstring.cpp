@@ -1,9 +1,10 @@
 #include "stackstring.h"
 #include "string"
+
 using namespace std;
 
 #undef msstring
-#define MSSTRING_MAXLEN (MSSTRING_SIZE - 1)
+
 msstring::msstring()
 {
 	data[0] = 0;

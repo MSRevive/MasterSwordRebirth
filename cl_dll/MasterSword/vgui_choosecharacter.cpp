@@ -73,12 +73,8 @@
 #include "../r_studioint.h"
 #include "logfile.h"
 
-
 int			ChooseChar_Interface::ServerCharNum = 0;
 bool		ChooseChar_Interface::CentralServer;
-bool		ChooseChar_Interface::CentralOnline;
-msstring	ChooseChar_Interface::CentralNetworkName;
-char		ChooseChar_Interface::CentralNetworkMOTD[4096];
 
 char *GenderPanel_MainBtnText[] =
 {
@@ -697,12 +693,7 @@ void CNewCharacterPanel::Update( )
 		cTemp2[0] = 0;
 		if (MSGlobals::IsLanGame) _snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
 		if( ChooseChar_Interface::CentralServer )
-		{
-			if( ChooseChar_Interface::CentralOnline )
-				 _snprintf(cTemp2, sizeof(cTemp2),  "\n%s\n%s",  Localized("#CHOOSECHAR_CENTRALNETWORK"),  ChooseChar_Interface::CentralNetworkName.c_str() );
-			else
-				 _snprintf(cTemp2, sizeof(cTemp2),  "\n%s",  Localized("#CHOOSECHAR_CENTRALNETWORK_DOWN") );
-		}
+			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
 
 		 _snprintf(cTemp, sizeof(cTemp),  "%s%s",  Localized("#CHOOSECHAR_SERVER"),  cTemp2 );
 		Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
@@ -735,19 +726,12 @@ void CNewCharacterPanel::Update( )
 					//Choose_MainBtn[i]->SetBGColorRGB( NewCharColor );
 					//Choose_MainBtn[i]->SetFGColorRGB( NewCharColor );
 
-					bool Enabled = true;
-					if( ChooseChar_Interface::CentralServer && !ChooseChar_Interface::CentralOnline )
-						Enabled = false;
-
-					Choose_MainBtn[i]->setEnabled( Enabled );
+					Choose_MainBtn[i]->setEnabled( true );
 					Choose_ImageCover[i]->setVisible( false );
 				}
 				else {
 					//Choose_MainBtn[i]->SetBGColorRGB( DisabledColor );
 					//Choose_MainBtn[i]->SetFGColorRGB( DisabledColor );
-					if( CharSlot.Status == CDS_LOADING )
-						Choose_MainBtn[i]->setText( Localized("#CHOOSECHAR_LOADING") );
-
 					Choose_MainBtn[i]->setEnabled( false );
 					//Choose_ImageCover[i]->setVisible( true );
 				}
@@ -1118,7 +1102,7 @@ int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
 
 	byte CharIndex = READ_BYTE( );						//Which char the info describes
 
-	if( CharIndex >= player.m_CharInfo.size() )
+	if (CharIndex >= MAX_CHARSLOTS)
 		return 0;
 
 	charinfo_t &CharSlot = player.m_CharInfo[CharIndex];

@@ -38,43 +38,17 @@ $Configuration
 	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./"
+		$AdditionalIncludeDirectories	"$BASE;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
+		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
-		
-		// Remove warnings from warning level 4.
-		// 4514  warning C4514: 'acosl' : unreferenced inline function has been removed
-		// 4100  warning C4100: 'hwnd' : unreferenced formal parameter
-		// 4127  warning C4127: conditional expression is constant
-		// 4512  warning C4512: 'InFileRIFF' : assignment operator could not be generated
-		// 4611  warning C4611: interaction between '_setjmp' and C++ object destruction is non-portable
-		// 4710  warning C4710: function 'x' not inlined
-		// 4702  warning C4702: unreachable code
-		// 4505  unreferenced local function has been removed
-		// 4239  nonstandard extension used : 'argument' ( conversion from class Vector to class Vector& 
-		// 4097  typedef-name 'BaseClass' used as synonym for class-name 'CFlexCycler::CBaseFlex'
-		// 4324  Padding was added at the end of a structure
-		// 4244  type conversion warning.
-		// 4305  truncation from 'const double ' to 'float '
-		// 4786  Disable warnings about long symbol names
-		// 4250  'X' : inherits 'Y::Z' via dominance
-		// 4201  nonstandard extension used : nameless struct/union
-		// 4481  warning C4481: nonstandard extension used: override specifier 'override'
-		// 4748  warning C4748: /GS can not protect parameters and local variables from local buffer overrun because optimizations are disabled in function
-		// 4511 Disable warnings about private copy constructors
-		// 4121 warning C4121: 'symbol' : alignment of a member was sensitive to packing
-		// 4530 warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc (disabled due to std headers having exception syntax
-		// 4996 functions declared deprecated
-		// 4267 conversion from 'size_t' to 'int', possible loss of data
-		// 4311 pointer truncation from 'char *' to 'int'
-		// 4312 conversion from 'unsigned int' to 'memhandle_t' of greater size
-		$DisableSpecificWarnings	"$BASE;4100;4514;4127;4512;4611;4710;4702;4505;4239;4097;4324;4244;4305;4786;4250;4201;4481;4748;4511;4121;4530;4996;4267;4311;4312" [$WIN32]
 	}
 
 	$Linker
 	{
 		$AdditionalDependencies			"$BASE winmm.lib" [$WIN32]
 		$AdditionalDependencies			"$BASE wsock32.lib Ws2_32.lib" [$WIN32||$LINUXALL]
+		$AdditionalDependencies         "$BASE $SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
 		$SystemLibraries                                                        "iconv" [$OSXALL]
 		$ModuleDefinitionFile				"$BASE $SRCDIR/dlls/ms.def"
 	}
@@ -160,7 +134,6 @@ $Project "Server"
 		$File	".\entity.cpp"
 		$File	".\magic.cpp"
 		$File	".\monsters\monsteranimation.cpp"
-		$File	".\mscentraltransaction_dll.cpp"
 		$File	".\effects\mseffects.cpp"
 		$File	"msmapents.cpp"
 		$File	".\monsters\msmonsterserver.cpp"
@@ -200,11 +173,9 @@ $Project "Server"
 			$File	".\monsters\bodyparts\bodyparts.h"
 			$File	".\monsters\bodyparts\bodyparts_human.h"
 			$File	".\monsters\corpse.h"
-			$File	"..\msshared\encrypt.h"
 			$File	"..\msshared\groupfile.h"
 			$File	".\player\modeldefs.h"
 			$File	".\monsters\monsteranimation.h"
-			$File	".\mscentral.h"
 			$File	"..\msshared\mscharacter.h"
 			$File	"..\msshared\mscharacterheader.h"
 			$File	"msdllheaders.h"
@@ -228,9 +199,12 @@ $Project "Server"
 
 	$Folder	"Shared"
 	{
+		$File	"..\msshared\FnDataHandler.cpp"
+		$File	"..\msshared\FnDataHandler.h"
+		$File	"..\msshared\HTTPRequestHandler.cpp"
+		$File	"..\msshared\HTTPRequestHandler.h"
 		$File	"..\msshared\buildcontrol.h"
 		$File	"..\msshared\dbginputs.cpp"
-		$File	"..\msshared\encrypt.cpp"
 		$File	"genitemlist.cpp"
 		$File	"genitemlist.h"
 		$File	"..\msshared\global.cpp"
@@ -240,8 +214,6 @@ $Project "Server"
 		$File	"..\msshared\iscript.h"
 		$File	".\logfile.h"
 		$File	"..\msshared\magic.h"
-		$File	"..\msshared\mem_encrypt.cpp"
-		$File	"..\msshared\mem_encrypt.h"
 		$File	"..\msshared\msbasic.h"
 		$File	"..\msshared\mscharacter.cpp"
 		$File	"..\msshared\msdebug.h"
@@ -278,9 +250,17 @@ $Project "Server"
 			$File "..\msshared\crc\crchash.h"
 			$File "..\msshared\crc\xxhash32.h"
 		}
+
+		$Folder "base64"
+		{
+			$File "..\thirdparty\base64\base64.cpp"
+			$File "..\thirdparty\base64\base64.h"
+		}
 	}
 
 	$Folder	"Link Libraries" 
 	{
+		$DynamicFile 	"$SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
+		$Lib			"$SRCDIR/lib/public/libcurl" [$WIN32]
 	}
 }

@@ -24,7 +24,7 @@ void ShowWeaponDesc(CGenericItem *pItem);
 #include "../cl_dll/MasterSword/CLGlobal.h"
 #else
 #include "Global.h"
-#include "MSCentral.h"
+#include "FnDataHandler.h"
 #endif
 
 //NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017
@@ -248,13 +248,9 @@ void CBasePlayer::InitialSpawn(void)
 
 	m_AnimSpeedAdj = 1;
 
-	//Reset char info
-	if (!m_CharInfo.size())
-	{
-		m_CharInfo.reserve_once(MAX_CHARSLOTS, MAX_CHARSLOTS);
-		for (int i = 0; i < m_CharInfo.size(); i++)
-			m_CharInfo[i].Index = i;
-	}
+	// Reset char info
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
+		m_CharInfo[i].Index = i;
 
 	dbg("Call CreateStats");
 	CreateStats();
@@ -1226,8 +1222,10 @@ void CBasePlayer::Deactivate()
 	RemoveAllItems(false, true); // Destroy all of the player's weapons and items
 
 	//Must manually deallocate any player memory that was dynamically allocated
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
+		m_CharInfo[i].Destroy();
+
 	m_EntInfo.clear();
-	m_CharInfo.clear();
 	m_Storages.clear();
 	m_ViewedHelpTips.clear();
 	m_Quests.clear();
@@ -1350,24 +1348,20 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	if (!MSGlobals::ServerSideChar)
 		return;
 
-	if (MSCentral::Enabled())
+	if (FnDataHandler::IsEnabled())
 	{
-		//Send a request to retrieve the player's info from a central server.
-		//Once the player file is downloaded, m_CharInfo will be updated with the info
+		// Send a request to retrieve the player's info from a central server.
+		// Once the player file is downloaded, m_CharInfo will be updated with the info
 		if (CharIdx == -1)
-		{
-			for (int i = 0; i < MAX_CHARSLOTS; i++)
-				if (m_CharInfo[i].Status != CDS_LOADING)
-					MSCentral::RetrieveChar(AuthID(), i);
-		}
-		else if (m_CharInfo[CharIdx].Status != CDS_LOADING)
-			MSCentral::RetrieveChar(AuthID(), CharIdx);
+			FnDataHandler::LoadCharacter(this);
+		else
+			FnDataHandler::LoadCharacter(this, CharIdx);
 	}
 	else
 	{
 		charloc_e Location = LOC_SERVER;
 #else
-	charloc_e Location = LOC_CLIENT;
+		charloc_e Location = LOC_CLIENT;
 #endif
 
 		//Load all characters from file, locally
@@ -1389,18 +1383,21 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	m_TimeSendCharInfo = gpGlobals->time;
 #endif
 }
-void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, char *pData, int iDataLen, CBasePlayer *pPlayer)
+
+void charinfo_t::Destroy()
 {
-	if (Data)
-	{
+	if (Data)	
 		delete Data;
-		Data = NULL;
-	}
+	Data = NULL;
 	GearInfo.clear();
-	clrmem(*this);
+	memset(this, 0, sizeof(this));
+}
+
+void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char *pData, int iDataLen, CBasePlayer *pPlayer)
+{
+	Destroy();
 
 	Index = CharIndex;
-
 	DataLen = iDataLen;
 	Data = msnew char[DataLen];
 	memcpy(Data, pData, DataLen);
@@ -1482,13 +1479,10 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, char *pData, int
 	else
 		Status = CDS_NOTFOUND;
 }
+
 charinfo_t::~charinfo_t()
 {
-	if (Data)
-	{
-		delete Data;
-		Data = NULL;
-	}
+	Destroy();
 }
 
 char *GetOtherPlayerTransition(CBasePlayer *pPlayer)

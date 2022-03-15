@@ -30,7 +30,7 @@ $Configuration
 
 	$Linker
 	{
-		$OutputFile						"$SRCDIR/infestus/bin/$OUTBINNAME"
+		$OutputFile						"$SRCDIR/bin/$OUTBINNAME"
 	}
 }
 

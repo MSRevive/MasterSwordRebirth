@@ -28,7 +28,7 @@ int CFindEntity::GetEntIndex()
 msstring CFindEntity::AsString()
 {
     char pszRet[16];
-    sprintf(pszRet, "%i", GetEntIndex());
+    _snprintf(pszRet, sizeof(pszRet), "%i", GetEntIndex());
     return msstring(pszRet);
 }
 

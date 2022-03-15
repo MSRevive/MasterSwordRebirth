@@ -15,7 +15,7 @@ $Project "server"
 
 $Project "client"
 {
-	"cl_dll\client.vpc"
+	"cl_dll\client.vpc" [$WIN32]
 }
 
 $Project "dedicated"
@@ -25,10 +25,15 @@ $Project "dedicated"
 
 $Project "scriptpack"
 {
-	"utils\scriptpack\scriptpack.vpc"
+	"utils\scriptpack\scriptpack.vpc" [$WIN32]
 }
 
 $Project "maphash"
 {
-	"utils\maphash\maphash.vpc"
+	"utils\maphash\maphash.vpc" [$WIN32]
+}
+
+$Project "charimport"
+{
+	"utils\charimport\charimport.vpc" [$WIN32]
 }
