@@ -1705,8 +1705,9 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 		{
 			StoreEntity(this, ENT_LASTSPOKE); //Thothie - not working :(
 			msstringlist Params;
+
 			Params.clear();
-			Params.add(pszSentence);
+			Params.add(stripBadChars(pszSentence));
 			Params.add(EntToString(this)); //Thothie - Workaround
 			((CMSMonster *)pEnt)->CallScriptEvent("game_heardtext", &Params);
 		}

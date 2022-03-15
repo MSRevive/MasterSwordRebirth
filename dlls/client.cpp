@@ -448,7 +448,13 @@ void ClientCommand2(edict_t *pEntity)
 			Parameters.clearitems();
 
 			for (int i = 0; i < CMD_ARGC(); i++)
-				Parameters.add(CMD_ARGV(i));
+			{
+				//this is so terrible to do...
+				//should think of another way to handle commands from scripts altogether.
+				char* argv = (char*)CMD_ARGV(i);
+				Parameters.add(stripBadChars(argv));
+			}
+				
 			MSGlobals::GameScript->CallScriptEvent("game_playercmd", &Parameters);
 		}
 	}

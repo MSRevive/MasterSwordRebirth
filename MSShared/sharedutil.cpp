@@ -513,3 +513,29 @@ msscriptset * GetScriptedSetFromHashMap(msscriptsethash &vScriptHashMap, msstrin
 
     return NULL;
 }
+
+bool isBadChar(int c)
+{
+	if (c == '(' || c == ')' || c == '$')
+		return true;
+		
+	return false;
+}
+
+char* stripBadChars(char* data)
+{
+	int i = 0, x = 0;
+	char c;
+	char* cleanData = data;
+	
+	while((c = data[i++]) != '\0')
+	{
+		if (!isBadChar(c))
+		{
+			cleanData[x++] = c;
+		}
+	}
+	
+	cleanData[x] = '\0';
+	return cleanData;
+}
