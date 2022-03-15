@@ -1013,7 +1013,12 @@ msstring CScript::ScriptGetter_Func( msstring& FullName, msstring& ParserName, m
 		}
 	}
 	
-	m.pScriptedInterface->CallScriptEvent( func_event.c_str(), &OutParams );
+	//for whatever reason on the client m_Scripts is empty, so a quick workaround fix...
+	//should really figure out why m_Scripts is empty on the client.
+	if(m.pScriptedInterface->m_Scripts.size() > 0)
+		m.pScriptedInterface->CallScriptEvent(func_event.c_str(), &OutParams);
+	else
+		RunScriptEventByName(func_event.c_str(), &OutParams);
 
 	if (m.pScriptedInterface->m_ReturnData.len()) 
 	{
