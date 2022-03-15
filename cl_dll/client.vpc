@@ -409,7 +409,6 @@ $Project "Client"
 		{
 			$File "..\msshared\crc\crchash.cpp"
 			$File "..\msshared\crc\crchash.h"
-			$File "..\msshared\crc\xxhash32.h"
 		}
 
 		$Folder "base64"

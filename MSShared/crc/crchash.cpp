@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "xxhash32.h"
+#include "xxhash/xxhash32.h"
 #include "../MSShared/stackstring.h"
 
 void Print( char *szFmt, ... );
