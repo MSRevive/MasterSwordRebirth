@@ -8,10 +8,15 @@
 #include <vector>
 #include <ostream>
 #include <fstream>
+#include <cstdio>
 
 #include "../../MSShared/crc/crchash.h"
+#include "rapidjson/document.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/writer.h"
 
 using namespace std;
+using namespace rapidjson;
 
 string getFileExt(string fileName)
 {
@@ -69,23 +74,34 @@ int main(int argc, char *argv[])
 	
 	vector<string> list = lsfiles(where); //Get contents of directory
 	
-	ofstream hashFile(output+"maphash.txt"); //we open the maphash.txt file to write to.
-
+	Document doc;
+	doc.SetObject();
+	
+	string fOutput = output+"maps.json";
+	
+	FILE* fp = fopen(fOutput.c_str(), "wb"); // non-Windows use "w"
+	
+	char writeBuffer[65536];
+	FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+	
 	for(vector<string>::iterator t = list.begin(); t != list.end(); ++t)
 	{
 		if(getFileExt(t->c_str()) == "bsp")
 		{
 			string fullpath = where+t->c_str();
 			cout << "Writing file hash for: " << t->c_str() << endl;
-			hashFile << t->c_str() << " " << GetFileCheckSumSize(fullpath.c_str()) << endl;
+			doc.AddMember(Value(t->c_str(), doc.GetAllocator()), GetFileCheckSum(fullpath.c_str()), doc.GetAllocator());
 		}
 	}
 	
-	hashFile.close(); //we close the maphash.txt file since we no longer need to write to it.
+	Writer<FileWriteStream> writer(os);
+	doc.Accept(writer);
+	
+	fclose(fp);
 	
 	cout << "\n";
 	cout << "Operation has finished. It is safe to close now." << endl;
-	cout << "File Located in: " << output+"maphash.txt" << endl;
+	cout << "File Located in: " << fOutput.c_str() << endl;
 	cout << "\n";
 	cout << "Press 'enter' to close." << endl;
 	cin.ignore();

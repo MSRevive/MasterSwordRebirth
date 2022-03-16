@@ -12,7 +12,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;..\..\MSShared\crc;$SRCDIR\thirdparty\xxhash"
+		$AdditionalIncludeDirectories	"$BASE;.\;..\..\MSShared\crc;..\..\thirdparty;..\..\thirdparty\xxhash"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}

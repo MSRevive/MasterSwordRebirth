@@ -38,7 +38,7 @@ $Configuration
 	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;../cl_dlls;../engine;../common;../pm_shared;../game_shared;../MSShared;./Effects;./gamerules;./Global;./Half-life;./Items;./Monsters;./Player;./Stats;./Syntax;./Weapons;./;$SRCDIR\thirdparty;$SRCDIR\thirdparty\xxhash"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
 		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
@@ -248,6 +248,7 @@ $Project "Server"
 		{
 			$File "..\msshared\crc\crchash.cpp"
 			$File "..\msshared\crc\crchash.h"
+			$File "..\thirdparty\xxhash\xxhash32.h"
 		}
 
 		$Folder "base64"
