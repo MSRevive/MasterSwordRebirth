@@ -25,7 +25,7 @@ using namespace rapidjson;
 
 enum RequestCommand
 {
-	FN_REQ_LOAD,
+	FN_REQ_LOAD = 0,
 	FN_REQ_CREATE,
 	FN_REQ_UPDATE,
 	FN_REQ_DELETE,
@@ -73,7 +73,7 @@ static std::chrono::milliseconds threadSleepTime(100);
 static std::atomic<bool> g_bShouldShutdownFn = false;
 static std::vector<FnRequestData*> g_vRequestData;
 static std::mutex mutex;
-static float g_fThinkTime;
+static float g_fThinkTime = 0.0f;
 
 static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS)); }
 
@@ -220,6 +220,11 @@ void FnDataHandler::Initialize(void)
 void FnDataHandler::Destroy(void)
 {
 	g_bShouldShutdownFn = true;
+}
+
+void FnDataHandler::Reset(void)
+{
+	g_fThinkTime = 0.0f;
 }
 
 void FnDataHandler::Think(void)

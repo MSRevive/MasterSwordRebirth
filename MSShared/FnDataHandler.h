@@ -7,6 +7,7 @@ namespace FnDataHandler
 {
 	void Initialize(void);
 	void Destroy(void);
+	void Reset(void);
 	void Think(void);
 	bool IsEnabled(void);
 
