@@ -245,8 +245,6 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
-	_snprintf(pPlayer->steamID64String, MSSTRING_SIZE, "%llu", pPlayer->steamID64);
-	//FnDataHandler::LoadCharacter(pPlayer); // TEST
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();

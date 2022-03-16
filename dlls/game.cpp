@@ -24,6 +24,8 @@
 #include <unistd.h>
 #endif
 
+#include "FnDataHandler.h"
+
 cvar_t displaysoundlist = {"displaysoundlist", "0"};
 cvar_t mapcyclefile = {"mapcyclefile", "mapcycle.txt"};
 cvar_t servercfgfile = {"servercfgfile", "server.cfg"};
@@ -119,10 +121,13 @@ void GameDLLInit(void)
 		g_engfuncs.pfnServerCommand("exit\n");
 		return;
 	}
+
+	FnDataHandler::Initialize();
 }
 
 void GameDLLShutdown()
 {
 	ScriptMgr::GameShutdown();
 	FileSystem_Shutdown();
+	FnDataHandler::Destroy();
 }
