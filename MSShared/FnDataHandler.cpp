@@ -69,7 +69,7 @@ private:
 	FnRequestData(const FnRequestData& data);
 };
 
-static std::chrono::milliseconds threadSleepTime(100);
+static std::chrono::milliseconds threadSleepTime(4);
 static std::atomic<bool> g_bShouldShutdownFn = false;
 static std::vector<FnRequestData*> g_vRequestData;
 static std::mutex mutex;
@@ -229,8 +229,10 @@ void FnDataHandler::Reset(void)
 
 void FnDataHandler::Think(void)
 {
-	if (gpGlobals->time <= g_fThinkTime) return;
-	g_fThinkTime = (gpGlobals->time + 0.1f);
+	if ((gpGlobals->time <= g_fThinkTime) || (g_vRequestData.size() == 0))
+		return;
+
+	g_fThinkTime = (gpGlobals->time + 0.01f);
 
 	if (mutex.try_lock())
 	{
