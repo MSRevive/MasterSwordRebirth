@@ -253,6 +253,7 @@ void FnDataHandler::Think(void)
 					charinfo_t& CharInfo = pPlayer->m_CharInfo[req->slot];
 					strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
 					CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
+					CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 					break;
 				}
 
