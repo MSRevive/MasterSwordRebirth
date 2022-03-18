@@ -281,19 +281,26 @@ void CHalfLifeMultiplay :: Think( void )
 
 	enddbg;
 }
-bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap( )
-{
-	bool Allowed = false;
-	for( int i = 1; i <= gpGlobals->maxClients; i++ )
-		{
-			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-			if( !pPlayer ) continue;
 
-			//If one person has a character that can join the map, then don't switch the map
-			if( pPlayer->m_CanJoin ) { Allowed = true; break; }
+bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap()
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
+		if (!pPlayer) continue;
+
+		//Somebody is still loading a character from the Central Server.  Wait for success or an error
+		for (int c = 0; c < MAX_CHARSLOTS; c++)
+		{
+			if (pPlayer->m_CharInfo[c].Status == CDS_LOADING)
+				return true;
 		}
 
-	return Allowed;
+		// If one person has a character that can join the map, then don't switch the map
+		if (pPlayer->m_CanJoin) return true;
+	}
+
+	return false;
 }
 
 void CheckValidation( )

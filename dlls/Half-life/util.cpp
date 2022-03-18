@@ -614,6 +614,19 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 	return pPlayer;
 }
 
+CBasePlayer* UTIL_PlayerBySteamID(unsigned long long steamID64)
+{
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	{
+		CBaseEntity* pEntity = UTIL_PlayerByIndex(i);
+		CBasePlayer* pPlayer = pEntity ? (CBasePlayer*)pEntity : NULL;
+		if (pPlayer && (pPlayer->steamID64 == steamID64))
+			return pPlayer;
+	}
+
+	return NULL;
+}
+
 //[begin] NOV2014_13 Thothie - centralizing trigger scriptevent and req functions
 void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 {

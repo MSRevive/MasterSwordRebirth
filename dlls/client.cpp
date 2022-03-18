@@ -245,8 +245,6 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
-	_snprintf(pPlayer->steamID64String, MSSTRING_SIZE, "%llu", pPlayer->steamID64);
-	//FnDataHandler::LoadCharacter(pPlayer); // TEST
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -1718,9 +1716,9 @@ void ServerDeactivate(void)
 
 	dbg("Call MSGameEnd");
 	MSGameEnd();
-
 	dbg("End");
 
+	FnDataHandler::Reset();
 	enddbg;
 }
 
@@ -1797,7 +1795,8 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CSVGlobals::WriteScriptLog();
 	Log("World Activate END");
 
-	enddbg;
+	FnDataHandler::Reset();
+	enddbg;	
 }
 
 /*
