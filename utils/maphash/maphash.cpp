@@ -6,8 +6,6 @@
 #include <iostream>
 #include <windows.h>
 #include <vector>
-#include <ostream>
-#include <fstream>
 #include <cstdio>
 
 #include "../../MSShared/crc/crchash.h"
