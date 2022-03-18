@@ -1716,9 +1716,9 @@ void ServerDeactivate(void)
 
 	dbg("Call MSGameEnd");
 	MSGameEnd();
-
 	dbg("End");
 
+	FnDataHandler::Reset();
 	enddbg;
 }
 

@@ -8,7 +8,7 @@ namespace FnDataHandler
 	void Initialize(void);
 	void Destroy(void);
 	void Reset(void);
-	void Think(void);
+	void Think(bool bNoCallback = false);
 	bool IsEnabled(void);
 
 	void LoadCharacter(CBasePlayer* pPlayer);

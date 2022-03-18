@@ -16,9 +16,9 @@
 #include "rapidjson/writer.h"
 #include "base64/base64.h"
 
-#include <chrono>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include <vector>
 
 using namespace rapidjson;
@@ -41,13 +41,15 @@ enum RequestResult
 struct FnRequestData
 {
 public:
-	FnRequestData(int command, unsigned long long steamID, const char* url)
+	FnRequestData(int command, unsigned long long steamID, int slot, const char* url)
 	{
 		guid[0] = 0;
 		data = NULL;
 		result = FN_RES_NA;
 		this->steamID = steamID;
 		this->command = command;
+		this->slot = slot;
+		this->size = 0;
 		strncpy(this->url, url, REQUEST_URL_SIZE);
 	}
 
@@ -69,10 +71,11 @@ private:
 	FnRequestData(const FnRequestData& data);
 };
 
-static std::chrono::milliseconds threadSleepTime(4);
 static std::atomic<bool> g_bShouldShutdownFn = false;
 static std::vector<FnRequestData*> g_vRequestData;
+static std::vector<FnRequestData*> g_vIntermediateData;
 static std::mutex mutex;
+static std::condition_variable cv;
 static float g_fThinkTime = 0.0f;
 
 static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS)); }
@@ -95,19 +98,11 @@ static const char* GetFnUrl(char* fmt, ...)
 // Load single char details.
 static bool LoadCharacter(FnRequestData* req, const JSONValue& val)
 {
-	req->slot = val["slot"].GetInt();
 	req->size = val["size"].GetInt();
-
-	if (!IsSlotValid(req->slot))
-	{
-		req->result = FN_RES_ERR;
-		return false; // Invalid slot!
-	}
-
 	strncpy(req->guid, val["id"].GetString(), MSSTRING_SIZE);
 	req->data = new char[req->size];
 	memcpy(req->data, (char*)base64_decode(val["data"].GetString()).c_str(), req->size);
-
+	req->result = FN_RES_OK;
 	return true;
 }
 
@@ -116,6 +111,7 @@ static void HandleRequest(FnRequestData* req)
 {
 	if (req == NULL) return;
 
+	req->result = FN_RES_ERR;
 	JSONDocument* pDoc = NULL;
 	const bool bIsUpdate = (req->command == FN_REQ_UPDATE);
 
@@ -126,10 +122,7 @@ static void HandleRequest(FnRequestData* req)
 	{
 		pDoc = HTTPRequestHandler::GetRequestAsJson(req->url);
 		if (pDoc == NULL)
-		{
-			req->result = FN_RES_ERR;
 			return;
-		}
 
 		const JSONDocument& doc = *pDoc;
 		for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
@@ -168,45 +161,48 @@ static void HandleRequest(FnRequestData* req)
 
 		if (bIsUpdate)
 		{
+			req->result = FN_RES_OK;
 			HTTPRequestHandler::PutRequest(req->url, s.GetString());
 			break;
 		}
 
 		pDoc = HTTPRequestHandler::PostRequestAsJson(req->url, s.GetString());
 		if (pDoc == NULL)
-		{
-			req->result = FN_RES_ERR;
 			return;
-		}
 
 		strncpy(req->guid, (*pDoc)["data"]["id"].GetString(), MSSTRING_SIZE);
+		req->result = FN_RES_OK;
 		break;
 	}
 
 	case FN_REQ_DELETE:
 		HTTPRequestHandler::DeleteRequest(req->url);
+		req->result = FN_RES_OK;
 		break;
 
 	}
 
 	delete pDoc;
-	req->result = FN_RES_OK;
 }
 
 static void Worker(void)
 {
-	while (!g_bShouldShutdownFn)
+	while (1)
 	{
-		if (mutex.try_lock())
+		std::unique_lock<std::mutex> lck(mutex);
+		while ((g_vRequestData.size() == 0) && (g_bShouldShutdownFn == false))
+			cv.wait(lck);
+
+		if (g_bShouldShutdownFn)
+			break;
+
+		for (auto* pRequest : g_vRequestData)
 		{
-			for (auto* pRequest : g_vRequestData)
-			{
-				if (pRequest->result != FN_RES_NA) continue;
-				HandleRequest(pRequest);
-			}
-			mutex.unlock();
+			if (pRequest->result != FN_RES_NA)
+				continue;
+
+			HandleRequest(pRequest);
 		}
-		std::this_thread::sleep_for(threadSleepTime);
 	}
 }
 
@@ -220,39 +216,71 @@ void FnDataHandler::Initialize(void)
 void FnDataHandler::Destroy(void)
 {
 	g_bShouldShutdownFn = true;
+	cv.notify_all();
 }
 
 void FnDataHandler::Reset(void)
 {
+	cv.notify_all();
+
+	// Wait for any remaining items.
+	do
+	{
+		Think(true);
+	} while (g_vRequestData.size());
+
 	g_fThinkTime = 0.0f;
 }
 
-void FnDataHandler::Think(void)
+void FnDataHandler::Think(bool bNoCallback)
 {
-	if ((gpGlobals->time <= g_fThinkTime) || (g_vRequestData.size() == 0))
-		return;
+	if (!bNoCallback)
+	{
+		if (gpGlobals->time <= g_fThinkTime)
+			return;
 
-	g_fThinkTime = (gpGlobals->time + 0.01f);
+		g_fThinkTime = (gpGlobals->time + 0.025f);
+	}
 
-	if (mutex.try_lock())
+	std::unique_lock<std::mutex> lck(mutex, std::defer_lock);
+
+	if (lck.try_lock())
 	{
 		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
 			const FnRequestData* req = g_vRequestData[i];
 			if (req->result == FN_RES_NA) continue;
 
-			CBasePlayer* pPlayer = UTIL_PlayerBySteamID(req->steamID);
-			if (pPlayer && (req->result == FN_RES_OK))
+			CBasePlayer* pPlayer = (bNoCallback ? NULL : UTIL_PlayerBySteamID(req->steamID));
+			if (pPlayer)
 			{
+				charinfo_t& CharInfo = pPlayer->m_CharInfo[req->slot];
+
 				switch (req->command)
 				{
 
 				case FN_REQ_LOAD:
 				case FN_REQ_CREATE:
 				{
-					charinfo_t& CharInfo = pPlayer->m_CharInfo[req->slot];
-					strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
-					CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
+					if (req->result == FN_RES_OK)
+					{
+						strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
+						CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
+					}
+					else
+					{
+						CharInfo.Index = req->slot;
+						CharInfo.Location = LOC_CENTRAL;
+						CharInfo.Status = CDS_NOTFOUND;
+					}
+
+					CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
+					break;
+				}
+
+				case FN_REQ_DELETE:
+				{
+					CharInfo.Status = CDS_NOTFOUND;
 					CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 					break;
 				}
@@ -263,7 +291,16 @@ void FnDataHandler::Think(void)
 			g_vRequestData.erase(g_vRequestData.begin() + i);
 			delete req;
 		}
-		mutex.unlock();
+
+		// Add new requests
+		if (g_vIntermediateData.size() > 0)
+		{
+			for (auto* pData : g_vIntermediateData)
+				g_vRequestData.push_back(pData);
+
+			g_vIntermediateData.clear();
+			cv.notify_all();
+		}
 	}
 }
 
@@ -277,27 +314,26 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL)) return;
 
-	mutex.lock();
 	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{
+		if (pPlayer->m_CharInfo[i].Status == CDS_LOADING)
+			continue;
+
 		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
-		pPlayer->m_CharInfo[i].Status = CDS_NOTFOUND;
-		g_vRequestData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, i)));
+		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
+		g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, i, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, i)));
 	}
-	mutex.unlock();
 }
 
 // Load a specific character!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot) || (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+		return;
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
-	pPlayer->m_CharInfo[slot].Status = CDS_NOTFOUND;
-
-	mutex.lock();
-	g_vRequestData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
-	mutex.unlock();
+	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
+	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, slot, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
 }
 
 // Create or Update character.
@@ -310,28 +346,28 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 	FnRequestData* req = new FnRequestData(
 		bIsUpdate ? FN_REQ_UPDATE : FN_REQ_CREATE,
 		pPlayer->steamID64,
+		slot,
 		bIsUpdate ? GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid) : GetFnUrl("api/v1/character/")
 	);
 	req->data = new char[size];
 	req->size = size;
-	req->slot = slot;
 	memcpy(req->data, data, size);
+	g_vIntermediateData.push_back(req);
 
-	mutex.lock();
-	g_vRequestData.push_back(req);
-	mutex.unlock();
+	if (!bIsUpdate)
+	{
+		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
+		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
+	}
 }
 
 void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 {
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot)) return;
 
-	pPlayer->m_CharInfo[slot].Status = CDS_NOTFOUND;
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
-
-	mutex.lock();
-	g_vRequestData.push_back(new FnRequestData(FN_REQ_DELETE, pPlayer->steamID64, GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
-	mutex.unlock();
+	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
+	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_DELETE, pPlayer->steamID64, slot, GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
 }
 
 // We store 64-bit SteamIDs, convert from old 32-bit string based ID to 64-bit numeric.

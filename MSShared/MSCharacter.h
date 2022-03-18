@@ -11,6 +11,7 @@
 enum chardatastatus_e
 {
 	CDS_UNLOADED,
+	CDS_LOADING,
 	CDS_LOADED,
 	CDS_NOTFOUND
 };
