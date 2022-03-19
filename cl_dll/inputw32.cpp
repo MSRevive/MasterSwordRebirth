@@ -21,10 +21,10 @@
 #include "in_defs.h"
 #include "../public/keydefs.h"
 #include "view.h"
-#include "Exports.h"
+#include "exports.h"
 
-#include "../thirdparty/SDL2/SDL_mouse.h"
-#include "../thirdparty/SDL2/SDL_gamecontroller.h"
+#include "../thirdparty/SDL2/sdl_mouse.h"
+#include "../thirdparty/SDL2/sdl_gamecontroller.h"
 
 #define MOUSE_BUTTON_COUNT 5
 

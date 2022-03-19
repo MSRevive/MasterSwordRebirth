@@ -1,16 +1,16 @@
-#include "MSDLLHeaders.h"
-#include "MSItemDefs.h"
-#include "Player.h"
-#include "Monsters/Corpse.h"
-#include "Stats/Stats.h"
+#include "msdllheaders.h"
+#include "msitemdefs.h"
+#include "player.h"
+#include "Monsters/corpse.h"
+#include "Stats/stats.h"
 #include "Stats/statdefs.h"
-#include "Syntax/Syntax.h"
-#include "Weapons/Weapons.h"
-#include "Weapons/GenericItem.h"
-#include "Titles.h"
-#include "Magic.h"
-#include "ScriptedEffects.h"
-#include "MSCharacter.h"
+#include "Syntax/syntax.h"
+#include "Weapons/weapons.h"
+#include "Weapons/genericitem.h"
+#include "titles.h"
+#include "magic.h"
+#include "scriptedeffects.h"
+#include "mscharacter.h"
 #include "script.h"
 #include "modeldefs.h"
 #include "logfile.h"
@@ -18,13 +18,13 @@
 #ifndef VALVE_DLL
 void ContainerWindowUpdate();
 void ShowWeaponDesc(CGenericItem *pItem);
-#include "../cl_dll/MasterSword/vgui_HUD.h"
+#include "../cl_dll/MasterSword/vgui_hud.h"
 #include "../cl_dll/hud.h"
-#include "../cl_dll/MasterSword/HUDScript.h"
-#include "../cl_dll/MasterSword/CLGlobal.h"
+#include "../cl_dll/MasterSword/hudscript.h"
+#include "../cl_dll/MasterSword/clglobal.h"
 #else
-#include "Global.h"
-#include "FnDataHandler.h"
+#include "global.h"
+#include "fndatahandler.h"
 #endif
 
 //NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017

@@ -19,7 +19,7 @@
   spawn, think, and use functions for entities that use brush models
 
 */
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "saverestore.h"
 #include "func_break.h"
 #include "decals.h"

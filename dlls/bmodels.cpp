@@ -20,7 +20,7 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "logfile.h"
 #include "doors.h"
 

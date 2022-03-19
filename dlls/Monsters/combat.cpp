@@ -20,12 +20,12 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "soundent.h"
 #include "decals.h"
 #include "animation.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "func_break.h"
 
 extern DLL_GLOBAL Vector g_vecAttackDir;

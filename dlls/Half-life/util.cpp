@@ -22,14 +22,14 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "saverestore.h"
 #include <time.h>
 #include <stdio.h>
 #include "../engine/shake.h"
 #include "decals.h"
 #include "player.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "gamerules.h"
 
 #include "logfile.h"

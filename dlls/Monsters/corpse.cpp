@@ -2,7 +2,7 @@
 
 #include "../Player/modeldefs.h"
 
-#include "Corpse.h"
+#include "corpse.h"
 extern int iBeam;
 
 LINK_ENTITY_TO_CLASS(player_corpse, CCorpse);

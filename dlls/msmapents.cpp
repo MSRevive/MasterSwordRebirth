@@ -1,8 +1,8 @@
-#include "MSDLLHeaders.h"
-#include "Player.h"
-#include "SVGlobals.h"
-#include "../MSShared/Global.h"
-#include "../MSShared/MSCharacter.h"
+#include "msdllheaders.h"
+#include "player.h"
+#include "svglobals.h"
+#include "../MSShared/global.h"
+#include "../MSShared/mscharacter.h"
 #include "logfile.h"
 
 class CCycler : public CBaseMonster

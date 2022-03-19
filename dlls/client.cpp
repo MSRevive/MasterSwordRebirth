@@ -25,7 +25,7 @@
 
 // Master Sword
 #include "inc_weapondefs.h"
-#include "Stats/Stats.h"
+#include "Stats/stats.h"
 #include "Stats/statdefs.h"
 // ---
 
@@ -38,14 +38,14 @@
 #include "netadr.h"
 
 #include "logfile.h"
-#include "SVGlobals.h"
-#include "MSNetCode.h"
-#include "MSCharacter.h"
-#include "Global.h"
+#include "svglobals.h"
+#include "msnetcode.h"
+#include "mscharacter.h"
+#include "global.h"
 #include "versioncontrol.h"
 
-#include "../MSShared/CVarMonitor.h"
-#include "FnDataHandler.h"
+#include "../MSShared/cvarmonitor.h"
+#include "fndatahandler.h"
 
 extern void PlayerPrecache();
 

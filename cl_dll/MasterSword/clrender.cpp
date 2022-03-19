@@ -1,13 +1,13 @@
 // Triangle rendering, if any
 
 #include "inc_weapondefs.h"
-#include "CLRender.h"
-#include "CLGlobal.h"
+#include "clrender.h"
+#include "clglobal.h"
 
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
-#include "HUDScript.h"
+#include "hudscript.h"
 
 // Triangle rendering apis are in gEngfuncs.pTriAPI
 
@@ -30,7 +30,7 @@
 #include <gl/gl.h>
 //include <gl/glext.h> //AUG2013_21 - Nvidia update - no longer need this header
 #include <cg/cg.h>
-#include <cg/cgGL.h>
+#include <cg/cggl.h>
 #pragma comment(lib, "cg.lib")
 #pragma comment(lib, "cgGL.lib")
 
@@ -598,8 +598,8 @@ void RenderFog()
 
 //VGUI_Image3D - 3D HUD Sprite
 //============
-#include "vgui_TeamFortressViewport.h"
-#include "MasterSword/vgui_MSControls.h"
+#include "vgui_teamfortressviewport.h"
+#include "MasterSword/vgui_mscontrols.h"
 
 mslist<VGUI_Image3D *> g_VGUIImages;
 void VGUIImages_NewLevel()

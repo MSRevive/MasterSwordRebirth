@@ -45,13 +45,13 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
-#include "Weapons/GenericItem.h"
-#include "Stats\Statdefs.h"
+#include "Weapons/genericitem.h"
+#include "stats\statdefs.h"
 
-#include "VGUI_Font.h"
-#include <VGUI_TextImage.h>
+#include "vgui_font.h"
+#include <vgui_textimage.h>
 
 #include "../hud.h"
 #include "../cl_util.h"
@@ -59,25 +59,25 @@
 #include "../parsemsg.h"
 
 #include "../vgui_int.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
 //Master Sword
 #include "logfile.h"
-#include "CLGlobal.h"
+#include "clglobal.h"
 #include "script.h"
-#include "../vgui_ScorePanel.h"
-#include "vgui_HUD.h"
-#include "vgui_MSControls.h"
-#include "../MSShared/vgui_MenuDefsShared.h"
+#include "../vgui_scorepanel.h"
+#include "vgui_hud.h"
+#include "vgui_mscontrols.h"
+#include "../MSShared/vgui_menudefsshared.h"
 //#include "vgui_MainMenu.h"
 
-#include "vgui_Infowin.h"
-#include "vgui_StartSayText.h"
-#include "vgui_EventConsole.h"
-#include "vgui_ID.h"
-#include "vgui_Health.h"
-#include "vgui_Vote.h"
-#include "vgui_QuickSlot.h"
+#include "vgui_infowin.h"
+#include "vgui_startsaytext.h"
+#include "vgui_eventconsole.h"
+#include "vgui_id.h"
+#include "vgui_health.h"
+#include "vgui_vote.h"
+#include "vgui_quickslot.h"
 
 #include "vgui_Status.h" //Drigien MAY2008
 //------------

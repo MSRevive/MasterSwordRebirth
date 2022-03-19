@@ -19,25 +19,25 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include <VGUI_LineBorder.h>
+#include <vgui_lineborder.h>
 
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
-#include "vgui_TeamFortressViewport.h"
-#include "vgui_ScorePanel.h"
+#include "vgui_teamfortressviewport.h"
+#include "vgui_scorepanel.h"
 #include "..\game_shared\vgui_helpers.h"
 #include "..\game_shared\vgui_loadtga.h"
-#include "vgui_SpectatorPanel.h"
+#include "vgui_spectatorpanel.h"
 
 //Master Sword
 #include "parsemsg.h"
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
-#include "Stats\Statdefs.h"
-#include "../MSShared/Global.h"
+#include "stats\statdefs.h"
+#include "../MSShared/global.h"
 
 hud_player_info_t g_PlayerInfoList[MAX_PLAYERS + 1];	// player info from the engine
 extra_player_info_t g_PlayerExtraInfo[MAX_PLAYERS + 1]; // additional player info sent directly to the client dll

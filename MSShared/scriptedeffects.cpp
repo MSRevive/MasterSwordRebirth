@@ -1,6 +1,6 @@
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "script.h"
-#include "ScriptedEffects.h"
+#include "scriptedeffects.h"
 #include "logfile.h"
 
 //  ==============================================================

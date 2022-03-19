@@ -1,7 +1,7 @@
 #ifndef MSSHARED_SCRIPTMGR_H
 #define MSSHARED_SCRIPTMGR_H
 
-#include "GroupFile.h"
+#include "groupfile.h"
 
 class CScript;
 

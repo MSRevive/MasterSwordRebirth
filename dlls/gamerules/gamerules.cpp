@@ -16,12 +16,12 @@
 // GameRules.cpp
 //=========================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
-#include "Weapons/Weapons.h"
+#include "Weapons/weapons.h"
 #include "gamerules.h"
 #include "skill.h"
-#include "MSGamerules.h"
+#include "msgamerules.h"
 
 extern edict_t *EntSelectSpawnPoint(CBaseEntity *pPlayer);
 

@@ -1,11 +1,11 @@
 
 #include "vgui_int.h"
-#include <VGUI_Label.h>
-#include <VGUI_BorderLayout.h>
-#include <VGUI_LineBorder.h>
-#include <VGUI_SurfaceBase.h>
-#include <VGUI_TextEntry.h>
-#include <VGUI_ActionSignal.h>
+#include <vgui_label.h>
+#include <vgui_borderlayout.h>
+#include <vgui_lineborder.h>
+#include <vgui_surfacebase.h>
+#include <vgui_textentry.h>
+#include <vgui_actionsignal.h>
 #include <string.h>
 #include "hud.h"
 #include "cl_util.h"
@@ -16,10 +16,10 @@
 #include "const.h"
 #include "camera.h"
 #include "in_defs.h"
-#include "vgui_TeamFortressViewport.h"
-#include "vgui_ControlConfigPanel.h"
+#include "vgui_teamfortressviewport.h"
+#include "vgui_controlconfigpanel.h"
 #include "logfile.h"
-#include "CLEnv.h"
+#include "clenv.h"
 
 namespace
 {

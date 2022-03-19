@@ -1,9 +1,9 @@
-#include "MSDLLHeaders.h"
-#include "MSItemDefs.h"
+#include "msdllheaders.h"
+#include "msitemdefs.h"
 #include "animation.h"
-#include "Weapons/Weapons.h"
+#include "Weapons/weapons.h"
 #include "Player/player.h"
-#include "Shield.h"
+#include "shield.h"
 #include "logfile.h"
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags)

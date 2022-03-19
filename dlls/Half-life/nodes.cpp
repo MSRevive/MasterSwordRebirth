@@ -16,7 +16,7 @@
 // nodes.cpp - AI node tree stuff.
 //=========================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "nodes.h"
 #include "animation.h"

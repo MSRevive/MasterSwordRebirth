@@ -1,17 +1,17 @@
 // MiB MAR2015_01 [LOCAL_PANEL] - Definition of localized panel
 #include "../hud.h"
 #include "../cl_util.h"
-#include "../vgui_TeamFortressViewport.h"
-#include "VGUI_TextImage.h"
+#include "../vgui_teamfortressviewport.h"
+#include "vgui_textimage.h"
 #include "parsemsg.h"
 
 #include "../../MSShared/sharedutil.h"
 
-#include "vgui_LocalizedPanel.h"
-#include "vgui_Stats.h"
-#include "../../MSShared/vgui_MenuDefsShared.h"
+#include "vgui_localizedpanel.h"
+#include "vgui_stats.h"
+#include "../../MSShared/vgui_menudefsshared.h"
 #include "../../MSShared/iscript.h"
-#include "HUDScript.h"
+#include "hudscript.h"
 
 #define LOCAL_TRANSPARENCY 60
 #define LOCAL_MAINPANEL_RATIO (.875)

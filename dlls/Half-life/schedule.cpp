@@ -16,7 +16,7 @@
 // schedule.cpp - functions and data pertaining to the
 // monsters' AI scheduling system.
 //=========================================================
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "animation.h"
 #include "scripted.h"

@@ -9,8 +9,8 @@
 //
 //	NPC Script: Basically a scripted_sequence, but for MS
 //  ����������
-#include "MSDLLHeaders.h"
-#include "Monsters/MSMonster.h"
+#include "msdllheaders.h"
+#include "Monsters/msmonster.h"
 #include "script.h"
 
 enum

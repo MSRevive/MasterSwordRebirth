@@ -23,7 +23,7 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "soundent.h"
 
 DLL_GLOBAL ULONG g_ulFrameCount;

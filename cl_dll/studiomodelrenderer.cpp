@@ -29,12 +29,12 @@
 #include "studio_util.h"
 #include "r_studioint.h"
 
-#include "StudioModelRenderer.h"
-#include "GameStudioModelRenderer.h"
+#include "studiomodelrenderer.h"
+#include "gamestudiomodelrenderer.h"
 #include "logfile.h"
-#include "MasterSword/CLRender.h"
-#include "MasterSword/CLGlobal.h"
-#include "MasterSword/HUDScript.h"
+#include "MasterSword/clrender.h"
+#include "MasterSword/clglobal.h"
+#include "MasterSword/hudscript.h"
 #include <gl\gl.h> // Header File For The OpenGL32 Library
 extern "C" int nanmask;
 #define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)

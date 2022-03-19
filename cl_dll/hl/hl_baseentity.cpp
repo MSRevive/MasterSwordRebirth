@@ -23,12 +23,12 @@ This file contains "stubs" of class member implementations so that we can predic
 */
 #include "../../cl_dll/hud.h"
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
 #include "Weapons/weapons.h"
 #include "nodes.h"
 #include "logfile.h"
-#include "../MasterSword/CLGlobal.h"
+#include "../MasterSword/clglobal.h"
 
 #include "cl_entity.h"
 #include "event_api.h"

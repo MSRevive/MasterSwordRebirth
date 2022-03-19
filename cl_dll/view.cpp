@@ -6,7 +6,7 @@
 //=============================================================================
 
 // view/refresh setup functions
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #undef DLLEXPORT
 
 #include "hud.h"
@@ -27,11 +27,11 @@
 #include "shake.h"
 #include "hltv.h"
 
-#include "MasterSword/HUDScript.h"
-#include "Weapons/GenericItem.h"
-#include "Player/Player.h"
-#include "MasterSword/CLRender.h"
-#include "MasterSword/CLGlobal.h"
+#include "MasterSword/hudscript.h"
+#include "Weapons/genericitem.h"
+#include "Player/player.h"
+#include "MasterSword/clrender.h"
+#include "MasterSword/clglobal.h"
 #include "logfile.h"
 
 //Master Sword - viewmode testing

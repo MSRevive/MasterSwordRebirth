@@ -1,5 +1,5 @@
-#include "MSDLLHeaders.h"
-#include "MSItemDefs.h"
+#include "msdllheaders.h"
+#include "msitemdefs.h"
 
 //MS-specific entity functions
 

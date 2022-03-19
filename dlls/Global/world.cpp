@@ -20,7 +20,7 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "nodes.h"
 #include "soundent.h"
 #include "client.h"
@@ -28,11 +28,11 @@
 #include "skill.h"
 #include "effects.h"
 #include "player.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "gamerules.h"
 
-#include "SVGlobals.h"
-#include "../MSShared/Global.h"
+#include "svglobals.h"
+#include "../MSShared/global.h"
 
 extern CGraph WorldGraph;
 extern CSoundEnt *pSoundEnt;

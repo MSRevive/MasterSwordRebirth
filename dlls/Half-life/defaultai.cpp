@@ -15,7 +15,7 @@
 //=========================================================
 // Default behaviors.
 //=========================================================
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "schedule.h"
 #include "defaultai.h"

@@ -10,7 +10,7 @@
 #include "com_model.h"
 #include "../studio_util.h"
 #include "../r_studioint.h"
-#include "../StudioModelRenderer.h"
+#include "../studiomodelrenderer.h"
 #include "../gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
 #include "opengl/CLOpenGL.h" // OpenGL stuff
@@ -78,8 +78,8 @@ Vertex g_cubeVertices[] =
 
 //#include "r_efx.h"
 #include "entity_types.h"
-#include "CLGlobal.h"
-#include "CLRender.h"
+#include "clglobal.h"
+#include "clrender.h"
 
 #include "logfile.h"
 

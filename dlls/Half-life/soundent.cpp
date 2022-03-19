@@ -12,7 +12,7 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#include	"MSDLLHeaders.h"
+#include	"msdllheaders.h"
 #include	"monsters.h"
 #include	"soundent.h"
 

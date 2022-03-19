@@ -12,19 +12,19 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "game.h"
 
-#include "SVGlobals.h"
+#include "svglobals.h"
 
-#include "FileSystem_Shared.h"
-#include "ScriptMgr.h"
+#include "filesystem_shared.h"
+#include "scriptmgr.h"
 
 #ifdef LINUX
 #include <unistd.h>
 #endif
 
-#include "FnDataHandler.h"
+#include "fndatahandler.h"
 
 cvar_t displaysoundlist = {"displaysoundlist", "0"};
 cvar_t mapcyclefile = {"mapcyclefile", "mapcycle.txt"};

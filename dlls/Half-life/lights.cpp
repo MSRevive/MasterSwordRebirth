@@ -22,7 +22,7 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 
 class CLight : public CPointEntity
 {

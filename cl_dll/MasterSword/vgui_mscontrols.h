@@ -1,7 +1,7 @@
 #ifndef MSCONTROLS_H
 #define MSCONTROLS_H
 
-#include "StoreShared.h"
+#include "storeshared.h"
 
 #define MAX_CONTAINER_ITEMS 256
 

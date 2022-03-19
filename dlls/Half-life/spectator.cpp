@@ -18,7 +18,7 @@
 
 // Spectator functions
 //
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "spectator.h"
 

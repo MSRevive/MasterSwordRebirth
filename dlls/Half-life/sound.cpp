@@ -19,8 +19,8 @@
 #define VALVE_DLL 1
 #define CHAR_TEX_SNOW 'N'
 
-#include "MSDLLHeaders.h"
-#include "Weapons.h"
+#include "msdllheaders.h"
+#include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
 

@@ -7,26 +7,26 @@
 #include "animation.h"
 #include "soundent.h"
 #include "script.h"
-#include "Stats/Races.h"
+#include "Stats/races.h"
 #include "Stats/statdefs.h"
-#include "../MSShared/Titles.h"
-#include "../MSShared/ScriptedEffects.h"
+#include "../MSShared/titles.h"
+#include "../MSShared/scriptedeffects.h"
 #include "logfile.h"
 #include "pm_defs.h"
 
 #ifndef VALVE_DLL
-#include "../cl_dll/MasterSword/CLRender.h"
-#include "../cl_dll/MasterSword/CLGlobal.h"
+#include "../cl_dll/MasterSword/clrender.h"
+#include "../cl_dll/MasterSword/clglobal.h"
 
 // MiB MAR2015_01 [LOCAL_PANEL] - Includes for VGUI elements
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
-#include "../cl_dll/vgui_TeamFortressViewport.h"
-#include "../cl_dll/MasterSword/vgui_MSControls.h"
-#include "../cl_dll/MasterSword/vgui_LocalizedPanel.h"
+#include "../cl_dll/vgui_teamfortressviewport.h"
+#include "../cl_dll/MasterSword/vgui_mscontrols.h"
+#include "../cl_dll/MasterSword/vgui_localizedpanel.h"
 #else
-#include "SVGlobals.h"
-#include "../MSShared/Global.h"
+#include "svglobals.h"
+#include "../MSShared/global.h"
 #endif
 
 #undef SCRIPTVAR

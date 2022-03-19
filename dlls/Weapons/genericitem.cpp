@@ -20,8 +20,8 @@
 
 #include "inc_weapondefs.h"
 #include "script.h"
-#include "Effects/MSEffects.h"
-#include "GroupFile.h"
+#include "Effects/mseffects.h"
+#include "groupfile.h"
 #include "Stats/statdefs.h"
 #include "logfile.h"
 
@@ -29,8 +29,8 @@
 void ContainerWindowClose();
 void ContainerWindowUpdate();
 void ContainerWindowOpen(ulong ContainerID);
-#include "../cl_dll/MasterSword/CLGlobal.h"
-#include "../cl_dll/MasterSword/CLRender.h"
+#include "../cl_dll/MasterSword/clglobal.h"
+#include "../cl_dll/MasterSword/clrender.h"
 #endif
 
 #include "soundent.h"

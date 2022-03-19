@@ -20,7 +20,7 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "player.h"
 #include "saverestore.h"
 #include "trains.h" // trigger_camera has train functionality

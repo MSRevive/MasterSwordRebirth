@@ -43,7 +43,7 @@ extern "C"
 #include "vgui_int.h"
 #include "interface.h"
 #include "voice_status.h"
-#include "FileSystem_Shared.h"
+#include "filesystem_shared.h"
 
 #define DLLEXPORT __declspec(dllexport)
 

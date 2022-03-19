@@ -1,8 +1,8 @@
-#include "MSDLLHeaders.h"
-#include "MSItemDefs.h"
+#include "msdllheaders.h"
+#include "msitemdefs.h"
 #ifdef VALVE_DLL
 #include "gamerules/gamerules.h"
 #endif
-#include "Syntax/Syntax.h"
-#include "Weapons/GenericItem.h"
+#include "Syntax/syntax.h"
+#include "Weapons/genericitem.h"
 #include "Player/player.h"

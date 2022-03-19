@@ -24,16 +24,16 @@
 #include "event_api.h"
 #include "r_efx.h"
 #include "entity_types.h"
-#include "CLGlobal.h"
+#include "clglobal.h"
 #include "logfile.h"
 
 //HUD stuff
 #include "..\inc_huditem.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
-#include "HUDMisc.h"
-#include "HUDmagic.h"
-#include "Action.h"
+#include "hudmisc.h"
+#include "hudmagic.h"
+#include "action.h"
 #include "menu.h"
 
 #define MAX_MENU_STRING 512

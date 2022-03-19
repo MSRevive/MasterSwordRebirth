@@ -3,13 +3,13 @@
 //
 
 #include "inc_weapondefs.h"
-#include "Stats/Stats.h"
-#include "../MSShared/Global.h"
+#include "Stats/stats.h"
+#include "../MSShared/global.h"
 #include "logfile.h"
-#include "MSCharacter.h"
-#include "../MSShared/Magic.h"
+#include "mscharacter.h"
+#include "../MSShared/magic.h"
 #include "../MSShared/script.h"
-#include "FnDataHandler.h"
+#include "fndatahandler.h"
 
 #ifndef _WIN32
 #include "sys/io.h"

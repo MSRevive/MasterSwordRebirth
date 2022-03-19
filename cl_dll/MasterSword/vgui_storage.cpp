@@ -37,11 +37,11 @@
 #include "../hud.h"
 #include "../cl_util.h"
 #include "../parsemsg.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "vgui_Storage.h"
-#include "../MSShared/vgui_MenuDefsShared.h"
+#include "vgui_storage.h"
+#include "../MSShared/vgui_menudefsshared.h"
 #include "logfile.h"
 
 msstring_ref CStoragePanel::Text_Subtitle_Storage = "#STORAGE_SUBTITLE_STORAGE";

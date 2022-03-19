@@ -35,7 +35,7 @@
 typedef struct msurface_s msurface_t;
 typedef struct decal_s decal_t;
 
-#include "CLEnv.h"
+#include "clenv.h"
 #include "Tartan/textureloader.h"
 
 //

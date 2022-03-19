@@ -1,5 +1,5 @@
-#include "MSDLLHeaders.h"
-#include "MasterSword/CLGlobal.h"
+#include "msdllheaders.h"
+#include "MasterSword/clglobal.h"
 #undef DLLEXPORT
 
 #include "hud.h"

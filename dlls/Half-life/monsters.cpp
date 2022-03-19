@@ -22,12 +22,12 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "nodes.h"
 #include "monsters.h"
 #include "animation.h"
 #include "saverestore.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "scripted.h"
 //#include "squadmonster.h"
 #include "decals.h"

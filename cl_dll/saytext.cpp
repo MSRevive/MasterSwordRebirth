@@ -25,7 +25,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "vgui_TeamFortressViewport.h"
+#include "vgui_teamfortressviewport.h"
 
 extern float *GetClientColor( int clientIndex );
 

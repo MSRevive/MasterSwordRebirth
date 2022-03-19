@@ -2,14 +2,14 @@
 	Manages netcode for receieving MS characters
 */
 
-#include "MSDLLHeaders.h"
-#include "Weapons/GenericItem.h"
-#include "MSItemDefs.h"
-#include "MSNetcodeServer.h"
-#include "Stats/Stats.h"
-#include "../MSShared/MSCharacter.h"
-#include "SVGlobals.h"
-#include "Teams.h"
+#include "msdllheaders.h"
+#include "Weapons/genericitem.h"
+#include "msitemdefs.h"
+#include "msnetcodeserver.h"
+#include "Stats/stats.h"
+#include "../MSShared/mscharacter.h"
+#include "svglobals.h"
+#include "teams.h"
 #include "logfile.h"
 
 //Callback for save file transaction

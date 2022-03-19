@@ -20,7 +20,7 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "trains.h"
 #include "nodes.h"
 #include "soundent.h"
@@ -33,29 +33,29 @@
 #include "hltv.h"
 
 //MasterSword
-#include "MSItemDefs.h"
+#include "msitemdefs.h"
 #include "modeldefs.h"
 #include "Stats/statdefs.h"
-#include "Stats/Stats.h"
-#include "Stats/Races.h"
-#include "Player.h"
-#include "Weapons/GenericItem.h"
+#include "Stats/stats.h"
+#include "Stats/races.h"
+#include "player.h"
+#include "Weapons/genericitem.h"
 #include "script.h"
 //#include "Monsters/Bodyparts/Bodyparts_Human.h"
-#include "Monsters/Corpse.h"
-#include "SVGlobals.h"
-#include "Effects/MSEffects.h"
-#include "vgui_MenuDefsShared.h"
+#include "Monsters/corpse.h"
+#include "svglobals.h"
+#include "Effects/mseffects.h"
+#include "vgui_menudefsshared.h"
 #include "Store.h" //CStore
-#include "Syntax/Syntax.h"
-#include "Monsters/MonsterAnimation.h"
-#include "gamerules/Teams.h"
-#include "MSNetcodeServer.h"
-#include "Global.h"
-#include "MSCharacter.h"
-#include "Magic.h"
+#include "Syntax/syntax.h"
+#include "Monsters/monsteranimation.h"
+#include "gamerules/teams.h"
+#include "msnetcodeserver.h"
+#include "global.h"
+#include "mscharacter.h"
+#include "magic.h"
 #include "logfile.h"
-#include "FnDataHandler.h"
+#include "fndatahandler.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];

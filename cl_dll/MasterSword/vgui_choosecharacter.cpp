@@ -51,24 +51,24 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
 #include "Weapons/genericitem.h"
 //#include "Gamerules\Teams.h"
 //#include "Stats\stats.h"
-#include "CLGlobal.h"
+#include "clglobal.h"
 
 #include "../hud.h"
 #include "../cl_util.h"
 #include "const.h"
 #include "../parsemsg.h"
 
-#include "../vgui_TeamFortressViewport.h"
-#include "vgui_MSControls.h"
+#include "../vgui_teamfortressviewport.h"
+#include "vgui_mscontrols.h"
 
-#include "../MSShared/vgui_MenuDefsShared.h"
-#include "vgui_ChooseCharacter.h"
-#include "vgui_HUD.h"
+#include "../MSShared/vgui_menudefsshared.h"
+#include "vgui_choosecharacter.h"
+#include "vgui_hud.h"
 #include "Player/modeldefs.h"
 #include "../r_studioint.h"
 #include "logfile.h"

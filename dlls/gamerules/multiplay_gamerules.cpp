@@ -19,16 +19,16 @@
 //Master Sword
 #include	"inc_weapondefs.h"
 //#include	"MSNetcode.h"
-#include	"Teams.h"
+#include	"teams.h"
 #include	"game.h"
 #include	"items.h"
 #include	"voice_gamemgr.h"
 #include	"hltv.h"
 #include	"logfile.h"
-#include	"MSGamerules.h"
-#include	"Global.h"
-#include	"SVGlobals.h"
-#include	"MSCharacter.h"
+#include	"msgamerules.h"
+#include	"global.h"
+#include	"svglobals.h"
+#include	"mscharacter.h"
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;

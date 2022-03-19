@@ -18,9 +18,9 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "nodes.h"
 #include "soundent.h"
 #include "decals.h"

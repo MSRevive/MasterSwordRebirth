@@ -10,7 +10,7 @@
 
 #define MAINLABEL_TOP_Y YRES(0)
 
-#include "HUDId.h"
+#include "hudid.h"
 
 #define INTERACT_MAX_BUTTONS 10
 #define INTERACT_MENU_NAME "interact"

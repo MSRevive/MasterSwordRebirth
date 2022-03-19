@@ -12,11 +12,11 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 #include "customentity.h"
 #include "effects.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "decals.h"
 #include "func_break.h"
 #include "shake.h"

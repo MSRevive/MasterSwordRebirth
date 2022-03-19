@@ -20,7 +20,7 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "doors.h"
 
 extern void SetMovedir(entvars_t *ev);

@@ -19,10 +19,10 @@
 #include "hud.h"
 #include "cl_util.h"
 
-#include "vgui_TeamFortressViewport.h"
+#include "vgui_teamfortressviewport.h"
 //Master Sword
 #include "logfile.h"
-#include "MasterSword/CLGlobal.h"
+#include "MasterSword/clglobal.h"
 #include "../MSShared/sharedutil.h"
 
 #define MAX_LOGO_FRAMES 56

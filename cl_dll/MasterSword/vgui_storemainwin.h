@@ -1,7 +1,7 @@
 #ifndef MS_STORE_MAINWIN
 #define MS_STORE_MAINWIN
 
-#include "vgui_Container.h"
+#include "vgui_container.h"
 
 class CStorePanel : public VGUI_ContainerPanel
 {

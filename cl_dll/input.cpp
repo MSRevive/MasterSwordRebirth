@@ -33,11 +33,11 @@ extern "C"
 #include "view.h"
 #include <string.h>
 #include <ctype.h>
-#include "MasterSword/HUDScript.h"
+#include "MasterSword/hudscript.h"
 
-#include "vgui_TeamFortressViewport.h"
+#include "vgui_teamfortressviewport.h"
 
-#include "FileSystem_Shared.h"
+#include "filesystem_shared.h"
 #include "scriptmgr.h"
 
 extern "C"

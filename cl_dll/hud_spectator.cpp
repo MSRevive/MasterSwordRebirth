@@ -9,8 +9,8 @@
 #include "cl_util.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "vgui_TeamFortressViewport.h"
-#include "vgui_SpectatorPanel.h"
+#include "vgui_teamfortressviewport.h"
+#include "vgui_spectatorpanel.h"
 #include "hltv.h"
 
 #include "pm_shared.h"
@@ -27,8 +27,8 @@
 #include "screenfade.h"
 
 //Master Sword
-#include "vgui_ScorePanel.h"
-#include "vgui_MenuDefsShared.h"
+#include "vgui_scorepanel.h"
+#include "vgui_menudefsshared.h"
 #include "logfile.h"
 
 #pragma warning(disable : 4244)

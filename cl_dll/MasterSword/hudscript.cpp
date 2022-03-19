@@ -25,9 +25,9 @@
 #include "event_api.h"
 #include "shake.h"
 #include "ref_params.h"
-#include "CLGlobal.h"
-#include "ScriptedEffects.h"
-#include "HUDScript.h"
+#include "clglobal.h"
+#include "scriptedeffects.h"
+#include "hudscript.h"
 #include "logfile.h"
 
 extern physent_t *MSUTIL_EntityByIndex( int playerindex );
@@ -58,7 +58,7 @@ extern physent_t *MSUTIL_EntityByIndex( int playerindex );
 
 //----------------
 
-#include "HUDScript.h"
+#include "hudscript.h"
 
 int CHudScript::Init( void )
 {

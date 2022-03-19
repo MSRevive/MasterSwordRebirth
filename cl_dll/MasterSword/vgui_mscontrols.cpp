@@ -1,10 +1,10 @@
 #include "../hud.h"
 #include "../cl_util.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 #include "../inc_weapondefs.h"
-#include "vgui_MSControls.h"
-#include "CLGlobal.h"
-#include "..\game_shared\vgui_LoadTGA.h"
+#include "vgui_mscontrols.h"
+#include "clglobal.h"
+#include "..\game_shared\vgui_loadtga.h"
 
 /*
 	Checkbox

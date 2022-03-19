@@ -6,22 +6,22 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Half-life/monsters.h"
 #include "animation.h"
 #include "soundent.h"
 
 #include "../MSShared/script.h"
 
-#include "Stats/Stats.h"
-#include "Stats/Races.h"
-#include "Store.h"
-#include "MSItemDefs.h"
+#include "Stats/stats.h"
+#include "Stats/races.h"
+#include "store.h"
+#include "msitemdefs.h"
 #include "Stats/statdefs.h"
-#include "../MSShared/Magic.h"
-#include "Weapons/GenericItem.h"
-#include "Syntax/Syntax.h"
-#include "../cl_dll/MasterSword/vgui_HUD.h"
+#include "../MSShared/magic.h"
+#include "Weapons/genericitem.h"
+#include "Syntax/syntax.h"
+#include "../cl_dll/MasterSword/vgui_hud.h"
 #include "logfile.h"
 
 #ifdef VALVE_DLL

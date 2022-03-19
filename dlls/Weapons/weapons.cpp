@@ -20,18 +20,18 @@
 
 */
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
 #include "monsters.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "nodes.h"
 #include "soundent.h"
 #include "decals.h"
 #ifdef VALVE_DLL
 #include "gamerules/gamerules.h"
 #endif
-#include "MSItemDefs.h"
-#include "Syntax/Syntax.h"
+#include "msitemdefs.h"
+#include "Syntax/syntax.h"
 #include "logfile.h"
 
 #ifndef VALVE_DLL
@@ -243,7 +243,7 @@ void ExplodeModel( const Vector &vecOrigin, float speed, int model, int count )
 // called by CWorld::Spawn( );
 
 #ifdef VALVE_DLL
-#include "Global.h"
+#include "global.h"
 
 void W_Precache(void)
 {

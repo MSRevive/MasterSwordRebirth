@@ -15,12 +15,12 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "Monsters/MSMonster.h"
+#include "Monsters/msmonster.h"
 #include "../MSShared/sharedutil.h"
 #include "../MSShared/music.h"
-#include "Monsters/Bodyparts/Bodyparts_Human.h"
+#include "Monsters/Bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
-#include "../MSShared/MSCharacter.h"
+#include "../MSShared/mscharacter.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128

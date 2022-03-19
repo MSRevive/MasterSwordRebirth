@@ -1,6 +1,6 @@
 #include "inc_weapondefs.h"
 #include "script.h"
-#include "MSEffects.h"
+#include "mseffects.h"
 #include "shake.h"
 #include "logfile.h"
 //#include "Monsters/Bodyparts/Bodyparts.h"

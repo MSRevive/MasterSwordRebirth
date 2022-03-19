@@ -20,8 +20,8 @@
 
 */
 
-#include "MSDLLHeaders.h"
-#include "../MSShared/Global.h"
+#include "msdllheaders.h"
+#include "../MSShared/global.h"
 #include "logfile.h"
 
 // Holds engine functionality callbacks

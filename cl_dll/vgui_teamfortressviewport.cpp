@@ -37,23 +37,23 @@
 //
 // $NoKeywords: $
 //=============================================================================
-/*#include<VGUI_Cursor.h>
-#include<VGUI_Frame.h>
-#include<VGUI_Label.h>
-#include<VGUI_Surface.h>
-#include<VGUI_BorderLayout.h>
-#include<VGUI_Panel.h>
-#include<VGUI_ImagePanel.h>
-#include<VGUI_Button.h>
-#include<VGUI_ActionSignal.h>
-#include<VGUI_InputSignal.h>
-#include<VGUI_MenuSeparator.h>
-#include<VGUI_TextPanel.h>
-#include<VGUI_LoweredBorder.h>
-#include<VGUI_LineBorder.h>
-#include<VGUI_Scheme.h>
-#include<VGUI_Font.h>
-#include<VGUI_App.h>
+/*#include<vgui_cursor.h>
+#include<vgui_frame.h>
+#include<vgui_label.h>
+#include<vgui_surface.h>
+#include<vgui_borderlayout.h>
+#include<vgui_panel.h>
+#include<vgui_imagepanel.h>
+#include<vgui_button.h>
+#include<vgui_actionsignal.h>
+#include<vgui_inputsignal.h>
+#include<vgui_menuseparator.h>
+#include<vgui_textpanel.h>
+#include<vgui_loweredborder.h>
+#include<vgui_lineborder.h>
+#include<vgui_scheme.h>
+#include<vgui_font.h>
+#include<vgui_app.h>
 #include<VGUI_BuildGroup.h>*/
 
 #include "hud.h"
@@ -70,26 +70,26 @@
 #include "demo_api.h"
 
 #include "vgui_int.h"
-#include "vgui_TeamFortressViewport.h"
-#include "vgui_ServerBrowser.h"
-#include "vgui_ScorePanel.h"
-#include "vgui_SpectatorPanel.h"
+#include "vgui_teamfortressviewport.h"
+#include "vgui_serverbrowser.h"
+#include "vgui_scorepanel.h"
+#include "vgui_spectatorpanel.h"
 #include "pm_shared.h"
 
 //Master Sword
 #include "../MSShared/sharedutil.h"
-#include "../MSShared/vgui_MenuDefsShared.h"
-#include "Menu.h"
-#include "MasterSword/vgui_MSControls.h"
-#include "MasterSword/vgui_StoreBuy.h"
-#include "MasterSword/vgui_StoreSell.h"
-#include "MasterSword/vgui_Storage.h"
-#include "MasterSword/vgui_ContainerList.h"
+#include "../MSShared/vgui_menudefsshared.h"
+#include "menu.h"
+#include "MasterSword/vgui_mscontrols.h"
+#include "MasterSword/vgui_storebuy.h"
+#include "MasterSword/vgui_storesell.h"
+#include "MasterSword/vgui_storage.h"
+#include "MasterSword/vgui_containerlist.h"
 //#include "MasterSword/vgui_ChooseCharacter.h"
-#include "MasterSword/vgui_Stats.h"
-#include "MasterSword/vgui_Spawn.h"
-#include "MasterSword/vgui_HUD.h"
-#include "MasterSword/vgui_MenuBase.h"
+#include "MasterSword/vgui_stats.h"
+#include "MasterSword/vgui_spawn.h"
+#include "MasterSword/vgui_hud.h"
+#include "MasterSword/vgui_menubase.h"
 #include "logfile.h"
 
 #include "MasterSword/vgui_LocalizedPanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for local panel

@@ -12,7 +12,7 @@
 #include "com_model.h"
 #include "../studio_util.h"
 #include "../r_studioint.h"
-#include "../StudioModelRenderer.h"
+#include "../studiomodelrenderer.h"
 #include "../gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
 #include "opengl/CLOpenGL.h" // OpenGL stuff
@@ -22,10 +22,10 @@ void GenerateInverseMatrix4f(const float inMatrix[4][4], float outInverse[4][4])
 
 //#include "r_efx.h"
 #include "entity_types.h"
-#include "CLGlobal.h"
-#include "CLRender.h"
+#include "clglobal.h"
+#include "clrender.h"
 
-#include "HUDMisc.h"
+#include "hudmisc.h"
 #include "logfile.h"
 extern CGameStudioModelRenderer g_StudioRenderer;
 extern float ClFOV;

@@ -6,24 +6,24 @@
 #include "inc_weapondefs.h"
 #include "script.h"
 #include "scriptmgr.h"
-#include "../MSShared/GroupFile.h"
+#include "../MSShared/groupfile.h"
 
 #ifdef VALVE_DLL
-#include "SVGlobals.h"
-#include "../MSShared/Global.h"
+#include "svglobals.h"
+#include "../MSShared/global.h"
 bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #else
-#include "../cl_dll/MasterSword/CLGlobal.h"
+#include "../cl_dll/MasterSword/clglobal.h"
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
-#include "../cl_dll/MasterSword/HUDScript.h"
+#include "../cl_dll/MasterSword/hudscript.h"
 #endif
 
 #include "../engine/studio.h"
 #include "logfile.h"
 #include "time.h"
 #include "../MSShared/crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
-#include "FindEntities.h"
+#include "findentities.h"
 
 #undef SCRIPTVAR
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
@@ -5169,7 +5169,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 		}
 		return 1;
 	}
-	else if( !stricmp(TestCommand,	"#include"		) )
+	else if( !stricmp(TestCommand, "#include") )
 	{	//#include [scope] <name> [allowduplicate]
 		//Include another script file
 		msstring FileName = Line.thru_char( SKIP_STR );
@@ -5208,7 +5208,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 		}
 		return 1;
 	}
-	else if( !stricmp(TestCommand,	"#scope"		) )
+	else if( !stricmp(TestCommand, "#scope") )
 	{
 		msstring Scope = Line.thru_char( SKIP_STR );
 		if( Scope == "client" )		m.DefaultScope = EVENTSCOPE_CLIENT;

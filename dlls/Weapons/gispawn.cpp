@@ -1,6 +1,6 @@
-#include "MSDLLHeaders.h"
-#include "Weapons/Weapons.h"
-#include "Weapons/GenericItem.h"
+#include "msdllheaders.h"
+#include "Weapons/weapons.h"
+#include "Weapons/genericitem.h"
 
 class CBaseGISpawn : public CBaseEntity
 {

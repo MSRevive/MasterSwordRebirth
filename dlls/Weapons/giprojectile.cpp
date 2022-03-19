@@ -13,7 +13,7 @@
 #ifdef VALVE_DLL
 
 #include "inc_weapondefs.h"
-#include "Stats/Stats.h"
+#include "Stats/stats.h"
 #include "Stats/statdefs.h"
 #include "logfile.h"
 

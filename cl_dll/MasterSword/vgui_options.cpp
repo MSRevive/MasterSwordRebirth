@@ -36,20 +36,20 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
 
 #include "../hud.h"
 #include "../cl_util.h"
 #include "../parsemsg.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "../vgui_ScorePanel.h"
-#include "vgui_Options.h"
-#include "../MSShared/vgui_MenuDefsShared.h"
-#include "CLGlobal.h"
-#include "vgui_MSControls.h"
+#include "../vgui_scorepanel.h"
+#include "vgui_options.h"
+#include "../MSShared/vgui_menudefsshared.h"
+#include "clglobal.h"
+#include "vgui_mscontrols.h"
 #include "logfile.h"
 //------------
 

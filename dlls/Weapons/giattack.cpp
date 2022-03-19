@@ -16,12 +16,12 @@
 #endif
 
 #include "inc_weapondefs.h"
-#include "Global.h"
+#include "global.h"
 #include "Stats/statdefs.h"
 #include "logfile.h"
 
 #ifdef VALVE_DLL
-#include "Items/Shields/Shield.h"
+#include "Items/Shields/shield.h"
 #include "soundent.h"
 #endif
 

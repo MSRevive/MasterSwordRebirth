@@ -22,10 +22,10 @@
 
 #include "../hud.h"
 #include "../cl_util.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "vgui_Container.h"
+#include "vgui_container.h"
 #include "logfile.h"
 
 // Menu Dimensions

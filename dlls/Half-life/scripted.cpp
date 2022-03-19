@@ -21,7 +21,7 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "monsters.h"
 
 #ifndef ANIMATION_H

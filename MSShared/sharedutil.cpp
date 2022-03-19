@@ -1,14 +1,14 @@
-#include "MSDLLHeaders.h"
-#include "Global.h"
+#include "msdllheaders.h"
+#include "global.h"
 #include "logfile.h"
 #include "time.h"
 
 #ifdef VALVE_DLL
-#include "../dlls/SVGlobals.h"
+#include "../dlls/svglobals.h"
 #else
 #include "../cl_dll/hud.h"
 #include "../cl_dll/cl_util.h"
-#include "../dlls/Player/Player.h"
+#include "../dlls/Player/player.h"
 extern CBasePlayer player;
 #endif
 

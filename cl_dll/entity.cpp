@@ -24,8 +24,8 @@
 
 //Master Sword
 #include "inc_weapondefs.h"
-#include "MasterSword/HUDScript.h"
-#include "MasterSword/CLGlobal.h"
+#include "MasterSword/hudscript.h"
+#include "MasterSword/clglobal.h"
 #include "script.h"
 #include "logfile.h"
 

@@ -1,12 +1,12 @@
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 
 #include "script.h"
-#include "Weapons/GenericItem.h"
-#include "Store.h"
+#include "Weapons/genericitem.h"
+#include "store.h"
 #include "Stats/statdefs.h"
-#include "Stats/Stats.h"
-#include "Stats/Races.h"
-#include "MSItemDefs.h"
+#include "Stats/stats.h"
+#include "Stats/races.h"
+#include "msitemdefs.h"
 #include "logfile.h"
 
 #define ERROR_MISSING_PARMS MSErrorConsoleText("CGenericItem::ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", Script->m.ScriptFile.c_str(), Cmd.Name().c_str()))

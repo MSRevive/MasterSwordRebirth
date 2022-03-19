@@ -32,11 +32,11 @@
 #include "../cl_util.h"
 #include "../parsemsg.h"
 
-#include "../vgui_TeamFortressViewport.h"
-#include "../vgui_ServerBrowser.h"
+#include "../vgui_teamfortressviewport.h"
+#include "../vgui_serverbrowser.h"
 
 //Master Sword
-#include "vgui_StoreMainwin.h"
+#include "vgui_storemainwin.h"
 
 msstring CStorePanel::StoreVendorName;
 mslist<storeitem_t> CStorePanel::StoreItems;

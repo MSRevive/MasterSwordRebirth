@@ -29,13 +29,13 @@
 // $NoKeywords: $
 //=============================================================================
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
-#include "../MSShared/Global.h"
+#include "../MSShared/global.h"
 
 #undef DLLEXPORT
 
-#include "VGUI_Font.h"
+#include "vgui_font.h"
 //#include <VGUI_TextImage.h>
 
 #include "../hud.h"
@@ -46,15 +46,15 @@
 #include "../parsemsg.h"
 
 #include "../vgui_int.h"
-#include "../vgui_TeamFortressViewport.h"
+#include "../vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "vgui_Options.h"
-#include "../MSShared/vgui_MenuDefsShared.h"
+#include "vgui_options.h"
+#include "../MSShared/vgui_menudefsshared.h"
 
-#include "vgui_MenuBase.h"
-#include "vgui_Menu_Main.h"
-#include "vgui_Menu_Interact.h"
+#include "vgui_menubase.h"
+#include "vgui_menu_main.h"
+#include "vgui_menu_interact.h"
 
 //------------
 

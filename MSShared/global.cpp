@@ -4,8 +4,8 @@
 
 #include "inc_weapondefs.h"
 #include "script.h"
-#include "Titles.h"
-#include "ScriptedEffects.h"
+#include "titles.h"
+#include "scriptedeffects.h"
 #include "logfile.h"
 #ifndef VALVE_DLL
 #include "../cl_dll/hud.h"
@@ -13,11 +13,11 @@
 #include "pmtrace.h"
 #include "pm_defs.h"
 #include "event_api.h"
-#include "CLGlobal.h"
+#include "clglobal.h"
 #else
-#include "Global.h"
+#include "global.h"
 #endif
-#include "../MSShared/CVarMonitor.h"
+#include "../MSShared/cvarmonitor.h"
 
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 

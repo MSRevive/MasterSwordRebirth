@@ -1,6 +1,6 @@
 #include "../MSShared/sharedutil.h"
 #include "statdefs.h"
-#include "Stats.h"
+#include "stats.h"
 #include <math.h>
 #include <string.h>
 

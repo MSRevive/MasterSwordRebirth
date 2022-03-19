@@ -12,7 +12,7 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "saverestore.h"
 #include "client.h"
 #include "decals.h"
@@ -291,7 +291,7 @@ void DispatchUse(edict_t *pentUsed, edict_t *pentOther)
 		pEntity->Use(pOther, pOther, USE_TOGGLE, 0);
 }
 
-#include "MSITemDefs.h"
+#include "msitemdefs.h"
 #define Set_DispatchThinkDbg(a) dbg(msstring("(") + STRING(pent->v.classname) + ") " + a)
 void DispatchThink(edict_t *pent)
 {

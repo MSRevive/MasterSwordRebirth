@@ -16,18 +16,18 @@
 //  hud_msg.cpp
 //
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "string.h"
 #include "logfile.h"
-#include "MasterSword/MSNetcodeClient.h"
-#include "../MSShared/MSCharacter.h"
-#include "MasterSword/CLGlobal.h"
-#include "MasterSword/CLEnv.h"
-#include "MasterSword/vgui_ChooseCharacter.h"
-#include "Monsters/MSMonster.h"
+#include "MasterSword/msnetcodeclient.h"
+#include "../MSShared/mscharacter.h"
+#include "MasterSword/clglobal.h"
+#include "MasterSword/clenv.h"
+#include "MasterSword/vgui_choosecharacter.h"
+#include "Monsters/msmonster.h"
 
 int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 {

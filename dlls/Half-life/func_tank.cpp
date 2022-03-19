@@ -14,9 +14,9 @@
 ****/
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "effects.h"
-#include "Weapons.h"
+#include "weapons.h"
 #include "explode.h"
 
 #include "player.h"

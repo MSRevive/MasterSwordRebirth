@@ -12,7 +12,7 @@
 #pragma warning(disable : 4800) // forcing int to bool
 
 #include "inc_weapondefs.h"
-#include "vgui_MenudefsShared.h"
+#include "vgui_menudefsshared.h"
 #include "logfile.h"
 
 //#define LOG_EXTRA

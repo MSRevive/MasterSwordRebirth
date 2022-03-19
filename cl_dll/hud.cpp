@@ -19,7 +19,7 @@
 //
 
 //Master Sword
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "Player/player.h"
 //------------
 
@@ -27,7 +27,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "hud_servers.h"
-#include "vgui_TeamFortressViewport.h"
+#include "vgui_teamfortressviewport.h"
 
 #include "demo.h"
 #include "demo_api.h"
@@ -36,15 +36,15 @@
 #include "logfile.h"
 #include "MasterSword/health.h"
 #include "MasterSword/fatigue.h"
-#include "Stats\stats.h"
-#include "MasterSword/HUDmagic.h"
+#include "stats\stats.h"
+#include "MasterSword/hudmagic.h"
 #include "MasterSword/action.h"
 #include "MasterSword/menu.h"
-#include "MasterSword/HUDScript.h"
-#include "MasterSword/HUDMisc.h"
-#include "MasterSword/HUDMusic.h"
-#include "MasterSword/HUDId.h"
-#include "MasterSword/CLGlobal.h"
+#include "MasterSword/hudscript.h"
+#include "MasterSword/hudmisc.h"
+#include "MasterSword/hudmusic.h"
+#include "MasterSword/hudid.h"
+#include "MasterSword/clglobal.h"
 #include "MasterSword/vgui_LocalizedPanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
 //-----------------

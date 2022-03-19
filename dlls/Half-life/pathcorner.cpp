@@ -18,7 +18,7 @@
 
 #define VALVE_DLL 1
 
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "trains.h"
 #include "saverestore.h"
 
