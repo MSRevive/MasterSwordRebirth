@@ -45,7 +45,7 @@
 #include "ms/hudmusic.h"
 #include "ms/hudid.h"
 #include "ms/clglobal.h"
-#include "ms/vgui_LocalizedPanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
+#include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
 //-----------------
 

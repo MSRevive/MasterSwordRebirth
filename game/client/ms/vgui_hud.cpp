@@ -50,8 +50,8 @@
 #include "weapons/genericitem.h"
 #include "stats/statdefs.h"
 
-#include "vgui_font.h"
-#include <vgui_textimage.h>
+#include "VGUI_Font.h"
+#include "VGUI_TextImage.h"
 
 #include "../hud.h"
 #include "../cl_util.h"
@@ -79,7 +79,7 @@
 #include "vgui_vote.h"
 #include "vgui_quickslot.h"
 
-#include "vgui_Status.h" //Drigien MAY2008
+#include "vgui_status.h" //Drigien MAY2008
 //------------
 
 enum

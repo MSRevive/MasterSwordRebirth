@@ -10,7 +10,7 @@
 #include <windows.h> // Standard windows header
 #endif
 #include <stdio.h> // Standard I/O header
-#include <gl/gl.h> // Header for OpenGL32 library
+#include <GL/gl.h> // Header for OpenGL32 library
 
 #include "texturestruct.h"
 #include <pshpack1.h>

@@ -35,7 +35,7 @@
 #include "ms/clrender.h"
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"
-#include <gl/gl.h> // Header File For The OpenGL32 Library
+#include <GL/gl.h> // Header File For The OpenGL32 Library
 
 extern "C" int nanmask;
 #define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)

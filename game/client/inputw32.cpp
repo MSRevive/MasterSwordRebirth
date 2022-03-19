@@ -23,8 +23,8 @@
 #include "view.h"
 #include "exports.h"
 
-#include "../thirdparty/SDL2/sdl_mouse.h"
-#include "../thirdparty/SDL2/sdl_gamecontroller.h"
+#include "../thirdparty/SDL2/SDL_mouse.h"
+#include "../thirdparty/SDL2/SDL_gamecontroller.h"
 
 #define MOUSE_BUTTON_COUNT 5
 

@@ -92,7 +92,7 @@
 #include "ms/vgui_menubase.h"
 #include "logfile.h"
 
-#include "ms/vgui_LocalizedPanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for local panel
+#include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for local panel
 //-----------
 
 void VGUI_Think()

@@ -3,6 +3,6 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "../msitemdefs.h"
-#include "../Weapons/weapons.h"
-#include "../Player/player.h"
+#include "../weapons/weapons.h"
+#include "../player/player.h"
 #include "gamerules.h"

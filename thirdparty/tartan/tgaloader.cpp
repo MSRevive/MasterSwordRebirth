@@ -12,9 +12,9 @@
 
 #include "tgastruct.h"
 
-#include <nvidia/gl\gl.h>	  // Header File For The OpenGL32 Library
-#include <nvidia/gl\glu.h>	  // Header File For The GLu32 Library
-#include <nvidia/gl\glaux.h> // Header File For The GLaux Library
+#include <nvidia/gl/gl.h>	  // Header File For The OpenGL32 Library
+#include <nvidia/gl/glu.h>	  // Header File For The GLu32 Library
+#include <nvidia/gl/glaux.h> // Header File For The GLaux Library
 
 #include "msfileio.h"
 #include "textureloader.h"

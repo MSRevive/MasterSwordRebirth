@@ -46,7 +46,7 @@
 #include "svglobals.h"
 #include "effects/mseffects.h"
 #include "vgui_menudefsshared.h"
-#include "Store.h" //CStore
+#include "store.h" //CStore
 #include "syntax/syntax.h"
 #include "monsters/monsteranimation.h"
 #include "gamerules/teams.h"

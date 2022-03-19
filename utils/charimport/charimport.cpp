@@ -7,9 +7,9 @@
 #include "stdio.h"
 #include "iostream"
 #include <conio.h>
-#include "GroupFile.h"
+#include "groupfile.h"
 #include "msfileio.h"
-#include "HTTPRequestHandler.h"
+#include "httprequesthandler.h"
 #include "rapidjson/document_safe.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
