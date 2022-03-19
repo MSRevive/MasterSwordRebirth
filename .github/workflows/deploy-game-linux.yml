@@ -13,7 +13,15 @@ jobs:
     - name: C/C++ dev tools
       run: |
         sudo apt update
-        sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
+        sudo apt-get install build-essential gcc-multilib g++-multilib
+      
+    - name: Setup Steam Runtime
+      run: |
+        sudo mkdir /valve
+        sudo wget https://media.steampowered.com/client/runtime/steam-runtime-sdk_latest.tar.xz
+        sudo tar xvf steam-runtime-sdk_latest.tar.xz
+        sudo mv steam-runtime-sdk_2013-09-05 /valve/steam-runtime
+        sudo /valve/steam-runtime/setup.sh --auto-update --target=i386 --release
     
     - name: Create makefile
       run: |
@@ -25,7 +33,7 @@ jobs:
         ./createall
 
     - name: Build
-      run: sudo make -f msc.mak
+      run: cat build-game.txt | sudo /valve/steam-runtime/shell-i386.sh
 
     - name: Upload Binaries
       uses: actions/upload-artifact@v2
