@@ -24,20 +24,6 @@ $Configuration
 // Skeleton Project - All derived projects get this as a starting base
 $Project
 {
-	$Folder	"Source Files"
-	{
-		$File	"$SRCDIR\public\tier0\memoverride.cpp"
-		{
-			$Configuration
-			{
-				$Compiler
-				{
-					$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
-				}
-			}
-		}
-	}
-
 	$Folder "Resources"
 	{
 		$File	"$ROOTSCRIPT"
