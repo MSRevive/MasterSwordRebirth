@@ -255,13 +255,6 @@ CreateInterfaceFn Sys_GetFactory( const char *pModuleName )
 #if defined ( _WIN32 )
 	return static_cast<CreateInterfaceFn>( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
 #else
-// Linux gives this error:
-//../public/interface.cpp: In function `IBaseInterface *(*Sys_GetFactory 
-//(const char *)) (const char *, int *)':
-//../public/interface.cpp:186: invalid static_cast from type `void *' to 
-//type `IBaseInterface *(*) (const char *, int *)'
-//
-// so lets use the old style cast.
 	return (CreateInterfaceFn)( Sys_GetProcAddress( pModuleName, CREATEINTERFACE_PROCNAME ) );
 #endif
 }

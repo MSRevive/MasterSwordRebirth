@@ -4,10 +4,7 @@
 #include "buildcontrol.h"
 #include "sharedutil.h"
 #include <fstream>
-
-#ifndef _WIN32
 #include <string>
-#endif
 
 using namespace std;
 
