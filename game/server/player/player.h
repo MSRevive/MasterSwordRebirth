@@ -227,7 +227,10 @@ struct createchar_t
 	msstring SteamID; //SteamID (server-side characters)
 };
 
+#ifdef _WIN32
 #include <pshpack1.h>
+#endif
+
 struct clientitem_t : public genericitem_t
 {
 	clientitem_t() {}
@@ -242,7 +245,10 @@ struct scoreinfo_t
 	int SkillLevel;
 	bool IsElite, InTransition;
 };
+
+#ifdef _WIN32
 #include <poppack.h>
+#endif
 
 // -------------
 enum netmsg_e

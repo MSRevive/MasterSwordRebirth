@@ -80,7 +80,9 @@ void dbgtxt( msstring_ref Text );
 
 #ifdef CONST_H
 	//Data used in the client item delta comparison
+#ifdef _WIN32
 	#include <pshpack1.h>
+#endif
 	struct genericitem_t
 	{
 		genericitem_t( ) { }
@@ -92,7 +94,10 @@ void dbgtxt( msstring_ref Text );
 		unsigned short Quantity;
 		unsigned short Quality, MaxQuality;
 	};
+
+#ifdef _WIN32
 	#include <poppack.h>
+#endif
 #endif
 
 #define ERRORPRINT_LOG      (1 << 0)

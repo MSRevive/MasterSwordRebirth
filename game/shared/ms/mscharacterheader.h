@@ -1,7 +1,10 @@
 #ifndef MSCHARACTERHEADER_H
 #define MSCHARACTERHEADER_H
 
+#ifdef _WIN32
 #include <pshpack4.h>
+#endif
+
 struct savedata_t
 {
 	//Player info
@@ -26,6 +29,9 @@ struct savedata_t
 	float TimeWaitedToForgetKill;  //Counts up... when reachs a certain number, decrement PlayerKills
 	float TimeWaitedToForgetSteal; //Counts up... when reachs a certain number, player is not considered a thief
 };
+
+#ifdef _WIN32
 #include <poppack.h>
+#endif
 
 #endif //MSCHARACTERHEADER_H
