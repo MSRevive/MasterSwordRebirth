@@ -2204,8 +2204,9 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
 	
+	CBaseEntity *pEntity = GetClassPtr((CBaseEntity *)&ent->v);
 	// if entity isn't flagged for force send then go through checks.
-	if (!(ent->v.flags & FL_ENTFORCESEND))
+	if (!pEntity->FORCESEND)
 	{
 		// don't send if flagged for NODRAW and it's not the host getting the message
 		if ((ent->v.effects == EF_NODRAW) && (ent != host))
@@ -2216,7 +2217,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			return 0;
 		
 		// Don't send entities with flag NOSEND or using null.mdl
-		if (strcmp(STRING(ent->v.model),"models/null.mdl") == 0 || (ent->v.flags & FL_ENTNOSEND))
+		if (strcmp(STRING(ent->v.model),"models/null.mdl") == 0 || (pEntity->NOSEND))
 			return 0;
 	
 		// Don't send spectators to other players

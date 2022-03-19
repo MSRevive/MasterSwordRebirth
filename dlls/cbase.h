@@ -600,6 +600,11 @@ public:
 
 	virtual BOOL FVisible(CBaseEntity *pEntity);
 	virtual BOOL FVisible(const Vector &vecOrigin);
+	
+#ifdef VALVE_DLL
+	unsigned bool NOSEND = false;
+	unsigned bool FORCESEND = false;
+#endif
 };
 
 class CScriptedEnt : public CBaseEntity, public IScripted
