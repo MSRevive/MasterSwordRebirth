@@ -4,7 +4,7 @@
 //-----------------------------------------------------------------------------
 
 $Macro SRCDIR		"..\.."
-$Macro OUTBINDIR	"$SRCDIR\bin"
+$Macro OUTBINDIR	"$SRCDIR\build"
 
 $Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
 
@@ -12,7 +12,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;..\..\MSShared\crc;..\..\thirdparty;..\..\thirdparty\xxhash"
+		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared\ms;..\..\thirdparty"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -27,8 +27,8 @@ $Project "maphash"
 {
 	$Folder	"Source Files"
 	{
-		$File "..\..\MSShared\crc\crchash.cpp"
-    $File "..\..\MSShared\crc\crchash.h"
+		$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
+		$File "$SRCDIR\game\shared\ms\crc\crchash.h"
 		$File "..\..\thirdparty\xxhash\xxhash32.h"
 		$File "maphash.cpp"
 	}

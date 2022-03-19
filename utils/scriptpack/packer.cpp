@@ -1,7 +1,7 @@
 #include "cbase.h"
 #include "iostream"
-#include "../../MSShared/sharedutil.h"
-#include "../../MSShared/msfileio.h"
+#include "sharedutil.h"
+#include "msfileio.h"
 
 using namespace std;
 

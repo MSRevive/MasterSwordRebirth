@@ -1,0 +1,37 @@
+name: Deploy game on Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: C/C++ dev tools
+      run: |
+        sudo apt update
+        sudo apt-get install build-essential gcc-multilib g++-multilib
+      
+    - name: Setup Steam Runtime
+      run: |
+        sudo mkdir /valve
+        sudo wget https://media.steampowered.com/client/runtime/steam-runtime-sdk_latest.tar.xz
+        sudo tar xvf steam-runtime-sdk_latest.tar.xz
+        sudo mv steam-runtime-sdk_2013-09-05 /valve/steam-runtime
+        sudo /valve/steam-runtime/setup.sh --auto-update --target=i386 --release
+    
+    - name: Create makefile
+      run: ./createall
+
+    - name: Build
+      run: cat build-game.txt | sudo /valve/steam-runtime/shell-i386.sh
+
+    - name: Upload Binaries
+      uses: actions/upload-artifact@v2
+      with:
+        name: Linux Binaries
+        path: |
+          build/*.so

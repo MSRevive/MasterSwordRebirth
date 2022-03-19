@@ -5,7 +5,7 @@
 #if !defined PORT_H
 #define PORT_H
 
-#include "..\public\archtypes.h" // DAL
+#include "../public/archtypes.h" // DAL
 
 #ifdef _WIN32
 

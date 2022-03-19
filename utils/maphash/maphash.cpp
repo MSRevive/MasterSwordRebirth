@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstdio>
 
-#include "../../MSShared/crc/crchash.h"
+#include "crc/crchash.h"
 #include "rapidjson/document.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/writer.h"

@@ -10,17 +10,17 @@
 
 $Project "server"
 {
-	"dlls\server.vpc"
+	"game\server\server.vpc"
 }
 
 $Project "client"
 {
-	"cl_dll\client.vpc" [$WIN32]
+	"game\client\client.vpc" [$WIN32]
 }
 
 $Project "dedicated"
 {
-	"dedicated\dedicated.vpc"
+	"utils\dedicated\dedicated.vpc" [$WIN32]
 }
 
 $Project "scriptpack"

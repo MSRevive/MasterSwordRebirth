@@ -1,0 +1,265 @@
+//-----------------------------------------------------------------------------
+//	SERVER.VPC
+//
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME 	"msc"
+$Macro OUTBINNAME	"ms"
+$Macro OUTBINDIR	"$SRCDIR\build"
+
+$include "$SRCDIR\vpc_scripts\source_dll_base.vpc"
+
+$Configuration	"Debug"
+{
+	$General
+	{
+		$OutputDirectory		".\Debug_$GAMENAME"			[$WIN32]
+		$IntermediateDirectory	".\Debug_$GAMENAME"			[$WIN32]
+	}
+}
+
+$Configuration	"Release"
+{
+	$General
+	{
+		$OutputDirectory		".\Release_$GAMENAME"		[$WIN32]
+		$IntermediateDirectory	".\Release_$GAMENAME"		[$WIN32]
+	}
+}
+
+$Configuration
+{
+	$General
+	{
+		$OutputDirectory		".\$GAMENAME"		[$OSXALL]
+	}
+	
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
+		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
+		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
+		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies			"$BASE winmm.lib wsock32.lib Ws2_32.lib" [$WIN32]
+		$AdditionalDependencies         "$BASE $SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
+		$SystemLibraries                                                        "iconv" [$OSXALL]
+		$ModuleDefinitionFile				"$BASE $SRCDIR/game/server/ms.def" [$WIN32]
+	}
+}
+
+$Project "Server"
+{	
+	$Folder	"HL1"
+	{
+		$File	"hl\animating.cpp"
+		$File	"hl\animation.cpp"
+		$File	"hl\buttons.cpp"
+		$File	"hl\defaultai.cpp"
+		$File	"hl\doors.cpp"
+		$File	"hl\explode.cpp"
+		$File	"hl\func_tank.cpp"
+		$File	"hl\globals.cpp"
+		$File	"hl\lights.cpp"
+		$File	"hl\monsters.cpp"
+		$File	"hl\monsterstate.cpp"
+		$File	"hl\nodes.cpp"
+		$File	"hl\pathcorner.cpp"
+		$File	"hl\plane.cpp"
+		$File	"hl\plats.cpp"
+		$File	"hl\schedule.cpp"
+		$File	"hl\scripted.cpp"
+		$File	"shurispritedefs.h"
+		$File	"hl\skill.cpp"
+		$File	"hl\sound.cpp"
+		$File	"hl\spectator.cpp"
+		$File	"hl\subs.cpp"
+		$File	"hl\util.cpp"
+		$File	"$SRCDIR\game\shared\voice_gamemgr.cpp"
+		$File	"basemonster.h"
+		$File	"enginecallback.h"
+		$File	"hl\monsters.h"
+		$File	"$SRCDIR\game\shared\movement\pm_defs.h"
+		$File	"$SRCDIR\game\shared\movement\pm_math.c"
+		$File	"$SRCDIR\game\shared\movement\pm_movevars.h"
+		$File	"bmodels.cpp"
+		$File	"hl\cbase.cpp"
+		$File	"$SRCDIR\game\shared\cbase.h"
+		$File	"$SRCDIR\engine\progdefs.h"
+		$File	"$SRCDIR\common\const.h"
+		$File	"cdll_dll.h"
+		$File	"client.cpp"
+		$File	"monsters\combat.cpp"
+		$File	"effects.cpp"
+		$File	"hl\extdll.h"
+		$File	"func_break.cpp"
+		$File	"game.cpp"
+		$File	"hl\game.h"
+		$File	"gamerules\gamerules.cpp"
+		$File	"gamerules\gamerules.h"
+		$File	"ggrenade.cpp"
+		$File	"h_export.cpp"
+		$File	"gamerules\multiplay_gamerules.cpp"
+		$File	"hl\soundent.cpp"
+		$File	"hl\soundent.h"
+		$File	"triggers.cpp"
+		$File	"hl\util.h"
+		$File	"world.cpp"
+		$File	"serverfindentities.cpp"
+		$File	"serverfindentities.h"
+		$File	"$SRCDIR\common\cstringpool.cpp"
+		$File	"$SRCDIR\common\cstringpool.h"
+	}
+	
+	$Folder "SDK2013"
+	{
+		$File "$SRCDIR\public\FileSystem.h"
+		$File "$SRCDIR\public\interface.h"
+		$File "$SRCDIR\public\interface.cpp"
+	}
+	
+	$Folder	"MS"
+	{
+		$File	"monsters\bodyparts\bodyparts.cpp"
+		$File	"monsters\bodyparts\bodyparts_human.cpp"
+		$File	"monsters\corpse.cpp"
+		$File	"entity.cpp"
+		$File	"magic.cpp"
+		$File	"monsters\monsteranimation.cpp"
+		$File	"effects\mseffects.cpp"
+		$File	"msmapents.cpp"
+		$File	"monsters\msmonsterserver.cpp"
+		$File	"$SRCDIR\game\shared\ms\msmonstershared.cpp"
+		$File	"msnetcodeserver.cpp"
+		$File	"$SRCDIR\game\shared\ms\netcodeshared.cpp"
+		$File	"monsters\npcact.cpp"
+		$File	"monsters\npcglobal.cpp"
+		$File	"monsters\npcscript.cpp"
+		$File	"player\player.cpp"
+		$File	"player\playerstats.cpp"
+		$File	"$SRCDIR\game\shared\movement\pm_shared.cpp"
+		$File	"$SRCDIR\game\shared\movement\pm_shared.h"
+		$File	"$SRCDIR\game\shared\stats\races.cpp"
+		$File	"shield.cpp"
+		$File	"store.cpp"
+		$File	"sv_character.cpp"
+		$File	"svglobals.cpp"
+		$File	"$SRCDIR\game\shared\syntax\syntax.cpp"
+		$File	"gamerules\team.cpp"	
+		
+		$Folder	"Headers"
+		{
+			$File	"monsters\bodyparts\bodyparts.h"
+			$File	"monsters\bodyparts\bodyparts_human.h"
+			$File	"monsters\corpse.h"
+			$File	"$SRCDIR\game\shared\ms\groupfile.h"
+			$File	"player\modeldefs.h"
+			$File	"monsters\monsteranimation.h"
+			$File	"$SRCDIR\game\shared\ms\mscharacter.h"
+			$File	"$SRCDIR\game\shared\ms\mscharacterheader.h"
+			$File	"msdllheaders.h"
+			$File	"effects\mseffects.h"
+			$File	"msgamerules.h"
+			$File	"msitemdefs.h"
+			$File	"monsters\msmonster.h"			
+			$File	"msnetcodeserver.h"
+			$File	"player\player.h"
+			$File	"$SRCDIR\game\shared\stats\races.h"
+			$File	"shield.h"
+			$File	"$SRCDIR\game\shared\stats\statdefs.h"
+			$File	"$SRCDIR\game\shared\stats\stats.h"
+			$File	"store.h"
+			$File	"svglobals.h"
+			$File	"gamerules\teams.h"
+			$File	"$SRCDIR\game\shared\ms\titles.h"
+			$File	"$SRCDIR\game\shared\ms\votedefs.h"
+		}
+	}
+
+	$Folder	"Shared"
+	{
+		$File	"$SRCDIR\game\shared\ms\fndatahandler.cpp"
+		$File	"$SRCDIR\game\shared\ms\fndatahandler.h"
+		$File	"$SRCDIR\game\shared\ms\httprequesthandler.cpp"
+		$File	"$SRCDIR\game\shared\ms\httprequesthandler.h"
+		$File	"$SRCDIR\game\shared\ms\buildcontrol.h"
+		$File	"$SRCDIR\game\shared\ms\dbginputs.cpp"
+		$File	"$SRCDIR\game\shared\ms\global.cpp"
+		$File	"$SRCDIR\game\shared\ms\global.h"
+		$File	"$SRCDIR\game\shared\ms\globalmem.cpp"
+		$File	"$SRCDIR\game\shared\ms\groupfile.cpp"
+		$File	"$SRCDIR\game\shared\ms\iscript.h"
+		$File	"logfile.h"
+		$File	"$SRCDIR\game\shared\ms\magic.h"
+		$File	"$SRCDIR\game\shared\ms\msbasic.h"
+		$File	"$SRCDIR\game\shared\ms\mscharacter.cpp"
+		$File	"$SRCDIR\game\shared\ms\msdebug.h"
+		$File	"$SRCDIR\game\shared\ms\msfileio.cpp"
+		$File	"$SRCDIR\game\shared\ms\msfileio.h"
+		$File	"$SRCDIR\game\shared\ms\msnetcode.cpp"
+		$File	"$SRCDIR\game\shared\ms\msnetcode.h"
+		$File	"player\playershared.cpp"
+		$File	"$SRCDIR\game\shared\ms\script.cpp"
+		$File	"$SRCDIR\game\shared\ms\script.h"
+		$File	"$SRCDIR\game\shared\ms\scriptcmds.cpp"
+		$File	"$SRCDIR\game\shared\ms\scriptedeffects.cpp"
+		$File	"$SRCDIR\game\shared\ms\scriptedeffects.h"
+		$File	"$SRCDIR\game\shared\ms\sharedutil.cpp"
+		$File	"$SRCDIR\game\shared\ms\sharedutil.h"
+		$File	"$SRCDIR\game\shared\ms\stackstring.cpp"
+		$File	"$SRCDIR\game\shared\ms\stackstring.h"
+		$File	"$SRCDIR\game\shared\stats\stats.cpp"
+		$File	"$SRCDIR\game\shared\ms\storeshared.h"
+		$File	"$SRCDIR\game\shared\ms\versioncontrol.h"
+		$File	"$SRCDIR\game\shared\ms\vgui_menudefsshared.h"
+		$File "$SRCDIR\game\shared\ms\scriptmgr.cpp"
+		$File "$SRCDIR\game\shared\ms\scriptmgr.h"
+		$File "$SRCDIR\game\shared\ms\findentities.cpp"
+		$File "$SRCDIR\game\shared\ms\findentities.h"
+		$File "$SRCDIR\game\shared\ms\filesystem_shared.cpp"
+		$File "$SRCDIR\game\shared\ms\filesystem_shared.h"
+		$File "$SRCDIR\game\shared\ms\cvarmonitor.cpp"
+		$File "$SRCDIR\game\shared\ms\cvarmonitor.h"
+		
+		$Folder	"Generic Item"
+		{
+			$File	"$SRCDIR\game\shared\weapons\genericitem.cpp"
+			$File	"$SRCDIR\game\shared\weapons\genericitem.h"
+			$File	"$SRCDIR\game\shared\weapons\giarmor.cpp"
+			$File	"$SRCDIR\game\shared\weapons\giattack.cpp"
+			$File	"$SRCDIR\game\shared\weapons\gidrinkable.cpp"
+			$File	"$SRCDIR\game\shared\weapons\gipack.cpp"
+			$File	"$SRCDIR\game\shared\weapons\giprojectile.cpp"
+			$File	"$SRCDIR\game\shared\weapons\gispawn.cpp"
+			$File	"$SRCDIR\game\shared\weapons\gispell.cpp"
+			$File	"$SRCDIR\game\shared\weapons\weapons.cpp"
+			$File	"$SRCDIR\game\shared\weapons\weapons.h"
+			$File	"$SRCDIR\game\shared\genitemlist.cpp"
+			$File	"$SRCDIR\game\shared\genitemlist.h"			
+		}		
+		
+		$Folder	"CRC"
+		{
+			$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
+			$File "$SRCDIR\game\shared\ms\crc\crchash.h"
+			$File "$SRCDIR\thirdparty\xxhash\xxhash32.h"
+		}
+
+		$Folder "base64"
+		{
+			$File "$SRCDIR\thirdparty\base64\base64.cpp"
+			$File "$SRCDIR\thirdparty\base64\base64.h"
+		}
+	}
+
+	$Folder	"Link Libraries" 
+	{
+		$DynamicFile 	"$SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
+		$Lib			"$SRCDIR/lib/public/libcurl" [$WIN32]
+	}
+}
