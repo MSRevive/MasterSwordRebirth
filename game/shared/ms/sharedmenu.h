@@ -9,7 +9,7 @@ typedef void (*MenuCallback)(int idx, struct TCallbackMenu *pcbMenu); // The idx
 
 struct TCallbackMenu
 {
-	CHAR cMenuText[2048];
+	char cMenuText[2048];
 	int iValidslots;
 	MenuCallback m_MenuCallback;
 	int m_MenuType;

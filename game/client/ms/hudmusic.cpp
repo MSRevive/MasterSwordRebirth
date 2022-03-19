@@ -204,7 +204,7 @@ void CHudMusic::PlayMusic()
 		MCI_OPEN_PARMS mciOpenParms;
 		MCI_PLAY_PARMS mciPlayParms;
 		MCI_STATUS_PARMS mciStatusParms;
-		CHAR ErrString[256];
+		char ErrString[256];
 		clrmem(mciOpenParms);
 		clrmem(mciPlayParms);
 

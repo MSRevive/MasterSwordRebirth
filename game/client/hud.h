@@ -97,9 +97,6 @@ void ShowVGUIMenu(int iMenu);
 #ifndef BOOL
 typedef int BOOL;
 #endif
-#ifndef CHAR
-typedef char CHAR;
-#endif
 
 //Moved here from CHudStatusIcons
 #define MAX_SPRITE_NAME_LENGTH 24
