@@ -24,7 +24,9 @@ jobs:
         sudo /valve/steam-runtime/setup.sh --auto-update --target=i386 --release
     
     - name: Create makefile
-      run: ./createall
+      run: |
+        sudo chmod +x ./createall
+        ./createall
 
     - name: Build
       run: cat build-game.txt | sudo /valve/steam-runtime/shell-i386.sh
