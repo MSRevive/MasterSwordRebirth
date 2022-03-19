@@ -26,6 +26,10 @@ jobs:
     - name: Create makefile
       run: |
         sudo chmod +x ./createall
+        sudo chmod +x ./devtools/gendbg.sh
+        sudo chmod +x ./devtools/bin/vpc
+        sudo chmod +x ./devtools/bin/vpc_linux
+        sudo chmod +x ./devtools/bin/linux/ccache
         ./createall
 
     - name: Build
