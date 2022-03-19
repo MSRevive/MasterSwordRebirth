@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 
 	printf("Parsing %s...\n\n", pszRoot);
 	PackScriptDir(pszRoot);
-	printf("Wrote changes to the script dll.\n\n");
+	printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 
 	return 0;
 }

@@ -12,7 +12,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;..\..\dlls;..\..\MSShared"
+		$AdditionalIncludeDirectories	"$BASE;.\;..\..\dlls;..\..\MSShared;..\..\thirdparty\xxhash"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -27,10 +27,13 @@ $Project "scriptpack"
 {
 	$Folder	"Source Files"
 	{
-		$File "..\..\MSShared\GroupFile.cpp"
+		$File "..\..\MSShared\crc\crchash.cpp"
+		$File "..\..\MSShared\crc\crchash.h"
+		$File "..\..\thirdparty\xxhash\xxhash32.h"
+		$File "..\..\MSShared\groupfile.cpp"
 		$File "..\..\MSShared\msfileio.cpp"
 		$File "..\..\MSShared\stackstring.cpp"
-		$File "..\..\MSShared\GroupFile.h"
+		$File "..\..\MSShared\groupfile.h"
 		$File "packer.cpp"
 		$File "scriptpack.cpp"
 		$File "packer.h"
