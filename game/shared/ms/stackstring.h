@@ -5,6 +5,11 @@
 extern "C" char *strlwr(char *str);
 #endif
 
+#include <iostream>
+#include <cstring>
+#include <string.h>
+#include <string>
+
 #ifndef STD_MAP
 #define STD_MAP
 #include <map>
@@ -20,7 +25,7 @@ extern "C" char *strlwr(char *str);
 #include <set>
 #endif
 
-#define clrmem(a) memset(&a, 0, sizeof(a));
+#define clrmem(a) std::memset(&a, 0, sizeof(a));
 
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -79,7 +84,7 @@ public:
 		reserve(m_Items + 1);
 
 		int idx = m_Items;
-		memset(&m_First[idx], 0, sizeof(itemtype_y));
+		std::memset(&m_First[idx], 0, sizeof(itemtype_y));
 
 		m_Items++;
 
@@ -92,7 +97,7 @@ public:
 	void erase(const size_t idx)
 	{
 		if (idx + 1 < m_Items)
-			memmove(&m_First[idx], &m_First[idx + 1], (m_Items - (idx + 1)) * sizeof(itemtype_y));
+			std::memmove(&m_First[idx], &m_First[idx + 1], (m_Items - (idx + 1)) * sizeof(itemtype_y));
 
 		m_Items--;
 	}

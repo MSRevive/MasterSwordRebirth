@@ -340,8 +340,9 @@ public:
 
 	static void DynamicPrecache(); //Precaches monsters specified in the ms_dynamicnpc CVAR.
 
-	CMSMonster::CMSMonster();
-	CMSMonster::~CMSMonster();
+	CMSMonster();
+	~CMSMonster();
+
 	virtual void Deactivate(); //Called when the server shuts down
 	virtual bool IsMSMonster(void) { return true; }
 	virtual float MaxHP() { return m_MaxHP; }

@@ -197,12 +197,8 @@ public:
 	scriptcmdbase_t(P func) { Init(func, false); }
 	scriptcmdbase_t(P func, bool Conditional) { Init(func, Conditional); }
 
-	void Inc() { ++referenced; }
-	unsigned long GetReferenced() const { return referenced; }
 	bool GetConditional() const { return m_Conditional; }
 	P GetFunc() const { return pFunc; }
-
-	msstring toString() { return msstring(UTIL_VarArgs("Pointer:%p Used:%Lu", GetFunc(), GetReferenced())); }
 };
 
 //Definitions for functions like GetProp(), CLGetCurrentTempEntProp()
