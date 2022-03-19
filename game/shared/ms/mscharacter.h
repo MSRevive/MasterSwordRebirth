@@ -40,7 +40,7 @@ enum charsendstatus_e
 
 struct charinfo_base_t
 {
-	int Index; //Keep track of index, because the characters might not be loaded in order
+	int Index; // Keep track of index, because the characters might not be loaded in order
 	char *Data;
 	int DataLen;
 };
@@ -160,8 +160,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer = NULL);	 //Cli
 bool IsValidCharVersion(int Version);										 //Client & Server
 savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps); //Client & Server
 
-#define MAX_CHARSLOTS 3 //Max number of characters one person can have. \
-						//This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
+#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
 
 struct charslot_t
 {

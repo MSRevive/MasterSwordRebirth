@@ -494,4 +494,4 @@ typedef int	(*APIFUNCTION2)( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersio
 //Master Sword
 #include "msbasic.h"
 
-#endif EIFACE_H
+#endif // EIFACE_H

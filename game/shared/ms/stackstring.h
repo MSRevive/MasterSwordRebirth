@@ -305,4 +305,4 @@ public:
 
 typedef std::map<msstring,msstring> msstringstringhash;
 
-#endif STACKSTRING_H
+#endif // STACKSTRING_H

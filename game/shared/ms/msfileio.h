@@ -1,4 +1,7 @@
 #include <fstream>
+#include <iostream>
+#include "stackstring.h"
+
 typedef unsigned char byte;
 typedef int string_t;
 

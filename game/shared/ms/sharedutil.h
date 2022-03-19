@@ -110,4 +110,4 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...);
 bool isBadChar(int c);
 char* stripBadChars(char* data);
 
-#endif SHAREDUTIL_H
+#endif // SHAREDUTIL_H

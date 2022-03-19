@@ -7,7 +7,6 @@
 #include "sharedutil.h"
 #define STRING(a) ""
 #define LOAD_FILE_FOR_ME(a, b) 0
-
 #endif
 
 using namespace std;

@@ -100,4 +100,4 @@ extern skillstatinfo_t SkillStatList[9];
 extern char *SkillTypeList[3];
 extern char *SpellTypeList[5];
 
-#endif STATS_H
+#endif // STATS_H
