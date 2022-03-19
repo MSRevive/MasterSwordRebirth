@@ -3,11 +3,9 @@
 
 #include "buildcontrol.h"
 #include "sharedutil.h"
-
-#ifdef _WIN32
 #include <fstream>
-#else
-#include <fstream.h>
+
+#ifndef _WIN32
 #include <string>
 #endif
 
