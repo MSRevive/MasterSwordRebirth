@@ -175,7 +175,6 @@ int __MsgFunc_Anim(const char *pszName, int iSize, void *pbuf);		  //MiB DEC2007
 int __MsgFunc_CLXPlay(const char *pszName, int iSize, void *pbuf);	  //MAR2012_28 - moving most sounds client side
 int __MsgFunc_LocalPanel(const char *pszName, int iSize, void *pbuf); // MiB MAR2015_01 [LOCAL_PANEL] - Message for server to adjust panel
 int __MsgFunc_UpdateItem( const char *pszName, int iSize, void *pbuf ); // OCT2016_18 [NETMSG_UPDATEITEM] Thothie Update Item
-int __MsgFunc_CvarChange( const char *pszName, int iSize, void *pbuf );
 
 //------------
 

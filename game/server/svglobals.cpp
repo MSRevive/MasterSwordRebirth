@@ -10,7 +10,6 @@
 #include "store.h"
 #include "versioncontrol.h"
 #include "cstringpool.h"
-#include "cvarmonitor.h"
 #include "fndatahandler.h"
 
 ofstream modelout;

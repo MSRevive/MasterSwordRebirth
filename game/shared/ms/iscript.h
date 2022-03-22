@@ -6,6 +6,7 @@
 */
 class CScript;
 class CBaseEntity;
+#include <stdio.h>
 
 struct scriptvar_t
 {

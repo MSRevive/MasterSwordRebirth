@@ -2480,8 +2480,7 @@ void PM_Physics_Toss()
 	// If on ground and not moving, return.
 	if (pmove->onground != -1)
 	{
-		if (pmove->basevelocity == vec3_origin &&
-			pmove->basevelocity == vec3_origin)
+		if (pmove->basevelocity == vec3_origin)
 			return;
 	}
 

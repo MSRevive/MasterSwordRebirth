@@ -223,8 +223,6 @@ $Project "Server"
 		$File "$SRCDIR\game\shared\ms\findentities.h"
 		$File "$SRCDIR\game\shared\ms\filesystem_shared.cpp"
 		$File "$SRCDIR\game\shared\ms\filesystem_shared.h"
-		$File "$SRCDIR\game\shared\ms\cvarmonitor.cpp"
-		$File "$SRCDIR\game\shared\ms\cvarmonitor.h"
 		
 		$Folder	"Generic Item"
 		{

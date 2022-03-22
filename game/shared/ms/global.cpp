@@ -17,7 +17,6 @@
 #else
 #include "global.h"
 #endif
-#include "cvarmonitor.h"
 
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
@@ -119,7 +118,6 @@ void MSGlobals::NewMap()
 		MSErrorConsoleText("MSGlobals::NewMap", "MSGlobals::GameScript already allocated!");
 	}
 	
-	CVarMonitorManager::Reset();
 #if SPAWN_GLOBAL_ITEMS
 	for(int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
