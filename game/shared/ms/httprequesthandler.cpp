@@ -2,6 +2,10 @@
 // Simple HTTP Request handling using cUrl.
 //
 
+#ifndef _WIN32
+typedef int socklen_t;
+#endif
+
 #include "curl/curl.h"
 #include "httprequesthandler.h"
 
