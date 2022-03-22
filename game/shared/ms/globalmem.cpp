@@ -8,7 +8,6 @@
 
 #ifdef VALVE_DLL
 //#define TRACK_MEMORY		//Deterimines whether all memory allocations should be catalogued and dumped to file
-
 #ifdef TRACK_MEMORY
 memalloc_t *Allocations[500000];
 int alloctotal = 0;
@@ -28,6 +27,8 @@ extern bool g_MemWarningActive;
 //Debug memory testing
 //This is only enabled when DEV_BUILD is defined
 
+#ifdef DEV_BUILD
+
 void *operator new(size_t size, const char *pszSourceFile, int LineNum)
 {
 #ifdef TRACK_MEMORY
@@ -39,6 +40,7 @@ void *operator new(size_t size, const char *pszSourceFile, int LineNum)
 
 	return operator new(size);
 }
+
 void *operator new(size_t size)
 {
 	try
@@ -166,7 +168,7 @@ void operator delete(void *ptr)
 	}
 }
 
-//#endif
+#endif
 
 void LogMemoryUsage(msstring_ref Title)
 {

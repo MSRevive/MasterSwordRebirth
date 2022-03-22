@@ -272,7 +272,7 @@ public:
     typedef std::map<msstring,scriptcpp_cmdfunc_t> msgetterhash_t;
     static msgetterhash_t m_GlobalGetterHash; // MiB 30NOV_2014 Hashed commands for Script.cpp
 	// Below are the functions for the Script.cpp hash. Please keep them in alphabetical order here and where they are defined.
-#define SCRIPTCPP_GETTER(a) msstring CScript::ScriptGetter_##a( msstring& FullName, msstring& ParserName, msstringlist& Params )
+#define SCRIPTCPP_GETTER(a) msstring ScriptGetter_##a( msstring& FullName, msstring& ParserName, msstringlist& Params )
 	SCRIPTCPP_GETTER( AlphaNum );
 	SCRIPTCPP_GETTER( AngleDiff );
 	SCRIPTCPP_GETTER( Angles );

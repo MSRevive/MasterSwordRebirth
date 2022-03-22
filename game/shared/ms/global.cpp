@@ -188,15 +188,19 @@ void MSGlobals::SharedThink()
 //Called on client & server when the dll is loaded
 void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 {
+#ifdef _WIN32
 	GetModuleFileName(hinstDLL, DllFileName.c_str(), 256);
 
 	int len = DllFileName.len();
 	for (int i = 0; i < len; i++)
+	{
 		if (DllFileName[len - 1 - i] == '\\' || DllFileName[len - 1 - i] == '/')
 		{
 			DllPath = DllFileName.substr(0, len - i - 1);
 			break;
 		}
+	}
+#endif // _WIN32
 }
 
 //Called on client & server when the dll is unloaded

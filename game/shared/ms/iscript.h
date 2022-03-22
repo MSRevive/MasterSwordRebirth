@@ -165,7 +165,11 @@ public:
 	virtual void SetScriptVar(msstring_ref VarName, float flValue);																   //Set var in first script
 	virtual void Deactivate();																									   //Deallocate resources
 	//virtual void Script_Use( CBaseEntity *pActivator, CBaseEntity *pCaller, int useType, float value );
+	
 	IScripted();
+	virtual ~IScripted()
+	{
+	}
 
 	scriptcmdname_list *m_pScriptCommands; //Master list of commands for this Scripted Ent
 	mslist<CScript *> m_Scripts;		   //List of scripts

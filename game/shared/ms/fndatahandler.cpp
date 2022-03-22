@@ -5,10 +5,13 @@
 //
 
 #include "rapidjson/document.h"
+
+#undef min
+#undef max
+
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "base64/base64.h"
-
 #include "msdllheaders.h"
 #include "player.h"
 #include "global.h"
