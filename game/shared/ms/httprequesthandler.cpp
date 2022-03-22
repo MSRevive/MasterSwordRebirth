@@ -4,7 +4,7 @@
 
 #include "httprequesthandler.h"
 #include "curl/curl.h"
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <string>

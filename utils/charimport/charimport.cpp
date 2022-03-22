@@ -10,7 +10,7 @@
 #include "groupfile.h"
 #include "msfileio.h"
 #include "httprequesthandler.h"
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include "base64/base64.h"

@@ -4,22 +4,24 @@
 // Allow the player to easily switch between and use these characters.
 //
 
+#include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
+#include "base64/base64.h"
+
 #include "msdllheaders.h"
 #include "player.h"
 #include "global.h"
 
-#include "httprequesthandler.h"
-#include "fndatahandler.h"
-
-#include "rapidjson/document_safe.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-#include "base64/base64.h"
+#undef vector
 
 #include <thread>
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+
+#include "httprequesthandler.h"
+#include "fndatahandler.h"
 
 using namespace rapidjson;
 
