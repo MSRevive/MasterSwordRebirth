@@ -8,58 +8,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include <linux/sys.h>
 
-// typedef void *HANDLE;
-typedef unsigned long DWORD;
-typedef unsigned int uint;
-typedef short int sint;
-
-#define INVALID_HANDLE_VALUE ((HANDLE)((long)-1))
-#define GENERIC_READ (0x80000000L)
-#define GENERIC_WRITE (0x40000000L)
-#define FILE_FLAG_SEQUENTIAL_SCAN 0x08000000
-#define CREATE_ALWAYS 2
-#define OPEN_EXISTING 3
-#define OPEN_ALWAYS 4
-#define FILE_SHARE_READ 0x00000001
-#define FILE_SHARE_WRITE 0x00000002
-#define FILE_BEGIN 0
-
-FHANDLE CreateFile(char* file, uint mode, uint fProps, void* nul, uint opAlways, uint fileAtts, void* devnul)
-{
-	const char* modeStr;
-	// calculate the proper mode - read/write from start of file, read from start, or write from start
-	if (mode & GENERIC_READ)
-	{
-		if (mode & GENERIC_WRITE)
-			modeStr = "r+";
-		else
-			modeStr = "r";
-	}
-	else
-		modeStr = "w";
-	FHANDLE fh;
-	fh = fopen(file, modeStr);
-	return fh;
-}
-
-//#undef CreateFile
-//#define CreateFile sys_CreateFile
-
-uint GetFileSize(FHANDLE file, int null)
-{
-	// save position
-	sint pos = ftell(file);
-	// go to end
-	fseek(file, 0, SEEK_END);
-	// get size (position)
-	sint size = ftell(file);
-	// return to previous position
-	fseek(file, pos, SEEK_SET);
-	return size;
-}
-
+//#define INVALID_HANDLE_VALUE ((HANDLE)((long)-1))
+//#define GENERIC_READ (0x80000000L)
+//#define GENERIC_WRITE (0x40000000L)
+//#define FILE_FLAG_SEQUENTIAL_SCAN 0x08000000
+//#define CREATE_ALWAYS 2
+//#define OPEN_EXISTING 3
+//#define OPEN_ALWAYS 4
+//#define FILE_SHARE_READ 0x00000001
+//#define FILE_SHARE_WRITE 0x00000002
+//#define FILE_BEGIN 0
 #endif
 
 #include "groupfile.h"

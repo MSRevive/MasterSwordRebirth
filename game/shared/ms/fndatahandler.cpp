@@ -17,6 +17,8 @@
 #include "global.h"
 
 #undef vector
+#undef min
+#undef max
 
 #include <thread>
 #include <mutex>
