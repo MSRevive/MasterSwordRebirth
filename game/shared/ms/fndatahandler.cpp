@@ -79,7 +79,7 @@ private:
 	FnRequestData(const FnRequestData& data);
 };
 
-static std::atomic<bool> g_bShouldShutdownFn = false;
+static std::atomic<bool> g_bShouldShutdownFn(false);
 static std::vector<FnRequestData*> g_vRequestData;
 static std::vector<FnRequestData*> g_vIntermediateData;
 static std::mutex mutex;

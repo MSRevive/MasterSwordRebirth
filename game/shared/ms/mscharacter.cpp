@@ -19,8 +19,11 @@
 
 #ifndef _WIN32
 #include "sys/io.h"
-#endif
+#include <sys/stat.h>
+#include <sys/types.h>
+#else
 #include <direct.h> //for mkdir()
+#endif
 
 //Vector	MSChar_Interface::LastGoodPos,
 //		MSChar_Interface::LastGoodAng;
@@ -239,7 +242,11 @@ bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMap
 
 void MSChar_Interface::CreateSaveDir()
 {
+#ifdef _WIN32
 	mkdir(MSGlobals::DllPath + "/../save");
+#else
+	mkdir(MSGlobals::DllPath + "/../save", 0777);
+#endif	
 }
 
 #define RWVar Write
