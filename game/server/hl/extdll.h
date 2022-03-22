@@ -42,20 +42,31 @@
 #else // _WIN32
 #define FALSE 0
 #define TRUE 1
+
 typedef unsigned long ULONG;
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef int BOOL;
-#define MAX_PATH 260
+
 #include <limits.h>
 #include <stdarg.h>
+
 #ifndef min
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #endif
+
 #ifndef max
 #define max(a, b) (((a) > (b)) ? (a) : (b))
-#define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
 #endif
+
+#ifndef MAX_PATH
+#define MAX_PATH PATH_MAX
+#endif
+
+#define _snprintf snprintf
+#define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
+#define strnicmp strncasecmp
+
 #endif //_WIN32
 
 // Misc C-runtime library headers

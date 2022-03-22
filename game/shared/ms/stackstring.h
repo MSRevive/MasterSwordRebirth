@@ -27,13 +27,6 @@ extern "C" char *strlwr(char *str);
 
 #define clrmem(a) std::memset(&a, 0, sizeof(a));
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 //Deuplicated from msdebug.h
 #ifdef NOT_HLDLL
 #define msnew new

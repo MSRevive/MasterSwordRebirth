@@ -47,12 +47,6 @@ int numofdigits(int x);
 void Print(char *szFmt, ...);
 #define FloatToString( a ) UTIL_VarArgs( "%.2f", a )
 #define IntToString( a ) UTIL_VarArgs( "%i", a )
-#ifndef max
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#endif
-#ifndef min
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-#endif
 
 #ifndef _WIN32
 	extern "C" char* strlwr( char* str );
@@ -72,11 +66,9 @@ void Print(char *szFmt, ...);
 msstring EntToString( class CBaseEntity *pEntity );			//Converts an entity to a string of format "�Pent�P(idx,addr)"
 CBaseEntity *StringToEnt( msstring_ref EntString);			//Converts an string of format "�Pent�P(idx,addr)" to an entity
 
-
 void WRITE_FLOAT( float Float );
 char *GetFullResourceName( msstring_ref PartialName );	//Adds models/ or sprites/ to a model or sprite filename
 void dbgtxt( msstring_ref Text );
-
 
 #ifdef CONST_H
 	//Data used in the client item delta comparison

@@ -1,3 +1,5 @@
+#include <fstream>
+
 #ifdef _WIN32
 #include "windows.h"
 #include "logfile.h"
@@ -59,8 +61,6 @@ uint GetFileSize(FHANDLE file, int null)
 }
 
 #endif
-
-#include <fstream>
 
 #include "groupfile.h"
 #include "msfileio.h"

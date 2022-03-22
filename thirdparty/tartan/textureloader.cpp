@@ -6,14 +6,11 @@
 //
 
 #include <iostream>
-using namespace std;
-
 #include <string.h>
 
 #include "texturestruct.h"
 #include "tgaloader.h"
 //#include "pcxloader.h"
-
 #include "textureloader.h"
 
 #ifndef _WIN32
@@ -64,7 +61,7 @@ namespace Tartan
 		}
 		else
 		{
-			cout << "Tartan::LoadTextureFile() Error: file type for file " << sFilePath << " unknown." << endl;
+			std::cout << "Tartan::LoadTextureFile() Error: file type for file " << sFilePath << " unknown." << std::endl;
 			return false;
 		}
 	}

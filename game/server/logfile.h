@@ -1,10 +1,9 @@
 #ifndef MS_LOGFILE
 #define MS_LOGFILE
 
-#include "buildcontrol.h"
-#include "sharedutil.h"
 #include <fstream>
 #include <string>
+#include "sharedutil.h"
 
 using namespace std;
 
