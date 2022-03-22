@@ -5,12 +5,12 @@
 //
 
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 
 #undef min
 #undef max
 
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
 #include "base64/base64.h"
 #include "msdllheaders.h"
 #include "player.h"
@@ -24,6 +24,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+#include <atomic>
 
 #include "httprequesthandler.h"
 #include "fndatahandler.h"
