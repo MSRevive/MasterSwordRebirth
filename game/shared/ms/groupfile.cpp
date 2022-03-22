@@ -9,16 +9,10 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-//#define INVALID_HANDLE_VALUE ((HANDLE)((long)-1))
-//#define GENERIC_READ (0x80000000L)
-//#define GENERIC_WRITE (0x40000000L)
-//#define FILE_FLAG_SEQUENTIAL_SCAN 0x08000000
-//#define CREATE_ALWAYS 2
-//#define OPEN_EXISTING 3
-//#define OPEN_ALWAYS 4
-//#define FILE_SHARE_READ 0x00000001
-//#define FILE_SHARE_WRITE 0x00000002
-//#define FILE_BEGIN 0
+typedef unsigned long DWORD;
+typedef unsigned int uint;
+typedef unsigned char byte;
+typedef unsigned int size_t;
 #endif
 
 #include "groupfile.h"
