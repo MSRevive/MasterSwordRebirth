@@ -66,6 +66,7 @@ typedef int BOOL;
 #define _snprintf snprintf
 #define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
 #define strnicmp strncasecmp
+#define stricmp strcasecmp
 
 #endif //_WIN32
 
