@@ -3,7 +3,10 @@
 //
 
 #ifndef _WIN32
-typedef int socklen_t;
+#define CURL_PULL_SYS_TYPES_H
+#define CURL_PULL_STDINT_H
+#define CURL_PULL_INTTYPES_H
+#define HAVE_SYS_SOCKET_H
 #endif
 
 #include "curl/curl.h"
