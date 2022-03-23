@@ -19,7 +19,7 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "ms/hudscript.h"
 #endif
 
-#ifdef POSIX
+#ifndef _WIN32
 #include <stdlib.h>
 #define _gcvt gcvt
 #endif
@@ -4746,7 +4746,7 @@ scriptvar_t *CScript::SetVar( const char *pszVarName, const char *pszValue, SCRI
 }
 scriptvar_t *CScript::SetVar( const char *pszVarName, int iValue, bool fGlobal ) {
 	char ctemp[64];
-	itoa( iValue, ctemp, 10 );
+	_snprintf(ctemp, sizeof(ctemp), "%i", iValue);
 	return SetVar( pszVarName, ctemp, fGlobal );
 }
 scriptvar_t *CScript::SetVar( const char *pszVarName, float flValue, bool fGlobal ) {

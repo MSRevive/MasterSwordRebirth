@@ -1121,8 +1121,8 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 		ipick = count - 1;
 
 	strncpy(szfound, "!", 64);
-	strncat(szfound, szgroupname, CBSENTENCENAME_MAX);
-	itoa(ipick, sznum, 10);
+	strncat(szfound, szgroupname, CBSENTENCENAME_MAX);	
+	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(szfound, sznum, sizeof(sznum));
 
 	if (ipick >= count)
@@ -1182,7 +1182,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 		{
 			strncpy(szfound, "!", 64);
 			strncat(szfound, szgroupname, CBSENTENCENAME_MAX);
-			itoa(ipick, sznum, 10);
+			_snprintf(sznum, sizeof(sznum), "%i", ipick);
 			strncat(szfound, sznum, sizeof(sznum));
 			return ipick;
 		}
@@ -1305,7 +1305,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 
 	strncpy(buffer, "!", sizeof(buffer));
 	strncat(buffer, rgsentenceg[isentenceg].szgroupname, CBSENTENCENAME_MAX);
-	itoa(ipick, sznum, 10);
+	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(buffer, sznum, sizeof(sznum));
 
 	STOP_SOUND(entity, CHAN_VOICE, buffer);
@@ -1453,7 +1453,7 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 			if (sentencenum)
 			{
 				strncpy(sentencenum, "!", 32);
-				itoa(i, sznum, 10);
+				_snprintf(sznum, sizeof(sznum), "%i", i);
 				strncat(sentencenum, sznum, sizeof(sznum));
 			}
 			return i;
