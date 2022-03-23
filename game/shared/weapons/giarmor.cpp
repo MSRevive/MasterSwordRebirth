@@ -30,7 +30,7 @@ void CGenericItem::RegisterArmor()
 		delete ArmorData;
 
 	ArmorData = msnew(armordata_t);
-	ZeroMemory(ArmorData, sizeof(armordata_t));
+	memset(ArmorData, 0, sizeof(armordata_t));
 
 	ArmorData->Type = GetFirstScriptVar("ARMOR_TYPE");
 

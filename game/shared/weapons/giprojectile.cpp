@@ -43,7 +43,7 @@ void CGenericItem::RegisterProjectile()
 		delete ProjectileData;
 
 	ProjectileData = new (projectiledata_t);
-	ZeroMemory(ProjectileData, sizeof(projectiledata_t));
+	memset(ProjectileData, 0, sizeof(projectiledata_t));
 
 	ProjectileData->Damage = atof(GetFirstScriptVar("reg.proj.dmg"));
 	ProjectileData->flDamageAOERange = atof(GetFirstScriptVar("reg.proj.aoe.range"));

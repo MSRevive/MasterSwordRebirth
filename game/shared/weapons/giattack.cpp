@@ -476,7 +476,7 @@ void CGenericItem::Attack()
 void CGenericItem::RegisterAttack()
 {
 	attackdata_t attData;
-	ZeroMemory(&attData, sizeof(attackdata_t));
+	memset(&attData, 0, sizeof(attackdata_t));
 	attData.flRange = atof(GetFirstScriptVar("reg.attack.range"));
 	attData.flDamage = atof(GetFirstScriptVar("reg.attack.dmg"));
 	attData.f1DmgMulti = atof(GetFirstScriptVar("reg.attack.dmg.multi")); //Thothie OCT2007a

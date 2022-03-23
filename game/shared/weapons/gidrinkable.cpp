@@ -33,7 +33,7 @@ void CGenericItem::RegisterDrinkable( )
 	if( DrinkData ) delete DrinkData;
 
 	DrinkData = msnew(drinkdata_t);
-	ZeroMemory( DrinkData, sizeof(drinkdata_t) );
+	memset(DrinkData, 0, sizeof(drinkdata_t));
 	//if( !stricmp(GetFirstScriptVar("DRINK_TYPE"),"givehealth") )
 	//	DrinkData->Type = DRINK_GIVEHEALTH;
 

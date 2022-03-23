@@ -437,7 +437,7 @@ bool CMSMonster::CreateStats()
 	//foreach( i, MAXPLAYERS ) m_PlayerDamage[i] = msnew playerdamage_t;
 
 	dbg("Clear player damage memory");
-	//foreach( i, MAXPLAYERS ) ZeroMemory( m_PlayerDamage[i], sizeof(playerdamage_t) );
+	//foreach( i, MAXPLAYERS ) memset( m_PlayerDamage[i], 0, sizeof(playerdamage_t) );
 
 	m_Race[0] = 0;
 	m_SayTextRange = SPEECH_LOCAL_RANGE;

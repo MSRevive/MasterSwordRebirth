@@ -225,7 +225,7 @@ void CChangePlayerSpeed ::Spawn(void)
 	pev->movetype = MOVETYPE_FLY;
 	pev->effects = EF_NODRAW;
 	pev->nextthink = gpGlobals->time + 0.1;
-	ZeroMemory(&m_PlayerInfo, sizeof(playerinfo_t) * 256);
+	memset(&m_PlayerInfo, 0, sizeof(playerinfo_t) * 256);
 }
 
 void CChangePlayerSpeed ::Think(void)

@@ -210,7 +210,7 @@ char *GetFullResourceName(msstring_ref pszPartialName)
 void *MSCopyClassMemory(void *pDest, void *pSource, size_t Length)
 {
 	long lFirstPtr = *(long *)pDest;
-	void *pReturn = CopyMemory(pDest, pSource, Length);
+	void *pReturn = memcpy(pDest, pSource, Length);
 	*(long *)pDest = lFirstPtr;
 	return pReturn;
 }
@@ -218,7 +218,7 @@ void *MSCopyClassMemory(void *pDest, void *pSource, size_t Length)
 void *MSZeroClassMemory(void *pDest, size_t Length)
 {
 	long lFirstPtr = *(long *)pDest;
-	void *pReturn = ZeroMemory(pDest, Length);
+	void* pReturn = memset(pDest, 0, Length);
 	*(long *)pDest = lFirstPtr;
 	return pReturn;
 }

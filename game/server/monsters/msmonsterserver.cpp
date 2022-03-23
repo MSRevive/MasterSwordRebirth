@@ -1840,7 +1840,7 @@ tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
 	if (ptiTradeInfo->pCustomer != this)
 	{
 		static tradeinfo_t tiTradeInfo;
-		ZeroMemory(&tiTradeInfo, sizeof(tradeinfo_t));
+		memset(&tiTradeInfo, 0, sizeof(tradeinfo_t));
 
 		storeitem_t *psiStoreItem = NULL;
 
