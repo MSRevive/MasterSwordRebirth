@@ -2641,7 +2641,7 @@ void CMSMonster ::DieThink()
 void CMSMonster::ReportAIState()
 {
 	Print("Name: %s\n", DisplayName());
-	Print("Script: %s\n", m_ScriptName.len() ? m_ScriptName : "None");
+	Print("Script: %s\n", m_ScriptName.len() ? m_ScriptName.c_str() : "None");
 }
 
 /*

@@ -675,7 +675,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 								pItem->pev->origin = pEnt->pev->origin; //If couldn't give, drop the item on the floor
 						}
 						else
-							ALERT(at_console, "%s - offer: item %s not found!", DisplayName(), Params[1]);
+							ALERT(at_console, "%s - offer: item %s not found!", DisplayName(), Params[1].c_str());
 					}
 					else if (ItemType == ITEM_GOLD)
 						pMonster->GiveGold(GoldAmt);
@@ -796,7 +796,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 					uint iRealCost = 0;
 					if (pItem->m_Value)
 					{
-						uint MaxPercent = int(MAXUINT_PTR / (double)pItem->m_Value);
+						uint MaxPercent = int(0xffffffff / (double)pItem->m_Value);
 						//iRealCost = int(pItem->m_Value * min(iCost/100.0,MaxPercent));
 						if (iCost / 100.0 < MaxPercent)
 							iRealCost = int(pItem->m_Value * (iCost / 100.0));
