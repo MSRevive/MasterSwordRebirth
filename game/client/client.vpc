@@ -336,6 +336,8 @@ $Project "Client"
 	
 	$Folder	"Shared"
 	{
+		$File "$SRCDIR\game\shared\strhelper.cpp"
+		$File "$SRCDIR\game\shared\strhelper.h"	
 		$File "$SRCDIR\game\shared\ms\buildcontrol.h"
 		$File "$SRCDIR\game\shared\ms\dbginputs.cpp"
 		$File "$SRCDIR\game\shared\ms\global.cpp"

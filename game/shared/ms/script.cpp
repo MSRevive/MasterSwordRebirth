@@ -7,6 +7,7 @@
 #include "script.h"
 #include "scriptmgr.h"
 #include "groupfile.h"
+#include "strhelper.h"
 
 #ifdef VALVE_DLL
 #include "svglobals.h"
@@ -17,6 +18,11 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "hud.h"
 #include "cl_util.h"
 #include "ms/hudscript.h"
+#endif
+
+#ifdef POSIX
+#include <stdlib.h>
+#define _gcvt gcvt
 #endif
 
 #include "../engine/studio.h"
@@ -964,11 +970,11 @@ msstring CScript::ScriptGetter_Float( msstring& FullName, msstring& ParserName, 
 
 			if ( perc_end_result < perc_base_point )
 			{
-				return UTIL_VarArgs(perc_mask.c_str(),INT( (perc_base_point - perc_end_result)*100) );
+				return UTIL_VarArgs(perc_mask.c_str(), int((perc_base_point - perc_end_result)*100.0));
 			}
 			else
 			{
-				return UTIL_VarArgs(perc_mask.c_str(),INT( (perc_end_result - perc_base_point)*100) );
+				return UTIL_VarArgs(perc_mask.c_str(), int((perc_end_result - perc_base_point)*100.0));
 			}
 		}
 	}
@@ -2823,7 +2829,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("player",Name) && pEnt->IsPlayer() )
 			{
-					ent_str = return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2834,7 +2840,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() )
 			{
-					ent_str = return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2845,7 +2851,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("any",Name) && !pEnt->IsMSItem() )
 			{
-					ent_str = return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2860,7 +2866,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				if ( my_relate == -3 && pMonster->m_Race )
 				{
-					ent_str = return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2876,7 +2882,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				if ( my_relate == 1 && pMonster->m_Race )
 				{
-					ent_str = return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -4890,15 +4896,19 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 					#ifndef RELEASE_LOCKDOWN
 #ifdef VALVE_DLL
 						logfile << "ERROR: Script not found: " << ScriptName.c_str() << endl;
+#ifndef POSIX
 						MessageBox( NULL, msstring("Script not found: ") + ScriptName + "\r\n\r\nThis is probably caused by a script using #include on a non-existant script.", "FIX THIS QUICK!", MB_OK );
+#endif
 #endif
 					#else
 						//In the release build, this is a fatal error
 						//SERVER_COMMAND( "exit\n" ); This crashes the game, currently
 //server side so we can retain ability to add server side only scripts
 #ifdef VALVE_DLL
+#ifndef POSIX
 					MessageBox( NULL, msstring("Script not found: ") + ScriptName, "MAP SCRIPT ERROR", MB_OK ); //Thothie - JUN2007 Trying to get script bugs to report
 					//exit( 0 ); //MAR2008a Thothie - making non-fatal so it can report multiple
+#endif
 #endif
 					#endif
 				#endif
@@ -5202,7 +5212,9 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			m.AllowDupInclude = AllowDupInclude;
 			if( !fSucces && !Casual )
 			{
+#ifndef POSIX
 				MessageBox( NULL, msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + FileName + "\r\n\r\nThis is a fatal error in the public build.", "FIX THIS QUICK!", MB_OK );
+#endif
 				ALERT( at_console, "Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, FileName.c_str() );
 			}
 		}
@@ -5617,12 +5629,13 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 
 	{
 		//Check if this word is a command
-		scriptcmdname_t Command( TestCommand );
-    msfunchash_t::iterator iFunc = m_GlobalCmdHash.find( msstring(TestCommand) );
+		scriptcmdname_t Command(TestCommand);
+		msfunchash_t::iterator iFunc = m_GlobalCmdHash.find(msstring(TestCommand));
 		bool fFoundCmd = iFunc != m_GlobalCmdHash.end();
 
 		//Create the command
-    scriptcmd_t &ScriptCmd = scriptcmd_t( msstring(TestCommand), fFoundCmd ? iFunc->second.GetConditional() : false );
+		scriptcmd_t ScriptCmd(msstring(TestCommand), fFoundCmd ? iFunc->second.GetConditional() : false);
+
 		if( !fFoundCmd )
 		{
 			//First word was not a command

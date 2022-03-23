@@ -421,7 +421,9 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #ifdef RELEASE_LOCKDOWN
 		exit(0);
 #else
+#ifndef POSIX
 		MessageBox(NULL, "Missing items.txt inside sc.dll! This is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
+#endif
 #endif
 #endif
 		}
@@ -504,7 +506,9 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #ifdef RELEASE_LOCKDOWN
 			exit(0);
 #else
+#ifndef POSIX
 			MessageBox(NULL, msstring("Item script not found: ") + cItemFileName + "\r\n\r\nThis is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
+#endif
 #endif
 #endif
 		}

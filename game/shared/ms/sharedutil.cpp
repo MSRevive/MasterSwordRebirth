@@ -44,7 +44,9 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 	else
 	{
 		//This is prety fatal - We got an error before the logs were initialized
+#ifndef POSIX
 		MessageBox(NULL, msstring(pszLabel) + msstring(" (Logs not yet initialized)"), Progress, MB_OK);
+#endif
 	}
 #endif
 }
@@ -421,7 +423,9 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_POPUP)
     {
+#ifndef POSIX
         MessageBox(NULL, string, vsShortTitle.c_str(), MB_OK);
+#endif
     }
 }
 

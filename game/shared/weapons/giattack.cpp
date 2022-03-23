@@ -1877,11 +1877,11 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				{
 					if ( tdm_modifier < 1 )
 					{
-						tdm_engrish = UTIL_VarArgs("[%i%% resistant]",INT((1 - tdm_modifier)*100));
+						tdm_engrish = UTIL_VarArgs("[%i%% resistant]", int((1 - tdm_modifier)*100.0));
 					}
 					else if ( tdm_modifier > 1 )
 					{
-						tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]",INT((tdm_modifier-1)*100));
+						tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]", int((tdm_modifier-1)*100.0));
 					}
 				}
 				//Thothie SEP2019_22 - report resistance END	

@@ -24,6 +24,10 @@
 #include "player.h"
 #include "gamerules.h"
 
+#ifdef POSIX
+#include <stdlib.h>
+#endif
+
 static char *memfgets(byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize);
 
 // ==================== GENERIC AMBIENT SOUND ======================================
