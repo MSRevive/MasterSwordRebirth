@@ -665,7 +665,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 			if (!pTargetStart || !pTargetEnd)
 			{
-				ALERT(at_console, "Script: %s, effect beam ent got NULL for entity: %s!\n", m.ScriptFile.c_str(), Params[NextParam - 1]);
+				ALERT(at_console, "Script: %s, effect beam ent got NULL for entity: %s!\n", m.ScriptFile.c_str(), Params[NextParam - 1].c_str());
 				return;
 			}
 

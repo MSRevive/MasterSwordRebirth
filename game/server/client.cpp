@@ -433,7 +433,7 @@ void ClientCommand2(edict_t *pEntity)
 	entvars_t *pev = &pEntity->v;
 
 	CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
-	INT iHand = -1;
+	int iHand = -1;
 
 	if (MSGlobals::GameScript)
 	{
