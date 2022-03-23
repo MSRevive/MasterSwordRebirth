@@ -1376,12 +1376,12 @@ msstring CScript::ScriptGetter_GetAttackProp( msstring& FullName, msstring& Pars
 		attackdata_t &AttData = pItem->m_Attacks[attackNum];
 		msstring &PropName = Params[2];
 
-		if( PropName == "type" ) return msstring(AttData.sDamageType);
+		if( PropName == "type" ) return msstring(AttData.sDamageType.c_str());
 		else if( PropName == "numattacks" ) RETURN_INT( pItem->m_Attacks.size() ) //Thothie OCT2016_22 get number of attacks
 		else if( PropName == "range" ) RETURN_FLOAT( AttData.flRange )
 		else if( PropName == "dmg" ) RETURN_FLOAT( AttData.flDamage )
 		else if( PropName == "dmg.range" ) RETURN_FLOAT( AttData.flDamageRange )
-		else if( PropName == "dmg.type" ) return msstring(AttData.sDamageType);
+		else if( PropName == "dmg.type" ) return msstring(AttData.sDamageType.c_str());
 		else if( PropName == "dmg.multi" ) RETURN_FLOAT(AttData.f1DmgMulti)
 		else if( PropName == "aoe.range" ) RETURN_FLOAT( AttData.flDamageAOERange )
 		else if( PropName == "aoe.falloff" ) RETURN_FLOAT( AttData.flDamageAOEAttn )
@@ -2734,7 +2734,7 @@ msstring CScript::ScriptGetter_GetTraceLine( msstring& FullName, msstring& Parse
 		//can we work a version that would return hit model indexes?
 		CBaseEntity *pHitEnt = Tr.HitEnt ? MSInstance(INDEXENT(Tr.HitEnt)) : NULL;
 		//msstring dbg_result = pHitEnt ? EntToString(pHitEnt) : VecToString(Tr.EndPos);
-		return pHitEnt ? EntToString(pHitEnt) : VecToString(Tr.EndPos);
+		return (pHitEnt ? EntToString(pHitEnt) : msstring(VecToString(Tr.EndPos)));
 	}
 	else if ( Flags.contains("contents") )
 	{
@@ -2828,7 +2828,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("player",Name) && pEnt->IsPlayer() )
 			{
-					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
+					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2839,7 +2839,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() )
 			{
-					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
+					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2850,7 +2850,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 
 			if( !stricmp("any",Name) && !pEnt->IsMSItem() )
 			{
-					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
+					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2865,7 +2865,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				if ( my_relate == -3 && pMonster->m_Race )
 				{
-					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
+					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{
@@ -2881,7 +2881,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				if ( my_relate == 1 && pMonster->m_Race )
 				{
-					ent_str = msstring(return_idx ? UTIL_VarArgs("%i",pEnt->entindex()) : EntToString(pEnt)); //Thothie APR2016_17 - isphere
+					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 					int total_len = thoth_token_string.len() + ent_str.len();
 					if ( total_len < str_limit )
 					{

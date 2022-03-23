@@ -78,6 +78,7 @@ public:
         CTraceLineFilter(CFindEntity::YWrapType * pEntity);
         CTraceLineFilter(CFindEntity::YWrapType * pEntity, const Vector& vOrigin);
     #endif
+    virtual ~CTraceLineFilter() { }
     virtual bool Allow(CFindEntity & vEntity) const;
 };
 
