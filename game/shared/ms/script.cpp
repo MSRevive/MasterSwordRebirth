@@ -3536,9 +3536,11 @@ msstring CScript::ScriptGetter_RelPos( msstring& FullName, msstring& ParserName,
 			StartPos = g_vecZero;
 		}
 
-		Vector Pos = StartPos + GetRelativePos( Angle, StringToVec(PosString) );
+		Vector vPosStr = StringToVec(PosString);
+		Vector vRelPos = GetRelativePos(Angle, vPosStr);
+		Vector vPos = StartPos + vRelPos;
 		//sprintf( cReturn, "(%.2f,%.2f,%.2f)", Pos.x, Pos.y, Pos.z );
-		RETURN_VECTOR( Pos )
+		RETURN_VECTOR(Pos)
 	}
 	else return "0";
 }
