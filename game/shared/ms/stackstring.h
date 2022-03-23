@@ -3,6 +3,14 @@
 
 #ifndef _WIN32
 extern "C" char *strlwr(char *str);
+
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
 #endif
 
 #include "strhelper.h"
@@ -23,6 +31,19 @@ extern "C" char *strlwr(char *str);
 #ifndef STD_SET
 #define STD_SET
 #include <set>
+#endif
+
+#ifndef _WIN32
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 #define clrmem(a) memset(&a, 0, sizeof(a));

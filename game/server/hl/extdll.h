@@ -51,17 +51,28 @@ typedef unsigned char byte;
 typedef unsigned int uint;
 typedef int BOOL;
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #include <cstddef>
 #include <limits.h>
 #include <stdarg.h>
 
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
+#ifdef min
+#undef min
 #endif
 
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
+#ifdef max
+#undef max
 #endif
+
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #ifndef MAX_PATH
 #define MAX_PATH PATH_MAX
