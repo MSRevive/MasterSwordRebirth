@@ -87,7 +87,7 @@ void VectorScale(const float *in, float scale, float *out);
 float VectorNormalize(float *v);
 void VectorInverse(float *v);
 
-extern vec3_t vec3_origin;
+extern "C" vec3_t vec3_origin;
 extern "C" void AngleVectors(const float *angles, float *forward, float *right, float *up);
 #endif
 
@@ -3585,9 +3585,7 @@ msstring_ref PM_GetValue(msstringlist &Params)
 }
 
 #ifdef VALVE_DLL
-//c++ version of the utils, ripped from the client's util.h
-vec3_t vec3_origin(0, 0, 0);
-
+// c++ version of the utils, ripped from the client's util.h
 double sqrt(double x);
 
 float Length(const float *v)
