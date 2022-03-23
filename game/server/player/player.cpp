@@ -1853,7 +1853,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 		return;
 
 	// only check for time based damage approx. every 2 seconds
-	if (abs(gpGlobals->time - m_tbdPrev) < 2.0)
+	if (fabs(gpGlobals->time - m_tbdPrev) < 2.0)
 		return;
 
 	m_tbdPrev = gpGlobals->time;
@@ -4035,7 +4035,7 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//Update the kill waited time every 10 secs
-	if (abs(m_TimeWaitedToForgetKill - m_ClTimeWaitedToForgetKill) > 10)
+	if (fabs(m_TimeWaitedToForgetKill - m_ClTimeWaitedToForgetKill) > 10)
 	{
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 		WRITE_BYTE(9);
@@ -4046,7 +4046,7 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//Update the steal waited time every 10 secs
-	if (abs(m_TimeWaitedToForgetSteal - m_ClTimeWaitedToForgetSteal) > 10)
+	if (fabs(m_TimeWaitedToForgetSteal - m_ClTimeWaitedToForgetSteal) > 10)
 	{
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 		WRITE_BYTE(13);
