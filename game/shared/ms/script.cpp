@@ -7,7 +7,6 @@
 #include "script.h"
 #include "scriptmgr.h"
 #include "groupfile.h"
-#include "strhelper.h"
 
 #ifdef VALVE_DLL
 #include "svglobals.h"
