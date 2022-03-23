@@ -1939,7 +1939,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 					pev->modelindex = 0;
 
 				//This is for monsters
-				m_pOwner->SetScriptVar("game.monster.wielded_item", m_PlayerHoldModel);
+				m_pOwner->SetScriptVar("game.monster.wielded_item", m_PlayerHoldModel.c_str());
 				m_pOwner->CallScriptEvent("game_wielditem");
 			}
 		}

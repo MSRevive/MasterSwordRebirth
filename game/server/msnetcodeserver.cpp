@@ -430,7 +430,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 		if (!pScripted || !pScripted->m_Scripts.size())
 			continue;
 		for (int v = 0; v < Companion.SaveVarName.size(); v++)
-			pScripted->SetScriptVar(Companion.SaveVarName[v], Companion.SaveVarValue[v]);
+			pScripted->SetScriptVar(Companion.SaveVarName[v].c_str(), Companion.SaveVarValue[v].c_str());
 
 		pScripted->CallScriptEvent("game_companion_restore");
 	}
