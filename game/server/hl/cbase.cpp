@@ -28,15 +28,9 @@
 #define logfileopt NullFile
 #endif
 
-#ifdef _WIN32
-extern "C" void PM_Move(struct playermove_s *ppmove, int server);
-extern "C" void PM_Init(struct playermove_s *ppmove);
-extern "C" char PM_FindTextureType(char *name);
-#else
-void PM_Move(struct playermove_s *ppmove, int server);
-void PM_Init(struct playermove_s *ppmove);
-char PM_FindTextureType(char *name);
-#endif
+extern "C" void PM_Move(struct playermove_s* ppmove, int server);
+extern "C" void PM_Init(struct playermove_s* ppmove);
+extern "C" char PM_FindTextureType(char* name);
 
 void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd);
 
