@@ -2,6 +2,7 @@
 #define SHAREDUTIL_H
 
 #include "buildcontrol.h"
+#include "strhelper.h"
 
 //Extentions
 #define SCRIPT_EXT ".script"

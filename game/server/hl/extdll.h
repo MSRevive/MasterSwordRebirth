@@ -78,11 +78,7 @@ typedef int BOOL;
 #define MAX_PATH PATH_MAX
 #endif
 
-#define _snprintf snprintf
-#define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
-#define strnicmp strncasecmp
-#define stricmp strcasecmp
-
+#include "strhelper.h"
 #endif //_WIN32
 
 // Misc C-runtime library headers

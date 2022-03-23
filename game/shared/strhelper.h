@@ -7,6 +7,10 @@ char* strlower(char* start);
 
 #define _strupr strupr
 #define _strlwr strlower
+#define _snprintf snprintf
+#define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
+#define strnicmp strncasecmp
+#define stricmp strcasecmp
 #endif
 
 #endif	// STR_HELPER_H
