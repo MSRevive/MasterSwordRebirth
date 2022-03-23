@@ -6,7 +6,6 @@ extern "C" char *strlwr(char *str);
 #endif
 
 #include "strhelper.h"
-#include "stream_safe.h"
 #include <cstring>
 #include <string.h>
 #include <string>
