@@ -32,21 +32,15 @@ typedef struct WSAData
 } WSADATA;
 
 #define IOCPARM_MASK 0x7f  /* parameters must be < 128 bytes */
-#define IOC_OUT 0x40000000 /* copy out parameters */
-#define IOC_IN 0x80000000  /* copy in parameters */
-#define _IOR(x, y, t) (IOC_OUT | (((long)sizeof(t) & IOCPARM_MASK) << 16) | ((x) << 8) | (y))
 
 typedef unsigned long u_long;
 
 #define SIO_GET_INTERFACE_LIST _IOR('t', 127, u_long)
 
 typedef struct sockaddr_in SOCKADDR_IN;
+typedef int SOCKET;
 
 #define _IOW(x, y, t) (IOC_IN | (((long)sizeof(t) & IOCPARM_MASK) << 16) | ((x) << 8) | (y))
-
-#define FIONBIO _IOW('f', 126, u_long) /* set/clear non-blocking i/o */
-
-#define IFF_LOOPBACK 0x00000004 /* this is loopback interface */
 
 typedef union sockaddr_gen
 {
