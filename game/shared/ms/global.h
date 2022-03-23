@@ -5,9 +5,9 @@
 void MSGlobalItemInit();
 
 #ifndef _WINDEF_
-typedef void *HANDLE;
+typedef int HANDLE;
 typedef HANDLE HINSTANCE;
-typedef HINSTANCE HMODULE; /* HMODULEs can be used in place of HINSTANCEs */
+#define HMODULE void *
 #endif
 
 enum gametype_e

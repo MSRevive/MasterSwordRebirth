@@ -183,6 +183,8 @@ $Project "Server"
 
 	$Folder	"Shared"
 	{
+		$File	"$SRCDIR\game\shared\strhelper.cpp"
+		$File	"$SRCDIR\game\shared\strhelper.h"
 		$File	"$SRCDIR\game\shared\ms\fndatahandler.cpp"
 		$File	"$SRCDIR\game\shared\ms\fndatahandler.h"
 		$File	"$SRCDIR\game\shared\ms\httprequesthandler.cpp"

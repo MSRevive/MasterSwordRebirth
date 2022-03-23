@@ -15,11 +15,11 @@
 void SetSocketBlocking(SOCKET Socket, bool Enabled)
 {
 	//Disable socket blocking
-	u_long arg = !Enabled ? 1 : 0;
 #ifdef _WIN32
+	u_long arg = !Enabled ? 1 : 0;
 	ioctlsocket(Socket, FIONBIO, &arg);
 #else
-	fcntl(Socket, F_SETFL, O_NONBLOCK);
+	fcntl(Socket, F_SETFL, (Enabled ? 0 : O_NONBLOCK));
 #endif
 }
 
@@ -120,9 +120,15 @@ CNetFileTransaction::CNetFileTransaction(const msstring_ref sDestAddr, byte *pDa
 	m.DataSize = lDataSize;
 	m.Data = msnew byte[m.DataSize]; //Copy data locally
 	memcpy(m.Data, pData, m.DataSize);
-	m.FileID = RANDOM_LONG(200, 66666);
+	m.FileID = RANDOM_LONG(200, 66666);	
+
+#ifdef _WIN32
 	u_long arg = 1;
-	ioctlsocket(m.socket, FIONBIO, &arg); //Turn off socket blocking
+	ioctlsocket(m.socket, FIONBIO, &arg); // Turn off socket blocking
+#else
+	fcntl(m.socket, F_SETFL, O_NONBLOCK);
+#endif
+
 	m.fRecv = false;
 	m.TransCallback = pTransCallback;
 	m.TimeTimeout = gpGlobals->time + NET_CONNECTTIMEOUT; // Connection time out

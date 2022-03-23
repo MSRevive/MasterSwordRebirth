@@ -32,6 +32,9 @@ typedef struct WSAData
 } WSADATA;
 
 #define IOCPARM_MASK 0x7f  /* parameters must be < 128 bytes */
+#define SOCKET_ERROR            (-1)
+#define INVALID_SOCKET			(-1)
+#define closesocket close
 
 typedef unsigned long u_long;
 
@@ -39,8 +42,6 @@ typedef unsigned long u_long;
 
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef int SOCKET;
-
-#define _IOW(x, y, t) (IOC_IN | (((long)sizeof(t) & IOCPARM_MASK) << 16) | ((x) << 8) | (y))
 
 typedef union sockaddr_gen
 {
