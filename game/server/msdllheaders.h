@@ -7,6 +7,15 @@
 
 #ifndef _WIN32
 #define Sleep sleep
+#define MINCHAR     0x80        
+#define MAXCHAR     0x7f        
+#define MINSHORT    0x8000      
+#define MAXSHORT    0x7fff      
+#define MINLONG     0x80000000  
+#define MAXLONG     0x7fffffff  
+#define MAXBYTE     0xff        
+#define MAXWORD     0xffff      
+#define MAXDWORD    0xffffffff  
 #endif
 
 #pragma warning(disable : 4995) // allow use of old headers (such as string.h, iostream.h, etc.)
