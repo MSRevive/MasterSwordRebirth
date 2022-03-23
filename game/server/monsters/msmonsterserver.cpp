@@ -1879,7 +1879,7 @@ tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
 				return NULL;
 
 			//Find the item in my store.  Item must exist in my store
-			if (!(psiStoreItem = OpenStore->GetItem(ptiTradeInfo->pItem->ItemName)))
+			if (!(psiStoreItem = OpenStore->GetItem(ptiTradeInfo->pItem->ItemName.c_str())))
 				return NULL;
 
 			tiTradeInfo.iStatus = ptiTradeInfo->iStatus;

@@ -1111,7 +1111,7 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonsterData->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, FLOAT(pMonsterData->m_nRndMobs) - 1);
+			int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
 			for (int i = 0; i < pMonsterData->m_nRndMobs; i++)
 			{
 				logfile << UTIL_VarArgs("DEBUG: respawn randommob list #%i / %i as %s\n", i, pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
@@ -1157,7 +1157,7 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonster->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, FLOAT(pMonster->m_nRndMobs) - 1);
+			int idx = RANDOM_LONG(0, float(pMonster->m_nRndMobs) - 1);
 			mdSpawnMonster[iMonstersToSpawn].m_nRndMobs = pMonster->m_nRndMobs;
 			for (int i = 0; i < pMonster->m_nRndMobs; i++)
 			{

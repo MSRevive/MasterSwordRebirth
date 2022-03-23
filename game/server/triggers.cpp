@@ -1480,7 +1480,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 	if (bNdvCdwn && trig_secondary_activation && trig_individualized == 1)
 		skip_triggers = true;
 
-	//Print("DEBUG: ActivateMultiTrigger IndvType %i Scndry %s Skip %s MyTime %f GameTime %f \n", trig_individualized, trig_secondary_activation ? "1" : "0", skip_triggers ? "1" : "0", trig_actcooldown, FLOAT(gpGlobals->time));
+	//Print("DEBUG: ActivateMultiTrigger IndvType %i Scndry %s Skip %s MyTime %f GameTime %f \n", trig_individualized, trig_secondary_activation ? "1" : "0", skip_triggers ? "1" : "0", trig_actcooldown, float(gpGlobals->time));
 
 	if (!trig_secondary_activation)
 		trig_actcooldown = (gpGlobals->time + m_flWait) - 0.1;
