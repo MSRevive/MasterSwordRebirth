@@ -221,30 +221,30 @@ int gmsgStatusValue = 0;
 
 //Master Sword
 //These correspond to the netmsg_e enums in player.h
-const char *g_PlayerMsgs[NETMSG_NUM] =
-	{
-		("SetProp"),	 // MiBNov/Dec2007 - Part of the name/title changing system.
-		("StatusIcons"), //Drigien MAY2008 - Status Icons
-		{"Anim"},
-		{"Fatigue"},
-		{"Music"},
-		{"Hands"},
-		{"SetStat"},
-		{"Spells"},
-		{"HP"},
-		{"MP"},
-		{"PlayEvent"},
-		{"CLDllFunc"},
-		{"VGUIMenu"},
-		{"EntInfo"},
-		{"StoreItem"},
-		{"Vote"},
-		{"HUDInfoMsg"},
-		{"CharInfo"},
-		{"Item"},
-		("Exp"),		//Search shuri
-		{"CLXPlay"},	//MAR2012_28 - client side sound
-		{"LocalPanel"}, // MiB MAR2015_01 [LOCAL_PANEL] - Message for local panel
+const char* g_PlayerMsgs[NETMSG_NUM] =
+{
+	"SetProp",	 // MiBNov/Dec2007 - Part of the name/title changing system.
+	"StatusIcons", //Drigien MAY2008 - Status Icons
+	"Anim",
+	"Fatigue",
+	"Music",
+	"Hands",
+	"SetStat",
+	"Spells",
+	"HP",
+	"MP",
+	"PlayEvent",
+	"CLDllFunc",
+	"VGUIMenu",
+	"EntInfo",
+	"StoreItem",
+	"Vote",
+	"HUDInfoMsg",
+	"CharInfo",
+	"Item",
+	"Exp",		//Search shuri
+	"CLXPlay",	//MAR2012_28 - client side sound
+	"LocalPanel", // MiB MAR2015_01 [LOCAL_PANEL] - Message for local panel
 };
 int g_netmsg[NETMSG_NUM] = {0};
 
@@ -2556,7 +2556,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		//No valid spots, kick player with message
 
 		msstring TransitionText = m_SpawnTransition ? m_SpawnTransition : "<unknown>";
-		logfile << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText << ")!!!\r\n";
+		logfile << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText.c_str() << ")!!!\r\n";
 		bool fKickPlayer = true;
 
 		if (m_CharacterState == CHARSTATE_LOADED)
@@ -5130,7 +5130,8 @@ void CBasePlayer::GetAnyItems()
 
 		bool ALLOW = true;
 		// MiB SEP2019_23 - Rewrote this for new array stuff. Should be converted to set eventually
-		msscriptarray * pArray = pObject->GetScriptedArray( msstring("PICKUP_ALLOW_LIST"), false );
+		msstring pArrayParam("PICKUP_ALLOW_LIST");
+		msscriptarray* pArray = pObject->GetScriptedArray(pArrayParam, false);
 		if(pArray)
 		{
 			ALLOW = false;
@@ -6103,7 +6104,9 @@ public:
 		pNewLightSensor->pev->origin = Origin;
 		pNewLightSensor->pev->iuser1 = PlayerIndex;
 		pNewLightSensor->Spawn();
+		return pNewLightSensor;
 	}
+
 	void Spawn()
 	{
 		//Note:  Half-life will only give an an object a light level when:
