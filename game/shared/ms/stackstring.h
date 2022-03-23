@@ -13,7 +13,6 @@ extern "C" char *strlwr(char *str);
 #endif
 #endif
 
-#include "strhelper.h"
 #include <cstring>
 #include <string.h>
 #include <string>
@@ -45,6 +44,8 @@ extern "C" char *strlwr(char *str);
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #endif
+
+#include "strhelper.h"
 
 #define clrmem(a) memset(&a, 0, sizeof(a));
 
