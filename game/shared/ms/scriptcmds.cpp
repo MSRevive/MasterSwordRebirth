@@ -5648,8 +5648,8 @@ bool CScript::ScriptCmd_Set(
 					, ERRORPRINT_CONSOLE | ERRORPRINT_LOG | ERRORPRINT_CVAR
 					, "Set %s doesn't exist for command %s"
 					, vsSetName.c_str()
-					, Cmd.Name()
-					);
+					, Cmd.Name().c_str()
+				);
 				return true;
 			}
 
@@ -7580,7 +7580,13 @@ public:
 	void Delete(msstring fileName)
 	{
 		if (is_open())
+		{
+#ifdef _WIN32
 			::DeleteFile(fileName);
+#else
+			remove(fileName);
+#endif
+		}			
 	};
 
 	void Close() { ifstream::close(); };

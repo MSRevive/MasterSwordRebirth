@@ -3625,7 +3625,7 @@ msstring CScript::ScriptGetter_ShapeRect(msstring & FullName, msstring & ParserN
         }
         else
         {
-            vHalfX = abs( atof( Params[1] ) / 2 );
+            vHalfX = fabs( atof( Params[1] ) / 2 );
             vHalfZ = 0;
 
             if ( Params.size() == 2 )
@@ -3636,12 +3636,12 @@ msstring CScript::ScriptGetter_ShapeRect(msstring & FullName, msstring & ParserN
             else
             if ( Params.size() == 3 )
             {
-                vHalfY = abs( atof( Params[2] ) );
+                vHalfY = fabs( atof( Params[2] ) );
             }
             else
             {
-                vHalfY = abs( atof( Params[2] ) );
-                vHalfZ = abs( atof( Params[3] ) );
+                vHalfY = fabs( atof( Params[2] ) );
+                vHalfZ = fabs( atof( Params[3] ) );
             }
         }
 
