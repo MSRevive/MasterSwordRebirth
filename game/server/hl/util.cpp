@@ -710,7 +710,8 @@ float UTIL_StringToSecs(const char *timein)
 //returns "noarray" if size or getidx used on non-existent array
 char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation, const char *array_name, int subIdx)
 {
-	msscriptarray * pArray = pEntity->GetScriptedArray( msstring(array_name), false );
+	msstring arrNameStr(array_name);
+	msscriptarray* pArray = pEntity->GetScriptedArray(arrNameStr, false);
 	if ( !pArray )
 	{
 		if ( !strcmp( array_operation, "exists" ) )

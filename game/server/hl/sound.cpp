@@ -1667,7 +1667,7 @@ char TEXTURETYPE_Find(char *name)
 
 	for (int i = 0; i < gcTextures; i++)
 	{
-		if (!_strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
+		if (!strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
 			return (grgchTextureType[i]);
 	}
 
