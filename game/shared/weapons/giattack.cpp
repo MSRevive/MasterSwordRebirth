@@ -890,11 +890,10 @@ bool CGenericItem::UseAmmo(int iAmt)
 			bool PreSelectedArrow = false;
 			if (m_pPlayer->m_ChosenArrow)
 			{
-
 				CGenericItem *pArrow = m_pPlayer->m_ChosenArrow;
 				bool GENERIC = msstring(pArrow->m_Name).ends_with("_generic");
 				//Make sure I have the right type of arrow/bolt!
-				bool REQUIRE_ARROW = msstring(CurrentAttack->sProjectileType).contains("arrow");
+				bool REQUIRE_ARROW = msstring(CurrentAttack->sProjectileType.c_str()).contains("arrow");
 				bool HAVE_ARROW = msstring(pArrow->m_Name).contains("arrow");
 
 				if (((REQUIRE_ARROW && HAVE_ARROW) || (!REQUIRE_ARROW && !HAVE_ARROW)) &&
