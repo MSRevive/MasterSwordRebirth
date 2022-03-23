@@ -11,17 +11,7 @@
 
 #include "curl/curl.h"
 #include "httprequesthandler.h"
-
-#undef min
-#undef max
-
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-
-#undef min
-#undef max
-
+#include "rapidjson/document_safe.h"
 #include <string>
 
 #if defined(_WIN32) && defined(USE_VS2022)

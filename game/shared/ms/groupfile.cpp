@@ -1,4 +1,4 @@
-#include <fstream>
+#include "stream_safe.h"
 
 #ifdef _WIN32
 #include "windows.h"

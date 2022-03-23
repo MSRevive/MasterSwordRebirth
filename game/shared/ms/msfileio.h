@@ -1,5 +1,4 @@
-#include <fstream>
-#include <iostream>
+#include "stream_safe.h"
 #include "stackstring.h"
 
 typedef unsigned char byte;

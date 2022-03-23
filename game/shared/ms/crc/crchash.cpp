@@ -1,7 +1,6 @@
 #include <string.h> // Needed for strlen().
-#include <fstream>
-#include <iostream>
 #include <stdio.h>
+#include "../stream_safe.h"
 
 #include "xxhash/xxhash32.h"
 #include "stackstring.h"

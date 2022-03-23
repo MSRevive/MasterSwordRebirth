@@ -7,7 +7,7 @@
 /			LoadUncompressedTGA(Texture * texture, char * filename, FILE * fTGA)*	
 /*******************************************************************************/
 
-//#include <iostream>
+//#include "stream_safe.h"
 //using namespace std;
 
 #include "tgastruct.h"

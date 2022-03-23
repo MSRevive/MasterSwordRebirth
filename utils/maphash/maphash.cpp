@@ -3,15 +3,13 @@
 //
 #include <stdio.h>
 #include <string>
-#include <iostream>
 #include <windows.h>
 #include <vector>
 #include <cstdio>
 
+#include "../stream_safe.h"
 #include "crc/crchash.h"
-#include "rapidjson/document.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/writer.h"
+#include "rapidjson/document_safe.h"
 
 using namespace std;
 using namespace rapidjson;

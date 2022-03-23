@@ -1,8 +1,8 @@
 #ifndef MS_LOGFILE
 #define MS_LOGFILE
 
-#include <fstream>
 #include <string>
+#include "stream_safe.h"
 #include "sharedutil.h"
 
 using namespace std;

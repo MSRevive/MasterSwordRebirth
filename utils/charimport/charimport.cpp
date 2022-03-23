@@ -5,14 +5,12 @@
 
 #include "windows.h"
 #include "stdio.h"
-#include "iostream"
+#include "stream_safe.h"
 #include <conio.h>
 #include "groupfile.h"
 #include "msfileio.h"
 #include "httprequesthandler.h"
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
+#include "rapidjson/document_safe.h"
 #include "base64/base64.h"
 
 using namespace rapidjson;

@@ -1,5 +1,5 @@
 #include "cbase.h"
-#include "iostream"
+#include "../stream_safe.h"
 #include "sharedutil.h"
 #include "msfileio.h"
 

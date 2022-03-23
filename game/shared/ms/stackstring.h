@@ -5,7 +5,6 @@
 extern "C" char *strlwr(char *str);
 #endif
 
-#include <iostream>
 #include <cstring>
 #include <string.h>
 #include <string>

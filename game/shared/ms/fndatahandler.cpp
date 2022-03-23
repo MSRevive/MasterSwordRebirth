@@ -4,21 +4,13 @@
 // Allow the player to easily switch between and use these characters.
 //
 
-#include "rapidjson/document.h"
-#include "rapidjson/stringbuffer.h"
-#include "rapidjson/writer.h"
-
-#undef min
-#undef max
-
+#include "rapidjson/document_safe.h"
 #include "base64/base64.h"
 #include "msdllheaders.h"
 #include "player.h"
 #include "global.h"
 
 #undef vector
-#undef min
-#undef max
 
 #include <thread>
 #include <mutex>
