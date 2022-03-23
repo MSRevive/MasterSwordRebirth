@@ -48,10 +48,10 @@ typedef unsigned long DWORD;
 typedef unsigned long ULONG;
 typedef unsigned char BYTE;
 typedef unsigned char byte;
-typedef unsigned int size_t;
 typedef unsigned int uint;
 typedef int BOOL;
 
+#include <cstddef>
 #include <limits.h>
 #include <stdarg.h>
 

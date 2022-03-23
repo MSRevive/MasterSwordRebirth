@@ -1,7 +1,3 @@
-#ifndef _WIN32
-typedef unsigned int size_t;
-#endif
-
 #include "buildcontrol.h"
 #include "hl/extdll.h"
 #include "hl/util.h"
