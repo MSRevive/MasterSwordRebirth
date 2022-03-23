@@ -8,7 +8,7 @@
 #include "voice_gamemgr.h"
 #include <string.h>
 #include <assert.h>
-#include "MSDLLHeaders.h"
+#include "msdllheaders.h"
 #include "player.h"
 
 #define UPDATE_INTERVAL 0.3
