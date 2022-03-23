@@ -33,6 +33,8 @@
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include "sys/io.h"
 #include <fcntl.h>
 #define CreateDirectory(p, n) mkdir(p, 0777)
 #endif
