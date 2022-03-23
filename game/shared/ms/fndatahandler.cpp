@@ -11,12 +11,14 @@
 #include "global.h"
 
 #undef vector
+#undef min
+#undef max
 
 #include <thread>
 #include <mutex>
 #include <condition_variable>
-#include <vector>
 #include <atomic>
+#include <vector>
 
 #include "httprequesthandler.h"
 #include "fndatahandler.h"
