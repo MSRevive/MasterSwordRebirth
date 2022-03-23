@@ -6,6 +6,7 @@ extern "C" char *strlwr(char *str);
 #endif
 
 #include "strhelper.h"
+#include "stream_safe.h"
 #include <cstring>
 #include <string.h>
 #include <string>
@@ -25,7 +26,7 @@ extern "C" char *strlwr(char *str);
 #include <set>
 #endif
 
-#define clrmem(a) std::memset(&a, 0, sizeof(a));
+#define clrmem(a) memset(&a, 0, sizeof(a));
 
 //Deuplicated from msdebug.h
 #ifdef DEV_BUILD
@@ -75,7 +76,7 @@ public:
 		reserve(m_Items + 1);
 
 		int idx = m_Items;
-		std::memset(&m_First[idx], 0, sizeof(itemtype_y));
+		memset(&m_First[idx], 0, sizeof(itemtype_y));
 
 		m_Items++;
 
@@ -88,7 +89,7 @@ public:
 	void erase(const size_t idx)
 	{
 		if (idx + 1 < m_Items)
-			std::memmove(&m_First[idx], &m_First[idx + 1], (m_Items - (idx + 1)) * sizeof(itemtype_y));
+			memmove(&m_First[idx], &m_First[idx + 1], (m_Items - (idx + 1)) * sizeof(itemtype_y));
 
 		m_Items--;
 	}
