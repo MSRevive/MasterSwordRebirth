@@ -43,9 +43,13 @@
 #define FALSE 0
 #define TRUE 1
 
+typedef unsigned short WORD;
+typedef unsigned long DWORD;
 typedef unsigned long ULONG;
 typedef unsigned char BYTE;
-typedef unsigned short WORD;
+typedef unsigned char byte;
+typedef unsigned int size_t;
+typedef unsigned int uint;
 typedef int BOOL;
 
 #include <limits.h>

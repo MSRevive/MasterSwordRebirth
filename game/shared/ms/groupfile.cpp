@@ -4,16 +4,11 @@
 #include "windows.h"
 #include "logfile.h"
 #else
-#include "extdll.h"
 #include <ctype.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
-
-typedef unsigned long DWORD;
-typedef unsigned int uint;
-typedef unsigned char byte;
-typedef unsigned int size_t;
+#include "extdll.h"
 #endif
 
 #include "groupfile.h"
