@@ -100,12 +100,12 @@ msstring msstring::substr(size_t start) { return msstring(&data[start]); }
 msstring msstring::thru_substr(const msstring_ref a, size_t start) const
 {
 	size_t ret = find(a, start);
-	return (ret != msstring_error) ? msstring(&data[start], ret) : &data[start];
+	return (ret != msstring_error) ? msstring(&data[start], ret) : msstring(&data[start]);
 }
 msstring msstring::thru_char(const msstring_ref a, size_t start) const
 {
 	size_t ret = findchar(a, start);
-	return (ret != msstring_error) ? msstring(&data[start], ret) : &data[start];
+	return (ret != msstring_error) ? msstring(&data[start], ret) : msstring(&data[start]);
 }
 msstring msstring::skip(const msstring_ref a) const
 {
