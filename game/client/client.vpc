@@ -38,7 +38,7 @@ $Configuration
 
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS"
 	}
 
@@ -118,7 +118,7 @@ $Project "Client"
 		
 		$Folder	"Headers"
 		{
-			$File "$SRCDIR\engine\cdll_int.h"
+			$File "$SRCDIR\public\engine\cdll_int.h"
 			$File "$SRCDIR\common\cl_entity.h"
 			$File "cl_util.h"
 			$File "$SRCDIR\common\com_model.h"

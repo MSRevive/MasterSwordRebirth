@@ -1426,7 +1426,7 @@ void CRenderSpawnbox::Init( )
 	}
 	else
 	{
-		Print( "Spawnbox Model %s NOT FOUND!", MSGlobals::DefaultSpawnBoxModel );
+		Print("Spawnbox Model %s NOT FOUND!", MSGlobals::DefaultSpawnBoxModel.c_str());
 	}
 }
 void CRenderSpawnbox::Render( )

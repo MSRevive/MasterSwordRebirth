@@ -38,7 +38,7 @@ $Configuration
 	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
 		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
@@ -90,7 +90,7 @@ $Project "Server"
 		$File	"bmodels.cpp"
 		$File	"hl\cbase.cpp"
 		$File	"$SRCDIR\game\shared\cbase.h"
-		$File	"$SRCDIR\engine\progdefs.h"
+		$File	"$SRCDIR\public\engine\progdefs.h"
 		$File	"$SRCDIR\common\const.h"
 		$File	"cdll_dll.h"
 		$File	"client.cpp"

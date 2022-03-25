@@ -13,7 +13,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;../../engine;../../common"
+		$AdditionalIncludeDirectories	"$BASE;../../public/engine;../../common"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
