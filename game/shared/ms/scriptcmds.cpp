@@ -7221,23 +7221,23 @@ bool CScript::ScriptCmd_Velocity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 			CBaseEntity *pCaller = NULL;
 			if (m.pScriptedEnt->IsMSItem())
 			{
-				CGenericItem *pItem = (CGenericItem *)m.pScriptedEnt;
-				if (pItem) //Thothie JAN2020_12 - EXEC_CMD redundancy
+				CGenericItem* pItem = (CGenericItem*)m.pScriptedEnt;
+				if (pItem) // Thothie JAN2020_12 - EXEC_CMD redundancy
 				{
-					if (pItem->m_pOwner)	pCaller = pItem->m_pOwner;
+					if (pItem->m_pOwner)	
+						pCaller = pItem->m_pOwner;
 				}
 			}
 			else
-			{
 				pCaller = m.pScriptedEnt;
-			}
-			bool abort_push = false;
-			if (pEntity != pCaller)
+
+			if (pEntity != NULL)
 			{
-				if (Params[2] != "override")
+				bool abort_push = false;
+				if ((pEntity != pCaller) && (Params[2] != "override"))
 				{
-					//APR2012_01 - Thothie - Add Push Reduction via Var
-					IScripted *iScripted = pEntity->GetScripted();
+					// APR2012_01 - Thothie - Add Push Reduction via Var
+					IScripted* iScripted = pEntity->GetScripted();
 					if (iScripted)
 					{
 						float push_resist = atof(iScripted->GetFirstScriptVar("MSC_PUSH_RESIST"));
@@ -7249,18 +7249,19 @@ bool CScript::ScriptCmd_Velocity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 						}
 					}
 
-					CMSMonster *pMonster = (CMSMonster *)pEntity;
+					CMSMonster* pMonster = (pEntity->IsMSMonster() ? (CMSMonster*)pEntity : NULL);
 					if (pMonster)
 					{
-						if (pMonster->m_nopush) abort_push = true; //Thothie JAN2020_12 - EXEC_CMD redundancy
+						if (pMonster->m_nopush) 
+							abort_push = true; //Thothie JAN2020_12 - EXEC_CMD redundancy
 					}
 				}
-			}
-			if (!pEntity->IsAlive()) abort_push = true;
-			if (pEntity && !abort_push) //[/thothie]
-			{
-				if (Cmd.Name() == "setvelocity") pEntity->pev->velocity = lVelAdjust; //StringToVec( Params[1] );
-				else pEntity->pev->velocity += lVelAdjust; //StringToVec( Params[1] );
+				if (!pEntity->IsAlive()) abort_push = true;
+				if (!abort_push && pEntity->pev) //[/thothie]
+				{
+					if (Cmd.Name() == "setvelocity") pEntity->pev->velocity = lVelAdjust; //StringToVec( Params[1] );
+					else pEntity->pev->velocity += lVelAdjust; //StringToVec( Params[1] );
+				}
 			}
 		}
 	}
