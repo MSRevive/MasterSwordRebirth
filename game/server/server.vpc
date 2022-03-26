@@ -49,7 +49,7 @@ $Configuration
 		$AdditionalDependencies			"$BASE winmm.lib wsock32.lib Ws2_32.lib" [$WIN32]
 		$AdditionalDependencies         "$BASE $SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
 		$SystemLibraries                                                        "iconv" [$OSXALL]
-		$ModuleDefinitionFile				"$BASE $SRCDIR/game/server/ms.def" [$WIN32]
+		$ModuleDefinitionFile				"$BASE $SRCDIR/game/server/ms.def"
 	}
 }
 
