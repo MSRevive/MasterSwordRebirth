@@ -37,7 +37,7 @@ void *GetModuleHandle(const char *name)
 // ------------------------------------------------------------------------------------ //
 // InterfaceReg.
 // ------------------------------------------------------------------------------------ //
-;InterfaceReg *InterfaceReg::s_pInterfaceRegs = NULL;
+InterfaceReg *InterfaceReg::s_pInterfaceRegs = NULL;
 
 
 InterfaceReg::InterfaceReg( InstantiateInterfaceFn fn, const char *pName ) :

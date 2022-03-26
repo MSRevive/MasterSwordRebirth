@@ -39,67 +39,67 @@ extern DLL_GLOBAL Vector g_vecAttackDir;
 extern DLL_GLOBAL int g_iSkillLevel;
 
 static DLL_FUNCTIONS gFunctionTable =
-	{
-		GameDLLInit,			   //pfnGameInit
-		DispatchSpawn,			   //pfnSpawn
-		DispatchThink,			   //pfnThink
-		DispatchUse,			   //pfnUse
-		DispatchTouch,			   //pfnTouch
-		DispatchBlocked,		   //pfnBlocked
-		DispatchKeyValue,		   //pfnKeyValue
-		DispatchSave,			   //pfnSave
-		DispatchRestore,		   //pfnRestore
-		DispatchObjectCollsionBox, //pfnAbsBox
+{
+	GameDLLInit,			   //pfnGameInit
+	DispatchSpawn,			   //pfnSpawn
+	DispatchThink,			   //pfnThink
+	DispatchUse,			   //pfnUse
+	DispatchTouch,			   //pfnTouch
+	DispatchBlocked,		   //pfnBlocked
+	DispatchKeyValue,		   //pfnKeyValue
+	DispatchSave,			   //pfnSave
+	DispatchRestore,		   //pfnRestore
+	DispatchObjectCollsionBox, //pfnAbsBox
 
-		SaveWriteFields, //pfnSaveWriteFields
-		SaveReadFields,	 //pfnSaveReadFields
+	SaveWriteFields, //pfnSaveWriteFields
+	SaveReadFields,	 //pfnSaveReadFields
 
-		SaveGlobalState,	//pfnSaveGlobalState
-		RestoreGlobalState, //pfnRestoreGlobalState
-		ResetGlobalState,	//pfnResetGlobalState
+	SaveGlobalState,	//pfnSaveGlobalState
+	RestoreGlobalState, //pfnRestoreGlobalState
+	ResetGlobalState,	//pfnResetGlobalState
 
-		ClientConnect,		   //pfnClientConnect
-		ClientDisconnect,	   //pfnClientDisconnect
-		ClientKill,			   //pfnClientKill
-		ClientPutInServer,	   //pfnClientPutInServer
-		ClientCommand,		   //pfnClientCommand
-		ClientUserInfoChanged, //pfnClientUserInfoChanged
-		ServerActivate,		   //pfnServerActivate
-		ServerDeactivate,	   //pfnServerDeactivate
+	ClientConnect,		   //pfnClientConnect
+	ClientDisconnect,	   //pfnClientDisconnect
+	ClientKill,			   //pfnClientKill
+	ClientPutInServer,	   //pfnClientPutInServer
+	ClientCommand,		   //pfnClientCommand
+	ClientUserInfoChanged, //pfnClientUserInfoChanged
+	ServerActivate,		   //pfnServerActivate
+	ServerDeactivate,	   //pfnServerDeactivate
 
-		PlayerPreThink,	 //pfnPlayerPreThink
-		PlayerPostThink, //pfnPlayerPostThink
+	PlayerPreThink,	 //pfnPlayerPreThink
+	PlayerPostThink, //pfnPlayerPostThink
 
-		StartFrame,		  //pfnStartFrame
-		ParmsNewLevel,	  //pfnParmsNewLevel
-		ParmsChangeLevel, //pfnParmsChangeLevel
+	StartFrame,		  //pfnStartFrame
+	ParmsNewLevel,	  //pfnParmsNewLevel
+	ParmsChangeLevel, //pfnParmsChangeLevel
 
-		GetGameDescription,	 //pfnGetGameDescription    Returns string describing current .dll game.
-		PlayerCustomization, //pfnPlayerCustomization   Notifies .dll of new customization for player.
+	GetGameDescription,	 //pfnGetGameDescription    Returns string describing current .dll game.
+	PlayerCustomization, //pfnPlayerCustomization   Notifies .dll of new customization for player.
 
-		SpectatorConnect,	 //pfnSpectatorConnect      Called when spectator joins server
-		SpectatorDisconnect, //pfnSpectatorDisconnect   Called when spectator leaves the server
-		SpectatorThink,		 //pfnSpectatorThink        Called when spectator sends a command packet (usercmd_t)
+	SpectatorConnect,	 //pfnSpectatorConnect      Called when spectator joins server
+	SpectatorDisconnect, //pfnSpectatorDisconnect   Called when spectator leaves the server
+	SpectatorThink,		 //pfnSpectatorThink        Called when spectator sends a command packet (usercmd_t)
 
-		Sys_Error, //pfnSys_Error				Called when engine has encountered an error
+	Sys_Error, //pfnSys_Error				Called when engine has encountered an error
 
-		PM_Move,			//pfnPM_Move
-		PM_Init,			//pfnPM_Init				Server version of player movement initialization
-		PM_FindTextureType, //pfnPM_FindTextureType
+	PM_Move,			//pfnPM_Move
+	PM_Init,			//pfnPM_Init				Server version of player movement initialization
+	PM_FindTextureType, //pfnPM_FindTextureType
 
-		SetupVisibility,		  //pfnSetupVisibility        Set up PVS and PAS for networking for this client
-		UpdateClientData,		  //pfnUpdateClientData       Set up data sent only to specific client
-		AddToFullPack,			  //pfnAddToFullPack
-		CreateBaseline,			  //pfnCreateBaseline			Tweak entity baseline for network encoding, allows setup of player baselines, too.
-		RegisterEncoders,		  //pfnRegisterEncoders		Callbacks for network encoding
-		GetWeaponData,			  //pfnGetWeaponData
-		CmdStart,				  //pfnCmdStart
-		CmdEnd,					  //pfnCmdEnd
-		ConnectionlessPacket,	  //pfnConnectionlessPacket
-		GetHullBounds,			  //pfnGetHullBounds
-		CreateInstancedBaselines, //pfnCreateInstancedBaselines
-		InconsistentFile,		  //pfnInconsistentFile
-		AllowLagCompensation,	  //pfnAllowLagCompensation
+	SetupVisibility,		  //pfnSetupVisibility        Set up PVS and PAS for networking for this client
+	UpdateClientData,		  //pfnUpdateClientData       Set up data sent only to specific client
+	AddToFullPack,			  //pfnAddToFullPack
+	CreateBaseline,			  //pfnCreateBaseline			Tweak entity baseline for network encoding, allows setup of player baselines, too.
+	RegisterEncoders,		  //pfnRegisterEncoders		Callbacks for network encoding
+	GetWeaponData,			  //pfnGetWeaponData
+	CmdStart,				  //pfnCmdStart
+	CmdEnd,					  //pfnCmdEnd
+	ConnectionlessPacket,	  //pfnConnectionlessPacket
+	GetHullBounds,			  //pfnGetHullBounds
+	CreateInstancedBaselines, //pfnCreateInstancedBaselines
+	InconsistentFile,		  //pfnInconsistentFile
+	AllowLagCompensation,	  //pfnAllowLagCompensation
 };
 
 void OnFreeEntPrivateData(edict_t* pEnt);
@@ -114,42 +114,44 @@ NEW_DLL_FUNCTIONS gNewDLLFunctions =
 
 static void SetObjectCollisionBox(entvars_t *pev);
 
-int GetEntityAPI(DLL_FUNCTIONS *pFunctionTable, int interfaceVersion)
-{
-	DBG_INPUT;
-	if (!pFunctionTable || interfaceVersion != INTERFACE_VERSION)
+extern "C" {
+	int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfaceVersion)
 	{
-		return FALSE;
+		DBG_INPUT;
+		if (!pFunctionTable || interfaceVersion != INTERFACE_VERSION)
+		{
+			return FALSE;
+		}
+
+		memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
+		return TRUE;
 	}
 
-	memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
-	return TRUE;
-}
-
-int GetEntityAPI2(DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
-{
-	DBG_INPUT;
-	if (!pFunctionTable || *interfaceVersion != INTERFACE_VERSION)
+	int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
 	{
-		// Tell engine what version we had, so it can figure out who is out of date.
-		*interfaceVersion = INTERFACE_VERSION;
-		return FALSE;
+		DBG_INPUT;
+		if (!pFunctionTable || *interfaceVersion != INTERFACE_VERSION)
+		{
+			// Tell engine what version we had, so it can figure out who is out of date.
+			*interfaceVersion = INTERFACE_VERSION;
+			return FALSE;
+		}
+
+		memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
+		return TRUE;
 	}
 
-	memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
-	return TRUE;
-}
-
-int GetNewDLLFunctions(NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion)
-{
-	if(!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+	int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
 	{
-		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
-		return FALSE;
+		if (!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
+		{
+			*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+			return FALSE;
+		}
+
+		memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
+		return TRUE;
 	}
-	
-	memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
-	return TRUE;
 }
 
 #define Set_DispatchSpawnDbg(a) dbg(msstring("(") + STRING(pent->v.classname) + ") " + a)

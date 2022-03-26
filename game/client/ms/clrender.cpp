@@ -52,7 +52,7 @@ float CEnvMgr::m_MaxViewDistance = 4096;
 CEnvMgr::fog_t CEnvMgr::m_Fog = {false, Vector(0, 0, 0), 0.01, 0.01, 10000, GL_EXP};
 
 //Half-life callback
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT EXPORT
 extern "C"
 {
 	void DLLEXPORT HUD_DrawNormalTriangles(void);

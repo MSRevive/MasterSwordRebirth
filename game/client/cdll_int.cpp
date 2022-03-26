@@ -45,7 +45,7 @@ extern "C"
 #include "voice_status.h"
 #include "filesystem_shared.h"
 
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT EXPORT
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;

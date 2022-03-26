@@ -34,11 +34,13 @@
 // This is conveniently done for them in extdll.h
 //
 
+/*
 #ifdef _WIN32
 #define DLLEXPORT __stdcall
 #else
-#define DLLEXPORT /* */
+#define DLLEXPORT  __attribute__ ((visibility("default")))
 #endif
+*/
 
 typedef enum
 	{

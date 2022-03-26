@@ -18,7 +18,7 @@
 #include "demo_api.h"
 #include <memory.h>
 
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT EXPORT
 
 int g_demosniper = 0;
 int g_demosniperdamage = 0;

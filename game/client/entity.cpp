@@ -30,7 +30,7 @@
 #include "logfile.h"
 
 #undef DLLEXPORT //Master Sword
-#define DLLEXPORT __declspec(dllexport)
+#define DLLEXPORT EXPORT
 
 void Game_AddObjects(void);
 void SetClEntityProp(cl_entity_t &Ent, msstring &Cmd, mslist<msstring *> &ValueParams);
