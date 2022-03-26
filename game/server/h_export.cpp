@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -26,17 +26,24 @@
 
 // Holds engine functionality callbacks
 enginefuncs_t g_engfuncs;
-globalvars_t *gpGlobals;
+globalvars_t* gpGlobals;
+
+#undef DLLEXPORT
+#ifdef _WIN32
+#define DLLEXPORT __stdcall
+#else
+#define DLLEXPORT __attribute__ ((visibility("default")))
+#endif
 
 #ifdef _WIN32
-
 /*
-#define DLL_PROCESS_DETACH   0    
-#define DLL_PROCESS_ATTACH   1    
-#define DLL_THREAD_ATTACH    2    
-#define DLL_THREAD_DETACH    3    
-#define DLL_PROCESS_VERIFIER 4    
+#define DLL_PROCESS_DETACH   0
+#define DLL_PROCESS_ATTACH   1
+#define DLL_THREAD_ATTACH    2
+#define DLL_THREAD_DETACH    3
+#define DLL_PROCESS_VERIFIER 4
 */
+
 // Required DLL entry point
 BOOL WINAPI DllMain(
 	HINSTANCE hinstDLL,
@@ -58,24 +65,13 @@ BOOL WINAPI DllMain(
 	}
 	return TRUE;
 }
+#endif
 
-void DLLEXPORT GiveFnptrsToDll(enginefuncs_t *pengfuncsFromEngine, globalvars_t *pGlobals)
+extern "C" void DLLEXPORT GiveFnptrsToDll(enginefuncs_t * pengfuncsFromEngine, globalvars_t * pGlobals)
 {
+#ifdef _WIN32
 	DBG_INPUT;
+#endif
 	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
 	gpGlobals = pGlobals;
 }
-
-#else
-
-extern "C"
-{
-
-	void GiveFnptrsToDll(enginefuncs_t *pengfuncsFromEngine, globalvars_t *pGlobals)
-	{
-		memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
-		gpGlobals = pGlobals;
-	}
-}
-
-#endif
