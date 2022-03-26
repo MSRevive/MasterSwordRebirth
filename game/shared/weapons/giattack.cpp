@@ -668,7 +668,7 @@ void CGenericItem::ItemPostFrame()
 	else AttackButtonUp( );*/
 
 	dbg("Attack2ButtonDown");
-	if (FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK2))
+	if (m_pPlayer && FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK2))
 		Attack2ButtonDown(); // +attack2
 	else
 		Attack2ButtonUp();
@@ -677,17 +677,17 @@ void CGenericItem::ItemPostFrame()
 	{
 		int iActivateButton = ActivateButton();
 
-		if (FBitSet(m_pPlayer->m_afButtonPressed, iActivateButton)) //Button pressed this frame
+		if (m_pPlayer && FBitSet(m_pPlayer->m_afButtonPressed, iActivateButton)) //Button pressed this frame
 			CallScriptEvent("game_playeractivate");
 
-		if (FBitSet(m_pPlayer->pbs.ButtonsDown, iActivateButton))
+		if (m_pPlayer && FBitSet(m_pPlayer->pbs.ButtonsDown, iActivateButton))
 			ActivateButtonDown(); //Button is currently down
 		else
 			ActivateButtonUp(); //Button is currently up
 	}
 
 	dbg("AllButtonsReleased");
-	if (!FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK | IN_ATTACK2))
+	if (!m_pPlayer || !FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK | IN_ATTACK2))
 		AllButtonsReleased(); // no fire buttons down
 
 	dbg("Idle");
