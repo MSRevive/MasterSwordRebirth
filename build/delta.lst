@@ -125,9 +125,9 @@ entity_state_t gamedll Entity_Encode
 	DEFINE_DELTA( basevelocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	
-	DEFINE_DELTA( vuser3[0], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser3[1], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
-	DEFINE_DELTA( vuser3[2], DT_SIGNED | DT_FLOAT, 10, 1.0 ),
+	DEFINE_DELTA( vuser3[0], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
+	DEFINE_DELTA( vuser3[1], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
+	DEFINE_DELTA( vuser3[2], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
 
 	// Playerclass signifies it's a decalable glass item when referring to an object
 
