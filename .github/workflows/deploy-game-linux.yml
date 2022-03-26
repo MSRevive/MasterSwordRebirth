@@ -30,8 +30,8 @@ jobs:
         sudo chmod +x ./devtools/bin/vpc
         sudo chmod +x ./devtools/bin/vpc_linux
         sudo chmod +x ./devtools/bin/linux/ccache
-        ln -s /usr/bin/g++-4.8 /valve/steam-runtime/bin/g++-4.8
-        ln -s /usr/bin/gcc-4.8 /valve/steam-runtime/bin/gcc-4.8
+        sudo ln -s /usr/bin/g++-4.8 /valve/steam-runtime/bin/g++-4.8
+        sudo ln -s /usr/bin/gcc-4.8 /valve/steam-runtime/bin/gcc-4.8
         ./createall
 
     - name: Build
