@@ -513,7 +513,7 @@ public:
 	}
 
 	//NOV2014_20 Thothie - add ms_text option to "say" text as NPC
-	void CGameText::KeyValue(KeyValueData *pkvd)
+	void KeyValue(KeyValueData *pkvd)
 	{
 		if (FStrEq(pkvd->szKeyName, "npcname"))
 		{
@@ -1692,7 +1692,7 @@ class CAreaTransition : public CAreaInvisible
 public:
 	string_t sDestName, sDestMap, sDestTrans, sName, ms_master;
 
-	CAreaTransition::CAreaTransition() : CAreaInvisible()
+	CAreaTransition() : CAreaInvisible()
 	{
 		sDestName = sDestMap = sDestTrans = 0;
 	}

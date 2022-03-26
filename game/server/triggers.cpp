@@ -1253,7 +1253,7 @@ void CBaseTrigger ::MultiTouch(CBaseEntity *pOther)
 	// Only touch clients, monsters, or pushables (depending on flags)
 	if (((pevToucher->flags & FL_CLIENT) && !(pev->spawnflags & SF_TRIGGER_NOCLIENTS)) ||
 		((pevToucher->flags & FL_MONSTER) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS)) ||
-		(pev->spawnflags & SF_TRIGGER_PUSHABLES) && FClassnameIs(pevToucher, "func_pushable"))
+		((pev->spawnflags & SF_TRIGGER_PUSHABLES) && FClassnameIs(pevToucher, "func_pushable")))
 	{
 
 #if 0
@@ -1438,8 +1438,8 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		msstringlist reqplayers_strlist;
 		TokenizeString(m_players, reqplayers_strlist);
 
-		int min_players;
-		int max_players;
+		int min_players = 0;
+		int max_players = 0;
 
 		if (reqplayers_strlist.size() > 0)
 			min_players = atoi(reqplayers_strlist[0].c_str());
@@ -2355,8 +2355,8 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 		msstringlist reqplayers_strlist;
 		TokenizeString(m_players, reqplayers_strlist);
 
-		int min_players;
-		int max_players;
+		int min_players = 0;
+		int max_players = 0;
 
 		if (reqplayers_strlist.size() > 0)
 			min_players = atoi(reqplayers_strlist[0].c_str());

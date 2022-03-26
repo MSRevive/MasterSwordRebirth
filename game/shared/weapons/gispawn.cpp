@@ -15,7 +15,7 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	bool PutItemInPack();
 	void PutItemInPackThink();
-	CBaseGISpawn::CBaseGISpawn() { cContainer[0] = 0; }
+	CBaseGISpawn() { cContainer[0] = 0; }
 };
 
 LINK_ENTITY_TO_CLASS(msitem_spawn, CBaseGISpawn);

@@ -46,15 +46,12 @@ int g_ItemRemovalStatus;
 
 //Have g_MSScriptInfo default to 'unknown'
 globalscriptinfo_t g_MSScriptTypes[] =
-	{
-		MS_SCRIPT_UKNOWN,
-		"unknown",
-		MS_SCRIPT_LIBRARY,
-		"sc.dll",
-		MS_SCRIPT_DIR,
-		"/scripts",
+{
+	{MS_SCRIPT_UKNOWN, "unknown"},
+	{MS_SCRIPT_LIBRARY, "sc.dll"},
+	{MS_SCRIPT_DIR, "/scripts"},
 },
-*g_MSScriptInfo = &g_MSScriptTypes[0];
+* g_MSScriptInfo = &g_MSScriptTypes[0];
 
 //#define LOG_ITEMHANDLING
 
@@ -736,9 +733,9 @@ void CGenericItem::ActivateButtonDown()
 	if (m_pPlayer && FBitSet(m_pPlayer->m_afButtonPressed, ActivateButton())) // First frame of button being held down
 	{
 		CallScriptEvent("game_attack1");
-		if ((CurrentAttack												//This is a click after the first attack click (sometime during a normal attack)
-				 && !CurrentAttack->flChargeAmt							//This attack isn't a charge attack
-			 || atoi(EngineFunc::CVAR_GetString("ms_autocharge")) == 1) // MiB MAR2012_05 - Allow auto-charge instead of auto-swing
+		if (((CurrentAttack												//This is a click after the first attack click (sometime during a normal attack)
+			&& !CurrentAttack->flChargeAmt)							//This attack isn't a charge attack
+			|| atoi(EngineFunc::CVAR_GetString("ms_autocharge")) == 1) // MiB MAR2012_05 - Allow auto-charge instead of auto-swing
 			&& !m_TimeChargeStart										//Haven't already started charging
 			&& GetHighestAttackCharge())								//There is some other attack which uses charging
 		{
@@ -1095,6 +1092,7 @@ bool CGenericItem::CanWearItem()
 			if (iSlots > PlayerPos.MaxAmt)
 			{
 				if (Verbose)
+				{
 					if (PlayerPos.MaxAmt == 0)
 					{
 						m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
@@ -1108,6 +1106,7 @@ bool CGenericItem::CanWearItem()
 					}
 					else
 						m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str());
+				}
 				//Thothie DEC2007a - was m_pPlayer->SendInfoMsg( "You are wearing too many %ss\n", DisplayName() )
 				return false;
 			}

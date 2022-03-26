@@ -4,9 +4,8 @@
 #include "bodyparts_human.h"
 #include "monsters.h"
 
-extern char *ModelList[4][2];
-
-int HumanModels = ARRAYSIZE(ModelList);
+extern char * ModelListHumanMale[HUMAN_BODYPARTS];
+extern char* ModelListHumanFemale[HUMAN_BODYPARTS];
 
 CHumanBodypart *CHumanBodypart::Duplicate()
 {
@@ -18,17 +17,17 @@ void CHumanBody::Initialize(CBaseEntity *pOwner, void *pvData)
 {
 	for (int i = 0; i < HUMAN_BODYPARTS; i++)
 	{
-		CHumanBodypart &HumanBodypart = *(CHumanBodypart *)GetClassPtr((CHumanBodypart *)NULL);
+		CHumanBodypart& HumanBodypart = *(CHumanBodypart*)GetClassPtr((CHumanBodypart*)NULL);
 
-		int Gender = ((CMSMonster *)pOwner)->m_Gender;
+		int Gender = ((CMSMonster*)pOwner)->m_Gender;
 		if (pvData)
 			Gender = (int)pvData;
 
-		HumanBodypart.Initialize(pOwner, ModelList[i][Gender], i);
-
+		HumanBodypart.Initialize(pOwner, ((Gender > 0) ? ModelListHumanFemale[i] : ModelListHumanMale[i]), i);
 		Bodyparts.add(&HumanBodypart);
 	}
 }
+
 CBaseBody *CHumanBody::Duplicate()
 {
 	CHumanBody &NewBody = *msnew(CHumanBody);

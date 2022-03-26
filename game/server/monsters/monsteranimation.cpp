@@ -128,10 +128,12 @@ void CAnimation ::GaitAnimate()
 	{
 		m_pPlayer->pev->gaitsequence = 0;
 		if (FBitSet(m_pPlayer->pev->flags, FL_DUCKING))
+		{
 			if (!speed)
 				m_pPlayer->pev->gaitsequence = m_pOwner->LookupActivity(ACT_CROUCH);
 			else
 				m_pPlayer->pev->gaitsequence = m_pOwner->LookupActivity(ACT_CROUCHIDLE);
+		}
 	}
 	else
 		m_pPlayer->pev->gaitsequence = NewGait;

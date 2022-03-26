@@ -9,7 +9,9 @@ enum
 	HBP_ARMS,
 	HUMAN_BODYPARTS
 };
-extern char *ModelList[HUMAN_BODYPARTS][2];
+
+extern char* ModelListHumanMale[HUMAN_BODYPARTS];
+extern char* ModelListHumanFemale[HUMAN_BODYPARTS];
 
 class CHumanBodypart : public CBodypart
 {

@@ -69,8 +69,6 @@ clientitem_t::clientitem_t(class CGenericItem *pItem) : genericitem_t(pItem)
 //------
 
 CGenericItem *FindParryWeapon(CMSMonster *pMonster, /*out*/ int &iPlayerHand, /*out*/ int &iAttackNum);
-extern char *ModelList[][2];
-extern int HumanModels;
 
 //DLL_GLOBAL ULONG		g_ulModelRefHuman;
 extern DLL_GLOBAL BOOL g_fGameOver;
@@ -4720,6 +4718,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 				}
 
 			if (!pSlot)						 //Slot not found
+			{
 				if (m_EntInfo.size() < 1024) //Create a new slot
 					pSlot = &m_EntInfo.add(entinfo_t());
 				else //Too many entities - overwrite the furthest one away
@@ -4727,7 +4726,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 					int iFarthestDist = -1, iFarthestEnt = 0;
 					for (int e = 0; e < m_EntInfo.size(); e++)
 					{
-						CBaseEntity *pEntity = MSInstance(INDEXENT(m_EntInfo[e].entindex));
+						CBaseEntity* pEntity = MSInstance(INDEXENT(m_EntInfo[e].entindex));
 						if (!pEntity)
 							continue;
 						if ((pEntity->pev->origin - pev->origin).Length() > iFarthestDist)
@@ -4736,9 +4735,9 @@ void CBasePlayer::UpdateMiscPositions(void)
 							iFarthestEnt = e;
 						}
 					}
-
 					pSlot = &m_EntInfo[iFarthestEnt];
 				}
+			}
 
 			if (pSlot &&
 				(pSlot->entindex != EntData.entindex ||

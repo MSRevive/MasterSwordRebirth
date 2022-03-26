@@ -709,17 +709,13 @@ bool DoDebugEntities(
 			}
 			else
 			{
-				sprintf( pszMsg+vPrependLength
-					, vsMsgTemplate.c_str()
-					);
+				sprintf(pszMsg + vPrependLength, "%s", vsMsgTemplate.c_str());
 			}
 		}
 		else
 		if ( vDebugInfo.mbIsExists )
 		{
-			sprintf( pszMsg+vPrependLength
-				, vsMsgTemplate.c_str()
-				);
+			sprintf(pszMsg + vPrependLength, "%s", vsMsgTemplate.c_str());
 		}
 		else
 		{
@@ -2907,50 +2903,50 @@ bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 //- Remove self, or another entity, with optional fade effect
 //- If used on a script tied to a msmonster_spawn, it will not realize the monster was removed.
 //- (Thinking maybe we should fix that, not sure)
-bool CScript::ScriptCmd_DeleteEntity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
+bool CScript::ScriptCmd_DeleteEntity(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	if (m.pScriptedEnt)
-	if (Cmd.Name() == "deleteme")
 	{
-		if (!m.pScriptedEnt->IsPlayer())	//Don't allow a crash by deleting players
+		if (Cmd.Name() == "deleteme")
 		{
-			//Thothie OCT2016_12 - notification of removal
-			IScripted *pScripted = m.pScriptedEnt->GetScripted();
-			pScripted->CallScriptEvent("game_deleted");
-
-			m.pScriptedEnt->DelayedRemove();
-		}
-	}
-	else if (Params.size() >= 1)
-	{
-		CBaseEntity *pEntity = m.pScriptedEnt->RetrieveEntity(Params[0]);
-		if (pEntity && !pEntity->IsPlayer())
-		{
-#ifdef VALVE_DLL
-			if( Params.size() >= 2 )
-			{
-				if( Params[1] == "fade" )
-				{
-					if( Params.size() >= 3 )
-						pEntity->SUB_FadeOut( atoi(Params[2]) );
-					else
-						pEntity->SUB_StartFadeOut( );
-				}
-				if ( Params[1] == "remove" )
-				{
-					//Thothie FEB2015_19 - allow removing of map entities
-					UTIL_Remove( pEntity );
-				}
-			}
-			else
+			if (!m.pScriptedEnt->IsPlayer())	//Don't allow a crash by deleting players
 			{
 				//Thothie OCT2016_12 - notification of removal
-				IScripted *pScripted = pEntity->GetScripted();
+				IScripted* pScripted = m.pScriptedEnt->GetScripted();
 				pScripted->CallScriptEvent("game_deleted");
-
-				pEntity->DelayedRemove( );
+				m.pScriptedEnt->DelayedRemove();
 			}
+		}
+		else if (Params.size() >= 1)
+		{
+			CBaseEntity* pEntity = m.pScriptedEnt->RetrieveEntity(Params[0]);
+			if (pEntity && !pEntity->IsPlayer())
+			{
+#ifdef VALVE_DLL
+				if (Params.size() >= 2)
+				{
+					if (Params[1] == "fade")
+					{
+						if (Params.size() >= 3)
+							pEntity->SUB_FadeOut(atoi(Params[2]));
+						else
+							pEntity->SUB_StartFadeOut();
+					}
+					if (Params[1] == "remove")
+					{
+						//Thothie FEB2015_19 - allow removing of map entities
+						UTIL_Remove(pEntity);
+					}
+				}
+				else
+				{
+					//Thothie OCT2016_12 - notification of removal
+					IScripted* pScripted = pEntity->GetScripted();
+					pScripted->CallScriptEvent("game_deleted");
+					pEntity->DelayedRemove();
+				}
 #endif
+			}
 		}
 	}
 
@@ -3676,7 +3672,7 @@ bool CScript::ScriptCmd_bleed(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 	{
 		CBaseEntity *pEntity = m.pScriptedEnt->RetrieveEntity( Params[0] );
 
-		Vector blood_origin = blood_origin = pEntity->pev->origin;
+		Vector blood_origin = pEntity->pev->origin;
 		blood_origin += Vector( RANDOM_FLOAT(-10,10), RANDOM_FLOAT(-10,10), RANDOM_FLOAT(-10,10) );
 
 		Vector blood_direction = UTIL_RandomBloodVector();
@@ -3793,8 +3789,8 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	}
 	//***************************** ADDIMGICON *************************
 	//addimgicon <target> <icon> <name> <x> <y> <width> <height> <duration>
-	//NOTE: USES TGA FILES ONLY!! Path Starts: msc\gfx\vgui\
-		//Drigien MAY2008
+	//NOTE: USES TGA FILES ONLY!! Path Starts: msc/gfx/vgui/
+	//Drigien MAY2008
 	else if (Cmd.Name() == "hud.addimgicon")
 	{
 #ifdef VALVE_DLL
@@ -4566,16 +4562,19 @@ bool CScript::ScriptCmd_Origin(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 {
 	//Parameters: <target> <origin>
 	if (Params.size() >= 2)
-	if (m.pScriptedEnt)
 	{
-		CBaseEntity *pEntity = m.pScriptedEnt->RetrieveEntity(Params[0]);
-		if (pEntity)
+		if (m.pScriptedEnt)
 		{
-			if (Cmd.Name() == "setorigin") pEntity->pev->origin = StringToVec(Params[1]);
-			else pEntity->pev->origin += StringToVec(Params[1]);
+			CBaseEntity* pEntity = m.pScriptedEnt->RetrieveEntity(Params[0]);
+			if (pEntity)
+			{
+				if (Cmd.Name() == "setorigin")
+					pEntity->pev->origin = StringToVec(Params[1]);
+				else
+					pEntity->pev->origin += StringToVec(Params[1]);
+			}
 		}
 	}
-
 	else ERROR_MISSING_PARMS;
 
 	return false;
@@ -4763,8 +4762,8 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 		if ( Song.Length <= 0 )
 		{
-			//Get Error (SERVER): Error: ClientCommand --> here, but it works :\
-						//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
+			//Get Error (SERVER): Error: ClientCommand --> here, but it works
+			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
 			//pPlayer->Music_Stop( m.pScriptedEnt );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 1 );
@@ -5717,21 +5716,23 @@ bool CScript::ScriptCmd_Set(
 //- Once marked dead, subsequent delayed events will not be called, as the script will stop "thinking".
 //- Beware that monster spawners will still count resurrected monster as dead, and spawn another one, if it is set to do so.
 //- Not certain if using this to set an NPC as dead will cause the monster spawner to count it as such, but I doubt it.
-bool CScript::ScriptCmd_SetAlive(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
+bool CScript::ScriptCmd_SetAlive(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	if (Params.size() >= 1)
 	{
 		if (m.pScriptedEnt)
-		if (atoi(Params[0]))
 		{
-			m.pScriptedEnt->pev->deadflag = DEAD_NO;
-			m.pScriptedEnt->pev->solid = SOLID_BBOX;
-			m.pScriptedEnt->pev->movetype = MOVETYPE_STEP;
-			UTIL_SetOrigin(m.pScriptedEnt->pev, m.pScriptedEnt->pev->origin);
-			m.pScriptedEnt->SetThink(NULL);
-			RunScriptEventByName("game_fake_death"); //Thothie DEC2010_06 - handle fake deaths globally
+			if (atoi(Params[0]))
+			{
+				m.pScriptedEnt->pev->deadflag = DEAD_NO;
+				m.pScriptedEnt->pev->solid = SOLID_BBOX;
+				m.pScriptedEnt->pev->movetype = MOVETYPE_STEP;
+				UTIL_SetOrigin(m.pScriptedEnt->pev, m.pScriptedEnt->pev->origin);
+				m.pScriptedEnt->SetThink(NULL);
+				RunScriptEventByName("game_fake_death"); //Thothie DEC2010_06 - handle fake deaths globally
+			}
+			else m.pScriptedEnt->pev->deadflag = DEAD_DEAD;
 		}
-		else m.pScriptedEnt->pev->deadflag = DEAD_DEAD;
 	}
 	else ERROR_MISSING_PARMS;
 
@@ -6295,7 +6296,7 @@ bool CScript::ScriptCmd_SetProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			else if( PropName == "controller3" ) pEntity->pev->controller[3] = Int;
 			else if( PropName == "blending0" ) pEntity->pev->blending[0] = Int;
 			else if( PropName == "blending1" ) pEntity->pev->blending[1] = Int;
-			else if( PropName == "blending2" ) pEntity->pev->blending[2] = Int;
+			else if (PropName == "blending2") { pEntity->pev->blending[0] = Int; pEntity->pev->blending[1] = Int; }
 			else if( PropName == "renderamt" ) pEntity->pev->renderamt = Int; //added by Thothie
 			else if( PropName == "rendermode" ) pEntity->pev->rendermode = Int;  //added by Thothie
 			else if( PropName == "renderfx" ) pEntity->pev->renderfx = Int;  //added by Thothie

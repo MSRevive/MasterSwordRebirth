@@ -31,16 +31,20 @@ void ShowWeaponDesc(CGenericItem *pItem);
 #include "game.h"
 //END NOTE
 
-char *ModelList[HUMAN_BODYPARTS][2] =
-	{
-		MODEL_HUMAN_HEAD,
-		MODEL_HUMAN_FEM_HEAD,
-		MODEL_HUMAN_CHEST,
-		MODEL_HUMAN_FEM_CHEST,
-		MODEL_HUMAN_ARMS,
-		MODEL_HUMAN_FEM_ARMS,
-		MODEL_HUMAN_LEGS,
-		MODEL_HUMAN_FEM_LEGS,
+char* ModelListHumanMale[HUMAN_BODYPARTS] =
+{
+	MODEL_HUMAN_LEGS,
+	MODEL_HUMAN_HEAD,
+	MODEL_HUMAN_CHEST,
+	MODEL_HUMAN_ARMS,	
+};
+
+char* ModelListHumanFemale[HUMAN_BODYPARTS] =
+{
+	MODEL_HUMAN_FEM_LEGS,
+	MODEL_HUMAN_FEM_HEAD,
+	MODEL_HUMAN_FEM_CHEST,
+	MODEL_HUMAN_FEM_ARMS,	
 };
 
 keysnapshot KeyHistory[MAX_KEYHISTORY];
@@ -382,12 +386,13 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 		}
 
 	if (!HoldingTwoHandedItem) //If I'm holding a two-handed weapon, my hands are already full
+	{
 		if (pItem->m_PrefHand != BOTH_HANDS)
 		{
 			//If the item has left or right set as the desired hand, only put the item
 			//into that hand.  If no desired hand, use iPrefHand.  If needs both hands,
 			//check both, and use iPrefHand if both are empty
-			bool fHandAllowed[MAX_PLAYER_HANDS] = {false};
+			bool fHandAllowed[MAX_PLAYER_HANDS] = { false };
 			if (pItem->m_PrefHand == ANY_HAND)
 				for (int i = 0; i < MAX_PLAYER_HANDS; i++)
 					fHandAllowed[i] = true;
@@ -414,6 +419,7 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 					break;
 				}
 		}
+	}
 
 	if (CheckWeight && !CanHold(pItem, bVerbose, cErrorString)) //If CheckWeight is not set, skip the weight/volume check since I'm already carrying the item
 		iAddHand = -3;
@@ -658,10 +664,12 @@ bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool 
 		if (bVerbose)
 		{
 			if (!pItem->SpellData)
+			{
 				if (!RANDOM_LONG(0, 1))
 					SendInfoMsg("Your %s can't fit that!\n", pContainer->DisplayName());
 				else
 					SendInfoMsg("You try to stuff %s into your %s, but to no avail.\n", SPEECH_GetItemName(pItem), pContainer->DisplayName());
+			}
 		}
 		return false;
 	}

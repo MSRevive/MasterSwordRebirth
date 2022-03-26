@@ -289,15 +289,21 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 	bool fAccepted = true; //Default to true, in case if AcceptItemTypes has no members
 
 	if (PackData->RejectItemsTypes.size())
+	{
 		if (PackData->RejectItemsTypes[0] == "all")
 			fAccepted = false;
 		else
+		{
 			for (int i = 0; i < PackData->RejectItemsTypes.size(); i++)
+			{
 				if (strstr(pItem->ItemName, PackData->RejectItemsTypes[i]))
 				{
 					fAccepted = false;
 					break;
 				}
+			}
+		}
+	}
 
 	//This accept overrules a reject
 	if (PackData->AcceptItemsTypes.size())
