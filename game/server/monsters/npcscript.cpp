@@ -1153,12 +1153,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				SetBits(Damage.iDamageType, DMG_DIRECT);
 				Damage.pDirectDmgTarget = RetrieveEntity(Params[0]);
+
 				//Thothie JUN2010_14 - make sure dead players don't do damage (may crash server)
-				if (Damage.pDirectDmgTarget->IsPlayer())
-				{
-					if (!Damage.pDirectDmgTarget->IsAlive())
-						return 0;
-				}
+				if (!Damage.pDirectDmgTarget || (Damage.pDirectDmgTarget->IsPlayer() && !Damage.pDirectDmgTarget->IsAlive()))
+					return 0;
+
 				if (Params.size() >= 6)
 					Damage.sDamageType = Params[5]; //Thothie
 			}
