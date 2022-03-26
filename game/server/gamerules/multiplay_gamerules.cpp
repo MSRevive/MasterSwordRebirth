@@ -186,13 +186,10 @@ void CHalfLifeMultiplay :: Think( void )
 	g_accelerate->value = 10.0;
 	g_airaccelerate->value = 10.0;
 	g_wateraccelerate->value = 10.0;
-	g_airmove->value = 1.0;
 	g_stepsize->value = 18.0;
 	g_friction->value = 4.0;
 	g_stopspeed->value = 100.0;
-	g_clipmode->value = 0.0;
 	g_waterfriction->value = 1.0;
-
 
 	//Delete empty teams here, so they won't be deleted in the middle of a frame
 	dbg( "Delete empty teams" );

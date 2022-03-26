@@ -47,6 +47,7 @@ cvar_t decalfrequency = {"decalfrequency", "30", FCVAR_SERVER};
 //cvar_t	defaultteam = {"mp_defaultteam","0" };
 
 //cvar_t  mp_chattime = {"mp_chattime","10", FCVAR_SERVER };
+
 cvar_t *g_psv_gravity = NULL;
 cvar_t *g_psv_aim = NULL;
 cvar_t *g_footsteps = NULL;
@@ -54,11 +55,9 @@ cvar_t *g_maxspeed = NULL;
 cvar_t *g_accelerate = NULL;
 cvar_t *g_airaccelerate = NULL;
 cvar_t *g_wateraccelerate = NULL;
-cvar_t *g_airmove = NULL;
 cvar_t *g_stepsize = NULL;
 cvar_t *g_friction = NULL;
 cvar_t *g_stopspeed = NULL;
-cvar_t *g_clipmode = NULL;
 cvar_t *g_waterfriction = NULL;
 
 // Register your console variables here
@@ -85,12 +84,10 @@ void GameDLLInit(void)
 	g_accelerate = CVAR_GET_POINTER("sv_accelerate");
 	g_airaccelerate = CVAR_GET_POINTER("sv_airaccelerate");
 	g_wateraccelerate = CVAR_GET_POINTER("sv_wateraccelerate");
-	g_airmove = CVAR_GET_POINTER("sv_airmove");
 	g_stepsize = CVAR_GET_POINTER("sv_stepsize");
 	g_airaccelerate = CVAR_GET_POINTER("sv_airaccelerate");
 	g_friction = CVAR_GET_POINTER("sv_friction");
 	g_stopspeed = CVAR_GET_POINTER("sv_stopspeed");
-	g_clipmode = CVAR_GET_POINTER("sv_clipmode");
 	g_waterfriction = CVAR_GET_POINTER("sv_waterfriction");
 
 	CVAR_REGISTER(&displaysoundlist);

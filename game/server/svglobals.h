@@ -40,12 +40,10 @@ extern cvar_t *g_maxspeed;
 extern cvar_t *g_accelerate;
 extern cvar_t *g_airaccelerate;
 extern cvar_t *g_wateraccelerate;
-extern cvar_t *g_airmove;
 extern cvar_t *g_stepsize;
 extern cvar_t *g_airaccelerate;
 extern cvar_t *g_friction;
 extern cvar_t *g_stopspeed;
-extern cvar_t *g_clipmode;
 extern cvar_t *g_waterfriction;
 
 #ifdef DEV_BUILD
