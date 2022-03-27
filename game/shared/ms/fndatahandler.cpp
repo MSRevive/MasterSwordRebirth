@@ -187,12 +187,22 @@ static void HandleRequest(FnRequestData* req)
 	delete pDoc;
 }
 
+static bool HasItemsToHandle(void)
+{
+	for (auto* pRequest : g_vRequestData)
+	{
+		if (pRequest->result == FN_RES_NA)
+			return true;
+	}
+	return false;
+}
+
 static void Worker(void)
 {
 	while (1)
 	{
 		std::unique_lock<std::mutex> lck(mutex);
-		while ((g_vRequestData.size() == 0) && (g_bShouldShutdownFn == false))
+		while ((g_bShouldShutdownFn == false) && !HasItemsToHandle())
 			cv.wait(lck);
 
 		if (g_bShouldShutdownFn)
@@ -202,7 +212,6 @@ static void Worker(void)
 		{
 			if (pRequest->result != FN_RES_NA)
 				continue;
-
 			HandleRequest(pRequest);
 		}
 	}
@@ -244,14 +253,17 @@ void FnDataHandler::Think(bool bNoCallback)
 		g_fThinkTime = (gpGlobals->time + 0.025f);
 	}
 
-	std::unique_lock<std::mutex> lck(mutex, std::defer_lock);
-
-	if (lck.try_lock())
+	if (mutex.try_lock())
 	{
+		bool bHasUnhandledItems = false;
 		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
 			const FnRequestData* req = g_vRequestData[i];
-			if (req->result == FN_RES_NA) continue;
+			if (req->result == FN_RES_NA)
+			{
+				bHasUnhandledItems = true;
+				continue;
+			}
 
 			CBasePlayer* pPlayer = (bNoCallback ? NULL : UTIL_PlayerBySteamID(req->steamID));
 			if (pPlayer)
@@ -299,10 +311,13 @@ void FnDataHandler::Think(bool bNoCallback)
 		{
 			for (auto* pData : g_vIntermediateData)
 				g_vRequestData.push_back(pData);
-
 			g_vIntermediateData.clear();
-			cv.notify_all();
+			bHasUnhandledItems = true;
 		}
+
+		mutex.unlock();
+		if (bHasUnhandledItems)
+			cv.notify_all();
 	}
 }
 
