@@ -204,6 +204,9 @@ static void Worker(void)
 
 		for (auto* pRequest : g_vRequestData)
 		{
+			int res = pRequest->result;
+			ALERT(at_console, "THREAD handled req: %i %llu, res %i\n", pRequest->command, pRequest->steamID, res);
+
 			if (pRequest->result != FN_RES_NA)
 				continue;
 			HandleRequest(pRequest);
@@ -252,11 +255,16 @@ void FnDataHandler::Think(bool bNoCallback)
 		g_fThinkTime = (gpGlobals->time + 0.2f);
 	}
 
+	ALERT(at_console, "FnDataHandler::Think - State %i, Time %f next %f\n", g_bShouldHandleRequests ? 1 : 0, gpGlobals->time, g_fThinkTime);
 	if (mutex.try_lock())
 	{
+		ALERT(at_console, "FnDataHandler::Think->LOCKED - Items %i\n", g_vRequestData.size());
 		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
 			const FnRequestData* req = g_vRequestData[i];
+			int vlue = req->result;
+			ALERT(at_console, "REQ: %i, %llu, %s, res %i\n", req->command, req->steamID, req->url, vlue);
+
 			if (req->result == FN_RES_NA)
 			{
 				g_bShouldHandleRequests = true;
@@ -317,7 +325,10 @@ void FnDataHandler::Think(bool bNoCallback)
 	}
 
 	if (g_bShouldHandleRequests)
+	{
+		ALERT(at_console, "Notified thread!\n");
 		cv.notify_all();
+	}
 }
 
 bool FnDataHandler::IsEnabled(void)
