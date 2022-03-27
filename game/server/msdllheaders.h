@@ -6,7 +6,6 @@
 #include "cbase.h"
 
 #ifndef _WIN32
-#define Sleep sleep
 #define MINCHAR     0x80        
 #define MAXCHAR     0x7f        
 #define MINSHORT    0x8000      

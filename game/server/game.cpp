@@ -60,6 +60,15 @@ cvar_t *g_friction = NULL;
 cvar_t *g_stopspeed = NULL;
 cvar_t *g_waterfriction = NULL;
 
+void wait(unsigned long ms)
+{
+#ifdef _WIN32
+	Sleep(ms); // millisec
+#else
+	usleep(ms * 1000); // microsec -> millisec
+#endif
+}
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit(void)
@@ -70,7 +79,7 @@ void GameDLLInit(void)
 	if (!MSGlobalInit())
 	{
 		ALERT(at_console, "Mastersword Initialization FAILED!\n");
-		Sleep(3000);
+		wait(2000);
 		SERVER_COMMAND("exit\n");
 		return;
 	}

@@ -7,7 +7,7 @@ typedef rapidjson::Document JSONDocument;
 typedef rapidjson::Value JSONValue;
 typedef rapidjson::SizeType JSONSizeType;
 
-#define REQUEST_URL_SIZE 128
+#define REQUEST_URL_SIZE 200
 #define REQUEST_BUFFER_SIZE 8192
 
 namespace HTTPRequestHandler

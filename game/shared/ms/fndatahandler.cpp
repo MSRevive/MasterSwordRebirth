@@ -73,6 +73,7 @@ private:
 	FnRequestData(const FnRequestData& data);
 };
 
+extern void wait(unsigned long ms);
 static std::atomic<bool> g_bShouldShutdownFn(false);
 static std::vector<FnRequestData*> g_vRequestData;
 static std::vector<FnRequestData*> g_vIntermediateData;
@@ -178,9 +179,11 @@ static void HandleRequest(FnRequestData* req)
 	}
 
 	case FN_REQ_DELETE:
+	{
 		HTTPRequestHandler::DeleteRequest(req->url);
 		req->result = FN_RES_OK;
 		break;
+	}
 
 	}
 
@@ -238,6 +241,7 @@ void FnDataHandler::Reset(void)
 	do
 	{
 		Think(true);
+		wait(100);
 	} while (g_vRequestData.size());
 
 	g_fThinkTime = 0.0f;
@@ -249,8 +253,7 @@ void FnDataHandler::Think(bool bNoCallback)
 	{
 		if (gpGlobals->time <= g_fThinkTime)
 			return;
-
-		g_fThinkTime = (gpGlobals->time + 0.025f);
+		g_fThinkTime = (gpGlobals->time + 0.1f);
 	}
 
 	if (mutex.try_lock())
@@ -278,8 +281,8 @@ void FnDataHandler::Think(bool bNoCallback)
 				{
 					if (req->result == FN_RES_OK)
 					{
-						strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
 						CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
+						strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
 					}
 					else
 					{
@@ -307,7 +310,7 @@ void FnDataHandler::Think(bool bNoCallback)
 		}
 
 		// Add new requests
-		if (g_vIntermediateData.size() > 0)
+		if (g_vIntermediateData.size())
 		{
 			for (auto* pData : g_vIntermediateData)
 				g_vRequestData.push_back(pData);
