@@ -78,7 +78,6 @@ static std::atomic<bool> g_bShouldShutdownFn(false);
 static std::vector<FnRequestData*> g_vRequestData;
 static std::vector<FnRequestData*> g_vIntermediateData;
 static std::mutex mutex;
-static std::condition_variable cv;
 static float g_fThinkTime = 0.0f;
 
 static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS)); }
@@ -190,33 +189,25 @@ static void HandleRequest(FnRequestData* req)
 	delete pDoc;
 }
 
-static bool HasItemsToHandle(void)
-{
-	for (auto* pRequest : g_vRequestData)
-	{
-		if (pRequest->result == FN_RES_NA)
-			return true;
-	}
-	return false;
-}
-
 static void Worker(void)
 {
 	while (1)
 	{
-		std::unique_lock<std::mutex> lck(mutex);
-		while ((g_bShouldShutdownFn == false) && !HasItemsToHandle())
-			cv.wait(lck);
-
 		if (g_bShouldShutdownFn)
 			break;
 
-		for (auto* pRequest : g_vRequestData)
+		if (mutex.try_lock())
 		{
-			if (pRequest->result != FN_RES_NA)
-				continue;
-			HandleRequest(pRequest);
+			for (auto* pRequest : g_vRequestData)
+			{
+				if (pRequest->result != FN_RES_NA)
+					continue;
+				HandleRequest(pRequest);
+			}
+			mutex.unlock();
 		}
+
+		wait(15);
 	}
 }
 
@@ -230,20 +221,16 @@ void FnDataHandler::Initialize(void)
 void FnDataHandler::Destroy(void)
 {
 	g_bShouldShutdownFn = true;
-	cv.notify_all();
 }
 
 void FnDataHandler::Reset(void)
 {
-	cv.notify_all();
-
 	// Wait for any remaining items.
 	do
 	{
 		Think(true);
-		wait(100);
+		wait(10);
 	} while (g_vRequestData.size());
-
 	g_fThinkTime = 0.0f;
 }
 
@@ -253,20 +240,15 @@ void FnDataHandler::Think(bool bNoCallback)
 	{
 		if (gpGlobals->time <= g_fThinkTime)
 			return;
-		g_fThinkTime = (gpGlobals->time + 0.1f);
+		g_fThinkTime = (gpGlobals->time + 0.03f);
 	}
 
 	if (mutex.try_lock())
 	{
-		bool bHasUnhandledItems = false;
 		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
 			const FnRequestData* req = g_vRequestData[i];
-			if (req->result == FN_RES_NA)
-			{
-				bHasUnhandledItems = true;
-				continue;
-			}
+			if (req->result == FN_RES_NA) continue;
 
 			CBasePlayer* pPlayer = (bNoCallback ? NULL : UTIL_PlayerBySteamID(req->steamID));
 			if (pPlayer)
@@ -315,12 +297,9 @@ void FnDataHandler::Think(bool bNoCallback)
 			for (auto* pData : g_vIntermediateData)
 				g_vRequestData.push_back(pData);
 			g_vIntermediateData.clear();
-			bHasUnhandledItems = true;
 		}
 
 		mutex.unlock();
-		if (bHasUnhandledItems)
-			cv.notify_all();
 	}
 }
 
