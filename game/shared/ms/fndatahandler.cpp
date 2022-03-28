@@ -58,16 +58,17 @@ public:
 	~FnRequestData()
 	{
 		delete[] data;
+		data = NULL;
 	}
 
 	int command;
 	int slot;
 	int size;
+	int result;
 	unsigned long long steamID;
 	char url[REQUEST_URL_SIZE];
 	char guid[MSSTRING_SIZE];
 	char* data;
-	std::atomic<int> result;
 
 private:
 	FnRequestData(const FnRequestData& data);
@@ -202,14 +203,12 @@ static void Worker(void)
 		if (g_bShouldShutdownFn)
 			break;
 
-		for (auto* pRequest : g_vRequestData)
+		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
-			int res = pRequest->result;
-			ALERT(at_console, "THREAD handled req: %i %llu, res %i\n", pRequest->command, pRequest->steamID, res);
-
-			if (pRequest->result != FN_RES_NA)
+			FnRequestData* req = g_vRequestData[i];
+			if (req->result != FN_RES_NA)
 				continue;
-			HandleRequest(pRequest);
+			HandleRequest(req);
 		}
 
 		g_bShouldHandleRequests = false;
@@ -252,18 +251,14 @@ void FnDataHandler::Think(bool bNoCallback)
 	{
 		if (gpGlobals->time <= g_fThinkTime)
 			return;
-		g_fThinkTime = (gpGlobals->time + 0.2f);
+		g_fThinkTime = (gpGlobals->time + 0.15f);
 	}
 
-	ALERT(at_console, "FnDataHandler::Think - State %i, Time %f next %f\n", g_bShouldHandleRequests ? 1 : 0, gpGlobals->time, g_fThinkTime);
 	if (mutex.try_lock())
 	{
-		ALERT(at_console, "FnDataHandler::Think->LOCKED - Items %i\n", g_vRequestData.size());
 		for (int i = (g_vRequestData.size() - 1); i >= 0; i--)
 		{
 			const FnRequestData* req = g_vRequestData[i];
-			int vlue = req->result;
-			ALERT(at_console, "REQ: %i, %llu, %s, res %i\n", req->command, req->steamID, req->url, vlue);
 
 			if (req->result == FN_RES_NA)
 			{
@@ -315,8 +310,9 @@ void FnDataHandler::Think(bool bNoCallback)
 		// Add new requests
 		if (g_vIntermediateData.size())
 		{
-			for (auto* pData : g_vIntermediateData)
-				g_vRequestData.push_back(pData);
+			for (int i = 0; i < g_vIntermediateData.size(); i++)
+				g_vRequestData.push_back(g_vIntermediateData[i]);
+
 			g_vIntermediateData.clear();
 			g_bShouldHandleRequests = true;
 		}
@@ -325,10 +321,7 @@ void FnDataHandler::Think(bool bNoCallback)
 	}
 
 	if (g_bShouldHandleRequests)
-	{
-		ALERT(at_console, "Notified thread!\n");
 		cv.notify_all();
-	}
 }
 
 bool FnDataHandler::IsEnabled(void)
