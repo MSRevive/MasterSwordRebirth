@@ -3655,6 +3655,7 @@ void CBasePlayer::UpdateClientData(void)
 	dbg("Begin");
 
 	bool fConnectedThisFrame = false;
+	bool bShouldSaveChar = false;
 
 	//Init HUD message MUST be first!
 	if (m_fInitHUD)
@@ -3818,8 +3819,7 @@ void CBasePlayer::UpdateClientData(void)
 		WRITE_BYTE(fInCache ? 1 : 0); //0 == New | 1 == Update existing
 		SendGenericItem(this, pItem, false);
 		MESSAGE_END();
-		//Save the item
-		SaveChar();
+		bShouldSaveChar = true; // Save the item
 
 		if (!fInCache) //If it's a completely new item...
 		{
@@ -3848,11 +3848,13 @@ void CBasePlayer::UpdateClientData(void)
 		WRITE_BYTE(2);
 		WRITE_LONG(ClientItemID);
 		MESSAGE_END();
-		//Remove the item from save
-		SaveChar();
+		bShouldSaveChar = true; // Remove the item from save
 
 		m_ClientItems.erase(i--); //Have to decrement i after the call so I don't skip items
 	}
+
+	if (bShouldSaveChar)
+		SaveChar();
 
 	//Active Hand
 	if (m_CurrentHand != m_ClientCurrentHand)

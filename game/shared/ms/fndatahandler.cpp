@@ -373,13 +373,26 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 	req->data = new char[size];
 	req->size = size;
 	memcpy(req->data, data, size);
-	g_vIntermediateData.push_back(req);
 
-	if (!bIsUpdate)
+	if (bIsUpdate) // Did we already add an update request? Swap it quickly!
+	{
+		for (int i = (g_vIntermediateData.size() - 1); i >= 0; i--)
+		{
+			const FnRequestData* pOtherReq = g_vIntermediateData[i];
+			if ((pOtherReq->command != FN_REQ_UPDATE) || (pOtherReq->steamID == 0ULL) || (pOtherReq->steamID != pPlayer->steamID64))
+				continue;
+
+			g_vIntermediateData.erase(g_vIntermediateData.begin() + i);
+			delete pOtherReq;
+		}
+	}
+	else
 	{
 		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 	}
+
+	g_vIntermediateData.push_back(req);
 }
 
 void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
