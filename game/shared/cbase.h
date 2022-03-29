@@ -67,6 +67,10 @@ class CRestore
 
 // C functions for external declarations that call the appropriate C++ methods
 
+#ifdef EXPORT
+#undef EXPORT
+#endif
+
 #ifndef CBASE_DLLEXPORT
 #ifdef _WIN32
 #define CBASE_DLLEXPORT _declspec( dllexport )

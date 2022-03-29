@@ -2,6 +2,10 @@
 #define HUD_IFACEH
 #pragma once
 
+#ifdef EXPORT
+#undef EXPORT
+#endif
+
 #ifdef _WIN32
 #define EXPORT _declspec( dllexport )
 #else

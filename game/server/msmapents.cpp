@@ -1408,7 +1408,7 @@ class CTrigStopMonsterSpawn : public CBaseEntity
 	{
 		edict_t *peSpawnArea = NULL,
 				*peFirstArea = NULL;
-		bool fFoundOneArea;
+		bool fFoundOneArea = false;
 
 		while (peSpawnArea = FIND_ENTITY_BY_TARGETNAME(peSpawnArea, STRING(pev->target)))
 		{
