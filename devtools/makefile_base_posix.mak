@@ -205,17 +205,10 @@ LINK_MAP_FLAGS = -Wl,-Map,$(@:.so=).map
 
 SHLIBLDFLAGS = -shared $(LDFLAGS) -Wl,--no-undefined
 
-_WRAP := -Xlinker --wrap=
-PATHWRAP = $(_WRAP)fopen $(_WRAP)freopen $(_WRAP)open    $(_WRAP)creat    $(_WRAP)access  $(_WRAP)__xstat \
-	   $(_WRAP)stat  $(_WRAP)lstat   $(_WRAP)fopen64 $(_WRAP)open64   $(_WRAP)opendir $(_WRAP)__lxstat \
-	   $(_WRAP)chmod $(_WRAP)chown   $(_WRAP)lchown  $(_WRAP)symlink  $(_WRAP)link    $(_WRAP)__lxstat64 \
-	   $(_WRAP)mknod $(_WRAP)utimes  $(_WRAP)unlink  $(_WRAP)rename   $(_WRAP)utime   $(_WRAP)__xstat64 \
-	   $(_WRAP)mount $(_WRAP)mkfifo  $(_WRAP)mkdir   $(_WRAP)rmdir    $(_WRAP)scandir $(_WRAP)realpath
-
-LIB_START_EXE = $(PATHWRAP) -static-libgcc -Wl,--start-group
+LIB_START_EXE = -static-libgcc -Wl,--start-group
 LIB_END_EXE = -Wl,--end-group -lm -ldl $(LIBSTDCXX) -lpthread 
 
-LIB_START_SHLIB = $(PATHWRAP) -static-libgcc -Wl,--start-group
+LIB_START_SHLIB = -static-libgcc -Wl,--start-group
 LIB_END_SHLIB = -Wl,--end-group -lm -ldl $(LIBSTDCXXPIC) -lpthread -l:$(LD_SO) -Wl,--version-script=$(SRCROOT)/devtools/version_script.linux.txt
 
 #
