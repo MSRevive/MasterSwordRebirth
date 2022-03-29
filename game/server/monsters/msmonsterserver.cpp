@@ -907,14 +907,15 @@ void CMSMonster::ListenForSound()
 
 	if (HasConditions(bits_COND_HEAR_SOUND))
 	{
-		int iThisSound;
+		int iThisSound = m_iAudibleList;
 		CSound *pSound = NULL;
 		msstringlist Parameters;
-		iThisSound = m_iAudibleList;
 
 		while (iThisSound != SOUNDLIST_EMPTY)
 		{
-			if ((pSound = CSoundEnt::SoundPointerForIndex(iThisSound)) && (bool)pSound->m_SrcEntity)
+			pSound = CSoundEnt::SoundPointerForIndex(iThisSound);
+
+			if ((pSound != NULL) && (bool)pSound->m_SrcEntity)
 			{
 				StoreEntity(pSound->m_SrcEntity.Entity(), ENT_LASTHEARD);
 				Parameters.clearitems();
@@ -923,8 +924,11 @@ void CMSMonster::ListenForSound()
 				Parameters.add(UTIL_VarArgs("%.2f", pSound->m_DangerRadius));
 				CallScriptEvent("game_heardsound", &Parameters);
 			}
-			iThisSound = pSound->m_iNextAudible;
+
+			if (pSound)
+				iThisSound = pSound->m_iNextAudible;
 		}
+
 		/*if ( iBestSound >= 0 )
 		{
 			pSound = CSoundEnt::SoundPointerForIndex( iBestSound );
@@ -1673,7 +1677,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, edict());
 				WRITE_BYTE(4);
 				WRITE_BYTE(SayTextType);
-				WRITE_STRING(FinalSentence);
+				WRITE_STRING_LIMIT(FinalSentence, WRITE_STRING_MAX);
 				MESSAGE_END();
 			}
 			continue;
@@ -1694,7 +1698,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pEnt->edict());
 			WRITE_BYTE(4);
 			WRITE_BYTE(SayTextType);
-			WRITE_STRING(FinalSentence);
+			WRITE_STRING_LIMIT(FinalSentence, WRITE_STRING_MAX);
 			MESSAGE_END();
 		}
 
@@ -2801,7 +2805,7 @@ void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 	WRITE_BYTE(25);
 	WRITE_LONG(entindex());
-	WRITE_STRING(DisplayName());
+	WRITE_STRING_LIMIT(DisplayName(), WRITE_STRING_MAX);
 	MESSAGE_END();
 
 	dbg("Read:game_menu_getoptions");
@@ -2830,9 +2834,9 @@ void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 		WRITE_BYTE(26);
 		WRITE_BYTE(MenuOption.Access);
-		WRITE_STRING(MenuOption.Title);
+		WRITE_STRING_LIMIT(MenuOption.Title, 92);
 		WRITE_BYTE(MenuOption.Type);
-		WRITE_STRING(MenuOption.Data);
+		WRITE_STRING_LIMIT(MenuOption.Data, 92);
 		MESSAGE_END();
 	}
 	pPlayer->InMenu = true;

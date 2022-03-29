@@ -1133,7 +1133,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "value")
 	{
 		//Thothie FEB2008a - return item values
-		if (pItem->m_Value)
+		if (pItem && pItem->m_Value)
 		{
 			int iRealCost = int(pItem->m_Value);
 			RETURN_INT(iRealCost)
@@ -1726,7 +1726,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
 		WRITE_BYTE( 1 );
-		WRITE_STRING( EntToString(m.pScriptedEnt) );
+		WRITE_STRING_LIMIT(EntToString(m.pScriptedEnt), WRITE_STRING_MAX);
 		MESSAGE_END();
 #else
 		pLocal->Show();
@@ -1748,7 +1748,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
 		WRITE_BYTE( 3 );
-		WRITE_STRING( sTitle );
+		WRITE_STRING_LIMIT(sTitle, WRITE_STRING_MAX);
 		MESSAGE_END();
 #else
 		pLocal->Reset();
@@ -1776,13 +1776,13 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
-		WRITE_BYTE( 4 );
-		WRITE_STRING( sText );
-		WRITE_BOOL( bEnabled  );
-		WRITE_BOOL( bCloseOnClick  );
-		WRITE_BYTE( cbType );
-		WRITE_STRING( sCallBack );
-		WRITE_STRING( sCallBackData );
+		WRITE_BYTE(4);
+		WRITE_STRING_LIMIT(sText, 60);
+		WRITE_BOOL(bEnabled);
+		WRITE_BOOL(bCloseOnClick);
+		WRITE_BYTE(cbType);
+		WRITE_STRING_LIMIT(sCallBack, 60);
+		WRITE_STRING_LIMIT(sCallBackData, 60);
 		MESSAGE_END();
 #else
 		pLocal->AddButton(sText, bEnabled, bCloseOnClick, cbType, sCallBack, sCallBackData);
@@ -1824,7 +1824,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 		}
 
 #ifdef VALVE_DLL
-		WRITE_STRING( src );
+		WRITE_STRING_LIMIT(src, WRITE_STRING_MAX);
 		MESSAGE_END();
 #endif
 	}
@@ -1840,7 +1840,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
 		WRITE_BYTE( 6 );
-		WRITE_STRING( vName );
+		WRITE_STRING_LIMIT(vName, WRITE_STRING_MAX);
 		if ( bIsTga )
 		{
 			WRITE_BOOL( true );
@@ -2119,8 +2119,8 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 	if( Params.size() >= 4 )
 	{
-		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Params[0] ) : NULL;
-		if( pEntity->IsMSItem() )
+		CBaseEntity * pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Params[0] ) : NULL;
+		if (pEntity && pEntity->IsMSItem())
 		{
 			CGenericItem *pItem = (CGenericItem *) pEntity;
 			int attackNum = atoi(Params[1]);
@@ -2175,14 +2175,13 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			{
 				CBasePlayer *pPlayer = (CBasePlayer *)pItem->Owner();
 
-
 				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev );
 				WRITE_BYTE( 6 );
 				// Params: ID, Attacknum, prop, value
 				WRITE_LONG( pItem->m_iId );
 				WRITE_BYTE( attackNum );
-				WRITE_STRING( PropName.c_str() );
-				WRITE_STRING( PropValue.c_str() );
+				WRITE_STRING_LIMIT(PropName.c_str(), 70);
+				WRITE_STRING_LIMIT(PropValue.c_str(), 70);
 				SendGenericItem( pPlayer, pItem, false );
 				MESSAGE_END();
 			}
@@ -3756,13 +3755,13 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 				if( pPlayer )
 				{
 					msstring &Icon = Params[1];
-					msstring &Name = Params[2];
-					MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev );
-					WRITE_SHORT( 1 );
-					WRITE_STRING( Icon.c_str() );  //Icon
-					WRITE_STRING( Name.c_str() );  //ID Name
-					WRITE_FLOAT( atof(Params[3].c_str()) );	//Duration
-					WRITE_BYTE( isTGA );				//isTGA
+					msstring& Name = Params[2];
+					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev);
+					WRITE_SHORT(1);
+					WRITE_STRING_LIMIT(Icon.c_str(), 85);  //Icon
+					WRITE_STRING_LIMIT(Name.c_str(), 85);  //ID Name
+					WRITE_FLOAT(atof(Params[3].c_str()));	//Duration
+					WRITE_BYTE(isTGA);				//isTGA
 					MESSAGE_END();
 				}
 			}
@@ -3776,8 +3775,8 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 					msstring &Name = Params[2];
 					MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev );
 					WRITE_SHORT( 1 );
-					WRITE_STRING( Icon.c_str() );  //Icon
-					WRITE_STRING( Name.c_str() );  //ID Name
+					WRITE_STRING_LIMIT(Icon.c_str(), 85);  //Icon
+					WRITE_STRING_LIMIT(Name.c_str(), 85);  //ID Name
 					WRITE_FLOAT( atof(Params[3].c_str()) );	//Duration
 					WRITE_BYTE( isTGA );				//isTGA
 					MESSAGE_END();
@@ -3804,8 +3803,8 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 				msstring &Name = Params[2];
 				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev );
 				WRITE_SHORT( 2 );
-				WRITE_STRING( Img.c_str() );  //Icon
-				WRITE_STRING( Name.c_str() );	// ID Name
+				WRITE_STRING_LIMIT(Img.c_str(), 80);  //Icon
+				WRITE_STRING_LIMIT(Name.c_str(), 80);  //ID Name
 				WRITE_SHORT( atoi(Params[3].c_str()) ); //X Pos
 				WRITE_SHORT( atoi(Params[4].c_str()) ); //Y Pos
 				WRITE_SHORT( atoi(Params[5].c_str()) ); //Width
@@ -3867,10 +3866,10 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev );
 				WRITE_SHORT( -1 );
-				if( Params.size() == 1 )
-					WRITE_STRING( "all" );
-				else if( Params.size() >= 2 )
-					WRITE_STRING( Params[1].c_str() );
+				if (Params.size() == 1)
+					WRITE_STRING("all");
+				else if (Params.size() >= 2)
+					WRITE_STRING_LIMIT(Params[1].c_str(), WRITE_STRING_MAX);
 				MESSAGE_END();
 			}
 		}
@@ -3892,10 +3891,10 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_STATUSICONS], NULL, pPlayer->pev );
 				WRITE_SHORT( -2 );
-				if( Params.size() == 1 )
-					WRITE_STRING( "all" );
-				else if( Params.size() >= 2 )
-					WRITE_STRING( Params[1].c_str() );
+				if (Params.size() == 1)
+					WRITE_STRING("all");
+				else if (Params.size() >= 2)
+					WRITE_STRING_LIMIT(Params[1].c_str(), WRITE_STRING_MAX);
 				MESSAGE_END();
 			}
 		}
@@ -4605,7 +4604,7 @@ bool CScript::ScriptCmd_OverwriteSpell(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, ms
 				WRITE_BYTE( PROP_SPELL );
 				WRITE_BYTE( 1 );
 				WRITE_BYTE( idx );
-				WRITE_STRING( Params[2].c_str() );
+				WRITE_STRING_LIMIT(Params[2].c_str(), WRITE_STRING_MAX);
 				MESSAGE_END();
 			}
 		}
@@ -4640,7 +4639,7 @@ bool CScript::ScriptCmd_PlayerName(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 #ifdef VALVE_DLL
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SETPROP], NULL, pEntity->pev );
 			WRITE_BYTE(PROP_NAME); // 0 for title, 1 for name. More possibly to come.
-			WRITE_STRING( pEntity->DisplayName() );
+			WRITE_STRING_LIMIT(pEntity->DisplayName(), WRITE_STRING_MAX);
 			MESSAGE_END();
 #endif
 		}
@@ -4667,7 +4666,7 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 #ifdef VALVE_DLL
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SETPROP], NULL, pPlayer->pev );
 			WRITE_BYTE(PROP_TITLE); // 0 for title, 1 for name. More possibly to come.
-			WRITE_STRING( pPlayer->CustomTitle );
+			WRITE_STRING_LIMIT(pPlayer->CustomTitle, WRITE_STRING_MAX);
 			MESSAGE_END();
 #endif
 		}
@@ -6430,8 +6429,8 @@ bool CScript::ScriptCmd_syncitem(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 				//WRITE_BYTE( 1 );							//0 == New | 1 == Update existing
 				//SendGenericItem( pPlayer, pItem, false );
 				WRITE_LONG( pItem->m_iId );
-				WRITE_STRING(pItem->m_DisplayName.c_str());
-				WRITE_STRING(pItem->DisplayDesc.c_str());
+				WRITE_STRING_LIMIT(pItem->m_DisplayName.c_str(), 90);
+				WRITE_STRING_LIMIT(pItem->DisplayDesc.c_str(), 90);
 				MESSAGE_END();
 			}
 			else if ( Cmd.Name() == "displaydesc" )

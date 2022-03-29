@@ -894,7 +894,7 @@ bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSoun
 
 	CBasePlayer *pPlayer = NULL;
 	bool fWentToPack = false;
-	if (pReciever->IsPlayer())
+	if (pReciever && pReciever->IsPlayer())
 		pPlayer = (CBasePlayer *)pReciever;
 
 	//I'm an airborne projectile, cancel out
@@ -942,11 +942,11 @@ bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSoun
 		RemoveFromOwner();
 
 		//iGetMethod = METHOD_PICKEDUP;
-		if (!pReciever->AddItem(this, true, true))
+		if (!pReciever || !pReciever->AddItem(this, true, true))
 			return false;
 	}
 
-	if (fSound)
+	if (fSound && pReciever && pReciever->pev)
 		EMIT_SOUND(ENT(pReciever->pev), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM);
 
 	return true;

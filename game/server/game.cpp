@@ -1,9 +1,9 @@
 /***
 *
 *	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
 *	All Rights Reserved.
 *
 *   Use, distribution, and modification of this source code and/or resulting
@@ -26,39 +26,41 @@
 
 #include "fndatahandler.h"
 
-cvar_t displaysoundlist = {"displaysoundlist", "0"};
-cvar_t mapcyclefile = {"mapcyclefile", "mapcycle.txt"};
-cvar_t servercfgfile = {"servercfgfile", "server.cfg"};
-cvar_t lservercfgfile = {"lservercfgfile", "listenserver.cfg"};
+cvar_t displaysoundlist = { "displaysoundlist", "0" };
+cvar_t mapcyclefile = { "mapcyclefile", "mapcycle.txt" };
+cvar_t servercfgfile = { "servercfgfile", "server.cfg" };
+cvar_t lservercfgfile = { "lservercfgfile", "listenserver.cfg" };
 // multiplayer server rules
-cvar_t fragsleft = {"mp_fragsleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED}; // Don't spam console/log files/users with this changing
-cvar_t timeleft = {"mp_timeleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED};	 // "      "
+cvar_t fragsleft = { "mp_fragsleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED }; // Don't spam console/log files/users with this changing
+cvar_t timeleft = { "mp_timeleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED };	 // "      "
 
 // multiplayer server rules
-cvar_t teamplay = {"mp_teamplay", "0", FCVAR_SERVER};
+cvar_t teamplay = { "mp_teamplay", "0", FCVAR_SERVER };
 //cvar_t	fraglimit	= {"mp_fraglimit","0", FCVAR_SERVER };
 //cvar_t	friendlyfire= {"mp_friendlyfire","0", FCVAR_SERVER };
-cvar_t falldamage = {"mp_falldamage", "0", FCVAR_SERVER};
+cvar_t falldamage = { "mp_falldamage", "0", FCVAR_SERVER };
 //cvar_t	weaponstay	= {"mp_weaponstay","0", FCVAR_SERVER };
-cvar_t forcerespawn = {"mp_forcerespawn", "1", FCVAR_SERVER};
+cvar_t forcerespawn = { "mp_forcerespawn", "1", FCVAR_SERVER };
 //cvar_t	flashlight	= {"mp_flashlight","0", FCVAR_SERVER };
 //cvar_t	aimcrosshair= {"mp_autocrosshair","1", FCVAR_SERVER };
-cvar_t decalfrequency = {"decalfrequency", "30", FCVAR_SERVER};
+cvar_t decalfrequency = { "decalfrequency", "30", FCVAR_SERVER };
 //cvar_t	defaultteam = {"mp_defaultteam","0" };
 
 //cvar_t  mp_chattime = {"mp_chattime","10", FCVAR_SERVER };
 
-cvar_t *g_psv_gravity = NULL;
-cvar_t *g_psv_aim = NULL;
-cvar_t *g_footsteps = NULL;
-cvar_t *g_maxspeed = NULL;
-cvar_t *g_accelerate = NULL;
-cvar_t *g_airaccelerate = NULL;
-cvar_t *g_wateraccelerate = NULL;
-cvar_t *g_stepsize = NULL;
-cvar_t *g_friction = NULL;
-cvar_t *g_stopspeed = NULL;
-cvar_t *g_waterfriction = NULL;
+cvar_t* g_psv_gravity = NULL;
+cvar_t* g_psv_aim = NULL;
+cvar_t* g_footsteps = NULL;
+cvar_t* g_maxspeed = NULL;
+cvar_t* g_accelerate = NULL;
+cvar_t* g_airaccelerate = NULL;
+cvar_t* g_wateraccelerate = NULL;
+cvar_t* g_stepsize = NULL;
+cvar_t* g_friction = NULL;
+cvar_t* g_stopspeed = NULL;
+cvar_t* g_waterfriction = NULL;
+
+char g_pTempStringLimit[WRITE_STRING_MAX];
 
 void wait(unsigned long ms)
 {
@@ -98,6 +100,7 @@ void GameDLLInit(void)
 	g_friction = CVAR_GET_POINTER("sv_friction");
 	g_stopspeed = CVAR_GET_POINTER("sv_stopspeed");
 	g_waterfriction = CVAR_GET_POINTER("sv_waterfriction");
+	g_pTempStringLimit[0] = 0;
 
 	CVAR_REGISTER(&displaysoundlist);
 
@@ -118,8 +121,8 @@ void GameDLLInit(void)
 	//CVAR_REGISTER (&defaultteam);
 
 	//CVAR_REGISTER (&mp_chattime);
-	
-	if(!FileSystem_Init())
+
+	if (!FileSystem_Init())
 	{
 		//Queue up a shutdown command so we don't wind up crashing later on - Solokiller
 		//Don't call g_engfuncs.pfnServerExecute; the engine is still initializing, let it finish
@@ -133,6 +136,7 @@ void GameDLLInit(void)
 
 void GameDLLShutdown()
 {
+	g_pTempStringLimit[0] = 0;
 	ScriptMgr::GameShutdown();
 	FileSystem_Shutdown();
 	FnDataHandler::Destroy();

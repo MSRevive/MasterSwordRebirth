@@ -1048,8 +1048,8 @@ void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)
 #ifdef VALVE_DLL
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
 	WRITE_BYTE(0);		 //This is an InfoMsg
-	WRITE_STRING(Title); //Title
-	WRITE_STRING(Text);	 //Text
+	WRITE_STRING_LIMIT(Title, 90); //Title
+	WRITE_STRING_LIMIT(Text, 90);	 //Text
 	MESSAGE_END();
 #else
 	HUD_ShowInfoWin(Title, Text);
@@ -1099,7 +1099,7 @@ void CBasePlayer::SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring
 	}
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
 	WRITE_BYTE(3);		 //This is an HelpMsg
-	WRITE_STRING(Title); //Title
+	WRITE_STRING_LIMIT(Title, WRITE_STRING_MAX); //Title
 	MESSAGE_END();
 #else
 	HUD_ShowHelpWin(Title, Text);
@@ -1135,7 +1135,7 @@ void CBasePlayer::SendEventMsg(COLOR &color, msstring_ref Text)
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
 	WRITE_BYTE(1);			  //Print to the event console
 	WRITE_LONG((ulong)color); //Color
-	WRITE_STRING(Text);		  //Text
+	WRITE_STRING_LIMIT(Text, WRITE_STRING_MAX);		  //Text
 	MESSAGE_END();
 #else
 	vgui::Color vguicolor(color.r, color.g, color.b, color.a);
@@ -1287,7 +1287,7 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 	//MiB Aug2008a (JAN2010_15) - 8 tome limit fix. New method sends one spell at a time.
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev);
 	WRITE_BYTE(fVerbose ? 1 : 0);
-	WRITE_STRING(pszSpellScript);
+	WRITE_STRING_LIMIT(pszSpellScript, WRITE_STRING_MAX);
 	MESSAGE_END();
 
 /*	MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev );

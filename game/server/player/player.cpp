@@ -3675,8 +3675,8 @@ void CBasePlayer::UpdateClientData(void)
 		{
 			dbg("Send InitHUD MSG");
 			MESSAGE_BEGIN(MSG_ONE, gmsgInitHUD, NULL, pev);
-			WRITE_STRING(CVAR_GET_STRING("hostname"));
-			WRITE_STRING(STRING(gpGlobals->mapname));
+			WRITE_STRING_LIMIT(CVAR_GET_STRING("hostname"), 64);
+			WRITE_STRING_LIMIT(STRING(gpGlobals->mapname), 32);
 
 			//Find the proper IP address to send to this player.  I
 			//If he matches my lan address, I'll send that one.
@@ -3702,7 +3702,7 @@ void CBasePlayer::UpdateClientData(void)
 			if (GetOtherPlayerTransition(this))
 				Flags |= (1 << 5); //Other players are on and eligible to join?
 			WRITE_BYTE(Flags);
-			WRITE_STRING(GETPLAYERAUTHID(edict()));
+			WRITE_STRING_LIMIT(GETPLAYERAUTHID(edict()), 32);
 
 			//Send allowed votes
 			byte VotesAllowed = 0;
@@ -4089,8 +4089,8 @@ void CBasePlayer::UpdateClientData(void)
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 		WRITE_BYTE(16);
 		WRITE_BYTE(1);
-		WRITE_STRING(Script->GetVar("game.effect.id"));
-		WRITE_STRING(Script->GetVar("game.effect.displayname"));
+		WRITE_STRING_LIMIT(Script->GetVar("game.effect.id"), 90);
+		WRITE_STRING_LIMIT(Script->GetVar("game.effect.displayname"), 90);
 		MESSAGE_END();
 
 		Script->SetVar("game.effect.updateplayer", 0);
@@ -4750,7 +4750,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 				*pSlot = EntData;
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ENTINFO], NULL, pev);
 				WRITE_SHORT(EntData.entindex);
-				WRITE_STRING(EntData.Name);
+				WRITE_STRING_LIMIT(EntData.Name, WRITE_STRING_MAX);
 				WRITE_BYTE(EntData.Type);
 				MESSAGE_END();
 				EntriesSent++;
@@ -5742,7 +5742,7 @@ void CBasePlayer ::ShowMenu(char *pszText, int bitsValidSlots,
 		WRITE_SHORT(bitsValidSlots);
 		WRITE_CHAR(nDisplayTime);
 		WRITE_BYTE(bLclNeedMore);
-		WRITE_STRING(cTemp);
+		WRITE_STRING_LIMIT(cTemp, 128);
 		MESSAGE_END();
 	}
 	if (i >= 200)
@@ -6364,28 +6364,30 @@ void CBasePlayer::Think_SendCharData()
 
 	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{
-		charinfo_t &CharInfo = m_CharInfo[i];
+		charinfo_t& CharInfo = m_CharInfo[i];
 
 		if (CharInfo.m_CachedStatus == CharInfo.Status)
 			continue;
 
 		CharInfo.m_CachedStatus = CharInfo.Status;
 
+		// Send base char data
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CHARINFO], NULL, pev);
+		WRITE_BYTE((CharInfo.Status == CDS_LOADED) ? CHAR_TYPE_HEADER : CHAR_TYPE_BASE);
 		WRITE_BYTE(CharInfo.Index);	   //This character is available or pending
 		WRITE_BYTE(CharInfo.Status);   //Current status
 		WRITE_BYTE(CharInfo.Location); //Current storage location
 
 		if (CharInfo.Status == CDS_LOADED)
 		{
-			WRITE_STRING(CharInfo.Name);	 //Character name
-			WRITE_STRING(CharInfo.MapName);	 //Map char was last on
-			WRITE_STRING(CharInfo.OldTrans); //Last trans char hit
-			WRITE_STRING(CharInfo.NextMap);	 //New map char wants to enter
-			WRITE_STRING(CharInfo.NewTrans); //New trans at new map
+			WRITE_STRING_LIMIT(CharInfo.Name, 32);	 //Character name
+			WRITE_STRING_LIMIT(CharInfo.MapName, 16);	 //Map char was last on
+			WRITE_STRING_LIMIT(CharInfo.OldTrans, 32); //Last trans char hit
+			WRITE_STRING_LIMIT(CharInfo.NextMap, 32);	 //New map char wants to enter
+			WRITE_STRING_LIMIT(CharInfo.NewTrans, 32); //New trans at new map
 			WRITE_SHORT(CharInfo.body);		 //MIB JAN2010_27 - Char Selection Fix - Body the model should use
 
-			//jointype_e JoinType = MSChar_Interface::CanJoinThisMap( CharInfo, VisitedMaps );
+			// jointype_e JoinType = MSChar_Interface::CanJoinThisMap( CharInfo, VisitedMaps );
 
 			byte CharFlags = 0;
 			if (CharInfo.IsElite)
@@ -6394,19 +6396,30 @@ void CBasePlayer::Think_SendCharData()
 				SetBits(CharFlags, (1 << 1));
 			if (CharInfo.JoinType != JN_NOTALLOWED)
 				SetBits(CharFlags, (1 << 2));
-			WRITE_BYTE(CharFlags); //Character flags
 
-			WRITE_SHORT(CharInfo.GearInfo.size());
-			for (int i = 0; i < CharInfo.GearInfo.size(); i++)
+			WRITE_BYTE(CharFlags); //Character flags
+		}
+		MESSAGE_END();
+
+		// Send items data
+		if (CharInfo.Status == CDS_LOADED)
+		{
+			const int maxItemsToSend = min(CharInfo.GearInfo.size(), 20);
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CHARINFO], NULL, pev);
+			WRITE_BYTE(CHAR_TYPE_ITEMS);
+			WRITE_BYTE(CharInfo.Index);
+			WRITE_BYTE(maxItemsToSend);
+			for (int i = 0; i < maxItemsToSend; i++)
 			{
-				gearinfo_t &GearInfo = CharInfo.GearInfo[i];
+				const gearinfo_t& GearInfo = CharInfo.GearInfo[i];
 				WRITE_BYTE(GearInfo.Flags);
 				WRITE_SHORT(GearInfo.Model);
 				WRITE_SHORT(GearInfo.Body);
+				WRITE_SHORT(GearInfo.Skin);
 				WRITE_BYTE(GearInfo.Anim);
 			}
+			MESSAGE_END();
 		}
-		MESSAGE_END();
 	}
 
 	m_TimeSendCharInfo = gpGlobals->time + 0.5f;
@@ -6440,8 +6453,8 @@ void CBasePlayer::Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStor
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pev);
 	WRITE_BYTE(5);
-	WRITE_STRING(m_CurrentStorage.DisplayName);
-	WRITE_STRING(m_CurrentStorage.StorageName);
+	WRITE_STRING_LIMIT(m_CurrentStorage.DisplayName, 90);
+	WRITE_STRING_LIMIT(m_CurrentStorage.StorageName, 90);
 	WRITE_FLOAT(m_CurrentStorage.flFeeRatio);
 	MESSAGE_END();
 }
@@ -6459,7 +6472,7 @@ void CBasePlayer::Storage_Send()
 			//If the storage has no items, just send the storage name, indicating no items
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 			WRITE_BYTE(2); //storage item
-			WRITE_STRING(m_Storages[s].Name);
+			WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
 			WRITE_BYTE(0); //No items
 			MESSAGE_END();
 		}
@@ -6470,7 +6483,7 @@ void CBasePlayer::Storage_Send()
 			{
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 				WRITE_BYTE(2); //storage item
-				WRITE_STRING(m_Storages[s].Name);
+				WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
 				WRITE_BYTE(1); //Add this item to the storage
 				SendGenericItem(this, m_Storages[s].Items[i], false);
 				MESSAGE_END();
@@ -6511,7 +6524,7 @@ void CBasePlayer::Music_Play(mslist<song_t> &Songs, CBaseEntity *pMusicArea)
 	for (int i = 0; i < Songs.size(); i++)
 	{
 		//SetScriptVar("PLR_CURRENT_MUSIC", Songs[i].Name.c_str()); //Thothie JAN2013_08 - (moved to event, see above)
-		WRITE_STRING(Songs[i].Name);
+		WRITE_STRING_LIMIT(Songs[i].Name, WRITE_STRING_MAX);
 		WRITE_FLOAT(Songs[i].Length);
 	}
 	MESSAGE_END();
@@ -6628,7 +6641,7 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer)
 	WRITE_BYTE(Flags);
 	if (pPlayer->m_CharacterState == CHARSTATE_LOADED)
 	{
-		WRITE_STRING(pPlayer->GetFullTitle());
+		WRITE_STRING_LIMIT(pPlayer->GetFullTitle(), WRITE_STRING_MAX);
 		WRITE_SHORT((int)pPlayer->MaxHP()); //FEB2008a -- Shuriken
 		WRITE_SHORT((int)pPlayer->m_HP);	//FEB2008a -- Shuriken
 	}

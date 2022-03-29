@@ -747,10 +747,7 @@ public:
 	void MusicTouch(CBaseEntity *pOther)
 	{
 		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
-		if( m_Songs.size() == 0 )
-			return;
-		
-		if (!pOther->IsPlayer())
+		if (m_Songs.size() == 0 || !pOther || !pOther->IsPlayer())
 			return;
 
 		//NOV2014_12 - seeing if we can give msarea_music a master switch
@@ -1806,9 +1803,9 @@ public:
 		WRITE_BYTE(3);
 		WRITE_BYTE(0);
 		WRITE_BYTE((fAutoShowBrowser ? TRANS_AUTOSHOWBROWSER : 0) | TRANS_PLAYSOUND);
-		WRITE_STRING(STRING(sDestMap));
-		WRITE_STRING(STRING(sName));
-		WRITE_STRING(STRING(sDestTrans));
+		WRITE_STRING_LIMIT(STRING(sDestMap), 32);
+		WRITE_STRING_LIMIT(STRING(sName), 32);
+		WRITE_STRING_LIMIT(STRING(sDestTrans), 32);
 		MESSAGE_END();
 
 		return TRUE;

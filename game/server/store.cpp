@@ -82,7 +82,7 @@ void CStore ::Offer(edict_t *pePlayer, int iBuyFlags, CBaseMonster *pVendor)
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_VGUIMENU], NULL, pPlayer->pev);
 	WRITE_BYTE(MENU_STORE);
 	WRITE_BYTE(iBuyFlags);
-	WRITE_STRING(pVendor->DisplayName());
+	WRITE_STRING_LIMIT(pVendor->DisplayName(), WRITE_STRING_MAX);
 	WRITE_BYTE(Items.size());
 	MESSAGE_END();
 
@@ -94,7 +94,7 @@ void CStore ::Offer(edict_t *pePlayer, int iBuyFlags, CBaseMonster *pVendor)
 
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pPlayer->pev);
 		WRITE_BYTE(0); //store item
-		WRITE_STRING(Item.Name);
+		WRITE_STRING_LIMIT(Item.Name.c_str(), 170);
 		WRITE_SHORT(Item.Quantity);
 		WRITE_LONG(Item.iCost); //MiB JAN2010_15 Shop Prices over 32k.rtf
 		WRITE_SHORT(Item.flSellRatio * 100);

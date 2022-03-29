@@ -580,7 +580,7 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 		msstring LeaveMsg = msstring("- ") + pPlayer->DisplayName() + " has departed from the lands\n";
 		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 			WRITE_BYTE( pPlayer->entindex() );
-			WRITE_STRING( LeaveMsg );
+			WRITE_STRING_LIMIT(LeaveMsg.c_str(), 128);
 		MESSAGE_END();
 
 		pPlayer->SUB_Remove( );
@@ -799,7 +799,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	MESSAGE_BEGIN( MSG_ALL, gmsgDeathMsg );
 		WRITE_BYTE( killer_index );						// the killer
 		WRITE_BYTE( ENTINDEX(pVictim->edict()) );		// the victim
-		WRITE_STRING( killer_weapon_name );		// what they were killed by (should this be a string?)
+		WRITE_STRING_LIMIT(killer_weapon_name, 128);		// what they were killed by (should this be a string?)
 	MESSAGE_END();
 
 	// replace the code names with the 'real' names
@@ -1723,7 +1723,7 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgMOTD, NULL, client );
 			WRITE_BYTE( *pFileList ? FALSE : TRUE );	// FALSE means there is still more message to come
-			WRITE_STRING( chunk );
+			WRITE_STRING_LIMIT(chunk, sizeof(chunk));
 		MESSAGE_END();
 	}
 
@@ -2067,7 +2067,7 @@ void CHalfLifeMultiplay	:: StartVote( CBasePlayer *pPlayer, msstring VoteType, m
 	//Send vote to all players
 	MESSAGE_BEGIN( MSG_ALL, g_netmsg[NETMSG_VOTE], NULL );
 		WRITE_BYTE( 1 ); //Vote has started
-		WRITE_STRING( m_CurrentVote.Type + (SendVoteInfo.len() ? msstring(";") + SendVoteInfo : "") );
+		WRITE_STRING_LIMIT(m_CurrentVote.Type + (SendVoteInfo.len() ? msstring(";") + SendVoteInfo : ""), 128);
 	MESSAGE_END();
 
 	msstringlist Params;

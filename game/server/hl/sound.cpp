@@ -1778,9 +1778,9 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int 
 		rgsz[1] = "player/pl_snow2.wav";
 		rgsz[2] = "player/pl_snow3.wav";
 		rgsz[3] = "player/pl_snow4.wav";
-		rgsz[4] = "player/pl_snow5.wav";
-		rgsz[5] = "player/pl_snow6.wav";
-		cnt = 5;
+		//rgsz[4] = "player/pl_snow5.wav";
+		//rgsz[5] = "player/pl_snow6.wav";
+		cnt = 4;
 		break;
 	case CHAR_TEX_GRATE:
 		fvol = 0.9;

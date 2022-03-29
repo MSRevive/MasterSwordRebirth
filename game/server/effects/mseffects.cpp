@@ -409,9 +409,9 @@ class CMSChangeLevel : public CBaseEntity
 			WRITE_BYTE(3);
 			WRITE_BYTE(0);
 			WRITE_BYTE(0);
-			WRITE_STRING(STRING(sDestMap));
-			WRITE_STRING(pPlayer->m_OldTransition);
-			WRITE_STRING(STRING(sDestTrans));
+			WRITE_STRING_LIMIT(STRING(sDestMap),32);
+			WRITE_STRING_LIMIT(pPlayer->m_OldTransition, 32);
+			WRITE_STRING_LIMIT(STRING(sDestTrans), 32);
 			MESSAGE_END();
 		}
 		pev->nextthink = gpGlobals->time + 0.2;

@@ -467,7 +467,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//Send the character name down to client
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 	WRITE_BYTE(4);
-	WRITE_STRING(Data.Name);
+	WRITE_STRING_LIMIT(Data.Name, 32);
 	MESSAGE_END();
 
 	dbg("Call CBasePlayer::Spawn()");

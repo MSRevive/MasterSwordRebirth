@@ -15,12 +15,14 @@ enum chardatastatus_e
 	CDS_LOADED,
 	CDS_NOTFOUND
 };
+
 enum charloc_e
 {
 	LOC_CLIENT,
 	LOC_SERVER,
 	LOC_CENTRAL
 };
+
 enum jointype_e
 {
 	JN_NOTALLOWED,
@@ -29,6 +31,7 @@ enum jointype_e
 	JN_VISITED,
 	JN_ELITE
 };
+
 enum charsendstatus_e
 {
 	CSS_DORMANT,
@@ -38,6 +41,13 @@ enum charsendstatus_e
 	CSS_RECEIVED
 };
 
+enum charClientType
+{
+	CHAR_TYPE_BASE = 0,
+	CHAR_TYPE_HEADER,
+	CHAR_TYPE_ITEMS,
+};
+
 struct charinfo_base_t
 {
 	int Index; // Keep track of index, because the characters might not be loaded in order
@@ -45,14 +55,14 @@ struct charinfo_base_t
 	int DataLen;
 };
 
-struct gearinfo_t
-{
-//msstring ItemName;
 #define GEARFL_COVER_HEAD (1 << 0)
 #define GEARFL_COVER_TORSO (1 << 1)
 #define GEARFL_COVER_ARMS (1 << 2)
 #define GEARFL_COVER_LEGS (1 << 3)
 #define GEARFL_WEARING (1 << 4)
+
+struct gearinfo_t
+{
 	byte Flags;
 	ushort Model, Body, Skin, Anim;
 };

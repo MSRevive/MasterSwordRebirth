@@ -6102,7 +6102,7 @@ void CScript::ClXPlaySoundAll( msstring_ref sSample, const Vector &Origin, int s
 	if( g_netmsg[NETMSG_CLDLLFUNC] ) //g_netmsgs aren't initialized until the player is spawned... but this may be called earlier from the world.script
 	{
 		MESSAGE_BEGIN( MSG_ALL, g_netmsg[NETMSG_CLXPLAY], NULL );
-		WRITE_STRING( sSample );
+		WRITE_STRING_LIMIT(sSample, 128);
 		WRITE_COORD( Origin.x );
 		WRITE_COORD( Origin.y );
 		WRITE_COORD( Origin.z );

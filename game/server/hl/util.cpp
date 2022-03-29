@@ -1145,17 +1145,7 @@ void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, cons
 	if (textparms.effect == 2)
 		WRITE_SHORT(FixedUnsigned16(textparms.fxTime, 1 << 8));
 
-	if (strlen(pMessage) < 512)
-	{
-		WRITE_STRING(pMessage);
-	}
-	else
-	{
-		char tmp[512];
-		strncpy(tmp, pMessage, 511);
-		tmp[511] = 0;
-		WRITE_STRING(tmp);
-	}
+	WRITE_STRING_LIMIT(pMessage, 160);
 	MESSAGE_END();
 }
 

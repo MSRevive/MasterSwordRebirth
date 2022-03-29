@@ -1081,8 +1081,6 @@ void CNewCharacterPanel::UpdateUpload( )
 
 }
 
-
-
 void ShowVGUIMenu( int iMenu );
 void __CmdFunc_PlayerChooseChar( )
 {
@@ -1091,57 +1089,30 @@ void __CmdFunc_PlayerChooseChar( )
 		ShowVGUIMenu( MENU_NEWCHARACTER );
 #endif
 }
-int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
+
+int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 {
 	startdbg;
-	dbg( "Begin" );
-	BEGIN_READ( pbuf, iSize );
+	dbg("Begin");
+	BEGIN_READ(pbuf, iSize);
 
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
 	//This info comes from the server, if characters are server-side
 	//If chars are client-side, then this message only comes with Status == CDS_LOADED after I've uploaded a char
 	//Read data for one character at a time
 
-	byte CharIndex = READ_BYTE( );						//Which char the info describes
+	byte CharMsgType = READ_BYTE();
+	byte CharIndex = READ_BYTE();						//Which char the info describes
 
 	if (CharIndex >= MAX_CHARSLOTS)
 		return 0;
 
-	charinfo_t &CharSlot = player.m_CharInfo[CharIndex];
-	clrmem( CharSlot );
+	charinfo_t& CharSlot = player.m_CharInfo[CharIndex];
 
-	CharSlot.Index = CharIndex;
-	CharSlot.Status = (chardatastatus_e)READ_BYTE( );				//Char status (unloaded/pending/loaded)
-	CharSlot.Location = (charloc_e)READ_BYTE( );					//Char location (client/server/central network)
-
-	if( CharSlot.Status == CDS_LOADED )
+	if (CharMsgType == CHAR_TYPE_ITEMS)
 	{
-		CharSlot.Name = READ_STRING( );
-		CharSlot.MapName = READ_STRING( );
-		CharSlot.OldTrans = READ_STRING( );
-		CharSlot.NextMap = READ_STRING( );
-		CharSlot.NewTrans = READ_STRING( );
-		CharSlot.body = READ_SHORT( ); //MiB JAN2010_27 - Char Selection Fix
-		//CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
-		byte CharFlags = READ_BYTE();
-		CharSlot.IsElite = FBitSet( CharFlags, (1<<0) );
-		CharSlot.Gender = FBitSet( CharFlags, (1<<1) ) ? GENDER_FEMALE : GENDER_MALE;
-		CharSlot.JoinType = FBitSet( CharFlags, (1<<2) ) ? JN_TRAVEL : JN_NOTALLOWED;
-		//Thothie FEB2011_02 - invisible new character fix (default based on gender)
-		if ( CharSlot.body == 0 )
-		{
-			CharSlot.body = 40; 
-			if ( CharSlot.Gender == GENDER_FEMALE ) CharSlot.body = 80;
-		}
-
-		if( CharSlot.Location == LOC_CLIENT )	
-		{
-			CharSlot.m_SendStatus = CSS_SENT;	//I just finished sending this char to the server
-			player.m_CharSend.Status = CSS_DORMANT;
-		}
-
-		int GearItems = READ_SHORT( );
-		 for (int i = 0; i < GearItems; i++) 
+		int GearItems = READ_BYTE();
+		for (int i = 0; i < GearItems; i++)
 		{
 			gearinfo_t GearInfo;
 			GearInfo.Flags = READ_BYTE();
@@ -1149,31 +1120,65 @@ int __MsgFunc_CharInfo(const char *pszName, int iSize, void *pbuf)
 			GearInfo.Body = READ_SHORT();
 			GearInfo.Skin = READ_SHORT();
 			GearInfo.Anim = READ_BYTE();
+			CharSlot.GearInfo.add(GearInfo);
+		}
+	}
+	else
+	{
+		clrmem(CharSlot);
 
-			CharSlot.GearInfo.add( GearInfo );
+		CharSlot.Index = CharIndex;
+		CharSlot.Status = (chardatastatus_e)READ_BYTE();				//Char status (unloaded/pending/loaded)
+		CharSlot.Location = (charloc_e)READ_BYTE();					//Char location (client/server/central network)
+
+		if (CharSlot.Status == CDS_LOADED)
+		{
+			CharSlot.Name = READ_STRING();
+			CharSlot.MapName = READ_STRING();
+			CharSlot.OldTrans = READ_STRING();
+			CharSlot.NextMap = READ_STRING();
+			CharSlot.NewTrans = READ_STRING();
+			CharSlot.body = READ_SHORT(); //MiB JAN2010_27 - Char Selection Fix
+			//CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
+			byte CharFlags = READ_BYTE();
+			CharSlot.IsElite = FBitSet(CharFlags, (1 << 0));
+			CharSlot.Gender = FBitSet(CharFlags, (1 << 1)) ? GENDER_FEMALE : GENDER_MALE;
+			CharSlot.JoinType = FBitSet(CharFlags, (1 << 2)) ? JN_TRAVEL : JN_NOTALLOWED;
+			//Thothie FEB2011_02 - invisible new character fix (default based on gender)
+			if (CharSlot.body == 0)
+			{
+				CharSlot.body = 40;
+				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.body = 80;
+			}
+
+			if (CharSlot.Location == LOC_CLIENT)
+			{
+				CharSlot.m_SendStatus = CSS_SENT;	//I just finished sending this char to the server
+				player.m_CharSend.Status = CSS_DORMANT;
+			}
 		}
 	}
 
-	if( MSCLGlobals::CharPanelActive ) 
-		if( gViewPort && gViewPort->m_pCurrentMenu ) 
-			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update( );
+	if (MSCLGlobals::CharPanelActive)
+		if (gViewPort && gViewPort->m_pCurrentMenu)
+			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
 
 	enddbg;
 	return 1;
 }
-void ChooseChar_Interface::UpdateCharScreen( )
-{
-	if( MSCLGlobals::CharPanelActive ) 
-		if( gViewPort && gViewPort->m_pCurrentMenu ) 
-			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update( );
-}
-void ChooseChar_Interface::UpdateCharScreenUpload( )
-{
-	if( MSCLGlobals::CharPanelActive ) 
-		if( gViewPort && gViewPort->m_pCurrentMenu ) 
-			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->UpdateUpload( );
-}
 
+void ChooseChar_Interface::UpdateCharScreen()
+{
+	if (MSCLGlobals::CharPanelActive)
+		if (gViewPort && gViewPort->m_pCurrentMenu)
+			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
+}
+void ChooseChar_Interface::UpdateCharScreenUpload()
+{
+	if (MSCLGlobals::CharPanelActive)
+		if (gViewPort && gViewPort->m_pCurrentMenu)
+			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->UpdateUpload();
+}
 
 //CRenderChar
 
