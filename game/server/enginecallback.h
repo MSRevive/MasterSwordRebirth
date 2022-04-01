@@ -17,6 +17,7 @@
 #pragma once
 
 #include "event_flags.h"
+#include <string.h>
 //include "logfile.h"
 
 // Must be provided by user of this code
