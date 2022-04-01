@@ -20,6 +20,9 @@
 
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
+unsigned int g_iNumBytesWritten = 0;
+int g_iUserMessageType = -1;
+
 void LogMemoryUsage(msstring_ref Title);
 
 //Global Declarations.  Both Client & Server

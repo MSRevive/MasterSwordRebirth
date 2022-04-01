@@ -36,7 +36,6 @@ void BEGIN_READ( void *buf, int size )
 	gpBuf = (byte*)buf;
 }
 
-
 int READ_CHAR( void )
 {
 	int     c;
@@ -90,7 +89,6 @@ int READ_WORD( void )
 {
 	return READ_SHORT();
 }
-
 
 int READ_LONG( void )
 {
@@ -155,7 +153,6 @@ char* READ_STRING( void )
 }
 
 float READ_COORD( void )
-
 {
 	return (float)(READ_SHORT() * (1.0/8));
 }
@@ -169,4 +166,3 @@ float READ_HIRESANGLE( void )
 {
 	return (float)(READ_SHORT() * (360.0/65536));
 }
-

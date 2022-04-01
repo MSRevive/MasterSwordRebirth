@@ -150,9 +150,10 @@ inline entvars_t *VARS(edict_t *pent)
 inline entvars_t *VARS(EOFFSET eoffset) { return VARS(ENT(eoffset)); }
 inline int ENTINDEX(edict_t *pEdict) { return (*g_engfuncs.pfnIndexOfEdict)(pEdict); }
 inline edict_t *INDEXENT(int iEdictNum) { return (*g_engfuncs.pfnPEntityOfEntIndex)(iEdictNum); }
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent)
+
+inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin, entvars_t* ent)
 {
-	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ENT(ent));
+	MESSAGE_BEGIN(msg_dest, msg_type, pOrigin, ENT(ent));
 }
 
 // Testing the three types of "entity" for nullity

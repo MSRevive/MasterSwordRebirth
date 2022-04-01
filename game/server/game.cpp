@@ -100,6 +100,7 @@ void GameDLLInit(void)
 	g_friction = CVAR_GET_POINTER("sv_friction");
 	g_stopspeed = CVAR_GET_POINTER("sv_stopspeed");
 	g_waterfriction = CVAR_GET_POINTER("sv_waterfriction");
+
 	g_pTempStringLimit[0] = 0;
 
 	CVAR_REGISTER(&displaysoundlist);

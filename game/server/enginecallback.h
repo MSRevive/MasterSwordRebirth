@@ -22,6 +22,10 @@
 // Must be provided by user of this code
 extern enginefuncs_t g_engfuncs;
 
+extern unsigned int g_iNumBytesWritten;
+extern int g_iUserMessageType;
+#define MAX_USERMESSAGE_SIZE 192
+
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
 //#define PRECACHE_MODEL	(*g_engfuncs.pfnPrecacheModel)
@@ -73,33 +77,6 @@ int PRECACHE_SOUND(const char *pszSound); //Thothie MAR2012_26 - Ditto for sound
 #define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
 
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float *pOrigin = NULL, edict_t *ed = NULL)
-{
-	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
-}
-#define MESSAGE_END (*g_engfuncs.pfnMessageEnd)
-#define WRITE_BYTE (*g_engfuncs.pfnWriteByte)
-#define WRITE_CHAR (*g_engfuncs.pfnWriteChar)
-#define WRITE_SHORT (*g_engfuncs.pfnWriteShort)
-#define WRITE_LONG (*g_engfuncs.pfnWriteLong)
-#define WRITE_ANGLE (*g_engfuncs.pfnWriteAngle)
-#define WRITE_COORD (*g_engfuncs.pfnWriteCoord)
-#define WRITE_STRING (*g_engfuncs.pfnWriteString)
-#define WRITE_ENTITY (*g_engfuncs.pfnWriteEntity)
-#define CVAR_REGISTER (*g_engfuncs.pfnCVarRegister)
-#define CVAR_GET_FLOAT (*g_engfuncs.pfnCVarGetFloat)
-#define CVAR_GET_STRING (*g_engfuncs.pfnCVarGetString)
-#define CVAR_SET_FLOAT (*g_engfuncs.pfnCVarSetFloat)
-#define CVAR_SET_STRING (*g_engfuncs.pfnCVarSetString)
-#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
-
-#ifdef VALVE_DLL
-#define WRITE_STRING_MAX 180 // Upper limit for a usermessage is around 192 bytes, keep this in mind!
-extern char g_pTempStringLimit[WRITE_STRING_MAX];
-// Use this to ensure that we only write this many bytes, ensure null terminated string, prevent overflows.
-#define WRITE_STRING_LIMIT(src, len)  memset(g_pTempStringLimit, 0, WRITE_STRING_MAX); strncpy(g_pTempStringLimit, src, WRITE_STRING_MAX); g_pTempStringLimit[min(WRITE_STRING_MAX-1, len)] = 0; WRITE_STRING(g_pTempStringLimit)
-#endif
-
 //MIB JUN2010_17 - enable total disable of debug alert messages
 #define TURN_OFF_ALERT 0
 #if !TURN_OFF_ALERT
@@ -109,6 +86,94 @@ extern char g_pTempStringLimit[WRITE_STRING_MAX];
 #define ALERT
 #define SPAWN_GLOBAL_ITEMS 0
 #endif
+
+inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin = NULL, edict_t* ed = NULL)
+{
+	g_iNumBytesWritten = 0;
+	g_iUserMessageType = msg_type;
+	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
+}
+
+inline void MESSAGE_END(void)
+{
+	if (g_iNumBytesWritten >= MAX_USERMESSAGE_SIZE)
+	{
+		ALERT(at_console, "USERMSG: Wrote at least %u bytes for usermsg %i\n", g_iNumBytesWritten, g_iUserMessageType);
+	}
+	(*g_engfuncs.pfnMessageEnd)();
+}
+
+// Used to check if a usermsg can write X more bytes!
+inline bool CHECK_CAN_WRITE(unsigned int size)
+{
+	if ((g_iNumBytesWritten + size) > MAX_USERMESSAGE_SIZE)
+		return false;
+
+	g_iNumBytesWritten += size;
+	return true;
+}
+
+inline void WRITE_BYTE(int iValue)
+{
+	if (!CHECK_CAN_WRITE(1)) return;
+	(*g_engfuncs.pfnWriteByte)(iValue);
+}
+
+inline void WRITE_CHAR(int iValue)
+{
+	if (!CHECK_CAN_WRITE(1)) return;
+	(*g_engfuncs.pfnWriteChar)(iValue);
+}
+
+inline void WRITE_SHORT(int iValue)
+{
+	if (!CHECK_CAN_WRITE(2)) return;
+	(*g_engfuncs.pfnWriteShort)(iValue);
+}
+
+inline void WRITE_ENTITY(int iValue)
+{
+	if (!CHECK_CAN_WRITE(4)) return;
+	(*g_engfuncs.pfnWriteEntity)(iValue);
+}
+
+inline void WRITE_LONG(int iValue)
+{
+	if (!CHECK_CAN_WRITE(4)) return;
+	(*g_engfuncs.pfnWriteLong)(iValue);
+}
+
+inline void WRITE_ANGLE(float flValue)
+{
+	if (!CHECK_CAN_WRITE(1)) return;
+	(*g_engfuncs.pfnWriteAngle)(flValue);
+}
+
+inline void WRITE_COORD(float flValue)
+{
+	if (!CHECK_CAN_WRITE(2)) return;
+	(*g_engfuncs.pfnWriteCoord)(flValue);
+}
+
+inline void WRITE_STRING(const char* sz)
+{
+	if (!sz || !CHECK_CAN_WRITE(strlen(sz))) return;
+	(*g_engfuncs.pfnWriteString)(sz);
+}
+
+#ifdef VALVE_DLL
+#define WRITE_STRING_MAX 180 // Upper limit for a usermessage is around 192 bytes, keep this in mind!
+extern char g_pTempStringLimit[WRITE_STRING_MAX];
+// Use this to ensure that we only write this many bytes, ensure null terminated string, prevent overflows.
+#define WRITE_STRING_LIMIT(src, len)  memset(g_pTempStringLimit, 0, WRITE_STRING_MAX); strncpy(g_pTempStringLimit, src, WRITE_STRING_MAX); g_pTempStringLimit[min(WRITE_STRING_MAX-1, len)] = 0; WRITE_STRING(g_pTempStringLimit)
+#endif
+
+#define CVAR_REGISTER (*g_engfuncs.pfnCVarRegister)
+#define CVAR_GET_FLOAT (*g_engfuncs.pfnCVarGetFloat)
+#define CVAR_GET_STRING (*g_engfuncs.pfnCVarGetString)
+#define CVAR_SET_FLOAT (*g_engfuncs.pfnCVarSetFloat)
+#define CVAR_SET_STRING (*g_engfuncs.pfnCVarSetString)
+#define CVAR_GET_POINTER (*g_engfuncs.pfnCVarGetPointer)
 
 #define ENGINE_FPRINTF (*g_engfuncs.pfnEngineFprintf)
 #define ALLOC_PRIVATE (*g_engfuncs.pfnPvAllocEntPrivateData)
