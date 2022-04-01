@@ -972,6 +972,9 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		static vec4_t q1b[MAXSTUDIOBONES];
 		float s;
 
+		if (Ent.latched.prevsequence >= m_pStudioHeader->numseq)
+			Ent.latched.prevsequence = 0;
+
 		pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + Ent.latched.prevsequence;
 		panim = StudioGetAnim(m_pRenderModel, pseqdesc);
 		// clip prevframe
@@ -1011,6 +1014,10 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	}
 
 	pbones = (mstudiobone_t*)((byte*)m_pStudioHeader + m_pStudioHeader->boneindex);
+
+	// bounds checking
+	if (m_pPlayerInfo && (m_pPlayerInfo->gaitsequence >= m_pStudioHeader->numseq))
+		m_pPlayerInfo->gaitsequence = 0;
 
 	// calc gait animation
 	if (m_pPlayerInfo && m_pPlayerInfo->gaitsequence != 0)
@@ -1733,6 +1740,9 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 	float flYaw = 0; // view direction relative to movement
 	float frametime = 0;
 
+	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
+		m_pCurrentEntity->curstate.sequence = 0;
+
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
 
 	StudioPlayerBlend(pseqdesc, &iBlend, &m_pCurrentEntity->angles[PITCH]);
@@ -1808,6 +1818,9 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 		m_pCurrentEntity->latched.prevcontroller[2] = m_pCurrentEntity->curstate.controller[2];
 		m_pCurrentEntity->latched.prevcontroller[3] = m_pCurrentEntity->curstate.controller[3];
 	}
+
+	if (pplayer->gaitsequence >= m_pStudioHeader->numseq)
+		pplayer->gaitsequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + pplayer->gaitsequence;
 
