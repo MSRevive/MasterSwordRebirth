@@ -93,11 +93,10 @@ enum
 	MSERR_EXCEPTION_SERVERTHINK,			//111
 };
 
-void Print(char *szFmt, ...);
-void Log(char *szFmt, ...);
-const char *ShortProjectFileName(const char *FileName);
+void Print(char* szFmt, ...);
+void Log(char* szFmt, ...);
 
-#define LogCurrentLine(Text) Log("%s:%i %s", ShortProjectFileName(__FILE__), __LINE__, msstring_ref(Text))
+#define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, msstring_ref(Text))
 void LogExtensive(msstring_ref Text);
 #define DBG_ENTR_FUNCTION_TEXT (msstring("Enter - ") + __FUNCTION__)
 #define DBG_EXIT_FUNCTION_TEXT (msstring("Exit - ") + __FUNCTION__)
@@ -116,18 +115,11 @@ void LogExtensive(msstring_ref Text);
 	try                   \
 	{                     \
 		LogExtensive(DBG_ENTR_FUNCTION_TEXT)
+
 #define enddbgline(a)                         \
 	LogExtensive(DBG_EXIT_FUNCTION_TEXT + a); \
 	}                                         \
 	catch (...) { MSErrorConsoleText(msstring("Error: ") + __FUNCTION__ + a, FunctionPrg); }
-
-/*#ifndef EXTENSIVE_LOGGING
-		#define startdbg msstring FunctionPrg; try {
-		#define enddbgline( a ) } catch( ... ) { MSErrorConsoleText( msstring(__FUNCTION__) + a, FunctionPrg ); }
-	#else
-		#define startdbg msstring FunctionPrg; try { LogCurrentLine( DBG_ENTR_FUNCTION_TEXT )
-		#define enddbgline( a ) LogCurrentLine( DBG_EXIT_FUNCTION_TEXT + a ); } catch( ... ) { MSErrorConsoleText( msstring("Error: ") + __FUNCTION__ + a, FunctionPrg ); }
-	#endif*/
 
 #define dbg(a) SetDebugProgress(FunctionPrg, a)
 #define enddbg enddbgline("")

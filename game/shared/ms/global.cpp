@@ -548,7 +548,7 @@ void LogExtensive(msstring_ref Text)
 
 void DbgLog(char *szFmt, ...)
 {
-#ifdef LOG_INPUTS
+#ifdef EXTENSIVE_LOGGING
 	if (!logfile.is_open())
 		return;
 
@@ -561,15 +561,6 @@ void DbgLog(char *szFmt, ...)
 
 	logfile << string << endl;
 #endif
-}
-const char *ShortProjectFileName(const char *FileName)
-{
-	const char *pszCut = strstr(FileName, "c:\\projects\\mastersword\\sourcecodecvs\\");
-	if (!pszCut)
-		return FileName;
-
-	return FileName + 38;
-	;
 }
 
 msstring_ref EngineFunc::GetString(int string)

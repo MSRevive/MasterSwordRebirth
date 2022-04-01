@@ -8,16 +8,14 @@
 
 //Allows exceptions to be logged to both console and the logfile
 #define LOG_EXCEPTIONS
-//!!!EXTENSIVE_LOGGING has MOVED!! - Look at the top of Global.cpp!
-//#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
-#ifdef EXTENSIVE_LOGGING
-#define LOG_INPUTS //Automatic, with extensive logging
-#endif
+//!!!EXTENSIVE_LOGGING has MOVED!! - Look at the top of Global.cpp
+//#ifndef EXTENSIVE_LOGGING
+//#define EXTENSIVE_LOGGING // Causes EXTENSIVE logging of every dbg operation
+//#endif
 
 //Causes DbgInputs() to be called for each DLL input function in the client and server dlls
 #define TRACK_INPUTS
-//#define LOG_INPUTS				//Extensive logging of inputs to file
 
 //In the release build, whether certain errors treated as fatal (release) or not (debug)
 #define RELEASE_LOCKDOWN
