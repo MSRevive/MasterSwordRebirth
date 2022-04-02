@@ -362,13 +362,13 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_pCancelButton->SetArmedColor(colTemp2);
 	m_pCancelButton->SetUnArmedColor(Color_TextNormal);
 
-	m_AllowUpdate = false;
+	m_AllowUpdate = m_bIsOpened = false;
 }
 
 // Update
 void VGUI_ContainerPanel::Update()
 {
-	if (!m_AllowUpdate)
+	if (!m_AllowUpdate || !m_bIsOpened)
 		return;
 
 	m_GearPanel->Reset();
@@ -513,10 +513,9 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 
 void VGUI_ContainerPanel::Open(void)
 {
-	//Update before opening
-	m_AllowUpdate = true;
+	// Update before opening
+	m_AllowUpdate = m_bIsOpened = true;
 	Update();
-
 	CMenuPanel::Open();
 }
 void VGUI_ContainerPanel::Close(void)
@@ -525,7 +524,7 @@ void VGUI_ContainerPanel::Close(void)
 	m_pCancelButton->setArmed(false); //If the user presses cancel, the cancel button doesn't automaticaly get unarmed... so manually do it
 	m_ActButton->setArmed(false);
 	CMenuPanel::Close();
-	m_AllowUpdate = false;
+	m_AllowUpdate = m_bIsOpened = false;
 }
 bool VGUI_ContainerPanel::SlotInput(int iSlot)
 {

@@ -115,6 +115,7 @@ public:
 	virtual void ItemCreated(void* pData) { m_AllowUpdate = true; }
 
 	bool m_AllowUpdate;
+	bool m_bIsOpened;
 };
 
 #endif //VGUI_CONTAINER_H

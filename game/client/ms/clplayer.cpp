@@ -963,11 +963,13 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		ShowWeaponDesc( pItem );
 	}
 	break;
+	}	
+
+	if (Operation <= 5)
+	{
+		dbg("UpdateActiveMenus()");
+		UpdateActiveMenus();
 	}
-
-	dbg("UpdateActiveMenus()");
-
-	UpdateActiveMenus();
 
 	enddbg;
 	return 1;

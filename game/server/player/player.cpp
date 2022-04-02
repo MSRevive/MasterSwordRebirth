@@ -6240,7 +6240,7 @@ void CBasePlayer::KickPlayer(const char *pszMessage)
 		if (IsLocalHost())
 			SERVER_COMMAND("disconnect\n");
 		else
-			SERVER_COMMAND(UTIL_VarArgs("kick #%i\n", ENTINDEX(edict())));
+			SERVER_COMMAND(UTIL_VarArgs("kick #%i\n", GETPLAYERUSERID(edict())));
 		logfile << "Kicked " << DisplayName() << " Reason: " << pszMessage << "\r\n";
 	}
 }
