@@ -111,5 +111,8 @@ void CStoreBuyPanel::ItemHighlighted(void *pData)
 void Update_StoreBuy()
 {
 	if (gViewPort->m_pStoreBuyMenu)
+	{
+		gViewPort->m_pStoreBuyMenu->m_AllowUpdate = true;
 		gViewPort->m_pStoreBuyMenu->Update();
+	}
 }

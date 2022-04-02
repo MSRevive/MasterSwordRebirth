@@ -293,6 +293,7 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 
 	gEngfuncs.pfnClientCmd( CommandString );
 }*/
+
 void CStoragePanel::Close()
 {
 	player.m_CurrentStorage.Active = false;
@@ -300,15 +301,20 @@ void CStoragePanel::Close()
 	VGUI_ContainerPanel::Close(); //Skip CStorePanel::Close()
 }
 
+void Storage_Update()
+{
+	if (gViewPort && gViewPort->m_pStoreStorageMenu)
+	{
+		gViewPort->m_pStoreStorageMenu->m_AllowUpdate = true;
+		gViewPort->m_pStoreStorageMenu->Update();
+	}
+}
+
 //Item msg
 void Storage_ItemReset()
 {
 	player.m_Storages.clear();
-}
-void Storage_Update()
-{
-	if (gViewPort && gViewPort->m_pStoreStorageMenu)
-		gViewPort->m_pStoreStorageMenu->Update();
+	Storage_Update();
 }
 
 void Storage_ItemMsg()
@@ -343,12 +349,12 @@ void Storage_ItemMsg()
 
 	Storage_Update();
 }
+
 void Storage_Show(msstring_ref DisplayName, msstring_ref StorageName, float flFeeRatio)
 {
 	player.m_CurrentStorage.Active = true;
 	player.m_CurrentStorage.DisplayName = DisplayName;
 	player.m_CurrentStorage.StorageName = StorageName;
 	player.m_CurrentStorage.flFeeRatio = flFeeRatio;
-
 	ShowVGUIMenu(MENU_STORAGE);
 }

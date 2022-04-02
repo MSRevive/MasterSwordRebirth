@@ -95,7 +95,6 @@ protected:
 	VGUI_InventoryPanel *m_GearPanel;
 	VGUI_ItemInfoPanel *m_InfoPanel;
 	MSButton *m_ActButton;
-	bool m_AllowUpdate;
 
 public:
 	static const char *m_Text_DoubleClick;
@@ -112,7 +111,10 @@ public:
 	virtual bool SlotInput(int iSlot);
 
 	//Callbacks
-	virtual void ItemHighlighted(void *pData);
+	virtual void ItemHighlighted(void* pData);
+	virtual void ItemCreated(void* pData) { m_AllowUpdate = true; }
+
+	bool m_AllowUpdate;
 };
 
 #endif //VGUI_CONTAINER_H

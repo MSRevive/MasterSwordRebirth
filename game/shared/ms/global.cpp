@@ -18,6 +18,10 @@
 #include "global.h"
 #endif
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
 unsigned int g_iNumBytesWritten = 0;
@@ -59,8 +63,7 @@ int MSGlobals::SpawnLimit=0; //Thothie OCT2016_18 spawnlimiter
 float MSGlobals::maxviewdistance;					//Thothie JAN2010_23
 //int MSGlobals::FakeHP;	//DEC2007a (AUG2011_17 - switched to cvar)
 msstring MSGlobals::ServerName;
-msstring MSGlobals::DllFileName;
-msstring MSGlobals::DllPath;
+msstring MSGlobals::AbsGamePath;
 msstringlist MSGlobals::DefaultWeapons;
 msstringlist MSGlobals::DefaultFreeItems; //Free items that come with a new character
 int MSGlobals::DefaultGold = 10;		  //Starting gold
@@ -192,18 +195,35 @@ void MSGlobals::SharedThink()
 void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 {
 #ifdef _WIN32
-	GetModuleFileName(hinstDLL, DllFileName.c_str(), 256);
+	msstring DllFileName;
+	GetModuleFileName(hinstDLL, DllFileName.c_str(), MSSTRING_SIZE);
+
+	// Remove cl_dlls or dlls (plus slash) from the path!
+#ifdef VALVE_DLL
+	size_t nullterm = 5;
+#else
+	size_t nullterm = 8;
+#endif
 
 	int len = DllFileName.len();
 	for (int i = 0; i < len; i++)
 	{
 		if (DllFileName[len - 1 - i] == '\\' || DllFileName[len - 1 - i] == '/')
 		{
-			DllPath = DllFileName.substr(0, len - i - 1);
+			AbsGamePath = DllFileName.substr(0, len - i - 1);
 			break;
 		}
 	}
-#endif // _WIN32
+
+	DllFileName = AbsGamePath;
+	AbsGamePath = DllFileName.substr(0, DllFileName.len() - nullterm);
+#else	
+	char szTempPath[MSSTRING_SIZE];
+	getcwd(szTempPath, MSSTRING_SIZE);
+	AbsGamePath = msstring(szTempPath) + msstring("/msc");
+#endif
+
+	logfile.DebugOpen();
 }
 
 //Called on client & server when the dll is unloaded
@@ -216,6 +236,7 @@ void MSGlobals::DLLDetach()
 	CGlobalScriptedEffects::DeleteEffects();
 
 	CScript::m_gVariables.clear();
+
 	LogMemoryUsage("[DLL Unload Remaining Memory Allocations]");
 }
 

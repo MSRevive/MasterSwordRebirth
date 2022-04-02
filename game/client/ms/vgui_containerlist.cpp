@@ -303,6 +303,8 @@ void ContainerWindowUpdate()
 {
 	if (!gViewPort || !gViewPort->m_pContainerMenu)
 		return;
+
+	gViewPort->m_pContainerMenu->m_AllowUpdate = true;
 	gViewPort->m_pContainerMenu->Update();
 }
 void ContainerWindowClose()

@@ -397,24 +397,7 @@ BOOL WINAPI DllMain(
 	LPVOID lpvReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
-	{
 		MSGlobals::DLLAttach(hinstDLL);
-		logfile.DebugOpen();
-		/*#ifdef KEEP_LOG
-			char cLogfile[MAX_PATH], *pGameDir;
-
-			#ifdef DEV_BUILD
-				pGameDir = "MSDev";
-			#else
-				pGameDir = "MS";
-			#endif
-
-			//MessageBox( NULL, gEngfuncs.pfnGetGameDirectory(), "", MB_OK );
-			 _snprintf(cLogfile, sizeof(cLogfile),  "%s/log_cldll.txt",  pGameDir );
-			logfile.open( cLogfile );
-			g_log_initialized = true;
-		#endif*/
-	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
 	{
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;

@@ -45,13 +45,14 @@ struct FnRequestData
 public:
 	FnRequestData(int command, unsigned long long steamID, int slot, const char* url)
 	{
-		guid[0] = 0;
-		data = NULL;
-		result = FN_RES_NA;
+		this->guid[0] = 0;
+		this->data = NULL;
+		this->result = FN_RES_NA;
 		this->steamID = steamID;
 		this->command = command;
 		this->slot = slot;
 		this->size = 0;
+		this->isBanned = false;
 		strncpy(this->url, url, REQUEST_URL_SIZE);
 	}
 
@@ -65,6 +66,7 @@ public:
 	int slot;
 	int size;
 	int result;
+	bool isBanned;
 	unsigned long long steamID;
 	char url[REQUEST_URL_SIZE];
 	char guid[MSSTRING_SIZE];
@@ -130,6 +132,8 @@ static void HandleRequest(FnRequestData* req)
 			return;
 
 		const JSONDocument& doc = *pDoc;
+
+		req->isBanned = doc["isBanned"].GetBool();
 		for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
 		{
 			if (LoadCharacter(req, val))
@@ -175,6 +179,7 @@ static void HandleRequest(FnRequestData* req)
 		if (pDoc == NULL)
 			return;
 
+		req->isBanned = (*pDoc)["isBanned"].GetBool();
 		strncpy(req->guid, (*pDoc)["data"]["id"].GetString(), MSSTRING_SIZE);
 		req->result = FN_RES_OK;
 		break;
@@ -269,37 +274,42 @@ void FnDataHandler::Think(bool bNoCallback)
 			CBasePlayer* pPlayer = (bNoCallback ? NULL : UTIL_PlayerBySteamID(req->steamID));
 			if (pPlayer)
 			{
-				charinfo_t& CharInfo = pPlayer->m_CharInfo[req->slot];
-
-				switch (req->command)
+				if (req->isBanned)
+					pPlayer->KickPlayer("You have been banned from FN!");
+				else
 				{
+					charinfo_t& CharInfo = pPlayer->m_CharInfo[req->slot];
 
-				case FN_REQ_LOAD:
-				case FN_REQ_CREATE:
-				{
-					if (req->result == FN_RES_OK)
+					switch (req->command)
 					{
-						CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
-						strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
+
+					case FN_REQ_LOAD:
+					case FN_REQ_CREATE:
+					{
+						if (req->result == FN_RES_OK)
+						{
+							CharInfo.AssignChar(req->slot, LOC_CENTRAL, (char*)req->data, req->size, pPlayer);
+							strncpy(CharInfo.Guid, req->guid, MSSTRING_SIZE);
+						}
+						else
+						{
+							CharInfo.Index = req->slot;
+							CharInfo.Location = LOC_CENTRAL;
+							CharInfo.Status = CDS_NOTFOUND;
+						}
+
+						CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
+						break;
 					}
-					else
+
+					case FN_REQ_DELETE:
 					{
-						CharInfo.Index = req->slot;
-						CharInfo.Location = LOC_CENTRAL;
 						CharInfo.Status = CDS_NOTFOUND;
+						CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
+						break;
 					}
 
-					CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
-					break;
-				}
-
-				case FN_REQ_DELETE:
-				{
-					CharInfo.Status = CDS_NOTFOUND;
-					CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
-					break;
-				}
-
+					}
 				}
 			}
 

@@ -372,7 +372,6 @@ void VGUI_ContainerPanel::Update()
 		return;
 
 	m_GearPanel->Reset();
-
 	AddInventoryItems();
 
 	//Move the Cancel button on top
@@ -382,6 +381,8 @@ void VGUI_ContainerPanel::Update()
 	msstring sGold;
 	_snprintf(sGold, MSSTRING_SIZE, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
+
+	m_AllowUpdate = false;
 }
 void VGUI_ContainerPanel::AddInventoryItems()
 {

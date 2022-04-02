@@ -55,14 +55,10 @@ BOOL WINAPI DllMain(
 		DBG_INPUT;
 
 	if (fdwReason == DLL_PROCESS_ATTACH)
-	{
 		MSGlobals::DLLAttach(hinstDLL);
-		logfile.DebugOpen();
-	}
 	else if (fdwReason == DLL_PROCESS_DETACH)
-	{
 		MSGlobals::DLLDetach();
-	}
+
 	return TRUE;
 }
 #endif
@@ -74,4 +70,7 @@ extern "C" void DLLEXPORT GiveFnptrsToDll(enginefuncs_t * pengfuncsFromEngine, g
 #endif
 	memcpy(&g_engfuncs, pengfuncsFromEngine, sizeof(enginefuncs_t));
 	gpGlobals = pGlobals;
+#ifndef _WIN32
+	MSGlobals::DLLAttach(0);
+#endif
 }

@@ -243,9 +243,9 @@ bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMap
 void MSChar_Interface::CreateSaveDir()
 {
 #ifdef _WIN32
-	mkdir(MSGlobals::DllPath + "/../save");
+	mkdir(MSGlobals::AbsGamePath + "/save");
 #else
-	mkdir(MSGlobals::DllPath + "/../save", 0777);
+	mkdir(MSGlobals::AbsGamePath + "/save", 0777);
 #endif	
 }
 

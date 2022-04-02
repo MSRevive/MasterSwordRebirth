@@ -51,12 +51,11 @@ public:
 	static msstring map_music_combat_file;	 //Thothie JAN2013_10 - dynamic music settings
 	static msstring map_music_combat_length; //Thothie JAN2013_10 - dynamic music settings
 
-	static msstring MapWeather;	  //Thothie SEP2007a
-	static msstring HPWarn;		  //Thothie SEP2007a
-	static float maxviewdistance; //Thothie JAN2010_23
-	//static int FakeHP;				//DEC2007a - AUG2011_17 Thothie - Switched to cvar
-	static msstring DllFileName;			//Dll filename
-	static msstring DllPath;				//Dll path
+	static msstring MapWeather;				//Thothie SEP2007a
+	static msstring HPWarn;					//Thothie SEP2007a
+	static float maxviewdistance;			//Thothie JAN2010_23
+	//static int FakeHP;					//DEC2007a - AUG2011_17 Thothie - Switched to cvar
+	static msstring AbsGamePath;			//GameDirPath Absolute
 	static int DefaultGold,					//Starting gold
 		FXLimit;							//Server FX Limit
 	static msstringlist DefaultWeapons;		//Default starting weapons

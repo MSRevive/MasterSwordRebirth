@@ -55,8 +55,8 @@ CStorePanel::CStorePanel() : VGUI_ContainerPanel()
 #define TITLE_Y YRES(48)
 
 //Create the sell calculation
-#define SELLLABEL_X ITEM_CONTAINER_X
-#define SELLLABEL_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y
+#define SELLLABEL_X ITEM_CONTAINER_X + XRES(2)
+#define SELLLABEL_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y + YRES(20)
 
 	m_SaleLabel = new MSLabel(this, "", SELLLABEL_X, SELLLABEL_Y);
 	m_SaleLabel->setFont(g_FontTitle);

@@ -92,6 +92,7 @@ void CStoreSellPanel::ItemCreated(void *pData)
 {
 	containeritem_t &Item = *(containeritem_t *)pData;
 	Item.Disabled = !InterestedInItem(Item.Name); //Disabled, if vendor isn't interested in this item
+	m_AllowUpdate = true;
 }
 
 void CStoreSellPanel::ItemHighlighted(void *pData)
@@ -173,5 +174,8 @@ void CStoreSellPanel::SellAll()
 void SellWindow_Update()
 {
 	if (gViewPort && gViewPort->m_pStoreSellMenu)
+	{
+		gViewPort->m_pStoreSellMenu->m_AllowUpdate = true;
 		gViewPort->m_pStoreSellMenu->Update();
+	}
 }

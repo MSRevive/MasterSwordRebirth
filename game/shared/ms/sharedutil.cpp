@@ -83,6 +83,7 @@ void CMSStream::open(msstring_ref FileName, int mode)
 	}
 	buffered = "";
 }
+
 void CMSStream::DebugOpen()
 {
 	//Force open the debug logs whenever the first log event occurs.
@@ -91,7 +92,7 @@ void CMSStream::DebugOpen()
 		return;
 
 #ifdef KEEP_LOG
-	char cLogfile[MAX_PATH], *pFileName;
+	char cLogfile[MAX_PATH], * pFileName;
 
 #ifdef VALVE_DLL
 	//Thothie Assemble msc_log
@@ -99,7 +100,7 @@ void CMSStream::DebugOpen()
 	char cChatFile[MAX_PATH];
 	time_t curTime;
 	time(&curTime);
-	struct tm *TheTime = localtime(&curTime);
+	struct tm* TheTime = localtime(&curTime);
 	int month = TheTime->tm_mon + 1;
 	int year = TheTime->tm_year + 1900;
 	//sprintf( pFileName, "msc_log_%i_%i", month, year );
@@ -109,12 +110,12 @@ void CMSStream::DebugOpen()
 	pFileName = "log_cldll";
 #endif
 
-	_snprintf(cLogfile, MAX_PATH, "%s/../%s.log", MSGlobals::DllPath.c_str(), pFileName);
+	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pFileName);
 	try
 	{
 		logfile.open(cLogfile);
 #ifdef VALVE_DLL
-		_snprintf(cChatFile, MAX_PATH, "%s/../%s.log", MSGlobals::DllPath.c_str(), pChatName);
+		_snprintf(cChatFile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatName);
 		chatlog.open(cChatFile, 1);
 #endif
 		g_log_initialized = true;
