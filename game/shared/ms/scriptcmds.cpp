@@ -5717,12 +5717,12 @@ bool CScript::ScriptCmd_Set(
 bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	#ifdef VALVE_DLL
-		char *Val = Params[1];
+		int Val = atoi(Params[1]);
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
 		
 		if(pEntity && !pEntity->NOSEND)
 		{
-			if(strcmp(Val, "true"))
+			if(Val > 0)
 				pEntity->FORCESEND = true;
 			else
 				pEntity->FORCESEND = false;
@@ -5742,12 +5742,12 @@ bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, m
 bool CScript::ScriptCmd_SetEntNoSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	#ifdef VALVE_DLL
-		char *Val = Params[1];
+		int Val = atoi(Params[1]);
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
 		
 		if(pEntity && !pEntity->FORCESEND)
 		{
-			if(strcmp(Val, "true"))
+			if(Val > 0)
 				pEntity->NOSEND = true;
 			else
 				pEntity->NOSEND = false;
