@@ -5720,15 +5720,17 @@ bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, m
 		char *Val = Params[1];
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
 		
-		if(pEntity)
+		if(pEntity && !pEntity->NOSEND)
 		{
 			if(strcmp(Val, "true"))
 				pEntity->FORCESEND = true;
 			else
 				pEntity->FORCESEND = false;
+				
+			return true;
 		}
 			
-		return true;	
+		return false;	
 	#endif
 	
 	return false;
@@ -5743,15 +5745,17 @@ bool CScript::ScriptCmd_SetEntNoSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msst
 		char *Val = Params[1];
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
 		
-		if(pEntity)
+		if(pEntity && !pEntity->FORCESEND)
 		{
 			if(strcmp(Val, "true"))
 				pEntity->NOSEND = true;
 			else
 				pEntity->NOSEND = false;
+				
+			return true;
 		}
 			
-		return true;	
+		return false;	
 	#endif
 	
 	return false;
