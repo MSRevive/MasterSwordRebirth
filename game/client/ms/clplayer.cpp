@@ -658,6 +658,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 
 	BEGIN_READ(pbuf, iSize);
 	byte Operation = READ_BYTE();
+	bool bDoInvUpdate = false;
 
 	switch (Operation)
 	{
@@ -666,28 +667,31 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 	{
 		dbg("Add item");
 		CGenericItem *pItem = ReadGenericItem(true);
-		if (!pItem)
-			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add item' msg but client couldn't create item");
-
-		//Add the item, without any checks (free hand, weight, etc.)
-		if (player.AddItem(pItem, (pItem->m_Location == ITEMPOS_HANDS), false, pItem->m_Hand))
+		if (pItem)
 		{
-			if (pItem->m_Location > ITEMPOS_HANDS)
+			//Add the item, without any checks (free hand, weight, etc.)
+			if (player.AddItem(pItem, (pItem->m_Location == ITEMPOS_HANDS), false, pItem->m_Hand))
 			{
-				//Thothie FEB2010_01 Pass gender/race with wear
-				static msstringlist Params;
-				Params.clearitems();
-				Params.add(pItem->m_pOwner->m_Race);
-				Params.add((pItem->m_pOwner->m_Gender == GENDER_MALE) ? "male" : "female"); //Thothie: This returns wrong here
-				Params.add("__MsgFunc_Item_Add");
-				pItem->CallScriptEvent("game_wear", &Params);
+				if (pItem->m_Location > ITEMPOS_HANDS)
+				{
+					//Thothie FEB2010_01 Pass gender/race with wear
+					static msstringlist Params;
+					Params.clearitems();
+					Params.add(pItem->m_pOwner->m_Race);
+					Params.add((pItem->m_pOwner->m_Gender == GENDER_MALE) ? "male" : "female"); //Thothie: This returns wrong here
+					Params.add("__MsgFunc_Item_Add");
+					pItem->CallScriptEvent("game_wear", &Params);
+				}
+				bDoInvUpdate = true;
+			}
+			else
+			{
+				pItem->SUB_Remove();
+				MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add item' msg but client didn't accept item ") + pItem->DisplayName());
 			}
 		}
 		else
-		{
-			pItem->SUB_Remove();
-			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add item' msg but client didn't accept item ") + pItem->DisplayName());
-		}
+			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add item' msg but client couldn't create item");
 	}
 	break;
 
@@ -702,7 +706,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		{
 			int LastLoc = pItem->m_Location;
 			pItem = ReadGenericItem(false);
-			if (LastLoc == ITEMPOS_HANDS && pItem->m_Location > ITEMPOS_HANDS)
+			if (pItem && (LastLoc == ITEMPOS_HANDS) && (pItem->m_Location > ITEMPOS_HANDS))
 			{
 				//Thothie FEB2010_01 Pass gender/race with wear
 				static msstringlist Params;
@@ -711,10 +715,10 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 				Params.add((pItem->m_pOwner->m_Gender == GENDER_MALE) ? "male" : "female");
 				Params.add("__MsgFunc_Item_Update");
 				pItem->CallScriptEvent("game_wear", &Params);
+				bDoInvUpdate = true;
 			}
 		}
-
-		if (!pItem)
+		else
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'update item' msg but client couldn't find item");
 	}
 	break;
@@ -725,7 +729,6 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		dbg("Remove item");
 		ulong ItemID = READ_LONG();
 		CGenericItem *pItem = MSUtil_GetItemByID(ItemID, &player);
-
 		if (pItem)
 		{
 			//Must check if item is still on the player...
@@ -736,6 +739,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 				player.RemoveItem(pItem);
 				pItem->SUB_Remove();
 			}
+			bDoInvUpdate = true;
 		}
 		else
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Non-Fatal: Got 'remove item' msg but item ") + int(ItemID) + " not found.");
@@ -747,8 +751,10 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 	{
 		dbg("Add item to container");
 		ulong ContainerID = READ_LONG();
+
 		dbg("Read Long");
 		CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, &player);
+
 		dbg("get pContainer");
 		if (!pContainer)
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't find container") + (int)ContainerID);
@@ -758,8 +764,10 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add to container' msg but client couldn't find item");
 
-		if (!pItem->PutInPack(pContainer))
+		if (pContainer && pItem && !pItem->PutInPack(pContainer))
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't put ") + pItem->DisplayName() + " in " + pContainer->DisplayName());
+		
+		bDoInvUpdate = true;
 	}
 	break;
 
@@ -777,9 +785,13 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'remove from container' msg but client couldn't find item");
 
-		if (!pContainer->Container_RemoveItem(pItem))
+		if (pContainer && pItem && !pContainer->Container_RemoveItem(pItem))
 			MSErrorConsoleText("__MsgFunc_Item()", "Non-Fatal: Got 'remove from container' msg but item was not found in container");
-		pItem->SUB_Remove();
+
+		if (pItem)
+			pItem->SUB_Remove();
+
+		bDoInvUpdate = true;
 	}
 	break;
 
@@ -791,6 +803,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		msstring StorageName = READ_STRING();
 		float flFeeRatio = READ_FLOAT();
 		Storage_Show(DisplayName, StorageName, flFeeRatio);
+		bDoInvUpdate = true;
 	}
 	break;
 
@@ -890,49 +903,45 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 			int iParam1;
 			float fParam1;
 			msstring sParam1;
-			if (Mode == "model")
-			{
-				sParam1 = READ_STRING();
-			}
+
+			if (Mode == "model")			
+				sParam1 = READ_STRING();			
 			else
 			{
-				if (Mode == "animspeed")
-				{
-					fParam1 = READ_FLOAT();
-				}
-				else
-				{
-					iParam1 = READ_BYTE();
-				}
+				if (Mode == "animspeed")				
+					fParam1 = READ_FLOAT();				
+				else				
+					iParam1 = READ_BYTE();				
 			}
 
 			CGenericItem *pItem = player.Hand(iHand);
-
-			if (Mode == "submodel")
+			if (pItem)
 			{
-
-				pItem->m_ViewModelPart = iParam1;
-				pItem->m_ViewModelSubmodel = READ_BYTE();
-				//pItem->m_ViewModelBody = Param1;
-			}
-			else if (Mode == "skin")
-				pItem->m_Skin = iParam1;
-			else if (Mode == "rendermode")
-				pItem->m_RenderMode = iParam1;
-			else if (Mode == "renderfx")
-				pItem->m_RenderFx = iParam1;
-			else if (Mode == "renderamt")
-				pItem->m_RenderAmt = iParam1;
-			else if (Mode == "model")
-			{
-				//Print( "%s\n", sParam1.c_str() );
-				pItem->m_ViewModel = sParam1;
-			}
-			else if (Mode == "animspeed")
-			{
-				//Thothie OCT2011_30 viewnim_speed
-				Print("DEBUG: cl_got_animspeed %f\n", fParam1);
-				pItem->m_ViewModelAnimSpeed = fParam1;
+				if (Mode == "submodel")
+				{
+					pItem->m_ViewModelPart = iParam1;
+					pItem->m_ViewModelSubmodel = READ_BYTE();
+					//pItem->m_ViewModelBody = Param1;
+				}
+				else if (Mode == "skin")
+					pItem->m_Skin = iParam1;
+				else if (Mode == "rendermode")
+					pItem->m_RenderMode = iParam1;
+				else if (Mode == "renderfx")
+					pItem->m_RenderFx = iParam1;
+				else if (Mode == "renderamt")
+					pItem->m_RenderAmt = iParam1;
+				else if (Mode == "model")
+				{
+					//Print( "%s\n", sParam1.c_str() );
+					pItem->m_ViewModel = sParam1;
+				}
+				else if (Mode == "animspeed")
+				{
+					//Thothie OCT2011_30 viewnim_speed
+					Print("DEBUG: cl_got_animspeed %f\n", fParam1);
+					pItem->m_ViewModelAnimSpeed = fParam1;
+				}
 			}
 		}
 		break;
@@ -951,21 +960,22 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		for (int i = 0; i < numParams; i++)
 			Params.add(READ_STRING());
 
-		pItem->CallScriptEvent(Event, &Params);
+		if (pItem)
+			pItem->CallScriptEvent(Event, &Params);
 	}
 	break;
 	
 	//Thothie OCT2016_23 - displaydesc
 	case 9:
 	{
-		ulong lID = READ_LONG ( );
-		CGenericItem *pItem = MSUtil_GetItemByID( lID );
-		ShowWeaponDesc( pItem );
+		ulong lID = READ_LONG();
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
+		ShowWeaponDesc(pItem);
 	}
 	break;
 	}	
 
-	if (Operation <= 5)
+	if (bDoInvUpdate)
 	{
 		dbg("UpdateActiveMenus()");
 		UpdateActiveMenus();
