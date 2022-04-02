@@ -1846,7 +1846,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 				if (pPlayerAttacker)
 				{
-					 _snprintf(sz, sizeof(sz), "You attack %s %s. %s %s%s",
+					 _snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
 					 		pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
 							pTarget->DisplayName(),
 							szStats, szHitMiss, szDamage);
