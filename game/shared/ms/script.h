@@ -362,6 +362,8 @@ public:
 	SCRIPTCPP_GETTER( WithinBox );
 	SCRIPTCPP_GETTER( GetItemTable ); //MiB FEB2019_23 - item table getter
 	SCRIPTCPP_GETTER( Conjunction ); //MiB FEB2019_23 - Extended If Conditionals
+	SCRIPTCPP_GETTER( SetEntForceSend );
+	SCRIPTCPP_GETTER( SetEntNoSend );
 #undef SCRIPTCPP_GETTER
 
 	//bool ScriptCmd_Hud( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params );

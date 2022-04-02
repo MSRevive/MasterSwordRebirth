@@ -194,6 +194,9 @@ void CScript::ScriptGetterHash_Setup( )
         m_GlobalGetterHash["$g_get_set_hasvalue"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetSet);
         m_GlobalGetterHash["$g_get_set_exists"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetSet);
         m_GlobalGetterHash["$g_get_set_amt"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_GetSet);
+				
+        m_GlobalGetterHash["$set_ent_forcesend"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_SetEntForceSend);
+        m_GlobalGetterHash["$set_ent_nosend"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_SetEntNoSend);
 	}
 }
 
@@ -2182,6 +2185,40 @@ msstring CScript::ScriptGetter_GetQuestData( msstring& FullName, msstring& Parse
 	return FullName;
 }
 
+//$set_ent_forcesend(<entity>,<bool>)
+//- set the entity to be force sent to the client.
+//- scope: server
+msstring CScript::ScriptGetter_SetEntForceSend(msstring &FullName, msstring &ParserName, msstringlist &Params)
+{
+#ifdef VALVE_DLL
+	msstring &Val = Params[1];
+	CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
+	
+	if(pEntity)
+		pEntity->FORCESEND = &Val;
+		
+#endif
+	
+	return FullName;
+}
+
+//$set_ent_nosend(<entity>,<bool>)
+//- set the entity not to be sent to via client.
+//- scope: server
+msstring CScript::ScriptGetter_SetEntNoSend(msstring &FullName, msstring &ParserName, msstringlist &Params)
+{
+#ifdef VALVE_DLL
+	msstring &Val = Params[1];
+	CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
+	
+	if(pEntity)
+		pEntity->NOSEND = &Val;
+		
+#endif
+	
+	return FullName;
+}
+
 // All below return "[ERROR_NO_SET]" if set doesn't exist, except $get_set_exists
 // $[g_]get_set([Entity,]<set_name>,<index>)
 // - Gets the <index> element in the set. Note that this isn't strictly "proper" behavior
@@ -2194,20 +2231,16 @@ msstring CScript::ScriptGetter_GetQuestData( msstring& FullName, msstring& Parse
 // - Determines if the set exists
 // $[g_]get_set_amt([Entity,]<set_name>)
 // - Gets the number of values in the set
-msstring CScript::ScriptGetter_GetSet(
-  msstring &                            FullName
-, msstring &                            ParserName
-, msstringlist &                        Params
-)
+msstring CScript::ScriptGetter_GetSet(msstring &FullName, msstring &ParserName, msstringlist &Params)
 {
-    msstring                            Return;
-    size_t                              vParam = 0;
-    msstring                            vsSubCmd;
-    bool                                bGlobal = false;
-    CBaseEntity *                       pEntity = NULL;
-    msstring                            vsSetName;
-    bool                                bExisted;
-    msscriptset::iterator               iVal;
+    msstring Return;
+    size_t vParam = 0;
+    msstring vsSubCmd;
+    bool bGlobal = false;
+    CBaseEntity *pEntity = NULL;
+    msstring vsSetName;
+    bool bExisted;
+    msscriptset::iterator iVal;
     if ( Params.size() )
     {
         vsSetName = Params[vParam++];
