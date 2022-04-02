@@ -279,6 +279,9 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["g_set.erase"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Set);
 		m_GlobalCmdHash["g_set.clear"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Set);
 		m_GlobalCmdHash["g_set.copy"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Set);
+		
+		m_GlobalCmdHash["forcesend"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_SetEntForceSend);
+		m_GlobalCmdHash["nosend"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_SetEntNoSend);
 	}
 }
 
@@ -5706,6 +5709,52 @@ bool CScript::ScriptCmd_Set(
 	else ERROR_MISSING_PARMS;
 
 	return true;
+}
+
+// forcesend <entity> <bool>
+//- scope: server
+//- set the entity to be force sent to the client.
+bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
+{
+	#ifdef VALVE_DLL
+		char *Val = Params[1];
+		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
+		
+		if(pEntity)
+		{
+			if(strcmp(Val, "true"))
+				pEntity->FORCESEND = true;
+			else
+				pEntity->FORCESEND = false;
+		}
+			
+		return true;	
+	#endif
+	
+	return false;
+}
+
+// nosend <entity> <bool>
+//- scope: server
+//- set the entity not to be sent to via client.
+bool CScript::ScriptCmd_SetEntNoSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
+{
+	#ifdef VALVE_DLL
+		char *Val = Params[1];
+		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
+		
+		if(pEntity)
+		{
+			if(strcmp(Val, "true"))
+				pEntity->NOSEND = true;
+			else
+				pEntity->NOSEND = false;
+		}
+			
+		return true;	
+	#endif
+	
+	return false;
 }
 
 //setalive <0|1>
