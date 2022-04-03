@@ -2447,7 +2447,7 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 			float xpsend = 0.0;
 			// MiB JUN2010_19 - Decreases the exp-damage ratio if monster was overkilled
 			float mult = min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
-			for (int n = 0; n < SKILL_MAX_ATTACK; n++)
+			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
 				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
 				{
@@ -2465,6 +2465,7 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 						dbg("pPlayer->LearnSkill");
 						if (!xp_custom)
 							pPlayer->LearnSkill(n, r, xp); //NOV2014_21 Thothie - script side XP management option
+
 						//NOV2014_21 Thothie - script side XP management option [begin]
 						if (xp_dump)
 						{
@@ -2474,7 +2475,7 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 							skillname.append(".");
 							if (skillname.contains("Spell"))
 								skillname.append(SpellTypeList[r]);
-							else
+							else if (r < 3)
 								skillname.append(SkillTypeList[r]);
 
 							Util_ScriptArray(this, "add", "ARRAY_XP_SKILLS", skillname.c_str());
