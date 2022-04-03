@@ -258,7 +258,7 @@ public:
 		else if (Prop == name ".roll")             \
 			RETURN_FLOAT(angles.z)                 \
 	}
-#define RETURN_NOTHING_STR "�NA�"
+#define RETURN_NOTHING_STR "¯NA¯"
 #define RETURN_NOTHING return RETURN_NOTHING_STR
 #define RETURN_ZERO return "0"
 

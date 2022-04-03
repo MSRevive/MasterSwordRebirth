@@ -832,7 +832,7 @@ void CGenericItem::StrikeLand()
 	msstringlist Parameters;
 	Parameters.add(pHit ? (pHit->IsMSMonster() ? "npc" : "world") : "none");
 	Parameters.add(VecToString(Damage.outTraceResult.vecEndPos));
-	Parameters.add(pHit ? EntToString(pHit) : "�NONE�");
+	Parameters.add(pHit ? EntToString(pHit) : "¯NONE¯");
 	Parameters.add(Damage.AttackHit ? "1" : "0");
 	CallScriptEvent(CurrentAttack->CallbackName + "_strike", &Parameters);
 

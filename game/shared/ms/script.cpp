@@ -1435,19 +1435,17 @@ msstring CScript::ScriptGetter_GetByName( msstring& FullName, msstring& ParserNa
 	//priority: moderate, scope: server
 #ifdef VALVE_DLL
 	msstring Return;
-	if( Params.size() >= 1 )
+	if (Params.size() >= 1)
 	{
-		CBaseEntity *pEntity = UTIL_FindEntityByString( NULL, "netname", msstring("�") + Params[0] );
-		if( pEntity )
-		{
+		CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + Params[0]);
+		if (pEntity)
 			return EntToString(pEntity);
-		}
 		else
 		{
 			//Thothie DEC2014_11 check map ents too
 			//Print("XEBUG: Checkin map ents for %s\n",Params[0].c_str());
-			CBaseEntity *pEntity = UTIL_FindEntityByString( NULL, "targetname", Params[0].c_str() );
-			if ( pEntity ) return EntToString(pEntity);
+			CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "targetname", Params[0].c_str());
+			if (pEntity) return EntToString(pEntity);
 		}
 	}
 	return "0";

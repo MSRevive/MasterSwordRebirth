@@ -127,7 +127,7 @@ void CMSStream::DebugOpen()
 }
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
-msstring EntToString(class CBaseEntity *pEntity) //Converts an entity to a string of format "�Pent�P(idx,addr)"
+msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a string of format "PentP(idx,addr)"
 {
 	if (!pEntity)
 		return "";
@@ -137,7 +137,7 @@ msstring EntToString(class CBaseEntity *pEntity) //Converts an entity to a strin
 
 	return RetString;
 }
-CBaseEntity *StringToEnt(msstring_ref EntString) //Converts an string of format "�Pent�P(idx,addr)" to an entity
+CBaseEntity *StringToEnt(msstring_ref EntString) // Converts an string of format "PentP(idx,addr)" to an entity
 {
 	int Idx = -1;
 	unsigned int Addr = ~0;

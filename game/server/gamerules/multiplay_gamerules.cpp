@@ -202,14 +202,17 @@ void CHalfLifeMultiplay :: Think( void )
 	
 	float flTimeLimit = timelimit.value * 60;
 	static float TimeLastPlayerLeft = 0;
-	if( flTimeLimit && !UTIL_NumPlayers() )
+	if (flTimeLimit && !UTIL_NumPlayers())
 	{
-		if( gpGlobals->time >= TimeLastPlayerLeft + flTimeLimit )
+		if (gpGlobals->time >= TimeLastPlayerLeft + flTimeLimit)
 		{
 			//Thothie FEB2008a - let the game master handle the time out thing in case he has to do somethin
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
-			IScripted *pGMScript = pGameMasterEnt->GetScripted();
-			pGMScript->CallScriptEvent( "game_timedout" );
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+			if (pGMScript)
+				pGMScript->CallScriptEvent("game_timedout");
+			else
+				ALERT(at_console, "Game Master not available for timeout!\n");
 			return;
 		}
 	}

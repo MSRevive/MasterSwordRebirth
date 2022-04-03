@@ -63,9 +63,9 @@ void Print(char *szFmt, ...);
 	Vector GetRelativePos( Vector &Ang, Vector &Dir );	//Uses Dir.x for right-left, Dir.y for forward-back, and Dir.z as up-down, relative to the angle
 #endif
 
-#define ENT_PREFIX "�Pent�P"
-msstring EntToString( class CBaseEntity *pEntity );			//Converts an entity to a string of format "�Pent�P(idx,addr)"
-CBaseEntity *StringToEnt( msstring_ref EntString);			//Converts an string of format "�Pent�P(idx,addr)" to an entity
+#define ENT_PREFIX "PentP"
+msstring EntToString( class CBaseEntity *pEntity );			//Converts an entity to a string of format "PentP(idx,addr)"
+CBaseEntity *StringToEnt( msstring_ref EntString);			//Converts an string of format "PentP(idx,addr)" to an entity
 
 void WRITE_FLOAT( float Float );
 char *GetFullResourceName( msstring_ref PartialName );	//Adds models/ or sprites/ to a model or sprite filename

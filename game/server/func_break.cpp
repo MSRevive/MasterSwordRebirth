@@ -585,26 +585,33 @@ int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			{
 				if (m_scriptevent.starts_with("gm_"))
 				{
-					CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-					IScripted *pGMScript = pGameMasterEnt->GetScripted();
-					//Thothie JAN2011_25 - add ID of touch for GM to work with, as well as params
-					static msstringlist Params;
-					Params.clearitems();
-					Params.add(EntToString(pOther));
-
-					static msstringlist Tokens;
-					Tokens.clearitems();
-					TokenizeString(m_scriptevent.c_str(), Tokens);
-					if (Tokens.size() > 1)
+					CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+					IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+					if (pGMScript)
 					{
-						for (int i = 0; i < Tokens.size(); i++)
-						{
-							if (i > 0)
-								Params.add(Tokens[i].c_str());
-						}
-					}
+						//Thothie JAN2011_25 - add ID of touch for GM to work with, as well as params
+						static msstringlist Params;
+						static msstringlist Tokens;
 
-					pGMScript->CallScriptEvent(Tokens[0].c_str(), &Params);
+						Params.clearitems();
+						Tokens.clearitems();
+
+						Params.add(EntToString(pOther));
+						TokenizeString(m_scriptevent.c_str(), Tokens);
+
+						if (Tokens.size() > 1)
+						{
+							for (int i = 0; i < Tokens.size(); i++)
+							{
+								if (i > 0)
+									Params.add(Tokens[i].c_str());
+							}
+						}
+
+						pGMScript->CallScriptEvent(Tokens[0].c_str(), &Params);
+					}
+					else
+						ALERT(at_console, "Unable to execute scriped event for func_break!\n");
 				}
 				else
 				{

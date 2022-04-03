@@ -1803,13 +1803,15 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	MESSAGE_END();
 	*/
 	//NOV2014_12 Thothie - wanted to axe this ent entirely, but just making MSC friendly instead.
-	CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-	IScripted *pGMScript = pGameMasterEnt->GetScripted();
-
-	msstringlist Parameters;
-	Parameters.add(STRING(m_szMapName));
-	Parameters.add(STRING(m_szLandmarkName));
-	pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+	if (pGMScript)
+	{
+		msstringlist Parameters;
+		Parameters.add(STRING(m_szMapName));
+		Parameters.add(STRING(m_szLandmarkName));
+		pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+	}
 }
 
 FILE_GLOBAL char st_szNextMap[cchMapNameMost];

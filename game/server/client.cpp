@@ -478,17 +478,21 @@ void ClientCommand2(edict_t *pEntity)
 	{
 		if (CMD_ARGC() >= 3)
 		{
-			char *Args = (char *)CMD_ARGS();
+			char* Args = (char*)CMD_ARGS();
 			int SayType = atoi(CMD_ARGV(1));
 			msstring Text = msstring(Args).find_str(" "); //skip the first parameter
 			Text = Text.substr(1);
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-			IScripted *pGMScript = pGameMasterEnt->GetScripted();
-			msstringlist Parameters;
-			Parameters.add(EntToString(pPlayer));
-			Parameters.add(CMD_ARGV(1));
-			Parameters.add(Text);
-			pGMScript->CallScriptEvent("game_playerspeak", &Parameters);
+
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+			if (pGMScript)
+			{
+				msstringlist Parameters;
+				Parameters.add(EntToString(pPlayer));
+				Parameters.add(CMD_ARGV(1));
+				Parameters.add(Text);
+				pGMScript->CallScriptEvent("game_playerspeak", &Parameters);
+			}
 
 			pPlayer->Speak(Text, (speech_type)SayType);
 		}
@@ -1167,7 +1171,7 @@ void ClientCommand2(edict_t *pEntity)
 		if (!strcmp(CMD_ARGV(1), "GM"))
 		{
 			ALERT(at_console, "DEBUG: ce - requested GM as target\n");
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
+			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 			if (pGameMasterEnt)
 			{
 				pScripted = pGameMasterEnt->GetScripted();
@@ -1738,19 +1742,18 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	LinkUserMessages();
 
 	//If the game master hasn't been created yet, create it now - Solokiller
-	CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
-
-	if( !pGameMasterEnt )
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	if (!pGameMasterEnt)
 	{
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
-		CMSMonster *NewMonster = (CMSMonster *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
-		if( NewMonster ) {
-			NewMonster->pev->origin = Vector( 20000,-10000,-20000 );
-			NewMonster->Spawn( "game_master" );	
+		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
+		if (NewMonster)
+		{
+			NewMonster->pev->origin = Vector(20000, -10000, -20000);
+			NewMonster->Spawn("game_master");
 
 			msstringlist params;
-
-			NewMonster->CallScriptEvent( "game_dynamically_created", &params );
+			NewMonster->CallScriptEvent("game_dynamically_created", &params);
 		}
 	}
 

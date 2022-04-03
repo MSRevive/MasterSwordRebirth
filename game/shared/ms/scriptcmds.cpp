@@ -389,7 +389,7 @@ bool GetNextDebugEntity(
 	{
 		if ( rDebugInfo.mTimesLooked == 1 )
 		{
-			rDebugInfo.mpFoundEntity = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
+			rDebugInfo.mpFoundEntity = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 		}
 	}
 	else
@@ -1687,7 +1687,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 			}
 		}
 	}
-	else return "�NA�";
+	else return "¯NA¯";
 
 	return fSuccess ? "1" : "0";
 }
@@ -4446,8 +4446,8 @@ bool CScript::ScriptCmd_Name(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 
 			if (!m.pScriptedEnt->pev->netname)
 			{
-				//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("�") + Name );
-				m.pScriptedEnt->m_NetName = msstring("�") + Name;
+				//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("¯") + Name );
+				m.pScriptedEnt->m_NetName = msstring("¯") + Name;
 				m.pScriptedEnt->pev->netname = MAKE_STRING(m.pScriptedEnt->m_NetName.c_str());
 			}
 			m.pScriptedEnt->m_DisplayName = GetScriptVar(Name);
@@ -4484,8 +4484,8 @@ bool CScript::ScriptCmd_NameUnique(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	{
 		if (m.pScriptedEnt)
 		{
-			//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("�") + Params[0] );
-			m.pScriptedEnt->m_NetName = msstring("�") + Params[0];
+			//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("¯") + Params[0] );
+			m.pScriptedEnt->m_NetName = msstring("¯") + Params[0];
 			m.pScriptedEnt->pev->netname = MAKE_STRING(m.pScriptedEnt->m_NetName.c_str());
 		}
 	}	//Need braces

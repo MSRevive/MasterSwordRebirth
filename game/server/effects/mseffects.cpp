@@ -421,13 +421,17 @@ class CMSChangeLevel : public CBaseEntity
 	{
 		//MAR2008a - Thothie - Let game master handle mstrig_changelevel level changes
 		//- original: CHANGE_LEVEL( (char *)STRING(sDestMap), NULL );
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-
-		msstringlist Parameters;
-		Parameters.add(STRING(sDestMap));
-		Parameters.add(STRING(sDestTrans));
-		pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
+		{
+			msstringlist Parameters;
+			Parameters.add(STRING(sDestMap));
+			Parameters.add(STRING(sDestTrans));
+			pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+		}
+		else
+			ALERT(at_console, "Unable to find game_master for level change!\n");
 	}
 	void KeyValue(KeyValueData *pkvd)
 	{

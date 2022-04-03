@@ -418,9 +418,10 @@ public:
 		Params.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
 		Params.add("3");
 
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-		pGMScript->CallScriptEvent("gm_set_idle_music", &Params);
+		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
+			pGMScript->CallScriptEvent("gm_set_idle_music", &Params);
 
 		//old way
 		/*
@@ -502,9 +503,10 @@ public:
 			Params.add(ms_npcname.c_str());
 			Params.add(MessageGet());
 
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-			IScripted *pGMScript = pGameMasterEnt->GetScripted();
-			pGMScript->CallScriptEvent("gm_ms_text", &Params);
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+			if (pGMScript)
+				pGMScript->CallScriptEvent("gm_ms_text", &Params);
 		}
 
 		//UTIL_SayTextAll( MessageGet(), pActivator );
@@ -549,20 +551,18 @@ public:
 		}
 		*/
 	}
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 	{
 		msstringlist Parameters;
 		Parameters.add(m_WeatherName);
 		TokenizeString(m_WeatherOptions, Parameters);
 
 		//Thothie DEC2010_27 - lock weather via game master
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-
-		if (pGameMasterEnt)
-		{
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
 			pGMScript->CallScriptEvent("game_set_weather", &Parameters);
-		}
 
 		//Thothie DEC2010_27 - old system
 		/*
@@ -678,7 +678,7 @@ public:
 
 	void MusicTouch(CBaseEntity *pOther)
 	{
-		if (!pOther->IsPlayer())
+		if (!pOther || !pOther->IsPlayer())
 			return;
 
 		if (ms_master)
@@ -709,15 +709,15 @@ public:
 
 		if (strcmp(mt_global.c_str(), "1") == 0)
 		{
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-			IScripted *pGMScript = pGameMasterEnt->GetScripted();
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			static msstringlist Params;
-			pGMScript->CallScriptEvent("gm_set_music", &Params);
+			if (pGMScript)
+				pGMScript->CallScriptEvent("gm_set_music", &Params);
 		}
 		else
-		{
 			pPlayer->CallScriptEvent("set_music", &Params);
-		}
+
 		//send script command to player, unless global, then GM
 	}
 };
@@ -1080,17 +1080,17 @@ public:
 	bool SpawnLimitReached()
 	{
 		msstring sTemp = STRING(pev->targetname);
-		if ( sTemp.starts_with("crit") ) return false;
+		if (sTemp.starts_with("crit")) return false;
 
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-		if ( pGMScript )
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
 		{
-			if ( atoi(pGMScript->GetFirstScriptVar("GM_DISABLE_SPAWNS")) == 1 ) return true;
+			if (atoi(pGMScript->GetFirstScriptVar("GM_DISABLE_SPAWNS")) == 1) return true;
 			int tlimit = atoi(pGMScript->GetFirstScriptVar("GM_SPAWN_LIMIT"));
-			if ( tlimit == 0 ) return false;
+			if (tlimit == 0) return false;
 			int tcount = atoi(pGMScript->GetFirstScriptVar("GM_SPAWN_COUNT"));
-			if ( tcount >= tlimit ) return true;
+			if (tcount >= tlimit) return true;
 		}
 
 		return false;
@@ -1504,7 +1504,7 @@ public:
 
 	void TransTouch(CBaseEntity *pOther)
 	{
-		if (!pOther->IsPlayer())
+		if (!pOther || !pOther->IsPlayer())
 			return;
 
 		if (ms_master)
@@ -1521,8 +1521,8 @@ public:
 			}
 		}
 
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return;
 
@@ -1623,15 +1623,9 @@ public:
 
 						iScripted->SetScriptVar("PLR_LOCAL_TRANS", "none");
 					}
-					else
-					{
-						return;
-					} //end valid_activate
 				}
 			} //end toucher in use
 		}
-		else
-			return; //not iscripted (for some reason)
 	}
 
 	bool FAllPlayersAreTouchingMe()
@@ -1744,8 +1738,8 @@ public:
 			}
 		}
 
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return FALSE;
 
@@ -1835,8 +1829,8 @@ public:
 		if (!pPlayer || pPlayer->CurrentTransArea != this)
 			return;
 
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return;
 
@@ -1860,27 +1854,22 @@ public:
 	//           (You can either vote yes or not vote, which means no)
 	void *MSQuery(int iRequest)
 	{
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return NULL;
 
 		if (!thoth_didvote)
 		{
-			/*char thoth_trans_string[64];
-			 strncpy(thoth_trans_string, "touch_trans_", sizeof(thoth_trans_string) );
-			strcat(thoth_trans_string,STRING(sDestMap));
-			FireTargets( thoth_trans_string, this, this, USE_TOGGLE, 0 );*/
-			//Thothie JAN2008a moving vote system from amx to scripts
-			//CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString( NULL, "netname", msstring("�") + "game_master" );
-			//IScripted *pGMScript = pGameMasterEnt->GetScripted();
-
-			msstringlist Parameters;
-			Parameters.add(STRING(sDestName));
-			Parameters.add(STRING(sDestMap));
-			Parameters.add(STRING(sName));
-			Parameters.add(STRING(sDestTrans));
-			pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
+			if (pGMScript)
+			{
+				msstringlist Parameters;
+				Parameters.add(STRING(sDestName));
+				Parameters.add(STRING(sDestMap));
+				Parameters.add(STRING(sName));
+				Parameters.add(STRING(sDestTrans));
+				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
+			}
 			thoth_didvote = true;
 		}
 

@@ -74,7 +74,7 @@ void CGenericItem::Spell_Think()
 	if (gpGlobals->time >= Spell_TimeCast + SpellData->TimeFizzle)
 	{
 		if (m_pPlayer)
-			m_pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(this) + " spell�s duration ends");
+			m_pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(this) + " spell’s duration ends");
 		DelayedRemove();
 	}
 }

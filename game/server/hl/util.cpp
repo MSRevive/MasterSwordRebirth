@@ -633,27 +633,34 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 	msstring m_scriptevent = tokenevents;
 	if (m_scriptevent.starts_with("gm_"))
 	{
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-		//Thothie JAN2011_25 - add ID of touch for GM to work with, as well as params
-		static msstringlist Params;
-		Params.clearitems();
-		if (pTarget)
-			Params.add(EntToString(pTarget));
-
-		Print("relay-tokenize");
-		static msstringlist Tokens;
-		Tokens.clearitems();
-		TokenizeString(m_scriptevent.c_str(), Tokens);
-		if (Tokens.size() > 1)
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
 		{
-			for (int i = 0; i < Tokens.size(); i++)
+			//Thothie JAN2011_25 - add ID of touch for GM to work with, as well as params
+			static msstringlist Params;
+			Params.clearitems();
+
+			if (pTarget)
+				Params.add(EntToString(pTarget));
+
+			Print("relay-tokenize");
+			static msstringlist Tokens;
+			Tokens.clearitems();
+			TokenizeString(m_scriptevent.c_str(), Tokens);
+			if (Tokens.size() > 1)
 			{
-				if (i > 0)
-					Params.add(Tokens[i].c_str());
+				for (int i = 0; i < Tokens.size(); i++)
+				{
+					if (i > 0)
+						Params.add(Tokens[i].c_str());
+				}
 			}
+
+			pGMScript->CallScriptEvent(Tokens[0].c_str(), &Params);
 		}
-		pGMScript->CallScriptEvent(Tokens[0].c_str(), &Params);
+		else
+			ALERT(at_console, "UTIL_DoTokenScriptEvent - Game Master Unavailable!\n");
 	}
 	else
 	{
@@ -1864,12 +1871,16 @@ void UTIL_Remove(CBaseEntity *pEntity)
 	msstring thoth_class = STRING(pEntity->pev->classname);
 	if (thoth_class.contains("msarea_monsterspawn") || thoth_class.contains("ms_monsterspawn"))
 	{
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("�") + "game_master");
-		IScripted *pGMScript = pGameMasterEnt->GetScripted();
-		msstringlist Parameters;
-		Parameters.add(EntToString(pEntity));
-		//Print("Zomg a mosnterspawn werz removed wrong!");
-		pGMScript->CallScriptEvent("game_monsterspawn_removed", &Parameters);
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
+		{
+			msstringlist Parameters;
+			Parameters.add(EntToString(pEntity));
+			pGMScript->CallScriptEvent("game_monsterspawn_removed", &Parameters);
+		}
+		else
+			ALERT(at_console, "UTIL_Remove - Game Master Unavailable!\n");
 	}
 #endif
 
