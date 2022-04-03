@@ -163,10 +163,15 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 	if (!pGlobalItem)
 		return NULL;
 
+	if (pGlobalItem && (pGlobalItem->m_Scripts.size() <= 0))
+	{
+		ALERT(at_console, "CGenericItemMgr::NewGenericItem: No scripts for %s %s ID %llu!\n", pGlobalItem->ItemName.c_str(), pGlobalItem->m_Name, pGlobalItem->m_iId);
+		return NULL;
+	}
+
 	dbg("Create Entity for Item");
 #ifdef VALVE_DLL
 	CGenericItem *pItem = GetClassPtr((CGenericItem *)NULL);
-
 	if ((ulong)pItem == m_LastDestroyedItemID)
 	{
 		//Work around for a bug.
@@ -205,6 +210,7 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 		pItem->m_Scripts.add(msnew CScript);
 		pGlobalItem->m_Scripts[0]->CopyAllData(pItem->m_Scripts[0], pItem, pItem);
 	}
+
 #ifndef VALVE_DLL
 	MSCLGlobals::AddEnt(pItem);
 #endif
