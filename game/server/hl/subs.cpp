@@ -86,8 +86,6 @@ BOOL CBaseDMStart::IsTriggered(CBaseEntity *pEntity)
 // This updates global tables that need to know about entities being removed
 void CBaseEntity::UpdateOnRemove(void)
 {
-	int i;
-
 	//Thothie DEC2007a - removed monsters tied to monster spawn
 	//Phayle
 	/*if ( STRING( pev->classname ) == "msarea_monsterspawn" )
@@ -97,21 +95,25 @@ void CBaseEntity::UpdateOnRemove(void)
 		MSGlobals::GameScript->CallScriptEvent( "game_monsterspawn_removed" , &Parameters );
 	}*/
 
-	if (FBitSet(pev->flags, FL_GRAPHED))
+	if (pev)
 	{
-		// this entity was a LinkEnt in the world node graph, so we must remove it from
-		// the graph since we are removing it from the world.
-		for (i = 0; i < WorldGraph.m_cLinks; i++)
+		if (FBitSet(pev->flags, FL_GRAPHED))
 		{
-			if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev)
+			// this entity was a LinkEnt in the world node graph, so we must remove it from
+			// the graph since we are removing it from the world.
+			for (int i = 0; i < WorldGraph.m_cLinks; i++)
 			{
-				// if this link has a link ent which is the same ent that is removing itself, remove it!
-				WorldGraph.m_pLinkPool[i].m_pLinkEnt = NULL;
+				if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev)
+				{
+					// if this link has a link ent which is the same ent that is removing itself, remove it!
+					WorldGraph.m_pLinkPool[i].m_pLinkEnt = NULL;
+				}
 			}
 		}
+
+		if (pev->globalname)
+			gGlobalState.EntitySetState(pev->globalname, GLOBAL_DEAD);
 	}
-	if (pev->globalname)
-		gGlobalState.EntitySetState(pev->globalname, GLOBAL_DEAD);
 }
 
 // Convenient way to delay removing oneself
