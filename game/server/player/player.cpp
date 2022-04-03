@@ -6192,7 +6192,7 @@ void CBasePlayer ::SetTeam(CTeam *pNewTeam)
 }
 int CBasePlayer::IRelationship(CBaseEntity *pTarget)
 {
-	if (pTarget->IsPlayer())
+	if (pTarget && pTarget->IsPlayer())
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
 		if (SameTeam(this, pPlayer))

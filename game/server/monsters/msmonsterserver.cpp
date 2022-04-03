@@ -69,7 +69,6 @@ int CMSMonster::Classify()
 
 int CMSMonster::IRelationship(CBaseEntity *pTarget)
 {
-
 	if (!m_Race[0] || !pTarget || !pTarget->IsMSMonster())
 		return RELATIONSHIP_NO;
 

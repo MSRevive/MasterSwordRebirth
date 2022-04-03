@@ -337,14 +337,14 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 #endif
 
 	// MiB MAR2012_07 -  -2 means mouse was released before it got to the first charge. Changing this to do something.
-	if (iNewAttack >= 0 || iNewAttack == -2)
+	if (CurrentAttack && ((iNewAttack >= 0) || (iNewAttack == -2)))
 	{
 		//Start attack
 		dbg("Initiate attack");
 		SetBits(m_pOwner->m_StatusFlags, PLAYER_MOVE_ATTACKING);
 		CallScriptEvent(CurrentAttack->CallbackName + "_start");
 
-		CurrentAttack->tStart = CurrentAttack->tTrueStart = gpGlobals->time;
+		CurrentAttack->tStart = CurrentAttack->tTrueStart = (gpGlobals ? gpGlobals->time : 0.0f);
 		CurrentAttack->fAttackLanded = false;
 		CurrentAttack->fAttackReleased = false;
 		CurrentAttack->fAttackThisFrame = false;
@@ -356,8 +356,10 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		m_pOwner->Stamina -= CurrentAttack->flEnergy;
 		if (m_pOwner->Stamina < 0)
 			m_pOwner->Stamina = 0;
+
 		if (m_pPlayer)
 			m_pPlayer->AddNoise(CurrentAttack->flNoise); //Make noise in world
+
 		//Thothie FEB2008a
 		//- fuck +special breaking me wrists, and dbl click lag - just let players charge their attacks as long as they hold the button
 		//- downside: cant hold button for continuous attacks
@@ -388,6 +390,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		//Check for ammo
 		if (!UseAmmo(CurrentAttack->iAmmoDrain))
 			CancelAttack();
+
 		m_LastChargedAmt = 0; //Clear after I've checked for valid attack.  This way if I let go of charge early, it still waits for the attack to finish
 	}
 
