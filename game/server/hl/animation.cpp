@@ -285,51 +285,52 @@ int GetSequenceFlags(void *pmodel, entvars_t *pev)
 	return pseqdesc->flags;
 }
 
-int GetAnimationEvent(void *pmodel, entvars_t *pev, MonsterEvent_t *pMonsterEvent, float flStart, float flEnd, int index)
+int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
 {
-	studiohdr_t *pstudiohdr;
-
-	pstudiohdr = (studiohdr_t *)pmodel;
-	if (!pstudiohdr || pev->sequence >= pstudiohdr->numseq || !pMonsterEvent)
-		return 0;
-
-	int events = 0;
-
-	mstudioseqdesc_t *pseqdesc;
-	mstudioevent_t *pevent;
-
-	pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
-	pevent = (mstudioevent_t *)((byte *)pstudiohdr + pseqdesc->eventindex);
-
-	if (pseqdesc->numevents == 0 || index > pseqdesc->numevents)
-		return 0;
-
-	if (pseqdesc->numframes > 1)
+	try
 	{
-		flStart *= (pseqdesc->numframes - 1) / 256.0;
-		flEnd *= (pseqdesc->numframes - 1) / 256.0;
-	}
-	else
-	{
-		flStart = 0;
-		flEnd = 1.0;
-	}
+		studiohdr_t* pstudiohdr = (studiohdr_t*)pmodel;
+		if (!pstudiohdr || (pev->sequence >= pstudiohdr->numseq) || !pMonsterEvent)
+			return 0;
 
-	for (; index < pseqdesc->numevents; index++)
-	{
-		// Don't send client-side events to the server AI
-		if (pevent[index].event >= EVENT_CLIENT)
-			continue;
+		mstudioseqdesc_t* pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + pev->sequence;
+		if ((pseqdesc->numevents == 0) || (index >= pseqdesc->numevents))
+			return 0;
 
-		if ((pevent[index].frame >= flStart && pevent[index].frame < flEnd) ||
-			((pseqdesc->flags & STUDIO_LOOPING) && flEnd >= pseqdesc->numframes - 1 && pevent[index].frame < flEnd - pseqdesc->numframes + 1))
+		mstudioevent_t* pevent = (mstudioevent_t*)((byte*)pstudiohdr + pseqdesc->eventindex);
+
+		if (pseqdesc->numframes > 1)
 		{
-			pMonsterEvent->event = pevent[index].event;
-			pMonsterEvent->options = pevent[index].options;
-			return index + 1;
+			flStart *= (pseqdesc->numframes - 1) / 256.0;
+			flEnd *= (pseqdesc->numframes - 1) / 256.0;
 		}
+		else
+		{
+			flStart = 0;
+			flEnd = 1.0;
+		}
+
+		for (; index < pseqdesc->numevents; index++)
+		{
+			// Don't send client-side events to the server AI
+			if (pevent[index].event >= EVENT_CLIENT)
+				continue;
+
+			if ((pevent[index].frame >= flStart && pevent[index].frame < flEnd) ||
+				((pseqdesc->flags & STUDIO_LOOPING) && flEnd >= pseqdesc->numframes - 1 && pevent[index].frame < flEnd - pseqdesc->numframes + 1))
+			{
+				pMonsterEvent->event = pevent[index].event;
+				pMonsterEvent->options = pevent[index].options;
+				return index + 1;
+			}
+		}
+
+		return 0;
 	}
-	return 0;
+	catch (...)
+	{
+		return 0;
+	}
 }
 
 float SetController(void *pmodel, entvars_t *pev, int iController, float flValue)
