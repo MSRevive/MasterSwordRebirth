@@ -612,8 +612,12 @@ void CGenericItem::Spawn()
 	CallScriptEvent("game_spawn");
 
 	SetBits(lProperties, GI_JUSTSPAWNED);
-	pev->classname = MAKE_STRING("ms_item");
-	pev->nextthink = gpGlobals->time + 0.1;
+
+	if (pev)
+	{
+		pev->classname = MAKE_STRING("ms_item");
+		pev->nextthink = gpGlobals->time + 0.1;
+	}
 }
 
 CMSMonster *CGenericItem::Owner()
@@ -640,7 +644,7 @@ float CGenericItem::Weight()
 }
 int CGenericItem::GetItemInfo(ItemInfo *p)
 {
-	p->pszName = STRING(pev->classname);
+	p->pszName = ((pev != NULL) ? STRING(pev->classname) : "INVALID");
 	p->pszAmmo1 = NULL;
 	p->iMaxAmmo1 = -1;
 	p->pszAmmo2 = NULL;
@@ -1509,7 +1513,9 @@ void CGenericItem::RemoveFromOwner()
 	dbg("Call CancelAttack");
 	CancelAttack();
 
-	ClearBits(pev->flags, FL_SKIPLOCALHOST); //Start sending the entity to the owner again
+	if (pev)
+		ClearBits(pev->flags, FL_SKIPLOCALHOST); // Start sending the entity to the owner again
+
 	m_Location = ITEMPOS_HANDS;
 	Wielded = FALSE;
 
@@ -1534,7 +1540,7 @@ void CGenericItem::RemoveFromOwner()
 	m_pOwner = NULL;
 
 #ifdef VALVE_DLL
-	if (pev->iuser2 && pev->iuser3) //Notify torch sprite I've been removed
+	if (pev && pev->iuser2 && pev->iuser3) //Notify torch sprite I've been removed
 	{
 		CBaseEntity *pSprite = MSInstance(INDEXENT(pev->iuser2));
 		if ((int)pSprite == pev->iuser3)

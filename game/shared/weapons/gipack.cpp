@@ -434,9 +434,12 @@ bool CGenericItem::Container_RemoveItem(CGenericItem *pItem)
 	//Update the client
 	Container_SendItem(pItem, false);
 
-	ClearBits(pItem->pev->effects, EF_NODRAW);
-	if (pItem->pev->owner == edict())
-		pItem->pev->owner = NULL;
+	if (pItem->pev)
+	{
+		ClearBits(pItem->pev->effects, EF_NODRAW);
+		if (pItem->pev->owner == edict())
+			pItem->pev->owner = NULL;
+	}
 
 	if (pItem->m_pParentContainer == this)
 		pItem->m_pParentContainer = NULL;
