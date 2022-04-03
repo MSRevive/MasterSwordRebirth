@@ -120,9 +120,10 @@ void CBaseEntity::UpdateOnRemove(void)
 void CBaseEntity ::SUB_Remove(void)
 {
 	//Thothie OCT2016_12 - notification of removal
-	IScripted *pScripted = GetScripted();
-	if ( pScripted ) pScripted->CallScriptEvent("game_deleted");
-	
+	IScripted* pScripted = GetScripted();
+	if (pScripted)
+		pScripted->CallScriptEvent("game_deleted");
+
 	UpdateOnRemove();
 	/*if (pev->health > 0)
 	{
@@ -135,7 +136,9 @@ void CBaseEntity ::SUB_Remove(void)
 
 	Deactivate();
 	//edict()->free = true; 	//MIB FEB2010_04 New: attempt to free edicts (fail)
-	REMOVE_ENTITY(ENT(pev));
+
+	if (pev && ENT(pev))
+		REMOVE_ENTITY(ENT(pev));
 }
 
 // Convenient way to explicitly do nothing (passed to functions that require a method)
