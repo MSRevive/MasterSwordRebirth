@@ -219,17 +219,19 @@ void MSCLGlobals::RemoveAllEntities()
 	for (int e = 0; e < m_ClEntites.size(); e++)
 	{
 		CBaseEntity *pEntity = m_ClEntites[e];
+		if (!pEntity) continue;
 
 		//Skip player
-		if (pEntity == &player)
-			continue;
+		if (pEntity == &player) continue;
 
 		//unset player hands (should happen in CBasePlayer::RemoveAllItems() first...)
 		if (pEntity == (CBaseEntity *)player.PlayerHands)
 			player.PlayerHands = NULL;
 
 		Print("Cleanup Item %i: %s\n", killed++, pEntity->DisplayName());
-		SetBits(pEntity->pev->flags, FL_KILLME);
+
+		if (pEntity->pev)
+			SetBits(pEntity->pev->flags, FL_KILLME);
 	}
 	//logfile << "Global Cleanup: " << killed << " unreferenced entites.\r\n";
 	MSCLGlobals::Think();

@@ -1267,13 +1267,13 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "spawner")
 	{
 		//DEC2007a - Return msmonster spawn ID to verify still exists
-		return pMonster->m_spawnedby;
+		return (pMonster ? pMonster->m_spawnedby : "0");
 	}
 	else if (Prop == "roam")
 	{
 		//Thothie AUG2010_25 - return roam condition
 		//- seems all these should be under an if (pMonster) somewherez. :(
-		return pMonster->HasConditions(MONSTER_ROAM) ? "0" : "1";
+		return ((pMonster && pMonster->HasConditions(MONSTER_ROAM)) ? "0" : "1");
 	}
 	else if (Prop == "lastmap")
 	{
