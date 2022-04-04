@@ -5716,23 +5716,18 @@ bool CScript::ScriptCmd_Set(
 //- set the entity to be force sent to the client.
 bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
-	#ifdef VALVE_DLL
-		int Val = atoi(Params[1]);
-		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
-		
-		if(pEntity && !pEntity->NOSEND)
+#ifdef VALVE_DLL
+	if (Params.size() >= 2)
+	{
+		int iVal = atoi(Params[1]);
+		CBaseEntity* pEntity = (m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL);
+		if (pEntity && !pEntity->NOSEND)
 		{
-			if(Val > 0)
-				pEntity->FORCESEND = true;
-			else
-				pEntity->FORCESEND = false;
-				
+			pEntity->FORCESEND = (iVal > 0);
 			return true;
 		}
-			
-		return false;	
-	#endif
-	
+	}
+#endif
 	return false;
 }
 
@@ -5741,23 +5736,18 @@ bool CScript::ScriptCmd_SetEntForceSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, m
 //- set the entity not to be sent to via client.
 bool CScript::ScriptCmd_SetEntNoSend(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
-	#ifdef VALVE_DLL
-		int Val = atoi(Params[1]);
-		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
-		
-		if(pEntity && !pEntity->FORCESEND)
+#ifdef VALVE_DLL
+	if (Params.size() >= 2)
+	{
+		int iVal = atoi(Params[1]);
+		CBaseEntity* pEntity = (m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL);
+		if (pEntity && !pEntity->FORCESEND)
 		{
-			if(Val > 0)
-				pEntity->NOSEND = true;
-			else
-				pEntity->NOSEND = false;
-				
+			pEntity->NOSEND = (iVal > 0);
 			return true;
 		}
-			
-		return false;	
-	#endif
-	
+	}
+#endif
 	return false;
 }
 

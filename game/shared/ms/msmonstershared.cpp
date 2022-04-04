@@ -316,6 +316,18 @@ bool CMSMonster::AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, int
 	if (!pItem)
 		return false;
 
+	if (pItem->Owner())
+	{
+		CBasePlayer* pPlayerOwner = pItem->Owner()->IsPlayer() ? (CBasePlayer*)pItem->Owner() : NULL;
+		if (pPlayerOwner)
+		{
+			//Thothie NOV2015_24 (post NOV2015a release)
+			//item is in another player's hand - you no can take
+			if (pItem == pPlayerOwner->Hand(0)) return false;
+			if (pItem == pPlayerOwner->Hand(1)) return false;
+		}
+	}
+
 	if (ToHand)
 	{
 		int iAddHand = (ForceHand >= 0) ? ForceHand : -1;
@@ -597,10 +609,8 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, msstring vsStat, float vAmou
 
 void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float vAmount)
 {
-	if(vStat < 0 || vAmount <= 0 || !pPlayer)
-	{
+	if (vStat < 0 || vAmount <= 0 || !pPlayer)
 		return;
-	}
 
 	if(vProp < 0)
 	{
@@ -615,10 +625,10 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float 
 	playerdamage_t & vPlayerDamage = m_PlayerDamage[ (pPlayer->entindex()-1) ];
 	msstring vsId = pPlayer->AuthID() + "_" + pPlayer->m_CharacterNum;
 
-	if ( FStrEq(vsId, vPlayerDamage.msId) )
+	if (!FStrEq(vsId, vPlayerDamage.msId))
 	{
 		vPlayerDamage.Clear();
-		strncpy( vPlayerDamage.msId, vsId, sizeof(vPlayerDamage.msId, vsId));
+		strncpy(vPlayerDamage.msId, vsId, 32);
 	}
 	
 	vPlayerDamage.dmgInTotal += vAmount;

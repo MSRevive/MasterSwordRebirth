@@ -3203,9 +3203,12 @@ void PM_PlayerMove(qboolean server)
 	}
 
 	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground
+	// MiB APR2019_07 - Move at full speed even with +use, fix for exploit stopping monsters from pushing
 	if ((pmove->onground != -1) && (pmove->cmd.buttons & IN_USE))
 	{
-		VectorScale(pmove->velocity, 0.3, pmove->velocity);
+		// MiB APR2019_08 - Okay, fine, allow "fine movement" when not in combat
+		if (!PMScript || !atoi(PMScript->GetFirstScriptVar("PLR_IN_COMBAT")))
+			VectorScale(pmove->velocity, 0.3, pmove->velocity);
 	}
 
 	// Handle movement

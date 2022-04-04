@@ -359,9 +359,9 @@ typedef enum _fieldtypes
 	FIELD_TYPECOUNT,		// MUST BE LAST
 } FIELDTYPE;
 
-//#ifndef offsetof
-//#define offsetof(s,m)	(size_t)&(((s *)0)->m)
-//#endif
+#ifndef offsetof
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#endif
 
 #define _FIELD(type,name,fieldtype,count,flags)		{ fieldtype, #name, offsetof(type, name), count, flags }
 #define DEFINE_FIELD(type,name,fieldtype)			_FIELD(type, name, fieldtype, 1, 0)

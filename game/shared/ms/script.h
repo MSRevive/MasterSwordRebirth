@@ -388,23 +388,18 @@ bool GetString(char *Return, size_t size, const char *sentence, int start, char 
 void ReplaceChar(char *pString, char org, char dest);
 float GetNumeric(const char *pszText);
 
-
-//[MiB NOV2007a]
-//void CheckIfUsingCE();
-//static mslist<scriptarray_t> GlobalScriptArrays; // MiB JUN2010_25
-//void CheckProcess( DWORD processID );
-//[/MiB]
-
 enum scriptconatiner_e {
 	MS_SCRIPT_UKNOWN,	//GenericItemPrecache hasn't been called yet, so we dont know
 	MS_SCRIPT_LIBRARY,	//Scripts loaded from sc.dll
 	MS_SCRIPT_DIR		//Scripts loaded from /scripts
 };
+
 struct globalscriptinfo_t
 {
 	scriptconatiner_e Container;
 	const char *ContainerName;
 };
+
 extern globalscriptinfo_t *g_MSScriptInfo;
 #define FILE_DEV_ITEMLIST "scripts/items.txt"
 #define FILE_ITEMLIST "items.txt"
@@ -414,7 +409,6 @@ extern globalscriptinfo_t *g_MSScriptInfo;
 #else
 	#define SCRIPT_ID_START 10000	//Client: ID of next script to be created
 #endif
-
 
 //MiB Feb2008a - for the scriptio system File I/O
 //- moved somewhere else?

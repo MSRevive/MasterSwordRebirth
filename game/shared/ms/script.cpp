@@ -3957,12 +3957,11 @@ msstring CScript::ScriptGetter_SortEntList( msstring& FullName, msstring& Parser
 		TokenizeString( Params[0], Tokens );
 
 		msstring SortedList;
-
 		msstring compParam = Params[1];
 
 		if ( Tokens.size() == 1 ) return Params[0].c_str(); //Thothie APR2016_23 - smashes if only given one entity otherwise
 
-		int size = (signed) Tokens.size();
+		int size = (signed)Tokens.size();
 		for(int i = 0; i < size; i++ )
 		{
 			CMSMonster *pZeroEnt = (CMSMonster *) m.pScriptedEnt->RetrieveEntity( Tokens[0] );
@@ -3986,9 +3985,9 @@ msstring CScript::ScriptGetter_SortEntList( msstring& FullName, msstring& Parser
 			else if ( compParam == "mp" ) curVal = pZeroEnt->m_MP;
 			else if ( compParam == "maxmp") curVal = pZeroEnt->m_MaxMP;
 
-			for(int j = 0; i < Tokens.size() - 1; i++ )
+			for (int j = 0; j < (Tokens.size() - 1); j++)
 			{
-				CMSMonster *pCurEnt = (CMSMonster *) m.pScriptedEnt->RetrieveEntity( Tokens[j+1] );
+				CMSMonster* pCurEnt = (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[j + 1]);
 				float compVal =  0;
 
 				if ( compParam == "range" )
@@ -4861,16 +4860,13 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 
 			int iFileSize;
 			byte *pMemFile = LOAD_FILE_FOR_ME(cScriptFile, &iFileSize);
-
-			if (!pMemFile)
+			if (pMemFile)
 			{
-				return false;
+				ScriptData = msnew(char[iFileSize + 1]);
+				memcpy(ScriptData, pMemFile, iFileSize);
+				ScriptData[iFileSize] = 0;
+				FREE_FILE(pMemFile);
 			}
-
-			ScriptData = msnew(char[iFileSize+1]);
-			memcpy( ScriptData, pMemFile, iFileSize );
-			ScriptData[iFileSize] = 0;
-			FREE_FILE(pMemFile);
 		}
 		else if( ScriptMgr::m_GroupFile.ReadEntry( ScriptName, NULL, ScriptSize ) )
 		{
@@ -5088,7 +5084,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
 
-	char TestCommand[128];
+	char TestCommand[128]; TestCommand[0] = 0;
 	char cBuffer[512];
 	int LineOfs = 0, TmpLineOfs = 0;
 
@@ -5958,11 +5954,12 @@ void IScripted::CallScriptEvent( msstring_ref EventName, msstringlist* Parameter
 
 void IScripted::Script_InitHUD( CBasePlayer *pPlayer )
 {
-	for(int i = 0; i < m_Scripts.size(); i++)
+	for (int i = 0; i < m_Scripts.size(); i++)
 	{
-		CScript *Script = m_Scripts[i];
-		for(int e = 0; Script->m.PersistentSendCmds.size( ); e++ )
-			Script->SendScript( Script->m.PersistentSendCmds[e] );
+		CScript* Script = m_Scripts[i];
+		if (Script == NULL) continue;
+		for (int e = 0; e < Script->m.PersistentSendCmds.size(); e++)
+			Script->SendScript(Script->m.PersistentSendCmds[e]);
 	}
 }
 msstring_ref IScripted::GetFirstScriptVar( msstring_ref VarName )

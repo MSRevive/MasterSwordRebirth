@@ -7,6 +7,7 @@
 #include "sharedutil.h"
 #define STRING(a) ""
 #define LOAD_FILE_FOR_ME(a, b) 0
+#define FREE_FILE( pFileData )
 #endif
 
 using namespace std;
@@ -148,11 +149,9 @@ void CMemFile::WriteToFile(const char* pszFileName)
 
 bool CMemFile::ReadFromGameFile(const char* pszFileName)
 {
-	//Load a half-life engine file - could be compressed in a package
-
+	// Load a half-life engine file - could be compressed in a package
 	int Size = 0;
 	byte* pBuffer = LOAD_FILE_FOR_ME((char*)pszFileName, &Size);
-
 	if (!pBuffer)
 		return false;
 
@@ -160,6 +159,7 @@ bool CMemFile::ReadFromGameFile(const char* pszFileName)
 	m_BufferSize = Size;
 	m_Buffer = new byte[m_BufferSize];
 	memcpy(m_Buffer, pBuffer, m_BufferSize);
+	FREE_FILE(pBuffer);
 	return true;
 }
 

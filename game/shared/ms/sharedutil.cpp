@@ -152,10 +152,13 @@ CBaseEntity *StringToEnt(msstring_ref EntString) // Converts an string of format
 	return pEntity;
 }
 
-msstring_ref VecToString(const Vector &Vec)
+msstring_ref VecToString(const Vector& Vec, bool bAs2D)
 {
 	static char RetString[128];
-	_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
+	if (bAs2D)
+		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f)", Vec.x, Vec.y);
+	else
+		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
 	return RetString;
 }
 Vector StringToVec(msstring_ref String)

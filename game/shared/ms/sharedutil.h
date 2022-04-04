@@ -57,7 +57,7 @@ void Print(char *szFmt, ...);
 #include "msdebug.h"
 
 #ifdef VECTOR_H
-	msstring_ref VecToString( const Vector &Vec );			//Converts a vector to a string of format "(x,y,z)"
+	msstring_ref VecToString(const Vector& Vec, bool bAs2D = false); //Converts a vector to a string of format "(x,y,z)"
 	Vector StringToVec( msstring_ref String );			//Converts a string of the format "(x,y)" or "(x,y,z)" to a Vector class
 	Color4F StringToColor( msstring_ref String );		//Converts a string of the format "(r,g,b,a)" Color class
 	Vector GetRelativePos( Vector &Ang, Vector &Dir );	//Uses Dir.x for right-left, Dir.y for forward-back, and Dir.z as up-down, relative to the angle

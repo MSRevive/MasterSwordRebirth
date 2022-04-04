@@ -166,7 +166,7 @@ void MSGlobals::EndMap()
 
 	if (MSGlobals::GameScript)
 	{
-		MSGlobals::GameScript->CallScriptEvent("game_end"); //Thothie - this does not get called due to unknown error (See SVGlobals.cpp line 228)
+		//MSGlobals::GameScript->CallScriptEvent("game_end"); //Thothie - this does not get called due to unknown error (See SVGlobals.cpp line 228)
 		MSGlobals::GameScript->Deactivate();
 		delete MSGlobals::GameScript;
 		MSGlobals::GameScript = NULL;
