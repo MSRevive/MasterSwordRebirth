@@ -230,24 +230,8 @@ public:
 	msstring thru_char(const msstring_ref a, size_t start = 0) const;	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
 	msstring skip(const msstring_ref a) const;							//Returns a substring starting at the first char that isn't within "a"
 
-	// These all need to be primes!
-	static const int PRIME_A = 54059;
-	static const int PRIME_B = 76963;
-	static const int PRIME_INIT = 31;
-	int hashCode()
-	{
-		int h = PRIME_INIT;
-		for (unsigned int i = 0; i < len(); i++)
-		{
-			h = (h * PRIME_A) ^ (data[i] * PRIME_B);
-		}
-		return h < 0 ? -h : h;
-	}
-	msstring toString() { return *this; }
-
 protected:
 	char data[MSSTRING_SIZE];
-	//char *data;
 };
 
 /*class str256 : public msstring
