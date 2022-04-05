@@ -34,37 +34,19 @@ void CGenericItem::RegisterSpell()
 
 bool CGenericItem::Spell_LearnSpell(const char *pszSpellName)
 {
-	CGenericItem *pSpell = CGenericItemMgr::GetGlobalGenericItemByName( pszSpellName, true );
+	CGenericItem* pSpell = CGenericItemMgr::GetGlobalGenericItemByName(pszSpellName, true);
 	bool fSuccess = false;
-	if (!pSpell)
-		return false;
-
-	if (!pSpell->SpellData)
-		goto End;
-
-	if (!m_pPlayer)
-		goto End;
-
-	if (m_pPlayer->GetSkillStat(SKILL_SPELLCASTING) < pSpell->SpellData->RequiredSkill)
-		goto End;
-
-	//Thothie attempting to fix spell limit before tome removed
-	//- how do I pull the #of spell from here? :/
-	/*
-	if ( m_pPlayer->m_SpellList.size() > 7 )
+	if (!pSpell
+		|| !pSpell->SpellData
+		|| !m_pPlayer
+		|| m_pPlayer->GetSkillStat(SKILL_SPELLCASTING) < pSpell->SpellData->RequiredSkill
+		)
 	{
-		m_pPlayer->SendEventMsg( HUDEVENT_NORMAL, msstring( "You can memorize no more tomes." ));
-		pSpell->SUB_Remove( );
 		return false;
 	}
-	*/
 
 	m_pPlayer->LearnSpell(pszSpellName, true);
-	fSuccess = true;
-
-End:
-	pSpell->SUB_Remove();
-	return fSuccess;
+	return true;
 }
 
 void CGenericItem::Spell_Think()
@@ -78,13 +60,11 @@ void CGenericItem::Spell_Think()
 		DelayedRemove();
 	}
 }
+
 bool CGenericItem::Spell_Prepare()
 {
 	//Attempt to prepare this spell
-	if (!SpellData)
-		return false;
-	if (!m_pOwner)
-		return false;
+	if (!SpellData || !m_pOwner) return false;
 
 	Spell_TimeCast = gpGlobals->time;
 
@@ -101,6 +81,7 @@ bool CGenericItem::Spell_Prepare()
 
 	return true;
 }
+
 void CGenericItem::Spell_Deactivate()
 {
 	if (!SpellData)

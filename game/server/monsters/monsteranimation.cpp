@@ -30,7 +30,7 @@ CAnimation *CAnimation::ChangeTo(MONSTER_ANIM NewAnim)
 }
 bool CAnimation ::SetAnim(msstring_ref pszSequence)
 {
-	if (!pszSequence || !strlen(pszSequence))
+	if (!pszSequence || !pszSequence[0])
 		return false;
 
 	int animDesired = LookupSequence(pszSequence);

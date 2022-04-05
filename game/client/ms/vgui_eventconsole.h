@@ -109,7 +109,7 @@ public:
 
 	void Print( Color color, msstring_ref Text, bool WrappedFromLastLine )
 	{
-		if( !Text || !strlen(Text) ) 
+		if (!Text || !Text[0])
 			return;
 
 		int MaxLines = min( EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES ); // Max amount of text lines to keep in the history

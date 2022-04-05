@@ -789,7 +789,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (NewStore)
 			{
 				dbg(StoreDbg + (int)200);
-				CGenericItem *pItem = NewGenericItem(ItemName);
+				// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table
+				CGenericItem* pItem = CGenericItemMgr::GetGlobalGenericItemByName(ItemName, true);
 				if (pItem)
 				{
 					//Error checking for out-of-bound values
@@ -808,8 +809,9 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 					if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) && !iBundleAmt)
 						iBundleAmt = pItem->iMaxGroupable;
 
-					dbg(StoreDbg + (int)1000);
-					pItem->SUB_Remove();
+					// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table (lines commented out as part of effort)
+					//dbg( StoreDbg + (int)1000 );
+					//pItem->SUB_Remove( ); //MIB MAR2019_12
 
 					dbg(StoreDbg + (int)2000);
 					NewStore->AddItem(ItemName, iQuantity, iRealCost, flSellRatio, iBundleAmt);

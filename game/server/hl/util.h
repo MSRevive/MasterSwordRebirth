@@ -274,6 +274,7 @@ extern void UTIL_SetOrigin(entvars_t *pev, const Vector &vecOrigin);
 extern void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch);
 extern void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount);
 extern void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, float duration, float radius);
+extern void UTIL_ScreenShakeOne(CBaseEntity* pPlayer, float amplitude, float frequency, float duration); //Thothie APR2016_08 attempting screenshake on one client
 extern void UTIL_ScreenShakeAll(const Vector &center, float amplitude, float frequency, float duration);
 extern void UTIL_ShowMessage(const char *pString, CBaseEntity *pPlayer);
 extern void UTIL_ShowMessageAll(const char *pString);

@@ -201,24 +201,32 @@ void CBaseEntity ::SUB_UseTargets(CBaseEntity *pActivator, USE_TYPE useType, flo
 	}
 }
 
-void FireTargets(const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	edict_t *pentTarget = NULL;
-	if (!targetName)
+	if (!targetName || !targetName[0])
 		return;
-
-	if (strlen(targetName) < 1)
-		return; //OCT2007a - attempting to strip null map events
 
 	ALERT(at_aiconsole, "Firing: (%s)\n", targetName);
 
+	//NOV2015_05 let GM capture triggers
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+	if (pGMScript)
+	{
+		static msstringlist Params;
+		Params.clearitems();
+		Params.add(targetName);
+		pGMScript->CallScriptEvent("game_triggered", &Params);
+	}
+
+	edict_t* pentTarget = NULL;
 	for (;;)
 	{
 		pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, targetName);
 		if (FNullEnt(pentTarget))
 			break;
 
-		CBaseEntity *pTarget = CBaseEntity::Instance(pentTarget);
+		CBaseEntity* pTarget = CBaseEntity::Instance(pentTarget);
 		if (pTarget && !(pTarget->pev->flags & FL_KILLME)) // Don't use dying ents
 		{
 			ALERT(at_aiconsole, "Found: %s, firing (%s)\n", STRING(pTarget->pev->classname), targetName);

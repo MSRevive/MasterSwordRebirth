@@ -509,13 +509,13 @@ void CGenericItem::Container_StackItems()
 						if (!FBitSet(pCur->Properties, ITEM_GROUPABLE)) //If it's groupable (Paranoia)
 							continue;
 
-						if (pCur->iQuantity == 0)
-						{
-							//PackData->ItemList.RemoveItem( pCur );
-							Container_RemoveItem(pCur);
-							pCur->RemoveFromOwner();
-							continue;
-						}
+						//if (pCur->iQuantity == 0)
+						//{
+						//	//PackData->ItemList.RemoveItem( pCur );
+						//	Container_RemoveItem(pCur);
+						//	pCur->RemoveFromOwner();
+						//	continue;
+						//}
 
 						//Thothie FEB2010_13 - MiB says try this other way around
 						pItem->iQuantity += pCur->iQuantity;
@@ -526,7 +526,7 @@ void CGenericItem::Container_StackItems()
 						pCur->iQuantity = 0;
 						Container_RemoveItem(pCur);
 						pCur->RemoveFromOwner();
-						//pCur->SUB_Remove( );
+						pCur->DelayedRemove();
 						Container_SendItem(pItem, true);
 						//pCur->iQuantity += pItem->iQuantity;
 						//Container_SendItem( pCur , true );

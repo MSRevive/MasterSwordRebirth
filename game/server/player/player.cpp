@@ -647,7 +647,21 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	}
 
 	//Thothie - removing XP penalty for being killed by trigger
-	if (DeathType == KILLED_BY_MONSTER && !pKillerEnt->IsPlayer())
+	//Thothie APR2016_10
+	//- Adding marker for specific NPCs not to cause XP loss when they kill
+	//- setvar NPC_NO_XP_PENALTY 1
+	bool no_xp_pen = false;
+	if (pKillerEnt)
+	{
+		IScripted* pKillerScript = pKillerEnt->GetScripted();
+		if (pKillerScript)
+		{
+			if (atof(pKillerScript->GetFirstScriptVar("NPC_NO_XP_PENALTY")) == 1)
+				no_xp_pen = true;
+		}
+	}
+
+	if ((DeathType == KILLED_BY_MONSTER) && pKillerEnt && !pKillerEnt->IsPlayer() && !no_xp_pen)
 	{
 		//THOTHIE wants this so you lose:
 		//up to 20% XP of a random skill when you die
@@ -3277,7 +3291,7 @@ CBaseEntity *CBasePlayer::GiveNamedItem(const char *pszName)
 	//First, search through all items with pszName as a substring
 	//If not found, use pszName as the full item name
 
-	if (!pszName || !strlen(pszName))
+	if (!pszName || !pszName[0])
 		return NULL;
 
 	msstring_ref WeaponScript = NULL;
@@ -4977,7 +4991,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 		if (m_CharacterState == CHARSTATE_LOADED)
 		{
 			scoreinfo_t Info;
-			Info.TitleIndex = GetPlayerTitleIdx(GetFullTitle());
+			Info.TitleIndex = GetPlayerTitleIdx(GetTitle()); //MIB FEB2019_19 - was GetFullTitle( )
 			Info.SkillLevel = SkillAvg();
 			Info.InTransition = CurrentTransArea ? true : false;
 			if (memcmp(&Info, &m_ScoreInfoCache, sizeof(scoreinfo_t)))
@@ -5166,13 +5180,11 @@ void CBasePlayer::GetAnyItems()
 
 		if (pItem->pev->owner)
 		{
-			if (!pItem->m_pOwner || pItem->m_pOwner->IsAlive())
-				continue;
-			else if (pItem->m_pOwner && pItem->m_pOwner->IsAlive())
+			if (!pItem->m_pOwner || pItem->m_pOwner->IsPlayer() || pItem->m_pOwner->IsAlive())
 				continue;
 		}
-		else if (pItem->m_NotUseable)
-			continue;
+		else if (pItem->m_pOwner && pItem->m_pOwner->IsPlayer()) continue; // Sanity check
+		else if (pItem->m_NotUseable) continue;
 
 		//Group groupable items
 		if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE))
@@ -5448,7 +5460,12 @@ void CBasePlayer ::OfferItem(offerinfo_t &OfferInfo)
 
 	CBasePlayer *pDestPlayer = NULL;
 	if (pMonster->IsPlayer())
-		pDestPlayer = (CBasePlayer *)pMonster;
+	{
+		//pDestPlayer = (CBasePlayer *)pMonster;
+		// MiB SEP2019_18 Disabling player offers because exploits
+		SendEventMsg(HUDEVENT_UNABLE, "You can't make offers to other players");
+		return;
+	}		
 
 	msstringlist Parameters;
 	if (OfferInfo.ItemType == ITEM_GOLD)

@@ -815,8 +815,23 @@ public:
 
 			//this method disables the ability to play lists, but I've never seen a map use that feature
 			msstringlist Parameters;
-			Parameters.add(m_Songs[0].Name.c_str());
-			Parameters.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
+			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+			if (pGMScript)
+			{
+				if (atoi(pGMScript->GetFirstScriptVar("GM_HOLIDAY_MUSIC")) == 1)
+				{
+					Parameters.add("xmass.mp3");
+					Parameters.add("3.0");
+					// you can add subsequent else if's here for other holidays, eg. GM_HOLIDAY_MUSIC = 2, 3, etc.
+				}
+				else
+				{
+					Parameters.add(m_Songs[0].Name.c_str());
+					Parameters.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
+				}
+			}
 			Parameters.add(playnow ? "1" : "0");
 			iScripted->CallScriptEvent("set_idle_music", &Parameters);
 			//Old way jams up sometimes

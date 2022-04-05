@@ -298,7 +298,7 @@ void CGenericItemMgr::DeleteItems()
 //Temporarily create an item to determine it's name
 msstring_ref CGenericItemMgr::GetItemDisplayName(msstring_ref ItemName, bool Capital, bool Fullname, int Amt)
 {
-	CGenericItem *pItem = ::NewGenericItem(ItemName);
+	CGenericItem* pItem = GetGlobalGenericItemByName(ItemName, true);
 	static msstring DisplayName = ItemName;
 	if (pItem)
 	{
@@ -309,10 +309,7 @@ msstring_ref CGenericItemMgr::GetItemDisplayName(msstring_ref ItemName, bool Cap
 		}
 		else
 			DisplayName = pItem->DisplayName();
-
-		pItem->SUB_Remove();
 	}
-
 	return DisplayName.c_str();
 }
 
@@ -429,6 +426,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 #endif
 #endif
+		goto end;
 		}
 
 #ifndef SCRIPT_LOCKDOWN
@@ -476,34 +474,28 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		GenItem_t NewGlobalItem;
 
 		NewGlobalItem.Name = cString;
-		
-		//CGenericItem *pNewItem = ::msnew CGenericItem;
-		//NewGlobalItem.pItem = pNewItem;
-		CGenericItem &NewItem = *(NewGlobalItem.pItem = (::msnew CGenericItem));
-		//MSZeroClassMemory( &NewItem, sizeof(CGenericItem) ); New memory routines automaticly initialize memory
+
+		CGenericItem* pNewItem = ::msnew CGenericItem;
+		NewGlobalItem.pItem = pNewItem;
 
 		CGenericItemMgr::AddGlobalItem(NewGlobalItem);
 
 		//NewItem.iWeaponType = 99 + CGenericItemMgr::ItemCount( ); //First must be 100
-		strncpy(NewItem.m_Name, cString, sizeof(NewItem.m_Name)); //NewItem.m_Name
-		NewItem.ItemName = cString;
+		strncpy(pNewItem->m_Name, cString, sizeof(pNewItem->m_Name)); //NewItem.m_Name
+		pNewItem->ItemName = cString;
 
 		dbg(msstring("Load script: ") + cItemFileName);
 		//Log(cItemFileName);
 		
-		bool fSuccess = NewItem.Script_Add(cItemFileName, &NewItem) ? true : false;
+		bool fSuccess = pNewItem->Script_Add(cItemFileName, pNewItem) ? true : false;
 		//Log("try adding new item scripts");
-		if (fSuccess)
-		{
-			//Log("run script events");
-			NewItem.RunScriptEvents(); //Slows down game load, but needed for the precachefile command
-		}
+		if (fSuccess) pNewItem->RunScriptEvents(); //Slows down game load, but needed for the precachefile command
 
 		if (!fSuccess)
 		{
 //Couldn't load the item's script, don't load the item
 #ifdef DEV_BUILD
-			CGenericItemMgr::DeleteItem(&pNewItem);
+			CGenericItemMgr::DeleteItem(pNewItem);
 			logfileopt << " FAILED\r\n";
 #else
 #ifdef RELEASE_LOCKDOWN
@@ -525,6 +517,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		//if( g_MSScriptInfo->Containter == MS_SCRIPT_LIBRARY )
 		delete[] pStringPtr;
 
+end: //Cleanup time
 	Log("Done precaching items");
 	enddbg;
 }
@@ -944,10 +937,10 @@ bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSoun
 		}
 	}
 
+	SetThink(NULL);
 	//Only add to hands if we didn't already add the item to a pack
 	if (!fWentToPack)
 	{
-		SetThink(NULL);
 		//If I'm still attached to someone, remove me
 		RemoveFromOwner();
 
@@ -1257,7 +1250,7 @@ bool CGenericItem::PutInPack(CGenericItem *pContainer)
 
 	if (m_pOwner)
 	{
-		//StoreEntity(m_pOwner, ENT_OWNER); //Thothie OCT2016_22 - items not storing owner propers when in pack (not cutting it)
+		StoreEntity(m_pOwner, ENT_OWNER); //Thothie OCT2016_22 - items not storing owner propers when in pack (not cutting it)
 		m_pOwner->RemoveItem(this);
 	}
 	else
@@ -1316,6 +1309,7 @@ void CGenericItem::Holster() { CancelAttack(); }
 
 void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector &Angles, const Vector &Origin */)
 {
+	m_pOwner = Owner(); // Oddness happens when trying to drop straight from packs because they get their owner from the container. Explicitly set for now
 	CallScriptEvent("game_drop");
 
 	CancelAttack();
@@ -1330,7 +1324,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 
 	pev->velocity = m_pOwner->pev->velocity;
 	pev->angles = m_pOwner->pev->angles;
-	pev->origin = m_pOwner->EyePosition();
+	pev->origin = m_pOwner->EyePosition() + gpGlobals->v_forward * 10; // Items sometimes get caught in head, move forward a bit
 
 	//	if( m_pPlayer ) strcpy( m_pPlayer->m_szAnimLegs, "" );
 	pev->sequence = 0;

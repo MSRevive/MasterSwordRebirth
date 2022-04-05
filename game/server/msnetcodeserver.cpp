@@ -445,13 +445,20 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	for (int q = 0; q < Data.m_QuickSlots.size(); q++)
 	{
 		quickslot_t &QuickSlot = Data.m_QuickSlots[q];
-		if (QuickSlot.Active && QuickSlot.Type == QS_ITEM)
+		if (QuickSlot.Active && (QuickSlot.Type == QS_ITEM))
+		{
+			bool bFound = false;
 			for (unsigned int i = 0; i < Items.size(); i++)
+			{
 				if (Items[i]->m_OldID == QuickSlot.ID)
 				{
 					QuickSlot.ID = Items[i]->m_iId;
+					bFound = true;
 					break;
 				}
+			}
+			QuickSlot.Active = bFound;
+		}
 		m_QuickSlots[q] = QuickSlot;
 	}
 

@@ -388,6 +388,7 @@ int PRECACHE_MODEL(const char *pszModelname)
 
 int ALLOC_STRING(const char *szValue) //Master Sword - Keep track of all string allocations
 {
+	//return MAKE_STRING(g_StringPool.FindOrAllocate(szValue));
 	return (*g_engfuncs.pfnAllocString)(szValue);
 }
 

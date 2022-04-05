@@ -145,7 +145,7 @@ void CMSMonster::Spawn()
 		{
 			logfile << UTIL_VarArgs("DEBUG: msmonster_random precache #%i / %i as %s\n", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
-			TempScript.Spawn(random_monsterdata[i].m_ScriptName, NULL, NULL, true);
+			TempScript.Spawn(random_monsterdata[i].m_ScriptName, this, this->GetScripted(), true);
 			//TempScript.RunScriptEventByName( "game_precache" ); //skipping this, and hoping it behaves, as I'm not sure if it'll remove when done or how to do so
 
 			//dis didn't work
@@ -491,7 +491,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 void CMSMonster ::Think()
 {
 	pev->vuser3.x = MaxHP();
-	pev->vuser3.y = pev->health;
+	pev->vuser3.y = (IsAlive() ? pev->health : 0);
 	pev->vuser3.z = 0.0f;
 
 	//dbg( "Start" );
@@ -1750,17 +1750,17 @@ void CMSMonster ::HearPhrase(CMSMonster *pSpeaker, const char *phrase)
 			{
 				int Matched = 0;
 				int len = strlen(CheckPhrase);
-				for (int i = 0; i < len; i++)
-					if (SubPhrase[i] == CheckPhrase[i])
+				for (int x = 0; x < len; x++)
+					if (SubPhrase[x] == CheckPhrase[x])
 						Matched++;
 
 				float ratio = (float)Matched / strlen(cTemp1);
-
 				if (ratio > BestMatchedRatio)
 				{
 					BestMatchedRatio = ratio;
 					BestPhrase = &Phrase;
 				}
+
 				break;
 			}
 		}
@@ -1770,7 +1770,6 @@ void CMSMonster ::HearPhrase(CMSMonster *pSpeaker, const char *phrase)
 	{
 		//Heard a phrase, store the talker and run the event
 		StoreEntity(pSpeaker, ENT_LASTSPOKE);
-
 		CallScriptEvent(BestPhrase->ScriptEvent);
 	}
 }
@@ -2265,15 +2264,22 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 
 	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
 	CStat *pStat = FindStat(Damage.ExpStat);
-	msstring out_skill = pStat->m_Name;
-	if (out_skill.contains("spell"))
+	if (pStat)
 	{
-		out_skill.append(".");
-		char toconv[256];
-		 strncpy(toconv,  SpellTypeList[Damage.ExpProp], sizeof(toconv) );
-		out_skill.append(msstring(_strlwr(toconv)));
+		msstring out_skill = pStat->m_Name;
+		if (out_skill.contains("spell"))
+		{
+			out_skill.append(".");
+			char toconv[256];
+			strncpy(toconv, SpellTypeList[Damage.ExpProp], sizeof(toconv));
+			out_skill.append(msstring(_strlwr(toconv)));
+		}
+		Parameters.add(out_skill);
 	}
-	Parameters.add(out_skill);
+	else
+	{
+		Parameters.add("none"); //Thothie OCT2019_11 - MiB Sanity Check
+	}
 	//[end] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
 
 	CallScriptEvent("game_damaged", &Parameters);
@@ -2436,13 +2442,33 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 	//MiB JUL2010_28 Anti-Gib
 	if (pev->deadflag == DEAD_NO)
 	{
+		//Thothie OCT2015_24 - make sure we remove any scripted client effects before we do anything else
+		CBaseEntity* pTarget = RetrieveEntity(ENT_ME);
+		IScripted* pScripted = (pTarget ? pTarget->GetScripted() : NULL);
+		if (pScripted)
+		{
+			for (int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
+			{
+				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect 
+				{
+					pScripted->m_Scripts[i]->RunScriptEventByName("effect_die"); //Call this effect's die function
+					pScripted->m_Scripts[i]->m.RemoveNextFrame = true;
+				}
+			}
+		}
+
 		//Award players with exp proportional to the damage they did
 		dbg("AwardXP");
 		for (int i = 1; i <= MAXPLAYERS; i++)
 		{
-			CMSMonster *pPlayer = (CMSMonster *)UTIL_PlayerByIndex(i);
+			CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i); // MiB MAR2019_22 [SLOT_EXP] - Need this to be a CBasePlayer, not sure why it wasn't
 			if (!pPlayer)
 				continue;
+
+			msstring vsId = pPlayer->AuthID() + "_" + pPlayer->m_CharacterNum;
+			if (!FStrEq(vsId, m_PlayerDamage[i - 1].msId))
+				continue; // MiB MAR2019_22 [SLOT_EXP] - Skip if the id doesn't match
+
 			float xpsend = 0.0;
 			// MiB JUN2010_19 - Decreases the exp-damage ratio if monster was overkilled
 			float mult = min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
@@ -2489,6 +2515,7 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 			{
 				msstringlist Parameters;
 				Parameters.add(UTIL_VarArgs("%f", xpsend));
+				Parameters.add(EntToString(this)); //Thothie APR2018_03
 				pPlayer->CallScriptEvent("game_xpgain", &Parameters);
 			}
 		}
@@ -2523,6 +2550,8 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 		//- maybe causing issues - prob not - test further when have time (see if actually fixes inf xp)
 		//bool thoth_spawner_alive = CBaseEntity::Instance(pev->owner)->IsAlive;
 		//if( !thoth_spawner_alive ) CallGibMonster();
+
+		CallScriptEvent("game_predeath"); //Thothie MAY2016_14 - allows fixing of death fx on some mobs
 
 		//I'm dying, create my body
 		if (!FBitSet(pev->effects, EF_NODRAW))
@@ -2924,8 +2953,8 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 					break;
 				}
 
-				for (int i = 0; i < FoundItems.size(); i++)
-					TotalFoundItems.add(FoundItems[i]);
+				for (int x = 0; x < FoundItems.size(); x++)
+					TotalFoundItems.add(FoundItems[x]);
 			}
 		}
 

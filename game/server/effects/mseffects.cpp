@@ -643,11 +643,17 @@ void CScript::ScriptedEffect(msstringlist &Params)
 				return;
 			Beam->PointEntInit(Start, pTarget->entindex());
 			Beam->SetEndAttachment(atoi(Params[NextParam++]));
+			//Thothie OCT2016_20 - storing all storable beam types
+			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
 		}
 		else if (Type == 1)
 		{
 			int StartPoint = NextParam++;
 			Beam->PointsInit(StringToVec(Params[StartPoint]), StringToVec(Params[NextParam++])); //Can't use NextParam++ twice
+			//Thothie OCT2016_20 - storing all storable beam types
+			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
 		}
 		else if (Type == 2)
 		{
@@ -679,6 +685,10 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			Beam->EntsInit(pTargetStart->entindex(), pTargetEnd->entindex());
 			Beam->SetStartAttachment(start_attach);
 			Beam->SetEndAttachment(end_attach);
+
+			//Thothie OCT2016_20 - storing all storable beam types
+			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
 		}
 		else if (Type == 3)
 		{
@@ -845,6 +855,24 @@ void CScript::ScriptedEffect(msstringlist &Params)
 		float Radius = atof(Params[5]);
 
 		UTIL_ScreenShake(Origin, Amplitude, Frequency, Duration, Radius);
+	}
+	else if (Params[0] == "screenshake_one")
+	{
+		//Thothie APR2016_08 - allow screen shake vs. single client
+		//effect screenshake_one <target> <amp> <freq> <dur>
+		REQPARAMS(5);
+		CBaseEntity* pEntity = (m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[1]) : NULL);
+		if (pEntity && pEntity->IsPlayer())
+		{
+			float Amplitude = atof(Params[2]);
+			float Frequency = atof(Params[3]);
+			float Duration = atof(Params[4]);
+			UTIL_ScreenShakeOne(pEntity, Amplitude, Frequency, Duration);
+		}
+		else
+		{
+			ALERT(at_console, "WARNING: Script: %s, effect screenshake_one: Target is not a player client.\n", m.ScriptFile.c_str());
+		}
 	}
 	else if (Params[0] == "screenfade")
 	{

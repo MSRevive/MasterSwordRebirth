@@ -770,19 +770,20 @@ void Util_ScriptArray(CBaseEntity *pEntity, const char *array_operation, const c
 			return;
 		}
 
-		if(vsOp == "clear")
+		if (vsOp == "clear")
 		{
-			if(pArray->size())
+			if (pArray->size())
 			{
 				pArray->clearitems();
 			}
 			else
 			{
-				Print("Warning: Util_ScriptArray %s - array %s already empty\n",vsOp.c_str(),vsArrayName.c_str());
+				Print("Warning: Util_ScriptArray %s - array %s already empty\n", vsOp.c_str(), vsArrayName.c_str());
 			}
 		}
-
-		if(vsOp == "set")
+		else if (vsOp == "add")
+			pArray->add(array_value);
+		else if (vsOp == "set")
 		{
 			if(vSubIdx < 0 || (unsigned)vSubIdx > pArray->size())
 			{
@@ -793,8 +794,7 @@ void Util_ScriptArray(CBaseEntity *pEntity, const char *array_operation, const c
 				(*pArray)[vSubIdx] = array_value;
 			}
 		}
-
-		if(vsOp == "del")
+		else if(vsOp == "del")
 		{
 			if(vSubIdx < 0 || (unsigned)vSubIdx > pArray->size())
 			{
@@ -1063,6 +1063,26 @@ void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, fl
 			MESSAGE_END();
 		}
 	}
+}
+
+//Thothie APR2016_08 attempting screenshake on one client
+void UTIL_ScreenShakeOne(CBaseEntity* pEntity, float amplitude, float frequency, float duration)
+{
+	if (!pEntity || !pEntity->IsPlayer()) return;
+
+	ScreenShake	shake;
+
+	shake.duration = FixedUnsigned16(duration, 1 << 12);		// 4.12 fixed
+	shake.frequency = FixedUnsigned16(frequency, 1 << 8);	// 8.8 fixed
+	shake.amplitude = FixedUnsigned16(amplitude, 1 << 12);		// 4.12 fixed
+
+	CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgShake, NULL, pPlayer->edict());		// use the magic #1 for "one client"
+	WRITE_SHORT(shake.amplitude);				// shake amount
+	WRITE_SHORT(shake.duration);				// shake lasts this long
+	WRITE_SHORT(shake.frequency);				// shake noise frequency
+	MESSAGE_END();
 }
 
 void UTIL_ScreenShakeAll(const Vector &center, float amplitude, float frequency, float duration)

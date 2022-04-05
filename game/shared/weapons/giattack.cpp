@@ -283,6 +283,15 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 			//- this bit would require a client recompile, dont want to do on a B patch
 			//if ( a > 0 && thoth_unskill_base ) continue;
 
+			// MiB MAR2019_31 - [CHARGE_BUG] Moved this earlier because we want to know they're qualified before attempting
+			if (AttData.RequiredSkill)    // Do I have the skill required to use this attack
+			{
+				int Stat = m_pOwner->GetSkillStat(AttData.StatProf, AttData.PropProf);
+				//Thothie SEP2007 - reduce accuracy and inc stanima drain instead of making unswingable
+				if ((Stat < AttData.RequiredSkill) && (a > 0))
+					continue;
+			}
+
 			if (m_TimeChargeStart || m_LastChargedAmt)
 			{
 				//If I just finished an attack and I charged during that attack...
@@ -294,7 +303,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 				if (ChargetAmt < AttData.flChargeAmt)
 				{
 					// MiB MAR2012_07 - If charged between 0 and 1, we're going to still let them attack, and powered up
-					if (!CurrentAttack)
+					if (AttData.flChargeAmt == 1) // MiB MAR2019_31 - [CHARGE_BUG] Fixing bug that allows doing more than charge-1 damage if you qualify for charge-2 but not charge-1 and charge past level 1
 					{
 						CurrentAttack = &m_Attacks[0]; // The real attack we'll be using
 						iNewAttack = -2;			   // Special code for later
@@ -307,16 +316,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 			else if (AttData.flChargeAmt)
 				continue; //Don't do 'charge' when not charging
 
-			if (AttData.RequiredSkill) //Do I have the skill required to use this attack
-			{
-				int Stat = m_pOwner->GetSkillStat(AttData.StatProf, AttData.PropProf);
-				//Thothie SEP2007 - reduce accuracy and inc stanima drain instead of making unswingable
-				if (Stat < AttData.RequiredSkill && a > 0)
-				{
-					//thoth_unskill_base = true;
-					continue;
-				}
-			}
 			//If this attack isn't forced, compare this attack against the already-selected attack
 			if (CurrentAttack)
 			{
@@ -1846,15 +1845,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				 strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
 				 strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss) );
 				 _snprintf(szStats, sizeof(szStats), "(%i/%i)",  (100 - iAccuracyRoll),  int(100 - Damage.flHitPercentage) );
-
-				if (pPlayerAttacker)
-				{
-					 _snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
-					 		pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
-							pTarget->DisplayName(),
-							szStats, szHitMiss, szDamage);
-					pPlayerAttacker->SendEventMsg(HUDEVENT_ATTACK, sz);
-				}
 				
 				//Thothie SEP2019_22 - report resistance BEGIN
 				bool tdm_found_entry = false;
@@ -1888,19 +1878,58 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				}
 				//Thothie SEP2019_22 - report resistance END	
 				
+				//Thothie SEP2019_22 - changing report syntax to be shorter
+				if (pPlayerAttacker)
+				{
+					// Old format
+					//_snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
+					//	pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
+					//	pTarget->DisplayName(),
+					//	szStats, szHitMiss, szDamage);
+
+					if (Damage.AttackHit)
+					{
+						//Hit <prefix> <name> for <dmg>(acc/req) [resist]
+						_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
+					}
+					else
+					{
+						if (!fDodged)
+						{
+							//Missed <prefix> <name> (acc/req)
+							_snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
+						}
+						else
+						{
+							//<prefix> <name> parries the attack!
+							_snprintf(sz, sizeof(sz), "%s parries the attack!", pTarget->DisplayName());
+						}
+					}
+
+					pPlayerAttacker->SendEventMsg(HUDEVENT_ATTACK, sz);
+				}
+
 				if (pVictim && pVictim->IsPlayer() && pEntityAttacker && pVictim != pEntityAttacker)
 				{
-					CMSMonster *pMonster = (CMSMonster *)pEntityAttacker;
-					CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
-					
-				 _snprintf(sz, sizeof(sz), "%s attacks you. %s %s %s %s", 
-				 		SPEECH::NPCName(pMonster, true),
-						szStats, 
-						szHitMiss, 
-						szDamage,
-						tdm_engrish.c_str()
-					);
-						
+					CMSMonster* pMonster = (CMSMonster*)pEntityAttacker;
+					CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
+
+					// Old format
+				 //_snprintf(sz, sizeof(sz), "%s attacks you. %s %s %s %s", 
+				 //		SPEECH::NPCName(pMonster, true),
+					//	szStats, 
+					//	szHitMiss, 
+					//	szDamage,
+					//	tdm_engrish.c_str()
+					//);
+
+					//Thothie SEP2019_22 - changing report syntax to be shorter
+					//<name> hits you for <damage/element> [resist]
+					if (Damage.AttackHit)
+						_snprintf(sz, sizeof(sz), "%s hits you: %s %s", SPEECH::NPCName(pMonster, true), szDamage, tdm_engrish.c_str());
+					else
+						_snprintf(sz, sizeof(sz), "%s misses you: %s", SPEECH::NPCName(pMonster, true), szStats);
+
 					pPlayer->SendEventMsg(HUDEVENT_ATTACKED, sz);
 				}
 			} //endif Damage.flDamage > 0
