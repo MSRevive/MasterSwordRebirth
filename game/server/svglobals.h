@@ -4,6 +4,7 @@
 //Global initialiazations
 
 bool MSGlobalInit();
+bool MSPreWorldSpawn();
 void MSWorldSpawn();
 void MSGameThink();
 void MSGameEnd();

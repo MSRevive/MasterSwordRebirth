@@ -11,6 +11,7 @@
 #include "versioncontrol.h"
 #include "cstringpool.h"
 #include "fndatahandler.h"
+#include "crc/crchash.h"
 
 ofstream modelout;
 int HighestPrecache = -1;
@@ -114,9 +115,9 @@ bool MSGlobalInit() //Called upon DLL Initialization
 #endif
 	
 	g_log_initialized = true;
-
+	
 	//	-- Initialize network for receiving characters
-	logfile << "Initialize network... ";
+	logfile << "\nInitialize network... ";
 
 	CNetCode::InitNetCode();
 
@@ -124,6 +125,21 @@ bool MSGlobalInit() //Called upon DLL Initialization
 
 	SERVER_COMMAND("exec msstartup.cfg\n");
 
+	return true;
+}
+
+bool MSPreWorldSpawn()
+{
+	if(FnDataHandler::IsEnabled())
+	{
+		char mapfile[128];
+		snprintf(mapfile, 128, "maps/%s.bsp", STRING(gpGlobals->mapname));
+		uint32_t hash = GetFileCheckSum(mapfile);
+	
+		if(!FnDataHandler::IsVerifiedMap(STRING(gpGlobals->mapname), hash))
+			return false;
+	}
+	
 	return true;
 }
 

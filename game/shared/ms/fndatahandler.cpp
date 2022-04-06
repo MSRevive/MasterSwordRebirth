@@ -339,6 +339,23 @@ bool FnDataHandler::IsEnabled(void)
 	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
+bool FnDataHandler::IsVerifiedMap(const char* name, uint32_t hash)
+{
+	JSONDocument* pDoc = NULL;
+	const char* url = GetFnUrl("api/v1/map/%s/%u", name, hash);
+	bool retVal;
+
+	pDoc = HTTPRequestHandler::GetRequestAsJson(url);
+	if (pDoc == NULL)
+		return false;
+
+	const JSONDocument& doc = *pDoc;
+	retVal = doc["data"].GetBool();
+
+	delete pDoc;
+	return retVal;
+}
+
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
