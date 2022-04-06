@@ -112,11 +112,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_devlog);
 	CVAR_REGISTER(&ms_allowdev);
 #endif
-
-	//------------
-
-	//	GMs
-	InitializeGMs();
+	
 	g_log_initialized = true;
 
 	//	-- Initialize network for receiving characters

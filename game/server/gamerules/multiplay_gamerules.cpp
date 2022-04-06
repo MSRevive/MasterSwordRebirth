@@ -1477,26 +1477,6 @@ bool CheckBanned( msstring_ref SteamID )
 	return false;
 }
 
-mslist<unsigned int> g_GMWonList;
-static const unsigned int gmEvaan = 1111;
-static const unsigned int gmDogg = 1111;
-
-
-void InitializeGMs( )
-{
-	g_GMWonList.push_back( gmEvaan );
-	g_GMWonList.push_back( gmDogg );
-}
-bool IsGM( unsigned int WonID )
-{
-	if( g_GMWonList.size() <= 0 ) return false;
-
-	 for (int i = 0; i < g_GMWonList.size(); i++) 
-		if( g_GMWonList[i] == WonID ) return true;
-
-	return false;
-}
-
 /*
 ==============
 ExtractCommandString
