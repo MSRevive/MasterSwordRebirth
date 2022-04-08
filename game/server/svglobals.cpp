@@ -128,18 +128,16 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	return true;
 }
 
-bool MSPreWorldSpawn()
+static bool IsVerifiedMap()
 {
-	if(FnDataHandler::IsEnabled())
+	if (FnDataHandler::IsEnabled())
 	{
 		char mapfile[128];
-		_snprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", STRING(gpGlobals->mapname));
-		uint32_t hash = GetFileCheckSum(mapfile);
-	
-		if(!FnDataHandler::IsVerifiedMap(STRING(gpGlobals->mapname), hash))
+		_snprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", MSGlobals::MapName.c_str());
+		unsigned int hash = GetFileCheckSum(mapfile);
+		if (!FnDataHandler::IsVerifiedMap(STRING(gpGlobals->mapname), hash))
 			return false;
 	}
-	
 	return true;
 }
 
@@ -183,8 +181,13 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.so");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
-	
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
+
+	if (!IsVerifiedMap())
+	{
+		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName);
+		SERVER_COMMAND("changelevel edana\n");
+	}
 }
 
 //Called every frame

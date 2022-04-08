@@ -92,8 +92,6 @@ bool HTTPRequestHandler::DeleteRequest(const char* url)
 	return (result == CURLE_OK);
 }
 
-const char* HTTPRequestHandler::GetRequestResponse(void) { return g_pDataBuffer.c_str(); }
-
 // Parses a JSON formatted char array, returns a JSON document, see https://rapidjson.org/index.html for documentation!
 JSONDocument* HTTPRequestHandler::ParseJSON(const char* data)
 {
@@ -129,15 +127,4 @@ JSONDocument* HTTPRequestHandler::PutRequestAsJson(const char* url, const char* 
 JSONDocument* HTTPRequestHandler::DeleteRequestAsJson(const char* url)
 {
 	return (DeleteRequest(url) ? ParseJSON(g_pDataBuffer.c_str()) : NULL);
-}
-
-void HTTPRequestHandler::PrintJSONDocument(const JSONDocument* pDocument)
-{
-	if (pDocument == NULL) return;
-
-	rapidjson::StringBuffer buff;
-	rapidjson::Writer<rapidjson::StringBuffer> writer(buff);
-	pDocument->Accept(writer);
-
-	printf("%s\n", buff.GetString());
 }

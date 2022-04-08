@@ -341,6 +341,7 @@ bool FnDataHandler::IsEnabled(void)
 
 bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
 {	
+	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
 	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%u", name, hash));
 	if (pDoc == NULL)
 		return false;

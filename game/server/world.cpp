@@ -409,23 +409,16 @@ extern DLL_GLOBAL BOOL g_fGameOver;
 
 #include "logfile.h"
 void CWorld ::Spawn(void)
-{
-	if (!MSPreWorldSpawn())
-	{
-		ALERT(at_console, "Mastersword World Spawn Initialization FAILED!\n");
-		SERVER_COMMAND("exit\n");
-		return;
-	}
-	
+{	
 	logfile << "World Spawn...\r\n";
 
 	g_fGameOver = FALSE;
-
 	CScriptedEnt::Spawn();
 	Precache();
 
 	pev->nextthink = pev->ltime + 0.1;
 	MSWorldSpawn();
+
 	logfile << "World Spawn END\r\n";
 }
 void CWorld ::Think(void)
