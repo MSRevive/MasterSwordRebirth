@@ -133,7 +133,7 @@ bool MSPreWorldSpawn()
 	if(FnDataHandler::IsEnabled())
 	{
 		char mapfile[128];
-		snprintf(mapfile, 128, "maps/%s.bsp", STRING(gpGlobals->mapname));
+		_snprintf(mapfile, sizeof(mapfile), "maps/%s.bsp", STRING(gpGlobals->mapname));
 		uint32_t hash = GetFileCheckSum(mapfile);
 	
 		if(!FnDataHandler::IsVerifiedMap(STRING(gpGlobals->mapname), hash))
