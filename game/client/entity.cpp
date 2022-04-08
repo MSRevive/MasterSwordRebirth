@@ -31,6 +31,7 @@
 
 #undef DLLEXPORT //Master Sword
 #define DLLEXPORT EXPORT
+#define MAX_TEMPENT_EXTRA 4096
 
 void Game_AddObjects(void);
 void SetClEntityProp(cl_entity_t &Ent, msstring &Cmd, mslist<msstring *> &ValueParams);
@@ -71,7 +72,8 @@ struct tempentextra_t
 	bool DieWithEntActive; //When the other ent ceases to exist, delete me
 	int DieWithEnt;
 };
-static tempentextra_t g_TempEntExtra[4096]; //Extra info about tempents
+
+static tempentextra_t g_TempEntExtra[MAX_TEMPENT_EXTRA]; //Extra info about tempents
 extern bool g_TempEntNewLevel;
 
 /*
@@ -991,7 +993,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			p->die += 1.0;
 
 			int Spot = 0;
-			for (int i = 0; i < ARRAYSIZE(g_TempEntExtra); i++)
+			for (int i = 0; i < MAX_TEMPENT_EXTRA; i++)
 				if (!g_TempEntExtra[i].Active)
 				{
 					Spot = i;
@@ -1624,6 +1626,42 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			gEngfuncs.pEventAPI->EV_IndexFromTrace(&pmtr), 0, thoth_trace_end, 0);
 		}
 	}
+	else if (Params[0] == "bleed")
+	{
+		if (Params.size() < 4)
+			return;
+
+		//cleffect bleed <red|green|yellow> <origin> <amt>
+		int bld_col = BLOOD_COLOR_RED;
+		int bld_dec = 13 + RANDOM_LONG(0, 5);
+		if (Params[1] == "green")
+		{
+			bld_col = BLOOD_COLOR_GREEN;
+			bld_dec = 19 + RANDOM_LONG(0, 5);
+		}
+		else if (Params[1] == "yellow")
+		{
+			bld_col = BLOOD_COLOR_YELLOW;
+			bld_dec = 19 + RANDOM_LONG(0, 5);
+		}
+
+		Vector bld_org = StringToVec(Params[2]);
+		bld_org.x += RANDOM_FLOAT(-10, 10);
+		bld_org.y += RANDOM_FLOAT(-10, 10);
+		bld_org.z += RANDOM_FLOAT(-10, 10);
+		Vector bld_dir; // = StringToVec(Params[3]);
+		bld_dir.x = RANDOM_FLOAT(-1, 1);
+		bld_dir.y = RANDOM_FLOAT(-1, 1);
+		bld_dir.z = RANDOM_FLOAT(0, 1);
+		int bld_amt = atoi(Params[3]);
+		gEngfuncs.pEfxAPI->R_BloodStream(bld_org, bld_dir, (bld_col == BLOOD_COLOR_RED) ? 70 : bld_col, min(bld_amt, 255));
+
+		int iFlags = 0;
+		SetBits(iFlags, PM_WORLD_ONLY);
+		Vector bld_trc_end = bld_org + bld_dir * bld_amt * 2;
+		pmtrace_s& pmtr = *gEngfuncs.PM_TraceLine((float*)&bld_org[0], (float*)&bld_trc_end[0], iFlags, 2, iFlags);
+		gEngfuncs.pEfxAPI->R_DecalShoot(gEngfuncs.pEfxAPI->Draw_DecalIndex(bld_dec), gEngfuncs.pEventAPI->EV_IndexFromTrace(&pmtr), 0, bld_trc_end, 0);
+	}
 }
 
 void SetClEntityProp(cl_entity_t &Ent, msstring &Cmd, mslist<msstring *> &Params)
@@ -1897,7 +1935,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 	{
 		if (g_TempEntNewLevel)
 		{
-			for (int i = 0; i < ARRAYSIZE(g_TempEntExtra); i++) //On level change, this is called.  Clear all tempent extra data from last level
+			for (int i = 0; i < MAX_TEMPENT_EXTRA; i++) //On level change, this is called.  Clear all tempent extra data from last level
 				clrmem(g_TempEntExtra[i]);
 
 			g_TempEntNewLevel = false;

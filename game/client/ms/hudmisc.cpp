@@ -167,7 +167,7 @@ void CHudMisc ::UserCmd_RemovePack(void)
 		SendString += ". ";
 		SendString += (ItemName + "\n").c_str();
 		strncat(MenuText, SendString, SendString.len());
-		iBitsValid += pow(2, Size);
+		iBitsValid += pow(2.0, Size);
 
 		m_RemoveList.add(pGearItem->m_iId);
 	}
@@ -223,7 +223,7 @@ void CHudMisc::SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
 		}
 
 		if (m_OfferInfo.GoldScreen)
-			gHUD.m_Menu->ShowMenu(pow(2, 10) - 1, UTIL_VarArgs("You have %i gold coins.\n\nOffer gold: %i\n", player.m_Gold, m_OfferInfo.GoldAmt), CHudMisc_SelectMenuItem, MENU_OFFER);
+			gHUD.m_Menu->ShowMenu(pow(2.0, 10) - 1, UTIL_VarArgs("You have %i gold coins.\n\nOffer gold: %i\n", player.m_Gold, m_OfferInfo.GoldAmt), CHudMisc_SelectMenuItem, MENU_OFFER);
 
 		break;
 	}

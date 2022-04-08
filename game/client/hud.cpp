@@ -787,6 +787,15 @@ int __MsgFunc_LocalPanel(const char *pszName, int iSize, void *pbuf)
 			pLocal->AddParagraph(src);
 		break;
 	}
+	// MIB FEB2019_22 [LOCAL_PANEL_IMAGE]
+	case 6: // Register image
+	{
+		msstring						vName = READ_STRING();
+		bool							bIsTga = READ_BYTE() == 1;
+		int								vFrame = bIsTga ? 0 : READ_BYTE();
+		bool							bBorder = READ_BOOL();
+		pLocal->AddImage(vName, bIsTga, bBorder, vFrame);
+	}
 	}
 	return 1;
 }

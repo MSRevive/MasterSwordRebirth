@@ -91,7 +91,7 @@ extern int iTeamColors[5][3];
 #define CMENU_TOP (BUTTON_SIZE_Y * 4)
 
 #define MAX_TEAMNAME_SIZE 64
-#define MAX_BUTTON_SIZE 32
+#define MAX_BUTTON_SIZE MSSTRING_SIZE
 
 // Map Briefing Window
 #define MAPBRIEF_INDENT 30

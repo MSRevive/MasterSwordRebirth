@@ -272,11 +272,11 @@ public:
 		}
 		else if (QuickSlot.Type == QS_SPELL)
 		{
-			CGenericItem *pItem = NewGenericItem(player.m_SpellList[QuickSlot.ID]);
+			// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table
+			CGenericItem* pItem = CGenericItemMgr::GetGlobalGenericItemByName(player.m_SpellList[QuickSlot.ID], true);
 			if (pItem)
 			{
 				SelectItem(pItem, QuickSlot.Type);
-				pItem->SUB_Remove();
 				return true;
 			}
 		}

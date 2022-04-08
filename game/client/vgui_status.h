@@ -83,6 +83,13 @@ public:
 		*/
 	}
 
+	// MiB FEB2019_22 - Update duration and reset start time
+	void UpdateDur(float dur)
+	{
+		m_Time = gpGlobals->time;
+		m_Dur = dur;
+	}
+
 	bool IsActive(void)
 	{
 		return gpGlobals->time < (m_Time + m_Dur);
@@ -260,8 +267,20 @@ static void SetFN(bool Up)
 	else
 		StatusIcons->m_FN.setVisible(true);
 }
-static void AddStatus(const char *Icon, const char *Name, float Dur, bool bSprite = false)
+
+static void AddStatus(const char* Icon, const char* Name, float Dur, bool bSprite = false)
 {
+	// MiB FEB2019_22 - When sent a duplicate name, reset the duration
+	for (int i = 0; i < StatusIcons->m_Status.size(); i++)
+	{
+		VGUI_StatusIcon* pIcon = StatusIcons->m_Status[i];
+		if (pIcon == NULL) continue;
+		if (!strcmp(Name, pIcon->m_Name))
+		{
+			pIcon->UpdateDur(Dur);
+			return;
+		}
+	}
 	StatusIcons->m_Status.add(new VGUI_StatusIcon(StatusIcons, Icon, Name, Dur, 0, 0, bSprite));
 }
 

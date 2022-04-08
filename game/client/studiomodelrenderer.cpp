@@ -1343,7 +1343,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			if (pItem->m_RenderMode > 0)
 				RenderEnt.curstate.rendermode = pItem->m_RenderMode;
 			if (pItem->m_RenderFx > 0)
-				RenderEnt.curstate.rendermode = pItem->m_RenderFx;
+				RenderEnt.curstate.renderfx = pItem->m_RenderFx;
 			if (pItem->m_RenderAmt > 0)
 				RenderEnt.baseline.renderamt = RenderEnt.curstate.renderamt = pItem->m_RenderAmt;
 			//[/Shuriken]
@@ -2096,23 +2096,15 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		IEngineStudio.StudioEntityLight( &lighting );
 
 		// model and frame independant
-		IEngineStudio.StudioSetupLighting (&lighting);
+		IEngineStudio.StudioSetupLighting (&lighting);*/
 
-		m_pPlayerInfo = IEngineStudio.PlayerInfo( m_nPlayerIndex );
+		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		m_nTopColor = m_pPlayerInfo->topcolor;
-		if (m_nTopColor < 0)
-			m_nTopColor = 0;
-		if (m_nTopColor > 360)
-			m_nTopColor = 360;
-		m_nBottomColor = m_pPlayerInfo->bottomcolor;
-		if (m_nBottomColor < 0)
-			m_nBottomColor = 0;
-		if (m_nBottomColor > 360)
-			m_nBottomColor = 360;
+		m_nTopColor = min(max(0, m_pPlayerInfo->topcolor), 360);
+		m_nBottomColor = min(max(0, m_pPlayerInfo->bottomcolor), 360);
 
-		IEngineStudio.StudioSetRemapColors( m_nTopColor, m_nBottomColor );*/
+		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
 		//Master Sword - don't render the normal player model. -- UNDONE
 		//Instead, the bodypart attachmets are rendered -- UNDONE
@@ -2230,9 +2222,8 @@ void CStudioModelRenderer::StudioRenderModel(void)
 	IEngineStudio.StudioSetupLighting(&lighting);
 
 	// get remap colors
-	//m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
-	//m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
-	m_nTopColor = m_nBottomColor = 0;
+	m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
+	m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
 
 	IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 

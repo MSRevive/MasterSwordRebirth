@@ -39,6 +39,8 @@
 #include "../vgui_scorepanel.h"
 #include "vgui_hud.h"
 #include "action.h"
+#include "../vgui_teamfortressviewport.h"
+#include "vgui_containerlist.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;
@@ -1041,12 +1043,17 @@ int __MsgFunc_SetProp(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-void Player_OpenInventory()
+void Player_ToggleInventory()
 {
-	if (player.m_CharacterState == CHARSTATE_UNLOADED)
+	if ((gHUD.m_iHideHUDDisplay & HIDEHUD_ALL) || (player.m_CharacterState == CHARSTATE_UNLOADED))
 		return;
-	if (gHUD.m_iHideHUDDisplay & HIDEHUD_ALL)
+
+	// Hide inventory if it is already visible.
+	if (gViewPort && gViewPort->m_pCurrentMenu && (gViewPort->m_pCurrentMenu == gViewPort->m_pContainerMenu))
+	{
+		gViewPort->HideTopMenu();
 		return;
+	}
 
 	CGenericItem *pWearable = NULL; //Fallback, in case a pack isn't found
 	for (int i = 0; i < player.Gear.size(); i++)
@@ -1068,7 +1075,8 @@ void Player_OpenInventory()
 	else
 		ContainerWindowOpen(0); //No wearable was found, Open to player hands
 }
-void __CmdFunc_Inv() { Player_OpenInventory(); }
+
+void __CmdFunc_Inv() { Player_ToggleInventory(); }
 /*void __CmdFunc_Slot1( ) { Player_SelectSlot( 1 ); }
 void __CmdFunc_Slot2( ) { Player_SelectSlot( 2 ); }
 void __CmdFunc_Slot3( ) { Player_SelectSlot( 3 ); }

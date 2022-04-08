@@ -66,6 +66,11 @@ public:
 	byte mousedownBgColor[4];
 	byte borderColor[4];
 
+	// MIB FEB2019_26 [LOCAL_PANEL_FONT]
+	bool bItalic;
+	bool bUnderline;
+	bool bStrike;
+
 	// construction/destruction
 	CScheme();
 	~CScheme();
@@ -79,6 +84,11 @@ CSchemeManager::CScheme::CScheme()
 	fontWeight = 0;
 	font = NULL;
 	ownFontPointer = false;
+
+	// MIB FEB2019_26 [LOCAL_PANEL_FONT]
+	bItalic = false;
+	bUnderline = false;
+	bStrike = false;
 }
 
 CSchemeManager::CScheme::~CScheme()
@@ -95,16 +105,22 @@ CSchemeManager::CScheme::~CScheme()
 //			!! needs to be shared out
 //-----------------------------------------------------------------------------
 static int g_ResArray[] =
-	{
-		320,
-		400,
-		512,
-		640,
-		800,
-		1024,
-		1152,
-		1280,
-		1600};
+{
+	640,
+	800,
+	720,
+	1024,
+	1152,
+	1176,
+	1280,
+	1360,
+	1366,
+	1440,
+	1600,
+	1680,
+	1768,
+	1920
+};
 static int g_NumReses = sizeof(g_ResArray) / sizeof(int);
 
 static byte *LoadFileByResolution(const char *filePrefix, int xRes, const char *filePostfix)
@@ -336,6 +352,13 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 			ParseRGBAFromString(pScheme->borderColor, paramValue);
 			hasMouseDownBgColor = true;
 		}
+		// MIB FEB2019_26 [LOCAL_PANEL_FONT]
+		else if (!stricmp(paramName, "Italic"))
+			pScheme->bItalic = atoi(paramValue) >= 1;
+		else if (!stricmp(paramName, "Underline"))
+			pScheme->bUnderline = atoi(paramValue) >= 1;
+		else if (!stricmp(paramName, "StrikeThrough"))
+			pScheme->bStrike = atoi(paramValue) >= 1;
 
 		// get the new token last, so we now if the loop needs to be continued or not
 		pFile = gEngfuncs.COM_ParseFile(pFile, token);
@@ -375,7 +398,14 @@ buildDefaultFont:
 		for (int j = 0; j < i; j++)
 		{
 			// check if the font name, size, and weight are the same
-			if (!stricmp(m_pSchemeList[i].fontName, m_pSchemeList[j].fontName) && m_pSchemeList[i].fontSize == m_pSchemeList[j].fontSize && m_pSchemeList[i].fontWeight == m_pSchemeList[j].fontWeight)
+			if (
+				!stricmp(m_pSchemeList[i].fontName, m_pSchemeList[j].fontName)
+				&& m_pSchemeList[i].fontSize == m_pSchemeList[j].fontSize
+				&& m_pSchemeList[i].fontWeight == m_pSchemeList[j].fontWeight
+				&& m_pSchemeList[i].bItalic == m_pSchemeList[j].bItalic // MIB FEB2019_26 [LOCAL_PANEL_FONT]
+				&& m_pSchemeList[i].bUnderline == m_pSchemeList[j].bUnderline
+				&& m_pSchemeList[i].bStrike == m_pSchemeList[j].bStrike
+				)
 			{
 				// copy the pointer, but mark i as not owning it
 				m_pSchemeList[i].font = m_pSchemeList[j].font;
@@ -405,9 +435,9 @@ buildDefaultFont:
 				0,
 				0,
 				m_pSchemeList[i].fontWeight,
-				false,
-				false,
-				false,
+				m_pSchemeList[i].bItalic, // MIB FEB2019_26 [LOCAL_PANEL_FONT]
+				m_pSchemeList[i].bUnderline,
+				m_pSchemeList[i].bStrike,
 				false);
 			
 			//Don't leak memory. - Solokiller
