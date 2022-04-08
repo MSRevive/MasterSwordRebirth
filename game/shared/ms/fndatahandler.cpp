@@ -353,6 +353,20 @@ bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
 	return retVal;
 }
 
+bool FnDataHandler::IsVerifiedSC(unsigned int hash)
+{	
+	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%u", hash));
+	if (pDoc == NULL)
+		return false;
+
+	const JSONDocument& doc = *pDoc;
+	const bool retVal = doc["data"].GetBool();
+
+	delete pDoc;
+	return retVal;
+}
+
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
