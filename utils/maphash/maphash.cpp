@@ -22,6 +22,15 @@ string getFileExt(string fileName)
 	return ext;
 }
 
+string stripExt(string fileName)
+{
+	size_t lastdot = fileName.find_last_of(".");
+	if (lastdot == std::string::npos) 
+		return fileName;
+	
+	return fileName.substr(0, lastdot);
+}
+
 //All of the hard work
 vector<string> lsfiles(string folder)  //(c) http://stackoverflow.com/a/20847429/1009816
 {
@@ -86,7 +95,7 @@ int main(int argc, char *argv[])
 		{
 			string fullpath = where+t->c_str();
 			cout << "Writing file hash for: " << t->c_str() << endl;
-			doc.AddMember(Value(t->c_str(), doc.GetAllocator()), GetFileCheckSum(fullpath.c_str()), doc.GetAllocator());
+			doc.AddMember(Value(stripExt(t->c_str()).c_str(), doc.GetAllocator()), GetFileCheckSum(fullpath.c_str()), doc.GetAllocator());
 		}
 	}
 	
