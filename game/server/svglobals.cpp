@@ -185,7 +185,7 @@ void MSWorldSpawn()
 
 	if (!IsVerifiedMap())
 	{
-		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName);
+		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
 		SERVER_COMMAND("changelevel edana\n");
 	}
 }
