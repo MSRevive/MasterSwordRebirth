@@ -132,7 +132,7 @@ static bool IsVerifiedMap()
 {
 	if (FnDataHandler::IsEnabled())
 	{
-		char mapfile[256];
+		char mapfile[MAX_PATH];
 		_snprintf(mapfile, sizeof(mapfile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
 		unsigned int hash = GetFileCheckSum(mapfile);
 		if (!FnDataHandler::IsVerifiedMap(MSGlobals::MapName.c_str(), hash))
