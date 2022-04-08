@@ -1652,12 +1652,10 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 					CBaseEntity *pEntity = RetrieveEntity(Params[0]);
 
 					//AUG2013_22 Thothie - fishies stay in water
-					if (pev->flags & (FL_SWIM))
+					if (pEntity && pEntity->pev && pev && (pev->flags & FL_SWIM))
 					{
 						if (EngineFunc::Shared_PointContents(pEntity->pev->origin) != CONTENTS_WATER)
-						{
 							pEntity = NULL;
-						}
 					}
 
 					if (pEntity)
