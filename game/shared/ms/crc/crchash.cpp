@@ -21,7 +21,7 @@ bool MatchFileCheckSum(const char* FilePath, uint32_t CheckSum)
 	file.read(pFileData, FileSize);
 	file.close();
 
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 0);
+	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
 
 	delete[] pFileData;
 	if (CheckSum == CRCText)
@@ -44,7 +44,7 @@ uint32_t GetFileCheckSum(const char* FilePath)
 	file.read(pFileData, FileSize);
 	file.close();
 
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 0);
+	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
 
 	delete[] pFileData;
 	return CRCText;
@@ -64,7 +64,7 @@ uint32_t GetFileCheckSumSize(const char* FilePath)
 	file.read(pFileData, FileSize);
 	file.close();
 
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 0);
+	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
 
 	delete[] pFileData;
 	return CRCText + FileSize;
