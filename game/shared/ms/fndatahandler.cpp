@@ -339,10 +339,10 @@ bool FnDataHandler::IsEnabled(void)
 	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
-bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
-{	
+bool FnDataHandler::IsVerifiedMap(const char* name, unsigned long hash)
+{
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%u", name, hash));
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%llu", name, hash));
 	if (pDoc == NULL)
 		return false;
 
@@ -353,10 +353,10 @@ bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
 	return retVal;
 }
 
-bool FnDataHandler::IsVerifiedSC(unsigned int hash)
-{	
+bool FnDataHandler::IsVerifiedSC(unsigned long hash)
+{
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%u", hash));
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%llu", hash));
 	if (pDoc == NULL)
 		return false;
 
@@ -407,7 +407,7 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 		pPlayer->steamID64,
 		slot,
 		bIsUpdate ? GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid) : GetFnUrl("api/v1/character/")
-	);
+		);
 	req->data = new char[size];
 	req->size = size;
 	memcpy(req->data, data, size);

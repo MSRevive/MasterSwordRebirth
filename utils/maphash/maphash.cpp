@@ -3,11 +3,10 @@
 //
 #include <stdio.h>
 #include <string>
-#include <windows.h>
 #include <vector>
-#include <cstdio>
+#include <windows.h>
 
-#include "../stream_safe.h"
+#include "stream_safe.h"
 #include "crc/crchash.h"
 #include "rapidjson/document_safe.h"
 
@@ -18,97 +17,83 @@ string getFileExt(string fileName)
 {
 	size_t perd = fileName.find_last_of(".");
 	string ext = fileName.substr(perd + 1);
-
 	return ext;
 }
 
 string stripExt(string fileName)
 {
 	size_t lastdot = fileName.find_last_of(".");
-	if (lastdot == std::string::npos) 
+	if (lastdot == std::string::npos)
 		return fileName;
-	
 	return fileName.substr(0, lastdot);
 }
 
-//All of the hard work
-vector<string> lsfiles(string folder)  //(c) http://stackoverflow.com/a/20847429/1009816
+// All of the hard work
+void lsfiles(vector<string> &files, string folder)  // (c) http://stackoverflow.com/a/20847429/1009816
 {
-  char search_path[200];
-  sprintf_s(search_path, "%s*.*", folder.c_str());
-	
-	vector<string> files;
-  WIN32_FIND_DATA fd; 
-  HANDLE hFind = ::FindFirstFile(search_path, &fd);
-	
-  if(hFind != INVALID_HANDLE_VALUE) 
-  { 
-    do 
-    { 
-      // read all (real) files in current folder, delete '!' read other 2 default folder . and ..
-      if(!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) 
-      {
-      	files.push_back(fd.cFileName);
-      }
-     }while(::FindNextFile(hFind, &fd)); 
-      ::FindClose(hFind); 
-  }
-	
-  return files;
+	files.clear();
+	char search_path[MAX_PATH];
+	_snprintf(search_path, MAX_PATH, "%s*.*", folder.c_str());
+
+	WIN32_FIND_DATA fd;
+	HANDLE hFind = ::FindFirstFile(search_path, &fd);
+	if (hFind != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			// read all (real) files in current folder, delete '!' read other 2 default folder . and ..
+			if (!(fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+				files.push_back(fd.cFileName);
+		} while (::FindNextFile(hFind, &fd));
+		::FindClose(hFind);
+	}
 }
 
 int main(int argc, char *argv[])
 {
-	string where;
-	string output;
-	
+	string where = "";
+	string output = "";
+
 	for (int i = 0; i < argc; i++)
 	{
 		if (!strcmp(argv[i], "-d") || !strcmp(argv[i], "--dir"))
-			where = argv[i+1] + string("\\");
-			
+		where = argv[i + 1] + string("\\");
+
 		if (!strcmp(argv[i], "-o") || !strcmp(argv[i], "--out"))
-			output = argv[i+1] + string("\\");
+			output = argv[i + 1] + string("\\");
 	}
-	
-	if (where.empty())
-		where = "";
-		
-	if (output.empty())
-		output = "";
-	
-	vector<string> list = lsfiles(where); //Get contents of directory
-	
-	Document doc;
-	doc.SetObject();
-	
-	string fOutput = output+"maps.json";
-	
+
+	vector<string> list;
+	lsfiles(list, where); // Get contents of directory
+
+	string fOutput = output + "maps.json";
 	FILE* fp = fopen(fOutput.c_str(), "wb"); // non-Windows use "w"
-	
+
 	char writeBuffer[65536];
 	FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-	
-	for(vector<string>::iterator t = list.begin(); t != list.end(); ++t)
+	Writer<FileWriteStream> fileStream(os);
+	fileStream.StartObject();
+
+	for (const string &val : list)
 	{
-		if(getFileExt(t->c_str()) == "bsp")
+		if (getFileExt(val.c_str()) == "bsp")
 		{
-			string fullpath = where+t->c_str();
-			cout << "Writing file hash for: " << t->c_str() << endl;
-			doc.AddMember(Value(stripExt(t->c_str()).c_str(), doc.GetAllocator()), GetFileCheckSum(fullpath.c_str()), doc.GetAllocator());
+			string fullpath = where + val.c_str();
+			cout << "Writing file hash for: " << val.c_str() << endl;
+			fileStream.Key(stripExt(val.c_str()).c_str());
+			fileStream.Int64(GetFileCheckSum(fullpath.c_str()));
 		}
 	}
-	
-	Writer<FileWriteStream> writer(os);
-	doc.Accept(writer);
-	
+
+	fileStream.EndObject();
 	fclose(fp);
-	
+
 	cout << "\n";
 	cout << "Operation has finished. It is safe to close now." << endl;
 	cout << "File Located in: " << fOutput.c_str() << endl;
 	cout << "\n";
 	cout << "Press 'enter' to close." << endl;
 	cin.ignore();
+
 	return 0;
 }

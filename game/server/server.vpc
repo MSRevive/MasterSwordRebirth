@@ -247,7 +247,8 @@ $Project "Server"
 		{
 			$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
 			$File "$SRCDIR\game\shared\ms\crc\crchash.h"
-			$File "$SRCDIR\thirdparty\xxhash\xxhash32.h"
+			$File "$SRCDIR\game\shared\ms\crc\checksum_crc.cpp"
+			$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
 		}
 
 		$Folder "base64"

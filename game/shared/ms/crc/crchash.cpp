@@ -1,71 +1,29 @@
-#include <string.h> // Needed for strlen().
-#include <stdio.h>
-#include "../stream_safe.h"
+#include "checksum_crc.h"
+#include "msfileio.h"
 
-#include "xxhash/xxhash32.h"
-#include "stackstring.h"
-
-using namespace std;
-
-bool MatchFileCheckSum(const char* FilePath, uint32_t CheckSum)
+static unsigned long ComputeCRC32ForFile(const char *path)
 {
-	ifstream file(FilePath, ios_base::in);
-	if (!file.is_open())
-		return false;
+	if (!path || !path[0])
+		return 0UL;
 
-	file.seekg(0, ios::end);
-	long FileSize = file.tellg();
-	file.seekg(0, ios::beg);
+	unsigned long hashValue = 0UL;
+	CMemFile gameFile;
+	bool bCouldLoad = gameFile.ReadFromFile(path);
+	if (bCouldLoad)
+	{
+		hashValue = CRC32::CRC32_ProcessSingleBuffer(gameFile.m_Buffer, gameFile.m_BufferSize);
+		gameFile.Close();
+	}
 
-	char* pFileData = new char[FileSize];
-	file.read(pFileData, FileSize);
-	file.close();
-
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
-
-	delete[] pFileData;
-	if (CheckSum == CRCText)
-		return true;
-	else
-		return false;
+	return hashValue;
 }
 
-uint32_t GetFileCheckSum(const char* FilePath)
+bool MatchFileCheckSum(const char* FilePath, unsigned long CheckSum)
 {
-	ifstream file(FilePath, ios_base::in);
-	if (!file.is_open())
-		return false;
-
-	file.seekg(0, ios::end);
-	long FileSize = file.tellg();
-	file.seekg(0, ios::beg);
-
-	char* pFileData = new char[FileSize];
-	file.read(pFileData, FileSize);
-	file.close();
-
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
-
-	delete[] pFileData;
-	return CRCText;
+	return (ComputeCRC32ForFile(FilePath) == CheckSum);
 }
 
-uint32_t GetFileCheckSumSize(const char* FilePath)
+unsigned long GetFileCheckSum(const char* FilePath)
 {
-	ifstream file(FilePath, ios_base::in);
-	if (!file.is_open())
-		return false;
-
-	file.seekg(0, ios::end);
-	long FileSize = file.tellg();
-	file.seekg(0, ios::beg);
-
-	char* pFileData = new char[FileSize];
-	file.read(pFileData, FileSize);
-	file.close();
-
-	uint32_t CRCText = XXHash32::hash(pFileData, FileSize, 1337);
-
-	delete[] pFileData;
-	return CRCText + FileSize;
+	return ComputeCRC32ForFile(FilePath);
 }

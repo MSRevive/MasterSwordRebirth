@@ -12,7 +12,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -29,7 +29,10 @@ $Project "maphash"
 	{
 		$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
 		$File "$SRCDIR\game\shared\ms\crc\crchash.h"
-		$File "..\..\thirdparty\xxhash\xxhash32.h"
+		$File "$SRCDIR\game\shared\ms\crc\checksum_crc.cpp"
+		$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
+		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
+		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
 		$File "maphash.cpp"
 	}
 }
