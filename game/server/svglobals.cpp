@@ -141,6 +141,19 @@ static bool IsVerifiedMap()
 	return true;
 }
 
+static bool IsVerifiedSC()
+{
+	if (FnDataHandler::IsEnabled())
+	{
+		char scfile[MAX_PATH];
+		_snprintf(scfile, sizeof(scfile), "%s/dlls/sc.dll", MSGlobals::AbsGamePath.c_str());
+		unsigned long hash = GetFileCheckSum(scfile);
+		if (!FnDataHandler::IsVerifiedSC(hash))
+			return false;
+	}
+	return true;
+}
+
 //Called from CWorld::Spawn() each map change
 void MSWorldSpawn()
 {
@@ -187,6 +200,12 @@ void MSWorldSpawn()
 	{
 		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
 		SERVER_COMMAND("changelevel edana\n");
+	}
+	
+	if(!IsVerifiedSC())
+	{
+		ALERT(at_console, "Script file not verified for FN!");
+		SERVER_COMMAND("exit\n"); //we want to quit to prevent cheaters
 	}
 }
 
