@@ -188,7 +188,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["setcvar"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_SetCVar); //Thothie - JUN2007a
 		m_GlobalCmdHash["respawn"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Respawn);
 		m_GlobalCmdHash["npcmove"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_NpcMove);
-		m_GlobalCmdHash["CheatEngineCheck"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_CheatEngineCheck); //MiB NOV2007a
 		m_GlobalCmdHash["giveexp"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_GiveExp); //MiB JAN2010_18
 		m_GlobalCmdHash["torandomspawn"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ToRandomSpawn); //Thothie JAN2010_20
 		m_GlobalCmdHash["scriptflags"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ScriptFlags); //Thothie JAN2013_02
@@ -2417,15 +2416,6 @@ bool CScript::ScriptCmd_ChatLog(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	else ERROR_MISSING_PARMS;
 #endif
 
-	return true;
-}
-
-//cheatenginecheck
-//- scope: shared
-//- Special procedure for hunting for specific cheat programs,
-//- Called periodically by game_master and client,
-bool CScript::ScriptCmd_CheatEngineCheck(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-{
 	return true;
 }
 
