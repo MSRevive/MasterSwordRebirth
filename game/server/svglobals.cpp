@@ -133,8 +133,7 @@ static bool IsVerifiedMap()
 	{
 		char mapfile[MAX_PATH];
 		_snprintf(mapfile, sizeof(mapfile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
-		unsigned long hash = GetFileCheckSum(mapfile);
-		if (!FnDataHandler::IsVerifiedMap(MSGlobals::MapName.c_str(), hash))
+		if (!FnDataHandler::IsVerifiedMap(MSGlobals::MapName.c_str(), GetFileCheckSum(mapfile)))
 			return false;
 	}
 	return true;
@@ -146,8 +145,7 @@ static bool IsVerifiedSC()
 	{
 		char scfile[MAX_PATH];
 		_snprintf(scfile, sizeof(scfile), "%s/dlls/sc.dll", MSGlobals::AbsGamePath.c_str());
-		unsigned long hash = GetFileCheckSum(scfile);
-		if (!FnDataHandler::IsVerifiedSC(hash))
+		if (!FnDataHandler::IsVerifiedSC(GetFileCheckSum(scfile)))
 			return false;
 	}
 	return true;
@@ -203,8 +201,8 @@ void MSWorldSpawn()
 	
 	if(!IsVerifiedSC())
 	{
-		ALERT(at_console, "Script file not verified for FN!");
-		SERVER_COMMAND("exit\n"); //we want to quit to prevent cheaters
+		ALERT(at_console, "Script file not verified for FN!\n");
+		SERVER_COMMAND("exit\n"); // we want to quit to prevent cheaters
 	}
 }
 
