@@ -73,7 +73,6 @@ cvar_t ms_allowdev = {"ms_allowdev", "1", 0};
 
 //SOCKET g_PingSock;
 void UnBanAll();
-void InitializeGMs();
 
 bool MSGlobalInit() //Called upon DLL Initialization
 {
