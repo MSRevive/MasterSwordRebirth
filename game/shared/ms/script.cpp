@@ -3964,52 +3964,48 @@ msstring CScript::ScriptGetter_SortEntList( msstring& FullName, msstring& Parser
 		int size = (signed)Tokens.size();
 		for(int i = 0; i < size; i++ )
 		{
-			CMSMonster *pZeroEnt = (CMSMonster *) m.pScriptedEnt->RetrieveEntity( Tokens[0] );
-
 			int curIdx = 0;
-
 			float curVal = 0;
-			if ( compParam == "range" )
-			{
-				if( Params.size() == 2 )
-				{
-					curVal = ( pZeroEnt->pev->origin - m.pScriptedEnt->pev->origin ).Length();
-				}
-				else
-				{
-					curVal = ( pZeroEnt->pev->origin - StringToVec(Params[2]) ).Length();
-				}
-			}
-			else if ( compParam == "hp" ) curVal = pZeroEnt->m_HP;
-			else if ( compParam == "maxhp") curVal = pZeroEnt->m_MaxHP;
-			else if ( compParam == "mp" ) curVal = pZeroEnt->m_MP;
-			else if ( compParam == "maxmp") curVal = pZeroEnt->m_MaxMP;
 
-			for (int j = 0; j < (Tokens.size() - 1); j++)
+			CMSMonster *pZeroEnt = (m.pScriptedEnt ? (CMSMonster *)m.pScriptedEnt->RetrieveEntity(Tokens[0]) : NULL);
+			if (pZeroEnt && pZeroEnt->pev && m.pScriptedEnt->pev)
 			{
-				CMSMonster* pCurEnt = (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[j + 1]);
-				float compVal =  0;
-
-				if ( compParam == "range" )
+				if (compParam == "range")
 				{
-					if( Params.size() == 2 )
-					{
-						compVal = ( pCurEnt->pev->origin - m.pScriptedEnt->pev->origin ).Length();
-					}
+					if (Params.size() == 2)
+						curVal = (pZeroEnt->pev->origin - m.pScriptedEnt->pev->origin).Length();
 					else
-					{
-						compVal = ( pCurEnt->pev->origin - StringToVec(Params[2]) ).Length();
-					}
+						curVal = (pZeroEnt->pev->origin - StringToVec(Params[2])).Length();
 				}
-				else if ( compParam == "hp" ) compVal = pCurEnt->m_HP;
-				else if ( compParam == "maxhp") compVal = pCurEnt->m_MaxHP;
-				else if ( compParam == "mp" ) compVal = pCurEnt->m_MP;
-				else if ( compParam == "maxmp") compVal = pCurEnt->m_MaxMP;
+				else if (compParam == "hp") curVal = pZeroEnt->m_HP;
+				else if (compParam == "maxhp") curVal = pZeroEnt->m_MaxHP;
+				else if (compParam == "mp") curVal = pZeroEnt->m_MP;
+				else if (compParam == "maxmp") curVal = pZeroEnt->m_MaxMP;
 
-				if ( compVal < curVal )
+				for (int j = 0; j < (Tokens.size() - 1); j++)
 				{
-					curIdx = j;
-					curVal = compVal;
+					float compVal = 0;
+					CMSMonster* pCurEnt = (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[j + 1]);
+					if (pCurEnt && pCurEnt->pev)
+					{
+						if (compParam == "range")
+						{
+							if (Params.size() == 2)
+								compVal = (pCurEnt->pev->origin - m.pScriptedEnt->pev->origin).Length();
+							else
+								compVal = (pCurEnt->pev->origin - StringToVec(Params[2])).Length();
+						}
+						else if (compParam == "hp") compVal = pCurEnt->m_HP;
+						else if (compParam == "maxhp") compVal = pCurEnt->m_MaxHP;
+						else if (compParam == "mp") compVal = pCurEnt->m_MP;
+						else if (compParam == "maxmp") compVal = pCurEnt->m_MaxMP;
+					}
+
+					if (compVal < curVal)
+					{
+						curIdx = j;
+						curVal = compVal;
+					}
 				}
 			}
 
