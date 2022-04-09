@@ -339,10 +339,10 @@ bool FnDataHandler::IsEnabled(void)
 	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
-bool FnDataHandler::IsVerifiedMap(const char* name, unsigned long hash)
+bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
 {
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%llu", name, hash));
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%u", name, hash));
 	if (pDoc == NULL)
 		return false;
 
@@ -353,10 +353,10 @@ bool FnDataHandler::IsVerifiedMap(const char* name, unsigned long hash)
 	return retVal;
 }
 
-bool FnDataHandler::IsVerifiedSC(unsigned long hash)
+bool FnDataHandler::IsVerifiedSC(unsigned int hash)
 {
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%llu", hash));
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%u", hash));
 	if (pDoc == NULL)
 		return false;
 
