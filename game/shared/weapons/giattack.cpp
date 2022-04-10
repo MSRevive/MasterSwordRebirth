@@ -1890,7 +1890,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					if (Damage.AttackHit)
 					{
 						//Hit <prefix> <name> for <dmg>(acc/req) [resist]
-						_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
+						_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats);
 					}
 					else
 					{
