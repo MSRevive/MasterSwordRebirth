@@ -121,7 +121,7 @@ static int g_ResArray[] =
 	1768,
 	1920
 };
-static int g_NumReses = sizeof(g_ResArray) / sizeof(int);
+static int g_NumReses = sizeof(g_ResArray);
 
 static byte *LoadFileByResolution(const char *filePrefix, int xRes, const char *filePostfix)
 {
