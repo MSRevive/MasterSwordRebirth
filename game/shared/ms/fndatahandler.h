@@ -10,8 +10,8 @@ namespace FnDataHandler
 	void Reset(void);
 	void Think(bool bNoCallback = false);
 	bool IsEnabled(void);
-	bool IsVerifiedMap(const char* name, unsigned long hash);
-	bool IsVerifiedSC(unsigned long hash);
+	bool IsVerifiedMap(const char* name, unsigned int hash);
+	bool IsVerifiedSC(unsigned int hash);
 
 	void LoadCharacter(CBasePlayer* pPlayer);
 	void LoadCharacter(CBasePlayer* pPlayer, int slot);

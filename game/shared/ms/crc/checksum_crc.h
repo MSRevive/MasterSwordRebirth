@@ -12,7 +12,7 @@
 #pragma once
 #endif
 
-typedef unsigned long VCRC32_t;
+typedef unsigned int VCRC32_t;
 
 namespace CRC32
 {
