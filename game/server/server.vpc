@@ -39,7 +39,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
-		$PreprocessorDefinitions		"$BASE;VALVE_DLL"
+		$PreprocessorDefinitions		"$BASE;VALVE_DLL;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER"
 		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -183,6 +183,8 @@ $Project "Server"
 
 	$Folder	"Shared"
 	{
+		$File	"$SRCDIR\game\shared\steamhelper.cpp"
+		$File	"$SRCDIR\game\shared\steamhelper.h"		
 		$File	"$SRCDIR\game\shared\strhelper.cpp"
 		$File	"$SRCDIR\game\shared\strhelper.h"
 		$File	"$SRCDIR\game\shared\ms\fndatahandler.cpp"
@@ -262,5 +264,6 @@ $Project "Server"
 	{
 		$DynamicFile 	"$SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
 		$Lib			"$SRCDIR/lib/public/libcurl" [$WIN32]
+		$ImpLibexternal steam_api
 	}
 }

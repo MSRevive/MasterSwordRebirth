@@ -12,6 +12,7 @@
 #include "hudscript.h"
 #include "vgui_hud.h"
 #include "logfile.h"
+#include "steamhelper.h"
 
 void VGUI_Think();
 
@@ -418,6 +419,7 @@ BOOL WINAPI DllMain(
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();
+		SteamHelper::Shutdown();
 	}
 	return TRUE;
 }

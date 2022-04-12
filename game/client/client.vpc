@@ -39,7 +39,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
-		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS"
+		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER"
 	}
 
 	$Linker
@@ -336,6 +336,8 @@ $Project "Client"
 	
 	$Folder	"Shared"
 	{
+		$File "$SRCDIR\game\shared\steamhelper.cpp"
+		$File "$SRCDIR\game\shared\steamhelper.h"	
 		$File "$SRCDIR\game\shared\strhelper.cpp"
 		$File "$SRCDIR\game\shared\strhelper.h"	
 		$File "$SRCDIR\game\shared\ms\buildcontrol.h"
@@ -403,5 +405,6 @@ $Project "Client"
 		$ImpLib     vgui
 		$ImpLib     SDL2
 		$ImpLib     procinfo
+		$ImpLib		steam_api
  	}
 }
