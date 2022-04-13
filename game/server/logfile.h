@@ -25,62 +25,44 @@ public:
 		flush();
 		return OStream;
 	}
-	
 	ostream &operator<<(unsigned char _c)
 	{
 		if (!is_open())
 			return *this;
-#ifdef _WIN32
-		ostream &OStream = ::operator<<(*this, _c);
-#else
 		ostream &OStream = ostream::operator<<(_c);
-#endif
 		flush();
 		return OStream;
 	}
-	
-// 	ostream &operator<<(int _n)
-// 	{
-// 		if (!is_open())
-// 			return *this;
-// // #ifdef _WIN32
-// // 		ostream &OStream = ::operator<<(*this, _n);
-// // #else
-// // 		ostream &OStream = ostream::operator<<(_n);
-// // #endif
-// 		ostream &OStream = ostream::operator<<(_n);
-// 		flush();
-// 		return OStream;
-// 	}
-// 
-// 	ostream &operator<<(unsigned long _n)
-// 	{
-// 		if (!is_open())
-// 			return *this;
-// // #ifdef _WIN32
-// // 		ostream &OStream = ::operator<<(*this, _n);
-// // #else
-// // 		ostream &OStream = ostream::operator<<(_n);
-// // #endif
-// 		ostream &OStream = ostream::operator<<(_n);
-// 		flush();
-// 		return OStream;
-// 	}
-// 
-// 	ostream &operator<<(double _n)
-// 	{
-// 		if (!is_open())
-// 			return *this;
-// // #ifdef _WIN32
-// // 		ostream &OStream = ::operator<<(*this, _n);
-// // #else
-// // 		ostream &OStream = ostream::operator<<(_n);
-// // #endif
-// 		ostream &OStream = ostream::operator<<(_n);
-// 		flush();
-// 		return OStream;
-// 	}
-
+	ostream &operator<<(int _num)
+	{
+		if (!is_open())
+			return *this;
+		ostream &OStream = ostream::operator<<(_num);
+		flush();
+		return OStream;
+	}
+	ostream &operator<<(unsigned long _num)
+	{
+		if (!is_open())
+			return *this;
+		ostream &OStream = ostream::operator<<(_num);
+		flush();
+		return OStream;
+	}
+	ostream &operator<<(double _num)
+	{
+		if (!is_open())
+			return *this;
+		ostream &OStream = ostream::operator<<(_num);
+		flush();
+		return OStream;
+	}
+	/*ostream& operator << ( double _num )
+	{
+		ostream& OStream = ostream::operator << ( _num );
+		flush( );
+		return OStream;
+	}*/
 	void open(msstring_ref FileName);
 	void open(msstring_ref FileName, int mode);
 	void Close() { ofstream::close(); }
