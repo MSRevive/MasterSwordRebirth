@@ -6182,7 +6182,7 @@ void CScript::conflict_check ( msstring testvar, msstring testvar_type, msstring
 	if ( cc_found )
 	{
 		msstring out_error = UTIL_VarArgs( "CONFLICT_ERROR! [%s:%s]:(%s) %s %s\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str() );
-		logfile << out_error.c_str();
+		logfile << Logger::LOG_WARN << out_error.c_str();
 		//be nice to be able to return the top script here, but buggers up if I try to pull the ent to do so
 		Print("%s",out_error.c_str());
 		MSErrorConsoleText( "",out_error.c_str() );

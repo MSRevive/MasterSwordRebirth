@@ -1225,11 +1225,11 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	switch (Cmd)
 	{
 	case 0: //Spawned
-		logfile << "Recieved SPAWN message..." << endl;
+		logfile << Logger::LOG_INFO << "Recieved SPAWN message..." << endl;
 		player.m_CharacterState = CHARSTATE_LOADED;
 
 		player.Spawn();
-		logfile << "Player Successfully Spawned" << endl;
+		logfile << Logger::LOG_INFO << "Player Successfully Spawned" << endl;
 		g_fMenuLastClosed = 0.0f;
 		break;
 	case 1: //Killed

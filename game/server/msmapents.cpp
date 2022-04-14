@@ -1079,7 +1079,7 @@ public:
 				iHPReq_max = atoi(reqhp_stringlist[1].c_str());
 				if (iHPReq_max < iHPReq_min)
 				{
-					logfile << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
+					logfile << Logger::LOG_WARN << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
 					iHPReq_max = 0;
 				}
 				if (iHPReq_min == 0)

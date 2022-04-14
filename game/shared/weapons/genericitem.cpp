@@ -320,7 +320,7 @@ std::map<msstring, msstring> CGenericItemMgr::mItemAlias;
 
 void CGenericItemMgr::GenericItemPrecache(void)
 {
-	Log("Precaching Items...");
+	logfile << Logger::LOG_INFO << "Precaching Items...\n";
 
 	ALERT(at_logged, "Precaching Items...\n");
 
@@ -518,7 +518,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		delete[] pStringPtr;
 
 end: //Cleanup time
-	Log("Done precaching items");
+	logfile << Logger::LOG_INFO << "Done precaching items\n";
 	enddbg;
 }
 

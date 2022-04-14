@@ -360,7 +360,7 @@ void MSCLGlobals::SpawnIntoServer()
 {
 	startdbg;
 
-	logfile << "SpawnIntoServer...";
+	logfile << Logger::LOG_INFO << "SpawnIntoServer...";
 
 	Cleanup(); //Clean up stuff from the previous map
 
@@ -415,7 +415,7 @@ BOOL WINAPI DllMain(
 	{
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
 		if (logfile.is_open())
-			(((logfile << __FILE__) << " client.dll being unloaded") << endl);
+			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded") << endl);
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();

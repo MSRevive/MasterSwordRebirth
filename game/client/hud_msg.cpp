@@ -59,25 +59,21 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	startdbg;
 	dbg("Read InitHUD msg");
 
-	logfile << "[MsgFunc_InitHUD: EndMap]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: EndMap]\n";
 	MSGlobals::EndMap(); //End old map
 
 	//Copy over the mapname here because the engine doesn't send it
 	//interally until later
-	logfile << "[MsgFunc_InitHUD: Globals]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Globals]\n";
 	BEGIN_READ(pbuf, iSize);
 	MSGlobals::ServerName = READ_STRING();
 	MSGlobals::MapName = READ_STRING();
 	//g_NetCode.m.HostIP = READ_STRING();
-	logfile << "[MsgFunc_InitHUD: CLEnt Readin]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: CLEnt Readin]\n";
 	for (int i = 0; i < CLPERMENT_TOTALK; i++)
 		MSGlobals::ClEntities[i] = READ_SHORT();
 	int flags = READ_BYTE();
-	logfile << "[MsgFunc_InitHUD: SetupDefGlobals]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: SetupDefGlobals]\n";
 	MSCLGlobals::OnMyOwnListenServer = (flags & (1 << 0)) ? true : false;
 	MSGlobals::IsLanGame = (flags & (1 << 1)) ? true : false;
 	MSGlobals::CanCreateCharOnMap = (flags & (1 << 2)) ? true : false;
@@ -85,29 +81,25 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	MSGlobals::ServerSideChar = (flags & (1 << 4)) ? true : false;
 	MSCLGlobals::OtherPlayers = (flags & (1 << 5)) ? true : false;
 
-	logfile << "[MsgFunc_InitHUD: AuthID]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: AuthID]\n";
 	MSCLGlobals::AuthID = READ_STRING();
 	int VotesAllowed = READ_BYTE();
-	logfile << "[MsgFunc_InitHUD: Charnum]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Charnum]\n";
 	ChooseChar_Interface::ServerCharNum = READ_BYTE(); //Number of characters the server allows you to have
 
-	logfile << "[MsgFunc_InitHUD: Clearvotes]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Clearvotes]\n";
 	vote_t::VotesTypesAllowed.clearitems();
 	for (int i = 0; i < vote_t::VotesTypes.size(); i++)
 		if (FBitSet(VotesAllowed, (1 << i)))
 			vote_t::VotesTypesAllowed.add(vote_t::VotesTypes[i]);
 
-	logfile << "Server IP: " << g_NetCode.m.HostIP.c_str() << "\r\n";
+	logfile << Logger::LOG_INFO << "Server IP: " << g_NetCode.m.HostIP.c_str() << "\n";
 
 	dbg("Call InitHUDData() on all");
 	// prepare all hud data
 	HUDLIST *pList = m_pHudList;
 
-	logfile << "[MsgFunc_InitHUD: InitHUDData]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitHUDData]\n";
 	while (pList)
 	{
 		dbg(msstring("Call InitHUDData on ") + pList->p->Name);
@@ -119,20 +111,16 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	//This would normally be called only after the scripts
 	//were downloaded... but since downloading new scripts
 	//isn't supported anymore, just call it
-	logfile << "[MsgFunc_InitHUD: SpawnIntoServer]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: SpawnIntoServer]\n";
 	dbg("Call SpawnIntoServer( )");
 	MSCLGlobals::SpawnIntoServer();
-	logfile << "[MsgFunc_InitHUD: NewMap]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: NewMap]\n";
 	MSGlobals::NewMap(); //Start new map
 
 	//Do this last
-	logfile << "[MsgFunc_InitHUD: InitNewLevel]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitNewLevel]\n";
 	CEnvMgr::InitNewLevel();
-	logfile << "[MsgFunc_InitHUD: Complete]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Complete]\n";
 	enddbg;
 }
 

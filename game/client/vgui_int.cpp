@@ -112,7 +112,7 @@ void VGui_Startup()
 		gViewPort->Initialize(); //Master Sword - call Initialize the first time the viewport is created
 	}
 
-	logfile << "[VGui_Startup: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[VGui_Startup: Complete]" << endl;
 
 	/*
 	TexturePanel* texturePanel=new TexturePanel();

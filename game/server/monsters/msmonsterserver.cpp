@@ -469,7 +469,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
 				{
 					mrand_m_HPReq_max = 0;
-					logfile << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
+					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}

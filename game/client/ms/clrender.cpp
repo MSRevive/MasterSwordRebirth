@@ -327,8 +327,7 @@ void CEnvMgr::InitNewLevel()
 {
 	CMirrorMgr::InitMirrors();
 	VGUIImages_NewLevel();
-	logfile << "[InitNewLevel Complete]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[InitNewLevel Complete]\n";
 }
 void CEnvMgr::ChangeSkyTexture(msstring_ref NewTexture)
 {
@@ -614,8 +613,7 @@ void VGUIImages_NewLevel()
 			g_VGUIImages[i]->LoadImg();
 		}
 	}
-	logfile << "[VGUIImages_NewLevel Complete]"
-			<< "\r\n";
+	logfile << Logger::LOG_INFO << "[VGUIImages_NewLevel Complete]\n";
 }
 
 VGUI_Image3D::VGUI_Image3D(const char *pszImageName, bool TGAorSprite, bool Delayed, int x, int y, int wide, int tall)

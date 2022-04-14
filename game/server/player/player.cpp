@@ -2502,7 +2502,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << "Looking for valid spawn spots for " << DisplayName() << " (" << JoinTypeText << ")...\r\n";
+	logfile << Logger::LOG_INFO << "Looking for valid spawn spots for " << DisplayName() << " (" << JoinTypeText << ")...\n";
 
 	//Find all valid spots
 	CBaseEntity *pSpot = NULL;
@@ -2520,7 +2520,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	}
 	else
 	{
-		logfile << "m_JoinType: " << m_JoinType << endl;
+		logfile << Logger::LOG_INFO << "m_JoinType: " << m_JoinType << endl;
 		switch (m_JoinType)
 		{
 		case JN_VISITED:
@@ -2550,14 +2550,14 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 
 	if (Status > SS_NOSPOT)
 	{
-		logfile << "Found useable spawn spots, testing...\r\n";
+		logfile << Logger::LOG_INFO << "Found useable spawn spots, testing...\n";
 
 		if (Status == SS_ALLFULL)
 		{
 			//All spots filled, wait.
 			SpawnCheckTime = gpGlobals->time + 2.0;
 			SendEventMsg(HUDEVENT_UNABLE, "Waiting to spawn...\n");
-			logfile << "All spawn spots filled!\r\n";
+			logfile << Logger::LOG_INFO << "All spawn spots filled!\n";
 			return NULL;
 		}
 
@@ -2568,7 +2568,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		//No valid spots, kick player with message
 
 		msstring TransitionText = m_SpawnTransition ? m_SpawnTransition : "<unknown>";
-		logfile << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText.c_str() << ")!!!\r\n";
+		logfile << Logger::LOG_WARN << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText.c_str() << ")!!!\n";
 		bool fKickPlayer = true;
 
 		if (m_CharacterState == CHARSTATE_LOADED)
@@ -2599,7 +2599,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << "Found VALID SPOT\r\n";
+	logfile << Logger::LOG_INFO << "Found VALID SPOT\n";
 
 	return pSpot;
 }
@@ -6258,7 +6258,7 @@ void CBasePlayer::KickPlayer(const char *pszMessage)
 			SERVER_COMMAND("disconnect\n");
 		else
 			SERVER_COMMAND(UTIL_VarArgs("kick #%i\n", GETPLAYERUSERID(edict())));
-		logfile << "Kicked " << DisplayName() << " Reason: " << pszMessage << "\r\n";
+		logfile << Logger::LOG_INFO << "Kicked " << DisplayName() << " Reason: " << pszMessage << "\n";
 	}
 }
 void CBasePlayer::Attacked(CBaseEntity *pAttacker, float flDamage, int bitsDamageType)

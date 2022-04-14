@@ -96,7 +96,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 	bool fSuccess = false;
 	startdbg;
 
-	logfile << "[ClientConnect]  ";
+	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
 	if (g_pGameRules)
 		fSuccess = g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason) ? true : false;
 	else
@@ -121,7 +121,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 	else
 		logfile << "Client rejected: " << szRejectReason << endl;
 
-	logfile << "[ClientConnect: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]" << endl;
 
 	enddbg;
 	return fSuccess ? 1 : 0;
@@ -213,7 +213,7 @@ void ClientPutInServer(edict_t *pEntity)
 	startdbg;
 	DBG_INPUT;
 
-	logfile << "[ClientPutInServer]" << endl;
+	logfile << Logger::LOG_INFO << "[ClientPutInServer]" << endl;
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;
@@ -226,7 +226,7 @@ void ClientPutInServer(edict_t *pEntity)
 		if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
 		{
 			int iPlayerOfs = ENTINDEX(pEntity) - 1;
-			logfile << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\r\n";
+			logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
 
 			strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
 

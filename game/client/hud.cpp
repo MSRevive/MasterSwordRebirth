@@ -68,7 +68,7 @@ int __MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	startdbg;
 	dbg("Begin");
 
-	logfile << "[__MsgFunc_InitHUD]" << endl;
+	logfile << Logger::LOG_INFO << "[__MsgFunc_InitHUD]" << endl;
 	gHUD.MsgFunc_InitHUD(pszName, iSize, pbuf);
 
 	enddbg;

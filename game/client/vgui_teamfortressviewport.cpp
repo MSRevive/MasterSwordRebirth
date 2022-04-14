@@ -513,7 +513,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	m_pCurrentCommandMenu = NULL;
 
 	dbg("Call Initialize() (first time)");
-	logfile << "[TeamFortressViewport: Initialize]" << endl;
+	logfile << Logger::LOG_INFO << "[TeamFortressViewport: Initialize]" << endl;
 	Initialize();
 
 	addInputSignal(new CViewPortInputHandler);
@@ -596,7 +596,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	//logfile << "[m_pSpectatorPanel->Initialize]" << endl;
 	m_pSpectatorPanel->Initialize();
 
-	logfile << "[TeamFortressViewport: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[TeamFortressViewport: Complete]" << endl;
 
 	//CreateSpectatorMenu();
 
@@ -1254,7 +1254,7 @@ void TeamFortressViewport::CreateScoreBoard(void)
 	m_pScoreBoard->setParent(this);
 	m_pScoreBoard->setVisible(false);
 
-	logfile << "[Scoreboard: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[Scoreboard: Complete]" << endl;
 
 	enddbg;
 }
@@ -1686,7 +1686,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 
 	m_pHUDPanel->setVisible(true);
 
-	logfile << "[Create VGUI Menus: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[Create VGUI Menus: Complete]" << endl;
 	enddbg;
 }
 

@@ -116,11 +116,11 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	g_log_initialized = true;
 	
 	//	-- Initialize network for receiving characters
-	logfile << "\nInitialize network... ";
+	logfile << Logger::LOG_INFO << "Initialize network... ";
 
 	CNetCode::InitNetCode();
 
-	logfile << "DONE\r\n";
+	logfile << "DONE\n";
 
 	SERVER_COMMAND("exec msstartup.cfg\n");
 

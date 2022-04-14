@@ -139,7 +139,7 @@ void CNetFileTransaction::Think()
 
 	if (m.TimeTimeout && gpGlobals->time >= m.TimeTimeout)
 	{
-		logfile << "[Net] File TIMED OUT\r\n";
+		logfile << Logger::LOG_INFO << "[Net] File TIMED OUT\r\n";
 		Shutdown(); //Timed out
 		return;
 	}
@@ -162,7 +162,7 @@ void CNetFileTransaction::Think()
 		{
 			if (iAmt < NET_FILEHEADERSIZE)
 			{
-				logfile << "[Net] Received bad header for incoming file (header too small). Rejecting file...\r\n";
+				logfile << Logger::LOG_WARN << "[Net] Received bad header for incoming file (header too small). Rejecting file...\r\n";
 				Shutdown();
 				return;
 			}
@@ -173,7 +173,7 @@ void CNetFileTransaction::Think()
 			//Sanity check.  If size is too large, this is a bogus file
 			if (FileHeader.DataSize >= (1 << 16))
 			{
-				logfile << "[Net] Received bad header for incoming file (DataSize too big). Rejecting file...\r\n";
+				logfile << Logger::LOG_WARN << "[Net] Received bad header for incoming file (DataSize too big). Rejecting file...\r\n";
 				Shutdown();
 				return;
 			}
@@ -237,7 +237,7 @@ void CNetFileTransaction::Think()
 				Port = m.DestAddr.substr(idx + 1);
 			}
 
-			logfile << "[Net] Connecting to server IP: " << Addr << ":" << Port << "....\r\n";
+			logfile << Logger::LOG_INFO << "[Net] Connecting to server IP: " << Addr << ":" << Port << "....\r\n";
 
 			m_AddrIn.sin_family = AF_INET;
 			m_AddrIn.sin_port = htons((unsigned short)atoi(Port));
@@ -257,7 +257,7 @@ void CNetFileTransaction::Think()
 		//Received ack of last packet, I'm done
 		if (m.Ofs >= m.DataSize)
 		{
-			logfile << "Done sending char " << m.Ofs << "/" << m.DataSize << "\r\n";
+			logfile << Logger::LOG_INFO << "Done sending char " << m.Ofs << "/" << m.DataSize << "\r\n";
 			Shutdown();
 			return;
 		}

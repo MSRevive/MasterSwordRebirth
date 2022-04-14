@@ -410,7 +410,7 @@ extern DLL_GLOBAL BOOL g_fGameOver;
 #include "logger.h"
 void CWorld ::Spawn(void)
 {	
-	logfile << "World Spawn...\r\n";
+	logfile << Logger::LOG_INFO << "World Spawn...\n";
 
 	g_fGameOver = FALSE;
 	CScriptedEnt::Spawn();
@@ -419,7 +419,7 @@ void CWorld ::Spawn(void)
 	pev->nextthink = pev->ltime + 0.1;
 	MSWorldSpawn();
 
-	logfile << "World Spawn END\r\n";
+	logfile << Logger::LOG_INFO << "World Spawn END\n";
 }
 void CWorld ::Think(void)
 {
