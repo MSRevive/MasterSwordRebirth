@@ -1290,9 +1290,6 @@
 				RelativePath="..\MSShared\GroupFile.cpp">
 			</File>
 			<File
-				RelativePath="..\dlls\logfile.h">
-			</File>
-			<File
 				RelativePath="..\MSShared\mem_encrypt.cpp">
 			</File>
 			<File

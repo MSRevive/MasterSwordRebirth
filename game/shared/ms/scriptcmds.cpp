@@ -7698,7 +7698,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 	mibfile.open(cFileName, 1);
 	mibfile << line << endl;
 
-	mibfile.Close();
+	mibfile.close();
 }
 //Write a line at X, possibly overwriting or just inserting
 void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwrite)
@@ -7718,7 +7718,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwri
 			mibfile << "\n"; //Add a line break
 	}
 
-	mibfile.Close(); //Close the file, if not for making sure that changes save, then for making sure we don't get overlapping handles
+	mibfile.close(); //Close the file, if not for making sure that changes save, then for making sure we don't get overlapping handles
 }
 //==================================
 

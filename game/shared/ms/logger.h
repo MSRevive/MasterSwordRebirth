@@ -29,6 +29,19 @@ class Logger {
       }
     }
     
+    void open(const char *filename, int mode)
+    {
+      switch(mode)
+      {
+        case 0:
+          file.open(filename);
+          break;
+        case 1:
+          file.open(filename, ios_base::app);
+          break;
+      }
+    }
+    
     void close() 
     {
       if (file.is_open())
@@ -42,7 +55,7 @@ class Logger {
       return file.is_open();
     }
     
-    friend Logger &operator << (Logger &logger, const e_logtype ltype) 
+    friend Logger &operator<<(Logger &logger, const e_logtype ltype) 
     {
       switch (ltype) {
         case Logger::e_logtype::LOG_ERROR:
@@ -59,35 +72,42 @@ class Logger {
       return logger;
     }
     
-    friend Logger &operator << (Logger &logger, const char *text)
+    //std::endl now works
+    friend Logger &operator<<(Logger &logger, ostream& (*os)(ostream&))
+    {
+      logger.file << os;
+      return logger;
+    }
+    
+    friend Logger &operator<<(Logger &logger, const char *text)
     {
       logger.file << text;
       logger.file.flush();
       return logger;
     }
     
-    friend Logger &operator << (Logger &logger, unsigned char c)
+    friend Logger &operator<<(Logger &logger, unsigned char c)
     {
       logger.file << c;
       logger.file.flush();
       return logger;
     }
     
-    friend Logger &operator << (Logger &logger, int n)
+    friend Logger &operator<<(Logger &logger, int n)
     {
       logger.file << n;
       logger.file.flush();
       return logger;
     }
     
-    friend Logger &operator << (Logger &logger, unsigned long n)
+    friend Logger &operator<<(Logger &logger, unsigned long n)
     {
       logger.file << n;
       logger.file.flush();
       return logger;
     }
     
-    friend Logger &operator << (Logger &logger, double n)
+    friend Logger &operator<<(Logger &logger, double n)
     {
       logger.file << n;
       logger.file.flush();

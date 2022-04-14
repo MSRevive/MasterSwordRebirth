@@ -106,7 +106,7 @@ void OpenLogFiles()
 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_msdll");
 	
 	logfile.open(cLogfile);
-	chatlog.open(cChatfile);
+	chatlog.open(cChatfile, 1);
 #else
 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_cldll");
 	logfile.open(cLogfile);
