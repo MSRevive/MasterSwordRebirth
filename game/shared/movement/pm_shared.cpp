@@ -29,7 +29,7 @@
 #include <string.h> // strcpy
 #include <stdlib.h> // atoi
 #include <ctype.h>	// isspace
-#include "logfile.h"
+#include "logger.h"
 #include "player/player.h"
 
 //Dogg -- Ripped from mathlib.h

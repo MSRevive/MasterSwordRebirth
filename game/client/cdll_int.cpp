@@ -22,7 +22,7 @@
 #include "cl_util.h"
 #include "netadr.h"
 #include "vgui_schememanager.h"
-#include "logfile.h"
+#include "logger.h"
 #include "steamhelper.h"
 #include <windows.h>
 

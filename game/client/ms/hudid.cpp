@@ -30,7 +30,7 @@ extern void HUD_PrepEntity(CBaseEntity *pEntity, CBasePlayer *pWeaponOwner);
 
 #include "hudid.h"
 #include "vgui_hud.h"
-#include "logfile.h"
+#include "logger.h"
 
 MS_DECLARE_MESSAGE(m_HUDId, EntInfo);
 

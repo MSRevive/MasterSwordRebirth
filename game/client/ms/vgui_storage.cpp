@@ -42,7 +42,7 @@
 //Master Sword
 #include "vgui_storage.h"
 #include "vgui_menudefsshared.h"
-#include "logfile.h"
+#include "logger.h"
 
 msstring_ref CStoragePanel::Text_Subtitle_Storage = "#STORAGE_SUBTITLE_STORAGE";
 msstring_ref CStoragePanel::Text_Subtitle_Inventory = "#STORAGE_SUBTITLE_INVENTORY";

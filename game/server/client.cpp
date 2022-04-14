@@ -38,7 +38,7 @@
 #include "usercmd.h"
 #include "netadr.h"
 
-#include "logfile.h"
+#include "logger.h"
 #include "svglobals.h"
 #include "msnetcode.h"
 #include "mscharacter.h"

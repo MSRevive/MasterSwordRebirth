@@ -13,7 +13,7 @@
 #include "mscharacter.h"
 #include "script.h"
 #include "global.h"
-#include "logfile.h"
+#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "hud.h"

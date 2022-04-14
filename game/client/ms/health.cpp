@@ -23,7 +23,7 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "clglobal.h"
-#include "logfile.h"
+#include "logger.h"
 #include "mscharacter.h"
 #include "script.h"
 

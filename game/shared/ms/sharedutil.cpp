@@ -1,6 +1,6 @@
 #include "msdllheaders.h"
 #include "global.h"
-#include "logfile.h"
+#include "logger.h"
 #include "time.h"
 
 #ifdef VALVE_DLL
@@ -13,11 +13,11 @@ extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
-CMSStream logfile;
+Logger logfile;
 #ifdef VALVE_DLL
-CMSStream chatlog;
+Logger chatlog;
 #endif
-CMSStream NullFile;
+Logger NullFile;
 bool g_log_initialized = false;
 void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress)
 {
@@ -51,80 +51,110 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 #endif
 }
 
-msstring CMSStream::buffered;
-void CMSStream::open(msstring_ref FileName)
+// msstring CMSStream::buffered;
+// void CMSStream::open(msstring_ref FileName)
+// {
+// 	ofstream::open(FileName);
+// 	time_t Time;
+// 	time(&Time);
+// 	msstring_ref TimeString = ctime(&Time);
+// 
+// 	flush();
+// 
+// 	if (TimeString)
+// 		operator<<(TimeString) << endl;
+// 	else
+// 		operator<<("Couldn't get time") << endl;
+// 
+// 	operator<<(buffered);
+// 	buffered = "";
+// }
+// 
+// void CMSStream::open(msstring_ref FileName, int mode)
+// {
+// 	/* Mode:
+// 	0 - Basic open
+// 	1 - Appending open
+// 	*/
+// 	switch (mode)
+// 	{
+// 	case 0:
+// 		ofstream::open(FileName);
+// 		break;
+// 	case 1:
+// 		ofstream::open(FileName, ios_base::app);
+// 		break;
+// 	}
+// 	buffered = "";
+// }
+
+void OpenLogFiles()
 {
-	ofstream::open(FileName);
-	time_t Time;
-	time(&Time);
-	msstring_ref TimeString = ctime(&Time);
-	if (TimeString)
-		operator<<(TimeString) << endl;
-	else
-		operator<<("Couldn't get time") << endl;
-	operator<<(buffered);
-	buffered = "";
-}
-
-void CMSStream::open(msstring_ref FileName, int mode)
-{
-	/* Mode:
-	0 - Basic open
-	1 - Appending open
-	*/
-	switch (mode)
-	{
-	case 0:
-		ofstream::open(FileName);
-		break;
-	case 1:
-		ofstream::open(FileName, ios_base::app);
-		break;
-	}
-	buffered = "";
-}
-
-void CMSStream::DebugOpen()
-{
-	//Force open the debug logs whenever the first log event occurs.
-	//The event could occur during dll load, before any functions get called
-	if (is_open())
-		return;
-
-#ifdef KEEP_LOG
-	char cLogfile[MAX_PATH], * pFileName;
-
+	char cLogfile[MAX_PATH];
+	char cChatfile[MAX_PATH];
+	
 #ifdef VALVE_DLL
-	//Thothie Assemble msc_log
-	char pChatName[20];
-	char cChatFile[MAX_PATH];
 	time_t curTime;
 	time(&curTime);
 	struct tm* TheTime = localtime(&curTime);
 	int month = TheTime->tm_mon + 1;
 	int year = TheTime->tm_year + 1900;
-	//sprintf( pFileName, "msc_log_%i_%i", month, year );
-	pFileName = "log_msdll";
-	_snprintf(pChatName, sizeof(pChatName), "msc_chatlog_%02d_%i", month, year);
+	char pChatname[20];
+	_snprintf(pChatname, sizeof(pChatname), "msr_chatlog_%02d_%i", month, year);
+	_snprintf(cChatfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatname);
+	
+	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_msdll");
+	
+	logfile.open(cLogfile);
+	chatlog.open(cChatfile);
 #else
-	pFileName = "log_cldll";
+	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_cldll");
+	logfile.open(cLogfile);
 #endif
-
-	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pFileName);
-	try
-	{
-		logfile.open(cLogfile);
-#ifdef VALVE_DLL
-		_snprintf(cChatFile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatName);
-		chatlog.open(cChatFile, 1);
-#endif
-		g_log_initialized = true;
-	}
-	catch (...)
-	{
-	}
-#endif
+	g_log_initialized = true;
 }
+
+// void CMSStream::DebugOpen()
+// {
+// 	//Force open the debug logs whenever the first log event occurs.
+// 	//The event could occur during dll load, before any functions get called
+// 	if (is_open())
+// 		return;
+// 
+// #ifdef KEEP_LOG
+// 	char cLogfile[MAX_PATH], * pFileName;
+// 
+// #ifdef VALVE_DLL
+// 	//Thothie Assemble msc_log
+// 	char pChatName[20];
+// 	char cChatFile[MAX_PATH];
+// 	time_t curTime;
+// 	time(&curTime);
+// 	struct tm* TheTime = localtime(&curTime);
+// 	int month = TheTime->tm_mon + 1;
+// 	int year = TheTime->tm_year + 1900;
+// 	//sprintf( pFileName, "msc_log_%i_%i", month, year );
+// 	pFileName = "log_msdll";
+// 	_snprintf(pChatName, sizeof(pChatName), "msc_chatlog_%02d_%i", month, year);
+// #else
+// 	pFileName = "log_cldll";
+// #endif
+// 
+// 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pFileName);
+// 	try
+// 	{
+// 		logfile.open(cLogfile);
+// #ifdef VALVE_DLL
+// 		_snprintf(cChatFile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatName);
+// 		chatlog.open(cChatFile, 1);
+// #endif
+// 		g_log_initialized = true;
+// 	}
+// 	catch (...)
+// 	{
+// 	}
+// #endif
+//}
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
 msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a string of format "PentP(idx,addr)"
@@ -403,7 +433,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
     msstring vsAsOne = vsTitle + ": " + string + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
-        logfile << vsAsOne << endl;
+        logfile << vsAsOne << "\n";
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {

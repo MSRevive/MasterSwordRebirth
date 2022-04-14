@@ -2,7 +2,7 @@
 #include "script.h"
 #include "mseffects.h"
 #include "shake.h"
-#include "logfile.h"
+#include "logger.h"
 //#include "monsters/bodyparts/bodyparts.h"
 
 void UTIL_ScreenFadeBuild(ScreenFade &fade, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags);

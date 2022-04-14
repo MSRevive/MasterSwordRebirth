@@ -34,7 +34,7 @@
 #include "script.h"
 #include "menu.h"
 #include "stats/stats.h"
-#include "logfile.h"
+#include "logger.h"
 #include "mscharacter.h"
 #include "../vgui_scorepanel.h"
 #include "vgui_hud.h"

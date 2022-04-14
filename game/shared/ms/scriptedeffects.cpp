@@ -1,7 +1,7 @@
 #include "msdllheaders.h"
 #include "script.h"
 #include "scriptedeffects.h"
-#include "logfile.h"
+#include "logger.h"
 
 //  ==============================================================
 //								Global

@@ -11,7 +11,7 @@
 #include "stats/statdefs.h"
 #include "titles.h"
 #include "scriptedeffects.h"
-#include "logfile.h"
+#include "logger.h"
 #include "pm_defs.h"
 
 #ifndef VALVE_DLL
@@ -7694,7 +7694,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 
 	char cFileName[512];
 	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
-	CMSStream mibfile;
+	Logger mibfile;
 	mibfile.open(cFileName, 1);
 	mibfile << line << endl;
 
@@ -7705,7 +7705,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwri
 {
 	char cFileName[512];
 	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
-	CMSStream mibfile;
+	Logger mibfile;
 	mibfile.open(cFileName, 0);
 
 	AddLine(line, lineNum, overwrite);

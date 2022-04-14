@@ -15,7 +15,7 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "stats/statdefs.h"
-#include "logfile.h"
+#include "logger.h"
 
 struct projectiledata_t
 {

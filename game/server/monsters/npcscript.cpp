@@ -7,7 +7,7 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "msitemdefs.h"
-#include "logfile.h"
+#include "logger.h"
 
 #define ERROR_MISSING_PARMS MSErrorConsoleText("CGenericItem::ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", Script->m.ScriptFile.c_str(), Cmd.Name().c_str()))
 

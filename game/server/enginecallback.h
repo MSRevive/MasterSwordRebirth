@@ -18,7 +18,7 @@
 
 #include "event_flags.h"
 #include <string.h>
-//include "logfile.h"
+//include "logger.h"
 
 // Must be provided by user of this code
 extern enginefuncs_t g_engfuncs;

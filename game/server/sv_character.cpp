@@ -5,7 +5,7 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "global.h"
-#include "logfile.h"
+#include "logger.h"
 #include "mscharacter.h"
 #include "magic.h"
 #include "script.h"

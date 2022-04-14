@@ -25,7 +25,7 @@
 #include "r_efx.h"
 #include "entity_types.h"
 #include "clglobal.h"
-#include "logfile.h"
+#include "logger.h"
 
 //HUD stuff
 #include "inc_huditem.h"

@@ -2,7 +2,7 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "svglobals.h"
-#include "logfile.h"
+#include "logger.h"
 #include "msnetcode.h"
 #include "global.h"
 #include "weapons/genericitem.h"

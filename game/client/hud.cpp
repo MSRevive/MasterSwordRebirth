@@ -33,7 +33,7 @@
 #include "demo_api.h"
 
 //Master Sword
-#include "logfile.h"
+#include "logger.h"
 #include "ms/health.h"
 #include "ms/fatigue.h"
 #include "stats/stats.h"

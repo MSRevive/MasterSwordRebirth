@@ -23,7 +23,7 @@
 #include "effects/mseffects.h"
 #include "groupfile.h"
 #include "stats/statdefs.h"
-#include "logfile.h"
+#include "logger.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowClose();

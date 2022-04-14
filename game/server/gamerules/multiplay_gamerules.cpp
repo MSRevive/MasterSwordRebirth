@@ -24,7 +24,7 @@
 #include	"items.h"
 #include	"voice_gamemgr.h"
 #include	"hltv.h"
-#include	"logfile.h"
+#include	"logger.h"
 #include	"msgamerules.h"
 #include	"global.h"
 #include	"svglobals.h"

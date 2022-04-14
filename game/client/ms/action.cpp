@@ -21,7 +21,7 @@
 #include "msdllheaders.h"
 #include "scriptedeffects.h"
 #include "action.h"
-#include "logfile.h"
+#include "logger.h"
 
 void CHudAction_SelectMenuItem(int idx, TCallbackMenu *pcbMenu);
 

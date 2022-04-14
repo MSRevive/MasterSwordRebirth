@@ -28,7 +28,7 @@
 #include "clglobal.h"
 #include "scriptedeffects.h"
 #include "hudscript.h"
-#include "logfile.h"
+#include "logger.h"
 
 extern physent_t *MSUTIL_EntityByIndex( int playerindex );
 

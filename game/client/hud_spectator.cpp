@@ -29,7 +29,7 @@
 //Master Sword
 #include "vgui_scorepanel.h"
 #include "vgui_menudefsshared.h"
-#include "logfile.h"
+#include "logger.h"
 
 #pragma warning(disable : 4244)
 

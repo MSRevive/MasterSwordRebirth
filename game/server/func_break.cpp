@@ -24,7 +24,7 @@
 #include "func_break.h"
 #include "decals.h"
 #include "explode.h"
-#include "logfile.h"
+#include "logger.h"
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 

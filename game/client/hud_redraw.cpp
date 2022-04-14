@@ -23,7 +23,7 @@
 #include "vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "logfile.h"
+#include "logger.h"
 #include "clglobal.h"
 #include "sharedutil.h"
 

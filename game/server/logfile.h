@@ -57,12 +57,7 @@ public:
 		flush();
 		return OStream;
 	}
-	/*ostream& operator << ( double _num )
-	{
-		ostream& OStream = ostream::operator << ( _num );
-		flush( );
-		return OStream;
-	}*/
+	
 	void open(msstring_ref FileName);
 	void open(msstring_ref FileName, int mode);
 	void Close() { ofstream::close(); }

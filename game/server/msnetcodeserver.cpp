@@ -10,7 +10,7 @@
 #include "mscharacter.h"
 #include "svglobals.h"
 #include "teams.h"
-#include "logfile.h"
+#include "logger.h"
 
 //Callback for save file transaction
 void ReceivedSaveFile(CNetFileTransaction *pTransaction);

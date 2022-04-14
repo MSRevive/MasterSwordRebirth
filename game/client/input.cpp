@@ -14,7 +14,7 @@
 
 //Master Sword ----------
 #include "inc_weapondefs.h"
-#include "logfile.h"
+#include "logger.h"
 #undef DLLEXPORT
 //-----------------------
 

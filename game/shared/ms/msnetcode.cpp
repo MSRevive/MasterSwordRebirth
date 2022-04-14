@@ -5,7 +5,7 @@
 #include "msdllheaders.h"
 #include "msnetcode.h"
 #include "player/player.h"
-#include "logfile.h"
+#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "hud.h"

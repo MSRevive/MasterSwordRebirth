@@ -13,7 +13,7 @@
 
 #include "inc_weapondefs.h"
 #include "vgui_menudefsshared.h"
-#include "logfile.h"
+#include "logger.h"
 
 //#define LOG_EXTRA
 

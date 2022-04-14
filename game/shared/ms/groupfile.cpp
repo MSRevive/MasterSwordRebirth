@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 #include "windows.h"
-#include "logfile.h"
+#include "logger.h"
 #else
 #include <ctype.h>
 #include <string.h>

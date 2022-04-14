@@ -1205,7 +1205,7 @@ rem copy $(TargetPath) \\Miniagnus3\hlds\msc\dlls\
 				RelativePath="..\MSShared\iscript.h">
 			</File>
 			<File
-				RelativePath=".\logfile.h">
+				RelativePath=".\logger.h">
 			</File>
 			<File
 				RelativePath="..\MSShared\Magic.h">

@@ -6,7 +6,7 @@
 #include "net_api.h"
 #include <string.h>
 #include <winsock.h>
-#include "logfile.h"
+#include "logger.h"
 #include "msdebug.h"
 
 static int context_id;
@@ -154,7 +154,7 @@ ServerResponse
 
 ===================
 */
-#include "logfile.h"
+#include "logger.h"
 void CHudServers::ServerResponse(struct net_response_s *response)
 {
 	char *szresponse;

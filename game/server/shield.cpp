@@ -4,7 +4,7 @@
 #include "weapons/weapons.h"
 #include "player/player.h"
 #include "shield.h"
-#include "logfile.h"
+#include "logger.h"
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags)
 {

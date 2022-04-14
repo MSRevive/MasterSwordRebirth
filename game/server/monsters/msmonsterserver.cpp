@@ -20,7 +20,7 @@
 #include "weapons/genericitem.h"
 #include "syntax/syntax.h"
 #include "ms/vgui_hud.h"
-#include "logfile.h"
+#include "logger.h"
 
 #ifdef VALVE_DLL
 

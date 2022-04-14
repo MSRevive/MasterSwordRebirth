@@ -18,7 +18,7 @@
 #include "decals.h"
 #include "gamerules.h"
 #include "game.h"
-#include "logfile.h"
+#include "logger.h"
 
 #define LOG_BASECALLBACKS
 

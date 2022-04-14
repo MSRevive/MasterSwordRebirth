@@ -81,7 +81,7 @@ Vertex g_cubeVertices[] =
 #include "clglobal.h"
 #include "clrender.h"
 
-#include "logfile.h"
+#include "logger.h"
 
 typedef struct
 {

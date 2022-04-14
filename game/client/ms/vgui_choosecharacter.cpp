@@ -70,7 +70,7 @@
 #include "vgui_hud.h"
 #include "player/modeldefs.h"
 #include "r_studioint.h"
-#include "logfile.h"
+#include "logger.h"
 
 extern engine_studio_api_t IEngineStudio;
 int			ChooseChar_Interface::ServerCharNum = 0;

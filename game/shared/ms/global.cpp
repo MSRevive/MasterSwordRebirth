@@ -6,7 +6,7 @@
 #include "script.h"
 #include "titles.h"
 #include "scriptedeffects.h"
-#include "logfile.h"
+#include "logger.h"
 #ifndef VALVE_DLL
 #include "hud.h"
 #include "cl_util.h"
@@ -228,7 +228,7 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 	AbsGamePath = msstring(szTempPath) + msstring("/msrebirth");
 #endif
 
-	logfile.DebugOpen();
+	OpenLogFiles();
 }
 
 //Called on client & server when the dll is unloaded
@@ -562,7 +562,7 @@ void Log(char *szFmt, ...)
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
 
-	logfile << string << endl;
+	logfile << string << "\n";
 }
 
 void LogExtensive(msstring_ref Text)

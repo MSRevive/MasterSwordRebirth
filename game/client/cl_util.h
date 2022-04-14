@@ -18,7 +18,7 @@
 #include "msbasic.h"
 #include "sharedutil.h"
 #include "msdebug.h"
-#include "logfile.h"
+#include "logger.h"
 
 #include "cvardef.h"
 

@@ -20,7 +20,7 @@
 #include "syntax/syntax.h"
 #include "weapons/genericitem.h"
 #include "ms/vgui_hud.h"
-#include "logfile.h"
+#include "logger.h"
 
 void CMSMonster::Deactivate()
 {

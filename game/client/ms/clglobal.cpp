@@ -11,7 +11,7 @@
 #include "hudmisc.h"
 #include "hudscript.h"
 #include "vgui_hud.h"
-#include "logfile.h"
+#include "logger.h"
 #include "steamhelper.h"
 
 void VGUI_Think();

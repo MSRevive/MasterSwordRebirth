@@ -45,7 +45,7 @@
 
 //Master Sword
 #include "vgui_containerlist.h"
-#include "logfile.h"
+#include "logger.h"
 #include "clglobal.h"
 #include "vgui_menudefsshared.h"
 

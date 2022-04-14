@@ -21,7 +21,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "string.h"
-#include "logfile.h"
+#include "logger.h"
 #include "msnetcodeclient.h"
 #include "mscharacter.h"
 #include "clglobal.h"
