@@ -76,35 +76,35 @@ class Logger {
     friend Logger &operator<<(Logger &logger, const char *text)
     {
       logger.file << text;
-      logger.file.flush();
+      //logger.file.flush();
       return logger;
     }
     
     friend Logger &operator<<(Logger &logger, unsigned char c)
     {
       logger.file << c;
-      logger.file.flush();
+      //logger.file.flush();
       return logger;
     }
     
     friend Logger &operator<<(Logger &logger, int n)
     {
       logger.file << n;
-      logger.file.flush();
+      //logger.file.flush();
       return logger;
     }
     
     friend Logger &operator<<(Logger &logger, unsigned long n)
     {
       logger.file << n;
-      logger.file.flush();
+      //logger.file.flush();
       return logger;
     }
     
     friend Logger &operator<<(Logger &logger, double n)
     {
       logger.file << n;
-      logger.file.flush();
+      //logger.file.flush();
       return logger;
     }
     
