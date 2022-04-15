@@ -209,7 +209,7 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 	ALERT(at_aiconsole, "Firing: (%s)\n", targetName);
 
 	//NOV2015_05 let GM capture triggers
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("Â¯") + "game_master");
 	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 	if (pGMScript)
 	{
