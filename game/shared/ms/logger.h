@@ -15,29 +15,23 @@ class Logger {
       LOG_INFO
     };
     
-    void open(const char *filename)
-    {
-      file.open(filename);
-      
-      if (file.is_open())
-      {
-        time_t Time;
-      	time(&Time);
-      	char *TimeString = ctime(&Time);
-        
-        file << (TimeString) << endl;
-      }
-    }
-    
-    void open(const char *filename, int mode)
+    void open(const char *filename, int mode = 0)
     {
       switch(mode)
       {
         case 0:
           file.open(filename);
+          if (file.is_open())
+          {
+            time_t Time;
+          	time(&Time);
+          	char *TimeString = ctime(&Time);
+            
+            file << (TimeString) << endl;
+          }
           break;
         case 1:
-          file.open(filename, ios_base::app);
+          file.open(filename, ios_base::app); //open file for appending
           break;
       }
     }

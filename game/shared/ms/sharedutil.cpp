@@ -51,43 +51,6 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 #endif
 }
 
-// msstring CMSStream::buffered;
-// void CMSStream::open(msstring_ref FileName)
-// {
-// 	ofstream::open(FileName);
-// 	time_t Time;
-// 	time(&Time);
-// 	msstring_ref TimeString = ctime(&Time);
-// 
-// 	flush();
-// 
-// 	if (TimeString)
-// 		operator<<(TimeString) << endl;
-// 	else
-// 		operator<<("Couldn't get time") << endl;
-// 
-// 	operator<<(buffered);
-// 	buffered = "";
-// }
-// 
-// void CMSStream::open(msstring_ref FileName, int mode)
-// {
-// 	/* Mode:
-// 	0 - Basic open
-// 	1 - Appending open
-// 	*/
-// 	switch (mode)
-// 	{
-// 	case 0:
-// 		ofstream::open(FileName);
-// 		break;
-// 	case 1:
-// 		ofstream::open(FileName, ios_base::app);
-// 		break;
-// 	}
-// 	buffered = "";
-// }
-
 void OpenLogFiles()
 {
 	char cLogfile[MAX_PATH];
@@ -113,48 +76,6 @@ void OpenLogFiles()
 #endif
 	g_log_initialized = true;
 }
-
-// void CMSStream::DebugOpen()
-// {
-// 	//Force open the debug logs whenever the first log event occurs.
-// 	//The event could occur during dll load, before any functions get called
-// 	if (is_open())
-// 		return;
-// 
-// #ifdef KEEP_LOG
-// 	char cLogfile[MAX_PATH], * pFileName;
-// 
-// #ifdef VALVE_DLL
-// 	//Thothie Assemble msc_log
-// 	char pChatName[20];
-// 	char cChatFile[MAX_PATH];
-// 	time_t curTime;
-// 	time(&curTime);
-// 	struct tm* TheTime = localtime(&curTime);
-// 	int month = TheTime->tm_mon + 1;
-// 	int year = TheTime->tm_year + 1900;
-// 	//sprintf( pFileName, "msc_log_%i_%i", month, year );
-// 	pFileName = "log_msdll";
-// 	_snprintf(pChatName, sizeof(pChatName), "msc_chatlog_%02d_%i", month, year);
-// #else
-// 	pFileName = "log_cldll";
-// #endif
-// 
-// 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pFileName);
-// 	try
-// 	{
-// 		logfile.open(cLogfile);
-// #ifdef VALVE_DLL
-// 		_snprintf(cChatFile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatName);
-// 		chatlog.open(cChatFile, 1);
-// #endif
-// 		g_log_initialized = true;
-// 	}
-// 	catch (...)
-// 	{
-// 	}
-// #endif
-//}
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
 msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a string of format "PentP(idx,addr)"
