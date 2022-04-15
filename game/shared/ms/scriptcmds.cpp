@@ -7692,7 +7692,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 	//ScriptFile_WriteLine( line , Lines.size() );
 	AddLine(line, -1, false);
 
-	char cFileName[512];
+	char cFileName[MAX_PATH];
 	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
 	Logger mibfile;
 	mibfile.open(cFileName, 1);
@@ -7703,7 +7703,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 //Write a line at X, possibly overwriting or just inserting
 void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwrite)
 {
-	char cFileName[512];
+	char cFileName[MAX_PATH];
 	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
 	Logger mibfile;
 	mibfile.open(cFileName, 0);
