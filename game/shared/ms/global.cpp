@@ -562,7 +562,7 @@ void Log(char *szFmt, ...)
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
 
-	logfile << Logger::LOG_INFO << string << "\n";
+	logfile << string << "\n";
 }
 
 void LogExtensive(msstring_ref Text)
@@ -585,7 +585,7 @@ void DbgLog(char *szFmt, ...)
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
 
-	logfile << Logger::LOG_INFO << string << endl;
+	logfile << string << endl;
 #endif
 }
 

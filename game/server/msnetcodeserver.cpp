@@ -256,7 +256,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	startdbg;
 	dbg("Begin");
 
-	Log("Load Character: %s", DisplayName());
+	logfile << Logger::LOG_INFO << "Load Character: " << DisplayName() << "\n";
 
 	//Thothie JAN2010_10 - flag to tell "char" function character is loaded, so no clickie
 	m_CharacterState = CHARSTATE_LOADING;

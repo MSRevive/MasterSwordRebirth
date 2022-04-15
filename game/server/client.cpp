@@ -1688,7 +1688,7 @@ void ServerDeactivate(void)
 	SteamHelper::Shutdown();
 
 	dbg("Call FnDataHandler::Reset");
-	FnDataHandler::Reset();	
+	FnDataHandler::Reset();
 
 	dbg("End");
 	enddbg;
@@ -1702,7 +1702,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	startdbg;
 	int i;
 	CBaseEntity *pClass;
-	Log("World Activate...");
+	logfile << Logger::LOG_INFO << "World Activate...\n";
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
@@ -1767,7 +1767,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	FnDataHandler::Reset();
 	SteamHelper::Initialize();
 
-	Log("World Activate END");
+	logfile << Logger::LOG_INFO << "World Activate END\n";
 	enddbg;
 }
 
