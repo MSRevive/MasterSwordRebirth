@@ -70,7 +70,7 @@ void* operator new(size_t size)
 				allochighest = MemAlloc.Index;
 			if (allocid >= ARRAYSIZE(Allocations))
 			{
-				logfile << Logger::LOG_ERROR << "Error: Alloc New Memory: Allocations exceed max debug size (" << ARRAYSIZE(Allocations) << ")" << endl;
+				logfile << Logger::LOG_ERROR << "Error: Alloc New Memory: Allocations exceed max debug size (" << ARRAYSIZE(Allocations) << ")\n";
 				//int stop = 0;
 				exit(1);
 				return NULL;
@@ -95,10 +95,10 @@ void* operator new(size_t size)
 		msstring erloc = "client";
 #else
 		msstring erloc = "server";
-		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << endl;
+		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << "\n";
 #endif
 		Print("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) [%s]\n", erloc.c_str());
-		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << endl;
+		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << "\n";
 	}
 	return NULL;
 }
@@ -136,7 +136,7 @@ void operator delete(void* ptr)
 
 			if (!found)
 			{
-				logfile << Logger::LOG_ERROR << "Delete Memory: Tried to delete memory that wasn't allocated (" << Allocations[i]->SourceFile.c_str() << ":" << Allocations[i]->LineNum + ")" << endl;
+				logfile << Logger::LOG_ERROR << "Delete Memory: Tried to delete memory that wasn't allocated (" << Allocations[i]->SourceFile.c_str() << ":" << Allocations[i]->LineNum + ")\n";
 				exit(1);
 				return;
 			}
@@ -154,22 +154,22 @@ void operator delete(void* ptr)
 		msstring erloc = "client";
 #else
 		msstring erloc = "server";
-		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << endl;
+		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << "\n";
 #endif
 		Print("MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) [%s]\n", erloc.c_str());
-		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << endl;
+		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << "\n";
 	}
 }
 
 void LogMemoryUsage(msstring_ref Title)
 {
 #ifdef TRACK_MEMORY
-	logfile << Logger::LOG_INFO << Title << endl;
-	logfile << Logger::LOG_INFO << "[Current Memory Allocations: " << alloctotal << "][Highest Ever: " << allochighest << "]" << endl;
+	logfile << Logger::LOG_INFO << Title << "\n";
+	logfile << Logger::LOG_INFO << "[Current Memory Allocations: " << alloctotal << "][Highest Ever: " << allochighest << "]\n";
 	for (int i = 0; i < alloctotal; i++)
 	{
 		//if( Allocations[i]->Index == 124117 )
-		logfile << Logger::LOG_INFO << "[Unfreed #" << i << "][" << Allocations[i]->Index << "] " << Allocations[i]->SourceFile.c_str() << " : " << Allocations[i]->LineNum << endl;
+		logfile << Logger::LOG_INFO << "[Unfreed #" << i << "][" << Allocations[i]->Index << "] " << Allocations[i]->SourceFile.c_str() << " : " << Allocations[i]->LineNum << "\n";
 	}
 #endif
 }

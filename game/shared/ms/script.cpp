@@ -4882,7 +4882,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 				#else
 					#ifndef RELEASE_LOCKDOWN
 #ifdef VALVE_DLL
-						logfile << "ERROR: Script not found: " << ScriptName.c_str() << endl;
+						logfile << "ERROR: Script not found: " << ScriptName.c_str() << "\n";
 #ifndef POSIX
 						MessageBox( NULL, msstring("Script not found: ") + ScriptName + "\r\n\r\nThis is probably caused by a script using #include on a non-existant script.", "FIX THIS QUICK!", MB_OK );
 #endif

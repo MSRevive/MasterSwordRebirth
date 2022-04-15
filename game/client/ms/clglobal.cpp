@@ -377,7 +377,7 @@ void MSCLGlobals::SpawnIntoServer()
 	dbg("ShowVGUIMenu( MENU_NEWCHARACTER )");
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
-	logfile << "DONE" << endl;
+	logfile << "DONE\n";
 
 	enddbg;
 }
@@ -415,7 +415,7 @@ BOOL WINAPI DllMain(
 	{
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
 		if (logfile.is_open())
-			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded") << endl);
+			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();

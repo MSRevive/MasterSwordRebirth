@@ -117,7 +117,7 @@ void CRender::RT_BindTexture()
 	if (!wglBindTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
 		//MessageBox(NULL, "Could not bind p-buffer to render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
-		logfile << Logger::LOG_ERROR << "Error: Could not bind p-buffer to render texture!" << endl;
+		logfile << Logger::LOG_ERROR << "Error: Could not bind p-buffer to render texture!\n";
 		Print("Could not bind p-buffer to render texture!");
 		//exit(-1);
 	}
@@ -254,21 +254,21 @@ bool CMirrorMgr::InitMirrors()
 	const char *CardString = (const char *)glGetString(GL_RENDERER);
 	const char *VersionString = (const char *)glGetString(GL_VERSION);
 	const char *ExtensionsString = (const char *)glGetString(GL_EXTENSIONS);
-	logfile << Logger::LOG_INFO << "Video Card Vender: " << VenderString << endl;
-	logfile << Logger::LOG_INFO << "Video Card: " << CardString << endl;
-	logfile << Logger::LOG_INFO << "OpenGL Version: " << VersionString << endl;
-	logfile << Logger::LOG_INFO << "OpenGL Extensions: " << ExtensionsString << endl;
+	logfile << Logger::LOG_INFO << "Video Card Vender: " << VenderString << "\n";
+	logfile << Logger::LOG_INFO << "Video Card: " << CardString << "\n";
+	logfile << Logger::LOG_INFO << "OpenGL Version: " << VersionString << "\n";
+	logfile << Logger::LOG_INFO << "OpenGL Extensions: " << ExtensionsString << "\n";
 
 	if (atof(VersionString) < 1.1) //Not high enough OpenGL version
 	{
-		logfile << Logger::LOG_INFO << "\nOpenGL Version Not High Enough For Mirrors (Needs 1.1)!" << endl;
+		logfile << Logger::LOG_INFO << "\nOpenGL Version Not High Enough For Mirrors (Needs 1.1)!\n";
 		return false;
 	}
 
 	glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)wglGetProcAddress("glMultiTexCoord2fARB");
 	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
 
-	logfile << Logger::LOG_INFO << "OpenGL ActiveTexture Extention: " << (glActiveTextureARB ? "FOUND" : "NOT FOUND") << endl;
+	logfile << Logger::LOG_INFO << "OpenGL ActiveTexture Extention: " << (glActiveTextureARB ? "FOUND" : "NOT FOUND") << "\n";
 
 	if (!glActiveTextureARB) //Doesn't support Multitexturing
 		return false;
@@ -280,7 +280,7 @@ bool CMirrorMgr::InitMirrors()
 	//Set up wgl extensions
 	if (!strstr(wglExtensions, "WGL_ARB_pbuffer") || !strstr(wglExtensions, "WGL_ARB_pixel_format") || !strstr(wglExtensions, "WGL_ARB_render_texture"))
 	{
-		logfile << Logger::LOG_INFO << "\nOpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!" << endl;
+		logfile << Logger::LOG_WARN << "\nOpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!\n";
 		return false;
 	}
 

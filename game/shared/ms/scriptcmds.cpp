@@ -7696,7 +7696,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
 	Logger mibfile;
 	mibfile.open(cFileName, 1);
-	mibfile << line << endl;
+	mibfile << line << "\n";
 
 	mibfile.close();
 }

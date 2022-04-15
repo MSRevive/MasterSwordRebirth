@@ -180,7 +180,7 @@ int DLLEXPORT HUD_GetHullBounds(int hullnumber, float *mins, float *maxs)
 		break;
 	}
 
-	logfile << Logger::LOG_INFO << "[HUD_GetHullBounds: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_GetHullBounds: Complete]\n";
 
 	enddbg;
 	return iret;
@@ -260,12 +260,12 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	
 	if(!FileSystem_Init())
 	{
-		logfile << Logger::LOG_ERROR << "[DLLEXPORT Initialize: Failed to initialize filesystem]" << endl;
+		logfile << Logger::LOG_ERROR << "[DLLEXPORT Initialize: Failed to initialize filesystem]\n";
 		return 0;
 	}
 
 	SteamHelper::Initialize();
-	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]\n";
 
 	enddbg;
 	return 1;
@@ -296,7 +296,7 @@ int DLLEXPORT HUD_VidInit(void)
 	// IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in tri.cpp
 	InitScreenGlow();
 
-	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]\n";
 
 	enddbg;
 
@@ -320,19 +320,19 @@ void DLLEXPORT HUD_Init(void)
 	DBG_INPUT;
 	startdbg;
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: InitInput]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_Init: InitInput]\n";
 	dbg("Call InitInput");
 	InitInput();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: gHUD.Init]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_Init: gHUD.Init]\n";
 	dbg("Call gHUD.Init");
 	gHUD.Init();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]\n";
 	dbg("Call Scheme_Init");
 	Scheme_Init();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_Init: Complete]\n";
 
 	enddbg;
 }
@@ -410,7 +410,7 @@ void DLLEXPORT HUD_Reset(void)
 
 	gHUD.VidInit();
 
-	logfile << Logger::LOG_INFO << "[HUD_Reset: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[HUD_Reset: Complete]\n";
 
 	enddbg;
 }

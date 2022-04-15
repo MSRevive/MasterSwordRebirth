@@ -116,12 +116,12 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		 strncpy(ClientInfo.Addr,  pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
-		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << endl;
+		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
 	}
 	else
-		logfile << "Client rejected: " << szRejectReason << endl;
+		logfile << "Client rejected: " << szRejectReason << "\n";
 
-	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]" << endl;
+	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]\n";
 
 	enddbg;
 	return fSuccess ? 1 : 0;
@@ -213,7 +213,7 @@ void ClientPutInServer(edict_t *pEntity)
 	startdbg;
 	DBG_INPUT;
 
-	logfile << Logger::LOG_INFO << "[ClientPutInServer]" << endl;
+	logfile << Logger::LOG_INFO << "[ClientPutInServer]\n";
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;

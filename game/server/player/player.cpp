@@ -2520,7 +2520,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	}
 	else
 	{
-		logfile << Logger::LOG_INFO << "m_JoinType: " << m_JoinType << endl;
+		logfile << Logger::LOG_INFO << "m_JoinType: " << m_JoinType << "\n";
 		switch (m_JoinType)
 		{
 		case JN_VISITED:
