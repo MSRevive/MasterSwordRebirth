@@ -1751,6 +1751,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 	if (!pGameMasterEnt)
 	{
+		logfile << Logger::LOG_INFO << "Spawning game master\n";
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
 		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
 		if (NewMonster)
