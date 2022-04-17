@@ -669,7 +669,7 @@ bool DoDebugEntities(
 		if ( bIsSub )
 		{
 			vPrependLength = strlen( pszPrepend );
-			sprintf( pszMsg, "%s", pszPrepend );
+			_snprintf(pszMsg, sizeof(pszMsg), "%s", pszPrepend);
 		}
 		else
 		{
@@ -679,45 +679,34 @@ bool DoDebugEntities(
 			vsTemp += vDebugInfo.mpFoundEntity->entindex();
 			vsTemp += "]: ";
 			vPrependLength = vsTemp.len();
-			sprintf( pszMsg, "%s", vsTemp.c_str() );
+			_snprintf(pszMsg, sizeof(pszMsg), "%s", vsTemp.c_str());
 		}
 
 		if ( vDebugInfo.mbArray || vDebugInfo.mbGlobalArray )
 		{
-			bool                        bExisted;
-			msscriptarray *             pScriptArray = GetScriptedArrayFromHashMap( vDebugInfo.mbArray ? vDebugInfo.mpFoundEntity->scriptedArrays : CScript::GlobalScriptArrays
-				, vDebugInfo.msVarName
-				, false
-				, &bExisted
-				);
+			bool bExisted;
+			msscriptarray *pScriptArray = GetScriptedArrayFromHashMap(vDebugInfo.mbArray ? vDebugInfo.mpFoundEntity->scriptedArrays : CScript::GlobalScriptArrays, vDebugInfo.msVarName, false, &bExisted);
 			if ( vDebugInfo.mbDumpArray )
 			{
 				if ( bExisted )
 				{
-					sprintf( pszMsg+vPrependLength
-						, vsMsgTemplate.c_str()
-						, pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex
-						? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str()
-						: "[BAD_INDEX]"
-						);
+					//sprintf(pszMsg+vPrependLength, vsMsgTemplate.c_str(), pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex ? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str() : "[BAD_INDEX]");
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex ? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str() : "[BAD_INDEX]");
 				}
 				else
 				{
-					sprintf( pszMsg+vPrependLength
-						, vsMsgTemplate.c_str()
-						, "[ERROR_NO_ARRAY]"
-						);
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), "[ERROR_NO_ARRAY]");
 				}
 			}
 			else
 			{
-				sprintf(pszMsg + vPrependLength, "%s", vsMsgTemplate.c_str());
+				_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), "%s", vsMsgTemplate.c_str());
 			}
 		}
 		else
 		if ( vDebugInfo.mbIsExists )
 		{
-			sprintf(pszMsg + vPrependLength, "%s", vsMsgTemplate.c_str());
+			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), "%s", vsMsgTemplate.c_str());
 		}
 		else
 		{
@@ -769,7 +758,7 @@ bool DoDebugEntities(
 						vSubParams.add( vDebugInfo.mSubParams[i] );
 
 					vsOutAppend += "->";
-					sprintf(pszMsg+vPrependLength, vsMsgTemplate.c_str(), vsOutAppend.c_str());
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), vsOutAppend.c_str());
 					bResult = DoDebugEntities(pCallerPlayer, "dbg_index", vSubParams, pszMsg) && bResult;
 					continue;
 				}
@@ -836,10 +825,7 @@ bool DoDebugEntities(
 				vsOutAppend += vsPropRslt;
 			}
 
-			sprintf( pszMsg+vPrependLength
-				, vsMsgTemplate.c_str()
-				, vsOutAppend.c_str()
-				);
+			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), vsOutAppend.c_str());
 		}
 
 		msstringlist                    vPrintParams;
@@ -3110,10 +3096,10 @@ bool CScript::ScriptCmd_EraseFile(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 #ifdef VALVE_DLL
 	if( Params.size() > 0 )
 	{
-		char cFileName[256];
+		char cFileName[MAX_PATH];
 		msstring fname = Params[0];
 		bool clearFromHere = Params.size() >= 2 ? Params[1] != "no_clear" : true;
-		sprintf( cFileName, "%s/%s", EngineFunc::GetGameDir(), fname.c_str() );
+		_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fname.c_str());
 
 
 		if( clearFromHere ) //Remove from the filesOpen list unless specified otherwise.
@@ -7693,7 +7679,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 	AddLine(line, -1, false);
 
 	char cFileName[MAX_PATH];
-	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
+	_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
 	Logger mibfile;
 	mibfile.open(cFileName, 1);
 	mibfile << line << "\n";
@@ -7704,7 +7690,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line)
 void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwrite)
 {
 	char cFileName[MAX_PATH];
-	sprintf(cFileName, "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
+	_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
 	Logger mibfile;
 	mibfile.open(cFileName, 0);
 
