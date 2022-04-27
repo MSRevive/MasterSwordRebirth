@@ -25,6 +25,12 @@
 
 using namespace rapidjson;
 
+enum FnPlayerFlags
+{
+	FN_FLAG_BANNED = 0x01,
+	FN_FLAG_ADMIN = 0x02,
+};
+
 enum RequestCommand
 {
 	FN_REQ_LOAD = 0,
@@ -52,7 +58,7 @@ public:
 		this->command = command;
 		this->slot = slot;
 		this->size = 0;
-		this->isBanned = false;
+		this->flags = 0;
 		strncpy(this->url, url, REQUEST_URL_SIZE);
 	}
 
@@ -66,7 +72,7 @@ public:
 	int slot;
 	int size;
 	int result;
-	bool isBanned;
+	int flags;
 	unsigned long long steamID;
 	char url[REQUEST_URL_SIZE];
 	char guid[MSSTRING_SIZE];
@@ -103,14 +109,24 @@ static const char* GetFnUrl(char* fmt, ...)
 }
 
 // Load single char details.
-static bool LoadCharacter(FnRequestData* req, const JSONValue& val)
+static void LoadCharacter(FnRequestData* req, const JSONValue& val)
 {
 	req->size = val["size"].GetInt();
 	strncpy(req->guid, val["id"].GetString(), MSSTRING_SIZE);
 	req->data = new char[req->size];
 	memcpy(req->data, (char*)base64_decode(val["data"].GetString()).c_str(), req->size);
 	req->result = FN_RES_OK;
-	return true;
+}
+
+static void GetPlayerFlags(FnRequestData* req, const JSONDocument& doc)
+{
+	if (req == NULL) return;
+
+	if (doc["isBanned"].GetBool())
+		req->flags |= FN_FLAG_BANNED;
+
+	if (doc["isAdmin"].GetBool())
+		req->flags |= FN_FLAG_ADMIN;
 }
 
 // Handle a char request.
@@ -132,14 +148,8 @@ static void HandleRequest(FnRequestData* req)
 			return;
 
 		const JSONDocument& doc = *pDoc;
-
-		req->isBanned = doc["isBanned"].GetBool();
-		for (const JSONValue& val : doc["data"].GetArray()) // Iterate through the characters returned, if any.
-		{
-			if (LoadCharacter(req, val))
-				break;
-		}
-
+		GetPlayerFlags(req, doc);
+		LoadCharacter(req, doc["data"]);
 		break;
 	}
 
@@ -179,8 +189,9 @@ static void HandleRequest(FnRequestData* req)
 		if (pDoc == NULL)
 			return;
 
-		req->isBanned = (*pDoc)["isBanned"].GetBool();
-		strncpy(req->guid, (*pDoc)["data"]["id"].GetString(), MSSTRING_SIZE);
+		const JSONDocument& doc = *pDoc;
+		GetPlayerFlags(req, doc);
+		strncpy(req->guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
 		req->result = FN_RES_OK;
 		break;
 	}
@@ -274,7 +285,7 @@ void FnDataHandler::Think(bool bNoCallback)
 			CBasePlayer* pPlayer = (bNoCallback ? NULL : UTIL_PlayerBySteamID(req->steamID));
 			if (pPlayer)
 			{
-				if (req->isBanned)
+				if ((req->flags & FN_FLAG_BANNED) != 0)
 					pPlayer->KickPlayer("You have been banned from FN!");
 				else
 				{
@@ -407,7 +418,7 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 		pPlayer->steamID64,
 		slot,
 		bIsUpdate ? GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid) : GetFnUrl("api/v1/character/")
-		);
+	);
 	req->data = new char[size];
 	req->size = size;
 	memcpy(req->data, data, size);
