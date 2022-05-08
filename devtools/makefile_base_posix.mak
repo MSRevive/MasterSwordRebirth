@@ -90,17 +90,17 @@ ifdef MAKE_CHROOT
         $(info '$(SCHROOT_CHROOT_NAME)' is not '$(CHROOT_NAME)')
         $(error This makefile should be run from within a chroot. 'schroot --chroot $(CHROOT_NAME) -- $(MAKE) $(MAKEFLAGS)')  
 	endif
-	GCC_VER = -5
+	GCC_VER = -4.8
 	P4BIN = $(SRCROOT)/devtools/bin/linux/p4
 else ifeq ($(USE_VALVE_BINDIR),1)
 	# Using /valve/bin directory.
-	export STEAM_RUNTIME_PATH ?= /valve
-	GCC_VER = -4.6
+	export STEAM_RUNTIME_PATH := /usr
+	GCC_VER = -4.8
 	P4BIN = p4
 else
 	# Not using chroot, use old steam-runtime. (gcc 4.6.3)
-	export STEAM_RUNTIME_PATH ?= /valve/steam-runtime
-	GCC_VER =
+	export STEAM_RUNTIME_PATH := /usr
+	GCC_VER = -4.8
 	P4BIN = p4
 endif
 

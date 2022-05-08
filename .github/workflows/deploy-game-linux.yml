@@ -13,7 +13,7 @@ jobs:
     - name: C/C++ dev tools
       run: |
         sudo apt update
-        sudo apt-get install build-essential gcc-multilib gcc-4.8-multilib g++-4.8-multilib
+        sudo apt-get install build-essential gcc-4.8-multilib g++-4.8-multilib
       
     - name: Setup Steam Runtime
       run: |
@@ -35,7 +35,7 @@ jobs:
         ./createall
 
     - name: Build
-      run: cat build-game.txt | sudo /valve/steam-runtime/shell-i386.sh
+      run: make -f msc.mak
 
     - name: Upload Binaries
       uses: actions/upload-artifact@v2
