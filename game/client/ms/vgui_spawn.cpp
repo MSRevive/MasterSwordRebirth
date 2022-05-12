@@ -39,7 +39,6 @@
 #include "msdllheaders.h"
 #include "player/player.h"
 #include "stats/statdefs.h"
-#include "msnetcodeclient.h"
 
 #undef DLLEXPORT
 
@@ -123,29 +122,6 @@ CSpawnPanel::CSpawnPanel(Panel *pParent) : CMenuPanel(1, false, 0, 0, ScreenWidt
 void CSpawnPanel::Update()
 {
 	return;
-	if (!CNetCode::pNetCode)
-	{
-		Print("Error: Netcode not initialized..."); //Most likely cause is the netcode init was skipped due to an exception
-		return;
-	}
-	if (g_NetCode.m.Transactons.size())
-	{
-		CNetFileTransaction &Transaction = *(g_NetCode.m.Transactons[0]);
-
-		m_pTitle->setText("Loading character...");
-		if (!Transaction.m.Connected)
-		{
-			m_pNameLabel->setText("Attemping to send character to %s...", g_NetCode.m.HostIP.c_str());
-			if (gpGlobals->time > Transaction.m.TimeTimeout)
-			{
-				msstring Text = msstring("Could not connect to ") + g_NetCode.m.HostIP + " (tcp)\nThe server may not be configured correctly.";
-				m_Message->setText(Text.c_str());
-				m_Message->setVisible(true);
-			}
-		}
-		else if (Transaction.m.Connected)
-			m_pNameLabel->setText("Sending character to server...");
-	}
 }
 
 void CSpawnPanel::Close(void)

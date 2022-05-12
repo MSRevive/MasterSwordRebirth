@@ -2,7 +2,6 @@
 #include "cl_util.h"
 #include "com_weapons.h"
 #include "msdllheaders.h"
-#include "msnetcodeclient.h"
 #include "clglobal.h"
 #include "clenv.h"
 #include "mscharacter.h"
@@ -142,10 +141,6 @@ void MSCLGlobals::Initialize()
 
 	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
-
-	//Initialize Network
-	dbg("Call CNetCode::InitNetCode");
-	CNetCode::InitNetCode();
 
 	enddbg;
 }

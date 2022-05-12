@@ -3,7 +3,6 @@
 #include "stats/races.h"
 #include "svglobals.h"
 #include "logger.h"
-#include "msnetcode.h"
 #include "global.h"
 #include "weapons/genericitem.h"
 #include "gamerules/gamerules.h"
@@ -117,8 +116,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	
 	//	-- Initialize network for receiving characters
 	logfile << Logger::LOG_INFO << "Initialize network... ";
-
-	CNetCode::InitNetCode();
 
 	logfile << "DONE\n";
 

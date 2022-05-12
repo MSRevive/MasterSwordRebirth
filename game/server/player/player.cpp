@@ -50,7 +50,6 @@
 #include "syntax/syntax.h"
 #include "monsters/monsteranimation.h"
 #include "gamerules/teams.h"
-#include "msnetcodeserver.h"
 #include "global.h"
 #include "mscharacter.h"
 #include "magic.h"
@@ -6347,6 +6346,238 @@ void CBasePlayer::SetQuest(bool SetData, msstring_ref Name, msstring_ref Data)
 		}
 	}
 }
+
+bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
+{
+	startdbg;
+	dbg("Begin");
+
+	logfile << Logger::LOG_INFO << "Load Character: " << DisplayName() << "\n";
+
+	//Thothie JAN2010_10 - flag to tell "char" function character is loaded, so no clickie
+	m_CharacterState = CHARSTATE_LOADING;
+
+	//Thothie JUL2007 - prevent loading of STEAM_ID_PENDING chars
+	msstring thoth_displayname = DisplayName();
+	if (thoth_displayname.starts_with("LOAD_FAILED-RECONNECT"))
+	{
+		KickPlayer("\nNo clicky means no clicky. Please reconnect.\n");
+		return false;
+	}
+
+	RemoveAllItems(false, true);				  //Remove all items
+	CallScriptEvent("game_reset_wear_positions"); //Re-initialize all the wearable positions for items
+
+	chardata_t Data;
+	if (!MSChar_Interface::ReadCharData(pData, Size, &Data))
+	{
+		KickPlayer("\nTampering with the save file results in a ban!\n");
+		return false;
+	}
+
+	//Read Maps Visited
+
+	m_Maps = Data.m_VisitedMaps;
+
+	m_MapStatus = INVALID_MAP;
+	char cCurrentMap[32];
+	 strncpy(cCurrentMap,  STRING(gpGlobals->mapname), sizeof(cCurrentMap) );
+	strncpy(m_NextMap, cCurrentMap, 32);
+
+	//Determine whether a transition took place and set the spawn transition accordingly
+	if (FStrEq(Data.MapName, cCurrentMap))
+	{
+		m_MapStatus = OLD_MAP;
+		strncpy(m_OldTransition, Data.OldTrans, 32); //Copy transition names to savable memory
+	}
+	else if (FStrEq(Data.NextMap, cCurrentMap))
+	{
+		m_MapStatus = NEW_MAP;
+		strncpy(m_OldTransition, Data.NewTrans, 32); //The new transition becomes the old transition
+	}
+
+	m_SpawnTransition = m_OldTransition;
+	m_NextTransition[0] = 0;
+	m_NextMap[0] = 0;
+
+	//Copy the data
+
+	m_DisplayName = Data.Name;
+	pev->netname = 0;
+	//msstring String = msstring("\"name ") + Data.Name + "\"\n";
+
+	//Force the client to do the name command
+	//This is so the engine will run its name check routine and append (x) if people have the same names
+	//I need that check because if two people were to forecefully get assigned the same name (with g_engfuncs.pfnSetClientKeyValue),
+	//Then the whole server does the "5 minute delayed messages" bug
+	CLIENT_COMMAND(edict(), "name %s\n", Data.Name);
+	//g_engfuncs.pfnSetClientKeyValue( entindex(), g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "name", (char *)Data.Name );
+
+	dbg("Read Stats");
+	m_OldGold = m_Gold = Data.Gold;
+
+	//MiB JAN2010_15 Gold Change on Spawn.rtf
+	
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
+	WRITE_BYTE(3);
+	WRITE_BYTE(0);
+	WRITE_LONG(m_Gold);
+	MESSAGE_END();
+
+	if (Data.HP > 0)
+	{
+		float CappedHP = max(Data.HP, 0);
+		float CappedMP = max(Data.MP, 0);
+		pev->health = m_HP = CappedHP;
+		m_MP = CappedMP;
+		m_MaxHP = Data.MaxHP;
+		m_MaxMP = Data.MaxMP;
+	}
+	//Player saved while dead
+	else
+		pev->deadflag = DEAD_DEAD;
+
+	 strncpy(m_cEnterMap,  Data.MapName, sizeof(m_cEnterMap) );
+
+	SetTeam(CTeam::CreateTeam(Data.Party, Data.PartyID));
+	m_Gender = Data.Gender;
+	m_fIsElite = Data.IsElite ? true : false;
+	m_PlayersKilled = Data.PlayerKills;
+	m_TimeWaitedToForgetKill = Data.TimeWaitedToForgetKill;
+	m_TimeWaitedToForgetSteal = Data.TimeWaitedToForgetSteal;
+
+	//MiB JAN2010 - Player Kill Stickiness.rtf
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
+	WRITE_BYTE(8);
+	WRITE_SHORT(m_PlayersKilled);
+	MESSAGE_END();
+
+	m_JoinType = MSChar_Interface::CanJoinThisMap(Data, m_Maps);
+
+	//Create our Human body -- Must be done here
+	if (Body)
+		Body->Delete(); //Moved to SUB_Remove
+	Body = msnew CHumanBody;
+	//Body->Initialize( this );
+
+	//Read skills
+	m_Stats = Data.m_Stats;
+
+	//MiB Aug 2008a (JAN2010_15) - Reset tomes on client
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETPROP], NULL, pev);
+	WRITE_BYTE(PROP_SPELL);
+	WRITE_BYTE(-1);
+	MESSAGE_END();
+
+	//Read Magic spells
+	for (int s = 0; s < Data.m_Spells.size(); s++)
+		LearnSpell(Data.m_Spells[s]);
+
+	mslist<CGenericItem *> Items; //Keep track of ALL items, for quickslot assignment later
+
+	//Read Items
+	dbg("Read Items");
+	for (int i = 0; i < Data.m_Items.size(); i++)
+	{
+		CGenericItem *pItem = Data.m_Items[i].operator CGenericItem *();
+
+		if (pItem->m_Location == ITEMPOS_HANDS)
+			AddItem(pItem, true, false, pItem->m_Hand);
+		else
+			pItem->AddToOwner(this);
+
+		Items.add(pItem);
+		for (int c = 0; c < pItem->Container_ItemCount(); c++)
+			Items.add(pItem->Container_GetItem(c));
+
+		//if( FBitSet(pItem->MSProperties(), ITEM_WEARABLE) && pItem->IsWorn() )	//Wear the wearable items
+		//	pItem->WearItem( );
+	}
+
+	//Read storage items
+	m_Storages = Data.m_Storages;
+	Storage_Send(); //Send all the items in storage
+
+	//Read Companions
+	dbg("Read Companions");
+
+	m_Companions = Data.m_Companions;
+	//Thothie JUN2008a - just read in companions, save the summoning until the script command "summonpets"
+	//- scratch the above, if the player saves while his pet is not present, it corrupts the pet and character
+	for (int c = 0; c < m_Companions.size(); c++)
+	{
+		companion_t &Companion = m_Companions[c];
+
+		CMSMonster *pCompanion = (CMSMonster *)CREATE_ENT("ms_npc");
+		if (!pCompanion)
+			continue;
+		Companion.Active = true;
+		Companion.Entity = pCompanion;
+
+		pCompanion->StoreEntity(this, ENT_OWNER);
+		edict_t *pEdict = pCompanion->edict();
+		pCompanion->Spawn(Companion.ScriptName);
+		if (pEdict->free)
+			continue;
+
+		pCompanion->pev->origin = pev->origin + Vector(0, 0, 128);
+
+		IScripted *pScripted = pCompanion->GetScripted();
+		if (!pScripted || !pScripted->m_Scripts.size())
+			continue;
+		for (int v = 0; v < Companion.SaveVarName.size(); v++)
+			pScripted->SetScriptVar(Companion.SaveVarName[v].c_str(), Companion.SaveVarValue[v].c_str());
+
+		pScripted->CallScriptEvent("game_companion_restore");
+	}
+
+	//Read Help tips
+	m_ViewedHelpTips = Data.m_ViewedHelpTips;
+
+	//Read Quests
+	m_Quests = Data.m_Quests;
+
+	//Read QuickSlots
+	for (int q = 0; q < Data.m_QuickSlots.size(); q++)
+	{
+		quickslot_t &QuickSlot = Data.m_QuickSlots[q];
+		if (QuickSlot.Active && (QuickSlot.Type == QS_ITEM))
+		{
+			bool bFound = false;
+			for (unsigned int i = 0; i < Items.size(); i++)
+			{
+				if (Items[i]->m_OldID == QuickSlot.ID)
+				{
+					QuickSlot.ID = Items[i]->m_iId;
+					bFound = true;
+					break;
+				}
+			}
+			QuickSlot.Active = bFound;
+		}
+		m_QuickSlots[q] = QuickSlot;
+	}
+
+	//Make sure an update is sent from UpdateClientData ASAP
+	for (int i = 0; i < m_Stats.size(); i++)
+		m_Stats[i].OutDate();
+
+	m_CharacterState = CHARSTATE_LOADED;
+
+	//Send the character name down to client
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
+	WRITE_BYTE(4);
+	WRITE_STRING_LIMIT(Data.Name, 32);
+	MESSAGE_END();
+
+	dbg("Call CBasePlayer::Spawn()");
+	Spawn();
+
+	enddbg;
+
+	return true;
+}
+
 bool CBasePlayer::LoadCharacter(int Num)
 {
 	if (Num >= MAX_CHARSLOTS)

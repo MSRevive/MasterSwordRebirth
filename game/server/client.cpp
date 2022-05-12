@@ -40,7 +40,6 @@
 
 #include "logger.h"
 #include "svglobals.h"
-#include "msnetcode.h"
 #include "mscharacter.h"
 #include "global.h"
 #include "versioncontrol.h"
@@ -220,7 +219,20 @@ void ClientPutInServer(edict_t *pEntity)
 
 	pPlayer = GetClassPtr((CBasePlayer *)pev);
 	pPlayer->SetCustomDecalFrames(-1); // Assume none;
+	
+	if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
+	{
+		int iPlayerOfs = ENTINDEX(pEntity) - 1;
+		logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
 
+		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
+
+		msstring Port = CVAR_GET_STRING("clientport");
+	}else{
+		MSErrorConsoleText("ClientPutInServer", "Player already has Address");
+	}
+	
+	/*
 	if (CNetCode::pNetCode)
 	{
 		if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
@@ -241,7 +253,7 @@ void ClientPutInServer(edict_t *pEntity)
 		{
 			MSErrorConsoleText("ClientPutInServer", "Player already has Address");
 		}
-	}
+	}*/
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));

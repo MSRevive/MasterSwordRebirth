@@ -22,7 +22,6 @@
 #include "parsemsg.h"
 #include "string.h"
 #include "logger.h"
-#include "msnetcodeclient.h"
 #include "mscharacter.h"
 #include "clglobal.h"
 #include "clenv.h"
@@ -92,8 +91,6 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	for (int i = 0; i < vote_t::VotesTypes.size(); i++)
 		if (FBitSet(VotesAllowed, (1 << i)))
 			vote_t::VotesTypesAllowed.add(vote_t::VotesTypes[i]);
-
-	logfile << Logger::LOG_INFO << "Server IP: " << g_NetCode.m.HostIP.c_str() << "\n";
 
 	dbg("Call InitHUDData() on all");
 	// prepare all hud data

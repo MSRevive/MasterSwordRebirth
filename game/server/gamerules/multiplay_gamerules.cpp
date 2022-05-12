@@ -18,7 +18,6 @@
 
 //Master Sword
 #include	"inc_weapondefs.h"
-//#include	"MSNetcode.h"
 #include	"teams.h"
 #include	"game.h"
 #include	"items.h"

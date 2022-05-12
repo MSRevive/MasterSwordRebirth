@@ -87,11 +87,10 @@ int CHudMisc::Draw(float flTime)
 
 	return 1;
 }
-void SaveCharSend(bool fResetSend = false);
 void CHudMisc::Think(void)
 {
 	startdbg;
-	SaveCharSend(); //Done every frame so I can retry the connect
+	//SaveCharSend(); //Done every frame so I can retry the connect
 
 	//Handle character upload to server
 	dbg("Think_SendCharData");
