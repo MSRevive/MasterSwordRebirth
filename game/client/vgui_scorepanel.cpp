@@ -1126,8 +1126,8 @@ void MSG_ScoreInfo(const char *pszName, int iSize, void *pbuf)
 		sTitle = READ_STRING();
 	//byte	iTitle = READ_BYTE();
 	//short	iSkillave = READ_SHORT();
-	int iMaxHP = READ_SHORT();
-	int iHP = READ_SHORT();
+	short iMaxHP = READ_SHORT();
+	short iHP = READ_SHORT();
 	if (cl > 0 && cl <= MAX_PLAYERS)
 	{
 		if (FBitSet(Flags, (1 << 2)))

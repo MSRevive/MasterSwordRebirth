@@ -68,8 +68,8 @@ struct extra_player_info_t
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
 	ulong TeamID;
-	int MaxHP; //FEB2008a -- Shuriken
-	int HP;	   //FEB2008a -- Shuriken
+	short MaxHP; //FEB2008a -- Shuriken
+	short HP;	   //FEB2008a -- Shuriken
 };
 
 struct team_info_t
