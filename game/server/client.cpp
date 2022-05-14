@@ -112,7 +112,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		clientaddr_t &ClientInfo = g_NewClients[iPlayerOfs];
 		ClientInfo.pe = pEntity;
 		ClientInfo.TimeClientConnected = gpGlobals->time;
-		 strncpy(ClientInfo.Addr,  pszAddress, sizeof(ClientInfo.Addr) );
+		strncpy(ClientInfo.Addr,  pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
 		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
@@ -226,34 +226,14 @@ void ClientPutInServer(edict_t *pEntity)
 		logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
 
 		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
-
-		msstring Port = CVAR_GET_STRING("clientport");
 	}else{
 		MSErrorConsoleText("ClientPutInServer", "Player already has Address");
 	}
 	
-	/*
-	if (CNetCode::pNetCode)
-	{
-		if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
-		{
-			int iPlayerOfs = ENTINDEX(pEntity) - 1;
-			logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
-
-			strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
-
-			msstring Port = CVAR_GET_STRING("clientport");
-
-			if (strstr(pPlayer->m_ClientAddress, "loopback") ||
-				strstr(pPlayer->m_ClientAddress, "127.0.0.1"))
-				_snprintf(pPlayer->m_ClientAddress, 128, "%s:%s", g_NetCode.m.HostIP.c_str(), Port.c_str()); //If local player, use local address
-			bool fEntryFound = false;
-		}
-		else
-		{
-			MSErrorConsoleText("ClientPutInServer", "Player already has Address");
-		}
-	}*/
+	char msg[256];
+	_snprintf(msg, sizeof(msg), "Connecting %s (%s)\n", pPlayer->DisplayName(), pPlayer->m_ClientAddress);
+	g_engfuncs.pfnServerPrint(msg);
+	logfile << Logger::LOG_INFO << msg;
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = FnDataHandler::GetSteamID64(GETPLAYERAUTHID(pEntity));
