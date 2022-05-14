@@ -350,6 +350,26 @@ bool FnDataHandler::IsEnabled(void)
 	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
+//Checks if the connection to via FN server is valid.
+//needs optimzation!
+bool FnDataHandler::IsValidConnection(void)
+{
+	if (!IsEnabled())
+		return false;
+	
+	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/ping"));
+	
+	if (pDoc == NULL)
+		return false;
+		
+	const JSONDocument& doc = *pDoc;
+	const bool retVal = doc["data"].GetBool();
+	
+	delete pDoc;
+	return retVal;
+}
+
 bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
 {
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
