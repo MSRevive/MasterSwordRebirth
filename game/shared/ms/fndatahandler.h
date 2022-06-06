@@ -10,6 +10,7 @@ namespace FnDataHandler
 	void Reset(void);
 	void Think(bool bNoCallback = false);
 	bool IsEnabled(void);
+	bool IsValid(const char* url);
 	bool IsValidConnection(void);
 	bool IsVerifiedMap(const char* name, unsigned int hash);
 	bool IsVerifiedSC(unsigned int hash);

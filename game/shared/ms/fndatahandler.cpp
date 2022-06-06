@@ -350,53 +350,30 @@ bool FnDataHandler::IsEnabled(void)
 	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
 }
 
+bool FnDataHandler::IsValid(const char* url)
+{
+	if (!url || !url[0] || !IsEnabled()) return false;
+
+	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
+
+	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(url);
+	if (pDoc == NULL)
+		return false;
+
+	const JSONDocument& doc = *pDoc;
+	const bool retVal = doc["data"].GetBool();
+
+	delete pDoc;
+	return retVal;
+}
+
 //Checks if the connection to via FN server is valid.
 //needs optimzation!
-bool FnDataHandler::IsValidConnection(void)
-{
-	if (!IsEnabled())
-		return false;
-	
-	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/ping"));
-	
-	if (pDoc == NULL)
-		return false;
-		
-	const JSONDocument& doc = *pDoc;
-	const bool retVal = doc["data"].GetBool();
-	
-	delete pDoc;
-	return retVal;
-}
+bool FnDataHandler::IsValidConnection(void) { return IsValid(GetFnUrl("api/v1/ping")); }
 
-bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash)
-{
-	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/map/%s/%u", name, hash));
-	if (pDoc == NULL)
-		return false;
+bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash) { return IsValid(GetFnUrl("api/v1/map/%s/%u", name, hash)); }
 
-	const JSONDocument& doc = *pDoc;
-	const bool retVal = doc["data"].GetBool();
-
-	delete pDoc;
-	return retVal;
-}
-
-bool FnDataHandler::IsVerifiedSC(unsigned int hash)
-{
-	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
-	JSONDocument* pDoc = HTTPRequestHandler::GetRequestAsJson(GetFnUrl("api/v1/sc/%u", hash));
-	if (pDoc == NULL)
-		return false;
-
-	const JSONDocument& doc = *pDoc;
-	const bool retVal = doc["data"].GetBool();
-
-	delete pDoc;
-	return retVal;
-}
+bool FnDataHandler::IsVerifiedSC(unsigned int hash) { return IsValid(GetFnUrl("api/v1/sc/%u", hash)); }
 
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)

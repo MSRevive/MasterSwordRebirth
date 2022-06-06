@@ -191,24 +191,23 @@ void MSWorldSpawn()
 		g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
 		logfile << Logger::LOG_INFO << "FuzzNet connected\n";
 	}
-	else
+	else if (MSGlobals::CentralEnabled)
 	{
 		//ALERT(at_logged, "FuzzNet connection failed.\n"); //for some reason ALERT doesn't do anything here
 		g_engfuncs.pfnServerPrint("FuzzNet connection failed.\n");
 		logfile << Logger::LOG_INFO << "FuzzNet connection failed\n";
-		
+
 		//we set this to false so it doesn't keep trying to make requests to via FN
 		MSGlobals::CentralEnabled = false;
 	}
-		
-	
+
 	if (!IsVerifiedMap())
 	{
 		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
 		SERVER_COMMAND("changelevel edana\n");
 	}
-	
-	if(!IsVerifiedSC())
+
+	if (!IsVerifiedSC())
 	{
 		ALERT(at_console, "Script file not verified for FN!\n");
 		SERVER_COMMAND("exit\n"); // we want to quit to prevent cheaters
