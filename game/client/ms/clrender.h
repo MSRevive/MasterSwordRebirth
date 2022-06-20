@@ -315,10 +315,10 @@ void RenderModel(cl_entity_t *pEntity);
 #define SURF_DRAWBACKGROUND 0x40
 #define SURF_UNDERWATER 0x80
 
-#include <nvidia/gl/gl.h>	  // Header File For The OpenGL32 Library
-#include <nvidia/gl/glu.h>	  // Header File For The GLu32 Library
+#include <gl/gl.h>	  // Header File For The OpenGL32 Library
+#include <gl/glu.h>	  // Header File For The GLu32 Library
 #include <nvidia/gl/glaux.h> // Header File For The GLaux Library
-#include "nvidia/gl/glext.h" // Header File For The GL extentions
+#include <nvidia/gl/glext.h> // Header File For The GL extentions
 
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;

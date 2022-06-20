@@ -4,8 +4,6 @@
 #ifndef __TGA_H__
 #define __TGA_H__
 
-#pragma comment(lib, "Opengl32.lib") //Link to OpenGL32.lib so we can use OpenGL stuff
-
 #ifdef _WIN32
 #include <windows.h> // Standard windows header
 #endif

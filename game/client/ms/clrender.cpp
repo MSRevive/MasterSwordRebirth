@@ -22,24 +22,7 @@
 #include "r_studioint.h"
 #include "ref_params.h"
 
-//#include "D3dx8tex.h"
-
-//#include <gl/glext.h>
-
-//Thothie TWHL project JUN2010_22 - http://twhl.co.za/articulator.php?art=170&form=old
-#include <nvidia/gl/gl.h>
-//include <gl/glext.h> //AUG2013_21 - Nvidia update - no longer need this header
-#include <nvidia/cg/cg.h>
 #include <nvidia/cg/cggl.h>
-
-#pragma comment(lib, "cg.lib")
-#pragma comment(lib, "cgGL.lib")
-
-//originals from MSC
-//#include <GL/gl.h>								// Header File For The OpenGL32 Library
-#include <nvidia/gl/glu.h>	  // Header File For The GLu32 Library
-#include <nvidia/gl/glaux.h> // Header File For The GLaux Library
-#include "logger.h"
 
 //OGL
 void DeleteGLTextures();
