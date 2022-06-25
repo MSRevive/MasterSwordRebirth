@@ -225,7 +225,7 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 #else	
 	char szTempPath[MSSTRING_SIZE];
 	getcwd(szTempPath, MSSTRING_SIZE);
-	AbsGamePath = msstring(szTempPath) + msstring("/msrebirth");
+	AbsGamePath = msstring(szTempPath) + msstring("/msr");
 #endif
 
 	OpenLogFiles();
