@@ -148,6 +148,10 @@ static void HandleRequest(FnRequestData* req)
 			return;
 
 		const JSONDocument& doc = *pDoc;
+		
+		if (doc["code"] == 400)
+			return;
+		
 		GetPlayerFlags(req, doc);
 		LoadCharacter(req, doc["data"]);
 		break;
