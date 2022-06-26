@@ -46,9 +46,11 @@ void SteamHelper::Think()
 		s_SteamGameServerAPIContext.Init();
 
 		if (steamgameserverapicontext->SteamGameServer())
-			ALERT(at_console, "\nInitialized Steam GameServer Handler!\n");
+			//ALERT(at_console, "\nInitialized Steam GameServer Handler!\n");
+			g_engfuncs.pfnServerPrint("\nInitialized Steam GameServer Handler!\n");
 		else if (steamapicontext->SteamUser())
-			ALERT(at_console, "\nInitialized Steam Client Handler!\n");
+			g_engfuncs.pfnServerPrint("\nInitialized Steam Client Handler!\n");
+			//ALERT(at_console, "\nInitialized Steam Client Handler!\n");
 
 		return;
 	}
