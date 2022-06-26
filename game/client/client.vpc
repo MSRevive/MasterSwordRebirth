@@ -395,12 +395,10 @@ $Project "Client"
 	{		
 		$ImpLib     cg
 		$ImpLib     cgGL
-		$ImpLib     glut32
 		$ImpLib     Glaux
 		$ImpLib		game_controls
 		$ImpLib     vgui
 		$ImpLib     SDL2
-		$ImpLib     procinfo
 		$ImpLib		steam_api
  	}
 }

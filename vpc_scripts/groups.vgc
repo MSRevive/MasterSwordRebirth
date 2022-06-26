@@ -12,7 +12,6 @@ $Group "msc"
 {
 	"client"
 	"server"
-	"dedicated"
 	"scriptpack"
 	"maphash"
 	"charimport"
