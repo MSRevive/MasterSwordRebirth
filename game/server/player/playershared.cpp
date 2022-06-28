@@ -838,8 +838,6 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 			{
 				//The Corpse MUST have space for everything the player is holding
 				Gearlist[i]->RemoveFromOwner();
-				if (!m_Corpse->AddItem(Gearlist[i], false, true))
-					Gearlist[i]->Drop();
 			}
 #endif
 			//If I'm not dead, I don't have a corpse, or my corpse doesn't
