@@ -690,23 +690,22 @@ bool DoDebugEntities(
 			{
 				if ( bExisted )
 				{
-					//sprintf(pszMsg+vPrependLength, vsMsgTemplate.c_str(), pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex ? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str() : "[BAD_INDEX]");
-					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex ? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str() : "[BAD_INDEX]");
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), vsMsgTemplate.c_str(), pScriptArray->size() > (size_t)vDebugInfo.mArrayIndex ? (*pScriptArray)[vDebugInfo.mArrayIndex].c_str() : "[BAD_INDEX]");
 				}
 				else
 				{
-					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), "[ERROR_NO_ARRAY]");
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), vsMsgTemplate.c_str(), "[ERROR_NO_ARRAY]");
 				}
 			}
 			else
 			{
-				_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), "%s", vsMsgTemplate.c_str());
+				_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), "%s", vsMsgTemplate.c_str());
 			}
 		}
 		else
 		if ( vDebugInfo.mbIsExists )
 		{
-			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), "%s", vsMsgTemplate.c_str());
+			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), "%s", vsMsgTemplate.c_str());
 		}
 		else
 		{
@@ -758,7 +757,7 @@ bool DoDebugEntities(
 						vSubParams.add( vDebugInfo.mSubParams[i] );
 
 					vsOutAppend += "->";
-					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), vsOutAppend.c_str());
+					_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), vsMsgTemplate.c_str(), vsOutAppend.c_str());
 					bResult = DoDebugEntities(pCallerPlayer, "dbg_index", vSubParams, pszMsg) && bResult;
 					continue;
 				}
@@ -825,7 +824,7 @@ bool DoDebugEntities(
 				vsOutAppend += vsPropRslt;
 			}
 
-			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg+vPrependLength), vsMsgTemplate.c_str(), vsOutAppend.c_str());
+			_snprintf(pszMsg+vPrependLength, sizeof(pszMsg), vsMsgTemplate.c_str(), vsOutAppend.c_str());
 		}
 
 		msstringlist                    vPrintParams;

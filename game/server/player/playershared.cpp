@@ -1399,7 +1399,7 @@ void charinfo_t::Destroy()
 		delete Data;
 	Data = NULL;
 	GearInfo.clear();
-	memset(this, 0, sizeof(this));
+	memset(this, 0, sizeof(*this));
 }
 
 void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char *pData, int iDataLen, CBasePlayer *pPlayer)
