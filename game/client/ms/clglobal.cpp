@@ -268,9 +268,9 @@ const char *EngineFunc::GetGameDir()
 }
 void AlertMessage(ALERT_TYPE atype, char *szFmt, ...)
 {
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;
 	va_start(argptr, szFmt);
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
@@ -280,9 +280,9 @@ void AlertMessage(ALERT_TYPE atype, char *szFmt, ...)
 }
 char *UTIL_VarArgs(char *format, ...)
 {
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;	
 	va_start(argptr, format);
 	vsnprintf(string, sizeof(string), format, argptr);
 	va_end(argptr);

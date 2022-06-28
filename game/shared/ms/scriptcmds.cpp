@@ -2581,7 +2581,7 @@ bool CScript::ScriptCmd_ClientEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		fxfloodlevel = atoi(GetVar( "G_TOTAL_FX" ));
 		if ( fxfloodlevel > fxlimiter && fxlimiter > 0 )
 		{
-		ALERT( at_console, UTIL_VarArgs("Some FX not displayed - Total Flood Level: %i/%f", fxfloodlevel, fxlimiter) );
+		ALERT( at_console, "Some FX not displayed - Total Flood Level: %i/%f", fxfloodlevel, fxlimiter );
 		return false;
 		}
 		else
@@ -4943,7 +4943,7 @@ bool CScript::ScriptCmd_Quest(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 			msstring &Action = Params[0];
 			msstring &Name = Params[2];
 			msstring &Data = Params[3]; //Params.size() >= 4 ? Params[3] : NULL;
-			//ALERT( at_aiconsole, UTIL_VarArgs("Got Quest String1(%s) String2(%s) String3(%s) \n", Params[0], Params[2], Params[3]));
+			//ALERT( at_aiconsole, "Got Quest String1(%s) String2(%s) String3(%s) \n", Params[0], Params[2], Params[3]);
 			bool SetData = true;
 			if( Action == "unset" ) SetData = false;
 			if( Action == "clear" )

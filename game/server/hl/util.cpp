@@ -348,7 +348,7 @@ void DBG_AssertFunction(
 		 _snprintf(szOut, sizeof(szOut),  "ASSERT FAILED:\n %s \n(%s@%d)\n%s",  szExpr,  szFile,  szLine,  szMessage );
 	else
 		 _snprintf(szOut, sizeof(szOut),  "ASSERT FAILED:\n %s \n(%s@%d)",  szExpr,  szFile,  szLine );
-	ALERT(at_console, szOut);
+	ALERT(at_console, "%s", szOut);
 }
 #endif // DEBUG
 
@@ -546,19 +546,14 @@ CBaseEntity *UTIL_FindEntityInSphere(CBaseEntity *pStartEntity, const Vector &ve
 	return NULL;
 }
 
-CBaseEntity *UTIL_FindEntityByString(CBaseEntity *pStartEntity, const char *szKeyword, const char *szValue)
+CBaseEntity* UTIL_FindEntityByString(CBaseEntity* pStartEntity, const char* szKeyword, const char* szValue)
 {
-	edict_t *pentEntity;
-
-	if (pStartEntity)
-		pentEntity = pStartEntity->edict();
-	else
-		pentEntity = NULL;
-
+	edict_t* pentEntity = (pStartEntity ? pStartEntity->edict() : NULL);
 	pentEntity = FIND_ENTITY_BY_STRING(pentEntity, szKeyword, szValue);
 
 	if (!FNullEnt(pentEntity))
 		return CBaseEntity::Instance(pentEntity);
+
 	return NULL;
 }
 
@@ -1939,9 +1934,9 @@ void UTIL_PrecacheOther(const char *szClassname)
 //=========================================================
 void UTIL_LogPrintf(char *fmt, ...)
 {
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;
 	va_start(argptr, fmt);
 	vsnprintf(string, sizeof(string), fmt, argptr);
 	va_end(argptr);

@@ -537,27 +537,24 @@ Print debug messages to console
 */
 void Print(char *szFmt, ...)
 {
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;
 	va_start(argptr, szFmt);
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
 
-	//#ifdef VALVE_DLL
-	ALERT(at_console, string);
-	//#else
-	//	ConsolePrint( string );
-	//#endif
+	ALERT(at_console, "%s", string);
 }
+
 void Log(char *szFmt, ...)
 {
 	if (!logfile.is_open())
 		return;
 
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;	
 	va_start(argptr, szFmt);
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
@@ -578,9 +575,9 @@ void DbgLog(char *szFmt, ...)
 	if (!logfile.is_open())
 		return;
 
-	va_list argptr;
 	static char string[1024];
 
+	va_list argptr;	
 	va_start(argptr, szFmt);
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);

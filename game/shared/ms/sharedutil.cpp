@@ -331,13 +331,12 @@ extern "C" char *strlwr(char *str)
 
 void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
 {
+	static char	string[1024];
+
   	va_list argptr;
-  	static char	string[1024];
-
-  	va_start (argptr, szFmt);
-
-  	vsprintf (string, szFmt,argptr);
-  	va_end (argptr);
+  	va_start(argptr, szFmt);
+  	vsprintf(string, szFmt,argptr);
+  	va_end(argptr);
 
     msstring vsShortTitle = "[";
     vsShortTitle += vsUnqeTag + "] ";
@@ -358,11 +357,11 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {
-      #ifdef VALVE_DLL
-		    ALERT( at_console, vsAsOne.c_str() );
-	    #else
-		    ConsolePrint( vsAsOne.c_str() );
-	    #endif
+#ifdef VALVE_DLL
+		ALERT(at_console, "%s", vsAsOne.c_str());
+#else
+		ConsolePrint(vsAsOne.c_str());
+#endif
     }
     if (vFlags & ERRORPRINT_INFOMSG)
     {
