@@ -39,7 +39,7 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 		{
 			logfile << Output;
 		}
-		Print(Output);
+		Print("%s", Output);
 	}
 	else
 	{

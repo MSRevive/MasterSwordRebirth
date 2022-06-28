@@ -1816,7 +1816,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				//pPlayer->SendInfoMsg( "You are now the leader of %s\n", Name );
 				msstring CreateMsg = msstring("You are now the leader of ") + pTeam->m_TeamName;
 				pPlayer->SendHUDMsg( "Party", CreateMsg );
-				pPlayer->SendInfoMsg( CreateMsg );
+				pPlayer->SendInfoMsg("%s", CreateMsg);
 				pPlayer->SetTeam( pTeam );
 			}
 		}
@@ -1839,7 +1839,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 						continue;
 					msstring LeaveMsg = msstring(pPlayer->DisplayName()) + " left your party";
 					pOtherPlayer->SendHUDMsg( "Party", LeaveMsg );
-					pOtherPlayer->SendInfoMsg( LeaveMsg );
+					pOtherPlayer->SendInfoMsg("%s", LeaveMsg);
 					//pOtherPlayer->SendInfoMsg( "%s left your party\n", STRING(pPlayer->DisplayName) );
 				}
 			pPlayer->SetTeam( NULL ); //Deletes Team if no players left
@@ -1912,7 +1912,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 					if( pOtherPlayer )
 					{
 						pOtherPlayer->SendHUDMsg( "Party", JoinMsg );
-						pOtherPlayer->SendInfoMsg( JoinMsg );
+						pOtherPlayer->SendInfoMsg( "%s", JoinMsg );
 					}
 
 				}
@@ -1920,7 +1920,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				pCheckPlayer->SetTeam( pTeam );
 //				pCheckPlayer->SendInfoMsg( "%s accepted your request, you join the %s party.\n", STRING(pPlayer->DisplayName), pTeam->TeamName() );
 				pCheckPlayer->SendHUDMsg( "Party", msstring(pPlayer->DisplayName()) + " accepted your request.\nYou join the " + pTeam->TeamName() + " party." );
-				pCheckPlayer->SendInfoMsg( msstring("You join the ") + pTeam->TeamName() + " party." );
+				pCheckPlayer->SendInfoMsg("You join the %s party.", pTeam->TeamName());
 				pCheckPlayer->m_pJoinTeam = NULL;
 			}
 		}

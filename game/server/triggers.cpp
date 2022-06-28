@@ -1510,7 +1510,6 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		if (pev->message && pActivator && pActivator->IsPlayer())
 		{
 			UTIL_ShowMessage(STRING(pev->message), pActivator);
-			//		CLIENT_PRINTF( ENT( pActivator->pev ), print_center, STRING(pev->message) );
 		}
 	} //end if skiptriggers
 

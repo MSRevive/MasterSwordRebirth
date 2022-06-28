@@ -1524,7 +1524,7 @@ void ClientCommand2(edict_t *pEntity)
 		}
 		else if (FStrEq(pcmd, "buffer"))
 		{
-			pPlayer->SendInfoMsg(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()));
+			pPlayer->SendInfoMsg("%s", g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()));
 		}
 		/*else if ( FStrEq(pcmd, "uniqueid" ) &&  pPlayer->IsElite() ) {
 			char cTemp1[64];

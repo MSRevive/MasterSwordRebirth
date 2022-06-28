@@ -1036,11 +1036,12 @@ void CBasePlayer::SendInfoMsg(char *msg, ...)
 	if (!IsNetClient() || !m_fGameHUDInitialized)
 		return;
 
-	va_list argptr;
 	static char string[1024];
+	va_list argptr;	
 	va_start(argptr, msg);
 	vsnprintf(string, sizeof(string), msg, argptr);
 	va_end(argptr);
+
 	SendEventMsg(string);
 }
 void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)

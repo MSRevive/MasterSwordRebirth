@@ -1288,7 +1288,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print(msstring("cleffect ") + Params[0] + ": model '" + ModelName + "' not precached.\n");
+				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1322,7 +1322,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print(msstring("cleffect ") + Params[0] + ": model '" + ModelName + "' not precached.\n");
+				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1353,7 +1353,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print(msstring("cleffect ") + Params[0] + ": model '" + ModelName + "' not precached.\n");
+				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
 				return;
 			}
 			float Life = atof(Params[5]);
@@ -1384,7 +1384,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print(msstring("cleffect ") + Params[0] + ": model '" + ModelName + "' not precached.\n");
+				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1524,18 +1524,18 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			{
 				if (!found_beam)
 				{
-					Print(msstring("cleffect ") + Params[0] + ": could not find beam #%i.\n", atoi(Params[1]));
+					Print("cleffect %s could not find beam #%i.\n", Params[0], atoi(Params[1]));
 				}
 				else
 				{
-					Print(msstring("cleffect ") + Params[0] + " " + Params[1] + ": not enough parameters.\n");
+					Print("cleffect %s %s: not enough parameters.\n", Params[0], Params[1]);
 				}
 				return;
 			}
 		}
 		else
 		{
-			Print(msstring("cleffect ") + Params[0] + ": not enough parameters.\n");
+			Print("cleffect %s: not enough parameters.\n", Params[0]);
 			return;
 		}
 	}

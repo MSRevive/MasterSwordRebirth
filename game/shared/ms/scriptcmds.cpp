@@ -4273,7 +4273,7 @@ bool CScript::ScriptCmd_Message(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			if (Cmd.Name() == "playermessage")
 			{
 				if (sTemp.len()) sTemp += "\n";
-				((CBasePlayer *)pEntity)->SendInfoMsg(sTemp);
+				((CBasePlayer*)pEntity)->SendInfoMsg("%s", sTemp);
 			}
 			//Thothie playermessage red
 			else if (Cmd.Name() == "rplayermessage")
