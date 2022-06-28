@@ -183,8 +183,13 @@ entity_state_player_t gamedll Player_Encode
 	//DEFINE_DELTA( aiment, DT_INTEGER, 11, 1.0 ),			//MS - Player Model never has aiment
 	DEFINE_DELTA( basevelocity[0], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( basevelocity[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
-	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 )
+	DEFINE_DELTA( basevelocity[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	//DEFINE_DELTA( spectator, DT_INTEGER, 1, 1.0 ),
+	
+	DEFINE_DELTA( vuser3[0], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
+	DEFINE_DELTA( vuser3[1], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
+	DEFINE_DELTA( vuser3[2], DT_SIGNED | DT_FLOAT, 19, 1.0 ),
+	
 	DEFINE_DELTA( fuser1, DT_SIGNED | DT_FLOAT, 22, 128.0 )			//MS - Used for gait framerate
 }
 
