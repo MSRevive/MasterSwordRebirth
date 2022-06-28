@@ -1773,9 +1773,14 @@ void CBasePlayer::PreThink(void)
 
 	if (m_TimeCanSteal && gpGlobals->time >= m_TimeCanSteal)
 		m_TimeCanSteal = 0;
+		
+	pev->vuser3.x = MaxHP();
+	pev->vuser3.y = (IsAlive() ? pev->health : 0);
+	pev->vuser3.z = 0.0f;
 
 	enddbg;
 }
+
 /* Time based Damage works as follows:
 	1) There are several types of timebased damage:
 
@@ -1852,7 +1857,6 @@ void CBasePlayer::PreThink(void)
 //#define SLOWFREEZE_DAMAGE	3.0
 
 /* */
-
 void CBasePlayer::CheckTimeBasedDamage()
 {
 	int i;

@@ -618,7 +618,7 @@ BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity
 //=========================================================
 //=========================================================
 void CHalfLifeMultiplay :: PlayerThink( CBasePlayer *pPlayer )
-{
+{	
 	if ( g_fGameOver )
 	{
 		// check for button presses
@@ -629,25 +629,6 @@ void CHalfLifeMultiplay :: PlayerThink( CBasePlayer *pPlayer )
 		pPlayer->m_afButtonPressed = 0;
 		pPlayer->pev->button = 0;
 		pPlayer->m_afButtonReleased = 0;
-	}
-	else {
-		/*int idx = pPlayer->entindex() -1, skillstat = 0;
-
-		//Get the average of all skills
-		for( int r = 0; r < SKILL_MAX_STATS; r++ )
-			skillstat += pPlayer->GetSkillStat( r );
-		skillstat /= SKILL_MAX_STATS;
-
-		if( m_Skill[idx] != skillstat )
-		{
-			MESSAGE_BEGIN( MSG_ONE, gmsgScoreInfo, NULL, pPlayer->edict() );
-				WRITE_BYTE( pPlayer->entindex() );	// client number
-				WRITE_BYTE( pPlayer->Race ? pPlayer->Race->id : 0 );
-				WRITE_BYTE( pPlayer->Class ? pPlayer->Class->id : 0 );
-				WRITE_SHORT( skillstat );
-			MESSAGE_END();
-			m_Skill[idx] = skillstat;
-		}*/
 	}
 }
 
