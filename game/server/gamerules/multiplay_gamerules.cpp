@@ -1816,7 +1816,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				//pPlayer->SendInfoMsg( "You are now the leader of %s\n", Name );
 				msstring CreateMsg = msstring("You are now the leader of ") + pTeam->m_TeamName;
 				pPlayer->SendHUDMsg( "Party", CreateMsg );
-				pPlayer->SendInfoMsg("%s", CreateMsg);
+				pPlayer->SendInfoMsg("%s", CreateMsg.c_str());
 				pPlayer->SetTeam( pTeam );
 			}
 		}
@@ -1839,7 +1839,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 						continue;
 					msstring LeaveMsg = msstring(pPlayer->DisplayName()) + " left your party";
 					pOtherPlayer->SendHUDMsg( "Party", LeaveMsg );
-					pOtherPlayer->SendInfoMsg("%s", LeaveMsg);
+					pOtherPlayer->SendInfoMsg("%s", LeaveMsg.c_str());
 					//pOtherPlayer->SendInfoMsg( "%s left your party\n", STRING(pPlayer->DisplayName) );
 				}
 			pPlayer->SetTeam( NULL ); //Deletes Team if no players left
@@ -1912,7 +1912,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 					if( pOtherPlayer )
 					{
 						pOtherPlayer->SendHUDMsg( "Party", JoinMsg );
-						pOtherPlayer->SendInfoMsg( "%s", JoinMsg );
+						pOtherPlayer->SendInfoMsg( "%s", JoinMsg.c_str());
 					}
 
 				}

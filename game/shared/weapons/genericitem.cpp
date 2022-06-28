@@ -1875,8 +1875,8 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 #else
 				Cmd.Name() == "playermessagecl"
 #endif
-			)
-				m_pPlayer->SendInfoMsg("%s", sTemp);
+				)
+				m_pPlayer->SendInfoMsg("%s", sTemp.c_str());
 		}
 		else
 			ERROR_MISSING_PARMS;

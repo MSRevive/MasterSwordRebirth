@@ -1756,13 +1756,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		}
 	}
 
-	pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-	if (pGameMasterEnt != NULL)
-	{
-		int vx = 0;
-		vx++;
-	}
-
 	CSVGlobals::WriteScriptLog();
 	FnDataHandler::Reset();
 	SteamHelper::Initialize();
