@@ -156,8 +156,8 @@ entity_state_player_t gamedll Player_Encode
 	DEFINE_DELTA( maxs[1], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	DEFINE_DELTA( maxs[2], DT_SIGNED | DT_FLOAT, 16, 8.0 ),
 	//DEFINE_DELTA( weaponmodel, DT_INTEGER, 10, 1.0 ),		//MS - no weaponmodel
-	//DEFINE_DELTA( team, DT_INTEGER, 4, 1.0 )			//MS - no team
-	//DEFINE_DELTA( playerclass, DT_INTEGER, 4, 1.0 )		//MS - no playerclass
+	//DEFINE_DELTA( team, DT_INTEGER, 4, 1.0 ),			//MS - no team
+	//DEFINE_DELTA( playerclass, DT_INTEGER, 4, 1.0 ),		//MS - no playerclass
 	//DEFINE_DELTA( owner, DT_INTEGER, 5, 1.0 ),			//MS - Player Model never has owner
 	DEFINE_DELTA( effects, DT_INTEGER, 8, 1.0 ),
 	//DEFINE_DELTA( colormap, DT_INTEGER, 16, 1.0 ),		//MS - Player Model never visible

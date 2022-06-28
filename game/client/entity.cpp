@@ -1288,7 +1288,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
+				Print("cleffect %s: model '%s' not precached.\n", Params[0].c_str(), ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1322,7 +1322,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
+				Print("cleffect %s: model '%s' not precached.\n", Params[0].c_str(), ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1353,7 +1353,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
+				Print("cleffect %s: model '%s' not precached.\n", Params[0].c_str(), ModelName);
 				return;
 			}
 			float Life = atof(Params[5]);
@@ -1384,7 +1384,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
-				Print("cleffect %s: model '%s' not precached.\n", Params[0], ModelName);
+				Print("cleffect %s: model '%s' not precached.\n", Params[0].c_str(), ModelName);
 				return;
 			}
 			float Life = atof(Params[p++]);
@@ -1524,18 +1524,18 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			{
 				if (!found_beam)
 				{
-					Print("cleffect %s could not find beam #%i.\n", Params[0], atoi(Params[1]));
+					Print("cleffect %s could not find beam #%i.\n", Params[0].c_str(), atoi(Params[1].c_str()));
 				}
 				else
 				{
-					Print("cleffect %s %s: not enough parameters.\n", Params[0], Params[1]);
+					Print("cleffect %s %s: not enough parameters.\n", Params[0].c_str(), Params[1].c_str());
 				}
 				return;
 			}
 		}
 		else
 		{
-			Print("cleffect %s: not enough parameters.\n", Params[0]);
+			Print("cleffect %s: not enough parameters.\n", Params[0].c_str());
 			return;
 		}
 	}
