@@ -15,7 +15,7 @@
 
 using namespace rapidjson;
 
-#define FN_TARGET_URL "http://fn.msrebirth.net:27520/api/v1/character/"
+#define FN_TARGET_URL "http://fn.msrebirth.net:27500/api/v1/character/"
 #define MS_SIZE_LONG 4
 #define MS_CHAR_SIZE 5
 
