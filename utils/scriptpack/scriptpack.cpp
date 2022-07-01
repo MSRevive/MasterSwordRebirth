@@ -2,30 +2,51 @@
 // Scriptpack.cpp : Defines the entry point for the console application.
 //
 
+#include <direct.h>
+#include <string>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include "cbase.h"
+#include "tclap/CmdLine.h"
 
 HANDLE g_resHandle;
-char *pszRoot = NULL;
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
-	char CurrentDir[MAX_PATH];
-	GetCurrentDirectory(MAX_PATH, CurrentDir);
-
-	if (argc >= 2)
-	{
-		if (!SetCurrentDirectory(argv[1]))
+	try {
+		//Program description
+		TCLAP::CmdLine cmd("Packs via scripts for use with MSR", ' ', "0.9");
+		
+		//String arguements
+		char buffer[MAX_PATH];
+		char* dirStr = _getcwd(buffer, sizeof(buffer));
+		TCLAP::ValueArg<char*> dirArg("d", "dir", "Current Directory", false, dirStr, "Set the working directory");
+		cmd.add(dirArg);
+		
+		TCLAP::SwitchArg relSwitch("r", "release", "Release build", cmd, false);
+		
+		//Parse command line arguements
+		cmd.parse(argc, argv);
+		
+		char *currentDir = dirArg.getValue();
+		bool release = relSwitch.getValue();
+		
+		struct stat info;
+		if(stat(currentDir, &info) != 0)
 		{
-			printf("Couldn't change to %s\n", argv[1]);
-			return 1;
+			printf("Error: directory %s not found!\n", currentDir);
+			exit(-1);
 		}
-		pszRoot = argv[1];
+		
+		printf("Packing %s...\n\n", currentDir);
+		PackScriptDir(currentDir);
+		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
+	} catch (TCLAP::ArgException &err)
+	{
+		std::cout << "Error: " << err.error() << "for arg " << err.argId() << std::endl;
+		exit(-1);
 	}
-	else pszRoot = CurrentDir;
-
-	printf("Parsing %s...\n\n", pszRoot);
-	PackScriptDir(pszRoot);
-	printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 
 	return 0;
 }

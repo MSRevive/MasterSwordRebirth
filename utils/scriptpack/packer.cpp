@@ -6,7 +6,6 @@
 using namespace std;
 
 void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
-extern char *pszRoot;
 msstringlist StoreFiles;
 
 void PackScriptDir(char *pszName)
@@ -14,7 +13,7 @@ void PackScriptDir(char *pszName)
 	PackDirectory(pszName);
 
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", pszRoot);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", pszName);
 
 	CGroupFile GroupFile;
 	try {
@@ -34,7 +33,7 @@ void PackScriptDir(char *pszName)
 		if (InFile.ReadFromFile(FullPath))
 		{
 			char cRelativePath[MAX_PATH];
-			strncpy(cRelativePath, &FullPath[strlen(pszRoot) + 1], MAX_PATH);
+			strncpy(cRelativePath, &FullPath[strlen(pszName) + 1], MAX_PATH);
 
 			if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 				printf("Failed to write entry: %s\n", cRelativePath);
