@@ -30,7 +30,7 @@ $Configuration
 
 	$Linker
 	{
-		$OutputFile						"$SRCDIR/bin/$OUTBINNAME"
+		$OutputFile						"$SRCDIR/build/$OUTBINNAME"
 	}
 }
 
