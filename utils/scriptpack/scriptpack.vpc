@@ -38,6 +38,7 @@ $Project "scriptpack"
 		$File "scriptpack.cpp"
 		$File "packer.cpp"
 		$File "packer.h"
+		$File "parser.h"
 		$File "cbase.h"
 	}
 }

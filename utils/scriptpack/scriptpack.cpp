@@ -11,6 +11,7 @@
 #include "tclap/CmdLine.h"
 
 HANDLE g_resHandle;
+bool verbose;
 
 int main(int argc, char** argv)
 {
@@ -25,12 +26,14 @@ int main(int argc, char** argv)
 		cmd.add(dirArg);
 		
 		TCLAP::SwitchArg relSwitch("r", "release", "Release build", cmd, false);
+		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose.", cmd, false);
 		
 		//Parse command line arguements
 		cmd.parse(argc, argv);
 		
 		char *currentDir = dirArg.getValue();
 		bool release = relSwitch.getValue();
+		verbose = verboseSwitch.getValue();
 		
 		struct stat info;
 		if(stat(currentDir, &info) != 0)

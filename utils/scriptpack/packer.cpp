@@ -2,11 +2,72 @@
 #include "../stream_safe.h"
 #include "sharedutil.h"
 #include "msfileio.h"
+#include "parser.h"
 
-using namespace std;
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <algorithm>
 
 void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
+extern bool verbose;
 msstringlist StoreFiles;
+
+// template <typename InputIt, typename OutputIt>
+// constexpr OutputIt parseData(InputIt first, InputIt last, OutputIt out) {
+// 	State state = State::NoComment;
+// 
+// 	while (first != last) {
+// 		switch (state) {
+// 			case State::SlashOC:
+// 				if (*first == '/') state = State::SingleLineComment;
+// 				else {
+// 						state = State::NoComment;
+// 						*out++ = '/';
+// 						*out++ = *first;
+// 				}
+// 				break;
+// 			case State::SingleLineComment:
+// 				if (*first == '\n') {
+// 					state = State::NoComment;
+// 					*out++ = '\0';
+// 				}
+// 				break;
+// 			case State::NoComment:
+// 				if (*first == '/') state = State::SlashOC;
+// 				else *out++ = *first;
+// 		}
+// 		++first;
+// 	}
+// 
+// 	state = State::JunkStart;
+// 
+// 	while (fout.begin() != fout.end()) {
+// 		switch (state){
+// 			case State::Tab:
+// 				state = State::JunkStart;
+// 				*out++ = ' ';
+// 				*out++ = *first;
+// 				break;
+// 			case State::JunkStart:
+// 				if (*first == '\t') state = State::Tab;
+// 				else *out++ = *first;
+// 		}
+// 		++first;
+// 	}
+// 
+// 	return out;
+// }
+
+void createCopy(std::string data) {
+	std::ofstream o("./test.script");
+	
+	//parseData(data.begin(), data.end(), outIt);
+	Parser parser;
+	std::string result = parser.stripComments(data);
+	o << result << std::endl;
+	o.close();
+}
 
 void PackScriptDir(char *pszName)
 {
@@ -34,6 +95,14 @@ void PackScriptDir(char *pszName)
 		{
 			char cRelativePath[MAX_PATH];
 			strncpy(cRelativePath, &FullPath[strlen(pszName) + 1], MAX_PATH);
+			
+			char *cstr((char*)InFile.m_Buffer);
+			std::string cppstr(cstr);
+			
+			createCopy(cppstr);
+			
+			if (verbose == true)
+				printf("Doing file: %s\n", cRelativePath);
 
 			if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 				printf("Failed to write entry: %s\n", cRelativePath);
