@@ -12,6 +12,7 @@
 
 HANDLE g_resHandle;
 bool verbose;
+char *rootDir;
 
 int main(int argc, char** argv)
 {
@@ -19,11 +20,22 @@ int main(int argc, char** argv)
 		//Program description
 		TCLAP::CmdLine cmd("Packs via scripts for use with MSR", ' ', "0.9");
 		
+		char _workDir[MAX_PATH];
+		char _outDir[MAX_PATH];
+		
 		//String arguements
-		char buffer[MAX_PATH];
-		char* dirStr = _getcwd(buffer, sizeof(buffer));
-		TCLAP::ValueArg<char*> dirArg("d", "dir", "Current Directory", false, dirStr, "Set the working directory");
-		cmd.add(dirArg);
+		char rootDir[MAX_PATH];
+		_getcwd(rootDir, MAX_PATH);
+		memcpy(_workDir, rootDir, MAX_PATH);
+		strncat(_workDir, "\\scripts", MAX_PATH);
+		memcpy(_outDir, rootDir, MAX_PATH);
+		strncat(_outDir, "\\cooked", MAX_PATH);
+		
+		TCLAP::ValueArg<char*> wDirArg("d", "dir", "Work Directory", false, _workDir, "Set the working directory");
+		cmd.add(wDirArg);
+		
+		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for cleaned scripts");
+		cmd.add(oDirArg);
 		
 		TCLAP::SwitchArg relSwitch("r", "release", "Release build", cmd, false);
 		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose.", cmd, false);
@@ -31,19 +43,25 @@ int main(int argc, char** argv)
 		//Parse command line arguements
 		cmd.parse(argc, argv);
 		
-		char *currentDir = dirArg.getValue();
+		char *workDir = wDirArg.getValue();
+		char *outDir = oDirArg.getValue();
 		bool release = relSwitch.getValue();
 		verbose = verboseSwitch.getValue();
 		
 		struct stat info;
-		if(stat(currentDir, &info) != 0)
+		if(stat(workDir, &info) != 0)
 		{
-			printf("Error: directory %s not found!\n", currentDir);
+			printf("Error: work directory %s not found!\n", workDir);
 			exit(-1);
 		}
 		
-		printf("Packing %s...\n\n", currentDir);
-		PackScriptDir(currentDir);
+		if(stat(outDir, &info) != 0)
+		{
+			printf("Error: output directory %s not found!\n", outDir);
+		}
+		
+		printf("Packing %s...\n\n", workDir);
+		PackScriptDir(workDir);
 		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 	} catch (TCLAP::ArgException &err)
 	{

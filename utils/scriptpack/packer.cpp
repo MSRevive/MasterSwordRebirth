@@ -11,6 +11,7 @@
 
 void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
 extern bool verbose;
+extern char *rootDir;
 msstringlist StoreFiles;
 
 void createCopy(std::string data) {
@@ -27,12 +28,47 @@ void createCopy(std::string data) {
 	o.close();
 }
 
+//we grab all the files in the scripts directory to get ready for packing.
+void PackDirectory(char *pszName)
+{
+	WIN32_FIND_DATA wfd;
+	HANDLE findHandle;
+	
+	char cSearchString[MAX_PATH];
+	_snprintf(cSearchString, MAX_PATH, "%s\\*.*", pszName);
+	
+	if ((findHandle = FindFirstFile(cSearchString, &wfd)) == INVALID_HANDLE_VALUE) 
+		return;
+
+	StoreFile(pszName, wfd);
+
+	while (FindNextFile(findHandle, &wfd))
+		StoreFile(pszName, wfd);
+
+	FindClose(findHandle);
+}
+
+//store file info in array so we can process them at a later time.
+void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd)
+{
+	char cFullPath[MAX_PATH];
+	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
+	
+	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	{		
+		if (wfd.cFileName[0] != '.') PackDirectory(cFullPath); // Braces are neccesary
+	}
+	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
+		StoreFiles.add(cFullPath);
+}
+
 void PackScriptDir(char *pszName)
 {
 	PackDirectory(pszName);
-
+	
+	//we want to make sc.dll in via root dir.
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", pszName);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", rootDir);
 
 	CGroupFile GroupFile;
 	try {
@@ -57,7 +93,7 @@ void PackScriptDir(char *pszName)
 			char *cstr((char*)InFile.m_Buffer);
 			std::string cppstr(cstr);
 			
-			createCopy(cppstr);
+			//createCopy(cppstr);
 			
 			if (verbose == true)
 				printf("Doing file: %s\n", cRelativePath);
@@ -69,35 +105,4 @@ void PackScriptDir(char *pszName)
 
 	GroupFile.Flush();
 	GroupFile.Close();
-}
-
-void PackDirectory(char *pszName)
-{
-	WIN32_FIND_DATA wfd;
-	HANDLE findHandle;
-	char cSearchString[MAX_PATH];
-	
-	_snprintf(cSearchString, MAX_PATH, "%s\\*.*", pszName);
-	if ((findHandle = FindFirstFile(cSearchString, &wfd)) == INVALID_HANDLE_VALUE) 
-		return;
-
-	StoreFile(pszName, wfd);
-
-	while (FindNextFile(findHandle, &wfd))
-		StoreFile(pszName, wfd);
-
-	FindClose(findHandle);
-}
-
-void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd)
-{
-	char cFullPath[MAX_PATH];
-	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
-
-	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{		
-		if (wfd.cFileName[0] != '.') PackDirectory(cFullPath); // Braces are neccesary
-	}
-	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
-		StoreFiles.add(cFullPath);
 }
