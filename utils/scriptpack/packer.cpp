@@ -13,58 +13,16 @@ void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
 extern bool verbose;
 msstringlist StoreFiles;
 
-// template <typename InputIt, typename OutputIt>
-// constexpr OutputIt parseData(InputIt first, InputIt last, OutputIt out) {
-// 	State state = State::NoComment;
-// 
-// 	while (first != last) {
-// 		switch (state) {
-// 			case State::SlashOC:
-// 				if (*first == '/') state = State::SingleLineComment;
-// 				else {
-// 						state = State::NoComment;
-// 						*out++ = '/';
-// 						*out++ = *first;
-// 				}
-// 				break;
-// 			case State::SingleLineComment:
-// 				if (*first == '\n') {
-// 					state = State::NoComment;
-// 					*out++ = '\0';
-// 				}
-// 				break;
-// 			case State::NoComment:
-// 				if (*first == '/') state = State::SlashOC;
-// 				else *out++ = *first;
-// 		}
-// 		++first;
-// 	}
-// 
-// 	state = State::JunkStart;
-// 
-// 	while (fout.begin() != fout.end()) {
-// 		switch (state){
-// 			case State::Tab:
-// 				state = State::JunkStart;
-// 				*out++ = ' ';
-// 				*out++ = *first;
-// 				break;
-// 			case State::JunkStart:
-// 				if (*first == '\t') state = State::Tab;
-// 				else *out++ = *first;
-// 		}
-// 		++first;
-// 	}
-// 
-// 	return out;
-// }
-
 void createCopy(std::string data) {
 	std::ofstream o("./test.script");
 	
 	//parseData(data.begin(), data.end(), outIt);
-	Parser parser;
-	std::string result = parser.stripComments(data);
+	Parser parser(data);
+	parser.stripComments();
+	parser.stripTabs();
+	parser.stripDebug();
+	parser.stripEmptyLines();
+	std::string result = parser.getResult();
 	o << result << std::endl;
 	o.close();
 }
