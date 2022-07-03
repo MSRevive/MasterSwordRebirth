@@ -34,6 +34,7 @@ public:
 				case State::SingleLineComment:
 					if (ch == '\n')
 						m_cState = State::NotAComment;
+            m_Result += '\n';
 					break;
           
         case State::NotAComment:
