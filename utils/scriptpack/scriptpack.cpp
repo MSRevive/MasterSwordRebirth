@@ -12,6 +12,7 @@
 
 HANDLE g_resHandle;
 bool verbose;
+bool release;
 char *rootDir;
 
 int main(int argc, char** argv)
@@ -20,19 +21,16 @@ int main(int argc, char** argv)
 		//Program description
 		TCLAP::CmdLine cmd("Packs via scripts for use with MSR", ' ', "0.9");
 		
-		char _workDir[MAX_PATH];
+		char workDir[MAX_PATH];
 		char _outDir[MAX_PATH];
 		
 		//String arguements
 		char rootDir[MAX_PATH];
 		_getcwd(rootDir, MAX_PATH);
-		memcpy(_workDir, rootDir, MAX_PATH);
-		strncat(_workDir, "\\scripts", MAX_PATH);
+		memcpy(workDir, rootDir, MAX_PATH);
+		strncat(workDir, "\\scripts", MAX_PATH);
 		memcpy(_outDir, rootDir, MAX_PATH);
 		strncat(_outDir, "\\cooked", MAX_PATH);
-		
-		TCLAP::ValueArg<char*> wDirArg("d", "dir", "Work Directory", false, _workDir, "Set the working directory");
-		cmd.add(wDirArg);
 		
 		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for cleaned scripts");
 		cmd.add(oDirArg);
@@ -43,9 +41,8 @@ int main(int argc, char** argv)
 		//Parse command line arguements
 		cmd.parse(argc, argv);
 		
-		char *workDir = wDirArg.getValue();
 		char *outDir = oDirArg.getValue();
-		bool release = relSwitch.getValue();
+		release = relSwitch.getValue();
 		verbose = verboseSwitch.getValue();
 		
 		struct stat info;
@@ -61,7 +58,8 @@ int main(int argc, char** argv)
 		}
 		
 		printf("Packing %s...\n\n", workDir);
-		PackScriptDir(workDir);
+		Packer packer(workDir, rootDir, outDir);
+		packer.packScripts();
 		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 	} catch (TCLAP::ArgException &err)
 	{

@@ -1,7 +1,5 @@
 #include "cbase.h"
 #include "../stream_safe.h"
-#include "sharedutil.h"
-#include "msfileio.h"
 #include "parser.h"
 
 #include <iostream>
@@ -9,15 +7,12 @@
 #include <iterator>
 #include <algorithm>
 
-void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
 extern bool verbose;
-extern char *rootDir;
-msstringlist StoreFiles;
+extern bool release;
 
 void createCopy(std::string data) {
 	std::ofstream o("./test.script");
 	
-	//parseData(data.begin(), data.end(), outIt);
 	Parser parser(data);
 	parser.stripComments();
 	parser.stripTabs();
@@ -28,8 +23,18 @@ void createCopy(std::string data) {
 	o.close();
 }
 
+void Packer::cookScripts() {
+	if(release) 
+	{
+		for(size_t i = 0; i < m_StoredFiles.size(); i++)
+		{
+			
+		}
+	}
+}
+
 //we grab all the files in the scripts directory to get ready for packing.
-void PackDirectory(char *pszName)
+void Packer::readDirectory(char *pszName)
 {
 	WIN32_FIND_DATA wfd;
 	HANDLE findHandle;
@@ -40,35 +45,21 @@ void PackDirectory(char *pszName)
 	if ((findHandle = FindFirstFile(cSearchString, &wfd)) == INVALID_HANDLE_VALUE) 
 		return;
 
-	StoreFile(pszName, wfd);
+	storeFile(pszName, wfd);
 
 	while (FindNextFile(findHandle, &wfd))
-		StoreFile(pszName, wfd);
+		storeFile(pszName, wfd);
 
 	FindClose(findHandle);
 }
 
-//store file info in array so we can process them at a later time.
-void StoreFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd)
+void Packer::packScripts()
 {
-	char cFullPath[MAX_PATH];
-	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
-	
-	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{		
-		if (wfd.cFileName[0] != '.') PackDirectory(cFullPath); // Braces are neccesary
-	}
-	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
-		StoreFiles.add(cFullPath);
-}
-
-void PackScriptDir(char *pszName)
-{
-	PackDirectory(pszName);
+	readDirectory(m_WorkDir);
 	
 	//we want to make sc.dll in via root dir.
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", rootDir);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", m_RootDir);
 
 	CGroupFile GroupFile;
 	try {
@@ -82,16 +73,16 @@ void PackScriptDir(char *pszName)
 
 	CMemFile InFile;
 
-	for (size_t i = 0; i < StoreFiles.size(); i++)
+	for (size_t i = 0; i < m_StoredFiles.size(); i++)
 	{
-		msstring &FullPath = StoreFiles[i];
+		msstring &FullPath = m_StoredFiles[i];
 		if (InFile.ReadFromFile(FullPath))
 		{
 			char cRelativePath[MAX_PATH];
-			strncpy(cRelativePath, &FullPath[strlen(pszName) + 1], MAX_PATH);
+			strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
 			
-			char *cstr((char*)InFile.m_Buffer);
-			std::string cppstr(cstr);
+			// char *cstr((char*)InFile.m_Buffer);
+			// std::string cppstr(cstr);
 			
 			//createCopy(cppstr);
 			
@@ -105,4 +96,18 @@ void PackScriptDir(char *pszName)
 
 	GroupFile.Flush();
 	GroupFile.Close();
+}
+
+//store files info in array so we can process them at a later time.
+void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd)
+{
+	char cFullPath[MAX_PATH];
+	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
+	
+	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	{		
+		if (wfd.cFileName[0] != '.') readDirectory(cFullPath); // Braces are neccesary
+	}
+	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
+		m_StoredFiles.add(cFullPath);
 }
