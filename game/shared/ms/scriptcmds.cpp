@@ -4418,7 +4418,7 @@ bool CScript::ScriptCmd_Name(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 				m.pScriptedEnt->DisplayPrefix = GetScriptVar(Prefix);
 			}
 
-			if (!m.pScriptedEnt->pev->netname)
+			if (m.pScriptedEnt->pev && !m.pScriptedEnt->pev->netname)
 			{
 				//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("¯") + Name );
 				m.pScriptedEnt->m_NetName = msstring("¯") + Name;

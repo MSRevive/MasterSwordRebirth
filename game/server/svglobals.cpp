@@ -186,7 +186,8 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 	
-	HTTPRequestHandler::Initialize(CVAR_GET_STRING("ms_central_addr"));
+	if (FnDataHandler::IsEnabled())
+		HTTPRequestHandler::Initialize(CVAR_GET_STRING("ms_central_addr"));
 
 	if (FnDataHandler::IsValidConnection())
 	{

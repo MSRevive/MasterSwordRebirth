@@ -25,7 +25,7 @@ static bool IsValidResponse(const httplib::Result& result)
 
 void HTTPRequestHandler::Initialize(const char* url)
 {
-	if (g_pHttpClient != NULL)
+	if ((g_pHttpClient != NULL) || !url || !url[0])
 		return;
 
 	g_pHttpClient = new httplib::Client(url);
