@@ -1,10 +1,13 @@
+#ifndef PARSER_H
+#define PARSER_H
+
 #include <iterator>
-#include <algorithm>
 #include <sstream>
-#include <string>
 #include <regex>
 #include <ctype.h>
 #include <stack>
+
+#include "cbase.h"
 
 class Parser
 {
@@ -179,3 +182,5 @@ private:
   std::string &m_Data;
   std::vector<std::string> m_ErrorList;
 };
+
+#endif

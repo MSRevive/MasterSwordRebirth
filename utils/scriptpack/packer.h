@@ -1,4 +1,6 @@
-#include "cbase.h"
+#ifndef PACKER_H
+#define PACKER_H
+
 #include "sharedutil.h"
 #include "msfileio.h"
 
@@ -24,3 +26,5 @@ private:
   void readDirectory(char *pszName);
   void storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd);
 };
+
+#endif

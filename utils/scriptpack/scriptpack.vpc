@@ -37,8 +37,8 @@ $Project "scriptpack"
 		$File "$SRCDIR\game\shared\ms\stackstring.cpp"		
 		$File "scriptpack.cpp"
 		$File "packer.cpp"
+		$File "cbase.h"
 		$File "packer.h"
 		$File "parser.h"
-		$File "cbase.h"
 	}
 }

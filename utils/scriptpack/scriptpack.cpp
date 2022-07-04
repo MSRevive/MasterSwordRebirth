@@ -3,14 +3,14 @@
 //
 
 #include <direct.h>
-#include <string>
 #include <sys/types.h>
 #include <sys/stat.h>
 
 #include "cbase.h"
+#include "packer.h"
+#include "crc/crchash.h"
 #include "tclap/CmdLine.h"
 
-HANDLE g_resHandle;
 bool verbose;
 bool release;
 char *rootDir;

@@ -1,11 +1,11 @@
-#include "cbase.h"
-#include "../stream_safe.h"
-#include "parser.h"
-
 #include <iostream>
 #include <fstream>
-#include <iterator>
-#include <algorithm>
+
+#include "cbase.h"
+#include "packer.h"
+#include "../stream_safe.h"
+#include "parser.h"
+#include "groupfile.h"
 
 extern bool verbose;
 extern bool release;

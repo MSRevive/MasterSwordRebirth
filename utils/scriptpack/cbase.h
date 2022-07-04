@@ -5,10 +5,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "windows.h"
-#include "stdio.h"
-#include "packer.h"
-#include "groupfile.h"
-#include "crc/crchash.h"
+#include <windows.h>
+#include <algorithm>
+#include <iterator>
+#include <string>
 
 #endif // CBASE_H
