@@ -73,7 +73,11 @@ void Packer::packScripts()
 	//we want to make sc.dll in via root dir.
 	char cWriteFile[MAX_PATH];
 	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", m_RootDir);
-
+	
+	struct stat info;
+	if(stat(cWriteFile, &info) == 0)
+		std::remove(cWriteFile);
+	
 	CGroupFile GroupFile;
 	try {
 		GroupFile.Open("sc.dll");
