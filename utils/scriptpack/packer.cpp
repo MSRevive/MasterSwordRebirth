@@ -24,11 +24,24 @@ void createCopy(std::string data) {
 }
 
 void Packer::cookScripts() {
-	if(release) 
+	if(release == true) 
 	{
+		CMemFile inFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
-			
+			msstring &fullPath = m_StoredFiles[i];
+			if(inFile.ReadFromFile(fullPath))
+			{
+				char cRelativePath[MAX_PATH];
+				strncpy(cRelativePath, &fullPath[strlen(m_RootDir) + 1], MAX_PATH);
+				
+				//convert char array to std::string for parser.
+				char *cstr((char*)inFile.m_Buffer);
+				std::string cppstr(cstr);
+				
+				if (verbose == true)
+					printf("Doing file: %s\n", cRelativePath);
+			}
 		}
 	}
 }

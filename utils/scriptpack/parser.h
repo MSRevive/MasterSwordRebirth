@@ -4,12 +4,14 @@
 #include <string>
 #include <regex>
 #include <ctype.h>
+#include <stack>
 
 class Parser
 {
 public:
   Parser(std::string &str) : m_Data(str){  }
   
+  //credits to https://codereview.stackexchange.com/a/215913
   void stripComments()
 	{
     m_cState = State::NotAComment;
@@ -84,9 +86,70 @@ public:
     m_Result = newRes;
   }
   
+  //credits to https://www.tutorialspoint.com/cplusplus-program-to-check-for-balanced-paranthesis-by-using-stacks
+  bool areBracketsClosed(char *filename)
+  {
+    std::stack<char> s;
+    char ch;
+    size_t line;
+    
+    for (int i = 0; i < m_Result.length(); i++) 
+    { //for each character in the expression, check conditions
+      if (m_Result[i] == '(' || m_Result[i] == '[' || m_Result[i] == '{') 
+      { //when it is opening bracket, push into stack
+        s.push(m_Result[i]);
+        continue;
+      }
+      
+      if (m_Result[i] == '\n')
+        line++;
+      
+      if (s.empty()) //stack cannot be empty as it is not opening bracket, there must be closing bracket
+        return false;
+        
+      switch (m_Result[i]) 
+      {
+        case ')': //for closing parenthesis, pop it and check for braces and square brackets
+          ch = s.top();
+          s.pop();
+          if (ch == '{' || ch == '[')
+          {
+            closingError(filename, line);
+            return false;
+          }
+          break;
+        case '}': //for closing braces, pop it and check for parenthesis and square brackets
+          ch = s.top();
+          s.pop();
+          if (ch == '(' || ch == '[')
+          {
+            closingError(filename, line);
+            return false;
+          }
+          break;
+        case ']': //for closing square bracket, pop it and check for braces and parenthesis
+          ch = s.top();
+          s.pop();
+          if (ch == '(' || ch == '{')
+          {
+            closingError(filename, line);
+            return false;
+          }
+          break;
+      }
+    }
+    
+    return (s.empty()); //when stack is empty, return true
+  }
+  
   std::string getResult()
   {
     return m_Result;
+  }
+  
+  std::vector<std::string> getErrorlist()
+  {
+    return m_ErrorList;
   }
 
 private:
@@ -101,8 +164,18 @@ private:
   {
     return std::all_of(str.begin(),str.end(),isspace);
   }
+  
+  //file:line missing closing brackets
+  void closingError(char *file, size_t line)
+  {
+    char errStr[256];
+    std::snprintf(errStr, 0, "%s:%u missing bracket(s)\n", file, line);
+    std::string s(errStr);
+    m_ErrorList.push_back(s);
+  }
 
 	State m_cState = State::NotAComment;
   std::string m_Result{};
   std::string &m_Data;
+  std::vector<std::string> m_ErrorList;
 };
