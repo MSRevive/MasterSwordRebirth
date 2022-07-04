@@ -283,15 +283,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 			//- this bit would require a client recompile, dont want to do on a B patch
 			//if ( a > 0 && thoth_unskill_base ) continue;
 
-			// MiB MAR2019_31 - [CHARGE_BUG] Moved this earlier because we want to know they're qualified before attempting
-			if (AttData.RequiredSkill)    // Do I have the skill required to use this attack
-			{
-				int Stat = m_pOwner->GetSkillStat(AttData.StatProf, AttData.PropProf);
-				//Thothie SEP2007 - reduce accuracy and inc stanima drain instead of making unswingable
-				if ((Stat < AttData.RequiredSkill) && (a > 0))
-					continue;
-			}
-
 			if (m_TimeChargeStart || m_LastChargedAmt)
 			{
 				//If I just finished an attack and I charged during that attack...
@@ -303,7 +294,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 				if (ChargetAmt < AttData.flChargeAmt)
 				{
 					// MiB MAR2012_07 - If charged between 0 and 1, we're going to still let them attack, and powered up
-					if (AttData.flChargeAmt == 1) // MiB MAR2019_31 - [CHARGE_BUG] Fixing bug that allows doing more than charge-1 damage if you qualify for charge-2 but not charge-1 and charge past level 1
+					if (!CurrentAttack)
 					{
 						CurrentAttack = &m_Attacks[0]; // The real attack we'll be using
 						iNewAttack = -2;			   // Special code for later
@@ -315,6 +306,15 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 			}
 			else if (AttData.flChargeAmt)
 				continue; //Don't do 'charge' when not charging
+
+			//This is after the charge check to allow regular attacking if charge 1 is not unlocked, but charge 2 is. Charge bug was script-side, not code side.
+			if (AttData.RequiredSkill)    // Do I have the skill required to use this attack
+			{
+				int Stat = m_pOwner->GetSkillStat(AttData.StatProf, AttData.PropProf);
+				//Thothie SEP2007 - reduce accuracy and inc stanima drain instead of making unswingable
+				if ((Stat < AttData.RequiredSkill) && (a > 0))
+					continue;
+			}
 
 			//If this attack isn't forced, compare this attack against the already-selected attack
 			if (CurrentAttack)
