@@ -59,7 +59,7 @@ CFLAGS = $(BASE_CFLAGS) $(ENV_CFLAGS)
 ifeq ($(CLANG_BUILD),1)
 	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++14 -Wno-c++11-narrowing -Wno-dangling-else $(ENV_CXXFLAGS)
 else
-	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++0x -fpermissive $(ENV_CXXFLAGS)
+	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++14 -fpermissive $(ENV_CXXFLAGS)
 endif
 DEFINES += -DVPROF_LEVEL=1 -DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE
 
@@ -79,7 +79,7 @@ COPY_DLL_TO_SRV = 0
 LDFLAGS += -Wl,--build-id
 
 export STEAM_RUNTIME_PATH := /usr
-GCC_VER = -4.8
+GCC_VER = -5
 P4BIN = p4
 
 ifeq ($(TARGET_PLATFORM),linux64)
@@ -138,7 +138,7 @@ endif
 
 ifeq ($(CLANG_BUILD),1)
 	# Clang specific flags
-else ifeq ($(GCC_VER),-4.8)
+else ifeq ($(GCC_VER),-5)
 	WARN_FLAGS += -Wno-unused-local-typedefs
 	WARN_FLAGS += -Wno-unused-result
 	WARN_FLAGS += -Wno-narrowing
