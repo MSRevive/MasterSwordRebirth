@@ -15,8 +15,8 @@ $Configuration	"Debug"
 {
 	$General
 	{
-		$OutputDirectory		".\Debug_$GAMENAME"			[$WIN32]
-		$IntermediateDirectory	".\Debug_$GAMENAME"			[$WIN32]
+		$OutputDirectory		".\Debug"			[$WIN32]
+		$IntermediateDirectory	".\Debug"			[$WIN32]
 	}
 }
 
@@ -24,8 +24,8 @@ $Configuration	"Release"
 {
 	$General
 	{
-		$OutputDirectory		".\Release_$GAMENAME"		[$WIN32]
-		$IntermediateDirectory	".\Release_$GAMENAME"		[$WIN32]
+		$OutputDirectory		".\Release"		[$WIN32]
+		$IntermediateDirectory	".\Release"		[$WIN32]
 	}
 }
 
@@ -33,23 +33,19 @@ $Configuration
 {
 	$General
 	{
-		$OutputDirectory		".\$GAMENAME"		[$OSXALL]
 	}
 	
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER"
-		$PreprocessorDefinitions		"$BASE;CURL_STATICLIB" [$WIN32]
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
 
 	$Linker
 	{
 		$AdditionalDependencies			"$BASE winmm.lib wsock32.lib Ws2_32.lib" [$WIN32]
-		$AdditionalDependencies         "$BASE $SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
-		$SystemLibraries                                                        "iconv" [$OSXALL]
-		$ModuleDefinitionFile				"$BASE $SRCDIR/game/server/ms.def"
+		$ModuleDefinitionFile			"$BASE $SRCDIR/game/server/ms.def"
 	}
 }
 
@@ -258,8 +254,6 @@ $Project "Server"
 
 	$Folder	"Link Libraries" 
 	{
-		$DynamicFile 	"$SRCDIR/lib/public/linux32/libcurl.a" [$LINUXALL]
-		$Lib			"$SRCDIR/lib/public/libcurl" [$WIN32]
 		$ImpLibexternal steam_api
 	}
 }

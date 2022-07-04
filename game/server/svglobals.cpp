@@ -10,6 +10,7 @@
 #include "versioncontrol.h"
 #include "cstringpool.h"
 #include "fndatahandler.h"
+#include "httprequesthandler.h"
 #include "crc/crchash.h"
 
 ofstream modelout;
@@ -185,18 +186,17 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 	
+	HTTPRequestHandler::Initialize(CVAR_GET_STRING("ms_central_addr"));
+
 	if (FnDataHandler::IsValidConnection())
 	{
-		//ALERT(at_logged, "FuzzNet connected!\n"); //for some reason ALERT doesn't do anything here
 		g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
 		logfile << Logger::LOG_INFO << "FuzzNet connected\n";
 	}
 	else if (MSGlobals::CentralEnabled)
 	{
-		//ALERT(at_logged, "FuzzNet connection failed.\n"); //for some reason ALERT doesn't do anything here
 		g_engfuncs.pfnServerPrint("FuzzNet connection failed.\n");
 		logfile << Logger::LOG_INFO << "FuzzNet connection failed\n";
-
 		//we set this to false so it doesn't keep trying to make requests to via FN
 		MSGlobals::CentralEnabled = false;
 	}

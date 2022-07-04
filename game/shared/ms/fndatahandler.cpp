@@ -95,17 +95,14 @@ static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS
 
 static const char* GetFnUrl(char* fmt, ...)
 {
-	static char requestUrl[REQUEST_URL_SIZE], string[REQUEST_URL_SIZE];
+	static char string[REQUEST_URL_SIZE];
 
 	va_list argptr;
 	va_start(argptr, fmt);
 	vsnprintf(string, sizeof(string), fmt, argptr);
 	va_end(argptr);
 
-	_snprintf(requestUrl, REQUEST_URL_SIZE, "%s/", CVAR_GET_STRING("ms_central_addr"));
-	strncat(requestUrl, string, REQUEST_URL_SIZE - strlen(requestUrl) - 1);
-
-	return requestUrl;
+	return string;
 }
 
 // Load single char details.
@@ -373,11 +370,11 @@ bool FnDataHandler::IsValid(const char* url)
 
 //Checks if the connection to via FN server is valid.
 //needs optimzation!
-bool FnDataHandler::IsValidConnection(void) { return IsValid(GetFnUrl("api/v1/ping")); }
+bool FnDataHandler::IsValidConnection(void) { return IsValid(GetFnUrl("/api/v1/ping")); }
 
-bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash) { return IsValid(GetFnUrl("api/v1/map/%s/%u", name, hash)); }
+bool FnDataHandler::IsVerifiedMap(const char* name, unsigned int hash) { return IsValid(GetFnUrl("/api/v1/map/%s/%u", name, hash)); }
 
-bool FnDataHandler::IsVerifiedSC(unsigned int hash) { return IsValid(GetFnUrl("api/v1/sc/%u", hash)); }
+bool FnDataHandler::IsVerifiedSC(unsigned int hash) { return IsValid(GetFnUrl("/api/v1/sc/%u", hash)); }
 
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
@@ -391,7 +388,7 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 
 		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
-		g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, i, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, i)));
+		g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, i, GetFnUrl("/api/v1/character/%llu/%i", pPlayer->steamID64, i)));
 	}
 }
 
@@ -403,7 +400,7 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, slot, GetFnUrl("api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
+	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_LOAD, pPlayer->steamID64, slot, GetFnUrl("/api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
 }
 
 // Create or Update character.
@@ -418,7 +415,7 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 		bIsUpdate ? FN_REQ_UPDATE : FN_REQ_CREATE,
 		pPlayer->steamID64,
 		slot,
-		bIsUpdate ? GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid) : GetFnUrl("api/v1/character/")
+		bIsUpdate ? GetFnUrl("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid) : GetFnUrl("/api/v1/character/")
 	);
 	req->data = new char[size];
 	req->size = size;
@@ -451,7 +448,7 @@ void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_DELETE, pPlayer->steamID64, slot, GetFnUrl("api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_DELETE, pPlayer->steamID64, slot, GetFnUrl("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
 }
 
 // We store 64-bit SteamIDs, convert from old 32-bit string based ID to 64-bit numeric.

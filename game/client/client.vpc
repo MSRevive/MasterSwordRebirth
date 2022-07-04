@@ -15,8 +15,8 @@ $Configuration	"Debug"
 {
 	$General
 	{
-		$OutputDirectory			".\Debug_$GAMENAME"			[$WIN32]
-		$IntermediateDirectory		".\Debug_$GAMENAME"			[$WIN32]
+		$OutputDirectory			".\Debug"			[$WIN32]
+		$IntermediateDirectory		".\Debug"			[$WIN32]
 	}
 }
 
@@ -24,8 +24,8 @@ $Configuration	"Release"
 {
 	$General
 	{
-		$OutputDirectory			".\Release_$GAMENAME"		[$WIN32]
-		$IntermediateDirectory		".\Release_$GAMENAME"		[$WIN32]
+		$OutputDirectory			".\Release"		[$WIN32]
+		$IntermediateDirectory		".\Release"		[$WIN32]
 	}
 }
 
@@ -33,7 +33,6 @@ $Configuration
 {
 	$General
 	{
-			$OutputDirectory			".\$GAMENAME"		[$OSXALL]
 	}
 
 	$Compiler

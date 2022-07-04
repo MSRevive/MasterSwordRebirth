@@ -1,98 +1,68 @@
 //
-// Simple HTTP Request handling using cUrl.
+// Simple HTTP Request handling using httplib (https://github.com/yhirose/cpp-httplib)!
 //
 
-#ifndef _WIN32
-#define CURL_PULL_SYS_TYPES_H
-#define CURL_PULL_STDINT_H
-#define CURL_PULL_INTTYPES_H
-#define HAVE_SYS_SOCKET_H
-#endif
-
-#include "curl/curl.h"
+#include "httplib/httplib.h"
 #include "httprequesthandler.h"
 #include "rapidjson/document_safe.h"
 #include <string>
 
-#if defined(_WIN32) && defined(USE_VS2022)
-FILE _iob[] = { *stdin, *stdout, *stderr };
-extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
-#endif
+#define HTTP_CODE_OK 200
 
 static std::string g_pDataBuffer;
+static httplib::Client* g_pHttpClient = NULL;
 
-static size_t DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
+static bool IsValidResponse(const httplib::Result& result)
 {
-	g_pDataBuffer.append(buf, size * nmemb);
-	return (size * nmemb);
+	g_pDataBuffer.clear();
+	if (result && (result->status == HTTP_CODE_OK))
+	{
+		g_pDataBuffer = result->body;
+		return true;
+	}
+	return false;
+}
+
+void HTTPRequestHandler::Initialize(const char* url)
+{
+	if (g_pHttpClient != NULL)
+		return;
+
+	g_pHttpClient = new httplib::Client(url);
+}
+
+void HTTPRequestHandler::Destroy(void)
+{
+	delete g_pHttpClient;
+	g_pHttpClient = NULL;
 }
 
 bool HTTPRequestHandler::GetRequest(const char* url)
 {
-	g_pDataBuffer.clear();
-
-	CURL* curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
-	CURLcode result = curl_easy_perform(curl);
-	curl_easy_cleanup(curl);
-
-	return (result == CURLE_OK);
+	auto result = g_pHttpClient->Get(url);
+	return IsValidResponse(result);
 }
 
 bool HTTPRequestHandler::PostRequest(const char* url, const char* body)
 {
-	g_pDataBuffer.clear();
-
-	CURL* curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_POST, 1);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
-	CURLcode result = curl_easy_perform(curl);
-	curl_easy_cleanup(curl);
-
-	return (result == CURLE_OK);
+	auto result = g_pHttpClient->Post(url, body, "application/json");
+	return IsValidResponse(result);
 }
 
 bool HTTPRequestHandler::PutRequest(const char* url, const char* body)
 {
-	g_pDataBuffer.clear();
-
-	CURL* curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
-	CURLcode result = curl_easy_perform(curl);
-	curl_easy_cleanup(curl);
-
-	return (result == CURLE_OK);
+	auto result = g_pHttpClient->Put(url, body, "application/json");
+	return IsValidResponse(result);
 }
 
 bool HTTPRequestHandler::DeleteRequest(const char* url)
 {
-	g_pDataBuffer.clear();
-
-	CURL* curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, url);
-	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
-	CURLcode result = curl_easy_perform(curl);
-	curl_easy_cleanup(curl);
-
-	return (result == CURLE_OK);
+	auto result = g_pHttpClient->Delete(url);
+	return IsValidResponse(result);
 }
 
-// Parses a JSON formatted char array, returns a JSON document, see https://rapidjson.org/index.html for documentation!
+// Parses a JSON formatted char array, returns a JSON document
+// see https://rapidjson.org/index.html for documentation!
 JSONDocument* HTTPRequestHandler::ParseJSON(const char* data)
 {
 	if (!(data && data[0]))

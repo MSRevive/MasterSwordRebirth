@@ -15,9 +15,7 @@
 
 OS := $(shell uname)
 HOSTNAME := $(shell hostname)
-
--include $(SRCROOT)/devtools/steam_def.mak
--include $(SRCROOT)/devtools/sourcesdk_def.mak
+VALVE_NO_AUTO_P4=1
 
 # To build with clang, set the following in your environment:
 #   CC = clang
@@ -80,29 +78,9 @@ COPY_DLL_TO_SRV = 0
 # http://linux.die.net/man/1/ld and http://fedoraproject.org/wiki/Releases/FeatureBuildId.http://fedoraproject.org/wiki/Releases/FeatureBuildId
 LDFLAGS += -Wl,--build-id
 
-#
-# If we should be running in a chroot, check to see if we are. If not, then prefix everything with the 
-# required chroot
-#
-ifdef MAKE_CHROOT
-	export STEAM_RUNTIME_PATH := /usr
-	ifneq ("$(SCHROOT_CHROOT_NAME)", "$(CHROOT_NAME)")
-        $(info '$(SCHROOT_CHROOT_NAME)' is not '$(CHROOT_NAME)')
-        $(error This makefile should be run from within a chroot. 'schroot --chroot $(CHROOT_NAME) -- $(MAKE) $(MAKEFLAGS)')  
-	endif
-	GCC_VER = -4.8
-	P4BIN = $(SRCROOT)/devtools/bin/linux/p4
-else ifeq ($(USE_VALVE_BINDIR),1)
-	# Using /valve/bin directory.
-	export STEAM_RUNTIME_PATH := /usr
-	GCC_VER = -4.8
-	P4BIN = p4
-else
-	# Not using chroot, use old steam-runtime. (gcc 4.6.3)
-	export STEAM_RUNTIME_PATH := /usr
-	GCC_VER = -4.8
-	P4BIN = p4
-endif
+export STEAM_RUNTIME_PATH := /usr
+GCC_VER = -4.8
+P4BIN = p4
 
 ifeq ($(TARGET_PLATFORM),linux64)
 	MARCH_TARGET = core2

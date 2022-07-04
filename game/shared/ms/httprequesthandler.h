@@ -8,10 +8,12 @@ typedef rapidjson::Value JSONValue;
 typedef rapidjson::SizeType JSONSizeType;
 
 #define REQUEST_URL_SIZE 256
-#define REQUEST_BUFFER_SIZE 8192
 
 namespace HTTPRequestHandler
 {
+	void Initialize(const char* url);
+	void Destroy(void);
+
 	bool GetRequest(const char* url);
 	bool PostRequest(const char* url, const char* body);
 	bool PutRequest(const char* url, const char* body);

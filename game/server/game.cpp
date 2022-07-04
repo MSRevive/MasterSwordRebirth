@@ -25,6 +25,7 @@
 #endif
 
 #include "fndatahandler.h"
+#include "httprequesthandler.h"
 #include "steamhelper.h"
 
 cvar_t displaysoundlist = { "displaysoundlist", "0" };
@@ -132,7 +133,7 @@ void GameDLLInit(void)
 		g_engfuncs.pfnServerCommand("exit\n");
 		return;
 	}
-
+	
 	FnDataHandler::Initialize();
 }
 
@@ -143,4 +144,5 @@ void GameDLLShutdown()
 	FileSystem_Shutdown();
 	FnDataHandler::Destroy();
 	SteamHelper::Shutdown();
+	HTTPRequestHandler::Destroy();
 }
