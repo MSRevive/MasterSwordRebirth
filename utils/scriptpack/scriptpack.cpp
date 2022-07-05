@@ -59,7 +59,8 @@ int main(int argc, char** argv)
 		
 		printf("Packing %s...\n\n", workDir);
 		Packer packer(workDir, rootDir, outDir);
-		packer.packScripts();
+		packer.cookScripts();
+		//packer.packScripts();
 		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 	} catch (TCLAP::ArgException &err)
 	{

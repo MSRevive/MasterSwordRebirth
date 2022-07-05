@@ -14,8 +14,10 @@ public:
     memcpy(m_RootDir, rDir, MAX_PATH);
     memcpy(m_OutDir, oDir, MAX_PATH);
   }
+  //void readDirectory(char *pszName);
   void packScripts();
   void cookScripts();
+  void saveErrors();
   
 private:
   char m_WorkDir[MAX_PATH];

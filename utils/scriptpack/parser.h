@@ -12,42 +12,44 @@
 class Parser
 {
 public:
-  Parser(std::string &str) : m_Data(str){  }
+  Parser(std::string &data, char *file) : m_Data(data) {
+    m_FileName = file;
+  }
   
   //credits to https://codereview.stackexchange.com/a/215913
   void stripComments()
 	{
-    m_cState = State::NotAComment;
-		const auto size = m_Data.length();
+    State cState = State::NotAComment;
+		const size_t size = m_Data.length();
     
-		for (auto idx = 0; idx < size; ++idx)
+		for (size_t idx = 0; idx < size; ++idx)
 		{
-			const auto ch = m_Data[idx];
-			switch (m_cState)
+			const char ch = m_Data[idx];
+			switch (cState)
 			{
-				case State::SlashOC:
-					if (ch == '/')
-						m_cState = State::SingleLineComment;
-					else
-					{
-						// ?????
-						m_cState = State::NotAComment;
-						m_Result += '/' + ch;
-					}
-					break;
+			case State::SlashOC:
+				if (ch == '/')
+					cState = State::SingleLineComment;
+				else
+				{
+					// ?????
+					cState = State::NotAComment;
+					m_Result += '/' + ch;
+				}
+				break;
 
-				case State::SingleLineComment:
-					if (ch == '\n')
-						m_cState = State::NotAComment;
-            m_Result += '\n';
-					break;
-          
-        case State::NotAComment:
-					if (ch == '/')
-						m_cState = State::SlashOC;
-					else
-						m_Result += ch;
-					break;
+			case State::SingleLineComment:
+				if (ch == '\n')
+					cState = State::NotAComment;
+          m_Result += '\n';
+				break;
+        
+      case State::NotAComment:
+				if (ch == '/')
+					cState = State::SlashOC;
+				else
+					m_Result += ch;
+				break;
 			}
 		}
 	}
@@ -89,60 +91,91 @@ public:
     m_Result = newRes;
   }
   
-  //credits to https://www.tutorialspoint.com/cplusplus-program-to-check-for-balanced-paranthesis-by-using-stacks
-  bool areBracketsClosed(char *filename)
-  {
-    std::stack<char> s;
-    char ch;
-    size_t line;
+  bool checkClosing()
+  { 
+    //best to go off via original data.
+    const size_t size = m_Data.length();
+    size_t line = 1;
     
-    for (int i = 0; i < m_Result.length(); i++) 
-    { //for each character in the expression, check conditions
-      if (m_Result[i] == '(' || m_Result[i] == '[' || m_Result[i] == '{') 
-      { //when it is opening bracket, push into stack
-        s.push(m_Result[i]);
-        continue;
-      }
+    if (size <= 0)
+      return false;
+    
+    int oPara, cPara, oBrac, cBrac = 0;
+    
+    for (size_t i = 0; i < size; ++i) 
+    {
+      const char ch = m_Data[i];
       
-      if (m_Result[i] == '\n')
-        line++;
-      
-      if (s.empty()) //stack cannot be empty as it is not opening bracket, there must be closing bracket
-        return false;
-        
-      switch (m_Result[i]) 
+      switch(ch)
       {
-        case ')': //for closing parenthesis, pop it and check for braces and square brackets
-          ch = s.top();
-          s.pop();
-          if (ch == '{' || ch == '[')
-          {
-            closingError(filename, line);
-            return false;
-          }
-          break;
-        case '}': //for closing braces, pop it and check for parenthesis and square brackets
-          ch = s.top();
-          s.pop();
-          if (ch == '(' || ch == '[')
-          {
-            closingError(filename, line);
-            return false;
-          }
-          break;
-        case ']': //for closing square bracket, pop it and check for braces and parenthesis
-          ch = s.top();
-          s.pop();
-          if (ch == '(' || ch == '{')
-          {
-            closingError(filename, line);
-            return false;
-          }
-          break;
+      case '\n':
+        line++;
+        break;
+      case '(':
+        oPara++;
+        break;
+      case ')':
+        cPara++;
+        break;
+      case '{':
+        oBrac++;
+        break;
+      case '}':
+        cBrac++;
+        break;
       }
     }
     
-    return (s.empty()); //when stack is empty, return true
+    if ((oPara != cPara) || (oBrac != cBrac))
+    {
+      closingError();
+      return false;
+    }
+      
+    return true;
+  }
+  
+  bool checkQuotes()
+  {
+    State cState = State::NoQuote;
+		const size_t size = m_Data.length();
+    size_t line = 1;
+    
+    for (size_t i = 0; i < size; ++i)
+    {
+      const char ch = m_Data[i];
+      
+      if (ch == '\n')
+        line++;
+      
+      switch(cState)
+      {
+        case State::InDoubleQuote:
+          if (ch == '"')
+            return true;
+          else
+          {
+            quoteError(line);
+            return false;
+          }
+          break;
+        case State::InSingleQuote:
+          if (ch == '\'')
+            return true;
+          else
+          {
+            quoteError(line);
+            return false;
+          }
+          break;
+        case State::NoQuote:
+          if (ch == '"')
+            cState = State::InDoubleQuote;
+          else if (ch == '\'')
+            cState = State::InSingleQuote;
+          break;
+      }
+    }
   }
   
   std::string getResult()
@@ -154,6 +187,12 @@ public:
   {
     return m_ErrorList;
   }
+  
+  void printErrors()
+  {
+    //for (auto i: m_ErrorList)
+      //std::cout << i << std::endl;
+  }
 
 private:
 	enum class State : char
@@ -161,6 +200,10 @@ private:
 		SlashOC,
 		SingleLineComment,
 		NotAComment,
+    
+    InDoubleQuote,
+    InSingleQuote,
+    NoQuote,
 	};
   
   bool onlySpace(const std::string &str)
@@ -169,18 +212,26 @@ private:
   }
   
   //file:line missing closing brackets
-  void closingError(char *file, size_t line)
+  void closingError()
   {
     char errStr[256];
-    std::snprintf(errStr, 0, "%s:%u missing bracket(s)\n", file, line);
+    std::snprintf(errStr, 0, "%s missing bracket/paranthesis\n", m_FileName);
     std::string s(errStr);
     m_ErrorList.push_back(s);
   }
-
-	State m_cState = State::NotAComment;
+  
+  void quoteError(size_t line)
+  {
+    char errStr[256];
+    std::snprintf(errStr, 0, "%s:%u missing quote\n", m_FileName, line);
+    std::string s(errStr);
+    m_ErrorList.push_back(s);
+  }
+  
   std::string m_Result{};
   std::string &m_Data;
-  std::vector<std::string> m_ErrorList;
+  char *m_FileName;
+  std::vector<std::string> m_ErrorList{};
 };
 
 #endif

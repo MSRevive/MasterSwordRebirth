@@ -13,11 +13,20 @@ extern bool release;
 void createCopy(std::string data) {
 	std::ofstream o("./test.script");
 	
-	Parser parser(data);
+	Parser parser(data, "cookscripts.script");
 	parser.stripComments();
 	parser.stripTabs();
 	parser.stripDebug();
+	//parser.areBracketsClosed();
 	parser.stripEmptyLines();
+	
+	//std::vector<std::string> errList = parser.getErrorlist();
+	
+	//std::cout << errList.size() << std::endl;
+	//for (auto i: errList)
+		//std::cout << "unicorns" << std::endl;
+	parser.printErrors();
+	
 	std::string result = parser.getResult();
 	o << result << std::endl;
 	o.close();
@@ -26,6 +35,8 @@ void createCopy(std::string data) {
 void Packer::cookScripts() {
 	if(release == true) 
 	{
+		readDirectory(m_WorkDir);
+		
 		CMemFile inFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
@@ -39,11 +50,16 @@ void Packer::cookScripts() {
 				char *cstr((char*)inFile.m_Buffer);
 				std::string cppstr(cstr);
 				
+				createCopy(cppstr);
+				
 				if (verbose == true)
 					printf("Doing file: %s\n", cRelativePath);
 			}
 		}
 	}
+}
+
+void Packer::saveErrors() {
 }
 
 //we grab all the files in the scripts directory to get ready for packing.
