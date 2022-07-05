@@ -40,8 +40,10 @@ public:
 
 			case State::SingleLineComment:
 				if (ch == '\n')
-					cState = State::NotAComment;
+        {
+          cState = State::NotAComment;
           m_Result += '\n';
+        }
 				break;
         
       case State::NotAComment:
