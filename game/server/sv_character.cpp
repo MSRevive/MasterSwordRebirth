@@ -138,7 +138,7 @@ void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 	if (gpGlobals->time <= pPlayer->m_TimeNextSave) return;
 
 	SaveChar(pPlayer, NULL); // Don't auto save too often when using FN.
-	pPlayer->m_TimeNextSave = gpGlobals->time + (FnDataHandler::IsEnabled() ? RANDOM_FLOAT(25.0f, 50.0f) : 3.0f);
+	pPlayer->m_TimeNextSave = gpGlobals->time + (FnDataHandler::IsEnabled() ? RANDOM_FLOAT(4.0f, 8.0f) : 3.0f);
 }
 
 //
@@ -728,12 +728,11 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	}
 	//-------------
 
-	dbg("Encrypt");
 	gFile.m_BufferSize = gFile.GetWritePtr();
-
-	//#ifdef VALVE_DLL
+	
 	if (FnDataHandler::IsEnabled())
 	{
+		dbg("Write to FN");
 		// If Central Server is enabled, save to the Central Server instead of locally
 		FnDataHandler::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, (const char*)gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
 		gFile.Close();
@@ -741,15 +740,15 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	}
 	else if (!MSGlobals::ServerSideChar)
 	{
+		dbg("Write to client");
 		charinfo_t &CharInfo = pPlayer->m_CharInfo[pPlayer->m_CharacterNum];
 		CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CLIENT, (char *)gFile.m_Buffer, gFile.GetFileSize(), pPlayer);
 		gFile.Close();
 		return;
 	}
-	//#endif
-	dbg("Write to File");
-	gFile.WriteToFile(pszFileName, "wb", true);
 
+	dbg("Write to file");
+	gFile.WriteToFile(pszFileName, "wb", true);
 	gFile.Close();
 
 	enddbg;
