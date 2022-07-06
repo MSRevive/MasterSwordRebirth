@@ -14,17 +14,19 @@ class Parser
 public:
   Parser(std::string &data, char *file) : m_Data(data) {
     m_FileName = file;
+    m_Result = m_Data;
   }
   
   //credits to https://codereview.stackexchange.com/a/215913
   void stripComments()
 	{
     State cState = State::NotAComment;
-		const size_t size = m_Data.length();
+		const size_t size = m_Result.length();
+    std::string res;
     
 		for (size_t idx = 0; idx < size; ++idx)
 		{
-			const char ch = m_Data[idx];
+			const char ch = m_Result[idx];
 			switch (cState)
 			{
 			case State::SlashOC:
@@ -34,7 +36,7 @@ public:
 				{
 					// ?????
 					cState = State::NotAComment;
-					m_Result += '/' + ch;
+					res += '/' + ch;
 				}
 				break;
 
@@ -42,7 +44,7 @@ public:
 				if (ch == '\n')
         {
           cState = State::NotAComment;
-          m_Result += '\n';
+          res += '\n';
         }
 				break;
         
@@ -50,10 +52,12 @@ public:
 				if (ch == '/')
 					cState = State::SlashOC;
 				else
-					m_Result += ch;
+					res += ch;
 				break;
 			}
 		}
+    
+    m_Result = res;
 	}
   
   void stripTabs()
@@ -93,91 +97,103 @@ public:
     m_Result = newRes;
   }
   
-  bool checkClosing()
-  { 
-    //best to go off via original data.
-    const size_t size = m_Data.length();
-    size_t line = 1;
-    
-    if (size <= 0)
-      return false;
-    
-    int oPara, cPara, oBrac, cBrac = 0;
-    
-    for (size_t i = 0; i < size; ++i) 
-    {
-      const char ch = m_Data[i];
-      
-      switch(ch)
-      {
-      case '\n':
-        line++;
-        break;
-      case '(':
-        oPara++;
-        break;
-      case ')':
-        cPara++;
-        break;
-      case '{':
-        oBrac++;
-        break;
-      case '}':
-        cBrac++;
-        break;
-      }
-    }
-    
-    if ((oPara != cPara) || (oBrac != cBrac))
-    {
-      closingError();
-      return false;
-    }
-      
-    return true;
-  }
-  
-  bool checkQuotes()
+  void checkQuotes()
   {
     State cState = State::NoQuote;
-		const size_t size = m_Data.length();
-    size_t line = 1;
+    std::stringstream ss(m_Result);
+    size_t lineNum = 0;
+    std::string line;
     
-    for (size_t i = 0; i < size; ++i)
-    {
-      const char ch = m_Data[i];
+    while (std::getline(ss, line, '\n')) {
+      lineNum++;
       
-      if (ch == '\n')
-        line++;
-      
-      switch(cState)
+      //don't process if line is empty
+      if (!line.empty() && !onlySpace(line))
       {
-        case State::InDoubleQuote:
-          if (ch == '"')
-            return true;
-          else
+        for (size_t pos = 0; pos < line.length(); pos++)
+        {
+          const char ch = line[pos];
+          
+          switch(cState)
           {
-            quoteError(line);
-            return false;
+            case State::InDoubleQuote:
+              if (ch == '"')
+                cState = State::NoQuote;
+              else if (pos == (line.length() - 1))
+              {
+                cState = State::NoQuote;
+                quoteError(lineNum, pos);
+              }
+              break;
+            case State::InSingleQuote:
+              if (ch == '\'')
+                cState = State::NoQuote;
+              else if (pos == (line.length() - 1))
+              {
+                cState = State::NoQuote;
+                quoteError(lineNum, pos);
+              }
+              break;
+            case State::NoQuote:
+              if (ch == '"')
+                cState = State::InDoubleQuote;
+              else if (ch == '\'')
+                cState = State::InSingleQuote;
+              break;
           }
-          break;
-        case State::InSingleQuote:
-          if (ch == '\'')
-            return true;
-          else
-          {
-            quoteError(line);
-            return false;
-          }
-          break;
-        case State::NoQuote:
-          if (ch == '"')
-            cState = State::InDoubleQuote;
-          else if (ch == '\'')
-            cState = State::InSingleQuote;
-          break;
+        }
       }
     }
+  }
+  
+  //credits to https://codereview.stackexchange.com/a/40518
+  bool bracketsMatch() {
+    std::stringstream ss(m_Result);
+    std::stack<char> expectedDelimiters;
+    size_t lineNum = 0;
+    std::string line;
+    
+    while (std::getline(ss, line)) {
+      lineNum++;
+      size_t pos = 0;
+      
+      while (std::string::npos != (pos = line.find_first_of("(){}[]", pos))) {
+        size_t colNum = pos + 1;
+        switch (line[pos]) {
+          case '(': 
+            expectedDelimiters.push(')'); 
+            break;
+          case '{': 
+            expectedDelimiters.push('}'); 
+            break;
+          case '[': 
+            expectedDelimiters.push(']'); 
+            break;
+
+          case ']':
+          case '}':
+          case ')':
+            if (expectedDelimiters.empty()) {
+              addError("%s:%u.%u: mismatched brackets/parentheses", lineNum, colNum);
+              return false;
+            }
+            if (line[pos] != expectedDelimiters.top()) {
+              addError("%s:%u.%u: expected closing bracket/parentheses", lineNum, colNum);
+              return false;
+            }
+            expectedDelimiters.pop();
+            break;
+        }
+        
+        pos = colNum;
+      }
+    }
+    // // Should check for a possible input error here, but I didn't bother.
+    // if (!expectedDelimiters.empty()) {
+    // 
+    //   return false;
+    // }
+    return true;
   }
   
   std::string getResult()
@@ -192,8 +208,9 @@ public:
   
   void printErrors()
   {
-    //for (auto i: m_ErrorList)
-      //std::cout << i << std::endl;
+    std::cout << m_ErrorList.size() << " errors found" << std::endl;
+    for (auto i: m_ErrorList)
+      std::cout << i << std::endl;
   }
 
 private:
@@ -213,21 +230,19 @@ private:
     return std::all_of(str.begin(),str.end(),isspace);
   }
   
-  //file:line missing closing brackets
-  void closingError()
+  //to do: do generic variadic arguments
+  //file:lineNum:linePos
+  void addError(char *msg, size_t lineNum, size_t linePos = 0)
   {
-    char errStr[256];
-    std::snprintf(errStr, 0, "%s missing bracket/paranthesis\n", m_FileName);
-    std::string s(errStr);
+    char eBuffer[256];
+    std::snprintf(eBuffer, 256, msg, m_FileName, lineNum, linePos);
+    std::string s(eBuffer);
     m_ErrorList.push_back(s);
   }
   
-  void quoteError(size_t line)
+  void quoteError(size_t line, size_t pos)
   {
-    char errStr[256];
-    std::snprintf(errStr, 0, "%s:%u missing quote\n", m_FileName, line);
-    std::string s(errStr);
-    m_ErrorList.push_back(s);
+    addError("%s:%u:%u - missing quotation", line, pos);
   }
   
   std::string m_Result{};
