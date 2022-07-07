@@ -13,7 +13,7 @@
 
 bool verbose;
 bool release;
-char *rootDir;
+bool errFile;
 
 int main(int argc, char** argv)
 {
@@ -37,6 +37,7 @@ int main(int argc, char** argv)
 		
 		TCLAP::SwitchArg relSwitch("r", "release", "Release build", cmd, false);
 		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose.", cmd, false);
+		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Turn on/off error output to file.", cmd, false);
 		
 		//Parse command line arguements
 		cmd.parse(argc, argv);
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
 		char *outDir = oDirArg.getValue();
 		release = relSwitch.getValue();
 		verbose = verboseSwitch.getValue();
+		errFile = errFileSwitch.getValue();
 		
 		struct stat info;
 		if(stat(workDir, &info) != 0)
