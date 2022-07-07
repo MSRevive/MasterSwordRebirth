@@ -19,46 +19,44 @@ public:
   
   //credits to https://codereview.stackexchange.com/a/215913
   void stripComments()
-	{
+  {
     State cState = State::NotAComment;
-		const size_t size = m_Result.length();
+    const size_t size = m_Result.length();
     std::string res;
     
-		for (size_t idx = 0; idx < size; ++idx)
-		{
-			const char ch = m_Result[idx];
-			switch (cState)
-			{
-			case State::SlashOC:
-				if (ch == '/')
-					cState = State::SingleLineComment;
-				else
-				{
-					// ?????
-					cState = State::NotAComment;
-					res += '/' + ch;
-				}
-				break;
-
-			case State::SingleLineComment:
-				if (ch == '\n')
-        {
-          cState = State::NotAComment;
-          res += '\n';
-        }
-				break;
-        
-      case State::NotAComment:
-				if (ch == '/')
-					cState = State::SlashOC;
-				else
-					res += ch;
-				break;
-			}
-		}
+    for (size_t idx = 0; idx < size; ++idx)
+    {
+      const char ch = m_Result[idx];
+      switch (cState)
+      {
+        case State::SlashOC:
+          if (ch == '/')
+            cState = State::SingleLineComment;
+          else
+          {
+            // ?????
+            cState = State::NotAComment;
+            res += '/' + ch;
+          }
+          break;
+        case State::SingleLineComment:
+          if (ch == '\n')
+          {
+            cState = State::NotAComment;
+            res += '\n';
+          }
+          break;
+        case State::NotAComment:
+          if (ch == '/')
+            cState = State::SlashOC;
+          else
+            res += ch;
+          break;
+      }
+    }
     
     m_Result = res;
-	}
+  }
   
   void stripTabs()
   {
@@ -134,11 +132,22 @@ public:
                 quoteError(lineNum, pos);
               }
               break;
+            case State::InPara:
+              if (ch == ')')
+                cState = State::NoQuote;
+              else if (pos == (line.length() - 1))
+              {
+                cState = State::NoQuote;
+                addError("%s:%u.%u: expected closing parentheses", lineNum, pos);
+              }
+              break;
             case State::NoQuote:
               if (ch == '"')
                 cState = State::InDoubleQuote;
               else if (ch == '\'')
                 cState = State::InSingleQuote;
+              else if (ch == '(')
+                cState = State::InPara;
               break;
           }
         }
@@ -146,54 +155,33 @@ public:
     }
   }
   
-  //credits to https://codereview.stackexchange.com/a/40518
-  bool bracketsMatch() {
+  void checkBrackets()
+  {
     std::stringstream ss(m_Result);
-    std::stack<char> expectedDelimiters;
-    size_t lineNum = 0;
     std::string line;
+    std::vector<std::pair<size_t, size_t>> openBrace;
+    size_t lineNum = 0;
     
-    while (std::getline(ss, line)) {
+    while (std::getline(ss, line))
+    {
       lineNum++;
-      size_t pos = 0;
       
-      while (std::string::npos != (pos = line.find_first_of("(){}[]", pos))) {
-        size_t colNum = pos + 1;
-        switch (line[pos]) {
-          case '(': 
-            expectedDelimiters.push(')'); 
+      for(int pos = 0; pos < line.length(); pos++)
+      {
+        switch(line[pos])
+        {
+          case '{':
+            openBrace.push_back(std::make_pair(lineNum, pos));
             break;
-          case '{': 
-            expectedDelimiters.push('}'); 
-            break;
-          case '[': 
-            expectedDelimiters.push(']'); 
-            break;
-
-          case ']':
           case '}':
-          case ')':
-            if (expectedDelimiters.empty()) {
-              addError("%s:%u.%u: mismatched brackets/parentheses", lineNum, colNum);
-              return false;
-            }
-            if (line[pos] != expectedDelimiters.top()) {
-              addError("%s:%u.%u: expected closing bracket/parentheses", lineNum, colNum);
-              return false;
-            }
-            expectedDelimiters.pop();
+            openBrace.pop_back();
             break;
         }
-        
-        pos = colNum;
       }
     }
-    // // Should check for a possible input error here, but I didn't bother.
-    // if (!expectedDelimiters.empty()) {
-    // 
-    //   return false;
-    // }
-    return true;
+    
+    for (std::pair<size_t, size_t> ob : openBrace)
+      addError("%s:%u.%u: brace opened, but never closed", ob.first, ob.second);
   }
   
   std::string getResult()
@@ -211,38 +199,38 @@ public:
     std::cout << m_ErrorList.size() << " errors found" << std::endl;
     for (auto i: m_ErrorList)
       std::cout << i << std::endl;
+    std::cout << std::endl;
   }
 
 private:
-	enum class State : char
-	{
-		SlashOC,
-		SingleLineComment,
-		NotAComment,
+  enum class State : char
+  {
+    SlashOC,
+    SingleLineComment,
+    NotAComment,
     
     InDoubleQuote,
     InSingleQuote,
+    InPara,
     NoQuote,
-	};
+  };
   
   bool onlySpace(const std::string &str)
   {
     return std::all_of(str.begin(),str.end(),isspace);
   }
   
-  //to do: do generic variadic arguments
-  //file:lineNum:linePos
-  void addError(char *msg, size_t lineNum, size_t linePos = 0)
+  void addError(const char *fmt, size_t lineNum, size_t pos)
   {
     char eBuffer[256];
-    std::snprintf(eBuffer, 256, msg, m_FileName, lineNum, linePos);
+    snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
     std::string s(eBuffer);
     m_ErrorList.push_back(s);
   }
   
   void quoteError(size_t line, size_t pos)
   {
-    addError("%s:%u:%u - missing quotation", line, pos);
+    addError("%s:%u.%u: missing quotation", line, pos);
   }
   
   std::string m_Result{};
