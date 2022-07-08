@@ -30,7 +30,6 @@ int main(int argc, char** argv)
 		memcpy(workDir, rootDir, MAX_PATH);
 		strncat(workDir, "\\scripts", MAX_PATH);
 		memcpy(_outDir, rootDir, MAX_PATH);
-		strncat(_outDir, "\\cooked", MAX_PATH);
 		
 		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for cleaned scripts");
 		cmd.add(oDirArg);
@@ -59,10 +58,10 @@ int main(int argc, char** argv)
 			printf("Error: output directory %s not found!\n", outDir);
 		}
 		
-		printf("Packing %s...\n\n", workDir);
 		Packer packer(workDir, rootDir, outDir);
+		packer.readDirectory(workDir, false);
 		packer.cookScripts();
-		//packer.packScripts();
+		packer.packScripts();
 		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
 	} catch (TCLAP::ArgException &err)
 	{

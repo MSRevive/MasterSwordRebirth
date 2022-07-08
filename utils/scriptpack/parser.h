@@ -201,6 +201,17 @@ public:
       std::cout << i << std::endl;
     std::cout << std::endl;
   }
+  
+  void saveErrors()
+  {
+    std::ofstream o;
+    o.open("./errors.txt", std::ios_base::app | std::ios_base::out);
+    
+    for (auto i: m_ErrorList)
+      o << i << std::endl;
+      
+    o.close();
+  }
 
 private:
   enum class State : char
@@ -222,15 +233,15 @@ private:
   
   void addError(const char *fmt, size_t lineNum, size_t pos)
   {
-    char eBuffer[256];
-    snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
-    std::string s(eBuffer);
-    m_ErrorList.push_back(s);
+    // char eBuffer[256];
+    // snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
+    // std::string s(eBuffer);
+    m_ErrorList.push_back("err");
   }
   
   void quoteError(size_t line, size_t pos)
   {
-    addError("%s:%u.%u: missing quotation", line, pos);
+    addError("%s:%u.%u: unclosed quotation", line, pos);
   }
   
   std::string m_Result{};
