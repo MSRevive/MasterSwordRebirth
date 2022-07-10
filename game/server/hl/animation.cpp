@@ -149,17 +149,18 @@ void GetEyePosition(void *pmodel, float *vecEyePosition)
 	VectorCopy(pstudiohdr->eyeposition, vecEyePosition);
 }
 
-int LookupSequence(void *pmodel, const char *label)
+int LookupSequence(void* pmodel, const char* label)
 {
-	studiohdr_t *pstudiohdr;
+	if (!(label && label[0]))
+		return 0;
 
-	pstudiohdr = (studiohdr_t *)pmodel;
+	studiohdr_t* pstudiohdr = (studiohdr_t*)pmodel;
 	if (!pstudiohdr)
 		return 0;
 
-	mstudioseqdesc_t *pseqdesc;
+	mstudioseqdesc_t* pseqdesc;
 
-	pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex);
+	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex);
 
 	for (int i = 0; i < pstudiohdr->numseq; i++)
 	{
@@ -169,6 +170,7 @@ int LookupSequence(void *pmodel, const char *label)
 
 	return -1;
 }
+
 //Thothie JUN2007b - need a way to pull the string of the current animation
 //- meh, screw it, going to set animation indexes in scripts when they are played instead
 /*char LookupSequenceName( void *pmodel, const int *inseqindex )
