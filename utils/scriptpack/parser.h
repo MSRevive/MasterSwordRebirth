@@ -6,6 +6,7 @@
 #include <regex>
 #include <ctype.h>
 #include <stack>
+#include <mutex>
 
 #include "cbase.h"
 
@@ -102,7 +103,7 @@ public:
     size_t lineNum = 0;
     std::string line;
     
-    while (std::getline(ss, line, '\n')) {
+    while (std::getline(ss, line)) {
       lineNum++;
       
       //don't process if line is empty
@@ -117,7 +118,7 @@ public:
             case State::InDoubleQuote:
               if (ch == '"')
                 cState = State::NoQuote;
-              else if (pos == (line.length() - 1))
+              else if (pos == (line.length()))
               {
                 cState = State::NoQuote;
                 quoteError(lineNum, pos);
@@ -126,7 +127,7 @@ public:
             case State::InSingleQuote:
               if (ch == '\'')
                 cState = State::NoQuote;
-              else if (pos == (line.length() - 1))
+              else if (pos == (line.length()))
               {
                 cState = State::NoQuote;
                 quoteError(lineNum, pos);
@@ -135,7 +136,7 @@ public:
             case State::InPara:
               if (ch == ')')
                 cState = State::NoQuote;
-              else if (pos == (line.length() - 1))
+              else if (pos == (line.length()))
               {
                 cState = State::NoQuote;
                 addError("%s:%u.%u: expected closing parentheses", lineNum, pos);
@@ -243,7 +244,7 @@ private:
     char eBuffer[256];
     snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
     std::string s(eBuffer);
-    m_ErrorList.push_back("err");
+    m_ErrorList.push_back(s);
   }
   
   void quoteError(size_t line, size_t pos)
