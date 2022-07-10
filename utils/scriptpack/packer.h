@@ -39,9 +39,8 @@ private:
   msstringlist m_StoredFiles;
   msstringlist m_CookedFiles;
   
-  
   void storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked);
-  void doErrorCheck(char *file, char *name);
+  void doParser(char *file, char *name, char *create, bool errOnly);
 };
 
 #endif

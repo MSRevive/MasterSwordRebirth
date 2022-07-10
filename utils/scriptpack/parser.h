@@ -213,6 +213,13 @@ public:
     o.close();
   }
 
+  void saveResult(char *create)
+  {
+    std::ofstream o(create);
+    o << m_Result;
+    o.close();
+  }
+
 private:
   enum class State : char
   {
@@ -233,9 +240,9 @@ private:
   
   void addError(const char *fmt, size_t lineNum, size_t pos)
   {
-    // char eBuffer[256];
-    // snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
-    // std::string s(eBuffer);
+    char eBuffer[256];
+    snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
+    std::string s(eBuffer);
     m_ErrorList.push_back("err");
   }
   

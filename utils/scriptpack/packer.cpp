@@ -1,14 +1,15 @@
 #include <iostream>
 #include <fstream>
+#include <thread>
 
 #include "cbase.h"
 #include "packer.h"
 #include "../stream_safe.h"
 #include "parser.h"
 
-extern bool verbose;
-extern bool release;
-extern bool errFile;
+extern bool g_Verbose;
+extern bool g_Release;
+extern bool g_ErrFile;
 
 //we grab all the files in the scripts directory to get ready for packing.
 void Packer::readDirectory(char *pszName, bool cooked)
@@ -32,7 +33,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 
 void Packer::cookScripts() 
 {
-	if(release == true && m_StoredFiles.size() > 0)
+	if(g_Release == true && m_StoredFiles.size() > 0)
 	{	
 		CMemFile inFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
@@ -47,36 +48,14 @@ void Packer::cookScripts()
 				strncpy(createFile, m_CookedDir, MAX_PATH);
 				strncat(createFile, cRelativePath, MAX_PATH);
 				
-				if (verbose == true)
+				if (g_Verbose == true)
 					printf("Cleaning script: %s\n", cRelativePath);
 				
 				//convert char array to std::string for parser.
-				char *cstr((char*)inFile.m_Buffer);
-				std::string data(cstr);
-				
-				Parser parser(data, cRelativePath);
-				parser.stripComments();
-				
-				//we check for errors here because comments were already replaced.
-				parser.checkQuotes(); //check for quote errors
-				parser.checkBrackets(); //check for closing errors
-				
-				parser.stripTabs();
-				parser.stripDebug();
-				parser.stripEmptyLines();
-				
-				std::string result = parser.getResult();
-				
-				std::ofstream o(createFile);
-				o << result << std::endl;
-				o.close();
-				
-				//do error print at the end
-				parser.printErrors();
-				if (errFile)
-					parser.saveErrors();
+				std::thread parserThread(&Packer::doParser, this, (char*)inFile.m_Buffer, cRelativePath, createFile, false);
+				parserThread.join();
 					
-				if (verbose == true)
+				if (g_Verbose == true)
 					printf("End script cleaning: %s\n", cRelativePath);
 			}
 		}
@@ -106,7 +85,7 @@ void Packer::packScripts()
 		exit(-1);
 	}
 	
-	if(release == true && m_CookedFiles.size() > 0)
+	if(g_Release == true && m_CookedFiles.size() > 0)
 	{
 		CMemFile InFile;
 		for (size_t i = 0; i < m_CookedFiles.size(); i++)
@@ -117,7 +96,7 @@ void Packer::packScripts()
 				char cRelativePath[MAX_PATH];
 				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
 				
-				if (verbose == true)
+				if (g_Verbose == true)
 					printf("Doing file: %s\n", cRelativePath);
 	
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
@@ -138,11 +117,12 @@ void Packer::packScripts()
 				char cRelativePath[MAX_PATH];
 				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
 				
-				if (verbose == true)
+				if (g_Verbose == true)
 					printf("Doing file: %s\n", cRelativePath);
 				
 				//perform error check
-				doErrorCheck((char*)InFile.m_Buffer, cRelativePath);
+				std::thread parserThread(&Packer::doParser, this, (char*)InFile.m_Buffer, cRelativePath, FullPath, true);
+				parserThread.join();
 	
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
@@ -177,23 +157,33 @@ void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 	}
 }
 
-void Packer::doErrorCheck(char *file, char *name)
+void Packer::doParser(char *file, char *name, char *create, bool errOnly)
 {
 	//convert char array to std::string for parser.
 	char *cstr(file);
 	std::string data(cstr);
-	
-	//we create a Parser object to access error checking stuff.
+
+	//we create parser object.
 	Parser parser(data, name);
-	//we have to strip comments to ignore them, cause laziness
 	parser.stripComments();
-	
-	//we check for errors here because comments were already replaced and tabs removed.
+
+	//we check for errors here because comments were already replaced.
 	parser.checkQuotes(); //check for quote errors
 	parser.checkBrackets(); //check for closing errors
-	
+
+	//only run this stuff if we're doing full parser.
+	if (!errOnly)
+	{
+		parser.stripTabs();
+		parser.stripDebug();
+		parser.stripEmptyLines();
+	}
+
 	//do error print at the end
 	parser.printErrors();
-	if (errFile)
+	if (g_ErrFile)
 		parser.saveErrors();
+
+	if (!errOnly)
+		parser.saveResult(create);
 }

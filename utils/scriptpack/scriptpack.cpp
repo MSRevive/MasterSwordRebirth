@@ -11,9 +11,9 @@
 #include "crc/crchash.h"
 #include "tclap/CmdLine.h"
 
-bool verbose;
-bool release;
-bool errFile;
+bool g_Verbose;
+bool g_Release;
+bool g_ErrFile;
 
 int main(int argc, char** argv)
 {
@@ -42,9 +42,9 @@ int main(int argc, char** argv)
 		cmd.parse(argc, argv);
 		
 		char *outDir = oDirArg.getValue();
-		release = relSwitch.getValue();
-		verbose = verboseSwitch.getValue();
-		errFile = errFileSwitch.getValue();
+		g_Release = relSwitch.getValue();
+		g_Verbose = verboseSwitch.getValue();
+		g_ErrFile = errFileSwitch.getValue();
 		
 		struct stat info;
 		if(stat(workDir, &info) != 0)
