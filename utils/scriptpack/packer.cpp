@@ -35,11 +35,11 @@ void Packer::cookScripts()
 {
 	if(g_Release == true && m_StoredFiles.size() > 0)
 	{	
-		CMemFile inFile;
+		CMemFile InFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
 			msstring &fullPath = m_StoredFiles[i];
-			if(inFile.ReadFromFile(fullPath))
+			if(InFile.ReadFromFile(fullPath))
 			{
 				char cRelativePath[MAX_PATH];
 				strncpy(cRelativePath, &fullPath[strlen(m_RootDir) + 1], MAX_PATH);
@@ -52,12 +52,14 @@ void Packer::cookScripts()
 					printf("Cleaning script: %s\n", cRelativePath);
 				
 				//convert char array to std::string for parser.
-				std::thread parserThread(&Packer::doParser, this, (char*)inFile.m_Buffer, cRelativePath, createFile, false);
+				std::thread parserThread(&Packer::doParser, this, (char*)InFile.m_Buffer, cRelativePath, createFile, false);
 				parserThread.join();
 					
 				if (g_Verbose == true)
 					printf("End script cleaning: %s\n", cRelativePath);
 			}
+
+			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 		
 		//read and store cooked directory scripts
@@ -102,6 +104,7 @@ void Packer::packScripts()
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
 			}
+			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 	}
 	else if(m_StoredFiles.size() > 0)
@@ -127,6 +130,7 @@ void Packer::packScripts()
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
 			}
+			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 	}
 	else
@@ -168,7 +172,7 @@ void Packer::doParser(char *file, char *name, char *create, bool errOnly)
 	parser.stripComments();
 
 	//we check for errors here because comments were already replaced.
-	parser.checkQuotes(); //check for quote errors
+	//parser.checkQuotes(); //check for quote errors
 	parser.checkBrackets(); //check for closing errors
 
 	//only run this stuff if we're doing full parser.

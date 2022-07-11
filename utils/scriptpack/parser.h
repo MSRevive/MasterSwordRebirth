@@ -6,7 +6,6 @@
 #include <regex>
 #include <ctype.h>
 #include <stack>
-#include <mutex>
 
 #include "cbase.h"
 
@@ -22,12 +21,11 @@ public:
   void stripComments()
   {
     State cState = State::NotAComment;
-    const size_t size = m_Result.length();
     std::string res;
     
-    for (size_t idx = 0; idx < size; ++idx)
+    for (size_t i = 0; i < m_Result.length(); i++)
     {
-      const char ch = m_Result[idx];
+      const char ch = m_Result[i];
       switch (cState)
       {
         case State::SlashOC:
@@ -52,6 +50,7 @@ public:
             cState = State::SlashOC;
           else
             res += ch;
+
           break;
       }
     }
@@ -99,9 +98,9 @@ public:
   void checkQuotes()
   {
     State cState = State::NoQuote;
-    std::stringstream ss(m_Result);
-    size_t lineNum = 0;
+    std::istringstream ss(m_Result);
     std::string line;
+    size_t lineNum = 0;
     
     while (std::getline(ss, line)) {
       lineNum++;
@@ -158,15 +157,15 @@ public:
   
   void checkBrackets()
   {
-    std::stringstream ss(m_Result);
+    std::istringstream ss(m_Result);
     std::string line;
-    std::vector<std::pair<size_t, size_t>> openBrace;
-    size_t lineNum = 0;
+    std::vector<std::pair<size_t, size_t>> openBrace{};
+    size_t lineNum = 1;
+    //std::cout << m_Result << std::endl;
     
-    while (std::getline(ss, line))
+    while (std::getline(ss, line, '\n'))
     {
-      lineNum++;
-      
+      //std::cout << line << std::endl;
       for(int pos = 0; pos < line.length(); pos++)
       {
         switch(line[pos])
@@ -179,6 +178,8 @@ public:
             break;
         }
       }
+
+      lineNum++;
     }
     
     for (std::pair<size_t, size_t> ob : openBrace)
@@ -236,7 +237,7 @@ private:
   
   bool onlySpace(const std::string &str)
   {
-    return std::all_of(str.begin(),str.end(),isspace);
+    return std::all_of(str.begin(), str.end(), isspace);
   }
   
   void addError(const char *fmt, size_t lineNum, size_t pos)
