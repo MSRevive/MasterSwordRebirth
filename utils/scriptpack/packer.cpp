@@ -38,6 +38,7 @@ void Packer::cookScripts()
 		CMemFile InFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
+			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
 			msstring &fullPath = m_StoredFiles[i];
 			if(InFile.ReadFromFile(fullPath))
 			{
@@ -58,8 +59,6 @@ void Packer::cookScripts()
 				if (g_Verbose == true)
 					printf("End script cleaning: %s\n", cRelativePath);
 			}
-
-			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 		
 		//read and store cooked directory scripts
@@ -92,6 +91,7 @@ void Packer::packScripts()
 		CMemFile InFile;
 		for (size_t i = 0; i < m_CookedFiles.size(); i++)
 		{
+			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
 			msstring &FullPath = m_CookedFiles[i];
 			if (InFile.ReadFromFile(FullPath))
 			{
@@ -104,7 +104,6 @@ void Packer::packScripts()
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
 			}
-			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 	}
 	else if(m_StoredFiles.size() > 0)
@@ -114,6 +113,7 @@ void Packer::packScripts()
 		CMemFile InFile;
 		for (size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
+			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
 			msstring &FullPath = m_StoredFiles[i];
 			if (InFile.ReadFromFile(FullPath))
 			{
@@ -130,7 +130,6 @@ void Packer::packScripts()
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
 			}
-			delete InFile.m_Buffer; //CMemFile doesn't clear it's own buffer so we have to do it :(
 		}
 	}
 	else
@@ -172,7 +171,7 @@ void Packer::doParser(char *file, char *name, char *create, bool errOnly)
 	parser.stripComments();
 
 	//we check for errors here because comments were already replaced.
-	//parser.checkQuotes(); //check for quote errors
+	parser.checkQuotes(); //check for quote errors
 	parser.checkBrackets(); //check for closing errors
 
 	//only run this stuff if we're doing full parser.
