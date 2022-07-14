@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <thread>
+#include <sys/stat.h>
 
 #include "cbase.h"
 #include "packer.h"
@@ -10,6 +11,14 @@
 extern bool g_Verbose;
 extern bool g_Release;
 extern bool g_ErrFile;
+
+//we have to get the filesize another way beacuse the file.tellg method doesn't always return accurate size.
+size_t getFileSize(char *filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename, &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
+}
 
 //we grab all the files in the scripts directory to get ready for packing.
 void Packer::readDirectory(char *pszName, bool cooked)
@@ -38,12 +47,11 @@ void Packer::cookScripts()
 		CMemFile InFile;
 		for(size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
-			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
-			msstring &fullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(fullPath))
+			msstring &FullPath = m_StoredFiles[i];
+			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &fullPath[strlen(m_RootDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
 				
 				char createFile[MAX_PATH];
 				strncpy(createFile, m_CookedDir, MAX_PATH);
@@ -53,7 +61,7 @@ void Packer::cookScripts()
 					printf("Cleaning script: %s\n", cRelativePath);
 				
 				//convert char array to std::string for parser.
-				std::thread parserThread(&Packer::doParser, this, (char*)InFile.m_Buffer, cRelativePath, createFile, false);
+				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
 				parserThread.join();
 					
 				if (g_Verbose == true)
@@ -91,7 +99,6 @@ void Packer::packScripts()
 		CMemFile InFile;
 		for (size_t i = 0; i < m_CookedFiles.size(); i++)
 		{
-			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
 			msstring &FullPath = m_CookedFiles[i];
 			if (InFile.ReadFromFile(FullPath))
 			{
@@ -113,7 +120,6 @@ void Packer::packScripts()
 		CMemFile InFile;
 		for (size_t i = 0; i < m_StoredFiles.size(); i++)
 		{
-			InFile.m_Buffer = 0; //CMemFile doesn't clear it's own buffer so we have to do it :(
 			msstring &FullPath = m_StoredFiles[i];
 			if (InFile.ReadFromFile(FullPath))
 			{
@@ -122,9 +128,10 @@ void Packer::packScripts()
 				
 				if (g_Verbose == true)
 					printf("Doing file: %s\n", cRelativePath);
-				
-				//perform error check
-				std::thread parserThread(&Packer::doParser, this, (char*)InFile.m_Buffer, cRelativePath, FullPath, true);
+
+				//size_t sss = getFileSize(FullPath);
+				//Packer::doParser(InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
+				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
 				parserThread.join();
 	
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
@@ -160,11 +167,12 @@ void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 	}
 }
 
-void Packer::doParser(char *file, char *name, char *create, bool errOnly)
+void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
 {
 	//convert char array to std::string for parser.
-	char *cstr(file);
-	std::string data(cstr);
+	char *ffile = (char*)buffer;
+	ffile[bufferSize] = '\0';
+	std::string data(ffile);
 
 	//we create parser object.
 	Parser parser(data, name);

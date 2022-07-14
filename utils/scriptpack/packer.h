@@ -40,7 +40,7 @@ private:
   msstringlist m_CookedFiles;
   
   void storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked);
-  void doParser(char *file, char *name, char *create, bool errOnly);
+  void doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly);
 };
 
 #endif

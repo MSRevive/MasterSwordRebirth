@@ -12,7 +12,7 @@
 class Parser
 {
 public:
-  Parser(std::string &data, char *file) : m_Data(data) {
+  Parser(std::string data, char *file) : m_Data(data) {
     m_FileName = file;
     m_Result = m_Data;
   }
@@ -35,7 +35,7 @@ public:
           {
             // ?????
             cState = State::NotAComment;
-            res += '/' + ch;
+            res += ch;
           }
           break;
         case State::SingleLineComment:
@@ -171,10 +171,13 @@ public:
         switch(line[pos])
         {
           case '{':
+            std::cout << "push " << lineNum << std::endl;
             openBrace.push_back(std::make_pair(lineNum, pos));
             break;
           case '}':
-            openBrace.pop_back();
+            std::cout << "pop " << lineNum << std::endl;
+            if (openBrace.size() > 0) //don't try to pop empty vector, bad things happen...
+              openBrace.pop_back();
             break;
         }
       }
@@ -254,7 +257,7 @@ private:
   }
   
   std::string m_Result{};
-  std::string &m_Data;
+  std::string m_Data;
   char *m_FileName;
   std::vector<std::string> m_ErrorList{};
 };

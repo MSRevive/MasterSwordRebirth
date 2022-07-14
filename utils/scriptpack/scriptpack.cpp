@@ -52,6 +52,9 @@ int main(int argc, char** argv)
 			printf("Error: work directory %s not found!\n", workDir);
 			exit(-1);
 		}
+
+	  	if(stat("./errors.txt", &info) == 0)
+		  std::remove("./errors.txt");
 		
 		if(stat(outDir, &info) != 0)
 		{
