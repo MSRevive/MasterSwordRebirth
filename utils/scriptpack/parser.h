@@ -12,7 +12,7 @@
 class Parser
 {
 public:
-  Parser(std::string data, char *file) : m_Data(data) {
+  Parser(char *data, char *file) : m_Data(data) {
     m_FileName = file;
     m_Result = m_Data;
   }
@@ -161,11 +161,9 @@ public:
     std::string line;
     std::vector<std::pair<size_t, size_t>> openBrace{};
     size_t lineNum = 1;
-    //std::cout << m_Result << std::endl;
     
     while (std::getline(ss, line, '\n'))
     {
-      //std::cout << line << std::endl;
       for(int pos = 0; pos < line.length(); pos++)
       {
         switch(line[pos])
