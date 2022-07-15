@@ -1,0 +1,4 @@
+{
+callexternal players ext_weather_change snow
+}
+#include monstersbase_temporary

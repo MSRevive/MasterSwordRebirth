@@ -1,0 +1,16 @@
+{ treasure_spawn
+ gold$rand(10,20)
+ setvarSTORENAME treasure_storeA35
+}
+#include itemsbase_treasurechest
+{ chest_additems
+callevent get_players 300
+local L_N_ARROWS TC_NPLAYERS
+multiply L_N_ARROWS 120
+addstoreitemSTORENAME blunt_maul $rand(0,1) 0
+addstoreitemSTORENAME bows_shortbow $rand(0,1) 0
+addstoreitem STORENAME proj_arrow_poison L_N_ARROWS 0 0 120
+if TC_NPLAYERS > 5
+callevent add_good_item 50
+callevent add_great_item 50
+}

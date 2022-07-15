@@ -1,0 +1,34 @@
+{
+const SCRIPT_SFX1effectssfx_lightning
+const LTNG_SNDweatherStorm_exclamation.wav
+precache SCRIPT_SFX1
+precache LTNG_SND
+const WEATHER_SPRITE rain.spr
+const SPRITE_SPLASH rain_splash.spr
+const SPRITE_MIST rain_mist.spr
+const SPRITE_RIPPLE rain_ripple.spr
+const SOUND_RAIN weatherrain.wav
+precache WEATHER_SPRITE
+precache SPRITE_SPLASH
+precache SPRITE_MIST
+precache SPRITE_RIPPLE
+precache SOUND_RAIN
+const WEATHER_SPRITE snow1.spr
+const SPRITE_BREATH char_breath.spr
+const SOUND_AMB ambwind.wav
+precache WEATHER_SPRITE
+precache SPRITE_BREATH
+precache SOUND_AMB
+}
+{ rain 
+callexternal all game_playercmd_setweather rain 1 1 0 0 0 0
+}
+{ snow 
+callexternal all game_playercmd_setweather snow 1 1 0 0 0 0
+}
+{ storm 
+callexternal all game_playercmd_setweather storm 1 1 0 0 0 0
+}
+{ weather_clear 
+callexternal all game_playercmd_setweather clear 1 1 0 0 0 0
+}

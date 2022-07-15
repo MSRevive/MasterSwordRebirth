@@ -1,0 +1,5 @@
+{
+setvarg global.mstime.secs 147550
+setvarg global.mstime.updateall 0
+}
+#include monstersbase_temporary

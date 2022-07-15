@@ -1,0 +1,22 @@
+{
+const LIGHTNING_SPRITElgtning.spr
+const LIGHTNING_SPRITE_SPARKS3dmflaora.spr
+precache LIGHTNING_SPRITE
+precache LIGHTNING_SPRITE_SPARKS
+const LIGHT_COLOR(255,255,0)
+}
+{ game_spawn
+ const DURATION 1.0
+ const LIGHTNING_SOUNDweatherlightning.wav
+ setmodel none
+ height 1
+ invincible1
+ effect beam end LIGHTNING_SPRITE 100 ent_me $relpos(0,0,4096) 0 LIGHT_COLOR 128 20 DURATION
+ effect tempent trail LIGHTNING_SPRITE_SPARKS $relpos(0,0,0) $relpos(0,0,32) 10 1 1 5 12
+ effect screenshake $relpos(0,0,0) 100 20 DURATION 256
+ playsound const.snd.body 7 LIGHTNING_SOUND
+ callevent 1 remove
+}
+{remove
+ deleteme
+}

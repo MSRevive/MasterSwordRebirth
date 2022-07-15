@@ -160,11 +160,15 @@ void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 
 void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
 {
-	char *ffile = new char[bufferSize]();
-	snprintf(ffile, bufferSize, "%s", (char*)buffer);
+	//need buffersize + 1 to make room for the null terminator
+	size_t bufSize = bufferSize+1;
+
+	//we want to use snprintf instead of strncpy or memcpy because it applies a null terminator.
+	char *ffile = new char[bufSize]();
+	snprintf(ffile, bufSize, "%s", buffer);
 
 	//we create parser object.
-	Parser parser(buffer, name);
+	Parser parser(ffile, name);
 	parser.stripComments();
 
 	//we check for errors here because comments were already replaced.
@@ -186,4 +190,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 	if (!errOnly)
 		parser.saveResult(create);
+
+	//deallocate memory for object when done.
+	delete ffile;
 }

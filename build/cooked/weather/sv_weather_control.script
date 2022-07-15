@@ -1,0 +1,142 @@
+{
+ const WEATHER_CLEARclear
+ const WEATHER_SNOW weathersfx_weather_snow
+ const WEATHER_RAIN weathersfx_weather_rain
+ const WEATHER_STORMweathersfx_weather_rain_storm
+ const WEATHER_FOG_GREEN weathersfx_weather_snow
+ const WEATHER_FOG_BROWN weathersfx_weather_snow
+ const WEATHER_FOG_RED weathersfx_weather_snow
+ const WEATHER_FOG_WHITE weathersfx_weather_snow
+ const WEATHER_FOG_BLUE weathersfx_weather_snow
+ const WEATHER_FOG_THICK weathersfx_weather_snow
+ const WEATHER_FOG_BLACK weathersfx_weather_snow
+ const WEATHER_STOP_TIME 0
+ const WEATHER_START_TIME 15
+ const WEATHER_DUR_MIN1
+ const WEATHER_DUR_MAX6
+ setvarg GLOBAL_WEATHER WEATHER_CLEAR
+ callexternal all worldevent_weather clear
+clientevent update all const.localplayer.scriptID clear_weather
+}
+{ worldevent_time
+local l.expiretime global.weather.start
+add l.expiretime global.weather.duration
+local l.changeweather 0
+if( global.mstime.secs >= l.expiretime )
+local l.changeweather 1
+if( global.mstime.secs < global.weather.start )
+local l.changeweather 1
+if l.changeweather
+if ( game.time > 10 )
+{
+callevent 45.0 random_map_weather
+}
+else
+{
+callevent random_map_weather
+}
+setvarg global.weather.start global.mstime.secs
+setvarg global.weather.duration $rand(WEATHER_DUR_MIN,WEATHER_DUR_MAX)
+multiply global.weather.duration 3600
+}
+{ random_map_weather
+local l.weathertotal $get_token_amt(global.map.weather)
+subtract l.weathertotal 1
+local l.weathernum $rand(0,l.weathertotal)
+local l.weathername $get_token(global.map.weather,l.weathernum)
+if ( G_DEVELOPER_MODE )
+{
+local MSG_LIST l.weathername
+stradd MSG_LIST " of "
+stradd MSG_LIST global.map.weather
+infomsg all "WEATHER SET TO" MSG_LIST
+}
+callevent game_playercmd_setweather l.weathername $randf(5,15) $randf(5,15)
+}
+{ game_playercmd_setweather
+callevent weather_to_scriptname PARAM1
+setvard WEATHER_TYPE PARAM1
+if weather.name isnot '0'
+setvard NEW_WEATHER weather.name
+setvard NEW_WEATHER_STOPOLD_DELAYWEATHER_STOP_TIME
+setvard NEW_WEATHER_START_DELAYWEATHER_START_TIME
+if( PARAM2 isnot 'default' ) setvard NEW_WEATHER_STOPOLD_DELAY PARAM2
+if( PARAM3 isnot 'default' ) setvard NEW_WEATHER_START_DELAY PARAM3
+callexternal all worldevent_weather PARAM1
+callevent global_change_weather
+}
+{ game_playercmd_setweather_me
+callevent weather_to_scriptname PARAM1
+setvard WEATHER_TYPE PARAM1
+if weather.name isnot '0'
+setvard NEW_WEATHER weather.name
+setvard NEW_WEATHER_STOPOLD_DELAY1
+setvard NEW_WEATHER_START_DELAY1
+callexternal PARAM2 worldevent_weather PARAM1
+callevent global_change_weather
+}
+{ game_change_weather
+setvard NEW_WEATHER PARAM1
+setvard NEW_WEATHER_STOPOLD_DELAYPARAM2
+setvard NEW_WEATHER_START_DELAYPARAM3
+callexternal all worldevent_weather PARAM1
+callevent global_change_weather
+}
+{ game_precache_weather
+precachefile game.precacheweather
+}
+{ global_change_weather
+callevent global_stop_weather
+local STARTWEATHER_DELAY 0
+if( GLOBAL_WEATHER isnot WEATHER_CLEAR )
+{
+setvard STARTWEATHER_DELAY NEW_WEATHER_STOPOLD_DELAY
+}
+else
+{
+clientevent update all const.localplayer.scriptID clear_weather
+}
+if( NEW_WEATHER isnot WEATHER_CLEAR ) callevent STARTWEATHER_DELAY global_start_weather
+}
+{ global_stop_weather
+if GLOBAL_WEATHER isnot 'GLOBAL_WEATHER'
+if GLOBAL_WEATHER isnot WEATHER_CLEAR
+if game.players > 0
+callexternal ent_me worldevent_weather_die NEW_WEATHER_STOPOLD_DELAY
+}
+{ global_start_weather
+if NEW_WEATHER isnot 'NEW_WEATHER'
+setvarg GLOBAL_WEATHER NEW_WEATHER
+if NEW_WEATHER isnot WEATHER_CLEAR
+if game.players > 0
+setvarg G_CUR_WEATHER GLOBAL_WEATHER
+dbg global_start_weather $get(ent_me,name)
+applyeffect ent_me GLOBAL_WEATHER NEW_WEATHER_START_DELAY WEATHER_TYPE
+}
+{game_precache
+callevent map_setweather
+calleventloop $get_token_amt(global.map.weather) weather_precache_mapweather
+}
+{weather_precache_mapweather
+local l.weathername $get_token(global.map.weather,game.script.iteration)
+callevent weather_to_scriptname l.weathername
+if weather.name isnot WEATHER_CLEAR
+if weather.name isnot '0'
+precachefile weather.name
+}
+{weather_to_scriptname
+if( PARAM1 equals 'clear' )setvard weather.name WEATHER_CLEAR
+ else if( PARAM1 equals 'snow' )setvard weather.name WEATHER_SNOW
+else if( PARAM1 equals 'rain' )setvard weather.name WEATHER_RAIN
+else if( PARAM1 equals 'storm' )setvard weather.name WEATHER_STORM
+else if( PARAM1 equals 'fog_green' ) setvard weather.name WEATHER_FOG_GREEN
+else if( PARAM1 equals 'fog_brown' ) setvard weather.name WEATHER_FOG_BROWN
+else if( PARAM1 equals 'fog_red' ) setvard weather.name WEATHER_FOG_RED
+else if( PARAM1 equals 'fog_white' ) setvard weather.name WEATHER_FOG_WHITE
+else if( PARAM1 equals 'fog_blue' ) setvard weather.name WEATHER_FOG_BLUE
+else if( PARAM1 equals 'fog_thick' ) setvard weather.name WEATHER_FOG_THICK
+else if( PARAM1 equals 'fog_black' ) setvard weather.name WEATHER_FOG_BLACK
+else setvard weather.name 0
+setvarg G_WEATHER_SCRIPT weather.name
+if ( PARAM1 equals 'clear' ) clientevent update all const.localplayer.scriptID clear_weather
+}
