@@ -16,7 +16,7 @@ public:
     memcpy(m_CookedDir, rDir, MAX_PATH);
     memcpy(m_OutDir, oDir, MAX_PATH);
     
-    strncat(m_CookedDir, "\\cooked", MAX_PATH);
+    strncat(m_CookedDir, "\\cooked\\", MAX_PATH);
     
     try {
       CreateDirectory(m_CookedDir, NULL);

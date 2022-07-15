@@ -43,12 +43,11 @@ void Packer::cookScripts()
 			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
 				
 				char createFile[MAX_PATH];
 				strncpy(createFile, m_CookedDir, MAX_PATH);
 				strncat(createFile, cRelativePath, MAX_PATH);
-				std::cout << createFile << std::endl;
 				
 				if (g_Verbose == true)
 					printf("Cleaning script: %s\n", cRelativePath);
@@ -95,7 +94,7 @@ void Packer::packScripts()
 			if (InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
 				
 				if (g_Verbose == true)
 					printf("Doing file: %s\n", cRelativePath);
@@ -126,6 +125,8 @@ void Packer::packScripts()
 	
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
+			}else{
+				std::cout << "{hasdjhg>" << std::endl;
 			}
 		}
 	}
@@ -159,11 +160,11 @@ void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 
 void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
 {
-	char *ffile = (char*)buffer;
-	memset(ffile, '\0', bufferSize);
+	char *ffile = new char[bufferSize]();
+	snprintf(ffile, bufferSize, "%s", (char*)buffer);
 
 	//we create parser object.
-	Parser parser(ffile, name);
+	Parser parser(buffer, name);
 	parser.stripComments();
 
 	//we check for errors here because comments were already replaced.

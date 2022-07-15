@@ -23,7 +23,7 @@ public:
     State cState = State::NotAComment;
     std::string res;
     
-    for (size_t i = 0; i < m_Result.length(); i++)
+    for (size_t i = 0; i < m_Data.length(); i++)
     {
       const char ch = m_Result[i];
       switch (cState)
@@ -169,11 +169,9 @@ public:
         switch(line[pos])
         {
           case '{':
-            std::cout << "push " << lineNum << std::endl;
             openBrace.push_back(std::make_pair(lineNum, pos));
             break;
           case '}':
-            std::cout << "pop " << lineNum << std::endl;
             if (openBrace.size() > 0) //don't try to pop empty vector, bad things happen...
               openBrace.pop_back();
             break;
@@ -218,7 +216,14 @@ public:
 
   void saveResult(char *create)
   {
-    std::ofstream o(create);
+    // char dir[MAX_PATH];
+    // memcpy(dir, create, MAX_PATH);
+    //CreateDirectory(dir, NULL);
+    const char *dir = getBaseDir(create);
+    CreateDirectory(dir, NULL);
+
+    std::ofstream o;
+    o.open(create, std::ios_base::trunc);
     o << m_Result;
     o.close();
   }
@@ -252,6 +257,14 @@ private:
   void quoteError(size_t line, size_t pos)
   {
     addError("%s:%u.%u: unclosed quotation", line, pos);
+  }
+
+  const char *getBaseDir(char *path)
+  {
+    std::string str(path);
+    size_t found = str.find_last_of("/\\");
+    std::string result = str.substr(0, found);
+    return result.c_str();
   }
   
   std::string m_Result{};
