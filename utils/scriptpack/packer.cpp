@@ -55,7 +55,7 @@ void Packer::cookScripts()
 				parserThread.join();
 					
 				if (g_Verbose == true)
-					printf("End script cleaning: %s\n", cRelativePath);
+					printf("End script cleaning: %s\n\n", cRelativePath);
 			}
 		}
 		

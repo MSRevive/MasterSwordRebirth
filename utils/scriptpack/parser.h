@@ -199,8 +199,7 @@ public:
   {
     std::cout << m_ErrorList.size() << " errors found" << std::endl;
     for (auto i: m_ErrorList)
-      std::cout << i << std::endl;
-    std::cout << std::endl;
+      std::cout << '\t' << i << std::endl;
   }
   
   void saveErrors()
