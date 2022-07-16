@@ -1,1 +1,0 @@
-#include weathersfx_weather_base{ [client] weather_startsetcallback render enable}{ [client] weather_setenvsetenv fog.enabled1setenv fog.density5.4setenv fog.start50setenv fog.end500setenv fog.typelinearsetenv fog.color(0.4,0.5,0.2)}

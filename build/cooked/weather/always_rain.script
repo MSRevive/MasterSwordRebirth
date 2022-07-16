@@ -1,1 +1,0 @@
-{setvarg G_OVERRIDE_WEATHER_CODE "rain;rain;rain"setvarg global.map.weather G_OVERRIDE_WEATHER_CODEcallexternal players ext_weather_change rain}#include monstersbase_temporary
