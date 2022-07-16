@@ -217,9 +217,12 @@ public:
   void saveResult(char *create)
   {
     char dir[MAX_PATH];
-    snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
-    std::cout << dir <<std::endl;
-    CreateDirectory(dir, NULL);
+    int ret = snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
+    //terrible method, but only way to make sure it wrote to char array properly?
+    if (ret >= 5)
+      CreateDirectory(dir, NULL);
+    else
+      std::cout << "ERROR: MAX PATH limit exceeded" << std::endl;
 
     std::ofstream o;
     o.open(create, std::ios_base::trunc);
