@@ -23,7 +23,7 @@ public:
     State cState = State::NotAComment;
     std::string res;
     
-    for (size_t i = 0; i < m_Data.length(); i++)
+    for (size_t i = 0; i < m_Result.length(); i++)
     {
       const char ch = m_Result[i];
       switch (cState)
@@ -88,7 +88,7 @@ public:
       //check if line is empty or has whitespace
       if (!line.empty() && !onlySpace(line))
       {
-        newRes += line + "\n";
+        newRes += line + '\n';
       }
     }
     
@@ -216,18 +216,15 @@ public:
 
   void saveResult(char *create)
   {
-    // char dir[MAX_PATH];
-    // memcpy(dir, create, MAX_PATH);
-    //CreateDirectory(dir, NULL);
     char dir[MAX_PATH];
     snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
     std::cout << dir <<std::endl;
     CreateDirectory(dir, NULL);
 
-    // std::ofstream o;
-    // o.open(create, std::ios_base::trunc);
-    // o << m_Result;
-    // o.close();
+    std::ofstream o;
+    o.open(create, std::ios_base::trunc);
+    o << m_Result;
+    o.close();
   }
 
 private:
@@ -264,7 +261,6 @@ private:
   const char *getBaseDir(char *path)
   {
     std::string str(path);
-    size_t found = ;
     std::string result = str.substr(0, str.find_last_of("/\\"));
     return result.c_str();
   }

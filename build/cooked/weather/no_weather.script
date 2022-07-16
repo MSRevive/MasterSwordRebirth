@@ -1,4 +1,1 @@
-{
-setvarg NO_WEATHER 1
-callexternal all game_playercmd_setweather clear
-}
+{setvarg NO_WEATHER 1callexternal all game_playercmd_setweather clear}

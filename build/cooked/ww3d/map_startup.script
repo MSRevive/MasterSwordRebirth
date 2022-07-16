@@ -1,11 +1,1 @@
-{ [shared]
-const MAP_NAME 'ww2b'
-const MAP_WEATHER "clear;clear;clear;clear;clear;clear"
-const MAP_ALLOWNIGHT 0
-setvarg MAP_CON 1
-setvarg G_MAP_NAME "World Walker - Series One, Final by Crow"
-setvarg G_MAP_DESC "The lower catacombs and the tomb Sir Geric"
-setvarg G_MAP_DIFF "Levels 15-30200-600hp"
-setvarg G_WARN_HP 200
-}
-#include worlditemsmap_startup
+{ [shared]const MAP_NAME 'ww2b'const MAP_WEATHER "clear;clear;clear;clear;clear;clear"const MAP_ALLOWNIGHT 0setvarg MAP_CON 1setvarg G_MAP_NAME "World Walker - Series One, Final by Crow"setvarg G_MAP_DESC "The lower catacombs and the tomb Sir Geric"setvarg G_MAP_DIFF "Levels 15-30200-600hp"setvarg G_WARN_HP 200}#include worlditemsmap_startup

@@ -1,4 +1,1 @@
-{
-callexternal players ext_weather_change rain_storm
-}
-#include monstersbase_temporary
+{callexternal players ext_weather_change rain_storm}#include monstersbase_temporary

@@ -1,4 +1,1 @@
-{
-callexternal players ext_weather_change fog_black
-}
-#include monstersbase_temporary
+{callexternal players ext_weather_change fog_black}#include monstersbase_temporary

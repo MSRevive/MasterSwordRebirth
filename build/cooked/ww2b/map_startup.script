@@ -1,11 +1,1 @@
-{ [shared]
-const MAP_NAME 'ww2b'
-const MAP_WEATHER "clear;clear;clear;clear;clear;clear"
-const MAP_ALLOWNIGHT 0
-setvarg MAP_CON 1
-setvarg G_MAP_NAME "World Walker - Series One, Part II by Crow"
-setvarg G_MAP_DESC "The upper catacombs of an ancient tomb"
-setvarg G_MAP_DIFF "Levels 15-25200-500hp"
-setvarg G_WARN_HP 150
-}
-#include worlditemsmap_startup
+{ [shared]const MAP_NAME 'ww2b'const MAP_WEATHER "clear;clear;clear;clear;clear;clear"const MAP_ALLOWNIGHT 0setvarg MAP_CON 1setvarg G_MAP_NAME "World Walker - Series One, Part II by Crow"setvarg G_MAP_DESC "The upper catacombs of an ancient tomb"setvarg G_MAP_DIFF "Levels 15-25200-500hp"setvarg G_WARN_HP 150}#include worlditemsmap_startup
