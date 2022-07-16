@@ -30,11 +30,11 @@ int main(int argc, char** argv)
 		_snprintf(workDir, MAX_PATH, "%s\\scripts", rootDir);
 		_snprintf(_outDir, MAX_PATH, "%s", rootDir);
 		
-		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for cleaned scripts");
+		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for packed scripts");
 		cmd.add(oDirArg);
 		
-		TCLAP::SwitchArg relSwitch("r", "release", "Release build", cmd, false);
-		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose.", cmd, false);
+		TCLAP::SwitchArg relSwitch("r", "release", "Release build, this will clean the scipts then pack them.", cmd, false);
+		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose printing.", cmd, false);
 		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Turn on/off error output to file.", cmd, false);
 		
 		//Parse command line arguements
