@@ -27,9 +27,8 @@ int main(int argc, char** argv)
 		//String arguements
 		char rootDir[MAX_PATH];
 		_getcwd(rootDir, MAX_PATH);
-		memcpy(workDir, rootDir, MAX_PATH);
-		strncat(workDir, "\\scripts", MAX_PATH);
-		memcpy(_outDir, rootDir, MAX_PATH);
+		_snprintf(workDir, MAX_PATH, "%s\\scripts", rootDir);
+		_snprintf(_outDir, MAX_PATH, "%s", rootDir);
 		
 		TCLAP::ValueArg<char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for cleaned scripts");
 		cmd.add(oDirArg);
@@ -42,6 +41,7 @@ int main(int argc, char** argv)
 		cmd.parse(argc, argv);
 		
 		char *outDir = oDirArg.getValue();
+		//set global vars
 		g_Release = relSwitch.getValue();
 		g_Verbose = verboseSwitch.getValue();
 		g_ErrFile = errFileSwitch.getValue();

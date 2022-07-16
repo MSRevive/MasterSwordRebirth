@@ -11,12 +11,10 @@ class Packer
 {
 public:
   Packer(char *wDir, char *rDir, char *oDir) {
-    memcpy(m_WorkDir, wDir, MAX_PATH);
-    memcpy(m_RootDir, rDir, MAX_PATH);
-    memcpy(m_CookedDir, rDir, MAX_PATH);
-    memcpy(m_OutDir, oDir, MAX_PATH);
-    
-    strncat(m_CookedDir, "\\cooked\\", MAX_PATH);
+    _snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
+    _snprintf(m_RootDir, MAX_PATH, "%s", rDir);
+    _snprintf(m_OutDir, MAX_PATH, "%s", oDir);
+    _snprintf(m_CookedDir, MAX_PATH, "%s\\cooked\\", rDir);
     
     try {
       CreateDirectory(m_CookedDir, NULL);

@@ -217,7 +217,7 @@ public:
   void saveResult(char *create)
   {
     char dir[MAX_PATH];
-    int ret = snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
+    int ret = _snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
     //terrible method, but only way to make sure it wrote to char array properly?
     if (ret >= 5)
       CreateDirectory(dir, NULL);

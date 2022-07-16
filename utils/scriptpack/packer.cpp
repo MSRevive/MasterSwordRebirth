@@ -46,8 +46,7 @@ void Packer::cookScripts()
 				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
 				
 				char createFile[MAX_PATH];
-				strncpy(createFile, m_CookedDir, MAX_PATH);
-				strncat(createFile, cRelativePath, MAX_PATH);
+				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
 				
 				if (g_Verbose == true)
 					printf("Cleaning script: %s\n", cRelativePath);
@@ -125,8 +124,6 @@ void Packer::packScripts()
 	
 				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
 					printf("Failed to write entry: %s\n", cRelativePath);
-			}else{
-				std::cout << "{hasdjhg>" << std::endl;
 			}
 		}
 	}
