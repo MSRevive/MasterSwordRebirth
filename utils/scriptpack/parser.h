@@ -219,13 +219,15 @@ public:
     // char dir[MAX_PATH];
     // memcpy(dir, create, MAX_PATH);
     //CreateDirectory(dir, NULL);
-    const char *dir = getBaseDir(create);
+    char dir[MAX_PATH];
+    snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
+    std::cout << dir <<std::endl;
     CreateDirectory(dir, NULL);
 
-    std::ofstream o;
-    o.open(create, std::ios_base::trunc);
-    o << m_Result;
-    o.close();
+    // std::ofstream o;
+    // o.open(create, std::ios_base::trunc);
+    // o << m_Result;
+    // o.close();
   }
 
 private:
@@ -262,8 +264,8 @@ private:
   const char *getBaseDir(char *path)
   {
     std::string str(path);
-    size_t found = str.find_last_of("/\\");
-    std::string result = str.substr(0, found);
+    size_t found = ;
+    std::string result = str.substr(0, str.find_last_of("/\\"));
     return result.c_str();
   }
   
