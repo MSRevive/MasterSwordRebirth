@@ -23,7 +23,6 @@
 #include "netadr.h"
 #include "vgui_schememanager.h"
 #include "logger.h"
-#include "steamhelper.h"
 #include <windows.h>
 
 //#define LOG_ALLEXPORTS //more exports in entity.cpp
@@ -264,7 +263,6 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 		return 0;
 	}
 
-	SteamHelper::Initialize();
 	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]\n";
 
 	enddbg;
@@ -435,10 +433,6 @@ void DLLEXPORT HUD_Frame(double time)
 	dbg("Call SetBorderlessWindow");
 	SetBorderlessWindow();
 	dbg("Call SetBorderlessWindow DONE");
-
-	dbg("Call Steam Think");
-	SteamHelper::Think();
-	dbg("Call Steam Think DONE");
 
 	enddbg;
 }

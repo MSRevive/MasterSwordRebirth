@@ -3,12 +3,6 @@
 
 #include "rapidjson/fwd.h" // Rapid JSON Helpers from Infestus!
 
-typedef rapidjson::Document JSONDocument;
-typedef rapidjson::Value JSONValue;
-typedef rapidjson::SizeType JSONSizeType;
-
-#define REQUEST_URL_SIZE 256
-
 namespace HTTPRequestHandler
 {
 	void Initialize(const char* url);

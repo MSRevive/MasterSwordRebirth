@@ -23,7 +23,7 @@
 #include "httprequesthandler.h"
 #include "fndatahandler.h"
 
-using namespace rapidjson;
+#define REQUEST_URL_SIZE 256
 
 enum FnPlayerFlags
 {
@@ -145,10 +145,10 @@ static void HandleRequest(FnRequestData* req)
 			return;
 
 		const JSONDocument& doc = *pDoc;
-		
+
 		if (doc["code"] == 400)
 			return;
-		
+
 		GetPlayerFlags(req, doc);
 		LoadCharacter(req, doc["data"]);
 		break;
@@ -160,8 +160,8 @@ static void HandleRequest(FnRequestData* req)
 		char steamID64String[MSSTRING_SIZE];
 		_snprintf(steamID64String, MSSTRING_SIZE, "%llu", req->steamID);
 
-		StringBuffer s;
-		Writer<StringBuffer> writer(s);
+		rapidjson::StringBuffer s;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
 
 		writer.StartObject();
 
@@ -253,7 +253,7 @@ void FnDataHandler::Reset(void)
 	do
 	{
 		Think(true);
-		wait(200);
+		wait(100);
 	} while (g_vRequestData.size());
 
 	g_fThinkTime = 0.0f;
@@ -449,50 +449,4 @@ void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 	g_vIntermediateData.push_back(new FnRequestData(FN_REQ_DELETE, pPlayer->steamID64, slot, GetFnUrl("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
-}
-
-// We store 64-bit SteamIDs, convert from old 32-bit string based ID to 64-bit numeric.
-// See https://developer.valvesoftware.com/wiki/SteamID for help.
-// EX input: STEAM_0:0:7019991 = STEAM_X:Y:Z
-// Formula: 
-// V = 76561197960265728
-// ID = Z*2+V+Y
-unsigned long long FnDataHandler::GetSteamID64(const char* id)
-{
-	if (!id || !id[0]) return 0ULL;
-
-	char pchSteamID[32];
-	strncpy(pchSteamID, id, sizeof(pchSteamID));
-
-	const char* pStart = pchSteamID;
-	size_t size = strlen(pchSteamID);
-
-	for (size_t i = 0; i < size; i++)
-	{
-		if (pchSteamID[i] == ':') // Skip the first part.
-		{
-			pStart += (i + 1);
-			strncpy(pchSteamID, pStart, sizeof(pchSteamID)); // Removes STEAM_X:, WE ONLY CARE ABOUT Y:Z part!
-			break;
-		}
-	}
-
-	char pchArg1[16], pchArg2[16];
-	pStart = pchSteamID;
-	size = strlen(pchSteamID);
-
-	for (size_t i = 0; i < size; i++)
-	{
-		if (pchSteamID[i] == ':') // split
-		{
-			strncpy(pchArg1, pStart, sizeof(pchArg1));
-			pchArg1[i] = '\0';
-
-			pStart += (i + 1);
-			strncpy(pchArg2, pStart, sizeof(pchArg2));
-			break;
-		}
-	}
-
-	return (atoi(pchArg1) + 2ULL * atoi(pchArg2) + 76561197960265728ULL);
 }

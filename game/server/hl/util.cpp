@@ -609,17 +609,64 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 	return pPlayer;
 }
 
-CBasePlayer* UTIL_PlayerBySteamID(unsigned long long steamID64)
+CBasePlayer* UTIL_PlayerBySteamID(ID64 steamID64)
 {
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity* pEntity = UTIL_PlayerByIndex(i);
-		CBasePlayer* pPlayer = pEntity ? (CBasePlayer*)pEntity : NULL;
+		CBasePlayer* pPlayer = (pEntity ? (CBasePlayer*)pEntity : NULL);
 		if (pPlayer && (pPlayer->steamID64 == steamID64))
 			return pPlayer;
 	}
 
 	return NULL;
+}
+
+// We store 64-bit SteamIDs, convert from old 32-bit string based ID to 64-bit numeric.
+// See https://developer.valvesoftware.com/wiki/SteamID for help.
+// EX input: STEAM_0:0:7019991 = STEAM_X:Y:Z
+// Formula: 
+// V = 76561197960265728
+// ID = Z*2+V+Y
+ID64 UTIL_ComputeSteamID64(const char* id, char sep)
+{
+	if (!id || !id[0]) 
+		return 0ULL;
+
+	char pchSteamID[32];
+	strncpy(pchSteamID, id, sizeof(pchSteamID));
+
+	const char* pStart = pchSteamID;
+	size_t size = strlen(pchSteamID);
+
+	for (size_t i = 0; i < size; i++)
+	{
+		if (pchSteamID[i] == sep) // Skip the first part.
+		{
+			pStart += (i + 1);
+			strncpy(pchSteamID, pStart, sizeof(pchSteamID)); // Removes STEAM_X:, WE ONLY CARE ABOUT Y:Z part!
+			break;
+		}
+	}
+
+	char pchArg1[16], pchArg2[16];
+	pStart = pchSteamID;
+	size = strlen(pchSteamID);
+
+	for (size_t i = 0; i < size; i++)
+	{
+		if (pchSteamID[i] == sep) // split
+		{
+			strncpy(pchArg1, pStart, sizeof(pchArg1));
+			pchArg1[i] = '\0';
+
+			pStart += (i + 1);
+			strncpy(pchArg2, pStart, sizeof(pchArg2));
+			break;
+		}
+	}
+
+	return (atoi(pchArg1) + 2ULL * atoi(pchArg2) + 76561197960265728ULL);
 }
 
 //[begin] NOV2014_13 Thothie - centralizing trigger scriptevent and req functions

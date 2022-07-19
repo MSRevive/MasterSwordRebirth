@@ -148,4 +148,8 @@ typedef GenericSchemaValidator<SchemaDocument, BaseReaderHandler<UTF8<char>, voi
 
 RAPIDJSON_NAMESPACE_END
 
+typedef rapidjson::Document JSONDocument;
+typedef rapidjson::Value JSONValue;
+typedef rapidjson::SizeType JSONSizeType;
+
 #endif // RAPIDJSON_RAPIDJSONFWD_H_

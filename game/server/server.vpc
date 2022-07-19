@@ -145,7 +145,9 @@ $Project "Server"
 		$File	"sv_character.cpp"
 		$File	"svglobals.cpp"
 		$File	"$SRCDIR\game\shared\syntax\syntax.cpp"
-		$File	"gamerules\team.cpp"	
+		$File	"gamerules\team.cpp"
+		$File 	"steamhelper.cpp"
+		$File 	"steamhelper.h"
 		
 		$Folder	"Headers"
 		{
@@ -176,9 +178,7 @@ $Project "Server"
 	}
 
 	$Folder	"Shared"
-	{
-		$File	"$SRCDIR\game\shared\steamhelper.cpp"
-		$File	"$SRCDIR\game\shared\steamhelper.h"		
+	{	
 		$File	"$SRCDIR\game\shared\strhelper.cpp"
 		$File	"$SRCDIR\game\shared\strhelper.h"
 		$File	"$SRCDIR\game\shared\ms\fndatahandler.cpp"

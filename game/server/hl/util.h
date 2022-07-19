@@ -352,7 +352,9 @@ class CBasePlayerItem;
 class CBasePlayer;
 extern BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
 
-extern CBasePlayer* UTIL_PlayerBySteamID(unsigned long long steamID64);
+#define ID64 unsigned long long
+extern CBasePlayer* UTIL_PlayerBySteamID(ID64 steamID64);
+extern ID64 UTIL_ComputeSteamID64(const char* id, char sep = ':');
 
 // prints messages through the HUD
 extern void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);

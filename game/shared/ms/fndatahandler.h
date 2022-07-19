@@ -19,8 +19,6 @@ namespace FnDataHandler
 	void LoadCharacter(CBasePlayer* pPlayer, int slot);
 	void CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const char* data, int size, bool bIsUpdate);
 	void DeleteCharacter(CBasePlayer* pPlayer, int slot);
-
-	unsigned long long GetSteamID64(const char* id);
 }
 
 #endif // FN_DATA_HANDLER_H
