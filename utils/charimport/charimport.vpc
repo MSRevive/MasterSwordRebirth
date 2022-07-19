@@ -13,7 +13,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty"
-		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
+		$PreprocessorDefinitions		"$BASE;NOT_HLDLL;CURL_STATICLIB"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
 
@@ -32,5 +32,10 @@ $Project "charimport"
 		$File "..\..\thirdparty\base64\base64.cpp"
 		$File "$SRCDIR\game\shared\ms\httprequesthandler.cpp"
 		$File "charimport.cpp"
+	}
+
+	$Folder	"Link Libraries" 
+	{
+		$Lib libcurl
 	}
 }

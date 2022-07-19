@@ -1,64 +1,96 @@
 //
-// Simple HTTP Request handling using httplib (https://github.com/yhirose/cpp-httplib)!
+// Simple HTTP Request handling using cUrl.
 //
 
-#include "httplib/httplib.h"
+#ifndef _WIN32
+#define CURL_PULL_SYS_TYPES_H 1
+#define CURL_PULL_STDINT_H 1
+#define CURL_PULL_INTTYPES_H 1
+#define CURL_PULL_SYS_SOCKET_H 1
+#else
+#define CURL_PULL_WS2TCPIP_H 1
+#endif
+
+#include "curl/curl.h"
 #include "httprequesthandler.h"
 #include "rapidjson/document_safe.h"
 #include <string>
 
-#define HTTP_CODE_OK 200
-
 static std::string g_pDataBuffer;
-static httplib::Client* g_pHttpClient = NULL;
 
-static bool IsValidResponse(const httplib::Result& result)
+static size_t DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
-	g_pDataBuffer.clear();
-	if (result && (result->status == HTTP_CODE_OK))
-	{
-		g_pDataBuffer = result->body;
-		return true;
-	}
-	return false;
-}
-
-void HTTPRequestHandler::Initialize(const char* url)
-{
-	if ((g_pHttpClient != NULL) || !url || !url[0])
-		return;
-
-	g_pHttpClient = new httplib::Client(url);
-}
-
-void HTTPRequestHandler::Destroy(void)
-{
-	delete g_pHttpClient;
-	g_pHttpClient = NULL;
+	g_pDataBuffer.append(buf, size * nmemb);
+	return (size * nmemb);
 }
 
 bool HTTPRequestHandler::GetRequest(const char* url)
 {
-	auto result = g_pHttpClient->Get(url);
-	return IsValidResponse(result);
+	g_pDataBuffer.clear();
+
+	CURL* curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	CURLcode result = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+
+	return (result == CURLE_OK);
 }
 
 bool HTTPRequestHandler::PostRequest(const char* url, const char* body)
 {
-	auto result = g_pHttpClient->Post(url, body, "application/json");
-	return IsValidResponse(result);
+	g_pDataBuffer.clear();
+
+	CURL* curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_POST, 1);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	CURLcode result = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+
+	return (result == CURLE_OK);
 }
 
 bool HTTPRequestHandler::PutRequest(const char* url, const char* body)
 {
-	auto result = g_pHttpClient->Put(url, body, "application/json");
-	return IsValidResponse(result);
+	g_pDataBuffer.clear();
+
+	CURL* curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	CURLcode result = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+
+	return (result == CURLE_OK);
 }
 
 bool HTTPRequestHandler::DeleteRequest(const char* url)
 {
-	auto result = g_pHttpClient->Delete(url);
-	return IsValidResponse(result);
+	g_pDataBuffer.clear();
+
+	CURL* curl = curl_easy_init();
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	CURLcode result = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+
+	return (result == CURLE_OK);
 }
 
 // Parses a JSON formatted char array, returns a JSON document

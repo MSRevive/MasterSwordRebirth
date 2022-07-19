@@ -144,5 +144,4 @@ void GameDLLShutdown()
 	FileSystem_Shutdown();
 	FnDataHandler::Destroy();
 	SteamHelper::Shutdown();
-	HTTPRequestHandler::Destroy();
 }

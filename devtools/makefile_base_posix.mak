@@ -29,6 +29,10 @@ ifeq ($(OS),Darwin)
 endif
 
 ifeq ($(CFG), release)
+	# With gcc 4.6.3, engine.so went from 7,383,765 to 8,429,109 when building with -O3.
+	#  There also was no speed difference running at 1280x1024. May 2012, mikesart.
+	#  tonyp: The size increase was likely caused by -finline-functions and -fipa-cp-clone getting switched on with -O3.
+	# -fno-omit-frame-pointer: need this for stack traces with perf.
 	OptimizerLevel_CompilerSpecific = -O2 -fno-strict-aliasing -ffast-math -fno-omit-frame-pointer -ftree-vectorize
 	ifeq ($(CLANG_BUILD),1)
 		# These aren't supported wit Clang 3.5. Need to remove when we update that.
@@ -61,9 +65,14 @@ CFLAGS = $(BASE_CFLAGS) $(ENV_CFLAGS)
 ifeq ($(CLANG_BUILD),1)
 	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++14 -Wno-c++11-narrowing -Wno-dangling-else $(ENV_CXXFLAGS)
 else
-	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++14 -fpermissive $(ENV_CXXFLAGS)
+	CXXFLAGS = $(BASE_CFLAGS) -std=gnu++0x -fpermissive $(ENV_CXXFLAGS)
 endif
 DEFINES += -DVPROF_LEVEL=1 -DGNUC -DNO_HOOK_MALLOC -DNO_MALLOC_OVERRIDE
+
+## TODO: This cases build errors in cstrike/bin right now. Need to debug.
+# This causes all filesystem interfaces to default to their 64bit versions on
+# 32bit systems, which means we don't break on filesystems with inodes > 32bit.
+# DEFINES += -D_FILE_OFFSET_BITS=64
 
 LDFLAGS = $(CFLAGS) $(GCC_ExtraLinkerFlags) $(OptimizerLevel)
 GENDEP_CXXFLAGS = -MMD -MP -MF $(@:.o=.P) 
@@ -76,7 +85,7 @@ COPY_DLL_TO_SRV = 0
 LDFLAGS += -Wl,--build-id
 
 export STEAM_RUNTIME_PATH := /usr
-GCC_VER = -5
+GCC_VER = -4.8
 P4BIN = p4
 
 ifeq ($(TARGET_PLATFORM),linux64)
@@ -135,7 +144,7 @@ endif
 
 ifeq ($(CLANG_BUILD),1)
 	# Clang specific flags
-else ifeq ($(GCC_VER),-5)
+else ifeq ($(GCC_VER),-4.8)
 	WARN_FLAGS += -Wno-unused-local-typedefs
 	WARN_FLAGS += -Wno-unused-result
 	WARN_FLAGS += -Wno-narrowing

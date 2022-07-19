@@ -13,7 +13,7 @@ jobs:
     - name: C/C++ dev tools
       run: |
         sudo apt update
-        sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
+        sudo apt-get install build-essential gcc-4.8-multilib g++-4.8-multilib
 
     - name: Create makefile
       run: |
