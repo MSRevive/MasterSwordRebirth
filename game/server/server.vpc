@@ -255,6 +255,7 @@ $Project "Server"
 	$Folder	"Link Libraries" 
 	{
 		$ImpLibexternal steam_api
-		$Lib libcurl
+		$Lib libz [$LINUXALL]
+		$Lib libcurl		
 	}
 }
