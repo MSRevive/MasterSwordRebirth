@@ -95,14 +95,15 @@ static bool IsSlotValid(int slot) { return ((slot >= 0) && (slot < MAX_CHARSLOTS
 
 static const char* GetFnUrl(char* fmt, ...)
 {
-	static char string[REQUEST_URL_SIZE];
+	static char requestUrl[REQUEST_URL_SIZE], string[REQUEST_URL_SIZE];
 
 	va_list argptr;
 	va_start(argptr, fmt);
 	vsnprintf(string, sizeof(string), fmt, argptr);
 	va_end(argptr);
 
-	return string;
+	_snprintf(requestUrl, REQUEST_URL_SIZE, "%s%s", CVAR_GET_STRING("ms_central_addr"), string);
+	return requestUrl;
 }
 
 // Load single char details.
@@ -117,7 +118,8 @@ static void LoadCharacter(FnRequestData* req, const JSONValue& val)
 
 static void GetPlayerFlags(FnRequestData* req, const JSONDocument& doc)
 {
-	if (req == NULL) return;
+	if (req == NULL)
+		return;
 
 	if (doc["isBanned"].GetBool())
 		req->flags |= FN_FLAG_BANNED;
@@ -129,7 +131,8 @@ static void GetPlayerFlags(FnRequestData* req, const JSONDocument& doc)
 // Handle a char request.
 static void HandleRequest(FnRequestData* req)
 {
-	if (req == NULL) return;
+	if (req == NULL)
+		return;
 
 	req->result = FN_RES_ERR;
 	JSONDocument* pDoc = NULL;
@@ -353,7 +356,8 @@ bool FnDataHandler::IsEnabled(void)
 
 bool FnDataHandler::IsValid(const char* url)
 {
-	if (!url || !url[0] || !IsEnabled()) return false;
+	if (!url || !url[0] || !IsEnabled())
+		return false;
 
 	std::unique_lock<std::mutex> lck(mutex); // Ensure thread safety.
 
@@ -379,7 +383,8 @@ bool FnDataHandler::IsVerifiedSC(unsigned int hash) { return IsValid(GetFnUrl("/
 // Load all characters!
 void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL))
+		return;
 
 	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{
@@ -406,10 +411,14 @@ void FnDataHandler::LoadCharacter(CBasePlayer* pPlayer, int slot)
 // Create or Update character.
 void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const char* data, int size, bool bIsUpdate)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (data == NULL) || (size <= 0) || !IsSlotValid(slot)) return; // Quick validation - steamId is vital.
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (data == NULL) || (size <= 0) || !IsSlotValid(slot))
+		return; // Quick validation - steamId is vital.
 
-	if (bIsUpdate && (pPlayer->m_CharacterState == CHARSTATE_UNLOADED)) return; // You cannot update your char (save) if there is no char loaded.
-	if (!bIsUpdate && (pPlayer->m_CharInfo[slot].Status == CDS_LOADING)) return; // Busy, wait for callback!
+	if (bIsUpdate && (pPlayer->m_CharacterState == CHARSTATE_UNLOADED))
+		return; // You cannot update your char (save) if there is no char loaded.
+
+	if (!bIsUpdate && (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+		return; // Busy, wait for callback!
 
 	FnRequestData* req = new FnRequestData(
 		bIsUpdate ? FN_REQ_UPDATE : FN_REQ_CREATE,
@@ -444,7 +453,8 @@ void FnDataHandler::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, cons
 
 void FnDataHandler::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot) || (pPlayer->m_CharInfo[slot].Status == CDS_LOADING)) return;
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot) || (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+		return;
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;

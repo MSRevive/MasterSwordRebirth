@@ -5,9 +5,6 @@
 
 namespace HTTPRequestHandler
 {
-	void Initialize(const char* url);
-	void Destroy(void);
-
 	bool GetRequest(const char* url);
 	bool PostRequest(const char* url, const char* body);
 	bool PutRequest(const char* url, const char* body);

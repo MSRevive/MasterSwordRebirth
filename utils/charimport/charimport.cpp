@@ -15,7 +15,7 @@
 
 using namespace rapidjson;
 
-#define FN_TARGET_URL "http://fn.msrebirth.net:27500"
+#define FN_TARGET_URL "http://fn.msrebirth.net:27500/api/v1/character/"
 #define MS_SIZE_LONG 4
 #define MS_CHAR_SIZE 5
 
@@ -213,7 +213,7 @@ static bool WriteCharToFN(const char* steamID, int slot, const char* data, int s
 
 	writer.EndObject();
 
-	return HTTPRequestHandler::PostRequest("/api/v1/character/", s.GetString());
+	return HTTPRequestHandler::PostRequest(FN_TARGET_URL, s.GetString());
 }
 
 static void ImportOldCharacter(const char* file)
@@ -285,8 +285,6 @@ static void ImportOldCharacter(const char* file)
 
 int main(int argc, char** argv)
 {
-	HTTPRequestHandler::Initialize(FN_TARGET_URL);
-
 	char root[MAX_PATH], searchPath[MAX_PATH], filePath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, root);
 	g_iRootSize = (strlen(root) + 1);
@@ -312,7 +310,6 @@ int main(int argc, char** argv)
 	} while (FindNextFile(findHandle, &wfd));
 
 	FindClose(findHandle);
-	HTTPRequestHandler::Destroy();
 
 	printf("\nCompleted importing %i characters\n", g_iNumFilesProcessed);
 	printf("Press any key to exit...\n");
