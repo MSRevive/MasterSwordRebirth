@@ -3200,9 +3200,8 @@ bool CScript::ScriptCmd_GetEnts(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	float thoth_boxsize = atof(Params[1]);
 
 	CBaseEntity *pList[255], *pEnt = NULL;
-	Vector StartPos = Params.size() == 2 ? StringToVec(Params[2]) : m.pScriptedEnt->pev->origin;
+	Vector StartPos = Params.size() == 3 ? StringToVec(Params[2]) : m.pScriptedEnt->pev->origin;
 	int count = UTIL_MonstersInSphere( pList, 255, StartPos, thoth_boxsize);
-
 	int thoth_curstore = 0;
 	for(int i = 0; i < count; i++)
 	{
