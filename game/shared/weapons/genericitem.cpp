@@ -93,7 +93,10 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 				if(bTempPev)
 					GlobalItem.pItem->pev = new entvars_t();
 
-				if (!GlobalItem.pItem)
+				try {
+					GlobalItem.pItem->CallScriptEvent("game_spawn", &vParams);
+				}
+				catch(...)
 				{
 					CGenericItem * pNewItem = NULL;
 					try
@@ -121,38 +124,6 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 						#endif
 					}
 				}
-				// try
-				// {
-				// 	GlobalItem.pItem->CallScriptEvent( "game_spawn", &vParams );
-				// }
-				// catch(...)
-				// {
-				// 	CGenericItem * pNewItem = NULL;
-				// 	try
-				// 	{
-				// 		pNewItem = NewGenericItem(GlobalItem.pItem);
-				// 		::delete (CGenericItem *)GlobalItem.pItem;
-				// 		GlobalItem.pItem = pNewItem;
-				// 		GlobalItem.pItem->SUB_Remove();
-				// 		bTempPev = false;
-				// 	}
-				// 	catch( ... )
-				// 	{
-				// 	}
-				// 	#if !TURN_OFF_ALERT
-				// 			ErrorPrint( "GLBL_ITEM"
-				// 								, ERRORPRINT_LOG|ERRORPRINT_CONSOLE|ERRORPRINT_INFOMSG
-				// 								, "Error while spawning global item '%s'! %s"
-				// 								, pszItemName
-				// 								, pNewItem ? "Using a full item instead!"
-				// 													 : "Creating full item also failed, exiting game"
-				// 								);
-				// 			if ( !pNewItem )
-				// 			{
-				// 					exit(-1);
-				// 			}
-				// 	#endif
-				// }
 
 				if ( bTempPev )
 				{
