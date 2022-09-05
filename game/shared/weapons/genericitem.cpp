@@ -208,6 +208,7 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 		dbg("Copy script data from global item");
 		pItem->m_Scripts.add(msnew CScript);
 		pGlobalItem->m_Scripts[0]->CopyAllData(pItem->m_Scripts[0], pItem, pItem);
+		pItem->SetScriptVar("IS_NEW_ITEM", "1");
 	}
 
 #ifndef VALVE_DLL
@@ -454,7 +455,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		if (!cString[0] || cString[0] == '\r' || cString[0] == '\n')
 			continue;
 			
-		if(cString == strstr(cString,"#swap "))
+		if(cString == strstr(cString, "#swap "))
 		{
 			msstring vsLine = msstring(&cString[6]);
 			int vSpacePos = vsLine.find( " " );
@@ -473,7 +474,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		GenItem_t NewGlobalItem;
 
 		NewGlobalItem.Name = cString;
-
 		CGenericItem* pNewItem = ::msnew CGenericItem;
 		NewGlobalItem.pItem = pNewItem;
 
@@ -488,7 +488,11 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		
 		bool fSuccess = pNewItem->Script_Add(cItemFileName, pNewItem) ? true : false;
 		//Log("try adding new item scripts");
-		if (fSuccess) pNewItem->RunScriptEvents(); //Slows down game load, but needed for the precachefile command
+		if (fSuccess)
+		{
+			pNewItem->SetScriptVar("IS_NEW_ITEM", "0");
+			pNewItem->RunScriptEvents(); //Slows down game load, but needed for the precachefile command
+		}
 
 		if (!fSuccess)
 		{
@@ -667,7 +671,7 @@ bool CGenericItem::Deploy()
 			if (m_AnimExtLegs)
 				strncpy(m_pPlayer->m_szAnimLegs, m_AnimExtLegs, 32);
 			else
-				 strncpy(m_pPlayer->m_szAnimLegs,  "", sizeof(m_pPlayer->m_szAnimLegs) );
+				strncpy(m_pPlayer->m_szAnimLegs, "", sizeof(m_pPlayer->m_szAnimLegs));
 		}
 #endif
 
