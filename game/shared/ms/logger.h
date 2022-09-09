@@ -86,6 +86,12 @@ class Logger {
       //logger.file.flush();
       return logger;
     }
+
+    friend Logger &operator<<(Logger &logger, std::string str)
+    {
+      logger.file << str;
+      return logger;
+    }
     
     friend Logger &operator<<(Logger &logger, int n)
     {
