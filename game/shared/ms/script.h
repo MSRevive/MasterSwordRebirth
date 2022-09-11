@@ -3,7 +3,7 @@
 	Script.h - Script file implementation
 
 */
-
+#include <ctime>
 class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
@@ -87,6 +87,7 @@ public:
 	bool Spawn(string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
 	void RunScriptEventByName( msstring_ref pszEventName, msstringlist *Parameters = NULL );	//Run one named event
+	void CallLogged(msstring_ref title, std::clock_t start);
 	bool ParseScriptFile( const char *pszScriptData );
 	SCRIPT_EVENT *EventByName( const char *pszEventName );
 	msstring_ref GetConst( msstring_ref pszText );
@@ -170,7 +171,7 @@ public:
 	SCRIPTCMDSCPP_CMDS( GiveExp );
 	SCRIPTCMDSCPP_CMDS( GiveHPMP );
 	SCRIPTCMDSCPP_CMDS( Gravity );
-  SCRIPTCMDSCPP_CMDS( HashMap );
+  	SCRIPTCMDSCPP_CMDS( HashMap );
 	SCRIPTCMDSCPP_CMDS( HelpTip );
 	SCRIPTCMDSCPP_CMDS( HitMulti );
 	SCRIPTCMDSCPP_CMDS( HudIcon );
@@ -179,7 +180,7 @@ public:
 	SCRIPTCMDSCPP_CMDS( ItemRestrict );
 	SCRIPTCMDSCPP_CMDS( Kill );
 	SCRIPTCMDSCPP_CMDS( LocalPanel ); // MiB MAR2015_01 [LOCAL_PANEL] - Function for local panel options
-  SCRIPTCMDSCPP_CMDS( MarkDmg );
+  	SCRIPTCMDSCPP_CMDS( MarkDmg );
 	SCRIPTCMDSCPP_CMDS( MathSet );
 	SCRIPTCMDSCPP_CMDS( Message );
 	SCRIPTCMDSCPP_CMDS( MessageAll );
@@ -214,7 +215,7 @@ public:
 	//SCRIPTCMDSCPP_CMDS( SaveAllNow );
 	//SCRIPTCMDSCPP_CMDS( SaveNow );
 	SCRIPTCMDSCPP_CMDS( ServerCmd );
-  SCRIPTCMDSCPP_CMDS( Set );
+  	SCRIPTCMDSCPP_CMDS( Set );
 	SCRIPTCMDSCPP_CMDS( SetAlive );
 	SCRIPTCMDSCPP_CMDS( SetAngle );
 	SCRIPTCMDSCPP_CMDS( SetAtkSpeed );
@@ -347,8 +348,8 @@ public:
 	SCRIPTCPP_GETTER( ReplaceOrInsert );
 	SCRIPTCPP_GETTER( ScanShape );
 	SCRIPTCPP_GETTER( SearchString );
-  SCRIPTCPP_GETTER( ShapeCylinder );
-  SCRIPTCPP_GETTER( ShapeRect );
+  	SCRIPTCPP_GETTER( ShapeCylinder );
+  	SCRIPTCPP_GETTER( ShapeRect );
 	SCRIPTCPP_GETTER( ShapeSphere );
 	SCRIPTCPP_GETTER( SortEntList );
 	SCRIPTCPP_GETTER( StrAdd );
@@ -385,6 +386,7 @@ public:
 #define SCRIPTVAR GetFirstScriptVar
 bool GetString(char *Return, size_t size, const char *sentence, int start, char *endchars);
 void ReplaceChar(char *pString, char org, char dest);
+bool isSpace(const char &ch);
 float GetNumeric(const char *pszText);
 
 enum scriptconatiner_e {

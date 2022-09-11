@@ -29,6 +29,9 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "time.h"
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
+#include <sstream>
+#include <algorithm>
+#include <iterator>
 
 #undef SCRIPTVAR
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
@@ -4787,6 +4790,7 @@ CScript::~CScript( )
 
 bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly, bool Casual )
 {
+	std::clock_t clock_start = std::clock();
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
 	if( !m.AllowDupInclude )
@@ -4918,6 +4922,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	
 	RunScriptEventByName( "game_precache" );	//Run precache event
 
+	CallLogged(ScriptName, clock_start);
 	return fReturn;
 }
 
@@ -4983,6 +4988,15 @@ void CScript::RunScriptEventByName( msstring_ref pszEventName, msstringlist *Par
 	m.CurrentEvent = CurrentEvent;	//Restore the current event
 }
 
+void CScript::CallLogged(msstring_ref title, std::clock_t start)
+{
+    std::clock_t end = std::clock();
+    msstringlist Parameters;
+    Parameters.add(title);
+    Parameters.add(FloatToString((float)(end - start)));
+    RunScriptEventByName("display_timing", &Parameters);
+}
+
 bool CScript::ParseScriptFile(const char *pszScriptData)
 {
 	startdbg;
@@ -4998,20 +5012,27 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	SCRIPT_EVENT *CurrentEvent = NULL; //Current event
 	scriptcmd_list *CurrentCmds = NULL;	//Current command list within event
 	mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
-	int LineNum = 1;
+
+	/*
 	char cSpaces[128];
+	size_t LineNum = 1;
+
+	const char* pszScriptdata_start = pszScriptData;
+	size_t pszScriptdata_len = 0;
+	if (*pszScriptData != 0) pszScriptdata_len = strlen(pszScriptData);
 
 	while(*pszScriptData != 0)
 	{
 		char cBuf[768];
-		//cBuf[0] = 0;
-		if (GetString(cBuf, min(strlen(pszScriptData)+1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
+
+		if (GetString(cBuf, min(pszScriptdata_len - (pszScriptData - pszScriptdata_start) + 1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
+		//if (GetString(cBuf, min(strlen(pszScriptData)+1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
 			pszScriptData += strlen(cBuf);
 		else
 			pszScriptData += strlen(cBuf);
 
 		// skip over the carriage return
-		if( sscanf( pszScriptData, "%2[\r\n]", cSpaces ) > 0 )
+		if(sscanf(pszScriptData, "%2[\r\n]", cSpaces) > 0)
 			pszScriptData += strlen(cSpaces);
 
 		#define BufferPos &cBuf[ofs]
@@ -5020,7 +5041,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 		do
 		{
 			//Read the spaces at the beginning of the line, if any
-			if( sscanf( BufferPos, "%[ \t]", cSpaces ) > 0 )
+			if(sscanf(BufferPos, "%[ \t]", cSpaces) > 0)
 				ofs += strlen(cSpaces);
 
 			//Exclude the end-of-line comments
@@ -5029,25 +5050,60 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 				*pszCommentsStart = 0;
 
 			//If its a comment or empty line, break out
-			if( !*BufferPos || sscanf( BufferPos, "%[/]%[/]", cSpaces, cSpaces ) > 0 )
+			if(!*BufferPos || sscanf(BufferPos, "%[/]%[/]", cSpaces, cSpaces) > 0)
 				break;
 
 			//Parse this line and store any commands
 			//ParseLine() updates CurrentEvent
-			//Log(BufferPos);
-			int ret = ParseLine( BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds );
+			Log(BufferPos);
+			int ret = ParseLine(BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
 		}
 		while(0);
 
 		LineNum++;
+	}*/
+
+	size_t lineNum = 1;
+	std::string sData(pszScriptData);
+	std::istringstream ss(sData);
+
+	std::string line;
+	while(!getline(ss, line).eof())
+	{
+		line.erase(0, line.find_first_not_of(" \t\v"));
+
+		std::string result = "";
+		int lineSize = line.length();
+		for (int i = 0; i < lineSize; i++)
+		{
+			const char ch = line[i];
+			const char nextch = line[i+1]; //get next ch.
+
+			//remove comments.
+			if (ch == '/' && nextch == '/')
+				break;
+
+			//just remove return carriages here instead of doing erase.
+			if (ch == '\r')
+				break;
+
+			result += ch;
+		}
+
+		if (result.find_first_not_of(" \r\t") != std::string::npos)
+		{
+			//remove extra spaces
+			result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
+				return isSpace(a) && isSpace(b);
+			}), std::end(result));
+
+			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			//Log("Line: %s", result.c_str());
+		}
+		
+		lineNum++;
 	}
-
-	// if( MSGlobals::IsServer && m.ScriptFile == "items/smallarms_rknife" )
-	// 	int stop = 0;
-	// 
-	// if( MSGlobals::IsServer && m.ScriptFile == "items/bows_longbow" )
-	// 	int stop = 0;
-
+	
 	enddbg( "CSript::ParseScriptFile()" );
 //  Uncomment to print out all this function gathered from the script file
 //#ifndef VALVE_DLL
@@ -6112,9 +6168,60 @@ bool GetModelBounds( void *pModel, Vector Bounds[2] )
 	return true;
 }
 
+bool isSpace(const char &ch)
+{
+	switch(ch)
+	{
+	case ' ':
+		return true;
+	case '\t':
+		return true;
+	case '\v':
+		return true;
+	default:
+		return false;
+	}
+}
+
+//we have to use our own getline because of the mixed line endings.
+//credits to https://gist.github.com/josephwb/df09e3a71679461fc104
+std::istream &getline(std::istream &is, std::string &t) { 
+	t.clear();
+
+	// The characters in the stream are read one-by-one using a std::streambuf.
+	// That is faster than reading them one-by-one using the std::istream.
+	// Code that uses streambuf this way must be guarded by a sentry object.
+	// The sentry object performs various tasks,
+	// such as thread synchronization and updating the stream state.
+
+	std::istream::sentry se(is, true);
+	std::streambuf* sb = is.rdbuf();
+
+	for (;;) {
+		int c = sb->sbumpc();
+		switch (c) {
+			case '\n':
+				return is;
+			case '\r':
+				if (sb->sgetc() == '\n') {
+					sb->sbumpc();
+				}
+				return is;
+			case EOF:
+				// Also handle the case when the last line has no line ending
+				if (t.empty()) {
+					is.setstate(std::ios::eofbit);
+				}
+				return is;
+			default:
+				t += (char)c;
+		}
+	}
+}
+
 #if !TURN_OFF_ALERT
 //Thothie JAN2013
-void CScript::conflict_check ( msstring testvar, msstring testvar_type, msstring testvar_scope)
+void CScript::conflict_check (msstring testvar, msstring testvar_type, msstring testvar_scope)
 {
 	bool cc_found = false;
 	bool cc_check_against_const = false;
