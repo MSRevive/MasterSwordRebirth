@@ -5013,62 +5013,12 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	scriptcmd_list *CurrentCmds = NULL;	//Current command list within event
 	mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
 
-	/*
-	char cSpaces[128];
-	size_t LineNum = 1;
-
-	const char* pszScriptdata_start = pszScriptData;
-	size_t pszScriptdata_len = 0;
-	if (*pszScriptData != 0) pszScriptdata_len = strlen(pszScriptData);
-
-	while(*pszScriptData != 0)
-	{
-		char cBuf[768];
-
-		if (GetString(cBuf, min(pszScriptdata_len - (pszScriptData - pszScriptdata_start) + 1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
-		//if (GetString(cBuf, min(strlen(pszScriptData)+1, sizeof(cBuf)), pszScriptData, 0, "\r\n"))
-			pszScriptData += strlen(cBuf);
-		else
-			pszScriptData += strlen(cBuf);
-
-		// skip over the carriage return
-		if(sscanf(pszScriptData, "%2[\r\n]", cSpaces) > 0)
-			pszScriptData += strlen(cSpaces);
-
-		#define BufferPos &cBuf[ofs]
-
-		int ofs = 0;
-		do
-		{
-			//Read the spaces at the beginning of the line, if any
-			if(sscanf(BufferPos, "%[ \t]", cSpaces) > 0)
-				ofs += strlen(cSpaces);
-
-			//Exclude the end-of-line comments
-			char *pszCommentsStart = strstr(cBuf, "//");
-			if( pszCommentsStart )
-				*pszCommentsStart = 0;
-
-			//If its a comment or empty line, break out
-			if(!*BufferPos || sscanf(BufferPos, "%[/]%[/]", cSpaces, cSpaces) > 0)
-				break;
-
-			//Parse this line and store any commands
-			//ParseLine() updates CurrentEvent
-			Log(BufferPos);
-			int ret = ParseLine(BufferPos, LineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
-		}
-		while(0);
-
-		LineNum++;
-	}*/
-
 	size_t lineNum = 1;
 	std::string sData(pszScriptData);
 	std::istringstream ss(sData);
 
 	std::string line;
-	while(!getline(ss, line).eof())
+	while(getline(ss, line))
 	{
 		line.erase(0, line.find_first_not_of(" \t\v"));
 
@@ -5093,6 +5043,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 		if (result.find_first_not_of(" \r\t") != std::string::npos)
 		{
 			//remove extra spaces
+			//credit to https://stackoverflow.com/questions/35301432/remove-extra-white-spaces-in-c
 			result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
 				return isSpace(a) && isSpace(b);
 			}), std::end(result));
