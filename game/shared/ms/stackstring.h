@@ -16,6 +16,7 @@ extern "C" char *strlwr(char *str);
 #include <cstring>
 #include <string.h>
 #include <string>
+#include <sstream>
 
 #ifndef STD_MAP
 #define STD_MAP
@@ -301,5 +302,10 @@ public:
 };
 
 typedef std::map<msstring,msstring> msstringstringhash;
+
+namespace strutil {
+	//this type has to be a mslist 'cause thanks msc.
+	mslist<std::string> explode(std::string const &str, char delim);
+}
 
 #endif // STACKSTRING_H

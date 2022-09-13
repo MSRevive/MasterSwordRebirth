@@ -184,3 +184,17 @@ void msvariant::SetFromFloat(float a)
 	m_Int = (int)a;
 	m_Float = a;
 }
+
+mslist<std::string> strutil::explode(std::string const &str, char delim)
+{
+	mslist<std::string> result;
+	std::istringstream iss(str);
+
+	for (std::string token; std::getline(iss, token, delim); )
+	{	
+		if (!token.empty())
+			result.push_back(std::move(token));
+	}
+
+	return result;
+}
