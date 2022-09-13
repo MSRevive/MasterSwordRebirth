@@ -29,9 +29,9 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "time.h"
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
-#include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <unordered_map>
 
 #undef SCRIPTVAR
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
@@ -48,7 +48,7 @@ CScript::msfunchash_t CScript::m_GlobalCmdHash;	// MiB 30NOV_14  Hashed Commands
 CScript::msgetterhash_t CScript::m_GlobalGetterHash;
 msscripthashhash CScript::mGlobalScriptHashes;
 msscriptsethash CScript::mGlobalScriptSets;
-mslist<scriptvar_t> CScript::m_gVariables;				//Global script variables
+::mslist<scriptvar_t> CScript::m_gVariables;				//Global script variables
 msscriptarrayhash CScript::GlobalScriptArrays;		    // MiB JUN2010_25
 ulong CScript::m_gLastSendID = SCRIPT_ID_START;			//Server: ID of last script sent to a client
 														//Client: ID of next script to be created
@@ -3774,20 +3774,16 @@ msstring CScript::ScriptGetter_ReplaceOrInsert( msstring& FullName, msstring& Pa
 }
 
 //$scan(<shape>,<filter:any|player|monster|enemy|ally>,["traceline"],[array_name])
-msstring CScript::ScriptGetter_ScanShape(
-  msstring &                            FullName
-, msstring &                            ParserName
-, msstringlist &                        Params
-)
+msstring CScript::ScriptGetter_ScanShape(msstring &FullName, msstring &ParserName, msstringlist &Params)
 {
-    msstring                            Return;
+    msstring Return;
     if ( Params.size() > 1 )
     {
-        mslist<CEntityFilter *>         vFilterList;
+        ::mslist<CEntityFilter *> vFilterList;
         try
         {
             size_t                      vParam = 0;
-            mslist<CFindEntity>         vEntityList;
+            ::mslist<CFindEntity>         vEntityList;
             CShapeFilter *              pShapeFilter = NULL;
             msstring                    vsShapeFilter = Params[vParam++];
             msstring                    vsFilterType = Params[vParam++];
@@ -4945,7 +4941,7 @@ void CScript::RunScriptEvents( bool fOnlyRunNamedEvents )
 			continue;
 
 		//Run an event, if it's time
-		mslist<float> CachedExecutions;
+		::mslist<float> CachedExecutions;
 
 		if( Event.fNextExecutionTime > -1 && gpGlobals->time >= Event.fNextExecutionTime )
 		{
@@ -5011,7 +5007,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 
 	SCRIPT_EVENT *CurrentEvent = NULL; //Current event
 	scriptcmd_list *CurrentCmds = NULL;	//Current command list within event
-	mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
+	::mslist<scriptcmd_list *> ParentCmds; //List of all my parent command lists, top to bottom
 
 	size_t lineNum = 1;
 	std::string sData(pszScriptData);
@@ -5044,9 +5040,9 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 		{
 			//remove extra spaces
 			//credit to https://stackoverflow.com/questions/35301432/remove-extra-white-spaces-in-c
-			result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
-				return isSpace(a) && isSpace(b);
-			}), std::end(result));
+			// result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
+			// 	return isSpace(a) && isSpace(b);
+			// }), std::end(result));
 
 			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
 			//Log("Line: %s", result.c_str());
@@ -5077,8 +5073,234 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	return true;
 }
 
-int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/,
-					   scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/ )
+int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, ::mslist<scriptcmd_list *> &ParentCmds)
+{
+	//startdbg;
+	//dbg("Begin");
+
+	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
+	scriptcmd_list &CurrentCmds = **pCurrentCmds;
+
+	//keepCmd - This is for pre-commands that also function as normal commands
+	// pre-commands have to be inside an event.
+	bool keepCmd = false;
+
+	std::string cmdTest = cmdLine.substr(0, cmdLine.find(" "));
+
+	const static std::unordered_map<std::string,int> cmdMap {
+		{"{", 1},
+		{"#include", 2},
+		{"#scope", 3},
+		{"}", 4},
+		//{"if", 5}, // if command is too OP for this.
+		//{"else", 6}, // else command is too OP for this.
+		{"eventname", 7},
+		{"repeatdelay", 8},
+		{"setvar", 9},
+		{"const", 10},
+		{"removeconst", 11},
+		{"setvard", 12},
+		{"const_ovrd", 13},
+		{"setmodel", 14},
+		{"setviewmodel", 15},
+		{"setworldmodel", 16},
+		{"setpmodel", 17},
+		{"setshield", 18},
+		{"attachsprite", 19},
+		{"svplaysound", 20},
+		{"svplayrandomsound", 29},
+		{"svsound.play3d", 30},
+		{"precache", 31},
+		{"say", 32},
+		{"sound", 33},
+		{"model", 34},
+		{"sound.play3d", 35},
+		{"svsound.play3d", 36},
+	};
+
+	switch(cmdMap.count(cmdTest) ? cmdMap.at(cmdTest) : 0)
+	{
+	case 1: // {
+	{
+		if(!*pCurrentEvent)
+		{
+			//remove extra spaces
+			cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
+				return isSpace(a) && isSpace(b);
+			}), std::end(cmdLine));
+			
+			eventscope_e esScope = m.DefaultScope;
+			msstring Name;
+			bool Override = false;
+			::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+
+			if (args.size() >= 2)
+			{
+				if(args[1] == "[client]") esScope = EVENTSCOPE_CLIENT;
+				else if(args[1] == "[server]") esScope = EVENTSCOPE_SERVER;
+				else if(args[1] == "[shared]") esScope = EVENTSCOPE_SHARED;
+				else if(args[1] == "[override]") Override = true;
+				else Name = args[1].c_str();
+			}
+
+			SCRIPT_EVENT Event;
+			clrmem(Event);
+
+			Event.fNextExecutionTime = -1;
+			Event.fRepeatDelay = -1;
+
+			//Named event.  Don't run until called
+			if(Name.len())
+				Event.Name = Name;
+			else
+				Event.fNextExecutionTime = 0; //Run at least once
+
+			Event.Scope = esScope;
+
+			if(Name.len() && Override) //Delete all previous occurances of this event
+			{
+				int eventSize = m.Events.size();
+				for(int i=0; i < eventSize; i++)
+				{
+					if(Name == m.Events[i].Name)
+						m.Events.erase( i ); i--;
+				}
+			}
+
+			m.Events.add(Event);
+			*pCurrentEvent = &m.Events[m.Events.size()-1];
+			*pCurrentCmds = &m.Events[m.Events.size()-1].Commands;
+		}
+		else
+		{
+			if(!ParentCmds.size())
+			{
+				MSErrorConsoleText( __FUNCTION__, UTIL_VarArgs("Script: %s, Line: %i - %s \"{\" following non conditional command!\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str()));
+				return 0;
+			}
+
+			//Entering the group of commands within a conditional statement
+			CurrentCmds.m_SingleCmd = false; //Allow multiple commands in this list
+		}
+		return 1;
+	}
+	case 2: // #include
+	{
+		//remove extra spaces
+		cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
+			return isSpace(a) && isSpace(b);
+		}), std::end(cmdLine));
+
+		eventscope_e Scope = EVENTSCOPE_SHARED;
+		bool Casual = false;
+		std::string fileName;
+
+		::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+
+		// #include [scope][casual] <name>
+		if (args.size() == 3)
+		{
+			if (args[1] == "[server]") Scope = EVENTSCOPE_SERVER;
+			else if (args[1] == "[client]") Scope = EVENTSCOPE_CLIENT;
+			if (args[1] == "[casual]") Casual = true;
+
+			fileName = args[3];
+		}// #include <name>
+		else if(args.size() == 2)
+			fileName = args[2];
+
+		if (!fileName.empty())
+		{
+			if((Scope == EVENTSCOPE_SHARED) || MSGlobals::IsServer == (Scope==EVENTSCOPE_SERVER))
+			{
+				string_i CurrentScriptFile = m.ScriptFile;
+				bool fSucces = Spawn(fileName.c_str(), m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
+				m.ScriptFile = CurrentScriptFile;
+				if(!fSucces && !Casual)
+				{
+#ifndef POSIX
+					MessageBox(NULL, msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + fileName.c_str() + "\r\n\r\nThis is a fatal error in the public build.", "FIX THIS QUICK!", MB_OK);
+#endif
+					ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" failed! Possible File Not Found.\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str(), fileName.c_str());
+					return 0; //failed
+				}
+			}
+		}
+		else
+		{
+			return 0; //failed
+		}
+
+		return 1;
+	}
+	case 3: // #scope
+	{
+		//remove extra spaces
+		cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
+			return isSpace(a) && isSpace(b);
+		}), std::end(cmdLine));
+
+		::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+
+		if (args.size() == 2)
+		{
+			if (args[1] == "client") m.DefaultScope = EVENTSCOPE_CLIENT;
+			else if (args[1] == "server") m.DefaultScope = EVENTSCOPE_SERVER;
+			else if (args[1] == "shared") m.DefaultScope = EVENTSCOPE_SHARED;
+			else ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" - Not valid!.\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str(), args[1].c_str());
+			return 1;
+		}
+
+		return 0;
+	}
+	case 4: // }
+	{
+		if (!ParentCmds.size())
+		{
+			//Done with event
+			*pCurrentEvent = NULL;
+			*pCurrentCmds = NULL;
+
+			//If Event wasn't in the right scope, delete it now
+			if(m.Events.size() && m.Events[m.Events.size()-1].Scope ==
+			#ifdef VALVE_DLL
+				EVENTSCOPE_CLIENT
+			#else
+				EVENTSCOPE_SERVER
+			#endif
+			)
+			{
+				CurrentEvent = NULL;
+				m.Events.erase(m.Events.size() - 1);
+			}
+
+			return 1;
+		}
+		else
+		{
+			//Done with conditional code block
+			//return control to the parent command list
+			*pCurrentCmds = ParentCmds[ParentCmds.size()-1];
+			ParentCmds.erase(ParentCmds.size() - 1);
+
+			return 1;
+		}
+		return 0;
+	}
+	case 7: // eventname
+	{
+
+	}
+	// this block processes the more complex commands ex (if())
+	// or is a unknown command.
+	case 0:
+	{
+
+	}
+	}
+}
+
+int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, ::mslist<scriptcmd_list *> &ParentCmds /*in/out*/ )
 {
 	startdbg;
 
