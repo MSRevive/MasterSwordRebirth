@@ -198,3 +198,27 @@ mslist<std::string> strutil::explode(std::string const &str, char delim)
 
 	return result;
 }
+
+std::string& strutil::removeWhiteSpace(std::string &str)
+{
+	str.erase(std::unique(std::begin(str), std::end(str), [](unsigned char a, unsigned char b){
+		return isSpace(a) && isSpace(b);
+	}), std::end(str));
+
+	return str;
+}
+
+bool strutil::isSpace(const char &ch)
+{
+	switch(ch)
+	{
+	case ' ':
+		return true;
+	case '\t':
+		return true;
+	case '\v':
+		return true;
+	default:
+		return false;
+	}
+}
