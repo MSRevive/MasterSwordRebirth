@@ -29,7 +29,6 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "time.h"
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
-#include <algorithm>
 #include <iterator>
 #include <unordered_map>
 
@@ -5124,15 +5123,12 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 	{
 		if(!*pCurrentEvent)
 		{
-			//remove extra spaces
-			cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
-				return isSpace(a) && isSpace(b);
-			}), std::end(cmdLine));
+			std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
 			
 			eventscope_e esScope = m.DefaultScope;
 			msstring Name;
 			bool Override = false;
-			::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+			::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
 
 			if (args.size() >= 2)
 			{
@@ -5186,16 +5182,13 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 	}
 	case 2: // #include
 	{
-		//remove extra spaces
-		cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
-			return isSpace(a) && isSpace(b);
-		}), std::end(cmdLine));
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
 
 		eventscope_e Scope = EVENTSCOPE_SHARED;
 		bool Casual = false;
 		std::string fileName;
 
-		::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
 
 		// #include [scope][casual] <name>
 		if (args.size() == 3)
@@ -5235,12 +5228,9 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 	}
 	case 3: // #scope
 	{
-		//remove extra spaces
-		cmdLine.erase(std::unique(std::begin(cmdLine), std::end(cmdLine), [](unsigned char a, unsigned char b){
-			return isSpace(a) && isSpace(b);
-		}), std::end(cmdLine));
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
 
-		::mslist<std::string> args = strutil::explode(cmdLine, ' ');
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
 
 		if (args.size() == 2)
 		{
@@ -5289,14 +5279,90 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 	}
 	case 7: // eventname
 	{
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
 
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+		if (args.size() == 2)
+		{
+			CurrentEvent->Name = args[1].c_str();
+			CurrentEvent->fNextExecutionTime = -1;
+			CurrentEvent->fRepeatDelay = -1;
+			break;
+		}
+		return 0; //failed
 	}
-	// this block processes the more complex commands ex (if())
+	case 8: // repeat delay
+	{
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+		if (args.size() == 2)
+		{
+			CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(args[1].c_str()));
+			CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
+			keepCmd = true;
+			break;
+		}
+		return 0;
+	}
+	case 9: // setvar and const
+	case 10:
+	{
+		return 0;
+	}
+	// this block processes the more complex commands ex. (if())
 	// or is a unknown command.
 	case 0:
 	{
 
 	}
+	}
+
+	if (!keepCmd || m.PrecacheOnly)
+		goto KeepCommandFalse;
+
+	{
+		//Check if this word is a command
+		char TestCommand[128];
+		snprintf(TestCommand, 128, "%s", cmdTest.c_str());
+		scriptcmdname_t Command(TestCommand);
+		msfunchash_t::iterator iFunc = m_GlobalCmdHash.find(msstring(TestCommand));
+		bool fFoundCmd = iFunc != m_GlobalCmdHash.end();
+
+		//Create the command
+		scriptcmd_t ScriptCmd(msstring(TestCommand), fFoundCmd ? iFunc->second.GetConditional() : false);
+		if(!fFoundCmd)
+		{
+			//First word was not a command
+
+			//I have an owner, try his parseline function
+			int iReturn = m.pScriptedInterface ? m.pScriptedInterface->Script_ParseLine(this, cmdLine.c_str(), ScriptCmd) : 0;
+			if( iReturn <= 0 )
+			{
+				//Owner entity didn't recognize command
+				if( m.PrecacheOnly )
+					ALERT(at_console, "Script: %s, Line: %i - Command \"%s\" NOT FOUND!\n", m.ScriptFile.c_str(), lineNum, TestCommand);
+				return 0;
+			}
+		}
+
+		//TODO: error checking for quotation closing and removing comments.
+	}
+
+KeepCommandFalse:
+	if((*pCurrentCmds) && (*pCurrentCmds)->m_SingleCmd)
+	{
+		//This is the first line after a conditional and we didn't encounter an opening brace.
+		//The conditional only gets this one command... we now return control to the parent command list
+		if(ParentCmds.size())
+		{
+			*pCurrentCmds = ParentCmds[ParentCmds.size()-1];
+			ParentCmds.erase( ParentCmds.size()-1 );
+			
+		}
+		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), lineNum));
 	}
 }
 
@@ -5596,7 +5662,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			msstring testvar = VarName;
 			msstring testvar_type;
 			msstring testvar_scope = "preload";
-            if ( !stricmp(TestCommand,"setvar") ) testvar_type = "setvar";
+			if ( !stricmp(TestCommand,"setvar") ) testvar_type = "setvar";
 			if ( !stricmp(TestCommand,"const") ) testvar_type = "const";
 			conflict_check(testvar,testvar_type,testvar_scope);
 #endif
@@ -6339,21 +6405,6 @@ bool GetModelBounds( void *pModel, Vector Bounds[2] )
 		return false;
 
 	return true;
-}
-
-bool isSpace(const char &ch)
-{
-	switch(ch)
-	{
-	case ' ':
-		return true;
-	case '\t':
-		return true;
-	case '\v':
-		return true;
-	default:
-		return false;
-	}
 }
 
 //we have to use our own getline because of the mixed line endings.
