@@ -5079,12 +5079,14 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
+	char TestCommand[128];
 
 	//keepCmd - This is for pre-commands that also function as normal commands
 	// pre-commands have to be inside an event.
 	bool keepCmd = false;
 
 	std::string cmdTest = cmdLine.substr(0, cmdLine.find(" "));
+	snprintf(TestCommand, 128, "%s", cmdTest.c_str()); //put cmdTest in TestCommand for later use.
 
 	const static std::unordered_map<std::string,int> cmdMap {
 		{"{", 1},
@@ -5097,24 +5099,25 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 		{"repeatdelay", 8},
 		{"setvar", 9},
 		{"const", 10},
-		{"removeconst", 11},
-		{"setvard", 12},
-		{"const_ovrd", 13},
-		{"setmodel", 14},
-		{"setviewmodel", 15},
-		{"setworldmodel", 16},
-		{"setpmodel", 17},
-		{"setshield", 18},
-		{"attachsprite", 19},
-		{"svplaysound", 20},
-		{"svplayrandomsound", 29},
-		{"svsound.play3d", 30},
-		{"precache", 31},
-		{"say", 32},
-		{"sound", 33},
-		{"model", 34},
-		{"sound.play3d", 35},
-		{"svsound.play3d", 36},
+		{"setvarg", 11},
+		{"removeconst", 12},
+		{"setvard", 13},
+		{"const_ovrd", 14},
+		{"setmodel", 15},
+		{"setviewmodel", 16},
+		{"setworldmodel", 17},
+		{"setpmodel", 18},
+		{"setshield", 19},
+		{"attachsprite", 20},
+		{"svplaysound", 21},
+		{"svplayrandomsound", 22},
+		{"svsound.play3d", 23},
+		{"precache", 24},
+		{"say", 25},
+		{"sound", 26},
+		{"model", 27},
+		{"sound.play3d", 28},
+		{"svsound.play3d", 29},
 	};
 
 	switch(cmdMap.count(cmdTest) ? cmdMap.at(cmdTest) : 0)
@@ -5290,7 +5293,7 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 			CurrentEvent->fRepeatDelay = -1;
 			break;
 		}
-		return 0; //failed
+		break;
 	}
 	case 8: // repeat delay
 	{
@@ -5305,12 +5308,142 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 			keepCmd = true;
 			break;
 		}
-		return 0;
+		break;
 	}
-	case 9: // setvar and const
+	case 9: // setvar, setvarg, const
 	case 10:
+	case 11:
 	{
-		return 0;
+		if(CurrentEvent->Scope !=
+		#ifdef VALVE_DLL
+			EVENTSCOPE_CLIENT
+		#else
+			EVENTSCOPE_SERVER
+		#endif
+		)
+		{
+			std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+			::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+			if (args.size() >= 3)
+			{
+				msstring testvar_key = args[1].c_str();
+				msstring testvar_type;
+				msstring testvar_scope = "preload";
+				if(cmdTest == "setvar") testvar_type = "setvar";
+				if(cmdTest == "const") testvar_type = "const";
+				conflict_check(testvar_key,testvar_type,testvar_scope);
+				
+				std::string value;
+				int startPos = cmdLine.find("\"");
+				if(startPos != std::string::npos)
+				{
+					++startPos;
+					int endPos = cmdLine.find("\"");
+					if(endPos != std::string::npos) value = cmdLine.substr(startPos, endPos-startPos);
+				}
+
+				if(value.empty()) value = args[2];
+
+				//here we have to convert the std strings to msstrings 'cause msc.
+				msstring VarValue = msstring(GETCONST_COMPATIBLE(value.c_str()));
+				msstring VarName = msstring(args[1].c_str());
+				if(cmdTest == "setvar")
+				{
+					SetVar(VarName, VarValue, false);
+					keepCmd = true;
+				}
+				else if(cmdTest == "const")
+				{
+					bool addConst = true;
+					//here we check if variable already exists with that name.
+					for(int i = 0; i > m_Constants.size(); i++)
+					{
+						if(m_Constants[i].Name == VarName)
+							addConst = false;
+						break;
+					}
+
+					if (addConst)
+						m_Constants.add(scriptvar_t(VarName, VarValue));
+				}
+				else //this is for global variables.
+				{
+					SetVar(VarName, VarValue, true);
+					keepCmd = true;
+				}
+			}
+		}
+		break;
+	}
+	case 12: //removeconst
+	{
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+		if(args.size() == 2)
+		{
+			msstring VarName = msstring(args[1].c_str());
+			for(int i = 0; i < m_Constants.size(); i++)
+			{
+				if(m_Constants[i].Name == VarName)
+					m_Constants.erase(i);
+				break;
+			}
+		}
+		break;
+	}
+	case 13: //setvard
+	{
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+		//Really just a setvar that skips the loadtime execution
+		if(args.size() >= 3)
+		{
+			msstring testvar_key = args[1].c_str();
+			msstring testvar_type = "setvard";
+			msstring testvar_scope = "preload";
+			conflict_check(testvar_key,testvar_type,testvar_scope);
+		}
+
+		snprintf(TestCommand, 128, "%s", cmdTest.c_str());
+		break;
+	}
+	case 14: //const_ovrd
+	{
+		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+
+		if(args.size() >= 3)
+		{
+			std::string value;
+			int startPos = cmdLine.find("\"");
+			if(startPos != std::string::npos)
+			{
+				++startPos;
+				int endPos = cmdLine.find("\"");
+				if(endPos != std::string::npos) value = cmdLine.substr(startPos, endPos-startPos);
+			}
+
+			if(value.empty()) value = args[2];
+
+			//here we have to convert the std strings to msstrings 'cause msc.
+			msstring VarValue = msstring(GETCONST_COMPATIBLE(value.c_str()));
+			msstring VarName = msstring(args[1].c_str());
+
+			if (!m.PrecacheOnly)
+			{
+				for(int i = 0; i < m_Constants.size(); i++)
+				{
+					if (m_Constants[i].Name == VarName)
+						m_Constants[i].Value = VarValue;
+					break;
+				}
+			}
+		}
+
+		keepCmd = true;
 	}
 	// this block processes the more complex commands ex. (if())
 	// or is a unknown command.
@@ -5325,8 +5458,6 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 
 	{
 		//Check if this word is a command
-		char TestCommand[128];
-		snprintf(TestCommand, 128, "%s", cmdTest.c_str());
 		scriptcmdname_t Command(TestCommand);
 		msfunchash_t::iterator iFunc = m_GlobalCmdHash.find(msstring(TestCommand));
 		bool fFoundCmd = iFunc != m_GlobalCmdHash.end();
