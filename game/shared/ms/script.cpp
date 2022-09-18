@@ -5043,7 +5043,8 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			// 	return isSpace(a) && isSpace(b);
 			// }), std::end(result));
 
-			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			//we use the new parse line function that isn't really new.
+			NewParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
 			//Log("Line: %s", result.c_str());
 		}
 		
@@ -5072,29 +5073,49 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	return true;
 }
 
-int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, ::mslist<scriptcmd_list *> &ParentCmds)
+//returns: 0 - failed, 1 - done, 2 - not done yet.
+int CScript::NewParseLine(const char *pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, ::mslist<scriptcmd_list *> &ParentCmds)
 {
 	//startdbg;
 	//dbg("Begin");
 
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
-	char TestCommand[128];
+	char TestCommand[128]; TestCommand[0] = 0;
+	char cBuffer[512];
+	int LineOfs = 0, TmpLineOfs = 0;
 
 	//keepCmd - This is for pre-commands that also function as normal commands
 	// pre-commands have to be inside an event.
 	bool keepCmd = false;
 
-	std::string cmdTest = cmdLine.substr(0, cmdLine.find(" "));
-	snprintf(TestCommand, 128, "%s", cmdTest.c_str()); //put cmdTest in TestCommand for later use.
+	#define CmdLine &pszCommandLine[LineOfs]
+	#define CmdLineTmp &pszCommandLine[TmpLineOfs]
 
+	//Read the first word of the line
+	if(sscanf(pszCommandLine, "%s", TestCommand) <= 0)
+		return 0;
+
+	LineOfs += strlen(TestCommand);
+
+	//Read spaces
+	if(sscanf(CmdLine, "%[ \t\n\r]", cBuffer) > 0)
+		LineOfs += strlen(cBuffer);
+
+	TmpLineOfs = LineOfs;
+	msstring Line = CmdLineTmp;
+
+	//map has to use std::string for lookup :(
+	std::string cmdTest(TestCommand);
+
+	//this cannot be msstring type for whatever reason...
 	const static std::unordered_map<std::string,int> cmdMap {
 		{"{", 1},
 		{"#include", 2},
 		{"#scope", 3},
 		{"}", 4},
 		//{"if", 5}, // if command is too OP for this.
-		//{"else", 6}, // else command is too OP for this.
+		{"else", 6},
 		{"eventname", 7},
 		{"repeatdelay", 8},
 		{"setvar", 9},
@@ -5124,22 +5145,26 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 	{
 	case 1: // {
 	{
-		if(!*pCurrentEvent)
+		if( !*pCurrentEvent )
 		{
-			std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-			
+			//Create a new Event
 			eventscope_e esScope = m.DefaultScope;
 			msstring Name;
 			bool Override = false;
-			::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
 
-			if (args.size() >= 2)
+			msstring Param = Line.thru_char(SKIP_STR);
+
+			//Read options and the event name (all of it is optional and can be in any order)
+			while( Param.len() )
 			{
-				if(args[1] == "[client]") esScope = EVENTSCOPE_CLIENT;
-				else if(args[1] == "[server]") esScope = EVENTSCOPE_SERVER;
-				else if(args[1] == "[shared]") esScope = EVENTSCOPE_SHARED;
-				else if(args[1] == "[override]") Override = true;
-				else Name = args[1].c_str();
+				if( Param == "[client]" ) esScope = EVENTSCOPE_CLIENT;
+				else if( Param == "[server]" ) esScope = EVENTSCOPE_SERVER;
+				else if( Param == "[shared]" ) esScope = EVENTSCOPE_SHARED;
+				else if( Param == "[override]" ) Override = true;
+				else Name = Param;
+
+				Line = Line.substr(Param.len()).skip(SKIP_STR);
+				Param = Line.thru_char(SKIP_STR);
 			}
 
 			SCRIPT_EVENT Event;
@@ -5148,23 +5173,20 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 			Event.fNextExecutionTime = -1;
 			Event.fRepeatDelay = -1;
 
-			//Named event.  Don't run until called
-			if(Name.len())
+			if( Name.len() )
+			{
+				//Named event.  Don't run until called
 				Event.Name = Name;
-			else
-				Event.fNextExecutionTime = 0; //Run at least once
+			}
+			//Unnamed event.  Run once and let repeatdelay decide if it gets run after that
+			else Event.fNextExecutionTime = 0;		//Run at least once
 
 			Event.Scope = esScope;
 
-			if(Name.len() && Override) //Delete all previous occurances of this event
-			{
-				int eventSize = m.Events.size();
-				for(int i=0; i < eventSize; i++)
-				{
-					if(Name == m.Events[i].Name)
-						m.Events.erase( i ); i--;
-				}
-			}
+			if( Name.len() && Override )						//Delete all previous occurances of this event
+				for(int i = 0; i < m.Events.size(); i++)
+					if( Name == m.Events[i].Name )
+						{ m.Events.erase( i ); i--; }
 
 			m.Events.add(Event);
 			*pCurrentEvent = &m.Events[m.Events.size()-1];
@@ -5172,284 +5194,471 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 		}
 		else
 		{
-			if(!ParentCmds.size())
+			if( !ParentCmds.size() )
 			{
-				MSErrorConsoleText( __FUNCTION__, UTIL_VarArgs("Script: %s, Line: %i - %s \"{\" following non conditional command!\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str()));
+				MSErrorConsoleText( __FUNCTION__, UTIL_VarArgs("Script: %s, Line: %i - %s \"{\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer) );
 				return 0;
 			}
 
 			//Entering the group of commands within a conditional statement
-			CurrentCmds.m_SingleCmd = false; //Allow multiple commands in this list
+			CurrentCmds.m_SingleCmd = false;	//Allow multiple commands in this list
 		}
 		return 1;
 	}
-	case 2: // #include
+	case 2: // #include [scope] <name> [allowduplicate]
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-
+		//Include another script file
+		msstring FileName = Line.thru_char( SKIP_STR );
 		eventscope_e Scope = EVENTSCOPE_SHARED;
 		bool Casual = false;
-		std::string fileName;
 
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
-
-		// #include [scope][casual] <name>
-		if (args.size() == 3)
+		if( FileName[0] == '[' )	//#include [scope][casual] <name>
 		{
-			if (args[1] == "[server]") Scope = EVENTSCOPE_SERVER;
-			else if (args[1] == "[client]") Scope = EVENTSCOPE_CLIENT;
-			if (args[1] == "[casual]") Casual = true;
+			if( FileName.contains("[server]") ) Scope = EVENTSCOPE_SERVER;
+			else if( FileName.contains("[client]") ) Scope = EVENTSCOPE_CLIENT;
+			if( FileName.contains("[casual]") )
+				Casual = true;
 
-			fileName = args[3];
-		}// #include <name>
-		else if(args.size() == 2)
-			fileName = args[2];
+			Line = Line.substr( FileName.len() ).skip( SKIP_STR );
+			FileName = Line.thru_char( SKIP_STR );
+		}
 
-		if (!fileName.empty())
+		FileName = GetConst(FileName);
+
+		//Check the scope of this include.  Scope == EVENTSCOPE_SHARED means include the file on both
+		if( (Scope == EVENTSCOPE_SHARED) || MSGlobals::IsServer == (Scope==EVENTSCOPE_SERVER) )
 		{
-			if((Scope == EVENTSCOPE_SHARED) || MSGlobals::IsServer == (Scope==EVENTSCOPE_SERVER))
+			msstring AllowDup = msstring( Line.substr( FileName.len() ) ).skip( SKIP_STR ).thru_char( SKIP_STR );
+			string_i CurrentScriptFile = m.ScriptFile;
+			bool AllowDupInclude = m.AllowDupInclude;
+			m.AllowDupInclude = AllowDup.find( "allowduplicate" ) != msstring_error;
+			bool fSucces = Spawn( FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual );
+			m.ScriptFile = CurrentScriptFile;
+			m.AllowDupInclude = AllowDupInclude;
+			if( !fSucces && !Casual )
 			{
-				string_i CurrentScriptFile = m.ScriptFile;
-				bool fSucces = Spawn(fileName.c_str(), m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
-				m.ScriptFile = CurrentScriptFile;
-				if(!fSucces && !Casual)
-				{
 #ifndef POSIX
-					MessageBox(NULL, msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + fileName.c_str() + "\r\n\r\nThis is a fatal error in the public build.", "FIX THIS QUICK!", MB_OK);
+				MessageBox( NULL, msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + FileName + "\r\n\r\nThis is a fatal error in the public build.", "FIX THIS QUICK!", MB_OK );
 #endif
-					ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" failed! Possible File Not Found.\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str(), fileName.c_str());
-					return 0; //failed
-				}
+				ALERT( at_console, "Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, FileName.c_str() );
 			}
 		}
-		else
-		{
-			return 0; //failed
-		}
-
 		return 1;
 	}
 	case 3: // #scope
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
-
-		if (args.size() == 2)
-		{
-			if (args[1] == "client") m.DefaultScope = EVENTSCOPE_CLIENT;
-			else if (args[1] == "server") m.DefaultScope = EVENTSCOPE_SERVER;
-			else if (args[1] == "shared") m.DefaultScope = EVENTSCOPE_SHARED;
-			else ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" - Not valid!.\n", m.ScriptFile.c_str(), lineNum, cmdTest.c_str(), args[1].c_str());
-			return 1;
-		}
-
-		return 0;
+		msstring Scope = Line.thru_char( SKIP_STR );
+		if( Scope == "client" )		m.DefaultScope = EVENTSCOPE_CLIENT;
+		else if( Scope == "server" )	m.DefaultScope = EVENTSCOPE_SERVER;
+		else if( Scope == "shared" )	m.DefaultScope = EVENTSCOPE_SHARED;
+		else ALERT( at_console, "Script: %s, Line: %i - %s \"%s\" - Not valid!.\n", m.ScriptFile.c_str(), LineNum, TestCommand, Scope.c_str() );
+		return 1;
 	}
 	case 4: // }
 	{
-		if (!ParentCmds.size())
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
+
+		if( !ParentCmds.size() )
 		{
 			//Done with event
 			*pCurrentEvent = NULL;
 			*pCurrentCmds = NULL;
 
 			//If Event wasn't in the right scope, delete it now
-			if(m.Events.size() && m.Events[m.Events.size()-1].Scope ==
-			#ifdef VALVE_DLL
-				EVENTSCOPE_CLIENT
-			#else
-				EVENTSCOPE_SERVER
-			#endif
-			)
+			if( m.Events.size( ) && m.Events[m.Events.size()-1].Scope ==
+				#ifdef VALVE_DLL
+					EVENTSCOPE_CLIENT
+				#else
+					EVENTSCOPE_SERVER
+				#endif
+					)
 			{
 				CurrentEvent = NULL;
-				m.Events.erase(m.Events.size() - 1);
+				m.Events.erase( m.Events.size() - 1 );
 			}
-
-			return 1;
 		}
 		else
 		{
 			//Done with conditional code block
 			//return control to the parent command list
 			*pCurrentCmds = ParentCmds[ParentCmds.size()-1];
-			ParentCmds.erase(ParentCmds.size() - 1);
-
-			return 1;
+			ParentCmds.erase( ParentCmds.size() - 1 );
 		}
-		return 0;
+		break;
+	}
+	case 6: // else
+	{
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
+
+		scriptcmd_t &ParentCmd = CurrentCmds.m_Cmds[CurrentCmds.m_Cmds.size()-1];
+		if( ParentCmd.m_Conditional )
+		{
+			ParentCmd.m_AddingElseCmds = true;											//If I reach a '{', I know its for else commands and not if commands
+
+			ParentCmds.add( *pCurrentCmds );											//Store the current commands list
+			*pCurrentCmds = &ParentCmd.m_ElseCmds.add( scriptcmd_list() );				//Set the new parent command list to my new else child list
+			(*pCurrentCmds)->m_SingleCmd = true;										//Default to one command only.  If I hit a '{' first, then allow a block of commands
+
+			if( *CmdLineTmp && !isspace( *CmdLineTmp ) )
+			{
+				//There is a command at the end of this line
+				if(NewParseLine(CmdLineTmp, LineNum, pCurrentEvent, pCurrentCmds, ParentCmds) == 2)	//Parse the command at the end of the line
+					return 2;	//I found a conditional at the end of this line that isn't done yet... so let it finish parsing
+				//...I found a non-conditional or a conditional which only had one line... it drop out and escape to my parent
+			}
+			else
+				return 2; //Return 2 so any parent command knows I'm not done yet
+		}
+		else MSErrorConsoleText( "CSript::ParseLine", UTIL_VarArgs("Script: %s, Line: %i - %s \"else\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer) );
+		break;
 	}
 	case 7: // eventname
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
-
-		if (args.size() == 2)
-		{
-			CurrentEvent->Name = args[1].c_str();
-			CurrentEvent->fNextExecutionTime = -1;
-			CurrentEvent->fRepeatDelay = -1;
-			break;
-		}
+		//Set a name for the current event
+		sscanf(CmdLineTmp, "%s", cBuffer );
+		CurrentEvent->Name = cBuffer;
+		CurrentEvent->fNextExecutionTime = -1;
+		CurrentEvent->fRepeatDelay = -1;
 		break;
 	}
 	case 8: // repeat delay
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
-
-		if (args.size() == 2)
-		{
-			CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(args[1].c_str()));
-			CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
-			keepCmd = true;
-			break;
-		}
+		//Set a delay timer for the current event
+		sscanf( CmdLineTmp, "%s", cBuffer );
+		CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(cBuffer));
+		CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
+		keepCmd = true;
 		break;
 	}
 	case 9: // setvar, setvarg, const
 	case 10:
 	case 11:
 	{
-		if(CurrentEvent->Scope !=
-		#ifdef VALVE_DLL
-			EVENTSCOPE_CLIENT
-		#else
-			EVENTSCOPE_SERVER
-		#endif
-		)
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
+
+		if( CurrentEvent->Scope !=
+			#ifdef VALVE_DLL
+				EVENTSCOPE_CLIENT
+			#else
+				EVENTSCOPE_SERVER
+			#endif
+				)
 		{
-			std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-			::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
 
-			if (args.size() >= 3)
+			//Set variable value.  "setvarg" sets global variable
+			msstring VarName = Line.thru_char( SKIP_STR );
+
+#if !TURN_OFF_ALERT
+			//Thothie JUN2013_08 - check for conflicts in developer builds as we go
+			msstring testvar = VarName;
+			msstring testvar_type;
+			msstring testvar_scope = "preload";
+			if ( !stricmp(TestCommand,"setvar") ) testvar_type = "setvar";
+			if ( !stricmp(TestCommand,"const") ) testvar_type = "const";
+			conflict_check(testvar,testvar_type,testvar_scope);
+#endif
+
+			Line = Line.substr( VarName.len() ).skip( SKIP_STR );
+			msstring VarValue;
+			if( Line[0] == '"' ) VarValue = Line.substr(1).thru_char( "\"" );		//Starting quote found, read until the next quote
+			else VarValue = Line.thru_char( SKIP_STR );				//No quotes
+
+			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));				//Resolve both constants and variables -- TODO: Remove the variables - should be constants only
+			if( !stricmp(TestCommand,"setvar" ) )
 			{
-				msstring testvar_key = args[1].c_str();
-				msstring testvar_type;
-				msstring testvar_scope = "preload";
-				if(cmdTest == "setvar") testvar_type = "setvar";
-				if(cmdTest == "const") testvar_type = "const";
-				conflict_check(testvar_key,testvar_type,testvar_scope);
-				
-				std::string value;
-				int startPos = cmdLine.find("\"");
-				if(startPos != std::string::npos)
-				{
-					++startPos;
-					int endPos = cmdLine.find("\"");
-					if(endPos != std::string::npos) value = cmdLine.substr(startPos, endPos-startPos);
-				}
+				SetVar( VarName, VarValue, !stricmp(TestCommand, "setvarg") ? true : false );
+				keepCmd = true;
+			}
+			else
+			{
+				bool AddConst = true;
 
-				if(value.empty()) value = args[2];
-
-				//here we have to convert the std strings to msstrings 'cause msc.
-				msstring VarValue = msstring(GETCONST_COMPATIBLE(value.c_str()));
-				msstring VarName = msstring(args[1].c_str());
-				if(cmdTest == "setvar")
+				for(int i = 0; i < m_Constants.size(); i++ )
 				{
-					SetVar(VarName, VarValue, false);
-					keepCmd = true;
-				}
-				else if(cmdTest == "const")
-				{
-					bool addConst = true;
-					//here we check if variable already exists with that name.
-					for(int i = 0; i > m_Constants.size(); i++)
+					if( m_Constants[i].Name == VarName )
 					{
-						if(m_Constants[i].Name == VarName)
-							addConst = false;
+						AddConst = false;
 						break;
 					}
+				}
 
-					if (addConst)
-						m_Constants.add(scriptvar_t(VarName, VarValue));
-				}
-				else //this is for global variables.
+				if( AddConst )
 				{
-					SetVar(VarName, VarValue, true);
-					keepCmd = true;
+					m_Constants.add( scriptvar_t( VarName, VarValue ) );//Create new constant
 				}
+				//else if( !stricmp(TestCommand, "const_ovrd") ) m_Constants[i].Value = VarValue; //NOV2014_18 - no good here, runs at load time
 			}
 		}
 		break;
 	}
 	case 12: //removeconst
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
-		if(args.size() == 2)
+		msstring VarName = Line.thru_char( SKIP_STR );
+
+		//Update constant
+		for(int i = 0; i < m_Constants.size(); i++)
 		{
-			msstring VarName = msstring(args[1].c_str());
-			for(int i = 0; i < m_Constants.size(); i++)
+			if( m_Constants[i].Name == VarName )
 			{
-				if(m_Constants[i].Name == VarName)
-					m_Constants.erase(i);
-				break;
+				m_Constants.erase( i );
+				break; 
 			}
 		}
 		break;
 	}
 	case 13: //setvard
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
 		//Really just a setvar that skips the loadtime execution
-		if(args.size() >= 3)
-		{
-			msstring testvar_key = args[1].c_str();
-			msstring testvar_type = "setvard";
-			msstring testvar_scope = "preload";
-			conflict_check(testvar_key,testvar_type,testvar_scope);
-		}
-
-		snprintf(TestCommand, 128, "%s", cmdTest.c_str());
+#if !TURN_OFF_ALERT
+		//Thothie JUN2013_08 - check for conflicts in developer builds as we go
+		msstring tVarName = Line.thru_char( SKIP_STR );
+		msstring testvar = tVarName;
+		msstring testvar_type = "setvard";
+		msstring testvar_scope = "preload";
+		conflict_check(testvar,testvar_type,testvar_scope);
+#endif
+		strncpy( TestCommand, "setvar", 128 );
+		keepCmd = true;
 		break;
 	}
 	case 14: //const_ovrd
 	{
-		std::string cleanCmd = strutil::removeWhiteSpace(cmdLine);
-		::mslist<std::string> args = strutil::explode(cleanCmd, ' ');
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
-		if(args.size() >= 3)
+		//Thothie NOV2014_18 - fixing const_ovrd to only work during run time
+		msstring VarName = Line.thru_char( SKIP_STR );
+
+		Line = Line.substr( VarName.len() ).skip( SKIP_STR );
+		msstring VarValue;
+		if( Line[0] == '"' ) VarValue = Line.substr(1).thru_char( "\"" );		//Starting quote found, read until the next quote
+		else VarValue = Line.thru_char( SKIP_STR );				//No quotes
+
+		VarValue = msstring(GETCONST_COMPATIBLE(VarValue));
+
+		//keep command, but don't use until run time
+		//HOW DO THIS!?
+		if ( !m.PrecacheOnly )
 		{
-			std::string value;
-			int startPos = cmdLine.find("\"");
-			if(startPos != std::string::npos)
+			//Print("DEBUG: const_ovrd to replace %s with %s\n",VarName.c_str(),VarValue.c_str());
+			for(int i = 0; i < m_Constants.size(); i++)
 			{
-				++startPos;
-				int endPos = cmdLine.find("\"");
-				if(endPos != std::string::npos) value = cmdLine.substr(startPos, endPos-startPos);
-			}
-
-			if(value.empty()) value = args[2];
-
-			//here we have to convert the std strings to msstrings 'cause msc.
-			msstring VarValue = msstring(GETCONST_COMPATIBLE(value.c_str()));
-			msstring VarName = msstring(args[1].c_str());
-
-			if (!m.PrecacheOnly)
-			{
-				for(int i = 0; i < m_Constants.size(); i++)
+				//Print("DEBUG: const_ovrd checking %s vs %s\n",m_Constants[i].Name.c_str(),VarName.c_str());
+				if ( m_Constants[i].Name == VarName )
 				{
-					if (m_Constants[i].Name == VarName)
-						m_Constants[i].Value = VarValue;
+					m_Constants[i].Value = VarValue;
+					//Print("DEBUG: const_ovrd found! %s is now %s\n",m_Constants[i].Name.c_str(),m_Constants[i].Value.c_str());
 					break;
 				}
 			}
 		}
-
 		keepCmd = true;
+		break;
+	}
+	//TODO: refactor this rat nest.
+	case 15:
+	case 16:
+	case 17:
+	case 18:
+	case 19:
+	case 20:
+	case 21:
+	case 22:
+	case 23:
+	case 24:
+	case 25:
+	case 26:
+	case 27:
+	case 28:
+	case 29:
+	{
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
+
+#ifdef VALVE_DLL
+		char cSpaces[256] = "";
+		msstringlist Resources;
+		enum { pctype_model, pctype_sound, pctype_sprite } Precachetype;
+
+		int ResourceIdx = 0;
+		char *pSearchLine = "%s";
+		cBuffer[0] = 0;
+		int SndType = 0;
+		if( !stricmp(TestCommand,"sound.play3d") || !stricmp(TestCommand,"svsound.play3d") ) SndType = 1;	//Sound name is first parameter
+
+		while( sscanf( CmdLineTmp, pSearchLine, cSpaces, cBuffer ) > 0 ) //The first time preceding spaces aren't checked and the result is in cSpaces
+		{
+			TmpLineOfs += strlen(cSpaces) + strlen(cBuffer);
+			if( !ResourceIdx )
+					strncpy( cBuffer, cSpaces, sizeof(cBuffer) );		//The first parameter ends up in cSpaces.... move it to cBuffer
+			bool SkipFirst = (!SndType && strstr(TestCommand,"sound")) ? true : false;
+
+
+			if( !SkipFirst || ResourceIdx )						//Sounds skip the first parameter
+			{
+				msstring Resolved = SCRIPTCONST(cBuffer);		//For now, resolve both consts and vars
+																//Later, once the scripts have been updated remove vars
+				if( !strcmp(TestCommand,"say") )
+				{
+					//Thothie JUN2007b - see thoth_pissed
+					//- Well, this here explains why I couldn't stop it from parsing into waves
+					Resolved = Resolved.thru_char("[");		//Special case for 'say'.  Get the sound separate from the delay
+					if( Resolved == "*" ) { Resolved = ""; ALERT( at_console, "%s Warning: Old 'say' command using '*' as sound name\n", m.ScriptFile.c_str() ); }
+					if( Resolved.len() )
+					{
+						if ( !Resolved.contains("RND_SAY") )
+							Resolved = msstring("npc/") + Resolved + ".wav"; //still total h4x, but there's no good way to fix this without changing how the command works
+                	}
+				}
+				if( Resolved.len() && strstr(Resolved,".") )
+					Resources.add( Resolved );
+			}
+
+			ResourceIdx++;
+
+			if( strstr(TestCommand,"sprite") || strstr(TestCommand,"model") || strstr(TestCommand,"setshield") || SndType == 1 ) break;	//If a sprite or model, only use the first parameter
+			pSearchLine = "%[ \t\r\n]%s";
+		}
+
+		for(int i = 0; i < Resources.size(); i++)
+		{
+			msstring &FileName = Resources[i];
+
+			if( FileName == "none" ) continue;
+
+			if( !FileName.contains(".wav") && !FileName.contains(".mdl") && !FileName.contains(".spr") ) continue; //NOV2015_14 Thothie - don't attempt to precache non-media, makes the check below redundant
+
+			/*
+			if( FileName.len() < 4 )
+			{
+				Print( "Found precache with name too small: %s in %s line %i\n", FileName.c_str(),m.ScriptFile.c_str(),LineNum );
+				continue;
+			}
+			*/
+
+			msstring Extension = &FileName[FileName.len()-4];
+			//Thothie - Fail
+			/*if ( !FileName.contains("items") )
+			{
+				int thoth_pre = gpGlobals->PreCount;
+				thoth_pre++;
+				gpGlobals->PreCount = thoth_pre;
+			}*/
+
+			if( Extension == ".wav" ) Precachetype = pctype_sound;
+			else if( Extension == ".mdl" )
+				Precachetype = pctype_model;
+			else if( Extension == ".spr" )
+				Precachetype = pctype_sprite;
+			else { /*Print( "Found unknown preache: %s\n", FileName.c_str() );*/ continue; }
+
+			msstring Dirname;
+			Dirname = (Precachetype==pctype_model) ? "models/" : (Precachetype==pctype_sprite) ? "sprites/" : "";
+			msstring Fullpath = Dirname + FileName;
+
+			//char *pszDLLString = (char *)STRING(ALLOC_STRING(Fullpath));
+			//pszDLLString = Fullpath;
+			static msstring Precaches[16384] = { "" };
+			static int PrecachesTotal = 0;
+
+			char *pszGlobalPointer = NULL;			//Precaches MUST be global pointers.  Can't use stack memory
+			for(int p = 0; p < PrecachesTotal; p++)
+				if( Fullpath == Precaches[p] )
+					{
+						pszGlobalPointer = Precaches[p];
+						break;
+					}
+			if( !pszGlobalPointer )
+				pszGlobalPointer = (Precaches[PrecachesTotal++] = Fullpath).c_str();
+
+			//if( Fullpath.contains( "human" ) )
+			//	int stop = 0;
+
+			switch( Precachetype )
+			{
+				case pctype_sound:
+					if ( stricmp(TestCommand,"precache") ) PRECACHE_SOUND( pszGlobalPointer ); //Thothie MAR2012_27 - no longer precahing sounds from here, using client side sounds wherever possible
+					break;
+				case pctype_sprite:
+					PRECACHE_MODEL( pszGlobalPointer );	break;
+				case pctype_model:
+					PRECACHE_MODEL( pszGlobalPointer );  break;
+			}
+		}
+#endif
+		if( stricmp(TestCommand, "precache") ) //Don't keep the precache command
+			keepCmd = true;
+
+		break;
 	}
 	// this block processes the more complex commands ex. (if())
 	// or is a unknown command.
 	case 0:
 	{
+		if(!stricmp(msstring(TestCommand).substr(0,2), "if"))
+		{
+			if(!strstr(TestCommand,"(") && *CmdLineTmp != '(')
+				keepCmd = true;
+			else
+			{
+				//Create the command
+			scriptcmd_t &ScriptCmd = CurrentCmds.m_Cmds.add( scriptcmd_t( "if()", true ) );	//Change the command name to "if()
+			ScriptCmd.m_NewConditional = true;
 
+			//Add all the command's parameters
+			if( *CmdLineTmp == '(' ) TmpLineOfs++;											//Go past the '('
+			msstring ParamStr = msstring( CmdLineTmp ).skip( SKIP_STR );					//Skip spaces
+
+			for(int i = 0; i < 3; i++ )
+			{
+				ScriptCmd.m_Params.add( GetConst(ParamStr.thru_char( SKIP_STR )) );			//Save the next parameter - Resolve Contants but not variables
+				ParamStr = msstring( ParamStr.findchar_str( SKIP_STR ) ).skip( SKIP_STR );	//Skip over the parameter's text and any spaces
+				if( !i && ParamStr[0] == ')' )
+					break;																	//Compare parameter was ')' -- this if statement only has one parameter Ex: if( var ) command
+
+			}
+
+			if( ParamStr[0] == ')' )
+			{
+				ParentCmds.add( *pCurrentCmds );											//Store the current commands list
+				*pCurrentCmds = &ScriptCmd.m_IfCmds;										//Set the new parent command list to my true statment child list
+				(*pCurrentCmds)->m_SingleCmd = true;										//Default to one command only.  If I hit a '{' first, then allow a block of commands
+
+				//Check if there are any commands at the end of the if line and parse them under this if statement
+				ParamStr = msstring(ParamStr.findchar_str( SKIP_STR )).skip(SKIP_STR);	//Skip the ')' and any spaces
+
+				if( !ParamStr[0] || ParamStr[0] == ')' )
+					return 2;  //Return 2 so any parent command knows I'm not done yet
+				else
+				{
+					//There is a command at the end of this line
+					if(NewParseLine( ParamStr, LineNum, pCurrentEvent, pCurrentCmds, ParentCmds ) == 2)	//Parse the command at the end of the line
+						return 2;	//I found a conditional at the end of this line that isn't done yet... so let it finish parsing
+					//...I found a non-conditional or a conditional which only had one line... it drop out and escape to my parent
+				}
+			}
+			else
+				MSErrorConsoleText( "SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n" );
+			}
+		}
+		else
+			keepCmd = true; //normal command
+		break;
 	}
 	}
 
@@ -5469,17 +5678,45 @@ int CScript::NewParseLine(std::string &cmdLine, int lineNum, SCRIPT_EVENT **pCur
 			//First word was not a command
 
 			//I have an owner, try his parseline function
-			int iReturn = m.pScriptedInterface ? m.pScriptedInterface->Script_ParseLine(this, cmdLine.c_str(), ScriptCmd) : 0;
+			int iReturn = m.pScriptedInterface ? m.pScriptedInterface->Script_ParseLine(this, pszCommandLine, ScriptCmd) : 0;
 			if( iReturn <= 0 )
 			{
 				//Owner entity didn't recognize command
 				if( m.PrecacheOnly )
-					ALERT(at_console, "Script: %s, Line: %i - Command \"%s\" NOT FOUND!\n", m.ScriptFile.c_str(), lineNum, TestCommand);
+					ALERT(at_console, "Script: %s, Line: %i - Command \"%s\" NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, TestCommand);
 				return 0;
 			}
 		}
 
-		//TODO: error checking for quotation closing and removing comments.
+		//Add all the command's parameters
+		//Log("raw cmd line %s", pszCommandLine);
+		//Log("cmdline %s", CmdLine);
+		/*
+		while( sscanf(CmdLine, "%s", cBuffer) > 0 )
+		{
+			LineOfs += strlen(cBuffer);
+
+			if( cBuffer[0] == '"' )
+			{
+				LineOfs -= strlen(cBuffer);		//Bring the offset back to the quote
+				LineOfs++;						//Set the offset to the next char
+				if(sscanf( CmdLine, "%[^\"]", cBuffer) > 0) //Read until the next quote
+				{
+					LineOfs += strlen(cBuffer);	//Move up the offset to span the quoted parameter
+					LineOfs++;					//Skip the closing quote
+				}
+				else	//Error: No closing quotes
+					MSErrorConsoleText( "", UTIL_VarArgs("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, cBuffer) );
+			}
+
+			Log("cbuffer %s", cBuffer);
+			ScriptCmd.m_Params.add(GetConst(cBuffer));	//Resolve constants, but not variables
+
+			if(sscanf(CmdLine, "%[ \t\r\n]", cBuffer) > 0) LineOfs += strlen(cBuffer);
+		}*/
+
+		//Add the command to the bunch
+		CurrentCmds.m_Cmds.add(ScriptCmd);
 	}
 
 KeepCommandFalse:
@@ -5490,11 +5727,22 @@ KeepCommandFalse:
 		if(ParentCmds.size())
 		{
 			*pCurrentCmds = ParentCmds[ParentCmds.size()-1];
-			ParentCmds.erase( ParentCmds.size()-1 );
+			ParentCmds.erase(ParentCmds.size()-1);
 			
 		}
-		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), lineNum));
+		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), LineNum));
 	}
+}
+
+int CScript::CheckLineError(std::string &cmdLine, int lineNum)
+{
+	int lineSize = cmdLine.length();
+	for (int i = 0; i > lineSize; i++)
+	{
+		const char ch = cmdLine[i];
+	}
+
+	return false;
 }
 
 int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, ::mslist<scriptcmd_list *> &ParentCmds /*in/out*/ )
@@ -5702,6 +5950,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			//Add all the command's parameters
 			if( *CmdLineTmp == '(' ) TmpLineOfs++;											//Go past the '('
 			msstring ParamStr = msstring( CmdLineTmp ).skip( SKIP_STR );					//Skip spaces
+
 			for(int i = 0; i < 3; i++ )
 			{
 				ScriptCmd.m_Params.add( GetConst(ParamStr.thru_char( SKIP_STR )) );			//Save the next parameter - Resolve Contants but not variables
