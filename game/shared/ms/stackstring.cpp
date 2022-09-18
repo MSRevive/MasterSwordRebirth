@@ -126,6 +126,18 @@ msstring msstring::skip(const msstring_ref a) const
 	}
 	return &data[my_sz];
 }
+msstring msstring::tolower(void) const
+{
+	size_t my_sz = len();
+	msstring ret;
+	for (int i = 0; i < my_sz; i++)
+	{
+		char ch = data[i];
+		ret += ::tolower(ch);
+	}
+
+	return ret;
+}
 //#define msstring str256
 
 bool TokenizeString(const char *pszString, msstringlist &Tokens, msstring_ref Separator)
@@ -221,4 +233,18 @@ bool strutil::isSpace(const char &ch)
 	default:
 		return false;
 	}
+}
+
+char *strutil::tolower(const char *str)
+{
+	size_t sz = sizeof(str);
+	char *ret;
+
+	for (int i=0; i < sz; i++)
+	{
+		const char ch = str[i];
+		ret += ::tolower(ch);
+	}
+
+	return ret;
 }

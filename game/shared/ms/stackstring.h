@@ -231,6 +231,7 @@ public:
 	msstring thru_substr(const msstring_ref a, size_t start = 0) const; //Returns a substring spanning from "start" to "find(a,start)". Returns full string if "find(a,start)" not found
 	msstring thru_char(const msstring_ref a, size_t start = 0) const;	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
 	msstring skip(const msstring_ref a) const;							//Returns a substring starting at the first char that isn't within "a"
+	msstring tolower(void) const;
 
 protected:
 	char data[MSSTRING_SIZE];
@@ -309,6 +310,7 @@ namespace strutil {
 	mslist<std::string> explode(std::string const &str, char delim);
 	std::string& removeWhiteSpace(std::string &str);
 	bool isSpace(const char &ch);
+	char *tolower(const char *str);
 }
 
 #endif // STACKSTRING_H
