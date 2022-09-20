@@ -5044,7 +5044,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			// }), std::end(result));
 
 			//we use the new parse line function that isn't really new.
-			NewParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
 			//Log("Line: %s", result.c_str());
 		}
 		
