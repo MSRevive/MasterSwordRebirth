@@ -389,8 +389,8 @@ public:
 #undef SCRIPTVAR
 #define SCRIPTVAR GetFirstScriptVar
 bool GetString(char *Return, size_t size, const char *sentence, int start, char *endchars);
+::mslist<std::string> GetParams(std::string const &str);
 void ReplaceChar(char *pString, char org, char dest);
-bool isSpace(const char &ch);
 float GetNumeric(const char *pszText);
 
 enum scriptconatiner_e {

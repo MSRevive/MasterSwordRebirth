@@ -374,7 +374,6 @@ bool GetString(char *Return, size_t size, const char *sentence, int start, char 
 	return true;
 }
 
-
 scriptvar_t *IVariables::FindVar( msstring_ref Name )
 {
 	//Check local variables
@@ -819,11 +818,7 @@ msstring CScript::ScriptGetter_Dist( msstring& FullName, msstring& ParserName, m
 //- Executes the command and returns the result or resolves the variable.
 //- Used to delay resolution of something until used, or to build a command/variable
 //- string (MiB is a big fan of python)
-msstring CScript::ScriptGetter_Eval(
-  msstring&                             FullName
-, msstring&                             ParserName
-, msstringlist&                         Params
-)
+msstring CScript::ScriptGetter_Eval(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
 	if( Params.size() )
 	{
@@ -4992,6 +4987,54 @@ void CScript::CallLogged(msstring_ref title, std::clock_t start)
     RunScriptEventByName("display_timing", &Parameters);
 }
 
+::mslist<std::string> GetParams(std::string &str)
+{
+	::mslist<std::string> params;
+	std::string word = "";
+	bool inQuote = false;
+
+	int strlen = str.length();
+	for (int i = 0; i < strlen; i++)
+	{
+		const char ch = str[i];
+
+		if (ch == '"')
+		{
+			if (inQuote)
+			{
+				if (!word.empty())
+				{
+					params.push_back(word);
+					word.clear();
+				}
+				inQuote = false;
+			}
+			else
+				inQuote = true;
+
+			continue;
+		}
+
+		if (strutil::isSpace(ch) && !inQuote)
+		{
+			if (!word.empty())
+			{
+				params.push_back(word);
+				word.clear();
+			}
+			continue;
+		}
+
+		word += ch;
+
+		//process last word.
+		if (i == strlen-1 && !word.empty())
+			params.push_back(word);
+	}
+
+	return params;
+}
+
 bool CScript::ParseScriptFile(const char *pszScriptData)
 {
 	startdbg;
@@ -5013,6 +5056,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 	std::istringstream ss(sData);
 
 	std::string line;
+	
 	while(getline(ss, line))
 	{
 		line.erase(0, line.find_first_not_of(" \t\v"));
@@ -5689,31 +5733,13 @@ int CScript::NewParseLine(const char *pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 
 		//Add all the command's parameters
-		//Log("raw cmd line %s", pszCommandLine);
-		//Log("cmdline %s", CmdLine);
-		/*
-		while( sscanf(CmdLine, "%s", cBuffer) > 0 )
+		std::string cmdParams(CmdLine);
+		::mslist<std::string> params = GetParams(cmdParams);
+		for (int p = 0; p < params.size(); p++)
 		{
-			LineOfs += strlen(cBuffer);
-
-			if( cBuffer[0] == '"' )
-			{
-				LineOfs -= strlen(cBuffer);		//Bring the offset back to the quote
-				LineOfs++;						//Set the offset to the next char
-				if(sscanf( CmdLine, "%[^\"]", cBuffer) > 0) //Read until the next quote
-				{
-					LineOfs += strlen(cBuffer);	//Move up the offset to span the quoted parameter
-					LineOfs++;					//Skip the closing quote
-				}
-				else	//Error: No closing quotes
-					MSErrorConsoleText( "", UTIL_VarArgs("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, cBuffer) );
-			}
-
-			Log("cbuffer %s", cBuffer);
-			ScriptCmd.m_Params.add(GetConst(cBuffer));	//Resolve constants, but not variables
-
-			if(sscanf(CmdLine, "%[ \t\r\n]", cBuffer) > 0) LineOfs += strlen(cBuffer);
-		}*/
+			//Log("Param: %s", params[p].c_str());
+			ScriptCmd.m_Params.add(GetConst(params[p].c_str())); //Resolve constants, but not variables
+		}
 
 		//Add the command to the bunch
 		CurrentCmds.m_Cmds.add(ScriptCmd);
