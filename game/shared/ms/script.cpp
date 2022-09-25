@@ -5126,6 +5126,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
 	::mslist<std::string> params = GetParams(pszCommandLine);
+	int paramSize = params.size();
 	std::string TestCommand = params[0]; //key 0 is the command.
 	char cBuffer[256]; //this is error buffer.
 
@@ -5178,7 +5179,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 			bool Override = false;
 
 			//Read options and the event name (all of it is optional and can be in any order)
-			for(int i = 1; i < params.size(); i++)
+			for(int i = 1; i < paramSize; i++)
 			{
 				std::string pam = params[i];
 
@@ -5321,7 +5322,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 			*pCurrentCmds = &ParentCmd.m_ElseCmds.add( scriptcmd_list() ); //Set the new parent command list to my new else child list
 			(*pCurrentCmds)->m_SingleCmd = true; //Default to one command only. If I hit a '{' first, then allow a block of commands
 
-			if(params.size() => 2)
+			if(paramSize => 2)
 			{
 				std::string ParamStr = pszCommandLine.substr(TestCommand.length(), pszCommandLine.end());
 				if(NewParseLine(ParamStr.c_str(), LineNum, pCurrentEvent, pCurrentCmds, ParentCmds) == 2)
@@ -5541,7 +5542,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		if(!TestCommand.compare("sound.play3d") || !TestCommand.compare("svsound.play3d"))
 			break;
 
-		for(int i = 1; i < params.size(); i++)
+		for(int i = 1; i < paramSize; i++)
 		{
 			bool SkipFirst = (!SoundType && TestCommand.contains("sound")) ? true : false;
 			std::string arg = params[i];
@@ -5670,7 +5671,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 
 		//Add all the command's parameters
-		for (int p = 1; p < params.size(); p++)
+		for (int p = 1; p < paramSize; p++)
 		{
 			//Log("Param: %s", params[p].c_str());
 			ScriptCmd.m_Params.add(GetConst(params[p].c_str())); //Resolve constants, but not variables
