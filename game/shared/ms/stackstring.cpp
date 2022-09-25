@@ -211,6 +211,18 @@ mslist<std::string> strutil::explode(std::string const &str, char delim)
 	return result;
 }
 
+std::string strutil::implode(mslist<std::string> vec, int start)
+{
+	std::string result;
+
+	for(int i = start; i < vec.size(); i++)
+	{
+		result += vec[i];
+	}
+
+	return result;
+}
+
 std::string& strutil::removeWhiteSpace(std::string &str)
 {
 	str.erase(std::unique(std::begin(str), std::end(str), [](unsigned char a, unsigned char b){

@@ -308,6 +308,7 @@ typedef std::map<msstring,msstring> msstringstringhash;
 namespace strutil {
 	//this type has to be a mslist 'cause thanks msc.
 	mslist<std::string> explode(std::string const &str, char delim);
+	std::string& implode(mslist<std::string> vec, int start = 0);
 	std::string& removeWhiteSpace(std::string &str);
 	bool isSpace(const char &ch);
 	char *tolower(const char *str);
