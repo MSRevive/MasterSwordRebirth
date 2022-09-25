@@ -5670,7 +5670,6 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 
 		//Add all the command's parameters
-		std::string cmdParams(CmdLine);
 		for (int p = 1; p < params.size(); p++)
 		{
 			//Log("Param: %s", params[p].c_str());
