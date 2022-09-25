@@ -4987,6 +4987,8 @@ void CScript::CallLogged(msstring_ref title, std::clock_t start)
     RunScriptEventByName("display_timing", &Parameters);
 }
 
+//helper function to create a list of parameters from command line.
+//also handles quotes properly!
 ::mslist<std::string> GetParams(std::string &str)
 {
 	::mslist<std::string> params;
@@ -5126,7 +5128,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
 	::mslist<std::string> params = GetParams(pszCommandLine);
-	int paramSize = params.size();
+	int paramSize = params.size(); //we set the size here because it will never change.
 	std::string TestCommand = params[0]; //key 0 is the command.
 	char cBuffer[256]; //this is error buffer.
 
@@ -5246,6 +5248,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 
 		FileName = GetConst(FileName);
 
+		//TODO: refactor this
 		//Check the scope of this include.  Scope == EVENTSCOPE_SHARED means include the file on both
 		if( (Scope == EVENTSCOPE_SHARED) || MSGlobals::IsServer == (Scope==EVENTSCOPE_SERVER) )
 		{
@@ -5362,7 +5365,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		else MSErrorConsoleText( "CSript::ParseLine", UTIL_VarArgs("Script: %s, Line: %i - %s \"repeatdelay\" incorrect amount of parameters!\n", m.ScriptFile.c_str(), LineNum, TestCommand.c_str(), cBuffer) );
 		break;
 	}
-	case 9: //setvar
+	case 9: // setvar
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5388,7 +5391,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 		break;
 	}
-	case 10: //setvarg
+	case 10: // setvarg
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5414,7 +5417,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 		break;
 	}
-	case 11: //const
+	case 11: // const
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5450,7 +5453,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 		break;
 	}
-	case 12: //removeconst
+	case 12: // removeconst
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5468,7 +5471,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		}
 		break;
 	}
-	case 13: //setvard
+	case 13: // setvard
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5483,7 +5486,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		keepCmd = true;
 		break;
 	}
-	case 14: //const_ovrd
+	case 14: // const_ovrd
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5513,7 +5516,6 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		keepCmd = true;
 		break;
 	}
-	//TODO: refactor this rat nest.
 	case 15:
 	case 16:
 	case 17:
@@ -5632,11 +5634,49 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 	}
 	// this block processes the more complex commands ex. (if())
 	// or is a unknown command.
-	case 0: //TODO: if statement
+	case 0:
 	{
 		if (!TestCommand.substr(0,2).compare("if"))
 		{
+			if(!TestCommand.contains("("))
+			{
+				keepCmd = true;
+				break;
+			}
 
+			msstring ParamStr(pszCommandLine.substr(TestCommand.substr(0,2).length(), pszCommandLine.end()));
+			scriptcmd_t &ScriptCmd = CurrentCmds.m_Cmds.add(scriptcmd_t("if()", true));	//Change the command name to "if()
+			ScriptCmd.m_NewConditional = true;
+
+			for(int i = 0; i < 3; i++ )
+			{
+				ScriptCmd.m_Params.add(GetConst(ParamStr.thru_char(SKIP_STR))); //Save the next parameter - Resolve Contants but not variables
+				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR); //Skip over the parameter's text and any spaces
+				if(!i && ParamStr[0] == ')')
+					break; //Compare parameter was ')' -- this if statement only has one parameter Ex: if( var ) command
+			}
+
+			if(ParamStr[0] == ')')
+			{
+				ParentCmds.add(*pCurrentCmds); //Store the current commands list
+				*pCurrentCmds = &ScriptCmd.m_IfCmds; //Set the new parent command list to my true statment child list
+				(*pCurrentCmds)->m_SingleCmd = true; //Default to one command only.  If I hit a '{' first, then allow a block of commands
+
+				//Check if there are any commands at the end of the if line and parse them under this if statement
+				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR); //Skip the ')' and any spaces
+
+				if(!ParamStr[0] || ParamStr[0] == ')')
+					return 2;
+				else
+				{
+					if(NewParseLine(std::string(ParamStr), LineNum, pCurrentEvent, pCurrentCmds, ParentCmds) == 2)
+						return 2;
+				}
+			}
+			else
+			{
+				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
+			}
 		}
 		else
 			keepCmd = true; //normal command
