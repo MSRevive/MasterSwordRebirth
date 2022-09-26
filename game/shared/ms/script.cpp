@@ -5120,7 +5120,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 }
 
 //returns: 0 - failed, 1 - done, 2 - not done yet.
-int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, ::mslist<scriptcmd_list *> &ParentCmds)
+int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, ::mslist<scriptcmd_list *> &ParentCmds)
 {
 	//startdbg;
 	//dbg("Begin");
@@ -5243,7 +5243,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 			else if(FileName.contains("[client]")) Scope = EVENTSCOPE_CLIENT;
 			if(FileName.contains("[casual]")) Casual = true;
 
-			FileName = msstring(params[2]); //filename is second parameter then.
+			FileName = msstring(params[2].c_str()); //filename is second parameter then.
 		}
 
 		FileName = GetConst(FileName);
@@ -5252,11 +5252,11 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		//Check the scope of this include.  Scope == EVENTSCOPE_SHARED means include the file on both
 		if( (Scope == EVENTSCOPE_SHARED) || MSGlobals::IsServer == (Scope==EVENTSCOPE_SERVER) )
 		{
-			msstring AllowDup = msstring( Line.substr( FileName.len() ) ).skip( SKIP_STR ).thru_char( SKIP_STR );
-			string_i CurrentScriptFile = m.ScriptFile;
 			bool AllowDupInclude = m.AllowDupInclude;
-			m.AllowDupInclude = AllowDup.find( "allowduplicate" ) != msstring_error;
-			bool fSucces = Spawn( FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual );
+			m.AllowDupInclude = (pszCommandLine.find("[allowduplicate]") != std::string::npos) != msstring_error;
+
+			string_i CurrentScriptFile = m.ScriptFile;
+			bool fSucces = Spawn(FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
 			m.ScriptFile = CurrentScriptFile;
 			m.AllowDupInclude = AllowDupInclude;
 			if( !fSucces && !Casual )
@@ -5325,10 +5325,10 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 			*pCurrentCmds = &ParentCmd.m_ElseCmds.add( scriptcmd_list() ); //Set the new parent command list to my new else child list
 			(*pCurrentCmds)->m_SingleCmd = true; //Default to one command only. If I hit a '{' first, then allow a block of commands
 
-			if(paramSize => 2)
+			if(paramSize >= 2)
 			{
-				std::string ParamStr = pszCommandLine.substr(TestCommand.length(), pszCommandLine.end());
-				if(NewParseLine(ParamStr.c_str(), LineNum, pCurrentEvent, pCurrentCmds, ParentCmds) == 2)
+				std::string ParamStr = pszCommandLine.substr(TestCommand.length());
+				if(NewParseLine(ParamStr, LineNum, pCurrentEvent, pCurrentCmds, ParentCmds) == 2)
 					return 2; //Return 2 so any parent command knows I'm not done yet
 			}
 			else 
@@ -5342,7 +5342,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 		
-		if(params.size => 2)
+		if(paramSize >= 2)
 		{
 			CurrentEvent->Name = params[1].c_str();
 			CurrentEvent->fNextExecutionTime = -1;
@@ -5356,7 +5356,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
 
-		if(params.size => 2)
+		if(paramSize >= 2)
 		{
 			CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(params[1].c_str()));
 			CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
@@ -5636,15 +5636,16 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 	// or is a unknown command.
 	case 0:
 	{
-		if (!TestCommand.substr(0,2).compare("if"))
+		std::string Testy = TestCommand.substr(0, 2);
+		if (!Testy.compare("if"))
 		{
-			if(!TestCommand.contains("("))
+			if(TestCommand.find("(") == std::string::npos)
 			{
 				keepCmd = true;
 				break;
 			}
 
-			msstring ParamStr(pszCommandLine.substr(TestCommand.substr(0,2).length(), pszCommandLine.end()));
+			msstring ParamStr(pszCommandLine.substr(2).c_str());
 			scriptcmd_t &ScriptCmd = CurrentCmds.m_Cmds.add(scriptcmd_t("if()", true));	//Change the command name to "if()
 			ScriptCmd.m_NewConditional = true;
 
@@ -5700,7 +5701,7 @@ int CScript::NewParseLine(std::string pszCommandLine, int LineNum, SCRIPT_EVENT 
 			//First word was not a command
 
 			//I have an owner, try his parseline function
-			int iReturn = m.pScriptedInterface ? m.pScriptedInterface->Script_ParseLine(this, pszCommandLine, ScriptCmd) : 0;
+			int iReturn = m.pScriptedInterface ? m.pScriptedInterface->Script_ParseLine(this, pszCommandLine.c_str(), ScriptCmd) : 0;
 			if( iReturn <= 0 )
 			{
 				//Owner entity didn't recognize command

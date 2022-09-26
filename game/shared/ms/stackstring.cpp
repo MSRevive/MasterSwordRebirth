@@ -211,7 +211,7 @@ mslist<std::string> strutil::explode(std::string const &str, char delim)
 	return result;
 }
 
-std::string strutil::implode(mslist<std::string> vec, int start)
+std::string& strutil::implode(mslist<std::string> vec, int start)
 {
 	std::string result;
 

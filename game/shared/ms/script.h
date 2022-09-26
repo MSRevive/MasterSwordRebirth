@@ -101,7 +101,7 @@ public:
 	Vector StringToVec( msstring_ref String );
 	void CopyAllData( CScript *pDestScript, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface );
 
-	int NewParseLine(const char *pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, mslist<scriptcmd_list *> &ParentCmds);
+	int NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, mslist<scriptcmd_list *> &ParentCmds);
 	int CheckLineError(std::string &cmdLine, int lineNum);
 
 	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/);
