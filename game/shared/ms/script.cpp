@@ -5090,7 +5090,7 @@ bool CScript::ParseScriptFile(const char *pszScriptData)
 			// }), std::end(result));
 
 			//we use the new parse line function that isn't really new.
-			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			ParseLine(result, lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
 			//Log("Line: %s", result.c_str());
 		}
 		
@@ -5125,11 +5125,13 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 	//startdbg;
 	//dbg("Begin");
 
+	Log("Parse: %s", pszCommandLine.c_str());
 	SCRIPT_EVENT *CurrentEvent = *pCurrentEvent;
 	scriptcmd_list &CurrentCmds = **pCurrentCmds;
 	::mslist<std::string> params = GetParams(pszCommandLine);
 	int paramSize = params.size(); //we set the size here because it will never change.
 	std::string TestCommand = params[0]; //key 0 is the command.
+	Log("cmd: %s", TestCommand.c_str());
 	char cBuffer[256]; //this is error buffer.
 
 	//keepCmd - This is for pre-commands that also function as normal commands
@@ -5391,33 +5393,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 		}
 		break;
 	}
-	case 10: // setvarg
-	{
-		if( !CurrentEvent )
-		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
-
-		if( CurrentEvent->Scope !=
-			#ifdef VALVE_DLL
-				EVENTSCOPE_CLIENT
-			#else
-				EVENTSCOPE_SERVER
-			#endif
-				)
-		{
-			//Set variable value.  "setvarg" sets global variable
-			msstring VarName(params[1].c_str());
-			msstring VarValue(params[2].c_str());
-
-			conflict_check(VarName,"setvar","preload");
-
-			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));
-			SetVar(VarName, VarValue, true);
-
-			keepCmd = true;
-		}
-		break;
-	}
-	case 11: // const
+	case 10: // const
 	{
 		if( !CurrentEvent )
 		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
@@ -5450,6 +5426,32 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 
 			if (addConst)
 				m_Constants.add(scriptvar_t(VarName, VarValue)); //Create new constant
+		}
+		break;
+	}
+	case 11: // setvarg
+	{
+		if( !CurrentEvent )
+		{ ALERT( at_console, "Script: %s, Line: %i Missing {\n", m.ScriptFile.c_str(), LineNum ); return 0; }
+
+		if( CurrentEvent->Scope !=
+			#ifdef VALVE_DLL
+				EVENTSCOPE_CLIENT
+			#else
+				EVENTSCOPE_SERVER
+			#endif
+				)
+		{
+			//Set variable value.  "setvarg" sets global variable
+			msstring VarName(params[1].c_str());
+			msstring VarValue(params[2].c_str());
+
+			conflict_check(VarName,"setvar","preload");
+
+			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));
+			SetVar(VarName, VarValue, true);
+
+			keepCmd = true;
 		}
 		break;
 	}
@@ -5538,7 +5540,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 #ifdef VALVE_DLL
 		int ResourceIdx = 0;
 		msstringlist Resources;
-		enum Precachetype {pctype_model, pctype_sound, pctype_sprite};
+		enum {pctype_model, pctype_sound, pctype_sprite} Precachetype;
 
 		bool SoundType = false;
 		if(!TestCommand.compare("sound.play3d") || !TestCommand.compare("svsound.play3d"))
@@ -5546,7 +5548,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 
 		for(int i = 1; i < paramSize; i++)
 		{
-			bool SkipFirst = (!SoundType && TestCommand.contains("sound")) ? true : false;
+			bool SkipFirst = (!SoundType && (TestCommand.find("sound") != std::string::npos)) ? true : false;
 			std::string arg = params[i];
 
 			if(!SkipFirst || ResourceIdx)
@@ -5563,7 +5565,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 						ALERT(at_console, "%s Warning: Old 'say' command using '*' as sound name\n", m.ScriptFile.c_str());
 					}
 
-					if(Resolved.length())
+					if(Resolved.len())
 					{
 						if(!Resolved.contains("RND_SAY"))
 							Resolved = msstring("npc/") + Resolved + ".wav"; //still total h4x, but there's no good way to fix this without changing how the command works
@@ -5574,7 +5576,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 				}
 			}
 
-			ResourceIdx++
+			ResourceIdx++;
 		}
 
 		for(int it = 0; it < Resources.size(); it++)
@@ -5588,7 +5590,8 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 
 			msstring Extension = &FileName[FileName.len()-4];
 
-			if( Extension == ".wav" ) Precachetype = pctype_sound;
+			if( Extension == ".wav" ) 
+				Precachetype = pctype_sound;
 			else if( Extension == ".mdl" )
 				Precachetype = pctype_model;
 			else if( Extension == ".spr" )
