@@ -11,43 +11,6 @@
 
 class Parser
 {
-protected:
-	//we have to use our own getline because of the mixed line endings.
-	//credits to https://gist.github.com/josephwb/df09e3a71679461fc104
-	std::istream &getline(std::istream &is, std::string &t) { 
-		t.clear();
-
-		// The characters in the stream are read one-by-one using a std::streambuf.
-		// That is faster than reading them one-by-one using the std::istream.
-		// Code that uses streambuf this way must be guarded by a sentry object.
-		// The sentry object performs various tasks,
-		// such as thread synchronization and updating the stream state.
-
-		std::istream::sentry se(is, true);
-		std::streambuf* sb = is.rdbuf();
-
-		for (;;) {
-			int c = sb->sbumpc();
-			switch (c) {
-				case '\n':
-					return is;
-				case '\r':
-					if (sb->sgetc() == '\n') {
-						sb->sbumpc();
-					}
-					return is;
-				case EOF:
-					// Also handle the case when the last line has no line ending
-					if (t.empty()) {
-						is.setstate(std::ios::eofbit);
-					}
-					return is;
-				default:
-					t += (char)c;
-			}
-		}
-	}
-
 public:
 	Parser(char *data, char *file) : m_Data(data) {
 		m_FileName = file;
@@ -56,7 +19,37 @@ public:
 
 	void stripComments()
 	{
+		std::istringstream ss(m_Result);
+		std::string line;
+		std::string newRes;
 
+		//we have to build a new result.
+		while(getline(ss, line))
+		{
+			std::string nLine = "";
+			size_t lineSize = line.length();
+
+			for (int i = 0; i < lineSize; i++)
+			{
+				const char ch = line[i];
+				const char nextch = line[i+1]; //get next ch.
+
+				//remove comments.
+				if (ch == '/' && nextch == '/')
+					break;
+
+				//just remove return carriages here instead of doing erase.
+				if (ch == '\r')
+					break;
+
+				nLine += ch;
+			}
+
+			newRes += nLine;
+			newRes += "\n";
+		}
+
+		m_Result = newRes;
 	}
 	/*
 	//credits to https://codereview.stackexchange.com/a/215913
@@ -100,6 +93,37 @@ public:
 	m_Result = res;
 	}*/
 
+	//strip whitespaces per line.
+	void stripWhitespace()
+	{
+		std::istringstream ss(m_Result);
+		std::string line;
+		std::string newRes;
+
+		//we have to build a new result.
+		while(getline(ss, line))
+		{
+			//remove tabs at beginning of line.
+			line.erase(0, line.find_first_not_of(" \t\v"));
+
+			//skip over empty lines.
+			if (line.find_first_not_of(" \r\t") != std::string::npos)
+			{
+				//remove extra spaces
+				//credit to https://stackoverflow.com/questions/35301432/remove-extra-white-spaces-in-c
+				line.erase(std::unique(std::begin(line), std::end(line), [](unsigned char a, unsigned char b){
+					return isSpace(a) && isSpace(b);
+				}), std::end(line));
+
+				newRes += line;
+				newRes += "\n";
+			}
+		}
+
+		m_Result = newRes;
+	}
+
+	/*
 	void stripTabs()
 	{
 		//remove tabs
@@ -112,7 +136,7 @@ public:
 			m_Result.erase(pos, 2);
 			pos = m_Result.find("  ", pos);
 		}
-	}
+	}*/
 
 	void stripDebug()
 	{
@@ -120,6 +144,7 @@ public:
 		m_Result = std::regex_replace(m_Result, re, "");
 	}
 
+	/*
 	void stripEmptyLines()
 	{
 		std::istringstream ss(m_Result);
@@ -136,6 +161,7 @@ public:
 
 		m_Result = newRes;
 	}
+	*/
 
 	void checkQuotes()
 	{
@@ -205,7 +231,7 @@ public:
 		std::vector<std::pair<size_t, size_t>> openBrace{};
 		size_t lineNum = 1;
 
-		while (std::getline(ss, line, '\n'))
+		while (getline(ss, line))
 		{
 			for(int pos = 0; pos < line.length(); pos++)
 			{
@@ -285,9 +311,60 @@ private:
 		NoQuote,
 	};
 
+	//we have to use our own getline because of the mixed line endings.
+	//credits to https://gist.github.com/josephwb/df09e3a71679461fc104
+	std::istream &getline(std::istream &is, std::string &t) { 
+		t.clear();
+
+		// The characters in the stream are read one-by-one using a std::streambuf.
+		// That is faster than reading them one-by-one using the std::istream.
+		// Code that uses streambuf this way must be guarded by a sentry object.
+		// The sentry object performs various tasks,
+		// such as thread synchronization and updating the stream state.
+
+		std::istream::sentry se(is, true);
+		std::streambuf* sb = is.rdbuf();
+
+		for (;;) {
+			int c = sb->sbumpc();
+			switch (c) {
+				case '\n':
+					return is;
+				case '\r':
+					if (sb->sgetc() == '\n') {
+						sb->sbumpc();
+					}
+					return is;
+				case EOF:
+					// Also handle the case when the last line has no line ending
+					if (t.empty()) {
+						is.setstate(std::ios::eofbit);
+					}
+					return is;
+				default:
+					t += (char)c;
+			}
+		}
+	}
+
 	bool onlySpace(const std::string &str)
 	{
 		return std::all_of(str.begin(), str.end(), isspace);
+	}
+
+	static bool isSpace(const char &ch)
+	{
+		switch(ch)
+		{
+		case ' ':
+			return true;
+		case '\t':
+			return true;
+		case '\v':
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	void addError(const char *fmt, size_t lineNum, size_t pos)
