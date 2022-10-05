@@ -30,7 +30,7 @@ bool GetModelBounds(CBaseEntity *pEntity, Vector Bounds[2]);
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
 #include <iterator>
-#include <unordered_map>
+//#include <unordered_map>
 
 #undef SCRIPTVAR
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
