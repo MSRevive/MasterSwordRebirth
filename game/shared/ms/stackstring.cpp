@@ -223,14 +223,14 @@ std::string& strutil::implode(mslist<std::string> vec, int start)
 	return result;
 }
 
-std::string& strutil::removeWhiteSpace(std::string &str)
-{
-	str.erase(std::unique(std::begin(str), std::end(str), [](unsigned char a, unsigned char b){
-		return isSpace(a) && isSpace(b);
-	}), std::end(str));
+// std::string& strutil::removeWhiteSpace(std::string &str)
+// {
+// 	str.erase(std::unique(std::begin(str), std::end(str), [](unsigned char a, unsigned char b){
+// 		return isSpace(a) && isSpace(b);
+// 	}), std::end(str));
 
-	return str;
-}
+// 	return str;
+// }
 
 bool strutil::isSpace(const char &ch)
 {

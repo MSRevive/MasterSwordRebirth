@@ -17,7 +17,7 @@ extern "C" char *strlwr(char *str);
 #include <string.h>
 #include <string>
 #include <sstream>
-#include <algorithm>
+//#include <algorithm>
 
 #ifndef STD_MAP
 #define STD_MAP
@@ -309,7 +309,7 @@ namespace strutil {
 	//this type has to be a mslist 'cause thanks msc.
 	mslist<std::string> explode(std::string const &str, char delim);
 	std::string& implode(mslist<std::string> vec, int start = 0);
-	std::string& removeWhiteSpace(std::string &str);
+	//std::string& removeWhiteSpace(std::string &str);
 	bool isSpace(const char &ch);
 	char *tolower(const char *str);
 }
