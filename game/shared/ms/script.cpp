@@ -4912,7 +4912,7 @@ bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pS
 	
 	RunScriptEventByName( "game_precache" );	//Run precache event
 
-	CallLogged(ScriptName, clock_start);
+	//CallLogged(ScriptName, clock_start);
 	return fReturn;
 }
 
@@ -5200,7 +5200,7 @@ int CScript::NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT
 			Event.fNextExecutionTime = -1;
 			Event.fRepeatDelay = -1;
 
-			if( Name.len() )
+			if(Name.len())
 			{
 				//Named event.  Don't run until called
 				Event.Name = Name;
