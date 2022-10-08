@@ -13,6 +13,25 @@ extern bool g_Release;
 extern bool g_ErrFile;
 extern bool g_FailOnErr;
 
+Packer::Packer(char *wDir, char *rDir, char *oDir)
+{
+	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
+	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
+	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
+	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked\\", rDir);
+
+	if (g_Release)
+	{
+		try {
+			CreateDirectory(m_CookedDir, NULL);
+		}catch(...)
+		{
+			printf("Failed to create %s\n", m_CookedDir);
+			exit(-1);
+		}
+	}
+}
+
 //we grab all the files in the scripts directory to get ready for packing.
 void Packer::readDirectory(char *pszName, bool cooked)
 {
