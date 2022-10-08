@@ -528,6 +528,10 @@ void CBasePlayer::CheckRun()
 	if (pev->deadflag != DEAD_NO)
 		return;
 
+	//don't run if ducking.
+	if (FBitSet(player.pev->flags, FL_DUCKING))
+		return;
+
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD))
 	{
 		//MIB MAR2012_15 - switching run from double tap to +shift
