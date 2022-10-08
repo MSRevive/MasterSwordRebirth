@@ -14,6 +14,7 @@
 bool g_Verbose;
 bool g_Release;
 bool g_ErrFile;
+bool g_FailOnErr;
 
 int main(int argc, char** argv)
 {
@@ -36,6 +37,7 @@ int main(int argc, char** argv)
 		TCLAP::SwitchArg relSwitch("r", "release", "Release build, this will clean the scipts then pack them.", cmd, false);
 		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose printing.", cmd, false);
 		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Turn on/off error output to file.", cmd, false);
+		TCLAP::SwitchArg failErrSwitch("f", "fail", "Turn on/off exit on script error.", cmd, false);
 		
 		//Parse command line arguements
 		cmd.parse(argc, argv);
@@ -45,6 +47,7 @@ int main(int argc, char** argv)
 		g_Release = relSwitch.getValue();
 		g_Verbose = verboseSwitch.getValue();
 		g_ErrFile = errFileSwitch.getValue();
+		g_FailOnErr = failErrSwitch.getValue();
 		
 		struct stat info;
 		if(stat(workDir, &info) != 0)

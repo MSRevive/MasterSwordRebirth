@@ -129,7 +129,7 @@ public:
 		std::regex re(R"(dbg (".*?"))");
 		m_Result = std::regex_replace(m_Result, re, "");
 	}
-	
+
 	void checkQuotes()
 	{
 		State cState = State::NoQuote;
@@ -221,6 +221,15 @@ public:
 
 		for (std::pair<size_t, size_t> ob : openBrace)
 			addError("%s:%u.%u: brace opened, but never closed", ob.first, ob.second);
+	}
+
+	//false if script passes, true if script fails.
+	bool errorCheck()
+	{
+		if (m_ErrorList.size() > 0)
+			return true;
+		else
+			return false;
 	}
 
 	std::string getResult()

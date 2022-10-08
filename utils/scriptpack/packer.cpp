@@ -11,6 +11,7 @@
 extern bool g_Verbose;
 extern bool g_Release;
 extern bool g_ErrFile;
+extern bool g_FailOnErr;
 
 //we grab all the files in the scripts directory to get ready for packing.
 void Packer::readDirectory(char *pszName, bool cooked)
@@ -186,6 +187,12 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 	if (!errOnly)
 		parser.saveResult(create);
+
+	if (g_FailOnErr && parser.errorCheck())
+	{
+		delete ffile;
+		exit(-1);
+	}
 
 	//deallocate memory for object when done.
 	delete ffile;
