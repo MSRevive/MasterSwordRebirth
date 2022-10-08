@@ -65,39 +65,40 @@ public:
 
 			switch (pEntInfo->Type)
 			{
-
 			case ENT_FRIENDLY:
 			{
 				String = "Friendly";
 				DifficultyColor = COLOR(0, 255, 0, 0);
 				break;
 			}
-
 			case ENT_WARY:
 			{
 				String = "Wary";
 				DifficultyColor = COLOR(255, 255, 0, 0);
 				break;
 			}
-
 			case ENT_HOSTILE:
 			{
 				String = "Hostile";
 				DifficultyColor = COLOR(255, 0, 0, 0);
 				break;
 			}
-
 			case ENT_DEADLY:
 			{
 				String = "Deadly";
 				DifficultyColor = COLOR(255, 0, 0, 0);
 				break;
 			}
-
 			case ENT_BOSS:
 			{
 				String = "Elite";
 				DifficultyColor = COLOR(255, 128, 0, 0);
+				break;
+			}
+			case ENT_NEUTRAL:
+			{
+				String = "Neutral";
+				DifficultyColor = COLOR(200, 200, 200, 0);
 				break;
 			}
 
