@@ -27,9 +27,9 @@ public:
 		while(getline(ss, line))
 		{
 			std::string nLine = "";
-			size_t lineSize = line.length();
+			size_t lineLen = line.length();
 
-			for (int i = 0; i < lineSize; i++)
+			for (int i = 0; i < lineLen; i++)
 			{
 				const char ch = line[i];
 				const char nextch = line[i+1]; //get next ch.
@@ -51,6 +51,7 @@ public:
 
 		m_Result = newRes;
 	}
+
 	/*
 	//credits to https://codereview.stackexchange.com/a/215913
 	void stripComments()
@@ -123,61 +124,26 @@ public:
 		m_Result = newRes;
 	}
 
-	/*
-	void stripTabs()
-	{
-		//remove tabs
-		m_Result.erase(std::remove(m_Result.begin(), m_Result.end(), '\t'), m_Result.end());
-
-		//remove double spaces
-		std::string::size_type pos = m_Result.find("  ");
-		while (pos != std::string::npos)
-		{
-			m_Result.erase(pos, 2);
-			pos = m_Result.find("  ", pos);
-		}
-	}*/
-
 	void stripDebug()
 	{
 		std::regex re(R"(dbg (".*?"))");
 		m_Result = std::regex_replace(m_Result, re, "");
 	}
-
-	/*
-	void stripEmptyLines()
-	{
-		std::istringstream ss(m_Result);
-		std::string line;
-		std::string newRes = "";
-		while(getline(ss, line))
-		{
-			//check if line is empty or has whitespace
-			if (!line.empty() && !onlySpace(line))
-			{
-				newRes += line + '\n';
-			}
-		}
-
-		m_Result = newRes;
-	}
-	*/
-
+	
 	void checkQuotes()
 	{
 		State cState = State::NoQuote;
 		std::istringstream ss(m_Result);
 		std::string line;
-		size_t lineNum = 0;
+		size_t lineNum = 1;
 
-		while (std::getline(ss, line)) 
-		{
-			lineNum++;
-			
+		while (getline(ss, line)) 
+		{	
 			//don't process if line is empty
+			size_t lineLen = line.length();
 			if (!line.empty() && !onlySpace(line))
 			{
-				for (size_t pos = 0; pos < line.length(); pos++)
+				for (size_t pos = 0; pos < lineLen; pos++)
 				{
 					const char ch = line[pos];
 					
@@ -221,6 +187,8 @@ public:
 					}
 				}
 			}
+
+			lineNum++;
 		}
 	}
 
@@ -233,7 +201,8 @@ public:
 
 		while (getline(ss, line))
 		{
-			for(int pos = 0; pos < line.length(); pos++)
+			size_t lineLen = line.length();
+			for(int pos = 0; pos < lineLen; pos++)
 			{
 				switch(line[pos])
 				{
@@ -301,10 +270,6 @@ public:
 private:
 	enum class State : char
 	{
-		SlashOC,
-		SingleLineComment,
-		NotAComment,
-
 		InDoubleQuote,
 		InSingleQuote,
 		InPara,

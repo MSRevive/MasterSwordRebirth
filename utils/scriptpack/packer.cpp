@@ -176,9 +176,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 	if (!errOnly)
 	{
 		parser.stripWhitespace();
-		//parser.stripTabs();
 		parser.stripDebug();
-		//parser.stripEmptyLines();
 	}
 
 	//do error print at the end
