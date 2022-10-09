@@ -12,8 +12,8 @@ class Packer
 public:
 	Packer(char *wDir, char *rDir, char *oDir);
 	void readDirectory(char *pszName, bool cooked);
+	void processScripts();
 	void packScripts();
-	void cookScripts();
   
 private:
 	char m_WorkDir[MAX_PATH];

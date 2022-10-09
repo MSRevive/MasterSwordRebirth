@@ -52,109 +52,6 @@ void Packer::readDirectory(char *pszName, bool cooked)
 	FindClose(findHandle);
 }
 
-void Packer::cookScripts() 
-{
-	if(g_Release == true && m_StoredFiles.size() > 0)
-	{	
-		CMemFile InFile;
-		for(size_t i = 0; i < m_StoredFiles.size(); i++)
-		{
-			msstring &FullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(FullPath))
-			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
-				
-				char createFile[MAX_PATH];
-				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
-				
-				if (g_Verbose == true)
-					printf("Cleaning script: %s\n", cRelativePath);
-				
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
-				parserThread.join();
-					
-				if (g_Verbose == true)
-					printf("End script cleaning: %s\n\n", cRelativePath);
-			}
-		}
-		
-		//read and store cooked directory scripts
-		readDirectory(m_CookedDir, true);
-	}
-}
-
-void Packer::packScripts()
-{
-	//we want to make sc.dll in via root dir.
-	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", m_OutDir);
-	
-	struct stat info;
-	if(stat(cWriteFile, &info) == 0)
-		std::remove(cWriteFile);
-	
-	CGroupFile GroupFile;
-	try {
-		GroupFile.Open(cWriteFile);
-	}
-	catch(...)
-	{
-		printf("Failed to create %s\n", cWriteFile);
-		exit(-1);
-	}
-	
-	if(g_Release == true && m_CookedFiles.size() > 0)
-	{
-		CMemFile InFile;
-		for (size_t i = 0; i < m_CookedFiles.size(); i++)
-		{
-			msstring &FullPath = m_CookedFiles[i];
-			if (InFile.ReadFromFile(FullPath))
-			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
-				
-				if (g_Verbose == true)
-					printf("Doing file: %s\n", cRelativePath);
-	
-				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-					printf("Failed to write entry: %s\n", cRelativePath);
-			}
-		}
-	}
-	else if(m_StoredFiles.size() > 0)
-	{
-		std::cout << "CookedFiles is 0 or release turned off." << "\n" << std::endl;
-	
-		CMemFile InFile;
-		for (size_t i = 0; i < m_StoredFiles.size(); i++)
-		{
-			msstring &FullPath = m_StoredFiles[i];
-			if (InFile.ReadFromFile(FullPath))
-			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_RootDir) + 1], MAX_PATH);
-				
-				if (g_Verbose == true)
-					printf("Doing file: %s\n", cRelativePath);
-
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
-				parserThread.join();
-	
-				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-					printf("Failed to write entry: %s\n", cRelativePath);
-			}
-		}
-	}
-	else
-		std::cout << "Failed to pack scripts, exiting" << std::endl;
-	
-	//close and flush GroupFile
-	GroupFile.Flush();
-	GroupFile.Close();
-}
-
 //store files info in array so we can process them at a later time.
 void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 {
@@ -173,6 +70,117 @@ void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
 		else
 			m_StoredFiles.add(cFullPath);
 	}
+}
+
+//checks the scripts for errors and cleans them for release.
+void Packer::processScripts() 
+{
+	CMemFile InFile;
+	size_t listSize = m_StoredFiles.size();
+
+	if(g_Release && listSize > 0)
+	{	
+		for(size_t i = 0; i < listSize; i++)
+		{
+			msstring &FullPath = m_StoredFiles[i];
+			if(InFile.ReadFromFile(FullPath))
+			{
+				char cRelativePath[MAX_PATH];
+				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				
+				char createFile[MAX_PATH];
+				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
+				
+				if (g_Verbose)
+					printf("Cleaning script: %s\n", cRelativePath);
+				
+				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
+				parserThread.join();
+					
+				if (g_Verbose)
+					printf("End script cleaning: %s\n\n", cRelativePath);
+			}
+		}
+		
+		//read the cooked dir once scripts are cooked.
+		readDirectory(m_CookedDir, true);
+	}
+	else if (!g_Release && listSize > 0)
+	{
+		for(size_t i = 0; i < listSize; i++)
+		{
+			msstring &FullPath = m_StoredFiles[i];
+			if(InFile.ReadFromFile(FullPath))
+			{
+				char cRelativePath[MAX_PATH];
+				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+
+				if (g_Verbose)
+					printf("Error checking script: %s\n", cRelativePath);
+
+				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
+				parserThread.join();
+
+				if (g_Verbose)
+					printf("End script processing: %s\n\n", cRelativePath);
+			}
+		}
+	}
+}
+
+//packs the scripts.
+void Packer::packScripts()
+{
+	//we want to make sc.dll in via root dir.
+	char cWriteFile[MAX_PATH];
+	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", m_OutDir);
+	
+	struct stat info;
+	if(stat(cWriteFile, &info) == 0)
+		std::remove(cWriteFile);
+
+	msstringlist tempList;
+	if (g_Release)
+		tempList = m_CookedFiles;
+	else
+		tempList = m_StoredFiles;
+	
+	CGroupFile GroupFile;
+	try {
+		GroupFile.Open(cWriteFile);
+	}
+	catch(...)
+	{
+		printf("Failed to create %s\n", cWriteFile);
+		exit(-1);
+	}
+	
+	size_t tListSize = tempList.size();
+	if(tListSize > 0)
+	{
+		CMemFile InFile;
+		for (size_t i = 0; i < tListSize; i++)
+		{
+			msstring &FullPath = tempList[i];
+			if (InFile.ReadFromFile(FullPath))
+			{
+				char cRelativePath[MAX_PATH];
+				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				
+				if (g_Verbose == true)
+					printf("Packing file: %s\n", cRelativePath);
+	
+				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
+					printf("Failed to write entry: %s\n", cRelativePath);
+			}
+		}
+	}
+	else
+		std::cout << "Failed to pack scripts, exiting" << std::endl;
+	
+	//close and flush GroupFile
+	GroupFile.Flush();
+	GroupFile.Close();
 }
 
 void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
