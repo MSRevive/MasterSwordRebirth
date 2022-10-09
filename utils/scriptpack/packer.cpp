@@ -33,44 +33,46 @@ Packer::Packer(char *wDir, char *rDir, char *oDir)
 	}
 }
 
-//we grab all the files in the scripts directory to get ready for packing.
 void Packer::readDirectory(char *pszName, bool cooked)
 {
-	WIN32_FIND_DATA wfd;
-	HANDLE findHandle;
-	
-	char cSearchString[MAX_PATH];
-	_snprintf(cSearchString, MAX_PATH, "%s\\*.*", pszName);
-	
-	if ((findHandle = FindFirstFile(cSearchString, &wfd)) == INVALID_HANDLE_VALUE) 
-		return;
-
-	storeFile(pszName, wfd, cooked);
-
-	while (FindNextFile(findHandle, &wfd))
-		storeFile(pszName, wfd, cooked);
-
-	FindClose(findHandle);
-}
-
-//store files info in array so we can process them at a later time.
-void Packer::storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked)
-{
 	char cFullPath[MAX_PATH];
-	_snprintf(cFullPath, MAX_PATH, "%s\\%s", pszCurrentDir, wfd.cFileName);
-	
-	if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-	{		
-		if (wfd.cFileName[0] != '.') 
-			readDirectory(cFullPath, cooked); // Braces are neccesary
-	}
-	else if (strstr(wfd.cFileName, ".script") || !stricmp(wfd.cFileName, "items.txt"))
+	DIR *dir = opendir(pszName);
+	if(!dir)
+		exit(-1);
+
+	struct dirent *ent;
+	while ((ent = readdir(dir)) != NULL)
 	{
-		if (cooked)
-			m_CookedFiles.add(cFullPath);
-		else
-			m_StoredFiles.add(cFullPath);
+		strcpy(cFullPath, pszName);
+		strcat(cFullPath, "/");
+		strcat(cFullPath, ent->d_name);
+
+		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
+		{
+			switch (ent->d_type)
+			{
+			case DT_REG:
+				//ignore non script files.
+				if(strstr(ent->d_name, ".script"))
+				{
+					if(cooked)
+						m_CookedFiles.add(cFullPath);
+					else
+						m_StoredFiles.add(cFullPath);
+				}
+				break;
+			case DT_DIR:
+				if (g_Verbose)
+					printf("Reading Dir: %s\n", ent->d_name);
+				readDirectory(cFullPath);
+				break;
+			default:
+				break;
+			}
+		}
 	}
+
+	closedir(dir);
 }
 
 //checks the scripts for errors and cleans them for release.
@@ -142,9 +144,9 @@ void Packer::packScripts()
 
 	msstringlist tempList;
 	if (g_Release)
-		tempList = m_CookedFiles;
+		tempList = &m_CookedFiles;
 	else
-		tempList = m_StoredFiles;
+		tempList = &m_StoredFiles;
 	
 	CGroupFile GroupFile;
 	try {

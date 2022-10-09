@@ -11,7 +11,7 @@ class Packer
 {
 public:
 	Packer(char *wDir, char *rDir, char *oDir);
-	void readDirectory(char *pszName, bool cooked);
+	void readDirectory(char *pszName, bool cooked = false);
 	void processScripts();
 	void packScripts();
   
@@ -22,8 +22,7 @@ private:
 	char m_OutDir[MAX_PATH];
 	msstringlist m_StoredFiles;
 	msstringlist m_CookedFiles;
-
-	void storeFile(char *pszCurrentDir, WIN32_FIND_DATA &wfd, bool cooked);
+	
 	void doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly);
 };
 

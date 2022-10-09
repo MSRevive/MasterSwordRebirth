@@ -6,6 +6,7 @@
 #include <regex>
 #include <ctype.h>
 #include <stack>
+#include <sys/stat.h>
 
 #include "cbase.h"
 
@@ -264,9 +265,11 @@ public:
 	{
 		char dir[MAX_PATH];
 		int ret = _snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
+		std::string sdir(dir);
+
 		//terrible method, but only way to make sure it wrote to char array properly?
 		if (ret >= 5)
-			CreateDirectory(dir, NULL);
+			createDirectoryRecursively(sdir);
 		else
 			std::cout << "ERROR: MAX PATH limit exceeded" << std::endl;
 
@@ -352,6 +355,33 @@ private:
 	void quoteError(size_t line, size_t pos)
 	{
 		addError("%s:%u.%u: unclosed quotation", line, pos);
+	}
+
+	//create directory recursively for scripts
+	//modified from this https://gist.github.com/danzek/d7192d250c951804dec05125f5223a30
+	void createDirectoryRecursively(std::string &path)
+	{
+		static const std::string separators("\\/");
+
+		struct stat info;
+		if(stat(path.c_str(), &info) != 0)
+		{
+			// Recursively do it all again for the parent directory, if any
+			size_t slashIndex = path.find_last_of(separators);
+			if(slashIndex != std::string::npos) 
+			{
+				createDirectoryRecursively(path.substr(0, slashIndex));
+			}
+
+			// Create the last directory on the path (the recursive calls will have taken
+			// care of the parent directories by now)
+			bool result = CreateDirectory(path.c_str(), NULL);
+			if(!result)
+			{
+				std::cout << "ERROR: Could not create directory!" << std::endl;
+				exit(-1);
+			}
+		}
 	}
 
 	const char *getBaseDir(char *path)
