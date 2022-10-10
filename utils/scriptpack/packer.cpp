@@ -55,7 +55,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				//ignore non script files.
 				if(strstr(ent->d_name, ".script"))
 				{
-					if(cooked)
+					if(cooked == true)
 						m_CookedFiles.add(cFullPath);
 					else
 						m_StoredFiles.add(cFullPath);
@@ -63,8 +63,9 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				break;
 			case DT_DIR:
 				if (g_Verbose)
-					printf("Reading Dir: %s\n", ent->d_name);
-				readDirectory(cFullPath);
+					printf("Reading Directory: %s\n", ent->d_name);
+
+				readDirectory(cFullPath, cooked);
 				break;
 			default:
 				break;
@@ -141,12 +142,6 @@ void Packer::packScripts()
 	struct stat info;
 	if(stat(cWriteFile, &info) == 0)
 		std::remove(cWriteFile);
-
-	msstringlist tempList;
-	if (g_Release)
-		tempList = &m_CookedFiles;
-	else
-		tempList = &m_StoredFiles;
 	
 	CGroupFile GroupFile;
 	try {
@@ -158,28 +153,66 @@ void Packer::packScripts()
 		exit(-1);
 	}
 	
-	size_t tListSize = tempList.size();
-	if(tListSize > 0)
+	if(g_Release)
 	{
 		CMemFile InFile;
-		for (size_t i = 0; i < tListSize; i++)
+		size_t listSize = m_CookedFiles.size();
+
+		if (listSize > 0)
 		{
-			msstring &FullPath = tempList[i];
-			if (InFile.ReadFromFile(FullPath))
+			for (size_t i = 0; i < listSize; i++)
 			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
-				
-				if (g_Verbose == true)
-					printf("Packing file: %s\n", cRelativePath);
-	
-				if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-					printf("Failed to write entry: %s\n", cRelativePath);
+				msstring &FullPath = m_CookedFiles[i];
+				if (InFile.ReadFromFile(FullPath))
+				{
+					char cRelativePath[MAX_PATH];
+					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+					
+					if (g_Verbose == true)
+						printf("Packing file: %s\n", cRelativePath);
+		
+					if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
+						printf("Failed to write entry: %s\n", cRelativePath);
+				}
 			}
+		}
+		else
+		{
+			std::cout << "ERROR: No cooked files found!" << std::endl;
+			exit(-1);
 		}
 	}
 	else
-		std::cout << "Failed to pack scripts, exiting" << std::endl;
+	{
+		std::cout << "Release set to 0" << std::endl;
+
+		CMemFile InFile;
+		size_t listSize = m_StoredFiles.size();
+
+		if (listSize > 0)
+		{
+			for (size_t i = 0; i < listSize; i++)
+			{
+				msstring &FullPath = m_StoredFiles[i];
+				if (InFile.ReadFromFile(FullPath))
+				{
+					char cRelativePath[MAX_PATH];
+					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+					
+					if (g_Verbose == true)
+						printf("Packing file: %s\n", cRelativePath);
+		
+					if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
+						printf("Failed to write entry: %s\n", cRelativePath);
+				}
+			}
+		}
+		else
+		{
+			std::cout << "ERROR: No stored files found!" << std::endl;
+			exit(-1);
+		}
+	}
 	
 	//close and flush GroupFile
 	GroupFile.Flush();

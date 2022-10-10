@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 		}
 		
 		Packer packer(workDir, rootDir, outDir);
-		packer.readDirectory(workDir);
+		packer.readDirectory(workDir, true);
 		packer.processScripts();
 		packer.packScripts();
 		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
