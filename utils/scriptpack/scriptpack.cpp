@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 		}
 
 	  	if(stat("./errors.txt", &info) == 0)
-		  std::remove("./errors.txt");
+			std::remove("./errors.txt");
 		
 		if(stat(outDir, &info) != 0)
 		{
