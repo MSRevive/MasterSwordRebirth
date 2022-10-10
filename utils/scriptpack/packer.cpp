@@ -55,7 +55,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				//ignore non script files.
 				if(strstr(ent->d_name, ".script"))
 				{
-					if(cooked == true)
+					if(cooked)
 						m_CookedFiles.add(cFullPath);
 					else
 						m_StoredFiles.add(cFullPath);
@@ -63,7 +63,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				break;
 			case DT_DIR:
 				if (g_Verbose)
-					printf("Reading Directory: %s\n", ent->d_name);
+					printf("Reading Directory: %s\n", cFullPath);
 
 				readDirectory(cFullPath, cooked);
 				break;
@@ -81,9 +81,10 @@ void Packer::processScripts()
 {
 	CMemFile InFile;
 	size_t listSize = m_StoredFiles.size();
+	printf("size: %d\n", listSize);
 
 	if(g_Release && listSize > 0)
-	{	
+	{
 		for(size_t i = 0; i < listSize; i++)
 		{
 			msstring &FullPath = m_StoredFiles[i];
@@ -239,8 +240,8 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 	//only run this stuff if we're doing full parser.
 	if (!errOnly)
 	{
-		parser.stripWhitespace();
 		parser.stripDebug();
+		parser.stripWhitespace();
 	}
 
 	//do error print at the end

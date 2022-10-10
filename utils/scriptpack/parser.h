@@ -127,8 +127,23 @@ public:
 
 	void stripDebug()
 	{
+		std::istringstream ss(m_Result);
+		std::string line;
+		std::string newRes;
 		std::regex re(R"(dbg (".*?"))");
-		m_Result = std::regex_replace(m_Result, re, "");
+		std::smatch m;
+
+		//we have to build a new result without the dbg lines.
+		while (getline(ss, line))
+		{
+			if(!std::regex_search(line, m, re))
+			{
+				newRes += line;
+				newRes += "\n";
+			}
+		}
+
+		m_Result = newRes;
 	}
 
 	void checkQuotes()

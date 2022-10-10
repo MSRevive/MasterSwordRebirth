@@ -15,6 +15,7 @@ bool g_Verbose;
 bool g_Release;
 bool g_ErrFile;
 bool g_FailOnErr;
+bool g_NoPack;
 
 int main(int argc, char** argv)
 {
@@ -35,9 +36,10 @@ int main(int argc, char** argv)
 		cmd.add(oDirArg);
 		
 		TCLAP::SwitchArg relSwitch("r", "release", "Release build, this will clean the scipts then pack them.", cmd, false);
-		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Turn on/off verbose printing.", cmd, false);
-		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Turn on/off error output to file.", cmd, false);
-		TCLAP::SwitchArg failErrSwitch("f", "fail", "Turn on/off exit on script error.", cmd, false);
+		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose printing.", cmd, false);
+		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Print errors to text file.", cmd, false);
+		TCLAP::SwitchArg failErrSwitch("f", "fail", "Exit on script error.", cmd, false);
+		TCLAP::SwitchArg packSwitch("p", "pack", "Turn off script packing.", cmd, false);
 		
 		//Parse command line arguements
 		cmd.parse(argc, argv);
@@ -65,10 +67,14 @@ int main(int argc, char** argv)
 		}
 		
 		Packer packer(workDir, rootDir, outDir);
-		packer.readDirectory(workDir, true);
+		packer.readDirectory(workDir);
 		packer.processScripts();
-		packer.packScripts();
-		printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
+		if(!packSwitch.getValue();)
+		{
+			packer.packScripts();
+			printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
+		}
+		std::cout << "Finished..." << std::endl;
 	} catch (TCLAP::ArgException &err)
 	{
 		std::cout << "Error: " << err.error() << "for arg " << err.argId() << std::endl;
