@@ -53,7 +53,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 			{
 			case DT_REG:
 				//ignore non script files.
-				if(strstr(ent->d_name, ".script"))
+				if(strstr(ent->d_name, ".script") || !stricmp(ent->d_name, "items.txt"))
 				{
 					if(cooked)
 						m_CookedFiles.add(cFullPath);
@@ -229,33 +229,41 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 	char *ffile = new char[bufSize]();
 	snprintf(ffile, bufSize, "%s", buffer);
 
-	//we create parser object.
-	Parser parser(ffile, name);
-	parser.stripComments();
-
-	//we check for errors here because comments were already replaced.
-	parser.checkQuotes(); //check for quote errors
-	parser.checkBrackets(); //check for closing errors
-
-	//only run this stuff if we're doing full parser.
-	if (!errOnly)
+	if (!stricmp(name, "items.txt") && !errOnly)
 	{
-		parser.stripDebug();
-		parser.stripWhitespace();
-	}
-
-	//do error print at the end
-	parser.printErrors();
-	if (g_ErrFile)
-		parser.saveErrors();
-
-	if (!errOnly)
+		Parser parser(ffile, name);
 		parser.saveResult(create);
-
-	if (g_FailOnErr && parser.errorCheck())
+	}
+	else
 	{
-		delete ffile;
-		exit(-1);
+		//we create parser object.
+		Parser parser(ffile, name);
+		parser.stripComments();
+
+		//we check for errors here because comments were already replaced.
+		parser.checkQuotes(); //check for quote errors
+		parser.checkBrackets(); //check for closing errors
+
+		//only run this stuff if we're doing full parser.
+		if (!errOnly)
+		{
+			parser.stripDebug();
+			parser.stripWhitespace();
+		}
+
+		//do error print at the end
+		parser.printErrors();
+		if (g_ErrFile)
+			parser.saveErrors();
+
+		if (!errOnly)
+			parser.saveResult(create);
+
+		if (g_FailOnErr && parser.errorCheck())
+		{
+			delete ffile;
+			exit(-1);
+		}
 	}
 
 	//deallocate memory for object when done.
