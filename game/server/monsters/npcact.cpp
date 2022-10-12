@@ -232,14 +232,6 @@ void NPCScript ::MoveThink()
 		return;
 	}
 
-	Vector m_vecTarget;
-	m_vecTarget = pMonster->pev->origin - pev->origin;
-	if (m_vecTarget.Length() <= pMonster->m_MoveDest.Proximity)
-	{
-		Finish(true);
-		return;
-	}
-
 	pMonster->m_NextNodeTime = pMonster->m_NodeCancelTime = gpGlobals->time + 2.0;
 	pev->nextthink = gpGlobals->time + 0.1;
 
