@@ -331,7 +331,7 @@ msstring_ref CScript::GetConst( msstring_ref Text )
 		{
 			msstring StackReturn = ParserName;		//This string must be on the stack, so recursive parsing doesn't screw up
 			StackReturn += "(";
-			for(int i = 0; i < Params.size(); i++)
+			for(size_t i = 0; i < Params.size(); i++)
 			{
 				StackReturn += GetConst(Params[i]);
 				if( i != Params.size()-1 ) StackReturn += ",";
@@ -4780,7 +4780,6 @@ CScript::~CScript( )
 
 bool CScript::Spawn( string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly, bool Casual )
 {
-	std::clock_t clock_start = std::clock();
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
 	if( !m.AllowDupInclude )
@@ -6059,7 +6058,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			msstring testvar_scope = "preload";
             if ( !stricmp(TestCommand,"setvar") ) testvar_type = "setvar";
 			if ( !stricmp(TestCommand,"const") ) testvar_type = "const";
-			conflict_check(testvar,testvar_type,testvar_scope);
+			conflict_check(testvar,testvar_type,testvar_scope,LineNum);
 #endif
 
 			Line = Line.substr( VarName.len() ).skip( SKIP_STR );
@@ -6113,7 +6112,7 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			msstring testvar = tVarName;
 			msstring testvar_type = "setvard";
 			msstring testvar_scope = "preload";
-			conflict_check(testvar,testvar_type,testvar_scope);
+			conflict_check(testvar,testvar_type,testvar_scope,LineNum);
 #endif
 		strncpy( TestCommand, "setvar", 128 );
 		KeepCmd = true;
@@ -6840,7 +6839,7 @@ std::istream &getline(std::istream &is, std::string &t) {
 
 #if !TURN_OFF_ALERT
 //Thothie JAN2013
-void CScript::conflict_check (msstring testvar, msstring testvar_type, msstring testvar_scope)
+void CScript::conflict_check (msstring testvar, msstring testvar_type, msstring testvar_scope, int linenum)
 {
 	bool cc_found = false;
 	bool cc_check_against_const = false;
@@ -6907,7 +6906,12 @@ void CScript::conflict_check (msstring testvar, msstring testvar_type, msstring 
 
 	if ( cc_found )
 	{
-		msstring out_error = UTIL_VarArgs( "CONFLICT_ERROR! [%s:%s]:(%s) %s %s\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str() );
+		msstring out_error;
+		if(linenum == 0)
+			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str());
+		else
+			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s at %d\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
+
 		logfile << Logger::LOG_WARN << out_error.c_str();
 		//be nice to be able to return the top script here, but buggers up if I try to pull the ent to do so
 		Print("%s",out_error.c_str());

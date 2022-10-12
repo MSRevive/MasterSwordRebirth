@@ -82,7 +82,7 @@ public:
 	static ulong m_gLastLightID;	//ID of last dynamic light
 
 #if !TURN_OFF_ALERT
-	void conflict_check(msstring testvar, msstring testvar_type, msstring testvar_scope); //Thothie JAN2013_09 variable conflict checks
+	void conflict_check(msstring testvar, msstring testvar_type, msstring testvar_scope, int linenum); //Thothie JAN2013_09 variable conflict checks
 #endif
 	bool Spawn(string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events

@@ -6632,7 +6632,7 @@ bool CScript::ScriptCmd_SetVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 		msstring testvar = Cmd.m_Params[1];
 		msstring testvar_type = Cmd.m_Params[0];
 		msstring testvar_scope = "runtime";
-		conflict_check(testvar, testvar_type, testvar_scope);
+		conflict_check(testvar, testvar_type, testvar_scope, 0);
 #endif
 
 		if (Params.size() >= 3)	//Add strings together
