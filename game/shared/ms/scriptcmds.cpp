@@ -5048,6 +5048,7 @@ bool CScript::ScriptCmd_RegisterRace(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	NewRace.Name = SCRIPTVAR("reg.race.name");
 	TokenizeString( SCRIPTVAR("reg.race.enemies"), NewRace.Enemies );
 	TokenizeString( SCRIPTVAR("reg.race.allies"), NewRace.Allies );
+	TokenizeString( SCRIPTVAR("reg.race.wary"), NewRace.Wary );
 
 	CRaceManager::AddRace( NewRace );
 #endif

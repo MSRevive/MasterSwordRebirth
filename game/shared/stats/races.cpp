@@ -60,6 +60,8 @@ relationship_e CRaceManager::Relationship(msstring_ref pszSourceRace, msstring_r
 		return RELATIONSHIP_AL;
 	if (RelationshipContains(pSourceRace->Enemies, pTargetRace->Name)) //Found Enemy
 		return RELATIONSHIP_HT;
+	if (RelationshipContains(pSourceRace->Wary, pTargetRace->Name)) //Found wary
+		return RELATIONSHIP_WA;
 
-	return RELATIONSHIP_NO; //No relationship
+	return RELATIONSHIP_NE; //No relationship, so set to neutral.
 }

@@ -60,6 +60,7 @@ enum EntType
 	ENT_HOSTILE,
 	ENT_DEADLY,
 	ENT_BOSS, //Thothie DEC2012_12 - boss hud ID
+	ENT_NOTNPC,
 };
 struct entinfo_t
 {

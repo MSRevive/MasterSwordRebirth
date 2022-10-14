@@ -4712,14 +4712,27 @@ void CBasePlayer::UpdateMiscPositions(void)
 				if (EntData.Type == ENT_NEUTRAL)
 				{
 					int iRelationship = IRelationship(pSightEnt);
-					if (iRelationship == RELATIONSHIP_AL)
+					switch(iRelationship)
+					{
+					case RELATIONSHIP_AL: //friendly
 						EntData.Type = ENT_FRIENDLY;
-					else if (iRelationship == RELATIONSHIP_HT)
+						break;
+					case RELATIONSHIP_HT: //hostile
 						EntData.Type = ENT_HOSTILE;
-					else if (iRelationship == RELATIONSHIP_DL)
+						break;
+					case RELATIONSHIP_DL: //dislike
+						EntData.Type = ENT_HOSTILE;
+						break;
+					case RELATIONSHIP_WA: //wary
 						EntData.Type = ENT_WARY;
-					else if (iRelationship == RELATIONSHIP_NM)
+						break;
+					case RELATIONSHIP_NM: //nemesis
 						EntData.Type = ENT_DEADLY;
+						break;
+					case RELATIONSHIP_NO: //not NPC
+						EntData.Type = ENT_NOTNPC;
+						break;
+					}
 
 					//Thothie DEC2012_12 - boss hud ID
 					IScripted *pScripted = pSightEnt->GetScripted();
@@ -4736,7 +4749,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 					break;
 				}
 
-			if (!pSlot)						 //Slot not found
+			if (!pSlot)	//Slot not found
 			{
 				if (m_EntInfo.size() < 1024) //Create a new slot
 					pSlot = &m_EntInfo.add(entinfo_t());

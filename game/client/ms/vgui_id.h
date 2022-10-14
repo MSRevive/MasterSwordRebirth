@@ -101,7 +101,7 @@ public:
 				DifficultyColor = COLOR(200, 200, 200, 0);
 				break;
 			}
-
+			
 			}
 
 			m_Label[1]->setText(String);
