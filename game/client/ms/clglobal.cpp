@@ -141,6 +141,8 @@ void MSCLGlobals::Initialize()
 	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
 
+	PRECACHE_GENERIC("dlls/sc.dll");
+
 	enddbg;
 }
 //Player initialization that happens every map
