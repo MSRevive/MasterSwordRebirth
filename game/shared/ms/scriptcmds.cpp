@@ -1398,9 +1398,27 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 			{
 				CBaseEntity *pOtherEntity = RetrieveEntity(Params[2]);
 				int RelationShip = pMonster->IRelationship(pOtherEntity);
-				if (RelationShip == RELATIONSHIP_NO) return "neutral";
-				else if (RelationShip > RELATIONSHIP_NO) return "ally";
-				else if (RelationShip < RELATIONSHIP_NO) return "enemy";
+				switch(RelationShip)
+				{
+				case RELATIONSHIP_NO:
+					return "neutral";
+				case RELATIONSHIP_AL:
+					return "ally";
+				case RELATIONSHIP_NE:
+					return "neutral";
+				case RELATIONSHIP_FR:
+					return "ally";
+				case RELATIONSHIP_WA:
+					return "wary";
+				case RELATIONSHIP_DL:
+					return "enemy";
+				case RELATIONSHIP_HT:
+					return "enemy";
+				case RELATIONSHIP_NM:
+					return "enemy";
+				default:
+					return "neutral";
+				}
 			}
 			else if (Prop == "height")
 			{
