@@ -1407,7 +1407,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 				case RELATIONSHIP_NE:
 					return "neutral";
 				case RELATIONSHIP_FR:
-					return "ally";
+					return "enemy";
 				case RELATIONSHIP_WA:
 					return "wary";
 				case RELATIONSHIP_DL:

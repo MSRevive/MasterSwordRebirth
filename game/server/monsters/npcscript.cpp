@@ -1825,9 +1825,23 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 					FStrEq(pSighted->DisplayName(), Name))
 					fSawTarget = true;
 
-				if ((!stricmp("enemy", Name) && IRelationship(pSighted) < RELATIONSHIP_NO) ||
-					(!stricmp("ally", Name) && IRelationship(pSighted) > RELATIONSHIP_NO) ||
-					(!stricmp("player", Name) && pSighted->IsPlayer()))
+				if (!stricmp("enemy", Name))
+				{
+					switch(IRelationship(pSighted))
+					{
+					case RELATIONSHIP_FR:
+					case RELATIONSHIP_DL:
+					case RELATIONSHIP_HT:
+					case RELATIONSHIP_NM:
+						fSawTarget = true;
+						break;
+					}
+				}
+				else if (!stricmp("ally", Name) && IRelationship(pSighted) == RELATIONSHIP_AL)
+					fSawTarget = true;
+				else if (!stricmp("wary", Name) && IRelationship(pSighted) == RELATIONSHIP_WA)
+					fSawTarget = true;
+				else if (!stricmp("player", Name) && pSighted->IsPlayer())
 					fSawTarget = true;
 			}
 

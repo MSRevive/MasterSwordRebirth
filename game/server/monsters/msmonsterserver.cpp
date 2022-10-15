@@ -81,7 +81,7 @@ int CMSMonster::IRelationship(CBaseEntity *pTarget)
 bool CMSMonster::CanDamage(CBaseEntity *pOther) //Can I damage this entity?
 {
 	return (CBaseEntity::CanDamage(pOther)) &&		   //The entity can take damage
-		   (IRelationship(pOther) <= RELATIONSHIP_NO); //I have a bad or nonexistant releationship with the entity
+		   (IRelationship(pOther) <= RELATIONSHIP_NE); //I have a bad or nonexistant releationship with the entity
 }
 
 //Set up this monster to spawn at a spawn area
