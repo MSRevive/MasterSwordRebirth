@@ -56,12 +56,13 @@ relationship_e CRaceManager::Relationship(msstring_ref pszSourceRace, msstring_r
 	//if( !stricmp(pszSourceRace,pszTargetRace) )									//Same race, assume we're friends
 	//	return RELATIONSHIP_AL;
 
+	//it's possible for one race to be wary of another one even if that race isn't wary of them.
+	if (RelationshipContains(pSourceRace->Wary, pTargetRace->Name) || RelationshipContains(pTargetRace->Wary, pSourceRace->Name)) //Found wary
+		return RELATIONSHIP_WA;
 	if (RelationshipContains(pSourceRace->Allies, pTargetRace->Name)) //Found Friend
 		return RELATIONSHIP_AL;
 	if (RelationshipContains(pSourceRace->Enemies, pTargetRace->Name)) //Found Enemy
 		return RELATIONSHIP_HT;
-	if (RelationshipContains(pSourceRace->Wary, pTargetRace->Name)) //Found wary
-		return RELATIONSHIP_WA;
 
 	return RELATIONSHIP_NE; //No relationship, so set to neutral.
 }
