@@ -534,12 +534,11 @@ void CBasePlayer::CheckRun()
 
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD))
 	{
-		//MIB MAR2012_15 - switching run from double tap to +shift
-		if ((FBitSet(pbs.ButtonsDown, IN_RUN) || (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
-			!player.pev->maxspeed &&
-			!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
-			!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
-			!FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
+		if ((atoi(EngineFunc::CVAR_GetString("ms_doubletapsprint")) == 1 && (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
+		!player.pev->maxspeed &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
 		{
 			if (player.Stamina > 1)
 			{
