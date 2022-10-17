@@ -272,9 +272,8 @@ public:
 
 				//100% charged or bumped up charge level.
 				if (vCurChargeLevel > mCurChargeLevel)
-				{
+					PlaySound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
 
-				}
 				mCurChargeLevel = vCurChargeLevel;
 
 				ChargeBar.SetFGColorRGB(COLOR(vChargeR,vChargeG,vChargeB,vChargeA));
