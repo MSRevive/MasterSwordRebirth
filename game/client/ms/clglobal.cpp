@@ -95,24 +95,24 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_reflect_dbg", "0", FCVAR_ARCHIVE);					// Debug reflective surfaces
 	CVAR_CREATE("ms_bloom_darken", "-1", FCVAR_ARCHIVE);				// MiB DEC2010 - Darken bloom
 	CVAR_CREATE("ms_bloom_level", "0", FCVAR_ARCHIVE);					// Thothie DEC2010_30 - Fix ms_bloom_level stickiness
-	CVAR_CREATE("ms_reconnect_delay", "5", FCVAR_ARCHIVE);				// Thothie AUG2017 - Make reconnect delay adjustable client side
+	//CVAR_CREATE("ms_reconnect_delay", "5", FCVAR_ARCHIVE);				// Thothie AUG2017 - Make reconnect delay adjustable client side
 	CVAR_CREATE(MSCVAR_QUICKSLOT_TIMEOUT, "2.5", FCVAR_ARCHIVE);		// Timeout for the quickslots
 	CVAR_CREATE("ms_autocharge", "1", FCVAR_ARCHIVE);					// MiB MAR2012_05 - Let's you auto-charge your attack
 	CVAR_CREATE("ms_doubletapdodge", "0", FCVAR_ARCHIVE);				// MiB MAR2012_05 -Enable/Disable double tapping to dodge
 	CVAR_CREATE("ms_doubletapsprint", "0", FCVAR_ARCHIVE); //Enable/disable double tapping sprint.
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
-	CVAR_CREATE("ms_didbloomcheck", "0", FCVAR_ARCHIVE);				// Thothie FEB2012_12 - Boom check tracker
+	//CVAR_CREATE("ms_didbloomcheck", "0", FCVAR_ARCHIVE);				// Thothie FEB2012_12 - Boom check tracker
 	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // MiB APR2019_10 [GLOW_COLOR] - Desired glow color
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "10", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_hands_display_y", "20", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_hands_display_y", "20", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_scrollamount", "30", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_doubleclicktime", "1", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_aim_type", "0", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_scrollamount", "30", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_doubleclicktime", "1", FCVAR_ARCHIVE);
+	//CVAR_CREATE("ms_aim_type", "0", FCVAR_ARCHIVE);
 	//CVAR_CREATE( "r_decals", "300" , FCVAR_CLIENTDLL );   // Thothie SEP2011_07 - allow tracking/reasonable default setting of r_decals (fail, doesn't override engine setting)
 
 	/*msstring DefaultLANID = "this_must_be_unique";
