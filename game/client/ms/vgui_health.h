@@ -84,6 +84,18 @@ public:
 
 class VGUI_Health : public Panel, public IHUD_Interface
 {
+protected:
+	float vCurChargeAmt; //Amt
+	float vChargeLevelAmt; //LevelAmt
+	float vDisplayChargeLevel;
+	int vChargeLevel = 0; //Level
+	int vChargeR = 0; //r
+	int vChargeG = 0; //g
+	int vChargeB = 0; //b
+	int vChargeA = 128; //a
+	int mCurChargeLevel = 1;
+	int vCurChargeLevel = 0;
+
 public:
 	class VGUI_Flask *m_Flask[2];
 
@@ -93,6 +105,7 @@ public:
 	//Weight ----------------------------
 	CStatusBar *m_pWeight;
 	CStatusBar *m_Charge[2];
+	MSLabel *m_ChargeLbl[2];
 
 	//Main HUD Image
 	VGUI_Image3D m_HUDImage;
@@ -134,22 +147,6 @@ public:
 		//m_pStamina->SetBGColorRGB( BorderColor );
 		//m_pStamina->SetBGColorRGB( Color_Transparent );
 
-#define CHARGE_W XRES(30)
-#define CHARGE_H YRES(6)
-#define CHARGE_SPACER_W XRES(2)
-		//#define CHARGE_X XRES(320) - CHARGE_W/2
-
-		dbg("Setup m_Charge[0] & m_Charge[1]");
-		for (int i = 0; i < 2; i++)
-		{
-			int Multiplier = (i == 0) ? -1 : 1;
-			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
-			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
-			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
-			//m_Charge[i]->m_fBorder = false;
-			//m_Charge[i]->setVisible( false );
-		}
-
 #define STAMINA_LBL_SIZE_Y YRES(10)
 
 		dbg("Setup Stamina Label");
@@ -171,6 +168,24 @@ public:
 		pLabel = new MSLabel(m_pWeight, Localized("#WEIGHT"), 0, (WEIGHT_SIZE_Y / 2.0f) - (WEIGHT_LBL_SIZE_Y / 2.0f), STAMINA_SIZE_X, WEIGHT_LBL_SIZE_Y, MSLabel::a_center);
 		//pLabel->setFgColor( 255, 255, 255, 64 );
 		pLabel->SetFGColorRGB(Color_Text_White);
+
+//Charge system
+#define CHARGE_W XRES(30)
+#define CHARGE_H YRES(6)
+#define CHARGE_SPACER_W XRES(2)
+		//#define CHARGE_X XRES(320) - CHARGE_W/2
+
+		dbg("Setup m_Charge[0] & m_Charge[1]");
+		for (int i = 0; i < 2; i++)
+		{
+			int Multiplier = (i == 0) ? -1 : 1;
+			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
+			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
+			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
+			//m_Charge[i]->m_fBorder = false;
+			//m_Charge[i]->setVisible( false );
+			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);
+		}
 
 		enddbg;
 	}
@@ -200,6 +215,7 @@ public:
 
 		m_pWeight->Set(player.Weight(), player.Volume());
 
+		//Charge system
 		for (int i = 0; i < 2; i++)
 			m_Charge[i]->setVisible(false);
 
@@ -213,93 +229,63 @@ public:
 			{
 				int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
 				CStatusBar &ChargeBar = *m_Charge[Bar];
+				MSLabel &ChargeLabel = *m_ChargeLbl[Bar];
 
-				float Amt = Item.Attack_Charge();
-				if (Amt == 0)
+				vCurChargeAmt = Item.Attack_Charge();
+				if (vCurChargeAmt == 0)
 					continue;
 
 				ChargeBar.setVisible(bShowHealth);
 
-				//Old system
-				/* 
-			float Level1Amt = GET_CHARGE_FROM_TIME( 1 ); 
-			float Level2Amt = GET_CHARGE_FROM_TIME( 2 ); 
-			float Level3Amt = GET_CHARGE_FROM_TIME( 3 ); 
-
-			if( Amt <= Level1Amt ) 
-			{ 
-				ChargeBar.SetFGColorRGB( Color_Charge_Lvl1 ); 
-				//ChargeBar.SetBGColorRGB( Color_Transparent ); 
-			} 
-			else if( Amt <= Level2Amt ) 
-			{ 
-				ChargeBar.SetFGColorRGB( Color_Charge_Lvl2 ); 
-				//ChargeBar.SetBGColorRGB( Color_Charge_Lvl1 ); 
-				Amt -= Level1Amt; 
-				Amt /= (Level2Amt - Level1Amt); 
-			} 
-			else if( Amt <= Level3Amt ) 
-			{ 
-				ChargeBar.SetFGColorRGB( Color_Charge_Lvl3 ); 
-				//ChargeBar.SetBGColorRGB( Color_Charge_Lvl1 ); 
-				Amt -= Level2Amt; 
-				Amt /= (Level3Amt - Level2Amt); 
-			}*/
-				//[/Old system]
-
-				//[New System] (MiB NOV2007a)
-				bool notDone = true;
-
-				int Level = 1;
-				int r = 0;
-				int g = 0;
-				int b = 0;
-				int h = 128;
-				while (notDone)
-				{
-
-					float LevelAmt = GET_CHARGE_FROM_TIME(Level);
-
-					if (Amt <= LevelAmt)
+				while (true)
+				{	
+					vChargeLevel++;
+					vChargeLevelAmt = GET_CHARGE_FROM_TIME(vChargeLevel);
+					if (vCurChargeAmt <= vChargeLevelAmt)
 					{
-						notDone = false;
-						ChargeBar.SetFGColorRGB(COLOR(r, g, b, h));
-
-						if (Level != 1)
+						if (vChargeLevel != 1)
 						{
-							/* From 
-						Amt -= Level1Amt; 
-						Amt /= (Level2Amt - Level1Amt); 
-
-						for Level2, and the same number functions in 3 
-
-						1. Amt -= Previous level 
-						2. Amt /= (This level - Previous level) 
-						*/
-							Amt -= GET_CHARGE_FROM_TIME(Level - 1);
-							Amt /= (GET_CHARGE_FROM_TIME(Level) - GET_CHARGE_FROM_TIME(Level - 1));
+							vCurChargeAmt -= GET_CHARGE_FROM_TIME(vChargeLevel - 1);
+							vCurChargeAmt /= (GET_CHARGE_FROM_TIME(vChargeLevel) - GET_CHARGE_FROM_TIME(vChargeLevel - 1));
+							break;
 						}
 					}
 
-					r += 100;
-					if (r > 255)
+					vChargeR += 100;
+					if (vChargeR > 255)
 					{
-						r -= 255;
-						g += 100;
-						if (g > 255)
+						vChargeR -= 255;
+						vChargeG += 100;
+						if (vChargeG > 255)
 						{
-							g -= 255;
-							b += 100;
-							if (b > 255)
-								b -= 255;
+							vChargeG -= 255;
+							vChargeB += 100;
+							if (vChargeB > 255)
+								vChargeB -= 255;
 						}
 					}
-
-					Level++;
 				}
 				//[/New System]
 
-				ChargeBar.Set(Amt * 100);
+				vCurChargeLevel = (int)(vChargeLevel + vCurChargeAmt);
+				vDisplayChargeLevel = vCurChargeLevel - 1;
+
+				//100% charged or bumped up charge level.
+				if (vCurChargeLevel > mCurChargeLevel)
+				{
+
+				}
+				mCurChargeLevel = vCurChargeLevel;
+
+				ChargeBar.SetFGColorRGB(COLOR(vChargeR,vChargeG,vChargeB,vChargeA));
+				//for future stuff i guess?
+				//ChargeBar.SetAntiChargeColor(COLOR(vLastChargeR,vLastChargeG,vLastChargeB,vLastChargeA));
+				ChargeBar.Set(vCurChargeAmt * 100);
+
+				if (vDisplayChargeLevel)
+					ChargeLabel.setText(msstring() + vDisplayChargeLevel);
+				else
+					ChargeLabel.setText(" ");
 			}
 		}
 	}

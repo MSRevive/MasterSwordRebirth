@@ -177,12 +177,20 @@ class CStatusBar : public CommandButton
 public:
 	float Percentage;
 	bool m_fBorder;
+	bool mbDrawNeg;
+	COLOR mAntiChargeColor;
 
-	CStatusBar( Panel *pParent, int x, int y, int wide, int tall ) : CommandButton( "", x, y, wide, tall, true )
+	CStatusBar(Panel *pParent, int x, int y, int wide, int tall, bool bDrawNeg = false) : CommandButton( "", x, y, wide, tall, true )
 	{
 		setParent( pParent );
 		Percentage = 0;
 		m_fBorder = true;
+		mbDrawNeg = bDrawNeg;
+		SetAntiChargeColor(COLOR(0,0,0,255));
+	}
+	void SetAntiChargeColor(COLOR c)
+	{
+		mAntiChargeColor = c;
 	}
 	inline void Set( float fAmt, float fMax )
 	{
@@ -207,10 +215,26 @@ public:
 	{
 		// Border
 		int r, g, b, a;
-		getFgColor( r, g, b, a );
-		drawSetColor( r, g, b, a );
-		
-		drawFilledRect(0,0,_size[0] * (Percentage * 0.01),_size[1]);
+		int vBarJoin;
+
+		if ( mbDrawNeg )
+		{
+			vBarJoin = _size[0] * (1 - (Percentage * 0.01));
+			getFgColor( r, g, b, a );
+			drawSetColor( r, g, b, a );
+			drawFilledRect( vBarJoin, 0, _size[0], _size[1]);
+			drawSetColor(mAntiChargeColor.r, mAntiChargeColor.g, mAntiChargeColor.b, mAntiChargeColor.a);
+			drawFilledRect(0, 0, vBarJoin,	_size[1]);
+		}
+		else
+		{
+			vBarJoin = _size[0] * (Percentage * 0.01);
+			getFgColor(r, g, b, a);
+			drawSetColor(r, g, b, a);
+			drawFilledRect( 0, 0, vBarJoin,	_size[1]);
+			drawSetColor(mAntiChargeColor.r, mAntiChargeColor.g, mAntiChargeColor.b, mAntiChargeColor.a);
+			drawFilledRect(vBarJoin, 0,	_size[0], _size[1]);
+		}
 
 		if( m_fBorder )
 		{
