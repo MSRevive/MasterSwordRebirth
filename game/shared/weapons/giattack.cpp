@@ -1070,6 +1070,10 @@ bool CGenericItem::Attack_IsCharging()
 {
 	//old
 	//if( CurrentAttack && (CurrentAttack->Type == ATT_CHARGE_THROW_PROJ && !CurrentAttack->fCanCancel) )
+	//don't try charging if there's no charges.
+	if (GetHighestAttackCharge() == 0)
+		return false;
+
 	if (CurrentAttack && (CurrentAttack->Type == ATT_CHARGE_THROW_PROJ && !CurrentAttack->fCanCancel))
 	{
 		return true;
