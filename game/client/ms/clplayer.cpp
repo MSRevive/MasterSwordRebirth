@@ -534,7 +534,15 @@ void CBasePlayer::CheckRun()
 
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD))
 	{
-		if ((atoi(EngineFunc::CVAR_GetString("ms_doubletapsprint")) == 1 && (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
+		//this disables sprinting with shift without removing +speed
+		// if (((pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
+		// !player.pev->maxspeed &&
+		// !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
+		// !FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
+		// !FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
+
+		//this allows sprinting with shift and double tap.
+		if ((FBitSet(pbs.ButtonsDown, IN_RUN) || (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
 		!player.pev->maxspeed &&
 		!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
 		!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
