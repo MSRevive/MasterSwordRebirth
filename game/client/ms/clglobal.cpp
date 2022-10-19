@@ -103,7 +103,7 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
 	//CVAR_CREATE("ms_didbloomcheck", "0", FCVAR_ARCHIVE);				// Thothie FEB2012_12 - Boom check tracker
 	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // MiB APR2019_10 [GLOW_COLOR] - Desired glow color
-	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar.wav", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "10", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
