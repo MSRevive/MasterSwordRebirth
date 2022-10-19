@@ -2058,7 +2058,18 @@ msstring CScript::ScriptGetter_GetInSphere( msstring& FullName, msstring& Parser
 		{
 			CMSMonster *pMonster = (CMSMonster *)pEnt;
 			int my_relate = pMonster->IRelationship(m.pScriptedEnt);
-			if ( my_relate == -3 ) return EntToString(pEnt);
+			switch(my_relate)
+			{
+			case RELATIONSHIP_DL:
+			case RELATIONSHIP_HT:
+			case RELATIONSHIP_NM:
+				EntToString(pEnt);
+				break;
+			}
+
+			CMSMonster *pMonster = (CMSMonster *)pEnt;
+			int my_relate = pMonster->IRelationship(m.pScriptedEnt);
+			if ( my_relate == RELATIONSHIP_HT ) return EntToString(pEnt);
 		}
 
 		if ( !strcmp("ally",Name) )
@@ -2854,15 +2865,24 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 			{
 				CMSMonster *pMonster = (CMSMonster *)pEnt;
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
-				if ( my_relate == -3 && pMonster->m_Race )
+				switch(my_relate)
 				{
-					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-					int total_len = thoth_token_string.len() + ent_str.len();
-					if ( total_len < str_limit )
+				case RELATIONSHIP_DL:
+				case RELATIONSHIP_HT:
+				case RELATIONSHIP_NM:
+				{
+					if (pMonster->m_Race)
 					{
-						thoth_token_string += ent_str;
-						thoth_token_string += ";";
+						ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+						int total_len = thoth_token_string.len() + ent_str.len();
+						if ( total_len < str_limit )
+						{
+							thoth_token_string += ent_str;
+							thoth_token_string += ";";
+						}
 					}
+					break;
+				}
 				}
 			}
 
@@ -2870,15 +2890,22 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 			{
 				CMSMonster *pMonster = (CMSMonster *)pEnt;
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
-				if ( my_relate == 1 && pMonster->m_Race )
+				switch(my_relate)
 				{
-					ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-					int total_len = thoth_token_string.len() + ent_str.len();
-					if ( total_len < str_limit )
+				case RELATIONSHIP_AL:
+				{
+					if (pMonster->m_Race)
 					{
-						thoth_token_string += ent_str;
-						thoth_token_string += ";";
+						ent_str = return_idx ? msstring(UTIL_VarArgs("%i",pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
+						int total_len = thoth_token_string.len() + ent_str.len();
+						if ( total_len < str_limit )
+						{
+							thoth_token_string += ent_str;
+							thoth_token_string += ";";
+						}
 					}
+					break;
+				}
 				}
 			}
 		}
@@ -2965,15 +2992,24 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 			{
 				CMSMonster *pMonster = (CMSMonster *)pEnt;
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
-				if ( my_relate == -3 && pMonster->m_Race )
+				switch(my_relate)
 				{
-					ent_str = EntToString(pEnt);
-					int total_len = thoth_token_string.len() + ent_str.len();
-					if ( total_len < str_limit )
+				case RELATIONSHIP_DL:
+				case RELATIONSHIP_HT:
+				case RELATIONSHIP_NM:
+				{
+					if (pMonster->m_Race)
 					{
-						thoth_token_string += ent_str;
-						thoth_token_string += ";";
+						ent_str = EntToString(pEnt);
+						int total_len = thoth_token_string.len() + ent_str.len();
+						if ( total_len < str_limit )
+						{
+							thoth_token_string += ent_str;
+							thoth_token_string += ";";
+						}
 					}
+					break;
+				}
 				}
 			}
 
