@@ -85,14 +85,9 @@ public:
 class VGUI_Health : public Panel, public IHUD_Interface
 {
 protected:
-	float vCurChargeAmt; //Amt
-	float vChargeLevelAmt; //LevelAmt
-	float vDisplayChargeLevel;
-	int vChargeLevel = 0; //Level
-	int vChargeR = 0; //r
-	int vChargeG = 0; //g
-	int vChargeB = 0; //b
-	int vChargeA = 128; //a
+	float vChargeLevelAmt = 0;
+	float vCurChargeAmt = 0;
+	float vDisplayChargeLevel = 0;
 	int mCurChargeLevel = 1;
 	int vCurChargeLevel = 0;
 
@@ -149,7 +144,7 @@ public:
 
 #define STAMINA_LBL_SIZE_Y YRES(10)
 
-		dbg("Setup Stamina Label");
+		dbg("Setup Stamina Lbl");
 		MSLabel *pLabel = new MSLabel(m_pStamina, Localized("#STAMINA"), 0, (STAMINA_SIZE_Y / 2.0f) - (STAMINA_LBL_SIZE_Y / 2.0f), STAMINA_SIZE_X, STAMINA_LBL_SIZE_Y, MSLabel::a_center);
 		pLabel->SetFGColorRGB(Color_Text_White);
 
@@ -183,8 +178,9 @@ public:
 			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
 			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
 			//m_Charge[i]->m_fBorder = false;
-			//m_Charge[i]->setVisible( false );
+			m_Charge[i]->setVisible(false);
 			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);
+			m_ChargeLbl[i]->setVisible(false);
 		}
 
 		enddbg;
@@ -215,9 +211,11 @@ public:
 
 		m_pWeight->Set(player.Weight(), player.Volume());
 
-		//Charge system
 		for (int i = 0; i < 2; i++)
+		{
 			m_Charge[i]->setVisible(false);
+			m_ChargeLbl[i]->setVisible(false);
+		}
 
 		for (int i = 0; i < player.Gear.size(); i++)
 		{
@@ -225,29 +223,33 @@ public:
 			if (Item.m_Location != ITEMPOS_HANDS)
 				continue;
 
-			if (Item.Attack_IsCharging())
+			int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
+			CStatusBar &ChargeBar = *m_Charge[Bar];
+			MSLabel &ChargeLbl = *m_ChargeLbl[Bar];
+
+			if (Item.Attack_IsCharging() && (vCurChargeAmt = Item.Attack_Charge()) > 0)
 			{
-				int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
-				CStatusBar &ChargeBar = *m_Charge[Bar];
-				MSLabel &ChargeLabel = *m_ChargeLbl[Bar];
-
-				vCurChargeAmt = Item.Attack_Charge();
-				if (vCurChargeAmt == 0)
-					continue;
-
 				ChargeBar.setVisible(bShowHealth);
+				bool notDone = true;
 
-				while (true)
-				{	
-					vChargeLevel++;
+				int vChargeLevel = 1;
+				int vChargeR = 0;
+				int vChargeG = 0;
+				int vChargeB = 0;
+
+				while (notDone)
+				{
 					vChargeLevelAmt = GET_CHARGE_FROM_TIME(vChargeLevel);
+
 					if (vCurChargeAmt <= vChargeLevelAmt)
 					{
+						notDone = false;
+						ChargeBar.SetFGColorRGB(COLOR(vChargeR, vChargeG, vChargeB, 128));
+
 						if (vChargeLevel != 1)
 						{
 							vCurChargeAmt -= GET_CHARGE_FROM_TIME(vChargeLevel - 1);
 							vCurChargeAmt /= (GET_CHARGE_FROM_TIME(vChargeLevel) - GET_CHARGE_FROM_TIME(vChargeLevel - 1));
-							break;
 						}
 					}
 
@@ -264,28 +266,187 @@ public:
 								vChargeB -= 255;
 						}
 					}
-				}
-				//[/New System]
 
-				vCurChargeLevel = (int)(vChargeLevel + vCurChargeAmt);
+					vChargeLevel++;
+				}
+				
+				vCurChargeLevel = (int)((vChargeLevel - 1) + vCurChargeAmt);
 				vDisplayChargeLevel = vCurChargeLevel - 1;
 
-				//100% charged or bumped up charge level.
-				if (vCurChargeLevel > mCurChargeLevel)
+				if(vCurChargeLevel > mCurChargeLevel)
 					PlaySound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
 
 				mCurChargeLevel = vCurChargeLevel;
 
-				ChargeBar.SetFGColorRGB(COLOR(vChargeR,vChargeG,vChargeB,vChargeA));
-				//for future stuff i guess?
-				//ChargeBar.SetAntiChargeColor(COLOR(vLastChargeR,vLastChargeG,vLastChargeB,vLastChargeA));
-				ChargeBar.Set(vCurChargeAmt * 100);
-
 				if (vDisplayChargeLevel)
-					ChargeLabel.setText(msstring() + vDisplayChargeLevel);
+					ChargeLbl.setText(msstring() + vDisplayChargeLevel);
 				else
-					ChargeLabel.setText(" ");
+					ChargeLbl.setText(" ");
+
+				ChargeLbl.setVisible(bShowHealth);
+				ChargeBar.Set(vCurChargeAmt * 100);
 			}
 		}
+
+		/*
+		for (int i = 0; i < player.Gear.size(); i++)
+		{
+			CGenericItem &Item = *player.Gear[i];
+			if (Item.m_Location != ITEMPOS_HANDS)
+				continue;
+
+			int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
+			CStatusBar &ChargeBar = *m_Charge[Bar];
+			MSLabel &ChargeLbl = *m_ChargeLbl[Bar];
+
+			if (Item.Attack_IsCharging())
+			{
+				float Amt = Item.Attack_Charge();
+				if (Amt == 0)
+					continue;
+
+				ChargeBar.setVisible(bShowHealth);
+				bool notDone = true;
+
+				int Level = 1;
+				int r = 0;
+				int g = 0;
+				int b = 0;
+				while (notDone)
+				{
+					float LevelAmt = GET_CHARGE_FROM_TIME(Level);
+
+					if (Amt <= LevelAmt)
+					{
+						notDone = false;
+						ChargeBar.SetFGColorRGB(COLOR(r, g, b, 128));
+
+						if (Level != 1)
+						{
+							Amt -= GET_CHARGE_FROM_TIME(Level - 1);
+							Amt /= (GET_CHARGE_FROM_TIME(Level) - GET_CHARGE_FROM_TIME(Level - 1));
+						}
+					}
+
+					r += 100;
+					if (r > 255)
+					{
+						r -= 255;
+						g += 100;
+						if (g > 255)
+						{
+							g -= 255;
+							b += 100;
+							if (b > 255)
+								b -= 255;
+						}
+					}
+
+					Level++;
+				}
+
+				ChargeBar.Set(Amt * 100);
+				
+				vCurChargeLevel = (int)((Level - 1) + Amt);
+				vDisplayChargeLevel = vCurChargeLevel - 1;
+
+				if(vCurChargeLevel > mCurChargeLevel)
+					PlaySound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
+
+				mCurChargeLevel = vCurChargeLevel;
+
+				if (vDisplayChargeLevel)
+					ChargeLbl.setText(msstring() + vDisplayChargeLevel);
+				else
+					ChargeLbl.setText(" ");
+
+				ChargeLbl.setVisible(bShowHealth);
+			}
+		}*/
+
+		/*
+		for (int i = 0; i < player.Gear.size(); i++)
+		{
+			CGenericItem &Item = *player.Gear[i];
+			if (Item.m_Location != ITEMPOS_HANDS)
+				continue;
+
+			int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
+			CStatusBar &ChargeBar = *m_Charge[Bar];
+			MSLabel &ChargeLbl = *m_ChargeLbl[Bar];
+			
+			if (Item.Attack_IsCharging() && (vCurChargeAmt = Item.Attack_Charge()) > 0)
+			{
+				ChargeBar.setVisible(bShowHealth);
+
+				vChargeR = 0;
+				vChargeG = 0;
+				vChargeB = 0;
+				int vLastChargeR = 0;
+				int vLastChargeG = 0;
+				int vLastChargeB = 0;
+				vChargeLevelAmt = 0;
+
+				while (true)
+				{
+					vChargeLevel++;
+					vChargeLevelAmt = GET_CHARGE_FROM_TIME(vChargeLevel);
+
+					if(vChargeLevel > (int)Item.GetHighestAttackCharge())
+						break;
+
+					if (vCurChargeAmt <= vChargeLevelAmt)
+					{
+						if(vChargeLevel != 1)
+						{
+
+						}
+					}
+
+					vLastChargeR = vChargeR;
+					vLastChargeB = vChargeB;
+					vLastChargeG = vChargeG;
+
+					if (vChargeLevel > 1)
+					{
+						vChargeR += 100;
+						if (vChargeR > 255)
+						{
+							vChargeR -= 255;
+							vChargeG += 100;
+							if (vChargeG > 255)
+							{
+								vChargeG -= 255;
+								vChargeB += 100;
+								if (vChargeB > 255)
+									vChargeB -= 255;
+							}
+						}
+					}
+
+					ChargeBar.SetFGColorRGB(COLOR(vChargeR, vChargeG, vChargeB, 128));
+					ChargeBar.SetAntiChargeColor(COLOR(vLastChargeR, vLastChargeG, vLastChargeB, 255));
+					PlaySound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
+				}
+				ChargeBar.Set(vCurChargeAmt*100);
+
+				vDisplayChargeLevel = (int)(vCurChargeAmt);
+
+				//100% charged or bumped up charge level.
+				if (vCurChargeLevel > mCurChargeLevel)
+				{
+					PlaySound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
+				}
+
+				mCurChargeLevel = vCurChargeLevel;
+
+				if (vDisplayChargeLevel)
+					ChargeLbl.setText(msstring() + vDisplayChargeLevel);
+				else
+					ChargeLbl.setText(" ");
+
+				ChargeLbl.setVisible(bShowHealth);
+			}
+		}*/
 	}
 };
