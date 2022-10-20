@@ -2060,16 +2060,12 @@ msstring CScript::ScriptGetter_GetInSphere( msstring& FullName, msstring& Parser
 			int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 			switch(my_relate)
 			{
-			case RELATIONSHIP_DL:
-			case RELATIONSHIP_HT:
-			case RELATIONSHIP_NM:
+			case -3:
+			case -4:
+			case -5:
 				EntToString(pEnt);
 				break;
 			}
-
-			CMSMonster *pMonster = (CMSMonster *)pEnt;
-			int my_relate = pMonster->IRelationship(m.pScriptedEnt);
-			if ( my_relate == RELATIONSHIP_HT ) return EntToString(pEnt);
 		}
 
 		if ( !strcmp("ally",Name) )
@@ -2867,9 +2863,9 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				switch(my_relate)
 				{
-				case RELATIONSHIP_DL:
-				case RELATIONSHIP_HT:
-				case RELATIONSHIP_NM:
+				case -3:
+				case -4:
+				case -5:
 				{
 					if (pMonster->m_Race)
 					{
@@ -2892,7 +2888,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				switch(my_relate)
 				{
-				case RELATIONSHIP_AL:
+				case 1:
 				{
 					if (pMonster->m_Race)
 					{
@@ -2994,9 +2990,9 @@ msstring CScript::ScriptGetter_GetTSphereAndBox( msstring& FullName, msstring& P
 				int my_relate = pMonster->IRelationship(m.pScriptedEnt);
 				switch(my_relate)
 				{
-				case RELATIONSHIP_DL:
-				case RELATIONSHIP_HT:
-				case RELATIONSHIP_NM:
+				case -3:
+				case -4:
+				case -5:
 				{
 					if (pMonster->m_Race)
 					{
