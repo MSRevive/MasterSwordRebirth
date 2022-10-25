@@ -418,6 +418,13 @@ void IN_LeftUp(void) { KeyUp(&in_left); }
 void IN_RightDown(void) { KeyDown(&in_right); }
 void IN_RightUp(void) { KeyUp(&in_right); }
 
+// MiB MAR2012_05 - Adding script events for double-tapping left/right/back
+static float lastMoveLeftUp = 0;   // The last time Left was released
+static float lastMoveRightUp = 0;  //              Right
+static float lastMoveBackUp = 0;   //               Back
+static float lastMoveForward = 0;
+static const float tapDelay = 0.4; // The higher the amount, the longer the player has to hit left/right/back for a second time
+
 void IN_ForwardDown(void)
 {
 	KeyDown(&in_forward);
@@ -426,15 +433,10 @@ void IN_ForwardDown(void)
 
 void IN_ForwardUp(void)
 {
+	lastMoveForward = gpGlobals->time;
 	KeyUp(&in_forward);
 	gHUD.m_Spectator.HandleButtonsUp(IN_FORWARD);
 }
-
-// MiB MAR2012_05 - Adding script events for double-tapping left/right/back
-static float lastMoveLeftUp = 0;   // The last time Left was released
-static float lastMoveRightUp = 0;  //              Right
-static float lastMoveBackUp = 0;   //               Back
-static const float tapDelay = 0.4; // The higher the amount, the longer the player has to hit left/right/back for a second time
 
 #define GAME_LEAP(dir) ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, player.Stamina))
 
@@ -875,6 +877,9 @@ int CL_ButtonBits(int bResetState)
 	if (in_forward.state & 3)
 	{
 		bits |= IN_FORWARD;
+
+		// if(gpGlobals->time - lastMoveForward < 0.1)
+		// 	bits |= IN_FORWARD;
 	}
 
 	if (in_back.state & 3)
@@ -934,8 +939,17 @@ int CL_ButtonBits(int bResetState)
 
 	// MiB MAR2012_15 - +speed -> IN_RUN
 	if (in_speed.state & 3)
-	{
-		bits |= IN_RUN;
+	{	
+		if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "1"))
+		{
+			if (!FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+				bits |= IN_RUN;
+			else
+				//wanted to use a new bit, but it wouldn't work so.
+				SetBits(player.m_StatusFlags, PLAYER_MOVE_NORUN);
+		}
+		else
+			bits |= IN_RUN;
 	}
 
 	// Dead or in intermission? Shore scoreboard, too

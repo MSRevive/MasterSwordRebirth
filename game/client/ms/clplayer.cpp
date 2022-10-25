@@ -110,9 +110,6 @@ void CBasePlayer::Spawn(void)
 	//What's actually show on the screen are two different models based on what's in your hands
 	gEngfuncs.CL_LoadModel("models/null.mdl", &player.pev->viewmodel);
 
-	//Reset some variables
-	pbs.fMaxForwardPressTime = 0;
-
 	gHUD.m_HUDScript->CallScriptEvent("client_spawn");
 
 	ShowVGUIMenu(0); //Remove the blank screen VGUI
@@ -247,21 +244,12 @@ void CBasePlayer::DoSprint()
 	{
 		Player_UseStamina(0.6 * gpGlobals->frametime);
 
-		if (!strcmp(EngineFunc::CVAR_GetString("ms_sprint_toggle"), "0") && !FBitSet(pbs.ButtonsDown, IN_RUN))
+		if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "0") && !FBitSet(pbs.ButtonsDown, IN_RUN))
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg("You slow down and begin walking casually.");
 			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
 		}
-
-		//UNDONE: somehow allow another click of shift to cancel sprint
-		/*if (!strcmp(EngineFunc::CVAR_GetString("ms_sprint_toggle"), "1") && (m_afButtonPressed & IN_RUN))
-		{
-			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
-			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg("SPRINT STOAP");
-			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
-		}*/
 
 		//basically same as above, but more organized this way IMO.
 		if (!FBitSet(pbs.ButtonsDown, IN_FORWARD))
