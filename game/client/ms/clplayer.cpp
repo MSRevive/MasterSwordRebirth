@@ -124,6 +124,32 @@ int CL_IsDead(void)
 	return !player.IsAlive();
 }
 
+bool IsPlayerActing()
+{
+	return player.IsActing() ? true : false;
+}
+
+void Player_UseStamina(float flAddAmt)
+{
+	player.Stamina -= flAddAmt;
+	player.Stamina = max(player.Stamina, 0);
+	float MaxStamina = player.MaxStamina();
+	player.Stamina = min(player.Stamina, MaxStamina);
+}
+
+void Player_DoJump()
+{
+	//Use up stamina - called from the physics code
+	//This function is here so other factor can play into the
+	//loss for jumping ... TODO: Consider weight?
+	int Weight = player.Weight();
+	float FilledRatio = Weight / player.Volume();
+	FilledRatio = min(FilledRatio, 1.0f);
+	int JumpEnergy = FilledRatio * 4;
+	//player.UseStamina(JumpEnergy);
+	Player_UseStamina(JumpEnergy);
+}
+
 void CBasePlayer::Think(void)
 {
 	startdbg;
@@ -177,6 +203,202 @@ void CBasePlayer::Think(void)
 
 	enddbg;
 }
+
+void CBasePlayer::DoSprint()
+{
+	//she's dead jim
+	if (pev->deadflag != DEAD_NO)
+ 		return;
+
+	//serial duckers aren't allowed to sprint
+	if (FBitSet(player.pev->flags, FL_DUCKING))
+		return;
+
+	//NORUN flagged
+	if (FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
+		return;
+
+	//can't sprint while attacking
+	if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING))
+		return;
+
+	//sprint cooldown.
+	if (m_SprintDelay > gpGlobals->time)
+		return;
+
+	//start sprint
+	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
+	{
+		if (FBitSet(pbs.ButtonsDown, IN_RUN))
+		{
+			if (player.Stamina <= 1)
+			{
+				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+				return;
+			}
+
+			SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg("You break into a jog.");
+		}
+	}
+
+	//while sprinting checks
+	if (FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
+	{
+		Player_UseStamina(0.6 * gpGlobals->frametime);
+
+		if (!strcmp(EngineFunc::CVAR_GetString("ms_sprint_toggle"), "0") && !FBitSet(pbs.ButtonsDown, IN_RUN))
+		{
+			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg("You slow down and begin walking casually.");
+			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
+		}
+
+		//UNDONE: somehow allow another click of shift to cancel sprint
+		/*if (!strcmp(EngineFunc::CVAR_GetString("ms_sprint_toggle"), "1") && (m_afButtonPressed & IN_RUN))
+		{
+			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
+			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg("SPRINT STOAP");
+			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
+		}*/
+
+		//basically same as above, but more organized this way IMO.
+		if (!FBitSet(pbs.ButtonsDown, IN_FORWARD))
+		{
+			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg("You slow down and begin walking casually.");
+			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
+		}
+
+		//ran out of stamina
+		if (player.Stamina <= 0)
+		{
+			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+		}
+
+		//sprint interrupted
+		if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) ||
+		FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN) ||
+		FBitSet(player.pev->flags, FL_DUCKING) ||
+		(player.pev->velocity.Length2D() < fLastSpeed - 50))
+		{
+			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
+			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+		}
+	}
+
+	fLastSpeed = player.pev->velocity.Length2D();
+}
+
+void CBasePlayer::CheckSpeed()
+{
+	DoSprint();
+
+	//Normal speed (factoring in stamina, stuck arrows, etc.)
+	fSpeed = player.CurrentSpeed();
+
+	//Server maxspeed == % of normal speed that player should go
+	if (player.pev->maxspeed)
+		fSpeed *= (player.pev->maxspeed / 100.0f);
+
+	m_MaxSpeed = max(fSpeed, 0.001);
+
+	gEngfuncs.Cvar_SetValue("cl_forwardspeed", fSpeed);
+	//if( player.Class && player.Class->id == CLASS_ROGUE )
+	//Rogues can move backwards almost as fast as forwards
+	//	gEngfuncs.Cvar_SetValue( "cl_backspeed", fSpeed * 0.9 );
+	//else
+	gEngfuncs.Cvar_SetValue("cl_backspeed", fSpeed * 0.5);
+	gEngfuncs.Cvar_SetValue("cl_sidespeed", fSpeed * 0.8);
+}
+
+// void CBasePlayer::CheckRun()
+// {
+// 	//Master Sword: Check if the player is trying to run.
+// 	//You have to let go of forward before 0.1 secs and press it again by 0.4 secs
+// 	if (pev->deadflag != DEAD_NO)
+// 		return;
+
+// 	//don't run if ducking.
+// 	if (FBitSet(player.pev->flags, FL_DUCKING))
+// 		return;
+
+// 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD))
+// 	{
+// 		//MIB MAR2012_15 - switching run from double tap to +shift
+// 		if ((FBitSet(pbs.ButtonsDown, IN_RUN) || (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
+// 			!player.pev->maxspeed &&
+// 			!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
+// 			!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
+// 			!FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
+// 		{
+// 			if (player.Stamina > 1)
+// 			{
+// 				SendEventMsg("You break into a jog.");
+// 				SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+// 			}
+// 			else
+// 			{
+// 				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+// 			}
+// 			pbs.fMaxForwardPressTime = 0;
+// 		}
+// 		else if (FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING)) //Run until too tired or hit something
+// 		{
+// 			if (player.Stamina <= 0)
+// 			{ // Too Tired to go on
+// 				ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+// 				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+// 			}
+// 			else
+// 			{
+// 				Player_UseStamina(0.6 * gpGlobals->frametime);		  //Get tired from running
+// 				if (player.pev->velocity.Length2D() < fLastSpeed - 50 //If you lose too much speed between this frame
+// 																	  //and the last, you've hit something
+// 					|| FBitSet(player.pev->flags, FL_DUCKING)		  //If you duck, stop
+// 					|| FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING)  //If you attack, stop
+// 				)
+// 				{
+
+// 					ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+// 					SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+// 					//SendInfoMsg( "You lose your running speed.\n" );
+// 				}
+// 			}
+// 		}
+// 		else
+// 		{ //You're just walking or maybe tapping the button the first time
+// 			if (!pbs.fMaxForwardPressTime)
+// 				pbs.fMaxForwardPressTime = -(gpGlobals->time + 0.4);
+// 		}
+// 	}
+// 	else
+// 	{
+// 		if (m_StatusFlags & PLAYER_MOVE_RUNNING)
+// 		{ //Stop running
+// 			m_StatusFlags &= ~PLAYER_MOVE_RUNNING;
+// 			SendEventMsg("You slow down and begin walking casually.");
+// 			//SendInfoMsg( "You slow down and begin walking casually.\n" );
+// 		}
+// 		if (pbs.fMaxForwardPressTime)
+// 		{
+// 			if (gpGlobals->time > pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1))
+// 				pbs.fMaxForwardPressTime = 0;
+// 			else if (pbs.fMaxForwardPressTime < 0)
+// 			{
+// 				if (gpGlobals->time < pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1) - 0.2)
+// 					pbs.fMaxForwardPressTime *= -1;
+// 				else
+// 					pbs.fMaxForwardPressTime = 0;
+// 			}
+// 		}
+// 	}
+
+// 	fLastSpeed = player.pev->velocity.Length2D();
+// }
 
 const char *CBasePlayer::TeamID(void) { return GetPartyName(); }
 const char *CBasePlayer::GetPartyName(void)
@@ -451,28 +673,6 @@ void HUD_WeaponsPostThink(local_state_s *from, local_state_s *to, usercmd_t *cmd
 
 	enddbg;
 }
-bool IsPlayerActing()
-{
-	return player.IsActing() ? true : false;
-}
-void Player_UseStamina(float flAddAmt)
-{
-	player.Stamina -= flAddAmt;
-	player.Stamina = max(player.Stamina, 0);
-	float MaxStamina = player.MaxStamina();
-	player.Stamina = min(player.Stamina, MaxStamina);
-}
-void Player_DoJump()
-{
-	//Use up stamina - called from the physics code
-	//This function is here so other factor can play into the
-	//loss for jumping ... TODO: Consider weight?
-	int Weight = player.Weight();
-	float FilledRatio = Weight / player.Volume();
-	FilledRatio = min(FilledRatio, 1.0f);
-	int JumpEnergy = FilledRatio * 4;
-	Player_UseStamina(JumpEnergy);
-}
 /*
 =====================
 HUD_PostRunCmd
@@ -497,120 +697,6 @@ void _DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s 
 
 	enddbg;
 	//Print( "%f %f / %f %f\n", from->playerstate.origin.x, from->playerstate.origin.y, to->playerstate.origin.x, to->playerstate.origin.y );
-}
-
-void CBasePlayer::CheckSpeed()
-{
-	CheckRun();
-
-	//Normal speed (factoring in stamina, stuck arrows, etc.)
-	fSpeed = player.CurrentSpeed();
-
-	//Server maxspeed == % of normal speed that player should go
-	if (player.pev->maxspeed)
-		fSpeed *= (player.pev->maxspeed / 100.0f);
-
-	m_MaxSpeed = max(fSpeed, 0.001);
-
-	gEngfuncs.Cvar_SetValue("cl_forwardspeed", fSpeed);
-	//if( player.Class && player.Class->id == CLASS_ROGUE )
-	//Rogues can move backwards almost as fast as forwards
-	//	gEngfuncs.Cvar_SetValue( "cl_backspeed", fSpeed * 0.9 );
-	//else
-	gEngfuncs.Cvar_SetValue("cl_backspeed", fSpeed * 0.5);
-	gEngfuncs.Cvar_SetValue("cl_sidespeed", fSpeed * 0.8);
-}
-
-void CBasePlayer::CheckRun()
-{
-	//Master Sword: Check if the player is trying to run.
-	//You have to let go of forward before 0.1 secs and press it again by 0.4 secs
-	if (pev->deadflag != DEAD_NO)
-		return;
-
-	//don't run if ducking.
-	if (FBitSet(player.pev->flags, FL_DUCKING))
-		return;
-
-	if (FBitSet(pbs.ButtonsDown, IN_FORWARD))
-	{
-		//this disables sprinting with shift without removing +speed
-		// if (((pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
-		// !player.pev->maxspeed &&
-		// !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
-		// !FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
-		// !FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
-
-		//this allows sprinting with shift and double tap.
-		if ((FBitSet(pbs.ButtonsDown, IN_RUN) || (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime)) &&
-		!player.pev->maxspeed &&
-		!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) &&
-		!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
-		!FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
-		{
-			if (player.Stamina > 1)
-			{
-				SendEventMsg("You break into a jog.");
-				SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			}
-			else
-			{
-				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
-			}
-			pbs.fMaxForwardPressTime = 0;
-		}
-		else if (FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING)) //Run until too tired or hit something
-		{
-			if (player.Stamina <= 0)
-			{ // Too Tired to go on
-				ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
-			}
-			else
-			{
-				Player_UseStamina(0.6 * gpGlobals->frametime);		  //Get tired from running
-				if (player.pev->velocity.Length2D() < fLastSpeed - 50 //If you lose too much speed between this frame
-																	  //and the last, you've hit something
-					|| FBitSet(player.pev->flags, FL_DUCKING)		  //If you duck, stop
-					|| FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING)  //If you attack, stop
-				)
-				{
-
-					ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-					SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
-					//SendInfoMsg( "You lose your running speed.\n" );
-				}
-			}
-		}
-		else
-		{ //You're just walking or maybe tapping the button the first time
-			if (!pbs.fMaxForwardPressTime)
-				pbs.fMaxForwardPressTime = -(gpGlobals->time + 0.4);
-		}
-	}
-	else
-	{
-		if (m_StatusFlags & PLAYER_MOVE_RUNNING)
-		{ //Stop running
-			m_StatusFlags &= ~PLAYER_MOVE_RUNNING;
-			SendEventMsg("You slow down and begin walking casually.");
-			//SendInfoMsg( "You slow down and begin walking casually.\n" );
-		}
-		if (pbs.fMaxForwardPressTime)
-		{
-			if (gpGlobals->time > pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1))
-				pbs.fMaxForwardPressTime = 0;
-			else if (pbs.fMaxForwardPressTime < 0)
-			{
-				if (gpGlobals->time < pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1) - 0.2)
-					pbs.fMaxForwardPressTime *= -1;
-				else
-					pbs.fMaxForwardPressTime = 0;
-			}
-		}
-	}
-
-	fLastSpeed = player.pev->velocity.Length2D();
 }
 
 bool CBasePlayer::CheckHandSwitch() //No longer called.  Client now sends 'hand' command directly
@@ -1220,7 +1306,7 @@ int g_SwitchToHand = -1;
 void __CmdFunc_ToggleServerBrowser(void);
 bool fBroswerVisible();
 void ShowVGUIMenu(int iMenu);
-void Player_UseStamina(float flAddAmt);
+//void Player_UseStamina(float flAddAmt);
 extern float g_fMenuLastClosed;
 
 int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)

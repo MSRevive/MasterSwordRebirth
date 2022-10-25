@@ -104,6 +104,7 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // MiB APR2019_10 [GLOW_COLOR] - Desired glow color
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_sprint_toggle", "1", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);
@@ -161,6 +162,7 @@ void MSCLGlobals::InitializePlayer()
 
 	player.m_fGameHUDInitialized = TRUE;
 	player.pbs.fMaxForwardPressTime = 0;
+	player.m_SprintDelay = gpGlobals->time;
 	player.m_Initialized = false;
 
 	for (int i = 0; i < MAX_PLAYER_HANDITEMS; i++)

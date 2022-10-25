@@ -415,6 +415,7 @@ public:
 	CBaseEntity *CurrentTownArea;
 	int CurrentMenu;
 	PlayerButtonStruct pbs;
+	float m_SprintDelay;
 	char m_szAnimTorso[32], //The current torso anim to use
 		m_szAnimLegs[32];	//The current leg anim to use
 	float m_TimeResetLegs;	//Hold the attack legs anim until this time
@@ -518,8 +519,8 @@ public:
 #ifndef VALVE_DLL
 	void Think();
 	void SUB_Remove(void) {}
-	void CheckRun();
 	void CheckSpeed();
+	void DoSprint();
 	bool CheckHandSwitch();
 	void BeginRender();
 	void Render();
