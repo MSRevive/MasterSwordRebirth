@@ -203,6 +203,9 @@ void CBasePlayer::Think(void)
 
 void CBasePlayer::DoSprint()
 {
+	// float tLastClick = 0;
+	// float tClickTime = 0;
+
 	//she's dead jim
 	if (pev->deadflag != DEAD_NO)
  		return;
@@ -226,7 +229,8 @@ void CBasePlayer::DoSprint()
 	//start sprint
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
-		if (FBitSet(pbs.ButtonsDown, IN_RUN))
+		if (FBitSet(pbs.ButtonsDown, IN_RUN) || (pbs.fMaxForwardPressTime > 0 && gpGlobals->time < pbs.fMaxForwardPressTime))
+		//if(FBitSet(pbs.ButtonsDown, IN_RUN))
 		{
 			if (player.Stamina <= 1)
 			{
@@ -235,6 +239,7 @@ void CBasePlayer::DoSprint()
 			}
 
 			SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
+			pbs.fMaxForwardPressTime = 0;
 			SendEventMsg("You break into a jog.");
 		}
 	}
@@ -275,6 +280,26 @@ void CBasePlayer::DoSprint()
 			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+			m_SprintDelay = gpGlobals->time + 0.4;
+		}
+	}
+	else
+	{
+		if (!pbs.fMaxForwardPressTime)
+			pbs.fMaxForwardPressTime = -(gpGlobals->time + 0.4);
+	}
+
+	//must be done this way cause of https://github.com/MSRevive/MasterSwordRebirth/issues/106 :(
+	if (pbs.fMaxForwardPressTime)
+	{
+		if (gpGlobals->time > pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1))
+			pbs.fMaxForwardPressTime = 0;
+		else if (pbs.fMaxForwardPressTime < 0)
+		{
+			if (gpGlobals->time < pbs.fMaxForwardPressTime * (pbs.fMaxForwardPressTime < 0 ? -1 : 1) - 0.2)
+				pbs.fMaxForwardPressTime *= -1;
+			else
+				pbs.fMaxForwardPressTime = 0;
 		}
 	}
 

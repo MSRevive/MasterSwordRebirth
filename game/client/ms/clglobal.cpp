@@ -161,7 +161,7 @@ void MSCLGlobals::InitializePlayer()
 	player.m_HP = player.m_MP = 0;
 
 	player.m_fGameHUDInitialized = TRUE;
-	//player.pbs.fMaxForwardPressTime = 0;
+	player.pbs.fMaxForwardPressTime = 0;
 	player.m_SprintDelay = gpGlobals->time;
 	player.m_Initialized = false;
 

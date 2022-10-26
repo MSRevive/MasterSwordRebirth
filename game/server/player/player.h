@@ -184,7 +184,7 @@ struct PlayerButtonStruct
 {
 	int ButtonsDown;			//Are these keys currently down or up?
 	int MoreBTNSDown;			//To detect if buttons not defined by the engine are down
-	//float fMaxForwardPressTime; //hold forward longer than this & no run next keypress
+	float fMaxForwardPressTime; //hold forward longer than this & no run next keypress
 	int BlockButtons;			//Don't detect another push until user lets the button up
 };
 struct keysnapshot
