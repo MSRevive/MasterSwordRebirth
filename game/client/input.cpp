@@ -428,6 +428,11 @@ static const float tapDelay = 0.4; // The higher the amount, the longer the play
 void IN_ForwardDown(void)
 {
 	KeyDown(&in_forward);
+
+	//we handle double tap to sprint in via inputs now.
+	if (lastMoveForward + 0.2 > gpGlobals->time && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+		SetBits(player.pbs.ButtonsDown, IN_RUN);
+		
 	gHUD.m_Spectator.HandleButtonsDown(IN_FORWARD);
 }
 
@@ -445,7 +450,8 @@ void IN_BackDown(void)
 	KeyDown(&in_back);
 	gHUD.m_Spectator.HandleButtonsDown(IN_BACK);
 
-	if ((atoi(EngineFunc::CVAR_GetString("ms_doubletapdodge")) == 1 && gpGlobals->time - lastMoveBackUp < tapDelay) || in_speed.state & 1)
+	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveRightUp < tapDelay) || in_speed.state & 1)
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("back");
 	//ServerCmd( UTIL_VarArgs("game_leap back %f", player.Stamina) ) ;
 }
@@ -466,7 +472,8 @@ void IN_MoveleftDown(void)
 	KeyDown(&in_moveleft);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVELEFT);
 
-	if ((atoi(EngineFunc::CVAR_GetString("ms_doubletapdodge")) == 1 && gpGlobals->time - lastMoveLeftUp < tapDelay) || in_speed.state & 1)
+	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveLefttUp < tapDelay) || in_speed.state & 1)
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("left");
 }
 
@@ -482,7 +489,8 @@ void IN_MoverightDown(void)
 	KeyDown(&in_moveright);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVERIGHT);
 
-	if ((atoi(EngineFunc::CVAR_GetString("ms_doubletapdodge")) == 1 && gpGlobals->time - lastMoveRightUp < tapDelay) || in_speed.state & 1)
+	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveRightUp < tapDelay) || in_speed.state & 1)
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("right");
 }
 
@@ -495,8 +503,20 @@ void IN_MoverightUp(void)
 
 // MiB - End double tap changes
 
-void IN_SpeedDown(void) { KeyDown(&in_speed); }
-void IN_SpeedUp(void) { KeyUp(&in_speed); }
+void IN_SpeedDown(void) 
+{
+	KeyDown(&in_speed);
+
+	if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
+}
+void IN_SpeedUp(void) 
+{ 
+	KeyUp(&in_speed);
+
+	if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
+}
 
 void IN_StrafeDown(void)
 {
@@ -751,14 +771,12 @@ void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s *cmd, int active)
 		}
 
 		//MIB MAR2012_15 - disable +speed for walk, make do something more useful (dodge/run)
-		/*
-		if ( in_speed.state & 1 )
-		{
-			cmd->forwardmove *= cl_movespeedkey->value;
-			cmd->sidemove *= cl_movespeedkey->value;
-			cmd->upmove *= cl_movespeedkey->value;
-		}
-		*/
+		// if ( in_speed.state & 1 )
+		// {
+		// 	// cmd->forwardmove *= cl_movespeedkey->value;
+		// 	// cmd->sidemove *= cl_movespeedkey->value;
+		// 	// cmd->upmove *= cl_movespeedkey->value;
+		// }
 
 		//Master Sword - Scale movement from effects (drunk, stun, etc.)
 		Vector EffectMoveScale = gHUD.m_HUDScript->Effects_GetMoveScale();
@@ -939,17 +957,8 @@ int CL_ButtonBits(int bResetState)
 
 	// MiB MAR2012_15 - +speed -> IN_RUN
 	if (in_speed.state & 3)
-	{	
-		if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "1"))
-		{
-			if (!FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
-				bits |= IN_RUN;
-			else
-				//wanted to use a new bit, but it wouldn't work so.
-				SetBits(player.m_StatusFlags, PLAYER_MOVE_NORUN);
-		}
-		else
-			bits |= IN_RUN;
+	{
+		bits |= IN_RUN;
 	}
 
 	// Dead or in intermission? Shore scoreboard, too

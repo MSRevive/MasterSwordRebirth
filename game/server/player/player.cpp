@@ -4074,7 +4074,7 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//Update player actions list
-	ClearBits(m_StatusFlags, PLAYER_MOVE_NORUN | PLAYER_MOVE_NOJUMP | PLAYER_MOVE_NODUCK | PLAYER_MOVE_NOATTACK | PLAYER_MOVE_NOMOVE);
+	ClearBits(m_StatusFlags, PLAYER_MOVE_NORUN | PLAYER_MOVE_NOJUMP | PLAYER_MOVE_NODUCK | PLAYER_MOVE_NOATTACK | PLAYER_MOVE_NOMOVE | PLAYER_MOVE_STOPRUN);
 
 	for (int i = 0; i < m_Scripts.size(); i++)
 	{

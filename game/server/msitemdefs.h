@@ -68,13 +68,14 @@ enum
 #define PLAYER_MOVE_ATTACKING (1 << 1)
 #define PLAYER_MOVE_JUMPING (1 << 2)
 #define PLAYER_MOVE_SWIMMING (1 << 3) //Set by script.. really just an indicator for the client that it should rotate the model by pitch
-#define PLAYER_MOVE_SITTING (1 << 8)  //JAN2010_09 Thothie - Attempting to allow inventory access while sittin again
-
 #define PLAYER_MOVE_NORUN (1 << 3)
 #define PLAYER_MOVE_NOJUMP (1 << 4)
 #define PLAYER_MOVE_NODUCK (1 << 5)
 #define PLAYER_MOVE_NOATTACK (1 << 6)
 #define PLAYER_MOVE_NOMOVE (1 << 7)
+#define PLAYER_MOVE_SITTING (1 << 8)  //JAN2010_09 Thothie - Attempting to allow inventory access while sittin again
+#define PLAYER_MOVE_STOPRUN (1 << 9)
+
 
 //#define PLAYER_MOVE_SPECTATE		(1<<3)
 //#define PLAYER_MOVE_SPECTATE_MOVE	(1<<4)
