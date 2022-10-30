@@ -1694,7 +1694,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	startdbg;
 	int i;
 	CBaseEntity *pClass;
-	logfile << Logger::LOG_INFO << "World Activate...\n";
+	logfile << Logger::LOG_INFO << "World Activate..." << std::flush;
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
