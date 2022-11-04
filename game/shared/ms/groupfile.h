@@ -86,10 +86,12 @@ public:
 	void Open(char* pszFileName);
 	bool IsOpen() { return m_IsOpen; };
 	void Close();
-	bool WriteEntry(const char* pszName, byte* pData, unsigned long DataSize);
+	//bool WriteEntry(const char* pszName, byte* pData, unsigned long DataSize);
+	bool WriteEntry(const char* pszName, byte* pData, size_t DataSize);
 
 	//Call Read() with pBuffer == NULL to just get the size
-	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
+	//bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
+	bool ReadEntry(const char* pszName, byte* pBuffer, size_t& DataSize);
 	void Flush();
 
 private:

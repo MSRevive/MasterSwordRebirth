@@ -95,7 +95,7 @@ void CGroupFile::Close()
 }
 
 //You must call Flush() to actually write the entries
-bool CGroupFile::WriteEntry(const char* pszName, byte* pData, unsigned long DataSize)
+bool CGroupFile::WriteEntry(const char* pszName, byte* pData, size_t DataSize)
 {
 	msstring EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
@@ -117,7 +117,7 @@ bool CGroupFile::WriteEntry(const char* pszName, byte* pData, unsigned long Data
 	return true;
 }
 
-bool CGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize)
+bool CGroupFile::ReadEntry(const char* pszName, byte* pBuffer, size_t& DataSize)
 {
 	msstring EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
