@@ -450,8 +450,7 @@ void IN_BackDown(void)
 	KeyDown(&in_back);
 	gHUD.m_Spectator.HandleButtonsDown(IN_BACK);
 
-	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveRightUp < tapDelay) || in_speed.state & 1)
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time) || in_speed.state & 1)
 		GAME_LEAP("back");
 	//ServerCmd( UTIL_VarArgs("game_leap back %f", player.Stamina) ) ;
 }
@@ -472,8 +471,7 @@ void IN_MoveleftDown(void)
 	KeyDown(&in_moveleft);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVELEFT);
 
-	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveLefttUp < tapDelay) || in_speed.state & 1)
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time) || in_speed.state & 1)
 		GAME_LEAP("left");
 }
 
@@ -489,8 +487,7 @@ void IN_MoverightDown(void)
 	KeyDown(&in_moveright);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVERIGHT);
 
-	//if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && gpGlobals->time - lastMoveRightUp < tapDelay) || in_speed.state & 1)
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time) || in_speed.state & 1)
 		GAME_LEAP("right");
 }
 
