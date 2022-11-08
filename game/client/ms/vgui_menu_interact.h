@@ -52,7 +52,7 @@ public:
 			AddButton("", 0, i);
 
 		// MiB NOV2014_25, center the title and separator NpcInteractMenus.rft
-		m_AllowKeys = false; // MiB 25NOV_2014 - Disable key-input
+		m_AllowKeys = true; // MiB 25NOV_2014 - Disable key-input
 
 		enddbg;
 	}

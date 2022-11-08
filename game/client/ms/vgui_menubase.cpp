@@ -92,7 +92,7 @@ int GetCenteredItemX(int WorkSpaceSizeX, int ItemSizeX, int Items, int SpaceBewt
 // Creation
 VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenWidth, ScreenHeight)
 {
-	m_AllowKeys = false; // MiB NOV2014_25, block number shortcuts: NpcInteractMenus.rft
+	m_AllowKeys = true; // MiB NOV2014_25, block number shortcuts: NpcInteractMenus.rft
 	setParent(myParent);
 }
 
