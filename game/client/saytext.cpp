@@ -167,10 +167,11 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
+	ConsolePrint( pszBuf );
+	
 	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
 	{
 		// Print it straight to the console
-		ConsolePrint( pszBuf );
 		return;
 	}
 
