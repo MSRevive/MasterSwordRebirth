@@ -564,8 +564,7 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 
 	if( pPlayer && pPlayer->IsPlayer() )
 	{
-		if (FnDataHandler::IsEnabled())
-			pPlayer->SaveChar(); // Save data on disconnect! TODO: should this count for non-FN as well?
+		pPlayer->SaveChar(); // Save data on disconnect! TODO: should this count for non-FN as well?
 
 		FireTargets( "game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0 );
 
