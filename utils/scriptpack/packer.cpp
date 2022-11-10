@@ -154,6 +154,9 @@ void Packer::packScripts()
 		exit(-1);
 	}
 	
+	if (!GroupFile.WriteEntry("/dev/null", (byte*)"", (size_t)0))
+		printf("Failed to write first entry\n");
+
 	if(g_Release)
 	{
 		CMemFile InFile;
