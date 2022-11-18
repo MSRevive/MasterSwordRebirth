@@ -10,8 +10,8 @@
 #include "filesystem_shared.h"
 #include "interface.h"
 
-CSysModule* g_pFileSystemModule = NULL;
-IFileSystem* g_pFileSystem = NULL;
+CSysModule* g_pFileSystemModule = nullptr;
+IFileSystem* g_pFileSystem = nullptr;
 
 bool FileSystem_Init()
 {
@@ -28,28 +28,28 @@ bool FileSystem_Init()
 	}
 #else
 	//Just use the filename for the server. No COM_ExpandFilename here.
-	strcpy(szFSDir, szFsModule);
+	strncpy(szFSDir, szFsModule, sizeof(szFSDir));
 #endif
 
 	// Get filesystem interface.
-	g_pFileSystemModule = Sys_LoadModule( szFSDir );
-	assert( g_pFileSystemModule );
+	g_pFileSystemModule = Sys_LoadModule(szFSDir);
+	assert(g_pFileSystemModule != nullptr);
 
-	if( !g_pFileSystemModule )
+	if(g_pFileSystemModule == nullptr)
 	{
 		return false;
 	}
 
-	CreateInterfaceFn fileSystemFactory = Sys_GetFactory( g_pFileSystemModule );
-	if( !fileSystemFactory )
+	CreateInterfaceFn fileSystemFactory = Sys_GetFactory(g_pFileSystemModule);
+	if(!fileSystemFactory)
 	{
 		return false;
 	}
 
-	g_pFileSystem = ( IFileSystem* ) fileSystemFactory( FILESYSTEM_INTERFACE_VERSION, NULL );
-	assert( g_pFileSystem );
+	g_pFileSystem = (IFileSystem*) fileSystemFactory(FILESYSTEM_INTERFACE_VERSION, NULL);
+	assert(g_pFileSystem != nullptr);
 
-	if( !g_pFileSystem )
+	if(g_pFileSystem == nullptr)
 	{
 		return false;
 	}
@@ -59,14 +59,14 @@ bool FileSystem_Init()
 
 void FileSystem_Shutdown()
 {
-	if( g_pFileSystem != NULL )
+	if( g_pFileSystem != nullptr )
 	{
-		g_pFileSystem = NULL;
+		g_pFileSystem = nullptr;
 	}
 
-	if( g_pFileSystemModule != NULL )
+	if( g_pFileSystemModule != nullptr )
 	{
-		Sys_UnloadModule( g_pFileSystemModule );
-		g_pFileSystemModule = NULL;
+		Sys_UnloadModule(g_pFileSystemModule);
+		g_pFileSystemModule = nullptr;
 	}
 }
