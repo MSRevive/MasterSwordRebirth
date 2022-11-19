@@ -70,3 +70,20 @@ void FileSystem_Shutdown()
 		g_pFileSystemModule = nullptr;
 	}
 }
+
+::mslist<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID)
+{
+	assert(g_pFileSystem != nullptr);
+
+	if (fileName == nullptr)
+	{
+		return {};
+	}
+
+	return {};
+}
+
+bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const char* pathID)
+{
+	return false;
+}
