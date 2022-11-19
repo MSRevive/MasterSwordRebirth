@@ -1,3 +1,18 @@
+/***
+*
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*
+*	This product contains software technology licensed from Id
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc.
+*	All Rights Reserved.
+*
+*   Use, distribution, and modification of this source code and/or resulting
+*   object code is restricted to non-commercial enhancements to products from
+*   Valve LLC.  All other use, distribution, or modification is prohibited
+*   without written permission from Valve LLC.
+*
+****/
+
 #ifndef MSSHARED_FILESYSTEM_SHARED_H
 #define MSSHARED_FILESYSTEM_SHARED_H
 
@@ -6,7 +21,9 @@
 /**
 *	@file
 *
-*	Engine filesystem shared game code
+*	Functions, types and globals to load and use the GoldSource engine filesystem interface to read and write files.
+*	See the VDC for information on which search paths exist to be used as path IDs:
+*	https://developer.valvesoftware.com/wiki/GoldSource_SteamPipe_Directories
 */
 enum class FileContentFormat
 {
@@ -71,9 +88,9 @@ public:
 		Open(filename, options, pathID);
 	}
 
-	CFile(CFile&& other) noexcept : _handle(other._handle) 
+	CFile(CFile&& other) noexcept : m_Handle(other.m_Handle) 
 	{
-		other._handle = FILESYSTEM_INVALID_HANDLE;
+		other.m_Handle = FILESYSTEM_INVALID_HANDLE;
 	}
 
 	~CFile()
@@ -85,17 +102,17 @@ public:
 
 	constexpr bool IsOpen() const 
 	{ 
-		return _handle != FILESYSTEM_INVALID_HANDLE; 
+		return m_Handle != FILESYSTEM_INVALID_HANDLE; 
 	}
 
 	size_t Size() const { 
-		return static_cast<size_t>(g_pFileSystem->Size(_handle)); 
+		return static_cast<size_t>(g_pFileSystem->Size(m_Handle)); 
 	}
 
 	bool Open(const char* filename, const char* options, const char* pathID = nullptr)
 	{
 		Close();
-		_handle = g_pFileSystem->Open(filename, options, pathID);
+		m_Handle = g_pFileSystem->Open(filename, options, pathID);
 		return IsOpen();
 	}
 
@@ -103,8 +120,8 @@ public:
 	{
 		if (IsOpen())
 		{
-			g_pFileSystem->Close(_handle);
-			_handle = FILESYSTEM_INVALID_HANDLE;
+			g_pFileSystem->Close(m_Handle);
+			m_Handle = FILESYSTEM_INVALID_HANDLE;
 		}
 	}
 
@@ -112,18 +129,18 @@ public:
 	{
 		if (IsOpen())
 		{
-			g_pFileSystem->Seek(_handle, pos, seekType);
+			g_pFileSystem->Seek(m_Handle, pos, seekType);
 		}
 	}
 
 	int Read(void* dest, int size)
 	{
-		return g_pFileSystem->Read(dest, size, _handle);
+		return g_pFileSystem->Read(dest, size, m_Handle);
 	}
 
 	int Write(const void* input, int size)
 	{
-		return g_pFileSystem->Write(input, size, _handle);
+		return g_pFileSystem->Write(input, size, m_Handle);
 	}
 
 	bool FileExists(const char* filename)
@@ -134,11 +151,11 @@ public:
 	template <typename... Args>
 	int Printf(const char* format, Args&&... args)
 	{
-		return g_pFileSystem->FPrintf(_handle, format, std::forward<Args>(args)...);
+		return g_pFileSystem->FPrintf(m_Handle, format, std::forward<Args>(args)...);
 	}
 
 private:
-	FileHandle_t _handle = FILESYSTEM_INVALID_HANDLE;
+	FileHandle_t m_Handle = FILESYSTEM_INVALID_HANDLE;
 };
 
 #endif //MSSHARED_FILESYSTEM_SHARED_H
