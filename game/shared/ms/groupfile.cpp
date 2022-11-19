@@ -227,74 +227,47 @@ void CGroupFile::Flush()
 /*-----------
 	CGameGroupFile
 ------------*/
-
 #ifndef NOT_HLDLL
 #include "filesystem_shared.h"
 
-CGameGroupFile::CGameGroupFile() : m_hFile(FILESYSTEM_INVALID_HANDLE)
+CGameGroupFile::CGameGroupFile() : cFile()
 {
 }
 
 CGameGroupFile::~CGameGroupFile()
 {
-	Close();
+	cFile.Close();
 }
 
 bool CGameGroupFile::Open(const char* pszFilename)
 {
-	Close();
-
 	//Load group files from config directories only (avoids loading downloaded content)
-	if (!g_pFileSystem->FileExists(pszFilename))
-	{
+	if (!cFile.FileExists(pszFilename))
 		return false;
-	}
 
-	m_hFile = g_pFileSystem->Open(pszFilename, "rb", "GAMECONFIG");
-
-	if (FILESYSTEM_INVALID_HANDLE == m_hFile)
-	{
+	if (!cFile.Open(pszFilename, "rb", "GAMECONFIG"))
 		return false;
-	}
 
 	int HeaderSize = 0;
-	if (sizeof(int) != g_pFileSystem->Read(&HeaderSize, sizeof(int), m_hFile))
+	if (sizeof(int) != cFile.Read(&HeaderSize, sizeof(int)))
 	{
-		Close();
+		cFile.Close();
 		return false;
 	}
-
-	/*
-	*	Helper to free memory automatically
-	*	TODO: Should use C++11 std::unique_ptr instead
-	*/
-	struct CleanupMemory
-	{
-		byte* pMemory;
-
-		CleanupMemory(byte* pMemory) : pMemory(pMemory)
-		{
-		}
-
-		~CleanupMemory()
-		{
-			delete[] pMemory;
-		}
-	};
 
 	CMemFile Headers;
 	{
-		CleanupMemory _HeaderData(msnew byte[HeaderSize]);
+		//CleanupMemory _HeaderData(msnew byte[HeaderSize]);
+		//_HeaderData = std::unique_ptr<byte*>(new byte[HeaderSize]);
+		std::unique_ptr<byte[]> _HeaderData = std::make_unique<byte[]>(HeaderSize);
 
-		if (HeaderSize != g_pFileSystem->Read(_HeaderData.pMemory, HeaderSize, m_hFile))
+		if (HeaderSize != cFile.Read(_HeaderData.get(), HeaderSize))
 		{
 			return false;
 		}
 
 		CData HeaderData;
-
-		HeaderData.SetData(_HeaderData.pMemory, HeaderSize);
-
+		HeaderData.SetData(_HeaderData.get(), HeaderSize);
 		Headers.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
 	}
 
@@ -311,19 +284,14 @@ bool CGameGroupFile::Open(const char* pszFilename)
 	}
 
 	//Seek to head so we're not left dangling someplace where it might cause problems
-	g_pFileSystem->Seek(m_hFile, 0, FILESYSTEM_SEEK_HEAD);
+	cFile.Seek(0, FILESYSTEM_SEEK_HEAD);
 
 	return true;
 }
 
 void CGameGroupFile::Close()
 {
-	if (FILESYSTEM_INVALID_HANDLE != m_hFile)
-	{
-		g_pFileSystem->Close(m_hFile);
-		m_hFile = FILESYSTEM_INVALID_HANDLE;
-	}
-
+	cFile.Close();
 	m_EntryList.clear();
 }
 
@@ -342,11 +310,11 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 		//Decrypt on demand
 		if (pBuffer)
 		{
-			g_pFileSystem->Seek(m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD);
+			cFile.Seek(Entry.DataOfs, FILESYSTEM_SEEK_HEAD);
 			byte* _pBuffer = msnew byte[Entry.DataSize];
 			bool bSuccess = false;
 
-			if (Entry.DataSize == g_pFileSystem->Read(_pBuffer, Entry.DataSize, m_hFile))
+			if (Entry.DataSize == cFile.Read(_pBuffer, Entry.DataSize))
 			{
 				CData Data(_pBuffer, Entry.DataSize);
 
@@ -358,7 +326,7 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 			delete[] _pBuffer;
 
 			//Seek to head so we're not left dangling someplace where it might cause problems
-			g_pFileSystem->Seek(m_hFile, 0, FILESYSTEM_SEEK_HEAD);
+			cFile.Seek(0, FILESYSTEM_SEEK_HEAD);
 
 			return bSuccess;
 		}
@@ -368,5 +336,143 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 
 	return false;
 }
+
+// CGameGroupFile::CGameGroupFile()
+// {
+// }
+
+// CGameGroupFile::~CGameGroupFile()
+// {
+// 	Close();
+// }
+
+// bool CGameGroupFile::Open(const char* pszFilename)
+// {
+// 	Close();
+
+// 	//Load group files from config directories only (avoids loading downloaded content)
+// 	if (!g_pFileSystem->FileExists(pszFilename))
+// 	{
+// 		return false;
+// 	}
+
+// 	m_hFile = g_pFileSystem->Open(pszFilename, "rb", "GAMECONFIG");
+
+// 	if (FILESYSTEM_INVALID_HANDLE == m_hFile)
+// 	{
+// 		return false;
+// 	}
+
+// 	int HeaderSize = 0;
+// 	if (sizeof(int) != g_pFileSystem->Read(&HeaderSize, sizeof(int), m_hFile))
+// 	{
+// 		Close();
+// 		return false;
+// 	}
+
+// 	/*
+// 	*	Helper to free memory automatically
+// 	*	TODO: Should use C++11 std::unique_ptr instead
+// 	*/
+// 	struct CleanupMemory
+// 	{
+// 		byte* pMemory;
+
+// 		CleanupMemory(byte* pMemory) : pMemory(pMemory)
+// 		{
+// 		}
+
+// 		~CleanupMemory()
+// 		{
+// 			delete[] pMemory;
+// 		}
+// 	};
+
+// 	CMemFile Headers;
+// 	{
+// 		CleanupMemory _HeaderData(msnew byte[HeaderSize]);
+
+// 		if (HeaderSize != g_pFileSystem->Read(_HeaderData.pMemory, HeaderSize, m_hFile))
+// 		{
+// 			return false;
+// 		}
+
+// 		CData HeaderData;
+
+// 		HeaderData.SetData(_HeaderData.pMemory, HeaderSize);
+
+// 		Headers.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
+// 	}
+
+// 	int HeaderEntries;
+// 	Headers.ReadInt(HeaderEntries);
+
+// 	//Read headers
+// 	for (int i = 0; i < HeaderEntries; i++)
+// 	{
+// 		cachedentry_t Entry;
+// 		Headers.Read(&Entry, sizeof(groupheader_t));
+
+// 		m_EntryList.add(Entry);
+// 	}
+
+// 	//Seek to head so we're not left dangling someplace where it might cause problems
+// 	g_pFileSystem->Seek(m_hFile, 0, FILESYSTEM_SEEK_HEAD);
+
+// 	return true;
+// }
+
+// void CGameGroupFile::Close()
+// {
+// 	if (FILESYSTEM_INVALID_HANDLE != m_hFile)
+// 	{
+// 		g_pFileSystem->Close(m_hFile);
+// 		m_hFile = FILESYSTEM_INVALID_HANDLE;
+// 	}
+
+// 	m_EntryList.clear();
+// }
+
+// bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize)
+// {
+// 	msstring EntryName = pszName;
+// 	ReplaceChar(EntryName, '\\', '/');
+
+// 	for (int i = 0; i < m_EntryList.size(); i++)
+// 	{
+// 		groupheader_t& Entry = m_EntryList[i];
+// 		if (Entry.FileName != EntryName)
+// 			continue;
+
+// 		DataSize = Entry.DataSize;
+// 		//Decrypt on demand
+// 		if (pBuffer)
+// 		{
+// 			g_pFileSystem->Seek(m_hFile, Entry.DataOfs, FILESYSTEM_SEEK_HEAD);
+// 			byte* _pBuffer = msnew byte[Entry.DataSize];
+// 			bool bSuccess = false;
+
+// 			if (Entry.DataSize == g_pFileSystem->Read(_pBuffer, Entry.DataSize, m_hFile))
+// 			{
+// 				CData Data(_pBuffer, Entry.DataSize);
+
+// 				//TODO: could check if DataSize matches Data.GetDataSize() here - Solokiller
+// 				memcpy(pBuffer, Data.GetData(), DataSize);
+// 				bSuccess = true;
+// 			}
+
+// 			delete[] _pBuffer;
+
+// 			//Seek to head so we're not left dangling someplace where it might cause problems
+// 			g_pFileSystem->Seek(m_hFile, 0, FILESYSTEM_SEEK_HEAD);
+
+// 			return bSuccess;
+// 		}
+
+// 		return true;
+// 	}
+
+// 	return false;
+// }
 
 #endif

@@ -105,7 +105,7 @@ private:
 */
 
 #ifndef NOT_HLDLL
-#include "FileSystem.h"
+#include "filesystem_shared.h"
 
 /**
 *	@brief Class to read the group file in the game
@@ -118,7 +118,7 @@ public:
 	CGameGroupFile();
 	~CGameGroupFile();
 
-	bool IsOpen() const { return FILESYSTEM_INVALID_HANDLE != m_hFile; }
+	bool IsOpen() const { return cFile.IsOpen(); }
 
 	/**
 	*	@brief Loads the group file from a given file
@@ -136,7 +136,7 @@ public:
 	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
 
 private:
-	FileHandle_t m_hFile;
+	CFile cFile;
 	mslist<groupheader_t> m_EntryList;
 };
 
