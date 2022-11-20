@@ -17,7 +17,7 @@
 //=========================================================
 
 #include <cassert>
-#include <limits>
+#include <limits.h>
 #include <string>
 #include "msdllheaders.h"
 #include "monsters.h"

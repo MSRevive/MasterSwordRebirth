@@ -6,7 +6,7 @@
 #endif
 
 #include <cassert>
-#include <limits>
+#include <limits.h>
 
 #include "filesystem_shared.h"
 #include "interface.h"
