@@ -6,6 +6,7 @@
 #endif
 
 #include <cassert>
+#include <limits>
 
 #include "filesystem_shared.h"
 #include "interface.h"
@@ -71,7 +72,7 @@ void FileSystem_Shutdown()
 	}
 }
 
-::mslist<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID)
+std::vector<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID)
 {
 	assert(g_pFileSystem != nullptr);
 
@@ -80,10 +81,53 @@ void FileSystem_Shutdown()
 		return {};
 	}
 
+	CFile file{fileName, "rb", pathID};
+	if (file)
+	{
+		size_t size = file.Size();
+		std::vector<byte> buffer;
+		buffer.resize(size + (format == FileContentFormat::Text ? 1 : 0));
+		file.Read(buffer.data(), size);
+
+		if (format == FileContentFormat::Text)
+		{
+			//Null terminate it in case it's actually text.
+			buffer[size] = byte{'\0'};
+		}
+
+		return buffer;
+	}
+
+	ALERT(at_console, "FileSystem_LoadFileIntoBuffer: couldn't open file \"%s\" for reading\n", fileName);
 	return {};
 }
 
 bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const char* pathID)
 {
+	assert(g_pFileSystem != nullptr);
+
+	if (fileName == nullptr || text == nullptr)
+	{
+		return false;
+	}
+
+	const size_t length = strlen(text);
+
+	//std::numeric_limits<int>::max() doesn't work cause of macro for max/min
+	//if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+	if (length > INT_MAX)
+	{
+		ALERT(at_console, "FileSystem_WriteTextToFile: text too long\n");
+		return false;
+	}
+
+	CFile file{fileName, "rb", pathID};
+	if (file)
+	{
+		file.Write(text, length);
+		return true;
+	}
+
+	ALERT(at_console, "FileSystem_WriteTextToFile: couldn't open file \"%s\" for writing\n", fileName);
 	return false;
 }
