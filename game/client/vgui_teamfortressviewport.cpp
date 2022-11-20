@@ -683,7 +683,6 @@ void TeamFortressViewport::Initialize(void)
 	enddbg;
 }
 
-class CException;
 //-----------------------------------------------------------------------------
 // Purpose: Read the Command Menu structure from the txt file and create the menu.
 //-----------------------------------------------------------------------------
