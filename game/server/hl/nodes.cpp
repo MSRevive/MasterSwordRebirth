@@ -2334,7 +2334,7 @@ int CGraph ::FLoadGraph(const char *szMapName)
 
 	auto pMemFile = reinterpret_cast<const byte*>(buffer.data());
 
-	assert(buffer.size() <= static_cast<std::size_t>(std::numeric_limits<int>::max()));
+	assert(buffer.size() <= INT_MAX);
 	int length = static_cast<int>(buffer.size());
 
 	// Read the graph version number
