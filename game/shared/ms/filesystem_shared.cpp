@@ -72,7 +72,7 @@ void FileSystem_Shutdown()
 	}
 }
 
-std::vector<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID)
+std::vector<unsigned char> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID)
 {
 	assert(g_pFileSystem != nullptr);
 
@@ -85,14 +85,14 @@ std::vector<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileConten
 	if (file)
 	{
 		size_t size = file.Size();
-		std::vector<byte> buffer;
+		std::vector<unsigned char> buffer;
 		buffer.resize(size + (format == FileContentFormat::Text ? 1 : 0));
 		file.Read(buffer.data(), size);
 
 		if (format == FileContentFormat::Text)
 		{
 			//Null terminate it in case it's actually text.
-			buffer[size] = byte{'\0'};
+			buffer[size] = unsigned char{'\0'};
 		}
 
 		return buffer;
