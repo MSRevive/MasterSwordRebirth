@@ -24,7 +24,7 @@ public:
 
 	char m_TeamName[MAX_TEAMNAME_LEN + 1];
 
-	vector<teamunit_t> MemberList;
+	mslist<teamunit_t> MemberList;
 
 	void AddToTeam(CBasePlayer *pNewPlayer);
 	void RemoveFromTeam(CBasePlayer *pPlayer);
@@ -37,7 +37,7 @@ public:
 	const char *TeamName() { return &m_TeamName[0]; }
 	CBasePlayer *GetPlayer(int idx);
 
-	static vector<CTeam *> Teams;
+	static mslist<CTeam *> Teams;
 	static CTeam *CreateTeam(const char *pszName, ulong ID);
 	static CTeam *GetTeam(const char *pszName);
 	static CTeam *GetTeam(ulong ID);
