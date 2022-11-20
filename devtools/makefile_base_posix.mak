@@ -85,7 +85,7 @@ COPY_DLL_TO_SRV = 0
 LDFLAGS += -Wl,--build-id
 
 export STEAM_RUNTIME_PATH := /usr
-GCC_VER = -5.5
+GCC_VER = -5
 P4BIN = p4
 
 ifeq ($(TARGET_PLATFORM),linux64)
