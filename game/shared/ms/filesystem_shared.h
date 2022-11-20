@@ -82,7 +82,7 @@ public:
 	CFile() noexcept = default;
 	CFile& operator=(CFile&& other) noexcept;
 	CFile& operator=(const CFile&) = delete;
-	constexpr operator bool() const { return IsOpen(); }
+	operator bool() const { return IsOpen(); }
 
 	CFile(const char* filename, const char* options, const char* pathID = nullptr)
 	{
@@ -101,7 +101,7 @@ public:
 
 	CFile(const CFile&) = delete;
 
-	constexpr bool IsOpen() const 
+	bool IsOpen() const 
 	{ 
 		return m_Handle != FILESYSTEM_INVALID_HANDLE; 
 	}
