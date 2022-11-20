@@ -17,11 +17,6 @@ jobs:
         sudo apt update
         sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
 
-    - name: Testing
-      run: |
-        sudo gcc --version
-        sudo g++ --version
-
     - name: Create makefile
       run: |
         sudo chmod +x ./createall
