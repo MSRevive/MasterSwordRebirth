@@ -3,7 +3,7 @@
 class CStoreSellPanel : public CStorePanel
 {
 public:
-	vector<containeritem_t> m_SelectedItems;
+	mslist<containeritem_t> m_SelectedItems;
 
 	bool InterestedInItem(msstring_ref pszItemName);
 	void SellAll();

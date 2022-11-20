@@ -180,7 +180,8 @@ public:
 	}
 };
 
-#define vector mslist
+// we shouldn't be overriding vector with mslist
+//#define vector mslist
 
 //mstring - A fast string with features... no dynamic allocation
 //-Dogg
