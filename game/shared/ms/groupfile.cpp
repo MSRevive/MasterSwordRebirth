@@ -13,6 +13,7 @@
 
 #include "groupfile.h"
 #include "msfileio.h"
+#include <memory>
 
 //Deuplicated from msdebug.h
 #ifdef NOT_HLDLL
