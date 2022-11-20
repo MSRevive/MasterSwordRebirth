@@ -21,6 +21,7 @@ jobs:
       run: |
         sudo gcc --version
         sudo g++ --version
+        sudo ls /usr/bin/
 
     - name: Create makefile
       run: |
