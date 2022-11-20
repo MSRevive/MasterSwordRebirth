@@ -150,7 +150,7 @@ public:
 	}
 
 	template <typename... Args>
-	int Printf(const char* format, Args&&... args)
+	int Printf(char* format, Args&&... args)
 	{
 		return g_pFileSystem->FPrintf(m_Handle, format, std::forward<Args>(args)...);
 	}

@@ -16,6 +16,11 @@
 // nodes.h
 //=========================================================
 
+#ifndef NODES_H
+#define NODES_H
+
+class CFile;
+
 //=========================================================
 // DEFINE
 //=========================================================
@@ -155,8 +160,8 @@ public:
 	int m_iLastCoverSearch;
 
 	// functions to create the graph
-	int LinkVisibleNodes(CLink *pLinkPool, FILE *file, int *piBadNode);
-	int RejectInlineLinks(CLink *pLinkPool, FILE *file);
+	int LinkVisibleNodes(CLink *pLinkPool, CFile &file, int *piBadNode);
+	int RejectInlineLinks(CLink *pLinkPool, CFile &file);
 	int FindShortestPath(int *piPath, int iStart, int iDest, int iHull, int afCapMask);
 	int FindNearestNode(const Vector &vecOrigin, CBaseEntity *pEntity);
 	int FindNearestNode(const Vector &vecOrigin, int afNodeTypes);
@@ -177,9 +182,9 @@ public:
 	void InitGraph(void);
 	int AllocNodes(void);
 
-	int CheckNODFile(char *szMapName);
-	int FLoadGraph(char *szMapName);
-	int FSaveGraph(char *szMapName);
+	int CheckNODFile(const char *szMapName);
+	int FLoadGraph(const char *szMapName);
+	int FSaveGraph(const char *szMapName);
 	int FSetGraphPointers(void);
 	void CheckNode(Vector vecOrigin, int iNode);
 
@@ -366,3 +371,5 @@ enum
 };
 
 extern CGraph WorldGraph;
+
+#endif //NODES_H
