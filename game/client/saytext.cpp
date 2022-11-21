@@ -122,23 +122,40 @@ int CHudSayText :: Draw( float flTime )
 		}
 	}
 
+	char line[MAX_CHARS_PER_LINE]{};
 	for ( int i = 0; i < MAX_LINES; i++ )
 	{
 		if ( *g_szLineBuffer[i] )
 		{
 			if ( *g_szLineBuffer[i] == 2 && g_pflNameColors[i] )
 			{
+				//Make a copy we can freely modify
+				strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
+				line[sizeof(line) - 1] = '\0';
+
+				const std::size_t playerNameEndIndex = min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
+
+				//Cut off the actual text so we can print player name
+				line[playerNameEndIndex] = '\0';
+
+				const int x = DrawConsoleString(LINE_START, y, line + 1); // don't draw the control code at the start
+
+				//Reset last character
+				line[playerNameEndIndex] = g_szLineBuffer[i][playerNameEndIndex];
+
+				DrawConsoleString(x, y, line + g_iNameLengths[i]);
+
 				// it's a saytext string
-				static char buf[MAX_PLAYER_NAME_LENGTH+32];
+				// static char buf[MAX_PLAYER_NAME_LENGTH+32];
 
-				// draw the first x characters in the player color
-				strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
-				buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
-				gEngfuncs.pfnDrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
-				int x = DrawConsoleString( LINE_START, y, buf );
+				// // draw the first x characters in the player color
+				// strncpy( buf, g_szLineBuffer[i], min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+32) );
+				// buf[ min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH+31) ] = 0;
+				// gEngfuncs.pfnDrawSetTextColor( g_pflNameColors[i][0], g_pflNameColors[i][1], g_pflNameColors[i][2] );
+				// int x = DrawConsoleString( LINE_START, y, buf );
 
-				// color is reset after each string draw
-				DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
+				// // color is reset after each string draw
+				// DrawConsoleString( x, y, g_szLineBuffer[i] + g_iNameLengths[i] );
 			}
 			else
 			{
@@ -167,7 +184,6 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
 	ConsolePrint( pszBuf );
-
 	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
 	{
 		// Print it straight to the console
