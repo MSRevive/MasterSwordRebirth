@@ -30,7 +30,7 @@ jobs:
       run: make -f msc.mak
 
     - name: Upload Binaries
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: Linux Binaries
         path: |
