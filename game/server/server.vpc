@@ -245,6 +245,11 @@ $Project "Server"
 			$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
 		}
 
+		$Folder "AngelScript"
+		{
+			$File "$SRCDIR\game\shared\ms\angelscript\casengine.h"
+		}
+
 		$Folder "base64"
 		{
 			$File "$SRCDIR\thirdparty\base64\base64.cpp"
