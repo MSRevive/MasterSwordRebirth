@@ -392,6 +392,9 @@ bool CMSMonster ::SwitchHands(int iHand, bool bVerbose)
 	if (Hand(iHand)->CanDeploy())
 		return false;
 
+	if (ActiveItem() && ActiveItem()->CanHolster())
+		ActiveItem()->Holster();
+
 	m_CurrentHand = iHand;
 
 	ActiveItem()->Deploy();
