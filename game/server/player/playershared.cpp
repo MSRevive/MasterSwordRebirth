@@ -1180,12 +1180,12 @@ bool CBasePlayer ::SwitchHands(int iHand, bool bVerbose)
 			//Don't allow switch to the player hands if something else is already active
 			return false;
 
-		if (!pPrevActiveItem->CanHolster())
-		{
+		//if (!pPrevActiveItem->CanHolster()) //I dont think this is needed, as the item is already in the players hands. Ends up introducing a bug
+		//{
 			//if( bVerbose ) SendInfoMsg( "Can't switch to your %s hand.\n", SPEECH_IntToHand(iHand) );
-			return false;
-		}
-		pPrevActiveItem->Holster();
+		//	return false;
+		//}
+		//pPrevActiveItem->Holster();
 	}
 #endif
 
