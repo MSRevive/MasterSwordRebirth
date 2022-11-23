@@ -37,7 +37,7 @@ $Configuration
 
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty;$SRCDIR\thirdparty\angelscript"
 		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS"
 	}
 
@@ -384,6 +384,12 @@ $Project "Client"
 		$Folder "AngelScript"
 		{
 			$File "$SRCDIR\game\shared\ms\angelscript\casengine.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.h"
 		}
 
 		$Folder "base64"
