@@ -63,7 +63,7 @@ cvar_t ms_fake_hp = {"ms_fake_hp", "0", FCVAR_SERVER};			 //Thothie AUG2011_17 -
 cvar_t ms_fake_players = {"ms_fake_players", "0", FCVAR_SERVER}; //Thothie DEC2013_07 - for returning false # of players for some functions during testing
 cvar_t ms_central_addr = {"ms_central_addr", "0", FCVAR_PROTECTED};
 cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
-cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
+//cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
 
 #ifdef DEV_BUILD
 cvar_t ms_devlog = {"ms_devlog", "1", 0};
@@ -108,7 +108,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_debug_mem);
 	CVAR_REGISTER(&ms_fake_hp);		 //AUG2011_17 Thothie - moving fakehp functions to cvar
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
-	CVAR_REGISTER(&ms_crashcfg);
+	//CVAR_REGISTER(&ms_crashcfg);
 
 #ifdef DEV_BUILD
 	CVAR_REGISTER(&ms_devlog);
