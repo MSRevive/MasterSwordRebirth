@@ -12,20 +12,30 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty;.\tclap"
+		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty\angelscript;$SRCDIR\thirdparty\tclap"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
 
 	$Linker
 	{
-		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib angelscript.lib" [$WIN32]
 	}
 }
 
 $Project "scriptpack"
 {
 	$Folder	"Source Files"
+	{
+		$File "scriptpack.cpp"
+		$File "packer.cpp"
+		$File "packer.h"
+		$File "dirent.h"
+		$File "cbase.h"
+		$File "parser.h"
+	}
+
+	$Folder "Game"
 	{
 		$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
 		$File "$SRCDIR\game\shared\ms\crc\crchash.h"
@@ -34,12 +44,18 @@ $Project "scriptpack"
 		$File "$SRCDIR\game\shared\ms\groupfile.cpp"
 		$File "$SRCDIR\game\shared\ms\groupfile.h"
 		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
-		$File "$SRCDIR\game\shared\ms\stackstring.cpp"		
-		$File "scriptpack.cpp"
-		$File "packer.cpp"
-		$File "packer.h"
-		$File "dirent.h"
-		$File "cbase.h"
-		$File "parser.h"
+		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
+	}
+
+	$Folder "AngelScript"
+	{
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.cpp"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.h"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.cpp"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.h"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.cpp"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.h"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.cpp"
+		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.h"
 	}
 }
