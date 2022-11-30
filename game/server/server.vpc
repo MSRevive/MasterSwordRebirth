@@ -254,6 +254,8 @@ $Project "Server"
 			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.h"
 			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.cpp"
 			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.h"
 		}
 
 		$Folder "base64"
