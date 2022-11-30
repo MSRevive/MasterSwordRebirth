@@ -663,117 +663,15 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	if ((DeathType == KILLED_BY_MONSTER) && pKillerEnt && !pKillerEnt->IsPlayer() && !no_xp_pen)
 	{
 		//THOTHIE wants this so you lose:
-		//up to 20% XP of a random skill when you die
-		//20% at level 1-10,
-		//10% at levels 11-20,
-		//5% at levels 21-30,
-		//and 2% at levels above 30.
-		//+ 1% of gold on hand
+		//- 1% of gold on hand :)
 		//Contribs: HobbitG
 
-		//Thothie SEP2007 - attempting to allow magic item to reduce XP loss
-		//int thoth_noxploss = atoi( GetFirstScriptVar("PLR_NOXPLOSS") );
+		float DeathTax = 0.01;
+		int TaxOut = m_Gold;
 
-		if (NoExpLoss < 1)
-		{
-			float DeathTax = 0.01;
-			int TaxOut = m_Gold;
-
-			TaxOut *= DeathTax;
-			GiveGold(-TaxOut, false);
-
-			int highestSkill = 0;
-			/* for (int i = 0; i < GetSkillStatCount(); i++)
-				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) )
-					highestSkill = i;*/
-			highestSkill = RANDOM_LONG(0, 7);
-
-			if (highestSkill == 6)
-				highestSkill = 7; //spellcasting hits causing crash
-
-			//DEC2010_04 Thothie - Don't penalize parry (no effect)
-			if ((highestSkill + SKILL_FIRSTSKILL) == SKILL_PARRY)
-			{
-				if (RANDOM_LONG(0, 1) == 1)
-				{
-					highestSkill = SKILL_POLEARMS - SKILL_FIRSTSKILL;
-				}
-				else
-				{
-					highestSkill = SKILL_SWORDSMANSHIP - SKILL_FIRSTSKILL;
-				}
-			}
-
-			//int highestSkill = 0; //skill index to be penalized
-
-			//highestSkill = RANDOM_LONG( SKILL_FIRSTSKILL, SKILL_LASTSKILL ); //be nice if this worked ><
-
-			//highestSkill = RANDOM_LONG( 1, 8 );
-
-			ALERT(at_aiconsole, "DEBUG: Death Penalty num %i name %s", highestSkill, SkillStatList[highestSkill].Name);
-
-			//ALERT( at_aiconsole, "Highest(%d) Name(%s)", GetSkillStat( highestSkill ), SkillStatList[highestSkill].Name );
-			//ALERT( at_aiconsole, "StatFirst(%d) Stat+1(%d) Stat+2(%d) Stat+3(%d) Stat+4(%d) Stat+5(%d) Stat+6(%d)\n", GetSkillStat( SKILL_FIRSTSKILL ), GetSkillStat( SKILL_FIRSTSKILL + 1 ), GetSkillStat( SKILL_FIRSTSKILL + 2 ), GetSkillStat( SKILL_FIRSTSKILL + 3 ), GetSkillStat( SKILL_FIRSTSKILL + 4 ),GetSkillStat( SKILL_FIRSTSKILL + 5 ), GetSkillStat( SKILL_FIRSTSKILL + 6 ) ); // SkillStatList[1].Name, SkillStatList[1].StatCount);
-
-			float modifier = 1.00;
-			float thoth_pen_level = 0.0; //DEC2010_04 Thothie making it easier to setup a system where penalty is *reduced* rather than eliminated
-
-			if (GetSkillStat(SKILL_FIRSTSKILL + highestSkill) <= 10)
-			{
-				//ALERT( at_aiconsole, "Death Penalty 20%% from %s \n", SkillStatList[highestSkill].Name );
-				SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Death Penalty: 20%% from %s and %i gp \n", SkillStatList[highestSkill].Name, TaxOut));
-				thoth_pen_level = 0.2;
-			}
-
-			if (GetSkillStat(SKILL_FIRSTSKILL + highestSkill) <= 20 && GetSkillStat(highestSkill) > 10)
-			{
-				//ALERT( at_aiconsole, "Death Penalty 10%% from %s \n", SkillStatList[highestSkill].Name );
-				SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Death Penalty: 10%% from %s and %i gp \n", SkillStatList[highestSkill].Name, TaxOut));
-				thoth_pen_level = 0.1;
-			}
-
-			if (GetSkillStat(SKILL_FIRSTSKILL + highestSkill) <= 30 && GetSkillStat(highestSkill) > 20)
-			{
-				//ALERT( at_aiconsole, "Death Penalty 5%% from %s \n", SkillStatList[highestSkill].Name );
-				SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Death Penalty: 5%% from %s and %i gp \n", SkillStatList[highestSkill].Name, TaxOut));
-				thoth_pen_level = 0.05;
-			}
-
-			if (GetSkillStat(SKILL_FIRSTSKILL + highestSkill) > 30)
-			{
-				//ALERT( at_aiconsole, "Death Penalty 2%% from %s \n", SkillStatList[highestSkill].Name );
-				SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Death Penalty: 2%% from %s and %i gp \n", SkillStatList[highestSkill].Name, TaxOut));
-				thoth_pen_level = 0.02;
-			}
-
-			modifier -= thoth_pen_level;
-
-			//CStat *pLargest = FindStat( highestSkill );
-
-			/*
-			int highestskill = 0;
-			 for (int i = 0; i < GetSkillStatCount(); i++)
-				if( GetSkillStat( i + SKILL_FIRSTSKILL ) > GetSkillStat( highestSkill ) )
-					highestSkill = i;*/
-
-			CStat *pLargest = FindStat(SKILL_FIRSTSKILL + highestSkill);
-			//ALERT( at_aiconsole, "DEBUG: Death Penalty num %s vs %s (substats s% )", pLargest->m_Name.c_str, SkillStatList[highestSkill].Name, pLargest->m_SubStats.size() );
-			for (int r = 0; r < pLargest->m_SubStats.size(); r++)
-			{
-				pLargest->m_SubStats[r].Exp *= modifier;
-				//Shuriken - Send exp update message after xp loss on death because MiB says to.
-				if (pLargest->m_SubStats[r].Value > 26)
-				{
-					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_EXP], NULL, pev);
-					WRITE_BYTE(highestSkill);
-					WRITE_BYTE(r);
-					WRITE_LONG(pLargest->m_SubStats[r].Exp);
-					MESSAGE_END();
-				}
-			}
-		} //Endif NoExpLoss
-		if (NoExpLoss >= 1)
-			SendEventMsg(HUDEVENT_UNABLE, "Death Penalty averted due to quest or magic item.");
+		TaxOut *= DeathTax;
+		GiveGold(-TaxOut, false);
+		SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Death Penalty: Lost %i gp \n", TaxOut));
 	} //Endif DeathType == KILLED_BY_MONSTER
 
 	//if( OpenPack ) OpenPack->Container_UnListContents( );

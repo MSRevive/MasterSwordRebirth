@@ -588,7 +588,6 @@ public:
 
 	CGenericItem *ActiveItem();
 	int ActiveItemHand();
-	int NoExpLoss; //Thothie SEP2007a - attempting to allow disable of XP loss through special item
 #ifdef VALVE_DLL
 	bool m_Gagged; //Thothie FEB2007b - attempting to allow admin_gagging of players
 #endif

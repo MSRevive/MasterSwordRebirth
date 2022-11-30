@@ -82,7 +82,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["changelevel"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ChangeLevel); //Thoth DEC2007a - changelevel command for scripts
 		m_GlobalCmdHash["playername"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_PlayerName); //MiB/Thoth DEC2007a sets a players name
 		m_GlobalCmdHash["playertitle"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_PlayerTitle); //MiB/Thoth DEC2007a sets a players title
-		m_GlobalCmdHash["noxploss"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_NoXPLoss); //Thoth SEP2007a XP loss flag for special items
 		m_GlobalCmdHash["desc"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Desc);
 		m_GlobalCmdHash["weight"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Weight);
 		m_GlobalCmdHash["projectilesize"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ProjectileSize); //Thoth MAR2012 - hasn't been used for inventory volume for years, but is still used as projectile bounding box, so renamed
@@ -4482,29 +4481,6 @@ bool CScript::ScriptCmd_NameUnique(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	}	//Need braces
 
 	else ERROR_MISSING_PARMS;
-
-	return true;
-}
-
-//noxploss <player> <0|1>
-//- scope: server
-//- enable or disable XP loss on death (to be changed to a ratio reduction).
-bool CScript::ScriptCmd_NoXPLoss(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-{
-	//Thothie SEP2007a - flag player not to lose XP on death (special items)
-	//noxploss <target> <value>
-	//if value > 1 then xp loss is nullified (may make reduce in future)
-	CBaseEntity *pEntity = RetrieveEntity(Params[0]);
-	if (pEntity)
-	{
-		if (pEntity->IsPlayer())
-		{
-			((CBasePlayer *)pEntity)->NoExpLoss = atoi(Params[1]);
-			msstringlist Parameters;
-			Parameters.add(Params[1]);
-			((CBasePlayer *)pEntity)->CallScriptEvent("game_setxploss", &Parameters);
-		}
-	}
 
 	return true;
 }
