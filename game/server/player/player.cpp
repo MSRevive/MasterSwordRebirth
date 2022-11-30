@@ -3544,8 +3544,13 @@ void CBasePlayer::ItemPostFrame()
 
 	ImpulseCommands();
 
-	if (ActiveItem())
-		ActiveItem()->ItemPostFrame();
+	CGenericItem* pMainHand = Hand(0);
+	CGenericItem* pAltHand = Hand(1);
+
+	if (pMainHand)
+		pMainHand->ItemPostFrame();
+	if (pAltHand && pMainHand != pAltHand)
+		pAltHand->ItemPostFrame();
 }
 
 /*
