@@ -407,5 +407,6 @@ $Project "Client"
 		$ImpLib		game_controls
 		$ImpLib     vgui
 		$ImpLib     SDL2
+		$ImpLib 	angelscript
  	}
 }

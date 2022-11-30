@@ -267,6 +267,7 @@ $Project "Server"
 	{
 		$ImpLibexternal steam_api
 		$Lib libz [$LINUXALL]
-		$Lib libcurl		
+		$Lib libcurl
+		$Lib angelscript		
 	}
 }
