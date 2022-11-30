@@ -12,14 +12,14 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty\angelscript;$SRCDIR\thirdparty\tclap"
+		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty;$SRCDIR\thirdparty\angelscript"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
 
 	$Linker
 	{
-		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib angelscript.lib" [$WIN32]
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
 	}
 }
 
@@ -57,5 +57,10 @@ $Project "scriptpack"
 		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.h"
 		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.cpp"
 		$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.h"
+	}
+
+	$Folder	"Link Libraries"
+	{
+		$Lib angelscript
 	}
 }
