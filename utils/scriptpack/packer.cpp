@@ -6,7 +6,6 @@
 #include "cbase.h"
 #include "packer.h"
 #include "../stream_safe.h"
-#include "parser.h"
 #include "dirent.h"
 
 extern bool g_Verbose;
@@ -231,41 +230,41 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 	if (!stricmp(name, "items.txt") && !errOnly)
 	{
-		Parser parser(ffile, name);
-		parser.saveResult(create);
+		//Parser parser(ffile, name);
+		//parser.saveResult(create);
 	}
 	else
 	{
-		//we create parser object.
-		Parser parser(ffile, name);
-		parser.stripComments();
+		// //we create parser object.
+		// Parser parser(ffile, name);
+		// parser.stripComments();
 
-		//we check for errors here because comments were already replaced.
-		parser.checkQuotes(); //check for quote errors
-		parser.checkBrackets(); //check for closing errors
+		// //we check for errors here because comments were already replaced.
+		// parser.checkQuotes(); //check for quote errors
+		// parser.checkBrackets(); //check for closing errors
 
-		//only run this stuff if we're doing full parser.
-		if (!errOnly)
-		{
-			parser.stripDebug();
-			parser.stripWhitespace();
-		}
+		// //only run this stuff if we're doing full parser.
+		// if (!errOnly)
+		// {
+		// 	parser.stripDebug();
+		// 	parser.stripWhitespace();
+		// }
 
-		//do error print at the end
-		parser.printErrors();
-		if (g_ErrFile)
-			parser.saveErrors();
+		// //do error print at the end
+		// parser.printErrors();
+		// if (g_ErrFile)
+		// 	parser.saveErrors();
 
-		if (!errOnly)
-			parser.saveResult(create);
+		// if (!errOnly)
+		// 	parser.saveResult(create);
 
-		if (g_FailOnErr && parser.errorCheck())
-		{
-			delete ffile;
-			exit(-1);
-		}
+		// if (g_FailOnErr && parser.errorCheck())
+		// {
+		// 	delete ffile;
+		// 	exit(-1);
+		// }
 	}
 
 	//deallocate memory for object when done.
-	delete ffile;
+	//delete ffile;
 }
