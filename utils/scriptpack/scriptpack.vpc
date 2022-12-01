@@ -32,7 +32,6 @@ $Project "scriptpack"
 		$File "packer.h"
 		$File "dirent.h"
 		$File "cbase.h"
-		$File "parser.h"
 	}
 
 	$Folder "Game"
