@@ -13,23 +13,31 @@ extern bool g_Release;
 extern bool g_ErrFile;
 extern bool g_FailOnErr;
 
+void MessageCallback(const asSMessageInfo *msg, void *param)
+{
+	const char *type = "ERR ";
+	if( msg->type == asMSGTYPE_WARNING ) 
+		type = "WARN";
+	else if( msg->type == asMSGTYPE_INFORMATION ) 
+		type = "INFO";
+
+	printf("%s (%d, %d) : %s : %s\n", msg->section, msg->row, msg->col, type, msg->message);
+}
+
 Packer::Packer(char *wDir, char *rDir, char *oDir)
 {
 	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
 	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
 	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
-	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked\\", rDir);
 
-	if (g_Release)
+	m_Engine = asCreateScriptEngine();
+	if(m_Engine == 0)
 	{
-		try {
-			CreateDirectory(m_CookedDir, NULL);
-		}catch(...)
-		{
-			printf("Failed to create %s\n", m_CookedDir);
-			exit(-1);
-		}
+		printf("%s\n", "Failed to create scripting engine.");
+		exit(-1);
 	}
+
+	m_Engine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
 }
 
 void Packer::readDirectory(char *pszName, bool cooked)
@@ -92,14 +100,11 @@ void Packer::processScripts()
 				char cRelativePath[MAX_PATH];
 				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
 				
-				char createFile[MAX_PATH];
-				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
-				
 				if (g_Verbose)
 					printf("Cleaning script: %s\n", cRelativePath);
 				
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
-				parserThread.join();
+				//std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
+				//parserThread.join();
 					
 				if (g_Verbose)
 					printf("End script cleaning: %s\n\n", cRelativePath);
@@ -122,8 +127,8 @@ void Packer::processScripts()
 				if (g_Verbose)
 					printf("Error checking script: %s\n", cRelativePath);
 
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
-				parserThread.join();
+				//std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
+				//parserThread.join();
 
 				if (g_Verbose)
 					printf("End script processing: %s\n\n", cRelativePath);
@@ -219,6 +224,7 @@ void Packer::packScripts()
 	GroupFile.Close();
 }
 
+/*
 void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
 {
 	//need buffersize + 1 to make room for the null terminator
@@ -267,4 +273,4 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 	//deallocate memory for object when done.
 	//delete ffile;
-}
+}*/
