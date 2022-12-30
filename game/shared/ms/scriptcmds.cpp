@@ -2413,7 +2413,7 @@ bool CScript::ScriptCmd_ChatLog(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		}
 
 		//Print ( "chatlog: %s \n", sTemp.c_str() );
-		chatlog << sTemp.c_str() << "\n";
+		chatlog << sTemp.c_str() << std::endl;
 	}
 	else ERROR_MISSING_PARMS;
 #endif
