@@ -1254,36 +1254,72 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			ERROR_MISSING_PARMS;
 	}
 	//************************** TOSSPROJECTILE ***************************
-	//tossprojectile <projectile scriptname> <spawnLoc> <vec(r,f,u)> [skill]
 	else if (Cmd.Name() == "tossprojectile")
 	{
-		//Parameters: <projectile scriptname> <spawnLoc> <vec(r,f,u)> [skill]
-		if (Params.size() >= 3)
+		//Parameters: <projectile scriptname> <"view"|(src_origin)> <target|(targ_origin)> <speed> <damage> <cof> <skill|none>
+		if (Params.size() >= 7)
 		{
-			CGenericItem* pProjectile; //Contains object of projectile being tossed
-			CBaseEntity* pExistingProjectile = RetrieveEntity(Params[0]);
-			if (pExistingProjectile)
-			{
-				if (pExistingProjectile)
-					pProjectile = (CGenericItem*)pExistingProjectile;
-			}
-			else //If the projectile does not exist, create it using the provided scriptname
-			{
-				pProjectile = NewGenericItem(Params[0]);
-			}
+			float flRange = atof(Params[3]),
+				  flDamage = atof(Params[4]),
+				  flAccuracy = atof(Params[5]);
 
-			if (pProjectile) //If the projectile exists at all
-			{
-				Vector vStartPos = StringToVec(Params[1]); //Start location of the projectile
-				Vector vVelocity = StringToVec(Params[2]); //velocity of the projectile
+			//Thothie SEP2007a - make dmg multipliers internal
+			if (m_DMGMulti > 0)
+				flDamage *= m_DMGMulti;
 
-				int Stat = 0, Prop = 0;
-				if (IsPlayer())
+			CBaseEntity *pAttackEnt = NULL;
+			bool fAttack = true;
+			bool fLocation = false;
+			Vector Location;
+
+			if (Params[2][0] == '(')
+			{
+				Location = StringToVec(Params[2]); //Specified origin to shoot at
+				fLocation = true;				   //MIB JUL2010_23 - fix tossing at specific location - Dogg forgot to set this
+			}
+			else
+				pAttackEnt = RetrieveEntity(Params[2]);
+
+			if (fAttack)
+			{
+				CGenericItem *pProjectile = NewGenericItem(Params[0]);
+				if (pProjectile)
 				{
-					GetStatIndices(Params[3], Stat, Prop);
+					Vector vAngle = pev->v_angle, //Default fire angle
+						vForward,
+						vStartPos;
+
+					if (Params[1] == "view")
+						vStartPos = EyePosition(); //Default start position if not specified
+					else
+						vStartPos = StringToVec(Params[1]);
+
+					if (fLocation)
+					{
+						vAngle = UTIL_VecToAngles((Location - vStartPos).Normalize());
+						vAngle.x *= -1;
+					}
+					else if (pAttackEnt)
+					{
+						vAngle = UTIL_VecToAngles((pAttackEnt->Center() - vStartPos).Normalize());
+						vAngle.x *= -1;
+					}
+
+					vAngle.x += (flAccuracy * RANDOM_FLOAT(-1, 1));
+					vAngle.y += (flAccuracy * RANDOM_FLOAT(-1, 1));
+
+					UTIL_MakeVectorsPrivate(vAngle, vForward, NULL, NULL);
+
+					Vector vTemp = vForward * flRange;
+
+					int Stat = 0, Prop = 0;
+					if (IsPlayer())
+					{
+						GetStatIndices(Params[6], Stat, Prop);
+					}
+
+					pProjectile->TossProjectile(this, vStartPos, vTemp, flDamage, Stat, Prop);
 				}
-				
-				pProjectile->TossProjectile(this, vStartPos, vVelocity, 100.0f, Stat, Prop); //temp 100 damage for testing
 			}
 		}
 		else
