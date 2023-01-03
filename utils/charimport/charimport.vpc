@@ -36,7 +36,6 @@ $Project "charimport"
 
 	$Folder	"Link Libraries" 
 	{
-		$Lib libz [$LINUXALL]
 		$Lib libcurl
 	}
 }

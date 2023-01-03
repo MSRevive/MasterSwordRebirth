@@ -213,12 +213,11 @@ mslist<std::string> strutil::explode(std::string const &str, char delim)
 
 std::string& strutil::implode(mslist<std::string> vec, int start)
 {
-	std::string result;
+	static std::string result;
+	result.clear();
 
-	for(int i = start; i < vec.size(); i++)
-	{
+	for (int i = start; i < vec.size(); i++)
 		result += vec[i];
-	}
 
 	return result;
 }

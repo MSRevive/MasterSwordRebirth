@@ -3,18 +3,21 @@
 //
 
 #ifndef _WIN32
-#define CURL_PULL_SYS_TYPES_H 1
-#define CURL_PULL_STDINT_H 1
-#define CURL_PULL_INTTYPES_H 1
-#define CURL_PULL_SYS_SOCKET_H 1
-#else
-#define CURL_PULL_WS2TCPIP_H 1
+#define CURL_PULL_SYS_TYPES_H
+#define CURL_PULL_STDINT_H
+#define CURL_PULL_INTTYPES_H
+#define HAVE_SYS_SOCKET_H
 #endif
 
 #include "curl/curl.h"
 #include "httprequesthandler.h"
 #include "rapidjson/document_safe.h"
 #include <string>
+
+#if defined(_WIN32) && defined(USE_VS2022)
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
+#endif
 
 static std::string g_pDataBuffer;
 
