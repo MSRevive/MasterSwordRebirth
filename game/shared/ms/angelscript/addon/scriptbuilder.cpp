@@ -15,6 +15,8 @@ using namespace std;
 #include <unistd.h> // For getcwd()
 #endif
 
+#include "groupfile.h"
+
 BEGIN_AS_NAMESPACE
 
 // Helper functions
@@ -172,6 +174,14 @@ bool CScriptBuilder::IncludeIfNotAlreadyIncluded(const char *filename)
 
 int CScriptBuilder::LoadScriptSection(const char *filename)
 {
+	unsigned long size;
+	char* data = new(char[size+1]);
+
+	data[size] = 0;
+}
+
+/*int CScriptBuilder::LoadScriptSection(const char *filename)
+{
 	// Open the script file
 	string scriptFile = filename;
 #if _MSC_VER >= 1500 && !defined(__S3E__)
@@ -220,7 +230,7 @@ int CScriptBuilder::LoadScriptSection(const char *filename)
 
 	// Process the script section even if it is zero length so that the name is registered
 	return ProcessScriptSection(code.c_str(), (unsigned int)(code.length()), filename, 0);
-}
+}*/
 
 int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length, const char *sectionname, int lineOffset)
 {
