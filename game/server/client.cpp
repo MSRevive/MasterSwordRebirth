@@ -865,15 +865,7 @@ void ClientCommand2(edict_t *pEntity)
 		//char * cmholder;
 		if (thoth_canuseinv)
 		{
-			char thoth_match_str[] = "magic_hand_";
-			const char *thoth_match_result;
-			//thoth_match_len = strspn(CMD_ARGV(1),match_str);
-			thoth_match_result = strstr(CMD_ARGV(1), thoth_match_str);
-			int thoth_match_len;
-			thoth_match_len = strlen(thoth_match_result);
-			//ALERT( at_console, "thoth_match_len %i\n",thoth_match_len );
-			if (thoth_match_result > 0)
-				pPlayer->PrepareSpell(CMD_ARGV(1)); //Thothie - total h4x - doesnt check if you have the item or spell! YOU CAN SPAWN ANYTHING!
+			pPlayer->PrepareSpell(CMD_ARGV(1)); //Thothie - total h4x - doesnt check if you have the item or spell! YOU CAN SPAWN ANYTHING!
 		}
 		else
 		{

@@ -1537,8 +1537,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 				{
 					int idx = atoi( Params[2] );
 					msstring thoth_out_str = pPlayer->m_SpellList[idx].c_str();
-					if ( !thoth_out_str.starts_with("magic_hand_") ) return "0";
-					else return thoth_out_str.c_str();
+					return thoth_out_str.c_str();
 				}
 				else if( Prop == "jumping" )	fSuccess = FBitSet( pPlayer->m_StatusFlags, PLAYER_MOVE_JUMPING ) ? true : false;
 				else if( Prop == "companions" )
@@ -4568,15 +4567,13 @@ bool CScript::ScriptCmd_OverwriteSpell(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, ms
 		{
 			int idx = atoi( Params[1] );
 			pPlayer->m_SpellList[idx] = Params[2];
-			if( Params[2].starts_with("magic_hand_") )
-			{
-				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SETPROP], NULL, pPlayer->pev );
-				WRITE_BYTE( PROP_SPELL );
-				WRITE_BYTE( 1 );
-				WRITE_BYTE( idx );
-				WRITE_STRING_LIMIT(Params[2].c_str(), WRITE_STRING_MAX);
-				MESSAGE_END();
-			}
+
+			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SETPROP], NULL, pPlayer->pev );
+			WRITE_BYTE( PROP_SPELL );
+			WRITE_BYTE( 1 );
+			WRITE_BYTE( idx );
+			WRITE_STRING_LIMIT(Params[2].c_str(), WRITE_STRING_MAX);
+			MESSAGE_END();
 		}
 	}
 	else ERROR_MISSING_PARMS;
