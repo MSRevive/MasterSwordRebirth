@@ -39,7 +39,6 @@ bool CGenericItem::Spell_LearnSpell(const char *pszSpellName)
 	if (!pSpell
 		|| !pSpell->SpellData
 		|| !m_pPlayer
-		|| m_pPlayer->GetSkillStat(SKILL_SPELLCASTING) < pSpell->SpellData->RequiredSkill
 		)
 	{
 		return false;
