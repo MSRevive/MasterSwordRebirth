@@ -37,7 +37,7 @@ $Configuration
 	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty;$SRCDIR\thirdparty\angelscript"
 		$PreprocessorDefinitions		"$BASE;VALVE_DLL;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER;CURL_STATICLIB"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -245,6 +245,19 @@ $Project "Server"
 			$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
 		}
 
+		$Folder "AngelScript"
+		{
+			$File "$SRCDIR\game\shared\ms\angelscript\casengine.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptbuilder.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmath.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptmathcomplex.h"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.cpp"
+			$File "$SRCDIR\game\shared\ms\angelscript\addon\scriptstdstring.h"
+		}
+
 		$Folder "base64"
 		{
 			$File "$SRCDIR\thirdparty\base64\base64.cpp"
@@ -255,6 +268,9 @@ $Project "Server"
 	$Folder	"Link Libraries" 
 	{
 		$ImpLibexternal steam_api
-		$Lib libcurl		
+		$Lib libcurl
+		$Lib libz [$LINUXALL]
+		$Lib libcurl
+		$Lib angelscript
 	}
 }

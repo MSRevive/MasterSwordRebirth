@@ -5,11 +5,11 @@
 #include <direct.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <tclap/CmdLine.h>
 
 #include "cbase.h"
 #include "packer.h"
 #include "crc/crchash.h"
-#include "tclap/CmdLine.h"
 
 bool g_Verbose;
 bool g_Release;
