@@ -27,8 +27,8 @@ public:
 };
 
 TYPEDESCRIPTION CCycler::m_SaveData[] =
-	{
-		DEFINE_FIELD(CCycler, m_animate, FIELD_INTEGER),
+{
+	DEFINE_FIELD(CCycler, m_animate, FIELD_INTEGER),
 };
 
 IMPLEMENT_SAVERESTORE(CCycler, CBaseMonster);
@@ -906,7 +906,8 @@ struct monster_data_t
 	Vector origin, angles;
 	bool spawned,
 		spawnontrigger, //monster only spawns when individually triggered
-		triggered;
+		triggered,
+		hpreq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 	long lPrivData,
 		lTrigPrivData; //For monsters spawned by trigger
 
@@ -928,11 +929,13 @@ public:
 		SPAWNLOC_RANDOM
 	} m_SpawnLoc;
 	bool m_fSpawnOnTrigger,
-		m_fActive;			   //Set to false when ALL monsters run out of lives.
+		m_fActive,			   //Set to false when ALL monsters run out of lives.
+		hpreq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 	bool thoth_org_spawnstart; //Thothie JUN2007b this bits tells it to spawn all monsters imediately, if spawn isnt triggered (see second occurance below)
 	string_t m_sTargetAllPerish;
 	int resetwhen;		//NOV2014_20 Thothie - attempting to allow changes as to when ms_monsterspawn can respawn mobs 0=when all dead, 1=when any mob dead, 2=whenever triggered
 	bool didfirstspawn; //NOV2014_20 Thothie - the above requires us to know whether we've done the initial spawn or not
+	msstring sAddParams; //Thothie OCT2015_28 - pass additional parameters via monsterspawner
 
 	void Spawn()
 	{
@@ -1059,6 +1062,12 @@ public:
 			m_sTargetAllPerish = pev->target = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
+		else if (FStrEq(pkvd->szKeyName, "params"))
+		{
+			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
+			sAddParams = pkvd->szValue;
+			pkvd->fHandled = TRUE;
+		}
 		else if (FStrEq(pkvd->szKeyName, "nplayers"))
 		{
 			//Thothie AUG2007a - player req for monster spawns
@@ -1072,19 +1081,21 @@ public:
 			TokenizeString((pkvd->szValue), reqhp_stringlist);
 			iHPReq_min = 0;
 			iHPReq_max = 0;
+			hpreq_useavg = false; //Thothie OCT2015_28 - allow use average when calculating HP req, if token
+
 			if (reqhp_stringlist.size() > 0)
 				iHPReq_min = atoi(reqhp_stringlist[0].c_str());
-			if (reqhp_stringlist.size() > 1)
+			if (reqhp_stringlist.size() > 1 && !reqhp_stringlist[1].contains("avg"))
 			{
 				iHPReq_max = atoi(reqhp_stringlist[1].c_str());
-				if (iHPReq_max < iHPReq_min)
+				if ( iHPReq_max < iHPReq_min )
 				{
-					logfile << Logger::LOG_WARN << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
+					logfile << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
 					iHPReq_max = 0;
 				}
-				if (iHPReq_min == 0)
-					iHPReq_min = 1;
+				//if ( iHPReq_min == 0 ) iHPReq_min = 1; //OCT2015_28 disabled in case all players flagged AFK
 			}
+			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg")) hpreq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -1134,7 +1145,32 @@ public:
 			logfile << UTIL_VarArgs("DEBUG: specifically: %s\n", pMonsterData->random_monsterdata[idx].m_ScriptName.c_str());
 			pMonsterData->scriptfile = ALLOC_STRING(pMonsterData->random_monsterdata[idx].m_ScriptName);
 			pMonsterData->title = ALLOC_STRING(pMonsterData->random_monsterdata[idx].m_title);
-			pMonsterData->addparams = ALLOC_STRING(pMonsterData->random_monsterdata[idx].m_addparams);
+
+			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
+			msstring parseparams;
+			parseparams = pMonsterData->random_monsterdata[idx].m_addparams;
+			if ( sAddParams.len() > 1 && sAddParams != "none" )
+			{
+				if ( parseparams == "none" || !parseparams.len() )
+				{
+					parseparams = sAddParams;
+				}
+				else
+				{
+					//Thothie SEP2017_05 option to abort monsterspawn add params on individual monsters
+					//- also make sure local monster parameters are executed last, thus get priority
+					if ( !parseparams.contains("no_local") )
+					{
+						msstring stemp = parseparams;
+						parseparams = "";
+						parseparams.append(sAddParams.c_str());
+						parseparams.append(";");
+						parseparams.append(stemp.c_str());
+					}
+				}
+			}
+
+			pMonsterData->addparams = ALLOC_STRING(parseparams);
 			pMonsterData->dmgmulti = pMonsterData->random_monsterdata[idx].m_DMGMulti;
 			pMonsterData->hpmulti = pMonsterData->random_monsterdata[idx].m_HPMulti;
 			//nix these from the struct, this ain't gonna work
@@ -1143,6 +1179,7 @@ public:
 			pMonsterData->nplayers = pMonsterData->random_monsterdata[idx].m_ReqPlayers;
 			pMonsterData->hpreq_min = pMonsterData->random_monsterdata[idx].m_HPReq_min;
 			pMonsterData->hpreq_max = pMonsterData->random_monsterdata[idx].m_HPReq_max;
+			pMonsterData->hpreq_useavg = pMonsterData->random_monsterdata[idx].m_HPReq_useavg;
 		}
 		//NOV2014_20 - Thothie msmonster_random [end]
 
@@ -1165,6 +1202,7 @@ public:
 		//if ( iPlayerReq < thoth_CountPlayers() && iPlayerReq > 0 ) return; //Thothie AUG2007a - player req for monster spawns (FAIL - but the monster side one works fine)
 
 		CMSMonster *pMonster = (CMSMonster *)m_pGoalEnt;
+		msstring parseparams; //Thothie OCT2015_28 - pass additional parameters via monsterspawner
 
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonster->m_nRndMobs > 0)
@@ -1173,7 +1211,7 @@ public:
 			mdSpawnMonster[iMonstersToSpawn].m_nRndMobs = pMonster->m_nRndMobs;
 			for (int i = 0; i < pMonster->m_nRndMobs; i++)
 			{
-				logfile << UTIL_VarArgs("DEBUG: spawn adding randommob #%i / %i as %s\n", i, pMonster->m_nRndMobs, pMonster->random_monsterdata[i].m_ScriptName ? pMonster->random_monsterdata[i].m_ScriptName.c_str() : "???");
+				// logfile << UTIL_VarArgs("DEBUG: spawn adding randommob #%i / %i as %s\n", i, pMonster->m_nRndMobs, pMonster->random_monsterdata[i].m_ScriptName ? pMonster->random_monsterdata[i].m_ScriptName.c_str() : "???");
 				mdSpawnMonster[iMonstersToSpawn].random_monsterdata.add(pMonster->random_monsterdata[i]); //read em in
 			}
 			//logfile << UTIL_VarArgs("DEBUG: spawn chose randommob #%i = %s\n",idx,pMonster->random_monsterdata[idx].m_ScriptName ? pMonster->random_monsterdata[idx].m_ScriptName : "???");
@@ -1182,28 +1220,62 @@ public:
 			logfile << UTIL_VarArgs("DEBUG: specifically %s\n", pMonster->random_monsterdata[idx].m_ScriptName.c_str());
 			mdSpawnMonster[iMonstersToSpawn].scriptfile = ALLOC_STRING(pMonster->random_monsterdata[idx].m_ScriptName);
 			mdSpawnMonster[iMonstersToSpawn].title = ALLOC_STRING(pMonster->random_monsterdata[idx].m_title);
-			mdSpawnMonster[iMonstersToSpawn].addparams = ALLOC_STRING(pMonster->random_monsterdata[idx].m_addparams);
+
+			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
+			parseparams = pMonster->random_monsterdata[idx].m_addparams;
+			if ( sAddParams.len() > 1 && sAddParams != "none" )
+			{
+				if ( parseparams == "none" || !parseparams.len() )
+				{
+					parseparams = sAddParams;
+				}
+				else
+				{
+					parseparams.append(";");
+					parseparams.append(sAddParams.c_str());
+				}
+			}
+
+			mdSpawnMonster[iMonstersToSpawn].addparams = ALLOC_STRING(parseparams);
 			mdSpawnMonster[iMonstersToSpawn].dmgmulti = pMonster->random_monsterdata[idx].m_DMGMulti;
 			mdSpawnMonster[iMonstersToSpawn].hpmulti = pMonster->random_monsterdata[idx].m_HPMulti;
 			mdSpawnMonster[iMonstersToSpawn].nplayers = pMonster->random_monsterdata[idx].m_ReqPlayers;
 			mdSpawnMonster[iMonstersToSpawn].hpreq_min = pMonster->random_monsterdata[idx].m_HPReq_min;
 			mdSpawnMonster[iMonstersToSpawn].hpreq_max = pMonster->random_monsterdata[idx].m_HPReq_max;
+			mdSpawnMonster[iMonstersToSpawn].hpreq_useavg = pMonster->random_monsterdata[idx].m_HPReq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 			mdSpawnMonster[iMonstersToSpawn].lives =
-				mdSpawnMonster[iMonstersToSpawn].livesleft = pMonster->m_Lives;
+			mdSpawnMonster[iMonstersToSpawn].livesleft = pMonster->m_Lives;
 		}
 		//NOV2014_20 - Thothie msmonster_random [end]
 		else
 		{
 			mdSpawnMonster[iMonstersToSpawn].scriptfile = ALLOC_STRING(pMonster->m_ScriptName);
 			mdSpawnMonster[iMonstersToSpawn].title = ALLOC_STRING(pMonster->m_title);
-			mdSpawnMonster[iMonstersToSpawn].addparams = ALLOC_STRING(pMonster->m_addparams);
+
+			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
+			parseparams = pMonster->m_addparams;
+			if ( sAddParams.len() > 1 && sAddParams != "none" )
+			{
+				if ( parseparams == "none" || !parseparams.len() )
+				{
+					parseparams = sAddParams;
+				}
+				else
+				{
+					parseparams.append(";");
+					parseparams.append(sAddParams.c_str());
+				}
+			}
+
+			mdSpawnMonster[iMonstersToSpawn].addparams = ALLOC_STRING(parseparams);
 			mdSpawnMonster[iMonstersToSpawn].dmgmulti = pMonster->m_DMGMulti;
 			mdSpawnMonster[iMonstersToSpawn].hpmulti = pMonster->m_HPMulti;
 			mdSpawnMonster[iMonstersToSpawn].lives =
-				mdSpawnMonster[iMonstersToSpawn].livesleft = pMonster->m_Lives;
+			mdSpawnMonster[iMonstersToSpawn].livesleft = pMonster->m_Lives;
 			mdSpawnMonster[iMonstersToSpawn].nplayers = pMonster->m_ReqPlayers;
 			mdSpawnMonster[iMonstersToSpawn].hpreq_min = pMonster->m_HPReq_min;
 			mdSpawnMonster[iMonstersToSpawn].hpreq_max = pMonster->m_HPReq_max;
+			mdSpawnMonster[iMonstersToSpawn].hpreq_useavg = pMonster->m_HPReq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 		}
 
 		mdSpawnMonster[iMonstersToSpawn].origin = pMonster->pev->origin;
@@ -1257,6 +1329,7 @@ public:
 		{
 			if (mdSpawnMonster[i].spawned)
 				continue;
+
 			//If the monster is out of lives, don't respawn
 			if (mdSpawnMonster[i].lives > 0 && mdSpawnMonster[i].livesleft <= 0)
 			{
@@ -1264,32 +1337,74 @@ public:
 				continue;
 			}
 
+			bool thoth_nospawn = false;	//Lark DEC2017_10 - Changed scope to simplify Random Monster respawn
 			if (mdSpawnMonster[i].nplayers > 0)
 			{
 				if (UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers)
 				{
 					//Thothie AUG2007a - not enough players to spawn monster
-					//count as dead and continue
-					iDeadMonsters++; //Count the dead monsters
-					continue;
+
+					//Lark DEC2017_10 - If Random spawn, fix in the hpreq block a few lines down
+					if ( mdSpawnMonster[i].m_nRndMobs > 0 )
+						thoth_nospawn = true;
+					else
+					{
+						//count as dead and continue
+						iDeadMonsters++; //count as dead
+						continue;
+					}
 				}
 			}
 
-			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
+			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0 || thoth_nospawn) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
 			{
-				float thoth_thp = UTIL_TotalHP();
-				bool thoth_nospawn = false;
-				if (thoth_thp < mdSpawnMonster[i].hpreq_min)
-					thoth_nospawn = true;
-				if (thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0)
-					thoth_nospawn = true;
-				if (thoth_nospawn)
+				//Lark DEC2017_10 - Added thoth_nospawn check from nplayers above
+				float thoth_thp;
+				if ( mdSpawnMonster[i].hpreq_useavg )
+				{
+					thoth_thp = UTIL_AvgHP(); //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
+				}
+				else
+				{
+					thoth_thp = UTIL_TotalHP();
+				}
+				
+				if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
+				if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
+				if ( thoth_nospawn )
 				{
 					//Thothie AUG2007a - not enough hp on server to spawn monster
-					//count as dead and continue
-					mdSpawnMonster[i].spawnchance = -1; //don't respawn later just cuz you meet reqs later
-					iDeadMonsters++;					//count as dead
-					continue;
+
+					//Lark DEC2017_10 - If msmonster_random, pick another random mob from the list.
+					//If this fails X times (where X = size of list), skip this spawn.
+					if ( mdSpawnMonster[i].m_nRndMobs > 0 )
+					{
+						int retrySpawn = mdSpawnMonster[i].m_nRndMobs * 2;	// Double the odds of finding a monster that meets requirements
+						do
+						{
+							RespawnMonster( &mdSpawnMonster[i] );
+							
+							thoth_nospawn = false;
+							if ( UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers ) thoth_nospawn = true;
+							if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
+							if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
+							--retrySpawn;
+						}
+						while ( thoth_nospawn && retrySpawn > 0 );
+
+						if ( thoth_nospawn ) // Requirements still failed; skip this spawn until triggered again.
+						{
+							iDeadMonsters++; //count as dead
+							continue;
+						}
+					}
+					else
+					{
+						//count as dead and continue
+						mdSpawnMonster[i].spawnchance = -1; //don't respawn later just cuz you meet reqs later
+						iDeadMonsters++; //count as dead
+						continue;
+					}
 				}
 			}
 
@@ -1412,7 +1527,6 @@ LINK_ENTITY_TO_CLASS(ms_monsterspawn, CAreaMonsterSpawn);
 //Thothie note: this does not seem to function
 class CTrigStopMonsterSpawn : public CBaseEntity
 {
-
 	string_t sTarget;
 	bool fRemoveAllMonsters;
 

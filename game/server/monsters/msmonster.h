@@ -189,7 +189,8 @@ struct random_monster_t
 	int				  //m_Lives, //lives (undone, difficult to apply in spawner)
 		m_HPReq_min,  //reqhp (min;)
 		m_HPReq_max,  //reqhp (;max)
-		m_ReqPlayers; //nplayers
+		m_ReqPlayers, //nplayers
+		m_HPReq_useavg;
 };
 //NOV2014_20 - Thothie msmonster_random [end]
 
@@ -261,7 +262,8 @@ public:
 		m_HPReq_min,  //Thothie AUG2007a - adding optional req total hp on server to spawn monster
 		m_HPReq_max,  //Thothie FEB2011_22 - adding option for "min;max" hpreq
 		m_ReqPlayers, //Thothie AUG2007a - adding optional REQ players to spawn monster
-		m_nRndMobs;	  //NOV2014_20 - Thothie msmonster_random
+		m_nRndMobs,	  //NOV2014_20 - Thothie msmonster_random
+		m_HPReq_useavg;
 
 	float m_HPMulti, //Thothie SEP2007a - multiply HP by this amount
 		m_DMGMulti;	 //Thothie SEP2007a - multiply DMG by this amount

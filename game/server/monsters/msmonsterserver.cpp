@@ -360,9 +360,10 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 		TokenizeString((pkvd->szValue), reqhp_stringlist);
 		m_HPReq_min = 0;
 		m_HPReq_max = 0;
+		m_HPReq_useavg = false;
 		if (reqhp_stringlist.size() > 0)
 			m_HPReq_min = atoi(reqhp_stringlist[0].c_str());
-		if (reqhp_stringlist.size() > 1)
+		if (reqhp_stringlist.size() > 1 && !reqhp_stringlist[1].contains("avg"))
 		{
 			m_HPReq_max = atoi(reqhp_stringlist[1].c_str());
 			if (m_HPReq_max < m_HPReq_min)
@@ -372,6 +373,8 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 			}
 			//else if ( m_HPReq_min == 0 ) m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 		}
+		if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg")) 
+			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "title"))
@@ -461,9 +464,10 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 			TokenizeString((pkvd->szValue), reqhp_stringlist);
 			int mrand_m_HPReq_min = 0;
 			int mrand_m_HPReq_max = 0;
+			bool rand_m_HPReq_useavg = false; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 			if (reqhp_stringlist.size() > 0)
 				mrand_m_HPReq_min = atoi(reqhp_stringlist[0].c_str());
-			if (reqhp_stringlist.size() > 1)
+			if (reqhp_stringlist.size() > 1 && !reqhp_stringlist[1].contains("avg"))
 			{
 				mrand_m_HPReq_max = atoi(reqhp_stringlist[1].c_str());
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
@@ -473,8 +477,13 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
+
+			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg")) 
+				rand_m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
+
 			random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
 			random_monsterdata[idx].m_HPReq_max = mrand_m_HPReq_max;
+			random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
 		}
 		//Gotta use the logfile here, dernitall
 		logfile << UTIL_VarArgs("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s\n", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
