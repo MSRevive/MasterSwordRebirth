@@ -38,7 +38,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
-		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS"
+		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS;DISCORD_DYNAMIC_LIB"
 	}
 
 	$Linker
@@ -245,7 +245,9 @@ $Project "Client"
 		$File "$SRCDIR\game\shared\movement\pm_shared.cpp"
 		$File "studiomodelrenderer.cpp"
 		$File "$SRCDIR\thirdparty\tartan\textureloader.cpp"
-		$File "$SRCDIR\thirdparty\tartan\tgaloader.cpp"
+		$File "$SRCDIR\thirdparty\tartan\tgaloader.cpp"		
+		$File "client_discord_rpc.cpp"
+		$File "client_discord_rpc.h"
 		
 		$Folder	"Generic Item"
 		{
@@ -396,5 +398,6 @@ $Project "Client"
 		$ImpLib		game_controls
 		$ImpLib     vgui
 		$ImpLib     SDL2
+		$ImpLib		discord-rpc
  	}
 }

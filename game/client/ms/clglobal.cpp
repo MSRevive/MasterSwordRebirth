@@ -11,6 +11,7 @@
 #include "hudscript.h"
 #include "vgui_hud.h"
 #include "logger.h"
+#include "client_discord_rpc.h"
 
 void VGUI_Think();
 
@@ -142,10 +143,14 @@ void MSCLGlobals::Initialize()
 	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
 
-	PRECACHE_GENERIC("dlls/sc.dll");
+	//PRECACHE_GENERIC("dlls/sc.dll"); --- crashes ???
+
+	dbg("Call DiscordRPCInitialize");
+	DiscordRPCInitialize();
 
 	enddbg;
 }
+
 //Player initialization that happens every map
 void MSCLGlobals::InitializePlayer()
 {
@@ -414,6 +419,7 @@ BOOL WINAPI DllMain(
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
 		if (logfile.is_open())
 			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
+		DiscordRPCShutdown();
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();

@@ -44,6 +44,7 @@ extern "C"
 #include "interface.h"
 #include "voice_status.h"
 #include "filesystem_shared.h"
+#include "client_discord_rpc.h"
 
 #define DLLEXPORT EXPORT
 
@@ -428,11 +429,12 @@ void DLLEXPORT HUD_Frame(double time)
 
 	dbg("Call ServersThink");
 	ServersThink(time);
-	dbg("Call ServersThink DONE");
 
 	dbg("Call SetBorderlessWindow");
 	SetBorderlessWindow();
-	dbg("Call SetBorderlessWindow DONE");
+
+	dbg("Call DiscordRPC Think");
+	DiscordRPCUpdate();
 
 	enddbg;
 }
