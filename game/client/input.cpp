@@ -431,7 +431,10 @@ void IN_ForwardDown(void)
 
 	//we handle double tap to sprint in via inputs now.
 	if (lastMoveForward + 0.2 > gpGlobals->time && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	{
+		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
+	}
 		
 	gHUD.m_Spectator.HandleButtonsDown(IN_FORWARD);
 }
