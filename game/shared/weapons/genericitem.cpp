@@ -182,7 +182,6 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 #else
 	CGenericItem *pItem = ::new CGenericItem; //Allocate from engine.  Don't use msnew
 	entvars_t *tmpPev = pItem->pev;
-	//MSZeroClassMemory( pItem, sizeof(CGenericItem) ); //UNDONE - Memory is now automagicly zero'd
 	pItem->pev = tmpPev;
 	if (pItem)
 		pItem->m_pfnThink = NULL;

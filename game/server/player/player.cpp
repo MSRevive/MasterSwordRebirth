@@ -5199,7 +5199,7 @@ void CBasePlayer::GetAnyItems()
 		}
 	}
 
-	 _snprintf(cTemp, sizeof(cTemp),  "\n%i. Nothing\n",  ++MenuCount );
+	_snprintf(cTemp, sizeof(cTemp), "\n%i. Nothing\n",  ++MenuCount);
 	strcat(cItemList, cTemp);
 
 	//Now create the menu showing available items
@@ -6301,7 +6301,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	m_MapStatus = INVALID_MAP;
 	char cCurrentMap[32];
-	 strncpy(cCurrentMap,  STRING(gpGlobals->mapname), sizeof(cCurrentMap) );
+	strncpy(cCurrentMap, STRING(gpGlobals->mapname), sizeof(cCurrentMap));
 	strncpy(m_NextMap, cCurrentMap, 32);
 
 	//Determine whether a transition took place and set the spawn transition accordingly
@@ -6357,7 +6357,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	else
 		pev->deadflag = DEAD_DEAD;
 
-	 strncpy(m_cEnterMap,  Data.MapName, sizeof(m_cEnterMap) );
+	strncpy(m_cEnterMap,  Data.MapName, sizeof(m_cEnterMap) );
 
 	SetTeam(CTeam::CreateTeam(Data.Party, Data.PartyID));
 	m_Gender = Data.Gender;
