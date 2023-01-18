@@ -798,6 +798,58 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 		if (!pItem)
 			continue;
 
+		if (fDeleteItems)
+		{
+			RemoveItem(pItem);
+
+#ifdef VALVE_DLL
+			pItem->SUB_Remove();
+#endif
+		}
+	}
+
+	int count = Gear.size();
+	if (count)
+	{
+		CGenericItem **Gearlist = new(CGenericItem *[count]);
+
+		for (i = 0; i < count; i++)
+		{
+			if (!Gearlist[i])
+				continue;
+
+			if (fDeleteItems)
+			{
+				RemoveItem(Gearlist[i]);
+
+#ifdef VALVE_DLL
+				Gearlist[i]->SUB_Remove();
+#endif
+			}
+			else if(fDead && m_Corpse)
+			{
+#ifdef VALVE_DLL
+				Gearlist[i]->RemoveFromOwner();
+#endif
+			}
+		}
+
+		delete[] Gearlist;
+	}
+
+	m_Corpse = NULL;
+}
+
+/*
+void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
+{
+	int i = 0;
+	for (i = 0; i < MAX_NPC_HANDS; i++)
+	{
+		CGenericItem *pItem = Hand(i);
+		if (!pItem)
+			continue;
+
 		//Drop what's in your hands
 		DropItem(pItem, true, false);
 
@@ -857,7 +909,7 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 
 	m_Corpse = NULL;
 	//SetViewModel( NULL );
-}
+}*/
 
 //=========================================================
 // DropItem - drop the item in the specified hand, or if not given,
