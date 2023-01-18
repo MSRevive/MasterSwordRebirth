@@ -222,6 +222,21 @@ std::string& strutil::implode(mslist<std::string> vec, int start)
 	return result;
 }
 
+char* strutil::rmQuotes(char* data)
+{
+	int i = 0, x = 0;
+	char c;
+	char* cleanData = data;
+
+	while((c = data[i++]) != '\0')
+	{
+		if (c != '"')
+			cleanData[x++] = c;
+	}
+
+	cleanData[x] = '\0';
+	return cleanData;
+}
 // std::string& strutil::removeWhiteSpace(std::string &str)
 // {
 // 	str.erase(std::unique(std::begin(str), std::end(str), [](unsigned char a, unsigned char b){

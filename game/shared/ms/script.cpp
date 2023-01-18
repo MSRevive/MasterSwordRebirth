@@ -6293,15 +6293,19 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			static msstring Precaches[16384] = { "" };
 			static int PrecachesTotal = 0;
 
-			char *pszGlobalPointer = NULL;			//Precaches MUST be global pointers.  Can't use stack memory
+			char *pszGlobalPointer = nullptr; //Precaches MUST be global pointers. Can't use stack memory
+			char *cleanCache = nullptr;
 			for(int p = 0; p < PrecachesTotal; p++)
 				if( Fullpath == Precaches[p] )
 					{
 						pszGlobalPointer = Precaches[p];
 						break;
 					}
-			if( !pszGlobalPointer )
+			if( !pszGlobalPointer && !cleanCache)
+			{
 				pszGlobalPointer = (Precaches[PrecachesTotal++] = Fullpath).c_str();
+				cleanCache = strutil::rmQuotes(pszGlobalPointer);
+			}
 
 			//if( Fullpath.contains( "human" ) )
 			//	int stop = 0;
@@ -6309,12 +6313,13 @@ int CScript::ParseLine( const char *pszCommandLine /*in*/, int LineNum /*in*/, S
 			switch( Precachetype )
 			{
 				case pctype_sound:
-					if ( stricmp(TestCommand,"precache") ) PRECACHE_SOUND( pszGlobalPointer ); //Thothie MAR2012_27 - no longer precahing sounds from here, using client side sounds wherever possible
+					if ( stricmp(TestCommand,"precache") ) 
+						PRECACHE_SOUND( cleanCache ); //Thothie MAR2012_27 - no longer precahing sounds from here, using client side sounds wherever possible
 					break;
 				case pctype_sprite:
-					PRECACHE_MODEL( pszGlobalPointer );	break;
+					PRECACHE_MODEL( cleanCache );	break;
 				case pctype_model:
-					PRECACHE_MODEL( pszGlobalPointer );  break;
+					PRECACHE_MODEL( cleanCache ); break;
 			}
 		}
 	#endif

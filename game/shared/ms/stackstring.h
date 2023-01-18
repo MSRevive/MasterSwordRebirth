@@ -311,6 +311,7 @@ namespace strutil {
 	mslist<std::string> explode(std::string const &str, char delim);
 	std::string& implode(mslist<std::string> vec, int start = 0);
 	//std::string& removeWhiteSpace(std::string &str);
+	char* rmQuotes(char* data);
 	bool isSpace(const char &ch);
 	char *tolower(const char *str);
 }
