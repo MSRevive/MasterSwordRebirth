@@ -320,9 +320,9 @@ void CBasePlayer ::PlaySound(int channel, const char *sample, float volume, bool
 			pszStart += 7;
 			int iLeftLen = pszStart - sample;
 			char cTemp1[128];
-			 strncpy(cTemp1,  sample, sizeof(cTemp1) );
+			strncpy(cTemp1,  sample, sizeof(cTemp1) );
 			cTemp1[iLeftLen] = 0;
-			 _snprintf(SoundName, sizeof(SoundName),  "%sfemale%s",  cTemp1,  pszStart );
+			_snprintf(SoundName, sizeof(SoundName),  "%sfemale%s",  cTemp1,  pszStart );
 		}
 	}
 
@@ -541,7 +541,7 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 	if (TotalItems >= MaxItems)
 	{
 		if (bVerbose)
-			 strncpy(cErrorString,  "You are carrying too many items.", sizeof(cErrorString) );
+			strncpy(cErrorString,  "You are carrying too many items.", sizeof(cErrorString) );
 		pItem->pev->origin = pev->origin;
 		Success = false;
 	}
@@ -556,7 +556,7 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 	if (pItem->Weight() + Weight() > Volume())
 	{
 		if (bVerbose)
-			 _snprintf(cErrorString, sizeof(cErrorString),  "The %s would make your equipment too heavy!",  pItem->DisplayName() );
+			_snprintf(cErrorString, sizeof(cErrorString),  "The %s would make your equipment too heavy!",  pItem->DisplayName() );
 		pItem->pev->origin = pev->origin; //Thothie - attempting to stop items that are too heavy from going to oblivion
 		Success = false;
 	}
@@ -676,7 +676,7 @@ bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool 
 
 	//RemovePlayerItem() gets called from the Item's PutInPack( ) function
 	char sz[32];
-	 strncpy(sz,  SPEECH_GetItemName(pItem), sizeof(sz) );
+	strncpy(sz,  SPEECH_GetItemName(pItem), sizeof(sz) );
 	if (bVerbose)
 		SendInfoMsg("You put %s in %s\n", sz, SPEECH_GetItemName(pContainer));
 #ifndef VALVE_DLL
@@ -791,74 +791,13 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 {
-	int i = 0;
-	for (i = 0; i < MAX_NPC_HANDS; i++)
+	for (int i = 0; i < MAX_NPC_HANDS; i++)
 	{
 		CGenericItem *pItem = Hand(i);
 		if (!pItem)
 			continue;
 
-		if (fDeleteItems)
-		{
-			RemoveItem(pItem);
-
-#ifdef VALVE_DLL
-			pItem->SUB_Remove();
-#endif
-		}
-	}
-
-	int count = Gear.size();
-	if (count)
-	{
-		CGenericItem **Gearlist = new(CGenericItem *[count]);
-
-		for (i = 0; i < count; i++)
-		{
-			if (!Gearlist[i])
-				continue;
-
-			if (fDeleteItems)
-			{
-				RemoveItem(Gearlist[i]);
-
-#ifdef VALVE_DLL
-				Gearlist[i]->SUB_Remove();
-#endif
-			}
-			else if(fDead && m_Corpse)
-			{
-#ifdef VALVE_DLL
-				Gearlist[i]->RemoveFromOwner();
-#endif
-			}
-		}
-
-		delete[] Gearlist;
-	}
-
-	m_Corpse = NULL;
-}
-
-/*
-void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
-{
-	int i = 0;
-	for (i = 0; i < MAX_NPC_HANDS; i++)
-	{
-		CGenericItem *pItem = Hand(i);
-		if (!pItem)
-			continue;
-
-		//Drop what's in your hands
-		DropItem(pItem, true, false);
-
-#ifdef VALVE_DLL
-		//Sever only - client deletes items in CGenericItem::Drop()
-		if (fDeleteItems)
-			//Delete the item
-			pItem->SUB_Remove();
-#endif
+		pItem->SUB_Remove();		
 	}
 
 	//I have to make a copy of the current Gear list because it gets
@@ -866,50 +805,21 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 	int count = Gear.size();
 	if (count)
 	{
-		CGenericItem **Gearlist = msnew(CGenericItem *[count]);
-		for (i = 0; i < count; i++)
-			Gearlist[i] = Gear[i];
-
-		for (i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 		{
-			if (!Gearlist[i])
+			CGenericItem *pItem = Gear[i];
+			if (!pItem)
 				continue;
 
-			if (fDeleteItems)
-			{
-				//Delete the item
-				DropItem(Gearlist[i], true, false);
 #ifdef VALVE_DLL
-				//Sever only - client deletes items in CGenericItem::Drop()
-				Gearlist[i]->SUB_Remove();
+			pItem->RemoveFromOwner();
 #endif
-			}
-
-#ifdef VALVE_DLL
-			else if (fDead && m_Corpse)
-			{
-				//The Corpse MUST have space for everything the player is holding
-				Gearlist[i]->RemoveFromOwner();
-			}
-#endif
-			//If I'm not dead, I don't have a corpse, or my corpse doesn't
-			//have space for this item, drop the item
-			else
-			{
-				DropItem(Gearlist[i], true, false);
-				Gearlist[i]->pev->velocity = pev->velocity * RANDOM_FLOAT(1, 1.6);
-			}
+			pItem->SUB_Remove();
 		}
-
-		//Items get deleted from the player's gear list in RemoveFromOwner
-		//(which is also called from DropItem)
-		//	Gear.RemoveAllItems( );
-		delete[] Gearlist;
 	}
 
 	m_Corpse = NULL;
-	//SetViewModel( NULL );
-}*/
+}
 
 //=========================================================
 // DropItem - drop the item in the specified hand, or if not given,
