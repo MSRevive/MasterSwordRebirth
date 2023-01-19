@@ -30,7 +30,7 @@
 #include "ms/hudscript.h"
 #include "weapons/genericitem.h"
 #include "player/player.h"
-#include "ms/clrender.h"
+#include "renderer/glrender.h"
 #include "ms/clglobal.h"
 #include "logger.h"
 

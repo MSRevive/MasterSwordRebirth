@@ -649,7 +649,7 @@ void CAM_EndDistance(void)
 
 #include "weapons/genericitem.h"
 #include "player/player.h"
-#include "ms/clrender.h"
+#include "renderer/glrender.h"
 
 int DLLEXPORT CL_IsThirdPerson(void)
 {

@@ -21,8 +21,8 @@ Add game specific, client-side objects here
 //#include "r_efx.h"
 #include "entity_types.h"
 #include "clglobal.h"
-#include "clrender.h"
-#include "../studiomodelrenderer.h"
+#include "glrender.h"
+#include "studiomodelrenderer.h"
 
 #include "hudmisc.h"
 void CLFrameShowModel(cl_entity_t &Entity);

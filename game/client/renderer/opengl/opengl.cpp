@@ -10,10 +10,10 @@
 #include "com_model.h"
 #include "../studio_util.h"
 #include "../r_studioint.h"
-#include "../studiomodelrenderer.h"
-#include "../gamestudiomodelrenderer.h"
+#include "studiomodelrenderer.h"
+#include "renderer/gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
-#include "opengl/clopengl.h" // OpenGL stuff
+#include "renderer/opengl/opengl.h" // OpenGL stuff
 
 // WGL_ARB_extensions_string
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = NULL;
@@ -79,7 +79,7 @@ Vertex g_cubeVertices[] =
 //#include "r_efx.h"
 #include "entity_types.h"
 #include "clglobal.h"
-#include "clrender.h"
+#include "renderer/glrender.h"
 
 #include "logger.h"
 
