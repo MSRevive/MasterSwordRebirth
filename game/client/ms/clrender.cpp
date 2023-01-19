@@ -1,7 +1,7 @@
 // Triangle rendering, if any
 
 #include "inc_weapondefs.h"
-#include "glrender.h"
+#include "clrender.h"
 #include "clglobal.h"
 
 #include "hud.h"

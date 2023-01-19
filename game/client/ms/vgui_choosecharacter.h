@@ -1,6 +1,6 @@
 #ifdef TEAMFORTRESSVIEWPORT_H
 #include "vgui_storemainwin.h"
-#include "renderer/glrender.h"
+#include "clrender.h"
 
 class CMenuHandler_PutInPack;
 #define CONTAINER_INFO_LABELS 1

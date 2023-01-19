@@ -31,7 +31,7 @@ void ContainerWindowUpdate();
 void ContainerWindowOpen(ulong ContainerID);
 extern engine_studio_api_t IEngineStudio;
 #include "ms/clglobal.h"
-#include "renderer/glrender.h"
+#include "ms/clrender.h"
 #endif
 
 #include "soundent.h"
