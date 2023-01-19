@@ -442,7 +442,7 @@ void ClientCommand2(edict_t *pEntity)
 				//this is so terrible to do...
 				//should think of another way to handle commands from scripts altogether.
 				char* argv = (char*)CMD_ARGV(i);
-				Parameters.add(stripBadChars(argv));
+				Parameters.add(strutil::stripBadChars(argv));
 			}
 				
 			MSGlobals::GameScript->CallScriptEvent("game_playercmd", &Parameters);

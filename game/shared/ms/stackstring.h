@@ -313,6 +313,9 @@ namespace strutil {
 	//std::string& removeWhiteSpace(std::string &str);
 	bool isSpace(const char &ch);
 	char *tolower(const char *str);
+	bool isBadChar(int c);
+	char* stripBadChars(char *data);
+	bool isBadStr(char *str);
 }
 
 #endif // STACKSTRING_H

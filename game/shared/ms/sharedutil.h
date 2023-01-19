@@ -100,7 +100,4 @@ void dbgtxt( msstring_ref Text );
 #define ERRORPRINT_POPUP    (1 << 4)
 void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...);
 
-bool isBadChar(int c);
-char* stripBadChars(char* data);
-
 #endif // SHAREDUTIL_H

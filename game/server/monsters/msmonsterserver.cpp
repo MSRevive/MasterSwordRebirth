@@ -1717,7 +1717,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 			msstringlist Params;
 
 			Params.clear();
-			Params.add(stripBadChars(pszSentence));
+			Params.add(strutil::stripBadChars(pszSentence));
 			Params.add(EntToString(this)); //Thothie - Workaround
 			((CMSMonster *)pEnt)->CallScriptEvent("game_heardtext", &Params);
 		}
