@@ -391,7 +391,7 @@ void CHud ::Init(void)
 
 	//Load crosshair sprites.
 	LoadCrosshairSprites();
-
+	SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
 
 	ServersInit();
 
@@ -405,8 +405,6 @@ CHud ::~CHud()
 	delete[] m_rghSprites;
 	delete[] m_rgrcRects;
 	delete[] m_rgszSpriteNames;
-	delete[] hCrosshair;
-	delete[] rcCrosshair;
 
 	if (m_pHudList)
 	{
@@ -432,15 +430,15 @@ void CHud::LoadCrosshairSprites()
 	if (!pList)
 		return;
 
-	hCrosshair = new HLSPRITE[iResourceCount];
-	rcCrosshair = new wrect_t[iResourceCount];
-	client_sprite_t *p = GetSpriteList(pList, "crosshair", 320, iResourceCount);
+	//m_hCrosshair = new HLSPRITE[iResourceCount];
+	//m_rcCrosshair = new wrect_t[iResourceCount];
+	client_sprite_t *p = GetSpriteList(pList, "crosshair0", 320, iResourceCount);
 	if (p)
 	{
 		char sz[128];
-		sprintnf(sz, "sprites/crosshairs/%s.spr", p->szSprite);
-		hCrosshair = SPR_Load(sz);
-		rcCrosshair = p->rc;
+		snprintf(sz, 128, "sprites/crosshairs/%s.spr", p->szSprite);
+		m_hCrosshair = SPR_Load(sz);
+		m_rcCrosshair = p->rc;
 	}
 }
 
@@ -535,7 +533,7 @@ void CHud ::VidInit(void)
 			if (p->iRes == m_iRes)
 			{
 				char sz[256];
-				 _snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
+				_snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
 				m_rghSprites[index] = SPR_Load(sz);
 				index++;
 			}

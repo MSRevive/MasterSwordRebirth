@@ -550,8 +550,8 @@ private:
 	float m_flMouseSensitivity;
 	int m_iConcussionEffect;
 
-	HLSPRITE *m_hCrosshair;
-	wrect_t *m_rcCrosshair;
+	HLSPRITE m_hCrosshair;
+	wrect_t m_rcCrosshair;
 
 public:
 	HLSPRITE m_hsprCursor;

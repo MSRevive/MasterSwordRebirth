@@ -146,6 +146,32 @@ static void SetBorderlessWindow() // Bernt; fixing bloom by making fullscreen wi
 	g_iBorderlessMode = iCurrentMode;
 }
 
+/* =================================
+	GetSpriteList
+
+Finds and returns the matching 
+sprite name 'psz' and resolution 'iRes'
+in the given sprite list 'pList'
+iCount is the number of items in the pList
+================================= */
+client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount)
+{
+	if (!pList)
+		return NULL;
+
+	int i = iCount;
+	client_sprite_t *p = pList;
+
+	while(i--)
+	{
+		if ((!strcmp(psz, p->szName)) && (p->iRes == iRes))
+			return p;
+		p++;
+	}
+
+	return NULL;
+}
+
 /*
 ================================
 HUD_GetHullBounds
