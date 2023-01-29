@@ -13,6 +13,7 @@ public:
 	int Draw(float flTime);
 	void Think(void);
 	void Reset(void);
+	void FreeMemory(void);
 	void UserCmd_ChangeSayType(void);
 	void UserCmd_RemovePack(void);
 	void UserCmd_Offer(void);
@@ -23,6 +24,12 @@ public:
 	entinfo_t m_OfferTarget;
 
 private:
+	// easiest place to set the crosshair lol
+	HLSPRITE m_hCrosshairList[9];
+	HLSPRITE m_hCrosshair;
+	wrect_t m_rcCrosshair;
+
+	HLSPRITE GetCrosshairSprite(int type);
 #define MAX_GOLD_OFFER 1000000
 
 	struct offerinfo_t

@@ -113,10 +113,6 @@ private:
 	HLSPRITE m_hSprite;
 	HLSPRITE m_hDamage;
 
-	// easiest place to set the crosshair lol
-	HLSPRITE m_hCrosshair;
-	wrect_t m_rcCrosshair;
-
 	DAMAGE_IMAGE m_dmg[NUM_DMG_TYPES];
 	int m_bitsDamage;
 	float m_fFade;
@@ -126,5 +122,4 @@ private:
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
 	void CalcDamageDirection(vec3_t vecFrom);
 	void UpdateTiles(float fTime, long bits);
-	HLSPRITE GetCrosshairSprite(int type);
 };

@@ -55,16 +55,38 @@ int CHudMisc::Init(void)
 	HOOK_COMMAND("accept", Accept);
 	//HOOK_COMMAND("listskills", ListSkills);
 
+	CVAR_CREATE("cl_crosshair_draw", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("cl_crosshair_type", "0", FCVAR_ARCHIVE);
+
 	gHUD.AddHudElem(this);
 
 	m_iFlags |= HUD_ACTIVE;
 	return 1;
 }
 
-void CHudMisc::Reset(void) {}
+void CHudMisc::FreeMemory(void)
+{
+	delete[] m_hCrosshairList;
+}
+
+void CHudMisc::Reset(void) 
+{
+
+}
 
 void CHudMisc ::InitHUDData(void)
 {
+	// we load all crosshairs so they can be switched with miniumum performance lost at that time.
+	m_hCrosshairList[0] = SPR_Load("sprites/crosshairs/crosshair_0.spr");
+	m_hCrosshairList[1] = SPR_Load("sprites/crosshairs/crosshair_1.spr");
+	m_hCrosshairList[2] = SPR_Load("sprites/crosshairs/crosshair_2.spr");
+	m_hCrosshairList[3] = SPR_Load("sprites/crosshairs/crosshair_3.spr");
+	m_hCrosshairList[4] = SPR_Load("sprites/crosshairs/crosshair_4.spr");
+	m_hCrosshairList[5] = SPR_Load("sprites/crosshairs/crosshair_5.spr");
+	m_hCrosshairList[6] = SPR_Load("sprites/crosshairs/crosshair_6.spr");
+	m_hCrosshairList[7] = SPR_Load("sprites/crosshairs/crosshair_7.spr");
+	m_hCrosshairList[8] = SPR_Load("sprites/crosshairs/crosshair_8.spr");
+
 	clrmem(m_OfferInfo);
 	player.m_SayType = SPEECH_GLOBAL;
 }
@@ -72,6 +94,19 @@ void CHudMisc ::InitHUDData(void)
 bool ScriptRecvRead();
 int CHudMisc::Draw(float flTime)
 {
+	// Crosshair draw.
+	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0)
+	{
+		// easiest place to set the crosshair lol
+		int chType = atoi(CVAR_GET_STRING("cl_crosshair_type"));
+		m_hCrosshair = GetCrosshairSprite(chType);
+		//m_hCrosshair = SPR_Load("sprites/crosshairs/crosshair_0.spr");
+		m_rcCrosshair.right = SPR_Width(m_hCrosshair, 0);
+		m_rcCrosshair.bottom = SPR_Height(m_hCrosshair, 0);
+		SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
+	}else{
+		SetCrosshair(0, m_rcCrosshair, 0, 0, 0);
+	}
 	/*if ( (gHUD.m_iHideHUDDisplay&HIDEHUD_ALL) || !(m_iFlags&HUD_ACTIVE) ) return 1;
 
 	int SpriteIndex;
@@ -87,6 +122,35 @@ int CHudMisc::Draw(float flTime)
 
 	return 1;
 }
+
+HLSPRITE CHudMisc::GetCrosshairSprite(int type)
+{
+	switch(type)
+	{
+	case 0:
+		return m_hCrosshairList[0];
+	case 1:
+		return m_hCrosshairList[1];
+	case 2:
+		return m_hCrosshairList[2];
+	case 3:
+		return m_hCrosshairList[3];
+	case 4:
+		return m_hCrosshairList[4];
+	case 5:
+		return m_hCrosshairList[5];
+	case 6:
+		return m_hCrosshairList[6];
+	case 7:
+		return m_hCrosshairList[7];
+	case 8:
+		return m_hCrosshairList[8];
+	default:
+		return m_hCrosshairList[0];
+	}
+	return 0;
+}
+
 void CHudMisc::Think(void)
 {
 	startdbg;

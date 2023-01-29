@@ -411,6 +411,7 @@ CHud ::~CHud()
 		m_pHudList = NULL;
 	}
 
+	m_Misc->FreeMemory();
 	ServersShutdown();
 }
 
