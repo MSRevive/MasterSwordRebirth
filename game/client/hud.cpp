@@ -391,7 +391,7 @@ void CHud ::Init(void)
 
 	//Load crosshair sprites.
 	LoadCrosshairSprites();
-	SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
+	//SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
 
 	ServersInit();
 
