@@ -789,6 +789,77 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 	return true;
 }
 
+// void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
+// {
+// 	int i = 0;
+// 	for (i = 0; i < MAX_NPC_HANDS; i++)
+// 	{
+// 		CGenericItem *pItem = Hand(i);
+// 		if (!pItem)
+// 			continue;
+
+// 		//Drop what's in your hands
+// 		DropItem(pItem, true, false);
+
+// #ifdef VALVE_DLL
+// 		//Sever only - client deletes items in CGenericItem::Drop()
+// 		if (fDeleteItems)
+// 			//Delete the item
+// 			pItem->SUB_Remove();
+// #endif
+// 	}
+
+// 	//I have to make a copy of the current Gear list because it gets
+// 	//modified while I go through it calling DropItem()
+// 	int count = Gear.size();
+// 	if (count)
+// 	{
+// 		CGenericItem **Gearlist = msnew(CGenericItem *[count]);
+// 		for (i = 0; i < count; i++)
+// 			Gearlist[i] = Gear[i];
+
+// 		for (i = 0; i < count; i++)
+// 		{
+// 			if (!Gearlist[i])
+// 				continue;
+
+// 			if (fDeleteItems)
+// 			{
+// 				//Delete the item
+// 				DropItem(Gearlist[i], true, false);
+// #ifdef VALVE_DLL
+// 				//Sever only - client deletes items in CGenericItem::Drop()
+// 				Gearlist[i]->SUB_Remove();
+// #endif
+// 			}
+
+// #ifdef VALVE_DLL
+// 			else if (fDead && m_Corpse)
+// 			{
+// 				//The Corpse MUST have space for everything the player is holding
+// 				Gearlist[i]->RemoveFromOwner();
+// 			}
+// #endif
+// 			//If I'm not dead, I don't have a corpse, or my corpse doesn't
+// 			//have space for this item, drop the item
+// 			else
+// 			{
+// 				DropItem(Gearlist[i], true, false);
+// 				Gearlist[i]->pev->velocity = pev->velocity * RANDOM_FLOAT(1, 1.6);
+// 			}
+// 		}
+
+// 		//Items get deleted from the player's gear list in RemoveFromOwner
+// 		//(which is also called from DropItem)
+// 		//	Gear.RemoveAllItems( );
+// 		delete[] Gearlist;
+// 	}
+
+// 	m_Corpse = NULL;
+// 	//SetViewModel( NULL );
+// }
+
+// Better way to remove items without dropping them.
 void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 {
 	for (int i = 0; i < MAX_NPC_HANDS; i++)
@@ -797,25 +868,38 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 		if (!pItem)
 			continue;
 
-		pItem->SUB_Remove();		
+		RemoveItem(pItem);
+		pItem->SUB_Remove();
+
+#ifdef VALVE_DLL
+		pItem->SUB_Remove();
+#endif
 	}
 
-	//I have to make a copy of the current Gear list because it gets
-	//modified while I go through it calling DropItem()
 	int count = Gear.size();
 	if (count)
 	{
-		for (int i = 0; i < count; i++)
-		{
-			CGenericItem *pItem = Gear[i];
-			if (!pItem)
-				continue;
+		//We have to make a copy of the current gear list
+		//otherwise it won't delete all the items on via client...
+		int i = 0;
+		CGenericItem **Gearlist = msnew(CGenericItem *[count]);
+		for (i = 0; i < count; i++)
+			Gearlist[i] = Gear[i];
 
+		for (i = 0; i < count; i++)
+		{
+			if (!Gearlist[i])
+				continue;
+			
+			RemoveItem(Gearlist[i]);
+			Gearlist[i]->SUB_Remove();
 #ifdef VALVE_DLL
-			pItem->RemoveFromOwner();
+			Gearlist[i]->RemoveFromOwner();
+			Gearlist[i]->SUB_Remove();
 #endif
-			pItem->SUB_Remove();
 		}
+
+		delete[] Gearlist;
 	}
 
 	m_Corpse = NULL;
