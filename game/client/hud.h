@@ -550,9 +550,6 @@ private:
 	float m_flMouseSensitivity;
 	int m_iConcussionEffect;
 
-	HLSPRITE m_hCrosshair;
-	wrect_t m_rcCrosshair;
-
 public:
 	HLSPRITE m_hsprCursor;
 	float m_flTime;		  // the current client time
@@ -566,11 +563,8 @@ public:
 	int m_Teamplay;
 	int m_iRes;
 	cvar_t *m_pCvarStealMouse;
-	cvar_t *m_pCvarCrosshairDraw;
-	cvar_t *m_pCvarCrosshairType;
 
 	int m_iFontHeight;
-	void LoadCrosshairSprites();
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b);
 	int DrawHudString(int x, int y, int iMaxX, char *szString, int r, int g, int b);
 	int DrawHudStringReverse(int xpos, int ypos, int iMinX, char *szString, int r, int g, int b);

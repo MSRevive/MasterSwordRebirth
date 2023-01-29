@@ -337,9 +337,6 @@ void CHud ::Init(void)
 	default_fov = CVAR_CREATE("default_fov", "90", 0);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
 
-	m_pCvarCrosshairDraw = CVAR_CREATE("cl_crosshair_draw", "1", FCVAR_ARCHIVE);
-	m_pCvarCrosshairType = CVAR_CREATE("cl_crosshair_type", "0", FCVAR_ARCHIVE);
-
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
 
 	m_pSpriteList = NULL;
@@ -389,10 +386,6 @@ void CHud ::Init(void)
 	MSCLGlobals::Initialize();
 	//------------
 
-	//Load crosshair sprites.
-	LoadCrosshairSprites();
-	//SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
-
 	ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL);
@@ -419,27 +412,6 @@ CHud ::~CHud()
 	}
 
 	ServersShutdown();
-}
-
-void CHud::LoadCrosshairSprites()
-{
-	int iResourceCount;
-
-	client_sprite_t *pList = SPR_GetList("sprites/crosshairs/crosshairs.txt", &iResourceCount);
-
-	if (!pList)
-		return;
-
-	//m_hCrosshair = new HLSPRITE[iResourceCount];
-	//m_rcCrosshair = new wrect_t[iResourceCount];
-	client_sprite_t *p = GetSpriteList(pList, "crosshair0", 320, iResourceCount);
-	if (p)
-	{
-		char sz[128];
-		snprintf(sz, 128, "sprites/crosshairs/%s.spr", p->szSprite);
-		m_hCrosshair = SPR_Load(sz);
-		m_rcCrosshair = p->rc;
-	}
 }
 
 // GetSpriteIndex()

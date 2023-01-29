@@ -75,6 +75,9 @@ int CHudHealth::Init(void)
 	//g_flHealth = player.m_HP;
 	m_iTempHP = m_iTempMP = 0;
 
+	CVAR_CREATE("cl_crosshair_draw", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("cl_crosshair_type", "0", FCVAR_ARCHIVE);
+
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
 
 	/*	if( !CVAR_GET_FLOAT("gl_polyoffset") ) {
@@ -218,6 +221,20 @@ void CHudHealth::GetPainColor(int &r, int &g, int &b)
 
 int CHudHealth::Draw(float flTime)
 {
+	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0)
+	{
+		// easiest place to set the crosshair lol
+		int chType = atoi(CVAR_GET_STRING("cl_crosshair_type"));
+		m_hCrosshair = GetCrosshairSprite(chType);
+		//m_hCrosshair = SPR_Load("sprites/crosshairs/crosshair_0.spr");
+		m_rcCrosshair.right = SPR_Width(m_hCrosshair, 0);
+		m_rcCrosshair.bottom = SPR_Height(m_hCrosshair, 0);
+		SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
+	}else{
+		SetCrosshair(0, m_rcCrosshair, 0, 0, 0);
+	}
+	
+	
 	return 1;
 	/*	int HPr, HPg, HPb;
 	int x, y;
@@ -303,6 +320,34 @@ int CHudHealth::Draw(float flTime)
 
 	DrawDamage(flTime);
 	return DrawPain(flTime);*/
+}
+
+HLSPRITE CHudHealth::GetCrosshairSprite(int type)
+{
+	switch(type)
+	{
+	case 0:
+		return SPR_Load("sprites/crosshairs/crosshair_0.spr");
+	case 1:
+		return SPR_Load("sprites/crosshairs/crosshair_1.spr");
+	case 2:
+		return SPR_Load("sprites/crosshairs/crosshair_2.spr");
+	case 3:
+		return SPR_Load("sprites/crosshairs/crosshair_3.spr");
+	case 4:
+		return SPR_Load("sprites/crosshairs/crosshair_4.spr");
+	case 5:
+		return SPR_Load("sprites/crosshairs/crosshair_5.spr");
+	case 6:
+		return SPR_Load("sprites/crosshairs/crosshair_6.spr");
+	case 7:
+		return SPR_Load("sprites/crosshairs/crosshair_7.spr");
+	case 8:
+		return SPR_Load("sprites/crosshairs/crosshair_8.spr");
+	default:
+		return SPR_Load("sprites/crosshairs/crosshair_0.spr");
+	}
+	return 0;
 }
 
 void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
