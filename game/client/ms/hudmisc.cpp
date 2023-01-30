@@ -95,12 +95,12 @@ bool ScriptRecvRead();
 int CHudMisc::Draw(float flTime)
 {
 	// Crosshair draw.
-	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0)
+	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0 || ShowHUD())
 	{
 		// easiest place to set the crosshair lol
 		int chType = atoi(CVAR_GET_STRING("cl_crosshair_type"));
+		
 		m_hCrosshair = GetCrosshairSprite(chType);
-		//m_hCrosshair = SPR_Load("sprites/crosshairs/crosshair_0.spr");
 		m_rcCrosshair.right = SPR_Width(m_hCrosshair, 0);
 		m_rcCrosshair.bottom = SPR_Height(m_hCrosshair, 0);
 		SetCrosshair(m_hCrosshair, m_rcCrosshair, 255, 255, 255);
