@@ -510,6 +510,7 @@ void IN_SpeedDown(void)
 	if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
+
 void IN_SpeedUp(void) 
 { 
 	KeyUp(&in_speed);
@@ -522,6 +523,7 @@ void IN_StrafeDown(void)
 {
 	///KeyDown(&in_strafe);
 }
+
 void IN_StrafeUp(void)
 {
 	//KeyUp(&in_strafe);
@@ -535,23 +537,29 @@ void IN_Attack2Down(void)
 }
 
 void IN_Attack2Up(void) { KeyUp(&in_attack2); }
+
 void IN_UseDown(void)
 {
 	KeyDown(&in_use);
 	gHUD.m_Spectator.HandleButtonsDown(IN_USE);
 }
+
 void IN_UseUp(void) { KeyUp(&in_use); }
+
 void IN_JumpDown(void)
 {
 	KeyDown(&in_jump);
 	gHUD.m_Spectator.HandleButtonsDown(IN_JUMP);
 }
+
 void IN_JumpUp(void) { KeyUp(&in_jump); }
+
 void IN_DuckDown(void)
 {
 	KeyDown(&in_duck);
 	gHUD.m_Spectator.HandleButtonsDown(IN_DUCK);
 }
+
 void IN_DuckUp(void) { KeyUp(&in_duck); }
 void IN_ReloadDown(void) { KeyDown(&in_reload); }
 void IN_ReloadUp(void) { KeyUp(&in_reload); }

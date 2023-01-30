@@ -53,6 +53,7 @@ const char *GetPlayerTitle(int Title)
 {
 	return CTitleManager::Titles[Title].Name;
 }
+
 int GetPlayerTitleIdx(const char *pszTitle)
 {
 	for (int i = 0; i < CTitleManager::Titles.size(); i++)
@@ -63,7 +64,6 @@ int GetPlayerTitleIdx(const char *pszTitle)
 
 mslist<title_t> CTitleManager::Titles;
 title_t CTitleManager::DefaultTitle;
-
 void CTitleManager::AddTitle(title_t &Title)
 {
 	if (!Title.SkillsReq.size()) //Setting the default title
@@ -71,6 +71,7 @@ void CTitleManager::AddTitle(title_t &Title)
 	else
 		Titles.add(Title); //Setting a normal title
 }
+
 void CTitleManager::DeleteAllTitles()
 {
 	Titles.clear();
@@ -212,6 +213,7 @@ const char *CBasePlayer::GetFullTitle()
 
 	return "Unknown";
 }
+
 bool CBasePlayer::CreateStats()
 {
 	if (m_CharacterState == CHARSTATE_LOADED || m_StatsCreated)
@@ -227,6 +229,7 @@ bool CBasePlayer::CreateStats()
 
 	return true;
 }
+
 void CBasePlayer::DeleteStats()
 {
 	//#ifdef VALVE_DLL
@@ -657,6 +660,7 @@ bool CBasePlayer::PutInPack(int iHand, CGenericItem *pContainer, bool bVerbose)
 
 	return PutInPack(Hand(iHand), pContainer, bVerbose);
 }
+
 bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool bVerbose)
 {
 	if (!pItem->PutInPack(pContainer))
@@ -684,10 +688,12 @@ bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool 
 #endif
 	return true;
 }
+
 CGenericItem *CBasePlayer::CanPutInAnyPack(CGenericItem *pItem, bool bVerbose)
 {
 	return pItem->FindPackForItem(this, bVerbose);
 }
+
 bool CBasePlayer::PutInAnyPack(CGenericItem *pItem, bool bVerbose)
 {
 	int PackCount = 0;
@@ -985,6 +991,7 @@ float CBasePlayer::CurrentSpeed(bool bParseSpeed)
 	else
 		return WalkSpeed(bParseSpeed);
 }
+
 float CBasePlayer::WalkSpeed(bool fParseSpeed)
 {
 	//75 dex adds 100 to speed
@@ -1010,6 +1017,7 @@ float CBasePlayer::WalkSpeed(bool fParseSpeed)
 
 	return fParseSpeed ? ParseSpeed(fSpeed) : fSpeed;
 }
+
 float CBasePlayer::RunSpeed(bool fParseSpeed)
 {
 	float fSpeed;
@@ -1024,6 +1032,7 @@ float CBasePlayer::RunSpeed(bool fParseSpeed)
 	//if( !bParseSpeed ) return fSpeed;
 	//return ParseSpeed(fSpeed);
 }
+
 float CBasePlayer::ParseSpeed(float flSpeed)
 {
 	float Speed = flSpeed;
@@ -1044,6 +1053,7 @@ float CBasePlayer::Volume()
 	MyVolume = min(MyVolume, 2000);
 	return MyVolume;
 }
+
 float CBasePlayer::MaxHP()
 {
 	//Thothie adding 3hp per Wisdom point
@@ -1054,14 +1064,17 @@ float CBasePlayer::MaxHP()
 	Wis = max(Wis, 0);
 	return 5 + Str * 7 + Fit * 7 + Wis * 3;
 }
+
 float CBasePlayer::MaxMP()
 {
 	return GetNatStat(NATURAL_WIS) * 10;
 }
+
 float CBasePlayer::MaxStamina()
 {
 	return 3 + GetNatStat(NATURAL_FIT) * 2.5 + GetNatStat(NATURAL_STR) * 1.0;
 }
+
 int CBasePlayer::SkillAvg()
 {
 	//Get the average of all skills
@@ -1088,6 +1101,7 @@ void CBasePlayer::SendInfoMsg(char *msg, ...)
 
 	SendEventMsg(string);
 }
+
 void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)
 {
 #ifdef VALVE_DLL
@@ -1100,6 +1114,7 @@ void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)
 	HUD_ShowInfoWin(Title, Text);
 #endif
 }
+
 void CBasePlayer::SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring_ref Text)
 {
 	if (m_CharacterState != CHARSTATE_LOADED)
@@ -1169,6 +1184,7 @@ void CBasePlayer::SendEventMsg(msstring_ref Text)
 {
 	SendEventMsg((hudevent_e)HUDEVENT_NORMAL, Text);
 }
+
 void CBasePlayer::SendEventMsg(hudevent_e HudEvent, msstring_ref Text)
 {
 	SendEventMsg(HUDEventColor[HudEvent], Text);
@@ -1192,6 +1208,7 @@ CGenericItem *CBasePlayer::ActiveItem()
 {
 	return Hand(m_CurrentHand);
 }
+
 int CBasePlayer::ActiveItemHand()
 {
 	CGenericItem *pActiveItem = ActiveItem();
@@ -1200,6 +1217,7 @@ int CBasePlayer::ActiveItemHand()
 
 	return pActiveItem->m_Hand;
 }
+
 //Switchs to a held item as the current item
 bool CBasePlayer ::SwitchHands(int iHand, bool bVerbose)
 {
@@ -1247,6 +1265,7 @@ bool CBasePlayer ::SwitchHands(int iHand, bool bVerbose)
 	}
 	return true;
 }
+
 //Switchs to the best hand
 bool CBasePlayer::SwitchToBestHand()
 {
@@ -1266,6 +1285,7 @@ bool CBasePlayer::SwitchToBestHand()
 void CBasePlayer::AttackSound()
 {
 }
+
 void CBasePlayer::Deactivate()
 {
 #ifdef VALVE_DLL
@@ -1309,6 +1329,7 @@ void CBasePlayer::SetKeys()
 	ClearBits(pbs.BlockButtons, (~pev->button));  //Buttons that aren't down anymore get removed from blocking
 	ClearBits(pbs.ButtonsDown, pbs.BlockButtons); //Block the buttons
 }
+
 void CBasePlayer::BlockButton(int Button)
 {
 	//Setting a blocked button causes the bit for that button to stay false
@@ -1385,6 +1406,7 @@ bool CBasePlayer::IsLocalHost() //This is a listen server and this is the host
 	return MSCLGlobals::OnMyOwnListenServer;
 #endif
 }
+
 msstring CBasePlayer::AuthID()
 {
 #ifdef VALVE_DLL
