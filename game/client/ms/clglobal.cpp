@@ -107,6 +107,7 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_sprinttoggle", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_doubletapsprint", "1", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);

@@ -430,7 +430,7 @@ void IN_ForwardDown(void)
 	KeyDown(&in_forward);
 
 	//we handle double tap to sprint in via inputs now.
-	if (lastMoveForward + 0.2 > gpGlobals->time && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + 0.2 > gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
@@ -453,7 +453,7 @@ void IN_BackDown(void)
 	KeyDown(&in_back);
 	gHUD.m_Spectator.HandleButtonsDown(IN_BACK);
 
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("back");
 	//ServerCmd( UTIL_VarArgs("game_leap back %f", player.Stamina) ) ;
 }
@@ -474,7 +474,7 @@ void IN_MoveleftDown(void)
 	KeyDown(&in_moveleft);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVELEFT);
 
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("left");
 }
 
@@ -490,7 +490,7 @@ void IN_MoverightDown(void)
 	KeyDown(&in_moveright);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVERIGHT);
 
-	if ((!strcmp(EngineFunc::CVAR_GetString("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("right");
 }
 
@@ -507,7 +507,7 @@ void IN_SpeedDown(void)
 {
 	KeyDown(&in_speed);
 
-	if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 
@@ -515,7 +515,7 @@ void IN_SpeedUp(void)
 { 
 	KeyUp(&in_speed);
 
-	if (!strcmp(EngineFunc::CVAR_GetString("ms_sprinttoggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 
