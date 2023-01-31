@@ -5,58 +5,57 @@
 #include <string.h>
 
 statinfo_t NatStatList[6] =
-{
-	{"Strength"},
-	{"Agility"},
-	{"Concentration"},
-	{"Awareness"},
-	{"Fitness"},
-	{"Wisdom"},
+	{
+		{"Strength"},
+		{"Agility"},
+		{"Concentration"},
+		{"Awareness"},
+		{"Fitness"},
+		{"Wisdom"},
 };
 
 skillstatinfo_t SkillStatList[9] =
-{
-	{"Swordsmanship", "swordsmanship", STATPROP_TOTAL},
-	{"Martial Arts", "martialarts", STATPROP_TOTAL},
-	{"Small Arms", "smallarms", STATPROP_TOTAL},
-	{"Axe Handling", "axehandling", STATPROP_TOTAL},
-	{"Blunt Arms", "bluntarms", STATPROP_TOTAL},
-	{"Archery", "archery", STATPROP_TOTAL},
-	//	"Shield handling",
-	//	"Two-handed weapons",
-	//	"Dual weapons",
-	{"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL},
-	{"Parry", "parry", 1},
-	{"Pole Arms", "polearms", STATPROP_TOTAL}, //MiB JUL2010_02 - Pole Arms!
-	//	"Spell Preparation",
-	//	"Swimming",
-	//	"Pickpocket", true,
+	{
+		{"Swordsmanship", "swordsmanship", STATPROP_TOTAL},
+		{"Martial Arts", "martialarts", STATPROP_TOTAL},
+		{"Small Arms", "smallarms", STATPROP_TOTAL},
+		{"Axe Handling", "axehandling", STATPROP_TOTAL},
+		{"Blunt Arms", "bluntarms", STATPROP_TOTAL},
+		{"Archery", "archery", STATPROP_TOTAL},
+		//	"Shield handling",
+		//	"Two-handed weapons",
+		//	"Dual weapons",
+		{"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL},
+		{"Parry", "parry", 1},
+		{"Pole Arms", "polearms", STATPROP_TOTAL}, // MiB JUL2010_02 - Pole Arms!
+												   //	"Spell Preparation",
+												   //	"Swimming",
+												   //	"Pickpocket", true,
 };
 
 char *SkillTypeList[3] =
-{
-	"Proficiency",
-	"Balance",
-	"Power"
-};
+	{
+		"Proficiency",
+		"Balance",
+		"Power"};
 
 char *SpellTypeList[5] =
-{
-	"Fire",
-	"Ice",
-	"Lightning",
-	"Divination",
-	"Affliction",
+	{
+		"Fire",
+		"Ice",
+		"Lightning",
+		"Divination",
+		"Affliction",
 };
 
-int GetSkillStatByName(const char *pszName) //Index lookup by name (Skill stats only)
+int GetSkillStatByName(const char *pszName) // Index lookup by name (Skill stats only)
 {
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
 		if (!stricmp(pszName, SkillStatList[i].DllName))
 			return SKILL_FIRSTSKILL + i;
 	return -1;
 }
-const char *GetSkillName(int Skill) //Name lookup by index (Any stat)
+const char *GetSkillName(int Skill) // Name lookup by index (Any stat)
 {
 	if (Skill < 0 || Skill >= STATS_TOTAL)
 		return "(Invalid Skill)";
@@ -68,7 +67,7 @@ const char *GetSkillName(int Skill) //Name lookup by index (Any stat)
 }
 int GetSubSkillByName(const char *pszName)
 {
-	if (!stricmp(pszName, "prof")) //alias for proficiency
+	if (!stricmp(pszName, "prof")) // alias for proficiency
 		return 0;
 	for (int i = 0; i < STATPROP_TOTAL; i++)
 		if (!stricmp(pszName, SkillTypeList[i]))
@@ -85,7 +84,7 @@ int GetNatStatByName(const char *pszName)
 			return i;
 	return -1;
 }
-//Converts stat.prop into valid indices
+// Converts stat.prop into valid indices
 void GetStatIndices(const char *Name, int &Stat, int &Prop)
 {
 	msstring FullName = Name;
@@ -149,7 +148,11 @@ int CStat::Value()
 	for (int i = 0; i < iSubStats; i++)
 		Total += m_SubStats[i].Value;
 
-	int iVal = (Total / iSubStats) + ((Total % iSubStats) ? 1 : 0);
+	// grabs third digit for rounding
+	int math_average_x10 = (Total * 10) / iSubStats;
+
+	// proper rounding using grabbed third digit
+	int iVal = (Total / iSubStats) + (math_average_x10 % 10 >= 5 ? 1 : 0);
 	return iVal;
 }
 
@@ -167,7 +170,7 @@ void CStat::OutDate() // Makes sure an update will be sent next frame
 }
 
 void CStat::Update() // Updates the stat to current - no updates sent
-{	
+{
 	bNeedsUpdate = false;
 
 	for (int i = 0; i < m_SubStats.size(); i++)
@@ -179,7 +182,8 @@ void CStat::Update() // Updates the stat to current - no updates sent
 
 bool CStat::Changed()
 {
-	if (bNeedsUpdate) return true;
+	if (bNeedsUpdate)
+		return true;
 
 	// If any values changed -> update.
 	for (int i = 0; i < m_SubStats.size(); i++)
@@ -191,7 +195,7 @@ bool CStat::Changed()
 
 bool CStat::operator!=(const CStat &Other)
 {
-	//Just check the substats
+	// Just check the substats
 	for (int i = 0; i < m_SubStats.size(); i++)
 	{
 		if (i >= (signed)Other.m_SubStats.size())
