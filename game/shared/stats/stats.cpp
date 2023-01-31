@@ -151,7 +151,7 @@ int CStat::Value()
 	// grabs third digit for rounding and round accordingly
 	int iRoundResult = (((Total * 10) / iSubStats % 10) >= 5 ? 1 : 0);
 
-	int iVal = (Total / iSubStats) + ;
+	int iVal = (Total / iSubStats) + iRoundResult;
 
 	return iVal;
 }
