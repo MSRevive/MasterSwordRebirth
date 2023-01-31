@@ -39,19 +39,10 @@ extern int gmsgMOTD;
 
 bool CheckBanned( msstring_ref SteamID );
 
-//Validation stuff -- Now switched OFF
-
-//#include "../Validater/keycode.h"
 float g_TimeTryValidate = 0.0;
 #define VALIDATE_DELAY (60 * 30)// 30 mins
 bool g_fServerValidated = true;
-//SOCKET g_ValidateSock;
-//char g_cValidateServerIP[][16] = { "65.12.54.201",
-//								   "198.172.46.140",
-//								   "127.0.0.1" };
-//char g_cValidateServerIP[] = { "192.168.0.2" };
-//int g_ValidateServerPort = 6007;
-//void CheckValidation( );
+float g_ServerResetTimer = NULL;
 
 //#define msg ALERT( at_console,
 #define msg ( 
@@ -120,7 +111,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			char szCommand[256];
 			
 			ALERT( at_console, "Executing dedicated server config file\n" );
-			 _snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  servercfgfile );
+			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  servercfgfile );
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -134,7 +125,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			char szCommand[256];
 			
 			ALERT( at_console, "Executing listen server config file\n" );
-			 _snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  lservercfgfile );
+			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  lservercfgfile );
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -169,16 +160,13 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 //=========================================================
 void CHalfLifeMultiplay :: Think( void )
 {
-	startdbg;
-
-	//Print( "%f\n", gpGlobals->time );
-	dbg( "Call g_VoiceGameMgr.Update" );
+	//dbg( "Call g_VoiceGameMgr.Update" );
 	g_VoiceGameMgr.Update( gpGlobals->frametime );
 
-	dbg( "Call MSGameThink" );
+	//dbg( "Call MSGameThink" );
 	MSGameThink( );
 
-	dbg( "Call UpdateVote" );
+	//dbg( "Call UpdateVote" );
 	UpdateVote( );
 
 	g_psv_gravity->value = 800.0;
@@ -192,7 +180,7 @@ void CHalfLifeMultiplay :: Think( void )
 	g_waterfriction->value = 1.0;
 
 	//Delete empty teams here, so they won't be deleted in the middle of a frame
-	dbg( "Delete empty teams" );
+	//dbg( "Delete empty teams" );
 	for( int i = CTeam::Teams.size()-1; i >= 0; i-- )
 	{
 		CTeam *pTeam = CTeam::Teams[i];
@@ -217,6 +205,20 @@ void CHalfLifeMultiplay :: Think( void )
 		}
 	}
 	else TimeLastPlayerLeft = gpGlobals->time;
+
+	if (!strcmp(CVAR_GET_STRING("ms_reset_empty"), "1") && !UTIL_NumPlayers())
+	{
+		ALERT(at_console, "Server empty checking for reset.\n");
+		if (!g_ServerResetTimer)
+			g_ServerResetTimer = gpGlobals->time + (CVAR_GET_FLOAT("ms_reset_time")*60);
+
+		if (gpGlobals->time >= g_ServerResetTimer)
+		{
+			ALERT(at_console, "Resetting server.\n");
+			g_ServerResetTimer = NULL;
+			SERVER_COMMAND("changelevel edana\n");
+		}
+	}
 
 	///// Check game rules /////
 	/*static int last_frags;
@@ -256,7 +258,7 @@ void CHalfLifeMultiplay :: Think( void )
 	//Check for clients sending item or stat info
 //	while( CheckData( ) );
 
-	dbg( "Check switch to start map" );
+	//dbg( "Check switch to start map" );
 	//If players join the server, but their characters aren't on the map, switch the map to a start map
 	if( ms_joinreset.value )
 		if( m_TimeCheckSwitchToStartMap && gpGlobals->time > m_TimeCheckSwitchToStartMap )
@@ -278,8 +280,6 @@ void CHalfLifeMultiplay :: Think( void )
 		if( !IsAnyPlayerAllowedInMap( ) )
 			SERVER_COMMAND( msstring("changelevel ") + m_NewMapName + "\n" );
 	}
-
-	enddbg;
 }
 
 bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap()
@@ -457,6 +457,8 @@ BOOL CHalfLifeMultiplay :: ClientConnected( edict_t *pEntity, const char *pszNam
 		strncpy(szRejectReason, "You are BANNED\n", 128);
 		return FALSE;
 	}
+
+	g_ServerResetTimer = 0.0;
 
 	return TRUE;
 }
@@ -658,7 +660,7 @@ float CHalfLifeMultiplay :: FlPlayerSpawnTime( CBasePlayer *pPlayer )
 
 BOOL CHalfLifeMultiplay :: AllowAutoTargetCrosshair( void )
 {
-	return ( CVAR_GET_FLOAT( "mp_autocrosshair" ) != 0 );
+	return FALSE;
 }
 
 //=========================================================

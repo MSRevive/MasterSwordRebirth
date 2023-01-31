@@ -37,7 +37,8 @@ cvar_t ms_dev_mode = {"ms_dev_mode", "0", FCVAR_SERVER}; //MiB JUL2010_13 - Dev 
 cvar_t ms_dynamicnpc = {"ms_dynamicnpc", "", 0};
 cvar_t msallowkickvote = {"ms_allowkickvote", "1", FCVAR_SERVER};
 cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
-cvar_t timelimit = {"ms_timelimit", "0", FCVAR_SERVER};
+cvar_t ms_reset_time = {"ms_reset_time", "10", FCVAR_SERVER};
+cvar_t ms_reset_empty = {"ms_reset_empty", "1", FCVAR_SERVER};
 cvar_t ms_version = {"ms_version", MS_VERSION, FCVAR_EXTDLL};
 cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER};
 //cvar_t	ms_trans_req	= {"ms_trans_req","0", FCVAR_SERVER }; //Thothie JUN2007 - max players required to activate a transition (0 = all on server) - nvm, changed method - nvm, changed method
@@ -45,7 +46,6 @@ cvar_t ms_fxlimit = {"ms_fxlimit", "0", FCVAR_SERVER};
 //cvar_t	ms_currentfx	= {"ms_currentfx","0", 0 }; //Thothie - want to make FX control total ms.dll, but can't figure how
 cvar_t ms_serverchar = {"ms_serverchar", "1", FCVAR_SERVER};
 cvar_t ms_joinreset = {"ms_joinreset", "1", FCVAR_SERVER};
-cvar_t ms_reset_if_empty = {"ms_reset_if_empty", "0", FCVAR_SERVER}; //Thothie FEB2008a - game_master restarts server, 60 seconds after last player leaves, if no new players join
 cvar_t ms_hp_limit = {"ms_hp_limit", "0", FCVAR_SERVER};
 cvar_t msvote_farm_all_day = {"msvote_farm_all_day", "0", FCVAR_SERVER};		 //Thothie FEB2008a - Allow voting for the map the players are on
 cvar_t msvote_map_type = {"msvote_map_type", "all", FCVAR_SERVER};				 //Thothie FEB2008a - Map vote type (current: all, and root)
@@ -90,7 +90,8 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&msallowtimevote);
 	CVAR_REGISTER(&ms_serverchar);
 	CVAR_REGISTER(&ms_joinreset);
-	CVAR_REGISTER(&ms_reset_if_empty);
+	CVAR_REGISTER(&ms_reset_time);
+	CVAR_REGISTER(&ms_reset_empty);
 	CVAR_REGISTER(&ms_hp_limit);
 	CVAR_REGISTER(&msvote_farm_all_day);
 	CVAR_REGISTER(&msvote_map_type);
