@@ -5,57 +5,57 @@
 #include <string.h>
 
 statinfo_t NatStatList[6] =
-	{
-		{"Strength"},
-		{"Agility"},
-		{"Concentration"},
-		{"Awareness"},
-		{"Fitness"},
-		{"Wisdom"},
+{
+	{"Strength"},
+	{"Agility"},
+	{"Concentration"},
+	{"Awareness"},
+	{"Fitness"},
+	{"Wisdom"},
 };
 
 skillstatinfo_t SkillStatList[9] =
-	{
-		{"Swordsmanship", "swordsmanship", STATPROP_TOTAL},
-		{"Martial Arts", "martialarts", STATPROP_TOTAL},
-		{"Small Arms", "smallarms", STATPROP_TOTAL},
-		{"Axe Handling", "axehandling", STATPROP_TOTAL},
-		{"Blunt Arms", "bluntarms", STATPROP_TOTAL},
-		{"Archery", "archery", STATPROP_TOTAL},
-		//	"Shield handling",
-		//	"Two-handed weapons",
-		//	"Dual weapons",
-		{"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL},
-		{"Parry", "parry", 1},
-		{"Pole Arms", "polearms", STATPROP_TOTAL}, // MiB JUL2010_02 - Pole Arms!
-												   //	"Spell Preparation",
-												   //	"Swimming",
-												   //	"Pickpocket", true,
+{
+	{"Swordsmanship", "swordsmanship", STATPROP_TOTAL},
+	{"Martial Arts", "martialarts", STATPROP_TOTAL},
+	{"Small Arms", "smallarms", STATPROP_TOTAL},
+	{"Axe Handling", "axehandling", STATPROP_TOTAL},
+	{"Blunt Arms", "bluntarms", STATPROP_TOTAL},
+	{"Archery", "archery", STATPROP_TOTAL},
+	//	"Shield handling",
+	//	"Two-handed weapons",
+	//	"Dual weapons",
+	{"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL},
+	{"Parry", "parry", 1},
+	{"Pole Arms", "polearms", STATPROP_TOTAL}, // MiB JUL2010_02 - Pole Arms!
+	//	"Spell Preparation",
+	//	"Swimming",
+	//	"Pickpocket", true,
 };
 
-char *SkillTypeList[3] =
-	{
-		"Proficiency",
-		"Balance",
-		"Power"};
+char* SkillTypeList[3] =
+{
+	"Proficiency",
+	"Balance",
+	"Power" };
 
-char *SpellTypeList[5] =
-	{
-		"Fire",
-		"Ice",
-		"Lightning",
-		"Divination",
-		"Affliction",
+char* SpellTypeList[5] =
+{
+	"Fire",
+	"Ice",
+	"Lightning",
+	"Divination",
+	"Affliction",
 };
 
-int GetSkillStatByName(const char *pszName) // Index lookup by name (Skill stats only)
+int GetSkillStatByName(const char* pszName) // Index lookup by name (Skill stats only)
 {
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
 		if (!stricmp(pszName, SkillStatList[i].DllName))
 			return SKILL_FIRSTSKILL + i;
 	return -1;
 }
-const char *GetSkillName(int Skill) // Name lookup by index (Any stat)
+const char* GetSkillName(int Skill) // Name lookup by index (Any stat)
 {
 	if (Skill < 0 || Skill >= STATS_TOTAL)
 		return "(Invalid Skill)";
@@ -65,7 +65,7 @@ const char *GetSkillName(int Skill) // Name lookup by index (Any stat)
 
 	return SkillStatList[Skill - SKILL_FIRSTSKILL].Name;
 }
-int GetSubSkillByName(const char *pszName)
+int GetSubSkillByName(const char* pszName)
 {
 	if (!stricmp(pszName, "prof")) // alias for proficiency
 		return 0;
@@ -77,7 +77,7 @@ int GetSubSkillByName(const char *pszName)
 			return i;
 	return -1;
 }
-int GetNatStatByName(const char *pszName)
+int GetNatStatByName(const char* pszName)
 {
 	for (int i = 0; i < NATURAL_MAX_STATS; i++)
 		if (!stricmp(pszName, NatStatList[i].Name))
@@ -85,7 +85,7 @@ int GetNatStatByName(const char *pszName)
 	return -1;
 }
 // Converts stat.prop into valid indices
-void GetStatIndices(const char *Name, int &Stat, int &Prop)
+void GetStatIndices(const char* Name, int& Stat, int& Prop)
 {
 	msstring FullName = Name;
 
@@ -101,7 +101,7 @@ CSubStat::~CSubStat()
 {
 }
 
-CSubStat &CSubStat::operator=(const CSubStat &Other)
+CSubStat& CSubStat::operator=(const CSubStat& Other)
 {
 	Value = Other.Value;
 	Exp = Other.Exp;
@@ -153,6 +153,7 @@ int CStat::Value()
 
 	// proper rounding using grabbed third digit
 	int iVal = (Total / iSubStats) + (math_average_x10 % 10 >= 5 ? 1 : 0);
+
 	return iVal;
 }
 
@@ -193,7 +194,7 @@ bool CStat::Changed()
 	return false;
 }
 
-bool CStat::operator!=(const CStat &Other)
+bool CStat::operator!=(const CStat& Other)
 {
 	// Just check the substats
 	for (int i = 0; i < m_SubStats.size(); i++)
@@ -208,14 +209,14 @@ bool CStat::operator!=(const CStat &Other)
 	return false;
 }
 
-void CStat::InitStatList(statlist &Stats)
+void CStat::InitStatList(statlist& Stats)
 {
 	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
 	for (int i = 0; i < STATS_TOTAL; i++)
 	{
 		msstring_ref Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
 		CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;
-		CStat &Stat = Stats[i];
+		CStat& Stat = Stats[i];
 		Stat.m_Name = Name;
 		Stat.m_Type = Type;
 		int iSubStats = (Stat.m_Type == CStat::STAT_NAT) ? 1 : SkillStatList[i - NATURAL_MAX_STATS].StatCount;
