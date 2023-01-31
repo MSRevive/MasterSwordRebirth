@@ -95,7 +95,7 @@ bool ScriptRecvRead();
 int CHudMisc::Draw(float flTime)
 {
 	// Crosshair draw.
-	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0 || ShowHUD())
+	if (CVAR_GET_FLOAT("cl_crosshair_draw") > 0 && ShowHUD())
 	{
 		// easiest place to set the crosshair lol
 		int chType = atoi(CVAR_GET_STRING("cl_crosshair_type"));
