@@ -148,11 +148,10 @@ int CStat::Value()
 	for (int i = 0; i < iSubStats; i++)
 		Total += m_SubStats[i].Value;
 
-	// grabs third digit for rounding
-	int math_average_x10 = (Total * 10) / iSubStats;
+	// grabs third digit for rounding and round accordingly
+	int iRoundResult = (((Total * 10) / iSubStats % 10) >= 5 ? 1 : 0);
 
-	// proper rounding using grabbed third digit
-	int iVal = (Total / iSubStats) + (math_average_x10 % 10 >= 5 ? 1 : 0);
+	int iVal = (Total / iSubStats) + ;
 
 	return iVal;
 }
