@@ -104,15 +104,10 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 	if (fSuccess)
 	{
 		int iPlayerOfs = ENTINDEX(pEntity) - 1;
-		//Thothie JUN2007a - Attempting to defeat chat bug by forcing a player to slot #1
-		//FAIL
-		//CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( 1 );
-		//if ( !pOtherPlayer->IsNetClient() ) iPlayerOfs = 0;
-
 		clientaddr_t &ClientInfo = g_NewClients[iPlayerOfs];
 		ClientInfo.pe = pEntity;
 		ClientInfo.TimeClientConnected = gpGlobals->time;
-		strncpy(ClientInfo.Addr,  pszAddress, sizeof(ClientInfo.Addr) );
+		strncpy(ClientInfo.Addr, pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
 		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
