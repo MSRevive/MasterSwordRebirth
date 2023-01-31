@@ -35,7 +35,7 @@ cvar_t lservercfgfile = { "lservercfgfile", "listenserver.cfg" };
 // multiplayer server rules
 cvar_t fragsleft = { "mp_fragsleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED }; // Don't spam console/log files/users with this changing
 cvar_t timeleft = { "mp_timeleft", "0", FCVAR_SERVER | FCVAR_UNLOGGED };	 // "      "
-
+cvar_t timelimit = { "mp_timelimit", "0", FCVAR_SERVER };
 // multiplayer server rules
 cvar_t teamplay = { "mp_teamplay", "0", FCVAR_SERVER };
 //cvar_t	fraglimit	= {"mp_fraglimit","0", FCVAR_SERVER };
@@ -108,7 +108,6 @@ void GameDLLInit(void)
 	CVAR_REGISTER(&displaysoundlist);
 
 	CVAR_REGISTER(&teamplay);
-	//CVAR_REGISTER (&fraglimit);
 	CVAR_REGISTER(&timelimit);
 
 	CVAR_REGISTER(&fragsleft);
