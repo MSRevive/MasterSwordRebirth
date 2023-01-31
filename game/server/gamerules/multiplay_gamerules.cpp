@@ -206,7 +206,7 @@ void CHalfLifeMultiplay :: Think( void )
 	}
 	else TimeLastPlayerLeft = gpGlobals->time;
 
-	if (!strcmp(CVAR_GET_STRING("ms_reset_empty"), "1") && !UTIL_NumPlayers())
+	if (!strcmp(CVAR_GET_STRING("ms_reset_time"), "0") && !UTIL_NumPlayers())
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
