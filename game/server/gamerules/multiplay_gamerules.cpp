@@ -187,24 +187,6 @@ void CHalfLifeMultiplay :: Think( void )
 		if( !pTeam->MemberList.size() )
 			{ CTeam::Teams.erase( i ); delete pTeam; }
 	}
-	
-	float flTimeLimit = timelimit.value * 60;
-	static float TimeLastPlayerLeft = 0;
-	if (flTimeLimit && !UTIL_NumPlayers())
-	{
-		if (gpGlobals->time >= TimeLastPlayerLeft + flTimeLimit)
-		{
-			//Thothie FEB2008a - let the game master handle the time out thing in case he has to do somethin
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			if (pGMScript)
-				pGMScript->CallScriptEvent("game_timedout");
-			else
-				ALERT(at_console, "Game Master not available for timeout!\n");
-			return;
-		}
-	}
-	else TimeLastPlayerLeft = gpGlobals->time;
 
 	if (!strcmp(CVAR_GET_STRING("ms_reset_time"), "0") && !UTIL_NumPlayers())
 	{
