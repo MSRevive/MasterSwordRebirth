@@ -519,25 +519,24 @@ int CMSMonster::GetStat(int iStatIdx, int iStatType)
 		{
 		case NATURAL_STR:
 			return (GetSkillStat(SKILL_SWORDSMANSHIP) * 1.5 +
-					GetSkillStat(SKILL_MARTIALARTS) +
+					GetSkillStat(SKILL_MARTIALARTS) + //upped to 0.3
 					GetSkillStat(SKILL_AXEHANDLING) * 2.0 +
 					GetSkillStat(SKILL_BLUNTARMS) * 1.9 +
-					(GetSkillStat(SKILL_POLEARMS) * 0.6f) +
-					(GetSkillStat(SKILL_SMALLARMS) * 0.8) +
-					(GetSkillStat(SKILL_ARCHERY) * 0.5)) /
+					(GetSkillStat(SKILL_POLEARMS) * 0.8f) +
+					(GetSkillStat(SKILL_SMALLARMS) * 0.5) +
+					(GetSkillStat(SKILL_ARCHERY) * 0.6)) /
 				   4;
 		case NATURAL_DEX: //How fast u can move
 			return (GetSkillStat(SKILL_SWORDSMANSHIP) * 0.6 +
-					GetSkillStat(SKILL_MARTIALARTS) +
+					GetSkillStat(SKILL_MARTIALARTS) + //upped to 0.2
 					GetSkillStat(SKILL_AXEHANDLING) * 0.6 +
 					GetSkillStat(SKILL_BLUNTARMS) * 0.6 +
-					(GetSkillStat(SKILL_SMALLARMS) * 1.5) +
+					(GetSkillStat(SKILL_SMALLARMS) * 0.6) +
 					(GetSkillStat(SKILL_POLEARMS) * 2.0f) +
 					(GetSkillStat(SKILL_ARCHERY) * 1.5)) /
 				   6;
 		case NATURAL_CON:
 			return (GetSkillStat(SKILL_ARCHERY) * 1.5 +
-					/*GetSkillStat(SKILL_PARRY) + */
 					(GetSkillStat(SKILL_POLEARMS) * 1.0f) +
 					GetSkillStat(SKILL_SPELLCASTING) * 2.0) /
 				   2;
@@ -549,8 +548,7 @@ int CMSMonster::GetStat(int iStatIdx, int iStatType)
 					GetSkillStat(SKILL_BLUNTARMS) * 0.5f +
 					(GetSkillStat(SKILL_SMALLARMS) * 1.5f) +
 					(GetSkillStat(SKILL_ARCHERY) * 2.0f) +
-					(GetSkillStat(SKILL_POLEARMS) * 2.0f)
-					/*(GetSkillStat(SKILL_PARRY) * 2.0f)*/) /
+					(GetSkillStat(SKILL_POLEARMS) * 2.0f)) /
 				   7;
 		case NATURAL_FIT:
 			//Archery & smallarms barely count for fitness
@@ -558,14 +556,12 @@ int CMSMonster::GetStat(int iStatIdx, int iStatType)
 					GetSkillStat(SKILL_MARTIALARTS) +
 					(GetSkillStat(SKILL_AXEHANDLING) * 1.5) +
 					(GetSkillStat(SKILL_BLUNTARMS) * 1.5) +
-					/*GetSkillStat(SKILL_PARRY) + */
 					(GetSkillStat(SKILL_SMALLARMS) * 0.7) +
 					(GetSkillStat(SKILL_POLEARMS) * 0.7f) +
 					(GetSkillStat(SKILL_ARCHERY) * 0.6)) /
 				   5;
 		case NATURAL_WIS:
-			return (1 +										  /*GetSkillStat(SKILL_PARRY) /2 +*/
-					GetSkillStat(SKILL_SPELLCASTING) * 1.75); //Thothie - how about SC counts for wisdom more than parry?
+			return (1 + GetSkillStat(SKILL_SPELLCASTING) * 1.80);
 		}
 		return 0;
 	}
