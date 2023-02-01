@@ -430,7 +430,7 @@ void IN_ForwardDown(void)
 	KeyDown(&in_forward);
 
 	//we handle double tap to sprint in via inputs now.
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + 0.2 > gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + 0.2 >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
@@ -455,7 +455,6 @@ void IN_BackDown(void)
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
 		GAME_LEAP("back");
-	//ServerCmd( UTIL_VarArgs("game_leap back %f", player.Stamina) ) ;
 }
 
 void IN_BackUp(void)
@@ -464,6 +463,7 @@ void IN_BackUp(void)
 	KeyUp(&in_back);
 	gHUD.m_Spectator.HandleButtonsUp(IN_BACK);
 }
+
 void IN_LookupDown(void) { KeyDown(&in_lookup); }
 void IN_LookupUp(void) { KeyUp(&in_lookup); }
 void IN_LookdownDown(void) { KeyDown(&in_lookdown); }
@@ -536,7 +536,9 @@ void IN_Attack2Down(void)
 	gHUD.m_Spectator.HandleButtonsDown(IN_ATTACK2);
 }
 
-void IN_Attack2Up(void) { KeyUp(&in_attack2); }
+void IN_Attack2Up(void) { 
+	KeyUp(&in_attack2); 
+}
 
 void IN_UseDown(void)
 {
@@ -544,7 +546,9 @@ void IN_UseDown(void)
 	gHUD.m_Spectator.HandleButtonsDown(IN_USE);
 }
 
-void IN_UseUp(void) { KeyUp(&in_use); }
+void IN_UseUp(void) { 
+	KeyUp(&in_use); 
+}
 
 void IN_JumpDown(void)
 {
@@ -552,7 +556,10 @@ void IN_JumpDown(void)
 	gHUD.m_Spectator.HandleButtonsDown(IN_JUMP);
 }
 
-void IN_JumpUp(void) { KeyUp(&in_jump); }
+void IN_JumpUp(void) 
+{
+	KeyUp(&in_jump);
+}
 
 void IN_DuckDown(void)
 {

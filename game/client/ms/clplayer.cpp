@@ -217,9 +217,6 @@ void CBasePlayer::DoSprint()
 	if (FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
 		return;
 
-	// if (FBitSet(m_StatusFlags, PLAYER_MOVE_STOPRUN))
-	// 	return;
-
 	//can't sprint while attacking
 	if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING))
 		return;
@@ -257,7 +254,7 @@ void CBasePlayer::DoSprint()
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg("You slow down and begin walking casually.");
-			m_SprintDelay = gpGlobals->time + 0.4; //0.4 second delay for sprinting
+			m_SprintDelay = gpGlobals->time + 0.3; //0.4 second delay for sprinting
 		}
 
 		//ran out of stamina
@@ -274,7 +271,7 @@ void CBasePlayer::DoSprint()
 		(player.pev->velocity.Length2D() < fLastSpeed - 50))
 		{
 			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
-			m_SprintDelay = gpGlobals->time + 0.4;
+			m_SprintDelay = gpGlobals->time + 0.3;
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
 		}
