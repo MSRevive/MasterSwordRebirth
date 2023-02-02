@@ -288,12 +288,12 @@ void Host_Say(edict_t *pEntity, int teamonly)
 	{
 		if (CMD_ARGC() >= 2)
 		{
-			 _snprintf(szTemp, sizeof(szTemp),  "%s %s",  (char *)pcmd,  (char *)CMD_ARGS() );
+			_snprintf(szTemp, sizeof(szTemp), "%s %s",  (char *)pcmd, (char *)CMD_ARGS());
 		}
 		else
 		{
 			// Just a one word command, use the first word...sigh
-			 _snprintf(szTemp, sizeof(szTemp),  "%s",  (char *)pcmd );
+			_snprintf(szTemp, sizeof(szTemp), "%s", (char *)pcmd);
 		}
 		p = szTemp;
 	}
@@ -320,16 +320,16 @@ void Host_Say(edict_t *pEntity, int teamonly)
 
 	// turn on color set 2  (color on,  no sound)
 	if (teamonly)
-		 _snprintf(text, sizeof(text),  "%c(TEAM) %s: ",  2,  STRING(pEntity->v.netname) );
+		_snprintf(text, sizeof(text), "%c(TEAM) %s: ",  2, STRING(pEntity->v.netname) );
 	else
-		 _snprintf(text, sizeof(text),  "%c%s: ",  2,  STRING(pEntity->v.netname) );
+		_snprintf(text, sizeof(text), "%c%s: ",  2, STRING(pEntity->v.netname) );
 
 	j = sizeof(text) - 2 - strlen(text); // -2 for /n and null terminator
 	if ((int)strlen(p) > j)
 		p[j] = 0;
 
-	strcat(text, p);
-	strcat(text, "\n");
+	strncat(text, p, sizeof(text));
+	strncat(text, "\n", sizeof(text));
 
 	player->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
 
