@@ -37,7 +37,8 @@ char* SkillTypeList[3] =
 {
 	"Proficiency",
 	"Balance",
-	"Power" };
+	"Power" 
+};
 
 char* SpellTypeList[5] =
 {
@@ -150,10 +151,10 @@ int CStat::Value()
 
 	// grabs third digit for rounding and round accordingly
 	int iRoundResult = (((Total * 10) / iSubStats % 10) >= 5 ? 1 : 0);
-
 	int iVal = (Total / iSubStats) + iRoundResult;
 
-	return iVal;
+	// if value is 0 then return 1, we don't want skills to be less than 1.
+	return (iVal == 0) ? 1 : iVal;
 }
 
 int CStat::Value(int StatProperty)
