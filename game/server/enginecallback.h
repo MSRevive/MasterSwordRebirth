@@ -77,16 +77,16 @@ int PRECACHE_SOUND(const char *pszSound); //Thothie MAR2012_26 - Ditto for sound
 #define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
 #define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
+#define ALERT (*g_engfuncs.pfnAlertMessage)
 
 //MIB JUN2010_17 - enable total disable of debug alert messages
-#define TURN_OFF_ALERT 0
-#if !TURN_OFF_ALERT
-#define ALERT (*g_engfuncs.pfnAlertMessage)
-#define SPAWN_GLOBAL_ITEMS 1
-#else
-#define ALERT
-#define SPAWN_GLOBAL_ITEMS 0
-#endif
+// #define TURN_OFF_ALERT 0
+// #if !TURN_OFF_ALERT
+// #define SPAWN_GLOBAL_ITEMS 1
+// #else
+// #define ALERT
+// #define SPAWN_GLOBAL_ITEMS 0
+// #endif
 
 inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin = NULL, edict_t* ed = NULL)
 {
