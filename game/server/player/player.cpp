@@ -2226,6 +2226,74 @@ pt_end:
 	CallScriptEvent("game_think");
 
 	postthinkdbg("End PostThink");
+	
+	//Deactivate no-collide if not near any players.
+	postthinkdbg("Check for nearby spawns and players, deactivate nocolloide");
+	//do not check for dead or spectating/noclipping players
+	if (pev->solid == SOLID_NOT && pev->deadflag == DEAD_NO && pev->movetype != MOVETYPE_NOCLIP) {
+
+		CBaseEntity* fEnt = NULL;
+		//initialize proximity check
+		bool hasProximity = false;
+		int proximityDistance = 124;
+
+		//loop through all nearby entities
+		while ( (fEnt = UTIL_FindEntityInSphere(fEnt, pev->origin, proximityDistance) ) != NULL) {
+
+			//if you find a player set check to 1
+			if (fEnt->IsPlayer() && fEnt->pev != pev) {
+				hasProximity = true;
+				//no reason to continue.
+				break;
+			}
+
+		};
+
+		//setup for spawn point check as they are never found by find entity in sphere
+		fEnt = NULL;
+		while ((fEnt = UTIL_FindEntityByClassname(fEnt, SPAWN_BEGIN)) != NULL) {
+			Vector spawnDistance = fEnt->pev->origin - pev->origin;
+
+			//hardcoding vector length since it's always x y z
+			for (int idx = 0; idx < 3; idx++) {
+				spawnDistance[idx] = abs(spawnDistance[idx]);
+			};
+
+			//if more than 124 away from spawn in any direction loop to next
+			if (spawnDistance[0] > proximityDistance || spawnDistance[1] > proximityDistance || spawnDistance[2] > proximityDistance) {
+				continue;
+			};
+
+			//else set proximity check
+			hasProximity = true;
+
+		};
+
+		//and same for generic spawns
+		fEnt = NULL;
+		while ((fEnt = UTIL_FindEntityByClassname(fEnt, SPAWN_GENERIC)) != NULL) {
+			Vector spawnDistance = fEnt->pev->origin - pev->origin;
+
+			for (int idx = 0; idx < 3; idx++) {
+				spawnDistance[idx] = abs(spawnDistance[idx]);
+			};
+
+			//if more than 124 away from spawn in any direction loop to next
+			if (spawnDistance[0] > proximityDistance || spawnDistance[1] > proximityDistance || spawnDistance[2] > proximityDistance) {
+				continue;
+			};
+
+			//else set proximity check
+			hasProximity = true;
+
+		};
+
+		//if check is not true set self solid state to slidebox
+		if (!hasProximity) {
+			pev->solid = SOLID_SLIDEBOX;
+		}
+	}
+
 	enddbg("CBasePlayer::PostThink()");
 }
 
@@ -2592,7 +2660,7 @@ void CBasePlayer::Spawn(void)
 	pev->classname = MAKE_STRING("player");
 	pev->armorvalue = 0;
 	pev->takedamage = DAMAGE_AIM;
-	pev->solid = SOLID_SLIDEBOX;
+	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_WALK;
 	pev->flags = FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;

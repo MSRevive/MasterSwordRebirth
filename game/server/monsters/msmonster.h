@@ -103,6 +103,8 @@ struct damage_t
 	string_i sDamageType;		  //Custom damage type from script
 	msstring *ItemCallBackPrefix; //Item callback prefix, if this attack was caused by an item
 	float flHitPercentage;
+	float flCritMutli;		//how much to multiply the hit by
+	float flCritThreshold;  //how high the roll needs to be to crit
 	float flDamageRange;
 	float flRange;			 //Range of normal attack.  If 0, use traceline
 	float flAOERange;		 //Area of effect range //Range of normal attack
@@ -111,6 +113,7 @@ struct damage_t
 	//Calulated during the attack
 	int AccuracyRoll;
 	bool AttackHit; //Whether the roll cuased a hit or miss
+	bool AttackCrit; //Whether the roll crit or not
 	class CGenericItem *pParryItem;
 	TraceResult outTraceResult;
 	bool nodecal; //Thothie MAR2012_16 non-bullet/noise damage
