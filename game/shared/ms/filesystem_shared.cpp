@@ -121,7 +121,7 @@ bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const ch
 		return false;
 	}
 
-	CFile file{fileName, "rb", pathID};
+	CFile file{fileName, "w", pathID};
 	if (file)
 	{
 		file.Write(text, length);
