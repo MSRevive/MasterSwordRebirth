@@ -12,6 +12,7 @@
 #include "fndatahandler.h"
 #include "httprequesthandler.h"
 #include "crc/crchash.h"
+#include "filesystem_shared.h"
 
 ofstream modelout;
 int HighestPrecache = -1;
@@ -145,6 +146,15 @@ static bool IsVerifiedSC()
 	return true;
 }
 
+void WriteCrashCfg()
+{
+	char crashCfg[MAX_PATH];
+	char content[128];
+	_snprintf(crashCfg, MAX_PATH, "%s.cfg", CVAR_GET_STRING("sv_crashcfg"));
+	_snprintf(content, 128, "// Written by MSR\nmap %s", MSGlobals::MapName.c_str());
+	FileSystem_WriteTextToFile(crashCfg, content);
+}
+
 //Called from CWorld::Spawn() each map change
 void MSWorldSpawn()
 {
@@ -212,6 +222,8 @@ void MSWorldSpawn()
 		ALERT(at_console, "Script file not verified for FN!\n");
 		SERVER_COMMAND("exit\n"); // we want to quit to prevent cheaters
 	}
+
+	WriteCrashCfg();
 }
 
 //Called every frame
