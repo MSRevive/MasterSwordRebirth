@@ -1399,7 +1399,7 @@ msstring CScript::ScriptGetter_GetAttackProp(msstring& FullName, msstring& Parse
 		else if (PropName == "keys") return AttData.ComboKeys[0];
 		else if (PropName == "dmg.ignore") return AttData.NoDamage ? "1" : "0";
 		else if (PropName == "hitchance") RETURN_FLOAT(AttData.flAccuracyDefault)
-		else if (PropName == "critchance") RETURN_FLOAT(AttData.flCritThreshold)
+		else if (PropName == "critthreshold") RETURN_FLOAT(AttData.flCritThreshold)
 		else if (PropName == "critmulti") RETURN_FLOAT(AttData.flCritMulti) 
 		else if (PropName == "delay.end") RETURN_FLOAT(AttData.tDuration)
 		else if (PropName == "delay.strike") RETURN_FLOAT(AttData.tLandDelay)
