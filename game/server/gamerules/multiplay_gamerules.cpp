@@ -188,7 +188,8 @@ void CHalfLifeMultiplay :: Think( void )
 			{ CTeam::Teams.erase( i ); delete pTeam; }
 	}
 
-	if (!strcmp(CVAR_GET_STRING("ms_reset_time"), "0") && !UTIL_NumPlayers())
+	//if ((strcmp(CVAR_GET_STRING("ms_reset_empty"), "0") != 0) && !UTIL_NumPlayers())
+	if ((CVAR_GET_FLOAT("ms_reset_time") >= 1.0) && !UTIL_NumPlayers())
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
@@ -440,7 +441,7 @@ BOOL CHalfLifeMultiplay :: ClientConnected( edict_t *pEntity, const char *pszNam
 		return FALSE;
 	}
 
-	g_ServerResetTimer = 0.0;
+	g_ServerResetTimer = NULL;
 
 	return TRUE;
 }
