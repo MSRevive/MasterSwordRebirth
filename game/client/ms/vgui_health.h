@@ -31,7 +31,7 @@ public:
 		m_Image.LoadImg(ImageName, false, false);
 		m_Image.setFgColor(255, 255, 255, 255);
 		m_Image.setSize(getWide(), getTall());
-		m_Label = new MSLabel(this, "0/0", 0, getWide(), getWide(), YRES(12), MSLabel::a_center);
+		m_Label = new MSLabel(this, "0/0", 0, getTall()/1.5, getWide(), YRES(7), MSLabel::a_center);
 	}
 
 	void Update()
