@@ -98,11 +98,10 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
 	if (g_pGameRules)
 		fSuccess = g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason) ? true : false;
-	else
-		fSuccess = true; //temp - should be false
 
 	if (fSuccess)
 	{
+		// this has to be here otherwise on reconnect players can't select characters
 		int iPlayerOfs = ENTINDEX(pEntity) - 1;
 		clientaddr_t &ClientInfo = g_NewClients[iPlayerOfs];
 		ClientInfo.pe = pEntity;
