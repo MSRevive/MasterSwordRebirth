@@ -1698,7 +1698,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 				//Check if your horrid skill or bad luck made you miss:
 				iAccuracyRoll = RANDOM_LONG(0, 99);
-				if (iAccuracyRoll > Damage.flHitPercentage)
+				if (iAccuracyRoll < (100 - Damage.flHitPercentage))
 				{
 					//used to be here twice? removed one iteration.
 					Damage.AttackHit = false;
@@ -1938,7 +1938,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 							// New implementation always hits unless affected by lightning or other forms of accuracy reduction.
 							// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
 							// _snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
-							_snprintf(sz, sizeof(sz), "Missed %s.", pTarget->DisplayName(), szStats);
+							_snprintf(sz, sizeof(sz), "Missed %s.", pTarget->DisplayName());
 						}
 						else
 						{

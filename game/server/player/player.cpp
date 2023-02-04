@@ -1264,6 +1264,7 @@ void FixPlayerCrouchStuck(edict_t *pPlayer)
 void CBasePlayer::Duck()
 {
 }
+
 void CBasePlayer::PlayerAction(msstring_ref Action)
 {
 	CScript *EventScript = NULL;
