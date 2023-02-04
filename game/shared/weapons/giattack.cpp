@@ -1669,7 +1669,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 	SetDebugProgress(ItemThinkProgress, "DoDamage - Check hit");
 	bool fReportHit = false;
-	Damage.AttackHit = false;
+	Damage.AttackHit = true;
 	Damage.AttackCrit = false;
 
 	CMSMonster *pVictim = NULL;
