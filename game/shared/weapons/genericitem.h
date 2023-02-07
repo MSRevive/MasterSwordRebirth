@@ -56,7 +56,7 @@ struct attackdata_t
 {
 	float flRange, flDamage, flDamageRange, flEnergy, flMPDrain,
 		flDamageAOERange, flDamageAOEAttn,
-		flAccuracyDefault, flAccBest,
+		flAccuracyDefault, flAccBest, flCritThreshold, flCritMulti,
 		flNoise, flChargeAmt, f1DmgMulti, //f1DmgMulti is OCT2007a
 		tDuration, tLandDelay, tProjMinHold,
 		tMaxHold;

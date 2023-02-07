@@ -755,8 +755,16 @@ void CGenericItem::StrikeLand()
 		thoth_unskilled = true;
 
 	float flMissPercentage = 0.0;
-	flMissPercentage = (100 - CurrentAttack->flAccuracyDefault);
-	float flHitPercentage = CurrentAttack->flAccuracyDefault + (flMissPercentage * flDmgFraction);
+
+	//misspercentage calculation 100-script defuned accuracy - commented out to guarantee hits - reuse for crit chance;
+	//flMissPercentage = (100 - CurrentAttack->flAccuracyDefault);
+
+	//old hitpercentage
+	//float flHitPercentage = CurrentAttack->flAccuracyDefault + (flMissPercentage * flDmgFraction);
+
+	//always hit, reuse flAccuracyDefault as crit chance.
+	float flHitPercentage = 100;
+
 	if (thoth_unskilled)
 		flHitPercentage = flHitPercentage * 0.25; //thothie - seems to work
 	if (m_pOwner->m_HITMulti > 0)
@@ -799,6 +807,17 @@ void CGenericItem::StrikeLand()
 	Damage.flDamage = flDamage;
 	Damage.iDamageType = bitsDamage;
 	Damage.flHitPercentage = flHitPercentage;
+
+	//Crits - Only player get default crit chance and multiplier
+	if (m_pOwner->IsPlayer()) { 
+		Damage.flCritThreshold = CurrentAttack->flCritThreshold > 0 ? CurrentAttack->flCritThreshold : 95;
+		Damage.flCritMutli = CurrentAttack->flCritMulti > 0 ? CurrentAttack->flCritMulti : 1.5;
+	}
+	else {
+		Damage.flCritThreshold = CurrentAttack->flCritThreshold;
+		Damage.flCritMutli = CurrentAttack->flCritMulti;
+	}
+
 	Damage.sDamageType = CurrentAttack->sDamageType;
 	Damage.flRange = CurrentAttack->NoAutoAim ? 0 : CurrentAttack->flRange; //Normal attacks have an 'Autoaim' AOE range to make hitting easier
 																			//(only hits the closest ent within range)
@@ -1650,7 +1669,8 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 	SetDebugProgress(ItemThinkProgress, "DoDamage - Check hit");
 	bool fReportHit = false;
-	Damage.AttackHit = false;
+	Damage.AttackHit = true;
+	Damage.AttackCrit = false;
 
 	CMSMonster *pVictim = NULL;
 
@@ -1678,10 +1698,16 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 				//Check if your horrid skill or bad luck made you miss:
 				iAccuracyRoll = RANDOM_LONG(0, 99);
-				if (iAccuracyRoll > Damage.flHitPercentage)
+				if (iAccuracyRoll < (100 - Damage.flHitPercentage))
 				{
+					//used to be here twice? removed one iteration.
 					Damage.AttackHit = false;
-					Damage.AttackHit = false;
+				}
+
+				//Check for critical hits and multiply damage accordingly
+				if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
+					Damage.flDamage *= Damage.flCritMutli;
+					Damage.AttackCrit = true;
 				}
 			}
 			else
@@ -1814,8 +1840,11 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 		if (fReportHit)
 		{
 			if (Damage.flDamage > 0)
-			{
-				char szStats[32], szDamage[32], szHitMiss[32];
+			{	
+				//szStats is no longer used since removing accuracy.
+				//char szStats[32], szDamage[32], szHitMiss[32];
+				char szDamage[32], szHitMiss[32];
+
 				//Thothie JAN2013b_25 - elemental codes
 				msstring dtype_code = Damage.sDamageType.c_str();
 				char element_code[11] = "";
@@ -1847,8 +1876,10 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					 strncpy(element_code,  " earth", sizeof(element_code) );
 
 				 strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
-				 strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss) );
-				 _snprintf(szStats, sizeof(szStats), "(%i/%i)",  (100 - iAccuracyRoll),  int(100 - Damage.flHitPercentage) );
+				 strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss));
+				 //our hits can not be inverted or they will seem weird with no accuracy
+				 // this is no longer needed with missing being only possible during lightning debuffs. Enabling this would mean missing with high numbers during lightning so obfuscating.
+				 //_snprintf(szStats, sizeof(szStats), "(%i)",  (iAccuracyRoll) );
 				
 				//Thothie SEP2019_22 - report resistance BEGIN
 				bool tdm_found_entry = false;
@@ -1893,15 +1924,21 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 					if (Damage.AttackHit)
 					{
-						//Hit <prefix> <name> for <dmg>(acc/req) [resist]
-						_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats);
+						//Hit <prefix> <name> for <dmg>(acc/req) [resist] <crit?>
+						// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
+						//_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats, Damage.AttackCrit ? "CRIT!" : "");
+
+						_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), Damage.AttackCrit ? "CRIT!" : "");
 					}
 					else
 					{
 						if (!fDodged)
 						{
-							//Missed <prefix> <name> (acc/req)
-							_snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
+							// Missed <prefix> <name> (acc/req)
+							// New implementation always hits unless affected by lightning or other forms of accuracy reduction.
+							// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
+							// _snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
+							_snprintf(sz, sizeof(sz), "Missed %s.", pTarget->DisplayName());
 						}
 						else
 						{
@@ -1929,10 +1966,15 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 					//Thothie SEP2019_22 - changing report syntax to be shorter
 					//<name> hits you for <damage/element> [resist]
-					if (Damage.AttackHit)
+					if (Damage.AttackHit) {
 						_snprintf(sz, sizeof(sz), "%s hits you: %s %s", SPEECH::NPCName(pMonster, true), szDamage, tdm_engrish.c_str());
-					else
-						_snprintf(sz, sizeof(sz), "%s misses you: %s", SPEECH::NPCName(pMonster, true), szStats);
+					}
+					else { 
+						//enemy hits need to be inverted or they will seem weird
+						//enemies still need certain rolls to hit, for now also obfuscating for consistency.
+						//_snprintf(szStats, sizeof(szStats), "(%i)", (100 - iAccuracyRoll));
+						_snprintf(sz, sizeof(sz), "%s misses you.", SPEECH::NPCName(pMonster, true));
+					}
 
 					pPlayer->SendEventMsg(HUDEVENT_ATTACKED, sz);
 				}
