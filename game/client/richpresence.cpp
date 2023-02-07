@@ -1,5 +1,5 @@
 //
-// Simple Discord Rich Presence Exposure!
+// Simple Rich Presence Exposure!
 //
 
 #include "msdllheaders.h"
@@ -10,12 +10,13 @@
 #include "hud.h"
 #include "hud_iface.h"
 #include "vgui_scorepanel.h"
-#include "client_discord_rpc.h"
+#include "richpresence.h"
+#include "steamhelper.h"
 #include "discord/discord_rpc.h"
 #include <time.h>
 #include <sysinfoapi.h>
 
-static bool loadedDiscordRPC = false;
+static bool loadedRichPresence = false;
 static ULONG lastTimeUpdated = 0;
 static int64_t startTime;
 
@@ -24,24 +25,24 @@ static char bufferState[128];
 
 #define DISCORD_RPC_UPDATE_TIME 35 // sec
 
-void DiscordRPCInitialize()
+void RichPresenceInitialize()
 {
-	loadedDiscordRPC = true;
+	loadedRichPresence = true;
 	DiscordEventHandlers handlers;
 	memset(&handlers, 0, sizeof(handlers));
 	Discord_Initialize("1063225093507010570", &handlers, 1, "1961680");
 	startTime = time(NULL);
 }
 
-void DiscordRPCShutdown()
+void RichPresenceShutdown()
 {
 	// Discord_Shutdown is broken --- game will hang endlessly if called!
-	loadedDiscordRPC = false;
+	loadedRichPresence = false;
 }
 
-void DiscordRPCUpdate()
+void RichPresenceUpdate()
 {
-	if (loadedDiscordRPC == false)
+	if (loadedRichPresence == false)
 		return;
 
 	const auto timeNow = (GetTickCount64() / 1000);
@@ -67,12 +68,22 @@ void DiscordRPCUpdate()
 
 		_snprintf(bufferDetails, sizeof(bufferDetails), "%s - %i HP", player.m_DisplayName.c_str(), currentHealth);
 		_snprintf(bufferState, sizeof(bufferState), "%s", MSGlobals::MapName.c_str());
+
+		if (steamapicontext && steamapicontext->SteamFriends())
+		{
+			steamapicontext->SteamFriends()->SetRichPresence("name", player.m_DisplayName.c_str());
+			steamapicontext->SteamFriends()->SetRichPresence("zone", MSGlobals::MapName.c_str());
+			steamapicontext->SteamFriends()->SetRichPresence("steam_display", "#Status_InGame");
+		}
 	}
 	else
 	{
 		strncpy(bufferDetails, "In Main-Menu", sizeof(bufferDetails));
 		strncpy(bufferState, "Awaiting Greatness", sizeof(bufferState));
 		clientsInGame = maxClients = 1;
+
+		if (steamapicontext && steamapicontext->SteamFriends())
+			steamapicontext->SteamFriends()->SetRichPresence("steam_display", "#Status_MainMenu");
 	}
 
 	DiscordRichPresence discordPresence;

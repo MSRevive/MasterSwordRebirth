@@ -44,7 +44,8 @@ extern "C"
 #include "interface.h"
 #include "voice_status.h"
 #include "filesystem_shared.h"
-#include "client_discord_rpc.h"
+#include "steamhelper.h"
+#include "richpresence.h"
 
 #define DLLEXPORT EXPORT
 
@@ -459,8 +460,11 @@ void DLLEXPORT HUD_Frame(double time)
 	dbg("Call SetBorderlessWindow");
 	SetBorderlessWindow();
 
-	dbg("Call DiscordRPC Think");
-	DiscordRPCUpdate();
+	dbg("Call Steam Helper Think");
+	steamhelper->Think();
+
+	dbg("Call Rich Presence Think");
+	RichPresenceUpdate();
 
 	enddbg;
 }

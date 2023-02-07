@@ -26,7 +26,6 @@
 
 #include "fndatahandler.h"
 #include "httprequesthandler.h"
-#include "steamhelper.h"
 
 cvar_t displaysoundlist = { "displaysoundlist", "0" };
 cvar_t mapcyclefile = { "mapcyclefile", "mapcycle.txt" };
@@ -142,5 +141,4 @@ void GameDLLShutdown()
 	ScriptMgr::GameShutdown();
 	FileSystem_Shutdown();
 	FnDataHandler::Destroy();
-	SteamHelper::Shutdown();
 }

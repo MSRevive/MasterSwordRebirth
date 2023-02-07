@@ -17,7 +17,6 @@
 #else
 #include "global.h"
 #endif
-#include "steamhelper.h"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -188,10 +187,6 @@ void MSGlobals::SharedThink()
 		MSGlobals::GameScript->RunScriptEvents(false);
 
 	MemMgr::Think();
-
-#ifdef VALVE_DLL
-	SteamHelper::Think();
-#endif
 
 	enddbg;
 }

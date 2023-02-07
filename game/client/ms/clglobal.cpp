@@ -11,7 +11,8 @@
 #include "hudscript.h"
 #include "vgui_hud.h"
 #include "logger.h"
-#include "client_discord_rpc.h"
+#include "steamhelper.h"
+#include "richpresence.h"
 
 void VGUI_Think();
 
@@ -146,8 +147,8 @@ void MSCLGlobals::Initialize()
 
 	//PRECACHE_GENERIC("dlls/sc.dll"); --- crashes ???
 
-	dbg("Call DiscordRPCInitialize");
-	DiscordRPCInitialize();
+	dbg("Call Rich Presence");
+	RichPresenceInitialize();
 
 	enddbg;
 }
@@ -420,7 +421,7 @@ BOOL WINAPI DllMain(
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
 		if (logfile.is_open())
 			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
-		DiscordRPCShutdown();
+		RichPresenceShutdown();
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();
