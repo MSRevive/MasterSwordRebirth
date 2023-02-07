@@ -38,7 +38,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
-		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS;DISCORD_DYNAMIC_LIB"
+		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS;DISCORD_DYNAMIC_LIB;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER"
 	}
 
 	$Linker
@@ -245,8 +245,8 @@ $Project "Client"
 		$File "studiomodelrenderer.cpp"
 		$File "$SRCDIR\thirdparty\tartan\textureloader.cpp"
 		$File "$SRCDIR\thirdparty\tartan\tgaloader.cpp"		
-		$File "client_discord_rpc.cpp"
-		$File "client_discord_rpc.h"
+		$File "richpresence.cpp"
+		$File "richpresence.h"
 		
 		$Folder	"Generic Item"
 		{
@@ -373,6 +373,9 @@ $Project "Client"
 		$File "$SRCDIR\game\shared\ms\filesystem_shared.h"
 		$File "$SRCDIR\game\shared\ms\logger.h"
 		
+		$File 	"steamhelper.cpp"
+		$File 	"steamhelper.h"		
+		
 		$Folder	"CRC"
 		{
 			$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
@@ -397,5 +400,6 @@ $Project "Client"
 		$ImpLib     vgui
 		$ImpLib     SDL2
 		$ImpLib		discord-rpc
+		$ImpLib 	steam_api
  	}
 }

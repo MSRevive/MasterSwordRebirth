@@ -27,7 +27,6 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "stats/statdefs.h"
-#include "steamhelper.h"
 // ---
 
 #include "saverestore.h"
@@ -1665,9 +1664,6 @@ void ServerDeactivate(void)
 	dbg("Call FnDataHandler::Reset");
 	FnDataHandler::Reset();
 
-	dbg("Call SteamHelper::Shutdown");
-	SteamHelper::Shutdown();
-
 	dbg("End");
 	enddbg;
 }
@@ -1744,7 +1740,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 	CSVGlobals::WriteScriptLog();
 	FnDataHandler::Reset();
-	SteamHelper::Initialize();
 
 	logfile << Logger::LOG_INFO << "World Activate END\n";
 	enddbg;
