@@ -38,18 +38,20 @@ void CSteamHelper::Think()
 
 void CSteamHelper::SetAchievement(const char* str)
 {
-	if (!steamapicontext || !steamapicontext->SteamUserStats())
+	if (!m_bHasLoadedSteamStats)
 		return;
 
 	steamapicontext->SteamUserStats()->SetAchievement(str);
+	steamapicontext->SteamUserStats()->StoreStats();
 }
 
 void CSteamHelper::SetStat(const char* str, int value)
 {
-	if (!steamapicontext || !steamapicontext->SteamUserStats())
+	if (!m_bHasLoadedSteamStats)
 		return;
 
 	steamapicontext->SteamUserStats()->SetStat(str, value);
+	steamapicontext->SteamUserStats()->StoreStats();
 }
 
 void CSteamHelper::OnUserStatsReceived(UserStatsReceived_t* pUserStatsReceived)
