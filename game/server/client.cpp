@@ -1967,9 +1967,6 @@ void Sys_Error(const char *error_string)
 	msstring Error = msstring("SYS_ERROR: ") + (error_string ? error_string : "[NO STRING]");
 	//logfile << "SYS_ERROR: " << (error_string ? error_string : "[NO STRING]") << endl;
 	LogCurrentLine(Error.c_str());
-#if TURN_OFF_ALERT
-	exit(0); //Thothie APR2011_18 - attempt clean exit to avoid pop-up hang
-#endif
 }
 
 /*

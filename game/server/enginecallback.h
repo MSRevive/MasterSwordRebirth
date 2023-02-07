@@ -81,7 +81,6 @@ int PRECACHE_SOUND(const char *pszSound); //Thothie MAR2012_26 - Ditto for sound
 
 //MIB JUN2010_17 - enable total disable of debug alert messages
 #define TURN_OFF_ALERT 0
-
 #if !TURN_OFF_ALERT
 #define SPAWN_GLOBAL_ITEMS 1
 #else
