@@ -2301,35 +2301,35 @@ pt_end:
 // checks if the spot is clear of players
 BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 {
-	CBaseEntity *ent = NULL;
+	// CBaseEntity *ent = NULL;
 
-	if (!pSpot->IsTriggered(pPlayer))
-	{
-		return FALSE;
-	}
+	// if (!pSpot->IsTriggered(pPlayer))
+	// {
+	// 	return FALSE;
+	// }
 
-	/*	while ( (ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 )) != NULL )
-	{
-		// if ent is a client, don't spawn on 'em
-		if ( ent->IsPlayer() && ent != pPlayer )
-			return FALSE;
-	}*/
-	bool fBlocked = false;
-	float Range = 72;
-	Vector vMinBounds = pSpot->pev->origin - Vector(Range, Range, Range);
-	Vector vMaxBounds = pSpot->pev->origin + Vector(Range, Range, Range);
-	int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
-	for (int i = 0; i < count; i++)
-	{
-		CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
-		if (!pSightEnt || pSightEnt->pev->solid == SOLID_NOT ||
-			pSightEnt->pev->solid == SOLID_TRIGGER || pSightEnt == pPlayer)
-			continue;
+	// /*	while ( (ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 )) != NULL )
+	// {
+	// 	// if ent is a client, don't spawn on 'em
+	// 	if ( ent->IsPlayer() && ent != pPlayer )
+	// 		return FALSE;
+	// }*/
+	// bool fBlocked = false;
+	// float Range = 72;
+	// Vector vMinBounds = pSpot->pev->origin - Vector(Range, Range, Range);
+	// Vector vMaxBounds = pSpot->pev->origin + Vector(Range, Range, Range);
+	// int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
+	// for (int i = 0; i < count; i++)
+	// {
+	// 	CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
+	// 	if (!pSightEnt || pSightEnt->pev->solid == SOLID_NOT ||
+	// 		pSightEnt->pev->solid == SOLID_TRIGGER || pSightEnt == pPlayer)
+	// 		continue;
 
-		//We're blocked, quit
-		fBlocked = true;
-		break;
-	}
+	// 	//We're blocked, quit
+	// 	fBlocked = true;
+	// 	break;
+	// }
 
 	return TRUE;
 }
