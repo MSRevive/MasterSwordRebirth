@@ -149,10 +149,25 @@ int CStat::Value()
 	for (int i = 0; i < iSubStats; i++)
 		Total += m_SubStats[i].Value;
 
-	// grabs third digit for rounding and round accordingly
-	int iRoundResult = (((Total * 10) / iSubStats % 10) >= 5 ? 1 : 0);
-	int iVal = (Total / iSubStats) + iRoundResult;
-
+	// (x + floor(y / 2)) / y
+	// As long as X is not negative, and Y is >= 2, this will work as expected. It
+	// does rounding by adding half of the divisor to the dividend, then dividing 
+	// that by the divisor.
+	// 
+	// Proof:
+	// - x=3, y=5: [(3 + (5 / 2)) / 5] -> [(3 + 2) / 5] -> [5 / 5] -> [1]
+	// - x=2, y=5: [(2 + (5 / 2)) / 5] -> [(2 + 2) / 5] -> [4 / 5] -> [0]
+	// - x=2, y=4: [(2 + (4 / 2)) / 4] -> [(2 + 2) / 4] -> [4 / 4] -> [1]
+	// - x=1, y=4: [(1 + (4 / 2)) / 4] -> [(1 + 2) / 4] -> [3 / 4] -> [0]
+	// - x=2, y=3: [(2 + (3 / 2)) / 3] -> [(2 + 1) / 3] -> [3 / 3] -> [1]
+	// - x=1, y=3: [(1 + (3 / 2)) / 3] -> [(1 + 1) / 3] -> [2 / 3] -> [0]
+	// - x=-3, y=-3: [(-3 + (-3 / 2)) / -3] -> [(-3 + -1) / -3] -> [-4 / -3] -> [1]
+	// 
+	// This breaks if total is negative:
+	// - x=-3, y=3: [(-3 + (3 / 2)) / 3] -> [(-3 + 1) / 3] -> [-2 / 3] -> [0] (should be -1)
+	// but can be fixed by changing it to: (abs(x) + floor(y / 2)) / y * sign(x)
+	int iVal = (Total + (iSubStats / 2)) / iSubStats;
+	
 	// if value is 0 then return 1, we don't want skills to be less than 1.
 	return (iVal == 0) ? 1 : iVal;
 }
