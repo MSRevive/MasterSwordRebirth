@@ -1928,7 +1928,11 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 						// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
 						//_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats, Damage.AttackCrit ? "CRIT!" : "");
 
-						_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), Damage.AttackCrit ? "CRIT!" : "");
+						if (Damage.AttackCrit)
+							_snprintf(sz, sizeof(sz), "Hit %s: %s %s CRIT! (%i/%i)", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), iAccuracyRoll, Damage.flCritThreshold);
+						else
+							_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
+						
 					}
 					else
 					{
