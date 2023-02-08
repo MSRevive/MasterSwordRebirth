@@ -20,6 +20,7 @@
 
 */
 
+#include <cmath>
 #include "msdllheaders.h"
 #include "trains.h"
 #include "nodes.h"
@@ -2257,7 +2258,7 @@ pt_end:
 
 			//hardcoding vector length since it's always x y z
 			for (int idx = 0; idx < 3; idx++) {
-				spawnDistance[idx] = abs(spawnDistance[idx]);
+				spawnDistance[idx] = std::abs(spawnDistance[idx]);
 			};
 
 			//if more than 124 away from spawn in any direction loop to next
@@ -2276,7 +2277,7 @@ pt_end:
 			Vector spawnDistance = fEnt->pev->origin - pev->origin;
 
 			for (int idx = 0; idx < 3; idx++) {
-				spawnDistance[idx] = abs(spawnDistance[idx]);
+				spawnDistance[idx] = std::abs(spawnDistance[idx]);
 			};
 
 			//if more than 124 away from spawn in any direction loop to next
