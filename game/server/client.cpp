@@ -188,8 +188,8 @@ void ClientKill(edict_t *pEntity)
 		return; // prevent suiciding too often
 
 	if (!pPlayer->IsElite())
-		pPlayer->SendInfoMsg("You will die in 15 seconds...\n");
-	pPlayer->m_TimeTillSuicide = gpGlobals->time + (pPlayer->IsElite() ? 0.1f : 15.0f);
+		pPlayer->SendInfoMsg("You will die in 5 seconds...\n");
+	pPlayer->m_TimeTillSuicide = gpGlobals->time + (pPlayer->IsElite() ? 0.1f : 5.0f);
 	pPlayer->m_fNextSuicideTime = pPlayer->m_TimeTillSuicide + 5;
 	enddbg;
 }
@@ -570,7 +570,7 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "char") && CMD_ARGV(1)) //JAN2010_09 Thothie - Fixed sploit here where other character could be accessed instant - may also fix dbl click bug
 	{
 		//Thothie MAR2010_09 - seperating delete option from unloaded/loading conditional
-		if (CMD_ARGC() == 3 && atoi(CMD_ARGV(1)) == -1) //Delete character
+		if (CMD_ARGC() == 3 && atoi(CMD_ARGV(1)) == -1 && pPlayer->m_CharacterState == CHARSTATE_UNLOADED) //Delete character
 		{
 			DeleteChar(pPlayer, atoi(CMD_ARGV(2)));
 		}
