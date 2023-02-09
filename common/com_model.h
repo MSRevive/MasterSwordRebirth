@@ -28,7 +28,7 @@
 #define STUDIO_EVENTS 2
 
 #define MAX_CLIENTS 32
-#define MAX_EDICTS 1501 //900 - Thothie MAR2010_04 - expariment
+#define MAX_EDICTS 2048
 
 #define MAX_MODEL_NAME 64
 #define MAX_MAP_HULLS 4

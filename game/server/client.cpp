@@ -36,6 +36,7 @@
 #include "customentity.h"
 #include "usercmd.h"
 #include "netadr.h"
+#include "com_model.h"
 
 #include "logger.h"
 #include "svglobals.h"
@@ -2144,6 +2145,13 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	DBG_INPUT;
 	startdbg;
 	dbg("Begin");
+
+	// Entities with an index greater than this will corrupt the client's heap because 
+	// the index is sent with only 11 bits of precision (2^11 == 2048).
+	// So we don't send them, just like having too many entities would result
+	// in the entity not being sent.
+	if (e >= MAX_EDICTS)
+		return 0;
 
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
 	
