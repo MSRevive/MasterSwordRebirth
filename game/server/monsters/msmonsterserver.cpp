@@ -22,6 +22,7 @@
 #include "ms/vgui_hud.h"
 #include "logger.h"
 #include "corpse.h"
+#include <set>
 
 #ifdef VALVE_DLL
 
@@ -1652,6 +1653,10 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 	// Fill pList with a all the monsters and players on the level including players that have died.
 	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
 
+	// Keep track of players that have already received a message;
+	std::set<CBaseEntity*> pTrackAlreadySent = {};
+
+
 	// Now try to speak to each one
 	for (int i = 0; i < count; i++)
 	{
@@ -1667,6 +1672,12 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 				pEnt = pCorpse->pPlayerSource;
 			}
 		}
+
+		//skip 
+		if (!pTrackAlreadySent.insert(pEnt).second) {
+			continue;
+		}
+
 
 		if (!pEnt->pev || FNullEnt(pEnt->edict()))
 			continue;
