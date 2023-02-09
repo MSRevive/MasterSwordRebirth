@@ -21,12 +21,13 @@
 #include "syntax/syntax.h"
 #include "ms/vgui_hud.h"
 #include "logger.h"
+#include "corpse.h"
 
 #ifdef VALVE_DLL
 
-BOOL SameTeam(CBaseEntity *pObject1, CBaseEntity *pObject2);
-void AlignToNormal(/*In*/ Vector &vNormal, /*Out*/ Vector &vAngles);
-CGenericItem *FindParryWeapon(CMSMonster *pMonster, /*out*/ int &iPlayerHand, /*out*/ int &iAttackNum);
+BOOL SameTeam(CBaseEntity* pObject1, CBaseEntity* pObject2);
+void AlignToNormal(/*In*/ Vector& vNormal, /*Out*/ Vector& vAngles);
+CGenericItem* FindParryWeapon(CMSMonster* pMonster, /*out*/ int& iPlayerHand, /*out*/ int& iAttackNum);
 extern int g_SummonedMonsters;
 extern int g_netmsg[NETMSG_NUM];
 #define MOVE_STEP_SIZE 1
@@ -67,21 +68,21 @@ int CMSMonster::Classify()
 	return CLASS_NPC;
 }
 
-int CMSMonster::IRelationship(CBaseEntity *pTarget)
+int CMSMonster::IRelationship(CBaseEntity* pTarget)
 {
 	if (!m_Race[0] || !pTarget || !pTarget->IsMSMonster())
 		return RELATIONSHIP_NO;
 
-	CMSMonster *pMonster = (CMSMonster *)pTarget;
+	CMSMonster* pMonster = (CMSMonster*)pTarget;
 	if (!pMonster->m_Race[0])
 		return RELATIONSHIP_NO;
 
 	return (int)CRaceManager::Relationship(m_Race, pMonster->m_Race);
 }
-bool CMSMonster::CanDamage(CBaseEntity *pOther) //Can I damage this entity?
+bool CMSMonster::CanDamage(CBaseEntity* pOther) //Can I damage this entity?
 {
 	return (CBaseEntity::CanDamage(pOther)) &&		   //The entity can take damage
-		   (IRelationship(pOther) <= RELATIONSHIP_NE); //I have a bad or nonexistant releationship with the entity
+		(IRelationship(pOther) <= RELATIONSHIP_NE); //I have a bad or nonexistant releationship with the entity
 }
 
 //Set up this monster to spawn at a spawn area
@@ -95,9 +96,9 @@ void CMSMonster::Activate()
 	//- If can verify existance of monster spawn here, or here after, somehow
 	//-- yes, MiB fixed this, somehow
 
-	edict_t *peSpawnArea = NULL,
-			*peFirstArea = NULL;
-	CBaseEntity *pSpawnAreaList[255];
+	edict_t* peSpawnArea = NULL,
+		* peFirstArea = NULL;
+	CBaseEntity* pSpawnAreaList[255];
 	int SpawnsFound = 0;
 
 	while ((peSpawnArea = FIND_ENTITY_BY_TARGETNAME(peSpawnArea, m_iszMonsterSpawnArea)) && SpawnsFound < 255)
@@ -106,14 +107,14 @@ void CMSMonster::Activate()
 			break;
 		else if (!peFirstArea)
 			peFirstArea = peSpawnArea;
-		CBaseEntity *pSpawnArea = CBaseEntity::Instance(peSpawnArea);
+		CBaseEntity* pSpawnArea = CBaseEntity::Instance(peSpawnArea);
 		if (pSpawnArea && (FStrEq(STRING(pSpawnArea->pev->classname), "msarea_monsterspawn") || FStrEq(STRING(pSpawnArea->pev->classname), "ms_monsterspawn")))
 			pSpawnAreaList[SpawnsFound++] = pSpawnArea;
 	}
 
 	if (SpawnsFound)
 	{
-		CBaseEntity *pSpawnArea = pSpawnAreaList[RANDOM_LONG(0, SpawnsFound - 1)];
+		CBaseEntity* pSpawnArea = pSpawnAreaList[RANDOM_LONG(0, SpawnsFound - 1)];
 		pSpawnArea->m_pGoalEnt = this;
 		pSpawnArea->Activate();
 		pev->owner = pSpawnArea->edict(); //Only used for spawn_on_trigger monsters
@@ -293,7 +294,7 @@ void CMSMonster::Precache()
 	CBaseMonster::Precache();
 }
 
-void CMSMonster::KeyValue(KeyValueData *pkvd)
+void CMSMonster::KeyValue(KeyValueData* pkvd)
 {
 	msstring randomdata = pkvd->szKeyName ? pkvd->szKeyName : "null"; //NOV2014_20 - Thothie msmonster_random
 
@@ -373,7 +374,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 			}
 			//else if ( m_HPReq_min == 0 ) m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 		}
-		if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg")) 
+		if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg"))
 			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 		pkvd->fHandled = TRUE;
 	}
@@ -410,7 +411,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "scriptfile") ||
-			 (FStrEq(pkvd->szKeyName, "defscriptfile") && !m_ScriptName))
+		(FStrEq(pkvd->szKeyName, "defscriptfile") && !m_ScriptName))
 	{
 		m_ScriptName = pkvd->szValue;
 		pkvd->fHandled = TRUE;
@@ -478,7 +479,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
 
-			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg")) 
+			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg"))
 				rand_m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 
 			random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
@@ -497,7 +498,7 @@ void CMSMonster::KeyValue(KeyValueData *pkvd)
 //
 //	Think
 //	�����
-void CMSMonster ::Think()
+void CMSMonster::Think()
 {
 	pev->vuser3.x = MaxHP();
 	pev->vuser3.y = (IsAlive() ? pev->health : 0);
@@ -634,7 +635,7 @@ void CMSMonster ::Think()
 	float   flTotalMoved = 0;
 
 	vecStartPos = pev->origin;
-	
+
 	//if( fIsFlying )
 		vecMove = (vecEnd - vecStart).Normalize();
 	//else flYaw = UTIL_VecToYaw ( vecEnd - vecStart );// build a yaw that points to the goal.
@@ -660,7 +661,7 @@ void CMSMonster ::Think()
 		fMoveSuccess = (vBeforeMove - pev->origin).Length() ? true : false;
 
 		//See if I can step up onto this surface
-		if( !fMoveSuccess && !fIsFlying && vecMove.z > -1 ) 
+		if( !fMoveSuccess && !fIsFlying && vecMove.z > -1 )
 		{
 			Vector FlyStartOrigin = pev->origin;
 			Vector FlyDestOrigin = pev->origin + Vector(0,0,m_StepSize);
@@ -690,7 +691,7 @@ void CMSMonster ::Think()
 						pev->angles = BeforeAngles;
 					}
 				}
-				else 
+				else
 					pev->origin = vBeforeMove;
 			}
 			else
@@ -722,7 +723,7 @@ void CMSMonster ::Think()
 			break;
 		}
 	}
-	
+
 	// since we've actually moved the monster during the check, undo the move.
 	pev->flags = iFlags;
 	pev->movetype = MoveType;
@@ -731,7 +732,7 @@ void CMSMonster ::Think()
 
 	return iReturn;
 }*/
-bool CMSMonster ::MoveExecute(moveexec_t &MoveExec)
+bool CMSMonster::MoveExecute(moveexec_t& MoveExec)
 {
 	Vector OrigOrigin = pev->origin;
 	Vector OrigAngles = pev->angles;
@@ -874,10 +875,10 @@ void CMSMonster::Float()
 #endif*/
 }
 
-void CMSMonster ::Touch(CBaseEntity *pOther)
+void CMSMonster::Touch(CBaseEntity* pOther)
 {
 	//	if( FBitSet(pev->flags,FL_FLOAT) ) ALERT( at_console, "Touching %s\n", STRING(pOther->pev->classname) );
-	CBaseEntity ::Touch(pOther);
+	CBaseEntity::Touch(pOther);
 	if (m_HandleTouch && (pOther->IsPlayer() || pOther->IsMSMonster()))
 	{
 		msstringlist Parameters;
@@ -892,9 +893,9 @@ void CMSMonster::Look()
 		return;
 
 	// Look around for the best target
-	CBaseMonster ::Look(1024); //was 512
+	CBaseMonster::Look(1024); //was 512
 
-	CBaseEntity *pEnt = m_pLink; //Save seen targets
+	CBaseEntity* pEnt = m_pLink; //Save seen targets
 	m_EnemyListNum = 0;
 	while (pEnt && m_EnemyListNum < MAX_ENEMYLIST)
 	{
@@ -911,12 +912,12 @@ void CMSMonster::ListenForSound()
 	if (gpGlobals->time < m_ListenTime)
 		return;
 
-	CBaseMonster ::Listen();
+	CBaseMonster::Listen();
 
 	if (HasConditions(bits_COND_HEAR_SOUND))
 	{
 		int iThisSound = m_iAudibleList;
-		CSound *pSound = NULL;
+		CSound* pSound = NULL;
 		msstringlist Parameters;
 
 		while (iThisSound != SOUNDLIST_EMPTY)
@@ -947,7 +948,7 @@ void CMSMonster::ListenForSound()
 	#endif
 		return NULL;*/
 		/*CSound *pSound;
-		
+
 		if( pSound = PBestSound( ) )
 		{
 			bool fCheckSound = true;
@@ -957,7 +958,7 @@ void CMSMonster::ListenForSound()
 
 			if( m_hEnemy != NULL ) fCheckSound = false;
 
-			if( fCheckSound ) 
+			if( fCheckSound )
 			{
 				//Create a temporary entity for the script so it can react to the sound properly
 				relationship_e RelationShip = CRaceManager::Relationship( m_Race, pSound->m_Race );
@@ -1157,7 +1158,7 @@ Vector StartAng;
 void CMSMonster::Move(float flInterval)
 {
 	startdbg;
-	int Side[2] = {1, -1};
+	int Side[2] = { 1, -1 };
 
 	if (pev->movetype == MOVETYPE_FOLLOW || pev->movetype == MOVETYPE_NONE)
 		return;
@@ -1222,7 +1223,7 @@ void CMSMonster::Move(float flInterval)
 					// Alert the scripts
 					CallScriptEvent( "game_stuck" );
 				}
-	            */
+				*/
 
 				// MiB - This is redundant, as MoveExecute does it. Saving a very tiny bit of processing.
 				//UTIL_SetOrigin( pev, pev->origin );
@@ -1276,7 +1277,7 @@ void CMSMonster::Move(float flInterval)
 }
 void CMSMonster::AvoidFrontObject(float MoveAmt)
 {
-	static int Side[2] = {1, -1};
+	static int Side[2] = { 1, -1 };
 
 	float flmdist = 0;
 	ClearBits(FrameConditions, FC_AVOID);
@@ -1419,7 +1420,7 @@ void CMSMonster::Act()
 	/*if( m_Activity == ACT_SPECIAL_ATTACK1 )
 	{
 		//Action Animation
-		if( m_fSequenceFinished ) 
+		if( m_fSequenceFinished )
 		{
 			StopWalking( );
 		}
@@ -1431,10 +1432,10 @@ void CMSMonster::Act()
 		//Attack with the current hand
 		CGenericItem *CurrentHand = ActiveItem( );
 		if( CurrentHand ) {
-			if( CurrentHand->CurrentAttack ) 
+			if( CurrentHand->CurrentAttack )
 			{
 				m_Activity = ACT_MELEE_ATTACK1;
-				
+
 				if( m_fSequenceFinished ) {
 					//m_Hand->CurrentAttack->tStart = -65534;
 					//m_Hand->CurrentAttack->fCanCancel = TRUE;
@@ -1443,7 +1444,7 @@ void CMSMonster::Act()
 					return;
 				}
 				else CurrentHand->CurrentAttack->fCanCancel = FALSE;
-			
+
 				if( LastEvent.event == 600 ) //call attack this frame
 				{
 					CurrentHand->CurrentAttack->fAttackThisFrame = true;
@@ -1457,7 +1458,7 @@ void CMSMonster::Act()
 	}*/
 }
 
-void CMSMonster::HandleAnimEvent(MonsterEvent_t *pEvent)
+void CMSMonster::HandleAnimEvent(MonsterEvent_t* pEvent)
 {
 	LastEvent = *pEvent;
 	float z;
@@ -1525,7 +1526,7 @@ void CMSMonster :: Jump( ) {
 //
 //   Say - Have the Monster say something...
 //   ���
-void CMSMonster ::Say(msstring_ref Sound, float fDuration)
+void CMSMonster::Say(msstring_ref Sound, float fDuration)
 {
 
 	//Thothie JUN2007b
@@ -1541,12 +1542,12 @@ void CMSMonster ::Say(msstring_ref Sound, float fDuration)
 		m_Words.add(NewWord);
 	}
 }
-void CMSMonster ::Talk()
+void CMSMonster::Talk()
 {
 	if (!m_Words.size())
 		return;
 
-	word_t &Word = m_Words[0];
+	word_t& Word = m_Words[0];
 	float TimeEndWord = m_TimeLastSpoke + Word.Duration;
 	if (!Word.Spoken)
 	{
@@ -1582,7 +1583,7 @@ void CMSMonster ::Talk()
 //
 // Speak - Text speech for both NPCs and players
 // �����
-void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
+void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 {
 
 	if (!pszSentence || !pszSentence[0])
@@ -1600,7 +1601,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 	}
 
 	// make sure the text has content
-	char *pc = NULL;
+	char* pc = NULL;
 	for (pc = pszSentence; pc != NULL && *pc != 0; pc++)
 	{
 		if (isprint(*pc) && !isspace(*pc))
@@ -1629,7 +1630,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 		break;
 	case SPEECH_LOCAL:
 		char cTemp[4096];
-		 _snprintf(cTemp, sizeof(cTemp),  "%s says,  \"%s\"\n",  DisplayName(),  pszSentence );
+		_snprintf(cTemp, sizeof(cTemp), "%s says,  \"%s\"\n", DisplayName(), pszSentence);
 		strcat(FinalSentence, cTemp);
 		SayTextType = IsPlayer() ? SAYTEXT_LOCAL : SAYTEXT_NPC;
 		break;
@@ -1647,14 +1648,25 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 		//ALERT( at_console, "FinalSentence: %s\n", FinalSentence );
 	}
 
-	CBaseEntity *pList[255], *pEnt = NULL;
-	// Fill pList with a all the monsters and players on the level
-	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT);
+	CBaseEntity* pList[255], * pEnt = NULL;
+	// Fill pList with a all the monsters and players on the level including players that have died.
+	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
 
 	// Now try to speak to each one
 	for (int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
+
+		// Corpses didn't have edicts so were never delivered messages
+		// attempt to fix by passing the pointer to the player's edict pointer down through the corpse and into this.
+		if (dynamic_cast<CCorpse*>(pEnt)) {
+			CCorpse* pCorpse = reinterpret_cast<CCorpse*>(pEnt);
+			//this var only exists if the corpse comes from a player 
+			if (pCorpse->pPlayerSource != NULL)
+			{
+				pEnt = pCorpse->pPlayerSource;
+			}
+		}
 
 		if (!pEnt->pev || FNullEnt(pEnt->edict()))
 			continue;
@@ -1662,20 +1674,20 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 		if (pEnt->edict() == edict())
 		{
 			//Thothie FEB2008b - admin_gag
-			CBasePlayer *pPlayer = (CBasePlayer *)pEnt;
+			CBasePlayer* pPlayer = (CBasePlayer*)pEnt;
 			if (pPlayer)
 			{
 				if (pPlayer->m_Gagged)
 				{
 					int rnd_muffle = RANDOM_LONG(1, 4);
 					if (rnd_muffle == 1)
-						 _snprintf(FinalSentence, sizeof(FinalSentence),  "[muted] %s: %s\n",  DisplayName(),  "Hmmmf... Mmmm! MMmmmmf!" );
+						_snprintf(FinalSentence, sizeof(FinalSentence), "[muted] %s: %s\n", DisplayName(), "Hmmmf... Mmmm! MMmmmmf!");
 					else if (rnd_muffle == 2)
-						 _snprintf(FinalSentence, sizeof(FinalSentence),  "[muted] %s: %s\n",  DisplayName(),  "Mmmmm! Mmmmmmmmmf!" );
+						_snprintf(FinalSentence, sizeof(FinalSentence), "[muted] %s: %s\n", DisplayName(), "Mmmmm! Mmmmmmmmmf!");
 					else if (rnd_muffle == 3)
-						 _snprintf(FinalSentence, sizeof(FinalSentence),  "[muted] %s: %s\n",  DisplayName(),  "Ffffffmmmmffff!!!" );
+						_snprintf(FinalSentence, sizeof(FinalSentence), "[muted] %s: %s\n", DisplayName(), "Ffffffmmmmffff!!!");
 					else if (rnd_muffle == 4)
-						 _snprintf(FinalSentence, sizeof(FinalSentence),  "[muted] %s: %s\n",  DisplayName(),  "MMmmmmf! HMmmmmmf!" );
+						_snprintf(FinalSentence, sizeof(FinalSentence), "[muted] %s: %s\n", DisplayName(), "MMmmmmf! HMmmmmmf!");
 				}
 			}
 
@@ -1708,7 +1720,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 			WRITE_BYTE(SayTextType);
 			WRITE_STRING_LIMIT(FinalSentence, WRITE_STRING_MAX);
 			MESSAGE_END();
-		}
+		} 
 
 		//MiB DEC2007a
 		if (SpeechType == SPEECH_LOCAL && IsPlayer() && pEnt->IsMSMonster())
@@ -1719,12 +1731,12 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 			Params.clear();
 			Params.add(strutil::stripBadChars(pszSentence));
 			Params.add(EntToString(this)); //Thothie - Workaround
-			((CMSMonster *)pEnt)->CallScriptEvent("game_heardtext", &Params);
+			((CMSMonster*)pEnt)->CallScriptEvent("game_heardtext", &Params);
 		}
 
 		//This has to be called after the text msgs are sent out
 		if (SpeechType == SPEECH_LOCAL && IsPlayer() && pEnt->IsMSMonster())
-			((CMSMonster *)pEnt)->HearPhrase(this, pszSentence);
+			((CMSMonster*)pEnt)->HearPhrase(this, pszSentence);
 	}
 
 	// echo to server console
@@ -1733,7 +1745,7 @@ void CMSMonster ::Speak(char *pszSentence, speech_type SpeechType)
 }
 
 //Called when a player talks (normal mode)
-void CMSMonster ::HearPhrase(CMSMonster *pSpeaker, const char *phrase)
+void CMSMonster::HearPhrase(CMSMonster* pSpeaker, const char* phrase)
 {
 	char cTemp1[256];
 
@@ -1742,15 +1754,15 @@ void CMSMonster ::HearPhrase(CMSMonster *pSpeaker, const char *phrase)
 	if (!IsAlive())
 		return;
 
-	 strncpy(cTemp1,  phrase, sizeof(cTemp1) );
+	strncpy(cTemp1, phrase, sizeof(cTemp1));
 	_strlwr(cTemp1); //lower case comparison
 
-	listenphrase_t *BestPhrase = NULL;
+	listenphrase_t* BestPhrase = NULL;
 	float BestMatchedRatio = 0;
 
 	for (int i = 0; i < m_Phrases.size(); i++)
 	{
-		listenphrase_t &Phrase = m_Phrases[i];
+		listenphrase_t& Phrase = m_Phrases[i];
 		for (int p = 0; p < Phrase.Phrases.size(); p++)
 		{
 			msstring_ref CheckPhrase = Phrase.Phrases[p];
@@ -1783,7 +1795,7 @@ void CMSMonster ::HearPhrase(CMSMonster *pSpeaker, const char *phrase)
 	}
 }
 
-void CMSMonster ::Used(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+void CMSMonster::Used(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
 	if (!pActivator || !pActivator->IsPlayer())
 	{
@@ -1796,7 +1808,7 @@ void CMSMonster ::Used(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	if (HasConditions(MONSTER_NOAI))
 		return;
 
-	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
+	CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
 
 	StoreEntity(pActivator, ENT_LASTUSED);
 
@@ -1815,14 +1827,14 @@ void CMSMonster ::Used(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 //
 // Trade - Manage trading with others
 // �����
-void CMSMonster ::Trade()
+void CMSMonster::Trade()
 {
 	if (!HasConditions(MONSTER_TRADING))
 		return;
 
 	if (m_hEnemy != NULL && m_hEnemy->IsAlive())
 	{
-		CBaseMonster *pEnemy = (CBaseMonster *)(CBaseEntity *)m_hEnemy;
+		CBaseMonster* pEnemy = (CBaseMonster*)(CBaseEntity*)m_hEnemy;
 		if (pEnemy->m_hEnemy == this &&
 			(pEnemy->Center() - Center()).Length() <= 128)
 			return;
@@ -1841,7 +1853,7 @@ void CMSMonster ::Trade()
 	if ( pPlayer ) pPlayer->InMenu = false;
 	*/
 }
-tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
+tradeinfo_t* CMSMonster::TradeItem(tradeinfo_t* ptiTradeInfo)
 {
 	if (!HasConditions(MONSTER_TRADING) || m_hEnemy == NULL ||
 		!ptiTradeInfo || !OpenStore)
@@ -1853,7 +1865,7 @@ tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
 		static tradeinfo_t tiTradeInfo;
 		memset(&tiTradeInfo, 0, sizeof(tradeinfo_t));
 
-		storeitem_t *psiStoreItem = NULL;
+		storeitem_t* psiStoreItem = NULL;
 
 		tiTradeInfo.ItemName = ptiTradeInfo->ItemName;
 		tiTradeInfo.pCustomer = ptiTradeInfo->pCustomer;
@@ -1871,7 +1883,7 @@ tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
 			}
 			//If not gold, then match the item name to its store item
 			else if ((psiStoreItem = OpenStore->GetItem(ptiTradeInfo->ItemName)) &&
-					 psiStoreItem->Quantity >= psiStoreItem->iBundleAmt)
+				psiStoreItem->Quantity >= psiStoreItem->iBundleAmt)
 			{
 				tiTradeInfo.iStatus = ptiTradeInfo->iStatus;
 				tiTradeInfo.pItem = NewGenericItem(tiTradeInfo.ItemName);
@@ -1906,24 +1918,24 @@ tradeinfo_t *CMSMonster::TradeItem(tradeinfo_t *ptiTradeInfo)
 //
 // AcceptOffer - Accept an offer from a player or monster
 // �����������
-bool CMSMonster ::AcceptOffer()
+bool CMSMonster::AcceptOffer()
 {
 	bool fRecievedItem = false;
 
-	CBaseEntity *pEnt = (CBaseEntity *)GET_PRIVATE(INDEXENT(m_OfferInfo.SrcMonsterIDX));
+	CBaseEntity* pEnt = (CBaseEntity*)GET_PRIVATE(INDEXENT(m_OfferInfo.SrcMonsterIDX));
 	if (pEnt && pEnt == m_OfferInfo.pSrcMonster && pEnt->MyMonsterPointer())
 	{
-		CMSMonster *pMonster = (CMSMonster *)pEnt;
+		CMSMonster* pMonster = (CMSMonster*)pEnt;
 
 		if (m_OfferInfo.ItemType == ITEM_NORMAL)
 		{
-			CBaseEntity *pItemEnt = (CBaseEntity *)GET_PRIVATE(INDEXENT((int)m_OfferInfo.pItemData));
+			CBaseEntity* pItemEnt = (CBaseEntity*)GET_PRIVATE(INDEXENT((int)m_OfferInfo.pItemData));
 			if (pItemEnt &&
 				pItemEnt == m_OfferInfo.pItemData2 &&
 				FBitSet(pItemEnt->MSProperties(), ITEM_GENERIC) &&
-				((CGenericItem *)pItemEnt)->m_pOwner == m_OfferInfo.pSrcMonster)
+				((CGenericItem*)pItemEnt)->m_pOwner == m_OfferInfo.pSrcMonster)
 			{
-				CGenericItem *pItem = (CGenericItem *)pItemEnt;
+				CGenericItem* pItem = (CGenericItem*)pItemEnt;
 				if (IsPlayer())
 					fRecievedItem = pItem->GiveTo(this) ? true : false;
 				else if (pItem->m_pOwner)
@@ -1953,7 +1965,7 @@ bool CMSMonster ::AcceptOffer()
 
 float CMSMonster::Give(givetype_e Type, float Amt)
 {
-	float *Current = NULL, Max;
+	float* Current = NULL, Max;
 
 	switch (Type)
 	{
@@ -1984,7 +1996,7 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 }
 
 // Set the activity based on an event or current state
-void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char *pszAnimName, void *vData)
+void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
 	startdbg;
 
@@ -2066,7 +2078,7 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char *pszAnimName, vo
 
 	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
 }
-void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char *pszAnimName, void *vData)
+void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
 	//Thothie - Attempting to stop msdll from breaking anims
 
@@ -2124,7 +2136,7 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char *pszAnimName, 
 
 	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
 }
-void CMSMonster::Attacked(CBaseEntity *pAttacker, damage_t &Damage)
+void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 {
 	//Thothie FEB2011_22 - not used by any script, save the call
 	/*
@@ -2137,7 +2149,7 @@ void CMSMonster::Attacked(CBaseEntity *pAttacker, damage_t &Damage)
 }
 
 //MiB MAR2008a multiple changes
-float CMSMonster::TraceAttack(damage_t &Damage)
+float CMSMonster::TraceAttack(damage_t& Damage)
 {
 	startdbg;
 
@@ -2157,10 +2169,10 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 
 	bool thoth_did_parry = false;
 
-	CBaseEntity *pAttacker = Damage.pAttacker;
+	CBaseEntity* pAttacker = Damage.pAttacker;
 	if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
 	{
-		CMSMonster *pMonster = (CMSMonster *)pAttacker;
+		CMSMonster* pMonster = (CMSMonster*)pAttacker;
 
 		//PROBLEM: Players get INSANE XP bonus when monsters parry,
 		//- maybe internalize Parry for monsters?
@@ -2176,7 +2188,7 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 		//Using a weapon that can parry (shield, some swords) gives a parry bonus
 		int iAttackNum = 0, iHand = 0;
 		;
-		CGenericItem *pHandItem = FindParryWeapon(this, iHand, iAttackNum);
+		CGenericItem* pHandItem = FindParryWeapon(this, iHand, iAttackNum);
 		//NOV2014_09 - this is handled by setting the parry skill now, oh dear
 		/*
 		if( pHandItem )
@@ -2253,7 +2265,7 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 	if (Damage.sDamageType)
 		for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
 		{
-			takedamagemodifier_t &TDM = m.TakeDamageModifiers[i];
+			takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 			//msstring thoth_my_dmgtype = TDM.DamageType;
 			msstring thoth_inc_dmgtype = Damage.sDamageType.c_str();
 			if (thoth_inc_dmgtype.starts_with(TDM.DamageType))
@@ -2272,7 +2284,7 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor) : "none");
 
 	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
-	CStat *pStat = FindStat(Damage.ExpStat);
+	CStat* pStat = FindStat(Damage.ExpStat);
 	if (pStat)
 	{
 		msstring out_skill = pStat->m_Name;
@@ -2330,7 +2342,7 @@ float CMSMonster::TraceAttack(damage_t &Damage)
 	return 0;
 }
 
-int CMSMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	//	if( m_hEnemy == NULL || m_hEnemy.Get() != pevAttacker->pContainingEntity )
 	//		m_hEnemy.Set( pevAttacker->pContainingEntity );
@@ -2338,11 +2350,11 @@ int CMSMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	//if( pevAttacker == pev ) return fTookDamage;
 	//startdbg;
 	//dbg( "Begin" );
-	CBaseEntity *pInflictor = NULL, *pAttacker = NULL;
+	CBaseEntity* pInflictor = NULL, * pAttacker = NULL;
 	if (!FNullEnt(pevInflictor))
-		pInflictor = CBaseEntity ::Instance(pevInflictor);
+		pInflictor = CBaseEntity::Instance(pevInflictor);
 	if (!FNullEnt(pevAttacker))
-		pAttacker = CBaseEntity ::Instance(pevAttacker);
+		pAttacker = CBaseEntity::Instance(pevAttacker);
 
 	//--UNDONE:  If Damage is given, we must accept it regardless of the entity that caused it
 	//if( pAttacker && IRelationship(pAttacker) >= RELATIONSHIP_NO )
@@ -2418,7 +2430,7 @@ int CMSMonster::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 
 	return flDamage;
 }
-void CMSMonster::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtraData)
+void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtraData)
 {
 	if (!pInflictor || !pInflictor->IsMSItem())
 		return;
@@ -2428,7 +2440,7 @@ void CMSMonster::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtr
 	pInflictor->CounterEffect(this, CE_HITMONSTER, this);
 }
 
-void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
+void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
 	startdbg;
 	dbg("Begin");
@@ -2539,7 +2551,7 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 		//MAR2008b - this used to be after ShouldGibMonster( iGib ) - moving before
 		if (pev->owner)
 		{
-			CBaseEntity *pOwner = CBaseEntity::Instance(pev->owner);
+			CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
 			// MiB AUG2010_01 - pOwner - If the msarea_monsterspawn has been deleted, pev->owner will be "true", but it will null-pointer here
 			//				  - DEAD_NO redundancy is in case game_death changes it (happens on skeletons)
 			//if ( pOwner && pev->deadflag != DEAD_NO )
@@ -2598,11 +2610,11 @@ void CMSMonster::Killed(entvars_t *pevAttacker, int iGib)
 	}
 	enddbg;
 }
-void CMSMonster ::SUB_Remove()
+void CMSMonster::SUB_Remove()
 {
 	CBaseEntity::SUB_Remove();
 }
-void CMSMonster ::DieThink()
+void CMSMonster::DieThink()
 {
 	StudioFrameAdvance();
 	DispatchAnimEvents(); //Have to handle this, even when dead
@@ -2627,27 +2639,27 @@ void CMSMonster ::DieThink()
 	}*/
 
 	pev->deadflag = DEAD_DEAD; //I am now officially dead
-							   //pev->solid			= SOLID_NOT;		//Bodies aren't solid anymore
+	//pev->solid			= SOLID_NOT;		//Bodies aren't solid anymore
 
-	/*	Vector vOrigin = pev->origin;
-	GetBonePosition( 1, pev->origin, Vector(0,0,0) );
-	UTIL_SetOrigin(pev, pev->origin );
+/*	Vector vOrigin = pev->origin;
+GetBonePosition( 1, pev->origin, Vector(0,0,0) );
+UTIL_SetOrigin(pev, pev->origin );
 
-	pev->maxs = pev->maxs; pev->maxs.z = 16;
-	UTIL_SetSize(pev, pev->mins, pev->maxs );
+pev->maxs = pev->maxs; pev->maxs.z = 16;
+UTIL_SetSize(pev, pev->mins, pev->maxs );
 
-	pev->origin = vOrigin;*/
+pev->origin = vOrigin;*/
 
-	//pev->maxs.z = 16;
-	//UTIL_SetSize(pev, pev->mins, pev->maxs );
+//pev->maxs.z = 16;
+//UTIL_SetSize(pev, pev->mins, pev->maxs );
 
-	//Make the BBox HUGE, so it covers the whole body.
-	/*	pev->mins.x = min(pev->mins.x,-128);
-	pev->mins.y = min(pev->mins.y,-128);
-	pev->mins.z = min(pev->mins.z,-128);
-	pev->maxs.x = max(pev->maxs.x,128);
-	pev->maxs.y = max(pev->maxs.y,128);
-	pev->maxs.z = max(pev->maxs.z,128);*/
+//Make the BBox HUGE, so it covers the whole body.
+/*	pev->mins.x = min(pev->mins.x,-128);
+pev->mins.y = min(pev->mins.y,-128);
+pev->mins.z = min(pev->mins.z,-128);
+pev->maxs.x = max(pev->maxs.x,128);
+pev->maxs.y = max(pev->maxs.y,128);
+pev->maxs.z = max(pev->maxs.z,128);*/
 
 	float z = pev->mins.z;
 	ExtractBbox(pev->sequence, pev->mins, pev->maxs);
@@ -2687,7 +2699,7 @@ void CMSMonster::ReportAIState()
 }
 
 /*
-	LearnSkill - Called after certain actions to increase your skill stats.  
+	LearnSkill - Called after certain actions to increase your skill stats.
 	����������   Caller gets EnemySkillLevel experience pts and then
 				 it checks whether it should advance his stats
 */
@@ -2696,7 +2708,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 {
 	float LearnMultiplier = 1.0;
 
-	CStat *pStat = FindStat(iStat);
+	CStat* pStat = FindStat(iStat);
 	if (!pStat)
 		return false;
 
@@ -2705,7 +2717,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 
 	//if ( pStat->Value() >= CHAR_LEVEL_CAP ) return false; //Thoth DEC2008a level cap
 
-	CSubStat &SubStat = pStat->m_SubStats[iStatType];
+	CSubStat& SubStat = pStat->m_SubStats[iStatType];
 
 	//MiB JAN2010_15 Global Level Cap [BEGIN]
 	if (SubStat.Value >= CHAR_LEVEL_CAP)
@@ -2719,7 +2731,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 		for (int i = 0; i < 1; i++)
 		{
 			iStatType = (iStatType + 1) % 3;
-			CSubStat &SubStat = pStat->m_SubStats[iStatType];
+			CSubStat& SubStat = pStat->m_SubStats[iStatType];
 			if (SubStat.Value < CHAR_LEVEL_CAP)
 				break;
 		}
@@ -2781,7 +2793,7 @@ float CMSMonster::GetBodyDist(Vector Point, float Radius)
 {
 	return CBaseMonster::GetBodyDist(Point, Radius) - GetDefaultMoveProximity();
 }
-bool CMSMonster::IsLootable(CMSMonster *pLooter)
+bool CMSMonster::IsLootable(CMSMonster* pLooter)
 {
 	return pLooter->CanDamage(this) && !IsAlive();
 }
@@ -2816,7 +2828,7 @@ void CMSMonster::SetSpeed()
 	//Can't move while a spell is preparing
 	//Thothie/Orochi APR2011_04 - undone
 	/*
-	 for (int i = 0; i < MAX_NPC_HANDS; i++) 
+	 for (int i = 0; i < MAX_NPC_HANDS; i++)
 		if( Hand(i) && !Hand(i)->Spell_CanAttack() )
 			SpeedPercent = 0;  //Percentage of normal speed
 	*/
@@ -2826,7 +2838,7 @@ void CMSMonster::SetSpeed()
 	//g_engfuncs.pfnSetClientMaxspeed( edict(), fSpeed );
 }
 //Opens interact menu from server
-void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
+void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 {
 	startdbg;
 	m_MenuCurrentOptions = NULL;
@@ -2853,7 +2865,7 @@ void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
 	Params.add(EntToString(pPlayer));
 
 	m_MenuCurrentOptions = &m_MenuOptions[pPlayer->entindex()];
-	mslist<menuoption_t> &Menuoptions = *m_MenuCurrentOptions;
+	mslist<menuoption_t>& Menuoptions = *m_MenuCurrentOptions;
 	Menuoptions.clearitems();
 
 	CallScriptEvent("game_menu_getoptions", &Params);
@@ -2865,7 +2877,7 @@ void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
 
 	for (int i = 0; i < Menuoptions.size(); i++)
 	{
-		menuoption_t &MenuOption = Menuoptions[i];
+		menuoption_t& MenuOption = Menuoptions[i];
 		if (MenuOption.Access != MOA_ALL)
 			continue;
 
@@ -2880,10 +2892,10 @@ void CMSMonster::OpenMenu(CBasePlayer *pPlayer)
 	pPlayer->InMenu = true;
 	enddbg;
 }
-void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
+void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
 	pPlayer->InMenu = false;
-	mslist<menuoption_t> &Menuoptions = m_MenuOptions[pPlayer->entindex()];
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
 
 	//Thothie JAN2008a - need a way of dealing with canceled menus
 	if (Option == -1)
@@ -2897,7 +2909,7 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 	if (Option < 0 || Option >= (signed)Menuoptions.size())
 		return;
 
-	menuoption_t &MenuOption = Menuoptions[Option];
+	menuoption_t& MenuOption = Menuoptions[Option];
 
 	bool PlayerCanPay = true;
 
@@ -2913,12 +2925,12 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 		TokenizeString(MenuOption.Data, Payments);
 
 		int TotalGold = 0;
-		static mslist<CGenericItem *> TotalFoundItems;
+		static mslist<CGenericItem*> TotalFoundItems;
 		TotalFoundItems.clearitems();
 
 		for (int i = 0; i < Payments.size(); i++)
 		{
-			msstring &Payment = Payments[i];
+			msstring& Payment = Payments[i];
 			if (Payment.starts_with("gold"))
 				TotalGold += atoi(Payment.substr(5));
 			else
@@ -2936,8 +2948,8 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 
 				ulong LastItem = 0;
 				ulong FirstItem = 0;
-				CGenericItem *pItem = NULL;
-				static mslist<CGenericItem *> FoundItems;
+				CGenericItem* pItem = NULL;
+				static mslist<CGenericItem*> FoundItems;
 				FoundItems.clearitems();
 				while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
 				{
@@ -2980,7 +2992,7 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 			pPlayer->m_Gold -= TotalGold;
 			for (int i = 0; i < TotalFoundItems.size(); i++)
 				TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
-												  //pPlayer->RemoveItem( TotalFoundItems[i] );
+			//pPlayer->RemoveItem( TotalFoundItems[i] );
 		}
 	}
 
@@ -3005,7 +3017,7 @@ void CMSMonster::UseMenuOption(CBasePlayer *pPlayer, int Option)
 	Menuoptions.clearitems();
 }
 
-void AlignToNormal(/*In*/ Vector &vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector &vAngles)
+void AlignToNormal(/*In*/ Vector& vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector& vAngles)
 {
 	Vector VNormalAngles = UTIL_VecToAngles(vNormal);
 	float yDiff = UTIL_AngleDiff(VNormalAngles.y, vAngles.y);
