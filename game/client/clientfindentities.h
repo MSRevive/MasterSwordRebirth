@@ -2,12 +2,9 @@
 class CEntityTypeFilter : public CEntityFilter
 {
 protected:
-    bool                                mbAllowPlayer;
+	bool mbAllowPlayer;
+
 public:
-    CEntityTypeFilter(
-          bool                          bAllowPlayer
-        );
-    virtual bool Allow(
-          CFindEntity &                 pEntity
-        ) const;
+	CEntityTypeFilter(bool bAllowPlayer);
+	virtual bool Allow(CFindEntity& pEntity) const;
 };
