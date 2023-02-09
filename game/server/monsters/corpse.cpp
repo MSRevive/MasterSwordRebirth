@@ -7,14 +7,14 @@ extern int iBeam;
 
 LINK_ENTITY_TO_CLASS(player_corpse, CCorpse);
 
-void CCorpse ::Spawn()
+void CCorpse::Spawn()
 {
 	pev->classname = MAKE_STRING(CLASS_CORPSE);
 	//	pev->flags |= FL_DORMANT;
 	m_Gold = 0;
 	m_Volume = 0;
 }
-float CCorpse ::DamageForce(float damage)
+float CCorpse::DamageForce(float damage)
 {
 	float force = damage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
 
@@ -23,13 +23,16 @@ float CCorpse ::DamageForce(float damage)
 
 	return force;
 }
-void CCorpse ::CreateCorpse(CMSMonster *pSource, float LoseGoldPercent)
+
+void CCorpse::CreateCorpse(CMSMonster* pSource, float LoseGoldPercent)
 {
 	//	if (pSource->pev->effects & EF_NODRAW) return;
 
-	CBasePlayer *pPlayer = NULL;
-	if (pSource->IsPlayer())
-		pPlayer = (CBasePlayer *)pSource;
+	CBasePlayer* pPlayer = NULL;
+	if (pSource->IsPlayer()) {
+		pPlayer = (CBasePlayer*)pSource;
+		pPlayerSource = pPlayer;
+	}
 
 	Spawn();
 	int LoseGold = pSource->m_Gold * (LoseGoldPercent * 0.01);
@@ -47,7 +50,7 @@ void CCorpse ::CreateCorpse(CMSMonster *pSource, float LoseGoldPercent)
 	//Let the player hit it
 	pev->health = pSource->pev->max_health;
 	pev->takedamage = DAMAGE_YES;
-	CBaseEntity *pCorpse = NULL;
+	CBaseEntity* pCorpse = NULL;
 
 	/*if( pSource->IsPlayer() ) pev->nextthink = gpGlobals->time + 300.0; //player get a good five minutes
 	else */
@@ -56,7 +59,7 @@ void CCorpse ::CreateCorpse(CMSMonster *pSource, float LoseGoldPercent)
 
 	float CheckRange = 1024;
 	Vector delta = Vector(CheckRange, CheckRange, CheckRange);
-	CBaseEntity *pEnt[100];
+	CBaseEntity* pEnt[100];
 	int count = UTIL_EntitiesInBox(pEnt, 100, pev->origin - delta, pev->origin + delta, NULL);
 	for (int i = 0; i < count; i++)
 	{
@@ -93,7 +96,10 @@ void CCorpse ::CreateCorpse(CMSMonster *pSource, float LoseGoldPercent)
 	pev->solid = SOLID_NOT;
 	//---------------------------
 	pev->velocity = pSource->pev->velocity;
+
+	//if the corpse was made by a player pass the edicts.
 	pev->flags = FL_MONSTER;
+
 	pev->deadflag = pSource->pev->deadflag;
 	//pev->rendermode	= kRenderTransAlpha;	//Currently showing player the model and not using gear
 	//pev->renderamt = 1;
@@ -106,11 +112,12 @@ void CCorpse ::CreateCorpse(CMSMonster *pSource, float LoseGoldPercent)
 
 	//Test the dead body size
 	/*BeamEffect( pev->absmin.x, pev->absmin.y, pev->absmin.z, pev->absmax.x,
-				pev->absmax.y, pev->absmax.z, iBeam, 0, 0, 250, 20, 0, 255, 255,255, 
+				pev->absmax.y, pev->absmax.z, iBeam, 0, 0, 250, 20, 0, 255, 255,255,
 				255, 20 );
 	*/
 }
-bool CCorpse::AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, int ForceHand)
+
+bool CCorpse::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int ForceHand)
 {
 	bool fReturn = true;
 	pItem->AddToOwner(this);
@@ -128,12 +135,12 @@ bool CCorpse::AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, int Fo
 
 	return fReturn;
 }
-bool CCorpse::RemoveItem(CGenericItem *pItem)
+bool CCorpse::RemoveItem(CGenericItem* pItem)
 {
 	pItem->RemoveFromOwner();
 	return true;
 }
-void CCorpse ::Deactivate()
+void CCorpse::Deactivate()
 {
 	//	pev->effects |= EF_NODRAW;
 
@@ -142,7 +149,7 @@ void CCorpse ::Deactivate()
 	int count = Gear.size();
 	int i = 0;
 
-	CGenericItem **Gearlist = new (CGenericItem *[count]);
+	CGenericItem** Gearlist = new (CGenericItem * [count]);
 	for (i = 0; i < count; i++)
 		Gearlist[i] = Gear[i];
 
@@ -197,7 +204,7 @@ void CCorpse ::Deactivate()
 	SetThink( SkeletonDie );
 	pev->nextthink = gpGlobals->time + 60.0;*/
 }
-int CCorpse ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+int CCorpse::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
 	// kill the corpse if enough damage was done to destroy the corpse and the
 	// damage is of a type that is allowed to destroy the corpse.
