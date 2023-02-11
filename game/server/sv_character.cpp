@@ -145,7 +145,8 @@ void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 //  Read chunks from raw char data
 //
 
-static char cTemp[256];
+static char cTemp[MSSTRING_SIZE];
+
 void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -159,12 +160,13 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 		m_VisitedMaps.clear();
 		for (int m = 0; m < Maps; m++)
 		{
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			m_VisitedMaps.add(cTemp);
 		}
 	}
 	enddbg;
 }
+
 void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -228,6 +230,7 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 	enddbg;
 }
+
 void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -240,12 +243,13 @@ void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 		m_File.ReadByte(Spells); //[BYTE]
 		for (int s = 0; s < Spells; s++)
 		{
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			m_Spells.add(cTemp);
 		}
 	}
 	enddbg;
 }
+
 void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -267,6 +271,7 @@ void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 	enddbg;
 }
+
 void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -280,7 +285,7 @@ void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 		for (int i = 0; i < Storages; i++)
 		{
 			storage_t Storage;
-			m_File.ReadString(Storage.Name); //[X STRINGS]
+			m_File.ReadString(Storage.Name, MSSTRING_SIZE); //[X STRINGS]
 
 			short Items = 0;
 			m_File.ReadShort(Items); //[X SHORTS]
@@ -298,6 +303,7 @@ void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 	enddbg;
 }
+
 void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -311,7 +317,7 @@ void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 		for (int c = 0; c < Companions; c++)
 		{
 			companion_t &Companion = m_Companions.add(companion_t());
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			Companion.ScriptName = cTemp;
 			Companion.Active = false;
 
@@ -320,15 +326,16 @@ void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_File.ReadShort(Vars); //[SHORT]
 			for (int var = 0; var < Vars; var++)
 			{
-				m_File.ReadString(cTemp); //[STRING]
+				m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 				Companion.SaveVarName.add(cTemp);
-				m_File.ReadString(cTemp); //[STRING]
+				m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 				Companion.SaveVarValue.add(cTemp);
 			}
 		}
 	}
 	enddbg;
 }
+
 void chardata_t::ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -340,12 +347,13 @@ void chardata_t::ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
 		m_ViewedHelpTips.clear();
 		for (int t = 0; t < HelpTips; t++)
 		{
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			m_ViewedHelpTips.add(cTemp);
 		}
 	}
 	enddbg;
 }
+
 void chardata_t::ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -358,15 +366,16 @@ void chardata_t::ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File)
 		for (int q = 0; q < Quests; q++)
 		{
 			quest_t Quest;
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			Quest.Name = cTemp;
-			m_File.ReadString(cTemp); //[STRING]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			Quest.Data = cTemp;
 			m_Quests.add(Quest);
 		}
 	}
 	enddbg;
 }
+
 void chardata_t::ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	startdbg;
@@ -407,7 +416,7 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 	clrmem(outItem);
 
 	char cTemp[128];
-	Data.ReadString(cTemp); //[STRING]
+	Data.ReadString(cTemp, sizeof(cTemp)); //[STRING]
 	if (!cTemp || !cTemp[0])
 		return false;
 

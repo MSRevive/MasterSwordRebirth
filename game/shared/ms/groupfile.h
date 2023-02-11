@@ -32,21 +32,28 @@ public:
 	CData()
 	{
 		m_pData = NULL;
+		m_DataSize = 0;
 	}
 
-	CData(const byte pData[], const size_t Size)
+	CData(const byte pData[], const size_t Size) : CData()
 	{
 		SetData(pData, Size);
 	}
 
 	virtual ~CData()
 	{
-		if (m_pData)
-			delete m_pData;
+		Clear();
+	}
+
+	void Clear()
+	{
+		delete[] m_pData;
+		m_pData = NULL;
 	}
 
 	void SetData(const byte pData[], const size_t Size)
 	{
+		Clear();
 		m_pData = new byte[Size];
 		m_DataSize = Size;
 		memcpy(m_pData, pData, m_DataSize);

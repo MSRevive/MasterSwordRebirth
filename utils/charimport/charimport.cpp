@@ -25,13 +25,12 @@ static size_t g_iRootSize = 0;
 class CEncryptData
 {
 public:
-	CEncryptData() { m_pData = NULL; }
+	CEncryptData() { m_pData = NULL; m_DataSize = 0; }
 	CEncryptData(const byte* pData, const size_t Size) { SetData(pData, Size); }
 
 	~CEncryptData()
 	{
-		if (m_pData)
-			delete m_pData;
+		delete[] m_pData;
 		m_pData = NULL;
 	}
 

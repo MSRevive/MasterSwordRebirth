@@ -264,11 +264,11 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 		if (g_FailOnErr && parser.errorCheck())
 		{
-			delete ffile;
+			delete[] ffile;
 			exit(-1);
 		}
 	}
 
 	//deallocate memory for object when done.
-	delete ffile;
+	delete[] ffile;
 }

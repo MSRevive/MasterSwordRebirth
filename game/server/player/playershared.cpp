@@ -1453,8 +1453,7 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 
 void charinfo_t::Destroy()
 {
-	if (Data)	
-		delete Data;
+	delete[] Data;
 	Data = NULL;
 	GearInfo.clear();
 	memset(this, 0, sizeof(*this));

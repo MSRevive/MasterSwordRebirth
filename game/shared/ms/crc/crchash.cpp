@@ -1,18 +1,14 @@
 #include "checksum_crc.h"
 #include "msfileio.h"
 
-static unsigned int ComputeCRC32ForFile(const char *path)
+static unsigned int ComputeCRC32ForFile(const char* path)
 {
 	if (!path || !path[0])
 		return 0;
 
-	unsigned int hashValue = 0;
 	CMemFile gameFile;
-	if (gameFile.ReadFromFile(path))
-	{
-		hashValue = CRC32::CRC32_ProcessSingleBuffer(gameFile.m_Buffer, gameFile.m_BufferSize);
-		gameFile.Close();
-	}
+	unsigned int hashValue = (gameFile.ReadFromFile(path) ? CRC32::CRC32_ProcessSingleBuffer(gameFile.m_Buffer, gameFile.m_BufferSize) : 0);
+	gameFile.Close();
 
 	return hashValue;
 }

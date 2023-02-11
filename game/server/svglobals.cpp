@@ -220,10 +220,7 @@ void MSWorldSpawn()
 	}
 
 	if (!IsVerifiedSC())
-	{
-		ALERT(at_console, "Script file not verified for FN!\n");
-		SERVER_COMMAND("exit\n"); // we want to quit to prevent cheaters
-	}
+		ALERT(at_console, "SC Script file is outdated!\n");
 
 	WriteCrashCfg();
 }

@@ -42,37 +42,31 @@ void CGroupFile::Open(char* pszFileName)
 		int HeaderSize;
 		GroupFile.ReadInt(HeaderSize);
 
-		CData HeaderData;
-
-		HeaderData.SetData(GroupFile.m_Buffer + GroupFile.GetReadPtr(), HeaderSize);
-
 		CMemFile Headers;
-		Headers.SetBuffer(HeaderData.GetData(), HeaderData.GetDataSize());
+		Headers.SetBuffer((GroupFile.m_Buffer + GroupFile.GetReadPtr()), HeaderSize);
 
 		int HeaderEntries;
 		Headers.ReadInt(HeaderEntries);
 
-		//Read headers
+		// Read headers
 		for (int i = 0; i < HeaderEntries; i++)
 		{
-			cachedentry_t Entry;
-			Headers.Read(&Entry, sizeof(groupheader_t)); //Read only the groupheader_t part.  The cachedentry_t part is not stored
-			Entry.Data = NULL;
-
-			m_EntryList.add(Entry);
+			cachedentry_t entry;
+			Headers.Read(&entry, sizeof(groupheader_t)); // Read only the groupheader_t part.  The cachedentry_t part is not stored
+			entry.Data = NULL;
+			m_EntryList.add(entry);
 		}
 
-		//Read existing data
+		// Read existing data
 		for (int i = 0; i < m_EntryList.size(); i++)
 		{
-			CData Data;
+			cachedentry_t& entry = m_EntryList[i];
 
-			cachedentry_t& Entry = m_EntryList[i];
+			if (entry.DataSize == 0) // Boggus entry?
+				continue;
 
-			Data.SetData(GroupFile.m_Buffer + Entry.DataOfs, Entry.DataSize);
-
-			Entry.Data = msnew byte[Data.GetDataSize()];
-			memcpy(Entry.Data, Data.GetData(), Data.GetDataSize());
+			entry.Data = msnew byte[entry.DataSize];
+			memcpy(entry.Data, (GroupFile.m_Buffer + entry.DataOfs), entry.DataSize);
 		}
 
 		m_IsOpen = true;
@@ -85,9 +79,7 @@ void CGroupFile::Close()
 	{
 		cachedentry_t& Entry = m_EntryList[i];
 
-		if (Entry.Data)
-			delete Entry.Data;
-
+		delete[] Entry.Data;
 		Entry.Data = NULL;
 	}
 
@@ -148,8 +140,8 @@ bool CGroupFile::DeleteEntry(const char* pszName)
 
 		if (Entry.FileName == pszName)
 		{
-			if (Entry.Data)
-				delete Entry.Data;
+			delete[] Entry.Data;
+			Entry.Data = NULL;
 
 			m_EntryList.erase(i);
 			return true;
@@ -182,7 +174,6 @@ void CGroupFile::Flush()
 	//Write dummy data, update after script data has been written
 	{
 		CData Data;
-
 		Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
 		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize());
 	}
@@ -193,7 +184,6 @@ void CGroupFile::Flush()
 		Entry.DataOfs = static_cast<int>(file.tellp());
 
 		CData Data;
-
 		Data.SetData(Entry.Data, Entry.DataSize);
 
 		file.write(reinterpret_cast<char*>(Data.GetData()), Data.GetDataSize()); //[X data]
@@ -209,7 +199,6 @@ void CGroupFile::Flush()
 
 	//Encrypt headers
 	CData Data;
-
 	Data.SetData(reinterpret_cast<byte*>(pHeaders), uiTotalHeaderSize);
 
 	file.seekp(uiHeaderOffset);

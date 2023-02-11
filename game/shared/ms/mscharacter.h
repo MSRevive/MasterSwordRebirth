@@ -50,9 +50,16 @@ enum charClientType
 
 struct charinfo_base_t
 {
-	int Index; // Keep track of index, because the characters might not be loaded in order
-	char *Data;
+	int Index; // Keep track of index, because the characters might not be loaded in order	
 	int DataLen;
+	char* Data;
+
+	charinfo_base_t()
+	{
+		Index = 0;
+		DataLen = 0;
+		Data = NULL;
+	}
 };
 
 #define GEARFL_COVER_HEAD (1 << 0)
@@ -82,7 +89,7 @@ struct charinfo_t : charinfo_base_t
 	char Guid[MSSTRING_SIZE];
 	mslist<gearinfo_t> GearInfo;
 
-	charinfo_t() { Data = NULL; Guid[0] = 0; }
+	charinfo_t() : charinfo_base_t() { Data = NULL; Guid[0] = 0; }
 	~charinfo_t();
 
 	void Destroy();
@@ -94,6 +101,8 @@ struct charsendinfo_t : charinfo_base_t
 	charsendstatus_e Status; //Whether this character is being sent or receieving
 	float TimeDataLastSent;
 	uint DataSent;
+
+	charsendinfo_t() : charinfo_base_t() {}
 };
 
 struct natstat_t

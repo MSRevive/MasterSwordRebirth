@@ -104,11 +104,11 @@ savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps)
 			int Maps = 0;
 			gFile.ReadInt(Maps); //[INT]
 
-			char cTemp[256];
+			char cTemp[MSSTRING_SIZE];
 			VisitedMaps.clear();
 			for (int m = 0; m < Maps; m++)
 			{
-				gFile.ReadString(cTemp); //[STRING]
+				gFile.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 				VisitedMaps.add(cTemp);
 			}
 		}

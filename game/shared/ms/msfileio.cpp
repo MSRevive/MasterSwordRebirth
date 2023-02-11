@@ -14,7 +14,8 @@ using namespace std;
 
 //
 //	Implementation of CGameFile and CPlayer_DataBuffer
-//  ���������������������������������������������
+//
+
 bool CGameFile::OpenWrite(const char* pszFileName)
 {
 	m_File.open(pszFileName, ios_base::out | ios_base::binary);
@@ -48,17 +49,19 @@ void CGameFile::Write(void* pvData, size_t Size)
 
 bool CGameFile::Read(void* pvData, size_t Size)
 {
+	if (pvData == NULL)
+		return false;
+
 	if (Size)
 		((char*)pvData)[0] = 0;
+
 	m_File.read((char*)pvData, Size);
-	//size_t retSize = fread( pvData, Size, 1, m_pFile );
-	//return (retSize > 0) ? true : false;
 	return !m_File.bad();
 }
-void CGameFile::ReadString(char* Data)
+
+void CGameFile::ReadString(char* Data, size_t length)
 {
-	byte ReadIn;
-	ReadIn = 0;
+	byte ReadIn = 0;
 	Data[0] = 0;
 	int i = 0;
 	do
@@ -66,7 +69,7 @@ void CGameFile::ReadString(char* Data)
 		if (!Read(&ReadIn, 1))
 			break;
 		Data[i++] = ReadIn;
-	} while (ReadIn);
+	} while (ReadIn && (i < length));
 }
 
 size_t CGameFile::GetFileSize()
@@ -79,10 +82,20 @@ size_t CGameFile::GetFileSize()
 	return Size;
 }
 
-CMemFile::CMemFile(int Alloc)
+CMemFile::CMemFile()
 {
-	init();
+	m_BufferSize = m_ReadOffset = m_WriteOffset = 0;
+	m_Buffer = NULL;
+}
+
+CMemFile::CMemFile(int Alloc) : CMemFile()
+{
 	Open(Alloc);
+}
+
+CMemFile::~CMemFile()
+{
+	Dealloc();
 }
 
 void CMemFile::Open(int iAlloc)
@@ -100,8 +113,7 @@ void CMemFile::Alloc(int Alloc)
 
 void CMemFile::Dealloc()
 {
-	if (m_Buffer)
-		delete m_Buffer;
+	delete[] m_Buffer;
 	m_Buffer = NULL;
 	m_BufferSize = 0;
 }
@@ -135,6 +147,7 @@ bool CMemFile::Read(void* pvData, size_t Size)
 {
 	if (m_ReadOffset + Size > m_BufferSize)
 		return false;
+
 	memcpy(pvData, &m_Buffer[m_ReadOffset], Size);
 	m_ReadOffset += Size;
 	return true;
@@ -142,7 +155,9 @@ bool CMemFile::Read(void* pvData, size_t Size)
 
 void CMemFile::WriteToFile(const char* pszFileName)
 {
-	CGameFile::OpenWrite(pszFileName);
+	if (!CGameFile::OpenWrite(pszFileName))
+		return;
+
 	CGameFile::Write(m_Buffer, m_BufferSize);
 	CGameFile::Close();
 }
@@ -172,10 +187,11 @@ bool CMemFile::ReadFromFile(const char* pszFileName)
 	Dealloc();
 	m_BufferSize = CGameFile::GetFileSize();
 	m_Buffer = new byte[m_BufferSize];
-	if (!CGameFile::Read(m_Buffer, m_BufferSize))
-		return false;
+
+	bool bResult = CGameFile::Read(m_Buffer, m_BufferSize);
+
 	CGameFile::Close();
-	return true;
+	return bResult;
 }
 
 size_t CMemFile::GetFileSize()

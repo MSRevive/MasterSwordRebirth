@@ -35,8 +35,9 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	SendInfo.Index = CharBase.Index;
 	SendInfo.TimeDataLastSent = 0;
 	SendInfo.DataSent = 0;
+
 	if (SendInfo.Data)
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 
 //Starting to send new char
 #ifdef VALVE_DLL
@@ -68,7 +69,6 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	UTIL_HudMessage(this, htp, Message);
 
 #else
-
 	SendInfo.DataLen = CharBase.DataLen * 2;
 	SendInfo.Data = msnew char[SendInfo.DataLen];
 
@@ -142,7 +142,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 	{
 		//Done sending
 		//Print( "Sent char #%i to %s\n", SendInfo.Index, pPlayer->DisplayName() );
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
 
@@ -192,7 +192,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 	{
 		//Done sending UUEncoded char to server
 		//Now the server must acknowledge by sending the char info in a msg before Status goes back to dormant
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		player.m_CharSend.Status = CSS_SENT;
 	}
@@ -211,7 +211,7 @@ void MSChar_Interface::HL_SVNewIncomingChar(CBasePlayer *pPlayer, int CharIdx, u
 
 	SendInfo.Status = CSS_RECEIVING;
 	if (SendInfo.Data)
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 	SendInfo.DataLen = DataLen;
 	SendInfo.Data = msnew char[SendInfo.DataLen];
 	SendInfo.DataSent = 0;
@@ -242,7 +242,7 @@ void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEnc
 		//Finished receieving file from client
 		pPlayer->m_CharInfo[SendInfo.Index].AssignChar(SendInfo.Index, LOC_CLIENT, SendInfo.Data, SendInfo.DataLen, pPlayer);
 		//Delete buffer
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
 	}
@@ -271,7 +271,7 @@ void MSChar_Interface::HL_CLNewIncomingChar(int CharIdx, uint DataLen)
 
 	SendInfo.Status = CSS_RECEIVING;
 	if (SendInfo.Data)
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 	SendInfo.DataLen = DataLen;
 	SendInfo.Data = msnew char[SendInfo.DataLen];
 	SendInfo.DataSent = 0;
@@ -305,7 +305,7 @@ void MSChar_Interface::HL_CLReadCharData()
 		SaveFile.Close();
 
 		//Delete buffer
-		delete SendInfo.Data;
+		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
 	}
