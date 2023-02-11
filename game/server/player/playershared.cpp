@@ -870,16 +870,12 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 {
 	for (int i = 0; i < MAX_NPC_HANDS; i++)
 	{
-		CGenericItem *pItem = Hand(i);
+		CGenericItem* pItem = Hand(i);
 		if (!pItem)
 			continue;
 
 		RemoveItem(pItem);
 		pItem->SUB_Remove();
-
-#ifdef VALVE_DLL
-		pItem->SUB_Remove();
-#endif
 	}
 
 	int count = Gear.size();
@@ -888,7 +884,7 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 		//We have to make a copy of the current gear list
 		//otherwise it won't delete all the items on via client...
 		int i = 0;
-		CGenericItem **Gearlist = msnew(CGenericItem *[count]);
+		CGenericItem** Gearlist = msnew(CGenericItem * [count]);
 		for (i = 0; i < count; i++)
 			Gearlist[i] = Gear[i];
 
@@ -896,13 +892,9 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 		{
 			if (!Gearlist[i])
 				continue;
-			
+
 			RemoveItem(Gearlist[i]);
 			Gearlist[i]->SUB_Remove();
-#ifdef VALVE_DLL
-			Gearlist[i]->RemoveFromOwner();
-			Gearlist[i]->SUB_Remove();
-#endif
 		}
 
 		delete[] Gearlist;
