@@ -148,13 +148,13 @@ static bool IsVerifiedSC()
 
 void WriteCrashCfg()
 {
-	char crashCfg[MAX_PATH];
-	char content[128];
-	char *cfgName = (!strcmp(CVAR_GET_STRING("sv_crashcfg"), "")) ? "crashed" : CVAR_GET_STRING("sv_crashcfg");
+	char fileName[MAX_PATH], content[128];
+	const char* cfgName = CVAR_GET_STRING("sv_crashcfg");
 
-	_snprintf(crashCfg, MAX_PATH, "%s.cfg", cfgName);
-	_snprintf(content, 128, "// Written by MSR\nmap %s", MSGlobals::MapName.c_str());
-	FileSystem_WriteTextToFile(crashCfg, content);
+	_snprintf(fileName, MAX_PATH, "%s.cfg", (cfgName && cfgName[0]) ? cfgName : "crashed");
+	_snprintf(content, sizeof(content), "map %s", MSGlobals::MapName.c_str());
+
+	FileSystem_WriteTextToFile(fileName, content);
 }
 
 //Called from CWorld::Spawn() each map change
