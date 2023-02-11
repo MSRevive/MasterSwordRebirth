@@ -509,6 +509,7 @@ void CGenericItem::RegisterAttack()
 	attData.flCritMulti = atof(GetFirstScriptVar("reg.attack.critmulti"));
 	attData.flCritThreshold = atof(GetFirstScriptVar("reg.attack.critthreshold"));
 
+
 	/*msstring Temp = GetFirstScriptVar("reg.attack.stat"); //Legecy support
 	if( Temp != "reg.attack.stat" )
 	{
