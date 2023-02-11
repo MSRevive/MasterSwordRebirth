@@ -1710,11 +1710,12 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				}
 
 				//Check for critical hits and multiply damage accordingly
-				if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
+				/* if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
 					Damage.flDamage *= Damage.flCritMutli;
 					//Damage.AttackCrit = true;
-					Damage.AttackCrit = false; //temp til we can get around to modifying weapons.
+					Damage.AttackCrit = false; 
 				}
+				*/ //temp til we can get around to modifying weapons.
 			}
 			else
 			{
@@ -1928,7 +1929,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					//	pTarget->DisplayName(),
 					//	szStats, szHitMiss, szDamage);
 
-					if (Damage.AttackHit)
+s					if (Damage.AttackHit)
 					{
 						//Hit <prefix> <name> for <dmg>(acc/req) [resist] <crit?>
 						// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
