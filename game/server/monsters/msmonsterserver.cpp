@@ -1668,8 +1668,8 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 		if (pCorpse && (pCorpse->pPlayerSource != NULL))
 			pEnt = pCorpse->pPlayerSource; // this var only exists if the corpse comes from a player 
 
-		//skip 
-		if (!pTrackAlreadySent.insert(pEnt).second)
+		//skip players that have already been sent messages.
+		if (pEnt->IsPlayer() && !pTrackAlreadySent.insert(pEnt).second)
 			continue;
 
 		if (!pEnt->pev || FNullEnt(pEnt->edict()))
