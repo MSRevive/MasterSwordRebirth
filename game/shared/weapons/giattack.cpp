@@ -1929,7 +1929,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					//	pTarget->DisplayName(),
 					//	szStats, szHitMiss, szDamage);
 
-s					if (Damage.AttackHit)
+					if (Damage.AttackHit)
 					{
 						//Hit <prefix> <name> for <dmg>(acc/req) [resist] <crit?>
 						// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
