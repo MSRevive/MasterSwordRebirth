@@ -507,7 +507,8 @@ void CGenericItem::RegisterAttack()
 	attData.RequiredSkill = atoi(GetFirstScriptVar("reg.attack.reqskill"));
 	// crit chance reading from script
 	attData.flCritMulti = atof(GetFirstScriptVar("reg.attack.critmulti"));
-	attData.flCritThreshold = atof(GetFirstScriptVar("reg.attack.critthreshold"))
+	attData.flCritThreshold = atof(GetFirstScriptVar("reg.attack.critthreshold"));
+
 
 	/*msstring Temp = GetFirstScriptVar("reg.attack.stat"); //Legecy support
 	if( Temp != "reg.attack.stat" )
