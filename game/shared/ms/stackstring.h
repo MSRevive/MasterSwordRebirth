@@ -312,7 +312,7 @@ namespace strutil {
 	std::string& implode(mslist<std::string> vec, int start = 0);
 	//std::string& removeWhiteSpace(std::string &str);
 	bool isSpace(const char &ch);
-	char *tolower(const char *str);
+	void tolower(char *str);
 	bool isBadChar(int c);
 	char* stripBadChars(char *data);
 	bool isBadStr(char *str);

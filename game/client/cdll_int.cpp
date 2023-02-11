@@ -252,7 +252,7 @@ void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s *ppmove)
 char DLLEXPORT HUD_PlayerMoveTexture(char *name)
 {
 	DBG_INPUT;
-	char ret;
+	char ret = 'C';
 	startdbg;
 	ret = PM_FindTextureType(name);
 	enddbg;

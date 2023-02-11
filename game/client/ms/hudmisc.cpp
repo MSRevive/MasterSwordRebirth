@@ -66,12 +66,10 @@ int CHudMisc::Init(void)
 
 void CHudMisc::FreeMemory(void)
 {
-	delete[] m_hCrosshairList;
 }
 
 void CHudMisc::Reset(void) 
 {
-
 }
 
 void CHudMisc ::InitHUDData(void)

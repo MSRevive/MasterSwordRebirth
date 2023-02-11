@@ -28,11 +28,7 @@ void CCorpse::CreateCorpse(CMSMonster* pSource, float LoseGoldPercent)
 {
 	//	if (pSource->pev->effects & EF_NODRAW) return;
 
-	CBasePlayer* pPlayer = NULL;
-	if (pSource->IsPlayer()) {
-		pPlayer = (CBasePlayer*)pSource;
-		pPlayerSource = pPlayer;
-	}
+	pPlayerSource = (pSource->IsPlayer() ? (CBasePlayer*)pSource : NULL);
 
 	Spawn();
 	int LoseGold = pSource->m_Gold * (LoseGoldPercent * 0.01);

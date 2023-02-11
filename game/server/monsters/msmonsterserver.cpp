@@ -1586,7 +1586,6 @@ void CMSMonster::Talk()
 // �����
 void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 {
-
 	if (!pszSentence || !pszSentence[0])
 		return;
 
@@ -1656,28 +1655,22 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 	// Keep track of players that have already received a message;
 	std::set<CBaseEntity*> pTrackAlreadySent = {};
 
-
 	// Now try to speak to each one
 	for (int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
+		if (pEnt == NULL)
+			continue;
 
 		// Corpses didn't have edicts so were never delivered messages
 		// attempt to fix by passing the pointer to the player's edict pointer down through the corpse and into this.
-		if (dynamic_cast<CCorpse*>(pEnt)) {
-			CCorpse* pCorpse = reinterpret_cast<CCorpse*>(pEnt);
-			//this var only exists if the corpse comes from a player 
-			if (pCorpse->pPlayerSource != NULL)
-			{
-				pEnt = pCorpse->pPlayerSource;
-			}
-		}
+		CCorpse* pCorpse = dynamic_cast<CCorpse*>(pEnt);
+		if (pCorpse && (pCorpse->pPlayerSource != NULL))
+			pEnt = pCorpse->pPlayerSource; // this var only exists if the corpse comes from a player 
 
 		//skip 
-		if (!pTrackAlreadySent.insert(pEnt).second) {
+		if (!pTrackAlreadySent.insert(pEnt).second)
 			continue;
-		}
-
 
 		if (!pEnt->pev || FNullEnt(pEnt->edict()))
 			continue;

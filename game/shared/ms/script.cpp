@@ -3324,7 +3324,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 	int imaths1 = (int)maths1;
 	int imaths2 = (int)maths2;
 
-	float end_result;
+	float end_result = 0;
 
 	if (op_type.starts_with("add"))
 	{
@@ -4845,7 +4845,7 @@ bool CScript::Spawn(string_i Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 	bool fReturn = false;
 
 	//This should always be true for non-dev builds, because it must use the script library
-	char* ScriptData;
+	char* ScriptData = NULL;
 	msstring ScriptName = m.ScriptFile;
 	ScriptName += SCRIPT_EXT;
 

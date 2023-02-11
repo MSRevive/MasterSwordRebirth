@@ -183,6 +183,7 @@ void msvariant::SetFromString(msstring_ref a)
 	m_Int = atoi(a);
 	m_Float = (float)atof(a);
 }
+
 void msvariant::SetFromInt(int a)
 {
 	m_String = "";
@@ -190,6 +191,7 @@ void msvariant::SetFromInt(int a)
 	m_Int = a;
 	m_Float = (float)a;
 }
+
 void msvariant::SetFromFloat(float a)
 {
 	_snprintf(m_String.c_str(), MSSTRING_SIZE, "%f", a);
@@ -246,58 +248,45 @@ bool strutil::isSpace(const char &ch)
 	}
 }
 
-char *strutil::tolower(const char *str)
+void strutil::tolower(char* str)
 {
-	size_t sz = sizeof(str);
-	char *ret;
-
-	for (int i=0; i < sz; i++)
+	char* target = str;
+	while (*target != '\0')
 	{
-		const char ch = str[i];
-		ret += ::tolower(ch);
+		(*target) = ::tolower(*target);
+		target++;
 	}
-
-	return ret;
 }
 
 bool strutil::isBadChar(int c)
 {
-	if (c == '(' || c == ')' || c == '$' || c == '¯')
-		return true;
-		
-	return false;
+	return (c == '(' || c == ')' || c == '$' || c == '¯');
 }
 
-char *strutil::stripBadChars(char *data)
+char* strutil::stripBadChars(char* data)
 {
 	int i = 0, x = 0;
 	char c;
-	char *cleanData = data;
-	
-	while((c = data[i++]) != '\0')
+	char* cleanData = data;
+
+	while ((c = data[i++]) != '\0')
 	{
 		if (!isBadChar(c))
-		{
 			cleanData[x++] = c;
-		}
 	}
-	
+
 	cleanData[x] = '\0';
 	return cleanData;
 }
 
-bool strutil::isBadStr(char *data)
+bool strutil::isBadStr(char* str)
 {
-	int i = 0, x = 0;
-	char c;
-	
-	while((c = data[i++]) != '\0')
+	char* target = str;
+	while (*target != '\0')
 	{
-		if (isBadChar(c))
-		{
+		if (isBadChar(*target))
 			return true;
-		}
+		target++;
 	}
-	
 	return false;
 }
