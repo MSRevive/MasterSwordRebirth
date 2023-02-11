@@ -41,12 +41,7 @@ bool CheckBanned( msstring_ref SteamID );
 
 float g_TimeTryValidate = 0.0;
 #define VALIDATE_DELAY (60 * 30)// 30 mins
-bool g_fServerValidated = true;
 float g_ServerResetTimer = NULL;
-
-//#define msg ALERT( at_console,
-#define msg ( 
-//#define end );
 
 #define ITEM_RESPAWN_TIME	30
 #define WEAPON_RESPAWN_TIME	20
@@ -85,7 +80,7 @@ static CMultiplayGameMgrHelper g_GameMgrHelper;
 // Rules for the half-life multiplayer game.
 //*********************************************************
 
-CHalfLifeMultiplay :: CHalfLifeMultiplay()
+CHalfLifeMultiplay::CHalfLifeMultiplay()
 {
 	g_VoiceGameMgr.Init( &g_GameMgrHelper, gpGlobals->maxClients );
 
@@ -133,7 +128,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 	SERVER_EXECUTE( );
 	m_CurrentVote.fActive = false;
 
-	 for (int i = 0; i < CLPERMENT_TOTAL; i++) 
+	for (int i = 0; i < CLPERMENT_TOTAL; i++) 
 	{
 		CBaseEntity *pInvEntity = GetClassPtr( (CBaseEntity *)NULL );
 		SetBits( pInvEntity->pev->flags, FL_DORMANT );
@@ -158,7 +153,7 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 //=========================================================
 //Think function
 //=========================================================
-void CHalfLifeMultiplay :: Think( void )
+void CHalfLifeMultiplay::Think( void )
 {
 	//dbg( "Call g_VoiceGameMgr.Update" );
 	g_VoiceGameMgr.Update( gpGlobals->frametime );
@@ -286,84 +281,6 @@ bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap()
 	return false;
 }
 
-void CheckValidation( )
-{
-
-	g_fServerValidated = true;
-	return;
-
-/*	char CheatCode[11]; //ZP9D8HGL3R - don't need to auth
-	CheatCode[0] = 'Z'; CheatCode[2] = '9';
-	CheatCode[3] = 'D'; CheatCode[5] = 'H';
-	CheatCode[7] = 'L'; CheatCode[9] = 'R';
-	CheatCode[10] = 0; CheatCode[1] = 'P';
-	CheatCode[6] = 'G'; CheatCode[4] = '8';
-	CheatCode[8] = '3';
-	if( !stricmp(CVAR_GET_STRING("ms_key"),CheatCode) )
-	{
-		g_fServerValidated = true;
-		return;
-	}
-
-	int ret;
-
-	msg "Create Socket\n" end
-	g_ValidateSock = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
-	if( g_ValidateSock == SOCKET_ERROR )
-	{
-		ALERT( at_console, "MS Network Error 2\n" );
-		return;
-	}
-	
-	sockaddr_in m_AddrIn;
-	m_AddrIn.sin_family = AF_INET;
-	memset( &m_AddrIn.sin_zero, 0, 8 );
-
-	m_AddrIn.sin_port = htons(g_ValidateServerPort);
-
-	unsigned long ulAddr;
-	
-	ALERT( at_console, "Obtaining Validation...\n" );
-
-	for( int i = 0; i < ARRAYSIZE(g_cValidateServerIP); i++ )
-	{
-		ulAddr = inet_addr(g_cValidateServerIP[i]);
-		memcpy( &m_AddrIn.sin_addr, &ulAddr, sizeof(in_addr) );
-		ret = connect( g_ValidateSock, (sockaddr *)&m_AddrIn, sizeof(sockaddr) );
-		if( ret != SOCKET_ERROR ) break;
-	}
-
-	//msg "Connecting... %s\n", (ret!=SOCKET_ERROR ? "success" : "failed") end
-	if( ret == SOCKET_ERROR )
-	{
-		ALERT( at_console, "Can't connect to validation server\nCheck your internet connection!\n" );
-		Sleep( 5000 );
-		SERVER_COMMAND( "exit\n" );
-		return;
-	}
-	
-	sendkey_t SendData;
-	SendData.m_KeyCode = CVAR_GET_STRING("ms_key");
-
-	send( g_ValidateSock, (const char *)&SendData, sizeof(sendkey_t), 0 );
-
-	msg "Send: %s\n", (const char *)SendData.m_KeyCode end
-
-	char recvCode[KEYCODE_SIZE];
-	recv( g_ValidateSock, (char *)&recvCode, KEYCODE_SIZE, 0 );
-	KeyCode complementCode;
-	complementCode = recvCode;
-
-	if( SendData.m_KeyCode.ComplimentaryCode() == complementCode ) 
-	{
-		g_fServerValidated = true;
-		msg "Code Good!\n" end
-	}
-	else 
-	{
-		msg "Bad Code (%.3f)\n", recvCode end
-	}*/
-}
 //=========================================================
 //=========================================================
 BOOL CHalfLifeMultiplay::IsMultiplayer( void )
@@ -415,7 +332,7 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerI
 	return FALSE;
 }
 
-BOOL CHalfLifeMultiplay :: GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon )
+BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon )
 {
 	//Function unused
 	return FALSE;
@@ -423,14 +340,9 @@ BOOL CHalfLifeMultiplay :: GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerI
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay :: ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] )
+BOOL CHalfLifeMultiplay::ClientConnected(edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128])
 {
 	g_VoiceGameMgr.ClientConnected( pEntity );
-/*	if( !g_fServerValidated )
-	{
-		 strncpy(szRejectReason,  "Server is not validated.\n", sizeof(szRejectReason) );
-		return FALSE;
-	}*/
 
 	const char *AuthID = GETPLAYERAUTHID(pEntity);
 
@@ -449,14 +361,14 @@ BOOL CHalfLifeMultiplay :: ClientConnected( edict_t *pEntity, const char *pszNam
 extern int gmsgSayText;
 extern int gmsgGameMode;
 
-void CHalfLifeMultiplay :: UpdateGameMode( CBasePlayer *pPlayer )
+void CHalfLifeMultiplay::UpdateGameMode( CBasePlayer *pPlayer )
 {
 	MESSAGE_BEGIN( MSG_ONE, gmsgGameMode, NULL, pPlayer->edict() );
 		WRITE_BYTE( 0 );  // game mode (use client non-teamplay mode)
 	MESSAGE_END();
 }
 
-void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pPlayer )
+void CHalfLifeMultiplay::InitHUD( CBasePlayer *pPlayer )
 {
 	// notify other clients of player joining the game
 	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has joined the game\n", 
@@ -540,7 +452,7 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pPlayer )
 //=========================================================
 //=========================================================
 
-void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
+void CHalfLifeMultiplay::ClientDisconnected( edict_t *pClient )
 {
 	if( !pClient )
 		return;
@@ -579,7 +491,7 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 
 //=========================================================
 //=========================================================
-float CHalfLifeMultiplay :: FlPlayerFallDamage( CBasePlayer *pPlayer )
+float CHalfLifeMultiplay::FlPlayerFallDamage( CBasePlayer *pPlayer )
 {
 	int iFallDamage = (int)falldamage.value;
 
@@ -605,7 +517,7 @@ BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity
 
 //=========================================================
 //=========================================================
-void CHalfLifeMultiplay :: PlayerThink( CBasePlayer *pPlayer )
+void CHalfLifeMultiplay::PlayerThink( CBasePlayer *pPlayer )
 {	
 	if ( g_fGameOver )
 	{
@@ -622,26 +534,26 @@ void CHalfLifeMultiplay :: PlayerThink( CBasePlayer *pPlayer )
 
 //=========================================================
 //=========================================================
-void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
+void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 {
 	//Master Sword - Nothing here
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay :: FPlayerCanRespawn( CBasePlayer *pPlayer )
+BOOL CHalfLifeMultiplay::FPlayerCanRespawn( CBasePlayer *pPlayer )
 {
 	return TRUE;
 }
 
 //=========================================================
 //=========================================================
-float CHalfLifeMultiplay :: FlPlayerSpawnTime( CBasePlayer *pPlayer )
+float CHalfLifeMultiplay::FlPlayerSpawnTime( CBasePlayer *pPlayer )
 {
 	return gpGlobals->time;//now!
 }
 
-BOOL CHalfLifeMultiplay :: AllowAutoTargetCrosshair( void )
+BOOL CHalfLifeMultiplay::AllowAutoTargetCrosshair( void )
 {
 	return FALSE;
 }
@@ -650,7 +562,7 @@ BOOL CHalfLifeMultiplay :: AllowAutoTargetCrosshair( void )
 // IPointsForKill - how many points awarded to anyone
 // that kills this player?
 //=========================================================
-int CHalfLifeMultiplay :: IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled )
+int CHalfLifeMultiplay::IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled )
 {
 	return 1;
 }
@@ -659,7 +571,7 @@ int CHalfLifeMultiplay :: IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *p
 //=========================================================
 // PlayerKilled - someone/something killed this player
 //=========================================================
-void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
+void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
 	DeathNotice( pVictim, pKiller, pInflictor );
 
@@ -850,7 +762,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 // PlayerGotWeapon - player has grabbed a weapon that was
 // sitting in the world
 //=========================================================
-void CHalfLifeMultiplay :: PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
+void CHalfLifeMultiplay::PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
 {
 }
 
@@ -858,7 +770,7 @@ void CHalfLifeMultiplay :: PlayerGotWeapon( CBasePlayer *pPlayer, CBasePlayerIte
 // FlWeaponRespawnTime - what is the time in the future
 // at which this weapon may spawn?
 //=========================================================
-float CHalfLifeMultiplay :: FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
+float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
 {
 	if ( CVAR_GET_FLOAT("mp_weaponstay") > 0 )
 	{
@@ -874,14 +786,14 @@ float CHalfLifeMultiplay :: FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
 
 // when we are within this close to running out of entities,  items 
 // marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
-#define ENTITY_INTOLERANCE	100
+#define ENTITY_INTOLERANCE 100
 
 //=========================================================
 // FlWeaponRespawnTime - Returns 0 if the weapon can respawn 
 // now,  otherwise it returns the time at which it can try
 // to spawn again.
 //=========================================================
-float CHalfLifeMultiplay :: FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
+float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
 {
 	if ( pWeapon && pWeapon->m_iId && (pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD) )
 	{
@@ -899,7 +811,7 @@ float CHalfLifeMultiplay :: FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
 // VecWeaponRespawnSpot - where should this weapon spawn?
 // Some game variations may choose to randomize spawn locations
 //=========================================================
-Vector CHalfLifeMultiplay :: VecWeaponRespawnSpot( CBasePlayerItem *pWeapon )
+Vector CHalfLifeMultiplay::VecWeaponRespawnSpot( CBasePlayerItem *pWeapon )
 {
 	return pWeapon->pev->origin;
 }
@@ -908,7 +820,7 @@ Vector CHalfLifeMultiplay :: VecWeaponRespawnSpot( CBasePlayerItem *pWeapon )
 // WeaponShouldRespawn - any conditions inhibiting the
 // respawning of this weapon?
 //=========================================================
-int CHalfLifeMultiplay :: WeaponShouldRespawn( CBasePlayerItem *pWeapon )
+int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
 {
 	if ( pWeapon->pev->spawnflags & SF_NORESPAWN )
 	{
@@ -1072,7 +984,7 @@ int CHalfLifeMultiplay::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *p
 	return GR_NOTTEAMMATE;
 }
 
-BOOL CHalfLifeMultiplay :: PlayFootstepSounds( CBasePlayer *pl, float fvol )
+BOOL CHalfLifeMultiplay::PlayFootstepSounds( CBasePlayer *pl, float fvol )
 {
 	if ( g_footsteps && g_footsteps->value == 0 )
 		return FALSE;
@@ -1083,14 +995,14 @@ BOOL CHalfLifeMultiplay :: PlayFootstepSounds( CBasePlayer *pl, float fvol )
 	return FALSE;
 }
 
-BOOL CHalfLifeMultiplay :: FAllowFlashlight( void ) 
+BOOL CHalfLifeMultiplay::FAllowFlashlight( void ) 
 { 
-	return CVAR_GET_FLOAT( "mp_flashlight" ) != 0; 
+	return FALSE; 
 }
 
 //=========================================================
 //=========================================================
-BOOL CHalfLifeMultiplay :: FAllowMonsters( void )
+BOOL CHalfLifeMultiplay::FAllowMonsters( void )
 {
 	return TRUE;
 	//return ( CVAR_GET_FLOAT( "mp_allowmonsters" ) != 0 );
@@ -1098,9 +1010,9 @@ BOOL CHalfLifeMultiplay :: FAllowMonsters( void )
 
 //=========================================================
 //======== CHalfLifeMultiplay private functions ===========
-#define INTERMISSION_TIME		6
+#define INTERMISSION_TIME 6
 
-void CHalfLifeMultiplay :: GoToIntermission( void )
+void CHalfLifeMultiplay::GoToIntermission( void )
 {
 	if ( g_fGameOver )
 		return;  // intermission has already been triggered, so ignore.

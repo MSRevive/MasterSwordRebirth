@@ -150,7 +150,9 @@ void WriteCrashCfg()
 {
 	char crashCfg[MAX_PATH];
 	char content[128];
-	_snprintf(crashCfg, MAX_PATH, "%s.cfg", CVAR_GET_STRING("sv_crashcfg"));
+	char *cfgName = (!strcmp(CVAR_GET_STRING("sv_crashcfg"), "")) ? "crashed" : CVAR_GET_STRING("sv_crashcfg");
+
+	_snprintf(crashCfg, MAX_PATH, "%s.cfg", cfgName);
 	_snprintf(content, 128, "// Written by MSR\nmap %s", MSGlobals::MapName.c_str());
 	FileSystem_WriteTextToFile(crashCfg, content);
 }
