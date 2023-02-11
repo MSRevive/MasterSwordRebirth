@@ -505,6 +505,10 @@ void CGenericItem::RegisterAttack()
 	attData.iPriority = atoi(GetFirstScriptVar("reg.attack.priority"));
 	attData.CallbackName = GetFirstScriptVar("reg.attack.callback");
 	attData.RequiredSkill = atoi(GetFirstScriptVar("reg.attack.reqskill"));
+	// crit chance reading from script
+	attData.flCritMulti = atof(GetFirstScriptVar("reg.attack.critmulti"));
+	attData.flCritThreshold = atof(GetFirstScriptVar("reg.attack.critthreshold"))
+
 	/*msstring Temp = GetFirstScriptVar("reg.attack.stat"); //Legecy support
 	if( Temp != "reg.attack.stat" )
 	{
@@ -1930,7 +1934,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 						//_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats, Damage.AttackCrit ? "CRIT!" : "");
 
 						if (Damage.AttackCrit)
-							_snprintf(sz, sizeof(sz), "Hit %s: %s %s CRIT! (%i/%i)", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), iAccuracyRoll, Damage.flCritThreshold);
+							_snprintf(sz, sizeof(sz), "Hit %s: %s %s CRIT! (%i/%i)", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), iAccuracyRoll, (int)Damage.flCritThreshold);
 						else
 							_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
 						
