@@ -2232,12 +2232,12 @@ pt_end:
 	//Deactivate no-collide if not near any players.
 	postthinkdbg("Check for nearby spawns and players, deactivate nocolloide");
 	//do not check for dead or spectating/noclipping players
-	if (pev->solid == SOLID_NOT && pev->deadflag == DEAD_NO && pev->movetype != MOVETYPE_NOCLIP) {
+	if (pev->solid == SOLID_TRIGGER && pev->deadflag == DEAD_NO && pev->movetype != MOVETYPE_NOCLIP) {
 
 		CBaseEntity* fEnt = NULL;
 		//initialize proximity check
 		bool hasProximity = false;
-		int proximityDistance = 124;
+		int proximityDistance = 32;
 
 		//loop through all nearby entities
 		while ( (fEnt = UTIL_FindEntityInSphere(fEnt, pev->origin, proximityDistance) ) != NULL) {
@@ -2662,7 +2662,7 @@ void CBasePlayer::Spawn(void)
 	pev->classname = MAKE_STRING("player");
 	pev->armorvalue = 0;
 	pev->takedamage = DAMAGE_AIM;
-	pev->solid = SOLID_NOT;
+	pev->solid = SOLID_TRIGGER;
 	pev->movetype = MOVETYPE_WALK;
 	pev->flags = FL_CLIENT;
 	pev->air_finished = gpGlobals->time + 12;
