@@ -42,6 +42,7 @@
 #include "ms/menu.h"
 #include "ms/hudscript.h"
 #include "ms/hudmisc.h"
+#include "ms/hudmusic.h"
 #include "ms/hudid.h"
 #include "ms/clglobal.h"
 #include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
@@ -262,6 +263,7 @@ void CHud ::Init(void)
 	SetMSHUD(m_Menu, CHudMenu);
 	SetMSHUD(m_Fatigue, CHudFatigue);
 	SetMSHUD(m_Magic, CHudMagic);
+	SetMSHUD(m_Music, CHudMusic);
 	SetMSHUD(m_Action, CHudAction);
 	SetMSHUD(m_Health, CHudHealth);
 	SetMSHUD(m_HUDScript, CHudScript);
@@ -373,6 +375,7 @@ void CHud ::Init(void)
 	m_Health->Init();
 	m_Fatigue->Init();
 	m_Magic->Init();
+	m_Music->Init();
 	m_Action->Init();
 	m_Menu->Init();
 	m_HUDScript->Init();
