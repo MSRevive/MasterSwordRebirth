@@ -1326,7 +1326,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 {
 	m_pOwner = Owner(); // Oddness happens when trying to drop straight from packs because they get their owner from the container. Explicitly set for now
 
-	if (bDropAttempted && m_pOwner->IsPlayer()) {
+	if ((bDropAttempted && m_pOwner->IsPlayer()) || !m_pOwner->IsPlayer()) {
 		CallScriptEvent("game_drop");
 
 		CancelAttack();
@@ -1374,7 +1374,8 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 		bDropAttempted = false;
 		iDropTickCounter = 0;
 	}
-	else if (SpellData) {
+	else if (SpellData || !m_pOwner->IsPlayer()) {
+		//I'm fairly certain npcs don't use this and the player check is unnecessary but trying to avoid weird stuff.
 		//Dropping spells fizzles them
 		if (m_pOwner)
 			m_pOwner->RemoveItem(this);
@@ -1383,52 +1384,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 	else if (m_pOwner->IsPlayer()) {
 		bDropAttempted = true;
 	}
-	else {
-		//if drop is called by a non player make sure the drop still happens
-		CallScriptEvent("game_drop");
 
-		CancelAttack();
-
-#ifdef VALVE_DLL
-		/*if( ParamsFilled > 0 ) pev->velocity = Velocity;
-			else if( m_pOwner ) pev->velocity = m_pOwner->pev->velocity;
-			if( ParamsFilled > 1 ) pev->angles = Angles;
-			else if( m_pOwner ) pev->angles = m_pOwner->pev->angles;
-			if( ParamsFilled > 2 ) pev->origin = Origin;
-			else if( m_pOwner ) pev->origin = m_pOwner->EyePosition( );*/
-
-		pev->velocity = m_pOwner->pev->velocity;
-		pev->angles = m_pOwner->pev->angles;
-		pev->origin = m_pOwner->EyePosition() + gpGlobals->v_forward * 10; // Items sometimes get caught in head, move forward a bit
-
-		//	if( m_pPlayer ) strcpy( m_pPlayer->m_szAnimLegs, "" );
-		pev->sequence = 0;
-		pev->aiment = NULL;
-		//pev->avelocity = Vector( 0,10,0 );
-		if (WorldModel.len())
-		{
-			ClearBits(pev->effects, EF_NODRAW); //might need to remove this
-			SetBits(pev->effects, EF_NOINTERP);
-			SET_MODEL(ENT(pev), WorldModel);
-		}
-#endif
-
-		if (m_pOwner)
-			m_pOwner->RemoveItem((CGenericItem*)this);
-
-#ifdef VALVE_DLL
-		FallInit(); //Call FallInit after RemoveItem unsets the think funcrion
-#endif
-		//CBasePlayerItem::Drop( ParamsFilled, Velocity, Angles, Origin );
-
-#ifndef VALVE_DLL
-		//Close the container when dropped (client-side)
-		//if( m_pPlayer && m_pPlayer->OpenPack == this ) ContainerWindowClose( );
-
-		void ContainerWindowUpdate();
-		SUB_Remove();
-#endif
-	}
 }
 
 void CGenericItem::FallInit()
