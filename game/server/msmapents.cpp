@@ -452,7 +452,7 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
+		if (sTemp.contains(".mp3"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
