@@ -172,6 +172,7 @@ $Project "Server"
 			$File	"gamerules\teams.h"
 			$File	"$SRCDIR\game\shared\ms\titles.h"
 			$File	"$SRCDIR\game\shared\ms\votedefs.h"
+			$File	"$SRCDIR\game\shared\ms\music.h"
 		}
 	}
 
