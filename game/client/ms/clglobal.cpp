@@ -310,6 +310,7 @@ byte *MSCLGlobals::LoadFile(char *pFileName, int *pLength)
 {
 	return gEngfuncs.COM_LoadFile(pFileName, 5, pLength);
 }
+
 string_t MSCLGlobals::AllocString(const char *pszString)
 {
 	if (!pszString)
