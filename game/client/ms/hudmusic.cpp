@@ -12,6 +12,8 @@ int CHudMusic::Init()
 	{
 		return 1;
 	}
+
+	return 0;
 }
 
 void CHudMusic::Shutdown()
@@ -31,7 +33,12 @@ void CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	int iCmd = READ_BYTE();
 	switch (iCmd) {
 	case 0:
-		m_MP3.PlayMP3(READ_STRING());
+	{
+		msstring songPath;
+		msstring musicFile = READ_STRING();
+		songPath = msstring("music/") + musicFile;
+		m_MP3.PlayMP3(songPath);
+	}
 	case 1:
 		m_MP3.StopMP3(READ_FLOAT());
 	}
