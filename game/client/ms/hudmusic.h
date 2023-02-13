@@ -1,32 +1,15 @@
-//
-// Music - Client-side playback of midi files
-//
+#pragma once
 
-#ifndef HUD_MUSIC_SYSTEM_H
-#define HUD_MUSIC_SYSTEM_H
-
-#include "music.h"
+#include "mp3.h"
 
 class CHudMusic : public CHudBase
 {
 public:
-	int Init(void);
-	void InitHUDData(void);
+	int Initalize(void);
+	void Shutdown(void);
 	void Think(void);
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
 
-	void PlayMusic();
-	void StopMusic();
-
-	int m_CurrentSong;
-	bool m_CurrentSongMp3; //True if mp3. False if midi
-	bool m_PlayingSong;
-	ulong m_SongsPlayed, //Bits for songs already played
-		m_FailedSongs;	 //Bits for songs that failed to play
-	float m_TimePlayNextSong;
-
-	songplaylist m_Songs;
-	int m_MidiDevice;
-};
-
-#endif // HUD_MUSIC_SYSTEM_H
+private:
+	CMP3 m_MP3;
+}

@@ -248,6 +248,10 @@ $Project "Client"
 		$File "$SRCDIR\thirdparty\tartan\tgaloader.cpp"		
 		$File "richpresence.cpp"
 		$File "richpresence.h"
+		$File "ms/fmod.h"
+		$File "ms/fmod_errors.h"
+		$File "ms/mp3.cpp"
+		$File "ms/mp3.h"
 		
 		$Folder	"Generic Item"
 		{

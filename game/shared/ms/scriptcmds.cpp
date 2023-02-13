@@ -4659,7 +4659,8 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	msstring &Name = Params[0];
 	//msstring &InMinutes = Params[1];
 	//float SMinutes = atof(InMinutes);
-	msstring &SFile = Params[2];
+	msstring &SFile = Params[1];
+	float &fadeTime = Params[2];
 	mslist<song_t> t_Songs;
 	song_t Song;
 	if ( t_Songs.size() ) t_Songs.clear( );
@@ -4717,12 +4718,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			//ALERT( at_aiconsole, "SMinutes > 0 PLAYING" );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 0 );
-			WRITE_BYTE( t_Songs.size() );
-			for( int s = 0; s < t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
-			{
-				WRITE_STRING( t_Songs[s].Name );
-				WRITE_FLOAT( t_Songs[s].Length );
-			}
+			WRITE_STRING( t_Songs[s].Name );
 			MESSAGE_END();
 		}
 
@@ -4733,6 +4729,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			//pPlayer->Music_Stop( m.pScriptedEnt );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 1 );
+			WRITE_FLOAT()
 			MESSAGE_END();
 		}
 	}
