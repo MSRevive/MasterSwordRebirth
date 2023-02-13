@@ -982,9 +982,11 @@ bool CGenericItem::UseItem(bool Verbose)
 	if (CurrentAttack)
 		return false;
 
-	//Don't do anything to spells
-	if (FBitSet(MSProperties(), ITEM_SPELL))
-		return false;
+	//"Drop" spells to cancel them when sheathed
+	if (FBitSet(MSProperties(), ITEM_SPELL)) {
+		this->Drop();
+		return true;
+	}
 
 	if (Verbose && !CanPutinInventory())
 		return false;
@@ -1301,15 +1303,20 @@ bool CGenericItem::CanDrop()
 	if (m_PrefHand == HAND_PLAYERHANDS)
 		return false;
 
+	/*
 	if (!Spell_CanAttack())
 		return false;
+	*/
+
 #endif
 
 	return true;
 }
 void CGenericItem::Holster() {
+	m_pOwner = Owner();
+
 	CancelAttack();
-	
+
 	//also reset the items drop tracking if it is holstered
 	bDropAttempted = false;
 	iDropTickCounter = 0;
@@ -1319,7 +1326,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 {
 	m_pOwner = Owner(); // Oddness happens when trying to drop straight from packs because they get their owner from the container. Explicitly set for now
 
-	if (bDropAttempted) {
+	if (bDropAttempted && m_pOwner->IsPlayer()) {
 		CallScriptEvent("game_drop");
 
 		CancelAttack();
@@ -1345,7 +1352,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 			ClearBits(pev->effects, EF_NODRAW); //might need to remove this
 			SetBits(pev->effects, EF_NOINTERP);
 			SET_MODEL(ENT(pev), WorldModel);
-	}
+		}
 #endif
 
 		if (m_pOwner)
@@ -1355,14 +1362,6 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 		FallInit(); //Call FallInit after RemoveItem unsets the think funcrion
 #endif
 		//CBasePlayerItem::Drop( ParamsFilled, Velocity, Angles, Origin );
-
-		if (SpellData)
-		{
-			//Dropping spells fizzles them
-			if (m_pOwner)
-				m_pOwner->RemoveItem(this);
-			DelayedRemove();
-		}
 
 #ifndef VALVE_DLL
 		//Close the container when dropped (client-side)
@@ -1374,9 +1373,61 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 		//reset drop trackers on successful drop
 		bDropAttempted = false;
 		iDropTickCounter = 0;
-}
-	else {
+	}
+	else if (SpellData) {
+		//Dropping spells fizzles them
+		if (m_pOwner)
+			m_pOwner->RemoveItem(this);
+		DelayedRemove();
+	}
+	else if (m_pOwner->IsPlayer()) {
 		bDropAttempted = true;
+	}
+	else {
+		//if drop is called by a non player make sure the drop still happens
+		CallScriptEvent("game_drop");
+
+		CancelAttack();
+
+#ifdef VALVE_DLL
+		/*if( ParamsFilled > 0 ) pev->velocity = Velocity;
+			else if( m_pOwner ) pev->velocity = m_pOwner->pev->velocity;
+			if( ParamsFilled > 1 ) pev->angles = Angles;
+			else if( m_pOwner ) pev->angles = m_pOwner->pev->angles;
+			if( ParamsFilled > 2 ) pev->origin = Origin;
+			else if( m_pOwner ) pev->origin = m_pOwner->EyePosition( );*/
+
+		pev->velocity = m_pOwner->pev->velocity;
+		pev->angles = m_pOwner->pev->angles;
+		pev->origin = m_pOwner->EyePosition() + gpGlobals->v_forward * 10; // Items sometimes get caught in head, move forward a bit
+
+		//	if( m_pPlayer ) strcpy( m_pPlayer->m_szAnimLegs, "" );
+		pev->sequence = 0;
+		pev->aiment = NULL;
+		//pev->avelocity = Vector( 0,10,0 );
+		if (WorldModel.len())
+		{
+			ClearBits(pev->effects, EF_NODRAW); //might need to remove this
+			SetBits(pev->effects, EF_NOINTERP);
+			SET_MODEL(ENT(pev), WorldModel);
+		}
+#endif
+
+		if (m_pOwner)
+			m_pOwner->RemoveItem((CGenericItem*)this);
+
+#ifdef VALVE_DLL
+		FallInit(); //Call FallInit after RemoveItem unsets the think funcrion
+#endif
+		//CBasePlayerItem::Drop( ParamsFilled, Velocity, Angles, Origin );
+
+#ifndef VALVE_DLL
+		//Close the container when dropped (client-side)
+		//if( m_pPlayer && m_pPlayer->OpenPack == this ) ContainerWindowClose( );
+
+		void ContainerWindowUpdate();
+		SUB_Remove();
+#endif
 	}
 }
 
@@ -1505,12 +1556,13 @@ void CGenericItem::Think()
 	pev->nextthink = gpGlobals->time;
 #endif
 
+	//drop attempt tracking
 	if (bDropAttempted && iDropTickCounter >= 100)
 	{
 		//if 100 ticks have passed since attempting to drop, cancel drop.
 		bDropAttempted = false;
 		CBasePlayer* pOwner;
-		if (pOwner = static_cast<CBasePlayer*>(Owner())) {
+		if (pOwner = dynamic_cast<CBasePlayer*>(Owner())) {
 			pOwner->SendEventMsg(HUDEVENT_NORMAL, msstring("Dropping timed out."));
 		}
 		iDropTickCounter = 0;
@@ -1577,14 +1629,14 @@ void CGenericItem::RemoveFromOwner()
 		CBaseEntity* pSprite = MSInstance(INDEXENT(pev->iuser2));
 		if ((int)pSprite == pev->iuser3)
 			pSprite->Think();
-}
+	}
 #endif
 
 	dbg("Call Wearable_ResetClientUpdate");
 	Wearable_ResetClientUpdate();
 
 	enddbgprt(msstring("[") + DisplayName() + "]");
-	}
+}
 void CGenericItem::RemoveFromContainer()
 {
 	if (!m_pParentContainer)
@@ -1626,7 +1678,7 @@ bool CGenericItem::IsInAttackStance()
 	if (m_pPlayer && m_pPlayer->m_TimeResetLegs && gpGlobals->time < m_pPlayer->m_TimeResetLegs)
 		return true;
 	return false;
-	}
+}
 #endif
 
 //*********************************************************************************
@@ -1724,7 +1776,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 		{
 			if (Params[0] != "none")
 				ActivateShield(msstring("models/") + Params[0]);
-	}
+		}
 
 		else
 			ERROR_MISSING_PARMS;
@@ -1743,8 +1795,8 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 				pSprite->TorchInit(msstring("sprites/") + Params[0], atof(Params[2]), atof(Params[3]), edict());
 				pev->iuser2 = pSprite->entindex();
 				pev->iuser3 = (int)pSprite;
-	}
-}
+			}
+		}
 		else
 			ERROR_MISSING_PARMS;
 #endif
@@ -1947,7 +1999,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 		//Thothie JAN2020_04 - need method to pull viewmodel server side
 		if (Params.size() >= 1) SetScriptVar("ITEM_VIEWMODEL", Params[0].c_str());
 #endif
-			}
+	}
 	//***************************** SETWORLDMODEL *************************
 	else if (Cmd.Name() == "setworldmodel")
 	{
@@ -1978,7 +2030,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 				//This is for monsters
 				m_pOwner->SetScriptVar("game.monster.wielded_item", m_PlayerHoldModel.c_str());
 				m_pOwner->CallScriptEvent("game_wielditem");
-	}
+			}
 		}
 		else
 			ERROR_MISSING_PARMS;
@@ -2005,7 +2057,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 		else
 			ERROR_MISSING_PARMS;
 #endif
-}
+	}
 	//********************* PLAYVIEWANIM **************************
 	else if (Cmd.Name() == "playviewanim")
 	{
@@ -2063,7 +2115,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 				if (m_pOwner->m_Scripts[0])
 					m_pOwner->m_Scripts[0]->Script_ExecuteCmd(Event, Cmd, Params);
 				Cmd.m_Params[0] = "playowneranim";
-	}
+			}
 #endif
 		}
 		else
@@ -2144,7 +2196,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 				}
 				else
 					CallScriptEvent("game_learnspell_failed");
-	}
+			}
 		}
 		else
 			ERROR_MISSING_PARMS;
@@ -2242,7 +2294,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	enddbg;
 
 	return true;
-	}
+}
 
 CGenericItem* FindParryWeapon(CMSMonster* pMonster, /*out*/ int& iPlayerHand, /*out*/ int& iAttackNum)
 {
@@ -2345,7 +2397,7 @@ void SendGenericItem(CBasePlayer* pPlayer, genericitem_full_t& Item, bool fNewMe
 	{
 		WRITE_COORD(Item.Spell_TimePrepare);
 		WRITE_BYTE(Item.Spell_CastSuccess);
-}
+	}
 	if (fNewMessage)
 		MESSAGE_END();
 }

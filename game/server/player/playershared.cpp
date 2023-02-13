@@ -790,6 +790,12 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		return false;
 	}
 
+	if (pUse && pUse->SpellData)
+	{
+		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pUse) + " spell is canceled");
+	}
+
+
 	enddbg;
 
 	return true;
@@ -943,19 +949,17 @@ bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose
 		{
 			if (Verbose)
 			{
-				if (pDropItem->bDropAttempted) {
-					if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
-						SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pDropItem) + " spell is canceled");
-					else
-						SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
+				if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
+					SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pDropItem) + " spell is canceled");
+				else if (pDropItem->bDropAttempted) {
+					SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
 				}
 				else {
-					if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
-						SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to cancel ") + SPEECH_GetItemName(pDropItem));
-					else
-						SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
+					SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
 				}
 			}
+
+
 
 			UTIL_MakeVectorsPrivate(pev->angles, gpGlobals->v_forward, NULL, NULL);
 			pDropItem->Drop();
@@ -1264,7 +1268,7 @@ bool CBasePlayer::SwitchHands(int iHand, bool bVerbose)
 			pActiveItem->CallScriptEvent("game_switchhands");
 	}
 	return true;
-}
+	}
 
 //Switchs to the best hand
 bool CBasePlayer::SwitchToBestHand()
@@ -1370,7 +1374,7 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 		{
 			SendEventMsg(HUDEVENT_NORMAL, msstring("You memorize the ") + pTempSpell->DisplayName() + " spell");
 		}
-	}
+}
 #endif
 }
 
@@ -1452,7 +1456,7 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	}
 
 #ifdef VALVE_DLL
-	}
+}
 
 //Start checking m_CharInfo for new char data
 m_TimeSendCharInfo = gpGlobals->time;
