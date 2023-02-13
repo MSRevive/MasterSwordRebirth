@@ -17,7 +17,7 @@
 
 #ifndef VALVE_DLL
 void ContainerWindowUpdate();
-void ShowWeaponDesc(CGenericItem *pItem);
+void ShowWeaponDesc(CGenericItem* pItem);
 #include "ms/vgui_hud.h"
 #include "hud.h"
 #include "ms/hudscript.h"
@@ -36,7 +36,7 @@ char* ModelListHumanMale[HUMAN_BODYPARTS] =
 	MODEL_HUMAN_LEGS,
 	MODEL_HUMAN_HEAD,
 	MODEL_HUMAN_CHEST,
-	MODEL_HUMAN_ARMS,	
+	MODEL_HUMAN_ARMS,
 };
 
 char* ModelListHumanFemale[HUMAN_BODYPARTS] =
@@ -44,17 +44,17 @@ char* ModelListHumanFemale[HUMAN_BODYPARTS] =
 	MODEL_HUMAN_FEM_LEGS,
 	MODEL_HUMAN_FEM_HEAD,
 	MODEL_HUMAN_FEM_CHEST,
-	MODEL_HUMAN_FEM_ARMS,	
+	MODEL_HUMAN_FEM_ARMS,
 };
 
 keysnapshot KeyHistory[MAX_KEYHISTORY];
 
-const char *GetPlayerTitle(int Title)
+const char* GetPlayerTitle(int Title)
 {
 	return CTitleManager::Titles[Title].Name;
 }
 
-int GetPlayerTitleIdx(const char *pszTitle)
+int GetPlayerTitleIdx(const char* pszTitle)
 {
 	for (int i = 0; i < CTitleManager::Titles.size(); i++)
 		if (FStrEq(CTitleManager::Titles[i].Name, pszTitle))
@@ -64,7 +64,7 @@ int GetPlayerTitleIdx(const char *pszTitle)
 
 mslist<title_t> CTitleManager::Titles;
 title_t CTitleManager::DefaultTitle;
-void CTitleManager::AddTitle(title_t &Title)
+void CTitleManager::AddTitle(title_t& Title)
 {
 	if (!Title.SkillsReq.size()) //Setting the default title
 		DefaultTitle = Title;
@@ -77,7 +77,7 @@ void CTitleManager::DeleteAllTitles()
 	Titles.clear();
 }
 
-title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
+title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 {
 	//if( !pPlayer->m_SkillStats.size() ) return NULL;
 
@@ -110,12 +110,12 @@ title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
 		Print( "Skill %i, [%i]%s (%i)\n", i, SortedSkills[i].Skill, SkillStatList[SortedSkills[i].Skill].Name, GetSkillName( SKILL_FIRSTSKILL + SortedSkills[i].Skill ) );
 #endif*/
 
-	//Find a title
-	title_t *pBestTitle = &DefaultTitle;
+//Find a title
+	title_t* pBestTitle = &DefaultTitle;
 
 	for (int i = 0; i < Titles.size(); i++)
 	{
-		title_t &Title = Titles[i];
+		title_t& Title = Titles[i];
 		bool SkillsAreValid = true;
 		for (int s = 0; s < Title.SkillsReq.size(); s++)
 		{
@@ -132,7 +132,7 @@ title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
 		Print( "Title: %s Skill #%i, [%i]%s (%i/%i)\n", STRING(Title.Name), s, Title.SkillsReq[s], GetSkillName( SKILL_FIRSTSKILL + Skills[Skill].Skill ), Skills[Skill].Value, Title.MinLevel );
 #endif*/
 
-			//Is this skill the highest skill? (If x skills are required, then is it one of the top x skills?)
+//Is this skill the highest skill? (If x skills are required, then is it one of the top x skills?)
 			bool IsHighestSkill = false;
 			for (int h = 0; h < Title.SkillsReq.size(); h++)
 				if (SortedSkills[h].Skill == Skill)
@@ -154,39 +154,39 @@ title_t *CTitleManager::GetPlayerTitle(CBasePlayer *pPlayer)
 		//Is this the first valid title, or is this title better than the previous best title?
 		if (!pBestTitle ||												 //First valid title
 			(pBestTitle &&												 //Previous title exists
-			 ((Title.SkillsReq.size() > pBestTitle->SkillsReq.size()) || //This title is better because it requires more skills
-			  (Title.MinLevel > pBestTitle->MinLevel))					 //This title is better because it requires a higher level
-			 ))
+				((Title.SkillsReq.size() > pBestTitle->SkillsReq.size()) || //This title is better because it requires more skills
+					(Title.MinLevel > pBestTitle->MinLevel))					 //This title is better because it requires a higher level
+				))
 			pBestTitle = &Title;
 	}
 
 	return pBestTitle;
 }
 
-const char *CBasePlayer::GetTitle()
+const char* CBasePlayer::GetTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if( !CustomTitle.contains("NONESET") )
+	if (!CustomTitle.contains("NONESET"))
 		return CustomTitle;
 	else
 	{
 		//Old Way
-		title_t *pTitle = CTitleManager::GetPlayerTitle( this );
-		if( pTitle ) return pTitle->Name;
+		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+		if (pTitle) return pTitle->Name;
 		return "Unknown";
 	}
 }
 
-const char *CBasePlayer::GetFullTitle()
+const char* CBasePlayer::GetFullTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if( !CustomTitle.contains("NONESET") )
+	if (!CustomTitle.contains("NONESET"))
 		return CustomTitle;
 	else
 	{
 		//Old Way
-		title_t *pTitle = CTitleManager::GetPlayerTitle( this );
-		if( pTitle )
+		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+		if (pTitle)
 		{
 			static msstring Title;   //Format: "<skilllevel> Title"
 
@@ -194,11 +194,11 @@ const char *CBasePlayer::GetFullTitle()
 
 			int SkillLevel = 0;
 			int SkillsReq = pTitle->SkillsReq.size();
-			if( SkillsReq )   //Only add the skill level if this title requires skills
+			if (SkillsReq)   //Only add the skill level if this title requires skills
 			{
-				for( int s = 0; s < SkillsReq; s++ )
+				for (int s = 0; s < SkillsReq; s++)
 				{
-					SkillLevel += GetSkillStat( pTitle->SkillsReq[s] );
+					SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
 				}
 				SkillLevel /= SkillsReq;
 
@@ -248,7 +248,7 @@ void CBasePlayer::InitialSpawn(void)
 	if (m_Initialized)
 		return;
 
-		//MiB JUN2010_17 - Reset the chosen arrow for the client
+	//MiB JUN2010_17 - Reset the chosen arrow for the client
 #ifndef VALVE_DLL
 	player.m_ChosenArrow = NULL;
 #endif
@@ -264,7 +264,7 @@ void CBasePlayer::InitialSpawn(void)
 
 	dbg("Call Script Spawn");
 
-//Load the script file and precache all models/sounds it uses
+	//Load the script file and precache all models/sounds it uses
 #ifdef VALVE_DLL
 	bool fScriptSpawned = Script_Add(PLAYER_SCRIPT, this) ? true : false;
 
@@ -285,11 +285,11 @@ void CBasePlayer::InitialSpawn(void)
 
 	for (int i = 0; i < CGlobalScriptedEffects::Effects.size(); i++)
 	{
-		globalscripteffect_t &Effect = CGlobalScriptedEffects::Effects[i];
+		globalscripteffect_t& Effect = CGlobalScriptedEffects::Effects[i];
 		if (!FBitSet(Effect.m_Flags, SCRIPTEFFECT_PLAYERACTION))
 			continue;
 
-		CScript *Script = CGlobalScriptedEffects::ApplyEffect(Effect.m_ScriptName, this, this);
+		CScript* Script = CGlobalScriptedEffects::ApplyEffect(Effect.m_ScriptName, this, this);
 		if (!Script)
 			continue;
 
@@ -310,22 +310,22 @@ void CBasePlayer::InitialSpawn(void)
   ���������   It also allows translation to the female versions of the sound
 */
 
-void CBasePlayer ::PlaySound(int channel, const char *sample, float volume, bool fGenderSpecific, float attenuation)
+void CBasePlayer::PlaySound(int channel, const char* sample, float volume, bool fGenderSpecific, float attenuation)
 {
 	char SoundName[128];
-	 strncpy(SoundName,  sample, sizeof(SoundName) );
+	strncpy(SoundName, sample, sizeof(SoundName));
 
 	if (fGenderSpecific && m_Gender == GENDER_FEMALE)
 	{
-		const char *pszStart = strstr(sample, "player/");
+		const char* pszStart = strstr(sample, "player/");
 		if (pszStart)
 		{
 			pszStart += 7;
 			int iLeftLen = pszStart - sample;
 			char cTemp1[128];
-			strncpy(cTemp1,  sample, sizeof(cTemp1) );
+			strncpy(cTemp1, sample, sizeof(cTemp1));
 			cTemp1[iLeftLen] = 0;
-			_snprintf(SoundName, sizeof(SoundName),  "%sfemale%s",  cTemp1,  pszStart );
+			_snprintf(SoundName, sizeof(SoundName), "%sfemale%s", cTemp1, pszStart);
 		}
 	}
 
@@ -335,7 +335,7 @@ void CBasePlayer ::PlaySound(int channel, const char *sample, float volume, bool
 //
 // Add an item to the player (Item == Weapon == Selectable Object)
 //
-bool CBasePlayer::AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, int ForceHand)
+bool CBasePlayer::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int ForceHand)
 {
 	if (CMSMonster::AddItem(pItem, ToHand, CheckWeight, ForceHand))
 	{
@@ -362,7 +362,7 @@ bool CBasePlayer::AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, in
 //-3 if item is too big
 //-4 if a hand is available, but a hand swap is needed first
 //If
-int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbose, bool FreeHands, char *pszErrorString)
+int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbose, bool FreeHands, char* pszErrorString)
 {
 	//Returns the hand (or -1) of where the new item can be held
 	//bNonVerbose == TRUE means don't say anything just return the value
@@ -445,7 +445,7 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 					if (!Hand(PrefHand) || Hand(PrefHand)->PutAway(false))
 					{
 						//Check if the other hand is holding a two-handed item
-						CGenericItem *pOtherHand = Hand(OtherHand);
+						CGenericItem* pOtherHand = Hand(OtherHand);
 						if (pOtherHand && pOtherHand->m_PrefHand == BOTH_HANDS)
 						{
 							if (pOtherHand->PutAway(false)) //Try to get rid of the two-handed item
@@ -456,7 +456,7 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 					}
 				}
 
-				 strncpy(cHandStr,  "your hands are full", sizeof(cHandStr) );
+				strncpy(cHandStr, "your hands are full", sizeof(cHandStr));
 			}
 		}
 		else if (pItem->m_PrefHand == BOTH_HANDS)
@@ -473,7 +473,7 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 				}
 			}
 
-			 strncpy(cHandStr,  "you need both hands available", sizeof(cHandStr) );
+			strncpy(cHandStr, "you need both hands available", sizeof(cHandStr));
 		}
 
 		if (Success)
@@ -481,7 +481,7 @@ int CBasePlayer::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbos
 		else
 		{
 			if (bVerbose)
-				 _snprintf(cErrorString, sizeof(cErrorString),  "You can't get %s because %s!",  SPEECH_GetItemName(pItem),  cHandStr );
+				_snprintf(cErrorString, sizeof(cErrorString), "You can't get %s because %s!", SPEECH_GetItemName(pItem), cHandStr);
 			iAddHand = -2;
 		}
 	}
@@ -500,7 +500,7 @@ int CBasePlayer::NumItems(void)
 	int TotalItems = Gear.size() - 1;
 	for (int i = 0; i < Gear.size(); i++)
 	{
-		CGenericItem *pPack = Gear[i];
+		CGenericItem* pPack = Gear[i];
 		for (int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			++TotalItems;
@@ -510,7 +510,7 @@ int CBasePlayer::NumItems(void)
 }
 
 //Weight check
-bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorString)
+bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorString)
 {
 	bool Success = true;
 
@@ -544,7 +544,7 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 	if (TotalItems >= MaxItems)
 	{
 		if (bVerbose)
-			strncpy(cErrorString,  "You are carrying too many items.", sizeof(cErrorString) );
+			strncpy(cErrorString, "You are carrying too many items.", sizeof(cErrorString));
 		pItem->pev->origin = pev->origin;
 		Success = false;
 	}
@@ -559,7 +559,7 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 	if (pItem->Weight() + Weight() > Volume())
 	{
 		if (bVerbose)
-			_snprintf(cErrorString, sizeof(cErrorString),  "The %s would make your equipment too heavy!",  pItem->DisplayName() );
+			_snprintf(cErrorString, sizeof(cErrorString), "The %s would make your equipment too heavy!", pItem->DisplayName());
 		pItem->pev->origin = pev->origin; //Thothie - attempting to stop items that are too heavy from going to oblivion
 		Success = false;
 	}
@@ -628,7 +628,7 @@ bool CBasePlayer::CanHold(CGenericItem *pItem, bool bVerbose, char *pszErrorStri
 					   from its owner.  Set to FALSE if you're just removing
 					   it from the player's hands (to wear it or something)
 */
-bool CBasePlayer::RemoveItem(CGenericItem *pItem)
+bool CBasePlayer::RemoveItem(CGenericItem* pItem)
 {
 	if (PlayerHands == pItem)
 		PlayerHands = NULL;
@@ -642,7 +642,7 @@ bool CBasePlayer::RemoveItem(CGenericItem *pItem)
 // PutInPack - puts the item in the specified hand into the
 // specified pack.
 //=========================================================
-bool CBasePlayer::PutInPack(int iHand, CGenericItem *pContainer, bool bVerbose)
+bool CBasePlayer::PutInPack(int iHand, CGenericItem* pContainer, bool bVerbose)
 {
 #ifdef VALVE_DLL
 	bVerbose = false;
@@ -661,7 +661,7 @@ bool CBasePlayer::PutInPack(int iHand, CGenericItem *pContainer, bool bVerbose)
 	return PutInPack(Hand(iHand), pContainer, bVerbose);
 }
 
-bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool bVerbose)
+bool CBasePlayer::PutInPack(CGenericItem* pItem, CGenericItem* pContainer, bool bVerbose)
 {
 	if (!pItem->PutInPack(pContainer))
 	{
@@ -680,7 +680,7 @@ bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool 
 
 	//RemovePlayerItem() gets called from the Item's PutInPack( ) function
 	char sz[32];
-	strncpy(sz,  SPEECH_GetItemName(pItem), sizeof(sz) );
+	strncpy(sz, SPEECH_GetItemName(pItem), sizeof(sz));
 	if (bVerbose)
 		SendInfoMsg("You put %s in %s\n", sz, SPEECH_GetItemName(pContainer));
 #ifndef VALVE_DLL
@@ -689,15 +689,15 @@ bool CBasePlayer::PutInPack(CGenericItem *pItem, CGenericItem *pContainer, bool 
 	return true;
 }
 
-CGenericItem *CBasePlayer::CanPutInAnyPack(CGenericItem *pItem, bool bVerbose)
+CGenericItem* CBasePlayer::CanPutInAnyPack(CGenericItem* pItem, bool bVerbose)
 {
 	return pItem->FindPackForItem(this, bVerbose);
 }
 
-bool CBasePlayer::PutInAnyPack(CGenericItem *pItem, bool bVerbose)
+bool CBasePlayer::PutInAnyPack(CGenericItem* pItem, bool bVerbose)
 {
 	int PackCount = 0;
-	CGenericItem *pFirstPack = NULL;
+	CGenericItem* pFirstPack = NULL;
 	for (int i = 0; i < Gear.size(); i++)
 		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) &&
 			Gear[i]->m_Location != ITEMPOS_HANDS)
@@ -709,7 +709,7 @@ bool CBasePlayer::PutInAnyPack(CGenericItem *pItem, bool bVerbose)
 	if (PackCount == 1) //Only one pack found, use it
 		return PutInPack(pItem, pFirstPack, bVerbose);
 
-	CGenericItem *pPack = CanPutInAnyPack(pItem, bVerbose);
+	CGenericItem* pPack = CanPutInAnyPack(pItem, bVerbose);
 
 	if (pPack)
 		return PutInPack(pItem, pPack, bVerbose);
@@ -781,7 +781,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		return false;
 	}*/
 
-	CGenericItem *pUse = Hand(iUseHand);
+	CGenericItem* pUse = Hand(iUseHand);
 
 	dbg("Call UseItem");
 	if (pUse && !pUse->UseItem(bVerbose))
@@ -928,7 +928,7 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 }*/
 
 //Items could be anywhere on the player (hands, worn, inside pack etc)
-bool CBasePlayer::DropItem(CGenericItem *pDropItem, bool ForceDrop, bool Verbose)
+bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose)
 {
 	if (!pDropItem)
 		return false;
@@ -943,10 +943,18 @@ bool CBasePlayer::DropItem(CGenericItem *pDropItem, bool ForceDrop, bool Verbose
 		{
 			if (Verbose)
 			{
-				if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
-					SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pDropItem) + " spell is canceled");
-				else
-					SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
+				if (pDropItem->bDropAttempted) {
+					if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
+						SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pDropItem) + " spell is canceled");
+					else
+						SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
+				}
+				else {
+					if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
+						SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to cancel ") + SPEECH_GetItemName(pDropItem));
+					else
+						SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
+				}
 			}
 
 			UTIL_MakeVectorsPrivate(pev->angles, gpGlobals->v_forward, NULL, NULL);
@@ -1080,13 +1088,13 @@ int CBasePlayer::SkillAvg()
 	return iTemp;
 }
 
-void CBasePlayer::SendInfoMsg(char *msg, ...)
+void CBasePlayer::SendInfoMsg(char* msg, ...)
 {
 	if (!IsNetClient() || !m_fGameHUDInitialized)
 		return;
 
 	static char string[1024];
-	va_list argptr;	
+	va_list argptr;
 	va_start(argptr, msg);
 	vsnprintf(string, sizeof(string), msg, argptr);
 	va_end(argptr);
@@ -1132,8 +1140,8 @@ void CBasePlayer::SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring
 	}
 
 #ifdef VALVE_DLL
-//Send the help msg in parts.  First send all the parts.  Then send a message that shows the parts, all put together
-//This gets around the 192 message size limit in HL
+	//Send the help msg in parts.  First send all the parts.  Then send a message that shows the parts, all put together
+	//This gets around the 192 message size limit in HL
 #define MAX_PARTLEN 189 //192 - (byte: null terminator) - (byte: msg id) - (byte: part index) = 189
 	int iParts = (strlen(Text) / MAX_PARTLEN) + 1;
 	msstringlist Parts;
@@ -1163,13 +1171,13 @@ void CBasePlayer::SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring
 }
 
 static COLOR HUDEventColor[] =
-	{
-		COLOR(220, 220, 220, 0),		   //HUDEVENT_NORMAL
-		COLOR(160, 160, 160, 0),		   //HUDEVENT_UNABLE
-		COLOR(255 * 0.7, 170 * 0.7, 0, 0), //HUDEVENT_ATTACK
-		COLOR(240, 0, 0, 0),			   //HUDEVENT_ATTACKED
-		COLOR(0, 240, 0, 0),			   //HUDEVENT_GREEN
-		COLOR(0, 0, 240, 0),			   //HUDEVENT_BLUE
+{
+	COLOR(220, 220, 220, 0),		   //HUDEVENT_NORMAL
+	COLOR(160, 160, 160, 0),		   //HUDEVENT_UNABLE
+	COLOR(255 * 0.7, 170 * 0.7, 0, 0), //HUDEVENT_ATTACK
+	COLOR(240, 0, 0, 0),			   //HUDEVENT_ATTACKED
+	COLOR(0, 240, 0, 0),			   //HUDEVENT_GREEN
+	COLOR(0, 0, 240, 0),			   //HUDEVENT_BLUE
 };
 
 void CBasePlayer::SendEventMsg(msstring_ref Text)
@@ -1182,7 +1190,7 @@ void CBasePlayer::SendEventMsg(hudevent_e HudEvent, msstring_ref Text)
 	SendEventMsg(HUDEventColor[HudEvent], Text);
 }
 
-void CBasePlayer::SendEventMsg(COLOR &color, msstring_ref Text)
+void CBasePlayer::SendEventMsg(COLOR& color, msstring_ref Text)
 {
 #ifdef VALVE_DLL
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
@@ -1196,14 +1204,14 @@ void CBasePlayer::SendEventMsg(COLOR &color, msstring_ref Text)
 #endif
 }
 
-CGenericItem *CBasePlayer::ActiveItem()
+CGenericItem* CBasePlayer::ActiveItem()
 {
 	return Hand(m_CurrentHand);
 }
 
 int CBasePlayer::ActiveItemHand()
 {
-	CGenericItem *pActiveItem = ActiveItem();
+	CGenericItem* pActiveItem = ActiveItem();
 	if (!pActiveItem)
 		return -1;
 
@@ -1211,10 +1219,10 @@ int CBasePlayer::ActiveItemHand()
 }
 
 //Switchs to a held item as the current item
-bool CBasePlayer ::SwitchHands(int iHand, bool bVerbose)
+bool CBasePlayer::SwitchHands(int iHand, bool bVerbose)
 {
-	CGenericItem *pPrevActiveItem = ActiveItem();
-	CGenericItem *pNewItem = Hand(iHand);
+	CGenericItem* pPrevActiveItem = ActiveItem();
+	CGenericItem* pNewItem = Hand(iHand);
 #ifdef VALVE_DLL
 	if (!pNewItem)
 	{
@@ -1247,7 +1255,7 @@ bool CBasePlayer ::SwitchHands(int iHand, bool bVerbose)
 
 	m_CurrentHand = iHand;
 
-	CGenericItem *pActiveItem = ActiveItem(); //This item is the new active item
+	CGenericItem* pActiveItem = ActiveItem(); //This item is the new active item
 	//Hand[iCurrentHand]->iGetMethod = METHOD_SWITCHEDHANDS;
 	if (pActiveItem)
 	{
@@ -1331,9 +1339,9 @@ void CBasePlayer::BlockButton(int Button)
 	ClearBits(pbs.ButtonsDown, Button);
 }
 
-void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
+void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 {
-	spellgroup_v &SpellList = m_SpellList;
+	spellgroup_v& SpellList = m_SpellList;
 
 	for (int s = 0; s < SpellList.size(); s++) //Already know this spell?
 		if (SpellList[s] == pszSpellScript)
@@ -1348,16 +1356,16 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 	WRITE_STRING_LIMIT(pszSpellScript, WRITE_STRING_MAX);
 	MESSAGE_END();
 
-/*	MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev );
-			WRITE_SHORT( SpellList.size() );					//Number of spells
-			WRITE_SHORT( fVerbose ? SpellList.size() : 0 );		//If Verbose: Which spell was learned (incremented by 1 | 0 = Non-verbose)
-			 for (int s = 0; s < SpellList.size(); s++)
-				WRITE_STRING( SpellList[s] );				//Spell scriptname
-		MESSAGE_END();		*/
+	/*	MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev );
+				WRITE_SHORT( SpellList.size() );					//Number of spells
+				WRITE_SHORT( fVerbose ? SpellList.size() : 0 );		//If Verbose: Which spell was learned (incremented by 1 | 0 = Non-verbose)
+				 for (int s = 0; s < SpellList.size(); s++)
+					WRITE_STRING( SpellList[s] );				//Spell scriptname
+			MESSAGE_END();		*/
 #else
 	if (fVerbose)
 	{
-		CGenericItem *pTempSpell = CGenericItemMgr::GetGlobalGenericItemByName( pszSpellScript, true );
+		CGenericItem* pTempSpell = CGenericItemMgr::GetGlobalGenericItemByName(pszSpellScript, true);
 		if (pTempSpell)
 		{
 			SendEventMsg(HUDEVENT_NORMAL, msstring("You memorize the ") + pTempSpell->DisplayName() + " spell");
@@ -1366,7 +1374,7 @@ void CBasePlayer::LearnSpell(const char *pszSpellScript, bool fVerbose)
 #endif
 }
 
-storage_t *CBasePlayer::Storage_GetStorage(msstring_ref pszStorageName)
+storage_t* CBasePlayer::Storage_GetStorage(msstring_ref pszStorageName)
 {
 	for (int s = 0; s < m_Storages.size(); s++)
 		if (m_Storages[s].Name == pszStorageName)
@@ -1374,16 +1382,16 @@ storage_t *CBasePlayer::Storage_GetStorage(msstring_ref pszStorageName)
 
 	return NULL;
 }
-storage_t *CBasePlayer::Storage_CreateAccount(storage_t &Storage)
+storage_t* CBasePlayer::Storage_CreateAccount(storage_t& Storage)
 {
-	storage_t *pExistingStorage = Storage_GetStorage(Storage.Name);
+	storage_t* pExistingStorage = Storage_GetStorage(Storage.Name);
 	if (pExistingStorage)
 		return pExistingStorage;
 
 	return &m_Storages.add(Storage);
 }
 
-bool CBasePlayer::Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event)
+bool CBasePlayer::Script_SetupEvent(CScript* Script, SCRIPT_EVENT& Event)
 {
 	//SetScriptVar( "game.monster.current_anim.uselegs", strlen(m_szAnimLegs) > 0 );
 
@@ -1410,7 +1418,7 @@ msstring CBasePlayer::AuthID()
 
 void CBasePlayer::PreLoadChars(int CharIdx)
 {
-//Reload the Character list, for players entering server
+	//Reload the Character list, for players entering server
 #ifdef VALVE_DLL
 	if (!MSGlobals::ServerSideChar)
 		return;
@@ -1428,26 +1436,26 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	{
 		charloc_e Location = LOC_SERVER;
 #else
-		charloc_e Location = LOC_CLIENT;
+	charloc_e Location = LOC_CLIENT;
 #endif
 
-		//Load all characters from file, locally
+	//Load all characters from file, locally
 
-		for (int i = 0; i < MAX_CHARSLOTS; i++)
-		{
-			charinfo_t &Char = m_CharInfo[i];
-			CPlayer_DataBuffer gFile;
-			if (gFile.ReadFromFile(GetSaveFileName(i, this), "rb", true))
-				Char.AssignChar(i, Location, (char *)gFile.m_Buffer, gFile.GetFileSize(), this);
-			else
-				Char.Status = CDS_NOTFOUND;
-		}
+	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	{
+		charinfo_t& Char = m_CharInfo[i];
+		CPlayer_DataBuffer gFile;
+		if (gFile.ReadFromFile(GetSaveFileName(i, this), "rb", true))
+			Char.AssignChar(i, Location, (char*)gFile.m_Buffer, gFile.GetFileSize(), this);
+		else
+			Char.Status = CDS_NOTFOUND;
+	}
 
 #ifdef VALVE_DLL
 	}
 
-	//Start checking m_CharInfo for new char data
-	m_TimeSendCharInfo = gpGlobals->time;
+//Start checking m_CharInfo for new char data
+m_TimeSendCharInfo = gpGlobals->time;
 #endif
 }
 
@@ -1459,7 +1467,7 @@ void charinfo_t::Destroy()
 	memset(this, 0, sizeof(*this));
 }
 
-void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char *pData, int iDataLen, CBasePlayer *pPlayer)
+void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pData, int iDataLen, CBasePlayer* pPlayer)
 {
 	Destroy();
 
@@ -1497,8 +1505,8 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char *pDat
 
 		for (int i = 0; i < CharData.m_Items.size(); i++) //Determine what model/body my gear is using
 		{
-			genericitem_full_t &Item = CharData.m_Items[i];
-			CGenericItem *pItem = (CGenericItem *)Item;
+			genericitem_full_t& Item = CharData.m_Items[i];
+			CGenericItem* pItem = (CGenericItem*)Item;
 			if (!pItem)
 				continue;
 
@@ -1551,12 +1559,12 @@ charinfo_t::~charinfo_t()
 	Destroy();
 }
 
-char *GetOtherPlayerTransition(CBasePlayer *pPlayer)
+char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
 {
 #ifdef VALVE_DLL
 	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
-		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+		CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 		if (!pOtherPlayer || pOtherPlayer == pPlayer)
 			continue;
 
