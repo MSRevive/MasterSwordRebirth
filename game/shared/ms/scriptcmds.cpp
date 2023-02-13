@@ -4722,7 +4722,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			MESSAGE_END();
 		}
 
-		if (actFile.len() <= 0)
+		if (actFile.contains("stop.mp3"))
 		{
 			//Get Error (SERVER): Error: ClientCommand --> here, but it works
 			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
