@@ -6,6 +6,8 @@
 
 int CHudMusic::Init()
 {
+	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
+
 	if (m_MP3.Initialize())
 	{
 		return 1;
