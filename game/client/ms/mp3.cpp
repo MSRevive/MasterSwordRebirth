@@ -1,7 +1,7 @@
 //mp3 support added by Killar
 
-#include "../hud.h"
-#include "../cl_util.h"
+#include "hud.h"
+#include "cl_util.h"
 #include "mp3.h"
 
 int CMP3::Initialize()

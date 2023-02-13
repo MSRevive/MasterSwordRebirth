@@ -4643,7 +4643,7 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	return true;
 }
 
-//playmp3 <player|all> <minutes> <file> [range]
+//playmp3 <player|all> <file> [fade] [range] 
 //- scope: server
 //- Plays music on client. If called by an NPC, player must be within [range] to be affected.
 bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
@@ -4656,20 +4656,19 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	//NOV2014_12 - todo: Rebuild and simplify this
 	bool specific_player = false;
 	float song_range = 0.0;
+	float fadeTime = 0.0;
 	msstring &Name = Params[0];
 	//msstring &InMinutes = Params[1];
 	//float SMinutes = atof(InMinutes);
+	msstring actFile = "music/";
 	msstring &SFile = Params[1];
-	float &fadeTime = Params[2];
-	mslist<song_t> t_Songs;
-	song_t Song;
-	if ( t_Songs.size() ) t_Songs.clear( );
-	Song.Name = SFile;
-	Song.Length = UTIL_StringToSecs(Params[1].c_str()); //DEC2014_21 Thothie - Centralizing music/time conversion
+	actFile.append(SFile);
 
-	//Song.Length = (SMinutes * 60.f) + atof(SongSeconds)/60.0f;
-	//Song.Length = (atof(SongMinutes) * 60.f) + atof(SongSeconds)/60.0f;
-	t_Songs.add( Song );
+	if ( Params.size() >= 2 )
+	{
+		msstring &Fade = Params[2];
+		fadeTime = atof(Fade);
+	}
 
 	if ( Params.size() >= 3 )
 	{
@@ -4690,7 +4689,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pPlayer ) continue;
 
-		ALERT( at_aiconsole, "Music Req: %s min %f range %f\n", Song.Name.c_str(), Song.Length, song_range );
+		//ALERT( at_aiconsole, "Music Req: %s min %f range %f\n", Song.Name.c_str(), Song.Length, song_range );
 
 		float Dist = (m.pScriptedEnt->pev->origin - pPlayer->pev->origin).Length();
 		if ( Dist > song_range && song_range > 0 ) continue;
@@ -4705,31 +4704,32 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC_LENGTH", UTIL_VarArgs("%f"),Song.Length);
 		//Thothie NOV2014_12 - friendlier method
 		ParamList.clearitems( );
-		ParamList.add( Song.Name.c_str() );
-		ParamList.add( FloatToString(Song.Length) );
+		ParamList.add( actFile.c_str() );
+		ParamList.add( FloatToString(fadeTime) );
+		ParamList.add( FloatToString(song_range) );
 		ParamList.add( "0" );
 		pPlayer->CallScriptEvent( "game_music", &ParamList );
 
 		//Thothie - OCT2010_13 - fixed this to work directly
 		//- it was using pPlayer->Music_Stop/Music_Play before, and these are designed to work only with the msarea_music entity
 		//- (plus it was calling it on the wrong entity)
-		if ( Song.Length > 0 )
+		if (actFile.len() > 0)
 		{
 			//ALERT( at_aiconsole, "SMinutes > 0 PLAYING" );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 0 );
-			WRITE_STRING( t_Songs[s].Name );
+			WRITE_STRING( actFile );
 			MESSAGE_END();
 		}
 
-		if ( Song.Length <= 0 )
+		if (actFile.len() <= 0)
 		{
 			//Get Error (SERVER): Error: ClientCommand --> here, but it works
 			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
 			//pPlayer->Music_Stop( m.pScriptedEnt );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 1 );
-			WRITE_FLOAT()
+			WRITE_FLOAT( fadeTime )
 			MESSAGE_END();
 		}
 	}

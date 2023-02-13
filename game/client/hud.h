@@ -615,7 +615,7 @@ public:
 	CHudHealth *m_Health;
 	CHudFatigue *m_Fatigue;
 	CHudMagic *m_Magic;
-	CHudMusic* m_Music;
+	CHudMusic *m_Music;
 	CHudAction *m_Action;
 	CHudMenu *m_Menu;
 	CHudScript *m_HUDScript;

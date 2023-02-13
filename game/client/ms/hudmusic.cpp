@@ -1,23 +1,26 @@
-#include "hudmusic.h"
+#include <windows.h>
+#include <mmsystem.h>
 #include "inc_huditem.h"
+#include "sharedutil.h"
+#include "hudmusic.h"
 
-int CHudMusic::Initalize(void)
+int CHudMusic::Init()
 {
 	if (m_MP3.Initialize())
 	{
-		HOOK_COMMAND("stopmp3", m_MP3.StopMP3);
 		return 1;
 	}
 }
 
-void CHudMusic::Shutdown(void)
+void CHudMusic::Shutdown()
 {
 	m_MP3.Shutdown();
 }
 
-void CHudMusic::Think(void)
+int CHudMusic::Redraw(float flTime, int intermission)
 {
 	m_MP3.Frame();
+	return 1;
 }
 
 void CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
@@ -28,6 +31,11 @@ void CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	case 0:
 		m_MP3.PlayMP3(READ_STRING());
 	case 1:
-		m_MP3.StopMP3(0);
+		m_MP3.StopMP3(READ_FLOAT());
 	}
+}
+
+void CHudMusic::StopMusic()
+{
+	m_MP3.StopMP3(0);
 }

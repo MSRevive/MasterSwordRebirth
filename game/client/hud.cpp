@@ -47,7 +47,6 @@
 #include "ms/clglobal.h"
 #include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
-#include "ms/mp3.h"
 //-----------------
 
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
@@ -255,7 +254,7 @@ int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 	strncpy(ptr->Name,  #type, 32 )
 	 
 // This is called every time the DLL is loaded
-void CHud ::Init(void)
+void CHud::Init(void)
 {
 	//MasterSword Initializations:
 	//ClientCmd( "r_shadows 1" );
@@ -394,7 +393,7 @@ void CHud ::Init(void)
 
 // CHud destructor
 // cleans up memory allocated for m_rg* arrays
-CHud ::~CHud()
+CHud::~CHud()
 {
 	delete[] m_rghSprites;
 	delete[] m_rgrcRects;
@@ -412,7 +411,7 @@ CHud ::~CHud()
 		m_pHudList = NULL;
 	}
 
-	m_Misc->FreeMemory();
+	m_Music->Shutdown();
 	ServersShutdown();
 }
 
@@ -420,7 +419,7 @@ CHud ::~CHud()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array
 // returns 0 if sprite not found
-int CHud ::GetSpriteIndex(const char *SpriteName)
+int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
 	for (int i = 0; i < m_iSpriteCount; i++)
@@ -432,7 +431,122 @@ int CHud ::GetSpriteIndex(const char *SpriteName)
 	return -1; // invalid sprite
 }
 
-void CHud ::VidInit(void)
+// Redraw
+// step through the local data,  placing the appropriate graphics & text as appropriate
+// returns 1 if they've changed, 0 otherwise
+int CHud::Redraw(float flTime, int intermission)
+{
+	//Print( "Time: %f\n", flTime );
+	m_fOldTime = m_flTime; // save time of previous redraw
+	m_flTime = flTime;
+	m_flTimeDelta = (double)m_flTime - m_fOldTime;
+	static float m_flShotTime = 0;
+
+	// Clock was reset, reset delta
+	if (m_flTimeDelta < 0)
+	{
+		m_flTimeDelta = 0;
+	}
+
+	// Bring up the scoreboard during intermission
+	if (gViewPort)
+	{
+		if (m_iIntermission && !intermission)
+		{
+			// Have to do this here so the scoreboard goes away
+			m_iIntermission = intermission;
+			gViewPort->HideCommandMenu();
+			gViewPort->HideScoreBoard();
+		}
+		else if (!m_iIntermission && intermission)
+		{
+			gViewPort->HideCommandMenu();
+			gViewPort->ShowScoreBoard();
+
+			// Take a screenshot if the client's got the cvar set
+			//if ( CVAR_GET_FLOAT( "hud_takesshots" ) != 0 )
+			//	m_flShotTime = flTime + 1.0;	// Take a screenshot in a second
+		}
+	}
+
+	if (m_flShotTime && m_flShotTime < flTime)
+	{
+		gEngfuncs.pfnClientCmd("snapshot\n");
+		m_flShotTime = 0;
+	}
+
+	m_iIntermission = intermission;
+
+	// if no redrawing is necessary
+	// return 0;
+
+	HUDLIST *pList = m_pHudList;
+
+	while (pList)
+	{
+		if (!intermission)
+		{
+			if ((pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL))
+				pList->p->Draw(flTime);
+		}
+		else
+		{ // it's an intermission,  so only draw hud elements that are set to draw during intermissions
+			if (pList->p->m_iFlags & HUD_INTERMISSION)
+				pList->p->Draw(flTime);
+		}
+
+		pList = pList->pNext;
+	}
+
+	// are we in demo mode? do we need to draw the logo in the top corner?
+	// if (m_iLogo)
+	// {
+	// 	int x, y, i;
+
+	// 	if (m_hsprLogo == 0)
+	// 		m_hsprLogo = LoadSprite("sprites/%d_logo.spr");
+
+	// 	SPR_Set(m_hsprLogo, 250, 250, 250);
+
+	// 	x = SPR_Width(m_hsprLogo, 0);
+	// 	x = ScreenWidth - x;
+	// 	y = SPR_Height(m_hsprLogo, 0) / 2;
+
+	// 	// Draw the logo at 20 fps
+	// 	int iFrame = (int)(flTime * 20) % MAX_LOGO_FRAMES;
+	// 	i = grgLogoFrame[iFrame] - 1;
+
+	// 	SPR_DrawAdditive(i, x, y, NULL);
+	// }
+
+	/*
+	if ( g_iVisibleMouse )
+	{
+		void IN_GetMousePos( int *mx, int *my );
+		int mx, my;
+
+		IN_GetMousePos( &mx, &my );
+		
+		if (m_hsprCursor == 0)
+		{
+			char sz[256];
+			 strncpy(sz,  "sprites/cursor.spr", sizeof(sz) );
+			m_hsprCursor = SPR_Load( sz );
+		}
+
+		SPR_Set(m_hsprCursor, 250, 250, 250 );
+		
+		// Draw the logo at 20 fps
+		SPR_DrawAdditive( 0, mx, my, NULL );
+	}
+	*/
+
+	m_Music->Redraw(flTime, intermission);
+
+	return 1;
+}
+
+void CHud::VidInit(void)
 {
 	startdbg;
 

@@ -64,10 +64,6 @@ int CHudMisc::Init(void)
 	return 1;
 }
 
-void CHudMisc::FreeMemory(void)
-{
-}
-
 void CHudMisc::Reset(void) 
 {
 }
