@@ -4824,7 +4824,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			//pPlayer->Music_Stop( m.pScriptedEnt );
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
 			WRITE_BYTE( 1 );
-			WRITE_FLOAT( fadeTime )
+			WRITE_FLOAT( fadeTime );
 			MESSAGE_END();
 		}
 	}

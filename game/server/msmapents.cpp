@@ -399,14 +399,12 @@ public:
 			{
 				ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
 				m_Songs[0].Name = main_song;
-				m_Songs[0].Length = main_song_length;
 			}
 			else
 			{
 				ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
 				song_t Song;
 				Song.Name = main_song;
-				Song.Length = main_song_length;
 				m_Songs.add(Song);
 			}
 		}
@@ -415,8 +413,7 @@ public:
 		Params.clearitems();
 		Params.add("0"); //gm_set_idle_music ignores first var, in case it comes from scriptevent
 		Params.add(m_Songs[0].Name.c_str());
-		Params.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
-		Params.add("3");
+		Params.add("2");
 
 		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
@@ -459,7 +456,6 @@ public:
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue);
 			m_Songs.add(Song);
 		}
 		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
@@ -778,14 +774,12 @@ public:
 				{
 					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
 					m_Songs[0].Name = main_song;
-					m_Songs[0].Length = main_song_length;
 				}
 				else
 				{
 					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
 					song_t Song;
 					Song.Name = main_song;
-					Song.Length = main_song_length;
 					m_Songs.add(Song);
 				}
 			}
@@ -829,7 +823,6 @@ public:
 				else
 				{
 					Parameters.add(m_Songs[0].Name.c_str());
-					Parameters.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
 				}
 			}
 			Parameters.add(playnow ? "1" : "0");
@@ -852,7 +845,6 @@ public:
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
 			m_Songs.add(Song);
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
