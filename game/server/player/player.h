@@ -534,7 +534,7 @@ public:
 	void Storage_Send();
 	void Music_Play(songplaylist &Songs, CBaseEntity *pMusicArea);
 	void Music_Stop(CBaseEntity *pMusicArea);
-	bool LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
+	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, msstring_ref Name, msstring_ref Data);
 	float TraceAttack(damage_t &Damage);
