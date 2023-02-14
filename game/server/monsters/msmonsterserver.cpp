@@ -2708,16 +2708,17 @@ void CMSMonster::ReportAIState()
 				 it checks whether it should advance his stats
 */
 
-bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
+std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 {
 	float LearnMultiplier = 1.0;
+	int iExpRemaining = EnemySkillLevel;
 
 	CStat* pStat = FindStat(iStat);
 	if (!pStat)
-		return false;
+		return std::make_tuple(false, 0);
 
 	if (iStatType >= (signed)pStat->m_SubStats.size())
-		return false;
+		return std::make_tuple(false, 0);
 
 	//if ( pStat->Value() >= CHAR_LEVEL_CAP ) return false; //Thoth DEC2008a level cap
 
@@ -2728,7 +2729,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 	{
 		//Don't go looking for a better option if it's a spell-stat or parry
 		if (pStat->m_SubStats.size() == 1 || pStat->m_SubStats.size() > 3)
-			return false;
+			return std::make_tuple(false, 0);
 
 		//Look through the other SubStats for one that's not at the cap, yet.
 		//Not random, but good enough.
@@ -2741,19 +2742,33 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 		}
 
 		if (SubStat.Value >= CHAR_LEVEL_CAP)
-			return false;
+			return std::make_tuple(false, 0);
 	}
 	//MiB JAN2010_15 Global Level Cap [/END]
+	int iExpHandout = max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
 
-	SubStat.Exp += max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
-	//ALERT( at_console, "Exp: %i %i\n", pStat->Exp[iStatType],  GetSkillStat( sStatName, iStatType )  );
-	//ALERT( at_console, "Exp: %f \n", SubStat.Exp ); //thothie attempting to get total XP
-
+	//moved up since it's needed here
 	int OldVal = SubStat.Value;
 	long double ExpNeeded = GetExpNeeded(OldVal);
 	//ALERT( at_console, "Exp: %i/%i\n", pStat->Exp[iStatType],  ExpNeeded  );
 	//Must use long double variables because a typecast to it won't work correctly
 	long double ExpLeft = SubStat.Exp - ExpNeeded;
+
+	if (iExpHandout > (int)abs(ExpLeft) && (int)abs(ExpLeft) != 0) {
+		iExpHandout = abs(ExpLeft);
+	}
+	else if ((int)abs(ExpLeft) == 0) {
+		iExpHandout = 1;
+	}
+	else if (iExpHandout == 0) {
+		iExpHandout = 0;
+	}
+
+	SubStat.Exp += iExpHandout;
+	iExpRemaining -= iExpHandout;
+
+	//ALERT( at_console, "Exp: %i %i\n", pStat->Exp[iStatType],  GetSkillStat( sStatName, iStatType )  );
+	//ALERT( at_console, "Exp: %f \n", SubStat.Exp ); //thothie attempting to get total XP
 
 	//Shuriken - Message to send the Exp because it gets f'd up at high levels.
 	//Thothie AUG2007a - this causes crash when monster kills monster (message not client)
@@ -2771,12 +2786,13 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 	}
 
 	if (ExpLeft < 0)
-		return false;
+		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
 	if (SubStat.Value > STATPROP_MAX_VALUE)
 		SubStat.Value = STATPROP_MAX_VALUE;
 	SubStat.Exp = 0;
+
 	//Thothie - why's this here twice? I dont see where oldval could change.
 	if (OldVal > 25)
 	{
@@ -2790,7 +2806,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 		}
 	}
 
-	return true;
+	return std::make_tuple(true, iExpRemaining);
 }
 
 float CMSMonster::GetBodyDist(Vector Point, float Radius)

@@ -441,7 +441,7 @@ public:
 	void CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtraData);
 	float GetBodyDist(Vector Point, float Radius);
 
-	virtual bool LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
+	virtual std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	virtual bool LearnSkill(int iStat, int EnemySkillLevel) { return false; }
 
 	virtual BOOL CanSetVelocity();
