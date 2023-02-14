@@ -416,6 +416,7 @@ public:
 	int CurrentMenu;
 	PlayerButtonStruct pbs;
 	float m_SprintDelay;
+	bool bSprintDelayWarned = false;
 	char m_szAnimTorso[32], //The current torso anim to use
 		m_szAnimLegs[32];	//The current leg anim to use
 	float m_TimeResetLegs;	//Hold the attack legs anim until this time

@@ -435,13 +435,16 @@ void IN_ForwardDown(void)
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
 	}
+	else {
+		lastMoveForward = gpGlobals->time;
+	}
 		
 	gHUD.m_Spectator.HandleButtonsDown(IN_FORWARD);
 }
 
 void IN_ForwardUp(void)
 {
-	lastMoveForward = gpGlobals->time;
+	// lastMoveForward = gpGlobals->time; Setting this on the downstroke already. With this in just means if you release to stop sprinting you are already at step 1 of trying to sprint again.
 	KeyUp(&in_forward);
 	gHUD.m_Spectator.HandleButtonsUp(IN_FORWARD);
 }
