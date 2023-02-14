@@ -2,9 +2,12 @@
 #include "sharedutil.h"
 #include "hudmusic.h"
 
+MS_DECLARE_MESSAGE(m_Music, Music);
+
 int CHudMusic::Init()
 {
 	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
+	HOOK_MESSAGE(Music);
 
 	if (m_MP3.Initialize())
 	{
@@ -26,7 +29,7 @@ int CHudMusic::Redraw(float flTime, int intermission)
 	return 1;
 }
 
-void CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
+int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 {
 	logfile << Logger::LOG_INFO << "PLAY MUSIC MSG\n";
 	BEGIN_READ(pbuf, iSize);
@@ -42,6 +45,8 @@ void CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	case 1:
 		m_MP3.StopMP3(READ_FLOAT());
 	}
+
+	return 1;
 }
 
 void CHudMusic::StopMusic()
