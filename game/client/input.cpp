@@ -423,14 +423,15 @@ static float lastMoveLeftUp = 0;   // The last time Left was released
 static float lastMoveRightUp = 0;  //              Right
 static float lastMoveBackUp = 0;   //               Back
 static float lastMoveForward = 0;
-static const float tapDelay = 0.4; // The higher the amount, the longer the player has to hit left/right/back for a second time
 
 void IN_ForwardDown(void)
 {
 	KeyDown(&in_forward);
 
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay"); // trying to load it before this crashes, trying to load it inline returns 0. I don't know why.
+
 	//we handle double tap to sprint in via inputs now.
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + 0.2 >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + cvar_flDtapDelay >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
@@ -456,7 +457,9 @@ void IN_BackDown(void)
 	KeyDown(&in_back);
 	gHUD.m_Spectator.HandleButtonsDown(IN_BACK);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("back");
 }
 
@@ -477,7 +480,9 @@ void IN_MoveleftDown(void)
 	KeyDown(&in_moveleft);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVELEFT);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("left");
 }
 
@@ -493,7 +498,9 @@ void IN_MoverightDown(void)
 	KeyDown(&in_moveright);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVERIGHT);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("right");
 }
 
