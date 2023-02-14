@@ -3,9 +3,9 @@
 #ifndef MP3_H
 #define MP3_H
 
+#include <windows.h>
 #include "fmod.h"
 #include "fmod_errors.h"
-#include <windows.h>
 
 class CMP3
 {
@@ -41,5 +41,4 @@ public:
 	void	Frame();
 };
 
-extern CMP3 gMP3;
 #endif
