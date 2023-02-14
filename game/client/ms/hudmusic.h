@@ -13,8 +13,6 @@ public:
 	void Shutdown(void);
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
 
-	void StopMusic(void);
-
 private:
 	CMP3 m_MP3;
 };

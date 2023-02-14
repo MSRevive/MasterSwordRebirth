@@ -4781,19 +4781,20 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		ParamList.add( "0" );
 		pPlayer->CallScriptEvent( "game_music", &ParamList );
 
+		if (Song.Name.contains("stop.mp3"))
+		{
+			Log("stop playmp3");
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+			WRITE_BYTE(1);
+			WRITE_FLOAT(fadeTime);
+			MESSAGE_END();
+		}
+
 		if (Song.Name.len() > 0)
 		{
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
 			WRITE_BYTE(0);
 			WRITE_STRING(Song.Name.c_str());
-			MESSAGE_END();
-		}
-
-		if (Song.Name.contains("stop.mp3"))
-		{
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-			WRITE_BYTE(1);
-			WRITE_FLOAT(fadeTime);
 			MESSAGE_END();
 		}
 	}
