@@ -14,7 +14,7 @@
 #include "../hud.h"
 #include "../cl_util.h"
 #include "../vgui_teamfortressviewport.h"
-
+	
 //Master Sword
 #include "vgui_storebuy.h"
 #include "logger.h"
