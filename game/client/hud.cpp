@@ -245,8 +245,8 @@ int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 
 int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 {
-  gHUD.MsgFunc_ViewModel(pszName, iSize, pbuf);
-  return 1;
+	gHUD.MsgFunc_ViewModel(pszName, iSize, pbuf);
+	return 1;
 }
 
 #define SetMSHUD(ptr, type) \
