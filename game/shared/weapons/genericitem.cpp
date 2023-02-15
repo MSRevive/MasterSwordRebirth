@@ -982,9 +982,11 @@ bool CGenericItem::UseItem(bool Verbose)
 	if (CurrentAttack)
 		return false;
 
-	//Don't do anything to spells
-	if (FBitSet(MSProperties(), ITEM_SPELL))
-		return false;
+	//"Drop" spells to cancel them when sheathed
+	if (FBitSet(MSProperties(), ITEM_SPELL)) {
+		this->Drop();
+		return true;
+	}
 
 	if (Verbose && !CanPutinInventory())
 		return false;
@@ -1301,8 +1303,8 @@ bool CGenericItem::CanDrop()
 	if (m_PrefHand == HAND_PLAYERHANDS)
 		return false;
 
-	if (!Spell_CanAttack())
-		return false;
+	// if (!Spell_CanAttack())
+	// 	return false;
 #endif
 
 	return true;

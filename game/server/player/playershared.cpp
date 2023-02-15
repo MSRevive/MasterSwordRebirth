@@ -794,6 +794,9 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		return false;
 	}
 
+	if (pUse && pUse->SpellData)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pUse) + " spell is canceled");
+
 	enddbg;
 
 	return true;
