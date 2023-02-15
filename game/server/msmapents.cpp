@@ -717,7 +717,6 @@ public:
 		//send script command to player, unless global, then GM
 	}
 };
-
 LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
 //[end] Thothie NOV2014_07 msarea_music_dynamic for CBM system
 
@@ -841,7 +840,7 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
+		if (sTemp.contains(".mp3"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
@@ -857,16 +856,10 @@ public:
 			main_song = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
-			pkvd->fHandled = TRUE;
-		}
 		else
 			CBaseEntity::KeyValue(pkvd);
 	}
 };
-
 LINK_ENTITY_TO_CLASS(msarea_music, CAreaMusic);
 
 struct monster_data_t
