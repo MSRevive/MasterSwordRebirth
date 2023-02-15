@@ -12,7 +12,7 @@ int CMP3::Initialize()
 	char fmodlib[256];
 
 	m_iIsPlaying = 0;
-	snprintf(fmodlib, sizeof(fmodlib), "%s/cl_dlls/fmod.dll", gEngfuncs.pfnGetGameDirectory());
+	_snprintf(fmodlib, sizeof(fmodlib), "%s/cl_dlls/fmod.dll", gEngfuncs.pfnGetGameDirectory());
 	// replace forward slashes with backslashes
 	for( int i=0; i < 256; i++ )
 		if( fmodlib[i] == '/' ) fmodlib[i] = '\\';
