@@ -388,10 +388,6 @@ public:
 	//IScripted
 	void Script_Setup();																				  //Ties m_pScriptActions and m_pScriptConditions to
 	bool Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params); //Runs a single command
-
-	//Drop double checking
-	bool bDropAttempted = false;
-	int iDropTickCounter = 0;
 };
 #ifdef VALVE_DLL
 void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage);
