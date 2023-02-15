@@ -11,7 +11,6 @@ int CHudMusic::Init(void)
 
 	if (m_MP3.InitFMOD())
 	{
-		m_MP3.PlayAmbientSound("ara.mp3");
 		return 1;
 	}
 
