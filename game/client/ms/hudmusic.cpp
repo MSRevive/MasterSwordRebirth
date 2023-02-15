@@ -9,9 +9,9 @@ int CHudMusic::Init(void)
 	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
 	HOOK_MESSAGE(Music);
 
-	if (m_MP3.Initialize())
+	if (m_MP3.InitFMOD())
 	{
-		//m_MP3.PlayMP3("music/ara.mp3");
+		m_MP3.PlayAmbientSound("ara.mp3");
 		return 1;
 	}
 
@@ -20,13 +20,12 @@ int CHudMusic::Init(void)
 
 void CHudMusic::Shutdown(void)
 {
-	m_MP3.Shutdown();
+	m_MP3.ExitFMOD();
 }
 
-int CHudMusic::Redraw(float flTime, int intermission)
+void CHudMusic::Think()
 {
-	m_MP3.Frame();
-	return 1;
+	m_MP3.FadeThink();
 }
 
 int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
@@ -36,13 +35,11 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	switch (iCmd) {
 	case 0:
 	{
-		std::string musicFile = READ_STRING();
-		std::transform(musicFile.begin(), musicFile.end(), musicFile.begin(), [](unsigned char ch) {return std::tolower(ch); });
-		std::string songPath = "music/" + musicFile;
-		m_MP3.PlayMP3(songPath);
+		char *musicFile = READ_STRING();
+		m_MP3.TransitionAmbientSounds(musicFile); //sound engine handles the including of dir now.
 	}
 	case 1:
-		m_MP3.StopMP3(READ_FLOAT());
+		m_MP3.StopAmbientSound();
 	}
 
 	return 1;

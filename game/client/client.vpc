@@ -37,7 +37,7 @@ $Configuration
 
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty"
+		$AdditionalIncludeDirectories	";$BASE;./;$SRCDIR/utils/vgui/include;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared\weapons;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\server;$SRCDIR\game\server\hl;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./ms;$SRCDIR\thirdparty;"
 		$PreprocessorDefinitions		"$BASE;ISCLIENT;CLIENT_WEAPONS;DISCORD_DYNAMIC_LIB;VERSION_SAFE_STEAM_API_INTERFACES;USE_BREAKPAD_HANDLER"
 	}
 
@@ -222,6 +222,12 @@ $Project "Client"
 		$File "$SRCDIR\thirdparty\SDL2\SDL_video.h"
 		$File "$SRCDIR\public\steam\steamtypes.h"	
 	}
+
+	$Folder "FMOD"
+	{
+		$File "fmod\soundengine.cpp"
+		$File "fmod\soundengine.h"
+	}
 	
 	$Folder	"MS"
 	{
@@ -248,10 +254,6 @@ $Project "Client"
 		$File "$SRCDIR\thirdparty\tartan\tgaloader.cpp"		
 		$File "richpresence.cpp"
 		$File "richpresence.h"
-		$File "ms/fmod.h"
-		$File "ms/fmod_errors.h"
-		$File "ms/mp3.cpp"
-		$File "ms/mp3.h"
 		
 		$Folder	"Generic Item"
 		{
@@ -407,5 +409,6 @@ $Project "Client"
 		$ImpLib     SDL2
 		$ImpLib		discord-rpc
 		$ImpLib 	steam_api
+		$ImpLib		fmod_vc
  	}
 }
