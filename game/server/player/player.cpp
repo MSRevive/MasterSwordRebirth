@@ -6729,57 +6729,7 @@ void CBasePlayer::Storage_Send()
 		}
 	}
 }
-void CBasePlayer::Music_Play(mslist<song_t> &Songs, CBaseEntity *pMusicArea)
-{
-	//NOV2014_12 - Dont think this is used by msarea_music anymore
-	//likely still used by mstrig_music, which maybe should be undone
 
-	if (m_MusicArea && m_MusicArea.Entity()->Intersects(this))
-		return; //I'm already standing within a music area
-
-	//AUG2013_13 Thothie - moved to event for better handling
-	//using index 0 SHOULD be safe, as SFAIK, no msarea_music uses multiple tracks
-	static msstringlist Params;
-	Params.clearitems();
-	Params.add(Songs[0].Name.c_str());
-	Params.add(FloatToString(Songs[0].Length));
-	//Thothie NOV2014_10 - allow game_music to set idle music, when touching msarea_music
-	msstring caller_type = STRING(pMusicArea->pev->classname);
-	Print("DEBUG: Music_Play Caller %s", caller_type.c_str());
-	if (caller_type.starts_with("msarea_music"))
-		Params.add("1");
-	CallScriptEvent("game_music", &Params);
-
-	if (Songs[0].Name.contains("!prev_music"))
-	{
-		Songs[0].Name = GetFirstScriptVar("PLR_PREV_MUSIC");
-		Songs[0].Length = atoi(GetFirstScriptVar("PLR_PREV_MUSIC_LENGTH"));
-	}
-
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pev);
-	WRITE_BYTE(0);
-	WRITE_BYTE(Songs.size());
-	for (int i = 0; i < Songs.size(); i++)
-	{
-		//SetScriptVar("PLR_CURRENT_MUSIC", Songs[i].Name.c_str()); //Thothie JAN2013_08 - (moved to event, see above)
-		WRITE_STRING_LIMIT(Songs[i].Name, WRITE_STRING_MAX);
-		WRITE_FLOAT(Songs[i].Length);
-	}
-	MESSAGE_END();
-
-	m_MusicArea = pMusicArea;
-}
-void CBasePlayer::Music_Stop(CBaseEntity *pMusicArea)
-{
-	if (m_MusicArea && m_MusicArea.Entity()->Intersects(this))
-		return; //I'm already standing within a music area
-
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pev);
-	WRITE_BYTE(1);
-	MESSAGE_END();
-
-	m_MusicArea = pMusicArea;
-}
 void CBasePlayer::SaveChar()
 {
 	//Save right now
