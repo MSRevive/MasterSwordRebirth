@@ -181,12 +181,11 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 
 	// find the closest matching scheme file to our resolution
 	char token[1024];
-	char *pFile = (char *)LoadFileByResolution("", xRes, "_textscheme.txt");
+	char* pFile = (char*)LoadFileByResolution("", xRes, "_textscheme.txt");
+	char* pFileStart = pFile;
 	m_xRes = xRes;
 
-	char *pFileStart = pFile;
-
-	byte *pFontData;
+	byte* pFontData;
 	int fontFileLength;
 	char fontFilename[512];
 

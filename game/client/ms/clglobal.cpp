@@ -109,6 +109,8 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_sprinttoggle", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletapsprint", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_doubletap_delay", "0.2", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
+
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);
@@ -310,6 +312,7 @@ byte *MSCLGlobals::LoadFile(char *pFileName, int *pLength)
 {
 	return gEngfuncs.COM_LoadFile(pFileName, 5, pLength);
 }
+
 string_t MSCLGlobals::AllocString(const char *pszString)
 {
 	if (!pszString)

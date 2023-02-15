@@ -416,6 +416,7 @@ public:
 	int CurrentMenu;
 	PlayerButtonStruct pbs;
 	float m_SprintDelay;
+	bool bSprintDelayWarned = false;
 	char m_szAnimTorso[32], //The current torso anim to use
 		m_szAnimLegs[32];	//The current leg anim to use
 	float m_TimeResetLegs;	//Hold the attack legs anim until this time
@@ -532,7 +533,9 @@ public:
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
 	void Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStorageName, float flFeeRatio, entityinfo_t &Entity);
 	void Storage_Send();
-	bool LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
+	void Music_Play(songplaylist &Songs, CBaseEntity *pMusicArea);
+	void Music_Stop(CBaseEntity *pMusicArea);
+	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, msstring_ref Name, msstring_ref Data);
 	float TraceAttack(damage_t &Damage);

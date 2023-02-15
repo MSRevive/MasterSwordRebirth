@@ -898,7 +898,7 @@ bool CHudSpectator::ParseOverviewFile()
 	char token[1024];
 	float height;
 
-	char *pfile = NULL;
+	char* pFile = NULL, * pStart = NULL;
 
 	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 
@@ -913,19 +913,19 @@ bool CHudSpectator::ParseOverviewFile()
 	m_OverviewData.zoom = 1.0f;
 	m_OverviewData.layers = 0;
 	m_OverviewData.layersHeights[0] = 0.0f;
-	 strncpy(m_OverviewData.map,  gEngfuncs.pfnGetLevelName(), sizeof(m_OverviewData.map) );
+	strncpy(m_OverviewData.map, gEngfuncs.pfnGetLevelName(), sizeof(m_OverviewData.map));
 
 	if (strlen(m_OverviewData.map) == 0)
 		return false; // not active yet
 
-	 strncpy(levelname,  m_OverviewData.map + 5, sizeof(levelname) );
+	strncpy(levelname, m_OverviewData.map + 5, sizeof(levelname));
 	levelname[strlen(levelname) - 4] = 0;
 
-	 _snprintf(filename, sizeof(filename),  "overviews/%s.txt",  levelname );
+	_snprintf(filename, sizeof(filename), "overviews/%s.txt", levelname);
 
-	pfile = (char *)gEngfuncs.COM_LoadFile(filename, 5, NULL);
+	pFile = pStart = (char*)gEngfuncs.COM_LoadFile(filename, 5, NULL);
 
-	if (!pfile)
+	if (!pFile)
 	{
 		gEngfuncs.Con_Printf("Couldn't open file %s. Using default values for overiew mode.\n", filename);
 		return false;
@@ -933,62 +933,65 @@ bool CHudSpectator::ParseOverviewFile()
 
 	while (true)
 	{
-		pfile = gEngfuncs.COM_ParseFile(pfile, token);
+		pStart = gEngfuncs.COM_ParseFile(pStart, token);
 
-		if (!pfile)
+		if (!pStart)
 			break;
 
 		if (!stricmp(token, "global"))
 		{
 			// parse the global data
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pStart = gEngfuncs.COM_ParseFile(pStart, token);
+
 			if (stricmp(token, "{"))
 			{
+				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
 				return false;
 			}
 
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pStart = gEngfuncs.COM_ParseFile(pStart, token);
 
 			while (stricmp(token, "}"))
 			{
 				if (!stricmp(token, "zoom"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.zoom = atof(token);
 				}
 				else if (!stricmp(token, "origin"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.origin[0] = atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.origin[1] = atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.origin[2] = atof(token);
 				}
 				else if (!stricmp(token, "rotated"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.rotated = atoi(token);
 				}
 				else if (!stricmp(token, "inset"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.insetWindowX = atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.insetWindowY = atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.insetWindowWidth = atof(token);
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					m_OverviewData.insetWindowHeight = atof(token);
 				}
 				else
 				{
+					gEngfuncs.COM_FreeFile(pFile);
 					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token);
 					return false;
 				}
 
-				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
+				pStart = gEngfuncs.COM_ParseFile(pStart, token); // parse next token
 			}
 		}
 		else if (!stricmp(token, "layer"))
@@ -997,47 +1000,50 @@ bool CHudSpectator::ParseOverviewFile()
 
 			if (m_OverviewData.layers == OVERVIEW_MAX_LAYERS)
 			{
+				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. ( too many layers )\n", filename);
 				return false;
 			}
 
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pStart = gEngfuncs.COM_ParseFile(pStart, token);
 
 			if (stricmp(token, "{"))
 			{
+				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
 				return false;
 			}
 
-			pfile = gEngfuncs.COM_ParseFile(pfile, token);
+			pStart = gEngfuncs.COM_ParseFile(pStart, token);
 
 			while (stricmp(token, "}"))
 			{
 				if (!stricmp(token, "image"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					strncpy(m_OverviewData.layersImages[m_OverviewData.layers], token, 255);
 				}
 				else if (!stricmp(token, "height"))
 				{
-					pfile = gEngfuncs.COM_ParseFile(pfile, token);
+					pStart = gEngfuncs.COM_ParseFile(pStart, token);
 					height = atof(token);
 					m_OverviewData.layersHeights[m_OverviewData.layers] = height;
 				}
 				else
 				{
+					gEngfuncs.COM_FreeFile(pFile);
 					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token);
 					return false;
 				}
 
-				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
+				pStart = gEngfuncs.COM_ParseFile(pStart, token); // parse next token
 			}
 
 			m_OverviewData.layers++;
 		}
 	}
 
-	gEngfuncs.COM_FreeFile(pfile);
+	gEngfuncs.COM_FreeFile(pFile);
 
 	m_mapZoom = m_OverviewData.zoom;
 	m_mapOrigin = m_OverviewData.origin;
