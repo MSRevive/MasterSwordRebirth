@@ -39,7 +39,7 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
 	}
 	case 1:
-		m_MP3.StopMusic();
+		m_MP3.StopMusic(true);
 	}
 
 	return 1;
