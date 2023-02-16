@@ -63,7 +63,10 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				break;
 			case DT_DIR:
 				if (g_Verbose)
-					printf("Reading Directory: %s\n", cFullPath);
+					printf("Reading Directory: %s\n", ent->d_name);
+				
+				if (g_Release && !stricmp(ent->d_name, "developer"))
+					continue;
 
 				readDirectory(cFullPath, cooked);
 				break;
