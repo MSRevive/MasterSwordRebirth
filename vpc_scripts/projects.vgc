@@ -20,7 +20,7 @@ $Project "client"
 
 $Project "scriptpack"
 {
-	"utils\scriptpack\scriptpack.vpc" [$WIN32]
+	"utils\scriptpack\scriptpack.vpc"
 }
 
 $Project "maphash"
