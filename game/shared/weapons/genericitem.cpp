@@ -1303,11 +1303,8 @@ bool CGenericItem::CanDrop()
 	if (m_PrefHand == HAND_PLAYERHANDS)
 		return false;
 
-	/*
-	if (!Spell_CanAttack())
-		return false;
-	*/
-
+	// if (!Spell_CanAttack())
+	// 	return false;
 #endif
 
 	return true;
