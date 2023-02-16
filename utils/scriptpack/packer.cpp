@@ -250,8 +250,8 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 		//only run this stuff if we're doing full parser.
 		if (!errOnly)
 		{
-			parser.stripDebug();
 			parser.stripWhitespace();
+			parser.stripDebug();
 		}
 
 		//do error print at the end
