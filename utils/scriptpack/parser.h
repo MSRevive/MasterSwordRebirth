@@ -153,7 +153,6 @@ public:
 
 		while(getline(ss, line))
 		{
-			std::string sub = line.substr(0, 3);
 			if (line.substr(0, 3) != "dbg")
 			{
 				newRes += line;
