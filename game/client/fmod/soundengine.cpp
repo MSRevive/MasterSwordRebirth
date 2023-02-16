@@ -97,7 +97,7 @@ bool CSoundEngine::FadeThink( void )
 			}
 			else
 			{
-				m_pChannel->setVolume( 0.0 );
+				m_pChannel->stop(); //stop channel when fadeout is done.
 				m_bFadeOut = false;
 				m_fFadeDelay = 0.0;
 			}
@@ -200,17 +200,24 @@ bool CSoundEngine::PlayMusic( const char* pszSong, bool fadeIn )
 }
 
 // Abruptly stops playing all ambient sounds
-void CSoundEngine::StopMusic()
+void CSoundEngine::StopMusic(bool fadeOut)
 {
-	m_pChannel->stop();
+	if (fadeOut)
+	{
+		m_pChannel->setVolume(m_fVolume);
+		m_bFadeOut = true;
+	}
+	else
+		m_pChannel->stop();
+
 	m_CurSound = "NULL";
 }
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CSoundEngine::TransitionMusic( const char* pszSong )
+void CSoundEngine::TransitionMusic(const char* pszSong)
 {
-	m_pChannel->setVolume( m_fVolume );
+	m_pChannel->setVolume(m_fVolume);
 	m_TranSound = pszSong;
 
 	m_bFadeOut = true;

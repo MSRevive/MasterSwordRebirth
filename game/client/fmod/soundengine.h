@@ -25,7 +25,7 @@ public:
 	bool IsPlaying();
 
 	bool PlayMusic( const char* pszSong, bool fadeIn = false );
-	void StopMusic();
+	void StopMusic(bool fadeOut = false);
 	void TransitionMusic( const char* pszSong );
 
 	FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
