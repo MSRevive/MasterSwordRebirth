@@ -41,5 +41,6 @@ $Project "scriptpack"
 		$File "dirent.h"
 		$File "cbase.h"
 		$File "parser.h"
+		$File "compat".h
 	}
 }
