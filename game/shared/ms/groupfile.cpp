@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
-#include "extdll.h"
+//#include "extdll.h"
 #endif
 
 #include "groupfile.h"
