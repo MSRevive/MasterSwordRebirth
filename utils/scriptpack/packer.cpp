@@ -24,13 +24,20 @@ Packer::Packer(char *wDir, char *rDir, char *oDir)
 
 	if (g_Release)
 	{
-		try {
-			CreateDirectory(m_CookedDir, NULL);
-		}catch(...)
+		if (!Compat::makePath(std::string(m_CookedDir)))
 		{
 			printf("Failed to create %s\n", m_CookedDir);
 			exit(-1);
 		}
+		/*
+		try {
+			CreateDirectory(m_CookedDir, NULL);
+			
+		}catch(...)
+		{
+			printf("Failed to create %s\n", m_CookedDir);
+			exit(-1);
+		}*/
 	}
 }
 
