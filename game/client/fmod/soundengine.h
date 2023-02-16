@@ -22,11 +22,11 @@ public:
 
 	bool FadeThink();
 
-	bool IsSoundPlaying( const char* pszSong );
+	bool IsPlaying();
 
-	bool PlayAmbientSound( const char* pszSong, bool fadeIn = false );
-	void StopAmbientSound( bool fadeOut = true );
-	void TransitionAmbientSounds( const char* pszSong );
+	bool PlayMusic( const char* pszSong, bool fadeIn = false );
+	void StopMusic();
+	void TransitionMusic( const char* pszSong );
 
 	FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
 

@@ -57,6 +57,8 @@ bool CSoundEngine::InitFMOD( void )
 // Stops FMOD
 bool CSoundEngine::ExitFMOD( void )
 {
+	m_pChannel->stop();
+	m_pSound->release();
 	FMOD_RESULT	result = m_pSystem->release();
 
 	if (result != FMOD_OK)
@@ -66,9 +68,6 @@ bool CSoundEngine::ExitFMOD( void )
 	}
 	else
 		gEngfuncs.Con_Printf("FMOD system terminated successfully.\n");
-
-	m_pChannel->stop();
-	m_pSound->release();
 
 	return true;
 }
@@ -158,15 +157,19 @@ bool CSoundEngine::FadeThink( void )
 
 // Compares specified ambient sound with the current ambient sound being played
 // Returns true if they match, false if they do not or if no sound is being played
-bool CSoundEngine::IsSoundPlaying( const char* pszSong )
+bool CSoundEngine::IsPlaying()
 {
-	const char* currentSoundPlaying = GetCurrentSoundName();
-	return strcmp(currentSoundPlaying, pszSong) == 0;
+	bool *playing = false;
+	FMOD_RESULT	result = m_pChannel->isPlaying(playing);
+	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
+		return false;
+
+	return true;
 }
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
-bool CSoundEngine::PlayAmbientSound( const char* pszSong, bool fadeIn )
+bool CSoundEngine::PlayMusic( const char* pszSong, bool fadeIn )
 {
 	char songPath[256];
 	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong);
@@ -197,24 +200,15 @@ bool CSoundEngine::PlayAmbientSound( const char* pszSong, bool fadeIn )
 }
 
 // Abruptly stops playing all ambient sounds
-void CSoundEngine::StopAmbientSound( bool fadeOut )
+void CSoundEngine::StopMusic()
 {
-	if ( fadeOut )
-	{
-		m_pChannel->setVolume( m_fVolume );
-		m_bFadeOut = true;
-	}
-	else
-	{
-		m_pChannel->setVolume( m_fVolume );
-	}
-
+	m_pChannel->stop();
 	m_CurSound = "NULL";
 }
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CSoundEngine::TransitionAmbientSounds( const char* pszSong )
+void CSoundEngine::TransitionMusic( const char* pszSong )
 {
 	m_pChannel->setVolume( m_fVolume );
 	m_TranSound = pszSong;

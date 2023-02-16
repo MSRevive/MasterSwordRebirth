@@ -11,6 +11,7 @@ int CHudMusic::Init(void)
 
 	if (m_MP3.InitFMOD())
 	{
+		//m_MP3.PlayMusic("ara.mp3");
 		return 1;
 	}
 
@@ -35,10 +36,10 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	case 0:
 	{
 		char *musicFile = READ_STRING();
-		m_MP3.TransitionAmbientSounds(musicFile); //sound engine handles the including of dir now.
+		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
 	}
 	case 1:
-		m_MP3.StopAmbientSound();
+		m_MP3.StopMusic();
 	}
 
 	return 1;
