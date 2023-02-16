@@ -2239,7 +2239,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
 			ParametersB.add(Damage.sDamageType);
 			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
-			ParametersB.add(UTIL_VarArgs("%i", AccRoll));
+			ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
 			ParametersB.add(UTIL_VarArgs("%i", ParryValue));
 			CallScriptEvent("game_parry", &ParametersB);
 			if (pHandItem)
