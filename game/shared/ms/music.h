@@ -7,7 +7,6 @@
 struct song_t
 {
 	msstring Name;
-	float Length;
 };
 
 typedef mslist<song_t> songplaylist;
