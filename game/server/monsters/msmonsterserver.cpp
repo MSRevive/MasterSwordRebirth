@@ -2754,10 +2754,10 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 	//Must use long double variables because a typecast to it won't work correctly
 	long double ExpLeft = SubStat.Exp - ExpNeeded;
 
-	if (iExpHandout > (int)abs(ExpLeft) && (int)abs(ExpLeft) != 0) {
-		iExpHandout = abs(ExpLeft);
+	if (iExpHandout > (int)std::abs(ExpLeft) && (int)std::abs(ExpLeft) != 0) {
+		iExpHandout = std::abs(ExpLeft);
 	}
-	else if ((int)abs(ExpLeft) == 0) {
+	else if ((int)std::abs(ExpLeft) == 0) {
 		iExpHandout = 1;
 	}
 	else if (iExpHandout == 0) {
