@@ -14,7 +14,7 @@ CSoundEngine::CSoundEngine()
 	m_bShouldTransition = false;
 	m_bFadeIn = false;
 	m_bFadeOut = false;
-	m_fVolume = 1.0;
+	m_fVolume = CVAR_GET_FLOAT("MP3Volume");
 	m_pSystem = nullptr;
 	m_pSound = nullptr;
 	m_pChannel = nullptr;
