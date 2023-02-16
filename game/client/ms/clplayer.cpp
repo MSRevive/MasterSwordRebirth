@@ -226,16 +226,17 @@ void CBasePlayer::DoSprint()
 		return;
 
 	//sprint cooldown.
-	if (m_SprintDelay > gpGlobals->time) {
-		//always give the user feedback if they are trying to do something reasonable
-		//requires a bool as it will otherwise send you a message for every frame for 0.3 seconds.
-		if (!bSprintDelayWarned) {
-			//this fires immediately after you stop sprinting but it still gets the message across.
-			SendEventMsg(HUDEVENT_UNABLE, "You need to wait before sprinting again.");
-			bSprintDelayWarned = true;
-		}
-		return;
-	}
+	// if (!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) && (m_SprintDelay > gpGlobals->time)) 
+	// {
+	// 	//always give the user feedback if they are trying to do something reasonable
+	// 	//requires a bool as it will otherwise send you a message for every frame for 0.3 seconds.
+	// 	if (!bSprintDelayWarned) {
+	// 		//this fires immediately after you stop sprinting but it still gets the message across.
+	// 		SendEventMsg(HUDEVENT_UNABLE, "You need to wait before sprinting again.");
+	// 		bSprintDelayWarned = true;
+	// 	}
+	// 	return;
+	// }
 
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
@@ -260,10 +261,9 @@ void CBasePlayer::DoSprint()
 		//basically same as above, but more organized this way IMO.
 		if (!FBitSet(pbs.ButtonsDown, IN_FORWARD) || FBitSet(m_StatusFlags, PLAYER_MOVE_STOPRUN))
 		{
-
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg("You slow down and begin walking casually.");
-			m_SprintDelay = gpGlobals->time + 0.3; //0.3 second delay for sprinting
+			//m_SprintDelay = gpGlobals->time + 0.3; //0.3 second delay for sprinting
 		}
 
 		//ran out of stamina
@@ -280,14 +280,14 @@ void CBasePlayer::DoSprint()
 			(player.pev->velocity.Length2D() < fLastSpeed - 50))
 		{
 			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
-			m_SprintDelay = gpGlobals->time + 0.3;
+			//m_SprintDelay = gpGlobals->time + 0.3;
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
 			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
 		}
 	}
 
 	fLastSpeed = player.pev->velocity.Length2D();
-	bSprintDelayWarned = false;
+	//bSprintDelayWarned = false;
 }
 
 void CBasePlayer::CheckSpeed()
