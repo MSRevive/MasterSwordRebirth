@@ -4746,17 +4746,10 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 #ifdef VALVE_DLL
 	//NOV2014_12 - todo: Rebuild and simplify this
 	bool specific_player = false;
-	float fadeTime = 0.0;
 	msstring &Name = Params[0];
 	msstring &SFile = Params[1];
 	song_t Song;
 	Song.Name = SFile;
-
-	if ( Params.size() >= 2 )
-	{
-		msstring &Fade = Params[2];
-		fadeTime = atof(Fade);
-	}
 
 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
 	if ( !Name.starts_with("all") && pSpecificEnt )
@@ -4777,7 +4770,6 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		//Thothie NOV2014_12 - friendlier method
 		ParamList.clearitems( );
 		ParamList.add( Song.Name.c_str() );
-		ParamList.add( FloatToString(fadeTime) );
 		ParamList.add( "0" );
 		pPlayer->CallScriptEvent( "game_music", &ParamList );
 
@@ -4786,7 +4778,6 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			Log("stop playmp3");
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
 			WRITE_BYTE(1);
-			WRITE_FLOAT(fadeTime);
 			MESSAGE_END();
 		}
 
