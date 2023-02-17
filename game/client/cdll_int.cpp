@@ -23,6 +23,7 @@
 #include "netadr.h"
 #include "vgui_schememanager.h"
 #include "logger.h"
+#include "fmod/soundengine.h"
 #include <windows.h>
 
 //#define LOG_ALLEXPORTS //more exports in entity.cpp
@@ -51,6 +52,7 @@ extern "C"
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
+CSoundEngine gSoundEngine;
 TeamFortressViewport *gViewPort = NULL;
 extern float g_fMenuLastClosed;
 
@@ -353,6 +355,9 @@ void DLLEXPORT HUD_Init(void)
 	logfile << Logger::LOG_INFO << "[HUD_Init: gHUD.Init]\n";
 	dbg("Call gHUD.Init");
 	gHUD.Init();
+
+	if (gSoundEngine.InitFMOD())
+		logfile << Logger::LOG_INFO << "[HUD_Init: gSoundEngine.Init]\n";
 
 	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]\n";
 	dbg("Call Scheme_Init");
