@@ -47,12 +47,12 @@
 #include "ms/clglobal.h"
 #include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
+#include "fmod/soundengine.h"
 //-----------------
-
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
-
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
+CSoundEngine gSoundEngine;
 
 void ShutdownInput(void);
 
@@ -333,6 +333,9 @@ void CHud::Init(void)
 	m_iLogo = 0;
 	m_iFOV = 0;
 
+	if (gSoundEngine.InitFMOD())
+		logfile << Logger::LOG_INFO << "[HUD_Init: gSoundEngine.Init]\n";
+
 	CVAR_CREATE("zoom_sensitivity_ratio", "1.2", 0);
 	default_fov = CVAR_CREATE("default_fov", "90", 0);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
@@ -412,6 +415,7 @@ CHud::~CHud()
 	}
 
 	m_Music->Shutdown();
+	gSoundEngine.ExitFMOD();
 	ServersShutdown();
 }
 
