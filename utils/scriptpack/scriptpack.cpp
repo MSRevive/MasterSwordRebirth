@@ -1,7 +1,6 @@
 // 
 // Scriptpack.cpp : Defines the entry point for the console application.
 //
-
 #include <direct.h>
 #include <sys/types.h>
 #include <sys/stat.h>

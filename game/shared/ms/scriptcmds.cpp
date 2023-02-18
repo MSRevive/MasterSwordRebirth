@@ -4643,39 +4643,114 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	return true;
 }
 
-//playmp3 <player|all> <minutes> <file> [range]
+// bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
+// {
+// 	//Thothie MAY2007a
+// 	//playmp3 <target|all> <minutes> <file> [range]
+// 	//use 0 minutes to stop (minutes can also be in fractions, in theory, eg 1.1 = 1 minute & 6 seconds
+// 	//plays mp3s to players, range is optional, path to music not required (assumes music folder)
+// #ifdef VALVE_DLL
+// 	//NOV2014_12 - todo: Rebuild and simplify this
+// 	bool specific_player = false;
+// 	float song_range = 0.0;
+// 	msstring &Name = Params[0];
+// 	//msstring &InMinutes = Params[1];
+// 	//float SMinutes = atof(InMinutes);
+// 	msstring &SFile = Params[2];
+// 	mslist<song_t> t_Songs;
+// 	song_t Song;
+// 	if ( t_Songs.size() ) t_Songs.clear( );
+// 	Song.Name = SFile;
+// 	Song.Length = UTIL_StringToSecs(Params[1].c_str()); //DEC2014_21 Thothie - Centralizing music/time conversion
+
+// 	//Song.Length = (SMinutes * 60.f) + atof(SongSeconds)/60.0f;
+// 	//Song.Length = (atof(SongMinutes) * 60.f) + atof(SongSeconds)/60.0f;
+// 	t_Songs.add( Song );
+
+// 	if ( Params.size() >= 3 )
+// 	{
+// 		msstring &SRange = Params[3];
+// 		song_range = atof(SRange);
+// 	}
+// 	//CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
+// 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
+// 	if ( !Name.starts_with("all") && pSpecificEnt )
+// 	{
+// 		if ( pSpecificEnt->IsPlayer() ) specific_player = true;
+// 	}
+
+// 	//can't simply exchange pSpecificEnt for pPlayer, so even with a specific target, we still have to scan all and see if there's a match
+// 	static msstringlist ParamList;
+// 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+// 	{
+// 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
+// 		if ( !pPlayer ) continue;
+
+// 		ALERT( at_aiconsole, "Music Req: %s min %f range %f\n", Song.Name.c_str(), Song.Length, song_range );
+
+// 		float Dist = (m.pScriptedEnt->pev->origin - pPlayer->pev->origin).Length();
+// 		if ( Dist > song_range && song_range > 0 ) continue;
+// 		if ( specific_player )
+// 		{
+// 			//ALERT( at_aiconsole, "Specific search %i",i );
+// 			if ( pPlayer->entindex() != pSpecificEnt->entindex() ) continue;
+// 		}
+
+// 		//Thothie JAN2013_08 - store current musak in var
+// 		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC",Song.Name.c_str());
+// 		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC_LENGTH", UTIL_VarArgs("%f"),Song.Length);
+// 		//Thothie NOV2014_12 - friendlier method
+// 		ParamList.clearitems( );
+// 		ParamList.add( Song.Name.c_str() );
+// 		ParamList.add( FloatToString(Song.Length) );
+// 		ParamList.add( "0" );
+// 		pPlayer->CallScriptEvent( "game_music", &ParamList );
+
+// 		//Thothie - OCT2010_13 - fixed this to work directly
+// 		//- it was using pPlayer->Music_Stop/Music_Play before, and these are designed to work only with the msarea_music entity
+// 		//- (plus it was calling it on the wrong entity)
+// 		if ( Song.Length > 0 )
+// 		{
+// 			//ALERT( at_aiconsole, "SMinutes > 0 PLAYING" );
+// 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
+// 			WRITE_BYTE( 0 );
+// 			WRITE_BYTE( t_Songs.size() );
+// 			for( int s = 0; s < t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
+// 			{
+// 				WRITE_STRING( t_Songs[s].Name );
+// 				WRITE_FLOAT( t_Songs[s].Length );
+// 			}
+// 			MESSAGE_END();
+// 		}
+
+// 		if ( Song.Length <= 0 )
+// 		{
+// 			//Get Error (SERVER): Error: ClientCommand --> here, but it works
+// 			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
+// 			//pPlayer->Music_Stop( m.pScriptedEnt );
+// 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
+// 			WRITE_BYTE( 1 );
+// 			MESSAGE_END();
+// 		}
+// 	}
+// #endif
+
+// 	return true;
+// }
+
+//playmp3 <player|all> <file> [fade]
 //- scope: server
 //- Plays music on client. If called by an NPC, player must be within [range] to be affected.
 bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-	//Thothie MAY2007a
-	//playmp3 <target|all> <minutes> <file> [range]
-	//use 0 minutes to stop (minutes can also be in fractions, in theory, eg 1.1 = 1 minute & 6 seconds
-	//plays mp3s to players, range is optional, path to music not required (assumes music folder)
 #ifdef VALVE_DLL
 	//NOV2014_12 - todo: Rebuild and simplify this
 	bool specific_player = false;
-	float song_range = 0.0;
 	msstring &Name = Params[0];
-	//msstring &InMinutes = Params[1];
-	//float SMinutes = atof(InMinutes);
-	msstring &SFile = Params[2];
-	mslist<song_t> t_Songs;
+	msstring &SFile = Params[1];
 	song_t Song;
-	if ( t_Songs.size() ) t_Songs.clear( );
 	Song.Name = SFile;
-	Song.Length = UTIL_StringToSecs(Params[1].c_str()); //DEC2014_21 Thothie - Centralizing music/time conversion
 
-	//Song.Length = (SMinutes * 60.f) + atof(SongSeconds)/60.0f;
-	//Song.Length = (atof(SongMinutes) * 60.f) + atof(SongSeconds)/60.0f;
-	t_Songs.add( Song );
-
-	if ( Params.size() >= 3 )
-	{
-		msstring &SRange = Params[3];
-		song_range = atof(SRange);
-	}
-	//CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
 	if ( !Name.starts_with("all") && pSpecificEnt )
 	{
@@ -4689,50 +4764,24 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pPlayer ) continue;
 
-		ALERT( at_aiconsole, "Music Req: %s min %f range %f\n", Song.Name.c_str(), Song.Length, song_range );
-
-		float Dist = (m.pScriptedEnt->pev->origin - pPlayer->pev->origin).Length();
-		if ( Dist > song_range && song_range > 0 ) continue;
-		if ( specific_player )
-		{
-			//ALERT( at_aiconsole, "Specific search %i",i );
-			if ( pPlayer->entindex() != pSpecificEnt->entindex() ) continue;
-		}
-
-		//Thothie JAN2013_08 - store current musak in var
-		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC",Song.Name.c_str());
-		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC_LENGTH", UTIL_VarArgs("%f"),Song.Length);
 		//Thothie NOV2014_12 - friendlier method
 		ParamList.clearitems( );
 		ParamList.add( Song.Name.c_str() );
-		ParamList.add( FloatToString(Song.Length) );
-		ParamList.add( "0" );
 		pPlayer->CallScriptEvent( "game_music", &ParamList );
 
-		//Thothie - OCT2010_13 - fixed this to work directly
-		//- it was using pPlayer->Music_Stop/Music_Play before, and these are designed to work only with the msarea_music entity
-		//- (plus it was calling it on the wrong entity)
-		if ( Song.Length > 0 )
+		if (Song.Name.contains("stop.mp3"))
 		{
-			//ALERT( at_aiconsole, "SMinutes > 0 PLAYING" );
-			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
-			WRITE_BYTE( 0 );
-			WRITE_BYTE( t_Songs.size() );
-			for( int s = 0; s < t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
-			{
-				WRITE_STRING( t_Songs[s].Name );
-				WRITE_FLOAT( t_Songs[s].Length );
-			}
+			Log("stop playmp3");
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+			WRITE_BYTE(1);
 			MESSAGE_END();
 		}
 
-		if ( Song.Length <= 0 )
+		if (Song.Name.len() > 0)
 		{
-			//Get Error (SERVER): Error: ClientCommand --> here, but it works
-			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
-			//pPlayer->Music_Stop( m.pScriptedEnt );
-			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
-			WRITE_BYTE( 1 );
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+			WRITE_BYTE(0);
+			WRITE_STRING(Song.Name.c_str());
 			MESSAGE_END();
 		}
 	}

@@ -1,6 +1,8 @@
 #ifndef __HUDID
 #define __HUDID
+
 #include "hudbase.h"
+
 struct entinfo_t;
 
 class CHudID : public CHudBase
@@ -19,4 +21,5 @@ public:
 	float Alpha;
 	float TimeDecAlpha;
 };
+
 #endif //__HUDID

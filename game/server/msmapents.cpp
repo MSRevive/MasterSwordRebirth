@@ -387,7 +387,6 @@ class CMSMusic : public CPointEntity
 public:
 	mslist<song_t> m_Songs;
 	msstring main_song;
-	float main_song_length;
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		//if( !pActivator->IsPlayer() )
@@ -399,24 +398,19 @@ public:
 			{
 				ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
 				m_Songs[0].Name = main_song;
-				m_Songs[0].Length = main_song_length;
 			}
 			else
 			{
 				ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
 				song_t Song;
 				Song.Name = main_song;
-				Song.Length = main_song_length;
 				m_Songs.add(Song);
 			}
 		}
 
 		static msstringlist Params;
 		Params.clearitems();
-		Params.add("0"); //gm_set_idle_music ignores first var, in case it comes from scriptevent
 		Params.add(m_Songs[0].Name.c_str());
-		Params.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
-		Params.add("3");
 
 		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
@@ -455,21 +449,15 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
+		if (sTemp.contains(".mp3"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue);
 			m_Songs.add(Song);
 		}
 		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
 		{
 			main_song = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -642,19 +630,9 @@ public:
 			mt_idle = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "midlelen"))
-		{
-			mt_idle_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
-			pkvd->fHandled = TRUE;
-		}
 		else if (FStrEq(pkvd->szKeyName, "mcombat"))
 		{
 			mt_combat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "mcombatlen"))
-		{
-			mt_combat_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
 			pkvd->fHandled = TRUE;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playall"))
@@ -699,19 +677,15 @@ public:
 
 		static msstringlist Params;
 		Params.clearitems();
-		if (strcmp(mt_global.c_str(), "1") == 0)
-			Params.add(EntToString(pOther));
 		Params.add(mt_idle.c_str());
-		Params.add(atof(mt_idle_length) > 0 ? FloatToString(atof(mt_idle_length) / 60) : "0");
 		Params.add(mt_combat.c_str());
-		Params.add(atof(mt_combat_length) > 0 ? FloatToString(atof(mt_combat_length) / 60) : "0");
 		Params.add(mt_playnow.c_str());
 
-		if (strcmp(mt_global.c_str(), "1") == 0)
+		if (strcmp(mt_global.c_str(), "1") == 0) //Play all?
 		{
 			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			static msstringlist Params;
+
 			if (pGMScript)
 				pGMScript->CallScriptEvent("gm_set_music", &Params);
 		}
@@ -721,7 +695,6 @@ public:
 		//send script command to player, unless global, then GM
 	}
 };
-
 LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
 //[end] Thothie NOV2014_07 msarea_music_dynamic for CBM system
 
@@ -778,39 +751,14 @@ public:
 				{
 					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
 					m_Songs[0].Name = main_song;
-					m_Songs[0].Length = main_song_length;
 				}
 				else
 				{
 					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
 					song_t Song;
 					Song.Name = main_song;
-					Song.Length = main_song_length;
 					m_Songs.add(Song);
 				}
-			}
-
-			bool playnow;
-			msstring plr_cbm = iScripted->GetFirstScriptVar("PLR_COMBAT_MUSIC");
-			if (plr_cbm != "none" && plr_cbm != "stop.mp3")
-			{
-				ALERT(at_console, "DEBUG: msarea_music - plr has cbm %s.\n", plr_cbm.c_str());
-				msstring plr_cur = iScripted->GetFirstScriptVar("PLR_CURRENT_MUSIC");
-				if (plr_cbm != plr_cur)
-				{
-					ALERT(at_console, "DEBUG: msarea_music current plr music is not cbm, playing first in list.\n");
-					playnow = true;
-				}
-				else
-				{
-					ALERT(at_console, "DEBUG: msarea_music - current plr music is cbm, adding first in list as idle.\n");
-					playnow = false;
-				}
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: msarea_music - current plr music has no cbm, playing first in list.\n");
-				playnow = true;
 			}
 
 			//this method disables the ability to play lists, but I've never seen a map use that feature
@@ -820,19 +768,8 @@ public:
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			if (pGMScript)
 			{
-				if (atoi(pGMScript->GetFirstScriptVar("GM_HOLIDAY_MUSIC")) == 1)
-				{
-					Parameters.add("xmass.mp3");
-					Parameters.add("3.0");
-					// you can add subsequent else if's here for other holidays, eg. GM_HOLIDAY_MUSIC = 2, 3, etc.
-				}
-				else
-				{
-					Parameters.add(m_Songs[0].Name.c_str());
-					Parameters.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
-				}
+				Parameters.add(m_Songs[0].Name.c_str());
 			}
-			Parameters.add(playnow ? "1" : "0");
 			iScripted->CallScriptEvent("set_idle_music", &Parameters);
 			//Old way jams up sometimes
 			/*
@@ -848,11 +785,10 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
+		if (sTemp.contains(".mp3"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
 			m_Songs.add(Song);
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
@@ -865,16 +801,10 @@ public:
 			main_song = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
-			pkvd->fHandled = TRUE;
-		}
 		else
 			CBaseEntity::KeyValue(pkvd);
 	}
 };
-
 LINK_ENTITY_TO_CLASS(msarea_music, CAreaMusic);
 
 struct monster_data_t

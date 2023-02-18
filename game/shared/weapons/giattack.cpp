@@ -1710,12 +1710,11 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				}
 
 				//Check for critical hits and multiply damage accordingly
-				/* if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
+				if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
 					Damage.flDamage *= Damage.flCritMutli;
-					//Damage.AttackCrit = true;
-					Damage.AttackCrit = false; 
+					Damage.AttackCrit = true;
+					pItemInflictor->CallScriptEvent("weapon_crit_success"); //call script event for item
 				}
-				*/ //temp til we can get around to modifying weapons.
 			}
 			else
 			{
