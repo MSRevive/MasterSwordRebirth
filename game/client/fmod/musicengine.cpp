@@ -38,11 +38,7 @@ void CMusicEngine::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
 	m_pChannelGroup = gSoundEngine.GetChannelGroup(CHANNELGROUP_MUSIC);
-
-	char songPath[256];
-	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), "ara.mp3");
-	m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
-	m_pSystem->playSound(m_pSound, m_pChannelGroup, false, &m_pChannel);
+	m_bFadeOut = false;
 }
 
 // Stops FMOD
@@ -170,6 +166,7 @@ bool CMusicEngine::PlayMusic( const char* pszSong, bool fadeIn )
 		return false;
 	}
 
+	m_pChannel->setVolume(m_fVolume);
 	if ( fadeIn )
 	{
 		m_pChannel->setVolume( 0.0 );
