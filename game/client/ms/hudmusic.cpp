@@ -8,19 +8,13 @@ int CHudMusic::Init(void)
 {
 	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
 	HOOK_MESSAGE(Music);
-
-	if (m_MP3.InitFMOD())
-	{
-		//m_MP3.PlayMusic("ara.mp3");
-		return 1;
-	}
-
-	return 0;
+	m_MP3.Init();
+	return 1;
 }
 
 void CHudMusic::Shutdown(void)
 {
-	m_MP3.ExitFMOD();
+	m_MP3.Shutdown();
 }
 
 void CHudMusic::Think()

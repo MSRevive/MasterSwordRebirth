@@ -432,8 +432,8 @@ void DLLEXPORT HUD_Reset(void)
 {
 	DBG_INPUT;
 	startdbg;
+	
 	dbg("Call VidInit");
-
 	gHUD.VidInit();
 
 	logfile << Logger::LOG_INFO << "[HUD_Reset: Complete]\n";

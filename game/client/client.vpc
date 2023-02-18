@@ -225,6 +225,8 @@ $Project "Client"
 
 	$Folder "FMOD"
 	{
+		$File "fmod\musicengine.cpp"
+		$File "fmod\musicengine.h"
 		$File "fmod\soundengine.cpp"
 		$File "fmod\soundengine.h"
 	}

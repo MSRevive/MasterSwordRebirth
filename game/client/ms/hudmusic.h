@@ -1,7 +1,7 @@
 #ifndef HUD_MUSIC_SYSTEM_H
 #define HUD_MUSIC_SYSTEM_H
 
-#include "fmod/soundengine.h"
+#include "fmod/musicengine.h"
 
 class CHudMusic : public CHudBase
 {
@@ -14,7 +14,7 @@ public:
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
 
 private:
-	CSoundEngine m_MP3;
+	CMusicEngine m_MP3;
 };
 
 #endif
