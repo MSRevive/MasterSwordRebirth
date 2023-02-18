@@ -533,8 +533,6 @@ public:
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
 	void Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStorageName, float flFeeRatio, entityinfo_t &Entity);
 	void Storage_Send();
-	void Music_Play(songplaylist &Songs, CBaseEntity *pMusicArea);
-	void Music_Stop(CBaseEntity *pMusicArea);
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, msstring_ref Name, msstring_ref Data);

@@ -387,7 +387,6 @@ class CMSMusic : public CPointEntity
 public:
 	mslist<song_t> m_Songs;
 	msstring main_song;
-	float main_song_length;
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
 		//if( !pActivator->IsPlayer() )
@@ -411,9 +410,7 @@ public:
 
 		static msstringlist Params;
 		Params.clearitems();
-		Params.add("0"); //gm_set_idle_music ignores first var, in case it comes from scriptevent
 		Params.add(m_Songs[0].Name.c_str());
-		Params.add("2");
 
 		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
@@ -461,11 +458,6 @@ public:
 		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
 		{
 			main_song = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -638,19 +630,9 @@ public:
 			mt_idle = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "midlelen"))
-		{
-			mt_idle_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
-			pkvd->fHandled = TRUE;
-		}
 		else if (FStrEq(pkvd->szKeyName, "mcombat"))
 		{
 			mt_combat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "mcombatlen"))
-		{
-			mt_combat_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
 			pkvd->fHandled = TRUE;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playall"))
@@ -695,19 +677,15 @@ public:
 
 		static msstringlist Params;
 		Params.clearitems();
-		if (strcmp(mt_global.c_str(), "1") == 0)
-			Params.add(EntToString(pOther));
 		Params.add(mt_idle.c_str());
-		Params.add(atof(mt_idle_length) > 0 ? FloatToString(atof(mt_idle_length) / 60) : "0");
 		Params.add(mt_combat.c_str());
-		Params.add(atof(mt_combat_length) > 0 ? FloatToString(atof(mt_combat_length) / 60) : "0");
 		Params.add(mt_playnow.c_str());
 
-		if (strcmp(mt_global.c_str(), "1") == 0)
+		if (strcmp(mt_global.c_str(), "1") == 0) //Play all?
 		{
 			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			static msstringlist Params;
+
 			if (pGMScript)
 				pGMScript->CallScriptEvent("gm_set_music", &Params);
 		}
@@ -783,29 +761,6 @@ public:
 				}
 			}
 
-			bool playnow;
-			msstring plr_cbm = iScripted->GetFirstScriptVar("PLR_COMBAT_MUSIC");
-			if (plr_cbm != "none" && plr_cbm != "stop.mp3")
-			{
-				ALERT(at_console, "DEBUG: msarea_music - plr has cbm %s.\n", plr_cbm.c_str());
-				msstring plr_cur = iScripted->GetFirstScriptVar("PLR_CURRENT_MUSIC");
-				if (plr_cbm != plr_cur)
-				{
-					ALERT(at_console, "DEBUG: msarea_music current plr music is not cbm, playing first in list.\n");
-					playnow = true;
-				}
-				else
-				{
-					ALERT(at_console, "DEBUG: msarea_music - current plr music is cbm, adding first in list as idle.\n");
-					playnow = false;
-				}
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: msarea_music - current plr music has no cbm, playing first in list.\n");
-				playnow = true;
-			}
-
 			//this method disables the ability to play lists, but I've never seen a map use that feature
 			msstringlist Parameters;
 			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
@@ -813,18 +768,8 @@ public:
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			if (pGMScript)
 			{
-				if (atoi(pGMScript->GetFirstScriptVar("GM_HOLIDAY_MUSIC")) == 1)
-				{
-					Parameters.add("xmass.mp3");
-					Parameters.add("3.0");
-					// you can add subsequent else if's here for other holidays, eg. GM_HOLIDAY_MUSIC = 2, 3, etc.
-				}
-				else
-				{
-					Parameters.add(m_Songs[0].Name.c_str());
-				}
+				Parameters.add(m_Songs[0].Name.c_str());
 			}
-			Parameters.add(playnow ? "1" : "0");
 			iScripted->CallScriptEvent("set_idle_music", &Parameters);
 			//Old way jams up sometimes
 			/*

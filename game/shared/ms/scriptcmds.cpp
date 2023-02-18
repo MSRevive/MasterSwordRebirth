@@ -4764,13 +4764,9 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pPlayer ) continue;
 
-		//Thothie JAN2013_08 - store current musak in var
-		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC",Song.Name.c_str());
-		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC_LENGTH", UTIL_VarArgs("%f"),Song.Length);
 		//Thothie NOV2014_12 - friendlier method
 		ParamList.clearitems( );
 		ParamList.add( Song.Name.c_str() );
-		ParamList.add( "0" );
 		pPlayer->CallScriptEvent( "game_music", &ParamList );
 
 		if (Song.Name.contains("stop.mp3"))
