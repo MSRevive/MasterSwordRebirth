@@ -2,6 +2,8 @@
 //  This should only be included by vgui_HUD.cpp
 //
 
+#include <vector>
+
 static COLOR Color_Text_LowHealth(250, 0, 0, 10),
 	Color_Charge_Lvl1(128, 128, 128, 128), Color_Charge_Lvl2(255, 100, 100, 128),
 	Color_Charge_Lvl3(100, 230, 30, 128),
@@ -217,18 +219,36 @@ public:
 			m_ChargeLbl[i]->setVisible(false);
 		}
 
+		//second attempt to fix phantom charge bar
+		std::vector<CGenericItem*> *vHandsItems = new std::vector<CGenericItem*>;
+
+		//get all hands items
 		for (int i = 0; i < player.Gear.size(); i++)
 		{
-			CGenericItem &Item = *player.Gear[i];
-			if (Item.m_Location != ITEMPOS_HANDS)
+			CGenericItem* Item = player.Gear[i];
+			if (Item->m_Location != ITEMPOS_HANDS)
 				continue;
 
-			int Bar = Item.m_Hand < 2 ? Item.m_Hand : 1;
+			vHandsItems->push_back(Item);
+		}
+
+		for (int i = 0; i < vHandsItems->size(); i++)
+		{
+			CGenericItem* Item = vHandsItems->at(i);
+
+			//if we have more than one item in our hand ignore playerhands.
+			if (vHandsItems->size() > 1 && Item->m_Hand == HAND_PLAYERHANDS)
+			{
+				continue;
+			}
+
+			int Bar = Item->m_Hand < 2 ? Item->m_Hand : 1;
 			CStatusBar &ChargeBar = *m_Charge[Bar];
 			MSLabel &ChargeLbl = *m_ChargeLbl[Bar];
 
-			if (Item.Attack_IsCharging() && (vCurChargeAmt = Item.Attack_Charge()) > 0)
+			if (Item->Attack_IsCharging() && (vCurChargeAmt = Item->Attack_Charge()) > 0)
 			{
+
 				ChargeBar.setVisible(bShowHealth);
 				bool notDone = true;
 
@@ -287,5 +307,6 @@ public:
 				ChargeBar.Set(vCurChargeAmt * 100);
 			}
 		}
+		delete vHandsItems;
 	}
 };
