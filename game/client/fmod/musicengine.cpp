@@ -198,7 +198,9 @@ void CMusicEngine::TransitionMusic(const char* pszSong)
 	m_pChannel->setVolume(m_fVolume);
 	m_TranSound = pszSong;
 
-	m_bFadeOut = true;
+	if (IsPlaying())
+		m_bFadeOut = true;
+		
 	m_bShouldTransition = true;
 	m_bFadeIn = true;
 }
