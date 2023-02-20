@@ -11,6 +11,7 @@ public:
 	void Think(void);
 	//int Redraw(float flTime, int intermission) { };
 	void Shutdown(void);
+	void Reload(void);
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
 
 private:

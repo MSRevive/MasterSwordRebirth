@@ -746,6 +746,8 @@ void CHud::VidInit(void)
 	MSBitmap::ReloadSprites();
 	//------------
 
+	m_Music->Reload();
+
 	enddbg;
 }
 

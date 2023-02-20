@@ -22,6 +22,11 @@ void CHudMusic::Think()
 	m_MP3.FadeThink();
 }
 
+void CHudMusic::Reload()
+{
+	m_MP3.StopMusic(false);
+}
+
 int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
