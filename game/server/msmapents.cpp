@@ -449,7 +449,7 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3"))
+		if (!sTemp.contains("zhlt_invisible"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;
@@ -785,7 +785,7 @@ public:
 	{
 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
 		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3"))
+		if (!sTemp.contains("zhlt_invisible"))
 		{
 			song_t Song;
 			Song.Name = pkvd->szKeyName;

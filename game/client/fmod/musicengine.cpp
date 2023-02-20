@@ -31,7 +31,6 @@ CMusicEngine::~CMusicEngine()
 	m_pSystem = nullptr;
 }
 
-// Starts FMOD
 void CMusicEngine::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
@@ -39,7 +38,6 @@ void CMusicEngine::Init( void )
 	m_bFadeOut = false;
 }
 
-// Stops FMOD
 void CMusicEngine::Shutdown( void )
 {
 	m_pChannel->stop();
