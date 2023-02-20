@@ -112,6 +112,8 @@ $Project "Client"
 		$File "view.cpp"
 		$File "clientfindentities.cpp"
 		$File "clientfindentities.h"
+		$File "clientlibrary.cpp"
+		$File "clientlibrary.h"
 		
 		$Folder	"Headers"
 		{
