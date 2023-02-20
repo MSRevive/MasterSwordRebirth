@@ -31,10 +31,14 @@ typedef enum
 
 typedef struct netadr_s
 {
-	netadrtype_t type;
-	unsigned char ip[4];
-	unsigned char ipx[10];
-	unsigned short port;
+	netadrtype_t type = NA_UNUSED;
+	unsigned char ip[4]{};
+	unsigned char ipx[10]{};
+	unsigned short port = 0;
+
+	bool operator!=(const netadr_s& rhs) {
+		return (rhs.ip==ip && rhs.port==port);
+	};
 } netadr_t;
 
 #endif // NETADR_H
