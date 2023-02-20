@@ -32,7 +32,7 @@
 #include "studiomodelrenderer.h"
 #include "gamestudiomodelrenderer.h"
 #include "logger.h"
-#include "ms/clrender.h"
+#include "clrender.h"
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"
 #include <GL/gl.h> // Header File For The OpenGL32 Library

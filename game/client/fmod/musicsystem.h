@@ -4,11 +4,11 @@
 
 #include <fmod/fmod.hpp>
 
-class CMusicEngine
+class CMusicSystem
 {
 public:
-	CMusicEngine();
-	~CMusicEngine();
+	CMusicSystem();
+	~CMusicSystem();
  
 	void Init();
 	void Shutdown();

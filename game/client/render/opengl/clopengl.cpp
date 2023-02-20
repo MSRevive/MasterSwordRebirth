@@ -13,7 +13,7 @@
 #include "../studiomodelrenderer.h"
 #include "../gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
-#include "opengl/clopengl.h" // OpenGL stuff
+#include "clopengl.h" // OpenGL stuff
 
 // WGL_ARB_extensions_string
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = NULL;
@@ -79,7 +79,7 @@ Vertex g_cubeVertices[] =
 //#include "r_efx.h"
 #include "entity_types.h"
 #include "clglobal.h"
-#include "clrender.h"
+#include "../clrender.h"
 
 #include "logger.h"
 

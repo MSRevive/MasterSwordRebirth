@@ -6,11 +6,11 @@
 #include "clglobal.h"
 #include "soundengine.h"
 
-#include "musicengine.h"
+#include "musicsystem.h"
 
 //extern CSoundEngine gSoundEngine;
 
-CMusicEngine::CMusicEngine()
+CMusicSystem::CMusicSystem()
 {
 	m_fFadeDelay = 0.0;
 	m_TranSound = "";
@@ -21,7 +21,7 @@ CMusicEngine::CMusicEngine()
 	m_pSystem = nullptr;
 }
 
-CMusicEngine::~CMusicEngine()
+CMusicSystem::~CMusicSystem()
 {
 	m_fFadeDelay = 0.0;
 	m_TranSound = "";
@@ -31,14 +31,14 @@ CMusicEngine::~CMusicEngine()
 	m_pSystem = nullptr;
 }
 
-void CMusicEngine::Init( void )
+void CMusicSystem::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
 	m_pChannelGroup = gSoundEngine.GetChannelGroup(CHANNELGROUP_MUSIC);
 	m_bFadeOut = false;
 }
 
-void CMusicEngine::Shutdown( void )
+void CMusicSystem::Shutdown( void )
 {
 	m_pChannel->stop();
 	m_pSound->release();
@@ -47,14 +47,14 @@ void CMusicEngine::Shutdown( void )
 
 // Returns the name of the current ambient sound being played
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
-const char* CMusicEngine::GetCurrentSoundName( void )
+const char* CMusicSystem::GetCurrentSoundName( void )
 {
 	return m_CurSound;
 }
 
 // Handles all fade-related sound stuffs
 // Called every frame when the client is in-game
-bool CMusicEngine::FadeThink( void )
+bool CMusicSystem::FadeThink( void )
 {
 	if ( m_bFadeOut )
 	{
@@ -108,7 +108,7 @@ bool CMusicEngine::FadeThink( void )
 
 // Compares specified ambient sound with the current ambient sound being played
 // Returns true if they match, false if they do not or if no sound is being played
-bool CMusicEngine::IsPlaying()
+bool CMusicSystem::IsPlaying()
 {
 	bool *playing = false;
 	FMOD_RESULT	result = m_pChannel->isPlaying(playing);
@@ -120,7 +120,7 @@ bool CMusicEngine::IsPlaying()
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
-bool CMusicEngine::PlayMusic( const char* pszSong, bool fadeIn )
+bool CMusicSystem::PlayMusic( const char* pszSong, bool fadeIn )
 {
 	m_bFadeOut = false;
 	char songPath[256];
@@ -152,7 +152,7 @@ bool CMusicEngine::PlayMusic( const char* pszSong, bool fadeIn )
 }
 
 // Abruptly stops playing all ambient sounds
-void CMusicEngine::StopMusic(bool fadeOut)
+void CMusicSystem::StopMusic(bool fadeOut)
 {
 	if (fadeOut)
 	{
@@ -165,7 +165,7 @@ void CMusicEngine::StopMusic(bool fadeOut)
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CMusicEngine::TransitionMusic(const char* pszSong)
+void CMusicSystem::TransitionMusic(const char* pszSong)
 {
 	m_pChannel->setVolume(m_fVolume);
 	if (IsPlaying())

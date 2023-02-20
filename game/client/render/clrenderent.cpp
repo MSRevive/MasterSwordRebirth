@@ -15,14 +15,14 @@ Add game specific, client-side objects here
 #include "dlight.h"
 //#include "triangleapi.h"
 
-#include "../studio_util.h"
+#include "studio_util.h"
 #include "../r_studioint.h"
 
 //#include "r_efx.h"
 #include "entity_types.h"
 #include "clglobal.h"
 #include "clrender.h"
-#include "../studiomodelrenderer.h"
+#include "studiomodelrenderer.h"
 
 #include "hudmisc.h"
 void CLFrameShowModel(cl_entity_t &Entity);

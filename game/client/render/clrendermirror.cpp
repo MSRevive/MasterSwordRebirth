@@ -10,10 +10,10 @@
 #include "dlight.h"
 #include "triangleapi.h"
 #include "com_model.h"
-#include "../studio_util.h"
+#include "studio_util.h"
 #include "../r_studioint.h"
-#include "../studiomodelrenderer.h"
-#include "../gamestudiomodelrenderer.h"
+#include "studiomodelrenderer.h"
+#include "gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
 #include "opengl/clopengl.h" // OpenGL stuff
 
