@@ -9,6 +9,7 @@ int CHudMusic::Init(void)
 	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
 	HOOK_MESSAGE(Music);
 	m_MP3.Init();
+	m_MP3.TransitionMusic("amongtheclouds.mp3");
 	return 1;
 }
 

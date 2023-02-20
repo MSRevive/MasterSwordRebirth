@@ -13,8 +13,7 @@
 CMusicEngine::CMusicEngine()
 {
 	m_fFadeDelay = 0.0;
-	m_TranSound = "NULL";
-	m_CurSound = "NULL";
+	m_TranSound = "";
 	m_bShouldTransition = false;
 	m_bFadeIn = false;
 	m_bFadeOut = false;
@@ -25,8 +24,7 @@ CMusicEngine::CMusicEngine()
 CMusicEngine::~CMusicEngine()
 {
 	m_fFadeDelay = 0.0;
-	m_TranSound = "NULL";
-	m_CurSound = "NULL";
+	m_TranSound = "";
 	m_bShouldTransition = false;
 	m_bFadeIn = false;
 	m_bFadeOut = false;
@@ -77,36 +75,14 @@ bool CMusicEngine::FadeThink( void )
 				m_pChannel->stop(); //stop channel when fadeout is done.
 				m_bFadeOut = false;
 				m_fFadeDelay = 0.0;
+				if ( m_bShouldTransition )
+				{
+					PlayMusic(m_TranSound, true);
+					m_bShouldTransition = false;
+					m_TranSound = "";
+				}
 			}
 		}
-	}
-	else if ( m_bShouldTransition )
-	{
-		char songPath[256];
-		_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), m_TranSound);
-		FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
-
-		if (result != FMOD_OK)
-		{
-			gEngfuncs.Con_Printf("FMOD: Failed to create stream of sound '%s' ! (ERROR NUMBER: %i)\n", m_TranSound, result);
-			m_TranSound = "NULL";
-			m_bShouldTransition = false;
-			return false;
-		}
-
-		result = m_pSystem->playSound(m_pSound, m_pChannelGroup, false, &m_pChannel);
-
-		if (result != FMOD_OK)
-		{
-			gEngfuncs.Con_Printf("FMOD: Failed to play sound '%s' ! (ERROR NUMBER: %i)\n", m_TranSound, result);
-			m_TranSound = "NULL";
-			m_bShouldTransition = false;
-			return false;
-		}
-
-		m_CurSound = m_TranSound;
-		m_TranSound = "NULL";
-		m_bShouldTransition = false;
 	}
 	else if ( m_bFadeIn )
 	{
@@ -141,13 +117,14 @@ bool CMusicEngine::IsPlaying()
 	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 		return false;
 
-	return true;
+	return playing;
 }
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
 bool CMusicEngine::PlayMusic( const char* pszSong, bool fadeIn )
 {
+	m_bFadeOut = false;
 	char songPath[256];
 	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong);
 	FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
@@ -166,14 +143,13 @@ bool CMusicEngine::PlayMusic( const char* pszSong, bool fadeIn )
 		return false;
 	}
 
-	m_pChannel->setVolume(m_fVolume);
+	m_pChannel->setVolume(1.0);
 	if ( fadeIn )
 	{
 		m_pChannel->setVolume( 0.0 );
 		m_bFadeIn = true;
 	}
 
-	m_CurSound = pszSong;
 	return true;
 }
 
@@ -187,8 +163,6 @@ void CMusicEngine::StopMusic(bool fadeOut)
 	}
 	else
 		m_pChannel->stop();
-
-	m_CurSound = "NULL";
 }
 
 // Transitions between two ambient sounds if necessary
@@ -196,11 +170,17 @@ void CMusicEngine::StopMusic(bool fadeOut)
 void CMusicEngine::TransitionMusic(const char* pszSong)
 {
 	m_pChannel->setVolume(m_fVolume);
-	m_TranSound = pszSong;
-
 	if (IsPlaying())
+	{
 		m_bFadeOut = true;
-		
-	m_bShouldTransition = true;
-	m_bFadeIn = true;
+		m_bShouldTransition = true;
+		m_TranSound = pszSong;
+	}
+	else
+	{
+		m_bFadeOut = false;
+		m_bShouldTransition = false;
+		m_TranSound = "";
+		PlayMusic(pszSong, true);
+	}
 }
