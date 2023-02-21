@@ -8,18 +8,6 @@
 
 #include "musicsystem.h"
 
-CMusicSystem::CMusicSystem()
-{
-	m_fFadeDelay = 0.0;
-	m_TranSound = "";
-	m_bShouldTransition = false;
-	m_bFadeIn = false;
-	m_bFadeOut = false;
-	m_fVolume = CVAR_GET_FLOAT("MP3Volume");
-	m_pSystem = nullptr;
-	m_pChannel = nullptr;
-}
-
 void CMusicSystem::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
@@ -29,8 +17,8 @@ void CMusicSystem::Init( void )
 
 void CMusicSystem::Shutdown( void )
 {
-	if (m_pChannel != nullptr)
-		m_pChannel->stop();
+	if (m_pChannel)
+		m_pChannel->stop();	
 
 	m_pSound->release();
 	m_pSystem = nullptr;
@@ -40,7 +28,7 @@ void CMusicSystem::Shutdown( void )
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
 const char* CMusicSystem::GetCurrentSoundName( void )
 {
-	return m_CurSound;
+	return m_TranSound;
 }
 
 // Handles all fade-related sound stuffs
