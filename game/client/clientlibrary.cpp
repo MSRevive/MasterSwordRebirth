@@ -67,6 +67,7 @@ void CClientLibrary::RunFrame()
 		m_ConnectionTime = status.connection_time;
 	}
 
+	gSoundEngine.Update();
 	steamhelper->Think();
 	RichPresenceUpdate();
 }
