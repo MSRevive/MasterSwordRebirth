@@ -26,15 +26,6 @@ bool CSoundEngine::InitFMOD(void)
 	else
 		gEngfuncs.Con_Printf("FMOD initialized successfully.\n");
 
-	/*result = m_pSystem->createChannelGroup("MusicChannel", m_pChannelGroups[CHANNELGROUP_MUSIC]); //initialize channelgroup for music;
-	if (result != FMOD_OK)
-	{
-		gEngfuncs.Con_Printf("FMOD ERROR: Failed to create music channel group!\n");
-		return false;
-	}
-	else
-		gEngfuncs.Con_Printf("FMOD music channel group created successfully.\n");
-		*/
 	return true;
 }
 
@@ -66,27 +57,6 @@ bool CSoundEngine::Update(void) {
 			return false;
 		}
 
-		FMOD::ChannelGroup* debug_music_channel = GetChannelGroup(CHANNELGROUP_MUSIC);
-
-		if (debug_music_channel) {
-			bool* debug = new bool;
-			int* debug_channelcount = new int;
-
-			debug_music_channel->isPlaying(debug);
-			debug_music_channel->getNumChannels(debug_channelcount);
-
-			if (*debug == true) {
-				gEngfuncs.Con_Printf("FMOD Music Channel is playing.\n");
-			}
-			else {
-				gEngfuncs.Con_Printf("FMOD Music Channel is not playing.\n");
-			}
-
-			gEngfuncs.Con_Printf("FMOD Music Channel count: %i.\n", debug_channelcount);
-
-			delete debug;
-			delete debug_music_channel;
-		}
 	}
 	else {
 		gEngfuncs.Con_Printf("FMOD System not found by update!.\n");

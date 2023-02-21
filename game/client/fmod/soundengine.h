@@ -5,7 +5,7 @@
 enum eChannelGroupType
 {
 	CHANNELGROUP_MUSIC = 0,
-	NUM_CHANNELGROUPS = 2
+	NUM_CHANNELGROUPS
 };
 
 class CSoundEngine
@@ -19,11 +19,11 @@ public:
 	bool Update();
 	FMOD::System *GetSystem() { return m_pSystem; }
 
-	FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return *m_pChannelGroups[channelgroupType]; }
+	FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
 
 private:
 	FMOD::System *m_pSystem;
-	FMOD::ChannelGroup** m_pChannelGroups[NUM_CHANNELGROUPS] = { nullptr };
+	FMOD::ChannelGroup* m_pChannelGroups[NUM_CHANNELGROUPS];
 };
 
 extern CSoundEngine gSoundEngine;
