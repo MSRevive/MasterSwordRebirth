@@ -8,7 +8,7 @@ class CMusicSystem
 {
 public:
 	CMusicSystem();
-	~CMusicSystem();
+	~CMusicSystem() = default;
  
 	void Init();
 	void Shutdown();
@@ -34,6 +34,6 @@ private:
 
 	FMOD::System *m_pSystem;
 	FMOD::Sound *m_pSound;
-	FMOD::Channel *m_pChannel;
+	FMOD::Channel *m_pChannel = nullptr;
 	FMOD::ChannelGroup *m_pChannelGroup;
 };

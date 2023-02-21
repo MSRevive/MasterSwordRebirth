@@ -20,17 +20,6 @@ CMusicSystem::CMusicSystem()
 	m_pChannel = nullptr;
 }
 
-CMusicSystem::~CMusicSystem()
-{
-	m_fFadeDelay = 0.0;
-	m_TranSound = "";
-	m_bShouldTransition = false;
-	m_bFadeIn = false;
-	m_bFadeOut = false;
-	m_pSystem = nullptr;
-	m_pChannel = nullptr;
-}
-
 void CMusicSystem::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
@@ -40,7 +29,7 @@ void CMusicSystem::Init( void )
 
 void CMusicSystem::Shutdown( void )
 {
-	if (m_pChannel)
+	if (m_pChannel != nullptr)
 		m_pChannel->stop();
 
 	m_pSound->release();
