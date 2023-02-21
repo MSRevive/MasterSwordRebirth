@@ -19,11 +19,13 @@ public:
 	bool Update();
 	FMOD::System *GetSystem() { return m_pSystem; }
 
-	FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
+	//No longer needed just pass NULL channel since we are not doing any submixing
+	//FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
 
 private:
 	FMOD::System *m_pSystem;
-	FMOD::ChannelGroup* m_pChannelGroups[NUM_CHANNELGROUPS];
+	//No longer needed just pass NULL channel since we are not doing any submixing
+	//FMOD::ChannelGroup* m_pChannelGroups[NUM_CHANNELGROUPS];
 };
 
 extern CSoundEngine gSoundEngine;

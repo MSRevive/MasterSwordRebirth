@@ -11,8 +11,10 @@
 void CMusicSystem::Init( void )
 {
 	m_pSystem = gSoundEngine.GetSystem();
-	m_pChannelGroup = gSoundEngine.GetChannelGroup(CHANNELGROUP_MUSIC);
+	//If we ever decide to do submixing replace the NULL pointer.
+	m_pChannelGroup = NULL;
 	m_bFadeOut = false;
+
 }
 
 void CMusicSystem::Shutdown( void )
@@ -35,6 +37,12 @@ const char* CMusicSystem::GetCurrentSoundName( void )
 // Called every frame when the client is in-game
 bool CMusicSystem::FadeThink( void )
 {
+	//check if volume is the intended volume
+	float cvar_fMP3Vol = CVAR_GET_FLOAT("MP3Volume");
+	if (m_fVolume != cvar_fMP3Vol) {
+		m_fVolume = cvar_fMP3Vol;
+	}
+
 	if ( m_bFadeOut )
 	{
 		if ( gEngfuncs.GetClientTime() >= m_fFadeDelay )
@@ -68,7 +76,8 @@ bool CMusicSystem::FadeThink( void )
 			float tempvol;
 			m_pChannel->getVolume( &tempvol );
 
-			if ( tempvol < 1.0 )
+			//we only want to fade up the the wanted volume not to 1.0
+			if ( tempvol < m_fVolume )
 			{
 				m_pChannel->setVolume( tempvol + 0.05 );
 				m_fFadeDelay = gEngfuncs.GetClientTime() + 0.1;
@@ -112,7 +121,7 @@ bool CMusicSystem::PlayMusic( const char* pszSong, bool fadeIn )
 		return false;
 	}
 
-	result = m_pSystem->playSound(m_pSound, m_pChannelGroup, false, &m_pChannel);
+	result = m_pSystem->playSound(m_pSound, m_pChannelGroup , false, &m_pChannel);
 
 	if (result != FMOD_OK)
 	{
@@ -120,7 +129,8 @@ bool CMusicSystem::PlayMusic( const char* pszSong, bool fadeIn )
 		return false;
 	}
 
-	m_pChannel->setVolume(1.0);
+	//never be louder than what the player set
+	m_pChannel->setVolume(m_fVolume);
 	if ( fadeIn )
 	{
 		m_pChannel->setVolume( 0.0 );
