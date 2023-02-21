@@ -8,8 +8,6 @@
 
 #include "musicsystem.h"
 
-//extern CSoundEngine gSoundEngine;
-
 CMusicSystem::CMusicSystem()
 {
 	m_fFadeDelay = 0.0;
@@ -19,6 +17,7 @@ CMusicSystem::CMusicSystem()
 	m_bFadeOut = false;
 	m_fVolume = CVAR_GET_FLOAT("MP3Volume");
 	m_pSystem = nullptr;
+	m_pChannel = nullptr;
 }
 
 CMusicSystem::~CMusicSystem()
@@ -29,6 +28,7 @@ CMusicSystem::~CMusicSystem()
 	m_bFadeIn = false;
 	m_bFadeOut = false;
 	m_pSystem = nullptr;
+	m_pChannel = nullptr;
 }
 
 void CMusicSystem::Init( void )
@@ -40,7 +40,9 @@ void CMusicSystem::Init( void )
 
 void CMusicSystem::Shutdown( void )
 {
-	m_pChannel->stop();
+	if (m_pChannel)
+		m_pChannel->stop();
+
 	m_pSound->release();
 	m_pSystem = nullptr;
 }

@@ -1151,7 +1151,7 @@ void ShutdownInput(void)
 
 void DLLEXPORT HUD_Shutdown(void)
 {
-	gClient.Shutdown();
 	ScriptMgr::GameShutdown();
+	gClient.Shutdown();
 	ShutdownInput();
 }

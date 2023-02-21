@@ -627,6 +627,7 @@ public:
 	void VidInit(void);
 	void Think(void);
 	int Redraw(float flTime, int intermission);
+	void ReloadClient();
 	int UpdateClientData(client_data_t *cdata, float time);
 
 	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}

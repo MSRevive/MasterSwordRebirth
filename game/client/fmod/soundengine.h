@@ -11,8 +11,8 @@ enum eChannelGroupType
 class CSoundEngine
 {
 public:
-	CSoundEngine() {  }
-	~CSoundEngine() {  }
+	CSoundEngine() = default;
+	~CSoundEngine() = default;
 
 	bool InitFMOD();
 	bool ExitFMOD();

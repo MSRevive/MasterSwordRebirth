@@ -48,9 +48,9 @@ extern "C"
 #define DLLEXPORT EXPORT
 
 cl_enginefunc_t gEngfuncs;
-CHud gHUD;
 CClientLibrary gClient;
 TeamFortressViewport *gViewPort = NULL;
+extern CHud gHUD;
 extern float g_fMenuLastClosed;
 
 // IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in CLRender.cpp
@@ -226,7 +226,7 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const ch
 	startdbg;
 	logfileopt << "HUD_ConnectionlessPacket\r\n";
 	// Parse stuff from args
-	int max_buffer_size = *response_buffer_size;
+	//int max_buffer_size = *response_buffer_size;
 
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer
@@ -343,9 +343,6 @@ void DLLEXPORT HUD_Init(void)
 
 	logfile << Logger::LOG_INFO << "[HUD_Init: InitInput]\n";
 	InitInput();
-
-	logfile << Logger::LOG_INFO << "[HUD_Init: gHUD.Init]\n";
-	gHUD.Init();
 
 	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]\n";
 	Scheme_Init();
