@@ -15,7 +15,7 @@
 #include "pm_defs.h"
 
 #ifndef VALVE_DLL
-#include "ms/clrender.h"
+#include "render/clrender.h"
 #include "ms/clglobal.h"
 
 // MiB MAR2015_01 [LOCAL_PANEL] - Includes for VGUI elements

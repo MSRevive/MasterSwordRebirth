@@ -52,7 +52,6 @@
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
-CSoundEngine gSoundEngine;
 
 void ShutdownInput(void);
 
@@ -333,9 +332,6 @@ void CHud::Init(void)
 	m_iLogo = 0;
 	m_iFOV = 0;
 
-	if (gSoundEngine.InitFMOD())
-		logfile << Logger::LOG_INFO << "[HUD_Init: gSoundEngine.Init]\n";
-
 	CVAR_CREATE("zoom_sensitivity_ratio", "1.2", 0);
 	default_fov = CVAR_CREATE("default_fov", "90", 0);
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
@@ -415,7 +411,6 @@ CHud::~CHud()
 	}
 
 	m_Music->Shutdown();
-	gSoundEngine.ExitFMOD();
 	ServersShutdown();
 }
 
@@ -682,7 +677,7 @@ void CHud::VidInit(void)
 				if (p->iRes == m_iRes)
 				{
 					char sz[256];
-					 _snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
+					_snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
 					m_rghSprites[index] = SPR_Load(sz);
 					m_rgrcRects[index] = p->rc;
 					strncpy(&m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH);
@@ -744,9 +739,14 @@ void CHud::VidInit(void)
 	//(only sprites are reloaded, not TGAs)
 	dbg("Reload global sprite list");
 	MSBitmap::ReloadSprites();
-	//------------
 
 	enddbg;
+}
+
+//this should get called whenever the client changes levels or servers.
+void CHud::ReloadClient()
+{
+	m_Music->Reload();
 }
 
 /*int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

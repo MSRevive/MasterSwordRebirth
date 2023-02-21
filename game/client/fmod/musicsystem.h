@@ -4,11 +4,11 @@
 
 #include <fmod/fmod.hpp>
 
-class CMusicEngine
+class CMusicSystem
 {
 public:
-	CMusicEngine();
-	~CMusicEngine();
+	CMusicSystem() = default;
+	~CMusicSystem() = default;
  
 	void Init();
 	void Shutdown();
@@ -24,13 +24,12 @@ public:
 private:
 	const char *GetCurrentSoundName( void );
 
-	const char *m_CurSound;
-	const char *m_TranSound;
-	bool m_bShouldTransition;
-	bool m_bFadeIn;
-	bool m_bFadeOut;
-	float m_fFadeDelay;
-	float m_fVolume;
+	const char *m_TranSound = "";
+	bool m_bShouldTransition = false;
+	bool m_bFadeIn = false;
+	bool m_bFadeOut = false;
+	float m_fFadeDelay = 0.0;
+	float m_fVolume = CVAR_GET_FLOAT("MP3Volume");
 
 	FMOD::System *m_pSystem;
 	FMOD::Sound *m_pSound;

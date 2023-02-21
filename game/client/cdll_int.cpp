@@ -23,6 +23,7 @@
 #include "netadr.h"
 #include "vgui_schememanager.h"
 #include "logger.h"
+#include "clientlibrary.h"
 #include <windows.h>
 
 //#define LOG_ALLEXPORTS //more exports in entity.cpp
@@ -43,15 +44,13 @@ extern "C"
 #include "vgui_int.h"
 #include "interface.h"
 #include "voice_status.h"
-#include "filesystem_shared.h"
-#include "steamhelper.h"
-#include "richpresence.h"
 
 #define DLLEXPORT EXPORT
 
 cl_enginefunc_t gEngfuncs;
-CHud gHUD;
+CClientLibrary gClient;
 TeamFortressViewport *gViewPort = NULL;
+extern CHud gHUD;
 extern float g_fMenuLastClosed;
 
 // IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in CLRender.cpp
@@ -227,7 +226,7 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const ch
 	startdbg;
 	logfileopt << "HUD_ConnectionlessPacket\r\n";
 	// Parse stuff from args
-	int max_buffer_size = *response_buffer_size;
+	//int max_buffer_size = *response_buffer_size;
 
 	// Zero it out since we aren't going to respond.
 	// If we wanted to response, we'd write data into response_buffer
@@ -285,11 +284,8 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	EV_HookEvents();
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
 	
-	if(!FileSystem_Init())
-	{
-		logfile << Logger::LOG_ERROR << "[DLLEXPORT Initialize: Failed to initialize filesystem]\n";
+	if(!gClient.Initialize())
 		return 0;
-	}
 
 	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]\n";
 
@@ -343,24 +339,15 @@ void DLLEXPORT HUD_Init(void)
 {
 	g_fMenuLastClosed = 0.0f;
 
-	DBG_INPUT;
-	startdbg;
+	gClient.HUDInit();
 
 	logfile << Logger::LOG_INFO << "[HUD_Init: InitInput]\n";
-	dbg("Call InitInput");
 	InitInput();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: gHUD.Init]\n";
-	dbg("Call gHUD.Init");
-	gHUD.Init();
-
 	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]\n";
-	dbg("Call Scheme_Init");
 	Scheme_Init();
 
 	logfile << Logger::LOG_INFO << "[HUD_Init: Complete]\n";
-
-	enddbg;
 }
 
 /*
@@ -451,22 +438,9 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame(double time)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call ServersThink");
 	ServersThink(time);
-
-	dbg("Call SetBorderlessWindow");
 	SetBorderlessWindow();
-
-	dbg("Call Steam Helper Think");
-	steamhelper->Think();
-
-	dbg("Call Rich Presence Think");
-	RichPresenceUpdate();
-
-	enddbg;
+	gClient.RunFrame();
 }
 
 /*

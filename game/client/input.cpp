@@ -34,10 +34,8 @@ extern "C"
 #include <string.h>
 #include <ctype.h>
 #include "ms/hudscript.h"
-
 #include "vgui_teamfortressviewport.h"
-
-#include "filesystem_shared.h"
+#include "clientlibrary.h"
 #include "scriptmgr.h"
 
 extern "C"
@@ -50,6 +48,8 @@ extern "C"
 
 //extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
+
+extern CClientLibrary gClient;
 
 // Defined in pm_math.c
 extern "C" float anglemod(float a);
@@ -1151,12 +1151,7 @@ void ShutdownInput(void)
 
 void DLLEXPORT HUD_Shutdown(void)
 {
-	DBG_INPUT;
-	startdbg;
-
 	ScriptMgr::GameShutdown();
-	FileSystem_Shutdown();
-
+	gClient.Shutdown();
 	ShutdownInput();
-	enddbg;
 }

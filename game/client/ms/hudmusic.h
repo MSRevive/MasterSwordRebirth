@@ -1,7 +1,7 @@
 #ifndef HUD_MUSIC_SYSTEM_H
 #define HUD_MUSIC_SYSTEM_H
 
-#include "fmod/musicengine.h"
+#include "fmod/musicsystem.h"
 
 class CHudMusic : public CHudBase
 {
@@ -11,10 +11,11 @@ public:
 	void Think(void);
 	//int Redraw(float flTime, int intermission) { };
 	void Shutdown(void);
+	void Reload(void);
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
 
 private:
-	CMusicEngine m_MP3;
+	CMusicSystem m_MP3;
 };
 
 #endif

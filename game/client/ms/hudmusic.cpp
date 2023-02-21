@@ -22,6 +22,11 @@ void CHudMusic::Think()
 	m_MP3.FadeThink();
 }
 
+void CHudMusic::Reload()
+{
+	m_MP3.StopMusic(false);
+}
+
 int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
@@ -31,9 +36,12 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	{
 		char *musicFile = READ_STRING();
 		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
+		break;
 	}
 	case 1:
+		gEngfuncs.Con_Printf("stopping musix!!\n");
 		m_MP3.StopMusic(true);
+		break;
 	}
 
 	return 1;
