@@ -23,7 +23,9 @@ void CMusicSystem::Shutdown( void )
 		m_pChannel->stop();	
 
 	m_pSound->release();
-	m_pSystem = nullptr;
+
+	//this should be unnecessary since the system is being released by CSoundEngine and trying to do it here causes an access violation on quit
+	//m_pSystem = nullptr;
 }
 
 // Returns the name of the current ambient sound being played
@@ -98,12 +100,12 @@ bool CMusicSystem::FadeThink( void )
 // Returns true if they match, false if they do not or if no sound is being played
 bool CMusicSystem::IsPlaying()
 {
-	bool *playing = false;
+	bool *playing = new bool;
 	FMOD_RESULT	result = m_pChannel->isPlaying(playing);
 	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 		return false;
 
-	return playing;
+	return *playing;
 }
 
 // Abruptly starts playing a specified ambient sound
@@ -157,7 +159,7 @@ void CMusicSystem::StopMusic(bool fadeOut)
 void CMusicSystem::TransitionMusic(const char* pszSong)
 {
 	m_pChannel->setVolume(m_fVolume);
-	if (IsPlaying())
+ 	if (IsPlaying())
 	{
 		m_bFadeOut = true;
 		m_bShouldTransition = true;

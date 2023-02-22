@@ -29,7 +29,7 @@ private:
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;
 	float m_fFadeDelay = 0.0;
-	float m_fVolume = 1.0;
+	float m_fVolume = 0.0;
 
 	FMOD::System* m_pSystem;
 	FMOD::Sound* m_pSound;
