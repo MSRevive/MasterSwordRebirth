@@ -37,6 +37,14 @@ void CClientLibrary::HUDInit()
 	
 }
 
+void CClientLibrary::VideoInit()
+{
+	ResetClient(); // this gets called on start of every map
+
+	logfile << Logger::LOG_INFO << "[INIT: Video Init]\n";
+	gHUD.VidInit();
+}
+
 void CClientLibrary::Shutdown()
 {
 	logfile << Logger::LOG_INFO << "[INIT: Shutdown]\n";
@@ -46,7 +54,7 @@ void CClientLibrary::Shutdown()
 
 void CClientLibrary::ResetClient()
 {
-	logfile << Logger::LOG_INFO << "[INIT: RESET CLIENT]\n";
+	logfile << Logger::LOG_INFO << "[INIT: Reset Client]\n";
 	gHUD.ReloadClient();
 }
 
@@ -56,8 +64,9 @@ void CClientLibrary::RunFrame()
 	gEngfuncs.pNetAPI->Status(&status);
 
 	bool isConnected = status.connected != 0;
+	//const char* mapName = gEngfuncs.pfnGetLevelName();
 
-	// An attempt to detect map change or disconnect to stop all sounds.
+	// An attempt to detect disconnect to stop all sounds. should make it work with map change as well.
 	if (isConnected != m_IsConnected || m_ConnectionTime > status.connection_time)
 	{
 		//logfile << Logger::LOG_INFO << "[INIT: CLIENT DISCONNECT]\n";

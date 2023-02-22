@@ -17,14 +17,14 @@ public:
 
 	bool IsPlaying();
 
-	bool PlayMusic(const char* pszSong, bool fadeIn = false);
+	bool PlayMusic(std::string pszSong, bool fadeIn = false);
 	void StopMusic(bool fadeOut = false);
-	void TransitionMusic(const char* pszSong);
+	void TransitionMusic(std::string pszSong);
 
 private:
-	const char* GetCurrentSoundName(void);
+	std::string GetCurrentSoundName(void);
 
-	const char* m_TranSound = "";
+	std::string m_TranSound = "";
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;

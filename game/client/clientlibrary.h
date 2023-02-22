@@ -10,6 +10,7 @@ public:
 
 	void HUDInit();
 	void Shutdown();
+	void VideoInit();
 	void RunFrame();
 	void ResetClient();
 

@@ -30,7 +30,7 @@ void CMusicSystem::Shutdown()
 
 // Returns the name of the current ambient sound being played
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
-const char* CMusicSystem::GetCurrentSoundName()
+std::string CMusicSystem::GetCurrentSoundName()
 {
 	return m_TranSound;
 }
@@ -110,16 +110,16 @@ bool CMusicSystem::IsPlaying()
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
-bool CMusicSystem::PlayMusic(const char* pszSong, bool fadeIn)
+bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 {
 	m_bFadeOut = false;
 	char songPath[256];
-	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong);
+	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong.c_str());
 	FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
 
 	if (result != FMOD_OK)
 	{
-		gEngfuncs.Con_Printf("FMOD: Failed to create stream of sound '%s' ! (ERROR NUMBER: %i)\n", pszSong, result);
+		gEngfuncs.Con_Printf("FMOD: Failed to create stream of sound '%s' ! (ERROR NUMBER: %i)\n", pszSong.c_str(), result);
 		return false;
 	}
 
@@ -127,7 +127,7 @@ bool CMusicSystem::PlayMusic(const char* pszSong, bool fadeIn)
 
 	if (result != FMOD_OK)
 	{
-		gEngfuncs.Con_Printf("FMOD: Failed to play sound '%s' ! (ERROR NUMBER: %i)\n", pszSong, result);
+		gEngfuncs.Con_Printf("FMOD: Failed to play sound '%s' ! (ERROR NUMBER: %i)\n", pszSong.c_str(), result);
 		return false;
 	}
 
@@ -156,7 +156,7 @@ void CMusicSystem::StopMusic(bool fadeOut)
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CMusicSystem::TransitionMusic(const char* pszSong)
+void CMusicSystem::TransitionMusic(std::string pszSong)
 {
 	m_pChannel->setVolume(m_fVolume);
  	if (IsPlaying())

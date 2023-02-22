@@ -34,6 +34,7 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	case 0:
 	{
 		const char *musicFile = READ_STRING();
+		gEngfuncs.Con_Printf("MUSIC: SENT '%s'\n", musicFile);
 		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
 		break;
 	}

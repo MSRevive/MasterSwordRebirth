@@ -307,8 +307,7 @@ int DLLEXPORT HUD_VidInit(void)
 	DBG_INPUT;
 	startdbg;
 
-	dbg("Call gHUD.VidInit");
-	gHUD.VidInit();
+	gClient.VideoInit();
 
 	dbg("Call VGui_Startup");
 	VGui_Startup();
