@@ -48,6 +48,7 @@ void CClientLibrary::VideoInit()
 void CClientLibrary::Shutdown()
 {
 	logfile << Logger::LOG_INFO << "[INIT: Shutdown]\n";
+	gHUD.Shutdown();
 	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
 }
@@ -64,12 +65,10 @@ void CClientLibrary::RunFrame()
 	gEngfuncs.pNetAPI->Status(&status);
 
 	bool isConnected = status.connected != 0;
-	//const char* mapName = gEngfuncs.pfnGetLevelName();
 
 	// An attempt to detect disconnect to stop all sounds. should make it work with map change as well.
 	if (isConnected != m_IsConnected || m_ConnectionTime > status.connection_time)
 	{
-		//logfile << Logger::LOG_INFO << "[INIT: CLIENT DISCONNECT]\n";
 		ResetClient();
 
 		m_IsConnected = isConnected;

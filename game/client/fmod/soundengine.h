@@ -2,12 +2,6 @@
 
 #include <fmod/fmod.hpp>
 
-enum eChannelGroupType
-{
-	CHANNELGROUP_MUSIC = 0,
-	NUM_CHANNELGROUPS
-};
-
 class CSoundEngine
 {
 public:
@@ -24,6 +18,7 @@ public:
 
 private:
 	FMOD::System *m_pSystem;
+	const int m_NumChannels = 100;
 	//No longer needed just pass NULL channel since we are not doing any submixing
 	//FMOD::ChannelGroup* m_pChannelGroups[NUM_CHANNELGROUPS];
 };

@@ -624,6 +624,7 @@ public:
 	//-----------
 
 	void Init(void);
+	void Shutdown(void);
 	void VidInit(void);
 	void Think(void);
 	int Redraw(float flTime, int intermission);

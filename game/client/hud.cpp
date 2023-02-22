@@ -377,6 +377,11 @@ void CHud::Init(void)
 	MsgFunc_ResetHUD(0, 0, NULL);
 }
 
+void CHud::Shutdown()
+{
+	m_Music->Shutdown();
+}
+
 // CHud destructor
 // cleans up memory allocated for m_rg* arrays
 CHud::~CHud()
@@ -396,8 +401,6 @@ CHud::~CHud()
 		}
 		m_pHudList = NULL;
 	}
-
-	m_Music->Shutdown();
 }
 
 // GetSpriteIndex()

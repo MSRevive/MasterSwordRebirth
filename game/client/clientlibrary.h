@@ -18,5 +18,4 @@ private:
 	bool m_IsConnected = false;
 	float m_ConnectionTime;
 	netadr_t m_ServerAddress;
-	const char *m_MapName;
 };

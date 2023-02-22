@@ -17,7 +17,7 @@ bool CSoundEngine::InitFMOD(void)
 	else
 		gEngfuncs.Con_Printf("FMOD system successfully created.\n");
 
-	result = m_pSystem->init(100, FMOD_INIT_NORMAL, 0);   // Initialize FMOD system.
+	result = m_pSystem->init(m_NumChannels, FMOD_INIT_NORMAL, 0);   // Initialize FMOD system.
 	if (result != FMOD_OK)
 	{
 		gEngfuncs.Con_Printf("FMOD ERROR: Failed to initialize properly!\n");
@@ -46,8 +46,8 @@ bool CSoundEngine::ExitFMOD(void)
 }
 
 // Update FMOD System
-bool CSoundEngine::Update(void) {
-
+bool CSoundEngine::Update(void) 
+{
 	if (m_pSystem) {
 
 		FMOD_RESULT result = m_pSystem->update();
