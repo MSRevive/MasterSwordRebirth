@@ -31,7 +31,6 @@
 #include "../ricochet/cl_dll/demo.h"
 #else
 #include "parsemsg.h"
-#include "hud_servers.h"
 #include "demo.h"
 #endif
 

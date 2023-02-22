@@ -33,7 +33,6 @@
 #include "../parsemsg.h"
 
 #include "../vgui_teamfortressviewport.h"
-#include "../vgui_serverbrowser.h"
 
 //Master Sword
 #include "vgui_storemainwin.h"

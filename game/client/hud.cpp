@@ -26,7 +26,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
-#include "hud_servers.h"
 #include "vgui_teamfortressviewport.h"
 
 #include "demo.h"
@@ -119,13 +118,6 @@ void __CmdFunc_ForceCloseCommandMenu( void )
 	}
 }*/
 
-void __CmdFunc_ToggleServerBrowser(void)
-{
-	if (gViewPort)
-	{
-		gViewPort->ToggleServerBrowser();
-	}
-}
 //Master Sword
 //void __CmdFunc_PlayerUseItem(void);
 //void __CmdFunc_PlayerDropItem(void);
@@ -313,9 +305,6 @@ void CHud::Init(void)
 	HOOK_MESSAGE(SetFOV);
 	//HOOK_MESSAGE( Concuss );
 
-	// TFFree CommandMenu
-	HOOK_COMMAND("togglebrowser", ToggleServerBrowser);
-
 	HOOK_MESSAGE(TeamNames);
 	HOOK_MESSAGE(MOTD);
 	HOOK_MESSAGE(ServerName);
@@ -385,8 +374,6 @@ void CHud::Init(void)
 	MSCLGlobals::Initialize();
 	//------------
 
-	ServersInit();
-
 	MsgFunc_ResetHUD(0, 0, NULL);
 }
 
@@ -411,7 +398,6 @@ CHud::~CHud()
 	}
 
 	m_Music->Shutdown();
-	ServersShutdown();
 }
 
 // GetSpriteIndex()

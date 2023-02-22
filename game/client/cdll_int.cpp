@@ -40,7 +40,6 @@ extern "C"
 }
 
 #include <string.h>
-#include "hud_servers.h"
 #include "vgui_int.h"
 #include "interface.h"
 #include "voice_status.h"
@@ -438,7 +437,6 @@ Called by engine every frame that client .dll is loaded
 
 void DLLEXPORT HUD_Frame(double time)
 {
-	ServersThink(time);
 	SetBorderlessWindow();
 	gClient.RunFrame();
 }
