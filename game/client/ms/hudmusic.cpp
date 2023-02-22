@@ -6,7 +6,6 @@ MS_DECLARE_MESSAGE(m_Music, Music);
 
 int CHudMusic::Init(void)
 {
-	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
 	HOOK_MESSAGE(Music);
 	m_MP3.Init();
 	return 1;
