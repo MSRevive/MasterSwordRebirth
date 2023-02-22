@@ -33,7 +33,7 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	switch (iCmd) {
 	case 0:
 	{
-		char *musicFile = READ_STRING();
+		const char *musicFile = READ_STRING();
 		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
 		break;
 	}

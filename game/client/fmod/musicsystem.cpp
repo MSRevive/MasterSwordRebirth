@@ -8,7 +8,7 @@
 
 #include "musicsystem.h"
 
-void CMusicSystem::Init( void )
+void CMusicSystem::Init()
 {
 	m_pSystem = gSoundEngine.GetSystem();
 	//If we ever decide to do submixing replace the NULL pointer.
@@ -17,7 +17,7 @@ void CMusicSystem::Init( void )
 
 }
 
-void CMusicSystem::Shutdown( void )
+void CMusicSystem::Shutdown()
 {
 	if (m_pChannel)
 		m_pChannel->stop();	
@@ -30,14 +30,14 @@ void CMusicSystem::Shutdown( void )
 
 // Returns the name of the current ambient sound being played
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
-const char* CMusicSystem::GetCurrentSoundName( void )
+const char* CMusicSystem::GetCurrentSoundName()
 {
 	return m_TranSound;
 }
 
 // Handles all fade-related sound stuffs
 // Called every frame when the client is in-game
-bool CMusicSystem::FadeThink( void )
+bool CMusicSystem::FadeThink()
 {
 	//check if volume is the intended volume
 	float cvar_fMP3Vol = CVAR_GET_FLOAT("MP3Volume");
@@ -110,7 +110,7 @@ bool CMusicSystem::IsPlaying()
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
-bool CMusicSystem::PlayMusic( const char* pszSong, bool fadeIn )
+bool CMusicSystem::PlayMusic(const char* pszSong, bool fadeIn)
 {
 	m_bFadeOut = false;
 	char songPath[256];
