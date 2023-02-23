@@ -366,6 +366,7 @@ public:
 	virtual void ListContents();
 
 	//Overridden
+	void operator delete(void *p);
 	void Deactivate(void);
 	void Spawn(void);
 	int iItemSlot(void) { return 4; }
