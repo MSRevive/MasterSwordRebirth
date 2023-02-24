@@ -9,7 +9,7 @@ class CMusicSystem
 public:
 	CMusicSystem() = default;
 	~CMusicSystem() = default;
- 
+
 	void Init();
 	void Shutdown();
 
@@ -17,22 +17,22 @@ public:
 
 	bool IsPlaying();
 
-	bool PlayMusic( const char* pszSong, bool fadeIn = false );
+	bool PlayMusic(std::string pszSong, bool fadeIn = false);
 	void StopMusic(bool fadeOut = false);
-	void TransitionMusic( const char* pszSong );
+	void TransitionMusic(std::string pszSong);
 
 private:
-	const char *GetCurrentSoundName( void );
+	std::string GetCurrentSoundName(void);
 
-	const char *m_TranSound = "";
+	std::string m_TranSound = "";
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;
 	float m_fFadeDelay = 0.0;
-	float m_fVolume = CVAR_GET_FLOAT("MP3Volume");
+	float m_fVolume = 0.0;
 
-	FMOD::System *m_pSystem;
-	FMOD::Sound *m_pSound;
-	FMOD::Channel *m_pChannel;
-	FMOD::ChannelGroup *m_pChannelGroup;
+	FMOD::System* m_pSystem;
+	FMOD::Sound* m_pSound;
+	FMOD::Channel* m_pChannel;
+	FMOD::ChannelGroup* m_pChannelGroup;
 };

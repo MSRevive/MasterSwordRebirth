@@ -1290,7 +1290,7 @@ void CRenderChar::Render( )
 
 			m_GearItems.add( *pItem );
 			pItem->SUB_Remove();
-			//delete pItem; ERROR ERROR ?!?!
+			delete pItem;
 		}
 		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.add( &m_GearItems[i] );

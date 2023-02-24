@@ -10,6 +10,7 @@ public:
 
 	void HUDInit();
 	void Shutdown();
+	void VideoInit();
 	void RunFrame();
 	void ResetClient();
 
@@ -17,5 +18,4 @@ private:
 	bool m_IsConnected = false;
 	float m_ConnectionTime;
 	netadr_t m_ServerAddress;
-	const char *m_MapName;
 };

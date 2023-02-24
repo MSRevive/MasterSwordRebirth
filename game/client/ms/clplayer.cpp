@@ -1301,7 +1301,7 @@ int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 }
 
 int g_SwitchToHand = -1;
-void __CmdFunc_ToggleServerBrowser(void);
+//void __CmdFunc_ToggleServerBrowser(void);
 bool fBroswerVisible();
 void ShowVGUIMenu(int iMenu);
 //void Player_UseStamina(float flAddAmt);
@@ -1346,16 +1346,12 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			strncpy(player.m_OldTransition, READ_STRING(), sizeof(player.m_OldTransition));
 			strncpy(player.m_NextTransition, READ_STRING(), sizeof(player.m_NextTransition));
 
-			//if( fShowBrowser && !fBroswerVisible() )
-			//	__CmdFunc_ToggleServerBrowser( );
 			if (fPlaySound)
 				PlaySound("misc/transition.wav", 1.0);
 			//Print("DEBUG_CLIENT_TRANS: %s", player.m_NextTransition); //MAR2010_08
 		}
 		else if (iMode == 1)
 		{
-			if (fBroswerVisible())
-				__CmdFunc_ToggleServerBrowser();
 			player.m_NextMap[0] = 0;
 			player.m_NextTransition[0] = 0;
 		}

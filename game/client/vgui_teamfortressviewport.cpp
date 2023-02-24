@@ -71,7 +71,6 @@
 
 #include "vgui_int.h"
 #include "vgui_teamfortressviewport.h"
-#include "vgui_serverbrowser.h"
 #include "vgui_scorepanel.h"
 #include "vgui_spectatorpanel.h"
 #include "pm_shared.h"
@@ -582,10 +581,6 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	CreateScoreBoard();
 	//CreateCommandMenu();
 
-	dbg("Call CreateServerBrowser");
-	CreateServerBrowser();
-	//logfile << "[CreateServerBrowser: Complete]" << endl;
-
 	// Create the spectator Panel
 	dbg("Call SpectatorPanel()");
 	m_pSpectatorPanel = new SpectatorPanel(0, 0, ScreenWidth, ScreenHeight);
@@ -905,31 +900,6 @@ catch( CException *e )
 	gEngfuncs.COM_FreeFile( pfile );
 
 	m_iInitialized = true;*/
-}
-
-void TeamFortressViewport::ToggleServerBrowser()
-{
-	//if (!m_iInitialized)
-	//	return;
-
-	if (!m_pServerBrowser)
-		return;
-
-	if (m_pServerBrowser->isVisible())
-	{
-		m_pServerBrowser->setVisible(false);
-	}
-	else
-	{
-		m_pServerBrowser->setVisible(true);
-	}
-
-	UpdateCursorState();
-}
-
-bool fBroswerVisible()
-{
-	return gViewPort->m_pServerBrowser ? gViewPort->m_pServerBrowser->isVisible() : false;
 }
 
 //=======================================================================
@@ -1256,13 +1226,6 @@ void TeamFortressViewport::CreateScoreBoard(void)
 	logfile << Logger::LOG_INFO << "[Scoreboard: Complete]\n";
 
 	enddbg;
-}
-
-void TeamFortressViewport::CreateServerBrowser(void)
-{
-	m_pServerBrowser = new ServerBrowser(0, 0, ScreenWidth, ScreenHeight);
-	m_pServerBrowser->setParent(this);
-	m_pServerBrowser->setVisible(false);
 }
 
 //======================================================================
@@ -1760,7 +1723,7 @@ void TeamFortressViewport::UpdateCursorState()
 		return;
 	}
 
-	if (m_pSpectatorPanel->m_menuVisible || m_pServerBrowser->isVisible() || GetClientVoiceMgr()->IsInSquelchMode())
+	if (m_pSpectatorPanel->m_menuVisible || GetClientVoiceMgr()->IsInSquelchMode())
 	{
 		//Exclude menu panels that don't use the mouse (stats display)
 		if ((!m_pStatMenu || !m_pStatMenu->IsActive()) &&
@@ -1952,14 +1915,6 @@ int TeamFortressViewport::KeyInput(int down, int keynum, const char *pszCurrentB
 				HideTopMenu();
 				return 0;
 			}
-		}
-
-		if (m_pServerBrowser && m_pServerBrowser->isVisible() &&
-			keynum == K_ESCAPE) // get out of the server browser
-		{
-			m_pServerBrowser->setVisible(false);
-			UpdateCursorState();
-			return 0;
 		}
 
 		// Grab enter keys to close TextWindows

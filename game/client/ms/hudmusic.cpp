@@ -6,7 +6,6 @@ MS_DECLARE_MESSAGE(m_Music, Music);
 
 int CHudMusic::Init(void)
 {
-	CVAR_CREATE("fmod_volume", "1.0", FCVAR_ARCHIVE);
 	HOOK_MESSAGE(Music);
 	m_MP3.Init();
 	return 1;
@@ -34,7 +33,7 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	switch (iCmd) {
 	case 0:
 	{
-		char *musicFile = READ_STRING();
+		const char *musicFile = READ_STRING();
 		m_MP3.TransitionMusic(musicFile); //sound engine handles the including of dir now.
 		break;
 	}

@@ -34,7 +34,6 @@
 
 #include "vgui_int.h"
 #include "vgui_teamfortressviewport.h"
-#include "vgui_serverbrowser.h"
 #include "vgui_loadtga.h"
 #include "sharedutil.h"
 #include "ms/vgui_mscontrols.h"

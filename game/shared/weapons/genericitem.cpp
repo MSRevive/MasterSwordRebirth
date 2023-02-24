@@ -559,6 +559,13 @@ CGenericItem::~CGenericItem()
 {
 	Deactivate();
 }
+
+void CGenericItem::operator delete(void *p)
+{
+	CGenericItem t;
+	t.~CGenericItem();
+}
+
 void CGenericItem::Deactivate()
 {
 	startdbg;

@@ -319,9 +319,9 @@ private:
 	BuildButton *m_pBuildButtons[3];
 	BuildButton *m_pBuildActiveButtons[3];
 
-public:
-	// Server Browser
-	ServerBrowser *m_pServerBrowser;
+// public:
+// 	// Server Browser
+// 	ServerBrowser *m_pServerBrowser;
 
 private:
 	// Spectator "menu"
@@ -349,7 +349,6 @@ public:
 
 	void CreateCommandMenu(void);
 	void CreateScoreBoard(void);
-	void CreateServerBrowser(void);
 
 	void UpdateCursorState(void);
 	void UpdateCommandMenu(int menuIndex);

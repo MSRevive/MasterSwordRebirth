@@ -8,33 +8,40 @@
 
 #include "musicsystem.h"
 
-void CMusicSystem::Init( void )
+void CMusicSystem::Init()
 {
 	m_pSystem = gSoundEngine.GetSystem();
-	m_pChannelGroup = gSoundEngine.GetChannelGroup(CHANNELGROUP_MUSIC);
+	//If we ever decide to do submixing replace the NULL pointer.
+	m_pChannelGroup = NULL;
 	m_bFadeOut = false;
+
 }
 
-void CMusicSystem::Shutdown( void )
+void CMusicSystem::Shutdown()
 {
 	if (m_pChannel)
-		m_pChannel->stop();	
+		m_pChannel->stop();
 
 	m_pSound->release();
-	m_pSystem = nullptr;
 }
 
 // Returns the name of the current ambient sound being played
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
-const char* CMusicSystem::GetCurrentSoundName( void )
+std::string CMusicSystem::GetCurrentSoundName()
 {
 	return m_TranSound;
 }
 
 // Handles all fade-related sound stuffs
 // Called every frame when the client is in-game
-bool CMusicSystem::FadeThink( void )
+bool CMusicSystem::FadeThink()
 {
+	//check if volume is the intended volume
+	float cvar_fMP3Vol = CVAR_GET_FLOAT("MP3Volume");
+	if (m_fVolume != cvar_fMP3Vol) {
+		m_fVolume = cvar_fMP3Vol;
+	}
+
 	if ( m_bFadeOut )
 	{
 		if ( gEngfuncs.GetClientTime() >= m_fFadeDelay )
@@ -68,7 +75,8 @@ bool CMusicSystem::FadeThink( void )
 			float tempvol;
 			m_pChannel->getVolume( &tempvol );
 
-			if ( tempvol < 1.0 )
+			//we only want to fade up the the wanted volume not to 1.0
+			if ( tempvol < m_fVolume )
 			{
 				m_pChannel->setVolume( tempvol + 0.05 );
 				m_fFadeDelay = gEngfuncs.GetClientTime() + 0.1;
@@ -89,8 +97,9 @@ bool CMusicSystem::FadeThink( void )
 // Returns true if they match, false if they do not or if no sound is being played
 bool CMusicSystem::IsPlaying()
 {
-	bool *playing = false;
-	FMOD_RESULT	result = m_pChannel->isPlaying(playing);
+	bool playing = false;
+
+	FMOD_RESULT	result = m_pChannel->isPlaying(&playing);
 	if ((result != FMOD_OK) && (result != FMOD_ERR_INVALID_HANDLE) && (result != FMOD_ERR_CHANNEL_STOLEN))
 		return false;
 
@@ -99,28 +108,29 @@ bool CMusicSystem::IsPlaying()
 
 // Abruptly starts playing a specified ambient sound
 // In most cases, we'll want to use TransitionAmbientSounds instead
-bool CMusicSystem::PlayMusic( const char* pszSong, bool fadeIn )
+bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 {
 	m_bFadeOut = false;
 	char songPath[256];
-	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong);
+	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong.c_str());
 	FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
 
 	if (result != FMOD_OK)
 	{
-		gEngfuncs.Con_Printf("FMOD: Failed to create stream of sound '%s' ! (ERROR NUMBER: %i)\n", pszSong, result);
+		gEngfuncs.Con_Printf("FMOD: Failed to create stream of sound '%s' ! (ERROR NUMBER: %i)\n", pszSong.c_str(), result);
 		return false;
 	}
 
-	result = m_pSystem->playSound(m_pSound, m_pChannelGroup, false, &m_pChannel);
+	result = m_pSystem->playSound(m_pSound, m_pChannelGroup , false, &m_pChannel);
 
 	if (result != FMOD_OK)
 	{
-		gEngfuncs.Con_Printf("FMOD: Failed to play sound '%s' ! (ERROR NUMBER: %i)\n", pszSong, result);
+		gEngfuncs.Con_Printf("FMOD: Failed to play sound '%s' ! (ERROR NUMBER: %i)\n", pszSong.c_str(), result);
 		return false;
 	}
 
-	m_pChannel->setVolume(1.0);
+	//never be louder than what the player set
+	m_pChannel->setVolume(m_fVolume);
 	if ( fadeIn )
 	{
 		m_pChannel->setVolume( 0.0 );
@@ -144,10 +154,10 @@ void CMusicSystem::StopMusic(bool fadeOut)
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CMusicSystem::TransitionMusic(const char* pszSong)
+void CMusicSystem::TransitionMusic(std::string pszSong)
 {
 	m_pChannel->setVolume(m_fVolume);
-	if (IsPlaying())
+ 	if (IsPlaying())
 	{
 		m_bFadeOut = true;
 		m_bShouldTransition = true;

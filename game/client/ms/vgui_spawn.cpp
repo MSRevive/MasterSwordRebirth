@@ -58,7 +58,6 @@
 
 #include "../vgui_int.h"
 #include "../vgui_teamfortressviewport.h"
-#include "../vgui_serverbrowser.h"
 
 //Master Sword
 #include "vgui_spawn.h"
