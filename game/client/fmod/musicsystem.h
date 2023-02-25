@@ -13,7 +13,7 @@ public:
 	void Init();
 	void Shutdown();
 
-	bool FadeThink();
+	bool Think();
 
 	bool IsPlaying();
 
