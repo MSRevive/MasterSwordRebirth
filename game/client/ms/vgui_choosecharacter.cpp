@@ -1290,7 +1290,10 @@ void CRenderChar::Render( )
 
 			m_GearItems.add( *pItem );
 			pItem->SUB_Remove();
-			delete pItem;
+
+			//can't use delete here so just manually clear the memory instead.
+			pItem->Deactivate();
+			pItem = nullptr;
 		}
 		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.add( &m_GearItems[i] );
