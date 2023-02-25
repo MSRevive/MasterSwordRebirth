@@ -362,19 +362,19 @@ void WRITE_FLOAT(float Float)
 int PRECACHE_SOUND(const char *pszSound)
 {
 	//Thothie tracking model precaches, avoiding duplicates
-	bool thoth_nolog = false;
+	bool bNoLog = false;
 	for (int i = 0; i < gSoundPrecacheList.size(); i++)
 	{
-		msstring thoth_yarglbarblb = pszSound;
-		if (strcmp(thoth_yarglbarblb.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
+		msstring msPrecacheSoundName = pszSound;
+		if (strcmp(msPrecacheSoundName.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
 		{
 			//logfile << "(Precache Duplicate Avoided)" << "\n"; //temporary
 			//return 0;
-			thoth_nolog = true;
+			bNoLog = true;
 			break;
 		}
 	}
-	if (!thoth_nolog)
+	if (!bNoLog)
 	{
 		gSoundPrecacheList.add_blank();
 		gSoundPrecacheList[gSoundPrecacheCount].PrecacheName = pszSound;
@@ -387,19 +387,19 @@ int PRECACHE_SOUND(const char *pszSound)
 int PRECACHE_MODEL(const char *pszModelname)
 {
 	//Thothie tracking model precaches, avoiding duplicates
-	bool thoth_nolog = false;
+	bool bNoLog = false;
 	for (int i = 0; i < gModelPrecacheList.size(); i++)
 	{
-		msstring thoth_yarglbarbl = pszModelname;
-		if (strcmp(thoth_yarglbarbl.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
+		msstring msPrecacheModelName = pszModelname;
+		if (strcmp(msPrecacheModelName.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
 		{
 			//logfile << "(Precache Duplicate Avoided)" << "\n"; //temporary
 			//return 0;
-			thoth_nolog = true;
+			bNoLog = true;
 			break;
 		}
 	}
-	if (!thoth_nolog)
+	if (!bNoLog)
 	{
 		gModelPrecacheList.add_blank();
 		gModelPrecacheList[gModelPrecacheCount].PrecacheName = pszModelname;

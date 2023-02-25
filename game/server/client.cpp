@@ -444,17 +444,17 @@ void ClientCommand2(edict_t *pEntity)
 	}
 
 	//JAN2010_09 Thothie - Changing situations where you can/can't use inventory
-	bool thoth_canuseinv = true;
+	bool bCanUseInventory = true;
 	if (pPlayer->InMenu)
-		thoth_canuseinv = false; //SEP2011_07 - prevent inv use while in menus
+		bCanUseInventory = false; //SEP2011_07 - prevent inv use while in menus
 	if (FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NOATTACK))
-		thoth_canuseinv = false; //can't use inventory cuz can't attack
+		bCanUseInventory = false; //can't use inventory cuz can't attack
 	if (FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_SITTING))
-		thoth_canuseinv = true; //but can't attack cuz sitting, so it's okay
+		bCanUseInventory = true; //but can't attack cuz sitting, so it's okay
 	if (!pPlayer->IsAlive())
-		thoth_canuseinv = false; //JAN2010_19 wait, dead, can't use inventory after all
+		bCanUseInventory = false; //JAN2010_19 wait, dead, can't use inventory after all
 	if (pPlayer->HasConditions(MONSTER_TRADING))
-		thoth_canuseinv = false; //SEP2011_10 - prevent inv use while in trade
+		bCanUseInventory = false; //SEP2011_10 - prevent inv use while in trade
 
 	if (FStrEq(pcmd, "say"))
 	{
@@ -630,7 +630,7 @@ void ClientCommand2(edict_t *pEntity)
 		//	foreach( i, MAX_NPC_HANDS )
 		//	if( pPlayer->Hand(i) ) pPlayer->Hand(i)->SUB_Remove( );
 	}
-	else if (FStrEq(pcmd, "get") && thoth_canuseinv)
+	else if (FStrEq(pcmd, "get") && bCanUseInventory)
 		pPlayer->GetAnyItems();
 
 	//Stealing disabled
@@ -857,7 +857,7 @@ void ClientCommand2(edict_t *pEntity)
 			return;
 		//Thothie attempting to de-h4x this
 		//char * cmholder;
-		if (thoth_canuseinv)
+		if (bCanUseInventory)
 		{
 			pPlayer->PrepareSpell(CMD_ARGV(1)); //Thothie - total h4x - doesnt check if you have the item or spell! YOU CAN SPAWN ANYTHING!
 		}
@@ -875,7 +875,7 @@ void ClientCommand2(edict_t *pEntity)
 			return;
 		//pPlayer->UseSkill( atoi((CHAR *)CMD_ARGV(1)) ); //Thothie - smells of h4x
 	}
-	else if (FStrEq(pcmd, "quickslot") && thoth_canuseinv)
+	else if (FStrEq(pcmd, "quickslot") && bCanUseInventory)
 	{
 		//This is only called when creating a slot, so this wont work here
 		/*
@@ -905,7 +905,7 @@ void ClientCommand2(edict_t *pEntity)
 	{
 		// Player is dropping an item.
 		//syntax: "drop <ID>"
-		if (thoth_canuseinv)
+		if (bCanUseInventory)
 		{
 			CGenericItem *pItem = NULL;
 			if (CMD_ARGC() > 1)
@@ -952,7 +952,7 @@ void ClientCommand2(edict_t *pEntity)
 	{
 		// player is trying to use an item.
 		//syntax: "use <hand>"
-		if (thoth_canuseinv)
+		if (bCanUseInventory)
 		{
 			int Hand = pPlayer->m_CurrentHand;
 			if (CMD_ARGC() > 1)
@@ -1213,7 +1213,7 @@ void ClientCommand2(edict_t *pEntity)
 		}
 		*/
 	}
-	else if (FStrEq(pcmd, "inv") && CMD_ARGV(1) && thoth_canuseinv) //MAY2008 - no pulling invenotry when you cant attack
+	else if (FStrEq(pcmd, "inv") && CMD_ARGV(1) && bCanUseInventory) //MAY2008 - no pulling invenotry when you cant attack
 	{
 		if (pPlayer->pev->weaponanim > 0)
 			return;
@@ -1296,7 +1296,7 @@ void ClientCommand2(edict_t *pEntity)
 			}
 		}
 	}
-	else if (FStrEq(pcmd, "inv") && !thoth_canuseinv)
+	else if (FStrEq(pcmd, "inv") && !bCanUseInventory)
 	{
 		if (FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NOMOVE))
 			pPlayer->SendInfoMsg("Can't use inventory while frozen or stunned...");

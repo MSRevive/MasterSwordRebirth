@@ -579,7 +579,7 @@ public:
 
 	int iTeleIdx; //OCT2011_28 Thothie - Teleport Destination Index Tracker
 
-	float thoth_last_triggered; //JUL2013_08 Thothie - let trigger_teleport use delay
+	float flLastTriggeredTime; //JUL2013_08 Thothie - let trigger_teleport use delay
 
 	virtual int ObjectCaps(void) { return CBaseToggle ::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
@@ -1383,8 +1383,8 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 	// pev->takedamage = DAMAGE_NO;
 
 	//AUG2011_17 Thothie - Filter by total HP
-	float thoth_min_hp = 0;
-	float thoth_max_hp = 0;
+	float flMinTriggerHP = 0;
+	float flMaxTriggerHP = 0;
 	bool use_else_target = false;
 
 	if (m_reqhp.len() > 0)
@@ -1393,20 +1393,20 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		TokenizeString(m_reqhp, reqhp_stringlist);
 
 		if (reqhp_stringlist.size() > 0)
-			thoth_min_hp = atof(reqhp_stringlist[0].c_str());
+			flMinTriggerHP = atof(reqhp_stringlist[0].c_str());
 		if (reqhp_stringlist.size() > 1)
 		{
-			thoth_max_hp = atof(reqhp_stringlist[1].c_str());
-			if (thoth_max_hp < thoth_min_hp)
-				thoth_max_hp = 0;
-			if (thoth_min_hp == 0)
-				thoth_min_hp = 1;
+			flMaxTriggerHP = atof(reqhp_stringlist[1].c_str());
+			if (flMaxTriggerHP < flMinTriggerHP)
+				flMaxTriggerHP = 0;
+			if (flMinTriggerHP == 0)
+				flMinTriggerHP = 1;
 		}
 
-		float thoth_hp = UTIL_TotalHP();
-		if (thoth_hp < thoth_min_hp)
+		float flTotalHP = UTIL_TotalHP();
+		if (flTotalHP < flMinTriggerHP)
 			use_else_target = true;
-		if (thoth_hp > thoth_max_hp && thoth_max_hp > 0)
+		if (flTotalHP > flMaxTriggerHP && flMaxTriggerHP > 0)
 			use_else_target = true;
 	}
 
@@ -1417,18 +1417,18 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		TokenizeString(m_reqavghp, reqavghp_stringlist);
 
 		if (reqavghp_stringlist.size() > 0)
-			thoth_min_hp = atof(reqavghp_stringlist[0].c_str());
+			flMinTriggerHP = atof(reqavghp_stringlist[0].c_str());
 		if (reqavghp_stringlist.size() > 1)
 		{
-			thoth_max_hp = atof(reqavghp_stringlist[1].c_str());
-			if (thoth_max_hp < thoth_min_hp)
-				thoth_max_hp = 0;
+			flMaxTriggerHP = atof(reqavghp_stringlist[1].c_str());
+			if (flMaxTriggerHP < flMinTriggerHP)
+				flMaxTriggerHP = 0;
 		}
 
-		float thoth_tavghp = UTIL_AvgHP();
-		if (thoth_tavghp < thoth_min_hp)
+		float flAverageHP = UTIL_AvgHP();
+		if (flAverageHP < flMinTriggerHP)
 			use_else_target = true;
-		if (thoth_tavghp > thoth_max_hp && thoth_max_hp > 0)
+		if (flAverageHP > flMaxTriggerHP && flMaxTriggerHP > 0)
 			use_else_target = true;
 	}
 
@@ -1450,7 +1450,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 				max_players = 0;
 		}
 
-		int thoth_total_players = UTIL_NumActivePlayers();
+		int iActivePlayerCount = UTIL_NumActivePlayers();
 
 		/*
 		for( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -1467,9 +1467,9 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		}
 #endif
 		*/
-		if (thoth_total_players < min_players)
+		if (iActivePlayerCount < min_players)
 			use_else_target = true;
-		if (thoth_total_players > max_players && max_players > 0)
+		if (iActivePlayerCount > max_players && max_players > 0)
 			use_else_target = true;
 	}
 
@@ -2272,7 +2272,7 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 	//Thothie - JUL2013_08 - let trigger teleport use delay
 	if (m_flDelay > 0)
 	{
-		if (thoth_last_triggered > 0 && ((thoth_last_triggered + m_flDelay) > gpGlobals->time))
+		if (flLastTriggeredTime > 0 && ((flLastTriggeredTime + m_flDelay) > gpGlobals->time))
 			return;
 	}
 
@@ -2301,8 +2301,8 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 
 	//Thothie DEC2012_15 - add hp/player/req to teleport triggersw (standard trigger functions do not work for teleporters)
 	//AUG2011_17 Thothie - Filter by total HP
-	float thoth_min_hp = 0;
-	float thoth_max_hp = 0;
+	float flMinTriggerHealth = 0;
+	float flMaxTriggerHealth = 0;
 	bool use_else_target = false;
 
 	if (m_reqhp.len() > 0)
@@ -2311,20 +2311,20 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 		TokenizeString(m_reqhp, reqhp_stringlist);
 
 		if (reqhp_stringlist.size() > 0)
-			thoth_min_hp = atof(reqhp_stringlist[0].c_str());
+			flMinTriggerHealth = atof(reqhp_stringlist[0].c_str());
 		if (reqhp_stringlist.size() > 1)
 		{
-			thoth_max_hp = atof(reqhp_stringlist[1].c_str());
-			if (thoth_max_hp < thoth_min_hp)
-				thoth_max_hp = 0;
-			if (thoth_min_hp == 0)
-				thoth_min_hp = 1;
+			flMaxTriggerHealth = atof(reqhp_stringlist[1].c_str());
+			if (flMaxTriggerHealth < flMinTriggerHealth)
+				flMaxTriggerHealth = 0;
+			if (flMinTriggerHealth == 0)
+				flMinTriggerHealth = 1;
 		}
 
-		float thoth_hp = UTIL_TotalHP();
-		if (thoth_hp < thoth_min_hp)
+		float flTotalHealth = UTIL_TotalHP();
+		if (flTotalHealth < flMinTriggerHealth)
 			use_else_target = true;
-		if (thoth_hp > thoth_max_hp && thoth_max_hp > 0)
+		if (flTotalHealth > flMaxTriggerHealth && flMaxTriggerHealth > 0)
 			use_else_target = true;
 	}
 
@@ -2335,18 +2335,18 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 		TokenizeString(m_reqavghp, reqavghp_stringlist);
 
 		if (reqavghp_stringlist.size() > 0)
-			thoth_min_hp = atof(reqavghp_stringlist[0].c_str());
+			flMinTriggerHealth = atof(reqavghp_stringlist[0].c_str());
 		if (reqavghp_stringlist.size() > 1)
 		{
-			thoth_max_hp = atof(reqavghp_stringlist[1].c_str());
-			if (thoth_max_hp < thoth_min_hp)
-				thoth_max_hp = 0;
+			flMaxTriggerHealth = atof(reqavghp_stringlist[1].c_str());
+			if (flMaxTriggerHealth < flMinTriggerHealth)
+				flMaxTriggerHealth = 0;
 		}
 
-		float thoth_tavghp = UTIL_AvgHP();
-		if (thoth_tavghp < thoth_min_hp)
+		float flAverageHealth = UTIL_AvgHP();
+		if (flAverageHealth < flMinTriggerHealth)
 			use_else_target = true;
-		if (thoth_tavghp > thoth_max_hp && thoth_max_hp > 0)
+		if (flAverageHealth > flMaxTriggerHealth && flMaxTriggerHealth > 0)
 			use_else_target = true;
 	}
 
@@ -2459,7 +2459,7 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 	UTIL_SetOrigin(pevToucher, tmp);
 
 	//Thothie - JUL2013_08 - let trigger teleport use delay
-	thoth_last_triggered = gpGlobals->time;
+	flLastTriggeredTime = gpGlobals->time;
 
 	pevToucher->angles = pentTarget->v.angles;
 
@@ -2484,7 +2484,7 @@ void CTriggerTeleport ::Spawn(void)
 	InitTrigger();
 	iTeleIdx = 0;
 	SetTouch(&CBaseTrigger::TeleportTouch);
-	thoth_last_triggered = 0;
+	flLastTriggeredTime = 0;
 }
 
 LINK_ENTITY_TO_CLASS(info_teleport_destination, CPointEntity);

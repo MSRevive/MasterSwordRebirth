@@ -6088,18 +6088,18 @@ bool CBasePlayer::PrepareSpell(const char *pszName)
 {
 	//Thothie - make sure player actually HAS SPELL before giving it to him
 	//otherwise you can summon any spell with prep command
-	bool thoth_madespell = false;
+	bool bCanGiveSpell = false;
 	for (int i = 0; i < m_SpellList.size(); i++)
 	{
 		msstring ShortName = m_SpellList[i];
 		if (ShortName == pszName)
 		{
 			return Magic::Prepare(pszName, this);
-			thoth_madespell = true;
+			bCanGiveSpell = true;
 			break;
 		}
 	}
-	return thoth_madespell;
+	return bCanGiveSpell;
 }
 
 class CLightSensor : public CBaseEntity
@@ -6348,8 +6348,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	m_CharacterState = CHARSTATE_LOADING;
 
 	//Thothie JUL2007 - prevent loading of STEAM_ID_PENDING chars
-	msstring thoth_displayname = DisplayName();
-	if (thoth_displayname.starts_with("LOAD_FAILED-RECONNECT"))
+	msstring msDisplayName = DisplayName();
+	if (msDisplayName.starts_with("LOAD_FAILED-RECONNECT"))
 	{
 		KickPlayer("\nNo clicky means no clicky. Please reconnect.\n");
 		return false;

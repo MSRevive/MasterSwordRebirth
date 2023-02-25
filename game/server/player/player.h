@@ -24,7 +24,7 @@
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
-#define THOTH_MAX_ITEMS 75 //Thothie APR2011_28
+#define NUM_MAX_ITEMS 75 //Thothie APR2011_28
 
 enum sbar_data
 {

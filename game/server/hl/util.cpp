@@ -1930,8 +1930,8 @@ void UTIL_Remove(CBaseEntity *pEntity)
 		return;
 
 #ifdef VALVE_DLL
-	msstring thoth_class = STRING(pEntity->pev->classname);
-	if (thoth_class.contains("msarea_monsterspawn") || thoth_class.contains("ms_monsterspawn"))
+	msstring msEntClassName = STRING(pEntity->pev->classname);
+	if (msEntClassName.contains("msarea_monsterspawn") || msEntClassName.contains("ms_monsterspawn"))
 	{
 		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);

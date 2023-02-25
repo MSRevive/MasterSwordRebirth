@@ -394,20 +394,20 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "hpmulti"))
 	{
 		//Thothie - SEP2007a - multiply hp by this amount
-		float thoth_inhealth = atof(pkvd->szValue);
-		if (thoth_inhealth > 1)
+		float flHealthMulti = atof(pkvd->szValue);
+		if (flHealthMulti > 1)
 		{
-			m_HPMulti = thoth_inhealth;
+			m_HPMulti = flHealthMulti;
 			pkvd->fHandled = TRUE;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "dmgmulti"))
 	{
 		//Thothie - SEP2007a - multiply damage by this amount
-		float thoth_invar = atof(pkvd->szValue);
-		if (thoth_invar > 1)
+		float flDamageMulti = atof(pkvd->szValue);
+		if (flDamageMulti > 1)
 		{
-			m_DMGMulti = thoth_invar;
+			m_DMGMulti = flDamageMulti;
 			pkvd->fHandled = TRUE;
 		}
 	}
@@ -1532,8 +1532,8 @@ void CMSMonster::Say(msstring_ref Sound, float fDuration)
 
 	//Thothie JUN2007b
 	//- wracking my brain trying to stop this thing from sending non-waves to players
-	msstring thoth_pissed = Sound;
-	if (!thoth_pissed.contains("RND_SAY"))
+	msstring msSoundRef = Sound;
+	if (!msSoundRef.contains("RND_SAY"))
 	{
 		word_t NewWord;
 		NewWord.Soundfile = Sound;
@@ -1553,8 +1553,8 @@ void CMSMonster::Talk()
 	if (!Word.Spoken)
 	{
 		//Thothie JUN2007b - trying to remove wave error with var based say commands
-		msstring thoth_filter = Word.Soundfile.c_str();
-		if (thoth_filter.contains(".wav"))
+		msstring msFileFilter = Word.Soundfile.c_str();
+		if (msFileFilter.contains(".wav"))
 		{
 			if (strlen(Word.Soundfile))
 				EMIT_SOUND(edict(), CHAN_VOICE, Word.Soundfile, SndVolume, ATTN_NORM);
@@ -2171,7 +2171,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
 	//	return 0;
 
-	bool thoth_did_parry = false;
+	bool bAttackWasParried = false;
 
 	CBaseEntity* pAttacker = Damage.pAttacker;
 	if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
@@ -2211,20 +2211,20 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		ParryRoll += GetNatStat(NATURAL_AWR);
 
 		//Thothie - do not parry certain damage types
-		msstring thoth_dmgtype = Damage.sDamageType;
-		if (thoth_dmgtype.starts_with("target"))
+		msstring msDamageTypeName = Damage.sDamageType;
+		if (msDamageTypeName.starts_with("target"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("fire"))
+		if (msDamageTypeName.starts_with("fire"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("poison"))
+		if (msDamageTypeName.starts_with("poison"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("lightning"))
+		if (msDamageTypeName.starts_with("lightning"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("cold"))
+		if (msDamageTypeName.starts_with("cold"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.contains("effect"))
+		if (msDamageTypeName.contains("effect"))
 			ParryRoll = 0; //do not parry DOT attacks
-		if (thoth_dmgtype.starts_with("magic"))
+		if (msDamageTypeName.starts_with("magic"))
 			ParryRoll = 0;
 		if (Damage.flDamage == 0)
 			ParryRoll = 0; //do not parry 0 damage atks
@@ -2246,7 +2246,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 				pHandItem->CallScriptEvent("game_parry", &ParametersB);
 			Damage.flDamage = -1; // -1 means the monster dodged the attack
 			ClearMultiDamage();
-			thoth_did_parry = true;
+			bAttackWasParried = true;
 			/* MiB JUL2010_02 - Remove Parry as a levellable stat
 			//Learn parry skill from  a successful parry
 			if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
@@ -2271,8 +2271,8 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		{
 			takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 			//msstring thoth_my_dmgtype = TDM.DamageType;
-			msstring thoth_inc_dmgtype = Damage.sDamageType.c_str();
-			if (thoth_inc_dmgtype.starts_with(TDM.DamageType))
+			msstring msIncomingDamageType = Damage.sDamageType.c_str();
+			if (msIncomingDamageType.starts_with(TDM.DamageType))
 			{
 				//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
 				Damage.flDamage *= TDM.modifier;
@@ -2336,7 +2336,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	}
 
 	dbg("AddMultiDamage");
-	if (!thoth_did_parry)
+	if (!bAttackWasParried)
 		AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
 
 	return Damage.flDamage;
@@ -2866,7 +2866,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	dbg("PrepClient");
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
-	if (pPlayer->NumItems() >= THOTH_MAX_ITEMS)
+	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
 	{
 		pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
 		return;
