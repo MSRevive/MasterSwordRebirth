@@ -461,13 +461,13 @@ void CScriptedEnt::Touch(CBaseEntity *pOther)
 	if (!m_HandleTouch)
 		return;
 
-	msstring thoth_targetname = STRING(pev->targetname);
-	msstring thoth_target = STRING(pev->target);
+	msstring msTouchTargetName = STRING(pev->targetname);
+	msstring msTouchTarget = STRING(pev->target);
 
 	Parameters.clearitems();
 	Parameters.add(EntToString(pOther));
-	Parameters.add(thoth_targetname);
-	Parameters.add(thoth_target);
+	Parameters.add(msTouchTargetName);
+	Parameters.add(msTouchTarget);
 
 	CallScriptEvent("game_touch", &Parameters);
 }

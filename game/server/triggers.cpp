@@ -2368,7 +2368,7 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 				max_players = 0;
 		}
 
-		int thoth_total_players = UTIL_NumActivePlayers();
+		int iActivePlayerCount = UTIL_NumActivePlayers();
 
 		/*
 		for( int i = 1; i <= gpGlobals->maxClients; i++ )
@@ -2385,9 +2385,9 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 		}
 #endif
 */
-		if (thoth_total_players < min_players)
+		if (iActivePlayerCount < min_players)
 			use_else_target = true;
-		if (thoth_total_players > max_players && max_players > 0)
+		if (iActivePlayerCount > max_players && max_players > 0)
 			use_else_target = true;
 	}
 
