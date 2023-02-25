@@ -107,9 +107,11 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_sprinttoggle", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletapsprint", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletap_delay", "0.2", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
+	CVAR_CREATE("ms_sprint_verbose", "2", FCVAR_ARCHIVE); // 0 for no messages , 1 for only warnings , 2 for everything
 
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
@@ -325,12 +327,12 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 
 	//Create new string
 	uint len = strlen(pszString) + 1;
-	char *pszNewString = msnew(char[len]);
-	strncpy(pszNewString, pszString, len);
+	std::unique_ptr<char[]> pszNewString(new char[len]);
+	strncpy(pszNewString.get(), pszString, len);
 
-	m_Strings.push_back((char *)pszNewString);
+	m_Strings.push_back((char *)pszNewString.get());
 
-	return pszNewString - gpGlobals->pStringBase;
+	return pszNewString.get() - gpGlobals->pStringBase;
 }
 /*char *MSCLGlobals::GetString( string_t sString )
 {
@@ -412,10 +414,7 @@ void MSCLGlobals::Cleanup()
 	enddbg;
 }
 
-BOOL WINAPI DllMain(
-	HINSTANCE hinstDLL,
-	DWORD fdwReason,
-	LPVOID lpvReserved)
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 		MSGlobals::DLLAttach(hinstDLL);
