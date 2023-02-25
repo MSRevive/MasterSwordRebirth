@@ -107,6 +107,7 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_sprinttoggle", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletapsprint", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletap_delay", "0.2", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
@@ -413,10 +414,7 @@ void MSCLGlobals::Cleanup()
 	enddbg;
 }
 
-BOOL WINAPI DllMain(
-	HINSTANCE hinstDLL,
-	DWORD fdwReason,
-	LPVOID lpvReserved)
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 		MSGlobals::DLLAttach(hinstDLL);
