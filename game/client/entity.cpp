@@ -1610,20 +1610,17 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			}
 		}else{
 			//cleffect decal <index> <origin>
-			int thoth_decalindex = atoi(Params[1]);
-			Vector thoth_trace_start = StringToVec(Params[2]);
-			Vector thoth_trace_end = StringToVec(Params[3]);
-	
-			//int thoth_testidx = gEngfuncs.pEfxAPI->Draw_DecalIndexFromName( "{bigblood1" );
-			//gEngfuncs.pEfxAPI->R_DecalShoot( thoth_testidx, 0, 0, thoth_decal_org, 0 );
-			//gEngfuncs.pEfxAPI->Draw_DecalIndex( 17);
+			int iDecalIndex = atoi(Params[1]);
+			Vector vTraceStart = StringToVec(Params[2]);
+			Vector vTraceEnd = StringToVec(Params[3]);
+
 			int iFlags = 0;
 			SetBits(iFlags, PM_WORLD_ONLY);
-			pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)&thoth_trace_start[0], (float *)&thoth_trace_end[0], iFlags, 2, iFlags);
+			pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)&vTraceStart[0], (float *)&vTraceEnd[0], iFlags, 2, iFlags);
 	
 			gEngfuncs.pEfxAPI->R_DecalShoot(
-			gEngfuncs.pEfxAPI->Draw_DecalIndex(thoth_decalindex),
-			gEngfuncs.pEventAPI->EV_IndexFromTrace(&pmtr), 0, thoth_trace_end, 0);
+			gEngfuncs.pEfxAPI->Draw_DecalIndex(iDecalIndex),
+			gEngfuncs.pEventAPI->EV_IndexFromTrace(&pmtr), 0, vTraceEnd, 0);
 		}
 	}
 	else if (Params[0] == "bleed")

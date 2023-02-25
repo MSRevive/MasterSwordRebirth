@@ -852,7 +852,7 @@ public:
 	int iPlayerReq;			//Thothie AUG2007a - adding optional player req
 	int iHPReq_min;			//Thothie AUG2007a - adding optional total HP on server req
 	int iHPReq_max;			//Thothie FEB2011_22 - adding min;max option for reqhp
-	float thoth_next_spawn; //Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
+	float flNextSpawnTime; //Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
 	enum spawnloc_e
 	{
 		SPAWNLOC_FIXED,
@@ -861,7 +861,7 @@ public:
 	bool m_fSpawnOnTrigger,
 		m_fActive,			   //Set to false when ALL monsters run out of lives.
 		hpreq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
-	bool thoth_org_spawnstart; //Thothie JUN2007b this bits tells it to spawn all monsters imediately, if spawn isnt triggered (see second occurance below)
+	bool bSpawnImmediately; //Thothie JUN2007b this bits tells it to spawn all monsters imediately, if spawn isnt triggered (see second occurance below)
 	string_t m_sTargetAllPerish;
 	int resetwhen;		//NOV2014_20 Thothie - attempting to allow changes as to when ms_monsterspawn can respawn mobs 0=when all dead, 1=when any mob dead, 2=whenever triggered
 	bool didfirstspawn; //NOV2014_20 Thothie - the above requires us to know whether we've done the initial spawn or not
@@ -976,7 +976,7 @@ public:
 			//original:
 			m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
 			//Thothie - store original spawnstart state
-			thoth_org_spawnstart = (atoi(pkvd->szValue)) ? true : false;
+			bSpawnImmediately = (atoi(pkvd->szValue)) ? true : false;
 			pkvd->fHandled = TRUE;
 		}
 		//NOV2014_20 seeing if we can change how ms_monsterspawn handles mob respawning
@@ -1267,7 +1267,7 @@ public:
 				continue;
 			}
 
-			bool thoth_nospawn = false;	//Lark DEC2017_10 - Changed scope to simplify Random Monster respawn
+			bool bNoSpawn = false;	//Lark DEC2017_10 - Changed scope to simplify Random Monster respawn
 			if (mdSpawnMonster[i].nplayers > 0)
 			{
 				if (UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers)
@@ -1276,7 +1276,7 @@ public:
 
 					//Lark DEC2017_10 - If Random spawn, fix in the hpreq block a few lines down
 					if ( mdSpawnMonster[i].m_nRndMobs > 0 )
-						thoth_nospawn = true;
+						bNoSpawn = true;
 					else
 					{
 						//count as dead and continue
@@ -1286,22 +1286,22 @@ public:
 				}
 			}
 
-			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0 || thoth_nospawn) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
+			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0 || bNoSpawn) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
 			{
 				//Lark DEC2017_10 - Added thoth_nospawn check from nplayers above
-				float thoth_thp;
+				float flCheckedTotalHealth;
 				if ( mdSpawnMonster[i].hpreq_useavg )
 				{
-					thoth_thp = UTIL_AvgHP(); //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
+					flCheckedTotalHealth = UTIL_AvgHP(); //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 				}
 				else
 				{
-					thoth_thp = UTIL_TotalHP();
+					flCheckedTotalHealth = UTIL_TotalHP();
 				}
 				
-				if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
-				if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
-				if ( thoth_nospawn )
+				if ( flCheckedTotalHealth < mdSpawnMonster[i].hpreq_min ) bNoSpawn = true;
+				if ( flCheckedTotalHealth >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) bNoSpawn = true;
+				if ( bNoSpawn )
 				{
 					//Thothie AUG2007a - not enough hp on server to spawn monster
 
@@ -1314,15 +1314,15 @@ public:
 						{
 							RespawnMonster( &mdSpawnMonster[i] );
 							
-							thoth_nospawn = false;
-							if ( UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers ) thoth_nospawn = true;
-							if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
-							if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
+							bNoSpawn = false;
+							if ( UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers ) bNoSpawn = true;
+							if ( flCheckedTotalHealth < mdSpawnMonster[i].hpreq_min ) bNoSpawn = true;
+							if ( flCheckedTotalHealth >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) bNoSpawn = true;
 							--retrySpawn;
 						}
-						while ( thoth_nospawn && retrySpawn > 0 );
+						while ( bNoSpawn && retrySpawn > 0 );
 
-						if ( thoth_nospawn ) // Requirements still failed; skip this spawn until triggered again.
+						if ( bNoSpawn ) // Requirements still failed; skip this spawn until triggered again.
 						{
 							iDeadMonsters++; //count as dead
 							continue;
@@ -1355,14 +1355,14 @@ public:
 			}
 
 			//Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
-			if (gpGlobals->time < thoth_next_spawn)
+			if (gpGlobals->time < flNextSpawnTime)
 			{
 				//only if spawnstart 1
 				//otherwise it fubars the already buggy fireallperish on sloppily built msarea_monsterspawns
-				if (thoth_org_spawnstart)
+				if (bSpawnImmediately)
 					continue;
 			}
-			thoth_next_spawn = gpGlobals->time + 0.2;
+			flNextSpawnTime = gpGlobals->time + 0.2;
 
 			//Spawn a monster
 			pMonster = (CMSMonster *)CREATE_ENT(STRING(mdSpawnMonster[i].classname));
@@ -1748,7 +1748,7 @@ public:
 	}
 
 	int PlayerVotes;
-	bool thoth_didvote;
+	bool bDidVote;
 
 	bool FAllPlayersAreTouchingMe()
 	{
@@ -1770,7 +1770,7 @@ public:
 	void Spawn()
 	{
 		CAreaInvisible::Spawn();
-		thoth_didvote = false;
+		bDidVote = false;
 		//For some reason, the targetname gets unset after this Spawn()
 		//function.  No time to find out why, just save it here.
 		sName = pev->targetname;
@@ -1900,7 +1900,7 @@ public:
 
 		pPlayer->CurrentTransArea = NULL;
 
-		thoth_didvote = false;
+		bDidVote = false;
 		msstringlist Parameters;
 		Parameters.add(STRING(sDestName));
 		Parameters.add(STRING(sDestMap));
@@ -1918,7 +1918,7 @@ public:
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return NULL;
 
-		if (!thoth_didvote)
+		if (!bDidVote)
 		{
 			if (pGMScript)
 			{
@@ -1929,7 +1929,7 @@ public:
 				Parameters.add(STRING(sDestTrans));
 				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
 			}
-			thoth_didvote = true;
+			bDidVote = true;
 		}
 
 		if (!FAllPlayersAreTouchingMe())

@@ -61,8 +61,8 @@ void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vec
 	if (!pTossDevice)
 		return;
 
-	float thoth_dmg_multi; //OCT2007a
-	float thoth_old_dmg = ProjectileData->Damage;
+	float flDamageMulti; //OCT2007a
+	float flStartingDamage = ProjectileData->Damage;
 
 	if (pTossDevice->IsMSItem())
 	{
@@ -75,8 +75,8 @@ void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vec
 		ProjectileData->PropExp = pTossItem->CurrentAttack->PropExp;
 		if (pTossItem->CurrentAttack->f1DmgMulti > 0) //OCT2007a
 		{
-			thoth_dmg_multi = pTossItem->CurrentAttack->f1DmgMulti;
-			ProjectileData->Damage = thoth_old_dmg * thoth_dmg_multi; //*= pTossItem->CurrentAttack->f1DmgMulti was not working
+			flDamageMulti = pTossItem->CurrentAttack->f1DmgMulti;
+			ProjectileData->Damage = flStartingDamage * flDamageMulti; //*= pTossItem->CurrentAttack->f1DmgMulti was not working
 		}
 		pev->owner = pTossItem->m_pOwner->edict();
 		ProjectileData->OriginalOwner = pTossItem->m_pOwner;

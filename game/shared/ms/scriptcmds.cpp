@@ -1010,8 +1010,8 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "scriptname")
 	{
 		//Thothie DEC2008a - return the full scriptname, with path
-		msstring thoth_return_scriptname = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
-		return thoth_return_scriptname.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		return msScriptNameReturn.c_str();
 		//MiB's attempt:
 		//static msstring Return = (msstring_ref) pTarget->ScriptFName;
 		//return Return.thru_substr( SCRIPT_EXT );
@@ -1019,12 +1019,12 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "itemname")
 	{
 		//Thothie DEC2008a - return the truncated script name (mostly for items)
-		msstring thoth_return_scriptname = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
 		bool found_last_slash = false;
-		int last_slash = thoth_return_scriptname.len();
+		int last_slash = msScriptNameReturn.len();
 		while (!found_last_slash)
 		{
-			if (thoth_return_scriptname[last_slash] == 47 || last_slash == 0)
+			if (msScriptNameReturn[last_slash] == 47 || last_slash == 0)
 			{
 				found_last_slash = true;
 			}
@@ -1034,9 +1034,9 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 			}
 		}
 		//thoth_return_scriptname = thoth_return_scriptname.findchar_str("/",0);
-		thoth_return_scriptname = thoth_return_scriptname.substr(last_slash + 1);
+		msScriptNameReturn = msScriptNameReturn.substr(last_slash + 1);
 		//thoth_return_scriptname = thoth_return_scriptname.substr( thoth_return_scriptname.len() - ( thoth_return_scriptname.len() -1 ) );
-		return thoth_return_scriptname.c_str();
+		return msScriptNameReturn.c_str();
 	}
 	else if (Prop == "gravity")		RETURN_FLOAT(pTarget->pev->gravity)
 	else if (Prop == "height")			RETURN_FLOAT(pTarget->pev->maxs.z - pTarget->pev->mins.z)
@@ -1228,10 +1228,10 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 #endif
 		}
 
-		msstring thoth_return_scriptname = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
-		thoth_return_scriptname = thoth_return_scriptname.findchar_str("/", 0);
-		thoth_return_scriptname = thoth_return_scriptname.substr(thoth_return_scriptname.len() - (thoth_return_scriptname.len() - 1));
-		return thoth_return_scriptname.c_str();
+		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
+		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
+		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
+		return msScriptNameReturn.c_str();
 	}
 	else if (Prop == "steamid")
 	{
@@ -1268,9 +1268,9 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	{
 		//Thothie JUN2007a - return Gold (attempt)
 		CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
-		int thoth_playergold = pPlayer->m_Gold;
-		msstring msthoth_PlayerGold = STRING(thoth_playergold);
-		return msthoth_PlayerGold;
+		int iPlayerGoldCount = pPlayer->m_Gold;
+		msstring msPlayerGoldCount = STRING(iPlayerGoldCount);
+		return msPlayerGoldCount;
 	}
 	else if (Prop == "isbot")
 	{
@@ -1279,9 +1279,9 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 		CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
 		if (!pTarget->IsNetClient()) return "1";
 
-		msstring thoth_steamid = pPlayer->AuthID();
-		if (thoth_steamid.contains("UNKNOWN")) return "1";
-		if (thoth_steamid.contains("BOT")) return "1";
+		msstring msSteamID = pPlayer->AuthID();
+		if (msSteamID.contains("UNKNOWN")) return "1";
+		if (msSteamID.contains("BOT")) return "1";
 		//add more dependants
 		return "0";
 	}
@@ -1536,8 +1536,8 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 				else if( Prop == "spellname" ) //MiB Dec2007a - returns the name of the spell on target player at slot 'idx'
 				{
 					int idx = atoi( Params[2] );
-					msstring thoth_out_str = pPlayer->m_SpellList[idx].c_str();
-					return thoth_out_str.c_str();
+					msstring msSpellNameReturn = pPlayer->m_SpellList[idx].c_str();
+					return msSpellNameReturn.c_str();
 				}
 				else if( Prop == "jumping" )	fSuccess = FBitSet( pPlayer->m_StatusFlags, PLAYER_MOVE_JUMPING ) ? true : false;
 				else if( Prop == "companions" )
@@ -1551,17 +1551,17 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 				//$get(<player>,keydown,<attack1|attack2|use|jump|moveleft|moveright|back|forward>)
 				else if (Prop == "keydown")
 				{
-					msstring thoth_key_check = (Params.size() >= 3 ? Params[2].c_str() : "");
-					if (thoth_key_check.starts_with("attack1")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_ATTACK)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("attack2")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_ATTACK2)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("use")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_USE)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("jump")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_JUMP)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("moveleft")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_MOVELEFT)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("moveright")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_MOVERIGHT)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("forward")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_FORWARD)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("back")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_BACK)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("speed")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_RUN)) ? "1" : "0");
-					else if (thoth_key_check.starts_with("duck")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_DUCK)) ? "1" : "0"); //APR2014_03 - Thothie - forgot about duck
+					msstring msKeyCheck = (Params.size() >= 3 ? Params[2].c_str() : "");
+					if (msKeyCheck.starts_with("attack1")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_ATTACK)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("attack2")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_ATTACK2)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("use")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_USE)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("jump")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_JUMP)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("moveleft")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_MOVELEFT)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("moveright")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_MOVERIGHT)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("forward")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_FORWARD)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("back")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_BACK)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("speed")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_RUN)) ? "1" : "0");
+					else if (msKeyCheck.starts_with("duck")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_DUCK)) ? "1" : "0"); //APR2014_03 - Thothie - forgot about duck
 				}
 #ifndef VALVE_DLL
 				else if (Prop == "stamina")		RETURN_FLOAT(pPlayer->Stamina)
@@ -1924,7 +1924,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 			//Thothie JUL2013_24 - applyeffect optimization
 			//very few effects stack, so let's just make all effects no-stack by default
 			//unless applyeffectstack command is used
-			bool thoth_applyeffect = true;
+			bool bApplyEffect = true;
 			if ( Cmd.Name() != "applyeffectstack" )
 			{
 				//Check if I has script
@@ -1935,13 +1935,13 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 					check_script = pScripted->m_Scripts[i]->m.ScriptFile.c_str();
 					if ( search_script == check_script )
 					{
-						thoth_applyeffect = false;
+						bApplyEffect = false;
 						break;
 					}
 				}
 			}
 
-			if ( thoth_applyeffect )
+			if ( bApplyEffect )
 			{
 				msstringlist Parameters;
 				for( int i = 0; i < Params.size() - 2; i++ )
@@ -2402,17 +2402,17 @@ bool CScript::ScriptCmd_ChatLog(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	//fuck dynamic I/O - trying for static
 	//chatlog [line] - append a file without loading it in (saves lag for chat log)
 #ifdef VALVE_DLL
-	msstring sTemp;
+	msstring msTemp;
 	if( Params.size() >= 1 )
 	{
 		for(int i = 0; i < Params.size(); i++ )
 		{
-			if( i ) sTemp += " ";
-			sTemp += Params[i];
+			if( i ) msTemp += " ";
+			msTemp += Params[i];
 		}
 
 		//Print ( "chatlog: %s \n", sTemp.c_str() );
-		chatlog << sTemp.c_str() << std::endl;
+		chatlog << msTemp.c_str() << std::endl;
 	}
 	else ERROR_MISSING_PARMS;
 #endif
@@ -2532,15 +2532,15 @@ bool CScript::ScriptCmd_ClientCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	//- sends command direct to client
 	//Thothie JAN2011_04 - udpated for use with 'all' option
 #ifdef VALVE_DLL
-	msstring sTemp;
+	msstring msTemp;
 	if( Params.size() >= 2 )
 	{
 		for( int i = 0; i < Params.size()-1; i++ )
 		{
-			if( i ) sTemp += " ";
-			sTemp += Params[i+1];
+			if( i ) msTemp += " ";
+			msTemp += Params[i+1];
 		}
-		sTemp += "\n";
+		msTemp += "\n";
 
 		if ( Params[0] != "all" )
 		{
@@ -2551,7 +2551,7 @@ bool CScript::ScriptCmd_ClientCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 
 				if ( pPlayer )
 				{
-					CLIENT_COMMAND( pPlayer->edict(), "%s", sTemp.c_str() );
+					CLIENT_COMMAND( pPlayer->edict(), "%s", msTemp.c_str() );
 				}
 			}
 			else ALERT( at_aiconsole, "Attempting to send client command to non-player!");
@@ -2562,7 +2562,7 @@ bool CScript::ScriptCmd_ClientCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			{
 				CBaseEntity *pEntity = UTIL_PlayerByIndex( i );
 				CBasePlayer *pPlayer = (CBasePlayer *)pEntity;;
-				if ( pPlayer ) CLIENT_COMMAND( pPlayer->edict(), "%s", sTemp.c_str() );
+				if ( pPlayer ) CLIENT_COMMAND( pPlayer->edict(), "%s", msTemp.c_str() );
 			}
 		}
 	}
@@ -3213,12 +3213,12 @@ bool CScript::ScriptCmd_GetEnts(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	//hopefully can be used in place of dodamage scans
 #ifdef VALVE_DLL
 	msstring &Name = Params[0];
-	float thoth_boxsize = atof(Params[1]);
+	float flAreaSize = atof(Params[1]);
 
 	CBaseEntity *pList[255], *pEnt = NULL;
 	Vector StartPos = Params.size() == 3 ? StringToVec(Params[2]) : m.pScriptedEnt->pev->origin;
-	int count = UTIL_MonstersInSphere( pList, 255, StartPos, thoth_boxsize);
-	int thoth_curstore = 0;
+	int count = UTIL_MonstersInSphere( pList, 255, StartPos, flAreaSize);
+	int iCurrentStore = 0;
 	for(int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
@@ -3227,20 +3227,20 @@ bool CScript::ScriptCmd_GetEnts(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		if ( m.pScriptedEnt->entindex() == pEnt->entindex() ) continue; //dont count self
 		if ( !pEnt->IsMSMonster() && !pEnt->IsPlayer() ) continue;
 
-		bool thoth_storethis = false;
-		if( !stricmp("player",Name) && pEnt->IsPlayer() ) thoth_storethis = true;
-		if( !stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() ) thoth_storethis = true;
-		if( !stricmp("any",Name) ) thoth_storethis = true;
+		bool bStoreEnt = false;
+		if( !stricmp("player",Name) && pEnt->IsPlayer() ) bStoreEnt = true;
+		if( !stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() ) bStoreEnt = true;
+		if( !stricmp("any",Name) ) bStoreEnt = true;
 
-		if ( thoth_storethis )
+		if ( bStoreEnt )
 		{
-			msstring thoth_outvar = msstring("GET_ENT") + ++thoth_curstore;
-			SetVar( thoth_outvar , EntToString(pEnt), Event );
-			if ( thoth_curstore >= 9 ) break;
+			msstring msEntStoreReturn = msstring("GET_ENT") + ++iCurrentStore;
+			SetVar( msEntStoreReturn , EntToString(pEnt), Event );
+			if ( iCurrentStore >= 9 ) break;
 		}
 
 	}
-	SetVar( "GET_COUNT", UTIL_VarArgs("%d",thoth_curstore), Event );
+	SetVar( "GET_COUNT", UTIL_VarArgs("%d",iCurrentStore), Event );
 #endif
 
 	return true;
@@ -3329,17 +3329,17 @@ bool CScript::ScriptCmd_GetPlayers(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	//getplayers <store_string>
 	//- get all players, store in token string
 #ifdef VALVE_DLL
-	msstring thoth_storeplayers;
+	msstring msStorePlayers;
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pOtherPlayer ) continue;
 
-		thoth_storeplayers += EntToString(pOtherPlayer);
-		thoth_storeplayers += ";";
+		msStorePlayers += EntToString(pOtherPlayer);
+		msStorePlayers += ";";
 	}
 	//ALERT(at_console,"stored players %s", thoth_storeplayers.c_str());
-	SetVar( Cmd.m_Params[1], thoth_storeplayers, Event );
+	SetVar( Cmd.m_Params[1], msStorePlayers, Event );
 #endif
 
 	return true;
@@ -3378,7 +3378,7 @@ bool CScript::ScriptCmd_GetPlayersNB(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	//- same as getplayers <token_string> - but doesn't return bots
 	//- saves a step in the bot mess, but for better security, use the script side verifications too (see base_treasurechest)
 #ifdef VALVE_DLL
-	msstring thoth_storeplayers;
+	msstring msStorePlayers;
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
@@ -3400,11 +3400,11 @@ bool CScript::ScriptCmd_GetPlayersNB(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 			continue;
 		}
 
-		thoth_storeplayers += EntToString(pOtherPlayer);
-		thoth_storeplayers += ";";
+		msStorePlayers += EntToString(pOtherPlayer);
+		msStorePlayers += ";";
 	}
 	//ALERT(at_console,"stored players %s", thoth_storeplayers.c_str());
-	SetVar( Cmd.m_Params[1], thoth_storeplayers, Event );
+	SetVar( Cmd.m_Params[1], msStorePlayers, Event );
 #endif
 
 	return true;
@@ -4114,7 +4114,7 @@ bool CScript::ScriptCmd_InfoMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 #ifdef VALVE_DLL
 			if( SendToAll )
-				SendHUDMsgAll( Title, sTemp );
+				SendHUDMsgAll( Title, msTemp );
 			else
 #endif
 				((CBasePlayer *)pEntity)->SendHUDMsg(Title, sTemp);
@@ -4337,16 +4337,16 @@ bool CScript::ScriptCmd_MessageAll(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 {
 	//messageall <color:w|r|b|g|y|d> <message>
 	//Thothie FEB2008a
-	msstring sTemp;
+	msstring msTemp;
 #ifdef VALVE_DLL
 	if( Params.size( ) >= 2 )
 	{
-		msstring thoth_color = Params[0];
+		msstring msColorString = Params[0];
 
 		for(int i = 0; i < Params.size()-1; i++)
 		{
-			if( i ) sTemp += " ";
-			sTemp += Params[i+1];
+			if( i ) msTemp += " ";
+			msTemp += Params[i+1];
 		}
 
 		for(int i = 1; i <= gpGlobals->maxClients; i++)
@@ -4355,12 +4355,12 @@ bool CScript::ScriptCmd_MessageAll(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 
 			if ( !pPlayer ) continue;
 
-			if ( thoth_color.starts_with("r") ) pPlayer->SendEventMsg( HUDEVENT_ATTACKED, sTemp );
-			else if ( thoth_color.starts_with("b") ) pPlayer->SendEventMsg( HUDEVENT_BLUE, sTemp );
-			else if ( thoth_color.starts_with("g") ) pPlayer->SendEventMsg( HUDEVENT_GREEN, sTemp );
-			else if ( thoth_color.starts_with("y") ) pPlayer->SendEventMsg( HUDEVENT_ATTACK, sTemp );
-			else if ( thoth_color.starts_with("d") ) pPlayer->SendEventMsg( HUDEVENT_UNABLE, sTemp );
-			else pPlayer->SendEventMsg( HUDEVENT_NORMAL, sTemp );
+			if ( msColorString.starts_with("r") ) pPlayer->SendEventMsg( HUDEVENT_ATTACKED, msTemp );
+			else if ( msColorString.starts_with("b") ) pPlayer->SendEventMsg( HUDEVENT_BLUE, msTemp );
+			else if ( msColorString.starts_with("g") ) pPlayer->SendEventMsg( HUDEVENT_GREEN, msTemp );
+			else if ( msColorString.starts_with("y") ) pPlayer->SendEventMsg( HUDEVENT_ATTACK, msTemp );
+			else if ( msColorString.starts_with("d") ) pPlayer->SendEventMsg( HUDEVENT_UNABLE, msTemp );
+			else pPlayer->SendEventMsg( HUDEVENT_NORMAL, msTemp );
 		}
 	}
 	else ERROR_MISSING_PARMS;
@@ -4839,10 +4839,10 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			logfile << "PLAYSOUND_TOO_LOUD [" << STRING(m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)") << "|" << sTemp.c_str() << "]" << endl;
 			}
 			*/
-			bool thoth_serversidesound = false;
+			bool bServerSideSound = false;
 			if (Cmd.Name().starts_with("sv"))
 			{
-				thoth_serversidesound = true;
+				bServerSideSound = true;
 			}
 
 			if (Cmd.Name() == "playrandomsound" || Cmd.Name() == "svplayrandomsound")
@@ -4873,7 +4873,7 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 				{
 					if (Volume)
 					{
-						if (thoth_serversidesound)
+						if (bServerSideSound)
 						{
 							EMIT_SOUND2(m.pScriptedEnt->edict(), iChannel, pszSound, Volume, sAttn, sPitch);
 						}
@@ -4894,7 +4894,7 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 					else
 					{
 						//volume 0 = stop the channel
-						if (thoth_serversidesound)
+						if (bServerSideSound)
 						{
 							EMIT_SOUND(m.pScriptedEnt->edict(), iChannel, "common/null.wav", 0.001f, sAttn);
 						}
@@ -5575,17 +5575,17 @@ bool CScript::ScriptCmd_ServerCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 {
 	//Thothie FEB2008a - client<->script management
 #ifdef VALVE_DLL
-	msstring sTemp;
+	msstring msTemp;
 	if( Params.size() >= 1 )
 	{
 		for(int i = 0; i < Params.size(); i++)
 		{
-			if( i ) sTemp += " ";
-			sTemp += Params[i];
+			if( i ) msTemp += " ";
+			msTemp += Params[i];
 		}
 
-		sTemp += "\n";
-		SERVER_COMMAND( sTemp.c_str() );
+		msTemp += "\n";
+		SERVER_COMMAND( msTemp.c_str() );
 	}
 	else ERROR_MISSING_PARMS;
 #endif
@@ -6008,9 +6008,9 @@ bool CScript::ScriptCmd_SetCVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 {
 	//Thothie JUN2007a - set a server-side cvar (MAYBE clientside too)
 	//setcvar <CVAR> <VALUE>
-	msstring &thoth_cvartoset = Params[0];
-	msstring &thoth_valuetoset = Params[1];
-	CVAR_SET_STRING(thoth_cvartoset.c_str(), thoth_valuetoset.c_str());
+	msstring &msCVARtoSetName = Params[0];
+	msstring &msCVARSetValue = Params[1];
+	CVAR_SET_STRING(msCVARtoSetName.c_str(), msCVARSetValue.c_str());
 
 	return true;
 }
@@ -6136,16 +6136,16 @@ bool CScript::ScriptCmd_SetGaitSpeed(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 bool CScript::ScriptCmd_SetModel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
-	msstring sTemp;
+	msstring msTemp;
 	if( Params.size() >= 1 )
 	{
 		if( Params[0] == "none" )
 			SetBits( m.pScriptedEnt->pev->effects, EF_NODRAW );
 		else
 		{
-			sTemp = "models/";
-			sTemp += Params[0];
-			m.pScriptedEnt->m_ModelName = sTemp;
+			msTemp = "models/";
+			msTemp += Params[0];
+			m.pScriptedEnt->m_ModelName = msTemp;
 			m.pScriptedEnt->pev->model = MAKE_STRING( m.pScriptedEnt->m_ModelName.c_str() );
 			if ( m.pScriptedEnt->edict() )
 			{
@@ -6290,7 +6290,7 @@ bool CScript::ScriptCmd_SetModelBody(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 bool CScript::ScriptCmd_SetProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
-	msstring sTemp;
+	msstring msTemp;
 	if( Params.size() >= 3 )
 	{
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Params[0] ) : NULL;
@@ -6308,9 +6308,9 @@ bool CScript::ScriptCmd_SetProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			else if( PropName == "modelindex" )	pEntity->pev->modelindex = Int;
 			else if( PropName == "model" )
 			{
-				sTemp = "models/";
-				sTemp += Params[2];
-				pEntity->m_ModelName = sTemp;
+				msTemp = "models/";
+				msTemp += Params[2];
+				pEntity->m_ModelName = msTemp;
 				if ( pEntity->edict() )
 				{
 					pEntity->pev->model = MAKE_STRING( pEntity->m_ModelName.c_str() );
@@ -7336,12 +7336,12 @@ bool CScript::ScriptCmd_VerVerify(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	//Thothie JUN2007a - Verify SC.DLL version
 	//this is done rarely, but once every game, thus, stuck it here
 	//note moved from hour change in OCT2007a
-	msstring thoth_scdll_ver = GetVar( "G_SCRIPT_VERSION" );
-	msstring thoth_msdll_ver = EngineFunc::CVAR_GetString("ms_version");
-	if ( !thoth_msdll_ver.starts_with(thoth_scdll_ver) )
+	msstring msScriptDllVersion = GetVar( "G_SCRIPT_VERSION" ); //sc.dll
+	msstring msServerDLLVersion = EngineFunc::CVAR_GetString("ms_version"); //ms.dll
+	if ( !msServerDLLVersion.starts_with(msScriptDllVersion) )
 	{
 #ifndef POSIX
-		MessageBox(NULL,UTIL_VarArgs("MS.DLL / SC.DLL version mismatch ( %s vs %s ). Cannot continue.",thoth_scdll_ver.c_str(),thoth_msdll_ver.c_str()), "ERROR",MB_OK|MB_ICONEXCLAMATION);
+		MessageBox(NULL,UTIL_VarArgs("MS.DLL / SC.DLL version mismatch ( %s vs %s ). Cannot continue.",msScriptDllVersion.c_str(),msServerDLLVersion.c_str()), "ERROR",MB_OK|MB_ICONEXCLAMATION);
 #endif
 		exit (-1);
 	}
@@ -7565,9 +7565,9 @@ bool CScript::ScriptCmd_XDoDamage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 		{
 			//FEB2010_28 - Thothie, compensate for monster width when dealing with ranges
 			//- be good to add target width too, but did that for regular dodamage, xdodamage is rarely used this way, and lazy
-			float thoth_range = atof(Params[1]);
-			thoth_range += pMonster->m_Width / 2;
-			Damage.flRange = Damage.flDamageRange = thoth_range;
+			float flDamageRangeParam = atof(Params[1]);
+			flDamageRangeParam += pMonster->m_Width / 2;
+			Damage.flRange = Damage.flDamageRange = flDamageRangeParam;
 			Vector vForward;
 			//pTarget = RetrieveEntity( Params[0] );
 			Damage.vecSrc = pMonster->EyePosition();

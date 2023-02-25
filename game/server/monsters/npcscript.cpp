@@ -245,8 +245,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 1)
 		{
-			int thoth_gold_amt = atoi(Params[0]);
-			GiveGold(thoth_gold_amt);
+			int iGoldAmount = atoi(Params[0]);
+			GiveGold(iGoldAmount);
 		}
 		else
 			ERROR_MISSING_PARMS;
@@ -643,7 +643,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool inventory_full = false;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() >= THOTH_MAX_ITEMS)
+				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
 					inventory_full = true;
 			}
 
@@ -843,7 +843,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (pPlayer)
 			{
 				pPlayer->CallScriptEvent("ext_remove_afk"); //flag player as non-afk when first offered store
-				if (pPlayer->NumItems() >= THOTH_MAX_ITEMS)
+				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
 				{
 					inventory_full = true;
 					pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use stores/chests while inventory full.");
@@ -1024,7 +1024,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			CBasePlayer *pPlayer = pTarget ? (pTarget->IsPlayer() ? (CBasePlayer *)pTarget : NULL) : NULL;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() < THOTH_MAX_ITEMS)
+				if (pPlayer->NumItems() < NUM_MAX_ITEMS)
 				{
 					OpenMenu(pPlayer);
 				}
@@ -1092,28 +1092,28 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 					m.TakeDamageModifiers.add(TDM);
 				msstring Debug_AMT = Params[1];
 				msstring Debug_Type = Params[0];
-				msstring thoth_var = "IMMUNE_";
+				msstring msDamageTypeImmune = "IMMUNE_";
 				if (Debug_Type.starts_with("cold"))
-					thoth_var.append("COLD");
+					msDamageTypeImmune.append("COLD");
 				if (Debug_Type.starts_with("fire"))
-					thoth_var.append("FIRE");
+					msDamageTypeImmune.append("FIRE");
 				if (Debug_Type.starts_with("lightning"))
-					thoth_var.append("LIGHTNING");
+					msDamageTypeImmune.append("LIGHTNING");
 				if (Debug_Type.starts_with("poison"))
-					thoth_var.append("POISON");
+					msDamageTypeImmune.append("POISON");
 				if (Debug_Type.starts_with("holy"))
-					thoth_var.append("HOLY");
+					msDamageTypeImmune.append("HOLY");
 				if (Debug_Type.starts_with("acid"))
-					thoth_var.append("ACID");
+					msDamageTypeImmune.append("ACID");
 				if (Debug_Type.starts_with("magic"))
-					thoth_var.append("MAGIC");
-				float thoth_final_val = flModifier;
+					msDamageTypeImmune.append("MAGIC");
+				// float thoth_final_val = flModifier; Completely unnecessary?
 				if (flModifier == 0)
-					SetScriptVar(thoth_var, "1");
+					SetScriptVar(msDamageTypeImmune, "1");
 				if (flModifier == 1)
-					SetScriptVar(thoth_var, "0.99");
-				if (thoth_final_val != 1 && thoth_final_val > 0)
-					SetScriptVar(thoth_var, flModifier);
+					SetScriptVar(msDamageTypeImmune, "0.99");
+				if (flModifier != 1 && flModifier > 0)
+					SetScriptVar(msDamageTypeImmune, flModifier);
 			}
 			
 			//Thothie DEC2017_13 - game_set_takedmg sets a base for later temporary adjustments
@@ -1168,16 +1168,16 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				//FEB2010_28 Thothie - Add monster width to range if non-AOE/Direct
 				if (Params[0][0] != '(')
 				{
-					float thoth_final_range = atof(Params[1]);
+					float flMonsterDamageRange = atof(Params[1]);
 					CMSMonster *pMonsterMe = IsMSMonster() ? (CMSMonster *)this : NULL;
 					CMSMonster *pTarget = IsMSMonster() ? (CMSMonster *)RetrieveEntity(Params[0]) : NULL;
 					if (pMonsterMe)
 					{
-						thoth_final_range += (pMonsterMe->m_Width / 2);
+						flMonsterDamageRange += (pMonsterMe->m_Width / 2);
 						if (pTarget)
-							thoth_final_range += (pTarget->m_Width / 2);
+							flMonsterDamageRange += (pTarget->m_Width / 2);
 					}
-					Damage.flRange = Damage.flDamageRange = thoth_final_range;
+					Damage.flRange = Damage.flDamageRange = flMonsterDamageRange;
 				}
 				else
 					Damage.flRange = Damage.flDamageRange = atof(Params[1]);
@@ -1330,11 +1330,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 2)
 		{
-			msstring thoth_instat = Params[0];
+			msstring msInputStatName = Params[0];
 
 			if (!IsPlayer())
 			{
-				if (thoth_instat == "parry")
+				if (msInputStatName == "parry")
 				{
 					float out_stat = atof(Params[1]);
 					SetScriptVar("MONSTER_PARRY", out_stat);
@@ -1343,7 +1343,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			if (IsPlayer())
 			{
-				if (!thoth_instat.contains("."))
+				if (!msInputStatName.contains("."))
 				{
 					CStat *pStat = FindStat(Params[0]);
 					if (pStat)
@@ -1364,11 +1364,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				else
 				{
 					//Thothie DEC2007a - more detailed stat settings (can't set some magic skills under old)
-					msstring parse_stat = thoth_instat.thru_char(".");
+					msstring parse_stat = msInputStatName.thru_char(".");
 					CStat *pStat = FindStat(parse_stat);
 					if (pStat)
 					{
-						msstring PropName = thoth_instat.substr(parse_stat.len() + 1);
+						msstring PropName = msInputStatName.substr(parse_stat.len() + 1);
 						int iProp = GetSubSkillByName(PropName);
 						if (iProp > -1)
 						{
