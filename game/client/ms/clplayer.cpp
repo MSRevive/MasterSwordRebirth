@@ -205,6 +205,7 @@ void CBasePlayer::Think(void)
 
 void CBasePlayer::DoSprint()
 {
+
 	//she's dead jim
 	if (pev->deadflag != DEAD_NO)
 		return;
@@ -238,18 +239,25 @@ void CBasePlayer::DoSprint()
 	// 	return;
 	// }
 
+	//grab cvar to turn off or on spring log message levels
+	std::string sCVARSprintText = CVAR_GET_STRING("ms_sprint_verbose");
+
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		if (FBitSet(pbs.ButtonsDown, IN_RUN))
 		{
 			if (player.Stamina <= 1)
 			{
-				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+				if (sCVARSprintText != "0") {
+					SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+				}
 				return;
 			}
 
 			SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg("You break into a jog.");
+			if (sCVARSprintText == "2") {
+				SendEventMsg("You break into a jog.");
+			}
 		}
 	}
 
@@ -262,7 +270,9 @@ void CBasePlayer::DoSprint()
 		if (!FBitSet(pbs.ButtonsDown, IN_FORWARD) || FBitSet(m_StatusFlags, PLAYER_MOVE_STOPRUN))
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg("You slow down and begin walking casually.");
+			if (sCVARSprintText == "2") {
+				SendEventMsg("You slow down and begin walking casually.");
+			}
 			//m_SprintDelay = gpGlobals->time + 0.3; //0.3 second delay for sprinting
 		}
 
@@ -270,7 +280,9 @@ void CBasePlayer::DoSprint()
 		if (player.Stamina <= 0)
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+			if (sCVARSprintText != "0") {
+				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+			}
 		}
 
 		//sprint interrupted
@@ -282,7 +294,9 @@ void CBasePlayer::DoSprint()
 			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
 			//m_SprintDelay = gpGlobals->time + 0.3;
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+			if (sCVARSprintText != "0") {
+				SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+			}
 		}
 	}
 
