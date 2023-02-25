@@ -325,12 +325,12 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 
 	//Create new string
 	uint len = strlen(pszString) + 1;
-	char *pszNewString = msnew(char[len]);
-	strncpy(pszNewString, pszString, len);
+	std::unique_ptr<char[]> pszNewString(new char[len]);
+	strncpy(pszNewString.get(), pszString, len);
 
-	m_Strings.push_back((char *)pszNewString);
+	m_Strings.push_back((char *)pszNewString.get());
 
-	return pszNewString - gpGlobals->pStringBase;
+	return pszNewString.get() - gpGlobals->pStringBase;
 }
 /*char *MSCLGlobals::GetString( string_t sString )
 {
