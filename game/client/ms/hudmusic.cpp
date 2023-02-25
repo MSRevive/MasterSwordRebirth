@@ -18,7 +18,7 @@ void CHudMusic::Shutdown(void)
 
 void CHudMusic::Think()
 {
-	m_MP3.FadeThink();
+	m_MP3.Think();
 }
 
 void CHudMusic::Reload()

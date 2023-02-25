@@ -32,14 +32,18 @@ std::string CMusicSystem::GetCurrentSoundName()
 	return m_TranSound;
 }
 
-// Handles all fade-related sound stuffs
+// Handles all fade-related and volume-related sound stuffs
 // Called every frame when the client is in-game
-bool CMusicSystem::FadeThink()
+bool CMusicSystem::Think()
 {
 	//check if volume is the intended volume
 	float cvar_fMP3Vol = CVAR_GET_FLOAT("MP3Volume");
 	if (m_fVolume != cvar_fMP3Vol) {
 		m_fVolume = cvar_fMP3Vol;
+		// if we aren't in the middle of fading already set the volume to our wanted volume.
+		if (!m_bFadeOut && !m_bFadeIn) {
+			m_pChannel->setVolume(m_fVolume);
+		}
 	}
 
 	if ( m_bFadeOut )
