@@ -4114,7 +4114,7 @@ bool CScript::ScriptCmd_InfoMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 
 #ifdef VALVE_DLL
 			if( SendToAll )
-				SendHUDMsgAll( Title, msTemp );
+				SendHUDMsgAll( Title, sTemp );
 			else
 #endif
 				((CBasePlayer *)pEntity)->SendHUDMsg(Title, sTemp);
