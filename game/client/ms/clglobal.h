@@ -82,7 +82,6 @@ public:
 	static void PrintAllEntites();									  //Print all client entities to console
 	static void RemoveAllEntities();								  //Delete all client entites
 	static void SetupGlobalEngFuncRedirects(void);					  //Set up engine functions at dll load
-	static byte *LoadFile(char *pFileName, int *pLength = NULL);	  //Load file into memory
 	static void SpawnIntoServer();									  //Called each map change
 	static void Cleanup();											  //Clean up all the stuff used from the previous map
 

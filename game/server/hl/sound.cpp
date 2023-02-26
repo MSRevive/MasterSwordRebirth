@@ -23,12 +23,11 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
+#include "ms/filesystem_shared.h"
 
 #ifdef POSIX
 #include <stdlib.h>
 #endif
-
-static char *memfgets(byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize);
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 // THOTHIE: I cut and pasted from the original HL1SDK's SOUND.CPP the entire Ambient Generic section in an effort to restore functionality
@@ -1061,7 +1060,7 @@ typedef struct sentenceg
 // globals
 
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
-int fSentencesInit = FALSE;
+bool bSentencesInit = false;
 
 char gszallsentencenames[CVOXFILESENTENCEMAX][CBSENTENCENAME_MAX];
 int gcallsentences = 0;
@@ -1073,7 +1072,7 @@ void USENTENCEG_InitLRU(unsigned char *plru, int count)
 	int i, j, k;
 	unsigned char temp;
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return;
 
 	if (count > CSENTENCE_LRU_MAX)
@@ -1105,7 +1104,7 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 	unsigned char count;
 	char sznum[8];
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return -1;
 
 	if (isentenceg < 0)
@@ -1155,7 +1154,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 	unsigned char ipick;
 	int ffound = FALSE;
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return -1;
 
 	if (isentenceg < 0)
@@ -1199,7 +1198,7 @@ int SENTENCEG_GetIndex(const char *szgroupname)
 {
 	int i;
 
-	if (!fSentencesInit || !szgroupname)
+	if (!bSentencesInit || !szgroupname)
 		return -1;
 
 	// search rgsentenceg for match on szgroupname
@@ -1226,7 +1225,7 @@ int SENTENCEG_PlayRndI(edict_t *entity, int isentenceg,
 	char name[64];
 	int ipick;
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return -1;
 
 	name[0] = 0;
@@ -1246,7 +1245,7 @@ int SENTENCEG_PlayRndSz(edict_t *entity, const char *szgroupname,
 	int ipick;
 	int isentenceg;
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return -1;
 
 	name[0] = 0;
@@ -1274,7 +1273,7 @@ int SENTENCEG_PlaySequentialSz(edict_t *entity, const char *szgroupname,
 	int ipicknext;
 	int isentenceg;
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return -1;
 
 	name[0] = 0;
@@ -1297,7 +1296,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 	char buffer[64];
 	char sznum[8];
 
-	if (!fSentencesInit)
+	if (!bSentencesInit)
 		return;
 
 	if (isentenceg < 0 || ipick < 0)
@@ -1315,6 +1314,56 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 // Should be called from world spawn, only works on the
 // first call and is ignored subsequently.
 
+static char* memfgets(const byte* pMemFile, std::size_t fileSize, std::size_t& filePos, char* pBuffer, std::size_t bufferSize)
+{
+	// Bullet-proofing
+	if (!pMemFile || !pBuffer)
+		return nullptr;
+
+	if (filePos >= fileSize)
+		return nullptr;
+
+	std::size_t i = filePos;
+	std::size_t last = fileSize;
+
+	// fgets always nullptr terminates, so only read bufferSize-1 characters
+	if (last - filePos > (bufferSize - 1))
+		last = filePos + (bufferSize - 1);
+
+	bool stop = false;
+
+	const auto text = reinterpret_cast<const char*>(pMemFile);
+
+	// Stop at the next newline (inclusive) or end of buffer
+	while (i < last && !stop)
+	{
+		if (text[i] == '\n')
+			stop = true;
+		i++;
+	}
+
+
+	// If we actually advanced the pointer, copy it over
+	if (i != filePos)
+	{
+		// We read in size bytes
+		std::size_t size = i - filePos;
+		// copy it out
+		memcpy(pBuffer, text + filePos, sizeof(byte) * size);
+
+		// If the buffer isn't full, terminate (this is always true)
+		if (size < bufferSize)
+			pBuffer[size] = 0;
+
+		// Update file pointer
+		filePos = i;
+		return pBuffer;
+	}
+
+	// No data read, bail
+	return nullptr;
+}
+
 void SENTENCEG_Init()
 {
 	char buffer[512];
@@ -1322,7 +1371,7 @@ void SENTENCEG_Init()
 	int i, j;
 	int isentencegs;
 
-	if (fSentencesInit)
+	if (bSentencesInit)
 		return;
 
 	memset(gszallsentencenames, 0, CVOXFILESENTENCEMAX * CBSENTENCENAME_MAX);
@@ -1333,23 +1382,22 @@ void SENTENCEG_Init()
 	memset(szgroup, 0, 64);
 	isentencegs = -1;
 
-	int filePos = 0, fileSize;
-	byte *pMemFile = g_engfuncs.pfnLoadFileForMe("sound/sentences.txt", &fileSize);
-	if (!pMemFile)
+	std::size_t filePos = 0;
+
+	const auto fileContents = FileSystem_LoadFileIntoBuffer("sound/sentences.txt", FileContentFormat::Text);
+
+	if (fileContents.empty())
 		return;
 
 	// for each line in the file...
-	while (memfgets(pMemFile, fileSize, filePos, buffer, 511) != NULL)
+	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, std::size(buffer)) != NULL)
 	{
 		// skip whitespace
 		i = 0;
-		while (buffer[i] && buffer[i] == ' ')
+		while ('\0' != buffer[i] && 0 != isspace(buffer[i]))
 			i++;
 
-		if (!buffer[i])
-			continue;
-
-		if (buffer[i] == '/' || !isalpha(buffer[i]))
+		if ('\0' == buffer[i])
 			continue;
 
 		// get sentence name
@@ -1418,9 +1466,7 @@ void SENTENCEG_Init()
 		}
 	}
 
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	fSentencesInit = TRUE;
+	bSentencesInit = true;
 
 	// init lru lists
 
@@ -1531,129 +1577,11 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // Used to detect the texture the player is standing on, map the
 // texture name to a material type.  Play footstep sound based
 // on material type.
-
-int fTextureTypeInit = FALSE;
-
 #define CTEXTURESMAX 512 // max number of textures loaded
 
 int gcTextures = 0;
 char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX]; // texture names
 char grgchTextureType[CTEXTURESMAX];				   // parallel array of texture types
-
-// open materials.txt,  get size, alloc space,
-// save in array.  Only works first time called,
-// ignored on subsequent calls.
-
-static char *memfgets(byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize)
-{
-	// Bullet-proofing
-	if (!pMemFile || !pBuffer)
-		return NULL;
-
-	if (filePos >= fileSize)
-		return NULL;
-
-	int i = filePos;
-	int last = fileSize;
-
-	// fgets always NULL terminates, so only read bufferSize-1 characters
-	if (last - filePos > (bufferSize - 1))
-		last = filePos + (bufferSize - 1);
-
-	int stop = 0;
-
-	// Stop at the next newline (inclusive) or end of buffer
-	while (i < last && !stop)
-	{
-		if (pMemFile[i] == '\n')
-			stop = 1;
-		i++;
-	}
-
-	// If we actually advanced the pointer, copy it over
-	if (i != filePos)
-	{
-		// We read in size bytes
-		int size = i - filePos;
-		// copy it out
-		memcpy(pBuffer, pMemFile + filePos, sizeof(byte) * size);
-
-		// If the buffer isn't full, terminate (this is always true)
-		if (size < bufferSize)
-			pBuffer[size] = 0;
-
-		// Update file pointer
-		filePos = i;
-		return pBuffer;
-	}
-
-	// No data read, bail
-	return NULL;
-}
-
-void TEXTURETYPE_Init()
-{
-	char buffer[512];
-	int i, j;
-	byte *pMemFile;
-	int fileSize, filePos = 0;
-
-	if (fTextureTypeInit)
-		return;
-
-	memset(&(grgszTextureName[0][0]), 0, CTEXTURESMAX * CBTEXTURENAMEMAX);
-	memset(grgchTextureType, 0, CTEXTURESMAX);
-
-	gcTextures = 0;
-	memset(buffer, 0, 512);
-
-	pMemFile = g_engfuncs.pfnLoadFileForMe("sound/materials.txt", &fileSize);
-	if (!pMemFile)
-		return;
-
-	// for each line in the file...
-	while (memfgets(pMemFile, fileSize, filePos, buffer, 511) != NULL && (gcTextures < CTEXTURESMAX))
-	{
-		// skip whitespace
-		i = 0;
-		while (buffer[i] && isspace(buffer[i]))
-			i++;
-
-		if (!buffer[i])
-			continue;
-
-		// skip comment lines
-		if (buffer[i] == '/' || !isalpha(buffer[i]))
-			continue;
-
-		// get texture type
-		grgchTextureType[gcTextures] = toupper(buffer[i++]);
-
-		// skip whitespace
-		while (buffer[i] && isspace(buffer[i]))
-			i++;
-
-		if (!buffer[i])
-			continue;
-
-		// get sentence name
-		j = i;
-		while (buffer[j] && !isspace(buffer[j]))
-			j++;
-
-		if (!buffer[j])
-			continue;
-
-		// null-terminate name and save in sentences array
-		j = min(j, CBTEXTURENAMEMAX - 1 + i);
-		buffer[j] = 0;
-		strncpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]), CBTEXTURENAMEMAX);
-	}
-
-	g_engfuncs.pfnFreeFile(pMemFile);
-
-	fTextureTypeInit = TRUE;
-}
 
 // given texture name, find texture type
 // if not found, return type 'concrete'

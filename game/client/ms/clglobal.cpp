@@ -303,16 +303,12 @@ char *UTIL_VarArgs(char *format, ...)
 
 	return (char *)string;
 }
+
 Vector UTIL_VecToAngles(const Vector &vec)
 {
 	float rgflVecOut[3];
 	AngleVectors(vec, rgflVecOut, NULL, NULL);
 	return Vector(rgflVecOut);
-}
-
-byte *MSCLGlobals::LoadFile(char *pFileName, int *pLength)
-{
-	return gEngfuncs.COM_LoadFile(pFileName, 5, pLength);
 }
 
 string_t MSCLGlobals::AllocString(const char *pszString)
@@ -359,8 +355,8 @@ void MSCLGlobals::SetupGlobalEngFuncRedirects(void)
 	g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
 	g_engfuncs.pfnRandomFloat = gEngfuncs.pfnRandomFloat;
 	g_engfuncs.pfnRandomLong = gEngfuncs.pfnRandomLong;
-	g_engfuncs.pfnLoadFileForMe = LoadFile;
-	g_engfuncs.pfnFreeFile = gEngfuncs.COM_FreeFile;
+	//g_engfuncs.pfnLoadFileForMe = gEngfuncs.COM_LoadFile; //why did MSC overwrite this with their own?
+	//g_engfuncs.pfnFreeFile = gEngfuncs.COM_FreeFile;
 }
 //I've recieved all script files, I can now spawn
 void CreateStoreMenus();
