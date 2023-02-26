@@ -492,7 +492,7 @@ public:
 		m_MessageLabel->getTextSize( w, h );
 		x += w + 1;
 		for (int i = 0; i < m_FadeLabels.size(); i++) { m_FadeLabels[i]->getTextSize(w, h); x += w; }
-		m_FadeLabels.add( new VGUI_FadeText( this, 0.6f, Letter, x, y, XRES(16), m_MessageLabel->getTall() ) );
+		m_FadeLabels.add( new VGUI_FadeText( this, 0, Letter, x, y, XRES(16), m_MessageLabel->getTall() ) );
 		m_Message += Letter;
 
 		if( getWide() - x < XRES(10) )
