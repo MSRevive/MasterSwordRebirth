@@ -5,12 +5,11 @@
 #include "util.h"
 #else
 #include "sharedutil.h"
-#define STRING(a) ""
-#define LOAD_FILE_FOR_ME(a, b) 0
-#define FREE_FILE( pFileData )
+//#define STRING(a) ""
+//#define LOAD_FILE_FOR_ME(a, b) 0
+//#define FREE_FILE( pFileData )
 #endif
-
-using namespace std;
+#include "ms/filesystem_shared.h"
 
 //
 //	Implementation of CGameFile and CPlayer_DataBuffer
@@ -18,7 +17,7 @@ using namespace std;
 
 bool CGameFile::OpenWrite(const char* pszFileName)
 {
-	m_File.open(pszFileName, ios_base::out | ios_base::binary);
+	m_File.open(pszFileName, std::ios_base::out | std::ios_base::binary);
 	if (!m_File.is_open())
 		return false;
 
@@ -28,7 +27,7 @@ bool CGameFile::OpenWrite(const char* pszFileName)
 
 bool CGameFile::OpenRead(const char* pszFileName)
 {
-	m_File.open(pszFileName, ios_base::in | ios_base::binary);
+	m_File.open(pszFileName, std::ios_base::in | std::ios_base::binary);
 	if (!m_File.is_open())
 		return false;
 
@@ -74,11 +73,11 @@ void CGameFile::ReadString(char* Data, size_t length)
 
 size_t CGameFile::GetFileSize()
 {
-	m_File.seekg(0, ios::cur);
+	m_File.seekg(0, std::ios::cur);
 	int CurPos = m_File.tellg();
-	m_File.seekg(0, ios::end);
+	m_File.seekg(0, std::ios::end);
 	int Size = m_File.tellg();
-	m_File.seekg(CurPos, ios::beg);
+	m_File.seekg(CurPos, std::ios::beg);
 	return Size;
 }
 
@@ -165,16 +164,16 @@ void CMemFile::WriteToFile(const char* pszFileName)
 bool CMemFile::ReadFromGameFile(const char* pszFileName)
 {
 	// Load a half-life engine file - could be compressed in a package
-	int Size = 0;
-	byte* pBuffer = LOAD_FILE_FOR_ME((char*)pszFileName, &Size);
-	if (!pBuffer)
+	const auto fileContents = FileSystem_LoadFileIntoBuffer(pszFileName, FileContentFormat::Binary);
+	
+	if (fileContents.empty())
 		return false;
 
 	Dealloc();
-	m_BufferSize = Size;
+	m_BufferSize = fileContents.size();
 	m_Buffer = new byte[m_BufferSize];
-	memcpy(m_Buffer, pBuffer, m_BufferSize);
-	FREE_FILE(pBuffer);
+	memcpy(m_Buffer, fileContents.data(), m_BufferSize);
+
 	return true;
 }
 
