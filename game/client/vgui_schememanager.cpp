@@ -22,8 +22,10 @@
 #include "hud.h"
 #include "vgui_schememanager.h"
 #include "cvardef.h"
+#include "ms/filesystem_shared.h"
 
 #include <string.h>
+#include <vector>
 
 cvar_t *g_CV_BitmapFonts;
 
@@ -123,38 +125,30 @@ static int g_ResArray[] =
 };
 static int g_NumReses = sizeof(g_ResArray);
 
-static byte *LoadFileByResolution(const char *filePrefix, int xRes, const char *filePostfix)
+static std::vector<byte> LoadFileByResolution(const char *filePrefix, int xRes, const char *filePostfix)
 {
 	// find our resolution in the res array
-	int resNum = g_NumReses - 1;
+	int resNum = std::size(g_ResArray) - 1;
 	while (g_ResArray[resNum] > xRes)
 	{
 		resNum--;
 
 		if (resNum < 0)
-			return NULL;
+			return {};
 	}
 
-	// try open the file
-	byte *pFile = NULL;
-	while (1)
+	for (; resNum >= 0; --resNum)
 	{
-
 		// try load
 		char fname[256];
-		 _snprintf(fname, sizeof(fname),  "%s%d%s",  filePrefix,  g_ResArray[resNum],  filePostfix );
-		pFile = gEngfuncs.COM_LoadFile(fname, 5, NULL);
+		sprintf(fname, "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix);
+		auto fileContents = FileSystem_LoadFileIntoBuffer(fname, FileContentFormat::Text);
 
-		if (pFile)
-			break;
+		if (!fileContents.empty())
+			return fileContents;
+	}
 
-		if (resNum == 0)
-			return NULL;
-
-		resNum--;
-	};
-
-	return pFile;
+	return {};
 }
 
 static void ParseRGBAFromString(byte colorArray[4], const char *colorVector)
@@ -181,12 +175,12 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 
 	// find the closest matching scheme file to our resolution
 	char token[1024];
-	char* pFile = (char*)LoadFileByResolution("", xRes, "_textscheme.txt");
-	char* pFileStart = pFile;
+	const auto fileContents = LoadFileByResolution("", xRes, "_textscheme.txt");
 	m_xRes = xRes;
 
-	byte* pFontData;
-	int fontFileLength;
+	char* pFileStart = (char*)fileContents.data();
+	char* pFile = pFileStart;
+
 	char fontFilename[512];
 
 	//
@@ -201,16 +195,16 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 	static CScheme tmpSchemes[numTmpSchemes];
 	memset(tmpSchemes, 0, sizeof(tmpSchemes));
 	int currentScheme = -1;
-	CScheme *pScheme = NULL;
+	CScheme *pScheme = nullptr;
 
-	if (!pFile)
+	if (fileContents.empty())
 	{
 		gEngfuncs.Con_DPrintf("Unable to find *_textscheme.txt\n");
 		goto buildDefaultFont;
 	}
 
 	// record what has been entered so we can create defaults from the different values
-	bool hasFgColor, hasBgColor, hasArmedFgColor, hasArmedBgColor, hasMouseDownFgColor, hasMouseDownBgColor;
+	bool hasFgColor, hasBgColor, hasArmedFgColor, hasArmedBgColor, hasMouseDownFgColor, hasMouseDownBgColor = false;
 
 	pFile = gEngfuncs.COM_ParseFile(pFile, token);
 	while (strlen(token) > 0 && (currentScheme < numTmpSchemes))
@@ -283,7 +277,7 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 				}
 				if (!pScheme->fontName[0])
 				{
-					 strncpy(pScheme->fontName,  "Courier", sizeof(pScheme->fontName) );
+					strncpy(pScheme->fontName,  "Courier", sizeof(pScheme->fontName) );
 				}
 			}
 
@@ -363,9 +357,6 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 		pFile = gEngfuncs.COM_ParseFile(pFile, token);
 	}
 
-	// free the file
-	gEngfuncs.COM_FreeFile(pFileStart);
-
 buildDefaultFont:
 
 	// make sure we have at least 1 valid font
@@ -373,7 +364,7 @@ buildDefaultFont:
 	{
 		currentScheme = 0;
 		strncpy(tmpSchemes[0].schemeName, "Default Scheme", sizeof(tmpSchemes[0].schemeName));
-		strncpy(tmpSchemes[0].fontName, "Courier", sizeof(tmpSchemes[0].fontName));
+		strncpy(tmpSchemes[0].fontName, "Arial", sizeof(tmpSchemes[0].fontName));
 		tmpSchemes[0].fontSize = 0;
 		tmpSchemes[0].fgColor[0] = tmpSchemes[0].fgColor[1] = tmpSchemes[0].fgColor[2] = tmpSchemes[0].fgColor[3] = 255;
 		tmpSchemes[0].armedFgColor[0] = tmpSchemes[0].armedFgColor[1] = tmpSchemes[0].armedFgColor[2] = tmpSchemes[0].armedFgColor[3] = 255;
@@ -415,14 +406,29 @@ buildDefaultFont:
 		// if we haven't found the font already, load it ourselves
 		if (!m_pSchemeList[i].font)
 		{
-			fontFileLength = -1;
-			pFontData = NULL;
+			int fontFileLength = -1;
+			byte *pFontData = nullptr;
+			std::vector<byte> fontFileContents;
 
 			if (g_CV_BitmapFonts && g_CV_BitmapFonts->value)
 			{
-				 _snprintf(fontFilename, sizeof(fontFilename),  "gfx\\vgui\\fonts\\%d_%s.tga",  m_xRes,  m_pSchemeList[i].schemeName );
-				pFontData = gEngfuncs.COM_LoadFile(fontFilename, 5, &fontFileLength);
-				if (!pFontData)
+				int fontRes = 640;
+				if (m_xRes >= 1600)
+					fontRes = 1600;
+				else if (m_xRes >= 1280)
+					fontRes = 1280;
+				else if (m_xRes >= 1152)
+					fontRes = 1152;
+				else if (m_xRes >= 1024)
+					fontRes = 1024;
+				else if (m_xRes >= 800)
+					fontRes = 800;
+
+				_snprintf(fontFilename, sizeof(fontFilename), "gfx\\vgui\\fonts\\%d_%s.tga", m_xRes, m_pSchemeList[i].schemeName);
+				fontFileContents = FileSystem_LoadFileIntoBuffer(fontFilename, FileContentFormat::Binary);
+				pFontData = reinterpret_cast<byte*>(fontFileContents.data());
+				fontFileLength = static_cast<int>(fontFileContents.size());
+				if (fontFileContents.empty())
 					gEngfuncs.Con_Printf("Missing bitmap font: %s\n", fontFilename);
 			}
 
@@ -438,9 +444,6 @@ buildDefaultFont:
 				m_pSchemeList[i].bUnderline,
 				m_pSchemeList[i].bStrike,
 				false);
-			
-			//Don't leak memory. - Solokiller
-			gEngfuncs.COM_FreeFile(pFontData);
 			
 			m_pSchemeList[i].ownFontPointer = true;
 		}

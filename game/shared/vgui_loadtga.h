@@ -13,7 +13,7 @@
 
 #include "vgui_bitmaptga.h"
 
-vgui::BitmapTGA *vgui_LoadTGA(char const *pFilename);
+vgui::BitmapTGA *vgui_LoadTGA(char const *pFilename, bool invertAlpha = true);
 vgui::BitmapTGA *vgui_LoadTGANoInvertAlpha(char const *pFilename);
 
 #endif // VGUI_LOADTGA_H
