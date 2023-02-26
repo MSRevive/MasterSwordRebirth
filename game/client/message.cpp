@@ -304,7 +304,7 @@ int CHudMessage::Draw(float fTime)
 {
 	int i, drawn;
 	client_textmessage_t *pMessage;
-	float endTime;
+	float endTime = -1;
 
 	drawn = 0;
 
