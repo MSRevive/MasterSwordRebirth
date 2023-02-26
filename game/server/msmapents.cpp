@@ -4,6 +4,7 @@
 #include "global.h"
 #include "mscharacter.h"
 #include "logger.h"
+#include "ms/filesystem_shared.h"
 
 class CCycler : public CBaseMonster
 {
@@ -45,7 +46,7 @@ LINK_ENTITY_TO_CLASS(cycler, CGenericCycler);
 
 // Cycler member functions
 
-void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
+void CCycler::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 {
 	if (!szModel || !*szModel)
 	{
@@ -54,16 +55,10 @@ void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 		return;
 	}
 
-	byte *pMemFile;
-	int iFileSize;
-
 	//hack to fix maps that wont load because they have old cyclers pointing to missing models
-	char c[256];
-	GET_GAME_DIR(c);
-	pMemFile = LOAD_FILE_FOR_ME(UTIL_VarArgs("%s/%s", c, szModel), &iFileSize);
-	if (pMemFile)
-		FREE_FILE(pMemFile);
-	else
+	const auto fileContents = FileSystem_LoadFileIntoBuffer(szModel, FileContentFormat::Binary);
+
+	if (fileContents.empty())
 	{
 		ALERT(at_error, "Cycler (%.0f %.0f %0.f) Model: \'%s\' NOT FOUND!\n", pev->origin.x, pev->origin.y, pev->origin.z, szModel);
 		REMOVE_ENTITY(ENT(pev));
@@ -79,7 +74,7 @@ void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 	UTIL_SetSize(pev, vecMin, vecMax);
 }
 
-void CCycler ::Spawn()
+void CCycler::Spawn()
 {
 	InitBoneControllers();
 	pev->solid = SOLID_SLIDEBOX;
@@ -112,7 +107,7 @@ void CCycler ::Spawn()
 //
 // cycler think
 //
-void CCycler ::Think(void)
+void CCycler::Think(void)
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 
@@ -137,7 +132,7 @@ void CCycler ::Think(void)
 //
 // CyclerUse - starts a rotation trend
 //
-void CCycler ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+void CCycler::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	m_animate = !m_animate;
 	if (m_animate)
@@ -150,7 +145,7 @@ void CCycler ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTy
 // CyclerPain , changes sequences when shot
 //
 //void CCycler :: Pain( float flDamage )
-int CCycler ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+int CCycler::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (m_animate)
 	{
