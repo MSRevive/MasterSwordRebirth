@@ -50,21 +50,15 @@ char *sArrowFilenames[] =
 // Get the name of TGA file, without a gamedir
 char *GetTGANameForRes(const char *pszName)
 {
-	static char gd[256];
-	gd[0] = 0;
-
-	startdbg;
-
-	int i;
 	char sz[256];
+	static char gd[256];
+
+	int i = 640;
 	if (ScreenWidth < 640)
 		i = 320;
-	else
-		i = 640;
-	 _snprintf(sz, sizeof(sz),  pszName,  i );
-	 _snprintf(gd, sizeof(gd),  "gfx/vgui/%s.tga",  sz );
 
-	enddbg;
+	snprintf(sz, sizeof(sz), pszName, i);
+	snprintf(gd, sizeof(gd), "gfx/vgui/%s.tga", sz);
 
 	return gd;
 }
@@ -74,15 +68,12 @@ char *GetTGANameForRes(const char *pszName)
 //-----------------------------------------------------------------------------
 BitmapTGA *LoadTGAForRes(const char *pImageName)
 {
-	BitmapTGA *pTGA = NULL;
-
-	startdbg;
+	BitmapTGA *pTGA = nullptr;
 
 	char sz[256];
-	 _snprintf(sz, sizeof(sz),  "%%d_%s",  pImageName );
+	_snprintf(sz, sizeof(sz), "%%d_%s", pImageName);
 	pTGA = vgui_LoadTGA(GetTGANameForRes(sz));
 
-	enddbg;
 	return pTGA;
 }
 

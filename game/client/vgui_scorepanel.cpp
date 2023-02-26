@@ -249,7 +249,7 @@ void ScorePanel::Initialize(void)
 	memset(g_TeamInfo, 0, sizeof g_TeamInfo);
 
 	//m_pIcons[0] = new CImageDelayed( "hud_trans", false, false, 0, 0, 16, 16 );
-	m_pIcons[0] = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_hud_trans.tga");
+	m_pIcons[0] = vgui_LoadTGA("gfx/vgui/640_hud_trans.tga", false);
 }
 
 bool HACK_GetPlayerUniqueID(int iPlayer, char playerID[16])
