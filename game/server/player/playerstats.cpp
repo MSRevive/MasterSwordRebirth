@@ -125,15 +125,15 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 		int iStatIdx = iStat - SKILL_FIRSTSKILL;
 
 		//Thoth DEC2008a level cap
-		if (GetSkillStat(iStatIdx, iStatType) >= CHAR_LEVEL_CAP)
+		if (GetSkillStat(iStatIdx, iBestSubstatId) >= CHAR_LEVEL_CAP)
 			return std::make_tuple(false, 0);
 
 		msstring stat_name = SkillStatList[iStatIdx].Name;
 		bool is_spell_stat = stat_name.contains("Spell");
 		if (is_spell_stat)
-			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SpellTypeList[iStatType]); //Thothie returns XP gained by monsters
+			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SpellTypeList[iBestSubstatId]); //Thothie returns XP gained by monsters
 		else
-			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SkillTypeList[iStatType]); //Thothie returns XP gained by monsters
+			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SkillTypeList[iBestSubstatId]); //Thothie returns XP gained by monsters
 		if (std::get<0>(tbiSuccess))
 		{
 			startdbg;
@@ -153,27 +153,27 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			htp.holdTime = 2.0;
 			htp.fxTime = 0.6;
 			dbg("HudMessage");
-			UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SkillTypeList[iStatType]));
+			UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SkillTypeList[iBestSubstatId]));
 
 			if (!is_spell_stat)
 			{
 				SendInfoMsg("You become more adept at %s.\n", SkillStatList[iStatIdx].Name);
-				UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SkillTypeList[iStatType]));
+				UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SkillTypeList[iBestSubstatId]));
 			}
 			else
 			{
 				SendInfoMsg("You become more adept at %s.\n", SkillStatList[iStatIdx]);
-				UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SpellTypeList[iStatType]));
+				UTIL_HudMessage(this, htp, UTIL_VarArgs("%s %s +1\n", SkillStatList[iStatIdx].Name, SpellTypeList[iBestSubstatId]));
 			}
 
 			dbg("game_learnskill");
 			msstringlist Params;
 			Params.add(SkillStatList[iStatIdx].Name);
 			if (!is_spell_stat)
-				Params.add(SkillTypeList[iStatType]);
+				Params.add(SkillTypeList[iBestSubstatId]);
 			else
-				Params.add(SpellTypeList[iStatType]);
-			Params.add(UTIL_VarArgs("%i", GetSkillStat(iStatIdx, iStatType)));
+				Params.add(SpellTypeList[iBestSubstatId]);
+			Params.add(UTIL_VarArgs("%i", GetSkillStat(iStatIdx, iBestSubstatId)));
 			CallScriptEvent("game_learnskill", &Params);
 			enddbg;
 		}
