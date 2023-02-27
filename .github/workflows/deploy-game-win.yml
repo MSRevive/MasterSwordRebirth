@@ -23,8 +23,8 @@ jobs:
       run: msbuild game\server\server.vcxproj -t:rebuild -verbosity:diag -property:Configuration=Release
 
     - name: Upload Binaries
-        uses: actions/upload-artifact@v3
-        with:
-          name: Windows Binaries
-          path: |
-            build/*.dll
+      uses: actions/upload-artifact@v3
+      with:
+        name: Windows Binaries
+        path: |
+          build/*.dll
