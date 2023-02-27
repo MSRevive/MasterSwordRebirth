@@ -73,10 +73,10 @@ void CBasePlayer::ParseMenu(int iMenu, int slot)
 }
 
 std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
-{	
+{
 	//see if a skill leveled.
 	bool bSkillLeveled = false;
-	
+
 	// track remaining exp
 	int iRemainingExp = EnemySkillLevel;
 
@@ -88,29 +88,36 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 		int iBestSubstatId = 10;
 
 		//see if anything has lower substats than the first skill in the list
-		for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
-			if (csExpStat->m_SubStats[idx].Value < iFirstSubValue) {
-				iBestSubstatId = idx;
-			}
-			else if (csExpStat->m_SubStats[idx].Value == 0) {
-				iBestSubstatId = idx;
-				break;
-			}
-		}
-
-		//if we didn't find a low substat, go through the remaining exp instead
-		if (iBestSubstatId == 10) {
-			long double	ldHighestExpRemaining = 0;
-
+		if (csExpStat->m_SubStats.size() < 4)
+		{
 			for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
-				long double ldCurrentExpRemaining = abs(GetExpNeeded(csExpStat->m_SubStats[idx].Value) - csExpStat->m_SubStats[idx].Exp);
-				
-				if (ldCurrentExpRemaining > ldHighestExpRemaining) {
-					ldHighestExpRemaining = ldCurrentExpRemaining;
+				if (csExpStat->m_SubStats[idx].Value < iFirstSubValue) {
 					iBestSubstatId = idx;
 				}
-
+				else if (csExpStat->m_SubStats[idx].Value == 0) {
+					iBestSubstatId = idx;
+					break;
+				}
 			}
+
+			//if we didn't find a low substat, go through the remaining exp instead
+			if (iBestSubstatId == 10) {
+				long double	ldHighestExpRemaining = 0;
+
+				for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
+					long double ldCurrentExpRemaining = abs(GetExpNeeded(csExpStat->m_SubStats[idx].Value) - csExpStat->m_SubStats[idx].Exp);
+
+					if (ldCurrentExpRemaining > ldHighestExpRemaining) {
+						ldHighestExpRemaining = ldCurrentExpRemaining;
+						iBestSubstatId = idx;
+					}
+
+				}
+			}
+		}
+		else {
+			//if this is spellcasting just use the given id
+			iBestSubstatId = iStatType;
 		}
 
 		//run learnskill
