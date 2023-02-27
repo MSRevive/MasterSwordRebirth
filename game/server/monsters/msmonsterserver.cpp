@@ -2760,9 +2760,6 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 	else if ((int)std::abs(ExpLeft) == 0) {
 		iExpHandout = 1;
 	}
-	else if (iExpHandout == 0) {
-		iExpHandout = 0;
-	}
 
 	SubStat.Exp += iExpHandout;
 	iExpRemaining -= iExpHandout;
