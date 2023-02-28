@@ -1324,6 +1324,7 @@ void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector
 {
 	m_pOwner = Owner(); // Oddness happens when trying to drop straight from packs because they get their owner from the container. Explicitly set for now
 
+	bDropAttempted = true;
 	if ((bDropAttempted && m_pOwner->IsPlayer()) || !m_pOwner->IsPlayer()) {
 		CallScriptEvent("game_drop");
 
@@ -1394,6 +1395,7 @@ void CGenericItem::FallInit()
 	m_TimeExpire = gpGlobals->time + ExpireTime;
 	flNextThink = pev->nextthink;
 }
+
 void CGenericItem::FallThink(void)
 {
 	if (pev->flags & FL_ONGROUND)
@@ -1511,6 +1513,7 @@ void CGenericItem::Think()
 #endif
 
 	//drop attempt tracking
+	/*
 	if (bDropAttempted && iDropTickCounter >= 100)
 	{
 		//if 100 ticks have passed since attempting to drop, cancel drop.
@@ -1523,7 +1526,7 @@ void CGenericItem::Think()
 	}
 	else if (bDropAttempted && iDropTickCounter < 100) {
 		iDropTickCounter++;
-	}
+	}*/
 
 	enddbg;
 }
