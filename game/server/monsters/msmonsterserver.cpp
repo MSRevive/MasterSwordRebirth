@@ -19,9 +19,9 @@
 #include "magic.h"
 #include "weapons/genericitem.h"
 #include "syntax/syntax.h"
-#include "ms/vgui_hud.h"
 #include "logger.h"
 #include "corpse.h"
+#include "saytext.h"
 #include <set>
 
 #ifdef VALVE_DLL

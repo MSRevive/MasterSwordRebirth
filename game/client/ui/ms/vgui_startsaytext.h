@@ -1,6 +1,7 @@
 //
 //  This should only be included by vgui_HUD.cpp
 //
+#include "saytext.h"
 
 class VGUI_SendTextPanel : public CTransparentPanel
 {

@@ -9,7 +9,7 @@
 #include "player/player.h"
 #include "hudmisc.h"
 #include "hudscript.h"
-#include "vgui_hud.h"
+#include "ms/vgui_hud.h"
 #include "logger.h"
 #include "steamhelper.h"
 #include "richpresence.h"

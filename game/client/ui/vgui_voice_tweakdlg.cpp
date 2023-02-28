@@ -10,8 +10,7 @@
 #include "vgui_teamfortressviewport.h"
 
 #include "vgui_actionsignal.h"
-#include "voice_vgui_tweakdlg.h"
-#include "voice_vgui_tweakdlg.h"
+#include "vgui_voice_tweakdlg.h"
 #include "vgui_panel.h"
 #include "vgui_scrollbar.h"
 #include "vgui_slider.h"

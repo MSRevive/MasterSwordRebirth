@@ -36,11 +36,11 @@
 #include "stats/stats.h"
 #include "logger.h"
 #include "mscharacter.h"
-#include "../vgui_scorepanel.h"
-#include "vgui_hud.h"
+#include "vgui_scorepanel.h"
+#include "ms/vgui_hud.h"
 #include "action.h"
-#include "../vgui_teamfortressviewport.h"
-#include "vgui_containerlist.h"
+#include "vgui_teamfortressviewport.h"
+#include "ms/vgui_containerlist.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;

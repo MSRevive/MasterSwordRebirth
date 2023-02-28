@@ -58,8 +58,8 @@
 #include "cvardef.h"
 #include "../parsemsg.h"
 
-#include "../vgui_int.h"
-#include "../vgui_teamfortressviewport.h"
+#include "vgui_int.h"
+#include "vgui_teamfortressviewport.h"
 
 //Master Sword
 #include "logger.h"
