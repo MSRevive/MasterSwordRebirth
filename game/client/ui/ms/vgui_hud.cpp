@@ -165,7 +165,7 @@ void CHUDPanel::AddInfoWin(msstring_ref Title, msstring_ref Text)
 
 void CHUDPanel::AddHelpWin(msstring_ref Title, msstring_ref Text)
 {
-	if (!EngineFunc::CVAR_GetFloat(CVAR_HELPTIPS))
+	if (!EngineFunc::CVAR_GetFloat("ms_help"))
 		return;
 
 	//Replaces '|' with '\n'

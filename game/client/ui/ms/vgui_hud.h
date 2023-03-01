@@ -25,8 +25,6 @@ bool QuickSlotConfirm();
 
 extern COLOR Color_Transparent, Color_Text_White;
 
-#define CVAR_HELPTIPS "ms_help"
-
 class IHUD_Interface
 {
 public:

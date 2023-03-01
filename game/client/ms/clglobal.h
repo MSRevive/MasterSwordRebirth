@@ -5,8 +5,6 @@ class CBaseEntity;
 
 inline CBaseEntity *PrivData(entvars_t *pev) { return (CBaseEntity *)pev->pContainingEntity; }
 
-#define MSCVAR_QUICKSLOT_TIMEOUT "ms_quickslot_timeout"
-
 //Client-side Globals
 //===================
 
@@ -73,6 +71,7 @@ public:
 	static void EndMap();								//Map ended.  Do client-side specific cleanup
 
 	//Entity-based
+	//static std::vector<std::string> m_Strings;
 	static mslist<char *> m_Strings;								  //All client-side globally allocated strings
 	static mslist<CBaseEntity *> m_ClEntites;						  //All client-side entities
 	static mslist<cl_entity_t> m_ClModels;							  //Extra models to be updated/animated client-side

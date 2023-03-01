@@ -56,7 +56,7 @@ public:
 		SelectItem(NULL);
 		m_TimeLastSelect = 0;
 
-		m_CVARTimeout = gEngfuncs.pfnGetCvarPointer(MSCVAR_QUICKSLOT_TIMEOUT);
+		m_CVARTimeout = gEngfuncs.pfnGetCvarPointer("ms_quickslot_timeout");
 
 		pGenericArrow = CGenericItemMgr::GetGlobalGenericItemByName("proj_arrow_generic");
 		pGenericArrow->m_DisplayName = "Crude Wooden Arrow";
