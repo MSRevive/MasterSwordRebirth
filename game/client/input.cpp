@@ -431,7 +431,7 @@ void IN_ForwardDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay"); // trying to load it before this crashes, trying to load it inline returns 0. I don't know why.
 
 	//we handle double tap to sprint in via inputs now.
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + cvar_flDtapDelay >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if ((!strcmp(CVAR_GET_STRING("ms_sprint_doubletap"), "1")) && (lastMoveForward + cvar_flDtapDelay >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
@@ -517,7 +517,7 @@ void IN_SpeedDown(void)
 {
 	KeyDown(&in_speed);
 
-	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprint_toggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 
@@ -525,7 +525,7 @@ void IN_SpeedUp(void)
 { 
 	KeyUp(&in_speed);
 
-	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprint_toggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 

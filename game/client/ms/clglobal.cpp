@@ -102,25 +102,19 @@ void MSCLGlobals::Initialize()
 	CVAR_CREATE("ms_autocharge", "1", FCVAR_ARCHIVE);					// MiB MAR2012_05 - Let's you auto-charge your attack
 	CVAR_CREATE("ms_doubletapdodge", "0", FCVAR_ARCHIVE);				// MiB MAR2012_05 -Enable/Disable double tapping to dodge
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
-	//CVAR_CREATE("ms_didbloomcheck", "0", FCVAR_ARCHIVE);				// Thothie FEB2012_12 - Boom check tracker
-	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // MiB APR2019_10 [GLOW_COLOR] - Desired glow color
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_sprinttoggle", "1", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_doubletapsprint", "1", FCVAR_ARCHIVE);
-	CVAR_CREATE("ms_doubletap_delay", "0.2", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
+	CVAR_CREATE("ms_doubletap_delay", "0.45", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
 	CVAR_CREATE("ms_sprint_verbose", "2", FCVAR_ARCHIVE); // 0 for no messages , 1 for only warnings , 2 for everything
+	CVAR_CREATE("ms_sprint_toggle", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_sprint_doubletap", "1", FCVAR_ARCHIVE);
 
 	//CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	//CVAR_CREATE("ms_chargebar_scale", "1.0", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_hands_display", "2", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_hands_display_y", "20", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_scrollamount", "30", FCVAR_ARCHIVE);
 	//CVAR_CREATE("ms_doubleclicktime", "1", FCVAR_ARCHIVE);
-	//CVAR_CREATE("ms_aim_type", "0", FCVAR_ARCHIVE);
-	//CVAR_CREATE( "r_decals", "300" , FCVAR_CLIENTDLL );   // Thothie SEP2011_07 - allow tracking/reasonable default setting of r_decals (fail, doesn't override engine setting)
 
 	/*msstring DefaultLANID = "this_must_be_unique";
 	gEngfuncs.pfnRegisterVariable( "ms_id", DefaultID, FCVAR_USERINFO|FCVAR_ARCHIVE );
@@ -148,8 +142,6 @@ void MSCLGlobals::Initialize()
 
 	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
-
-	//PRECACHE_GENERIC("dlls/sc.dll"); --- crashes ???
 
 	dbg("Call Rich Presence");
 	RichPresenceInitialize();
