@@ -313,14 +313,14 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 		if (FStrEq(m_Strings[s], pszString))
 			return m_Strings[s] - gpGlobals->pStringBase; //Return existing string
 
-	//Create new string
+	// we need memory leak otherwise effects don't work, wtf
 	uint len = strlen(pszString) + 1;
-	std::unique_ptr<char[]> pszNewString(new char[len]);
-	strncpy(pszNewString.get(), pszString, len);
+	char *pszNewString = msnew(char[len]);
+	strncpy(pszNewString, pszString, len);
 
-	m_Strings.push_back((char *)pszNewString.get());
+	m_Strings.push_back((char *)pszNewString);
 
-	return pszNewString.get() - gpGlobals->pStringBase;
+	return pszNewString - gpGlobals->pStringBase;
 }
 /*char *MSCLGlobals::GetString( string_t sString )
 {
@@ -347,8 +347,6 @@ void MSCLGlobals::SetupGlobalEngFuncRedirects(void)
 	g_engfuncs.pfnPrecacheEvent = gEngfuncs.pfnPrecacheEvent;
 	g_engfuncs.pfnRandomFloat = gEngfuncs.pfnRandomFloat;
 	g_engfuncs.pfnRandomLong = gEngfuncs.pfnRandomLong;
-	//g_engfuncs.pfnLoadFileForMe = gEngfuncs.COM_LoadFile; //why did MSC overwrite this with their own?
-	//g_engfuncs.pfnFreeFile = gEngfuncs.COM_FreeFile;
 }
 //I've recieved all script files, I can now spawn
 void CreateStoreMenus();
