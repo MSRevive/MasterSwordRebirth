@@ -5,9 +5,6 @@
 #include "util.h"
 #else
 #include "sharedutil.h"
-//#define STRING(a) ""
-//#define LOAD_FILE_FOR_ME(a, b) 0
-//#define FREE_FILE( pFileData )
 #endif
 #include "ms/filesystem_shared.h"
 
