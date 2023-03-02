@@ -7624,14 +7624,14 @@ bool CScript::Script_ExecuteCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 //InFile class
 //==================================
 //Class for inputting a file with minimal handle time
-class InFile : public ifstream
+class InFile : public std::ifstream
 {
 public:
 	msstring buffered;
 
 	void Open(msstring_ref FileName)
 	{
-		ifstream::open(FileName);
+		std::ifstream::open(FileName);
 		buffered = "";
 	};
 
@@ -7647,18 +7647,18 @@ public:
 		}			
 	};
 
-	void Close() { ifstream::close(); };
+	void Close() { std::ifstream::close(); };
 
 	msstring ReadLine()
 	{
 		if (!is_open()) return "[FILE_NOT_FOUND]";
-		if (ifstream::eof()) return "[EOF]";
+		if (std::ifstream::eof()) return "[EOF]";
 
 		char line[256];
-		ifstream::getline(line, 256);
+		std::ifstream::getline(line, 256);
 
 		msstring theReturn = line;
-		if (ifstream::eof()) //If this is the end of file
+		if (std::ifstream::eof()) //If this is the end of file
 		if (theReturn == "") //And there was nothing on this line
 			theReturn = "[EOF];"; //Mark it as the end of the file
 

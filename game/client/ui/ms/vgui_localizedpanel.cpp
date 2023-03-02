@@ -411,15 +411,15 @@ void CLocalizedPanel::ReadParagraphsFromFile(msstring fname)
 	if (!fname.ends_with(".txt"))
 		fname += ".txt";
 	char cFileName[256];
-	 _snprintf(cFileName, sizeof(cFileName),  "%s/%s",  EngineFunc::GetGameDir(),  fname.c_str() );
+	_snprintf(cFileName, sizeof(cFileName),  "%s/%s",  EngineFunc::GetGameDir(),  fname.c_str() );
 
-	ifstream file;
+	std::ifstream file;
 	file.open(cFileName);
 	if (file.is_open())
 	{
-		file.seekg(0, ios::end);
+		file.seekg(0, std::ios::end);
 		long len = file.tellg();
-		file.seekg(0, ios::beg);
+		file.seekg(0, std::ios::beg);
 
 		char *pszText = new char[len];
 		file.read(pszText, len);

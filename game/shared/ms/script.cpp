@@ -884,11 +884,11 @@ msstring CScript::ScriptGetter_FileSize(msstring& FullName, msstring& ParserName
 		msstring fileName = cfileName;
 		fileName += "/";
 		fileName += Params[0];
-		ifstream file;
-		file.open(fileName.c_str(), ios_base::in);
+		std::ifstream file;
+		file.open(fileName.c_str(), std::ios_base::in);
 		if (file.is_open())
 		{
-			file.seekg(0, ios_base::end);
+			file.seekg(0, std::ios_base::end);
 			long fileSize = file.tellg();
 			file.close();
 			RETURN_INT(fileSize);
@@ -4342,7 +4342,7 @@ msstring CScript::ScriptGetter_FileHash(msstring& FullName, msstring& ParserName
 		msstring filePath = cfileName;
 		filePath += "/";
 		filePath += Params[0];
-		ifstream file;
+		std::ifstream file;
 		file.open(filePath);
 		if (file.is_open())
 		{
