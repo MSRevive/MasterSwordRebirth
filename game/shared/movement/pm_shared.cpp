@@ -330,7 +330,7 @@ void PM_InitTextureTypes()
 	std::size_t filePos = 0;
 
 	// for each line in the file...
-	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, std::size(buffer) - 1) != nullptr && (gcTextures < CTEXTURESMAX))
+	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, size(buffer) - 1) != nullptr && (gcTextures < CTEXTURESMAX))
 	{
 		// skip whitespace
 		i = 0;
