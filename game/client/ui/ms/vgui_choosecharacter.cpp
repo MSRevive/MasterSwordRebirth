@@ -1289,11 +1289,15 @@ void CRenderChar::Render( )
 			SetBits( ItemEnt.curstate.colormap, MSRDR_LIGHT_NORMAL );
 
 			m_GearItems.add( *pItem );
-			pItem->SUB_Remove();
 
 			//can't use delete here so just manually clear the memory instead.
-			pItem->Deactivate();
-			pItem = nullptr;
+			if (pItem != nullptr)
+			{
+				pItem->RemoveFromOwner();
+				pItem->Container_RemoveAllItems();
+				pItem->Deactivate();
+				pItem = nullptr;
+			}
 		}
 		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.add( &m_GearItems[i] );
