@@ -24,7 +24,7 @@ public:
 
 		for (int i = 0; i < 3; i++)
 		{
-			m_Label[i] = new VGUI_FadeText(this, 0.2, "", 0, i * g_FontID->getTall(), MSLabel::a_west);
+			m_Label[i] = new VGUI_FadeText(this, 0.2, "", 0, i * g_FontID->getTall(), MSLabel::a_center);
 			m_Label[i]->setFont(g_FontID);
 		}
 		m_Label[0]->SetFGColorRGB(Color_Text_White);
