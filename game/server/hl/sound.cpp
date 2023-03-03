@@ -1390,7 +1390,7 @@ void SENTENCEG_Init()
 		return;
 
 	// for each line in the file...
-	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, std::size(buffer)) != NULL)
+	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, sizeof(buffer)) != NULL)
 	{
 		// skip whitespace
 		i = 0;

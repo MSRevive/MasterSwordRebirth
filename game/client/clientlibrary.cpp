@@ -66,6 +66,7 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // This is called in player think and was breaking the entire think cycle.
 	CVAR_CREATE("ms_chargebar_volume", "15", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_doubletap_delay", "0.45", FCVAR_ARCHIVE); // The higher the amount, the longer the player has to hit left/right/back for a second time
 	CVAR_CREATE("ms_sprint_verbose", "2", FCVAR_ARCHIVE); // 0 for no messages , 1 for only warnings , 2 for everything

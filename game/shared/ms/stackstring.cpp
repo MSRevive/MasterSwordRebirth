@@ -1,7 +1,5 @@
 #include "stackstring.h"
 
-using namespace std;
-
 #undef msstring
 
 #ifndef max

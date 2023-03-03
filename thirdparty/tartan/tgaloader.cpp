@@ -8,7 +8,6 @@
 /*******************************************************************************/
 
 //#include "stream_safe.h"
-//using namespace std;
 
 #include "tgastruct.h"
 
