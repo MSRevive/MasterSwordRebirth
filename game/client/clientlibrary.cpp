@@ -72,6 +72,9 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_sprint_verbose", "2", FCVAR_ARCHIVE); // 0 for no messages , 1 for only warnings , 2 for everything
 	CVAR_CREATE("ms_sprint_toggle", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_sprint_doubletap", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("msui_id_offsetx", "100", FCVAR_ARCHIVE);
+	CVAR_CREATE("msui_id_offsety", "-30", FCVAR_ARCHIVE);
+	CVAR_CREATE("msui_id_background", "0", FCVAR_ARCHIVE);
 
 	RichPresenceInitialize();
 }
