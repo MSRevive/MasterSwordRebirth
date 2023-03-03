@@ -30,7 +30,6 @@ BitmapTGA *MSBitmap::GetTGA(const char *pszImageName)
 	if( !pszImageName )
 		return NULL;
 
-	dbg( "Find Existing Image" );
 	for (int i = 0; i < g_Bitmaps.size(); i++) 
 	{
 		if( g_Bitmaps[i].m_TGAorSprite && !strcmp(g_Bitmaps[i].sImageName, pszImageName) )

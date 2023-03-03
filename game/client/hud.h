@@ -83,7 +83,7 @@ typedef struct cvar_s cvar_t;
 //					Master Sword
 //-----------------------------------------------------
 //=====================================================
-
+#include <vector>
 #include "ms/hudbase.h"
 #ifndef VALVE_DLL
 #include "voice_status.h" //SDK 2.3
@@ -123,12 +123,6 @@ public:
 };
 //------------
 #endif
-
-struct HUDLIST
-{
-	CHudBase *p;
-	HUDLIST *pNext;
-};
 
 //=====================================================
 //-----------------------------------------------------
@@ -483,33 +477,6 @@ private:
 //-----------------------------------------------------
 //
 
-//LRC
-//methods actually defined in tri.cpp
-
-class CShinySurface
-{
-	float m_fMinX, m_fMinY, m_fMaxX, m_fMaxY, m_fZ;
-	char m_fScale;
-	float m_fAlpha; // texture scale and brighness
-	HLSPRITE m_hsprSprite;
-	char m_szSprite[128];
-
-public:
-	CShinySurface *m_pNext;
-
-	CShinySurface(float fScale, float fAlpha, float fMinX, float fMaxX, float fMinY, float fMaxY, float fZ, char *szSprite);
-	~CShinySurface();
-
-	// draw the surface as seen from the given position
-	void Draw(const vec3_t &org);
-
-	void DrawAll(const vec3_t &org);
-};
-
-//
-//-----------------------------------------------------
-//
-
 class CHudStatusIcons : public CHudBase
 {
 public:
@@ -541,14 +508,22 @@ private:
 class CHud
 {
 private:
-	HUDLIST *m_pHudList;
+	struct HudSprite {
+		char Name[MAX_SPRITE_NAME_LENGTH];
+		char SpriteName[64];
+		HLSPRITE Handle = 0;
+		wrect_t Rectangle{0, 0, 0, 0};
+	};
+
+	std::vector<CHudBase*> m_HudList;
+	std::vector<HudSprite> m_Sprites;
+
 	HLSPRITE m_hsprLogo;
 	int m_iLogo;
-	client_sprite_t *m_pSpriteList;
-	int m_iSpriteCount;
-	int m_iSpriteCountAllRes;
+
 	float m_flMouseSensitivity;
 	int m_iConcussionEffect;
+	struct cvar_s *default_fov;
 
 public:
 	HLSPRITE m_hsprCursor;
@@ -576,24 +551,15 @@ public:
 	int DrawHudStringSML(int x, int y, char *pcString, int r, int g, int b, int iExtraSpace = 0);
 	//------------
 
-private:
-	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
-	// freed in ~CHud()
-	HLSPRITE *m_rghSprites; /*[HUD_SPRITE_COUNT]*/ // the sprites loaded from hud.txt
-	wrect_t *m_rgrcRects;						   /*[HUD_SPRITE_COUNT]*/
-	char *m_rgszSpriteNames;					   /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
-
-	struct cvar_s *default_fov;
-
 public:
 	HLSPRITE GetSprite(int index)
 	{
-		return (index < 0) ? 0 : m_rghSprites[index];
+		return (index < 0) ? 0 : m_Sprites[index].Handle;
 	}
 
 	wrect_t &GetSpriteRect(int index)
 	{
-		return m_rgrcRects[index];
+		return m_Sprites[index].Rectangle;
 	}
 
 	int GetSpriteIndex(const char *SpriteName); // gets a sprite index, for use in the m_rghSprites[] array
@@ -631,8 +597,8 @@ public:
 	void ReloadClient();
 	int UpdateClientData(client_data_t *cdata, float time);
 
-	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
-	~CHud(); // destructor, frees allocated memory
+	CHud() = default;
+	~CHud() = default; // destructor, frees allocated memory
 
 	// user messages
 	int _cdecl MsgFunc_Damage(const char *pszName, int iSize, void *pbuf);
