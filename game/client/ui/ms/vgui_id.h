@@ -72,7 +72,7 @@ public:
 		}
 		else if (currHP >= maxHP * INJURED_HPMOD && currHP < maxHP * HEALTHY_HPMOD)
 		{
-			cHPColor = COLOR(200, 255, 0, 0);
+			cHPColor = COLOR(188, 255, 0, 0);
 			sHPBracketName = "Barely Injured";
 		}
 		else if (currHP >= maxHP * WOUNDED_HPMOD && currHP < maxHP * INJURED_HPMOD)
