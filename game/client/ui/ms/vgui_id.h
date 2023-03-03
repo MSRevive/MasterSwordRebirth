@@ -10,6 +10,8 @@ public:
 	entinfo_t* m_LastID;
 	cl_entity_s* m_pClientEnt;
 	int iCurrentAlpha = 0;
+	int iCurrentWidth = 200;
+	int iCurrentHeight = 10 + g_FontID->getTall() * 3;
 
 #define ID_X XRES(320)
 #define ID_Y YRES(240)
@@ -17,7 +19,7 @@ public:
 #define WOUNDED_HPMOD 0.50
 #define CRITICAL_HPMOD 0.25
 
-	VGUI_ID(Panel* pParent, int x, int y) : Panel(x, y, XRES(50), 10 + g_FontID->getTall()*3)
+	VGUI_ID(Panel* pParent, int x, int y) : Panel(x, y, iCurrentWidth, iCurrentWidth)
 	{
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
@@ -175,6 +177,7 @@ public:
 		int iIntendedY = ID_Y + flCVARIdOffsetY;
 		int iCurrentX;
 		int iCurrentY;
+
 		getPos(iCurrentX, iCurrentY);
 
 		if (iCurrentX != iIntendedX || iCurrentY != iIntendedY)
@@ -194,14 +197,8 @@ public:
 
 		std::string sCVARHUDIDBackground = CVAR_GET_STRING("msui_id_background");
 
-		if (sCVARHUDIDBackground == "1") {
-				if (m_LastID != NULL)
-				{
-					FadeInTo(100);
-				}
-				else {
-					FadeOut();
-				}
+		if (sCVARHUDIDBackground == "1" && m_LastID != NULL) {
+			FadeInTo(100);
 		}
 		else {
 			if (iCurrentAlpha != 255) {
@@ -209,10 +206,26 @@ public:
 			}
 		}
 
+		int iWidestLabelWidth = 200;
+
+		for (int idx = 0; idx < 3; idx++) {
+			if (m_Label[idx]->getWide() > iWidestLabelWidth)
+				iWidestLabelWidth = m_Label[idx]->getWide();
+		}
+
+		if (iWidestLabelWidth > iCurrentWidth)
+		{
+			iCurrentWidth = iWidestLabelWidth;
+			setSize(iCurrentWidth, iCurrentHeight);
+		}
+		else if (this->getWide() != iCurrentWidth) {
+			setSize(iCurrentWidth, iCurrentHeight);
+		}
+
 		setVisible(ShowHUD());
 	}
 	void FadeInTo(int iTargetAlpha) {
-		
+
 		while (iCurrentAlpha > iTargetAlpha) {
 			iCurrentAlpha = iCurrentAlpha - 1;
 			this->setBgColor(0, 0, 0, iCurrentAlpha);
