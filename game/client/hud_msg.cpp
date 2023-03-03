@@ -33,13 +33,9 @@ int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 	//ASSERT( iSize == 0 );
 
 	// clear all hud data
-	HUDLIST *pList = m_pHudList;
-
-	while (pList)
+	for (auto hudElement : m_HudList)
 	{
-		if (pList->p)
-			pList->p->Reset();
-		pList = pList->pNext;
+		hudElement->Reset();
 	}
 
 	// reset sensitivity
@@ -94,15 +90,11 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 
 	dbg("Call InitHUDData() on all");
 	// prepare all hud data
-	HUDLIST *pList = m_pHudList;
 
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitHUDData]\n";
-	while (pList)
+	for (auto hudElement : m_HudList)
 	{
-		dbg(msstring("Call InitHUDData on ") + pList->p->Name);
-		if (pList->p)
-			pList->p->InitHUDData();
-		pList = pList->pNext;
+		hudElement->InitHUDData();
 	}
 
 	//This would normally be called only after the scripts

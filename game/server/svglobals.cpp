@@ -14,7 +14,7 @@
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
 
-ofstream modelout;
+std::ofstream modelout;
 int HighestPrecache = -1;
 int TotalModelPrecaches = 1;
 int PreCount = 0; //Thothie OCT2007a Precache map verification

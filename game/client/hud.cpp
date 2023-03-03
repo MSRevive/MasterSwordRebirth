@@ -327,20 +327,8 @@ void CHud::Init(void)
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
 
-	m_pSpriteList = NULL;
-
-	// Clear any old HUD list
-	if (m_pHudList)
-	{
-		HUDLIST *pList;
-		while (m_pHudList)
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free(pList);
-		}
-		m_pHudList = NULL;
-	}
+	m_Sprites.clear();
+	m_HudList.clear();
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
@@ -382,27 +370,6 @@ void CHud::Shutdown()
 	m_Music->Shutdown();
 }
 
-// CHud destructor
-// cleans up memory allocated for m_rg* arrays
-CHud::~CHud()
-{
-	delete[] m_rghSprites;
-	delete[] m_rgrcRects;
-	delete[] m_rgszSpriteNames;
-
-	if (m_pHudList)
-	{
-		HUDLIST *pList;
-		while (m_pHudList)
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			//free( pList );
-		}
-		m_pHudList = NULL;
-	}
-}
-
 // GetSpriteIndex()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array
@@ -410,10 +377,10 @@ CHud::~CHud()
 int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (int i = 0; i < m_iSpriteCount; i++)
+	for (std::size_t i = 0; i < m_Sprites.size(); ++i)
 	{
-		if (strncmp(SpriteName, m_rgszSpriteNames + (i * MAX_SPRITE_NAME_LENGTH), MAX_SPRITE_NAME_LENGTH) == 0)
-			return i;
+		if (SpriteName == m_Sprites[i].Name)
+			return static_cast<int>(i);
 	}
 
 	return -1; // invalid sprite
@@ -468,22 +435,18 @@ int CHud::Redraw(float flTime, int intermission)
 	// if no redrawing is necessary
 	// return 0;
 
-	HUDLIST *pList = m_pHudList;
-
-	while (pList)
+	for (auto hudElement : m_HudList)
 	{
 		if (!intermission)
 		{
-			if ((pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL))
-				pList->p->Draw(flTime);
+			if ((hudElement->m_iFlags & HUD_ACTIVE) != 0 && (m_iHideHUDDisplay & HIDEHUD_ALL) == 0)
+				hudElement->Draw(flTime);
 		}
 		else
 		{ // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-			if (pList->p->m_iFlags & HUD_INTERMISSION)
-				pList->p->Draw(flTime);
+			if ((hudElement->m_iFlags & HUD_INTERMISSION) != 0)
+				hudElement->Draw(flTime);
 		}
-
-		pList = pList->pNext;
 	}
 
 	// are we in demo mode? do we need to draw the logo in the top corner?
@@ -547,34 +510,15 @@ void CHud::Think(void)
 	dbg("Call MSCLGlobals::Think");
 	MSCLGlobals::Think();
 	//------------
-	int newfov;
-	HUDLIST *pList = m_pHudList;
-
-	dbg("Call Think on All HUDs");
-	while (pList)
+	int newfov = 0;
+	
+	for (auto hudElement : m_HudList)
 	{
-		dbg(msstring("Call Think on HUD: ") + pList->p->Name);
-
-		if (pList->p->m_iFlags & HUD_ACTIVE)
+		if ((hudElement->m_iFlags & HUD_ACTIVE) != 0)
 		{
-			//Debug - pretty useful too
-			/*if( pList->p == (CHudBase *)m_Action ) logfile << "[Action]";
-			else if( pList->p == (CHudBase *)&m_Ammo ) logfile << "[Ammo]";
-			else if( pList->p == (CHudBase *)m_Fatigue ) logfile << "[Fatigue]";
-			else if( pList->p == (CHudBase *)m_Hands ) logfile << "[Hands]";
-			else if( pList->p == (CHudBase *)m_Health ) logfile << "[Heath]";
-			else if( pList->p == (CHudBase *)m_Magic ) logfile << "[Magic]";
-			else if( pList->p == (CHudBase *)m_Menu ) logfile << "[Menu]";
-			else if( pList->p == (CHudBase *)m_Misc ) logfile << "[Misc]";
-			else if( pList->p == (CHudBase *)m_Music ) logfile << "[Music]";
-			else if( pList->p == (CHudBase *)m_HUDScript ) logfile << "[Script]";
-			else if( pList->p == (CHudBase *)m_HUDId ) logfile << "[ID]";*/
-
-			pList->p->Think();
-			//logfile << "[HUDTHINKDONE]\r\n";
+			hudElement->Think();
 		}
-		pList = pList->pNext;
-	}
+	}	
 
 	dbg("FOV Operations");
 	newfov = HUD_GetFOV();
@@ -636,72 +580,52 @@ void CHud::VidInit(void)
 		m_iRes = 640;
 
 	// Only load this once
-	if (!m_pSpriteList)
+	// Only load this once
+	if (m_Sprites.empty())
 	{
 		// we need to load the hud.txt, and all sprites within
-		m_pSpriteList = SPR_GetList("sprites/hud.txt", &m_iSpriteCountAllRes);
+		int spriteCountAllRes;
+		client_sprite_t* spriteList = SPR_GetList("sprites/hud.txt", &spriteCountAllRes);
 
-		if (m_pSpriteList)
+		if (spriteList)
 		{
-			// count the number of sprites of the appropriate res
-			m_iSpriteCount = 0;
-			client_sprite_t *p = m_pSpriteList;
-			for (int j = 0; j < m_iSpriteCountAllRes; j++)
-			{
-				if (p->iRes == m_iRes)
-					m_iSpriteCount++;
-				p++;
-			}
+			m_Sprites.reserve(spriteCountAllRes);
 
-			// allocated memory for sprite handle arrays
-			m_rghSprites = new HLSPRITE[m_iSpriteCount];
-			m_rgrcRects = new wrect_t[m_iSpriteCount];
-			m_rgszSpriteNames = msnew char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
-
-			p = m_pSpriteList;
-			int index = 0;
-			int j = 0;
-			for (j = 0; j < m_iSpriteCountAllRes; j++)
+			client_sprite_t* p = spriteList;
+			for (int j = 0; j < spriteCountAllRes; ++j)
 			{
 				if (p->iRes == m_iRes)
 				{
-					char sz[256];
-					_snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
-					m_rghSprites[index] = SPR_Load(sz);
-					m_rgrcRects[index] = p->rc;
-					strncpy(&m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH);
-
-					index++;
+					HudSprite hudSprite;
+					strncpy(hudSprite.Name, p->szName, MAX_SPRITE_NAME_LENGTH);
+					strncpy(hudSprite.SpriteName, p->szSprite, 64);
+					m_Sprites.push_back(hudSprite);
 				}
 
-				p++;
-			}
-		}
-	}
-	else
-	{
-		// we have already have loaded the sprite reference from hud.txt, but
-		// we need to make sure all the sprites have been loaded (we've gone through a transition, or loaded a save game)
-		client_sprite_t *p = m_pSpriteList;
-		int index = 0;
-		for (int j = 0; j < m_iSpriteCountAllRes; j++)
-		{
-			if (p->iRes == m_iRes)
-			{
-				char sz[256];
-				_snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
-				m_rghSprites[index] = SPR_Load(sz);
-				index++;
+				++p;
 			}
 
-			p++;
+			m_Sprites.shrink_to_fit();
+
+			gEngfuncs.COM_FreeFile(spriteList);
 		}
+	}
+
+	// we have already have loaded the sprite reference from hud.txt, but
+	// we need to make sure all the sprites have been loaded (we've gone through a transition, or loaded a save game)
+	for (auto& hudSprite : m_Sprites)
+	{
+		char file[256];
+		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName);
+		hudSprite.Handle = SPR_Load(file);
+		//hudSprite.Handle = SPR_Load(fmt::format("sprites/{}.spr", hudSprite.SpriteName.c_str()).c_str());
 	}
 
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+	const auto& numberRect = m_Sprites[m_HUD_number_0].Rectangle;
+	m_iFontHeight = numberRect.bottom - numberRect.top;
 
 	//Master Sword
 	dbg("MS Vid_Initialization - chars");
@@ -713,15 +637,9 @@ void CHud::VidInit(void)
 	m_HUD_char_A = GetSpriteIndex("char_A");
 
 	//Re-initialize the HUD elements
-	dbg("MS Vid_Initialization - m_pHudList"); //thothie more debug
-	HUDLIST *pList = m_pHudList;
-
-	dbg("MS Vid_Initialization - pList Loop"); //thothie more debug
-	while (pList)
+	for (auto hudElement : m_HudList)
 	{
-		//SetDebugProgress( CHUDThinkPrg, msstring( "Call Think on HUD: " ) + pList->p->Name );
-		pList->p->VidInit();
-		pList = pList->pNext;
+		hudElement->VidInit();
 	}
 
 	//Reload the Master Sword global sprite/TGA list
@@ -885,32 +803,10 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 
 void CHud::AddHudElem(CHudBase *phudelem)
 {
-	HUDLIST *pdl, *ptemp;
-
-	//phudelem->Think();
-
 	if (!phudelem)
 		return;
 
-	pdl = (HUDLIST *)malloc(sizeof(HUDLIST));
-	if (!pdl)
-		return;
-
-	memset(pdl, 0, sizeof(HUDLIST));
-	pdl->p = phudelem;
-
-	if (!m_pHudList)
-	{
-		m_pHudList = pdl;
-		return;
-	}
-
-	ptemp = m_pHudList;
-
-	while (ptemp->pNext)
-		ptemp = ptemp->pNext;
-
-	ptemp->pNext = pdl;
+	m_HudList.push_back(phudelem);
 }
 
 float CHud::GetSensitivity(void)

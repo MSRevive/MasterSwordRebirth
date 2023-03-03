@@ -22,20 +22,18 @@ struct bitmapresource_t {
 };
 mslist<bitmapresource_t> g_Bitmaps;
 
-BitmapTGA *MSBitmap::GetTGA( const char *pszImageName )
+BitmapTGA *MSBitmap::GetTGA(const char *pszImageName)
 {
 	bitmapresource_t Bitmap;
 
-	startdbg;
 	//Return existing TGA, or load from file
 	if( !pszImageName )
 		return NULL;
 
-	dbg( "Find Existing Image" );
-	 for (int i = 0; i < g_Bitmaps.size(); i++) 
+	for (int i = 0; i < g_Bitmaps.size(); i++) 
 	{
 		if( g_Bitmaps[i].m_TGAorSprite && !strcmp(g_Bitmaps[i].sImageName, pszImageName) )
-			return g_Bitmaps[i].m_TGA;							//Return existing TGA
+			return g_Bitmaps[i].m_TGA; //Return existing TGA
 	}
 
 	//Create new TGA
@@ -48,10 +46,9 @@ BitmapTGA *MSBitmap::GetTGA( const char *pszImageName )
 
 	g_Bitmaps.push_back( Bitmap );
 
-	enddbg;
-
 	return Bitmap.m_TGA;
 }
+
 HLSPRITE MSBitmap::GetSprite(const char *pszImageName)
 {
 	//Return existing sprite, or load from file
@@ -73,6 +70,7 @@ HLSPRITE MSBitmap::GetSprite(const char *pszImageName)
 
 	return Bitmap.m_Sprite;
 }
+
 HLSPRITE MSBitmap::LoadSprite(const char *pszImageName)
 {
 	//Load new sprite from file
@@ -80,7 +78,8 @@ HLSPRITE MSBitmap::LoadSprite(const char *pszImageName)
 	if( !Sprite ) Sprite = gHUD.GetSprite( gHUD.GetSpriteIndex(pszImageName) );
 	return Sprite;
 }
-void MSBitmap::ReloadSprites( )
+
+void MSBitmap::ReloadSprites()
 {
 	//Reload sprites after a video or level change
 	 for (int i = 0; i < g_Bitmaps.size(); i++) 
@@ -96,6 +95,7 @@ CImageDelayed::CImageDelayed( const char *pszImageName, bool TGAorSprite, bool D
 	setFgColor( 255, 255, 255, 255 );
 	LoadImg( pszImageName, TGAorSprite, Delayed );
 }
+
 void CImageDelayed::LoadImg( )
 {
 	startdbg;
@@ -124,6 +124,7 @@ void CImageDelayed::LoadImg( )
 	m_ImageLoaded = true;
 	enddbg;
 }
+
 void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool Delayed )
 {
 	startdbg;
@@ -138,6 +139,7 @@ void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool De
 		LoadImg( );
 	enddbg;
 }
+
 void CImageDelayed::ClearImg( )
 {
 	m_ImageLoaded = false;
@@ -145,6 +147,7 @@ void CImageDelayed::ClearImg( )
 	m_SpriteHandle = 0;
 	setImage( NULL );
 }
+
 void CImageDelayed::paintBackground()
 {
 	if ( m_TGAorSprite || !m_SpriteHandle )

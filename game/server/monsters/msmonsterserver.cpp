@@ -23,6 +23,7 @@
 #include "corpse.h"
 #include "saytext.h"
 #include <set>
+#include <cmath>
 
 #ifdef VALVE_DLL
 
