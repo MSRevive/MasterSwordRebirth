@@ -9,6 +9,7 @@ public:
 	VGUI_FadeText* m_Label[3];
 	entinfo_t* m_LastID;
 	cl_entity_s* m_pClientEnt;
+	int iCurrentAlpha = 0;
 
 #define ID_X XRES(320)
 #define ID_Y YRES(240)
@@ -16,14 +17,14 @@ public:
 #define WOUNDED_HPMOD 0.50
 #define CRITICAL_HPMOD 0.25
 
-	VGUI_ID(Panel* pParent, int x, int y) : Panel(x, y, XRES(200), YRES(54))
+	VGUI_ID(Panel* pParent, int x, int y) : Panel(x, y, XRES(50), 10 + g_FontID->getTall()*3)
 	{
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
 
 		for (int i = 0; i < 3; i++)
 		{
-			m_Label[i] = new VGUI_FadeText(this, 1, "", 0, i * g_FontID->getTall(), MSLabel::a_west);
+			m_Label[i] = new VGUI_FadeText(this, 0.2, "", 0, i * g_FontID->getTall(), MSLabel::a_west);
 			m_Label[i]->setFont(g_FontID);
 		}
 		m_Label[0]->SetFGColorRGB(Color_Text_White);
@@ -66,9 +67,14 @@ public:
 			cHPColor = COLOR(0, 255, 0, 0);
 			sHPBracketName = "Healthy";
 		}
-		else if (currHP > maxHP * WOUNDED_HPMOD)
+		else if (currHP > maxHP * WOUNDED_HPMOD && currHP < maxHP * HEALTHY_HPMOD)
 		{
 			cHPColor = COLOR(255, 255, 0, 0);
+			sHPBracketName = "Slightly Wounded";
+		}
+		else if (currHP < maxHP * WOUNDED_HPMOD && currHP > maxHP * CRITICAL_HPMOD)
+		{
+			cHPColor = COLOR(255, 188, 0, 0);
 			sHPBracketName = "Wounded";
 		}
 		else if (currHP < maxHP * CRITICAL_HPMOD) {
@@ -186,7 +192,40 @@ public:
 		//make sure we have the same alpha as the first element, fixes fade in as well as correctly updating health color in realtime
 		m_Label[2]->setFgColor(cHPColor.r, cHPColor.g, cHPColor.b, iCurrentIndendedAlpha);
 
+		std::string sCVARHUDIDBackground = CVAR_GET_STRING("msui_id_background");
+
+		if (sCVARHUDIDBackground == "1") {
+				if (m_LastID != NULL)
+				{
+					FadeInTo(100);
+				}
+				else {
+					FadeOut();
+				}
+		}
+		else {
+			if (iCurrentAlpha != 255) {
+				FadeOut();
+			}
+		}
+
 		setVisible(ShowHUD());
+	}
+	void FadeInTo(int iTargetAlpha) {
+		
+		while (iCurrentAlpha > iTargetAlpha) {
+			iCurrentAlpha = iCurrentAlpha - 1;
+			this->setBgColor(0, 0, 0, iCurrentAlpha);
+		}
+
+	}
+	void FadeOut() {
+
+		while (iCurrentAlpha < 255) {
+			iCurrentAlpha = iCurrentAlpha + 1;
+			this->setBgColor(0, 0, 0, iCurrentAlpha);
+		}
+
 	}
 	void NewLevel()
 	{
