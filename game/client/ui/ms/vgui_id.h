@@ -15,7 +15,8 @@ public:
 
 #define ID_X XRES(320)
 #define ID_Y YRES(240)
-#define HEALTHY_HPMOD 0.75
+#define HEALTHY_HPMOD 0.95
+#define INJURED_HPMOD 0.75
 #define WOUNDED_HPMOD 0.50
 #define CRITICAL_HPMOD 0.25
 
@@ -65,21 +66,26 @@ public:
 		msstring sHPBracketName;
 
 		//color the health portion appropriately
-		if (currHP > maxHP * HEALTHY_HPMOD) {
+		if (currHP >= maxHP * HEALTHY_HPMOD) {
 			cHPColor = COLOR(0, 255, 0, 0);
 			sHPBracketName = "Healthy";
 		}
-		else if (currHP > maxHP * WOUNDED_HPMOD && currHP < maxHP * HEALTHY_HPMOD)
+		else if (currHP >= maxHP * INJURED_HPMOD && currHP < maxHP * HEALTHY_HPMOD)
+		{
+			cHPColor = COLOR(200, 255, 0, 0);
+			sHPBracketName = "Barely Injured";
+		}
+		else if (currHP >= maxHP * WOUNDED_HPMOD && currHP < maxHP * INJURED_HPMOD)
 		{
 			cHPColor = COLOR(255, 255, 0, 0);
-			sHPBracketName = "Slightly Wounded";
+			sHPBracketName = "Lightly Wounded";
 		}
-		else if (currHP < maxHP * WOUNDED_HPMOD && currHP > maxHP * CRITICAL_HPMOD)
+		else if (currHP >= maxHP * CRITICAL_HPMOD && currHP < maxHP * WOUNDED_HPMOD)
 		{
 			cHPColor = COLOR(255, 188, 0, 0);
-			sHPBracketName = "Wounded";
+			sHPBracketName = "Severely Wounded";
 		}
-		else if (currHP < maxHP * CRITICAL_HPMOD) {
+		else if (currHP <= maxHP * CRITICAL_HPMOD) {
 			cHPColor = COLOR(255, 0, 0, 0);
 			sHPBracketName = "Near Death";
 		}
