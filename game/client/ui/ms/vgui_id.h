@@ -78,7 +78,7 @@ public:
 		else if (currHP >= maxHP * WOUNDED_HPMOD && currHP < maxHP * INJURED_HPMOD)
 		{
 			cHPColor = COLOR(255, 255, 0, 0);
-			sHPBracketName = "Lightly Wounded";
+			sHPBracketName = "Wounded";
 		}
 		else if (currHP >= maxHP * CRITICAL_HPMOD && currHP < maxHP * WOUNDED_HPMOD)
 		{
