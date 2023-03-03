@@ -60,7 +60,7 @@ public:
 
 		//move hp text to new line and make it colorful
 		msstring sHPBracketName;
-		
+
 		//color the health portion appropriately
 		if (currHP > maxHP * HEALTHY_HPMOD) {
 			cHPColor = COLOR(0, 255, 0, 0);
@@ -135,11 +135,8 @@ public:
 
 			m_Label[1]->setText(String);
 			m_Label[1]->SetFGColorRGB(DifficultyColor);
-			//hpcolor needs to be set here otherwise it breaks the fadein
-			m_Label[2]->SetFGColorRGB(cHPColor);
 			m_Label[0]->StartFade(false);
 			m_Label[1]->StartFade(false);
-			m_Label[2]->StartFade(false);
 		}
 		else
 		{
@@ -178,6 +175,16 @@ public:
 		{
 			setPos(iIntendedX, iIntendedY);
 		}
+
+		SetStatus();
+		//attempting to make it update correctly since the health color is late to update.
+		//i hate this vgui engine it is so annoying to deal with.
+
+		int iTemp; // because who would want just a single one of the colors of an element ever right?
+		int iCurrentIndendedAlpha;
+		m_Label[0]->getFgColor(iTemp, iTemp, iTemp, iCurrentIndendedAlpha);
+		//make sure we have the same alpha as the first element, fixes fade in as well as correctly updating health color in realtime
+		m_Label[2]->setFgColor(cHPColor.r, cHPColor.g, cHPColor.b, iCurrentIndendedAlpha);
 
 		setVisible(ShowHUD());
 	}
