@@ -86,28 +86,28 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 
 		// find the best substat to give things to;
 		int iBestSubstatId = 10;
+		int iEqualCount = 0;
 
 		//see if anything has lower substats than the first skill in the list
 		if (csExpStat->m_SubStats.size() < 4)
 		{
 			for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
-				if (csExpStat->m_SubStats[idx].Value < iFirstSubValue) {
+				if (csExpStat->m_SubStats[idx].Value <= iFirstSubValue) {
 					iBestSubstatId = idx;
-				}
-				else if (csExpStat->m_SubStats[idx].Value == 0) {
-					iBestSubstatId = idx;
-					break;
+					if (csExpStat->m_SubStats[idx].Value == iFirstSubValue) {
+						iEqualCount++;
+					}
 				}
 			}
 
 			//if we didn't find a low substat, go through the remaining exp instead
-			if (iBestSubstatId == 10) {
+			if (iBestSubstatId == 3) {
 				long double	ldHighestExpRemaining = 0;
 
 				for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
 					long double ldCurrentExpRemaining = abs(GetExpNeeded(csExpStat->m_SubStats[idx].Value) - csExpStat->m_SubStats[idx].Exp);
 
-					if (ldCurrentExpRemaining > ldHighestExpRemaining) {
+					if (ldCurrentExpRemaining >= ldHighestExpRemaining) {
 						ldHighestExpRemaining = ldCurrentExpRemaining;
 						iBestSubstatId = idx;
 					}
@@ -185,6 +185,7 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 
 	return std::make_tuple(bSkillLeveled, 0);
 }
+
 bool CBasePlayer::LearnSkill(int iStat, int EnemySkillLevel)
 {
 	//Exp is added to a random property of the skill
@@ -192,7 +193,7 @@ bool CBasePlayer::LearnSkill(int iStat, int EnemySkillLevel)
 	if (!pStat)
 		return false;
 
-	int iSubStat = RANDOM_LONG(0, (pStat->m_SubStats.size() - 1));
+	int iSubStat = 1;
 	//SendInfoMsg( "You gain %d XP", EnemySkillLevel ); //thothie - XP report - no workie
 
 	return std::get<0>(LearnSkill(iStat, iSubStat, EnemySkillLevel));
