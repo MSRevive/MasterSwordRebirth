@@ -3573,7 +3573,7 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	}
 
 	// In single player, reset friction after each movement to FrictionModifier Triggers work still.
-	if (!pmove->multiplayer && (pmove->movetype == MOVETYPE_WALK))
+	if (pmove->movetype == MOVETYPE_WALK)
 	{
 		pmove->friction = 1.0f;
 	}
