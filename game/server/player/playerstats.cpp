@@ -120,6 +120,10 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			iBestSubstatId = iStatType;
 		}
 
+		char sDebugInfo[64];
+		_snprintf(sDebugInfo, 64, "Stat: %i , Equalcount : %i");
+		g_engfuncs.pfnCVarSetString("DEBUG_bestxpstat", sDebugInfo);
+
 		//run learnskill
 		std::tuple<bool, int> tbiSuccess = CMSMonster::LearnSkill(iStat, iBestSubstatId, iRemainingExp);
 		int iStatIdx = iStat - SKILL_FIRSTSKILL;
