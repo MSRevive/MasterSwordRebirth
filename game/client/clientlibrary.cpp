@@ -79,8 +79,8 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_hidehud", "0", FCVAR_ARCHIVE);						// Hides the HUD and viewmodel completely
 	CVAR_CREATE("ms_lildude", "1", FCVAR_ARCHIVE);						// Thothie MAR2007a - Hides the 3d Guy if set 0
 
-	//debug outputs
-	CVAR_CREATE("DEBUG_bestxpstat", "0", FCVAR_CLIENTDLL);
+	//debug outputs ; remove later - always add where they are called!
+	CVAR_CREATE("DEBUG_bestxpstat", "0", FCVAR_CLIENTDLL); // Called @ playerstats.cpp line 123
 	CVAR_CREATE("DEBUG_widestlabel", "0", FCVAR_CLIENTDLL);
 
 	RichPresenceInitialize();

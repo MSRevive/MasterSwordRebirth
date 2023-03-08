@@ -101,7 +101,7 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			}
 
 			//if we didn't find a low substat, go through the remaining exp instead
-			if (iBestSubstatId == 3) {
+			if (iEqualCount == 3) {
 				long double	ldHighestExpRemaining = 0;
 
 				for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
@@ -120,8 +120,9 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			iBestSubstatId = iStatType;
 		}
 
+		//set debug cvar to avoid spamming console but be able to get
 		char sDebugInfo[64];
-		_snprintf(sDebugInfo, 64, "Stat: %i , Equalcount : %i");
+		_snprintf(sDebugInfo, 64, "Stat: %i , Equalcount : %i", iBestSubstatId, iEqualCount);
 		g_engfuncs.pfnCVarSetString("DEBUG_bestxpstat", sDebugInfo);
 
 		//run learnskill
