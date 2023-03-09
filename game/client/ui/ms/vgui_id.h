@@ -2,6 +2,8 @@
 //  This should only be included by vgui_HUD.cpp
 //
 
+#include <sstream>
+
 class VGUI_ID : public Panel
 {
 public:
@@ -213,6 +215,8 @@ public:
 		}
 
 		int iWidestLabelWidth = 200;
+
+		std::stringstream ssDebugInfo;
 
 		for (int idx = 0; idx < 3; idx++) {
 			if (m_Label[idx]->getWide() > iWidestLabelWidth)
