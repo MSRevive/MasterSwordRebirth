@@ -16,14 +16,6 @@
 #ifndef MSSHARED_FILESYSTEM_SHARED_H
 #define MSSHARED_FILESYSTEM_SHARED_H
 
-#ifdef min
-#undef min
-#endif
-
-#ifdef max
-#undef max
-#endif
-
 #include <vector>
 #include "FileSystem.h"
 
@@ -166,8 +158,5 @@ public:
 private:
 	FileHandle_t m_Handle = FILESYSTEM_INVALID_HANDLE;
 };
-
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#define max(a ,b) (((a) > (b)) ? (a) : (b))
 
 #endif //MSSHARED_FILESYSTEM_SHARED_H

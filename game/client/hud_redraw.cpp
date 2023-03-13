@@ -188,7 +188,7 @@ int CHud ::DrawHudNumberSML(int x, int y, int iFlags, int iNumber, int r, int g,
 			k = iNumber % 10;
 		else
 			k = (iNumber % (int)pow(10.0, itemp)) / pow(10.0, itemp - 1);
-		k = min(k, 9);
+		k = V_min(k, 9);
 		iWidth = GetSpriteRect(m_HUD_numberSML_0 + k).right - GetSpriteRect(m_HUD_numberSML_0 + k).left;
 		SPR_Set(GetSprite(m_HUD_numberSML_0 + k), r, g, b);
 		SPR_DrawAdditive(0, ix, y, &GetSpriteRect(m_HUD_numberSML_0 + k));

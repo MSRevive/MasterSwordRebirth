@@ -2101,8 +2101,8 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		m_nTopColor = min(max(0, m_pPlayerInfo->topcolor), 360);
-		m_nBottomColor = min(max(0, m_pPlayerInfo->bottomcolor), 360);
+		m_nTopColor = V_min(V_max(0, m_pPlayerInfo->topcolor), 360);
+		m_nBottomColor = V_min(V_max(0, m_pPlayerInfo->bottomcolor), 360);
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 

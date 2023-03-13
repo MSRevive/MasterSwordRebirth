@@ -1007,16 +1007,16 @@ float CBasePlayer::WalkSpeed(bool fParseSpeed)
 #define WALKSPEED_MAX_WEIGHT_SLOWDOWN 70
 #define WALKSPEED_MAX_DEX 75.0f
 
-	float StatEnhancement = (min(Dex, WALKSPEED_MAX_DEX) / WALKSPEED_MAX_DEX) * 100;
+	float StatEnhancement = (V_min(Dex, WALKSPEED_MAX_DEX) / WALKSPEED_MAX_DEX) * 100;
 
 	//Speed detriment - When weight over 50% the volume, speed reduces
 	float VolumeHalf = Volume() / 2.0f;
 
 	float SpeedDetriment = Weight() - VolumeHalf;
-	SpeedDetriment = (max(SpeedDetriment, 0) / VolumeHalf) * WALKSPEED_MAX_WEIGHT_SLOWDOWN;
+	SpeedDetriment = (V_max(SpeedDetriment, 0) / VolumeHalf) * WALKSPEED_MAX_WEIGHT_SLOWDOWN;
 
-	SpeedDetriment = min(SpeedDetriment, WALKSPEED_MAX_WEIGHT_SLOWDOWN);
-	SpeedDetriment = max(SpeedDetriment, 0);
+	SpeedDetriment = V_min(SpeedDetriment, WALKSPEED_MAX_WEIGHT_SLOWDOWN);
+	SpeedDetriment = V_max(SpeedDetriment, 0);
 
 	fSpeed = BASE_SPEED + StatEnhancement - SpeedDetriment;
 
@@ -1027,12 +1027,12 @@ float CBasePlayer::RunSpeed(bool fParseSpeed)
 {
 	float fSpeed;
 	fSpeed = WalkSpeed(fParseSpeed); //1.6
-	float flCappedStamina = max(Stamina, 0.001f);
+	float flCappedStamina = V_max(Stamina, 0.001f);
 	float flMaxStamina = MaxStamina();
-	float flCappedMaxStamina = max(flMaxStamina, 0.001f);
+	float flCappedMaxStamina = V_max(flMaxStamina, 0.001f);
 
 	float StaminaRatio = flCappedStamina / flCappedMaxStamina;
-	fSpeed *= 1 + min(StaminaRatio, 1.0f);
+	fSpeed *= 1 + V_min(StaminaRatio, 1.0f);
 	return fParseSpeed ? ParseSpeed(fSpeed) : fSpeed;
 	//if( !bParseSpeed ) return fSpeed;
 	//return ParseSpeed(fSpeed);
@@ -1055,7 +1055,7 @@ float CBasePlayer::Volume()
 	//- only after capping the item limit
 	int MyVolume = GetNatStat(NATURAL_STR) * 25;
 	MyVolume = MyVolume + 25; //max(min(MyVolume,600),0);
-	MyVolume = min(MyVolume, 2000);
+	MyVolume = V_min(MyVolume, 2000);
 	return MyVolume;
 }
 
@@ -1064,9 +1064,9 @@ float CBasePlayer::MaxHP()
 	//Thothie adding 3hp per Wisdom point
 	//AUG2010_23 - dropped Str from 8 to 7, raised fitness from 6 to 7 and wisdom from 2 to 3
 	int Str = GetNatStat(NATURAL_STR) - 1, Fit = GetNatStat(NATURAL_FIT) - 1, Wis = GetNatStat(NATURAL_WIS) - 1;
-	Str = max(Str, 0);
-	Fit = max(Fit, 0);
-	Wis = max(Wis, 0);
+	Str = V_max(Str, 0);
+	Fit = V_max(Fit, 0);
+	Wis = V_max(Wis, 0);
 	return 5 + Str * 7 + Fit * 7 + Wis * 3;
 }
 
@@ -1088,7 +1088,7 @@ int CBasePlayer::SkillAvg()
 		iTemp += GetSkillStat(i);
 	iTemp /= SKILL_MAX_STATS;
 
-	iTemp = max(iTemp, 0);
+	iTemp = V_max(iTemp, 0);
 
 	return iTemp;
 }

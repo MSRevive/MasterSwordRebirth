@@ -444,7 +444,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 	dbg("Load global items");
 
 	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
-	while (GetString(cString, min(FileSize, sizeof(cString)), (char*)pStringPtr, i, "\r\n"))
+	while (GetString(cString, V_min(FileSize, sizeof(cString)), (char*)pStringPtr, i, "\r\n"))
 	{
 		n = i;
 		i += strlen(cString) + 1;

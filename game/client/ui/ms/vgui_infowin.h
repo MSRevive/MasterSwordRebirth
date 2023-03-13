@@ -73,7 +73,7 @@ public:
 		int TextX, TextY;
 		Text->getSize(TextX, TextY);
 
-		int x = INFOWIN_SPACER_BORDER + max(TitleX, TextX) + INFOWIN_SPACER_BORDER + INFOWIN_BORDER_SIZE * 2 + 2; //+2 makes up for initial spacing in label text
+		int x = INFOWIN_SPACER_BORDER + V_max(TitleX, TextX) + INFOWIN_SPACER_BORDER + INFOWIN_BORDER_SIZE * 2 + 2; //+2 makes up for initial spacing in label text
 		int y = INFOWIN_SPACER_BORDER + TitleY + INFOWIN_SPACER_BELOWTITLE + TextY + INFOWIN_SPACER_BORDER + INFOWIN_BORDER_SIZE * 2;
 
 		setSize(x, y);
@@ -84,11 +84,11 @@ public:
 		float elapsedtime = gpGlobals->time - m_TimeDisplayed;
 
 		//fade in
-		float fadeamt = elapsedtime <= FADEIN_TIME ? (min(elapsedtime, FADEIN_TIME) / FADEIN_TIME) : 1.0f;
+		float fadeamt = elapsedtime <= FADEIN_TIME ? (V_min(elapsedtime, FADEIN_TIME) / FADEIN_TIME) : 1.0f;
 
 		//fade out
 		if (elapsedtime > m_Duration - FADEOUT_TIME)
-			fadeamt = 1.0f - min(elapsedtime - (m_Duration - FADEOUT_TIME), FADEOUT_TIME) / FADEOUT_TIME;
+			fadeamt = 1.0f - V_min(elapsedtime - (m_Duration - FADEOUT_TIME), FADEOUT_TIME) / FADEOUT_TIME;
 
 		int alpha = 255 - (255 * fadeamt);
 
@@ -113,7 +113,7 @@ public:
 			float elapsedtime = gpGlobals->time - FirstWin.m_TimeDisplayed;
 			if (elapsedtime > m_Duration - FADEOUT_TIME)
 			{
-				float moveamt = min(elapsedtime - (m_Duration - FADEOUT_TIME), FADEOUT_TIME) / FADEOUT_TIME;
+				float moveamt = V_min(elapsedtime - (m_Duration - FADEOUT_TIME), FADEOUT_TIME) / FADEOUT_TIME;
 				yPos -= (FirstWin.getTall() + INFOWIN_DISPLAY_SPACER_Y) * moveamt;
 			}
 		}

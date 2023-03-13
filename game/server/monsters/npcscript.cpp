@@ -525,8 +525,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		if (Params.size() >= 1)
 		{
 			m_MaxGroundSlope = (90.0f - atof(Params[0])) / 90.0f;
-			m_MaxGroundSlope = min(m_MaxGroundSlope, 1.0f);
-			m_MaxGroundSlope = max(m_MaxGroundSlope, 0.0f);
+			m_MaxGroundSlope = V_min(m_MaxGroundSlope, 1.0f);
+			m_MaxGroundSlope = V_max(m_MaxGroundSlope, 0.0f);
 		}
 
 		else
@@ -778,7 +778,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (Params.size() >= 4)
 				iCost = atoi(Params[3]);
 			if (Params.size() >= 5)
-				flSellRatio = min(atof(Params[4]), .9);
+				flSellRatio = V_min(atof(Params[4]), .9);
 			if (Params.size() >= 6)
 				iBundleAmt = atoi(Params[5]);
 
@@ -1373,7 +1373,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 						if (iProp > -1)
 						{
 							int value = atoi(Params[1]);
-							pStat->m_SubStats[iProp].Value = min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = V_min(value, STATPROP_MAX_VALUE);
 						}
 					}
 				}
@@ -1601,7 +1601,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	else if (Cmd.Name() == "setanim.frame")
 	{
 		if (Params.size() >= 1)
-			pev->frame = max(atof(Params[0]), 0);
+			pev->frame = V_max(atof(Params[0]), 0);
 		else
 			ERROR_MISSING_PARMS;
 	}

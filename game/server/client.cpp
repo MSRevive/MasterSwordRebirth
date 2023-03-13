@@ -1543,7 +1543,7 @@ void ClientCommand2(edict_t *pEntity)
 		else if (FStrEq(pcmd, "sizemeup"))
 		{
 			pPlayer->SendInfoMsg("MoveType: %i\n", pPlayer->pev->movetype);
-			Vector min = pev->origin + -(pPlayer->Size() / 2), max = pev->origin + (pPlayer->Size() / 2);
+			Vector min = pev->origin + -(pPlayer->Size() / 2), V_max = pev->origin + (pPlayer->Size() / 2);
 			//BeamEffect( min, max, iBeam, 0, 0, 100, 10, 0, 255, 255,255, 255, 20 );
 		}
 		else if (FStrEq(pcmd, "specme"))

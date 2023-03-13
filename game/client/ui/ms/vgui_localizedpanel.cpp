@@ -375,7 +375,7 @@ void CLocalizedPanel::AddParagraph(const char *pszText)
 	// Word-wrap and resize height
 	pParagraph->getTextImage()->getTextSizeWrapped(w, hParagraph);
 	pParagraph->setSize(w, hParagraph);
-	hPanel = max(LOCAL_TEXTPANEL_HEIGHT_MIN, yPos+hParagraph);
+	hPanel = V_max(LOCAL_TEXTPANEL_HEIGHT_MIN, yPos+hParagraph);
 	m_pTextPanel->setSize(m_pTextPanel->getWide(), hPanel);
 
 	m_pScroll->validate();

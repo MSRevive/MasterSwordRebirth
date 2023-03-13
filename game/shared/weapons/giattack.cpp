@@ -753,7 +753,7 @@ void CGenericItem::StrikeLand()
 	Vector vecEnd = vecSrc + vForward * CurrentAttack->flRange;
 
 	float flDmgFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STATPROP_MAX_VALUE;
-	flDmgFraction = max(flDmgFraction, 0);
+	flDmgFraction = V_max(flDmgFraction, 0);
 
 	//Thothie SEP2007 - attempting to make level limit work by decreasing accuracy
 	bool bUnderleveled = false;
@@ -777,7 +777,7 @@ void CGenericItem::StrikeLand()
 		flHitPercentage *= m_pOwner->m_HITMulti; //FEB2009_18
 
 	flDmgFraction = m_pOwner->GetSkillStat(CurrentAttack->StatPower, CurrentAttack->PropPower) / STATPROP_MAX_VALUE;
-	flDmgFraction = max(flDmgFraction, 0.001f);
+	flDmgFraction = V_max(flDmgFraction, 0.001f);
 
 	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
@@ -1056,17 +1056,17 @@ void CGenericItem::ChargeThrowProj()
 			   vOrigin = m_pOwner->EyePosition();
 
 		float flTimeHeld = gpGlobals->time - CurrentAttack->tTrueStart;
-		float flTimeHeldAdjusted = max(min(flTimeHeld, CurrentAttack->tMaxHold), CurrentAttack->tProjMinHold);
+		float flTimeHeldAdjusted = V_max(V_min(flTimeHeld, CurrentAttack->tMaxHold), CurrentAttack->tProjMinHold);
 		flTimeHeldAdjusted = CurrentAttack->tMaxHold ? (flTimeHeldAdjusted / CurrentAttack->tMaxHold) : 0; //[0.0 to 1.0]
 
 		//Shoot more accurately for higher skill
 		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STATPROP_MAX_VALUE;
-		flAccFraction = 1 - min(max(flAccFraction, 0.0f), 1.0f);
+		flAccFraction = 1 - V_min(V_max(flAccFraction, 0.0f), 1.0f);
 
 		//Shoot more accurately for drawing the bow back longer
 		float LoweredSpreadDeg = CurrentAttack->flAccuracyDefault - (CurrentAttack->flAccuracyDefault - CurrentAttack->flAccBest) * flTimeHeldAdjusted;
 
-		float Spread = max(LoweredSpreadDeg, 0) * flAccFraction * RANDOM_FLOAT(-1.0f, 1.0f); //Factor skill and randomness into the Spread
+		float Spread = V_max(LoweredSpreadDeg, 0) * flAccFraction * RANDOM_FLOAT(-1.0f, 1.0f); //Factor skill and randomness into the Spread
 		float VeerAng = RANDOM_FLOAT(0.0f, M_PI * 2);										 //Determine an angle to veer off 0-360
 		vAngle.x += cosf(VeerAng) * Spread;													 //Veer off at the angle, multiplied by the spread
 		vAngle.y += sinf(VeerAng) * Spread;
@@ -1115,8 +1115,8 @@ float CGenericItem::Attack_Charge()
 	{
 		ChargeDuration = gpGlobals->time - (CurrentAttack->tStart + CurrentAttack->tProjMinHold);			   //Duration
 		ChargeDuration = ChargeDuration / ((CurrentAttack->tMaxHold - CurrentAttack->tProjMinHold) + 0.0001f); //Ratio of max hold
-		ChargeDuration = max(ChargeDuration, 0);															   //Cap ratio at 0
-		ChargeDuration = min(ChargeDuration, 1.0f);															   //Cap ratio at 1 second
+		ChargeDuration = V_max(ChargeDuration, 0);															   //Cap ratio at 0
+		ChargeDuration = V_min(ChargeDuration, 1.0f);															   //Cap ratio at 1 second
 		return ChargeDuration;
 	}
 
@@ -1129,8 +1129,8 @@ float CGenericItem::Attack_Charge()
 
 	float HighestCharge = GetHighestAttackCharge();
 
-	Charge = max(Charge, 0);			 //Cap ratio at 0
-	Charge = min(Charge, HighestCharge); //Cap ratio at highest charge found
+	Charge = V_max(Charge, 0);			 //Cap ratio at 0
+	Charge = V_min(Charge, HighestCharge); //Cap ratio at highest charge found
 
 	return Charge;
 }

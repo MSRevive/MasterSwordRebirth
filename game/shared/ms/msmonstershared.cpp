@@ -584,7 +584,7 @@ int CMSMonster ::GiveGold(int iAmount, bool fVerbose)
 {
 	int GoldAmt = m_Gold;
 	int MaxSubtract = -GoldAmt;
-	int CappedChangeAmt = max(MaxSubtract, iAmount); //Ensure that I don't add (-gold), causing a negative gold amount
+	int CappedChangeAmt = V_max(MaxSubtract, iAmount); //Ensure that I don't add (-gold), causing a negative gold amount
 	m_Gold += CappedChangeAmt;
 	return m_Gold;
 }
