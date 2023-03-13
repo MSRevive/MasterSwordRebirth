@@ -580,7 +580,6 @@ void CHud::VidInit(void)
 		m_iRes = 640;
 
 	// Only load this once
-	// Only load this once
 	if (m_Sprites.empty())
 	{
 		// we need to load the hud.txt, and all sprites within
@@ -597,8 +596,8 @@ void CHud::VidInit(void)
 				if (p->iRes == m_iRes)
 				{
 					HudSprite hudSprite;
-					strncpy(hudSprite.Name, p->szName, MAX_SPRITE_NAME_LENGTH);
-					strncpy(hudSprite.SpriteName, p->szSprite, 64);
+					hudSprite.Name = p->szName;
+					hudSprite.SpriteName = p->szSprite;
 					m_Sprites.push_back(hudSprite);
 				}
 

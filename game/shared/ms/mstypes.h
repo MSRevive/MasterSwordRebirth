@@ -191,7 +191,7 @@ public:
 class msvariant
 {
 public:
-	fixedstr<256> m_String;
+	fixedstr<256> m_String = "";
 	int m_Int;
 	float m_Float;
 	enum type
@@ -387,6 +387,6 @@ public:
 	}
 };
 
-typedef mslist<fixedstr<>> msstringlist;
-typedef std::map<fixedstr<>,fixedstr<>> msstringstringhash;
-typedef fixedstr<> msstring;
+typedef mslist<fixedstr<256>> msstringlist;
+typedef std::map<fixedstr<256>,fixedstr<256>> msstringstringhash;
+typedef fixedstr<256> msstring;
