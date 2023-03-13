@@ -329,15 +329,14 @@ class CTargetMP3Audio : public CPointEntity
 public:
 	void Spawn(void);
 
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
-			 USE_TYPE useType, float value);
+	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
 	BOOL m_bPlaying;
 };
 
 LINK_ENTITY_TO_CLASS(trigger_mp3audio, CTargetMP3Audio);
 
-void CTargetMP3Audio ::Spawn(void)
+void CTargetMP3Audio::Spawn(void)
 {
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
@@ -345,8 +344,7 @@ void CTargetMP3Audio ::Spawn(void)
 	m_bPlaying = FALSE; // start out not playing
 }
 
-void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
-						  USE_TYPE useType, float value)
+void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	char command[64];
 
@@ -364,11 +362,11 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 
 	// issue the play/loop command
 	//Thothie AUG2007a - removing music/ dependancy, so you can play MP3's in valve/media/ folder
-	msstring th_test_string = STRING(pev->message);
-	if (th_test_string.contains("/"))
-		 _snprintf(command, sizeof(command),  "mp3 %s %s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
+	msstring testString = STRING(pev->message);
+	if (testString.contains("/"))
+		 _snprintf(command, sizeof(command), "mp3 %s %s\n", FBitSet(pev->spawnflags, SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
 	else
-		 _snprintf(command, sizeof(command),  "mp3 %s music/%s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
+		 _snprintf(command, sizeof(command), "mp3 %s music/%s\n", FBitSet(pev->spawnflags, SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
 
 	CLIENT_COMMAND(pActivator->edict(), command); //thothie - not sure how this works, might be useful to know
 
@@ -693,13 +691,13 @@ public:
 LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
 //[end] Thothie NOV2014_07 msarea_music_dynamic for CBM system
 
+//Rewrite this to not rely so much on the scripts.
 class CAreaMusic : public CAreaInvisible
 {
 public:
 	songplaylist m_Songs;
 	string_t ms_master;
 	msstring main_song;
-	float main_song_length;
 	typedef CAreaInvisible BaseClass;
 
 	void Spawn()
