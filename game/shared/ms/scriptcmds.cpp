@@ -13,6 +13,7 @@
 #include "scriptedeffects.h"
 #include "logger.h"
 #include "pm_defs.h"
+#include "strutil.h"
 
 #ifndef VALVE_DLL
 #include "render/clrender.h"

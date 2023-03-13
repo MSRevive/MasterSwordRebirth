@@ -19,6 +19,7 @@
 #include "global.h"
 #include "stats/statdefs.h"
 #include "logger.h"
+#include "strutil.h"
 
 #ifdef VALVE_DLL
 #include "shield.h"

@@ -25,6 +25,7 @@
 #include "decals.h"
 #include "explode.h"
 #include "logger.h"
+#include "strutil.h"
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 

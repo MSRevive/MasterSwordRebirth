@@ -45,6 +45,7 @@
 #include "versioncontrol.h"
 
 #include "fndatahandler.h"
+#include "strutil.h"
 
 extern void PlayerPrecache();
 

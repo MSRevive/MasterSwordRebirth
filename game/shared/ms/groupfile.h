@@ -2,7 +2,7 @@
 #define MSSHARED_GROUPFILE_H
 //Groupfile... its just like a pakfile
 
-#include "stackstring.h"
+#include "mstypes.h"
 typedef unsigned long ulong;
 
 struct groupheader_t

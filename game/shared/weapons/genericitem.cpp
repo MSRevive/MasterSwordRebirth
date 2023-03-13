@@ -24,6 +24,7 @@
 #include "groupfile.h"
 #include "stats/statdefs.h"
 #include "logger.h"
+#include "strutil.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowClose();

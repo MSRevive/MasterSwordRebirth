@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
+#include "strutil.h"
 #include <set>
 #include <cmath>
 

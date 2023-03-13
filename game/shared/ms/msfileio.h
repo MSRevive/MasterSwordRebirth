@@ -1,5 +1,5 @@
 #include "stream_safe.h"
-#include "stackstring.h"
+#include "mstypes.h"
 
 typedef unsigned char byte;
 typedef int string_t;

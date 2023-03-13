@@ -5,6 +5,7 @@
 #include "mscharacter.h"
 #include "logger.h"
 #include "ms/filesystem_shared.h"
+#include "strutil.h"
 
 class CCycler : public CBaseMonster
 {

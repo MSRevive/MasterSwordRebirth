@@ -41,6 +41,7 @@
 #include "action.h"
 #include "vgui_teamfortressviewport.h"
 #include "ms/vgui_containerlist.h"
+#include "strutil.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;

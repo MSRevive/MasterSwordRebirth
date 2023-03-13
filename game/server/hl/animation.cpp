@@ -15,13 +15,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "strhelper.h"
 
-typedef bool BOOL;
+//typedef bool BOOL;
 
 // hack into header files that we can ship
-typedef int qboolean;
-typedef unsigned char byte;
+//typedef int qboolean;
+//typedef unsigned char byte;
 #include "../utils/common/mathlib.h"
 #include "const.h"
 

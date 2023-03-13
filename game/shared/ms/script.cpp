@@ -29,6 +29,7 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #include "time.h"
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
+#include "strutil.h"
 #include <iterator>
 //#include <unordered_map>
 

@@ -13,18 +13,8 @@
 
 #include "groupfile.h"
 #include "msfileio.h"
+#include "strutil.h"
 #include <memory>
-
-//Deuplicated from msdebug.h
-#ifdef NOT_HLDLL
-#define msnew new
-#elif DEV_BUILD
-void* operator new(size_t size, const char* pszSourceFile, int LineNum);
-void operator delete(void* ptr, const char* pszSourceFile, int LineNum);
-#define msnew new (__FILE__, __LINE__)
-#else
-#define msnew new
-#endif
 
 void Print(char* szFmt, ...);
 
@@ -90,7 +80,7 @@ void CGroupFile::Close()
 //You must call Flush() to actually write the entries
 bool CGroupFile::WriteEntry(const char* pszName, byte* pData, size_t DataSize)
 {
-	msstring EntryName = pszName;
+	fixedstr<MAX_PATH> EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
 
 	DeleteEntry(EntryName);
@@ -112,7 +102,7 @@ bool CGroupFile::WriteEntry(const char* pszName, byte* pData, size_t DataSize)
 
 bool CGroupFile::ReadEntry(const char* pszName, byte* pBuffer, size_t& DataSize)
 {
-	msstring EntryName = pszName;
+	fixedstr<MAX_PATH> EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
 
 	for (int i = 0; i < m_EntryList.size(); i++)
@@ -287,7 +277,7 @@ void CGameGroupFile::Close()
 
 bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize)
 {
-	msstring EntryName = pszName;
+	fixedstr<MAX_PATH> EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
 
 	for (int i = 0; i < m_EntryList.size(); i++)

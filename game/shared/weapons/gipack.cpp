@@ -14,6 +14,7 @@
 #include "inc_weapondefs.h"
 #include "vgui_menudefsshared.h"
 #include "logger.h"
+#include "strutil.h"
 
 //#define LOG_EXTRA
 
