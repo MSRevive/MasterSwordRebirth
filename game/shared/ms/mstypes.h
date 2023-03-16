@@ -22,13 +22,174 @@ typedef const char *msstring_ref;
 #define MSSTRING_SIZE 256
 #define MSSTRING_MAXLEN 255
 
+class msstring
+{
+public:
+	msstring() { m_cData[0] = 0; }
+	msstring(const msstring_ref a) { operator=(a); }
+	msstring(const msstring_ref a, size_t length)
+	{
+		strncpy(m_cData, a, length);
+		m_cData[length] = 0;
+	}
+	msstring(const msstring &a) { operator=(a); }
+	msstring &operator=(const msstring_ref a)
+	{
+		if (a == m_cData)
+			return *this;
+		m_cData[0] = 0;
+		append(a);
+		return *this;
+	}
+
+	msstring &operator=(int a) 
+	{ 
+		_snprintf(m_cData, MSSTRING_SIZE, "%i", a); 
+		return *this;
+	}
+
+	msstring &operator=(const msstring &a) { return operator=(a.m_cData); }
+	msstring &operator+=(const msstring_ref a)
+	{ 
+		append(a); 
+		return *this;
+	}
+
+	msstring &operator+=(int a)
+	{
+		msstring tmp;
+		tmp = a;
+		return operator+=((const msstring_ref &)(tmp));
+	}
+
+	msstring operator+(const msstring_ref a) { return msstring(m_cData) += a; };
+	msstring operator+(msstring &a) { return msstring(m_cData) += (const char *)a; };
+	msstring operator+(int a) { return msstring(m_cData) += a; };
+	bool operator==(char *a) const { return !strcmp(m_cData, a); };
+	bool operator==(const char *a) const { return !strcmp(m_cData, (const char *)a); };
+	bool operator!=(char *a) const { return !operator==(a); }
+	bool operator!=(const char *a) const { return !operator==(a); }
+	bool operator<(char *a) const { return strcmp(m_cData, a) < 0; }
+	bool operator<(const char *a) const { return strcmp(m_cData, a) < 0; }
+	bool operator<(msstring& a) const { return strcmp(m_cData, a.m_cData) < 0; }
+	bool operator<(const msstring& a) const { return strcmp(m_cData, a.m_cData) < 0; }
+	operator char* () { return m_cData; }
+	operator void* () { return operator char* (); }
+	char *c_str() { return m_cData; }
+	size_t len() const { return strlen(m_cData); }
+	void append(const msstring_ref a)
+	{
+		size_t len = strlen(a);
+		append(a, len);
+	}
+
+	void append(const msstring_ref a, size_t length)
+	{
+		size_t my_sz = len();
+		size_t capped_sz = V_min(length, MSSTRING_SIZE - my_sz);
+		if (capped_sz <= 0)
+			return;
+		strncpy(&m_cData[my_sz], a, capped_sz);
+		m_cData[my_sz + capped_sz] = 0;
+	}
+
+	//Returns position of the string "a"
+	size_t find(const msstring_ref a, size_t start = 0) const
+	{
+		msstring_ref substring = strstr(&m_cData[start], a);
+		return substring ? (substring - &m_cData[start]) : error;
+	}
+
+	//Returns a substring starting at "find(a,start)". Returns full string if "a" not found
+	msstring_ref find_str(const msstring_ref a, size_t start = 0) const
+	{
+		size_t ret = find(a, start);
+		return (ret != error) ? &m_cData[ret] : &m_cData[start];
+	}
+
+	//Returns position of the first char within "a"
+	size_t findchar(const msstring_ref a, size_t start = 0) const
+	{
+		for (int i = start; i < (signed)len(); i++)
+		{
+			char datachar[2] = {m_cData[i], 0};
+			if (strstr(a, datachar))
+				return i - start;
+		}
+		return error;
+	}
+
+	//Returns a substring starting at "findchar(a,start)". Returns full string if text didn't contain any chars from "a"
+	msstring_ref findchar_str(const msstring_ref a, size_t start = 0) const
+	{
+		size_t ret = findchar(a, start);
+		return (ret != error) ? &m_cData[ret] : &m_cData[start];
+	}
+
+	//Returns true if substring "a" is contained within the main string
+	bool contains(const msstring_ref a) const { return find(a) != error; }
+	//Returns true if the main string starts with "a"
+	bool starts_with(const msstring_ref a) const { return find(a) == 0; }
+
+	//MIB FEB2008a returns true if last character is "a"
+	bool ends_with(const msstring_ref a) const
+	{
+		msstring temp = a;
+		int loc = len() - temp.len();
+		return loc == find(temp);
+	}
+	msstring substr(size_t start, size_t length) { return msstring(&m_cData[start], length); }
+	msstring substr(size_t start) { return msstring(&m_cData[start]); }
+
+	//Returns a substring spanning from "start" to "find(a,start)". Returns full string if "find(a,start)" not found
+	msstring thru_substr(const msstring_ref a, size_t start = 0) const
+	{
+		size_t ret = find(a, start);
+		return (ret != error) ? msstring(&m_cData[start], ret) : msstring(&m_cData[start]);
+	}
+
+	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
+	msstring thru_char(const msstring_ref a, size_t start = 0) const
+	{
+		size_t ret = findchar(a, start);
+		return (ret != error) ? msstring(&m_cData[start], ret) : msstring(&m_cData[start]);
+	}
+
+	//Returns a substring starting at the first char that isn't within "a"
+	msstring skip(const msstring_ref a) const
+	{
+		size_t my_sz = len();
+		for (int i = 0; i < my_sz; i++)
+		{
+			char datachar[2] = {m_cData[i], 0};
+			if (!strstr(a, datachar))
+				return msstring(&m_cData[i], my_sz - i);
+		}
+		return &m_cData[my_sz];
+	}
+
+	msstring tolower(void) const
+	{
+		size_t my_sz = len();
+		msstring ret;
+		for (int i = 0; i < my_sz; i++)
+		{
+			char ch = m_cData[i];
+			ret += ::tolower(ch);
+		}
+
+		return ret;
+	}
+
+private:
+	char m_cData[MSSTRING_SIZE];
+	int error = ((size_t)-1);
+};
+
+//should be rewritten to use basic_string
 template <size_t sizeT = MSSTRING_SIZE>
 class fixedstr
 {
-private:
-	char m_cData[sizeT];
-	int error = ((size_t)-1);
-
 public:
 	fixedstr() { m_cData[0] = 0; }
 	fixedstr(const msstring_ref a) { operator=(a); }
@@ -185,6 +346,10 @@ public:
 
 		return ret;
 	}
+
+private:
+	char m_cData[sizeT];
+	int error = ((size_t)-1);
 };
 
 //It's an int, a float, and a string
@@ -387,6 +552,5 @@ public:
 	}
 };
 
-typedef mslist<fixedstr<256>> msstringlist;
-typedef std::map<fixedstr<256>,fixedstr<256>> msstringstringhash;
-typedef fixedstr<256> msstring;
+typedef mslist<msstring> msstringlist;
+typedef std::map<msstring,msstring> msstringstringhash;
