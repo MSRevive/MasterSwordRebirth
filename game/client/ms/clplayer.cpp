@@ -1356,6 +1356,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		if (!iMode)
 		{
 			int flags = READ_BYTE();
+			bool fPlaySound = (flags & (1 << 1)) ? true : false;
 			strncpy(player.m_NextMap, READ_STRING(), sizeof(player.m_NextMap));
 			strncpy(player.m_OldTransition, READ_STRING(), sizeof(player.m_OldTransition));
 			strncpy(player.m_NextTransition, READ_STRING(), sizeof(player.m_NextTransition));
