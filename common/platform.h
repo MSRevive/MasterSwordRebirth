@@ -14,6 +14,7 @@
 #pragma warning(disable : 26495) // Variable is uninitialized
 #pragma warning(disable : 26451) // Arithmetic overflow
 #pragma warning(disable : 26812) // The enum type is unscoped
+#pragma warning(disable : 4389) // signed/unsigned mismatch
 
 #include "steam/steamtypes.h" // DAL
 
