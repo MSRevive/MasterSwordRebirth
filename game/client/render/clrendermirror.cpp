@@ -42,7 +42,7 @@ void MirrorPoint(Vector &OrigPoint, Plane &Plane, Vector &MirroredPoint)
 	MirroredPoint = OrigPoint + ((-Plane.m_Normal) * (Dist * 2));
 }
 
-mslist<uint> CMirrorMgr::m_MirrorTextures;			  //List of mirror textures in level
+mslist<GLuint> CMirrorMgr::m_MirrorTextures;			  //List of mirror textures in level
 mslist<CMirror> CMirrorMgr::m_Mirrors;				  //List of mirrors in the level
 mslist<CMirror *> CMirrorMgr::m_RdrMirrors;			  //List of mirrors to render this frame
 mslist<CMirror> CMirrorMgr::m_WorldMirrors;			  //List of mirrors attached to the world
@@ -151,7 +151,7 @@ void CMirrorMgr::Cleanup()
 	for (int m = 0; m < CMirrorMgr::m_MirrorTextures.size(); m++)
 	{
 		//CMirror &Mirror = CMirrorMgr::m_LevelMirrors[m];
-		glDeleteTextures(1, &m_MirrorTextures[m]);
+		glDeleteTextures(1, reinterpret_cast<GLuint*>(m_MirrorTextures[m]));
 	}
 
 	CMirrorMgr::m_MirrorTextures.clearitems();
