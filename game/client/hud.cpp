@@ -615,7 +615,7 @@ void CHud::VidInit(void)
 	for (auto& hudSprite : m_Sprites)
 	{
 		char file[256];
-		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName);
+		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName.c_str());
 		hudSprite.Handle = SPR_Load(file);
 		//hudSprite.Handle = SPR_Load(fmt::format("sprites/{}.spr", hudSprite.SpriteName.c_str()).c_str());
 	}
