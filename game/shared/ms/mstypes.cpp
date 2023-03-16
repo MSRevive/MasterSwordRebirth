@@ -3,11 +3,6 @@
 #undef msstring
 
 //msstring type
-msstring::msstring()
-{
-	m_cData[0] = 0;
-}
-
 msstring::msstring(const msstring_ref a) { operator=(a); }
 msstring::msstring(const msstring_ref a, size_t length)
 {
@@ -20,7 +15,7 @@ msstring &msstring::operator=(const msstring_ref a)
 {
 	if (a == m_cData)
 		return *this;
-	m_cData[0] = 0;
+	//m_cData[0] = 0;
 	append(a);
 	return *this;
 }
@@ -54,7 +49,7 @@ msstring::operator char *() { return m_cData; }
 char *msstring::c_str() { return m_cData; }
 void msstring::append(const msstring_ref a, size_t length)
 {
-	size_t my_sz = len();
+	size_t my_sz = strlen(m_cData);
 	size_t capped_sz = V_min(length, MSSTRING_MAXLEN - my_sz);
 	if (capped_sz <= 0)
 		return;
@@ -166,7 +161,7 @@ void msvariant::SetFromInt(int a)
 
 void msvariant::SetFromFloat(float a)
 {
-	_snprintf(m_String.c_str(), MSSTRING_SIZE, "%f", a);
+	_snprintf((char*)m_String.c_str(), 256, "%f", a);
 	m_Int = (int)a;
 	m_Float = a;
 }

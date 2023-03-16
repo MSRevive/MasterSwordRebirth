@@ -1,12 +1,14 @@
 #pragma once
 
-#include <cstring>
-#include <string.h>
-#include <string>
 #include <sstream>
 #include <map>
 #include <set>
+#include <list>
+#include <iterator>
+#include <alloc/alloc.h>
 #include "platform.h"
+
+#define clrmem(a) memset(&a, 0, sizeof(a));
 
 //Deuplicated from msdebug.h
 #ifdef DEV_BUILD
@@ -24,8 +26,12 @@ typedef const char *msstring_ref;
 
 class msstring
 {
+private:
+	char m_cData[MSSTRING_SIZE];
+	int error = ((size_t)-1);
+
 public:
-	msstring();
+	msstring() = default;
 	msstring(const msstring_ref a);
 	msstring(const msstring_ref a, size_t length);
 	msstring(const msstring &a);
@@ -84,176 +90,50 @@ public:
 	msstring skip(const msstring_ref a) const;
 
 	msstring tolower(void) const;
-
-private:
-	char m_cData[MSSTRING_SIZE];
-	int error = ((size_t)-1);
 };
 
-//should be rewritten to use basic_string
-template <size_t sizeT = MSSTRING_SIZE>
-class fixedstr
+//a fixed string with the same features as std::string
+template <size_t sizeT>
+class fixedstr : public std::basic_string<char, std::char_traits<char>, fixed_size_allocator<char, sizeT>>
 {
 public:
-	fixedstr() { m_cData[0] = 0; }
-	fixedstr(const msstring_ref a) { operator=(a); }
-	fixedstr(const msstring_ref a, size_t length)
+	typedef std::basic_string<char, std::char_traits<char>, fixed_size_allocator<char, sizeT>> basestr;
+
+	fixedstr() : basestr() {  }
+	fixedstr(const char *str) : basestr(str) {  }
+	fixedstr(const char *str, size_t n) : basestr(str, n) {  }
+	fixedstr(size_t n, char c) : basestr(n, c) {  }
+
+	bool contains(const char *str)
 	{
-		strncpy(m_cData, a, length);
-		m_cData[length] = 0;
+		if (find(str) != std::basic_string::npos)
+			return true;
+
+		return false;
 	}
-	fixedstr(const fixedstr &a) { operator=(a); }
-	fixedstr &operator=(const msstring_ref a)
+
+	fixedstr tolower()
 	{
-		if (a == m_cData)
-			return *this;
-		m_cData[0] = 0;
-		append(a);
-		return *this;
+		fixedstr str;
+		std::transform(begin(), end(), begin(), [](unsigned char c){ return std::tolower(c); });
+		return str;
 	}
 
-	fixedstr &operator=(int a) 
-	{ 
-		_snprintf(m_cData, sizeT, "%i", a); 
-		return *this;
-	}
-
-	fixedstr &operator=(const fixedstr &a) { return operator=(a.m_cData); }
-	fixedstr &operator+=(const msstring_ref a)
-	{ 
-		append(a); 
-		return *this;
-	}
-
-	fixedstr &operator+=(int a)
+	fixedstr toupper()
 	{
-		fixedstr tmp;
-		tmp = a;
-		return operator+=((const msstring_ref &)(tmp));
+		fixedstr str;
+		std::transform(begin(), end(), begin(), [](unsigned char c){ return std::toupper(c); });
+		return str;
 	}
 
-	fixedstr operator+(const msstring_ref a) { return fixedstr(m_cData) += a; };
-	fixedstr operator+(fixedstr &a) { return fixedstr(m_cData) += (const char *)a; };
-	fixedstr operator+(int a) { return fixedstr(m_cData) += a; };
-	bool operator==(char *a) const { return !strcmp(m_cData, a); };
-	bool operator==(const char *a) const { return !strcmp(m_cData, (const char *)a); };
-	bool operator!=(char *a) const { return !operator==(a); }
-	bool operator!=(const char *a) const { return !operator==(a); }
-	bool operator<(char *a) const { return strcmp(m_cData, a) < 0; }
-	bool operator<(const char *a) const { return strcmp(m_cData, a) < 0; }
-	bool operator<(fixedstr& a) const { return strcmp(m_cData, a.m_cData) < 0; }
-	bool operator<(const fixedstr& a) const { return strcmp(m_cData, a.m_cData) < 0; }
-	operator char* () { return m_cData; }
-	operator void* () { return operator char* (); }
-	char *c_str() { return m_cData; }
-	size_t len() const { return strlen(m_cData); }
-	void append(const msstring_ref a)
-	{
-		size_t len = strlen(a);
-		append(a, len);
-	}
-
-	void append(const msstring_ref a, size_t length)
-	{
-		size_t my_sz = len();
-		size_t capped_sz = V_min(length, sizeT - my_sz);
-		if (capped_sz <= 0)
-			return;
-		strncpy(&m_cData[my_sz], a, capped_sz);
-		m_cData[my_sz + capped_sz] = 0;
-	}
-
-	//Returns position of the string "a"
-	size_t find(const msstring_ref a, size_t start = 0) const
-	{
-		msstring_ref substring = strstr(&m_cData[start], a);
-		return substring ? (substring - &m_cData[start]) : error;
-	}
-
-	//Returns a substring starting at "find(a,start)". Returns full string if "a" not found
-	msstring_ref find_str(const msstring_ref a, size_t start = 0) const
-	{
-		size_t ret = find(a, start);
-		return (ret != error) ? &m_cData[ret] : &m_cData[start];
-	}
-
-	//Returns position of the first char within "a"
-	size_t findchar(const msstring_ref a, size_t start = 0) const
-	{
-		for (int i = start; i < (signed)len(); i++)
-		{
-			char datachar[2] = {m_cData[i], 0};
-			if (strstr(a, datachar))
-				return i - start;
-		}
-		return error;
-	}
-
-	//Returns a substring starting at "findchar(a,start)". Returns full string if text didn't contain any chars from "a"
-	msstring_ref findchar_str(const msstring_ref a, size_t start = 0) const
-	{
-		size_t ret = findchar(a, start);
-		return (ret != error) ? &m_cData[ret] : &m_cData[start];
-	}
-
-	//Returns true if substring "a" is contained within the main string
-	bool contains(const msstring_ref a) const { return find(a) != error; }
-	//Returns true if the main string starts with "a"
-	bool starts_with(const msstring_ref a) const { return find(a) == 0; }
-
-	//MIB FEB2008a returns true if last character is "a"
-	bool ends_with(const msstring_ref a) const
-	{
-		fixedstr<sizeT> temp = a;
-		int loc = len() - temp.len();
-		return loc == find(temp);
-	}
-	fixedstr substr(size_t start, size_t length) { return fixedstr<sizeT>(&m_cData[start], length); }
-	fixedstr substr(size_t start) { return fixedstr<sizeT>(&m_cData[start]); }
-
-	//Returns a substring spanning from "start" to "find(a,start)". Returns full string if "find(a,start)" not found
-	fixedstr thru_substr(const msstring_ref a, size_t start = 0) const
-	{
-		size_t ret = find(a, start);
-		return (ret != error) ? fixedstr<sizeT>(&m_cData[start], ret) : fixedstr<sizeT>(&m_cData[start]);
-	}
-
-	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
-	fixedstr thru_char(const msstring_ref a, size_t start = 0) const
-	{
-		size_t ret = findchar(a, start);
-		return (ret != error) ? fixedstr<sizeT>(&m_cData[start], ret) : fixedstr<sizeT>(&m_cData[start]);
-	}
-
-	//Returns a substring starting at the first char that isn't within "a"
-	fixedstr skip(const msstring_ref a) const
-	{
-		size_t my_sz = len();
-		for (int i = 0; i < my_sz; i++)
-		{
-			char datachar[2] = {m_cData[i], 0};
-			if (!strstr(a, datachar))
-				return fixedstr<sizeT>(&m_cData[i], my_sz - i);
-		}
-		return &m_cData[my_sz];
-	}
-
-	fixedstr tolower(void) const
-	{
-		size_t my_sz = len();
-		fixedstr<sizeT> ret;
-		for (int i = 0; i < my_sz; i++)
-		{
-			char ch = m_cData[i];
-			ret += ::tolower(ch);
-		}
-
-		return ret;
-	}
-
-private:
-	char m_cData[sizeT];
-	int error = ((size_t)-1);
+	// fixedstr &operator=(const char *str) { return fixedstr(str); }
+	// fixedstr &operator+(const char *str) { append(str); *this; }
+	// fixedstr &operator+(int n) { append(n); *this; }
+	// fixedstr &operator+(char ch) { append(ch); *this; }
+	// fixedstr &operator+=(const char *str) { append(str); *this; }
+	// fixedstr &operator+=(int n) { append(n); *this; }
+	// fixedstr &operator+=(char ch) { append(ch); *this; }
+	operator const char* () { return c_str(); }
 };
 
 //It's an int, a float, and a string
@@ -302,6 +182,105 @@ public:
 	operator float() { return m_Float; }
 	operator msstring_ref() { return m_String.c_str(); }
 };
+
+//wrapper for linked list
+//we're too lazy to replace mslist in the entire project.
+// template <typename itemtype_y>
+// class mslist
+// {
+// public:
+// 	std::list<itemtype_y> m_List;
+
+// public:
+// 	mslist() = default;
+// 	~mslist() = default;
+
+// 	inline itemtype_y &push_back(const itemtype_y &Item)
+// 	{
+// 		m_List.push_back(Item);
+// 		return m_List.back();
+// 	}
+
+// 	void insert(size_t idx, const itemtype_y &Item)
+// 	{
+// 		auto l_front = m_List.begin();
+// 		auto nx = std::next(l_front, idx);
+// 		m_List.insert(nx, Item);
+// 	}
+
+// 	itemtype_y &add(const itemtype_y &Item)
+// 	{
+// 		return push_back(Item);
+// 	}
+
+// 	itemtype_y &add_blank()
+// 	{
+// 		return push_back(itemtype_y());
+// 	}
+
+// 	auto operator[](const size_t idx) const
+// 	{
+// 		auto l_front = m_List.begin();
+// 		auto nx = std::next(l_front, idx);
+// 		return *nx;
+// 	}
+
+// 	auto operator=(const mslist &OtherList)
+// 	{
+// 		if (size() != OtherList.size())
+// 		{
+// 			clear();
+// 			for (size_t i = 0; i < OtherList.size(); i++)
+// 				add(OtherList[i]);
+// 		}
+// 		else //Don't re-allocate if I don't have to
+// 		{
+// 			for (size_t i = 0; i < OtherList.size(); i++)
+// 			{
+// 				insert(i, OtherList[i]);
+// 			}
+// 		}
+
+// 		return *this;
+// 	}
+
+// 	void erase(const size_t idx)
+// 	{
+// 		auto l_front = m_List.begin();
+// 		auto nx = std::next(l_front, idx);
+// 		m_List.erase(nx);
+// 	}
+
+// 	void clear()
+// 	{
+// 		m_List.clear();
+// 	}
+
+// 	size_t size() const
+// 	{
+// 		return m_List.size();
+// 	}
+
+// 	itemtype_y *FirstItem()
+// 	{
+// 		return m_List.front();
+// 	}
+
+// 	void reserve(size_t Items) 
+// 	{
+// 		m_List.assign(Items, itemtype_y());
+// 	}
+
+// 	void reserve_once(size_t ReserveItems, size_t Items) 
+// 	{
+// 		reserve(ReserveItems);
+// 	}
+
+// 	//compat functions
+// 	void clearitems() {  }
+//  	void reserve() {  }
+// 	void unalloc() {  }
+// };
 
 //mslist - List of items of type itemtype_y
 //-Dog
@@ -390,8 +369,8 @@ public:
 			m_ItemsAllocated++;
 		else
 			m_ItemsAllocated *= 2;
-		itemtype_y *pNewItems = ::msnew itemtype_y[m_ItemsAllocated];
-		for (unsigned int i = 0; i < m_Items; i++)
+		itemtype_y *pNewItems = msnew itemtype_y[m_ItemsAllocated];
+		for (size_t i = 0; i < m_Items; i++)
 			pNewItems[i] = m_First[i];
 		unalloc();
 		m_First = pNewItems;
@@ -423,11 +402,11 @@ public:
 		if (size() != OtherList.size())
 		{
 			clear();
-			for (unsigned int i = 0; i < OtherList.size(); i++)
+			for (size_t i = 0; i < OtherList.size(); i++)
 				add(OtherList[i]);
 		}
 		else //Don't re-allocate if I don't have to
-			for (unsigned int i = 0; i < OtherList.size(); i++)
+			for (size_t i = 0; i < OtherList.size(); i++)
 				m_First[i] = OtherList[i];
 
 		return *this;
