@@ -11,15 +11,14 @@
 #pragma warning(disable : 4514)	 // unreferenced inline function removed
 #pragma warning(disable : 4100)	 // unreferenced formal parameter
 #pragma warning(disable : 4201) // nameless struct/union
+#pragma warning(disable : 4389) // signed/unsigned mismatch
 #pragma warning(disable : 26495) // Variable is uninitialized
 #pragma warning(disable : 26451) // Arithmetic overflow
 #pragma warning(disable : 26812) // The enum type is unscoped
-#pragma warning(disable : 4389) // signed/unsigned mismatch
 
 #include "steam/steamtypes.h" // DAL
 
 // Misc C-runtime library headers
-#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <climits>
@@ -30,9 +29,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <iterator>
 #include <string>
-
+#include <vector>
+#include <string.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
