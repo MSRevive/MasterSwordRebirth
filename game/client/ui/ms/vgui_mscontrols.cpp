@@ -20,7 +20,7 @@ struct bitmapresource_t {
 	msstring sImageName;
 	bool m_TGAorSprite;
 };
-mslist<bitmapresource_t> g_Bitmaps;
+std::vector<bitmapresource_t> g_Bitmaps;
 
 BitmapTGA *MSBitmap::GetTGA(const char *pszImageName)
 {

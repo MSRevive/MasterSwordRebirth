@@ -1548,7 +1548,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 			Info.Model = pItem->pev->modelindex;
 			Info.Anim = pItem->pev->sequence;
 
-			GearInfo.add(Info);
+			GearInfo.push_back(Info);
 			pItem->SUB_Remove();
 		}
 		if (pPlayer)

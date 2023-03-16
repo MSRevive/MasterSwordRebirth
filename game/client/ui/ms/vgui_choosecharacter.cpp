@@ -1120,7 +1120,7 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 			GearInfo.Body = READ_SHORT();
 			GearInfo.Skin = READ_SHORT();
 			GearInfo.Anim = READ_BYTE();
-			CharSlot.GearInfo.add(GearInfo);
+			CharSlot.GearInfo.push_back(GearInfo);
 		}
 	}
 	else

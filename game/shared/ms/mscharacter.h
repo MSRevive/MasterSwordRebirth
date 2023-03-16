@@ -87,7 +87,7 @@ struct charinfo_t : charinfo_base_t
 	enum gender_e Gender;
 	msstring Name, MapName, OldTrans, NextMap, NewTrans;
 	char Guid[MSSTRING_SIZE];
-	mslist<gearinfo_t> GearInfo;
+	std::vector<gearinfo_t> GearInfo;
 
 	charinfo_t() : charinfo_base_t() { Data = NULL; Guid[0] = 0; }
 	~charinfo_t();

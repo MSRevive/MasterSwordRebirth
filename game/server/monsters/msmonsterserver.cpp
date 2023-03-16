@@ -426,6 +426,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 		//get mob idx we're adding to based on property name
 		//not the most efficient way to do this...
+		random_monster_t rndMonsterData;
 		static msstringlist Tokens;
 		Tokens.clearitems();
 		TokenizeString(randomdata, Tokens, "_"); //not sure if we can use semi-colons in properties - would look icky anyways
@@ -441,26 +442,31 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			logfile << UTIL_VarArgs("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i\n", idx, (int)random_monsterdata.size());
 		}
 		if (rndproperty == "title")
-			random_monsterdata[idx].m_title = pkvd->szValue;
+			rndMonsterData.m_title = pkvd->szValue;
+			//random_monsterdata[idx].m_title = pkvd->szValue;
 		if (rndproperty == "params")
-			random_monsterdata[idx].m_addparams = pkvd->szValue;
+			rndMonsterData.m_addparams = pkvd->szValue;
+			//random_monsterdata[idx].m_addparams = pkvd->szValue;
 		if (rndproperty == "scriptfile")
 		{
 			//is required, and only one of each, so add count here
-			random_monsterdata[idx].m_ScriptName = pkvd->szValue;
+			rndMonsterData.m_ScriptName = pkvd->szValue;
+			//random_monsterdata[idx].m_ScriptName = pkvd->szValue;
 			if (m_nRndMobs == 0)
 				m_nRndMobs = 1;
 			else
 				++m_nRndMobs;
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, random_monsterdata[idx].m_ScriptName.c_str());
+			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, rndMonsterData.m_ScriptName);
 		}
 		if (rndproperty == "hpmulti")
-			random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
+			rndMonsterData.m_HPMulti = atof(pkvd->szValue);
+			//random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
 		if (rndproperty == "dmgmulti")
-			random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
-		//if ( rndproperty == "lives" ) random_monsterdata[idx].m_Lives = atoi(pkvd->szValue);
+			rndMonsterData.m_DMGMulti = atof(pkvd->szValue);
+			//random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
 		if (rndproperty == "nplayers")
-			random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
+			rndMonsterData.m_ReqPlayers = atoi(pkvd->szValue);
+			//random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
 		//sticky bit
 		if (rndproperty == "reqhp")
 		{
@@ -477,7 +483,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
 				{
 					mrand_m_HPReq_max = 0;
-					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
+					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(rndMonsterData.m_ScriptName) << " - max reqhp set higher than min.\n";
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
@@ -485,12 +491,16 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg"))
 				rand_m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 
-			random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
-			random_monsterdata[idx].m_HPReq_max = mrand_m_HPReq_max;
-			random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
+			rndMonsterData.m_HPReq_min = mrand_m_HPReq_min;
+			rndMonsterData.m_HPReq_max = mrand_m_HPReq_max;
+			rndMonsterData.m_HPReq_useavg = rand_m_HPReq_useavg;
+			//random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
+			//random_monsterdata[idx].m_HPReq_max = mrand_m_HPReq_max;
+			//random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
 		}
 		//Gotta use the logfile here, dernitall
 		logfile << UTIL_VarArgs("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s\n", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
+		random_monsterdata[idx] = rndMonsterData;
 		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
