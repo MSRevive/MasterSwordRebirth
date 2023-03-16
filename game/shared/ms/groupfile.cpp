@@ -81,7 +81,7 @@ void CGroupFile::Close()
 bool CGroupFile::WriteEntry(const char* pszName, byte* pData, size_t DataSize)
 {
 	fixedstr<MAX_PATH> EntryName = pszName;
-	ReplaceChar(EntryName, '\\', '/');
+	ReplaceChar((char*)EntryName.c_str(), '\\', '/');
 
 	DeleteEntry(EntryName);
 
@@ -103,13 +103,13 @@ bool CGroupFile::WriteEntry(const char* pszName, byte* pData, size_t DataSize)
 bool CGroupFile::ReadEntry(const char* pszName, byte* pBuffer, size_t& DataSize)
 {
 	fixedstr<MAX_PATH> EntryName = pszName;
-	ReplaceChar(EntryName, '\\', '/');
+	ReplaceChar((char*)EntryName.c_str(), '\\', '/');
 
 	for (int i = 0; i < m_EntryList.size(); i++)
 	{
 		cachedentry_t& Entry = m_EntryList[i];
 
-		if (Entry.FileName != EntryName)
+		if (Entry.FileName != EntryName.c_str())
 			continue;
 
 		if (pBuffer)
@@ -278,12 +278,12 @@ void CGameGroupFile::Close()
 bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize)
 {
 	fixedstr<MAX_PATH> EntryName = pszName;
-	ReplaceChar(EntryName, '\\', '/');
+	ReplaceChar((char*)EntryName.c_str(), '\\', '/');
 
 	for (int i = 0; i < m_EntryList.size(); i++)
 	{
 		groupheader_t& Entry = m_EntryList[i];
-		if (Entry.FileName != EntryName)
+		if (Entry.FileName != EntryName.c_str())
 			continue;
 
 		DataSize = Entry.DataSize;
