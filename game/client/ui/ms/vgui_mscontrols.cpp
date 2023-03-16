@@ -413,8 +413,8 @@ void VGUI_ItemButton::Update( )
 		m_Image.setPos( x, y );
 		int iImageRightEdge = x + imgw;
 
-		int lblx, lbly;
-		int w, h;
+		int lblx, lbly = 0;
+		int w, h = 0;
 
 		 for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		{

@@ -91,7 +91,6 @@ namespace Tartan
 
 		tga.bytesPerPixel = (tga.Bpp / 8);							  // Compute the number of BYTES per pixel
 		tga.imageSize = (tga.bytesPerPixel * tga.Width * tga.Height); // Compute the total amout ofmemory needed to store data
-		int sz = tga.imageSize;
 		texture->imageData = (GLubyte *)malloc(tga.imageSize); // Allocate that much memory
 
 		if (texture->imageData == NULL) // If no space was allocated

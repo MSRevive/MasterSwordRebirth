@@ -85,7 +85,6 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	if (iCmds <= 0)
 		return false;
 
-	int KeyMask = 0;
 	char LastType = 0;
 	int Mask = 0, ClearMask = 0;
 	int LastCmdIdx = 0;

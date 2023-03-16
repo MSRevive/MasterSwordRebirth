@@ -130,7 +130,7 @@ bool CParticle::LoadTexture(msstring_ref Name)
 void CParticle::Render()
 {
 	//return;
-	Vector &vForward = m_DirForward, &vRight = m_DirRight, &vUp = m_DirUp;
+	Vector &vRight = m_DirRight, &vUp = m_DirUp;
 
 	Vector Points[4];
 

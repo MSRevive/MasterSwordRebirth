@@ -1012,9 +1012,9 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		dbg("setviewmodelprop");
 		msstring Mode = READ_STRING();
 		int iHand = READ_SHORT();
-		int iParam1;
-		float fParam1;
-		msstring sParam1;
+		int iParam1 = 0;
+		float fParam1 = 0.0;
+		msstring sParam1 = "";
 
 		if (Mode == "model")
 			sParam1 = READ_STRING();

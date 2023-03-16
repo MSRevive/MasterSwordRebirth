@@ -382,7 +382,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 	dbg("Load Script items.txt");
 
 	byte* pMemFile = NULL, * pStringPtr = NULL;
-	int iFileSize = 65535, i = 0, n;
+	int i = 0, n;
 	char cString[128], cItemFileName[128];
 
 #ifndef SCRIPT_LOCKDOWN
@@ -470,7 +470,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		logfileopt << "  (Precache) Creating item " << cString << "...";
 		//Create a new Global Item
 
-		int iD = 0;
 		GenItem_t NewGlobalItem;
 
 		NewGlobalItem.Name = cString;
@@ -1049,7 +1048,6 @@ bool CGenericItem::CanWearItem()
 		false;
 #endif
 
-	CGenericItem* pItemConflict = NULL;
 	if (m_pPlayer)
 	{
 		for (int iloc = 0; iloc < m_WearPositions.size(); iloc++)
@@ -1057,7 +1055,6 @@ bool CGenericItem::CanWearItem()
 			wearpos_t* pPlayerPos = NULL;
 			for (int ploc = 0; ploc < m_pPlayer->m_WearPositions.size(); ploc++)
 			{
-				msstring_ref PlayerPosName = m_pPlayer->m_WearPositions[ploc].Name;
 				if (m_WearPositions[iloc].Name != m_pPlayer->m_WearPositions[ploc].Name)
 					continue;
 
@@ -1180,7 +1177,6 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	if (!fSuccess)
 	{
 		//Last resort, try to put in any pack
-		int i = 0;
 		for (int i = 0; i < pPlayer->Gear.size(); i++)
 		{
 			CGenericItem* pNextPack = pPlayer->Gear[i];
