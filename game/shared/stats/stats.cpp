@@ -224,17 +224,36 @@ bool CStat::operator!=(const CStat& Other)
 	return false;
 }
 
-void CStat::InitStatList(statlist& Stats)
+void CStat::InitStatList(std::vector<CStat> &Stats)
 {
-	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
+	//Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
+	// CStat blankStat;
+	// Stats(STATS_TOTAL, &blankStat);
+	// for (int i = 0; i < STATS_TOTAL; i++)
+	// {
+	// 	msstring_ref Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
+	// 	CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;
+	// 	CStat& Stat = Stats[i];
+	// 	Stat.m_Name = Name;
+	// 	Stat.m_Type = Type;
+	// 	int iSubStats = (Stat.m_Type == CStat::STAT_NAT) ? 1 : SkillStatList[i - NATURAL_MAX_STATS].StatCount;
+	// 	CSubStat blankSubStat;
+	// 	Stat.m_SubStats(iSubStats, &blankSubStat);
+	// 	//Stat.m_SubStats.reserve_once(iSubStats, iSubStats);
+	// }
+
 	for (int i = 0; i < STATS_TOTAL; i++)
 	{
-		msstring_ref Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
+		fixedstr<128> Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
 		CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;
 		CStat& Stat = Stats[i];
 		Stat.m_Name = Name;
 		Stat.m_Type = Type;
+		Stats.push_back(Stat);
+
 		int iSubStats = (Stat.m_Type == CStat::STAT_NAT) ? 1 : SkillStatList[i - NATURAL_MAX_STATS].StatCount;
-		Stat.m_SubStats.reserve_once(iSubStats, iSubStats);
+		CSubStat subStat;
+		for (int iss = 0; iss < iSubStats; iss++)
+			Stat.m_SubStats.push_back(subStat);
 	}
 }

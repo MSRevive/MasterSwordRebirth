@@ -406,7 +406,7 @@ public:
 
 	//Stats
 	char m_Race[64];
-	statlist m_Stats;		  //All stats.  Natural stats and Skill-based stats
+	std::vector<CStat> m_Stats;		  //All stats.  Natural stats and Skill-based stats
 	msstringlist m_SpellList; //Known spells (scriptnames)
 	float m_SkillLevel;		  //How much experience I'm worth
 
