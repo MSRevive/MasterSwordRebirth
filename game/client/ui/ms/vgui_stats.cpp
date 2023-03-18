@@ -260,7 +260,7 @@ void CStatPanel::Update()
 		TextPanel *pModbox = Nat_StatModsLabel[i];
 		int iBonus = player.GetNatStatBonus( i );
 		pModbox->SetFGColorRGB( (iBonus < 0 ? COLOR(255,0,0,10) : COLOR( 0,240,0,0 )) );
-		_snprintf(cDisplayText, sizeof(cDisplayText),  (iBonus < 0 ? "(%i)" : "(+%i)"),  iBonus );
+		 _snprintf(cDisplayText, sizeof(cDisplayText),  (iBonus < 0 ? "(%i)" : "(+%i)"),  iBonus );
 		pModbox->setText( cDisplayText );
 #endif
 	}
@@ -268,7 +268,7 @@ void CStatPanel::Update()
 	bool FOUND_PARRY = false;
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
 	{
-		FOUND_PARRY = FOUND_PARRY || fixedstr<128>(SkillStatList[i].Name) == "Parry";
+		FOUND_PARRY = FOUND_PARRY || msstring(SkillStatList[i].Name) == "Parry";
 		bool blank = i == SKILL_MAX_STATS - 1;
 		int real_idx = FOUND_PARRY ? i + 1 : i;
 		if (!blank)
@@ -284,14 +284,14 @@ void CStatPanel::Update()
 			pTextbox->SetFGColorRGB(Color_NormalText);
 	}
 
-	_snprintf(cDisplayText, sizeof(cDisplayText),  "Parry: %i\n",  player.GetSkillStat(SKILL_PARRY) );
+	 _snprintf(cDisplayText, sizeof(cDisplayText),  "Parry: %i\n",  player.GetSkillStat(SKILL_PARRY) );
 	TextPanel *pTextbox = Skill_StatLabel[SKILL_MAX_STATS];
 	pTextbox->setText(cDisplayText);
 	pTextbox->SetFGColorRGB(Color_NormalText);
 
 	//Update the Stat Info pane
 
-	if (m_ActiveStat < 0 || fixedstr<128>(SkillStatList[m_ActiveStat].Name) == "Parry")
+	if (m_ActiveStat < 0 || msstring(SkillStatList[m_ActiveStat].Name) == "Parry")
 	{
 		m_InfoPanel->setVisible(false);
 		return;
