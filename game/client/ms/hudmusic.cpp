@@ -46,18 +46,18 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	}
 	case 0: // area music
 	{
-		const char *musicFile = READ_STRING();
-		m_MP3.TransitionMusic(musicFile, 0); //sound engine handles the including of dir now.
+		if (!m_bSystem)
+		{
+			const char *musicFile = READ_STRING();
+			m_MP3.TransitionMusic(musicFile, 0); //sound engine handles the including of dir now.
+		}
 		break;
 	}
 	case 1: // combat music
 	{
-		if (!m_bSystem)
-		{
-			const char *musicFile = READ_STRING();
-			m_MP3.TransitionMusic(musicFile, 1); //sound engine handles the including of dir now.
-			break;
-		}
+		const char *musicFile = READ_STRING();
+		m_MP3.TransitionMusic(musicFile, 1); //sound engine handles the including of dir now.
+		break;
 	}
 	case 2: // system music
 	{

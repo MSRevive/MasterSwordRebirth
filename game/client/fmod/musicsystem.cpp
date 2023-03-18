@@ -29,7 +29,7 @@ void CMusicSystem::Shutdown()
 // If there is an error getting the name of the ambient sound or if no ambient sound is currently being played, returns "NULL"
 std::string CMusicSystem::GetCurrentSoundName()
 {
-	return m_TranSound;
+	return m_CurSound;
 }
 
 // Handles all fade-related and volume-related sound stuffs
@@ -69,7 +69,7 @@ bool CMusicSystem::Think()
 					PlayMusic(m_TranSound, true);
 					m_bShouldTransition = false;
 					m_TranSound = "";
-				}
+				}	
 			}
 		}
 	}
@@ -94,6 +94,9 @@ bool CMusicSystem::Think()
 			}
 		}
 	}
+
+	if (!IsPlaying() && m_AreaMusic.size() > 0)
+		PlayMusic(m_AreaMusic, true);
 
 	return true;
 }
@@ -163,13 +166,15 @@ void CMusicSystem::StopMusic(bool fadeOut)
 void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 {
 	m_pChannel->setVolume(m_fVolume);
+
+	if (IsPlaying() && pszSong == m_CurSound)
+		return;
+
 	switch(mode)
 	{
 	case 0: // area music
 	{
 		m_AreaMusic = pszSong;
-		if (IsPlaying() && pszSong == m_CurSound)
-			return;
 
 		if (IsPlaying() && (pszSong != m_CurSound))
 		{
@@ -188,9 +193,6 @@ void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 	}
 	case 1: // combat music
 	{
-		if (IsPlaying() && pszSong == m_CurSound)
-			return;
-
 		if (IsPlaying() && (pszSong != m_CurSound))
 		{
 			m_bFadeOut = true;

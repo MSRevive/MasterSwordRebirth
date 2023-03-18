@@ -25,8 +25,8 @@ private:
 	std::string GetCurrentSoundName(void);
 
 	std::string m_TranSound = "";
-	std::string m_AreaMusic = "";
 	std::string m_CurSound = "";
+	std::string m_AreaMusic = "";
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;
@@ -36,6 +36,6 @@ private:
 
 	FMOD::System* m_pSystem;
 	FMOD::Sound* m_pSound;
-	FMOD::Channel* m_pChannel;
+	FMOD::Channel* m_pChannel = 0;
 	FMOD::ChannelGroup* m_pChannelGroup;
 };
