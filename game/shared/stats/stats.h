@@ -37,7 +37,7 @@ public:
 	std::vector<CSubStat> m_SubStats; //For regular stats, there are three - Speed, balance, power
 								 //For spellcasting, there is more
 								 //For parry, there is only one
-	fixedstr<128> m_Name;
+	fixedstr<128> m_Name = "";
 	bool bNeedsUpdate;
 	enum skilltype_e
 	{
@@ -85,13 +85,13 @@ struct skillcache_t
 
 struct statinfo_t
 {
-	fixedstr<128> Name;
+	fixedstr<128> Name = "";
 };
 
 struct skillstatinfo_t
 {
-	fixedstr<128> Name;
-	fixedstr<128> DllName;
+	fixedstr<128> Name = "";
+	fixedstr<128> DllName = "";
 	int StatCount;
 };
 

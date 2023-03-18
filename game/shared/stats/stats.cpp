@@ -52,7 +52,7 @@ char* SpellTypeList[5] =
 int GetSkillStatByName(const char* pszName) // Index lookup by name (Skill stats only)
 {
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
-		if (!stricmp(pszName, SkillStatList[i].DllName))
+		if (!stricmp(pszName, SkillStatList[i].DllName.c_str()))
 			return SKILL_FIRSTSKILL + i;
 	return -1;
 }
@@ -62,9 +62,9 @@ const char* GetSkillName(int Skill) // Name lookup by index (Any stat)
 		return "(Invalid Skill)";
 
 	if (Skill < SKILL_FIRSTSKILL)
-		return NatStatList[Skill].Name;
+		return NatStatList[Skill].Name.c_str();
 
-	return SkillStatList[Skill - SKILL_FIRSTSKILL].Name;
+	return SkillStatList[Skill - SKILL_FIRSTSKILL].Name.c_str();
 }
 int GetSubSkillByName(const char* pszName)
 {
@@ -81,7 +81,7 @@ int GetSubSkillByName(const char* pszName)
 int GetNatStatByName(const char* pszName)
 {
 	for (int i = 0; i < NATURAL_MAX_STATS; i++)
-		if (!stricmp(pszName, NatStatList[i].Name))
+		if (!stricmp(pszName, NatStatList[i].Name.c_str()))
 			return i;
 	return -1;
 }
@@ -246,9 +246,13 @@ void CStat::InitStatList(std::vector<CStat> &Stats)
 	{
 		fixedstr<128> Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
 		CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;
-		CStat& Stat = Stats[i];
+		
+		CStat Stat;
 		Stat.m_Name = Name;
 		Stat.m_Type = Type;
+		//CStat& Stat = Stats[i];
+		//Stat.m_Name = Name;
+		//Stat.m_Type = Type;
 		Stats.push_back(Stat);
 
 		int iSubStats = (Stat.m_Type == CStat::STAT_NAT) ? 1 : SkillStatList[i - NATURAL_MAX_STATS].StatCount;

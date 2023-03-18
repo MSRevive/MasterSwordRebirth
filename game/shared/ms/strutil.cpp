@@ -6,10 +6,10 @@ bool TokenizeString(const char *pszString, msstringlist &Tokens, msstring_ref Se
 	char cTemp[256 - 1];
 	int i = 0;
 	bool AnyFound = false;
-	msstring ParseStr = "%[^";
+	std::string ParseStr = "%[^";
 	ParseStr += Separator;
 	ParseStr += "]";
-	while (sscanf(&pszString[i], ParseStr, cTemp) > 0)
+	while (sscanf(&pszString[i], ParseStr.c_str(), cTemp) > 0)
 	{
 		i += strlen(cTemp);
 		Tokens.add(cTemp);
