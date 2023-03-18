@@ -22,7 +22,7 @@ bool MSCLGlobals::CreatingCharacter;						   //Am in the process of creating a n
 bool MSCLGlobals::CharPanelActive;							   //Choosing a character to play with?
 bool MSCLGlobals::CamThirdPerson;							   //Camera is in thirdperson?
 bool MSCLGlobals::OtherPlayers = false;						   //Other players who can legally play this map are on the server
-mslist<char *> MSCLGlobals::m_Strings;			   //All client-side globally allocated strings
+std::vector<std::string> MSCLGlobals::m_Strings;			   //All client-side globally allocated strings
 mslist<CBaseEntity *> MSCLGlobals::m_ClEntites;				   //All client-side entities
 mslist<cl_entity_t> MSCLGlobals::m_ClModels;				   //Extra models to be updated/animated client-side
 cl_entity_t MSCLGlobals::CLViewEntities[MAX_PLAYER_HANDITEMS]; //All View entity models
@@ -305,19 +305,19 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 	if (!pszString)
 		return 0;
 
-	//Does the string already exist?
-	for (int s = 0; s < m_Strings.size(); s++)
-		if (FStrEq(m_Strings[s], pszString))
-			return m_Strings[s] - gpGlobals->pStringBase; //Return existing string
+	size_t size = m_Strings.size();
+	for (int s = 0; s < size; s++)
+	{
+		if (FStrEq(m_Strings[s].c_str(), pszString))
+			return m_Strings[s].c_str() - gpGlobals->pStringBase;
+	}
 
-	// we need memory leak otherwise effects don't work, wtf
 	uint len = strlen(pszString) + 1;
-	char *pszNewString = msnew(char[len]);
+	char pszNewString[256];
 	strncpy(pszNewString, pszString, len);
+	m_Strings.push_back(std::string(pszNewString));
 
-	m_Strings.push_back((char *)pszNewString);
-
-	return pszNewString - gpGlobals->pStringBase;
+	return m_Strings.back().c_str() - gpGlobals->pStringBase;
 }
 /*char *MSCLGlobals::GetString( string_t sString )
 {
