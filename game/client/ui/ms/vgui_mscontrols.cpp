@@ -20,7 +20,7 @@ struct bitmapresource_t {
 	msstring sImageName;
 	bool m_TGAorSprite;
 };
-std::vector<bitmapresource_t> g_Bitmaps;
+mslist<bitmapresource_t> g_Bitmaps;
 
 BitmapTGA *MSBitmap::GetTGA(const char *pszImageName)
 {
@@ -223,10 +223,10 @@ void VGUI_FadeText::MSInit( float FadeDuration, const char *pszText )
 void VGUI_FadeText::Update( )
 {
 	float TimeRatio = (gpGlobals->time - m_StartTime) / m_FadeDuration;
-	TimeRatio = V_max(V_min(TimeRatio,1.0f),0);
+	TimeRatio = max(min(TimeRatio,1.0f),0);
 	if( m_FadeOut ) TimeRatio = 1.0f - TimeRatio;
 	m_Alpha = 255 * TimeRatio;
-	m_Alpha = 255 - V_min(m_Alpha,255);
+	m_Alpha = 255 - min(m_Alpha,255);
 	Color OldColor = getMSFGColor( );
 	setFgColor( OldColor[0], OldColor[1], OldColor[2], m_Alpha );
 }
@@ -413,8 +413,8 @@ void VGUI_ItemButton::Update( )
 		m_Image.setPos( x, y );
 		int iImageRightEdge = x + imgw;
 
-		int lblx, lbly = 0;
-		int w, h = 0;
+		int lblx, lbly;
+		int w, h;
 
 		 for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		{

@@ -609,7 +609,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Save skills
 	gFile.WriteByte(CHARDATA_SKILLS1); //[BYTE - CHUNK - STATS]
-	std::vector<CStat> &StatList = pPlayer->m_Stats;
+	statlist &StatList = pPlayer->m_Stats;
 	gFile.WriteByte(StatList.size()); //[BYTE]
 	for (int i = 0; i < StatList.size(); i++)
 	{

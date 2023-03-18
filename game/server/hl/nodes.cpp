@@ -983,7 +983,7 @@ int CGraph ::FindNearestNode(const Vector &vecOrigin, int afNodeTypes)
 		}
 	}
 
-	for (i = V_min(m_maxZ, halfZ); i >= m_minZ; i--)
+	for (i = min(m_maxZ, halfZ); i >= m_minZ; i--)
 	{
 		for (j = m_RangeStart[2][i]; j <= m_RangeEnd[2][i]; j++)
 		{

@@ -112,8 +112,8 @@ public:
 		if (!Text || !Text[0])
 			return;
 
-		int MaxLines = V_min( EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES ); // Max amount of text lines to keep in the history
-		int iNewLine = V_min(m_TotalLines,MaxLines-1);
+		int MaxLines = min( EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES ); // Max amount of text lines to keep in the history
+		int iNewLine = min(m_TotalLines,MaxLines-1);
 
 		//If the active line was the last line, then make this new line the active line
 		if( m_ActiveLine >= (iNewLine-1) )
@@ -135,7 +135,7 @@ public:
 		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES ) m_VisibleLines++;
 		else
 			m_Line[m_ActiveLine - m_VisibleLines]->Archive( );		//Window is at full size, start archiving text above what's visible
-		m_TotalLines = V_min( m_TotalLines+1, MaxLines );				//Increment the total number of lines... up to the maximum kept in history
+		m_TotalLines = min( m_TotalLines+1, MaxLines );				//Increment the total number of lines... up to the maximum kept in history
 		m_ShrinkTime = 0;											//Reset shrinktime
 		NewLine.m_SpansFromPrevLine = WrappedFromLastLine;
 		
@@ -210,7 +210,7 @@ public:
  			 for (int i = 0; i < m_VisibleLines; i++) 
 			{
 				int idx = m_ActiveLine - i;
-				int linewidth = V_min( m_Line[idx]->m_TextWidth, m_Line[idx]->getWide() );
+				int linewidth = min( m_Line[idx]->m_TextWidth, m_Line[idx]->getWide() );
  				if( linewidth > w ) w = linewidth;
 			}
 		}
@@ -221,7 +221,7 @@ public:
 
 		Color color;
 		getBgColor( color );
-		setBgColor( color[0], color[1], color[2], 128 + V_max(V_min(m_BGTrans->value,1),-1) * 127 );
+		setBgColor( color[0], color[1], color[2], 128 + max(min(m_BGTrans->value,1),-1) * 127 );
 
 		Button &TopScrollBtn = *m_ScrollPanel->getVerticalScrollBar()->getButton(0);
 		if( (m_ActiveLine+1) - m_VisibleLines > 0 )
@@ -264,7 +264,7 @@ public:
 			//And keep shrinking until the top visible line is a normal line
 
 			int TopLine = m_ActiveLine - (m_VisibleLines-1);
-			TopLine = V_max( TopLine, 0 );
+			TopLine = max( TopLine, 0 );
 			if( !m_Line[TopLine]->m_SpansFromPrevLine )
 				m_ShrinkTime = 0;
 		}
@@ -276,13 +276,13 @@ public:
 
 	void StepInput( bool fDown )
 	{
-		m_VisibleLines = V_min(EVENTCON_PREF_VISIBLELINES, m_TotalLines);	//Grow to max visible lines
+		m_VisibleLines = min(EVENTCON_PREF_VISIBLELINES, m_TotalLines);	//Grow to max visible lines
 		m_ShrinkTime = 0;																//Reset shrinktime
 
 		if( fDown )
-			m_ActiveLine = V_min(m_ActiveLine+1,m_TotalLines-1);
+			m_ActiveLine = min(m_ActiveLine+1,m_TotalLines-1);
 		else
-			m_ActiveLine = V_max(m_ActiveLine-1,m_VisibleLines-1);
+			m_ActiveLine = max(m_ActiveLine-1,m_VisibleLines-1);
 
 		Resize( );
 	}

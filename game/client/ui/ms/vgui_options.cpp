@@ -51,7 +51,6 @@
 #include "clglobal.h"
 #include "vgui_mscontrols.h"
 #include "logger.h"
-#include "strutil.h"
 //------------
 
 COLOR Color_Transparent(0, 0, 0, 255), Color_Text_White(255, 255, 255, 0); //Global

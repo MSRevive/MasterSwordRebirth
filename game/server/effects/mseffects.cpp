@@ -386,7 +386,7 @@ void CEntGlow::Think()
 		pev->nextthink = gpGlobals->time; //MiB
 	}
 	else //MiB
-		pev->nextthink = V_min(gpGlobals->time + 6, V_min(FadeStartTime, m_StartTime + m_Duration));
+		pev->nextthink = min(gpGlobals->time + 6, min(FadeStartTime, m_StartTime + m_Duration));
 }
 
 //

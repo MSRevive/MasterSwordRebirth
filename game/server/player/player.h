@@ -357,7 +357,7 @@ struct wearpos_t
 struct chardata_t : savedata_t
 {
 	msstringlist m_VisitedMaps;			//All the maps I've visited
-	std::vector<CStat> m_Stats;					//All stats.  Natural stats and Skill-based stats
+	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
 	msstringlist m_Spells;				//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
 	mslist<storage_t> m_Storages;		//Storage places where I have items
@@ -390,8 +390,7 @@ struct chardata_t : savedata_t
 	{
 		if ((index < 0) || (index >= m_Stats.size()))
 			return NULL;
-		//return &m_Stats[index];
-		return &m_Stats.at(index);
+		return &m_Stats[index];
 	}
 };
 

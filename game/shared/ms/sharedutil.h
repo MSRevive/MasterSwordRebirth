@@ -2,7 +2,7 @@
 #define SHAREDUTIL_H
 
 #include "buildcontrol.h"
-//#include "strhelper.h"
+#include "strhelper.h"
 
 //Extentions
 #define SCRIPT_EXT ".script"
@@ -53,7 +53,7 @@ void Print(char *szFmt, ...);
 	extern "C" char* strlwr( char* str );
 #endif
 
-#include "mstypes.h"
+#include "stackstring.h"
 #include "msdebug.h"
 
 #ifdef VECTOR_H

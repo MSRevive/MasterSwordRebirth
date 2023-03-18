@@ -1,4 +1,5 @@
 #include "steamhelper.h"
+#include "strhelper.h"
 #include "hud.h"
 #include "cl_util.h"
 

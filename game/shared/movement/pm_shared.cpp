@@ -192,9 +192,9 @@ typedef struct hull_s
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
 
 // double to float warning
-// #pragma warning(disable : 4244)
-// #define max(a, b) (((a) > (b)) ? (a) : (b))
-// #define min(a, b) (((a) < (b)) ? (a) : (b))
+#pragma warning(disable : 4244)
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+#define min(a, b) (((a) < (b)) ? (a) : (b))
 // up / down
 #define PITCH 0
 // left / right
@@ -365,7 +365,7 @@ void PM_InitTextureTypes()
 			continue;
 
 		// null-terminate name and save in sentences array
-		j = V_min(j, CBTEXTURENAMEMAX - 1 + i);
+		j = min(j, CBTEXTURENAMEMAX - 1 + i);
 		buffer[j] = 0;
 		strncpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]), CBTEXTURENAMEMAX);
 	}
@@ -2215,6 +2215,9 @@ void PM_Duck(void)
 	int buttonsChanged = (pmove->oldbuttons ^ pmove->cmd.buttons); // These buttons have changed this frame
 	int nButtonPressed = buttonsChanged & pmove->cmd.buttons;	   // The changed ones still down are "pressed"
 
+	//int duckchange		= buttonsChanged & IN_DUCK ? 1 : 0;
+	int duckpressed = nButtonPressed & IN_DUCK ? 1 : 0;
+
 	if (pmove->cmd.buttons & IN_DUCK)
 	{
 		pmove->oldbuttons |= IN_DUCK;
@@ -2253,7 +2256,7 @@ void PM_Duck(void)
 				pmove->bInDuck = true;
 			}
 
-			time = V_max(0.0, (1.0 - (float)pmove->flDuckTime / 1000.0));
+			time = max(0.0, (1.0 - (float)pmove->flDuckTime / 1000.0));
 
 			if (pmove->bInDuck)
 			{
@@ -2681,6 +2684,8 @@ PM_Jump
 void PM_Jump(void)
 {
 	int i;
+	qboolean tfc = false;
+
 	qboolean cansuperjump = false;
 
 	if (pmove->dead)
@@ -3046,7 +3051,7 @@ void PM_DropPunchAngle(Vector &punchangle)
 
 	len = VectorNormalize(punchangle);
 	len -= (10.0 + len * 0.5) * pmove->frametime;
-	len = V_max(len, 0.0);
+	len = max(len, 0.0);
 	VectorScale(punchangle, len, punchangle);
 }
 
@@ -3070,7 +3075,7 @@ void PM_CheckParamters(void)
 	maxspeed = pmove->clientmaxspeed; //atof( pmove->PM_Info_ValueForKey( pmove->physinfo, "maxspd" ) );
 	if (maxspeed != 0.0)
 	{
-		pmove->maxspeed = V_min(maxspeed, pmove->maxspeed);
+		pmove->maxspeed = min(maxspeed, pmove->maxspeed);
 	}
 
 	if ((spd != 0.0) &&

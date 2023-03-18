@@ -41,7 +41,6 @@
 #include "action.h"
 #include "vgui_teamfortressviewport.h"
 #include "ms/vgui_containerlist.h"
-#include "strutil.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;
@@ -132,9 +131,9 @@ bool IsPlayerActing()
 void Player_UseStamina(float flAddAmt)
 {
 	player.Stamina -= flAddAmt;
-	player.Stamina = V_max(player.Stamina, 0);
+	player.Stamina = max(player.Stamina, 0);
 	float MaxStamina = player.MaxStamina();
-	player.Stamina = V_min(player.Stamina, MaxStamina);
+	player.Stamina = min(player.Stamina, MaxStamina);
 }
 
 void Player_DoJump()
@@ -144,7 +143,7 @@ void Player_DoJump()
 	//loss for jumping ... TODO: Consider weight?
 	int Weight = player.Weight();
 	float FilledRatio = Weight / player.Volume();
-	FilledRatio = V_min(FilledRatio, 1.0f);
+	FilledRatio = min(FilledRatio, 1.0f);
 	int JumpEnergy = FilledRatio * 4;
 	//player.UseStamina(JumpEnergy);
 	Player_UseStamina(JumpEnergy);
@@ -316,7 +315,7 @@ void CBasePlayer::CheckSpeed()
 	if (player.pev->maxspeed)
 		fSpeed *= (player.pev->maxspeed / 100.0f);
 
-	m_MaxSpeed = V_max(fSpeed, 0.001);
+	m_MaxSpeed = max(fSpeed, 0.001);
 
 	gEngfuncs.Cvar_SetValue("cl_forwardspeed", fSpeed);
 	//if( player.Class && player.Class->id == CLASS_ROGUE )
@@ -1012,9 +1011,9 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		dbg("setviewmodelprop");
 		msstring Mode = READ_STRING();
 		int iHand = READ_SHORT();
-		int iParam1 = 0;
-		float fParam1 = 0.0;
-		msstring sParam1 = "";
+		int iParam1;
+		float fParam1;
+		msstring sParam1;
 
 		if (Mode == "model")
 			sParam1 = READ_STRING();
@@ -1356,7 +1355,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		if (!iMode)
 		{
 			int flags = READ_BYTE();
-			bool fPlaySound = (flags & (1 << 1)) ? true : false;
+			bool fShowBrowser = flags & (1 << 0), fPlaySound = (flags & (1 << 1)) ? true : false;
 			strncpy(player.m_NextMap, READ_STRING(), sizeof(player.m_NextMap));
 			strncpy(player.m_OldTransition, READ_STRING(), sizeof(player.m_OldTransition));
 			strncpy(player.m_NextTransition, READ_STRING(), sizeof(player.m_NextTransition));

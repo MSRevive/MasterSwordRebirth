@@ -251,7 +251,8 @@ void CStatPanel::Update()
 	}
 	for (i = 0; i < NATURAL_MAX_STATS; i++)
 	{
-		_snprintf(cDisplayText, sizeof(cDisplayText),  "%s: %i \n",  NatStatList[i].Name,  player.GetNatStat(i) );
+
+		 _snprintf(cDisplayText, sizeof(cDisplayText),  "%s: %i \n",  NatStatList[i].Name,  player.GetNatStat(i) );
 
 		TextPanel *pTextbox = Nat_StatLabel[i];
 		pTextbox->setText(cDisplayText);

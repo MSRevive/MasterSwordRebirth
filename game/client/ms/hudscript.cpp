@@ -29,7 +29,6 @@
 #include "scriptedeffects.h"
 #include "hudscript.h"
 #include "logger.h"
-#include "strutil.h"
 
 extern physent_t *MSUTIL_EntityByIndex( int playerindex );
 
@@ -108,6 +107,7 @@ int CHudScript::MsgFunc_ClientScript( const char *pszName, int iSize, void *pbuf
 		msstring ScriptName = READ_STRING( );
 		int iParameters = READ_BYTE( );
 		for (int i = 0; i < iParameters; i++) Parameters.add(READ_STRING());
+		CScript *Script = CreateScript( ScriptName, Parameters, true, ID );
 	}
 	else if( Action == 1 )	//Send Msg to Script
 	{

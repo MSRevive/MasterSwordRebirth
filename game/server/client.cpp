@@ -45,7 +45,6 @@
 #include "versioncontrol.h"
 
 #include "fndatahandler.h"
-#include "strutil.h"
 
 extern void PlayerPrecache();
 
@@ -1440,7 +1439,7 @@ void ClientCommand2(edict_t *pEntity)
 						if (iProp > -1)
 						{
 							int value = atoi(CMD_ARGV(2));
-							pStat->m_SubStats[iProp].Value = V_min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = min(value, STATPROP_MAX_VALUE);
 						}
 					}
 				}
@@ -1452,7 +1451,7 @@ void ClientCommand2(edict_t *pEntity)
 						int iSubStat = atoi(CMD_ARGV(2));
 						int value = atoi(CMD_ARGV(3));
 						if (iSubStat < (signed)pStat->m_SubStats.size())
-							pStat->m_SubStats[iSubStat].Value = V_min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iSubStat].Value = min(value, STATPROP_MAX_VALUE);
 					}
 				}
 			}
@@ -1543,7 +1542,7 @@ void ClientCommand2(edict_t *pEntity)
 		else if (FStrEq(pcmd, "sizemeup"))
 		{
 			pPlayer->SendInfoMsg("MoveType: %i\n", pPlayer->pev->movetype);
-			Vector min = pev->origin + -(pPlayer->Size() / 2), V_max = pev->origin + (pPlayer->Size() / 2);
+			Vector min = pev->origin + -(pPlayer->Size() / 2), max = pev->origin + (pPlayer->Size() / 2);
 			//BeamEffect( min, max, iBeam, 0, 0, 100, 10, 0, 255, 255,255, 255, 20 );
 		}
 		else if (FStrEq(pcmd, "specme"))

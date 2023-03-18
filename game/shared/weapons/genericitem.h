@@ -96,7 +96,7 @@ struct attackdata_t
 	string_i sProjectile; //Name of the next projectile item to be fired
 };
 
-#define GET_CHARGE_FROM_TIME(a) (a + V_max(a - 1, 0) * .5)
+#define GET_CHARGE_FROM_TIME(a) (a + max(a - 1, 0) * .5)
 
 // Global GenericItem
 class CGenericItem;

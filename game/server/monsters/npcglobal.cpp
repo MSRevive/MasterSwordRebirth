@@ -1,5 +1,4 @@
 #include "inc_weapondefs.h"
-#include "strutil.h"
 
 // DynamicPrecache - Precaches monsters specified in the ms_dynamicnpc CVAR.
 //					 Used for testing monster not on the map or dynamic quests

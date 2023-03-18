@@ -202,7 +202,10 @@ void CHudMisc ::UserCmd_RemovePack(void)
 	int iBitsValid = 0;
 	char MenuText[1024];
 
-	strncpy(MenuText, "Remove item:\n\n", sizeof(MenuText));
+	int test = *(int *)&m_RemoveList;
+	int test2 = m_RemoveList.size();
+
+	 strncpy(MenuText,  "Remove item:\n\n", sizeof(MenuText) );
 
 	m_RemoveList.clear();
 	for (int i = 0; i < player.Gear.size(); i++)

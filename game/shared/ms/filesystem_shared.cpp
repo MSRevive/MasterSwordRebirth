@@ -115,8 +115,7 @@ bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const ch
 
 	//std::numeric_limits<int>::max() doesn't work cause of macro for max/min
 	//if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
-	//if (length > INT_MAX)
-	if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+	if (length > INT_MAX)
 	{
 		ALERT(at_console, "FileSystem_WriteTextToFile: text too long\n");
 		return false;

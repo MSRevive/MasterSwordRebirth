@@ -22,7 +22,6 @@
 #include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
-#include "strutil.h"
 #include <set>
 #include <cmath>
 
@@ -426,7 +425,6 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 		//get mob idx we're adding to based on property name
 		//not the most efficient way to do this...
-		random_monster_t rndMonsterData;
 		static msstringlist Tokens;
 		Tokens.clearitems();
 		TokenizeString(randomdata, Tokens, "_"); //not sure if we can use semi-colons in properties - would look icky anyways
@@ -442,31 +440,26 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			logfile << UTIL_VarArgs("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i\n", idx, (int)random_monsterdata.size());
 		}
 		if (rndproperty == "title")
-			rndMonsterData.m_title = pkvd->szValue;
-			//random_monsterdata[idx].m_title = pkvd->szValue;
+			random_monsterdata[idx].m_title = pkvd->szValue;
 		if (rndproperty == "params")
-			rndMonsterData.m_addparams = pkvd->szValue;
-			//random_monsterdata[idx].m_addparams = pkvd->szValue;
+			random_monsterdata[idx].m_addparams = pkvd->szValue;
 		if (rndproperty == "scriptfile")
 		{
 			//is required, and only one of each, so add count here
-			rndMonsterData.m_ScriptName = pkvd->szValue;
-			//random_monsterdata[idx].m_ScriptName = pkvd->szValue;
+			random_monsterdata[idx].m_ScriptName = pkvd->szValue;
 			if (m_nRndMobs == 0)
 				m_nRndMobs = 1;
 			else
 				++m_nRndMobs;
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, rndMonsterData.m_ScriptName);
+			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, random_monsterdata[idx].m_ScriptName.c_str());
 		}
 		if (rndproperty == "hpmulti")
-			rndMonsterData.m_HPMulti = atof(pkvd->szValue);
-			//random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
+			random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
 		if (rndproperty == "dmgmulti")
-			rndMonsterData.m_DMGMulti = atof(pkvd->szValue);
-			//random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
+			random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
+		//if ( rndproperty == "lives" ) random_monsterdata[idx].m_Lives = atoi(pkvd->szValue);
 		if (rndproperty == "nplayers")
-			rndMonsterData.m_ReqPlayers = atoi(pkvd->szValue);
-			//random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
+			random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
 		//sticky bit
 		if (rndproperty == "reqhp")
 		{
@@ -483,7 +476,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
 				{
 					mrand_m_HPReq_max = 0;
-					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(rndMonsterData.m_ScriptName) << " - max reqhp set higher than min.\n";
+					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
@@ -491,16 +484,12 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg"))
 				rand_m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 
-			rndMonsterData.m_HPReq_min = mrand_m_HPReq_min;
-			rndMonsterData.m_HPReq_max = mrand_m_HPReq_max;
-			rndMonsterData.m_HPReq_useavg = rand_m_HPReq_useavg;
-			//random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
-			//random_monsterdata[idx].m_HPReq_max = mrand_m_HPReq_max;
-			//random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
+			random_monsterdata[idx].m_HPReq_min = mrand_m_HPReq_min;
+			random_monsterdata[idx].m_HPReq_max = mrand_m_HPReq_max;
+			random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
 		}
 		//Gotta use the logfile here, dernitall
 		logfile << UTIL_VarArgs("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s\n", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
-		random_monsterdata[idx] = rndMonsterData;
 		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
@@ -1964,7 +1953,7 @@ bool CMSMonster::AcceptOffer()
 		}
 		else
 		{
-			int iGoldAmt = V_max(V_min((int)m_OfferInfo.pItemData, pMonster->m_Gold), 0);
+			int iGoldAmt = max(min((int)m_OfferInfo.pItemData, pMonster->m_Gold), 0);
 			m_Gold += iGoldAmt;
 			pMonster->m_Gold -= iGoldAmt;
 			fRecievedItem = true;
@@ -1998,8 +1987,8 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 		//case GIVE_GOLD: Current = &m; Max = MaxMP( ); break;
 	}
 
-	float AddAmount = V_min(Max - *Current, Amt); //Max amount that can be added
-	AddAmount = V_max(-*Current, AddAmount);		//Max health that can be taken
+	float AddAmount = min(Max - *Current, Amt); //Max amount that can be added
+	AddAmount = max(-*Current, AddAmount);		//Max health that can be taken
 
 	if (AddAmount < 0 && FBitSet(pev->flags, FL_GODMODE))
 		AddAmount = 0;
@@ -2508,7 +2497,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 
 			float xpsend = 0.0;
 			// MiB JUN2010_19 - Decreases the exp-damage ratio if monster was overkilled
-			float mult = V_min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
+			float mult = min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
 			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
 				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
@@ -2757,7 +2746,7 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 			return std::make_tuple(false, 0);
 	}
 	//MiB JAN2010_15 Global Level Cap [/END]
-	int iExpHandout = V_max(int(V_max(EnemySkillLevel, 0) * LearnMultiplier), 0);
+	int iExpHandout = max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
 
 	//moved up since it's needed here
 	int OldVal = SubStat.Value;

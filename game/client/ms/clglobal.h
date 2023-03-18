@@ -1,6 +1,5 @@
 #include "global.h"
 #include "cl_entity.h"
-#include <unordered_map>
 
 class CBaseEntity;
 
@@ -38,7 +37,9 @@ struct hudcharanims_t
 
 struct hudsounds_t
 {
-	string_i QuickSlot_Select, QuickSlot_Confirm, QuickSlot_Assign;
+	string_i QuickSlot_Select,
+		QuickSlot_Confirm,
+		QuickSlot_Assign;
 };
 
 struct hudcoords_t
@@ -70,9 +71,8 @@ public:
 	static void EndMap();								//Map ended.  Do client-side specific cleanup
 
 	//Entity-based
-	static std::vector<msstring> m_Strings;
 	//static std::vector<std::string> m_Strings;
-	//static mslist<char *> m_Strings;								  //All client-side globally allocated strings
+	static mslist<char *> m_Strings;								  //All client-side globally allocated strings
 	static mslist<CBaseEntity *> m_ClEntites;						  //All client-side entities
 	static mslist<cl_entity_t> m_ClModels;							  //Extra models to be updated/animated client-side
 	static cl_entity_t CLViewEntities[CLPERMENT_TOTAL];				  //All View entity models

@@ -34,10 +34,10 @@ public:
 class CStat
 {
 public:
-	std::vector<CSubStat> m_SubStats; //For regular stats, there are three - Speed, balance, power
+	mslist<CSubStat> m_SubStats; //For regular stats, there are three - Speed, balance, power
 								 //For spellcasting, there is more
 								 //For parry, there is only one
-	fixedstr<128> m_Name;
+	string_i m_Name;
 	bool bNeedsUpdate;
 	enum skilltype_e
 	{
@@ -46,7 +46,7 @@ public:
 	} m_Type; //Stat type
 
 	CStat() { bNeedsUpdate = true; }
-	CStat(fixedstr<128> Name, skilltype_e Type)
+	CStat(msstring_ref Name, skilltype_e Type)
 	{
 		m_Name = Name;
 		m_Type = Type;
@@ -70,10 +70,10 @@ public:
 		return &m_SubStats[index];
 	}
 
-	static void InitStatList(std::vector<CStat> &Stats);
+	static void InitStatList(mslist<CStat> &Stats);
 };
 
-//typedef mslist<CStat> statlist;
+typedef mslist<CStat> statlist;
 
 //A caching structure for CStat.  Allows you to do numerous lookups without calling
 //Value() each time.  Used in TitleManager::GetPlayerTitle()
@@ -85,13 +85,13 @@ struct skillcache_t
 
 struct statinfo_t
 {
-	fixedstr<128> Name;
+	char *Name;
 };
 
 struct skillstatinfo_t
 {
-	fixedstr<128> Name;
-	fixedstr<128> DllName;
+	const char *Name;
+	const char *DllName;
 	int StatCount;
 };
 

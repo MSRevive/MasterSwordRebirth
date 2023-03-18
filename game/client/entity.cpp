@@ -1651,7 +1651,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		bld_dir.y = RANDOM_FLOAT(-1, 1);
 		bld_dir.z = RANDOM_FLOAT(0, 1);
 		int bld_amt = atoi(Params[3]);
-		gEngfuncs.pEfxAPI->R_BloodStream(bld_org, bld_dir, (bld_col == BLOOD_COLOR_RED) ? 70 : bld_col, V_min(bld_amt, 255));
+		gEngfuncs.pEfxAPI->R_BloodStream(bld_org, bld_dir, (bld_col == BLOOD_COLOR_RED) ? 70 : bld_col, min(bld_amt, 255));
 
 		int iFlags = 0;
 		SetBits(iFlags, PM_WORLD_ONLY);

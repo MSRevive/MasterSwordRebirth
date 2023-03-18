@@ -13,7 +13,6 @@
 #include "scriptedeffects.h"
 #include "logger.h"
 #include "pm_defs.h"
-#include "strutil.h"
 
 #ifndef VALVE_DLL
 #include "render/clrender.h"
@@ -3486,7 +3485,7 @@ bool CScript::ScriptCmd_GiveHPMP(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 bool CScript::ScriptCmd_Gravity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 	if (Params.size() >= 1)
-		m.pScriptedEnt->pev->gravity = V_max(atof(Params[0]), 0.001f);
+		m.pScriptedEnt->pev->gravity = max(atof(Params[0]), 0.001f);
 	else ERROR_MISSING_PARMS;
 	return true;
 }

@@ -165,7 +165,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 		return;
 	}
 
-	int PacketDataSize = V_min(DataLeft, MAX_UL_SIZE);
+	int PacketDataSize = min(DataLeft, MAX_UL_SIZE);
 
 #ifdef VALVE_DLL
 	//Sending sequential data for a char

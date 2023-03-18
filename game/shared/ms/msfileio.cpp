@@ -3,10 +3,10 @@
 #ifndef NOT_HLDLL
 #include "extdll.h"
 #include "util.h"
-#include "ms/filesystem_shared.h"
 #else
 #include "sharedutil.h"
 #endif
+#include "ms/filesystem_shared.h"
 
 //
 //	Implementation of CGameFile and CPlayer_DataBuffer
@@ -160,7 +160,6 @@ void CMemFile::WriteToFile(const char* pszFileName)
 
 bool CMemFile::ReadFromGameFile(const char* pszFileName)
 {
-#ifndef NOT_HLDLL
 	// Load a half-life engine file - could be compressed in a package
 	const auto fileContents = FileSystem_LoadFileIntoBuffer(pszFileName, FileContentFormat::Binary);
 	
@@ -173,9 +172,6 @@ bool CMemFile::ReadFromGameFile(const char* pszFileName)
 	memcpy(m_Buffer, fileContents.data(), m_BufferSize);
 
 	return true;
-#endif
-
-	return false;
 }
 
 bool CMemFile::ReadFromFile(const char* pszFileName)

@@ -46,7 +46,6 @@ class CHudMisc;
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
-#include "mstypes.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS 2
@@ -510,8 +509,8 @@ class CHud
 {
 private:
 	struct HudSprite {
-		fixedstr<MAX_SPRITE_NAME_LENGTH> Name = "";
-		fixedstr<64> SpriteName = "";
+		char Name[MAX_SPRITE_NAME_LENGTH];
+		char SpriteName[64];
 		HLSPRITE Handle = 0;
 		wrect_t Rectangle{0, 0, 0, 0};
 	};

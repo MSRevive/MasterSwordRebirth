@@ -120,7 +120,7 @@ void CShieldArea ::FollowThink()
 	float fTemp = -pPlayer->pev->v_angle.x;
 	pev->origin = pPlayer->pev->origin +
 				  pPlayer->pev->view_ofs + (gpGlobals->v_forward * 16) //24
-											   * V_max(1 - ((fTemp < 0 ? fTemp : fTemp * 2.11) / 190), 0.1);
+											   * max(1 - ((fTemp < 0 ? fTemp : fTemp * 2.11) / 190), 0.1);
 
 	pev->angles = UTIL_VecToAngles(gpGlobals->v_forward);
 

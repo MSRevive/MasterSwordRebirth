@@ -548,7 +548,7 @@ void CHud::Think(void)
 	// think about default fov
 	if (m_iFOV == 0)
 	{ // only let players adjust up in fov,  and only if they are not overriden by something else
-		m_iFOV = V_max(default_fov->value, 90);
+		m_iFOV = max(default_fov->value, 90);
 	}
 
 	m_Music->Think();
@@ -580,6 +580,7 @@ void CHud::VidInit(void)
 		m_iRes = 640;
 
 	// Only load this once
+	// Only load this once
 	if (m_Sprites.empty())
 	{
 		// we need to load the hud.txt, and all sprites within
@@ -596,8 +597,8 @@ void CHud::VidInit(void)
 				if (p->iRes == m_iRes)
 				{
 					HudSprite hudSprite;
-					hudSprite.Name = p->szName;
-					hudSprite.SpriteName = p->szSprite;
+					strncpy(hudSprite.Name, p->szName, MAX_SPRITE_NAME_LENGTH);
+					strncpy(hudSprite.SpriteName, p->szSprite, 64);
 					m_Sprites.push_back(hudSprite);
 				}
 
@@ -615,7 +616,7 @@ void CHud::VidInit(void)
 	for (auto& hudSprite : m_Sprites)
 	{
 		char file[256];
-		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName.c_str());
+		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName);
 		hudSprite.Handle = SPR_Load(file);
 		//hudSprite.Handle = SPR_Load(fmt::format("sprites/{}.spr", hudSprite.SpriteName.c_str()).c_str());
 	}

@@ -130,7 +130,7 @@ bool CParticle::LoadTexture(msstring_ref Name)
 void CParticle::Render()
 {
 	//return;
-	Vector &vRight = m_DirRight, &vUp = m_DirUp;
+	Vector &vForward = m_DirForward, &vRight = m_DirRight, &vUp = m_DirUp;
 
 	Vector Points[4];
 
@@ -230,7 +230,7 @@ class CSkyBox
 {
 public:
 	msstring m_SkyName;
-	std::vector<skyface_t> Faces;
+	mslist<skyface_t> Faces;
 	int m_uiNextTexIdx;
 
 	CSkyBox()
@@ -240,7 +240,7 @@ public:
 
 		for (int i = 0; i < 6; i++)
 		{
-			Faces.push_back(skyface_t());
+			Faces.add(skyface_t());
 
 			CParticle &Face = Faces[i].Face;
 			Face.m_Color = Color4F(1, 1, 1, 1);
@@ -757,7 +757,7 @@ bool LoadGLTexture(const char *FileName, uint &TextureID)
 void DeleteGLTextures()
 {
 	for (int i = 0; i < g_TextureList.size(); i++)
-		glDeleteTextures(1, reinterpret_cast<GLuint*>(g_TextureList[i].GLTexureID));
+		glDeleteTextures(1, &g_TextureList[i].GLTexureID);
 	g_TextureList.clear();
 }
 

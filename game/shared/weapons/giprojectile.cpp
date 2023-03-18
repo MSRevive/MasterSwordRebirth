@@ -164,7 +164,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 		{
 			CMSMonster *pMonsterOwner = (CMSMonster *)pOwner;
 			dmgMultiplier = pMonsterOwner->GetSkillStat(ProjectileData->StatPower, ProjectileData->PropPower) / STATPROP_MAX_VALUE;
-			dmgMultiplier = V_max(dmgMultiplier, 0.001f);
+			dmgMultiplier = max(dmgMultiplier, 0.001f);
 		}
 
 		clrmem(Damage);
