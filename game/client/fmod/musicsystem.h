@@ -26,6 +26,7 @@ private:
 
 	std::string m_TranSound = "";
 	std::string m_AreaMusic = "";
+	std::string m_CurSound = "";
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;

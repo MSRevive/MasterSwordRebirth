@@ -63,15 +63,12 @@ bool CMusicSystem::Think()
 				m_pChannel->stop(); //stop channel when fadeout is done.
 				m_bFadeOut = false;
 				m_fFadeDelay = 0.0;
+				m_CurSound = "";
 				if ( m_bShouldTransition )
 				{
 					PlayMusic(m_TranSound, true);
 					m_bShouldTransition = false;
 					m_TranSound = "";
-				}
-				else if (m_AreaMusic != "")
-				{
-					PlayMusic(m_AreaMusic, true);
 				}
 			}
 		}
@@ -119,6 +116,7 @@ bool CMusicSystem::IsPlaying()
 bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 {
 	m_bFadeOut = false;
+	m_CurSound = pszSong;
 	char songPath[256];
 	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong.c_str());
 	FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
@@ -170,7 +168,10 @@ void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 	case 0: // area music
 	{
 		m_AreaMusic = pszSong;
-		if (IsPlaying())
+		if (IsPlaying() && pszSong == m_CurSound)
+			return;
+
+		if (IsPlaying() && (pszSong != m_CurSound))
 		{
 			m_bFadeOut = true;
 			m_bShouldTransition = true;
@@ -187,7 +188,10 @@ void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 	}
 	case 1: // combat music
 	{
-		if (IsPlaying())
+		if (IsPlaying() && pszSong == m_CurSound)
+			return;
+
+		if (IsPlaying() && (pszSong != m_CurSound))
 		{
 			m_bFadeOut = true;
 			m_bShouldTransition = true;
