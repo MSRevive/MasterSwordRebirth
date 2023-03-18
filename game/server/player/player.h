@@ -20,7 +20,6 @@
 #include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
-#include "music.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
