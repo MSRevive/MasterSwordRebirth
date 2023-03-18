@@ -4738,51 +4738,77 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 // 	return true;
 // }
 
-//playmp3 <player|all> <file> [fade]
+//playmp3 <player|all> <mode> <file>
+//- mode
+	// 0 - stop music
+	// 1 - combat music
+	// 2 - system music
 //- scope: server
 //- Plays music on client. If called by an NPC, player must be within [range] to be affected.
 bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
 	//NOV2014_12 - todo: Rebuild and simplify this
-	bool specific_player = false;
+	//bool specific_player = false;
 	msstring &Name = Params[0];
 	msstring &SFile = Params[1];
-	song_t Song;
-	Song.Name = SFile;
+	msstring &SMode = Params[2];
 
 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
-	if ( !Name.starts_with("all") && pSpecificEnt )
+	if (!Name.starts_with("all") && (pSpecificEnt && pSpecificEnt->IsPlayer()))
 	{
-		if ( pSpecificEnt->IsPlayer() ) specific_player = true;
-	}
-
-	//can't simply exchange pSpecificEnt for pPlayer, so even with a specific target, we still have to scan all and see if there's a match
-	static msstringlist ParamList;
-	for( int i = 1; i <= gpGlobals->maxClients; i++ )
-	{
-		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-		if ( !pPlayer ) continue;
-
-		//Thothie NOV2014_12 - friendlier method
-		ParamList.clearitems( );
-		ParamList.add( Song.Name.c_str() );
-		pPlayer->CallScriptEvent( "game_music", &ParamList );
-
-		if (Song.Name.contains("stop.mp3"))
+		if(SFile.len() > 0)
 		{
-			Log("stop playmp3");
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-			WRITE_BYTE(1);
-			MESSAGE_END();
+			switch(atoi(SMode.c_str()))
+			{
+			case 0:
+				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
+					WRITE_BYTE(-1);
+				MESSAGE_END();
+				break;
+			case 1:
+				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
+					WRITE_BYTE(1);
+					WRITE_STRING(SFile);
+				MESSAGE_END();
+				break;
+			case 2:
+				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
+					WRITE_BYTE(2);
+					WRITE_STRING(SFile);
+				MESSAGE_END();
+				break;
+			}
 		}
-
-		if (Song.Name.len() > 0)
+	}
+	else
+	{
+		for(int i = 1; i <= gpGlobals->maxClients; i++)
 		{
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-			WRITE_BYTE(0);
-			WRITE_STRING(Song.Name.c_str());
-			MESSAGE_END();
+			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
+			if(SFile.len() > 0)
+			{
+				switch(atoi(SMode.c_str()))
+				{
+				case 0:
+					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+						WRITE_BYTE(-1);
+					MESSAGE_END();
+					break;
+				case 1:
+					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+						WRITE_BYTE(1);
+						WRITE_STRING(SFile);
+					MESSAGE_END();
+					break;
+				case 2:
+					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
+						WRITE_BYTE(2);
+						WRITE_STRING(SFile);
+					MESSAGE_END();
+					break;
+				}
+			}
 		}
 	}
 #endif

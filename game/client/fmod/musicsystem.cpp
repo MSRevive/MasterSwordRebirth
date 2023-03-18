@@ -69,6 +69,10 @@ bool CMusicSystem::Think()
 					m_bShouldTransition = false;
 					m_TranSound = "";
 				}
+				else if (m_AreaMusic != "")
+				{
+					PlayMusic(m_AreaMusic, true);
+				}
 			}
 		}
 	}
@@ -135,7 +139,7 @@ bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 
 	//never be louder than what the player set
 	m_pChannel->setVolume(m_fVolume);
-	if ( fadeIn )
+	if (fadeIn)
 	{
 		m_pChannel->setVolume( 0.0 );
 		m_bFadeIn = true;
@@ -158,20 +162,45 @@ void CMusicSystem::StopMusic(bool fadeOut)
 
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
-void CMusicSystem::TransitionMusic(std::string pszSong)
+void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 {
 	m_pChannel->setVolume(m_fVolume);
- 	if (IsPlaying())
+	switch(mode)
 	{
-		m_bFadeOut = true;
-		m_bShouldTransition = true;
-		m_TranSound = pszSong;
+	case 0: // area music
+	{
+		m_AreaMusic = pszSong;
+		if (IsPlaying())
+		{
+			m_bFadeOut = true;
+			m_bShouldTransition = true;
+			m_TranSound = pszSong;
+		}
+		else
+		{
+			m_bFadeOut = false;
+			m_bShouldTransition = false;
+			m_TranSound = "";
+			PlayMusic(pszSong, true);
+		}
+		break;
 	}
-	else
+	case 1: // combat music
 	{
-		m_bFadeOut = false;
-		m_bShouldTransition = false;
-		m_TranSound = "";
-		PlayMusic(pszSong, true);
+		if (IsPlaying())
+		{
+			m_bFadeOut = true;
+			m_bShouldTransition = true;
+			m_TranSound = pszSong;
+		}
+		else
+		{
+			m_bFadeOut = false;
+			m_bShouldTransition = false;
+			m_TranSound = "";
+			PlayMusic(pszSong, true);
+		}
+		break;
+	}
 	}
 }

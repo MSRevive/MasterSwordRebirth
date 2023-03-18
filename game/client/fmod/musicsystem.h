@@ -19,15 +19,17 @@ public:
 
 	bool PlayMusic(std::string pszSong, bool fadeIn = false);
 	void StopMusic(bool fadeOut = false);
-	void TransitionMusic(std::string pszSong);
+	void TransitionMusic(std::string pszSong, int mode);
 
 private:
 	std::string GetCurrentSoundName(void);
 
 	std::string m_TranSound = "";
+	std::string m_AreaMusic = "";
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;
+	bool m_bLoop = false;
 	float m_fFadeDelay = 0.0;
 	float m_fVolume = 0.0;
 

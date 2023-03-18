@@ -194,10 +194,10 @@ public:
 LINK_ENTITY_TO_CLASS(cycler_sprite, CCyclerSprite);
 
 TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
-	{
-		DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_INTEGER),
-		DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
-		DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
+{
+	DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_INTEGER),
+	DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
+	DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
 };
 
 IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity);
@@ -376,90 +376,6 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 	if (FBitSet(pev->spawnflags, SF_REMOVE_ON_FIRE))
 		UTIL_Remove(this);
 }
-
-class CMSMusic : public CPointEntity
-{
-public:
-	mslist<song_t> m_Songs;
-	msstring main_song;
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-	{
-		//if( !pActivator->IsPlayer() )
-		//	return;
-		//CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
-		if (main_song.len() > 0)
-		{
-			if (m_Songs.size() && m_Songs[0].Name != main_song)
-			{
-				ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
-				m_Songs[0].Name = main_song;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
-				song_t Song;
-				Song.Name = main_song;
-				m_Songs.add(Song);
-			}
-		}
-
-		static msstringlist Params;
-		Params.clearitems();
-		Params.add(m_Songs[0].Name.c_str());
-
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-		if (pGMScript)
-			pGMScript->CallScriptEvent("gm_set_idle_music", &Params);
-
-		//old way
-		/*
-		if( m_Songs.size() )
-		{	
-			for( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				//Thothie - attempting to make mstrig_music play music on ALL players
-				//- so we can have event driven music
-				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-				if ( pPlayer ) pPlayer->Music_Play( m_Songs, this );
-			}
-			return;
-		}
-		
-		if ( !m_Songs.size() )
-		{
-			for( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				//Thothie - attempting to make mstrig_music play music on ALL players
-				//- so we can have event driven music
-				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-				if ( pPlayer ) pPlayer->Music_Stop( this );
-			}
-		}
-		*/
-	}
-	void Deactivate() { m_Songs.clear(); }
-
-	void KeyValue(KeyValueData *pkvd)
-	{
-		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
-		msstring sTemp = pkvd->szKeyName;
-		if (!sTemp.contains("zhlt_invisible"))
-		{
-			song_t Song;
-			Song.Name = pkvd->szKeyName;
-			m_Songs.add(Song);
-		}
-		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
-		{
-			main_song = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else
-			CBaseEntity::KeyValue(pkvd);
-	}
-};
-LINK_ENTITY_TO_CLASS(mstrig_music, CMSMusic);
 
 //Thothie's half-assed game_text fix
 class CGameText : public CPointEntity
@@ -696,10 +612,9 @@ LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
 class CAreaMusic : public CAreaInvisible
 {
 public:
-	songplaylist m_Songs;
-	string_t ms_master;
-	msstring main_song;
-	float main_song_length;
+	string_t m_sMaster;
+	std::string m_sSong;
+	bool m_bLoop = false;
 	typedef CAreaInvisible BaseClass;
 
 	void Spawn()
@@ -710,20 +625,20 @@ public:
 		SetTouch(&CAreaMusic::MusicTouch);
 	}
 
-	void Deactivate() { m_Songs.clear(); }
+	void Deactivate() {  }
 
 	void MusicTouch(CBaseEntity *pOther)
 	{
 		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
-		if (m_Songs.size() == 0 || !pOther || !pOther->IsPlayer())
+		if (m_sSong.size() == 0 || !pOther || !pOther->IsPlayer())
 			return;
 
 		//NOV2014_12 - seeing if we can give msarea_music a master switch
 		//yes, we can, even if it's a bit hacky (added a new iuser to multisource)
-		if (ms_master)
+		if (m_sMaster)
 		{
-			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
-			if (!UTIL_IsMasterTriggered(ms_master, pOther))
+			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(m_sMaster));
+			if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
 			{
 				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
 				return;
@@ -734,66 +649,39 @@ public:
 			}
 		}
 
-		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-		//NOV2014_12 Thothie - don't play if we're using combat music
-		IScripted *iScripted = pPlayer ? pOther->GetScripted() : NULL;
-		if (iScripted)
+		/*
+			-1 - stop music
+			0 - area music
+			1 - combat music
+			2 - system music
+		*/
+		if (m_sSong == "stop.mp3")
 		{
-			if (main_song.len() > 0)
-			{
-				if (m_Songs.size() && m_Songs[0].Name != main_song)
-				{
-					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
-					m_Songs[0].Name = main_song;
-				}
-				else
-				{
-					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
-					song_t Song;
-					Song.Name = main_song;
-					m_Songs.add(Song);
-				}
-			}
-
-			//this method disables the ability to play lists, but I've never seen a map use that feature
-			msstringlist Parameters;
-			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			if (pGMScript)
-			{
-				Parameters.add(m_Songs[0].Name.c_str());
-			}
-			iScripted->CallScriptEvent("set_idle_music", &Parameters);
-			//Old way jams up sometimes
-			/*
-			if( m_Songs.size() )
-				pPlayer->Music_Play( m_Songs, this );
-			else
-				pPlayer->Music_Stop( this );
-			*/
+			ALERT(at_console, "DEBUG: msarea_music - stopping music.\n");
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
+				WRITE_BYTE(-1);
+			MESSAGE_END();
+		}
+		else
+		{
+			ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", m_sSong.c_str());
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
+				WRITE_BYTE(0);
+				WRITE_STRING(m_sSong.c_str());
+			MESSAGE_END();
 		}
 	}
 
 	void KeyValue(KeyValueData *pkvd)
 	{
-		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
-		msstring sTemp = pkvd->szKeyName;
-		if (!sTemp.contains("zhlt_invisible"))
+		if (FStrEq(pkvd->szKeyName, "master"))
 		{
-			song_t Song;
-			Song.Name = pkvd->szKeyName;
-			m_Songs.add(Song);
-		}
-		else if (FStrEq(pkvd->szKeyName, "master"))
-		{
-			ms_master = ALLOC_STRING(pkvd->szValue);
+			m_sMaster = ALLOC_STRING(pkvd->szValue);
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
+		else if (FStrEq(pkvd->szKeyName, "song"))
 		{
-			main_song = pkvd->szValue;
+			m_sSong = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
 		else
@@ -801,6 +689,115 @@ public:
 	}
 };
 LINK_ENTITY_TO_CLASS(msarea_music, CAreaMusic);
+LINK_ENTITY_TO_CLASS(mstrig_music, CAreaMusic);
+
+// class CAreaMusic : public CAreaInvisible
+// {
+// public:
+// 	songplaylist m_Songs;
+// 	string_t ms_master;
+// 	msstring main_song;
+// 	float main_song_length;
+// 	typedef CAreaInvisible BaseClass;
+
+// 	void Spawn()
+// 	{
+// 		BaseClass::Spawn();
+// 		pev->solid = SOLID_TRIGGER;
+// 		UTIL_SetOrigin(pev, pev->origin);
+// 		SetTouch(&CAreaMusic::MusicTouch);
+// 	}
+
+// 	void Deactivate() { m_Songs.clear(); }
+
+// 	void MusicTouch(CBaseEntity *pOther)
+// 	{
+// 		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
+// 		if (m_Songs.size() == 0 || !pOther || !pOther->IsPlayer())
+// 			return;
+
+// 		//NOV2014_12 - seeing if we can give msarea_music a master switch
+// 		//yes, we can, even if it's a bit hacky (added a new iuser to multisource)
+// 		if (ms_master)
+// 		{
+// 			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
+// 			if (!UTIL_IsMasterTriggered(ms_master, pOther))
+// 			{
+// 				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
+// 				return;
+// 			}
+// 			else
+// 			{
+// 				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
+// 			}
+// 		}
+
+// 		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
+
+// 		//NOV2014_12 Thothie - don't play if we're using combat music
+// 		IScripted *iScripted = pPlayer ? pOther->GetScripted() : NULL;
+// 		if (iScripted)
+// 		{
+// 			if (main_song.len() > 0)
+// 			{
+// 				if (m_Songs.size() && m_Songs[0].Name != main_song)
+// 				{
+// 					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
+// 					m_Songs[0].Name = main_song;
+// 				}
+// 				else
+// 				{
+// 					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
+// 					song_t Song;
+// 					Song.Name = main_song;
+// 					m_Songs.add(Song);
+// 				}
+// 			}
+
+// 			//this method disables the ability to play lists, but I've never seen a map use that feature
+// 			msstringlist Parameters;
+// 			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
+// 			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+// 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+// 			if (pGMScript)
+// 			{
+// 				Parameters.add(m_Songs[0].Name.c_str());
+// 			}
+// 			iScripted->CallScriptEvent("set_idle_music", &Parameters);
+// 			//Old way jams up sometimes
+// 			/*
+// 			if( m_Songs.size() )
+// 				pPlayer->Music_Play( m_Songs, this );
+// 			else
+// 				pPlayer->Music_Stop( this );
+// 			*/
+// 		}
+// 	}
+
+// 	void KeyValue(KeyValueData *pkvd)
+// 	{
+// 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
+// 		msstring sTemp = pkvd->szKeyName;
+// 		if (!sTemp.contains("zhlt_invisible"))
+// 		{
+// 			song_t Song;
+// 			Song.Name = pkvd->szKeyName;
+// 			m_Songs.add(Song);
+// 		}
+// 		else if (FStrEq(pkvd->szKeyName, "master"))
+// 		{
+// 			ms_master = ALLOC_STRING(pkvd->szValue);
+// 			pkvd->fHandled = TRUE;
+// 		}
+// 		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
+// 		{
+// 			main_song = pkvd->szValue;
+// 			pkvd->fHandled = TRUE;
+// 		}
+// 		else
+// 			CBaseEntity::KeyValue(pkvd);
+// 	}
+// };
 
 struct monster_data_t
 {
