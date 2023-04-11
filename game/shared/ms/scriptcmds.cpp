@@ -4744,15 +4744,14 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	// 1 - combat music
 	// 2 - system music
 //- scope: server
-//- Plays music on client. If called by an NPC, player must be within [range] to be affected.
 bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
 	//NOV2014_12 - todo: Rebuild and simplify this
 	//bool specific_player = false;
 	msstring &Name = Params[0];
-	msstring &SFile = Params[1];
-	msstring &SMode = Params[2];
+	msstring &SMode = Params[1];
+	msstring &SFile = Params[2];
 
 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
 	if (!Name.starts_with("all") && (pSpecificEnt && pSpecificEnt->IsPlayer()))
@@ -4763,18 +4762,18 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			{
 			case 0:
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(-1);
+					WRITE_BYTE(0);
 				MESSAGE_END();
 				break;
 			case 1:
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(1);
+					WRITE_BYTE(2);
 					WRITE_STRING(SFile);
 				MESSAGE_END();
 				break;
 			case 2:
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(2);
+					WRITE_BYTE(3);
 					WRITE_STRING(SFile);
 				MESSAGE_END();
 				break;
@@ -4792,18 +4791,18 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 				{
 				case 0:
 					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(-1);
+						WRITE_BYTE(0);
 					MESSAGE_END();
 					break;
 				case 1:
 					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(1);
+						WRITE_BYTE(2);
 						WRITE_STRING(SFile);
 					MESSAGE_END();
 					break;
 				case 2:
 					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(2);
+						WRITE_BYTE(3);
 						WRITE_STRING(SFile);
 					MESSAGE_END();
 					break;

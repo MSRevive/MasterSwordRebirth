@@ -31,20 +31,20 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	/*
-		-1 - stop music
-		0 - area music
-		1 - combat music
-		2 - system music
+		0 - stop music
+		1 - area music
+		2 - combat music
+		3 - system music
 	*/
 	int iCmd = READ_BYTE();
 	switch (iCmd) {
-	case -1: // stop music
+	case 0: // stop music
 	{
 		gEngfuncs.Con_Printf("stopping musix!!\n");
 		m_MP3.StopMusic(true);
 		break;
 	}
-	case 0: // area music
+	case 1: // area music
 	{
 		if (!m_bSystem)
 		{
@@ -53,13 +53,13 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 		}
 		break;
 	}
-	case 1: // combat music
+	case 2: // combat music
 	{
 		const char *musicFile = READ_STRING();
 		m_MP3.TransitionMusic(musicFile, 1); //sound engine handles the including of dir now.
 		break;
 	}
-	case 2: // system music
+	case 3: // system music
 	{
 		m_bSystem = true;
 		const char *musicFile = READ_STRING();

@@ -650,23 +650,23 @@ public:
 		}
 
 		/*
-			-1 - stop music
-			0 - area music
-			1 - combat music
-			2 - system music
+			0 - stop music
+			1 - area music
+			2 - combat music
+			3 - system music
 		*/
 		if (m_sSong == "stop.mp3")
 		{
 			ALERT(at_console, "DEBUG: msarea_music - stopping music.\n");
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
-				WRITE_BYTE(-1);
+				WRITE_BYTE(0);
 			MESSAGE_END();
 		}
 		else
 		{
 			ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", m_sSong.c_str());
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
-				WRITE_BYTE(0);
+				WRITE_BYTE(1);
 				WRITE_STRING(m_sSong.c_str());
 			MESSAGE_END();
 		}
