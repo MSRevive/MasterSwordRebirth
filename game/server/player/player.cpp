@@ -2789,6 +2789,13 @@ void CBasePlayer::Spawn(void)
 	{
 		dbg("Spawn in regular mode");
 		CallScriptEvent("game_player_putinworld"); //Thothie MAR2008a
+
+		//See if music is playing for all players, then play for newly connected character
+		if (MSGlobals::AllMusic.length() > 0) //If playing music for all players
+		{
+			SwapMusic(-1,MSGlobals::AllMusicMode,MSGlobals::AllMusic);
+		}
+
 		//debug
 		Print(">>>>> spawn: m_NextTransition: %s m_SpawnTransition: %s m_OldTransition: %s\n", m_SpawnTransition, m_SpawnTransition, m_OldTransition);
 
@@ -6560,6 +6567,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	WRITE_STRING_LIMIT(Data.Name, 32);
 	MESSAGE_END();
 
+	//Send music data 
+
 	dbg("Call CBasePlayer::Spawn()");
 	Spawn();
 
@@ -6834,4 +6843,26 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer)
 		WRITE_SHORT((int)pPlayer->m_HP);	//FEB2008a -- Shuriken
 	}
 	MESSAGE_END();
+}
+
+bool CBasePlayer::SwapMusic(int musicArea, int mode, std::string track)
+{
+	if (musicArea != m_iMusicArea || musicArea == -1)
+	{
+		m_iMusicArea = musicArea;
+
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, this->pev);
+		WRITE_BYTE(mode);
+
+		if (mode != 3) //If playing music instead of stopping, send the music file
+		{
+			if (track.length() > 0) WRITE_STRING(track.c_str());
+			else WRITE_STRING("stop.mp3"); //have to send something. dont send empty strings
+		}
+
+		MESSAGE_END();
+
+		return true;
+	}
+	return false;
 }

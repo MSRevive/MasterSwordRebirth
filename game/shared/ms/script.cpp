@@ -4585,16 +4585,6 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				}
 			}
 #endif
-			//seems we commented a little too far in JUL2013a (fixed)
-			//Thothie JAN2013_10 - Dynamic music system (tabs be fubar here for some reason)
-			else if (Name.starts_with("map.music."))
-			{
-				msstring Prop = Name.substr(10);
-				if (Prop == "idle.file") return MSGlobals::map_music_idle_file;
-				else if (Prop == "idle.length") return MSGlobals::map_music_idle_length;
-				else if (Prop == "combat.file") return MSGlobals::map_music_combat_file;
-				else if (Prop == "combat.length") return MSGlobals::map_music_combat_length;
-			}
 			else if (Name.starts_with("map."))
 			{
 				//bool Type[2] = { false };

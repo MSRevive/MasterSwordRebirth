@@ -511,7 +511,10 @@ public:
 	CTeam *m_pTeam,	  //My current party
 		*m_pJoinTeam; //Waiting for acceptance into this party
 	float m_TimeGainHP;
-	entityinfo_t m_MusicArea;  //The current music area I'm in
+
+	int m_iMusicArea = -1;  //Index of the last music trigger player used / was a part of
+	bool SwapMusic(int musicArea, int mode, std::string track); //Attempts to swap music with a new area trigger. Returns true if successful
+
 	float m_TimeSendCharInfo;  //Delay to send info about the next character
 	bool m_LoadedInitialChars; //Whether I've tried to load my characters for display yet
 #endif

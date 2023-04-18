@@ -149,9 +149,13 @@ bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 	return true;
 }
 
-// Abruptly stops playing all ambient sounds
-void CMusicSystem::StopMusic(bool fadeOut)
+//Reset flags and stop music. For stopsound cmd and map swaps
+void CMusicSystem::Reload(bool fadeOut)
 {
+	m_bCombat = false;
+	m_bSystem = false;
+	m_AreaMusic = "";
+
 	if (fadeOut)
 	{
 		m_pChannel->setVolume(m_fVolume);
@@ -161,39 +165,66 @@ void CMusicSystem::StopMusic(bool fadeOut)
 		m_pChannel->stop();
 }
 
+// Abruptly stops playing all ambient sounds
+void CMusicSystem::StopMusic(bool fadeOut)
+{
+	m_bCombat = false;
+	m_AreaMusic = "";
+
+	if (!m_bSystem)
+	{
+		if (fadeOut)
+		{
+			m_pChannel->setVolume(m_fVolume);
+			m_bFadeOut = true;
+		}
+		else
+			m_pChannel->stop();
+	}
+}
+
 // Transitions between two ambient sounds if necessary
 // If a sound isn't already playing when this is called, don't worry about it
 void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 {
 	m_pChannel->setVolume(m_fVolume);
 
-	if (IsPlaying() && pszSong == m_CurSound)
-		return;
+	if (IsPlaying() && pszSong == m_CurSound) return; //If song attempting to play is same as currently playing track
+	if (m_TranSound == pszSong) return; //If music is already transitioning to this track
+
+	bool bSwapMusic = false; //Flag to see if music will swap after checks
 
 	switch(mode)
 	{
-	case 0: // area music
-	{
-		m_AreaMusic = pszSong;
+		case MUSIC_SYSTEM:
+		{
+			m_bSystem = true;
+			bSwapMusic = true;
+		}
+		case MUSIC_COMBAT: // combat music
+		{
+			if (!m_bSystem)
+			{
+				m_bCombat = true;
+				bSwapMusic = true;
+			}
+			break;
+		}
+		case MUSIC_AREA: // area music
+		{
+			m_AreaMusic = pszSong; //Always switch queued area music
 
-		if (IsPlaying() && (pszSong != m_CurSound))
-		{
-			m_bFadeOut = true;
-			m_bShouldTransition = true;
-			m_TranSound = pszSong;
+			if (!m_bCombat && !m_bSystem)
+			{
+				bSwapMusic = true;
+			}
+			break;
 		}
-		else
-		{
-			m_bFadeOut = false;
-			m_bShouldTransition = false;
-			m_TranSound = "";
-			PlayMusic(pszSong, true);
-		}
-		break;
 	}
-	case 1: // combat music
+
+	if (bSwapMusic)
 	{
-		if (IsPlaying() && (pszSong != m_CurSound))
+		if (IsPlaying())
 		{
 			m_bFadeOut = true;
 			m_bShouldTransition = true;
@@ -206,7 +237,15 @@ void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 			m_TranSound = "";
 			PlayMusic(pszSong, true);
 		}
-		break;
 	}
+}
+
+// Abruptly stops playing all ambient sounds
+void CMusicSystem::StopCombat()
+{
+	if (m_bCombat)
+	{
+		m_bCombat = false;
+		TransitionMusic(m_AreaMusic,0);
 	}
 }

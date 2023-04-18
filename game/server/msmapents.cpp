@@ -516,19 +516,14 @@ public:
 class CAreaMusicDyn : public CAreaInvisible
 {
 public:
-	typedef CAreaInvisible BaseClass;
-
-	msstring mt_idle;
-	msstring mt_idle_length;
-	msstring mt_combat;
-	msstring mt_combat_length;
-	msstring mt_global;	 //play for all players
-	msstring mt_playnow; //0= neither, 1= idle, 2= combat
-	string_t ms_master;
+	std::string mt_idle;
+	std::string mt_combat;
+	std::string mt_global;	 //play for all players
+	std::string mt_playnow; //0= neither, 1= idle, 2= combat
 
 	void Spawn()
 	{
-		BaseClass::Spawn();
+		CAreaInvisible::Spawn();
 		pev->solid = SOLID_TRIGGER;
 		UTIL_SetOrigin(pev, pev->origin);
 		SetTouch(&CAreaMusicDyn::MusicTouch);
@@ -556,54 +551,42 @@ public:
 			mt_playnow = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "master"))
-		{
-			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
 		else
 			CBaseEntity::KeyValue(pkvd);
 	}
 
 	void MusicTouch(CBaseEntity *pOther)
 	{
+		
 		if (!pOther || !pOther->IsPlayer())
 			return;
 
-		if (ms_master)
+		int i, max;
+		if (mt_global == "1")
 		{
-			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
-			if (!UTIL_IsMasterTriggered(ms_master, pOther))
-			{
-				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
-				return;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
-			}
-		}
-
-		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-		static msstringlist Params;
-		Params.clearitems();
-		Params.add(mt_idle.c_str());
-		Params.add(mt_combat.c_str());
-		Params.add(mt_playnow.c_str());
-
-		if (strcmp(mt_global.c_str(), "1") == 0) //Play all?
-		{
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-
-			if (pGMScript)
-				pGMScript->CallScriptEvent("gm_set_music", &Params);
+			i = 1;
+			max = gpGlobals->maxClients;
 		}
 		else
-			pPlayer->CallScriptEvent("set_music", &Params);
+		{
+			i = pOther->entindex();
+			max = i;
+		}
 
-		//send script command to player, unless global, then GM
+		do
+		{
+			if (mt_playnow == "1") //idle music
+			{
+				((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, mt_idle);
+			}
+			else if (mt_playnow == "2") //combat music
+			{
+				((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_COMBAT, mt_combat);
+			}
+			MESSAGE_END();
+
+			i++;
+		} while (i <= max);
 	}
 };
 LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
@@ -614,15 +597,30 @@ class CAreaMusic : public CAreaInvisible
 public:
 	string_t m_sMaster;
 	std::string m_sSong;
-	bool m_bLoop = false;
-	typedef CAreaInvisible BaseClass;
 
 	void Spawn()
 	{
-		BaseClass::Spawn();
+		CAreaInvisible::Spawn();
 		pev->solid = SOLID_TRIGGER;
 		UTIL_SetOrigin(pev, pev->origin);
 		SetTouch(&CAreaMusic::MusicTouch);
+	}
+
+	void KeyValue(KeyValueData* pkvd)
+	{
+		std::string keyName = pkvd->szKeyName;
+		if (keyName == "song" )
+		{
+			m_sSong = pkvd->szValue;
+			pkvd->fHandled = TRUE;
+		}
+		else if (keyName.find(".mp3") != std::string::npos) //Legacy way of playing mp3s
+		{
+			m_sSong = pkvd->szKeyName;
+			pkvd->fHandled = TRUE;
+		}
+		else
+			CBaseEntity::KeyValue(pkvd);
 	}
 
 	void Deactivate() {  }
@@ -633,171 +631,37 @@ public:
 		if (m_sSong.size() == 0 || !pOther || !pOther->IsPlayer())
 			return;
 
-		//NOV2014_12 - seeing if we can give msarea_music a master switch
-		//yes, we can, even if it's a bit hacky (added a new iuser to multisource)
-		if (m_sMaster)
+		if (!m_sSong.find(".mp3") || m_sSong == "stop.mp3") //if no .mp3 is found, assume they want to stop music. Also support legacy "stop.mp3"
 		{
-			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(m_sMaster));
-			if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
-			{
-				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
-				return;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
-			}
-		}
-
-		/*
-			0 - stop music
-			1 - area music
-			2 - combat music
-			3 - system music
-		*/
-		if (m_sSong == "stop.mp3")
-		{
-			ALERT(at_console, "DEBUG: msarea_music - stopping music.\n");
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
-				WRITE_BYTE(0);
-			MESSAGE_END();
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_STOP, m_sSong);
 		}
 		else
 		{
-			ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", m_sSong.c_str());
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pOther->pev);
-				WRITE_BYTE(1);
-				WRITE_STRING(m_sSong.c_str());
-			MESSAGE_END();
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
 		}
 	}
 
-	void KeyValue(KeyValueData *pkvd)
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 	{
-		if (FStrEq(pkvd->szKeyName, "master"))
+		if (m_sSong.size() == 0) return;
+
+		MSGlobals::AllMusicMode = MUSIC_AREA;
+		MSGlobals::AllMusic = m_sSong;
+
+		int i = 1, max = gpGlobals->maxClients;
+		do
 		{
-			m_sMaster = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "song"))
-		{
-			m_sSong = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else
-			CBaseEntity::KeyValue(pkvd);
+			CBaseEntity* targ = UTIL_PlayerByIndex(i);
+			if (targ && targ->IsPlayer())
+			{
+				((CBasePlayer*)targ)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
+			}
+			i++;
+		} while (i <= max);
 	}
 };
 LINK_ENTITY_TO_CLASS(msarea_music, CAreaMusic);
 LINK_ENTITY_TO_CLASS(mstrig_music, CAreaMusic);
-
-// class CAreaMusic : public CAreaInvisible
-// {
-// public:
-// 	songplaylist m_Songs;
-// 	string_t ms_master;
-// 	msstring main_song;
-// 	float main_song_length;
-// 	typedef CAreaInvisible BaseClass;
-
-// 	void Spawn()
-// 	{
-// 		BaseClass::Spawn();
-// 		pev->solid = SOLID_TRIGGER;
-// 		UTIL_SetOrigin(pev, pev->origin);
-// 		SetTouch(&CAreaMusic::MusicTouch);
-// 	}
-
-// 	void Deactivate() { m_Songs.clear(); }
-
-// 	void MusicTouch(CBaseEntity *pOther)
-// 	{
-// 		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
-// 		if (m_Songs.size() == 0 || !pOther || !pOther->IsPlayer())
-// 			return;
-
-// 		//NOV2014_12 - seeing if we can give msarea_music a master switch
-// 		//yes, we can, even if it's a bit hacky (added a new iuser to multisource)
-// 		if (ms_master)
-// 		{
-// 			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
-// 			if (!UTIL_IsMasterTriggered(ms_master, pOther))
-// 			{
-// 				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
-// 				return;
-// 			}
-// 			else
-// 			{
-// 				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
-// 			}
-// 		}
-
-// 		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-// 		//NOV2014_12 Thothie - don't play if we're using combat music
-// 		IScripted *iScripted = pPlayer ? pOther->GetScripted() : NULL;
-// 		if (iScripted)
-// 		{
-// 			if (main_song.len() > 0)
-// 			{
-// 				if (m_Songs.size() && m_Songs[0].Name != main_song)
-// 				{
-// 					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
-// 					m_Songs[0].Name = main_song;
-// 				}
-// 				else
-// 				{
-// 					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
-// 					song_t Song;
-// 					Song.Name = main_song;
-// 					m_Songs.add(Song);
-// 				}
-// 			}
-
-// 			//this method disables the ability to play lists, but I've never seen a map use that feature
-// 			msstringlist Parameters;
-// 			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
-// 			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-// 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-// 			if (pGMScript)
-// 			{
-// 				Parameters.add(m_Songs[0].Name.c_str());
-// 			}
-// 			iScripted->CallScriptEvent("set_idle_music", &Parameters);
-// 			//Old way jams up sometimes
-// 			/*
-// 			if( m_Songs.size() )
-// 				pPlayer->Music_Play( m_Songs, this );
-// 			else
-// 				pPlayer->Music_Stop( this );
-// 			*/
-// 		}
-// 	}
-
-// 	void KeyValue(KeyValueData *pkvd)
-// 	{
-// 		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
-// 		msstring sTemp = pkvd->szKeyName;
-// 		if (!sTemp.contains("zhlt_invisible"))
-// 		{
-// 			song_t Song;
-// 			Song.Name = pkvd->szKeyName;
-// 			m_Songs.add(Song);
-// 		}
-// 		else if (FStrEq(pkvd->szKeyName, "master"))
-// 		{
-// 			ms_master = ALLOC_STRING(pkvd->szValue);
-// 			pkvd->fHandled = TRUE;
-// 		}
-// 		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
-// 		{
-// 			main_song = pkvd->szValue;
-// 			pkvd->fHandled = TRUE;
-// 		}
-// 		else
-// 			CBaseEntity::KeyValue(pkvd);
-// 	}
-// };
 
 struct monster_data_t
 {

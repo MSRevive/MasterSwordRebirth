@@ -51,10 +51,6 @@ vote_t MSGlobals::CurrentVote;
 msstring MSGlobals::MapName;
 msstring MSGlobals::map_addparams = "";				//Thothie DEC2014_17 - global addparams
 msstring MSGlobals::map_flags = "";					//Thothie DEC2014_17 - map flags
-msstring MSGlobals::map_music_idle_file = "none";	//Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_idle_length = "0";	//Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_combat_file = "none"; //Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_combat_length = "0";	//Thothie JAN2013_10 - dynamic music settings
 msstring MSGlobals::MapTitle;						//Thothie SEP2007a
 msstring MSGlobals::MapDesc;						//Thothie SEP2007a
 msstring MSGlobals::MapWeather;						//Thothie SEP2007a
@@ -175,6 +171,11 @@ void MSGlobals::EndMap()
 	//LogMemoryUsage( "[End Map Remaining Memory Allocations]" );
 
 	MSGlobals::GameType = GAMETYPE_ADVENTURE; //Default to adventure game for next level
+
+	//Reset vars for music
+	AllMusic.clear();
+	AllMusicMode = 0;
+
 	MemMgr::EndMap();
 }
 

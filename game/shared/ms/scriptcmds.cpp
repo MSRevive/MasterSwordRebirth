@@ -900,10 +900,6 @@ bool CScript::ScriptCmd_resetglobals(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 {
 	MSGlobals::map_addparams = "";
 	MSGlobals::map_flags = "";
-	MSGlobals::map_music_idle_file = "none";
-	MSGlobals::map_music_idle_length = "0";
-	MSGlobals::map_music_combat_file = "none";
-	MSGlobals::map_music_combat_length = "0";
 	MSGlobals::MapTitle = "";
 	MSGlobals::MapDesc = "";
 	MSGlobals::MapWeather = "clear;clear;clear";
@@ -2380,10 +2376,6 @@ bool CScript::ScriptCmd_ChangeLevel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		//clear music/weather for next map
 		MSGlobals::map_addparams = ""; //DEC2014_17 Thothie - global addparams
 		MSGlobals::map_flags = ""; //DEC2014_17 Thothie - map flags
-		MSGlobals::map_music_idle_file = "none";
-		MSGlobals::map_music_idle_length = "0";
-		MSGlobals::map_music_combat_file = "none";
-		MSGlobals::map_music_combat_length = "0";
 		MSGlobals::MapWeather = "";
 		MSGlobals::SpawnLimit = 0;
 	}
@@ -4643,173 +4635,47 @@ bool CScript::ScriptCmd_PlayerTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	return true;
 }
 
-// bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-// {
-// 	//Thothie MAY2007a
-// 	//playmp3 <target|all> <minutes> <file> [range]
-// 	//use 0 minutes to stop (minutes can also be in fractions, in theory, eg 1.1 = 1 minute & 6 seconds
-// 	//plays mp3s to players, range is optional, path to music not required (assumes music folder)
-// #ifdef VALVE_DLL
-// 	//NOV2014_12 - todo: Rebuild and simplify this
-// 	bool specific_player = false;
-// 	float song_range = 0.0;
-// 	msstring &Name = Params[0];
-// 	//msstring &InMinutes = Params[1];
-// 	//float SMinutes = atof(InMinutes);
-// 	msstring &SFile = Params[2];
-// 	mslist<song_t> t_Songs;
-// 	song_t Song;
-// 	if ( t_Songs.size() ) t_Songs.clear( );
-// 	Song.Name = SFile;
-// 	Song.Length = UTIL_StringToSecs(Params[1].c_str()); //DEC2014_21 Thothie - Centralizing music/time conversion
 
-// 	//Song.Length = (SMinutes * 60.f) + atof(SongSeconds)/60.0f;
-// 	//Song.Length = (atof(SongMinutes) * 60.f) + atof(SongSeconds)/60.0f;
-// 	t_Songs.add( Song );
-
-// 	if ( Params.size() >= 3 )
-// 	{
-// 		msstring &SRange = Params[3];
-// 		song_range = atof(SRange);
-// 	}
-// 	//CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
-// 	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
-// 	if ( !Name.starts_with("all") && pSpecificEnt )
-// 	{
-// 		if ( pSpecificEnt->IsPlayer() ) specific_player = true;
-// 	}
-
-// 	//can't simply exchange pSpecificEnt for pPlayer, so even with a specific target, we still have to scan all and see if there's a match
-// 	static msstringlist ParamList;
-// 	for( int i = 1; i <= gpGlobals->maxClients; i++ )
-// 	{
-// 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-// 		if ( !pPlayer ) continue;
-
-// 		ALERT( at_aiconsole, "Music Req: %s min %f range %f\n", Song.Name.c_str(), Song.Length, song_range );
-
-// 		float Dist = (m.pScriptedEnt->pev->origin - pPlayer->pev->origin).Length();
-// 		if ( Dist > song_range && song_range > 0 ) continue;
-// 		if ( specific_player )
-// 		{
-// 			//ALERT( at_aiconsole, "Specific search %i",i );
-// 			if ( pPlayer->entindex() != pSpecificEnt->entindex() ) continue;
-// 		}
-
-// 		//Thothie JAN2013_08 - store current musak in var
-// 		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC",Song.Name.c_str());
-// 		//pPlayer->SetScriptVar("PLR_CURRENT_MUSIC_LENGTH", UTIL_VarArgs("%f"),Song.Length);
-// 		//Thothie NOV2014_12 - friendlier method
-// 		ParamList.clearitems( );
-// 		ParamList.add( Song.Name.c_str() );
-// 		ParamList.add( FloatToString(Song.Length) );
-// 		ParamList.add( "0" );
-// 		pPlayer->CallScriptEvent( "game_music", &ParamList );
-
-// 		//Thothie - OCT2010_13 - fixed this to work directly
-// 		//- it was using pPlayer->Music_Stop/Music_Play before, and these are designed to work only with the msarea_music entity
-// 		//- (plus it was calling it on the wrong entity)
-// 		if ( Song.Length > 0 )
-// 		{
-// 			//ALERT( at_aiconsole, "SMinutes > 0 PLAYING" );
-// 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
-// 			WRITE_BYTE( 0 );
-// 			WRITE_BYTE( t_Songs.size() );
-// 			for( int s = 0; s < t_Songs.size(); s++ ) //Thothie JAN2012_08 - noticed bugger up here, s was i
-// 			{
-// 				WRITE_STRING( t_Songs[s].Name );
-// 				WRITE_FLOAT( t_Songs[s].Length );
-// 			}
-// 			MESSAGE_END();
-// 		}
-
-// 		if ( Song.Length <= 0 )
-// 		{
-// 			//Get Error (SERVER): Error: ClientCommand --> here, but it works
-// 			//ALERT( at_aiconsole, "SMinutes <= 0 STOPPING" );
-// 			//pPlayer->Music_Stop( m.pScriptedEnt );
-// 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev );
-// 			WRITE_BYTE( 1 );
-// 			MESSAGE_END();
-// 		}
-// 	}
-// #endif
-
-// 	return true;
-// }
-
-//playmp3 <player|all> <mode> <file>
-//- mode
-	// 0 - stop music
-	// 1 - combat music
-	// 2 - system music
+//playmp3 <playerId|all> <system|combat|stop> <file>
 //- scope: server
-bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
+bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 #ifdef VALVE_DLL
-	//NOV2014_12 - todo: Rebuild and simplify this
-	//bool specific_player = false;
-	msstring &Name = Params[0];
-	msstring &SMode = Params[1];
-	msstring &SFile = Params[2];
 
-	CBaseEntity *pSpecificEnt = RetrieveEntity(Name);
-	if (!Name.starts_with("all") && (pSpecificEnt && pSpecificEnt->IsPlayer()))
+	msstring& Target = Params[0];
+	std::string sMode = Params[1];
+	msstring& SFile = Params[2];
+
+	int iMode;
+	if (sMode == "system") iMode = MUSIC_SYSTEM;
+	else if (sMode == "combat") iMode = MUSIC_COMBAT;
+	else iMode = MUSIC_STOP_COMBAT;
+
+	int i,max;
+	if (Target.starts_with("all"))
 	{
-		if(SFile.len() > 0)
-		{
-			switch(atoi(SMode.c_str()))
-			{
-			case 0:
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(0);
-				MESSAGE_END();
-				break;
-			case 1:
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(2);
-					WRITE_STRING(SFile);
-				MESSAGE_END();
-				break;
-			case 2:
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pSpecificEnt->pev);
-					WRITE_BYTE(3);
-					WRITE_STRING(SFile);
-				MESSAGE_END();
-				break;
-			}
-		}
+		i = 1;
+		max = gpGlobals->maxClients;
+
+		MSGlobals::AllMusicMode = iMode;
+		MSGlobals::AllMusic = SFile.c_str();
 	}
 	else
 	{
-		for(int i = 1; i <= gpGlobals->maxClients; i++)
-		{
-			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
-			if(SFile.len() > 0)
-			{
-				switch(atoi(SMode.c_str()))
-				{
-				case 0:
-					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(0);
-					MESSAGE_END();
-					break;
-				case 1:
-					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(2);
-						WRITE_STRING(SFile);
-					MESSAGE_END();
-					break;
-				case 2:
-					MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pPlayer->pev);
-						WRITE_BYTE(3);
-						WRITE_STRING(SFile);
-					MESSAGE_END();
-					break;
-				}
-			}
-		}
+		i = RetrieveEntity(Target)->entindex();
+		max = i;
 	}
+
+	do
+	{
+		CBaseEntity* targ = UTIL_PlayerByIndex(i);
+		if (targ && targ->IsPlayer())
+		{
+			((CBasePlayer*)targ)->SwapMusic(-1, iMode, SFile.c_str());
+		}
+
+		i++;
+	} while (i <= max);
 #endif
 
 	return true;

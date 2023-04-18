@@ -16,7 +16,6 @@ public:
 
 private:
 	CMusicSystem m_MP3;
-	bool m_bSystem = false;
 };
 
 #endif

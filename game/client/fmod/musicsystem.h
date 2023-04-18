@@ -18,19 +18,25 @@ public:
 	bool IsPlaying();
 
 	bool PlayMusic(std::string pszSong, bool fadeIn = false);
+	void Reload(bool fadeOut = false);
 	void StopMusic(bool fadeOut = false);
+	void StopCombat();
 	void TransitionMusic(std::string pszSong, int mode);
 
 private:
 	std::string GetCurrentSoundName(void);
 
-	std::string m_TranSound = "";
-	std::string m_CurSound = "";
-	std::string m_AreaMusic = "";
+	std::string m_TranSound = ""; //Transition to this music when fade out is done
+	std::string m_CurSound = ""; //Current music playing
+	std::string m_AreaMusic = ""; //Current area music assigned
+
+	bool m_bLoop = false;
+	bool m_bSystem = false; //Using system music
+	bool m_bCombat = false; //Using combat music
+
 	bool m_bShouldTransition = false;
 	bool m_bFadeIn = false;
 	bool m_bFadeOut = false;
-	bool m_bLoop = false;
 	float m_fFadeDelay = 0.0;
 	float m_fVolume = 0.0;
 
