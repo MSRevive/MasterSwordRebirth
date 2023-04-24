@@ -70,6 +70,9 @@ char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else
 int MSGlobals::ClEntities[CLPERMENT_TOTAL] = {500, 501, 502};
 int MSGlobals::gSoundPrecacheCount = 0;
 
+std::string MSGlobals::AllMusic = "";
+int MSGlobals::AllMusicMode = 0;
+
 msstringlist vote_t::VotesTypes;		//All The vote types
 msstringlist vote_t::VotesTypesAllowed; //All The vote types allowed
 
