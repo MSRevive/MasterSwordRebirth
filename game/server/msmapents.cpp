@@ -583,7 +583,6 @@ public:
 			{
 				((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_COMBAT, mt_combat);
 			}
-			MESSAGE_END();
 
 			i++;
 		} while (i <= max);
@@ -631,6 +630,8 @@ public:
 		if (m_sSong.size() == 0 || !pOther || !pOther->IsPlayer())
 			return;
 
+		MSGlobals::AllMusic.clear(); //Area trigger stops all music
+
 		if (!m_sSong.find(".mp3") || m_sSong == "stop.mp3") //if no .mp3 is found, assume they want to stop music. Also support legacy "stop.mp3"
 		{
 			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_STOP, m_sSong);
@@ -645,7 +646,7 @@ public:
 	{
 		if (m_sSong.size() == 0) return;
 
-		MSGlobals::AllMusicMode = MUSIC_AREA;
+		MSGlobals::AllMusicMode = MUSIC_AREA; //Point trigger always plays to all
 		MSGlobals::AllMusic = m_sSong;
 
 		int i = 1, max = gpGlobals->maxClients;

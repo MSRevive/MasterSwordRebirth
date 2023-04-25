@@ -4644,7 +4644,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 
 	msstring& Target = Params[0];
 	std::string sMode = Params[1];
-	msstring& SFile = Params[2];
+	std::string SFile = Params[2];
 
 	int iMode;
 	if (sMode == "system") iMode = MUSIC_SYSTEM;
@@ -4657,11 +4657,15 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 		i = 1;
 		max = gpGlobals->maxClients;
 
-		MSGlobals::AllMusicMode = iMode;
-		MSGlobals::AllMusic = SFile.c_str();
+		if (iMode != MUSIC_STOP_COMBAT)
+		{
+			MSGlobals::AllMusicMode = iMode;
+			MSGlobals::AllMusic = SFile;
+		}
 	}
 	else
 	{
+		MSGlobals::AllMusic.clear();
 		i = RetrieveEntity(Target)->entindex();
 		max = i;
 	}
@@ -4671,7 +4675,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 		CBaseEntity* targ = UTIL_PlayerByIndex(i);
 		if (targ && targ->IsPlayer())
 		{
-			((CBasePlayer*)targ)->SwapMusic(-1, iMode, SFile.c_str());
+			((CBasePlayer*)targ)->SwapMusic(-1, iMode, SFile);
 		}
 
 		i++;

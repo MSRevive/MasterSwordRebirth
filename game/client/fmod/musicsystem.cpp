@@ -154,7 +154,7 @@ void CMusicSystem::Reload(bool fadeOut)
 {
 	m_bCombat = false;
 	m_bSystem = false;
-	m_AreaMusic = "";
+	m_AreaMusic.clear();
 
 	if (fadeOut)
 	{
@@ -169,7 +169,7 @@ void CMusicSystem::Reload(bool fadeOut)
 void CMusicSystem::StopMusic(bool fadeOut)
 {
 	m_bCombat = false;
-	m_AreaMusic = "";
+	m_AreaMusic.clear();
 
 	if (!m_bSystem)
 	{
@@ -200,6 +200,7 @@ void CMusicSystem::TransitionMusic(std::string pszSong, int mode)
 		{
 			m_bSystem = true;
 			bSwapMusic = true;
+			break;
 		}
 		case MUSIC_COMBAT: // combat music
 		{
@@ -246,6 +247,8 @@ void CMusicSystem::StopCombat()
 	if (m_bCombat)
 	{
 		m_bCombat = false;
-		TransitionMusic(m_AreaMusic,0);
+
+		if (m_AreaMusic.length() > 0) TransitionMusic(m_AreaMusic, 0);
+		else StopMusic(true);
 	}
 }
