@@ -95,8 +95,8 @@ bool CMusicSystem::Think()
 		}
 	}
 
-	if (!IsPlaying() && m_AreaMusic.size() > 0)
-		PlayMusic(m_AreaMusic, true);
+	if (!IsPlaying() && m_CurSound.size() > 0)
+		PlayMusic(m_CurSound, false);
 
 	return true;
 }
@@ -155,6 +155,7 @@ void CMusicSystem::Reload(bool fadeOut)
 	m_bCombat = false;
 	m_bSystem = false;
 	m_AreaMusic.clear();
+	m_CurSound.clear();
 
 	if (fadeOut)
 	{

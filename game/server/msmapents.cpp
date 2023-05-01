@@ -608,7 +608,7 @@ public:
 	void KeyValue(KeyValueData* pkvd)
 	{
 		std::string keyName = pkvd->szKeyName;
-		if (keyName == "song" )
+		if (keyName == "song")
 		{
 			m_sSong = pkvd->szValue;
 			pkvd->fHandled = TRUE;
@@ -632,7 +632,7 @@ public:
 
 		MSGlobals::AllMusic.clear(); //Area trigger stops all music
 
-		if (!m_sSong.find(".mp3") || m_sSong == "stop.mp3") //if no .mp3 is found, assume they want to stop music. Also support legacy "stop.mp3"
+		if (m_sSong.find(".mp3") == std::string::npos || m_sSong == "stop.mp3") //if no .mp3 is found, assume they want to stop music. Also support legacy "stop.mp3"
 		{
 			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_STOP, m_sSong);
 		}
