@@ -318,7 +318,7 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 	strncpy(pszNewString, pszString, len);
 	m_Strings.push_back(std::string(pszNewString));
 
-	return m_Strings.back().c_str() - gpGlobals->pStringBase;
+	return pszNewString - gpGlobals->pStringBase;
 }
 /*char *MSCLGlobals::GetString( string_t sString )
 {
