@@ -1668,7 +1668,8 @@ msstring CScript::ScriptGetter_getcl_beam(msstring& FullName, msstring& ParserNa
 //- priority: low, scope: shared
 msstring CScript::ScriptGetter_GetCVar(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
-	return EngineFunc::CVAR_GetString(Params[0].c_str());
+	if (!Params[0].contains("rcon_password") && !Params[0].contains("ms_central_addr")) return EngineFunc::CVAR_GetString(Params[0].c_str());
+	return "0";
 }
 
 //$get_fileline(<file>,[line])
@@ -4642,7 +4643,8 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 			else if (Name.starts_with("cvar."))
 			{
 				msstring msCvarReturnName = Name.substr(5);
-				return EngineFunc::CVAR_GetString(msCvarReturnName.c_str());
+				if (!msCvarReturnName.contains("rcon_password") && !msCvarReturnName.contains("ms_central_addr")) return EngineFunc::CVAR_GetString(msCvarReturnName.c_str());
+				return "0";
 			}
 			else if (Name.starts_with("script."))
 			{
