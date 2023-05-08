@@ -2428,8 +2428,6 @@ bool CBasePlayer::IsActive()
 	IScripted *iScripted = this->GetScripted();
 	if (!iScripted)
 		return false;
-	if (atoi(iScripted->GetFirstScriptVar("IS_AFK")) == 1)
-		return false;
 	if (atoi(iScripted->GetFirstScriptVar("PLR_IN_WORLD")) != 1)
 		return false;
 	msstring CheckSteamID = this->AuthID();
