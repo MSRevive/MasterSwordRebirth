@@ -1160,7 +1160,7 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	if (!pPlayer)
 		return NULL;
 
-	//Manual put in packs... should be done w/ scripts...
+	//Manual put in packs.
 	bool fSuccess = false;
 	CGenericItem* pPack = NULL;
 
@@ -1171,6 +1171,7 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	else if (strstr(ItemName, "blunt") ||
 		strstr(ItemName, "axes"))
 		pPack = pPlayer->GetContainer("holster");
+		
 
 	//Check for space, etc in desired pack
 	if (pPack && CanPutInPack(pPack))
@@ -1179,7 +1180,6 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	if (!fSuccess)
 	{
 		//Last resort, try to put in any pack
-		int i = 0;
 		for (int i = 0; i < pPlayer->Gear.size(); i++)
 		{
 			CGenericItem* pNextPack = pPlayer->Gear[i];

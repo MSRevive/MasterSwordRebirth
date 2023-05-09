@@ -2362,8 +2362,6 @@ bool CScript::ScriptCmd_CapVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 //changelevel <mapname>
 //- scope: server
 //- Resets relevant globals and changes map.
-//- This is normally handled through the game_master event gm_manual_map_change <map> <dest_spawn>.
-//- It should not be forced from elsewhere.
 bool CScript::ScriptCmd_ChangeLevel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 	//changelevel <mapname> - 3 guesses what this does.

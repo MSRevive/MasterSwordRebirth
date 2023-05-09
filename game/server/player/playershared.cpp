@@ -691,10 +691,6 @@ bool CBasePlayer::PutInPack(CGenericItem* pItem, CGenericItem* pContainer, bool 
 
 CGenericItem* CBasePlayer::CanPutInAnyPack(CGenericItem* pItem, bool bVerbose)
 {
-	if ((pItem->Weight() + this->Weight()) > this->Volume()) {
-		return NULL;
-	}
-
 	return pItem->FindPackForItem(this, bVerbose);
 }
 
