@@ -2148,9 +2148,8 @@ void CBasePlayer::PostThink()
 			if (flFallDamage > 0)
 			{
 				if (flFallDamage < pev->health)
-				{ // If you didn't die, yelp in pain!
-					//FEB2010_28 Thothie - moving script side to deal with gender
-					CallScriptEvent("game_fallpain_sound");
+				{ // If you didn't die
+					CallScriptEvent("game_fall");
 				}
 
 				//if( Class && Class->id == CLASS_ROGUE )
