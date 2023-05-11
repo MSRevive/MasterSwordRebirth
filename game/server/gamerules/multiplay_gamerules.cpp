@@ -105,8 +105,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		{
 			char szCommand[256];
 			
-			ALERT( at_console, "Executing dedicated server config file\n" );
-			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  servercfgfile );
+			ALERT(at_console, "Executing dedicated server config file\n");
+			_snprintf(szCommand, sizeof(szCommand), "exec %s\n", servercfgfile);
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -119,8 +119,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		{
 			char szCommand[256];
 			
-			ALERT( at_console, "Executing listen server config file\n" );
-			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  lservercfgfile );
+			ALERT(at_console, "Executing listen server config file\n");
+			_snprintf(szCommand, sizeof(szCommand), "exec %s\n", lservercfgfile);
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -194,7 +194,7 @@ void CHalfLifeMultiplay::Think( void )
 		{
 			ALERT(at_console, "Resetting server.\n");
 			g_ServerResetTimer = NULL;
-			SERVER_COMMAND("changelevel edana\n");
+			SERVER_COMMAND("map edana\n");
 		}
 	}
 
