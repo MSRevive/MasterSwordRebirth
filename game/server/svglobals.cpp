@@ -172,25 +172,6 @@ void MSWorldSpawn()
 	MSGlobals::CanCreateCharOnMap = false;
 	MSGlobals::ServerSideChar = ms_serverchar.value ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
-
-#ifndef RELEASE_LOCKDOWN
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("********                 \n");
-	UTIL_LogPrintf("********  DEVELOPER BUILD\n");
-	UTIL_LogPrintf("********                 \n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-#endif
-
-	//g_SummonedMonsters = 0;
-	//UnBanAll( ); //Unban all players //Thothie FEB2008a - commenting, seeing if this breaks
-
-	//Force items.txt to be unmodified --- Undone, servers need to be updated
-	//PRECACHE_GENERIC("dlls/sc.dll");
-	//ENGINE_FORCE_UNMODIFIED(force_exactfile,NULL,NULL,"dlls/sc.dll");
 	
 	//Force the client to use the same client lib as the server. - Solokiller
 	//This ensures that clients don't replace their client and send exploit commands.
@@ -200,23 +181,31 @@ void MSWorldSpawn()
 	PRECACHE_GENERIC("dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 
-	if (FnDataHandler::IsValidConnection())
+	if (MSGlobals::CentralEnabled)
 	{
-		g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-		logfile << Logger::LOG_INFO << "FuzzNet connected\n";
-	}
-	else if (MSGlobals::CentralEnabled)
-	{
-		g_engfuncs.pfnServerPrint("FuzzNet connection failed.\n");
-		logfile << Logger::LOG_INFO << "FuzzNet connection failed\n";
-		//we set this to false so it doesn't keep trying to make requests to via FN
+		for (int retry = 0; retry < 5; retry++)
+		{
+			if (FnDataHandler::IsValidConnection())
+			{
+				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
+				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+				break;
+			}
+			else if (retry != 5)
+			{
+				g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
+			}
+		}
+
+		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
 		MSGlobals::CentralEnabled = false;
 	}
 
 	if (!IsVerifiedMap())
 	{
 		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("changelevel edana\n");
+		SERVER_COMMAND("map edana\n");
 	}
 
 	if (!IsVerifiedSC())
