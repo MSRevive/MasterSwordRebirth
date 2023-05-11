@@ -313,9 +313,10 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 			return m_Strings[s].c_str() - gpGlobals->pStringBase;
 	}
 
-	uint len = strlen(pszString) + 1;
-	char pszNewString[256];
+	size_t len = strlen(pszString) + 1;
+	char *pszNewString = new(char[len]);
 	strncpy(pszNewString, pszString, len);
+	
 	m_Strings.push_back(std::string(pszNewString));
 
 	return pszNewString - gpGlobals->pStringBase;
