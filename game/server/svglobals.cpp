@@ -39,6 +39,7 @@ cvar_t ms_dynamicnpc = {"ms_dynamicnpc", "", 0};
 cvar_t msallowkickvote = {"ms_allowkickvote", "1", FCVAR_SERVER};
 cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
 cvar_t ms_reset_time = {"ms_reset_time", "10", FCVAR_SERVER};
+cvar_t ms_reset_map = {"ms_reset_map", "edana", FCVAR_SERVER};
 cvar_t ms_version = {"ms_version", MS_VERSION, FCVAR_EXTDLL};
 cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER};
 //cvar_t	ms_trans_req	= {"ms_trans_req","0", FCVAR_SERVER }; //Thothie JUN2007 - max players required to activate a transition (0 = all on server) - nvm, changed method - nvm, changed method
@@ -91,6 +92,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_serverchar);
 	CVAR_REGISTER(&ms_joinreset);
 	CVAR_REGISTER(&ms_reset_time);
+	CVAR_REGISTER(&ms_reset_map);
 	CVAR_REGISTER(&ms_hp_limit);
 	CVAR_REGISTER(&msvote_farm_all_day);
 	CVAR_REGISTER(&msvote_map_type);

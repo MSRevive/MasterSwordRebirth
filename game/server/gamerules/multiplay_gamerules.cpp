@@ -184,7 +184,7 @@ void CHalfLifeMultiplay::Think( void )
 	}
 
 	//if ((strcmp(CVAR_GET_STRING("ms_reset_empty"), "0") != 0) && !UTIL_NumPlayers())
-	if ((CVAR_GET_FLOAT("ms_reset_time") >= 1.0) && !UTIL_NumPlayers())
+	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
@@ -194,7 +194,8 @@ void CHalfLifeMultiplay::Think( void )
 		{
 			ALERT(at_console, "Resetting server.\n");
 			g_ServerResetTimer = NULL;
-			SERVER_COMMAND("map edana\n");
+			std::string mapCmd = "map " + CVAR_GET_STRING("ms_reset_map") + "\n";
+			SERVER_COMMAND(mapCmd.c_str());
 		}
 	}
 

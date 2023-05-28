@@ -952,7 +952,7 @@ bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose
 					SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
 				}
 				else {
-					SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
+					//SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
 				}
 			}
 
