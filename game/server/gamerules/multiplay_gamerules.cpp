@@ -194,8 +194,9 @@ void CHalfLifeMultiplay::Think( void )
 		{
 			ALERT(at_console, "Resetting server.\n");
 			g_ServerResetTimer = NULL;
-			std::string mapCmd = "map " + CVAR_GET_STRING("ms_reset_map") + "\n";
-			SERVER_COMMAND(mapCmd.c_str());
+			std::string resetMap = CVAR_GET_STRING("ms_reset_map");
+			std::string mapCmd = "map " + resetMap + "\n";
+			SERVER_COMMAND((char*)mapCmd.c_str());
 		}
 	}
 
