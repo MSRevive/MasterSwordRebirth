@@ -2103,8 +2103,6 @@ void CBasePlayer::PostThink()
 	postthinkdbg("Check player fall");
 	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
-		float fvol = 0.5;
-
 		// ALERT ( at_console, "%f\n", m_flFallVelocity );
 
 		if (pev->watertype == CONTENT_WATER)
@@ -2118,9 +2116,9 @@ void CBasePlayer::PostThink()
 		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{ // after this point, we start doing damage
 
-			pev->punchangle.x += 72;
-			pev->punchangle.y += RANDOM_LONG(-90, 90);
-			pev->punchangle.z += RANDOM_LONG(-90, 90);
+			pev->punchangle.x += 22;
+			pev->punchangle.y += RANDOM_LONG(-20, 20);
+			pev->punchangle.z += RANDOM_LONG(-20, 20);
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage(this);
 
 			//HIT GROUND SOUNDS
@@ -2132,16 +2130,21 @@ void CBasePlayer::PostThink()
 			}
 			switch (RANDOM_LONG(0, 4))
 			{
-			case 0:
-				PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
-			case 1:
-				PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
-			case 2:
-				PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
-			case 3:
-				PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
-			case 4:
-				PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
+				case 0:
+					PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
+					break;
+				case 1:
+					PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
+					break;
+				case 2:
+					PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
+					break;
+				case 3:
+					PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
+					break;
+				case 4:
+					PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
+					break;
 			}
 
 			//PAIN sounds and TakeDamage()
@@ -2157,33 +2160,8 @@ void CBasePlayer::PostThink()
 
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), flFallDamage, DMG_FALL);
 			}
-
-			fvol = 1.0;
 		}
-		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
-		{
-			pev->punchangle.x += 20;
-			switch (RANDOM_LONG(0, 4))
-			{
-			case 0:
-				PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
-			case 1:
-				PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
-			case 2:
-				PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
-			case 3:
-				PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
-			case 4:
-				PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
-			}
-			fvol = 0.85;
-		}
-		else if (m_flFallVelocity < PLAYER_MIN_BOUNCE_SPEED)
-		{
-			fvol = 0;
-		}
-
-		if (fvol > 0.0)
+		else
 		{
 			// knock the screen around a little bit, temporary effect
 			pev->punchangle.x = m_flFallVelocity * 0.018; // punch x axis
