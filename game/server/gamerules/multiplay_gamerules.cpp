@@ -183,13 +183,17 @@ void CHalfLifeMultiplay::Think( void )
 			{ CTeam::Teams.erase( i ); delete pTeam; }
 	}
 
-	//if ((strcmp(CVAR_GET_STRING("ms_reset_empty"), "0") != 0) && !UTIL_NumPlayers())
+	//if player joins and timer was started than reset timer.
+	if (UTIL_NumPlayers() && g_ServerResetTimer)
+		g_ServerResetTimer = NULL;
+
 	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
 			g_ServerResetTimer = gpGlobals->time + (CVAR_GET_FLOAT("ms_reset_time")*60);
 
+		//reset server once timer expires
 		if (gpGlobals->time >= g_ServerResetTimer)
 		{
 			ALERT(at_console, "Resetting server.\n");
