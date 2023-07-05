@@ -345,6 +345,94 @@ BOOL CFuncMonsterClip::IsOn(void)
 }
 
 // -------------------------------------------------------------------------------
+//
+// Player only clip brush
+//
+// This brush will be invisible and solid for any player, but not for monsters
+// It can be toggled on and off
+//
+// -------------------------------------------------------------------------------
+
+#define SF_PLAYERCLIP_START_OFF 0x0001
+
+class CMSFuncPlayerClip : public CFuncWallToggle
+{
+public:
+	void Spawn(void);
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	void Touch(CBaseEntity* pOther);
+	void TurnOff(void);
+	void TurnOn(void);
+	BOOL IsOn(void);
+};
+
+LINK_ENTITY_TO_CLASS(ms_func_playerclip, CMSFuncPlayerClip);
+
+void CMSFuncPlayerClip::Spawn(void)
+{
+	CFuncWall::Spawn();
+
+	// Handle visibility
+	if (CVAR_GET_FLOAT("showtriggers") == 0)
+		pev->effects |= EF_NODRAW;
+	else
+		pev->effects &= ~EF_NODRAW;
+
+	if (pev->spawnflags & SF_PLAYERCLIP_START_OFF)
+		TurnOff();
+	else
+		TurnOn();
+}
+
+void CMSFuncPlayerClip::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	int status = IsOn();
+
+	if (ShouldToggle(useType, status))
+	{
+		if (status)
+			TurnOff();
+		else
+			TurnOn();
+	}
+
+	CScriptedEnt::Use(pActivator, pCaller, useType, value);
+}
+
+void CMSFuncPlayerClip::Touch(CBaseEntity* pOther)
+{
+	// Don't care if it's not a player
+	if (!pOther->IsPlayer())
+		return;
+
+	entvars_t* pevOther = pOther->pev;
+
+	pevOther->velocity = (pevOther->origin - VecBModelOrigin(pev)).Normalize() * pev->dmg;
+}
+
+void CMSFuncPlayerClip::TurnOff(void)
+{
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	UTIL_SetOrigin(pev, pev->origin);
+}
+
+void CMSFuncPlayerClip::TurnOn(void)
+{
+	pev->solid = SOLID_TRIGGER;
+	pev->movetype = MOVETYPE_PUSH;
+	UTIL_SetOrigin(pev, pev->origin);
+}
+
+BOOL CMSFuncPlayerClip::IsOn(void)
+{
+	if (pev->solid & SOLID_TRIGGER)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+// -------------------------------------------------------------------------------
 //Thothie AUG2007a - Blocks players only - func_playerclip
 // FAIL - always causes ModExtraData Cacheing error on touch
 // - attempting to remake as flag for func_monserclip
