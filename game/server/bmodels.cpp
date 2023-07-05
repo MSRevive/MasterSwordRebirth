@@ -274,27 +274,17 @@ void CFuncIllusionary ::Spawn(void)
 // specific monsters out of certain areas
 //
 // -------------------------------------------------------------------------------
-class CFuncMonsterClip : public CFuncWall
+
+#define SF_MONSTERCLIP_START_OFF 0x0001
+
+class CFuncMonsterClip : public CFuncWallToggle
 {
 public:
 	void Spawn(void);
-	//Thothie AUG2013_19 - attempt to make monsterclip toggle'able
-	Vector mclip_old_org;
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-	{
-		if (FBitSet(pev->flags, FL_MONSTERCLIP))
-		{
-			pev->flags &= ~(FL_MONSTERCLIP); //didn't cut it, hrmmm
-			//this works, but hacky
-			mclip_old_org = pev->origin;
-			pev->origin = Vector(8000, 8000, 8000);
-		}
-		else
-		{
-			pev->origin = mclip_old_org;
-			pev->flags |= FL_MONSTERCLIP;
-		}
-	}
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	void TurnOff(void);
+	void TurnOn(void);
+	BOOL IsOn(void);
 };
 
 LINK_ENTITY_TO_CLASS(func_monsterclip, CFuncMonsterClip);
@@ -302,9 +292,56 @@ LINK_ENTITY_TO_CLASS(func_monsterclip, CFuncMonsterClip);
 void CFuncMonsterClip::Spawn(void)
 {
 	CFuncWall::Spawn();
+
+	// Handle visibility
 	if (CVAR_GET_FLOAT("showtriggers") == 0)
-		pev->effects = EF_NODRAW;
+		pev->effects |= EF_NODRAW;
+	else
+		pev->effects &= ~EF_NODRAW;
+
+	if (pev->spawnflags & SF_MONSTERCLIP_START_OFF)
+		TurnOff();
+	else
+		TurnOn();
+}
+
+void CFuncMonsterClip::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+{
+	int status = IsOn();
+
+	if (ShouldToggle(useType, status))
+	{
+		if (status)
+			TurnOff();
+		else
+			TurnOn();
+	}
+
+	CScriptedEnt::Use(pActivator, pCaller, useType, value);
+}
+
+void CFuncMonsterClip::TurnOff(void)
+{
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	pev->flags &= ~FL_MONSTERCLIP;
+	UTIL_SetOrigin(pev, pev->origin);
+}
+
+void CFuncMonsterClip::TurnOn(void)
+{
+	pev->solid = SOLID_BSP;
+	pev->movetype = MOVETYPE_PUSH;
 	pev->flags |= FL_MONSTERCLIP;
+	UTIL_SetOrigin(pev, pev->origin);
+}
+
+BOOL CFuncMonsterClip::IsOn(void)
+{
+	if (pev->flags & FL_MONSTERCLIP)
+		return TRUE;
+	else
+		return FALSE;
 }
 
 // -------------------------------------------------------------------------------
