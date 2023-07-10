@@ -68,6 +68,12 @@ char *GetTGANameForRes(const char *pszName)
 //-----------------------------------------------------------------------------
 BitmapTGA *LoadTGAForRes(const char *pImageName)
 {
+	// This is a super hacky way to prevent attempts to load null
+	// or zero-length name files. The best solution would be to 
+	// prevent such attempts, but alas... --thesupersoup, 2023/07/09
+	if (!pImageName || strlen(pImageName) <= 0)
+		return nullptr;
+
 	BitmapTGA *pTGA = nullptr;
 
 	char sz[256];
@@ -430,7 +436,6 @@ CTFScrollButton::CTFScrollButton(int iArrow, const char *text, int x, int y, int
 	setFgColor(Scheme::sc_primary1);
 
 	// Load in the arrow
-	//m_pTGA = LoadTGAForRes( sArrowFilenames[iArrow] );
 	m_pTGA = MSBitmap::GetTGA(sArrowFilenames[iArrow]);
 	setImage(m_pTGA);
 
