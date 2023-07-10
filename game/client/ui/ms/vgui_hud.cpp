@@ -104,15 +104,15 @@ public:
 	VGUI_Status* m_Status; //Drigien MAY2008
 
 	//Text Windows ----------------------
-	mslist<class CInfoWindow*> InfoWindows;
-	mslist<class CInfoWindow*> HelpWindows;
+	std::vector<class CInfoWindow*> InfoWindows;
+	std::vector<class CInfoWindow*> HelpWindows;
 	void AddInfoWin(msstring_ref Title, msstring_ref Text);
 	void AddHelpWin(msstring_ref Title, msstring_ref Text);
-	void UpdateInfoWindows(mslist<CInfoWindow*>& Windows);
-	void RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx);
+	void UpdateInfoWindows(std::vector<CInfoWindow*>& Windows);
+	void RemoveInfoWindow(std::vector<CInfoWindow*>& Windows, int idx);
 
 	//Event Console ---------------------
-	mslist<VGUI_EventConsole*> m_Consoles;
+	std::vector<VGUI_EventConsole*> m_Consoles;
 	void PrintEvent(Color color, msstring_ref Text);
 	void PrintSayText(Color color, msstring_ref Text);
 	void StepInput(hudscroll_e ScrollCmd);
@@ -143,7 +143,7 @@ public:
 	//virtual void SetActiveInfo( int iInput );
 	virtual void Initialize(void);
 
-	mslist<IHUD_Interface*> m_HUDElements;
+	std::vector<IHUD_Interface*> m_HUDElements;
 };
 
 VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); }
@@ -210,11 +210,11 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 
 	//Health
 	dbg("Create Health");
-	m_HUDElements.add(m_Health = new VGUI_Health(this));
+	m_HUDElements.push_back(m_Health = new VGUI_Health(this));
 
 	//Status Icons
 	dbg("Create StatusIcons");
-	m_HUDElements.add(m_Status = new VGUI_Status(this)); //Drigien MAY2008
+	m_HUDElements.push_back(m_Status = new VGUI_Status(this)); //Drigien MAY2008
 
 	//ID Panel
 	dbg("Create ID");
@@ -222,7 +222,7 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 
 	//Vote Info Panel
 	dbg("Create Vote");
-	m_HUDElements.add(m_VoteInfo = new VGUI_VoteInfo(this));
+	m_HUDElements.push_back(m_VoteInfo = new VGUI_VoteInfo(this));
 
 	//Event Console
 	dbg("Create Event Console");
@@ -237,7 +237,7 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 	Prefs.BGTrans = "ms_evthud_bgtrans";
 	Prefs.Width = NULL;
 
-	m_Consoles.add(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
+	m_Consoles.push_back(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
 
 	//SayText Console
 	dbg("Create SayText Console");
@@ -251,7 +251,7 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 	Prefs.BGTrans = "ms_txthud_bgtrans";
 	Prefs.Width = "ms_txthud_width";
 
-	m_Consoles.add(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
+	m_Consoles.push_back(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
 
 	//Start Say text panel
 	dbg("Create SayText Typing Panel");
@@ -263,7 +263,7 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 
 	//Quick Slot Text
 	dbg("Create Quickslot Text");
-	m_HUDElements.add(m_QuickSlot = new VGUI_QuickSlot(this));
+	m_HUDElements.push_back(m_QuickSlot = new VGUI_QuickSlot(this));
 
 	enddbg;
 }
@@ -274,6 +274,7 @@ void CHUDPanel::Think()
 	startdbg;
 	//Update ID
 	dbg("m_ID->Update( );");
+	bool showHud = ShowHUD();
 	m_ID->Update();
 
 	//Update HUD Elements
@@ -283,6 +284,7 @@ void CHUDPanel::Think()
 		d += i;
 		dbg(d);
 		m_HUDElements[i]->Update();
+		m_HUDElements[i]->SetVisible(showHud);
 	}
 
 	dbg("Update InfoWindows");
@@ -297,15 +299,17 @@ void CHUDPanel::Think()
 		d += i;
 		dbg(d);
 		m_Consoles[i]->Update();
+		m_Consoles[i]->setVisible(showHud);
 	}
 
 	//Update Start Say Text
 	dbg("Start saytext");
 	m_StartSayText->Update();
+	m_StartSayText->setVisible(showHud);
 	enddbg;
 }
 
-void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
+void CHUDPanel::UpdateInfoWindows(std::vector<CInfoWindow*>& Windows)
 {
 	//Count backwards because the objects might delete themselves
 	for (int i = Windows.size() - 1; i >= 0; i--)
@@ -319,10 +323,10 @@ void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
 			RemoveInfoWindow(Windows, i);
 	}
 }
-void CHUDPanel::RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx)
+void CHUDPanel::RemoveInfoWindow(std::vector<CInfoWindow*>& Windows, int idx)
 {
 	CInfoWindow* pInfoWin = Windows[idx];
-	Windows.erase(idx);
+	Windows.erase(std::next(Windows.begin(), idx));
 	removeChild(pInfoWin);
 	pInfoWin->Remove();
 }
@@ -476,7 +480,7 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 		int idx = READ_BYTE();
 		if (!idx)
 			HelpParts.clear();
-		HelpParts.add(READ_STRING());
+		HelpParts.push_back(READ_STRING());
 	}
 	else if (Type == 3)
 	{

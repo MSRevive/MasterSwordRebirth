@@ -79,7 +79,7 @@ public:
 		setSize(x, y);
 	}
 
-	void Update(mslist<CInfoWindow *> &Windows, int idx)
+	void Update(std::vector<CInfoWindow *> &Windows, int idx)
 	{
 		float elapsedtime = gpGlobals->time - m_TimeDisplayed;
 
