@@ -1565,7 +1565,7 @@ void CHudSpectator::Reset()
 	if (strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
 	{
 		// update level overview if level changed
-		ParseOverviewFile();
+		// ParseOverviewFile(); // Overviews are not used in MSR as of now, and clutter the console with warnings when trying to load --thesupersoup 2023/07/09
 		LoadMapSprites();
 	}
 

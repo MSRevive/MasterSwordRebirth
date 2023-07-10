@@ -2938,7 +2938,10 @@ bool CScript::ScriptCmd_DeleteEntity(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msst
 
 //desc
 //- scope: shared, items
-//- Descriptions for items - limited to 72 characters.
+//- Descriptions for items
+
+const int SCRIPT_DESC_MAX_LENGTH = 96;
+
 bool CScript::ScriptCmd_Desc(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 	msstring sTemp;
@@ -2948,9 +2951,9 @@ bool CScript::ScriptCmd_Desc(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 		{
 			if (i) sTemp += " ";  sTemp += Params[i];
 		}
-		if (sTemp.len() > 72)
+		if (sTemp.len() > SCRIPT_DESC_MAX_LENGTH)
 		{
-			sTemp = sTemp.substr(0, 72); //APR2011_28 - Thothie buffer overrun
+			sTemp = sTemp.substr(0, SCRIPT_DESC_MAX_LENGTH); //APR2011_28 - Thothie buffer overrun
 			IScripted *pScripted = m.pScriptedEnt->GetScripted();
 			Print("WARNING: Description too long [%s]!\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
 		}
