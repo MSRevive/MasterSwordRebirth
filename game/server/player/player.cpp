@@ -6829,7 +6829,7 @@ bool CBasePlayer::SwapMusic(int musicArea, int mode, std::string track)
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, this->pev);
 		WRITE_BYTE(mode);
 
-		if (mode != MUSIC_STOP) //If playing music instead of stopping, send the music file
+		if (mode != MUSIC_STOP || track != "") //If playing music instead of stopping, send the music file
 		{
 			if (track.length() > 0) WRITE_STRING(track.c_str());
 			else WRITE_STRING("stop.mp3"); //have to send something. dont send empty strings
