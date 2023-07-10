@@ -2768,7 +2768,7 @@ void CBasePlayer::Spawn(void)
 		//See if music is playing for all players, then play for newly connected character
 		if (MSGlobals::AllMusic.length() > 0) //If playing music for all players
 		{
-			SwapMusic(-1,MSGlobals::AllMusicMode,MSGlobals::AllMusic);
+			SwapMusic(-1, MSGlobals::AllMusicMode, MSGlobals::AllMusic);
 		}
 
 		//debug

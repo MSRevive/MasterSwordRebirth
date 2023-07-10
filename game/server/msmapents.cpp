@@ -636,7 +636,13 @@ public:
 		{
 			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_STOP, m_sSong);
 		}
-		else
+
+		if (m_sSong.find(".mp3") != std::string::npos || m_sSong.find(".ogg") != std::string::npos)
+		{
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
+		}
+
+		if (m_sSong != MSGlobals::AllMusic)
 		{
 			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
 		}
