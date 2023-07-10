@@ -246,7 +246,7 @@ void MSCLGlobals::RemoveAllEntities()
 	MSCLGlobals::Think();
 
 	m_ClModels.clear(); //Cleanup client-side models/sprites
-	m_Strings.clear(); //Cleanup allocated strings, hopefully this prevents com_loadfile error...
+	std::vector<std::string>().swap(m_Strings); //Cleanup allocated strings, hopefully this prevents com_loadfile error...
 
 	//Re-initialize player
 	InitializePlayer();
