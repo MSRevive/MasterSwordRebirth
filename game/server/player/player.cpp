@@ -767,9 +767,16 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		if (pScripted)
 		{
 			for (int i = 0; i < pScripted->m_Scripts.size(); i++)							 // Check each
+			{
 				if (m_Scripts[i]->VarExists("game.effect.id"))								 //This is an effect
+				{
 					if (strcmp(m_Scripts[i]->GetVar("game.effect.removeondeath"), "1") == 0) //If the effect is SUPPOSED to be removed
+					{
 						m_Scripts[i]->RunScriptEventByName("effect_die");					 //Call this effect's die function
+						m_Scripts[i]->m.RemoveNextFrame = true;
+					}
+				}
+			}
 		}
 	}
 
@@ -4034,8 +4041,6 @@ void CBasePlayer::UpdateClientData(void)
 	for (int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript *Script = m_Scripts[i];
-		if (!Script->VarExists("game.effect.type"))
-			continue;
 
 		//Update stuff based on effect script variables.
 		//To check for a 'true' blocking value make sure that it has explicitly set to "0".  If it was never set at all, assume false.
