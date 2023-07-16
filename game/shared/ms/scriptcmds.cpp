@@ -5123,6 +5123,7 @@ bool CScript::ScriptCmd_RemoveEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 //- This is usually the best way to remove client side scripts, but be sure any sprites or lights they are using have a chance to expire.
 bool CScript::ScriptCmd_RemoveScript(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
+	if (strcmp(GetVar("game.effect.id"), "game.effect.id") != 0) RunScriptEventByName("effect_die");
 	m.RemoveNextFrame = true;
 	return true;
 }
