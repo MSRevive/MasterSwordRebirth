@@ -315,6 +315,10 @@ public:
 		}
 		pev->body = body; //Thothie (see above)
 		pev->skin = skin; //Thothie (see above)
+		pev->controller[0] = 255 / 2;
+		pev->controller[1] = 255 / 2;
+		pev->controller[2] = 255 / 2;
+		pev->controller[3] = 255 / 2;
 	}
 };
 LINK_ENTITY_TO_CLASS(env_model, CStaticModel);
