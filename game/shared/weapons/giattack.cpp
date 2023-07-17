@@ -755,9 +755,9 @@ void CGenericItem::StrikeLand()
 	flDmgFraction = max(flDmgFraction, 0);
 
 	//Thothie SEP2007 - attempting to make level limit work by decreasing accuracy
-	bool thoth_unskilled = false;
+	bool bUnderleveled = false;
 	if (m_pOwner->GetSkillStat(CurrentAttack->StatProf, CurrentAttack->PropProf) < CurrentAttack->RequiredSkill)
-		thoth_unskilled = true;
+		bUnderleveled = true;
 
 	float flMissPercentage = 0.0;
 
@@ -770,7 +770,7 @@ void CGenericItem::StrikeLand()
 	//always hit, reuse flAccuracyDefault as crit chance.
 	float flHitPercentage = 100;
 
-	if (thoth_unskilled)
+	if (bUnderleveled)
 		flHitPercentage = flHitPercentage * 0.25; //thothie - seems to work
 	if (m_pOwner->m_HITMulti > 0)
 		flHitPercentage *= m_pOwner->m_HITMulti; //FEB2009_18
@@ -782,7 +782,7 @@ void CGenericItem::StrikeLand()
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
 	float flDamage = CurrentAttack->flDamage + RANDOM_LONG(-CurrentAttack->flDamageRange, CurrentAttack->flDamageRange);
 	flDamage *= flDmgFraction;
-	if (thoth_unskilled)
+	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
 	//Print( "In damage: %f\nLast charged: %f\n", flDamage, m_LastChargedAmt );
@@ -1710,12 +1710,11 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				}
 
 				//Check for critical hits and multiply damage accordingly
-				/* if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
+				if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
 					Damage.flDamage *= Damage.flCritMutli;
-					//Damage.AttackCrit = true;
-					Damage.AttackCrit = false; 
+					Damage.AttackCrit = true;
+					pItemInflictor->CallScriptEvent("weapon_crit_success"); //call script event for item
 				}
-				*/ //temp til we can get around to modifying weapons.
 			}
 			else
 			{

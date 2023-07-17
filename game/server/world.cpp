@@ -729,22 +729,6 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 		MSGlobals::map_flags = pkvd->szValue;
 	}
 	//Thothie JAN2013_10 - dynamic music settings
-	else if (FStrEq(pkvd->szKeyName, "map_music_idle_file"))
-	{
-		MSGlobals::map_music_idle_file = pkvd->szValue;
-	}
-	else if (FStrEq(pkvd->szKeyName, "map_music_idle_length"))
-	{
-		MSGlobals::map_music_idle_length = pkvd->szValue;
-	}
-	else if (FStrEq(pkvd->szKeyName, "map_music_combat_file"))
-	{
-		MSGlobals::map_music_combat_file = pkvd->szValue;
-	}
-	else if (FStrEq(pkvd->szKeyName, "map_music_combat_length"))
-	{
-		MSGlobals::map_music_combat_length = pkvd->szValue;
-	}
 	else if ( FStrEq(pkvd->szKeyName, "spawnlimit") )
 	{
 		MSGlobals::SpawnLimit = atoi(pkvd->szValue); //Thothie OCT2016_18 spawnlimiter

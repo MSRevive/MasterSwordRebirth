@@ -5,36 +5,13 @@
 // $NoKeywords: $
 //=============================================================================
 
-// There are hud.h's coming out of the woodwork so this ensures that we get the right one.
-#if defined( DMC_BUILD )
-#include "../dmc/cl_dll/hud.h"
-#include "../dmc/cl_dll/cl_util.h"
-#elif defined( RICOCHET_BUILD )
-#include "../ricochet/cl_dll/hud.h"
-#include "../ricochet/cl_dll/cl_util.h"
-#else
 #include "hud.h"
 #include "cl_util.h"
-#endif
-
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
-
-#if defined( DMC_BUILD )
-#include "../dmc/cl_dll/parsemsg.h"
-#include "../dmc/cl_dll/hud_servers.h"
-#include "../dmc/cl_dll/demo.h"
-#elif defined( RICOCHET_BUILD )
-#include "../ricochet/cl_dll/parsemsg.h"
-#include "../ricochet/cl_dll/hud_servers.h"
-#include "../ricochet/cl_dll/demo.h"
-#else
 #include "parsemsg.h"
-#include "hud_servers.h"
 #include "demo.h"
-#endif
-
 #include "demo_api.h"
 #include "voice_status.h"
 #include "r_efx.h"
@@ -45,11 +22,9 @@
 #include "vgui_loadtga.h"
 #include "vgui_helpers.h"
 #include "vgui_mousecode.h"
-
-
+#include "ms/filesystem_shared.h"
 
 using namespace vgui;
-
 
 //extern int cam_thirdperson;
 extern "C" int CL_IsThirdPerson();
@@ -300,21 +275,20 @@ int CVoiceStatus::VidInit()
 
 	// Figure out the voice head model height.
 	m_VoiceHeadModelHeight = 45;
-	char *pFile = (char *)gEngfuncs.COM_LoadFile("scripts/voicemodel.txt", 5, NULL);
-	if (pFile)
+	const auto fileContents = FileSystem_LoadFileIntoBuffer("scripts/voicemodel.txt", FileContentFormat::Text);
+	if (!fileContents.empty())
 	{
+		// TODO: token can potentially be larger than buffer.
 		char token[4096];
-		gEngfuncs.COM_ParseFile(pFile, token);
+		gEngfuncs.COM_ParseFile((char*)fileContents.data(), token);
 		if (token[0] >= '0' && token[0] <= '9')
 		{
 			m_VoiceHeadModelHeight = (float)atof(token);
 		}
-
-		gEngfuncs.COM_FreeFile(pFile);
 	}
 
 	m_VoiceHeadModel = gEngfuncs.pfnSPR_Load("sprites/voiceicon.spr");
-	return TRUE;
+	return true;
 }
 
 

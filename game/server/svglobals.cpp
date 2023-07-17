@@ -15,7 +15,7 @@
 #include "filesystem_shared.h"
 #include "angelscript/svglobals_angelscript.h"
 
-ofstream modelout;
+std::ofstream modelout;
 int HighestPrecache = -1;
 int TotalModelPrecaches = 1;
 int PreCount = 0; //Thothie OCT2007a Precache map verification
@@ -40,6 +40,7 @@ cvar_t ms_dynamicnpc = {"ms_dynamicnpc", "", 0};
 cvar_t msallowkickvote = {"ms_allowkickvote", "1", FCVAR_SERVER};
 cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
 cvar_t ms_reset_time = {"ms_reset_time", "10", FCVAR_SERVER};
+cvar_t ms_reset_map = {"ms_reset_map", "edana", FCVAR_SERVER};
 cvar_t ms_version = {"ms_version", MS_VERSION, FCVAR_EXTDLL};
 cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER};
 //cvar_t	ms_trans_req	= {"ms_trans_req","0", FCVAR_SERVER }; //Thothie JUN2007 - max players required to activate a transition (0 = all on server) - nvm, changed method - nvm, changed method
@@ -94,6 +95,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_serverchar);
 	CVAR_REGISTER(&ms_joinreset);
 	CVAR_REGISTER(&ms_reset_time);
+	CVAR_REGISTER(&ms_reset_map);
 	CVAR_REGISTER(&ms_hp_limit);
 	CVAR_REGISTER(&msvote_farm_all_day);
 	CVAR_REGISTER(&msvote_map_type);
@@ -179,25 +181,6 @@ void MSWorldSpawn()
 	MSGlobals::CanCreateCharOnMap = false;
 	MSGlobals::ServerSideChar = ms_serverchar.value ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
-
-#ifndef RELEASE_LOCKDOWN
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("********                 \n");
-	UTIL_LogPrintf("********  DEVELOPER BUILD\n");
-	UTIL_LogPrintf("********                 \n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-	UTIL_LogPrintf("***************************************\n");
-#endif
-
-	//g_SummonedMonsters = 0;
-	//UnBanAll( ); //Unban all players //Thothie FEB2008a - commenting, seeing if this breaks
-
-	//Force items.txt to be unmodified --- Undone, servers need to be updated
-	//PRECACHE_GENERIC("dlls/sc.dll");
-	//ENGINE_FORCE_UNMODIFIED(force_exactfile,NULL,NULL,"dlls/sc.dll");
 	
 	//Force the client to use the same client lib as the server. - Solokiller
 	//This ensures that clients don't replace their client and send exploit commands.
@@ -208,24 +191,31 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "data/scripts/core/msc.asc");
 
-	if (FnDataHandler::IsValidConnection())
+	if (MSGlobals::CentralEnabled)
 	{
-		g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-		logfile << Logger::LOG_INFO << "FuzzNet connected\n";
-		MSGlobals::HasConnected = true;
-	}
-	else if (MSGlobals::CentralEnabled)
-	{
-		g_engfuncs.pfnServerPrint("FuzzNet connection failed.\n");
-		logfile << Logger::LOG_INFO << "FuzzNet connection failed\n";
-		//we set this to false so it doesn't keep trying to make requests to via FN
+		for (int retry = 0; retry < 5; retry++)
+		{
+			if (FnDataHandler::IsValidConnection())
+			{
+				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
+				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+				break;
+			}
+			else if (retry != 5)
+			{
+				g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
+			}
+		}
+
+		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
 		MSGlobals::CentralEnabled = false;
 	}
 
 	if (!IsVerifiedMap())
 	{
 		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("changelevel edana\n");
+		SERVER_COMMAND("map edana\n");
 	}
 
 	if (!IsVerifiedSC())
@@ -377,19 +367,19 @@ void WRITE_FLOAT(float Float)
 int PRECACHE_SOUND(const char *pszSound)
 {
 	//Thothie tracking model precaches, avoiding duplicates
-	bool thoth_nolog = false;
+	bool bNoLog = false;
 	for (int i = 0; i < gSoundPrecacheList.size(); i++)
 	{
-		msstring thoth_yarglbarblb = pszSound;
-		if (strcmp(thoth_yarglbarblb.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
+		msstring msPrecacheSoundName = pszSound;
+		if (strcmp(msPrecacheSoundName.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
 		{
 			//logfile << "(Precache Duplicate Avoided)" << "\n"; //temporary
 			//return 0;
-			thoth_nolog = true;
+			bNoLog = true;
 			break;
 		}
 	}
-	if (!thoth_nolog)
+	if (!bNoLog)
 	{
 		gSoundPrecacheList.add_blank();
 		gSoundPrecacheList[gSoundPrecacheCount].PrecacheName = pszSound;
@@ -402,19 +392,19 @@ int PRECACHE_SOUND(const char *pszSound)
 int PRECACHE_MODEL(const char *pszModelname)
 {
 	//Thothie tracking model precaches, avoiding duplicates
-	bool thoth_nolog = false;
+	bool bNoLog = false;
 	for (int i = 0; i < gModelPrecacheList.size(); i++)
 	{
-		msstring thoth_yarglbarbl = pszModelname;
-		if (strcmp(thoth_yarglbarbl.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
+		msstring msPrecacheModelName = pszModelname;
+		if (strcmp(msPrecacheModelName.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
 		{
 			//logfile << "(Precache Duplicate Avoided)" << "\n"; //temporary
 			//return 0;
-			thoth_nolog = true;
+			bNoLog = true;
 			break;
 		}
 	}
-	if (!thoth_nolog)
+	if (!bNoLog)
 	{
 		gModelPrecacheList.add_blank();
 		gModelPrecacheList[gModelPrecacheCount].PrecacheName = pszModelname;

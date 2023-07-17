@@ -52,10 +52,6 @@ vote_t MSGlobals::CurrentVote;
 msstring MSGlobals::MapName;
 msstring MSGlobals::map_addparams = "";				//Thothie DEC2014_17 - global addparams
 msstring MSGlobals::map_flags = "";					//Thothie DEC2014_17 - map flags
-msstring MSGlobals::map_music_idle_file = "none";	//Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_idle_length = "0";	//Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_combat_file = "none"; //Thothie JAN2013_10 - dynamic music settings
-msstring MSGlobals::map_music_combat_length = "0";	//Thothie JAN2013_10 - dynamic music settings
 msstring MSGlobals::MapTitle;						//Thothie SEP2007a
 msstring MSGlobals::MapDesc;						//Thothie SEP2007a
 msstring MSGlobals::MapWeather;						//Thothie SEP2007a
@@ -74,6 +70,9 @@ IScripted *MSGlobals::GameScript = NULL;
 char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else
 int MSGlobals::ClEntities[CLPERMENT_TOTAL] = {500, 501, 502};
 int MSGlobals::gSoundPrecacheCount = 0;
+
+std::string MSGlobals::AllMusic = "";
+int MSGlobals::AllMusicMode = 0;
 
 msstringlist vote_t::VotesTypes;		//All The vote types
 msstringlist vote_t::VotesTypesAllowed; //All The vote types allowed
@@ -176,6 +175,11 @@ void MSGlobals::EndMap()
 	//LogMemoryUsage( "[End Map Remaining Memory Allocations]" );
 
 	MSGlobals::GameType = GAMETYPE_ADVENTURE; //Default to adventure game for next level
+
+	//Reset vars for music
+	AllMusic.clear();
+	AllMusicMode = 0;
+
 	MemMgr::EndMap();
 }
 
@@ -462,13 +466,13 @@ void CScriptedEnt::Touch(CBaseEntity *pOther)
 	if (!m_HandleTouch)
 		return;
 
-	msstring thoth_targetname = STRING(pev->targetname);
-	msstring thoth_target = STRING(pev->target);
+	msstring msTouchTargetName = STRING(pev->targetname);
+	msstring msTouchTarget = STRING(pev->target);
 
 	Parameters.clearitems();
 	Parameters.add(EntToString(pOther));
-	Parameters.add(thoth_targetname);
-	Parameters.add(thoth_target);
+	Parameters.add(msTouchTargetName);
+	Parameters.add(msTouchTarget);
 
 	CallScriptEvent("game_touch", &Parameters);
 }

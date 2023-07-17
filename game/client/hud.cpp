@@ -26,7 +26,6 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "parsemsg.h"
-#include "hud_servers.h"
 #include "vgui_teamfortressviewport.h"
 
 #include "demo.h"
@@ -47,10 +46,9 @@
 #include "ms/clglobal.h"
 #include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
+#include "fmod/soundengine.h"
 //-----------------
-
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
-
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
 
@@ -120,13 +118,6 @@ void __CmdFunc_ForceCloseCommandMenu( void )
 	}
 }*/
 
-void __CmdFunc_ToggleServerBrowser(void)
-{
-	if (gViewPort)
-	{
-		gViewPort->ToggleServerBrowser();
-	}
-}
 //Master Sword
 //void __CmdFunc_PlayerUseItem(void);
 //void __CmdFunc_PlayerDropItem(void);
@@ -245,8 +236,8 @@ int __MsgFunc_AllowSpec(const char *pszName, int iSize, void *pbuf)
 
 int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 {
-  gHUD.MsgFunc_ViewModel(pszName, iSize, pbuf);
-  return 1;
+	gHUD.MsgFunc_ViewModel(pszName, iSize, pbuf);
+	return 1;
 }
 
 #define SetMSHUD(ptr, type) \
@@ -254,7 +245,7 @@ int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 	strncpy(ptr->Name,  #type, 32 )
 	 
 // This is called every time the DLL is loaded
-void CHud ::Init(void)
+void CHud::Init(void)
 {
 	//MasterSword Initializations:
 	//ClientCmd( "r_shadows 1" );
@@ -314,9 +305,6 @@ void CHud ::Init(void)
 	HOOK_MESSAGE(SetFOV);
 	//HOOK_MESSAGE( Concuss );
 
-	// TFFree CommandMenu
-	HOOK_COMMAND("togglebrowser", ToggleServerBrowser);
-
 	HOOK_MESSAGE(TeamNames);
 	HOOK_MESSAGE(MOTD);
 	HOOK_MESSAGE(ServerName);
@@ -339,20 +327,8 @@ void CHud ::Init(void)
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
 
-	m_pSpriteList = NULL;
-
-	// Clear any old HUD list
-	if (m_pHudList)
-	{
-		HUDLIST *pList;
-		while (m_pHudList)
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			free(pList);
-		}
-		m_pHudList = NULL;
-	}
+	m_Sprites.clear();
+	m_HudList.clear();
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;
@@ -386,52 +362,203 @@ void CHud ::Init(void)
 	MSCLGlobals::Initialize();
 	//------------
 
-	ServersInit();
-
 	MsgFunc_ResetHUD(0, 0, NULL);
 }
 
-// CHud destructor
-// cleans up memory allocated for m_rg* arrays
-CHud ::~CHud()
+void CHud::Shutdown()
 {
-	delete[] m_rghSprites;
-	delete[] m_rgrcRects;
-	delete[] m_rgszSpriteNames;
-
-	if (m_pHudList)
-	{
-		HUDLIST *pList;
-		while (m_pHudList)
-		{
-			pList = m_pHudList;
-			m_pHudList = m_pHudList->pNext;
-			//free( pList );
-		}
-		m_pHudList = NULL;
-	}
-
-	m_Misc->FreeMemory();
-	ServersShutdown();
+	m_Music->Shutdown();
 }
 
 // GetSpriteIndex()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array
 // returns 0 if sprite not found
-int CHud ::GetSpriteIndex(const char *SpriteName)
+int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (int i = 0; i < m_iSpriteCount; i++)
+	for (std::size_t i = 0; i < m_Sprites.size(); ++i)
 	{
-		if (strncmp(SpriteName, m_rgszSpriteNames + (i * MAX_SPRITE_NAME_LENGTH), MAX_SPRITE_NAME_LENGTH) == 0)
-			return i;
+		if (SpriteName == m_Sprites[i].Name)
+			return static_cast<int>(i);
 	}
 
 	return -1; // invalid sprite
 }
 
-void CHud ::VidInit(void)
+// Redraw
+// step through the local data,  placing the appropriate graphics & text as appropriate
+// returns 1 if they've changed, 0 otherwise
+int CHud::Redraw(float flTime, int intermission)
+{
+	//Print( "Time: %f\n", flTime );
+	m_fOldTime = m_flTime; // save time of previous redraw
+	m_flTime = flTime;
+	m_flTimeDelta = (double)m_flTime - m_fOldTime;
+	static float m_flShotTime = 0;
+
+	// Clock was reset, reset delta
+	if (m_flTimeDelta < 0)
+	{
+		m_flTimeDelta = 0;
+	}
+
+	// Bring up the scoreboard during intermission
+	if (gViewPort)
+	{
+		if (m_iIntermission && !intermission)
+		{
+			// Have to do this here so the scoreboard goes away
+			m_iIntermission = intermission;
+			gViewPort->HideCommandMenu();
+			gViewPort->HideScoreBoard();
+		}
+		else if (!m_iIntermission && intermission)
+		{
+			gViewPort->HideCommandMenu();
+			gViewPort->ShowScoreBoard();
+
+			// Take a screenshot if the client's got the cvar set
+			//if ( CVAR_GET_FLOAT( "hud_takesshots" ) != 0 )
+			//	m_flShotTime = flTime + 1.0;	// Take a screenshot in a second
+		}
+	}
+
+	if (m_flShotTime && m_flShotTime < flTime)
+	{
+		gEngfuncs.pfnClientCmd("snapshot\n");
+		m_flShotTime = 0;
+	}
+
+	m_iIntermission = intermission;
+
+	// if no redrawing is necessary
+	// return 0;
+
+	for (auto hudElement : m_HudList)
+	{
+		if (!intermission)
+		{
+			if ((hudElement->m_iFlags & HUD_ACTIVE) != 0 && (m_iHideHUDDisplay & HIDEHUD_ALL) == 0)
+				hudElement->Draw(flTime);
+		}
+		else
+		{ // it's an intermission,  so only draw hud elements that are set to draw during intermissions
+			if ((hudElement->m_iFlags & HUD_INTERMISSION) != 0)
+				hudElement->Draw(flTime);
+		}
+	}
+
+	// are we in demo mode? do we need to draw the logo in the top corner?
+	// if (m_iLogo)
+	// {
+	// 	int x, y, i;
+
+	// 	if (m_hsprLogo == 0)
+	// 		m_hsprLogo = LoadSprite("sprites/%d_logo.spr");
+
+	// 	SPR_Set(m_hsprLogo, 250, 250, 250);
+
+	// 	x = SPR_Width(m_hsprLogo, 0);
+	// 	x = ScreenWidth - x;
+	// 	y = SPR_Height(m_hsprLogo, 0) / 2;
+
+	// 	// Draw the logo at 20 fps
+	// 	int iFrame = (int)(flTime * 20) % MAX_LOGO_FRAMES;
+	// 	i = grgLogoFrame[iFrame] - 1;
+
+	// 	SPR_DrawAdditive(i, x, y, NULL);
+	// }
+
+	/*
+	if ( g_iVisibleMouse )
+	{
+		void IN_GetMousePos( int *mx, int *my );
+		int mx, my;
+
+		IN_GetMousePos( &mx, &my );
+		
+		if (m_hsprCursor == 0)
+		{
+			char sz[256];
+			 strncpy(sz,  "sprites/cursor.spr", sizeof(sz) );
+			m_hsprCursor = SPR_Load( sz );
+		}
+
+		SPR_Set(m_hsprCursor, 250, 250, 250 );
+		
+		// Draw the logo at 20 fps
+		SPR_DrawAdditive( 0, mx, my, NULL );
+	}
+	*/
+
+	//m_Music->Redraw(flTime, intermission);
+
+	return 1;
+}
+
+extern int g_iVisibleMouse;
+float HUD_GetFOV(void);
+extern cvar_t *sensitivity;
+void CHud::Think(void)
+{
+	startdbg;
+
+	dbg("Begin");
+
+	//Master Sword
+	dbg("Call MSCLGlobals::Think");
+	MSCLGlobals::Think();
+	//------------
+	int newfov = 0;
+	
+	for (auto hudElement : m_HudList)
+	{
+		if ((hudElement->m_iFlags & HUD_ACTIVE) != 0)
+		{
+			hudElement->Think();
+		}
+	}	
+
+	dbg("FOV Operations");
+	newfov = HUD_GetFOV();
+	if (newfov == 0)
+	{
+		m_iFOV = default_fov->value;
+	}
+	else
+	{
+		m_iFOV = newfov;
+	}
+
+	// the clients fov is actually set in the client data update section of the hud
+
+	// Set a new sensitivity
+	if (m_iFOV == default_fov->value)
+	{
+		// reset to saved sensitivity
+		m_flMouseSensitivity = 0;
+	}
+	else
+	{
+		// set a new sensitivity that is proportional to the change from the FOV default
+		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)default_fov->value) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+	}
+
+	// think about default fov
+	if (m_iFOV == 0)
+	{ // only let players adjust up in fov,  and only if they are not overriden by something else
+		m_iFOV = max(default_fov->value, 90);
+	}
+
+	m_Music->Think();
+
+	dbg("End");
+
+	enddbg;
+}
+
+void CHud::VidInit(void)
 {
 	startdbg;
 
@@ -453,72 +580,52 @@ void CHud ::VidInit(void)
 		m_iRes = 640;
 
 	// Only load this once
-	if (!m_pSpriteList)
+	// Only load this once
+	if (m_Sprites.empty())
 	{
 		// we need to load the hud.txt, and all sprites within
-		m_pSpriteList = SPR_GetList("sprites/hud.txt", &m_iSpriteCountAllRes);
+		int spriteCountAllRes;
+		client_sprite_t* spriteList = SPR_GetList("sprites/hud.txt", &spriteCountAllRes);
 
-		if (m_pSpriteList)
+		if (spriteList)
 		{
-			// count the number of sprites of the appropriate res
-			m_iSpriteCount = 0;
-			client_sprite_t *p = m_pSpriteList;
-			for (int j = 0; j < m_iSpriteCountAllRes; j++)
-			{
-				if (p->iRes == m_iRes)
-					m_iSpriteCount++;
-				p++;
-			}
+			m_Sprites.reserve(spriteCountAllRes);
 
-			// allocated memory for sprite handle arrays
-			m_rghSprites = new HLSPRITE[m_iSpriteCount];
-			m_rgrcRects = new wrect_t[m_iSpriteCount];
-			m_rgszSpriteNames = msnew char[m_iSpriteCount * MAX_SPRITE_NAME_LENGTH];
-
-			p = m_pSpriteList;
-			int index = 0;
-			int j = 0;
-			for (j = 0; j < m_iSpriteCountAllRes; j++)
+			client_sprite_t* p = spriteList;
+			for (int j = 0; j < spriteCountAllRes; ++j)
 			{
 				if (p->iRes == m_iRes)
 				{
-					char sz[256];
-					 _snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
-					m_rghSprites[index] = SPR_Load(sz);
-					m_rgrcRects[index] = p->rc;
-					strncpy(&m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH);
-
-					index++;
+					HudSprite hudSprite;
+					strncpy(hudSprite.Name, p->szName, MAX_SPRITE_NAME_LENGTH);
+					strncpy(hudSprite.SpriteName, p->szSprite, 64);
+					m_Sprites.push_back(hudSprite);
 				}
 
-				p++;
-			}
-		}
-	}
-	else
-	{
-		// we have already have loaded the sprite reference from hud.txt, but
-		// we need to make sure all the sprites have been loaded (we've gone through a transition, or loaded a save game)
-		client_sprite_t *p = m_pSpriteList;
-		int index = 0;
-		for (int j = 0; j < m_iSpriteCountAllRes; j++)
-		{
-			if (p->iRes == m_iRes)
-			{
-				char sz[256];
-				_snprintf(sz, sizeof(sz),  "sprites/%s.spr",  p->szSprite );
-				m_rghSprites[index] = SPR_Load(sz);
-				index++;
+				++p;
 			}
 
-			p++;
+			m_Sprites.shrink_to_fit();
+
+			gEngfuncs.COM_FreeFile(spriteList);
 		}
+	}
+
+	// we have already have loaded the sprite reference from hud.txt, but
+	// we need to make sure all the sprites have been loaded (we've gone through a transition, or loaded a save game)
+	for (auto& hudSprite : m_Sprites)
+	{
+		char file[256];
+		snprintf(file, 256, "sprites/%s.spr", hudSprite.SpriteName);
+		hudSprite.Handle = SPR_Load(file);
+		//hudSprite.Handle = SPR_Load(fmt::format("sprites/{}.spr", hudSprite.SpriteName.c_str()).c_str());
 	}
 
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
 	m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+	const auto& numberRect = m_Sprites[m_HUD_number_0].Rectangle;
+	m_iFontHeight = numberRect.bottom - numberRect.top;
 
 	//Master Sword
 	dbg("MS Vid_Initialization - chars");
@@ -530,24 +637,23 @@ void CHud ::VidInit(void)
 	m_HUD_char_A = GetSpriteIndex("char_A");
 
 	//Re-initialize the HUD elements
-	dbg("MS Vid_Initialization - m_pHudList"); //thothie more debug
-	HUDLIST *pList = m_pHudList;
-
-	dbg("MS Vid_Initialization - pList Loop"); //thothie more debug
-	while (pList)
+	for (auto hudElement : m_HudList)
 	{
-		//SetDebugProgress( CHUDThinkPrg, msstring( "Call Think on HUD: " ) + pList->p->Name );
-		pList->p->VidInit();
-		pList = pList->pNext;
+		hudElement->VidInit();
 	}
 
 	//Reload the Master Sword global sprite/TGA list
 	//(only sprites are reloaded, not TGAs)
 	dbg("Reload global sprite list");
 	MSBitmap::ReloadSprites();
-	//------------
 
 	enddbg;
+}
+
+//this should get called whenever the client changes levels or servers.
+void CHud::ReloadClient()
+{
+	m_Music->Reload();
 }
 
 /*int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
@@ -697,32 +803,10 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 
 void CHud::AddHudElem(CHudBase *phudelem)
 {
-	HUDLIST *pdl, *ptemp;
-
-	//phudelem->Think();
-
 	if (!phudelem)
 		return;
 
-	pdl = (HUDLIST *)malloc(sizeof(HUDLIST));
-	if (!pdl)
-		return;
-
-	memset(pdl, 0, sizeof(HUDLIST));
-	pdl->p = phudelem;
-
-	if (!m_pHudList)
-	{
-		m_pHudList = pdl;
-		return;
-	}
-
-	ptemp = m_pHudList;
-
-	while (ptemp->pNext)
-		ptemp = ptemp->pNext;
-
-	ptemp->pNext = pdl;
+	m_HudList.push_back(phudelem);
 }
 
 float CHud::GetSensitivity(void)

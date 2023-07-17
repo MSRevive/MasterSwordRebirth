@@ -1,12 +1,10 @@
 #include "global.h"
 #include "cl_entity.h"
-#include "CTakeDamageInfo.h"
+#include <vector>
 
 class CBaseEntity;
 
 inline CBaseEntity *PrivData(entvars_t *pev) { return (CBaseEntity *)pev->pContainingEntity; }
-
-#define MSCVAR_QUICKSLOT_TIMEOUT "ms_quickslot_timeout"
 
 //Client-side Globals
 //===================
@@ -74,7 +72,8 @@ public:
 	static void EndMap();								//Map ended.  Do client-side specific cleanup
 
 	//Entity-based
-	static mslist<char *> m_Strings;								  //All client-side globally allocated strings
+	static std::vector<std::string> m_Strings;
+	//static mslist<char *> m_Strings;								  //All client-side globally allocated strings
 	static mslist<CBaseEntity *> m_ClEntites;						  //All client-side entities
 	static mslist<cl_entity_t> m_ClModels;							  //Extra models to be updated/animated client-side
 	static cl_entity_t CLViewEntities[CLPERMENT_TOTAL];				  //All View entity models
@@ -83,7 +82,6 @@ public:
 	static void PrintAllEntites();									  //Print all client entities to console
 	static void RemoveAllEntities();								  //Delete all client entites
 	static void SetupGlobalEngFuncRedirects(void);					  //Set up engine functions at dll load
-	static byte *LoadFile(char *pFileName, int *pLength = NULL);	  //Load file into memory
 	static void SpawnIntoServer();									  //Called each map change
 	static void Cleanup();											  //Clean up all the stuff used from the previous map
 

@@ -23,13 +23,14 @@
 #include "com_model.h"
 #include "demo_api.h"
 #include "event_api.h"
-#include "studio_util.h"
+#include "render/studio_util.h"
 #include "screenfade.h"
 
 //Master Sword
 #include "vgui_scorepanel.h"
 #include "vgui_menudefsshared.h"
 #include "logger.h"
+#include "ms/filesystem_shared.h"
 
 #pragma warning(disable : 4244)
 
@@ -51,10 +52,9 @@ extern vec3_t v_sim_org;   // last sim origin
 
 void SpectatorMode(void)
 {
-
 	if (gEngfuncs.Cmd_Argc() <= 1)
 	{
-		gEngfuncs.Con_Printf("usage:  spec_mode <Main Mode> [<Inset Mode>]\n");
+		gEngfuncs.Con_Printf("usage: spec_mode <Main Mode> [<Inset Mode>]\n");
 		return;
 	}
 
@@ -898,8 +898,6 @@ bool CHudSpectator::ParseOverviewFile()
 	char token[1024];
 	float height;
 
-	char* pFile = NULL, * pStart = NULL;
-
 	memset(&m_OverviewData, 0, sizeof(m_OverviewData));
 
 	// fill in standrd values
@@ -923,75 +921,74 @@ bool CHudSpectator::ParseOverviewFile()
 
 	_snprintf(filename, sizeof(filename), "overviews/%s.txt", levelname);
 
-	pFile = pStart = (char*)gEngfuncs.COM_LoadFile(filename, 5, NULL);
+	const auto fileContents = FileSystem_LoadFileIntoBuffer(filename, FileContentFormat::Text);
 
-	if (!pFile)
+	if (fileContents.empty())
 	{
-		gEngfuncs.Con_Printf("Couldn't open file %s. Using default values for overiew mode.\n", filename);
+		gEngfuncs.Con_DPrintf("Couldn't open file %s. Using default values for overiew mode.\n", filename);
 		return false;
 	}
 
+	auto pfile = (char*)fileContents.data();
 	while (true)
 	{
-		pStart = gEngfuncs.COM_ParseFile(pStart, token);
+		pfile = gEngfuncs.COM_ParseFile(pfile, token);
 
-		if (!pStart)
+		if (!pfile)
 			break;
 
 		if (!stricmp(token, "global"))
 		{
 			// parse the global data
-			pStart = gEngfuncs.COM_ParseFile(pStart, token);
+			pfile = gEngfuncs.COM_ParseFile(pfile, token);
 
 			if (stricmp(token, "{"))
 			{
-				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
 				return false;
 			}
 
-			pStart = gEngfuncs.COM_ParseFile(pStart, token);
+			pfile = gEngfuncs.COM_ParseFile(pfile, token);
 
 			while (stricmp(token, "}"))
 			{
 				if (!stricmp(token, "zoom"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.zoom = atof(token);
 				}
 				else if (!stricmp(token, "origin"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.origin[0] = atof(token);
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.origin[1] = atof(token);
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.origin[2] = atof(token);
 				}
 				else if (!stricmp(token, "rotated"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.rotated = atoi(token);
 				}
 				else if (!stricmp(token, "inset"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.insetWindowX = atof(token);
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.insetWindowY = atof(token);
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.insetWindowWidth = atof(token);
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					m_OverviewData.insetWindowHeight = atof(token);
 				}
 				else
 				{
-					gEngfuncs.COM_FreeFile(pFile);
 					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token);
 					return false;
 				}
 
-				pStart = gEngfuncs.COM_ParseFile(pStart, token); // parse next token
+				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
 			}
 		}
 		else if (!stricmp(token, "layer"))
@@ -1000,50 +997,45 @@ bool CHudSpectator::ParseOverviewFile()
 
 			if (m_OverviewData.layers == OVERVIEW_MAX_LAYERS)
 			{
-				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. ( too many layers )\n", filename);
 				return false;
 			}
 
-			pStart = gEngfuncs.COM_ParseFile(pStart, token);
+			pfile = gEngfuncs.COM_ParseFile(pfile, token);
 
 			if (stricmp(token, "{"))
 			{
-				gEngfuncs.COM_FreeFile(pFile);
 				gEngfuncs.Con_Printf("Error parsing overview file %s. (expected { )\n", filename);
 				return false;
 			}
 
-			pStart = gEngfuncs.COM_ParseFile(pStart, token);
+			pfile = gEngfuncs.COM_ParseFile(pfile, token);
 
 			while (stricmp(token, "}"))
 			{
 				if (!stricmp(token, "image"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					strncpy(m_OverviewData.layersImages[m_OverviewData.layers], token, 255);
 				}
 				else if (!stricmp(token, "height"))
 				{
-					pStart = gEngfuncs.COM_ParseFile(pStart, token);
+					pfile = gEngfuncs.COM_ParseFile(pfile, token);
 					height = atof(token);
 					m_OverviewData.layersHeights[m_OverviewData.layers] = height;
 				}
 				else
 				{
-					gEngfuncs.COM_FreeFile(pFile);
 					gEngfuncs.Con_Printf("Error parsing overview file %s. (%s unkown)\n", filename, token);
 					return false;
 				}
 
-				pStart = gEngfuncs.COM_ParseFile(pStart, token); // parse next token
+				pfile = gEngfuncs.COM_ParseFile(pfile, token); // parse next token
 			}
 
 			m_OverviewData.layers++;
 		}
 	}
-
-	gEngfuncs.COM_FreeFile(pFile);
 
 	m_mapZoom = m_OverviewData.zoom;
 	m_mapOrigin = m_OverviewData.origin;
@@ -1573,7 +1565,7 @@ void CHudSpectator::Reset()
 	if (strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
 	{
 		// update level overview if level changed
-		ParseOverviewFile();
+		// ParseOverviewFile(); // Overviews are not used in MSR as of now, and clutter the console with warnings when trying to load --thesupersoup 2023/07/09
 		LoadMapSprites();
 	}
 

@@ -17,14 +17,13 @@
 
 #include "monsters/msmonster.h"
 #include "sharedutil.h"
-#include "music.h"
 #include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
-#define THOTH_MAX_ITEMS 75 //Thothie APR2011_28
+#define NUM_MAX_ITEMS 75 //Thothie APR2011_28
 
 enum sbar_data
 {
@@ -426,6 +425,7 @@ public:
 	int CurrentMenu;
 	PlayerButtonStruct pbs;
 	float m_SprintDelay;
+	bool bSprintDelayWarned = false;
 	char m_szAnimTorso[32], //The current torso anim to use
 		m_szAnimLegs[32];	//The current leg anim to use
 	float m_TimeResetLegs;	//Hold the attack legs anim until this time
@@ -521,7 +521,10 @@ public:
 	CTeam *m_pTeam,	  //My current party
 		*m_pJoinTeam; //Waiting for acceptance into this party
 	float m_TimeGainHP;
-	entityinfo_t m_MusicArea;  //The current music area I'm in
+
+	int m_iMusicArea = -1;  //Index of the last music trigger player used / was a part of
+	bool SwapMusic(int musicArea, int mode, std::string track); //Attempts to swap music with a new area trigger. Returns true if successful
+
 	float m_TimeSendCharInfo;  //Delay to send info about the next character
 	bool m_LoadedInitialChars; //Whether I've tried to load my characters for display yet
 #endif
@@ -542,9 +545,7 @@ public:
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
 	void Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStorageName, float flFeeRatio, entityinfo_t &Entity);
 	void Storage_Send();
-	void Music_Play(songplaylist &Songs, CBaseEntity *pMusicArea);
-	void Music_Stop(CBaseEntity *pMusicArea);
-	bool LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
+	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, msstring_ref Name, msstring_ref Data);
 	float TraceAttack(damage_t &Damage);

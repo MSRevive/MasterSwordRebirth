@@ -758,9 +758,16 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		if (pScripted)
 		{
 			for (int i = 0; i < pScripted->m_Scripts.size(); i++)							 // Check each
+			{
 				if (m_Scripts[i]->VarExists("game.effect.id"))								 //This is an effect
+				{
 					if (strcmp(m_Scripts[i]->GetVar("game.effect.removeondeath"), "1") == 0) //If the effect is SUPPOSED to be removed
+					{
 						m_Scripts[i]->RunScriptEventByName("effect_die");					 //Call this effect's die function
+						m_Scripts[i]->m.RemoveNextFrame = true;
+					}
+				}
+			}
 		}
 	}
 
@@ -2094,8 +2101,6 @@ void CBasePlayer::PostThink()
 	postthinkdbg("Check player fall");
 	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
-		float fvol = 0.5;
-
 		// ALERT ( at_console, "%f\n", m_flFallVelocity );
 
 		if (pev->watertype == CONTENT_WATER)
@@ -2109,9 +2114,9 @@ void CBasePlayer::PostThink()
 		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED)
 		{ // after this point, we start doing damage
 
-			pev->punchangle.x += 72;
-			pev->punchangle.y += RANDOM_LONG(-90, 90);
-			pev->punchangle.z += RANDOM_LONG(-90, 90);
+			pev->punchangle.x += 22;
+			pev->punchangle.y += RANDOM_LONG(-20, 20);
+			pev->punchangle.z += RANDOM_LONG(-20, 20);
 			float flFallDamage = g_pGameRules->FlPlayerFallDamage(this);
 
 			//HIT GROUND SOUNDS
@@ -2123,25 +2128,29 @@ void CBasePlayer::PostThink()
 			}
 			switch (RANDOM_LONG(0, 4))
 			{
-			case 0:
-				PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
-			case 1:
-				PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
-			case 2:
-				PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
-			case 3:
-				PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
-			case 4:
-				PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
+				case 0:
+					PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
+					break;
+				case 1:
+					PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
+					break;
+				case 2:
+					PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
+					break;
+				case 3:
+					PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
+					break;
+				case 4:
+					PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
+					break;
 			}
 
 			//PAIN sounds and TakeDamage()
 			if (flFallDamage > 0)
 			{
 				if (flFallDamage < pev->health)
-				{ // If you didn't die, yelp in pain!
-					//FEB2010_28 Thothie - moving script side to deal with gender
-					CallScriptEvent("game_fallpain_sound");
+				{ // If you didn't die
+					CallScriptEvent("game_fall");
 				}
 
 				//if( Class && Class->id == CLASS_ROGUE )
@@ -2149,33 +2158,8 @@ void CBasePlayer::PostThink()
 
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), flFallDamage, DMG_FALL);
 			}
-
-			fvol = 1.0;
 		}
-		else if (m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2)
-		{
-			pev->punchangle.x += 20;
-			switch (RANDOM_LONG(0, 4))
-			{
-			case 0:
-				PlaySound(CHAN_AUTO, "player/hitground1.wav", 1.0, true);
-			case 1:
-				PlaySound(CHAN_AUTO, "player/hitground2.wav", 1.0, true);
-			case 2:
-				PlaySound(CHAN_AUTO, "common/bodydrop1.wav", 1.0, true);
-			case 3:
-				PlaySound(CHAN_AUTO, "common/bodydrop2.wav", 1.0, true);
-			case 4:
-				PlaySound(CHAN_AUTO, "common/bodydrop3.wav", 1.0, true);
-			}
-			fvol = 0.85;
-		}
-		else if (m_flFallVelocity < PLAYER_MIN_BOUNCE_SPEED)
-		{
-			fvol = 0;
-		}
-
-		if (fvol > 0.0)
+		else
 		{
 			// knock the screen around a little bit, temporary effect
 			pev->punchangle.x = m_flFallVelocity * 0.018; // punch x axis
@@ -2418,8 +2402,6 @@ bool CBasePlayer::IsActive()
 {
 	IScripted *iScripted = this->GetScripted();
 	if (!iScripted)
-		return false;
-	if (atoi(iScripted->GetFirstScriptVar("IS_AFK")) == 1)
 		return false;
 	if (atoi(iScripted->GetFirstScriptVar("PLR_IN_WORLD")) != 1)
 		return false;
@@ -2780,6 +2762,13 @@ void CBasePlayer::Spawn(void)
 	{
 		dbg("Spawn in regular mode");
 		CallScriptEvent("game_player_putinworld"); //Thothie MAR2008a
+
+		//See if music is playing for all players, then play for newly connected character
+		if (MSGlobals::AllMusic.length() > 0) //If playing music for all players
+		{
+			SwapMusic(-1, MSGlobals::AllMusicMode, MSGlobals::AllMusic);
+		}
+
 		//debug
 		Print(">>>>> spawn: m_NextTransition: %s m_SpawnTransition: %s m_OldTransition: %s\n", m_SpawnTransition, m_SpawnTransition, m_OldTransition);
 
@@ -4043,8 +4032,6 @@ void CBasePlayer::UpdateClientData(void)
 	for (int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript *Script = m_Scripts[i];
-		if (!Script->VarExists("game.effect.type"))
-			continue;
 
 		//Update stuff based on effect script variables.
 		//To check for a 'true' blocking value make sure that it has explicitly set to "0".  If it was never set at all, assume false.
@@ -6079,18 +6066,18 @@ bool CBasePlayer::PrepareSpell(const char *pszName)
 {
 	//Thothie - make sure player actually HAS SPELL before giving it to him
 	//otherwise you can summon any spell with prep command
-	bool thoth_madespell = false;
+	bool bCanGiveSpell = false;
 	for (int i = 0; i < m_SpellList.size(); i++)
 	{
 		msstring ShortName = m_SpellList[i];
 		if (ShortName == pszName)
 		{
 			return Magic::Prepare(pszName, this);
-			thoth_madespell = true;
+			bCanGiveSpell = true;
 			break;
 		}
 	}
-	return thoth_madespell;
+	return bCanGiveSpell;
 }
 
 class CLightSensor : public CBaseEntity
@@ -6339,8 +6326,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	m_CharacterState = CHARSTATE_LOADING;
 
 	//Thothie JUL2007 - prevent loading of STEAM_ID_PENDING chars
-	msstring thoth_displayname = DisplayName();
-	if (thoth_displayname.starts_with("LOAD_FAILED-RECONNECT"))
+	msstring msDisplayName = DisplayName();
+	if (msDisplayName.starts_with("LOAD_FAILED-RECONNECT"))
 	{
 		KickPlayer("\nNo clicky means no clicky. Please reconnect.\n");
 		return false;
@@ -6551,6 +6538,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	WRITE_STRING_LIMIT(Data.Name, 32);
 	MESSAGE_END();
 
+	//Send music data 
+
 	dbg("Call CBasePlayer::Spawn()");
 	Spawn();
 
@@ -6720,57 +6709,7 @@ void CBasePlayer::Storage_Send()
 		}
 	}
 }
-void CBasePlayer::Music_Play(mslist<song_t> &Songs, CBaseEntity *pMusicArea)
-{
-	//NOV2014_12 - Dont think this is used by msarea_music anymore
-	//likely still used by mstrig_music, which maybe should be undone
 
-	if (m_MusicArea && m_MusicArea.Entity()->Intersects(this))
-		return; //I'm already standing within a music area
-
-	//AUG2013_13 Thothie - moved to event for better handling
-	//using index 0 SHOULD be safe, as SFAIK, no msarea_music uses multiple tracks
-	static msstringlist Params;
-	Params.clearitems();
-	Params.add(Songs[0].Name.c_str());
-	Params.add(FloatToString(Songs[0].Length));
-	//Thothie NOV2014_10 - allow game_music to set idle music, when touching msarea_music
-	msstring caller_type = STRING(pMusicArea->pev->classname);
-	Print("DEBUG: Music_Play Caller %s", caller_type.c_str());
-	if (caller_type.starts_with("msarea_music"))
-		Params.add("1");
-	CallScriptEvent("game_music", &Params);
-
-	if (Songs[0].Name.contains("!prev_music"))
-	{
-		Songs[0].Name = GetFirstScriptVar("PLR_PREV_MUSIC");
-		Songs[0].Length = atoi(GetFirstScriptVar("PLR_PREV_MUSIC_LENGTH"));
-	}
-
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pev);
-	WRITE_BYTE(0);
-	WRITE_BYTE(Songs.size());
-	for (int i = 0; i < Songs.size(); i++)
-	{
-		//SetScriptVar("PLR_CURRENT_MUSIC", Songs[i].Name.c_str()); //Thothie JAN2013_08 - (moved to event, see above)
-		WRITE_STRING_LIMIT(Songs[i].Name, WRITE_STRING_MAX);
-		WRITE_FLOAT(Songs[i].Length);
-	}
-	MESSAGE_END();
-
-	m_MusicArea = pMusicArea;
-}
-void CBasePlayer::Music_Stop(CBaseEntity *pMusicArea)
-{
-	if (m_MusicArea && m_MusicArea.Entity()->Intersects(this))
-		return; //I'm already standing within a music area
-
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, pev);
-	WRITE_BYTE(1);
-	MESSAGE_END();
-
-	m_MusicArea = pMusicArea;
-}
 void CBasePlayer::SaveChar()
 {
 	//Save right now
@@ -6875,4 +6814,25 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer)
 		WRITE_SHORT((int)pPlayer->m_HP);	//FEB2008a -- Shuriken
 	}
 	MESSAGE_END();
+}
+
+bool CBasePlayer::SwapMusic(int musicArea, int mode, std::string track)
+{
+	if (musicArea != m_iMusicArea || musicArea == -1)
+	{
+		m_iMusicArea = musicArea;
+
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_MUSIC], NULL, this->pev);
+		WRITE_BYTE(mode);
+
+		if (mode != MUSIC_STOP || track.length() > 0) //If playing music instead of stopping, send the music file
+		{
+			WRITE_STRING(track.c_str());
+		}
+
+		MESSAGE_END();
+
+		return true;
+	}
+	return false;
 }

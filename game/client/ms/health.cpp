@@ -29,7 +29,7 @@
 
 //HUD stuff
 #include "inc_huditem.h"
-#include "../vgui_teamfortressviewport.h"
+#include "vgui_teamfortressviewport.h"
 
 #include "health.h"
 #include "hudmisc.h"

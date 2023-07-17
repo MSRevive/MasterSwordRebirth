@@ -22,6 +22,7 @@
 #include "../public/keydefs.h"
 #include "view.h"
 #include "exports.h"
+#include "clientlibrary.h"
 
 #include "../thirdparty/SDL2/SDL_mouse.h"
 #include "../thirdparty/SDL2/SDL_gamecontroller.h"
@@ -33,6 +34,7 @@ int g_iVisibleMouse = 0;
 
 extern cl_enginefunc_t gEngfuncs;
 extern int iMouseInUse;
+extern CClientLibrary gClient;
 
 extern kbutton_t in_strafe;
 extern kbutton_t in_mlook;
@@ -89,6 +91,7 @@ static int mouseactive = 0;
 int mouseinitialized;
 static int mouseparmsvalid;
 static int mouseshowtoggle = 1;
+static bool g_ReceivedFirstMouseActivate = false;
 
 // joystick defines and variables
 // where should defines be moved?
@@ -222,6 +225,12 @@ IN_ActivateMouse
 */
 void CL_DLLEXPORT IN_ActivateMouse(void)
 {
+	if (!g_ReceivedFirstMouseActivate)
+	{
+		g_ReceivedFirstMouseActivate = true;
+		gClient.PostInitialize();
+	}
+
 	if (mouseinitialized)
 	{
 #ifdef _WIN32
@@ -296,6 +305,7 @@ IN_Shutdown
 */
 void IN_Shutdown(void)
 {
+	g_ReceivedFirstMouseActivate = false;
 	IN_DeactivateMouse();
 
 #ifdef _WIN32

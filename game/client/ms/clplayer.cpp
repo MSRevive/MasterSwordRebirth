@@ -36,11 +36,11 @@
 #include "stats/stats.h"
 #include "logger.h"
 #include "mscharacter.h"
-#include "../vgui_scorepanel.h"
-#include "vgui_hud.h"
+#include "vgui_scorepanel.h"
+#include "ms/vgui_hud.h"
 #include "action.h"
-#include "../vgui_teamfortressviewport.h"
-#include "vgui_containerlist.h"
+#include "vgui_teamfortressviewport.h"
+#include "ms/vgui_containerlist.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;
@@ -55,7 +55,7 @@ CBasePlayer player;
 int playerBodyArray[16]; //MiB MAR2010_12 Armor Fix FINAL
 
 //Master Sword player functionality
-void ShowWeaponDesc(CGenericItem *pItem);
+void ShowWeaponDesc(CGenericItem* pItem);
 void Storage_Show(msstring_ref DisplayName, msstring_ref StorageName, float flFeeRatio);
 void UpdateActiveMenus();
 
@@ -74,7 +74,7 @@ CBaseEntity :: Killed
 If weapons code "kills" an entity, just set its effects to EF_NODRAW
 =====================
 */
-void CBaseEntity ::Killed(entvars_t *pevAttacker, int iGib)
+void CBaseEntity::Killed(entvars_t* pevAttacker, int iGib)
 {
 	pev->effects |= EF_NODRAW;
 }
@@ -85,7 +85,7 @@ CBasePlayer::Killed
 
 =====================
 */
-void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
+void CBasePlayer::Killed(entvars_t* pevAttacker, int iGib)
 {
 	//Referencing pev here causes crashes... no time to find out why
 	if (m_CharacterState != CHARSTATE_LOADED)
@@ -162,14 +162,14 @@ void CBasePlayer::Think(void)
 	startdbg;
 
 	dbg("Begin");
-	cl_entity_s *clplayer = gEngfuncs.GetLocalPlayer();
+	cl_entity_s* clplayer = gEngfuncs.GetLocalPlayer();
 	pev->iuser1 = clplayer->index;
 	pev->origin = clplayer->origin;
 	pev->angles = clplayer->angles;
 	pev->v_angle = clplayer->angles;
 
 	msstring vsGlowColor = CVAR_GET_STRING("ms_glowcolor");
-	if(!FStrEq(mLastGlowColor,vsGlowColor))
+	if (!FStrEq(mLastGlowColor, vsGlowColor))
 	{
 		strncpy(mLastGlowColor, vsGlowColor, sizeof(mLastGlowColor));
 		ServerCmd(UTIL_VarArgs("SetGlowColor \"%s\"\n", vsGlowColor.c_str()));
@@ -213,9 +213,10 @@ void CBasePlayer::Think(void)
 
 void CBasePlayer::DoSprint()
 {
+
 	//she's dead jim
 	if (pev->deadflag != DEAD_NO)
- 		return;
+		return;
 
 	//serial duckers aren't allowed to sprint
 	if (FBitSet(player.pev->flags, FL_DUCKING))
@@ -234,8 +235,20 @@ void CBasePlayer::DoSprint()
 		return;
 
 	//sprint cooldown.
-	if (m_SprintDelay > gpGlobals->time)
-		return;
+	// if (!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) && (m_SprintDelay > gpGlobals->time)) 
+	// {
+	// 	//always give the user feedback if they are trying to do something reasonable
+	// 	//requires a bool as it will otherwise send you a message for every frame for 0.3 seconds.
+	// 	if (!bSprintDelayWarned) {
+	// 		//this fires immediately after you stop sprinting but it still gets the message across.
+	// 		SendEventMsg(HUDEVENT_UNABLE, "You need to wait before sprinting again.");
+	// 		bSprintDelayWarned = true;
+	// 	}
+	// 	return;
+	// }
+
+	//grab cvar to turn off or on spring log message levels
+	std::string sCVARSprintText = CVAR_GET_STRING("ms_sprint_verbose");
 
 	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
@@ -243,12 +256,16 @@ void CBasePlayer::DoSprint()
 		{
 			if (player.Stamina <= 1)
 			{
-				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+				if (sCVARSprintText != "0") {
+					SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to run.");
+				}
 				return;
 			}
 
 			SetBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg("You break into a jog.");
+			if (sCVARSprintText == "2") {
+				SendEventMsg("You break into a jog.");
+			}
 		}
 	}
 
@@ -261,31 +278,38 @@ void CBasePlayer::DoSprint()
 		if (!FBitSet(pbs.ButtonsDown, IN_FORWARD) || FBitSet(m_StatusFlags, PLAYER_MOVE_STOPRUN))
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg("You slow down and begin walking casually.");
-			m_SprintDelay = gpGlobals->time + 0.3; //0.4 second delay for sprinting
+			if (sCVARSprintText == "2") {
+				SendEventMsg("You slow down and begin walking casually.");
+			}
+			//m_SprintDelay = gpGlobals->time + 0.3; //0.3 second delay for sprinting
 		}
 
 		//ran out of stamina
 		if (player.Stamina <= 0)
 		{
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+			if (sCVARSprintText != "0") {
+				SendEventMsg(HUDEVENT_UNABLE, "You are too exhausted to continue running.");
+			}
 		}
 
 		//sprint interrupted
 		if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) ||
-		FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN) ||
-		FBitSet(player.pev->flags, FL_DUCKING) ||
-		(player.pev->velocity.Length2D() < fLastSpeed - 50))
+			FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN) ||
+			FBitSet(player.pev->flags, FL_DUCKING) ||
+			(player.pev->velocity.Length2D() < fLastSpeed - 50))
 		{
 			SetBits(pbs.BlockButtons, IN_RUN); //block button while in use.
-			m_SprintDelay = gpGlobals->time + 0.3;
+			//m_SprintDelay = gpGlobals->time + 0.3;
 			ClearBits(m_StatusFlags, PLAYER_MOVE_RUNNING);
-			SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+			if (sCVARSprintText != "0") {
+				SendEventMsg(HUDEVENT_UNABLE, "You lose your running speed.");
+			}
 		}
 	}
 
 	fLastSpeed = player.pev->velocity.Length2D();
+	//bSprintDelayWarned = false;
 }
 
 void CBasePlayer::CheckSpeed()
@@ -396,8 +420,8 @@ void CBasePlayer::DoSprint()
 	fLastSpeed = player.pev->velocity.Length2D();
 }*/
 
-const char *CBasePlayer::TeamID(void) { return GetPartyName(); }
-const char *CBasePlayer::GetPartyName(void)
+const char* CBasePlayer::TeamID(void) { return GetPartyName(); }
+const char* CBasePlayer::GetPartyName(void)
 {
 	int PlayerIdx = MSCLGlobals::GetLocalPlayerIndex();
 	return g_PlayerExtraInfo[PlayerIdx].teamname;
@@ -415,7 +439,7 @@ UTIL_TraceLine
 Don't actually trace, but act like the trace didn't hit anything.
 =====================
 */
-void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr)
+void UTIL_TraceLine(const Vector& vecStart, const Vector& vecEnd, IGNORE_MONSTERS igmon, edict_t* pentIgnore, TraceResult* ptr)
 {
 	memset(ptr, 0, sizeof(*ptr));
 	ptr->flFraction = 1.0;
@@ -428,7 +452,7 @@ UTIL_ParticleBox
 For debugging, draw a box around a player made out of particles
 =====================
 */
-void UTIL_ParticleBox(CBasePlayer *player, float *mins, float *maxs, float life, unsigned char r, unsigned char g, unsigned char b)
+void UTIL_ParticleBox(CBasePlayer* player, float* mins, float* maxs, float life, unsigned char r, unsigned char g, unsigned char b)
 {
 	int i;
 	vec3_t mmin, mmax;
@@ -439,7 +463,7 @@ void UTIL_ParticleBox(CBasePlayer *player, float *mins, float *maxs, float life,
 		mmax[i] = player->pev->origin[i] + maxs[i];
 	}
 
-	gEngfuncs.pEfxAPI->R_ParticleBox((float *)&mmin, (float *)&mmax, 5.0, 0, 255, 0);
+	gEngfuncs.pEfxAPI->R_ParticleBox((float*)&mmin, (float*)&mmax, 5.0, 0, 255, 0);
 }
 
 /*
@@ -452,8 +476,8 @@ For debugging, draw boxes for other collidable players
 void UTIL_ParticleBoxes(void)
 {
 	int idx;
-	physent_t *pe;
-	cl_entity_t *player;
+	physent_t* pe;
+	cl_entity_t* player;
 	vec3_t mins, maxs;
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
@@ -476,14 +500,14 @@ void UTIL_ParticleBoxes(void)
 			mins = pe->origin + pe->mins;
 			maxs = pe->origin + pe->maxs;
 
-			gEngfuncs.pEfxAPI->R_ParticleBox((float *)&mins, (float *)&maxs, 0, 0, 255, 2.0);
+			gEngfuncs.pEfxAPI->R_ParticleBox((float*)&mins, (float*)&maxs, 0, 0, 255, 2.0);
 		}
 	}
 
 	gEngfuncs.pEventAPI->EV_PopPMStates();
 }
 
-physent_t *MSUTIL_EntityByIndex(int playerindex)
+physent_t* MSUTIL_EntityByIndex(int playerindex)
 {
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 	gEngfuncs.pEventAPI->EV_PushPMStates();
@@ -491,7 +515,7 @@ physent_t *MSUTIL_EntityByIndex(int playerindex)
 
 	for (int idx = 1; idx < 256; idx++)
 	{
-		physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(idx);
+		physent_t* pe = gEngfuncs.pEventAPI->EV_GetPhysent(idx);
 		if (!pe)
 			break;
 
@@ -511,7 +535,7 @@ UTIL_ParticleLine
 For debugging, draw a line made out of particles
 =====================
 */
-void UTIL_ParticleLine(CBasePlayer *player, float *start, float *end, float life, unsigned char r, unsigned char g, unsigned char b)
+void UTIL_ParticleLine(CBasePlayer* player, float* start, float* end, float life, unsigned char r, unsigned char g, unsigned char b)
 {
 	gEngfuncs.pEfxAPI->R_ParticleLine(start, end, r, g, b, life);
 }
@@ -523,7 +547,7 @@ HUD_WeaponsPostThink
 Run ItemPostFrame() as nessesary
 =====================
 */
-void HUD_WeaponsPostThink(local_state_s *from, local_state_s *to, usercmd_t *cmd, double time, unsigned int random_seed)
+void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
 	startdbg;
 	dbg("Begin");
@@ -680,7 +704,7 @@ runfuncs is 1 if this is the first time we've predicted this command.  If so, so
 be ignored
 =====================
 */
-void _DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed)
+void _DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
 	DBG_INPUT;
 	startdbg;
@@ -710,7 +734,7 @@ bool CBasePlayer::CheckHandSwitch() //No longer called.  Client now sends 'hand'
 
 	return true;
 }
-void ShowWeaponDesc(CGenericItem *pItem)
+void ShowWeaponDesc(CGenericItem* pItem)
 {
 	if (!pItem)
 		return;
@@ -718,14 +742,14 @@ void ShowWeaponDesc(CGenericItem *pItem)
 	static char cDescString[256];
 
 	if (!pItem->DisplayDesc.len())
-		 strncpy(cDescString,  "No Description", sizeof(cDescString) );
+		strncpy(cDescString, "No Description", sizeof(cDescString));
 	else
 	{
-		char amt[16] = {""};
+		char amt[16] = { "" };
 		if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) && pItem->iQuantity > 1)
-			 _snprintf(amt, sizeof(amt),  " (%i)",  pItem->iQuantity );
+			_snprintf(amt, sizeof(amt), " (%i)", pItem->iQuantity);
 
-		 _snprintf(cDescString, sizeof(cDescString),  "%s%s",  pItem->DisplayDesc.c_str(),  amt );
+		_snprintf(cDescString, sizeof(cDescString), "%s%s", pItem->DisplayDesc.c_str(), amt);
 	}
 	static client_textmessage_t msg;
 	msg.effect = 1;
@@ -746,7 +770,7 @@ void __CmdFunc_PlayerDesc(void)
 	ShowWeaponDesc(player.ActiveItem());
 }
 //Handles all inventory messages
-int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 {
 	startdbg;
 	dbg("Begin");
@@ -757,11 +781,11 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 
 	switch (Operation)
 	{
-	//New item
+		//New item
 	case 0:
 	{
 		dbg("Add item");
-		CGenericItem *pItem = ReadGenericItem(true);
+		CGenericItem* pItem = ReadGenericItem(true);
 		if (pItem)
 		{
 			//Add the item, without any checks (free hand, weight, etc.)
@@ -796,7 +820,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		dbg("Update item");
 		ulong lID = READ_LONG();
 		READ_REWIND_LONG(); //I read the ID, put the offset back so that ReadGenericItem() can read it
-		CGenericItem *pItem = MSUtil_GetItemByID(lID);
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 		if (pItem)
 		{
 			int LastLoc = pItem->m_Location;
@@ -823,7 +847,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 	{
 		dbg("Remove item");
 		ulong ItemID = READ_LONG();
-		CGenericItem *pItem = MSUtil_GetItemByID(ItemID, &player);
+		CGenericItem* pItem = MSUtil_GetItemByID(ItemID, &player);
 		if (pItem)
 		{
 			//Must check if item is still on the player...
@@ -848,20 +872,20 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		ulong ContainerID = READ_LONG();
 
 		dbg("Read Long");
-		CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, &player);
+		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 
 		dbg("get pContainer");
 		if (!pContainer)
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't find container") + (int)ContainerID);
 
 		dbg("get pItem");
-		CGenericItem *pItem = ReadGenericItem(true);
+		CGenericItem* pItem = ReadGenericItem(true);
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add to container' msg but client couldn't find item");
 
 		if (pContainer && pItem && !pItem->PutInPack(pContainer))
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't put ") + pItem->DisplayName() + " in " + pContainer->DisplayName());
-		
+
 		bDoInvUpdate = true;
 	}
 	break;
@@ -871,12 +895,12 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 	{
 		dbg("Remove item from container");
 		ulong ContainerID = READ_LONG();
-		CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, &player);
+		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 		if (!pContainer)
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'remove from container' msg but client couldn't find container") + (int)ContainerID);
 
 		ulong ItemID = READ_LONG();
-		CGenericItem *pItem = MSUtil_GetItemByID(ItemID);
+		CGenericItem* pItem = MSUtil_GetItemByID(ItemID);
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'remove from container' msg but client couldn't find item");
 
@@ -908,10 +932,10 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		// Params: ID, Attacknum, prop, value
 		dbg("AttackProps");
 		ulong lID = READ_LONG();
-		CGenericItem *pItem = MSUtil_GetItemByID(lID);
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		int attackNum = READ_BYTE();
-		attackdata_t *AttData = &pItem->m_Attacks[attackNum];
+		attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 
 		msstring PropName = READ_STRING();
 		msstring PropValue = READ_STRING();
@@ -991,61 +1015,61 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 	case 7:
 		//Shuriken FEB2008a - setviewmodelprop
 		//setviewmodelprop edits APR2008a MIB
+	{
+		dbg("setviewmodelprop");
+		msstring Mode = READ_STRING();
+		int iHand = READ_SHORT();
+		int iParam1;
+		float fParam1;
+		msstring sParam1;
+
+		if (Mode == "model")
+			sParam1 = READ_STRING();
+		else
 		{
-			dbg("setviewmodelprop");
-			msstring Mode = READ_STRING();
-			int iHand = READ_SHORT();
-			int iParam1;
-			float fParam1;
-			msstring sParam1;
-
-			if (Mode == "model")			
-				sParam1 = READ_STRING();			
+			if (Mode == "animspeed")
+				fParam1 = READ_FLOAT();
 			else
-			{
-				if (Mode == "animspeed")				
-					fParam1 = READ_FLOAT();				
-				else				
-					iParam1 = READ_BYTE();				
-			}
+				iParam1 = READ_BYTE();
+		}
 
-			CGenericItem *pItem = player.Hand(iHand);
-			if (pItem)
+		CGenericItem* pItem = player.Hand(iHand);
+		if (pItem)
+		{
+			if (Mode == "submodel")
 			{
-				if (Mode == "submodel")
-				{
-					pItem->m_ViewModelPart = iParam1;
-					pItem->m_ViewModelSubmodel = READ_BYTE();
-					//pItem->m_ViewModelBody = Param1;
-				}
-				else if (Mode == "skin")
-					pItem->m_Skin = iParam1;
-				else if (Mode == "rendermode")
-					pItem->m_RenderMode = iParam1;
-				else if (Mode == "renderfx")
-					pItem->m_RenderFx = iParam1;
-				else if (Mode == "renderamt")
-					pItem->m_RenderAmt = iParam1;
-				else if (Mode == "model")
-				{
-					//Print( "%s\n", sParam1.c_str() );
-					pItem->m_ViewModel = sParam1;
-				}
-				else if (Mode == "animspeed")
-				{
-					//Thothie OCT2011_30 viewnim_speed
-					Print("DEBUG: cl_got_animspeed %f\n", fParam1);
-					pItem->m_ViewModelAnimSpeed = fParam1;
-				}
+				pItem->m_ViewModelPart = iParam1;
+				pItem->m_ViewModelSubmodel = READ_BYTE();
+				//pItem->m_ViewModelBody = Param1;
+			}
+			else if (Mode == "skin")
+				pItem->m_Skin = iParam1;
+			else if (Mode == "rendermode")
+				pItem->m_RenderMode = iParam1;
+			else if (Mode == "renderfx")
+				pItem->m_RenderFx = iParam1;
+			else if (Mode == "renderamt")
+				pItem->m_RenderAmt = iParam1;
+			else if (Mode == "model")
+			{
+				//Print( "%s\n", sParam1.c_str() );
+				pItem->m_ViewModel = sParam1;
+			}
+			else if (Mode == "animspeed")
+			{
+				//Thothie OCT2011_30 viewnim_speed
+				Print("DEBUG: cl_got_animspeed %f\n", fParam1);
+				pItem->m_ViewModelAnimSpeed = fParam1;
 			}
 		}
-		break;
+	}
+	break;
 
 	//MIB FEB2010_03 - Clit event
 	case 8:
 	{
 		ulong lID = READ_LONG();
-		CGenericItem *pItem = MSUtil_GetItemByID(lID);
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		msstring Event = READ_STRING();
 		int numParams = READ_BYTE();
@@ -1059,7 +1083,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 			pItem->CallScriptEvent(Event, &Params);
 	}
 	break;
-	
+
 	//Thothie OCT2016_23 - displaydesc
 	case 9:
 	{
@@ -1068,7 +1092,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 		ShowWeaponDesc(pItem);
 	}
 	break;
-	}	
+	}
 
 	if (bDoInvUpdate)
 	{
@@ -1081,7 +1105,7 @@ int __MsgFunc_Item(const char *pszName, int iSize, void *pbuf)
 }
 
 //Modded by MiB JAN2010_15
-int __MsgFunc_SetProp(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_SetProp(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 	int Prop = READ_BYTE();
@@ -1148,10 +1172,10 @@ void Player_ToggleInventory()
 		return;
 	}
 
-	CGenericItem *pWearable = NULL; //Fallback, in case a pack isn't found
+	CGenericItem* pWearable = NULL; //Fallback, in case a pack isn't found
 	for (int i = 0; i < player.Gear.size(); i++)
 	{
-		CGenericItem *pPack = player.Gear[i];
+		CGenericItem* pPack = player.Gear[i];
 		if (FBitSet(pPack->MSProperties(), ITEM_CONTAINER) && pPack->m_Location > ITEMPOS_HANDS)
 		{
 			pPack->Container_Open();
@@ -1181,7 +1205,7 @@ void __CmdFunc_Slot8( ) { Player_SelectSlot( 8 ); }
 void __CmdFunc_Slot9( ) { Player_SelectSlot( 9 ); }
 void __CmdFunc_Slot10( ) { Player_SelectSlot( 10 ); }*/
 
-int __MsgFunc_HideWeapon(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_HideWeapon(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
@@ -1209,7 +1233,7 @@ void __CmdFunc_BindTeleport(void)
 
 	msstring Key = gEngfuncs.Cmd_Argv(1);
 	msstring BindStr;
-	cl_entity_t *clplayer = gEngfuncs.GetLocalPlayer();
+	cl_entity_t* clplayer = gEngfuncs.GetLocalPlayer();
 	if (clplayer)
 	{
 		_snprintf(BindStr.c_str(), MSSTRING_SIZE, "bind %s \"teleport %.2f %.2f %.2f\"\n", Key.c_str(), clplayer->origin.x, clplayer->origin.y, clplayer->origin.z);
@@ -1217,7 +1241,7 @@ void __CmdFunc_BindTeleport(void)
 	}
 #endif
 }
-void DynamicNPC_SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
+void DynamicNPC_SelectMenuItem(int idx, TCallbackMenu* pcbMenu)
 {
 	msstringlist NPCList;
 	TokenizeString(gEngfuncs.pfnGetCvarString("ms_dynamicnpc"), NPCList);
@@ -1232,7 +1256,7 @@ void __CmdFunc_DynamicNPC(void)
 
 	char MenuText[2048] = "Spawn NPC:\n\n";
 
-	char *pszNPCList = gEngfuncs.pfnGetCvarString("ms_dynamicnpc");
+	char* pszNPCList = gEngfuncs.pfnGetCvarString("ms_dynamicnpc");
 
 	if (!pszNPCList)
 	{
@@ -1255,7 +1279,7 @@ void __CmdFunc_DynamicNPC(void)
 	int iBitsValid = 0;
 	for (int i = 0; i < NPCList.size(); i++)
 	{
-		const char *arg = UTIL_VarArgs("%i. %s\n", i + 1, NPCList[i].c_str());
+		const char* arg = UTIL_VarArgs("%i. %s\n", i + 1, NPCList[i].c_str());
 		strncat(MenuText, arg, strlen(arg));
 		iBitsValid |= (1 << i);
 	}
@@ -1286,7 +1310,7 @@ bool ShowHUD()
 bool ShowHealth() { return player.m_CharacterState == CHARSTATE_LOADED ? ShowHUD() : false; }
 bool ShowChat() { return true; } //Always show chat
 
-int __MsgFunc_Hands(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 {
 	startdbg;
 	dbg("Begin");
@@ -1299,13 +1323,13 @@ int __MsgFunc_Hands(const char *pszName, int iSize, void *pbuf)
 }
 
 int g_SwitchToHand = -1;
-void __CmdFunc_ToggleServerBrowser(void);
+//void __CmdFunc_ToggleServerBrowser(void);
 bool fBroswerVisible();
 void ShowVGUIMenu(int iMenu);
 //void Player_UseStamina(float flAddAmt);
 extern float g_fMenuLastClosed;
 
-int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 {
 	startdbg;
 	dbg("Begin");
@@ -1340,20 +1364,16 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 		{
 			int flags = READ_BYTE();
 			bool fShowBrowser = flags & (1 << 0), fPlaySound = (flags & (1 << 1)) ? true : false;
-			 strncpy(player.m_NextMap,  READ_STRING(), sizeof(player.m_NextMap) );
-			 strncpy(player.m_OldTransition,  READ_STRING(), sizeof(player.m_OldTransition) );
-			 strncpy(player.m_NextTransition,  READ_STRING(), sizeof(player.m_NextTransition) );
+			strncpy(player.m_NextMap, READ_STRING(), sizeof(player.m_NextMap));
+			strncpy(player.m_OldTransition, READ_STRING(), sizeof(player.m_OldTransition));
+			strncpy(player.m_NextTransition, READ_STRING(), sizeof(player.m_NextTransition));
 
-			//if( fShowBrowser && !fBroswerVisible() )
-			//	__CmdFunc_ToggleServerBrowser( );
 			if (fPlaySound)
 				PlaySound("misc/transition.wav", 1.0);
 			//Print("DEBUG_CLIENT_TRANS: %s", player.m_NextTransition); //MAR2010_08
 		}
 		else if (iMode == 1)
 		{
-			if (fBroswerVisible())
-				__CmdFunc_ToggleServerBrowser();
 			player.m_NextMap[0] = 0;
 			player.m_NextTransition[0] = 0;
 		}
@@ -1410,7 +1430,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 				g_SwitchToHand = -1;
 		}
 
-		CGenericItem *pItem = player.Hand(iHand);
+		CGenericItem* pItem = player.Hand(iHand);
 		pItem->StartAttack(iAttackNum);
 		if (pItem->CurrentAttack)
 			pItem->CurrentAttack->tProjMinHold = 0.50;
@@ -1423,7 +1443,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	break;
 	case 12: //Item gain/lose quality
 	{
-		CGenericItem *pItem = MSUtil_GetItemByID(READ_LONG());
+		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
 		if (!pItem)
 			break;
 		pItem->Quality = READ_SHORT();
@@ -1435,7 +1455,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	break;
 	case 14: //Cancel shield and change quality at the same time
 	{
-		CGenericItem *pItem = MSUtil_GetItemByID(READ_LONG());
+		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
 		if (!pItem)
 			break;
 		pItem->Quality = READ_SHORT();
@@ -1472,7 +1492,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 		int Type = READ_BYTE();
 		int ID = READ_LONG();
 
-		quickslot_t &QuickSlot = player.m_QuickSlots[Slot];
+		quickslot_t& QuickSlot = player.m_QuickSlots[Slot];
 
 		if (Flags & (1 << 0))
 		{
@@ -1494,7 +1514,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 				msg.fxtime = 4.0;
 
 				static char msgtext[256];
-				 _snprintf(msgtext, sizeof(msgtext),  Localized("#QUICKSLOT_CREATE"),  (Slot + 1) );
+				_snprintf(msgtext, sizeof(msgtext), Localized("#QUICKSLOT_CREATE"), (Slot + 1));
 
 				msg.pMessage = msgtext;
 				gHUD.m_Message.MessageAdd(msg);
@@ -1514,7 +1534,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	{
 		for (int i = 0; i < MAX_QUICKSLOTS; i++)
 		{
-			quickslot_t &QuickSlot = player.m_QuickSlots[i];
+			quickslot_t& QuickSlot = player.m_QuickSlots[i];
 			QuickSlot.Active = READ_BYTE() ? true : false;
 			if (QuickSlot.Active)
 			{
@@ -1525,7 +1545,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	}
 	break;
 
-		//22-24: Unused
+	//22-24: Unused
 
 	case 25: //Open Interact Menu for the specified NPC
 	{
@@ -1555,7 +1575,7 @@ int __MsgFunc_CLDllFunc(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-int __MsgFunc_CLXPlay(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_CLXPlay(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 

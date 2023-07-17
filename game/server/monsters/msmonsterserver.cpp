@@ -19,10 +19,11 @@
 #include "magic.h"
 #include "weapons/genericitem.h"
 #include "syntax/syntax.h"
-#include "ms/vgui_hud.h"
 #include "logger.h"
 #include "corpse.h"
+#include "saytext.h"
 #include <set>
+#include <cmath>
 
 #ifdef VALVE_DLL
 
@@ -394,20 +395,20 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 	else if (FStrEq(pkvd->szKeyName, "hpmulti"))
 	{
 		//Thothie - SEP2007a - multiply hp by this amount
-		float thoth_inhealth = atof(pkvd->szValue);
-		if (thoth_inhealth > 1)
+		float flHealthMulti = atof(pkvd->szValue);
+		if (flHealthMulti > 1)
 		{
-			m_HPMulti = thoth_inhealth;
+			m_HPMulti = flHealthMulti;
 			pkvd->fHandled = TRUE;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "dmgmulti"))
 	{
 		//Thothie - SEP2007a - multiply damage by this amount
-		float thoth_invar = atof(pkvd->szValue);
-		if (thoth_invar > 1)
+		float flDamageMulti = atof(pkvd->szValue);
+		if (flDamageMulti > 1)
 		{
-			m_DMGMulti = thoth_invar;
+			m_DMGMulti = flDamageMulti;
 			pkvd->fHandled = TRUE;
 		}
 	}
@@ -1532,8 +1533,8 @@ void CMSMonster::Say(msstring_ref Sound, float fDuration)
 
 	//Thothie JUN2007b
 	//- wracking my brain trying to stop this thing from sending non-waves to players
-	msstring thoth_pissed = Sound;
-	if (!thoth_pissed.contains("RND_SAY"))
+	msstring msSoundRef = Sound;
+	if (!msSoundRef.contains("RND_SAY"))
 	{
 		word_t NewWord;
 		NewWord.Soundfile = Sound;
@@ -1553,8 +1554,8 @@ void CMSMonster::Talk()
 	if (!Word.Spoken)
 	{
 		//Thothie JUN2007b - trying to remove wave error with var based say commands
-		msstring thoth_filter = Word.Soundfile.c_str();
-		if (thoth_filter.contains(".wav"))
+		msstring msFileFilter = Word.Soundfile.c_str();
+		if (msFileFilter.contains(".wav"))
 		{
 			if (strlen(Word.Soundfile))
 				EMIT_SOUND(edict(), CHAN_VOICE, Word.Soundfile, SndVolume, ATTN_NORM);
@@ -2171,7 +2172,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
 	//	return 0;
 
-	bool thoth_did_parry = false;
+	bool bAttackWasParried = false;
 
 	CBaseEntity* pAttacker = Damage.pAttacker;
 	if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
@@ -2211,20 +2212,20 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		ParryRoll += GetNatStat(NATURAL_AWR);
 
 		//Thothie - do not parry certain damage types
-		msstring thoth_dmgtype = Damage.sDamageType;
-		if (thoth_dmgtype.starts_with("target"))
+		msstring msDamageTypeName = Damage.sDamageType;
+		if (msDamageTypeName.starts_with("target"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("fire"))
+		if (msDamageTypeName.starts_with("fire"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("poison"))
+		if (msDamageTypeName.starts_with("poison"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("lightning"))
+		if (msDamageTypeName.starts_with("lightning"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.starts_with("cold"))
+		if (msDamageTypeName.starts_with("cold"))
 			ParryRoll = 0;
-		if (thoth_dmgtype.contains("effect"))
+		if (msDamageTypeName.contains("effect"))
 			ParryRoll = 0; //do not parry DOT attacks
-		if (thoth_dmgtype.starts_with("magic"))
+		if (msDamageTypeName.starts_with("magic"))
 			ParryRoll = 0;
 		if (Damage.flDamage == 0)
 			ParryRoll = 0; //do not parry 0 damage atks
@@ -2239,14 +2240,14 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
 			ParametersB.add(Damage.sDamageType);
 			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
-			ParametersB.add(UTIL_VarArgs("%i", AccRoll));
+			ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
 			ParametersB.add(UTIL_VarArgs("%i", ParryValue));
 			CallScriptEvent("game_parry", &ParametersB);
 			if (pHandItem)
 				pHandItem->CallScriptEvent("game_parry", &ParametersB);
 			Damage.flDamage = -1; // -1 means the monster dodged the attack
 			ClearMultiDamage();
-			thoth_did_parry = true;
+			bAttackWasParried = true;
 			/* MiB JUL2010_02 - Remove Parry as a levellable stat
 			//Learn parry skill from  a successful parry
 			if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
@@ -2271,8 +2272,8 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		{
 			takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 			//msstring thoth_my_dmgtype = TDM.DamageType;
-			msstring thoth_inc_dmgtype = Damage.sDamageType.c_str();
-			if (thoth_inc_dmgtype.starts_with(TDM.DamageType))
+			msstring msIncomingDamageType = Damage.sDamageType.c_str();
+			if (msIncomingDamageType.starts_with(TDM.DamageType))
 			{
 				//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
 				Damage.flDamage *= TDM.modifier;
@@ -2336,7 +2337,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	}
 
 	dbg("AddMultiDamage");
-	if (!thoth_did_parry)
+	if (!bAttackWasParried)
 		AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
 
 	return Damage.flDamage;
@@ -2708,16 +2709,17 @@ void CMSMonster::ReportAIState()
 				 it checks whether it should advance his stats
 */
 
-bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
+std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 {
 	float LearnMultiplier = 1.0;
+	int iExpRemaining = EnemySkillLevel;
 
 	CStat* pStat = FindStat(iStat);
 	if (!pStat)
-		return false;
+		return std::make_tuple(false, 0);
 
 	if (iStatType >= (signed)pStat->m_SubStats.size())
-		return false;
+		return std::make_tuple(false, 0);
 
 	//if ( pStat->Value() >= CHAR_LEVEL_CAP ) return false; //Thoth DEC2008a level cap
 
@@ -2728,7 +2730,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 	{
 		//Don't go looking for a better option if it's a spell-stat or parry
 		if (pStat->m_SubStats.size() == 1 || pStat->m_SubStats.size() > 3)
-			return false;
+			return std::make_tuple(false, 0);
 
 		//Look through the other SubStats for one that's not at the cap, yet.
 		//Not random, but good enough.
@@ -2741,19 +2743,30 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 		}
 
 		if (SubStat.Value >= CHAR_LEVEL_CAP)
-			return false;
+			return std::make_tuple(false, 0);
 	}
 	//MiB JAN2010_15 Global Level Cap [/END]
+	int iExpHandout = max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
 
-	SubStat.Exp += max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
-	//ALERT( at_console, "Exp: %i %i\n", pStat->Exp[iStatType],  GetSkillStat( sStatName, iStatType )  );
-	//ALERT( at_console, "Exp: %f \n", SubStat.Exp ); //thothie attempting to get total XP
-
+	//moved up since it's needed here
 	int OldVal = SubStat.Value;
 	long double ExpNeeded = GetExpNeeded(OldVal);
 	//ALERT( at_console, "Exp: %i/%i\n", pStat->Exp[iStatType],  ExpNeeded  );
 	//Must use long double variables because a typecast to it won't work correctly
 	long double ExpLeft = SubStat.Exp - ExpNeeded;
+
+	if (iExpHandout > (int)std::abs(ExpLeft) && (int)std::abs(ExpLeft) != 0) {
+		iExpHandout = std::abs(ExpLeft);
+	}
+	else if ((int)std::abs(ExpLeft) == 0) {
+		iExpHandout = 1;
+	}
+
+	SubStat.Exp += iExpHandout;
+	iExpRemaining -= iExpHandout;
+
+	//ALERT( at_console, "Exp: %i %i\n", pStat->Exp[iStatType],  GetSkillStat( sStatName, iStatType )  );
+	//ALERT( at_console, "Exp: %f \n", SubStat.Exp ); //thothie attempting to get total XP
 
 	//Shuriken - Message to send the Exp because it gets f'd up at high levels.
 	//Thothie AUG2007a - this causes crash when monster kills monster (message not client)
@@ -2771,12 +2784,13 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 	}
 
 	if (ExpLeft < 0)
-		return false;
+		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
 	if (SubStat.Value > STATPROP_MAX_VALUE)
 		SubStat.Value = STATPROP_MAX_VALUE;
 	SubStat.Exp = 0;
+
 	//Thothie - why's this here twice? I dont see where oldval could change.
 	if (OldVal > 25)
 	{
@@ -2790,7 +2804,7 @@ bool CMSMonster::LearnSkill(int iStat, int iStatType, int EnemySkillLevel)
 		}
 	}
 
-	return true;
+	return std::make_tuple(true, iExpRemaining);
 }
 
 float CMSMonster::GetBodyDist(Vector Point, float Radius)
@@ -2850,7 +2864,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	dbg("PrepClient");
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
-	if (pPlayer->NumItems() >= THOTH_MAX_ITEMS)
+	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
 	{
 		pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
 		return;

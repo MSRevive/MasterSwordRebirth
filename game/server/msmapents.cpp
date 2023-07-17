@@ -4,6 +4,7 @@
 #include "global.h"
 #include "mscharacter.h"
 #include "logger.h"
+#include "ms/filesystem_shared.h"
 
 class CCycler : public CBaseMonster
 {
@@ -45,7 +46,7 @@ LINK_ENTITY_TO_CLASS(cycler, CGenericCycler);
 
 // Cycler member functions
 
-void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
+void CCycler::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 {
 	if (!szModel || !*szModel)
 	{
@@ -54,16 +55,10 @@ void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 		return;
 	}
 
-	byte *pMemFile;
-	int iFileSize;
-
 	//hack to fix maps that wont load because they have old cyclers pointing to missing models
-	char c[256];
-	GET_GAME_DIR(c);
-	pMemFile = LOAD_FILE_FOR_ME(UTIL_VarArgs("%s/%s", c, szModel), &iFileSize);
-	if (pMemFile)
-		FREE_FILE(pMemFile);
-	else
+	const auto fileContents = FileSystem_LoadFileIntoBuffer(szModel, FileContentFormat::Binary);
+
+	if (fileContents.empty())
 	{
 		ALERT(at_error, "Cycler (%.0f %.0f %0.f) Model: \'%s\' NOT FOUND!\n", pev->origin.x, pev->origin.y, pev->origin.z, szModel);
 		REMOVE_ENTITY(ENT(pev));
@@ -79,7 +74,7 @@ void CCycler ::GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 	UTIL_SetSize(pev, vecMin, vecMax);
 }
 
-void CCycler ::Spawn()
+void CCycler::Spawn()
 {
 	InitBoneControllers();
 	pev->solid = SOLID_SLIDEBOX;
@@ -112,7 +107,7 @@ void CCycler ::Spawn()
 //
 // cycler think
 //
-void CCycler ::Think(void)
+void CCycler::Think(void)
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 
@@ -137,7 +132,7 @@ void CCycler ::Think(void)
 //
 // CyclerUse - starts a rotation trend
 //
-void CCycler ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+void CCycler::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
 	m_animate = !m_animate;
 	if (m_animate)
@@ -150,7 +145,7 @@ void CCycler ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTy
 // CyclerPain , changes sequences when shot
 //
 //void CCycler :: Pain( float flDamage )
-int CCycler ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
+int CCycler::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if (m_animate)
 	{
@@ -199,10 +194,10 @@ public:
 LINK_ENTITY_TO_CLASS(cycler_sprite, CCyclerSprite);
 
 TYPEDESCRIPTION CCyclerSprite::m_SaveData[] =
-	{
-		DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_INTEGER),
-		DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
-		DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
+{
+	DEFINE_FIELD(CCyclerSprite, m_animate, FIELD_INTEGER),
+	DEFINE_FIELD(CCyclerSprite, m_lastTime, FIELD_TIME),
+	DEFINE_FIELD(CCyclerSprite, m_maxFrame, FIELD_FLOAT),
 };
 
 IMPLEMENT_SAVERESTORE(CCyclerSprite, CBaseEntity);
@@ -320,6 +315,10 @@ public:
 		}
 		pev->body = body; //Thothie (see above)
 		pev->skin = skin; //Thothie (see above)
+		pev->controller[0] = 255 / 2;
+		pev->controller[1] = 255 / 2;
+		pev->controller[2] = 255 / 2;
+		pev->controller[3] = 255 / 2;
 	}
 };
 LINK_ENTITY_TO_CLASS(env_model, CStaticModel);
@@ -381,102 +380,6 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 	if (FBitSet(pev->spawnflags, SF_REMOVE_ON_FIRE))
 		UTIL_Remove(this);
 }
-
-class CMSMusic : public CPointEntity
-{
-public:
-	mslist<song_t> m_Songs;
-	msstring main_song;
-	float main_song_length;
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
-	{
-		//if( !pActivator->IsPlayer() )
-		//	return;
-		//CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
-		if (main_song.len() > 0)
-		{
-			if (m_Songs.size() && m_Songs[0].Name != main_song)
-			{
-				ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
-				m_Songs[0].Name = main_song;
-				m_Songs[0].Length = main_song_length;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
-				song_t Song;
-				Song.Name = main_song;
-				Song.Length = main_song_length;
-				m_Songs.add(Song);
-			}
-		}
-
-		static msstringlist Params;
-		Params.clearitems();
-		Params.add("0"); //gm_set_idle_music ignores first var, in case it comes from scriptevent
-		Params.add(m_Songs[0].Name.c_str());
-		Params.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
-		Params.add("3");
-
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-		if (pGMScript)
-			pGMScript->CallScriptEvent("gm_set_idle_music", &Params);
-
-		//old way
-		/*
-		if( m_Songs.size() )
-		{	
-			for( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				//Thothie - attempting to make mstrig_music play music on ALL players
-				//- so we can have event driven music
-				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-				if ( pPlayer ) pPlayer->Music_Play( m_Songs, this );
-			}
-			return;
-		}
-		
-		if ( !m_Songs.size() )
-		{
-			for( int i = 1; i <= gpGlobals->maxClients; i++ )
-			{
-				//Thothie - attempting to make mstrig_music play music on ALL players
-				//- so we can have event driven music
-				CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
-				if ( pPlayer ) pPlayer->Music_Stop( this );
-			}
-		}
-		*/
-	}
-	void Deactivate() { m_Songs.clear(); }
-
-	void KeyValue(KeyValueData *pkvd)
-	{
-		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
-		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
-		{
-			song_t Song;
-			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue);
-			m_Songs.add(Song);
-		}
-		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
-		{
-			main_song = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
-		else
-			CBaseEntity::KeyValue(pkvd);
-	}
-};
-LINK_ENTITY_TO_CLASS(mstrig_music, CMSMusic);
 
 //Thothie's half-assed game_text fix
 class CGameText : public CPointEntity
@@ -617,19 +520,14 @@ public:
 class CAreaMusicDyn : public CAreaInvisible
 {
 public:
-	typedef CAreaInvisible BaseClass;
-
-	msstring mt_idle;
-	msstring mt_idle_length;
-	msstring mt_combat;
-	msstring mt_combat_length;
-	msstring mt_global;	 //play for all players
-	msstring mt_playnow; //0= neither, 1= idle, 2= combat
-	string_t ms_master;
+	std::string mt_idle;
+	std::string mt_combat;
+	std::string mt_global;	 //play for all players
+	std::string mt_playnow; //0= neither, 1= idle, 2= combat
 
 	void Spawn()
 	{
-		BaseClass::Spawn();
+		CAreaInvisible::Spawn();
 		pev->solid = SOLID_TRIGGER;
 		UTIL_SetOrigin(pev, pev->origin);
 		SetTouch(&CAreaMusicDyn::MusicTouch);
@@ -642,19 +540,9 @@ public:
 			mt_idle = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "midlelen"))
-		{
-			mt_idle_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
-			pkvd->fHandled = TRUE;
-		}
 		else if (FStrEq(pkvd->szKeyName, "mcombat"))
 		{
 			mt_combat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "mcombatlen"))
-		{
-			mt_combat_length = FloatToString(UTIL_StringToSecs(pkvd->szValue));
 			pkvd->fHandled = TRUE;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playall"))
@@ -667,215 +555,124 @@ public:
 			mt_playnow = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "master"))
-		{
-			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
-		}
 		else
 			CBaseEntity::KeyValue(pkvd);
 	}
 
 	void MusicTouch(CBaseEntity *pOther)
 	{
+		
 		if (!pOther || !pOther->IsPlayer())
 			return;
 
-		if (ms_master)
+		int i, max;
+		if (mt_global == "1")
 		{
-			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
-			if (!UTIL_IsMasterTriggered(ms_master, pOther))
-			{
-				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
-				return;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
-			}
-		}
-
-		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-		static msstringlist Params;
-		Params.clearitems();
-		if (strcmp(mt_global.c_str(), "1") == 0)
-			Params.add(EntToString(pOther));
-		Params.add(mt_idle.c_str());
-		Params.add(atof(mt_idle_length) > 0 ? FloatToString(atof(mt_idle_length) / 60) : "0");
-		Params.add(mt_combat.c_str());
-		Params.add(atof(mt_combat_length) > 0 ? FloatToString(atof(mt_combat_length) / 60) : "0");
-		Params.add(mt_playnow.c_str());
-
-		if (strcmp(mt_global.c_str(), "1") == 0)
-		{
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			static msstringlist Params;
-			if (pGMScript)
-				pGMScript->CallScriptEvent("gm_set_music", &Params);
+			i = 1;
+			max = gpGlobals->maxClients;
 		}
 		else
-			pPlayer->CallScriptEvent("set_music", &Params);
+		{
+			i = pOther->entindex();
+			max = i;
+		}
 
-		//send script command to player, unless global, then GM
+		do
+		{
+			if (mt_playnow == "1") //idle music
+			{
+				((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, mt_idle);
+			}
+			else if (mt_playnow == "2") //combat music
+			{
+				((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_COMBAT, mt_combat);
+			}
+
+			i++;
+		} while (i <= max);
 	}
 };
-
 LINK_ENTITY_TO_CLASS(msarea_music_dynamic, CAreaMusicDyn);
 //[end] Thothie NOV2014_07 msarea_music_dynamic for CBM system
 
 class CAreaMusic : public CAreaInvisible
 {
 public:
-	songplaylist m_Songs;
-	string_t ms_master;
-	msstring main_song;
-	float main_song_length;
-	typedef CAreaInvisible BaseClass;
+	string_t m_sMaster;
+	std::string m_sSong;
 
 	void Spawn()
 	{
-		BaseClass::Spawn();
+		CAreaInvisible::Spawn();
 		pev->solid = SOLID_TRIGGER;
 		UTIL_SetOrigin(pev, pev->origin);
 		SetTouch(&CAreaMusic::MusicTouch);
 	}
 
-	void Deactivate() { m_Songs.clear(); }
-
-	void MusicTouch(CBaseEntity *pOther)
+	void KeyValue(KeyValueData* pkvd)
 	{
-		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
-		if (m_Songs.size() == 0 || !pOther || !pOther->IsPlayer())
-			return;
-
-		//NOV2014_12 - seeing if we can give msarea_music a master switch
-		//yes, we can, even if it's a bit hacky (added a new iuser to multisource)
-		if (ms_master)
+		std::string keyName = pkvd->szKeyName;
+		if (keyName == "song")
 		{
-			ALERT(at_console, "DEBUG: %s - checking for master %s\n", STRING(pev->classname), STRING(ms_master));
-			if (!UTIL_IsMasterTriggered(ms_master, pOther))
-			{
-				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", STRING(pev->classname));
-				return;
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: %s - master unlocked, activating.\n", STRING(pev->classname));
-			}
-		}
-
-		CBasePlayer *pPlayer = (CBasePlayer *)pOther;
-
-		//NOV2014_12 Thothie - don't play if we're using combat music
-		IScripted *iScripted = pPlayer ? pOther->GetScripted() : NULL;
-		if (iScripted)
-		{
-			if (main_song.len() > 0)
-			{
-				if (m_Songs.size() && m_Songs[0].Name != main_song)
-				{
-					ALERT(at_console, "DEBUG: msarea_music - setting main song %s as idx 0.\n", main_song.c_str());
-					m_Songs[0].Name = main_song;
-					m_Songs[0].Length = main_song_length;
-				}
-				else
-				{
-					ALERT(at_console, "DEBUG: msarea_music - adding main song %s.\n", main_song.c_str());
-					song_t Song;
-					Song.Name = main_song;
-					Song.Length = main_song_length;
-					m_Songs.add(Song);
-				}
-			}
-
-			bool playnow;
-			msstring plr_cbm = iScripted->GetFirstScriptVar("PLR_COMBAT_MUSIC");
-			if (plr_cbm != "none" && plr_cbm != "stop.mp3")
-			{
-				ALERT(at_console, "DEBUG: msarea_music - plr has cbm %s.\n", plr_cbm.c_str());
-				msstring plr_cur = iScripted->GetFirstScriptVar("PLR_CURRENT_MUSIC");
-				if (plr_cbm != plr_cur)
-				{
-					ALERT(at_console, "DEBUG: msarea_music current plr music is not cbm, playing first in list.\n");
-					playnow = true;
-				}
-				else
-				{
-					ALERT(at_console, "DEBUG: msarea_music - current plr music is cbm, adding first in list as idle.\n");
-					playnow = false;
-				}
-			}
-			else
-			{
-				ALERT(at_console, "DEBUG: msarea_music - current plr music has no cbm, playing first in list.\n");
-				playnow = true;
-			}
-
-			//this method disables the ability to play lists, but I've never seen a map use that feature
-			msstringlist Parameters;
-			//Thothie DEC2017_02 - making sure holiday music isn't overriden by triggers
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-			if (pGMScript)
-			{
-				if (atoi(pGMScript->GetFirstScriptVar("GM_HOLIDAY_MUSIC")) == 1)
-				{
-					Parameters.add("xmass.mp3");
-					Parameters.add("3.0");
-					// you can add subsequent else if's here for other holidays, eg. GM_HOLIDAY_MUSIC = 2, 3, etc.
-				}
-				else
-				{
-					Parameters.add(m_Songs[0].Name.c_str());
-					Parameters.add((m_Songs[0].Length > 0) ? FloatToString(m_Songs[0].Length / 60) : "0");
-				}
-			}
-			Parameters.add(playnow ? "1" : "0");
-			iScripted->CallScriptEvent("set_idle_music", &Parameters);
-			//Old way jams up sometimes
-			/*
-			if( m_Songs.size() )
-				pPlayer->Music_Play( m_Songs, this );
-			else
-				pPlayer->Music_Stop( this );
-			*/
-		}
-	}
-
-	void KeyValue(KeyValueData *pkvd)
-	{
-		//JAN2013_08 Thothie - Noticed msarea_musics were adding "zhlt_invisible" as a song. :O
-		msstring sTemp = pkvd->szKeyName;
-		if (sTemp.contains(".mp3") || sTemp.contains(".midi"))
-		{
-			song_t Song;
-			Song.Name = pkvd->szKeyName;
-			Song.Length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
-			m_Songs.add(Song);
-		}
-		else if (FStrEq(pkvd->szKeyName, "master"))
-		{
-			ms_master = ALLOC_STRING(pkvd->szValue);
+			m_sSong = pkvd->szValue;
 			pkvd->fHandled = TRUE;
 		}
-		else if (FStrEq(pkvd->szKeyName, "song")) //NOV2014_12 - Thothie - making this a bit more intuitive to use via smartedit
+		else if (keyName.find(".mp3") != std::string::npos) //Legacy way of playing mp3s
 		{
-			main_song = pkvd->szValue;
-			pkvd->fHandled = TRUE;
-		}
-		else if (FStrEq(pkvd->szKeyName, "songlength"))
-		{
-			main_song_length = UTIL_StringToSecs(pkvd->szValue); //DEC2014_21 Thothie - Centralizing music/time conversion
+			m_sSong = pkvd->szKeyName;
 			pkvd->fHandled = TRUE;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
 	}
-};
 
+	void Deactivate() {  }
+
+	void MusicTouch(CBaseEntity *pOther)
+	{
+		//No songs, can't play anything (code below would crash) - Solokiller 5/10/2017
+		if (m_sSong.size() == 0 || !pOther || !pOther->IsPlayer())
+			return;
+
+		MSGlobals::AllMusic.clear(); //Area trigger stops all music
+
+		if (m_sSong.find(".mp3") == std::string::npos || m_sSong == "stop.mp3") //if no .mp3 is found, assume they want to stop music. Also support legacy "stop.mp3"
+		{
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_STOP, m_sSong);
+		}
+
+		if (m_sSong.find(".mp3") != std::string::npos || m_sSong.find(".ogg") != std::string::npos)
+		{
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
+		}
+
+		if (m_sSong != MSGlobals::AllMusic)
+		{
+			((CBasePlayer*)pOther)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
+		}
+	}
+
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+	{
+		if (m_sSong.size() == 0) return;
+
+		MSGlobals::AllMusicMode = MUSIC_AREA; //Point trigger always plays to all
+		MSGlobals::AllMusic = m_sSong;
+
+		int i = 1, max = gpGlobals->maxClients;
+		do
+		{
+			CBaseEntity* targ = UTIL_PlayerByIndex(i);
+			if (targ && targ->IsPlayer())
+			{
+				((CBasePlayer*)targ)->SwapMusic(this->entindex(), MUSIC_AREA, m_sSong);
+			}
+			i++;
+		} while (i <= max);
+	}
+};
 LINK_ENTITY_TO_CLASS(msarea_music, CAreaMusic);
+LINK_ENTITY_TO_CLASS(mstrig_music, CAreaMusic);
 
 struct monster_data_t
 {
@@ -922,7 +719,7 @@ public:
 	int iPlayerReq;			//Thothie AUG2007a - adding optional player req
 	int iHPReq_min;			//Thothie AUG2007a - adding optional total HP on server req
 	int iHPReq_max;			//Thothie FEB2011_22 - adding min;max option for reqhp
-	float thoth_next_spawn; //Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
+	float flNextSpawnTime; //Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
 	enum spawnloc_e
 	{
 		SPAWNLOC_FIXED,
@@ -931,7 +728,7 @@ public:
 	bool m_fSpawnOnTrigger,
 		m_fActive,			   //Set to false when ALL monsters run out of lives.
 		hpreq_useavg; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
-	bool thoth_org_spawnstart; //Thothie JUN2007b this bits tells it to spawn all monsters imediately, if spawn isnt triggered (see second occurance below)
+	bool bSpawnImmediately; //Thothie JUN2007b this bits tells it to spawn all monsters imediately, if spawn isnt triggered (see second occurance below)
 	string_t m_sTargetAllPerish;
 	int resetwhen;		//NOV2014_20 Thothie - attempting to allow changes as to when ms_monsterspawn can respawn mobs 0=when all dead, 1=when any mob dead, 2=whenever triggered
 	bool didfirstspawn; //NOV2014_20 Thothie - the above requires us to know whether we've done the initial spawn or not
@@ -1046,7 +843,7 @@ public:
 			//original:
 			m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
 			//Thothie - store original spawnstart state
-			thoth_org_spawnstart = (atoi(pkvd->szValue)) ? true : false;
+			bSpawnImmediately = (atoi(pkvd->szValue)) ? true : false;
 			pkvd->fHandled = TRUE;
 		}
 		//NOV2014_20 seeing if we can change how ms_monsterspawn handles mob respawning
@@ -1337,7 +1134,7 @@ public:
 				continue;
 			}
 
-			bool thoth_nospawn = false;	//Lark DEC2017_10 - Changed scope to simplify Random Monster respawn
+			bool bNoSpawn = false;	//Lark DEC2017_10 - Changed scope to simplify Random Monster respawn
 			if (mdSpawnMonster[i].nplayers > 0)
 			{
 				if (UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers)
@@ -1346,7 +1143,7 @@ public:
 
 					//Lark DEC2017_10 - If Random spawn, fix in the hpreq block a few lines down
 					if ( mdSpawnMonster[i].m_nRndMobs > 0 )
-						thoth_nospawn = true;
+						bNoSpawn = true;
 					else
 					{
 						//count as dead and continue
@@ -1356,22 +1153,22 @@ public:
 				}
 			}
 
-			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0 || thoth_nospawn) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
+			if (mdSpawnMonster[i].hpreq_min > 0 || mdSpawnMonster[i].hpreq_max > 0 || bNoSpawn) //NOV2014_20 - Thothie - fixed for potential bug if all players flagged AFK
 			{
 				//Lark DEC2017_10 - Added thoth_nospawn check from nplayers above
-				float thoth_thp;
+				float flCheckedTotalHealth;
 				if ( mdSpawnMonster[i].hpreq_useavg )
 				{
-					thoth_thp = UTIL_AvgHP(); //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
+					flCheckedTotalHealth = UTIL_AvgHP(); //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg";
 				}
 				else
 				{
-					thoth_thp = UTIL_TotalHP();
+					flCheckedTotalHealth = UTIL_TotalHP();
 				}
 				
-				if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
-				if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
-				if ( thoth_nospawn )
+				if ( flCheckedTotalHealth < mdSpawnMonster[i].hpreq_min ) bNoSpawn = true;
+				if ( flCheckedTotalHealth >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) bNoSpawn = true;
+				if ( bNoSpawn )
 				{
 					//Thothie AUG2007a - not enough hp on server to spawn monster
 
@@ -1384,15 +1181,15 @@ public:
 						{
 							RespawnMonster( &mdSpawnMonster[i] );
 							
-							thoth_nospawn = false;
-							if ( UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers ) thoth_nospawn = true;
-							if ( thoth_thp < mdSpawnMonster[i].hpreq_min ) thoth_nospawn = true;
-							if ( thoth_thp >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) thoth_nospawn = true;
+							bNoSpawn = false;
+							if ( UTIL_NumActivePlayers() < mdSpawnMonster[i].nplayers ) bNoSpawn = true;
+							if ( flCheckedTotalHealth < mdSpawnMonster[i].hpreq_min ) bNoSpawn = true;
+							if ( flCheckedTotalHealth >= mdSpawnMonster[i].hpreq_max && mdSpawnMonster[i].hpreq_max > 0 ) bNoSpawn = true;
 							--retrySpawn;
 						}
-						while ( thoth_nospawn && retrySpawn > 0 );
+						while ( bNoSpawn && retrySpawn > 0 );
 
-						if ( thoth_nospawn ) // Requirements still failed; skip this spawn until triggered again.
+						if ( bNoSpawn ) // Requirements still failed; skip this spawn until triggered again.
 						{
 							iDeadMonsters++; //count as dead
 							continue;
@@ -1425,14 +1222,14 @@ public:
 			}
 
 			//Thothie - JUN2007 - trying to stagger monster spawns to reduce lag
-			if (gpGlobals->time < thoth_next_spawn)
+			if (gpGlobals->time < flNextSpawnTime)
 			{
 				//only if spawnstart 1
 				//otherwise it fubars the already buggy fireallperish on sloppily built msarea_monsterspawns
-				if (thoth_org_spawnstart)
+				if (bSpawnImmediately)
 					continue;
 			}
-			thoth_next_spawn = gpGlobals->time + 0.2;
+			flNextSpawnTime = gpGlobals->time + 0.2;
 
 			//Spawn a monster
 			pMonster = (CMSMonster *)CREATE_ENT(STRING(mdSpawnMonster[i].classname));
@@ -1818,7 +1615,7 @@ public:
 	}
 
 	int PlayerVotes;
-	bool thoth_didvote;
+	bool bDidVote;
 
 	bool FAllPlayersAreTouchingMe()
 	{
@@ -1840,7 +1637,7 @@ public:
 	void Spawn()
 	{
 		CAreaInvisible::Spawn();
-		thoth_didvote = false;
+		bDidVote = false;
 		//For some reason, the targetname gets unset after this Spawn()
 		//function.  No time to find out why, just save it here.
 		sName = pev->targetname;
@@ -1970,7 +1767,7 @@ public:
 
 		pPlayer->CurrentTransArea = NULL;
 
-		thoth_didvote = false;
+		bDidVote = false;
 		msstringlist Parameters;
 		Parameters.add(STRING(sDestName));
 		Parameters.add(STRING(sDestMap));
@@ -1988,7 +1785,7 @@ public:
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return NULL;
 
-		if (!thoth_didvote)
+		if (!bDidVote)
 		{
 			if (pGMScript)
 			{
@@ -1999,7 +1796,7 @@ public:
 				Parameters.add(STRING(sDestTrans));
 				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
 			}
-			thoth_didvote = true;
+			bDidVote = true;
 		}
 
 		if (!FAllPlayersAreTouchingMe())

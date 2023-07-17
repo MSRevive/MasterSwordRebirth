@@ -34,10 +34,8 @@ extern "C"
 #include <string.h>
 #include <ctype.h>
 #include "ms/hudscript.h"
-
 #include "vgui_teamfortressviewport.h"
-
-#include "filesystem_shared.h"
+#include "clientlibrary.h"
 #include "scriptmgr.h"
 
 extern "C"
@@ -50,6 +48,8 @@ extern "C"
 
 //extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
+
+extern CClientLibrary gClient;
 
 // Defined in pm_math.c
 extern "C" float anglemod(float a);
@@ -423,17 +423,21 @@ static float lastMoveLeftUp = 0;   // The last time Left was released
 static float lastMoveRightUp = 0;  //              Right
 static float lastMoveBackUp = 0;   //               Back
 static float lastMoveForward = 0;
-static const float tapDelay = 0.4; // The higher the amount, the longer the player has to hit left/right/back for a second time
 
 void IN_ForwardDown(void)
 {
 	KeyDown(&in_forward);
 
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay"); // trying to load it before this crashes, trying to load it inline returns 0. I don't know why.
+
 	//we handle double tap to sprint in via inputs now.
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapsprint"), "1")) && (lastMoveForward + 0.2 >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if ((!strcmp(CVAR_GET_STRING("ms_sprint_doubletap"), "1")) && (lastMoveForward + cvar_flDtapDelay >= gpGlobals->time) && !FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		lastMoveForward = gpGlobals->time;
 		SetBits(player.pbs.ButtonsDown, IN_RUN);
+	}
+	else {
+		lastMoveForward = gpGlobals->time;
 	}
 		
 	gHUD.m_Spectator.HandleButtonsDown(IN_FORWARD);
@@ -441,7 +445,7 @@ void IN_ForwardDown(void)
 
 void IN_ForwardUp(void)
 {
-	lastMoveForward = gpGlobals->time;
+	// lastMoveForward = gpGlobals->time; Setting this on the downstroke already. With this in just means if you release to stop sprinting you are already at step 1 of trying to sprint again.
 	KeyUp(&in_forward);
 	gHUD.m_Spectator.HandleButtonsUp(IN_FORWARD);
 }
@@ -453,7 +457,9 @@ void IN_BackDown(void)
 	KeyDown(&in_back);
 	gHUD.m_Spectator.HandleButtonsDown(IN_BACK);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("back");
 }
 
@@ -474,7 +480,9 @@ void IN_MoveleftDown(void)
 	KeyDown(&in_moveleft);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVELEFT);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("left");
 }
 
@@ -490,7 +498,9 @@ void IN_MoverightDown(void)
 	KeyDown(&in_moveright);
 	gHUD.m_Spectator.HandleButtonsDown(IN_MOVERIGHT);
 
-	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + tapDelay > gpGlobals->time))
+	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
+
+	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + cvar_flDtapDelay > gpGlobals->time))
 		GAME_LEAP("right");
 }
 
@@ -507,7 +517,7 @@ void IN_SpeedDown(void)
 {
 	KeyDown(&in_speed);
 
-	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprint_toggle"), "1") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 
@@ -515,7 +525,7 @@ void IN_SpeedUp(void)
 { 
 	KeyUp(&in_speed);
 
-	if (!strcmp(CVAR_GET_STRING("ms_sprinttoggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
+	if (!strcmp(CVAR_GET_STRING("ms_sprint_toggle"), "0") && FBitSet(player.m_StatusFlags, PLAYER_MOVE_RUNNING))
 		SetBits(player.m_StatusFlags, PLAYER_MOVE_STOPRUN);
 }
 
@@ -1141,12 +1151,7 @@ void ShutdownInput(void)
 
 void DLLEXPORT HUD_Shutdown(void)
 {
-	DBG_INPUT;
-	startdbg;
-
 	ScriptMgr::GameShutdown();
-	FileSystem_Shutdown();
-
+	gClient.Shutdown();
 	ShutdownInput();
-	enddbg;
 }

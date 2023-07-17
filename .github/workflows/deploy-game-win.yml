@@ -1,0 +1,30 @@
+name: Deploy game on Windows
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Create makefile
+      run: ./createall.bat
+
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Build Client
+      run: msbuild game\client\client.vcxproj -t:rebuild -verbosity:diag -property:Configuration=Release
+
+    - name: Build Server
+      run: msbuild game\server\server.vcxproj -t:rebuild -verbosity:diag -property:Configuration=Release
+
+    - name: Upload Binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: Windows Binaries
+        path: |
+          build/*.dll

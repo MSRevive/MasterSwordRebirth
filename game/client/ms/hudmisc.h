@@ -13,7 +13,6 @@ public:
 	int Draw(float flTime);
 	void Think(void);
 	void Reset(void);
-	void FreeMemory(void);
 	void UserCmd_ChangeSayType(void);
 	void UserCmd_RemovePack(void);
 	void UserCmd_Offer(void);

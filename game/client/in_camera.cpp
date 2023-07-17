@@ -525,7 +525,7 @@ void CAM_Init(void)
 	cam_snapto = gEngfuncs.pfnRegisterVariable("cam_snapto", "0", 0);		  // snap to thirdperson view
 	cam_idealyaw = gEngfuncs.pfnRegisterVariable("cam_idealyaw", "0", 0);	  // thirdperson yaw
 	cam_idealpitch = gEngfuncs.pfnRegisterVariable("cam_idealpitch", "0", 0); // thirperson pitch
-	cam_idealdist = gEngfuncs.pfnRegisterVariable("cam_idealdist", "40", 0);  // thirdperson distance //Master Sword - Changed from 30
+	cam_idealdist = gEngfuncs.pfnRegisterVariable("cam_idealdist", "120", 0);  // thirdperson distance //Master Sword - Changed from 30
 	cam_contain = gEngfuncs.pfnRegisterVariable("cam_contain", "0", 0);		  // contain camera to world
 
 	c_maxpitch = gEngfuncs.pfnRegisterVariable("c_maxpitch", "90.0", 0);
@@ -649,7 +649,7 @@ void CAM_EndDistance(void)
 
 #include "weapons/genericitem.h"
 #include "player/player.h"
-#include "ms/clrender.h"
+#include "render/clrender.h"
 
 int DLLEXPORT CL_IsThirdPerson(void)
 {

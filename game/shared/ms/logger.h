@@ -5,8 +5,6 @@
 #include "stream_safe.h"
 #include "sharedutil.h"
 
-using namespace std;
-
 class Logger {
   public:
     enum e_logtype {
@@ -27,11 +25,11 @@ class Logger {
           	time(&Time);
           	char *TimeString = ctime(&Time);
             
-            file << (TimeString) << endl;
+            file << (TimeString) << std::endl;
           }
           break;
         case 1:
-          file.open(filename, ios_base::app); //open file for appending
+          file.open(filename, std::ios_base::app); //open file for appending
           break;
       }
     }
@@ -67,7 +65,7 @@ class Logger {
     }
     
     //std::endl now works
-    friend Logger &operator<<(Logger &logger, ostream& (*os)(ostream&))
+    friend Logger &operator<<(Logger &logger, std::ostream& (*os)(std::ostream&))
     {
       logger.file << os;
       return logger;
@@ -115,7 +113,7 @@ class Logger {
     }
     
   private:
-    ofstream file;
+    std::ofstream file;
 };
 
 extern Logger logfile;

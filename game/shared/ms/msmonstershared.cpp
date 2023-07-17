@@ -19,8 +19,11 @@
 #include "weapons/weapons.h"
 #include "syntax/syntax.h"
 #include "weapons/genericitem.h"
-#include "ms/vgui_hud.h"
 #include "logger.h"
+
+#ifndef VALVE_DLL
+#include "vgui_hud.h"
+#endif
 
 void CMSMonster::Deactivate()
 {

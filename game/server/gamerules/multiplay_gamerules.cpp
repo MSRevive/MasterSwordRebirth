@@ -105,8 +105,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		{
 			char szCommand[256];
 			
-			ALERT( at_console, "Executing dedicated server config file\n" );
-			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  servercfgfile );
+			ALERT(at_console, "Executing dedicated server config file\n");
+			_snprintf(szCommand, sizeof(szCommand), "exec %s\n", servercfgfile);
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -119,8 +119,8 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 		{
 			char szCommand[256];
 			
-			ALERT( at_console, "Executing listen server config file\n" );
-			_snprintf(szCommand, sizeof(szCommand),  "exec %s\n",  lservercfgfile );
+			ALERT(at_console, "Executing listen server config file\n");
+			_snprintf(szCommand, sizeof(szCommand), "exec %s\n", lservercfgfile);
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -183,18 +183,24 @@ void CHalfLifeMultiplay::Think( void )
 			{ CTeam::Teams.erase( i ); delete pTeam; }
 	}
 
-	//if ((strcmp(CVAR_GET_STRING("ms_reset_empty"), "0") != 0) && !UTIL_NumPlayers())
-	if ((CVAR_GET_FLOAT("ms_reset_time") >= 1.0) && !UTIL_NumPlayers())
+	//if player joins and timer was started than reset timer.
+	if (UTIL_NumPlayers() && g_ServerResetTimer)
+		g_ServerResetTimer = NULL;
+
+	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
 			g_ServerResetTimer = gpGlobals->time + (CVAR_GET_FLOAT("ms_reset_time")*60);
 
+		//reset server once timer expires
 		if (gpGlobals->time >= g_ServerResetTimer)
 		{
 			ALERT(at_console, "Resetting server.\n");
 			g_ServerResetTimer = NULL;
-			SERVER_COMMAND("changelevel edana\n");
+			std::string resetMap = CVAR_GET_STRING("ms_reset_map");
+			std::string mapCmd = "map " + resetMap + "\n";
+			SERVER_COMMAND((char*)mapCmd.c_str());
 		}
 	}
 

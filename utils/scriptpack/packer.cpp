@@ -7,6 +7,7 @@
 #include "packer.h"
 #include "../stream_safe.h"
 #include "parser.h"
+#include "compat.h"
 #include "dirent.h"
 
 extern bool g_Verbose;
@@ -23,13 +24,20 @@ Packer::Packer(char *wDir, char *rDir, char *oDir)
 
 	if (g_Release)
 	{
-		try {
-			CreateDirectory(m_CookedDir, NULL);
-		}catch(...)
+		if (!Compat::makePath(std::string(m_CookedDir)))
 		{
 			printf("Failed to create %s\n", m_CookedDir);
 			exit(-1);
 		}
+		/*
+		try {
+			CreateDirectory(m_CookedDir, NULL);
+			
+		}catch(...)
+		{
+			printf("Failed to create %s\n", m_CookedDir);
+			exit(-1);
+		}*/
 	}
 }
 
@@ -63,7 +71,10 @@ void Packer::readDirectory(char *pszName, bool cooked)
 				break;
 			case DT_DIR:
 				if (g_Verbose)
-					printf("Reading Directory: %s\n", cFullPath);
+					printf("Reading Directory: %s\n", ent->d_name);
+				
+				if (g_Release && !stricmp(ent->d_name, "developer"))
+					continue;
 
 				readDirectory(cFullPath, cooked);
 				break;
@@ -250,8 +261,8 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 		//only run this stuff if we're doing full parser.
 		if (!errOnly)
 		{
-			parser.stripDebug();
 			parser.stripWhitespace();
+			parser.stripDebug();
 		}
 
 		//do error print at the end

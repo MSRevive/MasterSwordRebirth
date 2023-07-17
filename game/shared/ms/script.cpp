@@ -884,11 +884,11 @@ msstring CScript::ScriptGetter_FileSize(msstring& FullName, msstring& ParserName
 		msstring fileName = cfileName;
 		fileName += "/";
 		fileName += Params[0];
-		ifstream file;
-		file.open(fileName.c_str(), ios_base::in);
+		std::ifstream file;
+		file.open(fileName.c_str(), std::ios_base::in);
 		if (file.is_open())
 		{
-			file.seekg(0, ios_base::end);
+			file.seekg(0, std::ios_base::end);
 			long fileSize = file.tellg();
 			file.close();
 			RETURN_INT(fileSize);
@@ -1668,7 +1668,8 @@ msstring CScript::ScriptGetter_getcl_beam(msstring& FullName, msstring& ParserNa
 //- priority: low, scope: shared
 msstring CScript::ScriptGetter_GetCVar(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
-	return EngineFunc::CVAR_GetString(Params[0].c_str());
+	if (!Params[0].contains("rcon_password") && !Params[0].contains("ms_central_addr")) return EngineFunc::CVAR_GetString(Params[0].c_str());
+	return "0";
 }
 
 //$get_fileline(<file>,[line])
@@ -1736,21 +1737,21 @@ msstring CScript::ScriptGetter_GetFindToken(msstring& FullName, msstring& Parser
 		static msstringlist Tokens;
 		Tokens.clearitems();
 		msstring& TokenAdd = Params[1];
-		bool thoth_partial_search = false; //Thothie SEP2019_09 - partial searches, needed sooner than later, since I r stuck
-		if (Params.size() >= 3) thoth_partial_search = true; //Thothie SEP2019_09 - partial searches
+		bool bPartialSearch = false; //Thothie SEP2019_09 - partial searches, needed sooner than later, since I r stuck
+		if (Params.size() >= 3) bPartialSearch = true; //Thothie SEP2019_09 - partial searches
 
 		msstring TokenString = GetVar(Params[0]);
 		TokenizeString(TokenString, Tokens);
 
-		int token_found_at = -1;
+		int iFoundAtPos = -1;
 
 		for (int i = 0; i < Tokens.size(); i++)
 		{
-			if (!thoth_partial_search) { if (Tokens[i] == TokenAdd) token_found_at = i; } //Thothie SEP2019_09 - partial searches
-			else { if (Tokens[i].contains(TokenAdd)) token_found_at = i; } //Thothie SEP2019_09 - partial searches
+			if (!bPartialSearch) { if (Tokens[i] == TokenAdd) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
+			else { if (Tokens[i].contains(TokenAdd)) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
 		}
 
-		RETURN_INT(token_found_at);
+		RETURN_INT(iFoundAtPos);
 	}
 	else return "-1";
 }
@@ -2021,13 +2022,13 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 	//priority: moderate, scope: server
 	//rarely used now, but tends to be called rapidly when it is - more or less defunct
 	msstring& Name = Params[0];
-	float thoth_boxsize = atof(Params[1]);
+	float flAreaSize = atof(Params[1]);
 	//float neg_boxsize = thoth_boxsize * -1;
 	CBaseEntity* pList[255], * pEnt = NULL;
 	Vector StartPos;
 	if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 	else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-	int count = UTIL_MonstersInSphere(pList, 255, StartPos, thoth_boxsize);
+	int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 	bool spec_search = false;
 
 	CBaseEntity* pSpecificEnt = RetrieveEntity(Name);
@@ -2681,7 +2682,7 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 	msstring& Flags = Params[2];
 	msstring Return;
 
-	bool thoth_return_contents = false;
+	bool bReturnContents = false;
 
 	CBaseEntity* pIgnoreEnt =
 #ifdef VALVE_DLL
@@ -2696,7 +2697,7 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 	else if (Flags.contains("worldonly")) SetBits(iFlags, ignore_monsters);
 	else if (Flags.contains("contents"))
 	{
-		thoth_return_contents = true;
+		bReturnContents = true;
 		SetBits(iFlags, ignore_monsters);
 	}
 #else
@@ -2714,7 +2715,7 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 	}
 	else if (Flags.contains("contents"))
 	{
-		thoth_return_contents = true;
+		bReturnContents = true;
 		SetBits(iFlags, PM_WORLD_ONLY);
 	}
 	else if (Flags.contains("clworld"))
@@ -2746,26 +2747,26 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 		//This doesn't seem to be working right due to the world only flag
 		//probably need to work into a differnet function
 		//as this also needs to return if the entire trace is empty
-		msstring thoth_contents_string;
+		msstring msContentString;
 		//Thothie AUG2013_22 - start pos, then end pos, silly
-		int thoth_start_contents = EngineFunc::Shared_PointContents(StartPos);
-		int thoth_end_contents = EngineFunc::Shared_PointContents(EndPos);
-		if (thoth_start_contents == CONTENTS_EMPTY) thoth_contents_string = "empty;";
-		else if (thoth_start_contents == CONTENTS_SOLID) thoth_contents_string = "solid;";
-		else if (thoth_start_contents == CONTENTS_WATER) thoth_contents_string = "water;";
-		else if (thoth_start_contents == CONTENTS_SLIME) thoth_contents_string = "slime;";
-		else if (thoth_start_contents == CONTENTS_LAVA) thoth_contents_string = "lava;";
-		else if (thoth_start_contents == CONTENTS_SKY) thoth_contents_string = "sky;";
-		else if (thoth_start_contents == 0) thoth_contents_string.append("unknown");
+		int iContentStartPos = EngineFunc::Shared_PointContents(StartPos);
+		int iContentEndPos = EngineFunc::Shared_PointContents(EndPos);
+		if (iContentStartPos == CONTENTS_EMPTY) msContentString = "empty;";
+		else if (iContentStartPos == CONTENTS_SOLID) msContentString = "solid;";
+		else if (iContentStartPos == CONTENTS_WATER) msContentString = "water;";
+		else if (iContentStartPos == CONTENTS_SLIME) msContentString = "slime;";
+		else if (iContentStartPos == CONTENTS_LAVA) msContentString = "lava;";
+		else if (iContentStartPos == CONTENTS_SKY) msContentString = "sky;";
+		else if (iContentStartPos == 0) msContentString.append("unknown");
 
-		if (thoth_end_contents == CONTENTS_EMPTY) thoth_contents_string.append("empty");
-		else if (thoth_end_contents == CONTENTS_SOLID) thoth_contents_string.append("solid");
-		else if (thoth_end_contents == CONTENTS_WATER) thoth_contents_string.append("water");
-		else if (thoth_end_contents == CONTENTS_SLIME) thoth_contents_string.append("slime");
-		else if (thoth_end_contents == CONTENTS_LAVA) thoth_contents_string.append("lava");
-		else if (thoth_end_contents == CONTENTS_SKY) thoth_contents_string.append("sky");
-		else if (thoth_end_contents == 0) thoth_contents_string.append("unknown");
-		return thoth_contents_string.c_str();
+		if (iContentEndPos == CONTENTS_EMPTY) msContentString.append("empty");
+		else if (iContentEndPos == CONTENTS_SOLID) msContentString.append("solid");
+		else if (iContentEndPos == CONTENTS_WATER) msContentString.append("water");
+		else if (iContentEndPos == CONTENTS_SLIME) msContentString.append("slime");
+		else if (iContentEndPos == CONTENTS_LAVA) msContentString.append("lava");
+		else if (iContentEndPos == CONTENTS_SKY) msContentString.append("sky");
+		else if (iContentEndPos == 0) msContentString.append("unknown");
+		return msContentString.c_str();
 	}
 
 	return FullName;
@@ -2807,22 +2808,22 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 		if (ParserName.starts_with("$get_isphere")) return_idx = true;
 		//[end] Thothie APR2016_17 - isphere
 		msstring& Name = Params[0];
-		msstring thoth_token_string;
+		msstring msTokenString;
 		msstring ent_str;
 		int str_limit = 214;
-		float thoth_boxsize = atof(Params[1]);
+		float flAreaSize = atof(Params[1]);
 		//float neg_boxsize = thoth_boxsize * -1;
 		CBaseEntity* pList[255], * pEnt = NULL;
 		Vector StartPos;
 		if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 		else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-		int count = UTIL_MonstersInSphere(pList, 255, StartPos, thoth_boxsize);
+		int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
 		for (int i = 0; i < count; i++)
 		{
-			if ((int)thoth_token_string.len() > str_limit) break; //outta room
+			if ((int)msTokenString.len() > str_limit) break; //outta room
 
 			pEnt = pList[i];
 
@@ -2833,33 +2834,33 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 			if (!stricmp("player", Name) && pEnt->IsPlayer())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
 			if (!stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
 			if (!stricmp("any", Name) && !pEnt->IsMSItem())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
@@ -2876,11 +2877,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 					if (pMonster->m_Race)
 					{
 						ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-						int total_len = thoth_token_string.len() + ent_str.len();
+						int total_len = msTokenString.len() + ent_str.len();
 						if (total_len < str_limit)
 						{
-							thoth_token_string += ent_str;
-							thoth_token_string += ";";
+							msTokenString += ent_str;
+							msTokenString += ";";
 						}
 					}
 					break;
@@ -2899,11 +2900,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 					if (pMonster->m_Race)
 					{
 						ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
-						int total_len = thoth_token_string.len() + ent_str.len();
+						int total_len = msTokenString.len() + ent_str.len();
 						if (total_len < str_limit)
 						{
-							thoth_token_string += ent_str;
-							thoth_token_string += ";";
+							msTokenString += ent_str;
+							msTokenString += ";";
 						}
 					}
 					break;
@@ -2911,45 +2912,45 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				}
 			}
 		}
-		if (thoth_token_string.len() > 0) return thoth_token_string.c_str();
+		if (msTokenString.len() > 0) return msTokenString.c_str();
 		else return "none";
 	}
 	else if (ParserName.starts_with("$get_tbox"))
 	{
 		msstring& Name = Params[0];
-		msstring thoth_token_string;
+		msstring msTokenString;
 		msstring ent_str;
 		int str_limit = 214;
 		CBaseEntity* pList[255], * pEnt = NULL;
 		Vector StartPos;
 
 		//Thothie OCT2015_11 - $get_tbox_abs(<scan_type>,<absmins>,<absmaxs>) - allow properly defined box
-		Vector thoth_mins;
-		Vector thoth_maxs;
+		Vector vMinimumBox;
+		Vector vMaximumBox;
 		if (!ParserName.starts_with("$get_tbox_abs"))
 		{
 			//$get_tbox
-			float thoth_boxsize = atof(Params[1]);
-			Vector thoth_delta = Vector(thoth_boxsize, thoth_boxsize, thoth_boxsize);
+			float flAreaSize = atof(Params[1]);
+			Vector vDelta = Vector(flAreaSize, flAreaSize, flAreaSize);
 			if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 			else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-			thoth_mins = StartPos - thoth_delta;
-			thoth_maxs = StartPos + thoth_delta;
+			vMinimumBox = StartPos - vDelta;
+			vMaximumBox = StartPos + vDelta;
 		}
 		else
 		{
 			//$get_tbox_abs
-			thoth_mins = StringToVec(Params[1]);
-			thoth_maxs = StringToVec(Params[2]);
+			vMinimumBox = StringToVec(Params[1]);
+			vMaximumBox = StringToVec(Params[2]);
 		}
 
-		int count = UTIL_EntitiesInBox(pList, 255, thoth_mins, thoth_maxs, FL_CLIENT | FL_MONSTER);
+		int count = UTIL_EntitiesInBox(pList, 255, vMinimumBox, vMaximumBox, FL_CLIENT | FL_MONSTER);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
 		for (int i = 0; i < count; i++)
 		{
-			if ((int)thoth_token_string.len() > str_limit) continue;
+			if ((int)msTokenString.len() > str_limit) continue;
 
 			pEnt = pList[i];
 
@@ -2960,33 +2961,33 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 			if (!stricmp("player", Name) && pEnt->IsPlayer())
 			{
 				ent_str = EntToString(pEnt);
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
 			if (!stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
 			{
 				ent_str = EntToString(pEnt);
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
 			if (!stricmp("any", Name) && !pEnt->IsMSItem())
 			{
 				ent_str = EntToString(pEnt);
-				int total_len = thoth_token_string.len() + ent_str.len();
+				int total_len = msTokenString.len() + ent_str.len();
 				if (total_len < str_limit)
 				{
-					thoth_token_string += ent_str;
-					thoth_token_string += ";";
+					msTokenString += ent_str;
+					msTokenString += ";";
 				}
 			}
 
@@ -3003,11 +3004,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 					if (pMonster->m_Race)
 					{
 						ent_str = EntToString(pEnt);
-						int total_len = thoth_token_string.len() + ent_str.len();
+						int total_len = msTokenString.len() + ent_str.len();
 						if (total_len < str_limit)
 						{
-							thoth_token_string += ent_str;
-							thoth_token_string += ";";
+							msTokenString += ent_str;
+							msTokenString += ";";
 						}
 					}
 					break;
@@ -3022,16 +3023,16 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				if (my_relate == 1 && pMonster->m_Race)
 				{
 					ent_str = EntToString(pEnt);
-					int total_len = thoth_token_string.len() + ent_str.len();
+					int total_len = msTokenString.len() + ent_str.len();
 					if (total_len < str_limit)
 					{
-						thoth_token_string += ent_str;
-						thoth_token_string += ";";
+						msTokenString += ent_str;
+						msTokenString += ";";
 					}
 				}
 			}
 		}
-		if (thoth_token_string.len() > 0) return thoth_token_string.c_str();
+		if (msTokenString.len() > 0) return msTokenString.c_str();
 		else return "none";
 	}
 #endif
@@ -4342,7 +4343,7 @@ msstring CScript::ScriptGetter_FileHash(msstring& FullName, msstring& ParserName
 		msstring filePath = cfileName;
 		filePath += "/";
 		filePath += Params[0];
-		ifstream file;
+		std::ifstream file;
 		file.open(filePath);
 		if (file.is_open())
 		{
@@ -4504,12 +4505,12 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				int month = TheTime->tm_mon + 1;   // Zero indexed month
 				int year = TheTime->tm_year + 1900;   // Zero indexed year (starting with 1900)
 				int DoW = TheTime->tm_wday + 1;      // Zero indexed Day of Week (0 == Sunday)
-				int thoth_hour = TheTime->tm_hour;		//hour (24 format?)
-				int thoth_minute = TheTime->tm_min;		//minute (past the hour?)
+				int iHour = TheTime->tm_hour;		//hour (24 format?)
+				int iMinute = TheTime->tm_min;		//minute (past the hour?)
 
 				if (Name.starts_with("time.day"))         theReturn = day;
-				else if (Name.starts_with("time.minute"))   theReturn = thoth_minute;
-				else if (Name.starts_with("time.hour"))   theReturn = thoth_hour;
+				else if (Name.starts_with("time.minute"))   theReturn = iMinute;
+				else if (Name.starts_with("time.hour"))   theReturn = iHour;
 				else if (Name.starts_with("time.year"))   theReturn = year;
 				else if (Name.starts_with("time.month"))   theReturn = month;
 				else if (Name.starts_with("time.year"))   theReturn = year;
@@ -4585,16 +4586,6 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				}
 			}
 #endif
-			//seems we commented a little too far in JUL2013a (fixed)
-			//Thothie JAN2013_10 - Dynamic music system (tabs be fubar here for some reason)
-			else if (Name.starts_with("map.music."))
-			{
-				msstring Prop = Name.substr(10);
-				if (Prop == "idle.file") return MSGlobals::map_music_idle_file;
-				else if (Prop == "idle.length") return MSGlobals::map_music_idle_length;
-				else if (Prop == "combat.file") return MSGlobals::map_music_combat_file;
-				else if (Prop == "combat.length") return MSGlobals::map_music_combat_length;
-			}
 			else if (Name.starts_with("map."))
 			{
 				//bool Type[2] = { false };
@@ -4605,21 +4596,21 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				else if (Prop == "flags") return MSGlobals::map_flags; //DEC2014_17 Thothie - map flags
 				else if (Prop == "title")
 				{
-					msstring thoth_tstring = MSGlobals::MapTitle;
-					if (thoth_tstring.len() > 1) return MSGlobals::MapTitle;
+					msstring msMapTitle = MSGlobals::MapTitle;
+					if (msMapTitle.len() > 1) return MSGlobals::MapTitle;
 					else return "0";
 
 				}
 				else if (Prop == "weather") //Thothie SEP2007a
 				{
-					msstring thoth_weather = MSGlobals::MapWeather;
-					if (thoth_weather.len() > 1) return MSGlobals::MapWeather;
+					msstring msWeather = MSGlobals::MapWeather;
+					if (msWeather.len() > 1) return MSGlobals::MapWeather;
 					else return "0";
 				}
 				else if (Prop == "desc") //Thothie SEP2007a, updated OCT2007a
 				{
-					msstring thoth_tstring = MSGlobals::MapDesc;
-					if (thoth_tstring.len() > 1) return MSGlobals::MapDesc;
+					msstring msMapDescription = MSGlobals::MapDesc;
+					if (msMapDescription.len() > 1) return MSGlobals::MapDesc;
 					else return "0";
 				}
 				else if (Prop == "maxviewdistance") //Thothie SEP2007a, updated OCT2007a
@@ -4628,8 +4619,8 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				}
 				else if (Prop == "hpwarn") //Thothie SEP2007a, updated OCT2007a
 				{
-					msstring thoth_tstring = MSGlobals::HPWarn;
-					if (thoth_tstring.len() > 1) return MSGlobals::HPWarn;
+					msstring msHealthWarning = MSGlobals::HPWarn;
+					if (msHealthWarning.len() > 1) return MSGlobals::HPWarn;
 					else return "0";
 				}
 				else if (Prop == "spawnlimit") //Thothie OCT2016_18 spawn limiter
@@ -4651,8 +4642,9 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 			else if (Name == "serverside")  fSuccess = IsServer;
 			else if (Name.starts_with("cvar."))
 			{
-				msstring thoth_cvar_return = Name.substr(5);
-				return EngineFunc::CVAR_GetString(thoth_cvar_return.c_str());
+				msstring msCvarReturnName = Name.substr(5);
+				if (!msCvarReturnName.contains("rcon_password") && !msCvarReturnName.contains("ms_central_addr")) return EngineFunc::CVAR_GetString(msCvarReturnName.c_str());
+				return "0";
 			}
 			else if (Name.starts_with("script."))
 			{
@@ -4964,10 +4956,10 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 	{
 		SCRIPT_EVENT& Event = m.Events[i];
 		//Skip unnamed events when running named events only
-		msstring thoth_event_name = (m.ScriptFile.c_str());
-		thoth_event_name.append("->");
-		thoth_event_name.append(Event.Name);
-		dbg(thoth_event_name);
+		msstring msEventName = (m.ScriptFile.c_str());
+		msEventName.append("->");
+		msEventName.append(Event.Name);
+		dbg(msEventName);
 		if (!Event.Name && fOnlyRunNamedEvents)
 			continue;
 

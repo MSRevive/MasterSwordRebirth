@@ -35,6 +35,10 @@ typedef struct netadr_s
 	unsigned char ip[4];
 	unsigned char ipx[10];
 	unsigned short port;
+
+	bool operator!=(const netadr_s& lhs) {
+		return lhs.ip!=ip || lhs.port!=port;
+	};
 } netadr_t;
 
 #endif // NETADR_H

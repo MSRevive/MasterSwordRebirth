@@ -31,14 +31,14 @@ void ContainerWindowUpdate();
 void ContainerWindowOpen(ulong ContainerID);
 extern engine_studio_api_t IEngineStudio;
 #include "ms/clglobal.h"
-#include "ms/clrender.h"
+#include "render/clrender.h"
 #endif
 
 #include "soundent.h"
 #include "shurispritedefs.h"
 
-extern CSoundEnt *pSoundEnt;
-extern CSoundEnt *Saved;
+extern CSoundEnt* pSoundEnt;
+extern CSoundEnt* Saved;
 extern int SavedName;
 
 //Prevents errors when SUB_Remove() is called from Think()
@@ -63,26 +63,26 @@ globalscriptinfo_t g_MSScriptTypes[] =
 
 // Global GenericItem retrieve functions
 // MiB APR2019_07 - $get_item_table
-CGenericItem *GetGenericItemByName(const char *pItemName, bool bCallSpawnIfNeeded = false)
+CGenericItem* GetGenericItemByName(const char* pItemName, bool bCallSpawnIfNeeded = false)
 {
 	return CGenericItemMgr::GetGlobalGenericItemByName(pItemName, bCallSpawnIfNeeded);
 }
 
-CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemName, bool bCallSpawnIfNeeded)
+CGenericItem* CGenericItemMgr::GetGlobalGenericItemByName(const char* pszItemName, bool bCallSpawnIfNeeded)
 {
 	for (int i = 0; i < m_Items.size(); i++)
 	{
-		GenItem_t &GlobalItem = m_Items[i];
+		GenItem_t& GlobalItem = m_Items[i];
 		if (FStrEq(GlobalItem.Name.c_str(), pszItemName))
 		{
 			// MiB MAR2019_03 - [GET_ITEM_TABLE] Call game_spawn if it hasn't been done already
-			if(bCallSpawnIfNeeded && !GlobalItem.bCalledSpawn)
+			if (bCallSpawnIfNeeded && !GlobalItem.bCalledSpawn)
 			{
 				// Only create once, just a param to tell the spawn this
 				// is the global item in case there's anything it shouldn't
 				// do in the spawn event
 				msstringlist vParams;
-				vParams.add( "1" );
+				vParams.add("1");
 				GlobalItem.bCalledSpawn = true;
 
 				// Create a temporary entvars. A lot of script commands expect
@@ -90,42 +90,42 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 				// if it's fake. If it causes any problems, turn off whatever
 				// command is causing it by utilizing PARAM1 being 1
 				bool bTempPev = GlobalItem.pItem->pev ? false : true;
-				if(bTempPev)
+				if (bTempPev)
 					GlobalItem.pItem->pev = new entvars_t();
 
 				try {
 					GlobalItem.pItem->CallScriptEvent("game_spawn", &vParams);
 				}
-				catch(...)
+				catch (...)
 				{
-					CGenericItem * pNewItem = NULL;
+					CGenericItem* pNewItem = NULL;
 					try
 					{
 						pNewItem = NewGenericItem(GlobalItem.pItem);
-						::delete (CGenericItem *)GlobalItem.pItem;
+						::delete (CGenericItem*)GlobalItem.pItem;
 						GlobalItem.pItem = pNewItem;
 						GlobalItem.pItem->SUB_Remove();
 						bTempPev = false;
 					}
-					catch(...)
+					catch (...)
 					{
-						#if !TURN_OFF_ALERT
-							ErrorPrint( "GLBL_ITEM"
-										, ERRORPRINT_LOG|ERRORPRINT_CONSOLE|ERRORPRINT_INFOMSG
-										, "Error while spawning global item '%s'! %s"
-										, pszItemName
-										, pNewItem ? "Using a full item instead!"
-										: "Creating full item also failed, exiting game"
-										);
-							if ( !pNewItem )
-							{
-								exit(-1);
-							}
-						#endif
+#if !TURN_OFF_ALERT
+						ErrorPrint("GLBL_ITEM"
+							, ERRORPRINT_LOG | ERRORPRINT_CONSOLE | ERRORPRINT_INFOMSG
+							, "Error while spawning global item '%s'! %s"
+							, pszItemName
+							, pNewItem ? "Using a full item instead!"
+							: "Creating full item also failed, exiting game"
+						);
+						if (!pNewItem)
+						{
+							exit(-1);
+						}
+#endif
 					}
 				}
 
-				if ( bTempPev )
+				if (bTempPev)
 				{
 					delete GlobalItem.pItem->pev;
 					GlobalItem.pItem->pev = NULL;
@@ -150,12 +150,12 @@ CGenericItem *CGenericItemMgr::GetGlobalGenericItemByName(const char *pszItemNam
 		return NULL;
 	}*/
 
-//Create a new CGenericItem ent from one of the global templates (GenItem_t)
-CGenericItem *NewGenericItem(CGenericItem *pGlobalItem) { 
-	return CGenericItemMgr::NewGenericItem(pGlobalItem); 
+	//Create a new CGenericItem ent from one of the global templates (GenItem_t)
+CGenericItem* NewGenericItem(CGenericItem* pGlobalItem) {
+	return CGenericItemMgr::NewGenericItem(pGlobalItem);
 }
 
-CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
+CGenericItem* CGenericItemMgr::NewGenericItem(CGenericItem* pGlobalItem)
 {
 	startdbg;
 
@@ -170,18 +170,18 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 
 	dbg("Create Entity for Item");
 #ifdef VALVE_DLL
-	CGenericItem *pItem = GetClassPtr((CGenericItem *)NULL);
+	CGenericItem* pItem = GetClassPtr((CGenericItem*)NULL);
 	if ((ulong)pItem == m_LastDestroyedItemID)
 	{
 		//Work around for a bug.
 		//(When new item gets last del'd item memory location (which is used for ID))
-		CGenericItem *NewItem = GetClassPtr((CGenericItem *)NULL);
+		CGenericItem* NewItem = GetClassPtr((CGenericItem*)NULL);
 		pItem->SUB_Remove();
 		pItem = NewItem;
 	}
 #else
-	CGenericItem *pItem = ::new CGenericItem; //Allocate from engine.  Don't use msnew
-	entvars_t *tmpPev = pItem->pev;
+	CGenericItem* pItem = ::new CGenericItem; //Allocate from engine.  Don't use msnew
+	entvars_t* tmpPev = pItem->pev;
 	pItem->pev = tmpPev;
 	if (pItem)
 		pItem->m_pfnThink = NULL;
@@ -231,20 +231,20 @@ CGenericItem *CGenericItemMgr::NewGenericItem(CGenericItem *pGlobalItem)
 }
 
 //CGenericItem *NewGenericItem( int iD ) { return NewGenericItem( CGenericItemMgr::GetGlobalGenericItemByID(iD) ); }
-CGenericItem *NewGenericItem(const char *pszItemName) { 
-	return NewGenericItem(GetGenericItemByName(pszItemName)); 
+CGenericItem* NewGenericItem(const char* pszItemName) {
+	return NewGenericItem(GetGenericItemByName(pszItemName));
 }
 
-void CGenericItemMgr::AddGlobalItem(GenItem_t &NewGlobalItem) { 
-	m_Items.add(NewGlobalItem); 
+void CGenericItemMgr::AddGlobalItem(GenItem_t& NewGlobalItem) {
+	m_Items.add(NewGlobalItem);
 }
 
-int CGenericItemMgr::ItemCount() { 
-	return m_Items.size(); 
+int CGenericItemMgr::ItemCount() {
+	return m_Items.size();
 }
 
-GenItem_t *CGenericItemMgr::Item(int idx) { 
-	return &m_Items[idx]; 
+GenItem_t* CGenericItemMgr::Item(int idx) {
+	return &m_Items[idx];
 }
 
 // MiB MAR2012_10 - Get item_name's index in the global array
@@ -260,7 +260,7 @@ int CGenericItemMgr::LookUpItemIdx(msstring item_name)
 }
 
 // MiB MAR2012_10 - Get a new item based on it's index in the global array
-CGenericItem *CGenericItemMgr::NewGenericItem(int idx)
+CGenericItem* CGenericItemMgr::NewGenericItem(int idx)
 {
 	return ::NewGenericItem(m_Items[idx].Name.c_str());
 }
@@ -268,7 +268,7 @@ CGenericItem *CGenericItemMgr::NewGenericItem(int idx)
 ulong CGenericItemMgr::m_LastDestroyedItemID = -1;
 mslist<GenItem_t> CGenericItemMgr::m_Items;
 
-void CGenericItemMgr::DeleteItem(CGenericItem *pItem)
+void CGenericItemMgr::DeleteItem(CGenericItem* pItem)
 {
 	for (int i = 0; i < ItemCount(); i++)
 		if (m_Items[i].pItem == pItem)
@@ -277,9 +277,9 @@ void CGenericItemMgr::DeleteItem(CGenericItem *pItem)
 
 void CGenericItemMgr::DeleteItem(int idx)
 {
-	GenItem_t &GlobalItem = m_Items[idx];
+	GenItem_t& GlobalItem = m_Items[idx];
 	GlobalItem.pItem->Deactivate();			   //This Global item isn't a real engine item.. but Deactivate() still deallocates the script data
-	::delete (CGenericItem *)GlobalItem.pItem; //Must delete using global function
+	::delete (CGenericItem*)GlobalItem.pItem; //Must delete using global function
 	m_Items.erase(idx);
 }
 
@@ -380,7 +380,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 	dbg("Load Script items.txt");
 
-	byte *pMemFile = NULL, *pStringPtr = NULL;
+	byte* pMemFile = NULL, * pStringPtr = NULL;
 	int iFileSize = 65535, i = 0, n;
 	char cString[128], cItemFileName[128];
 
@@ -402,7 +402,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		if (GroupFile.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
 		{
 			pStringPtr = msnew(byte[FileSize + 1]);
-			GroupFile.ReadEntry(FILE_ITEMLIST, (byte *)pStringPtr, FileSize);
+			GroupFile.ReadEntry(FILE_ITEMLIST, (byte*)pStringPtr, FileSize);
 			pStringPtr[FileSize] = 0;
 			//Set global variable: scripts loaded from library
 			g_MSScriptInfo = &g_MSScriptTypes[MS_SCRIPT_LIBRARY];
@@ -414,18 +414,18 @@ void CGenericItemMgr::GenericItemPrecache(void)
 			//Couldn't find items.txt in dev build... jump to end.  No items will be loaded
 			ALERT(at_console, "NONEXISTANT file: \"%s\"\nTHIS FILE IS EXTREMELY IMPORTANT. WHY IS IT MISSING?\n", FILE_DEV_ITEMLIST);
 #else
-		//Fatal error in public build... couldn't find items.txt
-		Log("FATAL ERROR: items.txt inside sc.dll NOT FOUND!");
+			//Fatal error in public build... couldn't find items.txt
+			Log("FATAL ERROR: items.txt inside sc.dll NOT FOUND!");
 
 #ifdef RELEASE_LOCKDOWN
-		exit(0);
+			exit(0);
 #else
 #ifndef POSIX
-		MessageBox(NULL, "Missing items.txt inside sc.dll! This is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
+			MessageBox(NULL, "Missing items.txt inside sc.dll! This is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
 #endif
 #endif
 #endif
-		goto end;
+			goto end;
 		}
 
 #ifndef SCRIPT_LOCKDOWN
@@ -441,9 +441,9 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif*/
 
 	dbg("Load global items");
-	
+
 	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
-	while (GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")) 
+	while (GetString(cString, min(FileSize, sizeof(cString)), (char*)pStringPtr, i, "\r\n"))
 	{
 		n = i;
 		i += strlen(cString) + 1;
@@ -453,18 +453,18 @@ void CGenericItemMgr::GenericItemPrecache(void)
 			continue; //comment
 		if (!cString[0] || cString[0] == '\r' || cString[0] == '\n')
 			continue;
-			
-		if(cString == strstr(cString, "#swap "))
+
+		if (cString == strstr(cString, "#swap "))
 		{
 			msstring vsLine = msstring(&cString[6]);
-			int vSpacePos = vsLine.find( " " );
+			int vSpacePos = vsLine.find(" ");
 			msstring vsSrcName = vsLine.substr(0, vSpacePos);
 			msstring vsDestName = vsLine.substr(vSpacePos + 1);
 			CGenericItemMgr::mItemAlias[vsSrcName] = vsDestName;
 			continue;
 		}
 
-		 _snprintf(cItemFileName, sizeof(cItemFileName),  "items/%s",  cString);
+		_snprintf(cItemFileName, sizeof(cItemFileName), "items/%s", cString);
 
 		logfileopt << "  (Precache) Creating item " << cString << "...";
 		//Create a new Global Item
@@ -484,7 +484,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		dbg(msstring("Load script: ") + cItemFileName);
 		//Log(cItemFileName);
-		
+
 		bool fSuccess = pNewItem->Script_Add(cItemFileName, pNewItem) ? true : false;
 		//Log("try adding new item scripts");
 		if (fSuccess)
@@ -495,7 +495,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		if (!fSuccess)
 		{
-//Couldn't load the item's script, don't load the item
+			//Couldn't load the item's script, don't load the item
 #ifdef DEV_BUILD
 			CGenericItemMgr::DeleteItem(pNewItem);
 			logfileopt << " FAILED\r\n";
@@ -527,7 +527,7 @@ end: //Cleanup time
 //-----------------
 
 extern int iBeam; //Global cuz this can be shared across players
-void FindHullIntersection(const Vector &vecSrc, TraceResult &tr, float *mins, float *maxs, edict_t *pEntity);
+void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, float* mins, float* maxs, edict_t* pEntity);
 
 LINK_ENTITY_TO_CLASS(ms_item, CGenericItem);
 
@@ -559,6 +559,7 @@ CGenericItem::~CGenericItem()
 {
 	Deactivate();
 }
+
 void CGenericItem::Deactivate()
 {
 	startdbg;
@@ -575,19 +576,19 @@ void CGenericItem::Deactivate()
 	dbg("Deallocate Drink data");
 	if (DrinkData)
 	{
-		delete (void *)DrinkData;
+		delete (void*)DrinkData;
 		DrinkData = NULL;
 	}
 	dbg("Deallocate Armor data");
 	if (ArmorData)
 	{
-		delete (void *)ArmorData;
+		delete (void*)ArmorData;
 		ArmorData = NULL;
 	}
 	dbg("Deallocate Projectile data");
 	if (ProjectileData)
 	{
-		delete (void *)ProjectileData;
+		delete (void*)ProjectileData;
 		ProjectileData = NULL;
 	}
 #ifdef VALVE_DLL
@@ -621,7 +622,7 @@ void CGenericItem::Spawn()
 	}
 }
 
-CMSMonster *CGenericItem::Owner()
+CMSMonster* CGenericItem::Owner()
 {
 	if (m_pParentContainer)
 		return m_pParentContainer->Owner();
@@ -639,11 +640,11 @@ float CGenericItem::Weight()
 	float MyVolume = CBaseEntity::m_Weight;
 	if (FBitSet(MSProperties(), ITEM_CONTAINER))
 		MyVolume += Container_Weight();
-	else if FBitSet (MSProperties(), ITEM_GROUPABLE)
+	else if FBitSet(MSProperties(), ITEM_GROUPABLE)
 		MyVolume *= iQuantity;
 	return MyVolume;
 }
-int CGenericItem::GetItemInfo(ItemInfo *p)
+int CGenericItem::GetItemInfo(ItemInfo* p)
 {
 	p->pszName = ((pev != NULL) ? STRING(pev->classname) : "INVALID");
 	p->pszAmmo1 = NULL;
@@ -694,13 +695,13 @@ bool CGenericItem::Deploy()
 	if (m_pPlayer)
 		m_pPlayer->m_ClientCurrentHand = -1;
 
-		/*			MESSAGE_BEGIN( MSG_ONE, gmsgHands, NULL, m_pPlayer->pev );
-			WRITE_BYTE( (m_Hand==mCH)?m_Hand+2:m_Hand );
-			WRITE_BYTE( iWeaponType );
-			WRITE_LONG( m_iId );
-			WRITE_BYTE( iGetMethod );
-			WRITE_SHORT( iQuantity );
-		MESSAGE_END();*/
+	/*			MESSAGE_BEGIN( MSG_ONE, gmsgHands, NULL, m_pPlayer->pev );
+		WRITE_BYTE( (m_Hand==mCH)?m_Hand+2:m_Hand );
+		WRITE_BYTE( iWeaponType );
+		WRITE_LONG( m_iId );
+		WRITE_BYTE( iGetMethod );
+		WRITE_SHORT( iQuantity );
+	MESSAGE_END();*/
 #else
 	if (FBitSet(MSProperties(), ITEM_SPELL))
 	{
@@ -804,7 +805,7 @@ void CGenericItem::ResetAttack()
 
 //Called on items when they hit something
 //For example: Sword hits a shield.  Shield calls countereffect on the sword so the sword can make his owner's screen shake
-void CGenericItem ::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtraData)
+void CGenericItem::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtraData)
 {
 #ifdef VALVE_DLL
 	switch (iEffect)
@@ -831,7 +832,7 @@ void CGenericItem ::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pE
 	case CE_SHIELDHIT: //I hit a shield
 	{
 		bool fWeaponDecay = false;
-		float fDamage = *(float *)pExtraData;
+		float fDamage = *(float*)pExtraData;
 		if (pExtraData)
 		{
 			if (Quality)
@@ -846,7 +847,7 @@ void CGenericItem ::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pE
 		if (m_pOwner)
 		{
 			m_pOwner->pev->punchangle = Vector(RANDOM_FLOAT(-3, 3),
-											   RANDOM_FLOAT(-3, 3), RANDOM_FLOAT(-3, 3));
+				RANDOM_FLOAT(-3, 3), RANDOM_FLOAT(-3, 3));
 			//EMIT_SOUND_DYN( m_pOwner->edict(), CHAN_WEAPON, SOUND_IRONSHIELD_HIT1, 1, ATTN_NORM, 0, 198 + RANDOM_LONG(0,50));
 			if (m_pPlayer)
 			{
@@ -892,15 +893,15 @@ void CGenericItem::Idle(void)
 	GiveTo - Called whenever an item is transferred to a player from the
 			 ground, a corpse, or the hand or body of another player.
 */
-bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSound, bool fPutItemsAway)
+bool CGenericItem::GiveTo(CMSMonster* pReciever, bool AllowPutInPack, bool fSound, bool fPutItemsAway)
 {
 	if (m_NotUseable)
 		return false;
 
-	CBasePlayer *pPlayer = NULL;
+	CBasePlayer* pPlayer = NULL;
 	bool fWentToPack = false;
 	if (pReciever && pReciever->IsPlayer())
-		pPlayer = (CBasePlayer *)pReciever;
+		pPlayer = (CBasePlayer*)pReciever;
 
 	//I'm an airborne projectile, cancel out
 	if (MSProperties() & ITEM_PROJECTILE)
@@ -956,11 +957,11 @@ bool CGenericItem::GiveTo(CMSMonster *pReciever, bool AllowPutInPack, bool fSoun
 
 	return true;
 }
-void CGenericItem::AddToOwner(CMSMonster *pMonster)
+void CGenericItem::AddToOwner(CMSMonster* pMonster)
 {
 	// Add item from to owner.  m_pOwner gets set here.
 	m_pOwner = pMonster;
-	m_pPlayer = pMonster->IsPlayer() ? (CBasePlayer *)pMonster : NULL;
+	m_pPlayer = pMonster->IsPlayer() ? (CBasePlayer*)pMonster : NULL;
 	pev->owner = pMonster->edict();
 	pev->aiment = pMonster->edict();
 	pev->movetype = MOVETYPE_FOLLOW;
@@ -982,9 +983,11 @@ bool CGenericItem::UseItem(bool Verbose)
 	if (CurrentAttack)
 		return false;
 
-	//Don't do anything to spells
-	if (FBitSet(MSProperties(), ITEM_SPELL))
-		return false;
+	//"Drop" spells to cancel them when sheathed
+	if (FBitSet(MSProperties(), ITEM_SPELL)) {
+		this->Drop();
+		return true;
+	}
 
 	if (Verbose && !CanPutinInventory())
 		return false;
@@ -1045,12 +1048,12 @@ bool CGenericItem::CanWearItem()
 		false;
 #endif
 
-	CGenericItem *pItemConflict = NULL;
+	CGenericItem* pItemConflict = NULL;
 	if (m_pPlayer)
 	{
 		for (int iloc = 0; iloc < m_WearPositions.size(); iloc++)
 		{
-			wearpos_t *pPlayerPos = NULL;
+			wearpos_t* pPlayerPos = NULL;
 			for (int ploc = 0; ploc < m_pPlayer->m_WearPositions.size(); ploc++)
 			{
 				msstring_ref PlayerPosName = m_pPlayer->m_WearPositions[ploc].Name;
@@ -1068,13 +1071,13 @@ bool CGenericItem::CanWearItem()
 				return false; //Couldn't find position on player (the position's name isn't defined)
 			}
 
-			wearpos_t &PlayerPos = *pPlayerPos;
-			CGenericItem *pItemConflict = NULL;
+			wearpos_t& PlayerPos = *pPlayerPos;
+			CGenericItem* pItemConflict = NULL;
 
 			int iSlots = 0;
 			for (int i = 0; i < m_pOwner->Gear.size(); i++)
 			{
-				CGenericItem *pItemWorn = m_pOwner->Gear[i];
+				CGenericItem* pItemWorn = m_pOwner->Gear[i];
 
 				if (pItemWorn == this ||
 					!FBitSet(pItemWorn->MSProperties(), ITEM_WEARABLE) ||
@@ -1152,22 +1155,23 @@ bool CGenericItem::WearItem(void)
 	pPlayer is a parameter because this can be called even when the
 	item doesn't have an owner (like picking up straight to pack)
 */
-CGenericItem *CGenericItem::FindPackForItem(CBasePlayer *pPlayer, bool fVerbose)
+CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 {
 	if (!pPlayer)
 		return NULL;
 
-	//Manual put in packs... should be done w/ scripts...
+	//Manual put in packs.
 	bool fSuccess = false;
-	CGenericItem *pPack = NULL;
+	CGenericItem* pPack = NULL;
 
 	if (strstr(ItemName, "arrow"))
 		pPack = pPlayer->GetContainer("quiver");
 	else if (strstr(ItemName, "swords"))
 		pPack = pPlayer->GetContainer("sheath");
 	else if (strstr(ItemName, "blunt") ||
-			 strstr(ItemName, "axes"))
+		strstr(ItemName, "axes"))
 		pPack = pPlayer->GetContainer("holster");
+		
 
 	//Check for space, etc in desired pack
 	if (pPack && CanPutInPack(pPack))
@@ -1176,10 +1180,9 @@ CGenericItem *CGenericItem::FindPackForItem(CBasePlayer *pPlayer, bool fVerbose)
 	if (!fSuccess)
 	{
 		//Last resort, try to put in any pack
-		int i = 0;
 		for (int i = 0; i < pPlayer->Gear.size(); i++)
 		{
-			CGenericItem *pNextPack = pPlayer->Gear[i];
+			CGenericItem* pNextPack = pPlayer->Gear[i];
 
 			if (FBitSet(pNextPack->MSProperties(), ITEM_CONTAINER) &&
 				//pPlayer->PutInPack( this, pNextPack, FALSE ) )
@@ -1202,9 +1205,9 @@ CGenericItem *CGenericItem::FindPackForItem(CBasePlayer *pPlayer, bool fVerbose)
 	pPlayer is a parameter because this can be called even when the
 	item doesn't have an owner (like picking up straight to pack)
 */
-bool CGenericItem::PutInAnyPack(CBasePlayer *pPlayer, bool fVerbose)
+bool CGenericItem::PutInAnyPack(CBasePlayer* pPlayer, bool fVerbose)
 {
-	CGenericItem *pPack = FindPackForItem(pPlayer, fVerbose);
+	CGenericItem* pPack = FindPackForItem(pPlayer, fVerbose);
 
 	if (!pPack)
 		return false;
@@ -1229,7 +1232,7 @@ bool CGenericItem::PutInAnyPack(CBasePlayer *pPlayer, bool fVerbose)
 	return PutInPack(pPack);
 }
 
-bool CGenericItem::CanPutInPack(CGenericItem *pContainer)
+bool CGenericItem::CanPutInPack(CGenericItem* pContainer)
 {
 	if (!pContainer)
 		return false;
@@ -1239,7 +1242,7 @@ bool CGenericItem::CanPutInPack(CGenericItem *pContainer)
 
 	return pContainer->Container_CanAcceptItem(this);
 }
-bool CGenericItem::PutInPack(CGenericItem *pContainer)
+bool CGenericItem::PutInPack(CGenericItem* pContainer)
 {
 	if (!CanPutInPack(pContainer))
 		return false;
@@ -1301,69 +1304,88 @@ bool CGenericItem::CanDrop()
 	if (m_PrefHand == HAND_PLAYERHANDS)
 		return false;
 
-	if (!Spell_CanAttack())
-		return false;
+	// if (!Spell_CanAttack())
+	// 	return false;
 #endif
 
 	return true;
 }
-void CGenericItem::Holster() { CancelAttack(); }
+void CGenericItem::Holster() {
+	m_pOwner = Owner();
+
+	CancelAttack();
+
+	//also reset the items drop tracking if it is holstered
+	bDropAttempted = false;
+	iDropTickCounter = 0;
+}
 
 void CGenericItem::Drop(/*int ParamsFilled, const Vector &Velocity, const Vector &Angles, const Vector &Origin */)
 {
 	m_pOwner = Owner(); // Oddness happens when trying to drop straight from packs because they get their owner from the container. Explicitly set for now
-	CallScriptEvent("game_drop");
 
-	CancelAttack();
+	bDropAttempted = true;
+	if ((bDropAttempted && m_pOwner->IsPlayer()) || !m_pOwner->IsPlayer()) {
+		CallScriptEvent("game_drop");
+
+		CancelAttack();
 
 #ifdef VALVE_DLL
-	/*if( ParamsFilled > 0 ) pev->velocity = Velocity;
-		else if( m_pOwner ) pev->velocity = m_pOwner->pev->velocity;
-		if( ParamsFilled > 1 ) pev->angles = Angles;
-		else if( m_pOwner ) pev->angles = m_pOwner->pev->angles;
-		if( ParamsFilled > 2 ) pev->origin = Origin;
-		else if( m_pOwner ) pev->origin = m_pOwner->EyePosition( );*/
+		/*if( ParamsFilled > 0 ) pev->velocity = Velocity;
+			else if( m_pOwner ) pev->velocity = m_pOwner->pev->velocity;
+			if( ParamsFilled > 1 ) pev->angles = Angles;
+			else if( m_pOwner ) pev->angles = m_pOwner->pev->angles;
+			if( ParamsFilled > 2 ) pev->origin = Origin;
+			else if( m_pOwner ) pev->origin = m_pOwner->EyePosition( );*/
 
-	pev->velocity = m_pOwner->pev->velocity;
-	pev->angles = m_pOwner->pev->angles;
-	pev->origin = m_pOwner->EyePosition() + gpGlobals->v_forward * 10; // Items sometimes get caught in head, move forward a bit
+		pev->velocity = m_pOwner->pev->velocity;
+		pev->angles = m_pOwner->pev->angles;
+		pev->origin = m_pOwner->EyePosition() + gpGlobals->v_forward * 10; // Items sometimes get caught in head, move forward a bit
 
-	//	if( m_pPlayer ) strcpy( m_pPlayer->m_szAnimLegs, "" );
-	pev->sequence = 0;
-	pev->aiment = NULL;
-	//pev->avelocity = Vector( 0,10,0 );
-	if (WorldModel.len())
-	{
-		ClearBits(pev->effects, EF_NODRAW); //might need to remove this
-		SetBits(pev->effects, EF_NOINTERP);
-		SET_MODEL(ENT(pev), WorldModel);
+		//	if( m_pPlayer ) strcpy( m_pPlayer->m_szAnimLegs, "" );
+		pev->sequence = 0;
+		pev->aiment = NULL;
+		//pev->avelocity = Vector( 0,10,0 );
+		if (WorldModel.len())
+		{
+			ClearBits(pev->effects, EF_NODRAW); //might need to remove this
+			SetBits(pev->effects, EF_NOINTERP);
+			SET_MODEL(ENT(pev), WorldModel);
+		}
+#endif
+
+		if (m_pOwner)
+			m_pOwner->RemoveItem((CGenericItem*)this);
+
+#ifdef VALVE_DLL
+		FallInit(); //Call FallInit after RemoveItem unsets the think funcrion
+#endif
+		//CBasePlayerItem::Drop( ParamsFilled, Velocity, Angles, Origin );
+
+#ifndef VALVE_DLL
+		//Close the container when dropped (client-side)
+		//if( m_pPlayer && m_pPlayer->OpenPack == this ) ContainerWindowClose( );
+
+		void ContainerWindowUpdate();
+		SUB_Remove();
+#endif
+		//reset drop trackers on successful drop
+		bDropAttempted = false;
+		iDropTickCounter = 0;
 	}
-#endif
-
-	if (m_pOwner)
-		m_pOwner->RemoveItem((CGenericItem *)this);
-
-#ifdef VALVE_DLL
-	FallInit(); //Call FallInit after RemoveItem unsets the think funcrion
-#endif
-	//CBasePlayerItem::Drop( ParamsFilled, Velocity, Angles, Origin );
-
-	if (SpellData)
-	{
+	else if (SpellData || !m_pOwner->IsPlayer()) {
+		//I'm fairly certain npcs don't use this and the player check is unnecessary but trying to avoid weird stuff.
 		//Dropping spells fizzles them
 		if (m_pOwner)
 			m_pOwner->RemoveItem(this);
 		DelayedRemove();
 	}
+	else if (m_pOwner->IsPlayer()) {
+		bDropAttempted = true;
+	}
 
-#ifndef VALVE_DLL
-	//Close the container when dropped (client-side)
-	//if( m_pPlayer && m_pPlayer->OpenPack == this ) ContainerWindowClose( );
-
-	void ContainerWindowUpdate();
-	SUB_Remove();
-#endif
 }
+
 void CGenericItem::FallInit()
 {
 	CBasePlayerItem::FallInit();
@@ -1373,6 +1395,7 @@ void CGenericItem::FallInit()
 	m_TimeExpire = gpGlobals->time + ExpireTime;
 	flNextThink = pev->nextthink;
 }
+
 void CGenericItem::FallThink(void)
 {
 	if (pev->flags & FL_ONGROUND)
@@ -1489,6 +1512,22 @@ void CGenericItem::Think()
 	pev->nextthink = gpGlobals->time;
 #endif
 
+	//drop attempt tracking
+	/*
+	if (bDropAttempted && iDropTickCounter >= 100)
+	{
+		//if 100 ticks have passed since attempting to drop, cancel drop.
+		bDropAttempted = false;
+		CBasePlayer* pOwner;
+		if (pOwner = dynamic_cast<CBasePlayer*>(Owner())) {
+			pOwner->SendEventMsg(HUDEVENT_NORMAL, msstring("Dropping timed out."));
+		}
+		iDropTickCounter = 0;
+	}
+	else if (bDropAttempted && iDropTickCounter < 100) {
+		iDropTickCounter++;
+	}*/
+
 	enddbg;
 }
 #ifdef VALVE_DLL
@@ -1544,7 +1583,7 @@ void CGenericItem::RemoveFromOwner()
 #ifdef VALVE_DLL
 	if (pev && pev->iuser2 && pev->iuser3) //Notify torch sprite I've been removed
 	{
-		CBaseEntity *pSprite = MSInstance(INDEXENT(pev->iuser2));
+		CBaseEntity* pSprite = MSInstance(INDEXENT(pev->iuser2));
 		if ((int)pSprite == pev->iuser3)
 			pSprite->Think();
 	}
@@ -1617,7 +1656,7 @@ void CGenericItem::Script_Setup()
 	m_pScriptCommands = &CGenericItemMgr::m_ScriptCommands;
 }
 
-bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
+bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	//Parse one command
 	startdbg;
@@ -1707,7 +1746,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 		if (Params.size() >= 4)
 		{
 			//Param 2 == sprite type. transparent is the only type right now
-			CMSSprite *pSprite = GetClassPtr((CMSSprite *)NULL);
+			CMSSprite* pSprite = GetClassPtr((CMSSprite*)NULL);
 			if (pSprite)
 			{
 				pSprite->TorchInit(msstring("sprites/") + Params[0], atof(Params[2]), atof(Params[3]), edict());
@@ -1781,14 +1820,14 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 			}
 			else if (Params.size() >= 2)
 			{
-				msstring &WearPos = Params[1];
+				msstring& WearPos = Params[1];
 				SetBits(Properties, ITEM_WEARABLE);
 				msstringlist Positions;
 				TokenizeString(WearPos, Positions, ";|");
 
 				for (int i1 = 0; i1 < Positions.size(); i1++)
 				{
-					msstring &PosName = Positions[i1];
+					msstring& PosName = Positions[i1];
 
 					bool Exists = false;
 					for (int i2 = 0; i2 < m_WearPositions.size(); i2++)
@@ -1915,7 +1954,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 			ERROR_MISSING_PARMS;
 #else
 		//Thothie JAN2020_04 - need method to pull viewmodel server side
-		if( Params.size( ) >= 1 ) SetScriptVar("ITEM_VIEWMODEL", Params[0].c_str());
+		if (Params.size() >= 1) SetScriptVar("ITEM_VIEWMODEL", Params[0].c_str());
 #endif
 	}
 	//***************************** SETWORLDMODEL *************************
@@ -2081,7 +2120,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 	{
 		if (Params.size() >= 1)
 		{
-			msstring &ReqHand = Params[0];
+			msstring& ReqHand = Params[0];
 			if (!stricmp(ReqHand, "left"))
 				m_PrefHand = LEFT_HAND;
 			else if (!stricmp(ReqHand, "right"))
@@ -2142,8 +2181,8 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 		{
 			if (m_CurrentDamage)
 			{
-				msstring &DmgProp = Params[0];
-				msstring &DmgValue = Params[1];
+				msstring& DmgProp = Params[0];
+				msstring& DmgValue = Params[1];
 				if (DmgProp == "dmg")
 					m_CurrentDamage->flDamage = atof(DmgValue);
 				else if (DmgProp == "type")
@@ -2158,8 +2197,8 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 
 #ifndef VALVE_DLL
 
-//This is handled here for the client-side entities.  This returns false and handles it again in CScript for the server side
-//******************************* SETMODEL ****************************
+	//This is handled here for the client-side entities.  This returns false and handles it again in CScript for the server side
+	//******************************* SETMODEL ****************************
 #define m_ClEntNormal m_ClEntity[ITEMENT_NORMAL]
 	else if (Cmd.Name() == "setmodel")
 	{
@@ -2200,7 +2239,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 	{
 		if (Params.size() >= 1)
 		{
-			cl_entity_t *view = gEngfuncs.GetViewModel();
+			cl_entity_t* view = gEngfuncs.GetViewModel();
 			view->curstate.skin = atoi(Params[0]);
 		}
 		return false;
@@ -2214,9 +2253,9 @@ bool CGenericItem::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scrip
 	return true;
 }
 
-CGenericItem *FindParryWeapon(CMSMonster *pMonster, /*out*/ int &iPlayerHand, /*out*/ int &iAttackNum)
+CGenericItem* FindParryWeapon(CMSMonster* pMonster, /*out*/ int& iPlayerHand, /*out*/ int& iAttackNum)
 {
-	CGenericItem *pHandItem;
+	CGenericItem* pHandItem;
 
 	//Look at current hand first, then other hand
 	int iHand[MAX_PLAYER_HANDS];
@@ -2232,7 +2271,7 @@ CGenericItem *FindParryWeapon(CMSMonster *pMonster, /*out*/ int &iPlayerHand, /*
 
 		for (int a = 0; a < pHandItem->m_Attacks.size(); a++)
 		{
-			attackdata_t &Attack = pHandItem->m_Attacks[a];
+			attackdata_t& Attack = pHandItem->m_Attacks[a];
 			if (Attack.StatExp == SKILL_PARRY)
 			{
 				iAttackNum = a;
@@ -2267,24 +2306,24 @@ float CGenericItem::Give(enum givetype_e Type, float Amt)
 	return CBaseEntity::Give(Type, Amt);
 }
 
-CGenericItem *MSUtil_GetItemByID(ulong m_iId)
+CGenericItem* MSUtil_GetItemByID(ulong m_iId)
 {
-	CGenericItem *pItem = (CGenericItem *)UTIL_FindEntityByClassname(NULL, "ms_item");
+	CGenericItem* pItem = (CGenericItem*)UTIL_FindEntityByClassname(NULL, "ms_item");
 	while (pItem)
 	{
 		if (pItem->m_iId == m_iId)
 			return pItem;
-		pItem = (CGenericItem *)UTIL_FindEntityByClassname(pItem, "ms_item");
+		pItem = (CGenericItem*)UTIL_FindEntityByClassname(pItem, "ms_item");
 	}
 	return NULL;
 }
-void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage)
+void SendGenericItem(CBasePlayer* pPlayer, CGenericItem* pItem, bool fNewMessage)
 {
 	genericitem_full_t newItem = genericitem_full_t(pItem);
 	SendGenericItem(pPlayer, newItem, fNewMessage);
 }
 //MIB MAR2012 anti-overlow (see previous archives for original)
-void SendGenericItem(CBasePlayer *pPlayer, genericitem_full_t &Item, bool fNewMessage)
+void SendGenericItem(CBasePlayer* pPlayer, genericitem_full_t& Item, bool fNewMessage)
 {
 	if (fNewMessage)
 	{
@@ -2321,9 +2360,9 @@ void SendGenericItem(CBasePlayer *pPlayer, genericitem_full_t &Item, bool fNewMe
 }
 #endif
 
-CGenericItem *MSUtil_GetItemByID(ulong m_iId, CMSMonster *pOwner)
+CGenericItem* MSUtil_GetItemByID(ulong m_iId, CMSMonster* pOwner)
 {
-	CGenericItem *pItem = MSUtil_GetItemByID(m_iId);
+	CGenericItem* pItem = MSUtil_GetItemByID(m_iId);
 	if (!pItem || pItem->Owner() != pOwner)
 		return NULL;
 
@@ -2332,28 +2371,28 @@ CGenericItem *MSUtil_GetItemByID(ulong m_iId, CMSMonster *pOwner)
 
 #ifndef VALVE_DLL
 #include "../parsemsg.h"
-CGenericItem *MSUtil_GetItemByID(ulong lID)
+CGenericItem* MSUtil_GetItemByID(ulong lID)
 {
 	for (int e = 0; e < MSCLGlobals::m_ClEntites.size(); e++)
 	{
-		CBaseEntity *pEntity = MSCLGlobals::m_ClEntites[e];
+		CBaseEntity* pEntity = MSCLGlobals::m_ClEntites[e];
 		if (!FBitSet(pEntity->MSProperties(), ITEM_GENERIC))
 			continue;
 
-		if (((CGenericItem *)pEntity)->m_iId == lID)
-			return (CGenericItem *)pEntity;
+		if (((CGenericItem*)pEntity)->m_iId == lID)
+			return (CGenericItem*)pEntity;
 	}
 
 	return NULL;
 }
-CGenericItem *ReadGenericItem(bool fAllowCreateNew)
+CGenericItem* ReadGenericItem(bool fAllowCreateNew)
 {
 	ulong lID = READ_LONG();
 	//msstring ItemScript = READ_STRING( );
 	int idx = READ_LONG(); // MiB MAR2012_10 - Using global index array instead of script name
 	//msstring ItemScript = CGenericItemMgr::NewGenericItem( idx );
 
-	CGenericItem *pItem = MSUtil_GetItemByID(lID);
+	CGenericItem* pItem = MSUtil_GetItemByID(lID);
 	if (!pItem && fAllowCreateNew)
 		pItem = CGenericItemMgr::NewGenericItem(idx); //ItemScript ); // MiB - See above
 	if (!pItem)
@@ -2385,15 +2424,15 @@ CGenericItem *ReadGenericItem(bool fAllowCreateNew)
 		pItem->Spell_CastSuccess = READ_BYTE() ? true : false;
 	}
 	/*logfile << "Server Caused Creation of New Item: "
-          << MSString(pItem->DisplayName) << " (" << pItem->m_iId
-         << ")\r\n";*/
+		  << MSString(pItem->DisplayName) << " (" << pItem->m_iId
+		 << ")\r\n";*/
 	return pItem;
 }
 #endif
 
 //splayviewanim
 #ifndef VALVE_DLL
-int __MsgFunc_Anim(const char *pszName, int iSize, void *pbuf)
+int __MsgFunc_Anim(const char* pszName, int iSize, void* pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
@@ -2403,7 +2442,7 @@ int __MsgFunc_Anim(const char *pszName, int iSize, void *pbuf)
 	if (!player.pev->weaponanim == iAnim)
 		player.pev->weaponanim = iAnim;
 
-	CGenericItem *pItem = player.Hand(iHand);
+	CGenericItem* pItem = player.Hand(iHand);
 	pItem->m_ViewModelAnim = iAnim;
 
 	return 1;
