@@ -44,13 +44,54 @@ $Configuration
 
 	$Linker
 	{
-		$AdditionalDependencies			"$BASE winmm.lib wsock32.lib Ws2_32.lib" [$WIN32]
+		$AdditionalDependencies			"$BASE winmm.lib wsock32.lib Ws2_32.lib angelscript.lib spdlog.lib" [$WIN32]
 		$ModuleDefinitionFile			"$BASE $SRCDIR/game/server/ms.def"
 	}
 }
 
 $Project "Server"
 {	
+	$Folder	"Angelscript"
+	{
+		$Folder	"add_on"
+		{
+			$File	"angelscript\add_on\datetime.cpp"
+			$File	"angelscript\add_on\random.cpp"
+			$File	"angelscript\add_on\scriptany.cpp"
+			$File	"angelscript\add_on\scriptarray.cpp"
+			$File	"angelscript\add_on\scriptmath.cpp"
+			$File	"angelscript\add_on\scriptmathcomplex.cpp"
+			$File	"angelscript\add_on\scriptstdstring.cpp"
+			$File	"angelscript\add_on\scriptstdstring_utils.cpp"
+		}
+		$Folder	"ScriptAPI"
+		{
+			$File	"angelscript\scriptapi\CASCBaseEntity.cpp"
+			$File	"angelscript\scriptapi\CASCBasePlayer.cpp"
+			$File	"angelscript\scriptapi\CASColor.cpp"
+			$File	"angelscript\scriptapi\CASEngine.cpp"
+			$File	"angelscript\scriptapi\CASEntityCreator.cpp"
+			$File	"angelscript\scriptapi\CASGlobalVars.cpp"
+			$File	"angelscript\scriptapi\CASLog.cpp"
+			$File	"angelscript\scriptapi\CASMath.cpp"
+			$File	"angelscript\scriptapi\CASQAngle.cpp"
+			$File	"angelscript\scriptapi\CASSchedule.cpp"
+			$File	"angelscript\scriptapi\CASUtil.cpp"
+			$File	"angelscript\scriptapi\CASVector.cpp"
+			$File	"angelscript\scriptapi\CASVector2D.cpp"
+			$File	"angelscript\scriptapi\"
+		}
+		$File	"angelscript\asdocs_forwards.cpp"
+		$File	"angelscript\CASBaseModuleBuilder.cpp"
+		$File	"angelscript\CASMapModuleBuilder.cpp"
+		$File	"angelscript\CHL2ASBaseInitializer.cpp"
+		$File	"angelscript\CHL2ASManager.cpp"
+		$File	"angelscript\CHL2ASServerInitializer.cpp"
+		$File	"angelscript\CHL2ASServerManager.cpp"
+		$File	"angelscript\IceKey.cpp"
+		$File	"angelscript\MSCASLogging.cpp"
+		$File	"angelscript\svglobals_angelscript.cpp"
+	}
 	$Folder	"HL1"
 	{
 		$File	"hl\animating.cpp"

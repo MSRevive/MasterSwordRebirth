@@ -125,6 +125,14 @@ void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker)
 	gMultiDamage.pEntity->TakeDamage(pevInflictor, pevAttacker, gMultiDamage.amount, gMultiDamage.type);
 }
 
+void ApplyMultiDamage(CBaseEntity* pInflictor, CBaseEntity* pAttacker)
+{
+	if ( !gMultiDamage.pEntity )
+		return;
+
+	gMultiDamage.pEntity->TakeDamage_New( pInflictor, pAttacker, gMultiDamage.amount, gMultiDamage.type );
+}
+
 // GLOBALS USED:
 //		gMultiDamage
 
@@ -143,6 +151,23 @@ void AddMultiDamage(entvars_t *pevInflictor, CBaseEntity *pEntity, float flDamag
 	}
 
 	gMultiDamage.amount += flDamage;
+}
+
+void AddMultiDamage(const CTakeDamageInfo& info, CBaseEntity* pEntity)
+{
+	if (!pEntity)
+		return;
+
+	gMultiDamage.type |= info.GetDamageTypes();
+
+	if ( pEntity != gMultiDamage.pEntity )
+	{
+		ApplyMultiDamage( info.GetInflictor(), info.GetInflictor() ); // UNDONE: wrong attacker!
+		gMultiDamage.pEntity = pEntity;
+		gMultiDamage.amount = 0;
+	}
+
+	gMultiDamage.amount += info.GetDamage();
 }
 
 /*

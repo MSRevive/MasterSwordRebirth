@@ -59,6 +59,14 @@ void ShowWeaponDesc(CGenericItem *pItem);
 void Storage_Show(msstring_ref DisplayName, msstring_ref StorageName, float flFeeRatio);
 void UpdateActiveMenus();
 
+// Fix for AS, and also why?
+void CBaseEntity::Killed_New(const CTakeDamageInfo&, int) {}
+void CBaseEntity::TakeDamage_New(CBaseEntity *, CBaseEntity *, float, int) {}
+void CBaseEntity::OnTakeDamage(const CTakeDamageInfo&) {}
+void CBaseEntity::TraceBleed_New(const CTakeDamageInfo&, Vector, TraceResult&) {}
+void CBaseEntity::TraceAttack_New(const CTakeDamageInfo&, Vector, TraceResult&) {}
+
+
 /*
 =====================
 CBaseEntity :: Killed

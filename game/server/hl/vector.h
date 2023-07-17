@@ -15,6 +15,13 @@
 #ifndef VECTOR_H
 #define VECTOR_H
 
+// MSVC CRT uses 0x7fff while gcc uses MAX_INT, leading to mismatches between platforms
+// As a result, we pick the least common denominator here.  This should be used anywhere
+// you might typically want to use RAND_MAX
+#define VALVE_RAND_MAX 0x7fff
+
+typedef float valve_vec_t;
+
 //=========================================================
 // 2DVector - used for many pathfinding and many other
 // operations that are treated as planar rather than 3d.
@@ -51,7 +58,7 @@ public:
 		}
 	}
 
-	vec_t x, y;
+	valve_vec_t x, y;
 };
 
 inline float DotProduct(const Vector2D &a, const Vector2D &b) { return (a.x * b.x + a.y * b.y); }
@@ -61,7 +68,7 @@ inline Vector2D operator*(float fl, const Vector2D &v) { return v * fl; }
 // 3D Vector
 //=========================================================
 class Vector // same data-layout as engine's vec3_t,
-{			 //		which is a vec_t[3]
+{			 //		which is a valve_vec_t[3]
 public:
 	// Construction/destruction
 	inline Vector(void) {}
@@ -126,9 +133,24 @@ public:
 	}
 	inline float Length2D(void) const { return sqrt(x * x + y * y); }
 
+	// Initialization methods
+	void Vector::Random( valve_vec_t minVal, valve_vec_t maxVal )
+	{
+		x = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+		y = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+		z = minVal + ((float)rand() / VALVE_RAND_MAX) * (maxVal - minVal);
+	}
+
+	// This should really be a single opcode on the PowerPC (move r0 onto the vec reg)
+	void Vector::Zero()
+	{
+		x = y = z = 0.0f;
+	}
+
 	// Members
-	vec_t x, y, z;
+	valve_vec_t x, y, z;
 };
+
 inline Vector operator*(float fl, const Vector &v) { return v * fl; }
 inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
 inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }

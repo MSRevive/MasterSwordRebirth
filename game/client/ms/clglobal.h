@@ -1,5 +1,6 @@
 #include "global.h"
 #include "cl_entity.h"
+#include "CTakeDamageInfo.h"
 
 class CBaseEntity;
 

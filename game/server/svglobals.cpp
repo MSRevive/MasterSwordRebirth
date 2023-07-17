@@ -13,6 +13,7 @@
 #include "httprequesthandler.h"
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
+#include "angelscript/svglobals_angelscript.h"
 
 ofstream modelout;
 int HighestPrecache = -1;
@@ -64,6 +65,8 @@ cvar_t ms_fake_players = {"ms_fake_players", "0", FCVAR_SERVER}; //Thothie DEC20
 cvar_t ms_central_addr = {"ms_central_addr", "0", FCVAR_PROTECTED};
 cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
+cvar_t ms_as_debug = { "ms_as_debug", "0", FCVAR_SERVER };
+
 
 #ifdef DEV_BUILD
 cvar_t ms_devlog = {"ms_devlog", "1", 0};
@@ -109,6 +112,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_fake_hp);		 //AUG2011_17 Thothie - moving fakehp functions to cvar
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
 	//CVAR_REGISTER(&ms_crashcfg);
+	CVAR_REGISTER(&ms_as_debug);
 
 #ifdef DEV_BUILD
 	CVAR_REGISTER(&ms_devlog);
@@ -118,6 +122,9 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	g_log_initialized = true;
 
 	SERVER_COMMAND("exec msstartup.cfg\n");
+
+	// Make sure to make it READY
+	MSC::ASManager::SetReady( true );
 
 	return true;
 }
@@ -199,11 +206,13 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
 	PRECACHE_GENERIC("dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "data/scripts/core/msc.asc");
 
 	if (FnDataHandler::IsValidConnection())
 	{
 		g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
 		logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+		MSGlobals::HasConnected = true;
 	}
 	else if (MSGlobals::CentralEnabled)
 	{
@@ -223,6 +232,8 @@ void MSWorldSpawn()
 		ALERT(at_console, "SC Script file is outdated!\n");
 
 	WriteCrashCfg();
+
+	MSC::ASManager::WorldCreated( STRING( gpGlobals->mapname ) );
 }
 
 //Called every frame
@@ -231,6 +242,7 @@ void MSGameThink()
 	startdbg;
 	dbg("Call FnDataHandler::Think");
 	FnDataHandler::Think();
+	MSC::ASManager::Think();
 	enddbg;
 }
 
@@ -240,7 +252,7 @@ void MSGameThink()
 void MSGameEnd()
 {
 	startdbg;
-	
+
 	if(MSGlobals::GameScript)
 	{
 		//Moved here from MSGlobals::EndMap because commands can access entities that are freed below - Solokiller 3/10/2017
@@ -258,7 +270,10 @@ void MSGameEnd()
 			if(!MSGlobals::ServerSideChar) pPlayer->m_TimeCharLastSent = 0;
 		}
 	}
-	
+
+	// Call this before we nuke all entities etc.
+	MSC::ASManager::WorldEnded();
+
 	//Thothie MAR2012_27 - clear duplicate precaches for next map
 	gSoundPrecacheList.clearitems();
 	gModelPrecacheList.clearitems();
