@@ -2676,6 +2676,7 @@ void CTriggerChangeTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 #define SF_CAMERA_PLAYER_POSITION 1
 #define SF_CAMERA_PLAYER_TARGET 2
 #define SF_CAMERA_PLAYER_TAKECONTROL 4
+#define SF_CAMERA_PLAYER_ALL 8
 
 class CTriggerCamera : public CBaseDelay
 {
@@ -2691,7 +2692,9 @@ public:
 	virtual int ObjectCaps(void) { return CBaseEntity ::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	static TYPEDESCRIPTION m_SaveData[];
 
-	EHANDLE m_hPlayer;
+	EHANDLE m_hPlayer[MAXPLAYERS];
+	int m_iNumPlayers;
+
 	EHANDLE m_hTarget;
 	CBaseEntity *m_pentPath;
 	int m_sPath;
@@ -2779,72 +2782,96 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		m_flReturnTime = gpGlobals->time;
 		return;
 	}
-	if (!pActivator || !pActivator->IsPlayer())
-	{
-		pActivator = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex(1));
-	}
-
-	m_hPlayer = pActivator;
 
 	m_flReturnTime = gpGlobals->time + m_flWait;
 	pev->speed = m_initialSpeed;
 	m_targetSpeed = m_initialSpeed;
 
-	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TARGET))
-	{
-		m_hTarget = m_hPlayer;
-	}
-	else
-	{
-		m_hTarget = GetNextTarget();
-	}
+	m_flStopTime = gpGlobals->time;
 
-	// Nothing to look at!
-	if (m_hTarget == NULL)
-	{
-		return;
-	}
-
-	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL))
-	{
-		((CBasePlayer *)pActivator)->EnableControl(FALSE);
-	}
-
+	//Path
 	if (m_sPath)
 	{
-		m_pentPath = Instance(FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_sPath)));
-	}
-	else
-	{
-		m_pentPath = NULL;
-	}
+		m_pentPath = Instance(FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_sPath))); //Set path
 
-	m_flStopTime = gpGlobals->time;
-	if (m_pentPath)
-	{
 		if (m_pentPath->pev->speed != 0)
 			m_targetSpeed = m_pentPath->pev->speed;
 
 		m_flStopTime += m_pentPath->GetDelay();
 	}
+	else
+	{
+		m_pentPath = NULL; //No path
+	}
+
+	//Camera takes control of all players?
+	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALL)) 
+	{
+		for (int i = 0; i < gpGlobals->maxClients; i++)
+		{
+			pActivator = UTIL_PlayerByIndex(i + 1); //get pointer to player's cbaseentity
+			if (!pActivator || !pActivator->IsPlayer())
+				continue;
+
+			m_hPlayer[m_iNumPlayers] = pActivator; //add player to list
+			m_iNumPlayers++;
+		}
+	}
+	else if (!pActivator || !pActivator->IsPlayer()) //Camera takes control of triggering player (or first on player list)
+	{
+		pActivator = CBaseEntity::Instance(g_engfuncs.pfnPEntityOfEntIndex(1));
+		m_iNumPlayers = 1;
+		m_hPlayer[0] = pActivator;
+	}
+	else
+	{
+		m_iNumPlayers = 1;
+		m_hPlayer[0] = pActivator;
+	}
+
+	//Get target
+	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TARGET))
+	{
+		m_hTarget = m_hPlayer[0]; //Follow triggering player (first player on player list, i know i know.)
+	}
+	else
+	{
+		m_hTarget = GetNextTarget(); //Follow target set by mapper
+	}
+
+	// Nothing to look at!
+	if (m_hTarget == NULL || m_iNumPlayers == 0)
+		return;
+
+	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)) //Freeze player(s)?
+	{
+		for (int i = 0; i < m_iNumPlayers; i++)
+		{
+			((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(FALSE);
+		}
+	}
 
 	// copy over player information
-	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_POSITION))
+	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_POSITION)) //Start from player position? Multiple players will have their view start at the first player
 	{
-		UTIL_SetOrigin(pev, pActivator->pev->origin + pActivator->pev->view_ofs);
-		pev->angles.x = -pActivator->pev->angles.x;
-		pev->angles.y = pActivator->pev->angles.y;
+		UTIL_SetOrigin(pev, m_hPlayer[0]->pev->origin + m_hPlayer[0]->pev->view_ofs);
+		pev->angles.x = -m_hPlayer[0]->pev->angles.x;
+		pev->angles.y = m_hPlayer[0]->pev->angles.y;
 		pev->angles.z = 0;
-		pev->velocity = pActivator->pev->velocity;
+		pev->velocity = m_hPlayer[0]->pev->velocity;
 	}
 	else
 	{
 		pev->velocity = Vector(0, 0, 0);
 	}
 
-	SET_VIEW(pActivator->edict(), edict());
+	
+	for (int i = 0; i < m_iNumPlayers; i++)
+	{
+		SET_VIEW(m_hPlayer[i]->edict(), edict());
 
-	SET_MODEL(ENT(pev), STRING(pActivator->pev->model));
+		SET_MODEL(ENT(pev), STRING(m_hPlayer[i]->pev->model));
+	}
 
 	// follow the player down
 	SetThink(&CTriggerCamera::FollowTarget);
@@ -2856,16 +2883,20 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 void CTriggerCamera::FollowTarget()
 {
-	if (m_hPlayer == NULL)
-		return;
-
-	if (m_hTarget == NULL || m_flReturnTime < gpGlobals->time)
+	if (m_hTarget == NULL || m_flReturnTime < gpGlobals->time) //Attempt to restore player view
 	{
-		if (m_hPlayer->IsAlive())
+		for (int i = 0; i < m_iNumPlayers; i++) 
 		{
-			SET_VIEW(m_hPlayer->edict(), m_hPlayer->edict());
-			((CBasePlayer *)((CBaseEntity *)m_hPlayer))->EnableControl(TRUE);
+			if (m_hPlayer == NULL)
+				continue;
+
+			if (m_hPlayer[i]->IsAlive())
+			{
+				SET_VIEW(m_hPlayer[i]->edict(), m_hPlayer[i]->edict());
+				((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(TRUE);
+			}
 		}
+
 		SUB_UseTargets(this, USE_TOGGLE, 0);
 		pev->avelocity = Vector(0, 0, 0);
 		m_state = 0;
