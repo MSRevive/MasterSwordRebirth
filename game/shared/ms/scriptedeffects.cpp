@@ -49,8 +49,9 @@ CScript *CGlobalScriptedEffects::ApplyEffect(msstring_ref ScriptName, IScripted 
 						return NULL;
 					}
 
-				//The effect allows stacking, warn it that it is being stacked
-				pScriptTarget->m_Scripts[i]->RunScriptEventByName("game_duplicated");
+				//The effect allows stacking, warn new effect that it is being stacked
+				Script->RunScriptEventByName("game_duplicated");
+				break;
 			}
 
 	//if( Effect.m_Type == SCRIPTEFFECT_PLAYERACTION )
