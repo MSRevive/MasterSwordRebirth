@@ -650,6 +650,11 @@ int CBaseEntity ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 	return 1;
 }
 
+void CBaseEntity::TakeDamage_New(CBaseEntity* pInflictor, CBaseEntity* pAttacker, float flDamage, int bitsDamageType)
+{
+	OnTakeDamage( CTakeDamageInfo( pInflictor, pAttacker, flDamage, bitsDamageType ) );
+}
+
 void CBaseEntity ::Killed(entvars_t *pevAttacker, int iGib)
 {
 	pev->takedamage = DAMAGE_NO;
@@ -805,6 +810,111 @@ int CBaseEntity ::IsDormant(void)
 {
 	return FBitSet(pev->flags, FL_DORMANT);
 }
+
+void CBaseEntity::Killed_New(const CTakeDamageInfo& info, int gibAction)
+{
+#ifdef VALVE_DLL
+	SetTakeDamageMode( k_eDamageModeNo );
+	SetDeadFlag( k_eFlagDead );
+	UTIL_Remove( this );
+#endif
+}
+
+void CBaseEntity::OnTakeDamage(const CTakeDamageInfo& info)
+{
+	if ( GetTakeDamageMode() == DAMAGE_NO )
+		return;
+
+	auto pInflictor = info.GetInflictor();
+
+	// UNDONE: some entity types may be immune or resistant to some bitsDamageType
+
+	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
+	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
+	// Otherwise, an actual missile was involved.
+	Vector vecTemp = pInflictor->GetAbsOrigin() - ( VecBModelOrigin( pev ) );
+
+	// this global is still used for glass and other non-monster killables, along with decals.
+	g_vecAttackDir = vecTemp.Normalize();
+
+	// save damage based on the target's armor level
+
+	// figure momentum add (don't let hurt brushes or other triggers move player)
+	if ( ( !FNullEnt( pInflictor ) ) && ( pev->movetype == MOVETYPE_WALK || pev->movetype == MOVETYPE_STEP ) && ( info.GetAttacker()->pev->solid != SOLID_TRIGGER ) )
+	{
+		Vector vecDir = GetAbsOrigin() - ( pInflictor->GetAbsMin() + pInflictor->GetAbsMax() ) * 0.5;
+		vecDir = vecDir.Normalize();
+
+		//TODO: use human hull here? - Solokiller
+		float flForce = info.GetDamage() * ( ( 32 * 32 * 72.0 ) / ( GetBounds().x * GetBounds().y * GetBounds().z ) ) * 5;
+
+		if( flForce > 1000.0 )
+			flForce = 1000.0;
+		SetAbsVelocity( GetAbsVelocity() + vecDir * flForce );
+	}
+
+	// do the damage
+	SetHealth( GetHealth() - info.GetDamage() );
+	if ( GetHealth() <= 0 )
+	{
+		Killed_New( info, GIB_NORMAL );
+		return;
+	}
+
+	return;
+}
+
+void CBaseEntity::TraceBleed_New(const CTakeDamageInfo& info, Vector vecDir, TraceResult& tr)
+{
+	if ( BloodColor() == DONT_BLEED )
+		return;
+
+	if ( info.GetDamage() == 0 )
+		return;
+
+	if ( !( info.GetDamageTypes() & ( DMG_CRUSH | DMG_BULLET | DMG_SLASH | DMG_BLAST | DMG_CLUB | DMG_MORTAR ) ) )
+		return;
+
+	// make blood decal on the wall! 
+	TraceResult Bloodtr;
+	Vector vecTraceDir;
+	float flNoise;
+	int cCount;
+	int i;
+
+	if( info.GetDamage() < 10 )
+	{
+		flNoise = 0.1;
+		cCount = 1;
+	}
+	else if( info.GetDamage() < 25 )
+	{
+		flNoise = 0.2;
+		cCount = 2;
+	}
+	else
+	{
+		flNoise = 0.3;
+		cCount = 4;
+	}
+
+	for ( i = 0; i < cCount; i++ )
+	{
+		vecTraceDir = vecDir * -1;// trace in the opposite direction the shot came from (the direction the shot is going)
+
+		vecTraceDir.x += RANDOM_FLOAT( -flNoise, flNoise );
+		vecTraceDir.y += RANDOM_FLOAT( -flNoise, flNoise );
+		vecTraceDir.z += RANDOM_FLOAT( -flNoise, flNoise );
+
+		UTIL_TraceLine( tr.vecEndPos, tr.vecEndPos + vecTraceDir * -172, ignore_monsters, ENT( pev ), &Bloodtr );
+
+		if( Bloodtr.flFraction != 1.0 )
+		{
+			UTIL_BloodDecalTrace( &Bloodtr, BloodColor() );
+		}
+	}
+}
+
 
 BOOL CBaseEntity ::IsInWorld(void)
 {

@@ -87,15 +87,6 @@ extern CGraph WorldGraph;
 #define PLAYER_WALLJUMP_SPEED 300 // how fast we can spring off walls
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
 
-#define TRAIN_ACTIVE 0x80
-#define TRAIN_NEW 0xc0
-#define TRAIN_OFF 0x00
-#define TRAIN_NEUTRAL 0x01
-#define TRAIN_SLOW 0x02
-#define TRAIN_MEDIUM 0x03
-#define TRAIN_FAST 0x04
-#define TRAIN_BACK 0x05
-
 #define FLASH_DRAIN_TIME 1.2  //100 units/3 minutes
 #define FLASH_CHARGE_TIME 0.2 // 100 units/20 seconds  (seconds per unit)
 
