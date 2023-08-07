@@ -53,6 +53,17 @@ $Project "Server"
 {	
 	$Folder	"Angelscript"
 	{
+		$File	"angelscript\asdocs_forwards.cpp"
+		$File	"angelscript\CASBaseModuleBuilder.cpp"
+		$File	"angelscript\CASMapModuleBuilder.cpp"
+		$File	"angelscript\CHL2ASBaseInitializer.cpp"
+		$File	"angelscript\CHL2ASManager.cpp"
+		$File	"angelscript\CHL2ASServerInitializer.cpp"
+		$File	"angelscript\CHL2ASServerManager.cpp"
+		$File	"angelscript\IceKey.cpp"
+		$File	"angelscript\MSCASLogging.cpp"
+		$File	"angelscript\svglobals_angelscript.cpp"
+
 		$Folder	"add_on"
 		{
 			$File	"angelscript\add_on\datetime.cpp"
@@ -64,6 +75,7 @@ $Project "Server"
 			$File	"angelscript\add_on\scriptstdstring.cpp"
 			$File	"angelscript\add_on\scriptstdstring_utils.cpp"
 		}
+
 		$Folder	"ScriptAPI"
 		{
 			$File	"angelscript\scriptapi\CASCBaseEntity.cpp"
@@ -79,18 +91,7 @@ $Project "Server"
 			$File	"angelscript\scriptapi\CASUtil.cpp"
 			$File	"angelscript\scriptapi\CASVector.cpp"
 			$File	"angelscript\scriptapi\CASVector2D.cpp"
-			$File	"angelscript\scriptapi\"
 		}
-		$File	"angelscript\asdocs_forwards.cpp"
-		$File	"angelscript\CASBaseModuleBuilder.cpp"
-		$File	"angelscript\CASMapModuleBuilder.cpp"
-		$File	"angelscript\CHL2ASBaseInitializer.cpp"
-		$File	"angelscript\CHL2ASManager.cpp"
-		$File	"angelscript\CHL2ASServerInitializer.cpp"
-		$File	"angelscript\CHL2ASServerManager.cpp"
-		$File	"angelscript\IceKey.cpp"
-		$File	"angelscript\MSCASLogging.cpp"
-		$File	"angelscript\svglobals_angelscript.cpp"
 	}
 	$Folder	"HL1"
 	{
