@@ -3,8 +3,6 @@
 
 #include <angelscript.h>
 
-#include "ASUtilsConfig.h"
-
 #include "util/ASPlatform.h"
 
 /**

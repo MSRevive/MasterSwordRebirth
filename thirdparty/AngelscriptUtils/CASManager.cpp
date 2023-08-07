@@ -5,8 +5,6 @@
 
 #include <angelscript.h>
 
-#include "ASUtilsConfig.h"
-
 #include "util/ASLogging.h"
 #include "util/ASUtil.h"
 

@@ -197,6 +197,3 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
-
-#AngelScript Stuff
-#thirdparty/AngelscriptUtils/ASUtilsConfig.h

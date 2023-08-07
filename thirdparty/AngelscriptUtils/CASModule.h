@@ -3,8 +3,6 @@
 
 #include <cstring>
 
-#include "ASUtilsConfig.h"
-
 #include "util/CASBaseClass.h"
 
 #include "CASModuleDescriptor.h"
