@@ -174,24 +174,6 @@ void CGib ::SpawnHeadGib(entvars_t *pevVictim)
 	pGib->LimitVelocity();
 }
 
-void CBaseEntity::TraceAttack_New(const CTakeDamageInfo& info, Vector vecDir, TraceResult& tr)
-{
-	Vector vecOrigin = tr.vecEndPos - vecDir * 4;
-
-	if ( GetTakeDamageMode() != DAMAGE_NO )
-	{
-		AddMultiDamage( info, this );
-
-		int blood = BloodColor();
-
-		if ( blood != DONT_BLEED )
-		{
-			SpawnBlood( vecOrigin, blood, info.GetDamage() );// a little surface blood.
-			TraceBleed_New( info, vecDir, tr );
-		}
-	}
-}
-
 void CGib ::SpawnRandomGibs(entvars_t *pevVictim, int cGibs, int human)
 {
 	int cSplat;

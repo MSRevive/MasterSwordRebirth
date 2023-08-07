@@ -772,20 +772,4 @@ typedef struct
 	int hitgroup;	// 0 == generic, non zero is specific body part
 } trace_t;
 
-enum DeadFlag
-{
-	k_eFlagNo = 0,			// Alive.
-	k_eFlagDying,			// Playing death animation or still falling off of a ledge waiting to hit ground.
-	k_eFlagDead,			// Dead. lying still.
-	k_eFlagRespawnable,		// Dead, and can be respawned.
-	k_eFlagDiscardBody,		// Not used in the SDK, used by TFC for spies feigning death.
-};
-
-enum TakeDamageMode
-{
-	k_eDamageModeNo = 0,	// Don't take damage.
-	k_eDamageModeYes,	// Take damage.
-	k_eDamageModeAim,	// Take damage, auto aim should snap to this target.
-};
-
 #endif

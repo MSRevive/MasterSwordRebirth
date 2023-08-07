@@ -26,7 +26,6 @@
 
 #include "fndatahandler.h"
 #include "httprequesthandler.h"
-#include "angelscript/svglobals_angelscript.h"
 
 cvar_t displaysoundlist = { "displaysoundlist", "0" };
 cvar_t mapcyclefile = { "mapcyclefile", "mapcycle.txt" };
@@ -134,7 +133,6 @@ void GameDLLInit(void)
 	}
 	
 	FnDataHandler::Initialize();
-	MSC::ASManager::Initialize();
 }
 
 void GameDLLShutdown()
@@ -143,5 +141,4 @@ void GameDLLShutdown()
 	ScriptMgr::GameShutdown();
 	FileSystem_Shutdown();
 	FnDataHandler::Destroy();
-	MSC::ASManager::Shutdown();
 }
