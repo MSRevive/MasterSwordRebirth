@@ -38,7 +38,7 @@ $Configuration
 	$Compiler
 	{
 		$AdditionalIncludeDirectories	"$BASE;$SRCDIR\game\client;$SRCDIR/public/engine;$SRCDIR/common;$SRCDIR\game\shared\movement;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;./effects;./gamerules;./hl;./monsters;./player;$SRCDIR\game\shared\stats;$SRCDIR\game\shared\syntax;$SRCDIR\game\shared\weapons;./;$SRCDIR\thirdparty";"$SRCDIR\thirdparty\angelscript";"$SRCDIR\thirdparty\AngelscriptUtils"
-		$PreprocessorDefinitions		"$BASE;VALVE_DLL;CURL_STATICLIB"
+		$PreprocessorDefinitions		"$BASE;VALVE_DLL;CURL_STATICLIB;_SILENCE_EXPERIMENTAL_FILESYSTEM_DEPRECATION_WARNING"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
 
