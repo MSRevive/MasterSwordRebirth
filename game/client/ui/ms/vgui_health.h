@@ -10,8 +10,12 @@ static COLOR Color_Text_LowHealth(250, 0, 0, 10),
 	Color_Charge_BG(128, 128, 128, 100);
 static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
-#define FLASK_W 325
-#define FLASK_H 80
+//Scales flasks down to only 40% wide of the screen if sprites are too big
+#define FLASK_SCALE (1.0f - (((320 * 2.0f) - (ScreenWidth * 0.40f)) / ScreenWidth))
+
+//Dimensions of the "Flask" sprites
+#define FLASK_W 320 * FLASK_SCALE
+#define FLASK_H 48 * FLASK_SCALE
 
 class VGUI_Flask : public Panel
 {
@@ -34,9 +38,9 @@ public:
 				break;
 			case 1: ImageName = "hud/manabar";
 				break;
-			case 2: ImageName = "hud/stambar";
+			case 2: ImageName = "hud/weightbar";
 				break;
-			case 3: ImageName = "hud/weightbar";
+			case 3: ImageName = "hud/stambar";
 				break;
 		}
 
@@ -44,7 +48,7 @@ public:
 		m_Image.LoadImg(ImageName, false, false);
 		m_Image.setFgColor(255, 255, 255, 255);
 		m_Image.setSize(getWide(), getTall());
-		m_Label = new MSLabel(this, "0/0", 0, getTall()/1.5, getWide(), YRES(8), MSLabel::a_center);
+		m_Label = new MSLabel(this, "0/0", 0, getTall()/5, getWide(), YRES(8), MSLabel::a_center);
 	}
 
 	void Update()
@@ -58,11 +62,11 @@ public:
 			case 1: Amt = player.m_MP;
 				MaxAmt = player.MaxMP();
 				break;
-			case 2: Amt = player.Stamina;
-				MaxAmt = player.MaxStamina();
-				break;
-			case 3: Amt = player.Weight();
+			case 2: Amt = player.Weight();
 				MaxAmt = player.Volume();
+				break;
+			case 3: Amt = player.Stamina;
+				MaxAmt = player.MaxStamina();
 				break;
 		}
 		
@@ -125,26 +129,39 @@ public:
 	CStatusBar *m_Charge[2];
 	MSLabel *m_ChargeLbl[2];
 
+	//Emblem
+	//VGUI_Image3D m_HUDImage;
+
 	//Main HUD Image
-	VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+	VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 	{
 		startdbg;
 		dbg("Begin");
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
-//Status Bars
+		//Point defines where status bars are positioned relative to and the max screen space its allowed to take before scaling
+		float coords[2];
+
+		coords[0] = 0; //x
+		coords[1] = (ScreenHeight - (2 * FLASK_H)); //y, from the bottom of the screen, as high as the sprites are
+
+		//	Status Bars
+		
 		//Health bar
-		m_Flask[0] = new VGUI_Flask(this, 0, 960, 950); 
+		m_Flask[0] = new VGUI_Flask(this, 0, coords[0], coords[1]);
+
 
 		//Mana bar
-		m_Flask[1] = new VGUI_Flask(this, 1, 960 - FLASK_W, 950);
+		m_Flask[1] = new VGUI_Flask(this, 1, coords[0] + FLASK_W, coords[1]);
+
 
 		//Stamina bar
-		m_Flask[2] = new VGUI_Flask(this, 2, 960 - FLASK_W, 1000);
+		m_Flask[2] = new VGUI_Flask(this, 2, coords[0], coords[1] + FLASK_H);
+
 
 		//Weight bar
-		m_Flask[3] = new VGUI_Flask(this, 3, 960, 1000);
+		m_Flask[3] = new VGUI_Flask(this, 3, coords[0] + FLASK_W, coords[1] + FLASK_H);
 
 //Charge system
 #define CHARGE_W XRES(30)
@@ -157,11 +174,11 @@ public:
 		{
 			int Multiplier = (i == 0) ? -1 : 1;
 			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
-			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H);
+			m_Charge[i] = new CStatusBar(this, XRES(304) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H);
 			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
 			//m_Charge[i]->m_fBorder = false;
 			m_Charge[i]->setVisible(false);
-			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H, MSLabel::a_center);
+			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H, MSLabel::a_center);
 			m_ChargeLbl[i]->setVisible(false);
 		}
 
@@ -171,8 +188,8 @@ public:
 	//MiB NOV2007a - Moar Charge Colors!
 	void Update()
 	{
-		//Update Health & Mana flasks
-		for (int i = 0; i < 2; i++)
+		//Update flasks
+		for (int i = 0; i < 4; i++)
 			m_Flask[i]->Update();
 
 		bool bShowHealth = ShowHealth();
