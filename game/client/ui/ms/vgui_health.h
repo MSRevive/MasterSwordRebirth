@@ -143,7 +143,7 @@ public:
 		//Point defines where status bars are positioned relative to and the max screen space its allowed to take before scaling
 		float coords[2];
 
-		coords[0] = 0; //x
+		coords[0] = 10; //x
 		coords[1] = (ScreenHeight - (2 * FLASK_H)); //y, from the bottom of the screen, as high as the sprites are
 
 		//	Status Bars
@@ -174,11 +174,11 @@ public:
 		{
 			int Multiplier = (i == 0) ? -1 : 1;
 			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
-			m_Charge[i] = new CStatusBar(this, XRES(304) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H);
+			m_Charge[i] = new CStatusBar(this, XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H);
 			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
 			//m_Charge[i]->m_fBorder = false;
 			m_Charge[i]->setVisible(false);
-			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(400), CHARGE_W, CHARGE_H, MSLabel::a_center);
+			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H, MSLabel::a_center);
 			m_ChargeLbl[i]->setVisible(false);
 		}
 
