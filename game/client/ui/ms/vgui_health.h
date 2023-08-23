@@ -202,6 +202,8 @@ public:
 
 		bool bShowHealth = ShowHealth();
 
+		m_HUDImage.setVisible(bShowHealth);
+
 		for (int i = 0; i < 2; i++)
 		{
 			m_Charge[i]->setVisible(false);
