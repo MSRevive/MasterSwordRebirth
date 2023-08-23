@@ -11,11 +11,13 @@ static COLOR Color_Text_LowHealth(250, 0, 0, 10),
 static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
 //Scales flasks down to only 40% wide of the screen if sprites are too big
-#define FLASK_SCALE (1.0f - (((320 * 2.0f) - (ScreenWidth * 0.40f)) / ScreenWidth))
+#define FLASK_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
 
 //Dimensions of the "Flask" sprites
-#define FLASK_W 320 * FLASK_SCALE
-#define FLASK_H 48 * FLASK_SCALE
+#define FLASK_W (320 * FLASK_SCALE)
+#define FLASK_H (40 * FLASK_SCALE)
+
+#define EMBLEM_SIZE (90 * FLASK_SCALE)
 
 class VGUI_Flask : public Panel
 {
@@ -31,23 +33,25 @@ public:
 		setBgColor(0, 0, 0, 255);
 		m_Type = Type;
 
-		msstring_ref ImageName = "hud/healthbar";
+		m_Image.setParent(this);
 
 		switch(Type) {
-			case 0: ImageName = "hud/healthbar";
+			case 0:
+				m_Image.LoadImg("hud/healthbar", false, false);
 				break;
-			case 1: ImageName = "hud/manabar";
+			case 1:
+				m_Image.LoadImg("hud/manabar", false, false);
 				break;
-			case 2: ImageName = "hud/weightbar";
+			case 2:
+				m_Image.LoadImg("hud/weightbar", false, false);
 				break;
-			case 3: ImageName = "hud/stambar";
+			case 3:
+				m_Image.LoadImg("hud/stambar", false, false);
 				break;
 		}
 
-		m_Image.setParent(this);
-		m_Image.LoadImg(ImageName, false, false);
-		m_Image.setFgColor(255, 255, 255, 255);
 		m_Image.setSize(getWide(), getTall());
+		
 		m_Label = new MSLabel(this, "0/0", 0, getTall()/5, getWide(), YRES(8), MSLabel::a_center);
 	}
 
@@ -66,7 +70,7 @@ public:
 				MaxAmt = player.Volume();
 				break;
 			case 3: Amt = player.Stamina;
-				MaxAmt = player.MaxStamina();
+				MaxAmt = player.MaxStamina(); 
 				break;
 		}
 		
@@ -130,7 +134,7 @@ public:
 	MSLabel *m_ChargeLbl[2];
 
 	//Emblem
-	//VGUI_Image3D m_HUDImage;
+	VGUI_Image3D m_HUDImage;
 
 	//Main HUD Image
 	VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
@@ -140,28 +144,32 @@ public:
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
+
+
 		//Point defines where status bars are positioned relative to and the max screen space its allowed to take before scaling
 		float coords[2];
 
 		coords[0] = 10; //x
-		coords[1] = (ScreenHeight - (2 * FLASK_H)); //y, from the bottom of the screen, as high as the sprites are
+		coords[1] = (ScreenHeight - (2 * FLASK_H) - 10); //y, from the bottom of the screen, as high as the sprites are
 
 		//	Status Bars
 		
 		//Health bar
 		m_Flask[0] = new VGUI_Flask(this, 0, coords[0], coords[1]);
 
-
-		//Mana bar
-		m_Flask[1] = new VGUI_Flask(this, 1, coords[0] + FLASK_W, coords[1]);
-
-
-		//Stamina bar
+		//weight bar
 		m_Flask[2] = new VGUI_Flask(this, 2, coords[0], coords[1] + FLASK_H);
 
+		//Mana bar
+		m_Flask[1] = new VGUI_Flask(this, 1, coords[0] + FLASK_W + EMBLEM_SIZE - 1, coords[1]);
 
-		//Weight bar
-		m_Flask[3] = new VGUI_Flask(this, 3, coords[0] + FLASK_W, coords[1] + FLASK_H);
+		//stam bar
+		m_Flask[3] = new VGUI_Flask(this, 3, coords[0] + FLASK_W + EMBLEM_SIZE - 1, coords[1] + FLASK_H);
+
+		m_HUDImage.setParent(this);
+		m_HUDImage.LoadImg("hud_main", true, false);
+		m_HUDImage.setSize(EMBLEM_SIZE, EMBLEM_SIZE);
+		m_HUDImage.setPos(coords[0] + FLASK_W, coords[1] - (7 * FLASK_SCALE));
 
 //Charge system
 #define CHARGE_W XRES(30)
