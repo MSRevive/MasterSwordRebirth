@@ -88,10 +88,16 @@ void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vec
 		{
 			if (iStat)
 			{
+				bool RandProp = false;
+				if (iProp < 0)
+				{
+					RandProp = true;
+				}
+
 				ProjectileData->StatPower = iStat;
-				ProjectileData->PropPower = iProp;
+				ProjectileData->PropPower = !RandProp ? iProp : 2;
 				ProjectileData->StatExp = iStat;
-				ProjectileData->PropExp = iProp;
+				ProjectileData->PropExp = !RandProp ? iProp : -1;
 			}
 			CBaseEntity *pOwner = pTossDevice->RetrieveEntity(ENT_EXPOWNER);
 			if (pOwner)
