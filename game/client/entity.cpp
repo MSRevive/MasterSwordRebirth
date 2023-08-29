@@ -724,7 +724,7 @@ msstring_ref CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 			beamret = IntToString(pBeam->segments);
 		else if (Prop == "framerate")
 			beamret = FloatToString(pBeam->frameRate);
-		else if (Prop == "framerate")
+		else if (Prop == "framecount")
 			beamret = IntToString(pBeam->frameCount);
 		else if (Prop == "sprite")
 			beamret = IntToString(pBeam->modelIndex);
@@ -805,8 +805,12 @@ msstring_ref CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 		RETURN_INT(ent.curstate.sequence)
 	else if (Prop == "height")
 		RETURN_FLOAT((ent.curstate.maxs.z) - (ent.curstate.mins.z)) //Thothie SEP2018_15 - return height/width for $getcl
-	else if (Prop == "weight")
+	else if (Prop == "width")
 		RETURN_FLOAT((ent.curstate.maxs.x) - (ent.curstate.mins.x)) //Thothie SEP2018_15 - return height/width for $getcl
+	else if (Prop == "mins")
+		RETURN_VECTOR(ent.curstate.mins)
+	else if (Prop == "maxs")
+		RETURN_VECTOR(ent.curstate.maxs)
 	else if (Prop == "frame")
 		RETURN_INT(ent.curstate.frame)
 	else if (Prop == "framerate")
@@ -1498,7 +1502,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 					pBeam->die = atof(Params[3]);
 				else if (Params[2] == "framerate")
 					pBeam->frameRate = atof(Params[3]);
-				else if (Params[2] == "framerate")
+				else if (Params[2] == "framecount")
 					pBeam->frameCount = atoi(Params[3]); //need this if you change sprites
 				//else if ( Params[2] == "segments" ) pBeam->segments = atoi(Params[3]); //no affect
 				//else if ( Params[2] == "t" ) pBeam->t = atof(Params[3]); //no affect
