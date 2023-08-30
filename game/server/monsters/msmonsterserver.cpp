@@ -2582,6 +2582,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		//I'm dying, create my body
 		if (!FBitSet(pev->effects, EF_NODRAW))
 		{
+			SetSpeed();
 			Activity DeathAct = GetDeathActivity();
 			pev->sequence = LookupActivity(DeathAct);
 			ResetSequenceInfo();
