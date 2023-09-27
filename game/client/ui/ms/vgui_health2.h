@@ -10,16 +10,11 @@ static COLOR Color_Text_LowHealth(250, 0, 0, 10),
 	Color_Charge_BG(128, 128, 128, 100);
 static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
-//Scales flasks down to only 40% wide of the screen if sprites are too big
-#define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
+#define FLASK_W XRES(64 * 0.625) //I want 64x104 in 1024x768 res, and smaller in lower res
+#define FLASK_H YRES(104 * 0.625)
+#define FLASK_SPACER XRES(10)
 
-//Dimensions of the "Flask" sprites
-#define BAR_W (320 * BAR_SCALE)
-#define BAR_H (40 * BAR_SCALE)
-
-#define EMBLEM_SIZE (90 * BAR_SCALE)
-
-class VGUI_Bar : public Panel
+class VGUI_Flask : public Panel
 {
 public:
 	VGUI_Image3D m_Image;
@@ -27,53 +22,24 @@ public:
 	int m_Type;
 	float m_CurrentAmt;
 
-	VGUI_Bar(Panel *pParent, int Type, int x, int y) : Panel(x, y, BAR_W, BAR_H)
+	VGUI_Flask(Panel *pParent, int Type, int x, int y) : Panel(x, y, FLASK_W, FLASK_H)
 	{
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
 		m_Type = Type;
 
+		msstring_ref ImageName = !Type ? "healthflask" : "manaflask";
 		m_Image.setParent(this);
-
-		switch(Type) {
-			case 0:
-				m_Image.LoadImg("hud/healthbar", false, false);
-				break;
-			case 1:
-				m_Image.LoadImg("hud/manabar", false, false);
-				break;
-			case 2:
-				m_Image.LoadImg("hud/weightbar", false, false);
-				break;
-			case 3:
-				m_Image.LoadImg("hud/stambar", false, false);
-				break;
-		}
-
+		m_Image.LoadImg(ImageName, false, false);
+		m_Image.setFgColor(255, 255, 255, 255);
 		m_Image.setSize(getWide(), getTall());
-		
-		m_Label = new MSLabel(this, "0/0", 0, getTall()/5, getWide(), YRES(8), MSLabel::a_center);
+		m_Label = new MSLabel(this, "0/0", 0, getTall()/1.5, getWide(), YRES(8), MSLabel::a_center);
 	}
 
 	void Update()
 	{
-		float Amt, MaxAmt;
-
-		switch (m_Type) {
-			case 0: Amt = player.m_HP;
-				MaxAmt = player.MaxHP();
-				break;
-			case 1: Amt = player.m_MP;
-				MaxAmt = player.MaxMP();
-				break;
-			case 2: Amt = player.Weight();
-				MaxAmt = player.Volume();
-				break;
-			case 3: Amt = player.Stamina;
-				MaxAmt = player.MaxStamina(); 
-				break;
-		}
-		
+		float Amt = !m_Type ? player.m_HP : player.m_MP;
+		float MaxAmt = !m_Type ? player.MaxHP() : player.MaxMP();
 		int LastFrame = m_Image.GetMaxFrames() - 1;
 
 		//thothie attempting to fix scrolling flasks
@@ -118,7 +84,7 @@ public:
 	}
 };
 
-class VGUI_Health : public Panel, public IHUD_Interface
+class VGUI_Health2 : public Panel, public IHUD_Interface
 {
 protected:
 	float vChargeLevelAmt = 0;
@@ -128,46 +94,73 @@ protected:
 	int vCurChargeLevel = 0;
 
 public:
-	class VGUI_Bar *m_Bar[4];
+	class VGUI_Flask *m_Flask[2];
 
+	//Stamina ---------------------------
+	CStatusBar *m_pStamina;
+
+	//Weight ----------------------------
+	CStatusBar *m_pWeight;
 	CStatusBar *m_Charge[2];
 	MSLabel *m_ChargeLbl[2];
 
-	//Emblem
+	//Main HUD Image
 	VGUI_Image3D m_HUDImage;
 
-	//Main HUD Image
-	VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+	VGUI_Health2(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 	{
 		startdbg;
 		dbg("Begin");
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
-		//Point defines where status bars are positioned relative to and the max screen space its allowed to take before scaling
-		float coords[2];
-
-		coords[0] = 10; //x
-		coords[1] = (ScreenHeight - (2 * BAR_H) - 10); //y, from the bottom of the screen, as high as the sprites are
-
-		//	Status Bars
-		
-		//Health bar
-		m_Bar[0] = new VGUI_Bar(this, 0, coords[0], coords[1]);
-
-		//weight bar
-		m_Bar[2] = new VGUI_Bar(this, 2, coords[0], coords[1] + BAR_H);
-
-		//Mana bar
-		m_Bar[1] = new VGUI_Bar(this, 1, coords[0] + BAR_W + EMBLEM_SIZE - 1, coords[1]);
-
-		//stam bar
-		m_Bar[3] = new VGUI_Bar(this, 3, coords[0] + BAR_W + EMBLEM_SIZE - 1, coords[1] + BAR_H);
-
+		dbg("Setup m_HUDImage");
 		m_HUDImage.setParent(this);
+		dbg("m_HUDImage.LoadImg");
 		m_HUDImage.LoadImg("hud_main", true, false);
-		m_HUDImage.setSize(EMBLEM_SIZE, EMBLEM_SIZE);
-		m_HUDImage.setPos(coords[0] + BAR_W, coords[1] - (7 * BAR_SCALE));
+		//m_HUDImage.setFgColor( 255, 255, 255, 255 );
+		dbg("m_HUDImage.setSize");
+		m_HUDImage.setSize(getWide(), getTall());
+
+//Health and mana flasks
+#define FLASK_START_X XRES(30)
+#define FLASK_START_Y YRES(480) - YRES(30) - FLASK_H
+#define MANA_FLASK_X FLASK_START_X + FLASK_W + FLASK_SPACER
+		dbg("Setup m_Flask[0]");
+		m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);
+		dbg("Setup m_Flask[1]");
+		m_Flask[1] = new VGUI_Flask(this, 1, MANA_FLASK_X, FLASK_START_Y);
+
+		//Stamina and weight bars
+
+#define STAMINA_X FLASK_START_X
+#define STAMINA_Y YRES(453)
+#define STAMINA_SIZE_X FLASK_W + FLASK_SPACER + FLASK_W
+#define STAMINA_SIZE_Y YRES(12)
+
+		m_pStamina = new CStatusBar(this, STAMINA_X, STAMINA_Y, STAMINA_SIZE_X, STAMINA_SIZE_Y);
+		m_pStamina->m_fBorder = false;
+		//m_pStamina->SetBGColorRGB( BorderColor );
+		//m_pStamina->SetBGColorRGB( Color_Transparent );
+
+#define STAMINA_LBL_SIZE_Y YRES(10)
+
+		MSLabel *pLabel = new MSLabel(m_pStamina, Localized("#STAMINA"), 0, (STAMINA_SIZE_Y / 2.0f) - (STAMINA_LBL_SIZE_Y / 2.0f), STAMINA_SIZE_X, STAMINA_LBL_SIZE_Y, MSLabel::a_center);
+		pLabel->SetFGColorRGB(Color_Text_White);
+
+#define WEIGHT_SIZE_Y YRES(10)
+
+		COLOR WeightColor(250, 150, 0, 100);
+
+		m_pWeight = new CStatusBar(this, STAMINA_X, STAMINA_Y + STAMINA_SIZE_Y, STAMINA_SIZE_X, WEIGHT_SIZE_Y);
+		m_pWeight->m_fBorder = false;
+		m_pWeight->SetFGColorRGB(WeightColor);
+
+#define WEIGHT_LBL_SIZE_Y WEIGHT_SIZE_Y
+
+		pLabel = new MSLabel(m_pWeight, Localized("#WEIGHT"), 0, (WEIGHT_SIZE_Y / 2.0f) - (WEIGHT_LBL_SIZE_Y / 2.0f), STAMINA_SIZE_X, WEIGHT_LBL_SIZE_Y, MSLabel::a_center);
+		//pLabel->setFgColor( 255, 255, 255, 64 );
+		pLabel->SetFGColorRGB(Color_Text_White);
 
 //Charge system
 #define CHARGE_W XRES(30)
@@ -179,11 +172,11 @@ public:
 		{
 			int Multiplier = (i == 0) ? -1 : 1;
 			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
-			m_Charge[i] = new CStatusBar(this, XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H);
+			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
 			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
 			//m_Charge[i]->m_fBorder = false;
 			m_Charge[i]->setVisible(false);
-			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H, MSLabel::a_center);
+			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);
 			m_ChargeLbl[i]->setVisible(false);
 		}
 	}
@@ -191,13 +184,27 @@ public:
 	//MiB NOV2007a - Moar Charge Colors!
 	void Update()
 	{
-		//Update flasks
-		for (int i = 0; i < 4; i++)
-			m_Bar[i]->Update();
+		//Update Health & Mana flasks
+		for (int i = 0; i < 2; i++)
+			m_Flask[i]->Update();
 
 		bool bShowHealth = ShowHealth();
 
+		m_pStamina->setVisible(bShowHealth);
+		m_pWeight->setVisible(bShowHealth);
 		m_HUDImage.setVisible(bShowHealth);
+
+		//Update stamina, weight
+		float flStaminaPercent = player.Stamina / player.MaxStamina();
+		m_pStamina->Set(flStaminaPercent * 100.0f);
+		if (flStaminaPercent < 0.15)
+			m_pStamina->SetFGColorRGB(LowColor);
+		else if (flStaminaPercent <= 0.85f)
+			m_pStamina->SetFGColorRGB(MedColor);
+		else
+			m_pStamina->SetFGColorRGB(HighColor);
+
+		m_pWeight->Set(player.Weight(), player.Volume());
 
 		for (int i = 0; i < 2; i++)
 		{
