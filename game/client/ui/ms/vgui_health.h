@@ -4,16 +4,10 @@
 
 #include <vector>
 
-static COLOR Color_Text_LowHealth(250, 0, 0, 10),
-	Color_Charge_Lvl1(128, 128, 128, 128), Color_Charge_Lvl2(255, 100, 100, 128),
-	Color_Charge_Lvl3(100, 230, 30, 128),
-	Color_Charge_BG(128, 128, 128, 100);
-static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
-
 //Scales flasks down to only 40% wide of the screen if sprites are too big
 #define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
 
-//Dimensions of the "Flask" sprites
+//Dimensions of the "Bar" sprites
 #define BAR_W (320 * BAR_SCALE)
 #define BAR_H (40 * BAR_SCALE)
 
@@ -60,16 +54,20 @@ public:
 		float Amt, MaxAmt;
 
 		switch (m_Type) {
-			case 0: Amt = player.m_HP;
+			case 0: 
+				Amt = player.m_HP;
 				MaxAmt = player.MaxHP();
 				break;
-			case 1: Amt = player.m_MP;
+			case 1: 
+				Amt = player.m_MP;
 				MaxAmt = player.MaxMP();
 				break;
-			case 2: Amt = player.Weight();
+			case 2: 
+				Amt = player.Weight();
 				MaxAmt = player.Volume();
 				break;
-			case 3: Amt = player.Stamina;
+			case 3: 
+				Amt = player.Stamina;
 				MaxAmt = player.MaxStamina(); 
 				break;
 		}
@@ -109,10 +107,13 @@ public:
 		m_Image.SetFrame(frame);
 
 		m_Label->setText(UTIL_VarArgs("%i/%i ", (int)m_CurrentAmt, (int)MaxAmt)); //the space is intentional
-		if (m_CurrentAmt > MaxAmt / 4.0f)
-			m_Label->SetFGColorRGB(Color_Text_White);
-		else
-			m_Label->SetFGColorRGB(Color_Text_LowHealth);
+		m_Label->SetFGColorRGB(COLOR(255, 255, 255, 10));
+		if (m_Type != 2) {
+			if (m_CurrentAmt > MaxAmt / 4.0f)
+				m_Label->SetFGColorRGB(COLOR(255, 255, 255, 10));
+			else
+				m_Label->SetFGColorRGB(COLOR(250, 0, 0, 10));
+		}
 
 		setVisible(ShowHealth());
 	}
@@ -139,8 +140,6 @@ public:
 	//Main HUD Image
 	VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 	{
-		startdbg;
-		dbg("Begin");
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
@@ -180,7 +179,7 @@ public:
 			int Multiplier = (i == 0) ? -1 : 1;
 			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
 			m_Charge[i] = new CStatusBar(this, XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H);
-			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
+			m_Charge[i]->SetBGColorRGB(COLOR(128, 128, 128, 100));
 			//m_Charge[i]->m_fBorder = false;
 			m_Charge[i]->setVisible(false);
 			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H, MSLabel::a_center);
@@ -234,7 +233,6 @@ public:
 
 			if (Item->Attack_IsCharging() && (vCurChargeAmt = Item->Attack_Charge()) > 0)
 			{
-
 				ChargeBar.setVisible(bShowHealth);
 				bool notDone = true;
 

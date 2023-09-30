@@ -4,10 +4,6 @@
 
 #include <vector>
 
-static COLOR Color_Text_LowHealth(250, 0, 0, 10),
-	Color_Charge_Lvl1(128, 128, 128, 128), Color_Charge_Lvl2(255, 100, 100, 128),
-	Color_Charge_Lvl3(100, 230, 30, 128),
-	Color_Charge_BG(128, 128, 128, 100);
 static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
 #define FLASK_W XRES(64 * 0.625) //I want 64x104 in 1024x768 res, and smaller in lower res
@@ -76,9 +72,9 @@ public:
 
 		m_Label->setText(UTIL_VarArgs("%i/%i ", (int)m_CurrentAmt, (int)MaxAmt)); //the space is intentional
 		if (m_CurrentAmt > MaxAmt / 4.0f)
-			m_Label->SetFGColorRGB(Color_Text_White);
+			m_Label->SetFGColorRGB(COLOR(255, 255, 255, 10));
 		else
-			m_Label->SetFGColorRGB(Color_Text_LowHealth);
+			m_Label->SetFGColorRGB(COLOR(250, 0, 0, 10)); //low health text colour
 
 		setVisible(ShowHealth());
 	}
@@ -109,26 +105,19 @@ public:
 
 	VGUI_Health2(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 	{
-		startdbg;
-		dbg("Begin");
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
-		dbg("Setup m_HUDImage");
 		m_HUDImage.setParent(this);
-		dbg("m_HUDImage.LoadImg");
 		m_HUDImage.LoadImg("hud_main", true, false);
 		//m_HUDImage.setFgColor( 255, 255, 255, 255 );
-		dbg("m_HUDImage.setSize");
 		m_HUDImage.setSize(getWide(), getTall());
 
 //Health and mana flasks
 #define FLASK_START_X XRES(30)
 #define FLASK_START_Y YRES(480) - YRES(30) - FLASK_H
 #define MANA_FLASK_X FLASK_START_X + FLASK_W + FLASK_SPACER
-		dbg("Setup m_Flask[0]");
 		m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);
-		dbg("Setup m_Flask[1]");
 		m_Flask[1] = new VGUI_Flask(this, 1, MANA_FLASK_X, FLASK_START_Y);
 
 		//Stamina and weight bars
@@ -173,7 +162,7 @@ public:
 			int Multiplier = (i == 0) ? -1 : 1;
 			float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
 			m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
-			m_Charge[i]->SetBGColorRGB(Color_Charge_BG);
+			m_Charge[i]->SetBGColorRGB(COLOR(128, 128, 128, 100));
 			//m_Charge[i]->m_fBorder = false;
 			m_Charge[i]->setVisible(false);
 			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);

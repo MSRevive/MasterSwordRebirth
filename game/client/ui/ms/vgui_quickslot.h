@@ -7,7 +7,6 @@
 static COLOR Color_Text_QuickSlot_Weapon(255, 255, 255, 0);
 static COLOR Color_Text_QuickSlot_Spell(120, 255, 255, 0);
 static COLOR Color_Text_QuickSlot_Arrow(0, 255, 128, 0);
-//static COLOR HighColor( 0, 255, 0, 128), MedColor( 255, 255, 0, 128), LowColor( 255, 0, 0, 128);
 
 #define QUICKSLOT_PREF_TIMEOUT m_CVARTimeout->value
 #define QUICKSLOT_WEAPON "weapon"
