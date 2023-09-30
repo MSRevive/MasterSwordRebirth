@@ -76,6 +76,7 @@
 #include "vgui_eventconsole.h"
 #include "vgui_id.h"
 #include "vgui_health.h"
+#include "vgui_health2.h"
 #include "vgui_vote.h"
 #include "vgui_quickslot.h"
 
@@ -97,7 +98,7 @@ public:
 	//Voting ----------------------------
 	VGUI_VoteInfo* m_VoteInfo;
 
-	//Health & Mana ---------------------
+	VGUI_Health2* m_RetroHealth;
 	VGUI_Health* m_Health;
 
 	//Status Icons ----------------------
@@ -204,28 +205,30 @@ void CHUDPanel::PrintSayText(Color color, msstring_ref Text)
 // -----------------
 CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
 {
-	startdbg;
-	dbg("Begin");
 	setParent(pParent);
-
-	//Health
-	dbg("Create Health");
+	
+	m_HUDElements.add(m_RetroHealth = new VGUI_Health2(this));
 	m_HUDElements.add(m_Health = new VGUI_Health(this));
 
+	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
+	{
+		m_RetroHealth->setVisible(true);
+		m_Health->setVisible(false);
+	}else{
+		m_RetroHealth->setVisible(false);
+		m_Health->setVisible(true);
+	}
+
 	//Status Icons
-	dbg("Create StatusIcons");
 	m_HUDElements.add(m_Status = new VGUI_Status(this)); //Drigien MAY2008
 
 	//ID Panel
-	dbg("Create ID");
 	m_ID = new VGUI_ID(this, ID_X, ID_Y);
 
 	//Vote Info Panel
-	dbg("Create Vote");
 	m_HUDElements.add(m_VoteInfo = new VGUI_VoteInfo(this));
 
 	//Event Console
-	dbg("Create Event Console");
 #define EVENTCON_SIZE_X XRES(230)
 #define EVENTCON_X XRES(640) - EVENTCON_SIZE_X - XRES(20)
 #define EVENTCON_Y (YRES(480) - YRES(10)) //Starts here, and moves upward as it grows
@@ -240,7 +243,6 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 	m_Consoles.add(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
 
 	//SayText Console
-	dbg("Create SayText Console");
 #define SAYTEXTCON_X XRES(10)
 	//thothie was 220, moving to 180
 #define SAYTEXTCON_Y YRES(180) //Starts here, and moves upward as it grows
@@ -254,26 +256,19 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 	m_Consoles.add(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
 
 	//Start Say text panel
-	dbg("Create SayText Typing Panel");
 	m_StartSayText = new VGUI_SendTextPanel(this, XRES(100), YRES(300), XRES(640) - XRES(100), YRES(16));
 
 	//Debug Text
-	dbg("Create Debug label");
 	m_DebugText = new MSLabel(this, "", 0, YRES(16));
 
 	//Quick Slot Text
-	dbg("Create Quickslot Text");
 	m_HUDElements.add(m_QuickSlot = new VGUI_QuickSlot(this));
-
-	enddbg;
 }
 
 // Update
 void CHUDPanel::Think()
 {
-	startdbg;
 	//Update ID
-	dbg("m_ID->Update( );");
 	m_ID->Update();
 
 	//Update HUD Elements
@@ -281,13 +276,19 @@ void CHUDPanel::Think()
 	{
 		msstring d = "HUD Elements loop: ";
 		d += i;
-		dbg(d);
 		m_HUDElements[i]->Update();
 	}
 
-	dbg("Update InfoWindows");
+	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
+	{
+		m_RetroHealth->setVisible(true);
+		m_Health->setVisible(false);
+	}else{
+		m_RetroHealth->setVisible(false);
+		m_Health->setVisible(true);
+	}
+
 	UpdateInfoWindows(InfoWindows); //Update Info windows
-	dbg("Update HelpWindows");
 	UpdateInfoWindows(HelpWindows); //Update Help windows
 
 	//Update Text Consoles
@@ -295,14 +296,11 @@ void CHUDPanel::Think()
 	{
 		msstring d = "Text Consoles: ";
 		d += i;
-		dbg(d);
 		m_Consoles[i]->Update();
 	}
 
 	//Update Start Say Text
-	dbg("Start saytext");
 	m_StartSayText->Update();
-	enddbg;
 }
 
 void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
@@ -319,6 +317,7 @@ void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
 			RemoveInfoWindow(Windows, i);
 	}
 }
+
 void CHUDPanel::RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx)
 {
 	CInfoWindow* pInfoWin = Windows[idx];
@@ -326,9 +325,11 @@ void CHUDPanel::RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx)
 	removeChild(pInfoWin);
 	pInfoWin->Remove();
 }
+
 void CHUDPanel::Close(void)
 {
 }
+
 //======================================
 // Key inputs for the Class Menu
 bool CHUDPanel::SlotInput(int iSlot)

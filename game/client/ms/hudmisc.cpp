@@ -55,6 +55,8 @@ int CHudMisc::Init(void)
 	HOOK_COMMAND("accept", Accept);
 	//HOOK_COMMAND("listskills", ListSkills);
 
+	CVAR_CREATE("cl_retrohud", "0", FCVAR_ARCHIVE);
+
 	CVAR_CREATE("cl_crosshair_draw", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("cl_crosshair_type", "0", FCVAR_ARCHIVE);
 
