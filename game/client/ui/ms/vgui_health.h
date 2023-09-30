@@ -11,15 +11,15 @@ static COLOR Color_Text_LowHealth(250, 0, 0, 10),
 static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
 //Scales flasks down to only 40% wide of the screen if sprites are too big
-#define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
+#define FLASK_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
 
 //Dimensions of the "Flask" sprites
-#define BAR_W (320 * BAR_SCALE)
-#define BAR_H (40 * BAR_SCALE)
+#define FLASK_W (320 * FLASK_SCALE)
+#define FLASK_H (40 * FLASK_SCALE)
 
-#define EMBLEM_SIZE (90 * BAR_SCALE)
+#define EMBLEM_SIZE (90 * FLASK_SCALE)
 
-class VGUI_Bar : public Panel
+class VGUI_Flask : public Panel
 {
 public:
 	VGUI_Image3D m_Image;
@@ -27,7 +27,7 @@ public:
 	int m_Type;
 	float m_CurrentAmt;
 
-	VGUI_Bar(Panel *pParent, int Type, int x, int y) : Panel(x, y, BAR_W, BAR_H)
+	VGUI_Flask(Panel *pParent, int Type, int x, int y) : Panel(x, y, FLASK_W, FLASK_H)
 	{
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
@@ -128,7 +128,7 @@ protected:
 	int vCurChargeLevel = 0;
 
 public:
-	class VGUI_Bar *m_Bar[4];
+	class VGUI_Flask *m_Flask[4];
 
 	CStatusBar *m_Charge[2];
 	MSLabel *m_ChargeLbl[2];
@@ -144,30 +144,32 @@ public:
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);
 
+
+
 		//Point defines where status bars are positioned relative to and the max screen space its allowed to take before scaling
 		float coords[2];
 
 		coords[0] = 10; //x
-		coords[1] = (ScreenHeight - (2 * BAR_H) - 10); //y, from the bottom of the screen, as high as the sprites are
+		coords[1] = (ScreenHeight - (2 * FLASK_H) - 10); //y, from the bottom of the screen, as high as the sprites are
 
 		//	Status Bars
 		
 		//Health bar
-		m_Bar[0] = new VGUI_Bar(this, 0, coords[0], coords[1]);
+		m_Flask[0] = new VGUI_Flask(this, 0, coords[0], coords[1]);
 
 		//weight bar
-		m_Bar[2] = new VGUI_Bar(this, 2, coords[0], coords[1] + BAR_H);
+		m_Flask[2] = new VGUI_Flask(this, 2, coords[0], coords[1] + FLASK_H);
 
 		//Mana bar
-		m_Bar[1] = new VGUI_Bar(this, 1, coords[0] + BAR_W + EMBLEM_SIZE - 1, coords[1]);
+		m_Flask[1] = new VGUI_Flask(this, 1, coords[0] + FLASK_W + EMBLEM_SIZE - 1, coords[1]);
 
 		//stam bar
-		m_Bar[3] = new VGUI_Bar(this, 3, coords[0] + BAR_W + EMBLEM_SIZE - 1, coords[1] + BAR_H);
+		m_Flask[3] = new VGUI_Flask(this, 3, coords[0] + FLASK_W + EMBLEM_SIZE - 1, coords[1] + FLASK_H);
 
 		m_HUDImage.setParent(this);
 		m_HUDImage.LoadImg("hud_main", true, false);
 		m_HUDImage.setSize(EMBLEM_SIZE, EMBLEM_SIZE);
-		m_HUDImage.setPos(coords[0] + BAR_W, coords[1] - (7 * BAR_SCALE));
+		m_HUDImage.setPos(coords[0] + FLASK_W, coords[1] - (7 * FLASK_SCALE));
 
 //Charge system
 #define CHARGE_W XRES(30)
@@ -175,6 +177,7 @@ public:
 #define CHARGE_SPACER_W XRES(2)
 		//#define CHARGE_X XRES(320) - CHARGE_W/2
 
+		dbg("Setup m_Charge[0] & m_Charge[1]");
 		for (int i = 0; i < 2; i++)
 		{
 			int Multiplier = (i == 0) ? -1 : 1;
@@ -186,6 +189,8 @@ public:
 			m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(304) + OffsetW * Multiplier, YRES(408), CHARGE_W, CHARGE_H, MSLabel::a_center);
 			m_ChargeLbl[i]->setVisible(false);
 		}
+
+		enddbg;
 	}
 
 	//MiB NOV2007a - Moar Charge Colors!
@@ -193,7 +198,7 @@ public:
 	{
 		//Update flasks
 		for (int i = 0; i < 4; i++)
-			m_Bar[i]->Update();
+			m_Flask[i]->Update();
 
 		bool bShowHealth = ShowHealth();
 
