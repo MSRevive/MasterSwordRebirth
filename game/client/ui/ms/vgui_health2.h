@@ -24,9 +24,17 @@ public:
 		setBgColor(0, 0, 0, 255);
 		m_Type = Type;
 
-		msstring_ref ImageName = !Type ? "healthflask" : "manaflask";
 		m_Image.setParent(this);
-		m_Image.LoadImg(ImageName, false, false);
+		
+		switch(Type) {
+			case 0:
+				m_Image.LoadImg("hud/healthflask", false, false);
+				break;
+			case 1:
+				m_Image.LoadImg("hud/manaflask", false, false);
+				break;
+		}
+		
 		m_Image.setFgColor(255, 255, 255, 255);
 		m_Image.setSize(getWide(), getTall());
 		m_Label = new MSLabel(this, "0/0", 0, getTall()/1.5, getWide(), YRES(8), MSLabel::a_center);
@@ -109,7 +117,7 @@ public:
 		SetBGColorRGB(Color_Transparent);
 
 		m_HUDImage.setParent(this);
-		m_HUDImage.LoadImg("hud_main", true, false);
+		m_HUDImage.LoadImg("hud_main2", true, false);
 		//m_HUDImage.setFgColor( 255, 255, 255, 255 );
 		m_HUDImage.setSize(getWide(), getTall());
 
