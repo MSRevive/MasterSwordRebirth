@@ -279,11 +279,13 @@ void CHUDPanel::Think()
 		m_HUDElements[i]->Update();
 	}
 
-	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
+	if ((CVAR_GET_FLOAT("cl_retrohud") > 0) && m_Health->isVisible())
 	{
 		m_RetroHealth->setVisible(true);
 		m_Health->setVisible(false);
-	}else{
+	}
+
+	if ((CVAR_GET_FLOAT("cl_retrohud") == 0) && m_RetroHealth->isVisible()) {
 		m_RetroHealth->setVisible(false);
 		m_Health->setVisible(true);
 	}
