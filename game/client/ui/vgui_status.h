@@ -71,16 +71,6 @@ public:
 		float flPercent = 1.0 - (gpGlobals->time - m_Time) / m_Dur;
 		m_pBar->Set(flPercent * 100.0f);
 		m_pBar->SetFGColorRGB(DurColor);
-
-		/*
-		// Use Different Colors for % left
-		if( flPercent < 0.15 ) 
-			m_pBar->SetFGColorRGB( LowColor ); 
-		else if( flPercent <= 0.85f ) 
-			m_pBar->SetFGColorRGB( MedColor ); 
-		else 
-			m_pBar->SetFGColorRGB( HighColor ); 
-		*/
 	}
 
 	// MiB FEB2019_22 - Update duration and reset start time
