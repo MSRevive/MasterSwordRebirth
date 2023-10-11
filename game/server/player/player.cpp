@@ -760,6 +760,8 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	//pev->gaitsequence = 0;
 
+	//This already runs on CMSMonster
+	/*
 	//MiB Dec2007a - For removing effects on death
 	if (m_Scripts.size() > 0)
 	{
@@ -778,7 +780,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 				}
 			}
 		}
-	}
+	}*/
 
 	dbg("Call game_death");
 	CallScriptEvent("game_death");
