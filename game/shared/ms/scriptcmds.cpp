@@ -4676,7 +4676,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 		CBaseEntity* targ = UTIL_PlayerByIndex(i);
 		if (targ && targ->IsPlayer())
 		{
-			((CBasePlayer*)targ)->SwapMusic(-1, iMode, SFile);
+			((CBasePlayer*)targ)->SwapMusic(-1, iMode, static_cast<std::string>(SFile));
 		}
 
 		i++;
