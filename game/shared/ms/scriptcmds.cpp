@@ -4644,8 +4644,8 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 #ifdef VALVE_DLL
 
 	msstring& Target = Params[0];
-	std::string sMode = Params[1];
-	std::string SFile = Params[2];
+	msstring sMode = Params[1];
+	msstring SFile = Params[2];
 
 	int iMode;
 	if (sMode == "system") iMode = MUSIC_SYSTEM;
