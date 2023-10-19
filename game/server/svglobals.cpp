@@ -185,10 +185,13 @@ void MSWorldSpawn()
 
 	if (MSGlobals::CentralEnabled)
 	{
+		bool fail = true;
+
 		for (int retry = 0; retry < 5; retry++)
 		{
 			if (FnDataHandler::IsValidConnection())
 			{
+				fail = false;
 				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
 				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
 				break;
@@ -199,9 +202,12 @@ void MSWorldSpawn()
 			}
 		}
 
-		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
-		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
-		MSGlobals::CentralEnabled = false;
+		if (fail == true)
+		{
+			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
+			MSGlobals::CentralEnabled = false;
+		}
 	}
 
 	if (!IsVerifiedMap())
