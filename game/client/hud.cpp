@@ -318,6 +318,11 @@ void CHud::Init(void)
 	// VGUI Menus
 	HOOK_MESSAGE(VGUIMenu);
 
+	//m_Sprites.clear();
+	std::vector<HudSprite>().swap(m_Sprites);
+	//m_HudList.clear();
+	std::vector<CHudBase*>().swap(m_HudList);
+
 	m_iLogo = 0;
 	m_iFOV = 0;
 
@@ -326,9 +331,6 @@ void CHud::Init(void)
 	m_pCvarStealMouse = CVAR_CREATE("hud_capturemouse", "1", FCVAR_ARCHIVE);
 
 	cl_lw = gEngfuncs.pfnGetCvarPointer("cl_lw");
-
-	m_Sprites.clear();
-	m_HudList.clear();
 
 	// In case we get messages before the first update -- time will be valid
 	m_flTime = 1.0;

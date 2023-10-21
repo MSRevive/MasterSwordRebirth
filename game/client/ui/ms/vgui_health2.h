@@ -238,7 +238,6 @@ public:
 
 			if (Item->Attack_IsCharging() && (vCurChargeAmt = Item->Attack_Charge()) > 0)
 			{
-
 				ChargeBar.setVisible(bShowHealth);
 				bool notDone = true;
 

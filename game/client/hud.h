@@ -515,8 +515,8 @@ private:
 		wrect_t Rectangle{0, 0, 0, 0};
 	};
 
-	std::vector<CHudBase*> m_HudList;
 	std::vector<HudSprite> m_Sprites;
+	std::vector<CHudBase*> m_HudList;
 
 	HLSPRITE m_hsprLogo;
 	int m_iLogo;
