@@ -12,7 +12,7 @@
 #include "ms/vgui_hud.h"
 #include "logger.h"
 #include "steamhelper.h"
-#include "richpresence.h"
+//#include "richpresence.h"
 
 void VGUI_Think();
 
@@ -408,7 +408,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
 		if (logfile.is_open())
 			(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
-		RichPresenceShutdown();
+		//RichPresenceShutdown();
 		MSGlobals::EndMap();
 		MSCLGlobals::DLLDetach();
 		MSGlobals::DLLDetach();

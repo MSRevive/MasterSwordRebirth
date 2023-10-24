@@ -9,6 +9,7 @@
 #include "fmod/soundengine.h"
 
 CSoundEngine gSoundEngine;
+CRichPresence gRichPresence;
 CHud gHUD;
 
 bool CClientLibrary::Initialize() 
@@ -82,7 +83,7 @@ void CClientLibrary::HUDInit()
 	//debug outputs ; remove later - always add where they are set! This way let's us get data after something goes wrong out of a string
 	CVAR_CREATE("DEBUG_bestxpstat", "0", FCVAR_CLIENTDLL); // Called @ playerstats.cpp line 123
 
-	RichPresenceInitialize();
+	gRichPresence.Init();
 }
 
 void CClientLibrary::VideoInit()
@@ -99,6 +100,7 @@ void CClientLibrary::Shutdown()
 	gHUD.Shutdown();
 	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
+	gRichPresence.Shutdown();
 }
 
 void CClientLibrary::ResetClient()
@@ -125,7 +127,7 @@ void CClientLibrary::RunFrame()
 
 	gSoundEngine.Update();
 	steamhelper->Think();
-	RichPresenceUpdate();
+	gRichPresence.Update();
 }
 
 extern CClientLibrary gClient;

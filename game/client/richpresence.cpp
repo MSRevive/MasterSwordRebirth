@@ -14,43 +14,37 @@
 #include "steamhelper.h"
 #include "discord/discord_rpc.h"
 #include <time.h>
-#include <sysinfoapi.h>
 
-static bool loadedRichPresence = false;
-static ULONG lastTimeUpdated = 0;
-static int64_t startTime;
+#define DISCORD_RPC_UPDATE_TIME 35.0 // sec
 
-static char bufferDetails[128];
-static char bufferState[128];
-
-#define DISCORD_RPC_UPDATE_TIME 35 // sec
-
-void RichPresenceInitialize()
+void CRichPresence::Init(void)
 {
-	loadedRichPresence = true;
-	DiscordEventHandlers handlers;
-	memset(&handlers, 0, sizeof(handlers));
-	Discord_Initialize("1063225093507010570", &handlers, 1, "1961680");
-	startTime = time(NULL);
+	if (!m_bLoaded)
+	{
+		m_bLoaded = true;
+		DiscordEventHandlers handlers;
+		memset(&handlers, 0, sizeof(handlers));
+		Discord_Initialize("1063225093507010570", &handlers, 1, "1961680");
+		m_numStartTime = time(NULL);
+	}
 }
 
-void RichPresenceShutdown()
+void CRichPresence::Shutdown(void)
 {
-	// Discord_Shutdown is broken --- game will hang endlessly if called!
-	loadedRichPresence = false;
+	//Discord_Shutdown is broken --- game will hang endlessly if called!
+	m_bLoaded = false;
 }
 
-void RichPresenceUpdate()
+void CRichPresence::Update(void)
 {
-	if (loadedRichPresence == false)
+	if (!m_bLoaded)
 		return;
 
-	const auto timeNow = (GetTickCount64() / 1000);
-
-	if (lastTimeUpdated >= timeNow)
+	const float timeNow = gEngfuncs.GetClientTime();
+	if (m_fLastUpdate >= timeNow)
 		return;
-
-	lastTimeUpdated = (timeNow + DISCORD_RPC_UPDATE_TIME);
+	
+	m_fLastUpdate = (timeNow + DISCORD_RPC_UPDATE_TIME);
 	int maxClients = gEngfuncs.GetMaxClients(), clientsInGame = 0, currentHealth = 0;
 
 	if (maxClients > 0)
@@ -66,8 +60,8 @@ void RichPresenceUpdate()
 			clientsInGame++;
 		}
 
-		_snprintf(bufferDetails, sizeof(bufferDetails), "%s - %i HP", player.m_DisplayName.c_str(), currentHealth);
-		_snprintf(bufferState, sizeof(bufferState), "%s", MSGlobals::MapName.c_str());
+		_snprintf(m_cBufferDetails, sizeof(m_cBufferDetails), "%s - %i HP", player.m_DisplayName.c_str(), currentHealth);
+		_snprintf(m_cBufferState, sizeof(m_cBufferState), "%s", MSGlobals::MapName.c_str());
 
 		if (steamapicontext && steamapicontext->SteamFriends())
 		{
@@ -78,8 +72,8 @@ void RichPresenceUpdate()
 	}
 	else
 	{
-		strncpy(bufferDetails, "In Main-Menu", sizeof(bufferDetails));
-		strncpy(bufferState, "Awaiting Greatness", sizeof(bufferState));
+		strncpy(m_cBufferDetails, "In Main-Menu", sizeof(m_cBufferDetails));
+		strncpy(m_cBufferState, "Awaiting Greatness", sizeof(m_cBufferState));
 		clientsInGame = maxClients = 1;
 
 		if (steamapicontext && steamapicontext->SteamFriends())
@@ -88,9 +82,9 @@ void RichPresenceUpdate()
 
 	DiscordRichPresence discordPresence;
 	memset(&discordPresence, 0, sizeof(discordPresence));
-	discordPresence.state = bufferState;
-	discordPresence.details = bufferDetails;
-	discordPresence.startTimestamp = startTime;
+	discordPresence.state = m_cBufferState;
+	discordPresence.details = m_cBufferDetails;
+	discordPresence.startTimestamp = m_numStartTime;
 	discordPresence.partySize = clientsInGame;
 	discordPresence.partyMax = maxClients;
 	discordPresence.largeImageKey = "msr";
