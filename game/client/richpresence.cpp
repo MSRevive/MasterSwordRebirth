@@ -32,6 +32,8 @@ void CRichPresence::Init(void)
 void CRichPresence::Shutdown(void)
 {
 	//Discord_Shutdown is broken --- game will hang endlessly if called!
+	//Seems to work fine now
+	Discord_Shutdown();
 	m_bLoaded = false;
 }
 
