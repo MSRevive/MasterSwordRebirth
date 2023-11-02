@@ -3,7 +3,8 @@
 //	Project Script
 //-----------------------------------------------------------------------------
 
-$Macro SRCDIR		"..\.."
+$Macro SRCDIR		".."
+$Macro PROJDIR		"..\game\charimport"
 $Macro OUTBINDIR	"$SRCDIR\build"
 
 $Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
@@ -12,7 +13,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;$PROJDIR;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL;CURL_STATICLIB"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -29,9 +30,9 @@ $Project "charimport"
 	{
 		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
 		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
-		$File "..\..\thirdparty\base64\base64.cpp"
+		$File "$SRCDIR\thirdparty\base64\base64.cpp"
 		$File "$SRCDIR\game\shared\ms\httprequesthandler.cpp"
-		$File "charimport.cpp"
+		$File "$PROJDIR\charimport.cpp"
 	}
 
 	$Folder	"Link Libraries" 

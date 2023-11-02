@@ -3,7 +3,8 @@
 //	Project Script
 //-----------------------------------------------------------------------------
 
-$Macro SRCDIR		"..\.."
+$Macro SRCDIR		".."
+$Macro PROJDIR		"..\game\maphash"
 $Macro OUTBINDIR	"$SRCDIR\build"
 
 $Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
@@ -12,7 +13,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty"
+		$AdditionalIncludeDirectories	"$BASE;$PROJDIR;$SRCDIR\game\server;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -33,6 +34,6 @@ $Project "maphash"
 		$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
 		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
 		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
-		$File "maphash.cpp"
+		$File "$PROJDIR\maphash.cpp"
 	}
 }

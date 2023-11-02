@@ -3,7 +3,8 @@
 //	Project Script
 //-----------------------------------------------------------------------------
 
-$Macro SRCDIR		"..\.."
+$Macro SRCDIR		".."
+$Macro PROJDIR		"..\game\scriptpack"
 $Macro OUTBINDIR	"$SRCDIR\build"
 
 $Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
@@ -12,7 +13,7 @@ $Configuration
 {	
 	$Compiler
 	{
-		$AdditionalIncludeDirectories	"$BASE;.\;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;..\..\thirdparty;.\tclap"
+		$AdditionalIncludeDirectories	"$BASE;$PROJDIR;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty;$PROJDIR\tclap"
 		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
 		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
 	}
@@ -35,12 +36,12 @@ $Project "scriptpack"
 		$File "$SRCDIR\game\shared\ms\groupfile.h"
 		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
 		$File "$SRCDIR\game\shared\ms\stackstring.cpp"		
-		$File "scriptpack.cpp"
-		$File "packer.cpp"
-		$File "packer.h"
-		$File "dirent.h"
-		$File "cbase.h"
-		$File "parser.h"
-		$File "compat.h"
+		$File "$PROJDIR\scriptpack.cpp"
+		$File "$PROJDIR\packer.cpp"
+		$File "$PROJDIR\packer.h"
+		$File "$PROJDIR\dirent.h"
+		$File "$PROJDIR\cbase.h"
+		$File "$PROJDIR\parser.h"
+		$File "$PROJDIR\compat.h"
 	}
 }
