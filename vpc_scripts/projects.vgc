@@ -10,25 +10,25 @@
 
 $Project "server"
 {
-	"game\server\server.vpc"
+	"projects\server.vpc"
 }
 
 $Project "client"
 {
-	"game\client\client.vpc" [$WIN32]
+	"projects\client.vpc" [$WIN32]
 }
 
 $Project "scriptpack"
 {
-	"utils\scriptpack\scriptpack.vpc" [$WIN32]
+	"projects\scriptpack.vpc" [$WIN32]
 }
 
 $Project "maphash"
 {
-	"utils\maphash\maphash.vpc" [$WIN32]
+	"projects\maphash.vpc" [$WIN32]
 }
 
 $Project "charimport"
 {
-	"utils\charimport\charimport.vpc" [$WIN32]
+	"projects\charimport.vpc" [$WIN32]
 }

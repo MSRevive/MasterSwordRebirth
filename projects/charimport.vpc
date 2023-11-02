@@ -1,0 +1,42 @@
+//-----------------------------------------------------------------------------
+//	CHARIMPORT.VPC - Imports encrypted charfiles from the old FN system!
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		".."
+$Macro PROJDIR		"..\game\charimport"
+$Macro OUTBINDIR	"$SRCDIR\build"
+
+$Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
+
+$Configuration
+{	
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$PROJDIR;$SRCDIR\game\server;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty"
+		$PreprocessorDefinitions		"$BASE;NOT_HLDLL;CURL_STATICLIB"
+		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
+	}
+}
+
+$Project "charimport"
+{
+	$Folder	"Source Files"
+	{
+		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
+		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
+		$File "$SRCDIR\thirdparty\base64\base64.cpp"
+		$File "$SRCDIR\game\shared\ms\httprequesthandler.cpp"
+		$File "$PROJDIR\charimport.cpp"
+	}
+
+	$Folder	"Link Libraries" 
+	{
+		$Lib libcurl
+	}
+}

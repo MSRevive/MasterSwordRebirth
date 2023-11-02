@@ -1,0 +1,39 @@
+//-----------------------------------------------------------------------------
+//	MAPHASH.VPC - Compiler which generates exe to create a list of map hashes.
+//	Project Script
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		".."
+$Macro PROJDIR		"..\game\maphash"
+$Macro OUTBINDIR	"$SRCDIR\build"
+
+$Include "$SRCDIR\vpc_scripts\source_exe_con_base.vpc"
+
+$Configuration
+{	
+	$Compiler
+	{
+		$AdditionalIncludeDirectories	"$BASE;$PROJDIR;$SRCDIR\game\server;$SRCDIR\game\shared\ms\crc;$SRCDIR\game\shared;$SRCDIR\game\shared\ms;$SRCDIR\thirdparty"
+		$PreprocessorDefinitions		"$BASE;NOT_HLDLL"
+		$PreprocessorDefinitions		"$BASE;SWDS" [$POSIX]
+	}
+
+	$Linker
+	{
+		$AdditionalDependencies				"$BASE ws2_32.lib odbc32.lib odbccp32.lib winmm.lib wsock32.lib" [$WIN32]
+	}
+}
+
+$Project "maphash"
+{
+	$Folder	"Source Files"
+	{
+		$File "$SRCDIR\game\shared\ms\crc\crchash.cpp"
+		$File "$SRCDIR\game\shared\ms\crc\crchash.h"
+		$File "$SRCDIR\game\shared\ms\crc\checksum_crc.cpp"
+		$File "$SRCDIR\game\shared\ms\crc\checksum_crc.h"
+		$File "$SRCDIR\game\shared\ms\msfileio.cpp"
+		$File "$SRCDIR\game\shared\ms\stackstring.cpp"
+		$File "$PROJDIR\maphash.cpp"
+	}
+}
