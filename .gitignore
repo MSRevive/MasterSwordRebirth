@@ -88,6 +88,8 @@ Release
 [Dd]ebug/
 [Rr]elease/
 [Oo]bj/
+projects/[Cc]lient/[Dd]ebug/
+projects/[Ss]erver/[Dd]ebug/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
