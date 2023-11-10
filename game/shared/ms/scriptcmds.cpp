@@ -154,7 +154,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["sound.pm_play"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_SoundPMPlay);
 		m_GlobalCmdHash["sound.setvolume"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_SoundSetVolume);
 		m_GlobalCmdHash["applyeffect"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ApplyEffect);
-		m_GlobalCmdHash["applyeffectstack"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_ApplyEffect); //Thothie JUL2013_24 - applyeffect optimization
 		m_GlobalCmdHash["storeentity"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_StoreEntity);
 		m_GlobalCmdHash["precachefile"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_PrecacheFile);
 		m_GlobalCmdHash["playermessage"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Message);
@@ -1859,7 +1858,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	return true;
 }
 
-//applyeffect / applyeffectstack <target> <script> [params...]
+//applyeffect <target> <script> [params...]
 //- scope: server
 //- applies an affect script to <target>
 bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
@@ -1917,33 +1916,10 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 			}
 			//[end] DEC2014_11 - allow script control of applyeffects
 
-			//Thothie JUL2013_24 - applyeffect optimization
-			//very few effects stack, so let's just make all effects no-stack by default
-			//unless applyeffectstack command is used
-			bool bApplyEffect = true;
-			if ( Cmd.Name() != "applyeffectstack" )
-			{
-				//Check if I has script
-				msstring search_script = Params[1].c_str();
-				msstring check_script;
-				for( int i = 0; i < pScripted->m_Scripts.size(); i++ ) // Check each
-				{
-					check_script = pScripted->m_Scripts[i]->m.ScriptFile.c_str();
-					if ( search_script == check_script )
-					{
-						bApplyEffect = false;
-						break;
-					}
-				}
-			}
-
-			if ( bApplyEffect )
-			{
-				msstringlist Parameters;
-				for( int i = 0; i < Params.size() - 2; i++ )
-					Parameters.add( Params[i+2] );
-				CGlobalScriptedEffects::ApplyEffect( Params[1], pScripted, pEntity, &Parameters );
-			}
+			Parameters.clearitems();
+			for( int i = 0; i < Params.size() - 2; i++ )
+				Parameters.add( Params[i+2] );
+			CGlobalScriptedEffects::ApplyEffect( Params[1], pScripted, pEntity, &Parameters);
 		}
 	}
 	else ERROR_MISSING_PARMS;
