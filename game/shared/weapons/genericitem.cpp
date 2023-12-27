@@ -781,6 +781,10 @@ void CGenericItem::Attack2ButtonDown(void)
 
 	//CallScriptEvent("attack2");//old
 	CallScriptEvent("game_+attack2");
+	if (m_pPlayer && FBitSet(m_pPlayer->m_afButtonPressed, IN_ATTACK2)) // First frame of button being held down
+	{
+		CallScriptEvent("game_attack2");
+	}
 }
 void CGenericItem::Attack2ButtonUp()
 {
