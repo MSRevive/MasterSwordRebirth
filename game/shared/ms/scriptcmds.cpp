@@ -107,7 +107,6 @@ void CScript::Script_Setup()
 		m_GlobalCmdHash["vectorscale"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_VectorMultiply);
 		m_GlobalCmdHash["vectorset"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_VectorSet);
 		m_GlobalCmdHash["stradd"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_StrAdd);
-		m_GlobalCmdHash["ververify"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_VerVerify); //Thothie OCT2007a - moving MS.DLL verify
 		m_GlobalCmdHash["capvar"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_CapVar);
 		m_GlobalCmdHash["volume"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_Volume);
 		m_GlobalCmdHash["usetrigger"] = scriptcmdscpp_cmdfunc_t(&CScript::ScriptCmd_UseTrigger);
@@ -7196,33 +7195,6 @@ bool CScript::ScriptCmd_Velocity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		}
 	}
 	else ERROR_MISSING_PARMS;
-
-	return true;
-}
-
-//ververify
-//- scope: server
-//- Verifies ms.dll and sc.dll versions match, once per game
-bool CScript::ScriptCmd_VerVerify(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
-{
-#ifdef VALVE_DLL
-	//Thothie JUN2007a - Verify SC.DLL version
-	//this is done rarely, but once every game, thus, stuck it here
-	//note moved from hour change in OCT2007a
-	msstring msScriptDllVersion = GetVar( "G_SCRIPT_VERSION" ); //sc.dll
-	msstring msServerDLLVersion = EngineFunc::CVAR_GetString("ms_version"); //ms.dll
-	if ( !msServerDLLVersion.starts_with(msScriptDllVersion) )
-	{
-#ifndef POSIX
-		MessageBox(NULL,UTIL_VarArgs("MS.DLL / SC.DLL version mismatch ( %s vs %s ). Cannot continue.",msScriptDllVersion.c_str(),msServerDLLVersion.c_str()), "ERROR",MB_OK|MB_ICONEXCLAMATION);
-#endif
-		exit (-1);
-	}
-	else
-	{
-		SetVar( "DLL_VALID", "1", true );
-	}
-#endif
 
 	return true;
 }
