@@ -1090,30 +1090,6 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				}
 				if (!found_entry)
 					m.TakeDamageModifiers.add(TDM);
-				msstring Debug_AMT = Params[1];
-				msstring Debug_Type = Params[0];
-				msstring msDamageTypeImmune = "IMMUNE_";
-				if (Debug_Type.starts_with("cold"))
-					msDamageTypeImmune.append("COLD");
-				if (Debug_Type.starts_with("fire"))
-					msDamageTypeImmune.append("FIRE");
-				if (Debug_Type.starts_with("lightning"))
-					msDamageTypeImmune.append("LIGHTNING");
-				if (Debug_Type.starts_with("poison"))
-					msDamageTypeImmune.append("POISON");
-				if (Debug_Type.starts_with("holy"))
-					msDamageTypeImmune.append("HOLY");
-				if (Debug_Type.starts_with("acid"))
-					msDamageTypeImmune.append("ACID");
-				if (Debug_Type.starts_with("magic"))
-					msDamageTypeImmune.append("MAGIC");
-				// float thoth_final_val = flModifier; Completely unnecessary?
-				if (flModifier == 0)
-					SetScriptVar(msDamageTypeImmune, "1");
-				if (flModifier == 1)
-					SetScriptVar(msDamageTypeImmune, "0.99");
-				if (flModifier != 1 && flModifier > 0)
-					SetScriptVar(msDamageTypeImmune, flModifier);
 			}
 			
 			//Thothie DEC2017_13 - game_set_takedmg sets a base for later temporary adjustments
