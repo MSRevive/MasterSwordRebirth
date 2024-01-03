@@ -1896,7 +1896,7 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					{
 						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
 						msstring tdm_damage_type = TDM.DamageType;
-						if (tdm_damage_type.contains(dtype_code))
+						if (dtype_code.contains(tdm_damage_type))
 						{
 							tdm_modifier = TDM.modifier;
 							tdm_found_entry = true;
