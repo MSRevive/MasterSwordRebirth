@@ -7165,22 +7165,21 @@ bool CScript::ScriptCmd_Velocity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 				bool abort_push = false;
 				if ((pEntity != pCaller) && (Params[2] != "override"))
 				{
-					// APR2012_01 - Thothie - Add Push Reduction via Var
-					IScripted* iScripted = pEntity->GetScripted();
-					if (iScripted)
-					{
-						float push_resist = atof(iScripted->GetFirstScriptVar("MSC_PUSH_RESIST"));
-						if (push_resist != 0)
-						{
-							lVelAdjust.x *= push_resist;
-							lVelAdjust.y *= push_resist;
-							lVelAdjust.z *= push_resist;
-						}
-					}
-
 					CMSMonster* pMonster = (pEntity->IsMSMonster() ? (CMSMonster*)pEntity : NULL);
 					if (pMonster)
 					{
+						for (int i = 0; i < pMonster->m.TakeDamageModifiers.size(); i++)
+						{
+							CMSMonster::takedamagemodifier_t& TDM = pMonster->m.TakeDamageModifiers[i];
+							msstring read_dmgtype = TDM.DamageType;
+							if (read_dmgtype.contains("stun"))
+							{
+								lVelAdjust.x *= TDM.modifier;
+								lVelAdjust.y *= TDM.modifier;
+								lVelAdjust.z *= TDM.modifier;
+							}
+						}
+
 						if (pMonster->m_nopush) 
 							abort_push = true; //Thothie JAN2020_12 - EXEC_CMD redundancy
 					}
