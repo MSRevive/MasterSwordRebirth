@@ -132,10 +132,8 @@ public:
 	}
 	void reserve()
 	{
-		if (!m_ItemsAllocated)
-			m_ItemsAllocated++;
-		else
-			m_ItemsAllocated *= 2;
+		m_ItemsAllocated++;
+
 		itemtype_y *pNewItems = ::msnew itemtype_y[m_ItemsAllocated];
 		for (unsigned int i = 0; i < m_Items; i++)
 			pNewItems[i] = m_First[i];
