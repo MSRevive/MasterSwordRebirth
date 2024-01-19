@@ -242,10 +242,11 @@ bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMap
 
 void MSChar_Interface::CreateSaveDir()
 {
+	std::string saveDir = MSGlobals::AbsGamePath + "/save";
 #ifdef _WIN32
-	_mkdir(MSGlobals::AbsGamePath + "/save");
+	_mkdir(saveDir.c_str());
 #else
-	mkdir(MMSGlobals::AbsGamePath + "/save", 0777);
+	mkdir(saveDir.c_str(), 0755);
 #endif
 
 // std::string gameDir = gEngfuncs.pfnGetGameDirectory();
