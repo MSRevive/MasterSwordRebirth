@@ -93,9 +93,9 @@ void MSGlobalItemInit()
 	// Load the scripts from file
 	CGenericItemMgr::GenericItemPrecache();
 
-	//Create the save directory
-	//On non-english versions of MS, this dir isn't already there
-	MSChar_Interface::CreateSaveDir();
+	//since we're on steam now and can control what is shipped,
+	//the save directory should already be there.
+	//MSChar_Interface::CreateSaveDir();
 
 	//Load the global.script file
 	//This sets up various un-changing values and game relationships

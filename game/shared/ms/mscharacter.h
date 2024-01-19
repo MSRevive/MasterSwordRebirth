@@ -158,7 +158,6 @@ public:
 
 	static void PacketAcknowledged(int PacketIdx);			//Client & Server
 	static void Think_SendChar(class CBasePlayer *pPlayer); //Client & Server
-	static void CreateSaveDir();							//Client & Server
 
 #ifdef VALVE_DLL
 		//Server

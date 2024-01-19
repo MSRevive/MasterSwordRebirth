@@ -240,24 +240,6 @@ bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMap
 	return false;
 }
 
-void MSChar_Interface::CreateSaveDir()
-{
-	std::string saveDir = MSGlobals::AbsGamePath + "/save";
-#ifdef _WIN32
-	_mkdir(saveDir.c_str());
-#else
-	mkdir(saveDir.c_str(), 0755);
-#endif
-
-// std::string gameDir = gEngfuncs.pfnGetGameDirectory();
-// 	std::string saveDir = gameDir + "/save";
-// #ifdef _WIN32
-// 	mkdir(saveDir.c_str());
-// #else
-// 	mkdir(saveDir.c_str(), 0755); //don't use 0777 permissions
-// #endif	
-}
-
 #define RWVar Write
 #define RWByte WriteByte
 #define RWString WriteString
