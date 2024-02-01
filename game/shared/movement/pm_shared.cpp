@@ -2111,55 +2111,26 @@ float PM_SplineFraction(float value, float scale)
 	return 3 * valueSquared - 2 * valueSquared * value;
 }
 
-//MAR2008a - MIB - complete re-write of this function
 void PM_FixPlayerCrouchStuck(int direction)
 {
 	int hitent;
-	//	int i;
-	vec3_t test;
+	int i;
+	Vector test;
 
 	hitent = pmove->PM_TestPlayerPosition(pmove->origin, NULL);
 	if (hitent == -1)
 		return;
-	/*
-	VectorCopy( pmove->origin, test );	
-	for ( i = 0; i < 36; i++ )
+
+	VectorCopy(pmove->origin, test);
+	for (i = 0; i < 36; i++)
 	{
 		pmove->origin[2] += direction;
-		hitent = pmove->PM_TestPlayerPosition ( pmove->origin, NULL );
-		if (hitent == -1 )
-			return;
-	}
-
-	VectorCopy( test, pmove->origin ); // Failed*/
-
-	//MiB Mar2008a - Attempting to fix shaking-when-crouching bug
-	VectorCopy(pmove->origin, test);
-	for (int i = 0; i < 36; i++)
-	{
-		test[2] += direction;
-		hitent = pmove->PM_TestPlayerPosition(test, NULL);
+		hitent = pmove->PM_TestPlayerPosition(pmove->origin, NULL);
 		if (hitent == -1)
-		{
-			VectorCopy(test, pmove->origin);
 			return;
-		}
 	}
-	/*Worked. Explaination - 
 
-		The above had the general idea right, but what happened was this:
-		1. Copied the origin into a different variable
-		2. Went through a for loop that _changed the origin_
-		3. If a satisfactory origin couldn't be found, it returned the old origin
-
-		This made it so that, when crouching, players would constantly twitch as the
-		for loop adjusted their origin.
-
-		What mine does is:
-		1. Copies the origin into a different variable
-		2. Goes through a for loop that changes _the copy_
-		3. If a proper origin is found, it copies it over the origin
-	*/
+	VectorCopy(test, pmove->origin); // Failed
 }
 
 void PM_UnDuck(void)
