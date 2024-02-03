@@ -1063,23 +1063,22 @@ void CGenericItem::ChargeThrowProj()
 		flAccFraction = 1 - min(max(flAccFraction, 0.0f), 1.0f);
 
 		//Shoot more accurately for drawing the bow back longer
-		float LoweredSpreadDeg = CurrentAttack->flAccuracyDefault - (CurrentAttack->flAccuracyDefault - CurrentAttack->flAccBest) * flTimeHeldAdjusted;
+		float LoweredSpreadDeg = CurrentAttack->flAccBest + ((CurrentAttack->flAccuracyDefault - CurrentAttack->flAccBest) * (1 - flTimeHeldAdjusted));
 
-		float Spread = max(LoweredSpreadDeg, 0) * flAccFraction * RANDOM_FLOAT(-1.0f, 1.0f); //Factor skill and randomness into the Spread
-		float VeerAng = RANDOM_FLOAT(0.0f, M_PI * 2);										 //Determine an angle to veer off 0-360
-		vAngle.x += cosf(VeerAng) * Spread;													 //Veer off at the angle, multiplied by the spread
+		float Spread = max(LoweredSpreadDeg, 0);
+		float VeerAng = RANDOM_FLOAT(0.0f, M_PI);
+		vAngle.x += cosf(VeerAng) * Spread; //Veer off at the angle, multiplied by the spread
 		vAngle.y += sinf(VeerAng) * Spread;
 
 		if (m_pPlayer)
 			vAngle += CurrentAttack->AimOffset;
 
-		UTIL_MakeVectorsPrivate(vAngle, vForward, vRight, vUp);
+		EngineFunc::MakeVectors(vAngle, vForward, NULL, NULL);
 
-		//if( m_pPlayer )
-		//	vOrigin = vOrigin + vRight * CurrentAttack->vAlignBase.x + Vector(0,0,1) * CurrentAttack->vAlignBase.y;
+		Vector vOffsets(CurrentAttack->StartOffset.x * (!m_Hand ? -1 : 1),CurrentAttack->StartOffset.y, CurrentAttack->StartOffset.z);
 
 		float flRange = CurrentAttack->flRange * flTimeHeldAdjusted;
-		Vector vStartPos = vOrigin + vForward * 10 + vForward * CurrentAttack->StartOffset.y + vRight * CurrentAttack->StartOffset.x * (!m_Hand ? -1 : 1) + vUp * CurrentAttack->StartOffset.z;
+		Vector vStartPos = vOrigin + vOffsets;
 
 		Vector vTemp = vForward * flRange;
 		pProjectile->TossProjectile(this, vStartPos, vTemp);
