@@ -191,6 +191,8 @@ typedef struct hull_s
 
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
 
+#define PLAYER_MOVE_NODUCK (1 << 5)
+
 // double to float warning
 #pragma warning(disable : 4244)
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -2199,7 +2201,7 @@ void PM_Duck(void)
 	}
 
 	// Prevent ducking if the iuser3 variable is set
-	if (pmove->iuser3 || pmove->dead)
+	if (FBitSet(pmove->iuser3, PLAYER_MOVE_NODUCK) || pmove->dead)
 	{
 		// Try to unduck
 		if (pmove->flags & FL_DUCKING)
