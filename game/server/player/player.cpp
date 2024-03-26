@@ -1492,18 +1492,6 @@ void CBasePlayer::PreThink(void)
 
 	dbg("Begin");
 
-	//Anti-cheat
-	if (!IsElite())
-	{
-		if ((pev->movetype == MOVETYPE_NOCLIP && pev->solid != SOLID_NOT) ||
-			FBitSet(pev->flags, FL_GODMODE))
-#ifndef RELEASE_LOCKDOWN
-			ALERT(at_console, "Player attmpting to use Half-life Cheat! (In the public build this is a fatal error)\n");
-#else
-			exit(0);
-#endif
-	}
-
 	//Send char info, if character is still unloaded
 	Think_SendCharData();
 
