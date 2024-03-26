@@ -1300,7 +1300,7 @@ bool ShowHUD()
 	return ShowHUD;
 }
 bool ShowHealth() { return player.m_CharacterState == CHARSTATE_LOADED ? ShowHUD() : false; }
-bool ShowChat() { return true; } //Always show chat
+bool ShowChat() { return ShowHUD(); } //Always show chat
 
 int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 {

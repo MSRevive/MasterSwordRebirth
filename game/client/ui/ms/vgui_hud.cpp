@@ -392,14 +392,14 @@ bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)
 
 void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text)
 {
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
+	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
 		return;
 
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddInfoWin(Title, Text);
 }
 void HUD_ShowHelpWin(msstring_ref Title, msstring_ref Text)
 {
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
+	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
 		return;
 
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddHelpWin(Title, Text);
@@ -424,7 +424,7 @@ void HUD_PrintEvent(Color color, msstring_ref Text)
 }
 void HUD_SayTextEvent(Color color, msstring_ref Text)
 {
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
+	if (!gViewPort || !gViewPort->m_pHUDPanel ||!ShowHUD())
 		return;
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintSayText(color, Text);
 }

@@ -192,7 +192,7 @@ public:
 	}
 	void Resize( )
 	{
-		if( !m_VisibleLines )
+		if( !m_VisibleLines || !ShowHUD())
 		{
 			setVisible( false );
 			return;
@@ -269,7 +269,7 @@ public:
 				m_ShrinkTime = 0;
 		}
 
-		if( FBitSet(gHUD.m_iHideHUDDisplay,HIDEHUD_ALL) )
+		if(!ShowHUD())
 			setVisible( false );
 		else if( m_VisibleLines ) setVisible( true );
 	}
