@@ -6159,6 +6159,7 @@ bool CScript::ScriptCmd_SetModelBody(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 //- rendercolor <RRR,GGG,BBB>
 //- scale <ratio>
 //- setbody <group> <submodel> - as setmodelbody
+//- angles <vec>
 bool CScript::ScriptCmd_SetProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 #ifdef VALVE_DLL
@@ -6230,6 +6231,7 @@ bool CScript::ScriptCmd_SetProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			else if( PropName == "renderfx" ) pEntity->pev->renderfx = Int;  //added by Thothie
 			else if( PropName == "rendercolor" ) pEntity->pev->rendercolor = vVector;  //added by Thothie
 			else if( PropName == "scale" ) pEntity->pev->scale = Float;  //added by Thothie
+			else if( PropName == "angles" ) pEntity->pev->angles = vVector;  //added by Thothie
 			else if( PropName == "setbody" )
 			{
 				SetBodygroup( GET_MODEL_PTR( ENT(pEntity->pev) ), pEntity->pev, atoi(Params[2]), atoi(Params[3]) );

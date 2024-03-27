@@ -3277,6 +3277,13 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 				RETURN_FLOAT(num);
 			}
 		}
+		else if (Params[0] == "sin")
+		{
+			if (Params.size() > 1)
+			{
+				RETURN_FLOAT(sin(atof(Params[1])));
+			}
+		}
 		MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", m.ScriptFile.c_str(), ParserName.c_str()));
 		return "0";
 	}
