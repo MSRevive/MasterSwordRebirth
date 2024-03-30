@@ -707,7 +707,7 @@ void CNewCharacterPanel::Update( )
 		m_ChoosePanel->setVisible( true );
 		iButtons = CHOOSEPANEL_MAINBTNS;
 
-		 for (int i = 0; i < iButtons; i++) 
+		for (int i = 0; i < iButtons; i++) 
 		{
 			//Only certain fields can be assumed valid in this savedata
 			//If client-side characters - all savedata_t info is valid;
@@ -1254,8 +1254,8 @@ void CRenderChar::Render( )
 		for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 		{
 			gearinfo_t &GearInfo = player.m_CharInfo[m_Idx].GearInfo[i];
-			CGenericItem *pItem = ::msnew CGenericItem();
-			cl_entity_t &ItemEnt = GearItemEntity( *pItem );
+			CGenericItem pItem = CGenericItem();
+			cl_entity_t &ItemEnt = GearItemEntity( pItem );
 
 			//ItemEnt = m_Ent;
 			ItemEnt.index = -1;
@@ -1288,16 +1288,12 @@ void CRenderChar::Render( )
 			SetBits( ItemEnt.curstate.oldbuttons, MSRDR_NOREFLECT );
 			SetBits( ItemEnt.curstate.colormap, MSRDR_LIGHT_NORMAL );
 
-			m_GearItems.add( *pItem );
+			m_GearItems.add( pItem );
 
-			//can't use delete here so just manually clear the memory instead.
-			if (pItem != nullptr)
-			{
-				pItem->RemoveFromOwner();
-				pItem->Container_RemoveAllItems();
-				pItem->Deactivate();
-				pItem = nullptr;
-			}
+			pItem.RemoveFromOwner();
+			pItem.Container_RemoveAllItems();
+			pItem.Deactivate();
+
 		}
 		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.add( &m_GearItems[i] );
