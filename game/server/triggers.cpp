@@ -591,13 +591,13 @@ public:
 	// MiB NOV2014_18, individualized trigger cooldown. [end]
 
 	//Thothie NOV2014_19 - application of the above
-	int trig_individualized; //0=none 1=scripteventsonly 2=scriptevents&triggers
+	int trig_individualized = 0; //0=none 1=scripteventsonly 2=scriptevents&triggers
 	float trig_actcooldown;	 //when I actually would have cooled down, if not individualized
 
 	//Thothie NOV2014_19 - fix for trigger_once
 	//- apply scripts to all in bounds, in case you unlock a large trigger_once with a script_event
 	//0=normal 1=run events on all in box bounds
-	bool trig_eventallinbounds; //0=normal 1=run events on all in box bounds
+	bool trig_eventallinbounds = 0; //0=normal 1=run events on all in box bounds
 };
 
 LINK_ENTITY_TO_CLASS(trigger, CBaseTrigger);
@@ -1483,7 +1483,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 	//Print("DEBUG: ActivateMultiTrigger IndvType %i Scndry %s Skip %s MyTime %f GameTime %f \n", trig_individualized, trig_secondary_activation ? "1" : "0", skip_triggers ? "1" : "0", trig_actcooldown, float(gpGlobals->time));
 
 	if (!trig_secondary_activation)
-		trig_actcooldown = (gpGlobals->time + m_flWait) - 0.1;
+		trig_actcooldown = (gpGlobals->time + m_flWait) - 0.1f;
 
 	if (!skip_triggers)
 	{
@@ -1564,7 +1564,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		// we can't just remove (self) here, because this is a touch function
 		// called while C code is looping through area links...
 		SetTouch(NULL);
-		pev->nextthink = gpGlobals->time + 0.1;
+		pev->nextthink = gpGlobals->time + 0.1f;
 		SetThink(&CBaseEntity::SUB_Remove);
 	}
 }
