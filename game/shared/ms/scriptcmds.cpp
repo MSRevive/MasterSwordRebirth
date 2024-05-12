@@ -4377,9 +4377,9 @@ bool CScript::ScriptCmd_Name(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 				Prefix = sTemp.substr(0, barloc);
 				Name = sTemp.substr(barloc + 1);
 				//Thothie APR2011_28 - buffer overrun prevention
-				if ((Name.len() + barloc) > 29)
+				if ((Name.len() + barloc) > 39)
 				{
-					Name = Name.substr(0, 29 - barloc);
+					Name = Name.substr(0, 39 - barloc);
 					IScripted *pScripted = m.pScriptedEnt->GetScripted();
 					Print("WARNING: Name too long [%s]!\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
 				}
