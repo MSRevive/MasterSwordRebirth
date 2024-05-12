@@ -2728,6 +2728,8 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 
 	EngineFunc::Shared_TraceLine(StartPos, EndPos, iFlags, Tr, 0, iFlags, pIgnoreEnt ? pIgnoreEnt->edict() : NULL);
 
+	m.pScriptedInterface->SetScriptVar("MSC_TRACE_NORMAL",VecToString(Tr.PlaneNormal));
+
 	if (Flags.contains("worldonly") || Flags.contains("tracebox"))
 	{
 		return VecToString(Tr.EndPos);
