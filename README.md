@@ -1,4 +1,4 @@
-# Master Sword Classic
+# Master Sword Rebirth
 Run createall to create the solution(s).
 
 ## Compiling
