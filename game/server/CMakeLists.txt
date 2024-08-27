@@ -13,9 +13,13 @@ else()
 	set_target_properties(curl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
 endif()
 
-add_library(server SHARED)
+add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 
 set_common_properties(server)
+
+target_link_libraries(client PRIVATE
+	steam_api
+	curl)
 
 # Include directories
 target_include_directories(server PRIVATE 

@@ -57,6 +57,14 @@ target_compile_definitions(client PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
 
+target_link_libraries(client PRIVATE
+	vgui
+	$<$<PLATFORM_ID:Windows>:wsock32>
+	SDL2
+	fmod
+	discord
+	steam_api)
+
 ################################################################################
 # Source groups
 ################################################################################
