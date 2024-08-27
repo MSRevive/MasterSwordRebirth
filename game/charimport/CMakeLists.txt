@@ -1,5 +1,9 @@
 set(PROJECT_NAME charimport)
 
+add_executable(charimport WIN32_EXECUTABLE)
+
+set_common_properties(charimport)
+
 ################################################################################
 # Source groups
 ################################################################################

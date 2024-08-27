@@ -1,4 +1,4 @@
-set(PROJECT_NAME Server)
+set(PROJECT_NAME server)
 
 add_library(steam_api SHARED IMPORTED)
 add_library(curl SHARED IMPORTED)
@@ -19,6 +19,10 @@ add_compile_definitions(CURL_STATICLIB)
 if (UNIX)
 	add_compile_definitions(SWDS)
 endif(UNIX)
+
+add_library(server SHARED)
+
+set_common_properties(server)
 
 ################################################################################
 # Source groups

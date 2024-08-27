@@ -1,5 +1,9 @@
 set(PROJECT_NAME maphash)
 
+add_executable(maphash WIN32_EXECUTABLE)
+
+set_common_properties(maphash)
+
 ################################################################################
 # Source groups
 ################################################################################

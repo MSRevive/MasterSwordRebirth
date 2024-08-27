@@ -1,5 +1,9 @@
 set(PROJECT_NAME scriptpack)
 
+add_executable(scriptpack WIN32_EXECUTABLE)
+
+set_common_properties(scriptpack)
+
 ################################################################################
 # Source groups
 ################################################################################

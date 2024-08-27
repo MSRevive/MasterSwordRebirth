@@ -1,4 +1,4 @@
-set(PROJECT_NAME Client)
+set(PROJECT_NAME client)
 
 add_library(vgui SHARED IMPORTED)
 add_library(SDL2 SHARED IMPORTED)
@@ -32,6 +32,10 @@ add_compile_definitions(CLIENT_WEAPONS)
 add_compile_definitions(DISCORD_DYNAMIC_LIB)
 add_compile_definitions(VERSION_SAFE_STEAM_API_INTERFACES)
 add_compile_definitions(USE_BREAKPAD_HANDLER)
+
+add_library(client SHARED)
+
+set_common_properties(client)
 
 ################################################################################
 # Source groups
