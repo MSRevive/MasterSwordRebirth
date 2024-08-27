@@ -13,6 +13,13 @@ else()
 	set_target_properties(curl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
 endif()
 
+add_compile_definitions(VALVE_DLL)
+add_compile_definitions(CURL_STATICLIB)
+
+if (UNIX)
+	add_compile_definitions(SWDS)
+endif(UNIX)
+
 ################################################################################
 # Source groups
 ################################################################################

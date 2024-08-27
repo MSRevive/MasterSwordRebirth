@@ -27,6 +27,11 @@ if (WIN32)
 	#set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0")
 endif()
 
+add_compile_definitions(ISCLIENT)
+add_compile_definitions(CLIENT_WEAPONS)
+add_compile_definitions(DISCORD_DYNAMIC_LIB)
+add_compile_definitions(VERSION_SAFE_STEAM_API_INTERFACES)
+add_compile_definitions(USE_BREAKPAD_HANDLER)
 
 ################################################################################
 # Source groups
