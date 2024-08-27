@@ -4,6 +4,15 @@ add_executable(maphash WIN32_EXECUTABLE)
 
 set_common_properties(maphash)
 
+target_include_directories(maphash PRIVATE
+	${BASEDIR}
+	game/server
+	game/shared
+	game/shared/ms
+	game/shared/ms/crc
+	thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR})
+
 ################################################################################
 # Source groups
 ################################################################################

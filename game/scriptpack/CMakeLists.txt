@@ -4,6 +4,15 @@ add_executable(scriptpack WIN32_EXECUTABLE)
 
 set_common_properties(scriptpack)
 
+target_include_directories(scriptpack PRIVATE
+	${BASEDIR}
+	game/server
+	game/shared
+	game/shared/ms
+	thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR}
+	tclap)
+
 ################################################################################
 # Source groups
 ################################################################################

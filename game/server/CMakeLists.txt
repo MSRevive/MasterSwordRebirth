@@ -13,16 +13,38 @@ else()
 	set_target_properties(curl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
 endif()
 
-add_compile_definitions(VALVE_DLL)
-add_compile_definitions(CURL_STATICLIB)
-
-if (UNIX)
-	add_compile_definitions(SWDS)
-endif(UNIX)
-
 add_library(server SHARED)
 
 set_common_properties(server)
+
+# Include directories
+target_include_directories(server PRIVATE 
+	${BASEDIR}
+	game/client
+	public/engine
+	common
+	game/shared
+	game/shared/movement
+	game/shared/ms
+	game/shared/stats
+	game/shared/syntax
+	game/shared/weapons
+	thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR}
+	effects
+	gamerules
+	hl
+	monsters
+	player)
+
+target_compile_definitions(server PRIVATE
+	VALVE_DLL
+	CURL_STATICLIB)
+
+if (UNIX)
+	target_compiler_definitions(server PRIVATE
+		SWDS)
+endif(UNIX)
 
 ################################################################################
 # Source groups

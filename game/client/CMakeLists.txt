@@ -27,15 +27,35 @@ if (WIN32)
 	#set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_BINARY_DIR}/libSDL2-2.0${CMAKE_SHARED_LIBRARY_SUFFIX}.0")
 endif()
 
-add_compile_definitions(ISCLIENT)
-add_compile_definitions(CLIENT_WEAPONS)
-add_compile_definitions(DISCORD_DYNAMIC_LIB)
-add_compile_definitions(VERSION_SAFE_STEAM_API_INTERFACES)
-add_compile_definitions(USE_BREAKPAD_HANDLER)
-
 add_library(client SHARED)
 
 set_common_properties(client)
+
+target_include_directories(server PRIVATE
+	${BASEDIR}
+	utils/vgui/include
+	public/engine
+	common
+	game/shared
+	game/shared/movement
+	game/shared/ms
+	game/shared/stats
+	game/shared/syntax
+	game/shared/weapons
+	game/server
+	game/server/hl
+	thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR}
+	ms
+	ui
+	ui/ms)
+
+target_compile_definitions(client PRIVATE
+	ISCLIENT
+	CLIENT_WEAPONS
+	DISCORD_DYNAMIC_LIB
+	VERSION_SAFE_STEAM_API_INTERFACES
+	USE_BREAKPAD_HANDLER)
 
 ################################################################################
 # Source groups

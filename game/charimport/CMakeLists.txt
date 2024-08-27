@@ -4,6 +4,12 @@ add_executable(charimport WIN32_EXECUTABLE)
 
 set_common_properties(charimport)
 
+target_include_directories(charimport PRIVATE
+	${BASEDIR}
+	game/shared/ms
+	thirdparty/base64
+	${CMAKE_CURRENT_SOURCE_DIR})
+
 ################################################################################
 # Source groups
 ################################################################################
