@@ -1,3 +1,4 @@
+# Taken from https://github.com/Spirrwell/source-sdk-2013-cmake, to help convert our project from VPC to CMake
 # vpc.cmake - Allows us to directly translate options into cmake from VPC.
 
 # Compile options that are populated and set for each target depending on their type
