@@ -44,7 +44,7 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++ -D_GLIBCXX_USE_CXX11_ABI=0")
 endif (UNIX)
 
-set(BASEDIR "${CMAKE_CURRENT_LIST_DIR}/src")
+set(BASEDIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 function(set_common_properties TARGET_NAME)
 	# Compile Flags and such.

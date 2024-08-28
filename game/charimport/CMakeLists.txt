@@ -1,6 +1,4 @@
-set(PROJECT_NAME charimport)
-
-add_executable(charimport WIN32_EXECUTABLE)
+add_executable(charimport WIN32_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/charimport.cpp)
 
 set_common_properties(charimport)
 
@@ -14,15 +12,17 @@ target_include_directories(charimport PRIVATE
 # Source groups
 ################################################################################
 set(Source_Files
-	"../game/charimport/charimport.cpp"
-	"../game/shared/ms/httprequesthandler.cpp"
-	"../game/shared/ms/msfileio.cpp"
-	"../game/shared/ms/stackstring.cpp"
-	"../public/tier0/pointeroverride.asm"
-	"../thirdparty/base64/base64.cpp"
+	"/game/charimport/charimport.cpp"
+	"/game/shared/ms/httprequesthandler.cpp"
+	"/game/shared/ms/msfileio.cpp"
+	"/game/shared/ms/stackstring.cpp"
+	"/public/tier0/pointeroverride.asm"
+	"/thirdparty/base64/base64.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})
 
 set(ALL_FILES
 	${Source_Files}
 )
+
+source_group(TREE ${BASEDIR} FILES ${ALL_FILES})
