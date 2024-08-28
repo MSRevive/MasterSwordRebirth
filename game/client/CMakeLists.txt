@@ -122,7 +122,7 @@ set(HL1
 )
 source_group("HL1" FILES ${HL1})
 
-set(HL1__Headers
+set(HL1_Headers
 	"/common/cl_entity.h"
 	"/common/com_model.h"
 	"/common/const.h"
@@ -132,7 +132,7 @@ set(HL1__Headers
 	"/game/client/hud_spectator.h"
 	"/public/engine/cdll_int.h"
 )
-source_group("HL1\\Headers" FILES ${HL1__Headers})
+source_group("HL1\\Headers" FILES ${HL1_Headers})
 
 set(MS
 	"/game/client/entity.cpp"
@@ -155,7 +155,7 @@ set(MS
 )
 source_group("MS" FILES ${MS})
 
-set(MS__Generic_Item
+set(MS_Generic_Item
 	"/game/shared/genitemlist.cpp"
 	"/game/shared/genitemlist.h"
 	"/game/shared/weapons/genericitem.cpp"
@@ -167,9 +167,9 @@ set(MS__Generic_Item
 	"/game/shared/weapons/weapons.cpp"
 	"/game/shared/weapons/weapons.h"
 )
-source_group("MS\\Generic Item" FILES ${MS__Generic_Item})
+source_group("MS\\Generic Item" FILES ${MS_Generic_Item})
 
-set(MS__Headers
+set(MS_Headers
 	"/game/client/inc_huditem.h"
 	"/game/client/ms/clenv.h"
 	"/game/client/ms/clglobal.h"
@@ -188,7 +188,7 @@ set(MS__Headers
 	"/game/shared/ms/saytext.h"
 	"/game/shared/stats/statdefs.h"
 )
-source_group("MS\\Headers" FILES ${MS__Headers})
+source_group("MS\\Headers" FILES ${MS_Headers})
 
 set(Misc
 	"/public/tier0/pointeroverride.asm"
@@ -341,19 +341,19 @@ set(Shared
 )
 source_group("Shared" FILES ${Shared})
 
-set(Shared__CRC
+set(Shared_CRC
 	"/game/shared/ms/crc/checksum_crc.cpp"
 	"/game/shared/ms/crc/checksum_crc.h"
 	"/game/shared/ms/crc/crchash.cpp"
 	"/game/shared/ms/crc/crchash.h"
 )
-source_group("Shared\\CRC" FILES ${Shared__CRC})
+source_group("Shared\\CRC" FILES ${Shared_CRC})
 
-set(Shared__base64
+set(Shared_base64
 	"/thirdparty/base64/base64.cpp"
 	"/thirdparty/base64/base64.h"
 )
-source_group("Shared\\base64" FILES ${Shared__base64})
+source_group("Shared\\base64" FILES ${Shared_base64})
 
 set(VGUI
 	"/game/client/ui/vgui_checkbutton2.cpp"
@@ -386,7 +386,7 @@ set(VGUI
 )
 source_group("VGUI" FILES ${VGUI})
 
-set(VGUI__ms
+set(VGUI_ms
 	"/game/client/ui/ms/vgui_choosecharacter.cpp"
 	"/game/client/ui/ms/vgui_choosecharacter.h"
 	"/game/client/ui/ms/vgui_container.cpp"
@@ -427,15 +427,15 @@ set(VGUI__ms
 	"/game/client/ui/ms/vgui_storesell.h"
 	"/game/client/ui/ms/vgui_vote.h"
 )
-source_group("VGUI\\ms" FILES ${VGUI__ms})
+source_group("VGUI\\ms" FILES ${VGUI_ms})
 
 set(ALL_FILES
 	${FMOD}
 	${HL1}
-	${HL1__Headers}
+	${HL1_Headers}
 	${MS}
-	${MS__Generic_Item}
-	${MS__Headers}
+	${MS_Generic_Item}
+	${MS_Headers}
 	${Misc}
 	${Render}
 	${SDK2013}
@@ -443,9 +443,8 @@ set(ALL_FILES
 	${Shared__CRC}
 	${Shared__base64}
 	${VGUI}
-	${VGUI__ms}
+	${VGUI_ms}
 )
 
-source_group(TREE ${BASEDIR} FILES ${ALL_FILES})
-
 target_precompile_headers(client PRIVATE entities/cbase.h)
+target_sources(client PRIVATE ${ALL_FILES})

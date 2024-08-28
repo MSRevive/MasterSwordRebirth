@@ -38,4 +38,4 @@ set(ALL_FILES
 	${Source_Files}
 )
 
-source_group(TREE ${BASEDIR} FILES ${ALL_FILES})
+target_sources(scriptpack PRIVATE ${ALL_FILES})

@@ -141,7 +141,7 @@ set(MS
 )
 source_group("MS" FILES ${MS})
 
-set(MS__Headers
+set(MS_Headers
 	"/game/server/effects/mseffects.h"
 	"/game/server/gamerules/teams.h"
 	"/game/server/monsters/bodyparts/bodyparts.h"
@@ -166,7 +166,7 @@ set(MS__Headers
 	"/game/shared/stats/statdefs.h"
 	"/game/shared/stats/stats.h"
 )
-source_group("MS\\Headers" FILES ${MS__Headers})
+source_group("MS\\Headers" FILES ${MS_Headers})
 
 set(Misc
 	"/public/tier0/pointeroverride.asm"
@@ -225,15 +225,15 @@ set(Shared
 )
 source_group("Shared" FILES ${Shared})
 
-set(Shared__CRC
+set(Shared_CRC
 	"/game/shared/ms/crc/checksum_crc.cpp"
 	"/game/shared/ms/crc/checksum_crc.h"
 	"/game/shared/ms/crc/crchash.cpp"
 	"/game/shared/ms/crc/crchash.h"
 )
-source_group("Shared\\CRC" FILES ${Shared__CRC})
+source_group("Shared\\CRC" FILES ${Shared_CRC})
 
-set(Shared__Generic_Item
+set(Shared_Generic_Item
 	"/game/shared/genitemlist.cpp"
 	"/game/shared/genitemlist.h"
 	"/game/shared/weapons/genericitem.cpp"
@@ -248,7 +248,7 @@ set(Shared__Generic_Item
 	"/game/shared/weapons/weapons.cpp"
 	"/game/shared/weapons/weapons.h"
 )
-source_group("Shared\\Generic Item" FILES ${Shared__Generic_Item})
+source_group("Shared\\Generic Item" FILES ${Shared_Generic_Item})
 
 set(Shared__base64
 	"/thirdparty/base64/base64.cpp"
@@ -259,15 +259,14 @@ source_group("Shared\\base64" FILES ${Shared__base64})
 set(ALL_FILES
 	${HL1}
 	${MS}
-	${MS__Headers}
+	${MS_Headers}
 	${Misc}
 	${SDK2013}
 	${Shared}
-	${Shared__CRC}
-	${Shared__Generic_Item}
-	${Shared__base64}
+	${Shared_CRC}
+	${Shared_Generic_Item}
+	${Shared_base64}
 )
 
-source_group(TREE ${BASEDIR} FILES ${ALL_FILES})
-
 target_precompile_headers(server PRIVATE entities/cbase.h)
+target_sources(server PRIVATE ${ALL_FILES})
