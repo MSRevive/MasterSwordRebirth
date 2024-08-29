@@ -1,36 +1,42 @@
 add_library(steam_api SHARED IMPORTED)
-add_library(curl SHARED IMPORTED)
+add_library(libcurl SHARED IMPORTED)
 
-target_include_directories(curl INTERFACE ${BASEDIR}/thirdparty/curl)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/curl)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
-	set_target_properties(curl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
+	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
 else()
 	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libsteam_api.so")
-	set_target_properties(curl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
+	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
 endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 
 set_common_properties(server)
 
-target_link_libraries(client PRIVATE
+target_link_libraries(server PRIVATE
+	$<$<PLATFORM_ID:Windows>:wsock32>
+	$<$<PLATFORM_ID:Windows>:Ws2_32>
+	$<$<PLATFORM_ID:Windows>:Wldap32>
+	$<$<PLATFORM_ID:Windows>:Normaliz>
+	$<$<PLATFORM_ID:Windows>:Crypt32>
 	steam_api
-	curl)
+	libcurl)
 
 # Include directories
 target_include_directories(server PRIVATE 
-	${BASEDIR}/game/client
-	${BASEDIR}/public/engine
-	${BASEDIR}/common
-	${BASEDIR}/game/shared
-	${BASEDIR}/game/shared/movement
-	${BASEDIR}/game/shared/ms
-	${BASEDIR}/game/shared/stats
-	${BASEDIR}/game/shared/syntax
-	${BASEDIR}/game/shared/weapons
+	${BASEDIR}/src/public
+	${BASEDIR}/src/public/engine
+	${BASEDIR}/src/common
+	${BASEDIR}/src/game/client #defeats the purpose of shared, but that's MSR for ya.
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/movement
+	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/src/game/shared/stats
+	${BASEDIR}/src/game/shared/syntax
+	${BASEDIR}/src/game/shared/weapons
 	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
@@ -250,9 +256,9 @@ set(Shared_Generic_Item
 )
 source_group("Shared\\Generic Item" FILES ${Shared_Generic_Item})
 
-set(Shared__base64
-	"../../thirdparty/base64/base64.cpp"
-	"../../thirdparty/base64/base64.h"
+set(Shared_base64
+	"../../../thirdparty/base64/base64.cpp"
+	"../../../thirdparty/base64/base64.h"
 )
 source_group("Shared\\base64" FILES ${Shared__base64})
 

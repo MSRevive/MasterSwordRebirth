@@ -1,4 +1,10 @@
+# Based off Solokiller's Half Life Unified SDK, modified for MSR
+# https://github.com/twhl-community/halflife-unified-sdk
 cmake_minimum_required( VERSION 3.23 )
+
+if (WIN32)
+	set(CMAKE_GENERATOR_PLATFORM win32)
+endif(WIN32)
 
 if (MSVC)
 	set(CMAKE_SYSTEM_VERSION 10.0)
@@ -80,7 +86,7 @@ function(set_common_properties TARGET_NAME)
 	endif()
 
 	target_link_options(${TARGET_NAME} PRIVATE
-			$<$<PLATFORM_ID:Linux>:-static-libstdc++ -Wl)
+		$<$<PLATFORM_ID:Linux>:-static-libstdc++ -Wl,-Map,${TARGET_NAME}_map.txt>)
 endfunction(set_common_properties)
 
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)

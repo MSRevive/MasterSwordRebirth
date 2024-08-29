@@ -3,19 +3,29 @@ add_library(SDL2 SHARED IMPORTED)
 add_library(fmod SHARED IMPORTED)
 add_library(discord SHARED IMPORTED)
 add_library(steam_api SHARED IMPORTED)
+add_library(cg SHARED IMPORTED)
+add_library(cgGL SHARED IMPORTED)
+add_library(glaux SHARED IMPORTED)
+find_package(OpenGL REQUIRED)
 
 target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/thirdparty/SDL2)
 target_include_directories(fmod INTERFACE ${BASEDIR}/thirdparty/fmod)
 target_include_directories(discord INTERFACE ${BASEDIR}/thirdparty/discord)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(cg INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
+target_include_directories(cgGL INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
+target_include_directories(glaux INTERFACE ${BASEDIR}/thirdparty/nvidia/gl)
 
 if (WIN32)
-	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/lib/win32/vgui.lib")
+	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
 	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/SDL2.lib")
 	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/fmod_vc.lib")
-	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/discord_rpc.lib")
+	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/discord-rpc.lib")
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
+	set_target_properties(cg PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cg.lib")
+	set_target_properties(cgGL PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cgGL.lib")
+	set_target_properties(glaux PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/glaux.lib")
 #else()
 	# Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
 	#configure_file(../../../utils/vgui/lib/linux/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} COPYONLY)
@@ -29,23 +39,39 @@ add_library(client SHARED)
 
 set_common_properties(client)
 
+target_link_options(client PRIVATE /SAFESEH:NO)
+
+target_link_libraries(client PRIVATE
+	$<$<PLATFORM_ID:Windows>:wsock32>
+	vgui
+	SDL2
+	fmod
+	discord
+	steam_api
+	glaux
+	cgGL
+	cg
+	${OPENGL_LIBRARIES})
+
 target_include_directories(client PRIVATE
 	${BASEDIR}/utils/vgui/include
-	${BASEDIR}/public/engine
-	${BASEDIR}/common
-	${BASEDIR}/game/shared
-	${BASEDIR}/game/shared/movement
-	${BASEDIR}/game/shared/ms
-	${BASEDIR}/game/shared/stats
-	${BASEDIR}/game/shared/syntax
-	${BASEDIR}/game/shared/weapons
-	${BASEDIR}/game/server
-	${BASEDIR}/game/server/hl
+	${BASEDIR}/src/public
+	${BASEDIR}/src/public/engine
+	${BASEDIR}/src/common
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/movement
+	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/src/game/shared/stats
+	${BASEDIR}/src/game/shared/syntax
+	${BASEDIR}/src/game/shared/weapons
+	${BASEDIR}/src/game/server
+	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
-	ui/ms)
+	ui/ms
+	${OPENGL_INCLUDE_DIR})
 
 target_compile_definitions(client PRIVATE
 	ISCLIENT
@@ -53,14 +79,6 @@ target_compile_definitions(client PRIVATE
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
-
-target_link_libraries(client PRIVATE
-	vgui
-	$<$<PLATFORM_ID:Windows>:wsock32>
-	SDL2
-	fmod
-	discord
-	steam_api)
 
 ################################################################################
 # Source groups
