@@ -32,18 +32,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-if (UNIX)
-	# the name of the target operating system
-	set(CMAKE_SYSTEM_NAME Linux)
-	set(CMAKE_SYSTEM_PROCESSOR i386)
-
-	# which compilers to use for C and C++
-	set(CMAKE_C_COMPILER gcc-5)
-	set(CMAKE_C_FLAGS -m32)
-	set(CMAKE_CXX_COMPILER g++-5)
-	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++ -D_GLIBCXX_USE_CXX11_ABI=0")
-endif (UNIX)
-
 set(BASEDIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 function(set_common_properties TARGET_NAME)
