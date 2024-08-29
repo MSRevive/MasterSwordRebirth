@@ -3,10 +3,10 @@ add_executable(maphash ${CMAKE_CURRENT_SOURCE_DIR}/maphash.cpp)
 set_common_properties(maphash)
 
 target_include_directories(maphash PRIVATE
-	${BASEDIR}/game/server
-	${BASEDIR}/game/shared
-	${BASEDIR}/game/shared/ms
-	${BASEDIR}/game/shared/ms/crc
+	${BASEDIR}/src/game/server
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/src/game/shared/ms/crc
 	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -15,12 +15,12 @@ target_include_directories(maphash PRIVATE
 ################################################################################
 set(Source_Files
 	"maphash.cpp"
-	"../shared/ms/crc/checksum_crc.cpp"
-	"../shared/ms/crc/checksum_crc.h"
-	"../shared/ms/crc/crchash.cpp"
-	"../shared/ms/crc/crchash.h"
-	"../shared/ms/msfileio.cpp"
-	"../shared/ms/stackstring.cpp"
+	"../../src/game/shared/ms/crc/checksum_crc.cpp"
+	"../../src/game/shared/ms/crc/checksum_crc.h"
+	"../../src/game/shared/ms/crc/crchash.cpp"
+	"../../src/game/shared/ms/crc/crchash.h"
+	"../../src/game/shared/ms/msfileio.cpp"
+	"../../src/game/shared/ms/stackstring.cpp"
 	"../../public/tier0/pointeroverride.asm"
 )
 source_group("Source Files" FILES ${Source_Files})

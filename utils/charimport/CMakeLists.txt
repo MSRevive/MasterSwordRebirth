@@ -13,7 +13,7 @@ set_common_properties(charimport)
 target_link_libraries(charimport PRIVATE curl)
 
 target_include_directories(charimport PRIVATE
-	${BASEDIR}/game/shared/ms
+	${BASEDIR}/src/game/shared/ms
 	${BASEDIR}/thirdparty/base64
 	${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -22,10 +22,10 @@ target_include_directories(charimport PRIVATE
 ################################################################################
 set(Source_Files
 	"charimport.cpp"
-	"../shared/ms/httprequesthandler.cpp"
-	"../shared/ms/msfileio.cpp"
-	"../shared/ms/stackstring.cpp"
-	"../../public/tier0/pointeroverride.asm"
+	"../../src/game/shared/ms/httprequesthandler.cpp"
+	"../../src/game/shared/ms/msfileio.cpp"
+	"../../src/game/shared/ms/stackstring.cpp"
+	"../../src/public/tier0/pointeroverride.asm"
 	"../../thirdparty/base64/base64.cpp"
 )
 source_group("Source Files" FILES ${Source_Files})

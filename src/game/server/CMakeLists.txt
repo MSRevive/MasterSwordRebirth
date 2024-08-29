@@ -2,7 +2,7 @@ add_library(steam_api SHARED IMPORTED)
 add_library(curl SHARED IMPORTED)
 
 target_include_directories(curl INTERFACE ${BASEDIR}/thirdparty/curl)
-target_include_directories(steam_api INTERFACE ${BASEDIR}/public/steam)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")

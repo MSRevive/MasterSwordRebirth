@@ -3,9 +3,9 @@ add_executable(scriptpack ${CMAKE_CURRENT_SOURCE_DIR}/scriptpack.cpp)
 set_common_properties(scriptpack)
 
 target_include_directories(scriptpack PRIVATE
-	${BASEDIR}/game/server
-	${BASEDIR}/game/shared
-	${BASEDIR}/game/shared/ms
+	${BASEDIR}/src/game/server
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/ms
 	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	tclap)
@@ -21,14 +21,14 @@ set(Source_Files
 	"packer.h"
 	"parser.h"
 	"scriptpack.cpp"
-	"../shared/ms/crc/checksum_crc.cpp"
-	"../shared/ms/crc/checksum_crc.h"
-	"../shared/ms/crc/crchash.cpp"
-	"../shared/ms/crc/crchash.h"
-	"../shared/ms/groupfile.cpp"
-	"../shared/ms/groupfile.h"
-	"../shared/ms/msfileio.cpp"
-	"../shared/ms/stackstring.cpp"
+	"../../src/game/shared/ms/crc/checksum_crc.cpp"
+	"../../src/game/shared/ms/crc/checksum_crc.h"
+	"../../src/game/shared/ms/crc/crchash.cpp"
+	"../../src/game/shared/ms/crc/crchash.h"
+	"../../src/game/shared/ms/groupfile.cpp"
+	"../../src/game/shared/ms/groupfile.h"
+	"../../src/game/shared/ms/msfileio.cpp"
+	"../../src/game/shared/ms/stackstring.cpp"
 	"../../public/tier0/pointeroverride.asm"
 )
 source_group("Source Files" FILES ${Source_Files})
