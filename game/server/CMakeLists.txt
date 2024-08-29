@@ -2,6 +2,7 @@ add_library(steam_api SHARED IMPORTED)
 add_library(curl SHARED IMPORTED)
 
 target_include_directories(curl INTERFACE ${BASEDIR}/thirdparty/curl)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/public/steam)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
@@ -21,17 +22,16 @@ target_link_libraries(client PRIVATE
 
 # Include directories
 target_include_directories(server PRIVATE 
-	${BASEDIR}
-	game/client
-	public/engine
-	common
-	game/shared
-	game/shared/movement
-	game/shared/ms
-	game/shared/stats
-	game/shared/syntax
-	game/shared/weapons
-	thirdparty
+	${BASEDIR}/game/client
+	${BASEDIR}/public/engine
+	${BASEDIR}/common
+	${BASEDIR}/game/shared
+	${BASEDIR}/game/shared/movement
+	${BASEDIR}/game/shared/ms
+	${BASEDIR}/game/shared/stats
+	${BASEDIR}/game/shared/syntax
+	${BASEDIR}/game/shared/weapons
+	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
 	gamerules
@@ -268,5 +268,4 @@ set(ALL_FILES
 	${Shared_base64}
 )
 
-target_precompile_headers(server PRIVATE entities/cbase.h)
 target_sources(server PRIVATE ${ALL_FILES})

@@ -30,19 +30,18 @@ add_library(client SHARED)
 set_common_properties(client)
 
 target_include_directories(client PRIVATE
-	${BASEDIR}
-	utils/vgui/include
-	public/engine
-	common
-	game/shared
-	game/shared/movement
-	game/shared/ms
-	game/shared/stats
-	game/shared/syntax
-	game/shared/weapons
-	game/server
-	game/server/hl
-	thirdparty
+	${BASEDIR}/utils/vgui/include
+	${BASEDIR}/public/engine
+	${BASEDIR}/common
+	${BASEDIR}/game/shared
+	${BASEDIR}/game/shared/movement
+	${BASEDIR}/game/shared/ms
+	${BASEDIR}/game/shared/stats
+	${BASEDIR}/game/shared/syntax
+	${BASEDIR}/game/shared/weapons
+	${BASEDIR}/game/server
+	${BASEDIR}/game/server/hl
+	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
@@ -446,5 +445,4 @@ set(ALL_FILES
 	${VGUI_ms}
 )
 
-target_precompile_headers(client PRIVATE entities/cbase.h)
 target_sources(client PRIVATE ${ALL_FILES})

@@ -3,12 +3,11 @@ add_executable(maphash ${CMAKE_CURRENT_SOURCE_DIR}/maphash.cpp)
 set_common_properties(maphash)
 
 target_include_directories(maphash PRIVATE
-	${BASEDIR}
-	game/server
-	game/shared
-	game/shared/ms
-	game/shared/ms/crc
-	thirdparty
+	${BASEDIR}/game/server
+	${BASEDIR}/game/shared
+	${BASEDIR}/game/shared/ms
+	${BASEDIR}/game/shared/ms/crc
+	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR})
 
 ################################################################################

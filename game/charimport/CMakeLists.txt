@@ -1,11 +1,20 @@
+add_library(curl SHARED IMPORTED)
+
+target_include_directories(curl INTERFACE ${BASEDIR}/thirdparty/curl)
+
+if (WIN32)
+	set_target_properties(curl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
+endif(WIN32)
+
 add_executable(charimport ${CMAKE_CURRENT_SOURCE_DIR}/charimport.cpp)
 
 set_common_properties(charimport)
 
+target_link_libraries(charimport PRIVATE curl)
+
 target_include_directories(charimport PRIVATE
-	${BASEDIR}
-	game/shared/ms
-	thirdparty/base64
+	${BASEDIR}/game/shared/ms
+	${BASEDIR}/thirdparty/base64
 	${CMAKE_CURRENT_SOURCE_DIR})
 
 ################################################################################

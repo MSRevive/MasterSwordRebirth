@@ -3,11 +3,10 @@ add_executable(scriptpack ${CMAKE_CURRENT_SOURCE_DIR}/scriptpack.cpp)
 set_common_properties(scriptpack)
 
 target_include_directories(scriptpack PRIVATE
-	${BASEDIR}
-	game/server
-	game/shared
-	game/shared/ms
-	thirdparty
+	${BASEDIR}/game/server
+	${BASEDIR}/game/shared
+	${BASEDIR}/game/shared/ms
+	${BASEDIR}/thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 	tclap)
 
