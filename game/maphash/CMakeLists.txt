@@ -1,4 +1,4 @@
-add_executable(maphash WIN32_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/maphash.cpp)
+add_executable(maphash ${CMAKE_CURRENT_SOURCE_DIR}/maphash.cpp)
 
 set_common_properties(maphash)
 

@@ -1,4 +1,4 @@
-add_executable(scriptpack WIN32_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/scriptpack.cpp)
+add_executable(scriptpack ${CMAKE_CURRENT_SOURCE_DIR}/scriptpack.cpp)
 
 set_common_properties(scriptpack)
 

@@ -1,4 +1,4 @@
-add_executable(charimport WIN32_EXECUTABLE ${CMAKE_CURRENT_SOURCE_DIR}/charimport.cpp)
+add_executable(charimport ${CMAKE_CURRENT_SOURCE_DIR}/charimport.cpp)
 
 set_common_properties(charimport)
 
