@@ -186,6 +186,28 @@ set(SDK2013
 )
 source_group("SDK2013" FILES ${SDK2013})
 
+set(FN
+	"fn/CreateCharacterReq.cpp"
+	"fn/CreateCharacterReq.h"
+	"fn/DeleteCharacterReq.cpp"
+	"fn/DeleteCharacterReq.h"
+	"fn/FNSharedDefs.cpp"
+	"fn/FNSharedDefs.h"
+	"fn/LoadCharacterReq.cpp"
+	"fn/LoadCharacterReq.h"
+	"fn/SteamHTTPReq.cpp"
+	"fn/SteamHTTPReq.h"
+	"fn/UpdateCharacterReq.cpp"
+	"fn/UpdateCharacterReq.h"
+	"fn/ValidateConReq.cpp"
+	"fn/ValidateConReq.h"
+	"fn/ValidateMapReq.cpp"
+	"fn/ValidateMapReq.h"
+	"fn/ValidateScriptsReq.cpp"
+	"fn/ValidateScriptsReq.h"
+)
+source_group("FN" FILES ${FN})
+
 set(Shared
 	"player/playershared.cpp"
 	"../shared/ms/buildcontrol.h"
@@ -194,14 +216,10 @@ set(Shared
 	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
-	"../shared/ms/fndatahandler.cpp"
-	"../shared/ms/fndatahandler.h"
 	"../shared/ms/global.cpp"
 	"../shared/ms/global.h"
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
-	"../shared/ms/httprequesthandler.cpp"
-	"../shared/ms/httprequesthandler.h"
 	"../shared/ms/iscript.h"
 	"../shared/ms/logger.h"
 	"../shared/ms/magic.h"
@@ -268,6 +286,7 @@ set(ALL_FILES
 	${MS_Headers}
 	${Misc}
 	${SDK2013}
+	${FN}
 	${Shared}
 	${Shared_CRC}
 	${Shared_Generic_Item}
