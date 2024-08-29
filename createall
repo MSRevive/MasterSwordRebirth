@@ -1,6 +1,2 @@
 #!/bin/bash
-
-pushd `dirname $0`
-devtools/bin/vpc /MSC +msc /mksln msc
-popd
-
+cmake -S . -B ./build --toolchain ./cmake/LinuxToolChain.cmake --fresh $@
