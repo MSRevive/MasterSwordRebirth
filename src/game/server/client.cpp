@@ -44,7 +44,7 @@
 #include "global.h"
 #include "versioncontrol.h"
 
-#include "fndatahandler.h"
+#include "fn/SteamHTTPReq.h"
 
 extern void PlayerPrecache();
 
@@ -1662,8 +1662,8 @@ void ServerDeactivate(void)
 	dbg("Call MSGameEnd");
 	MSGameEnd();	
 
-	dbg("Call FnDataHandler::Reset");
-	FnDataHandler::Reset();
+	dbg("Call SteamHttpRequest::SendAndWait");
+	SteamHttpRequest::SendAndWait();
 
 	dbg("End");
 	enddbg;
@@ -1740,7 +1740,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	}
 
 	CSVGlobals::WriteScriptLog();
-	FnDataHandler::Reset();
 
 	logfile << Logger::LOG_INFO << "World Activate END\n";
 	enddbg;

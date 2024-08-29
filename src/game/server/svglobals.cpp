@@ -9,10 +9,9 @@
 #include "store.h"
 #include "versioncontrol.h"
 #include "cstringpool.h"
-#include "fndatahandler.h"
-#include "httprequesthandler.h"
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
+#include "fn/FNSharedDefs.h"
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -124,30 +123,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	return true;
 }
 
-static bool IsVerifiedMap()
-{
-	if (FnDataHandler::IsEnabled())
-	{
-		char mapfile[MAX_PATH];
-		_snprintf(mapfile, sizeof(mapfile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
-		if (!FnDataHandler::IsVerifiedMap(MSGlobals::MapName.c_str(), GetFileCheckSum(mapfile)))
-			return false;
-	}
-	return true;
-}
-
-static bool IsVerifiedSC()
-{
-	if (FnDataHandler::IsEnabled())
-	{
-		char scfile[MAX_PATH];
-		_snprintf(scfile, sizeof(scfile), "%s/dlls/sc.dll", MSGlobals::AbsGamePath.c_str());
-		if (!FnDataHandler::IsVerifiedSC(GetFileCheckSum(scfile)))
-			return false;
-	}
-	return true;
-}
-
 void WriteCrashCfg()
 {
 	char fileName[MAX_PATH], content[128];
@@ -183,6 +158,8 @@ void MSWorldSpawn()
 	PRECACHE_GENERIC("dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 
+	SteamHttpRequest::SetBaseUrl(CVAR_GET_STRING("ms_central_addr"));
+
 	if (MSGlobals::CentralEnabled)
 	{
 		bool fail = true;
@@ -210,14 +187,7 @@ void MSWorldSpawn()
 		}
 	}
 
-	if (!IsVerifiedMap())
-	{
-		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("map edana\n");
-	}
-
-	if (!IsVerifiedSC())
-		ALERT(at_console, "SC Script file is outdated!\n");
+	FNShared::Validate();
 
 	WriteCrashCfg();
 }
@@ -225,10 +195,7 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	startdbg;
-	dbg("Call FnDataHandler::Think");
-	FnDataHandler::Think();
-	enddbg;
+	SteamHttpRequest::Think();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate

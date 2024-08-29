@@ -55,7 +55,7 @@
 #include "mscharacter.h"
 #include "magic.h"
 #include "logger.h"
-#include "fndatahandler.h"
+#include "fn/FNSharedDefs.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
@@ -3689,7 +3689,7 @@ void CBasePlayer::UpdateClientData(void)
 			//Central server info (on/off, name)
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev);
 			WRITE_BYTE(6);
-			WRITE_BYTE(FnDataHandler::IsEnabled() ? 1 : 0);
+			WRITE_BYTE(FNShared::IsEnabled() ? 1 : 0);
 			MESSAGE_END();
 
 			m_fGameHUDInitialized = TRUE;
