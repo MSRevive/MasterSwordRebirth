@@ -1,2 +1,2 @@
-devtools\bin\vpc.exe /MSC +msc /mksln msc.sln /define:VS2022
+cmake -S . -B ./build -A Win32 --fresh
 pause
