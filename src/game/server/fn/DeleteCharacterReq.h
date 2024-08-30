@@ -5,7 +5,7 @@
 #ifndef HTTP_DELETE_CHARACTER_REQUEST_H
 #define HTTP_DELETE_CHARACTER_REQUEST_H
 
-#include "SteamHttpRequest.h"
+#include "SteamHTTPReq.h"
 
 class DeleteCharacterRequest : public SteamHttpRequest
 {

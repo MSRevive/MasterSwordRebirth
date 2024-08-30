@@ -3,7 +3,7 @@
 //
 
 #include "rapidjson/document_safe.h"
-#include "UpdateCharacterRequest.h"
+#include "UpdateCharacterReq.h"
 #include "FNShareddefs.h"
 #include "msdllheaders.h"
 #include "player.h"

@@ -5,7 +5,7 @@
 #ifndef HTTP_VALIDATE_CONNECTIVITY_REQUEST_H
 #define HTTP_VALIDATE_CONNECTIVITY_REQUEST_H
 
-#include "SteamHttpRequest.h"
+#include "SteamHTTPReq.h"
 
 class ValidateConnectivityRequest : public SteamHttpRequest
 {

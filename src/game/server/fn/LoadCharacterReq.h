@@ -5,7 +5,7 @@
 #ifndef HTTP_LOAD_CHARACTER_REQUEST_H
 #define HTTP_LOAD_CHARACTER_REQUEST_H
 
-#include "SteamHttpRequest.h"
+#include "SteamHTTPReq.h"
 
 class LoadCharacterRequest : public SteamHttpRequest
 {

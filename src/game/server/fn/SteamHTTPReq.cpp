@@ -11,12 +11,6 @@
 #include "player.h"
 #include <string>
 
-#undef vector
-#undef min
-#undef max
-
-#include <vector>
-
 static bool g_bSuppressResponse = false;
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 

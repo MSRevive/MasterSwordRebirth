@@ -11,13 +11,13 @@
 #include "crc/crchash.h"
 
 // Requests
-#include "ValidateConnectivityRequest.h"
-#include "ValidateScriptsRequest.h"
-#include "ValidateMapRequest.h"
-#include "CreateCharacterRequest.h"
-#include "UpdateCharacterRequest.h"
-#include "LoadCharacterRequest.h"
-#include "DeleteCharacterRequest.h"
+#include "ValidateConnectivityReq.h"
+#include "ValidateScriptsReq.h"
+#include "ValidateMapReq.h"
+#include "CreateCharacterReq.h"
+#include "UpdateCharacterReq.h"
+#include "LoadCharacterReq.h"
+#include "DeleteCharacterReq.h"
 
 #define STRING_BUFFER 1024
 

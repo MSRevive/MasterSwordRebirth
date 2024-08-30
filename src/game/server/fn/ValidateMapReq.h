@@ -5,7 +5,7 @@
 #ifndef HTTP_VALIDATE_MAP_REQUEST_H
 #define HTTP_VALIDATE_MAP_REQUEST_H
 
-#include "SteamHttpRequest.h"
+#include "SteamHTTPReq.h"
 
 class ValidateMapRequest : public SteamHttpRequest
 {

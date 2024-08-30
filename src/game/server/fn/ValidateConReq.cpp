@@ -3,7 +3,7 @@
 //
 
 #include "rapidjson/document_safe.h"
-#include "ValidateConnectivityRequest.h"
+#include "ValidateConReq.h"
 #include "FNShareddefs.h"
 #include "msdllheaders.h"
 #include "global.h"

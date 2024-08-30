@@ -1652,9 +1652,7 @@ void ServerDeactivate(void)
 	if (g_pGameRules)
 		g_pGameRules->EndMultiplayerGame();
 
-	MSGameEnd();	
-
-	SteamHttpRequest::SendAndWait();
+	MSGameEnd();
 }
 
 DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
