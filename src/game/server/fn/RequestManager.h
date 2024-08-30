@@ -2,7 +2,6 @@
 #define MS_REQUEST_MANAGER
 
 #include <vector>
-#include "steamtypes"
 
 class CRequestManager 
 {
@@ -14,6 +13,10 @@ public:
 	void Shutdown(void);
 	void RunCallbacks(void);
 	*ISteamHTTP GetHTTPContext(void);
+	void SendAndWait(void);
+
+	void Clear(void) { m_vRequests.clear(); }
+	void Queue(SteamHTTPRequest* req) { m_vRequests.push_back(req); }
 
 private:
 	bool m_bLoaded = false;
@@ -28,5 +31,7 @@ private:
 class CSteamGameServerAPIContext;
 class ISteamHTTP;
 class SteamHttpRequest;
+
+extern CRequestManager g_FNRequestManager;
 
 #endif // MS_REQUEST_MANAGER

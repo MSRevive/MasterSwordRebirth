@@ -32,8 +32,6 @@ public:
 	virtual void OnResponse(bool bSuccessful) { }
 
 	static void SetBaseUrl(const char* url);
-	static void Think(void);
-	static void SendAndWait(void);
 
 protected: // Expose data to inheriting classes.
 	char pchApiUrl[REQUEST_URL_SIZE];

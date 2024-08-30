@@ -72,3 +72,22 @@ ISteamHTTP* GetHTTPContext(void)
 
 	return nullptr;
 }
+
+extern void wait(unsigned long ms);
+void SendAndWait(void)
+{
+	if (m_bLoaded)
+	{
+		g_bSuppressResponse = true;
+
+		do
+		{
+			Think();
+			RunCallbacks();
+			wait(10);
+		} while ((m_SteamHTTP != nullptr) && m_vRequests.size());
+
+		Shutdown();
+		g_bSuppressResponse = false;
+	}
+}

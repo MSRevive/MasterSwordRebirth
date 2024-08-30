@@ -1605,8 +1605,6 @@ it gets sent into the rest of the engine.
 */
 void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer)
 {
-	startdbg;
-	DBG_INPUT;
 
 	/*if( !pEntity->v.netname )
 	{
@@ -1633,16 +1631,12 @@ void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer)
 
 	if (g_pGameRules)
 		g_pGameRules->ClientUserInfoChanged(GetClassPtr((CBasePlayer *)&pEntity->v), infobuffer);
-	enddbg;
 }
 
 static int g_serveractive = 0;
 
 void ServerDeactivate(void)
 {
-	DBG_INPUT;
-	startdbg;
-
 	// It's possible that the engine will call this function more times than is necessary
 	//  Therefore, only run it one time for each call to ServerActivate
 	if (g_serveractive != 1)
@@ -1655,18 +1649,12 @@ void ServerDeactivate(void)
 	// Peform any shutdown operations here...
 	//
 
-	dbg("Call EndMultiplayerGame()");
 	if (g_pGameRules)
 		g_pGameRules->EndMultiplayerGame();
 
-	dbg("Call MSGameEnd");
 	MSGameEnd();	
 
-	dbg("Call SteamHttpRequest::SendAndWait");
 	SteamHttpRequest::SendAndWait();
-
-	dbg("End");
-	enddbg;
 }
 
 DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
