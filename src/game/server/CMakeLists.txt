@@ -196,6 +196,8 @@ set(FN
 	"fn/ValidateMapReq.h"
 	"fn/ValidateScriptsReq.cpp"
 	"fn/ValidateScriptsReq.h"
+	"fn/RequestManager.cpp"
+	"fn/RequestManager.h"
 )
 source_group("FN" FILES ${FN})
 

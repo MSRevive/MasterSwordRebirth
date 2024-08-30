@@ -72,10 +72,10 @@ SteamHttpRequest::~SteamHttpRequest()
 	Cleanup();
 }
 
-void SteamHttpRequest::SendRequest()
+void SteamHttpRequest::SendRequest(ISteamHTTP* steamHTTP)
 {
 	requestState = REQUEST_EXECUTED;
-	handle = steamhttpcontext->CreateHTTPRequest(httpMethod, pchApiUrl);
+	handle = steamHTTP->CreateHTTPRequest(httpMethod, pchApiUrl);
 	if (handle == NULL)
 	{
 		Cleanup();
@@ -108,11 +108,11 @@ void SteamHttpRequest::SendRequest()
 
 		std::string buffer = s.GetString();
 
-		steamhttpcontext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
+		steamHTTP->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
 	}
 
 	SteamAPICall_t apiCall = NULL;
-	if (steamhttpcontext->SendHTTPRequest(handle, &apiCall) && apiCall)
+	if (steamHTTP->SendHTTPRequest(handle, &apiCall) && apiCall)
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &SteamHttpRequest::OnHTTPRequestCompleted);
 	else
 		Cleanup();
