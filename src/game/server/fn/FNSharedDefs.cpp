@@ -142,3 +142,11 @@ void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 	new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid));
 }
+
+void FNShared::IsValidConnection(void)
+{
+	if (IsEnabled() == false)
+		return;
+
+	new ValidateConnectivityRequest("/api/v1/ping");
+}

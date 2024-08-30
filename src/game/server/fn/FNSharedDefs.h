@@ -27,6 +27,7 @@ namespace FNShared
 	void LoadCharacter(CBasePlayer* pPlayer, int slot);
 	void CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, uint8* data, size_t size, bool bIsUpdate);
 	void DeleteCharacter(CBasePlayer* pPlayer, int slot);
+	void IsValidConnection(void);
 }
 
 #endif // FN_SHAREDDEFS_H
