@@ -4,7 +4,6 @@
 #include "steam/steam_api.h"
 #include "steam/steam_gameserver.h"
 #include "HTTPRequest.h"
-#include "strhelper.h"
 #include <vector>
 
 class CRequestManager
@@ -27,7 +26,7 @@ private:
 
 	ISteamHTTP* m_SteamHTTP;
 
-	static std::vector<HTTPRequest*> m_vRequests;
+	std::vector<HTTPRequest*> m_vRequests;
 };
 
 extern CRequestManager g_FNRequestManager;
