@@ -186,8 +186,6 @@ set(FN
 	"fn/FNSharedDefs.h"
 	"fn/LoadCharacterReq.cpp"
 	"fn/LoadCharacterReq.h"
-	"fn/SteamHTTPReq.cpp"
-	"fn/SteamHTTPReq.h"
 	"fn/UpdateCharacterReq.cpp"
 	"fn/UpdateCharacterReq.h"
 	"fn/ValidateConReq.cpp"
@@ -198,6 +196,8 @@ set(FN
 	"fn/ValidateScriptsReq.h"
 	"fn/RequestManager.cpp"
 	"fn/RequestManager.h"
+	"fn/HTTPRequest.cpp"
+	"fn/HTTPRequest.h"
 )
 source_group("FN" FILES ${FN})
 

@@ -10,7 +10,7 @@
 #include "util.h"
 
 DeleteCharacterRequest::DeleteCharacterRequest(ID64 steamID, ID64 slot, const char* url) :
-	SteamHttpRequest(EHTTPMethod::k_EHTTPMethodDELETE, url, NULL, NULL, steamID, slot)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodDELETE, url, NULL, NULL, steamID, slot)
 {
 }
 

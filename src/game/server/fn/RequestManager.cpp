@@ -1,9 +1,6 @@
 #include "RequestManager.h"
 #include "strhelper.h"
-#include "steam/steam_api.h"
-#include "steam/steam_gameserver.h"
 #include "msdllheaders.h"
-#include "SteamHTTPReq.h"
 
 void CRequestManager::Init(void)
 {
@@ -13,8 +10,8 @@ void CRequestManager::Init(void)
 
 	if (!m_bLoaded) 
 	{
-		m_SteamGameServerAPIContext.Init();
-		m_SteamHTTP = m_SteamGameServerAPIContext->SteamHTTP();
+		//m_SteamGameServerAPIContext = &CSteamGameServerAPIContext.Init();
+		m_SteamHTTP = SteamGameServerHTTP();
 		m_bLoaded = true;
 	}
 }
@@ -23,14 +20,14 @@ void CRequestManager::Think(void)
 {
 	if (m_bLoaded)
 	{
-		if (m_bSteamLoaded && !m_SteamHTTP)
+		if (!m_SteamHTTP)
 		{
-			m_SteamHTTP = m_SteamGameServerAPIContext->SteamHTTP();
+			m_SteamHTTP = SteamGameServerHTTP();
 		}
 
 		for (int i = (m_vRequests.size() - 1); i >= 0; i--)
 		{
-			SteamHttpRequest* req = m_vRequests[i];
+			HTTPRequest* req = m_vRequests[i];
 			switch (req->requestState)
 			{
 			case REQUEST_QUEUED:
@@ -48,33 +45,20 @@ void CRequestManager::Think(void)
 
 void CRequestManager::Shutdown(void)
 {	
-	m_SteamGameServerAPIContext.Shutdown();
+	//m_SteamGameServerAPIContext.Shutdown();
 	m_SteamHTTP	= nullptr;
-	m_vRequests.clear()
+	m_vRequests.clear();
 	m_bLoaded = false;
 }
 
 void CRequestManager::RunCallbacks(void) 
 {
-	if (m_SteamGameServerAPIContext->SteamHTTP())
+	if (SteamGameServerHTTP())
 		SteamGameServer_RunCallbacks();
 }
 
-ISteamHTTP* GetHTTPContext(void)
-{
-	if (m_bLoaded) 
-	{
-		if (m_bSteamLoaded && !m_SteamHTTP)
-			m_SteamHTTP = m_SteamGameServerAPIContext->SteamHTTP();
-
-		return m_SteamHTTP;
-	}
-
-	return nullptr;
-}
-
 extern void wait(unsigned long ms);
-void SendAndWait(void)
+void CRequestManager::SendAndWait(void)
 {
 	if (m_bLoaded)
 	{
@@ -90,4 +74,10 @@ void SendAndWait(void)
 		Shutdown();
 		g_bSuppressResponse = false;
 	}
+}
+
+void CRequestManager::Queue(HTTPRequest* req)
+{
+	req.SetHTTPContext(m_SteamHTTP);
+	m_vRequests.push_back(req);
 }

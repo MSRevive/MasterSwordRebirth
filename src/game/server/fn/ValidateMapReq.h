@@ -7,7 +7,7 @@
 
 #include "SteamHTTPReq.h"
 
-class ValidateMapRequest : public SteamHttpRequest
+class ValidateMapRequest : public HTTPRequest
 {
 public:
 	ValidateMapRequest(const char* url);

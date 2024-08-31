@@ -15,23 +15,17 @@
 
 JSONDocument* ParseJSON(const char* data, size_t length = 0);
 
-enum RequestState
-{
-	REQUEST_QUEUED = 0,
-	REQUEST_EXECUTED,
-	REQUEST_FINISHED,
-};
-
-class SteamHttpRequest
+class HTTPRequest
 {
 public:
-	SteamHttpRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 param1 = 0ULL, ID64 param2 = 0ULL);
-	virtual ~SteamHttpRequest();
+	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 param1 = 0ULL, ID64 param2 = 0ULL);
+	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
 	virtual void OnResponse(bool bSuccessful) { }
 
 	static void SetBaseUrl(const char* url);
+	void SetHTTPContext(ISteamHTTP steamHTTP) { steamHTTP = steamHTTP; };
 
 protected: // Expose data to inheriting classes.
 	char pchApiUrl[REQUEST_URL_SIZE];
@@ -47,19 +41,30 @@ protected: // Expose data to inheriting classes.
 	ID64 param1;
 	ID64 param2;
 
+	int requestState;
+
+	ISteamHTTP steamHTTP;
+
 private: // Keep this private.
 	void SendRequest();
 	void Cleanup();
 	void ReleaseHandle();
+	
 	void OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError);
 
 	CCallResult<SteamHttpRequest, HTTPRequestCompleted_t> m_CallbackOnHTTPRequestCompleted;
 	HTTPRequestHandle handle;
 	EHTTPMethod httpMethod;
-	int requestState;
+
+	enum RequestState
+	{
+		REQUEST_QUEUED = 0,
+		REQUEST_EXECUTED,
+		REQUEST_FINISHED,
+	};
 
 private:
-	SteamHttpRequest(const SteamHttpRequest&); // No copy-constructor pls.
+	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
 };
 
 #endif // HTTP_BASE_REQUEST_H

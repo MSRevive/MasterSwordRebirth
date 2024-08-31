@@ -9,7 +9,7 @@
 #include "global.h"
 
 ValidateScriptsRequest::ValidateScriptsRequest(const char* url) :
-	SteamHttpRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
 {
 }
 

@@ -1,8 +1,9 @@
 #ifndef MS_REQUEST_MANAGER
 #define MS_REQUEST_MANAGER
 
-#undef vector
-
+#include "steam/steam_api.h"
+#include "steam/steam_gameserver.h"
+#include "SteamHTTPReq.h"
 #include <vector>
 
 class CRequestManager
@@ -14,25 +15,18 @@ public:
 	void Think(void);
 	void Shutdown(void);
 	void RunCallbacks(void);
-	ISteamHTTP* GetHTTPContext(void);
 	void SendAndWait(void);
 
 	void Clear(void) { m_vRequests.clear(); }
-	void Queue(SteamHttpRequest* req) { m_vRequests.push_back(req); }
+	void Queue(SteamHttpRequest* req);
 
 private:
 	bool m_bLoaded = false;
 
-	bool m_bSteamLoaded = false;
-	static CSteamGameServerAPIContext* m_SteamGameServerAPIContext;
 	ISteamHTTP* m_SteamHTTP;
 
-	static std::Vector<SteamHttpRequest*> m_vRequests;
+	static std::vector<SteamHttpRequest*> m_vRequests;
 };
-
-class CSteamGameServerAPIContext;
-class ISteamHTTP;
-class SteamHttpRequest;
 
 extern CRequestManager g_FNRequestManager;
 

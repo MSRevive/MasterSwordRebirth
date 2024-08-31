@@ -7,7 +7,7 @@
 
 #include "SteamHTTPReq.h"
 
-class DeleteCharacterRequest : public SteamHttpRequest
+class DeleteCharacterRequest : public HTTPRequest
 {
 public:
 	DeleteCharacterRequest(ID64 steamID, ID64 slot, const char* url);

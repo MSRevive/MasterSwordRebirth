@@ -7,7 +7,7 @@
 
 #include "SteamHTTPReq.h"
 
-class CreateCharacterRequest : public SteamHttpRequest
+class CreateCharacterRequest : public HTTPRequest
 {
 public:
 	CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize);

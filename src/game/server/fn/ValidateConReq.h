@@ -7,7 +7,7 @@
 
 #include "SteamHTTPReq.h"
 
-class ValidateConnectivityRequest : public SteamHttpRequest
+class ValidateConnectivityRequest : public HTTPRequest
 {
 public:
 	ValidateConnectivityRequest(const char* url);

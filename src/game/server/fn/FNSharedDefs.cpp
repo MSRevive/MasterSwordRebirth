@@ -11,7 +11,7 @@
 #include "crc/crchash.h"
 
 // Requests
-#include "ValidateConnectivityReq.h"
+#include "ValidateConReq.h"
 #include "ValidateScriptsReq.h"
 #include "ValidateMapReq.h"
 #include "CreateCharacterReq.h"
@@ -141,12 +141,4 @@ void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 	new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid));
-}
-
-void FNShared::IsValidConnection(void)
-{
-	if (IsEnabled() == false)
-		return;
-
-	new ValidateConnectivityRequest("/api/v1/ping");
 }

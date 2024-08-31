@@ -11,7 +11,7 @@
 #include "util.h"
 
 LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* url) :
-	SteamHttpRequest(EHTTPMethod::k_EHTTPMethodGET, url, NULL, NULL, steamID, slot)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url, NULL, NULL, steamID, slot)
 {
 }
 

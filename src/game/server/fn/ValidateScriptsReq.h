@@ -7,7 +7,7 @@
 
 #include "SteamHTTPReq.h"
 
-class ValidateScriptsRequest : public SteamHttpRequest
+class ValidateScriptsRequest : public HTTPRequest
 {
 public:
 	ValidateScriptsRequest(const char* url);

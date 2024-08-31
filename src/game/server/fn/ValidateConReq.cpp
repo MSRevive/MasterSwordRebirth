@@ -9,7 +9,7 @@
 #include "global.h"
 
 ValidateConnectivityRequest::ValidateConnectivityRequest(const char* url) :
-	SteamHttpRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
 {
 }
 

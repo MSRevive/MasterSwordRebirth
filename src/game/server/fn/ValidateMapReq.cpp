@@ -9,7 +9,7 @@
 #include "global.h"
 
 ValidateMapRequest::ValidateMapRequest(const char* url) :
-	SteamHttpRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
 {
 }
 
