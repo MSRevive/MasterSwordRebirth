@@ -3,7 +3,8 @@
 
 #include "steam/steam_api.h"
 #include "steam/steam_gameserver.h"
-#include "SteamHTTPReq.h"
+#include "HTTPRequest.h"
+#include "strhelper.h"
 #include <vector>
 
 class CRequestManager
@@ -16,16 +17,17 @@ public:
 	void Shutdown(void);
 	void RunCallbacks(void);
 	void SendAndWait(void);
+	static void SetBaseURL(const char* url);
 
 	void Clear(void) { m_vRequests.clear(); }
-	void Queue(SteamHttpRequest* req);
+	void QueueRequest(HTTPRequest* req);
 
 private:
 	bool m_bLoaded = false;
 
 	ISteamHTTP* m_SteamHTTP;
 
-	static std::vector<SteamHttpRequest*> m_vRequests;
+	static std::vector<HTTPRequest*> m_vRequests;
 };
 
 extern CRequestManager g_FNRequestManager;

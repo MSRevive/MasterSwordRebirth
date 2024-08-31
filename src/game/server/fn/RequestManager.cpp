@@ -30,11 +30,11 @@ void CRequestManager::Think(void)
 			HTTPRequest* req = m_vRequests[i];
 			switch (req->requestState)
 			{
-			case REQUEST_QUEUED:
+			case HTTPRequest::RequestState::REQUEST_QUEUED:
 				req->SendRequest();
 				break;
 
-			case REQUEST_FINISHED:
+			case  HTTPRequest::RequestState::REQUEST_FINISHED:
 				delete req;
 				m_vRequests.erase(m_vRequests.begin() + i);
 				break;
@@ -62,7 +62,7 @@ void CRequestManager::SendAndWait(void)
 {
 	if (m_bLoaded)
 	{
-		g_bSuppressResponse = true;
+		//g_bSuppressResponse = true;
 
 		do
 		{
@@ -72,12 +72,12 @@ void CRequestManager::SendAndWait(void)
 		} while ((m_SteamHTTP != nullptr) && m_vRequests.size());
 
 		Shutdown();
-		g_bSuppressResponse = false;
+		//g_bSuppressResponse = false;
 	}
 }
 
-void CRequestManager::Queue(HTTPRequest* req)
+void CRequestManager::QueueRequest(HTTPRequest* req)
 {
-	req.SetHTTPContext(m_SteamHTTP);
+	req->SetHTTPContext(m_SteamHTTP);
 	m_vRequests.push_back(req);
 }

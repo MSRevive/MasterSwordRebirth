@@ -44,8 +44,6 @@
 #include "global.h"
 #include "versioncontrol.h"
 
-#include "fn/SteamHTTPReq.h"
-
 extern void PlayerPrecache();
 
 // Temp

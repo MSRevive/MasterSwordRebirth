@@ -13,6 +13,7 @@
 #include "filesystem_shared.h"
 #include "fn/FNSharedDefs.h"
 #include "fn/RequestManager.h"
+#include "fn/HTTPRequest.h"
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -160,37 +161,37 @@ void MSWorldSpawn()
 	PRECACHE_GENERIC("dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 
-	SteamHttpRequest::SetBaseUrl(CVAR_GET_STRING("ms_central_addr"));
+	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
 
-	if (MSGlobals::CentralEnabled)
-	{
-		// Initialize FN Request Manager
-		g_FNRequestManager.Init();
+	// if (MSGlobals::CentralEnabled)
+	// {
+	// 	// Initialize FN Request Manager
+	// 	g_FNRequestManager.Init();
 
-		bool fail = true;
+	// 	bool fail = true;
 
-		for (int retry = 0; retry < 5; retry++)
-		{
-			if (FNShared::IsValidConnection())
-			{
-				fail = false;
-				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
-				break;
-			}
-			else if (retry != 5)
-			{
-				g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
-			}
-		}
+	// 	for (int retry = 0; retry < 5; retry++)
+	// 	{
+	// 		if (FNShared::IsValidConnection())
+	// 		{
+	// 			fail = false;
+	// 			g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
+	// 			logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+	// 			break;
+	// 		}
+	// 		else if (retry != 5)
+	// 		{
+	// 			g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
+	// 		}
+	// 	}
 
-		if (fail == true)
-		{
-			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
-			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
-			MSGlobals::CentralEnabled = false;
-		}
-	}
+	// 	if (fail == true)
+	// 	{
+	// 		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+	// 		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
+	// 		MSGlobals::CentralEnabled = false;
+	// 	}
+	// }
 
 	FNShared::Validate();
 

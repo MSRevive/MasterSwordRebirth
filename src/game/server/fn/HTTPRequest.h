@@ -18,14 +18,25 @@ JSONDocument* ParseJSON(const char* data, size_t length = 0);
 class HTTPRequest
 {
 public:
-	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 param1 = 0ULL, ID64 param2 = 0ULL);
+	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
 	virtual void OnResponse(bool bSuccessful) { }
 
 	static void SetBaseUrl(const char* url);
-	void SetHTTPContext(ISteamHTTP steamHTTP) { steamHTTP = steamHTTP; };
+	void SetHTTPContext(ISteamHTTP* steamHTTP) { this->steamHTTP = steamHTTP; };
+	void SendRequest();
+	static void SetBaseURL(const char* url);
+
+	int requestState;
+
+	enum RequestState
+	{
+		REQUEST_QUEUED = 0,
+		REQUEST_EXECUTED,
+		REQUEST_FINISHED,
+	};
 
 protected: // Expose data to inheriting classes.
 	char pchApiUrl[REQUEST_URL_SIZE];
@@ -38,30 +49,20 @@ protected: // Expose data to inheriting classes.
 
 	JSONDocument* pJSONData;
 
-	ID64 param1;
-	ID64 param2;
+	ID64 steamID64;
+	ID64 slot;
 
-	int requestState;
-
-	ISteamHTTP steamHTTP;
+	ISteamHTTP* steamHTTP;
 
 private: // Keep this private.
-	void SendRequest();
 	void Cleanup();
 	void ReleaseHandle();
 	
 	void OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError);
 
-	CCallResult<SteamHttpRequest, HTTPRequestCompleted_t> m_CallbackOnHTTPRequestCompleted;
+	CCallResult<HTTPRequest, HTTPRequestCompleted_t> m_CallbackOnHTTPRequestCompleted;
 	HTTPRequestHandle handle;
 	EHTTPMethod httpMethod;
-
-	enum RequestState
-	{
-		REQUEST_QUEUED = 0,
-		REQUEST_EXECUTED,
-		REQUEST_FINISHED,
-	};
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.

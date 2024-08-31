@@ -18,17 +18,17 @@ LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* 
 void LoadCharacterRequest::OnResponse(bool bSuccessful)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
-		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (param2 + 1), param1);
+		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (slot + 1), steamID64);
 
-	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(param1);
+	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(steamID64);
 	if (pPlayer == NULL)
 		return;
 
-	charinfo_t& CharInfo = pPlayer->m_CharInfo[param2];
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 
 	if ((pJSONData == NULL) || (bSuccessful == false))
 	{
-		CharInfo.Index = param2;
+		CharInfo.Index = slot;
 		CharInfo.Location = LOC_CENTRAL;
 		CharInfo.Status = CDS_NOTFOUND;
 		CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
@@ -48,7 +48,7 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful)
 	requestBody = new uint8[requestBodySize];
 	memcpy(requestBody, (char*)base64_decode(doc["data"]["data"].GetString()).c_str(), requestBodySize);
 
-	CharInfo.AssignChar(param2, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
+	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
 	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 }

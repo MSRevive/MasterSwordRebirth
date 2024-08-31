@@ -35,7 +35,7 @@ JSONDocument* ParseJSON(const char* data, size_t length)
 	return document;
 }
 
-HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 param1, ID64 param2)
+HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
 	httpMethod = method;
 	requestState = RequestState::REQUEST_QUEUED;
@@ -46,10 +46,8 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_
 	pJSONData = nullptr;
 	handle = NULL;
 
-	steamHTTP = steamHTTP
-
-	this->param1 = param1;
-	this->param2 = param2;
+	this->steamID64 = steamID64;
+	this->slot = slot;
 
 	if ((body != NULL) && (bodySize > 0))
 	{
@@ -77,7 +75,7 @@ void HTTPRequest::SendRequest()
 	if (requestBody != NULL)
 	{
 		char steamID64String[REQUEST_URL_SIZE];
-		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", param1);
+		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", steamID64);
 
 		rapidjson::StringBuffer s;
 		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -88,7 +86,7 @@ void HTTPRequest::SendRequest()
 		writer.String(steamID64String);
 
 		writer.Key("slot");
-		writer.Int(param2);
+		writer.Int(slot);
 
 		writer.Key("size");
 		writer.Int(requestBodySize);
@@ -158,4 +156,9 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 
 	OnResponse(bError == false);
 	ReleaseHandle();
+}
+
+/* static */ void HTTPRequest::SetBaseURL(const char* url)
+{
+	_snprintf(g_szBaseUrl, REQUEST_URL_SIZE, "%s", url);
 }

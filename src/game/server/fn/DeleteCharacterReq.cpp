@@ -17,13 +17,13 @@ DeleteCharacterRequest::DeleteCharacterRequest(ID64 steamID, ID64 slot, const ch
 void DeleteCharacterRequest::OnResponse(bool bSuccessful)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
-		FNShared::Print("Unable to delete character for SteamID %llu!\n", param1);
+		FNShared::Print("Unable to delete character for SteamID %llu!\n", steamID64);
 
-	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(param1);
+	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(steamID64);
 	if (pPlayer == NULL)
 		return;
 
-	charinfo_t& CharInfo = pPlayer->m_CharInfo[param2];
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 	CharInfo.Status = CDS_NOTFOUND;
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 }

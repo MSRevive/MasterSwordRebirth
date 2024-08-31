@@ -5,7 +5,7 @@
 #ifndef HTTP_UPDATE_CHARACTER_REQUEST_H
 #define HTTP_UPDATE_CHARACTER_REQUEST_H
 
-#include "SteamHTTPReq.h"
+#include "HTTPRequest.h"
 
 class UpdateCharacterRequest : public HTTPRequest
 {

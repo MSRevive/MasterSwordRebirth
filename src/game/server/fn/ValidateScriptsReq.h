@@ -5,7 +5,7 @@
 #ifndef HTTP_VALIDATE_SCRIPTS_REQUEST_H
 #define HTTP_VALIDATE_SCRIPTS_REQUEST_H
 
-#include "SteamHTTPReq.h"
+#include "HTTPRequest.h"
 
 class ValidateScriptsRequest : public HTTPRequest
 {

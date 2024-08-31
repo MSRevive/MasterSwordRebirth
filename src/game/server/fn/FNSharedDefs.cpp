@@ -9,6 +9,7 @@
 #include "logger.h"
 #include "global.h"
 #include "crc/crchash.h"
+#include "RequestManager.h"
 
 // Requests
 #include "ValidateConReq.h"
@@ -58,9 +59,9 @@ void FNShared::Validate(void)
 	_snprintf(mapFile, sizeof(mapFile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
 	unsigned int mapFileHash = GetFileCheckSum(mapFile);
 
-	new ValidateConnectivityRequest("/api/v1/ping");
-	new ValidateScriptsRequest(UTIL_VarArgs("/api/v1/sc/%u", scFileHash));
-	new ValidateMapRequest(UTIL_VarArgs("/api/v1/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash));
+	g_FNRequestManager.QueueRequest(new ValidateConnectivityRequest("/api/v1/ping"));
+	g_FNRequestManager.QueueRequest(new ValidateScriptsRequest(UTIL_VarArgs("/api/v1/sc/%u", scFileHash)));
+	g_FNRequestManager.QueueRequest(new ValidateMapRequest(UTIL_VarArgs("/api/v1/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
 }
 
 // Get Player Flags from response.
@@ -90,7 +91,8 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer)
 
 		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
-		new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, i));
+
+		g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, i)));
 	}
 }
 
@@ -102,7 +104,8 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer, int slot)
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-	new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, slot));
+
+	g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
 }
 
 // Create or Update FN character!
@@ -122,14 +125,16 @@ void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, uint8* da
 	if (bIsUpdate)
 	{
 		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid);
-		new UpdateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size);
+		
+		g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
 	}
 	else
 	{
 		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v1/character/");
 		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-		new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size);
+		
+		g_FNRequestManager.QueueRequest(new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
 	}
 }
 
@@ -140,5 +145,6 @@ void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-	new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid));
+
+	g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
 }

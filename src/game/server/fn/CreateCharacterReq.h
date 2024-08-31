@@ -5,7 +5,7 @@
 #ifndef HTTP_CREATE_CHARACTER_REQUEST_H
 #define HTTP_CREATE_CHARACTER_REQUEST_H
 
-#include "SteamHTTPReq.h"
+#include "HTTPRequest.h"
 
 class CreateCharacterRequest : public HTTPRequest
 {
