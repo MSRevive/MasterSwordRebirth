@@ -1,5 +1,4 @@
 #include "RequestManager.h"
-#include "strhelper.h"
 #include "msdllheaders.h"
 
 void CRequestManager::Init(void)
