@@ -743,7 +743,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	{
 		dbg("Write to FN");
 		// If Central Server is enabled, save to the Central Server instead of locally
-		FNShared::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, (const char*)gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
+		FNShared::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
 		gFile.Close();
 		return;
 	}
