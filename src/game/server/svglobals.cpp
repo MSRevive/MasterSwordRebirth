@@ -9,10 +9,11 @@
 #include "store.h"
 #include "versioncontrol.h"
 #include "cstringpool.h"
-#include "fndatahandler.h"
-#include "httprequesthandler.h"
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
+#include "fn/FNSharedDefs.h"
+#include "fn/RequestManager.h"
+#include "fn/HTTPRequest.h"
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -29,6 +30,7 @@ mslist<modelprecachelist_t> gModelPrecacheList;
 mslist<modelprecachelist_t> gSoundPrecacheList;
 
 CStringPool g_StringPool;
+CRequestManager g_FNRequestManager;
 
 //Master Sword CVARs
 /*
@@ -124,30 +126,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	return true;
 }
 
-static bool IsVerifiedMap()
-{
-	if (FnDataHandler::IsEnabled())
-	{
-		char mapfile[MAX_PATH];
-		_snprintf(mapfile, sizeof(mapfile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
-		if (!FnDataHandler::IsVerifiedMap(MSGlobals::MapName.c_str(), GetFileCheckSum(mapfile)))
-			return false;
-	}
-	return true;
-}
-
-static bool IsVerifiedSC()
-{
-	if (FnDataHandler::IsEnabled())
-	{
-		char scfile[MAX_PATH];
-		_snprintf(scfile, sizeof(scfile), "%s/dlls/sc.dll", MSGlobals::AbsGamePath.c_str());
-		if (!FnDataHandler::IsVerifiedSC(GetFileCheckSum(scfile)))
-			return false;
-	}
-	return true;
-}
-
 void WriteCrashCfg()
 {
 	char fileName[MAX_PATH], content[128];
@@ -183,41 +161,39 @@ void MSWorldSpawn()
 	PRECACHE_GENERIC("dlls/sc.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
 
-	if (MSGlobals::CentralEnabled)
-	{
-		bool fail = true;
+	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
 
-		for (int retry = 0; retry < 5; retry++)
-		{
-			if (FnDataHandler::IsValidConnection())
-			{
-				fail = false;
-				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
-				break;
-			}
-			else if (retry != 5)
-			{
-				g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
-			}
-		}
+	// if (MSGlobals::CentralEnabled)
+	// {
+	// 	// Initialize FN Request Manager
+	// 	g_FNRequestManager.Init();
 
-		if (fail == true)
-		{
-			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
-			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
-			MSGlobals::CentralEnabled = false;
-		}
-	}
+	// 	bool fail = true;
 
-	if (!IsVerifiedMap())
-	{
-		ALERT(at_console, "Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("map edana\n");
-	}
+	// 	for (int retry = 0; retry < 5; retry++)
+	// 	{
+	// 		if (FNShared::IsValidConnection())
+	// 		{
+	// 			fail = false;
+	// 			g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
+	// 			logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+	// 			break;
+	// 		}
+	// 		else if (retry != 5)
+	// 		{
+	// 			g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
+	// 		}
+	// 	}
 
-	if (!IsVerifiedSC())
-		ALERT(at_console, "SC Script file is outdated!\n");
+	// 	if (fail == true)
+	// 	{
+	// 		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+	// 		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
+	// 		MSGlobals::CentralEnabled = false;
+	// 	}
+	// }
+
+	FNShared::Validate();
 
 	WriteCrashCfg();
 }
@@ -225,10 +201,7 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	startdbg;
-	dbg("Call FnDataHandler::Think");
-	FnDataHandler::Think();
-	enddbg;
+	g_FNRequestManager.Think();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -236,8 +209,6 @@ void MSGameThink()
 #define WORLD_MAX 6000
 void MSGameEnd()
 {
-	startdbg;
-	
 	if(MSGlobals::GameScript)
 	{
 		//Moved here from MSGlobals::EndMap because commands can access entities that are freed below - Solokiller 3/10/2017
@@ -262,7 +233,6 @@ void MSGameEnd()
 	gModelPrecacheCount = 0;
 	gSoundPrecacheCount = 0;
 	
-	dbg("Call Deactivate on all Entities");
 	//Deallocate any 'extra' memory the mod allocated for any entity
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(0);
 	if (pEdict)
@@ -277,13 +247,11 @@ void MSGameEnd()
 
 			msstring dbgstr_classname = STRING(pEntity->pev->classname);
 
-			dbg(msstring("Call Deactivate on Entity: ") + pEntity->DisplayName() + " | " + STRING(pEntity->pev->classname));
 			pEntity->Deactivate();
 			REMOVE_ENTITY(pEntity->edict());
 		}
 
 	//Delete global items
-	dbg("Call CGenericItemMgr::DeleteItems( )");
 	CGenericItemMgr::DeleteItems();
 
 	//Delete global stores
@@ -292,20 +260,20 @@ void MSGameEnd()
 	//Delete global script commands -- UNDONE: Keep these through level changes
 	//CScript::Globals.Deactivate();
 
-	dbg("Call CRaceManager::DeleteAllRaces( )");
 	CRaceManager::DeleteAllRaces();
 
 	//Delete gamerules
-	dbg("delete g_pGameRules");
 	if (g_pGameRules)
 	{
 		delete g_pGameRules;
 		g_pGameRules = NULL;
 	}
 
+	//We handle all remaining requests and shutdown.
+	g_FNRequestManager.SendAndWait();
+
 	//Thothie - I've not added anything here but there's a game error that generates here
 	//MSGameEnd --> Call MSGlobals::EndMap
-	dbg("Call MSGlobals::EndMap");
 	MSGlobals::EndMap();
 
 	//Model precache dumpfile
@@ -318,8 +286,6 @@ void MSGameEnd()
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.
 	ClearStringPool();
-
-	enddbg;
 }
 
 void SendHUDMsgAll(msstring_ref Title, msstring_ref Text)

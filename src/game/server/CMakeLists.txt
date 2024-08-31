@@ -1,15 +1,11 @@
 add_library(steam_api SHARED IMPORTED)
-add_library(libcurl SHARED IMPORTED)
 
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
-target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/curl)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
-	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
 else()
-	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libsteam_api.so")
-	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux/libcurl.a")
+	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux/libsteam_api.so")
 endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
@@ -18,12 +14,7 @@ set_common_properties(server)
 
 target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
-	$<$<PLATFORM_ID:Windows>:Ws2_32>
-	$<$<PLATFORM_ID:Windows>:Wldap32>
-	$<$<PLATFORM_ID:Windows>:Normaliz>
-	$<$<PLATFORM_ID:Windows>:Crypt32>
-	steam_api
-	libcurl)
+	steam_api)
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -43,11 +34,11 @@ target_include_directories(server PRIVATE
 	gamerules
 	hl
 	monsters
-	player)
+	player
+	fn)
 
 target_compile_definitions(server PRIVATE
-	VALVE_DLL
-	CURL_STATICLIB)
+	VALVE_DLL)
 
 if (UNIX)
 	target_compiler_definitions(server PRIVATE
@@ -186,6 +177,30 @@ set(SDK2013
 )
 source_group("SDK2013" FILES ${SDK2013})
 
+set(FN
+	"fn/CreateCharacterReq.cpp"
+	"fn/CreateCharacterReq.h"
+	"fn/DeleteCharacterReq.cpp"
+	"fn/DeleteCharacterReq.h"
+	"fn/FNSharedDefs.cpp"
+	"fn/FNSharedDefs.h"
+	"fn/LoadCharacterReq.cpp"
+	"fn/LoadCharacterReq.h"
+	"fn/UpdateCharacterReq.cpp"
+	"fn/UpdateCharacterReq.h"
+	"fn/ValidateConReq.cpp"
+	"fn/ValidateConReq.h"
+	"fn/ValidateMapReq.cpp"
+	"fn/ValidateMapReq.h"
+	"fn/ValidateScriptsReq.cpp"
+	"fn/ValidateScriptsReq.h"
+	"fn/RequestManager.cpp"
+	"fn/RequestManager.h"
+	"fn/HTTPRequest.cpp"
+	"fn/HTTPRequest.h"
+)
+source_group("FN" FILES ${FN})
+
 set(Shared
 	"player/playershared.cpp"
 	"../shared/ms/buildcontrol.h"
@@ -194,14 +209,10 @@ set(Shared
 	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
-	"../shared/ms/fndatahandler.cpp"
-	"../shared/ms/fndatahandler.h"
 	"../shared/ms/global.cpp"
 	"../shared/ms/global.h"
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
-	"../shared/ms/httprequesthandler.cpp"
-	"../shared/ms/httprequesthandler.h"
 	"../shared/ms/iscript.h"
 	"../shared/ms/logger.h"
 	"../shared/ms/magic.h"
@@ -268,6 +279,7 @@ set(ALL_FILES
 	${MS_Headers}
 	${Misc}
 	${SDK2013}
+	${FN}
 	${Shared}
 	${Shared_CRC}
 	${Shared_Generic_Item}

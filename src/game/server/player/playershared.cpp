@@ -24,7 +24,7 @@ void ShowWeaponDesc(CGenericItem* pItem);
 #include "ms/clglobal.h"
 #else
 #include "global.h"
-#include "fndatahandler.h"
+#include "fn/FNSharedDefs.h"
 #endif
 
 //NOTENOTE: remove this when char corruption bug is fixed - Solokiller 5/10/2017
@@ -1424,14 +1424,14 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	if (!MSGlobals::ServerSideChar)
 		return;
 
-	if (FnDataHandler::IsEnabled())
+	if (FNShared::IsEnabled())
 	{
 		// Send a request to retrieve the player's info from a central server.
 		// Once the player file is downloaded, m_CharInfo will be updated with the info
 		if (CharIdx == -1)
-			FnDataHandler::LoadCharacter(this);
+			FNShared::LoadCharacter(this);
 		else
-			FnDataHandler::LoadCharacter(this, CharIdx);
+			FNShared::LoadCharacter(this, CharIdx);
 	}
 	else
 	{

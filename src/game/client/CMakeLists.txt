@@ -140,18 +140,19 @@ set(HL1
 source_group("HL1" FILES ${HL1})
 
 set(HL1_Headers
+	"cl_util.h"
+	"hud_spectator.h"
 	"../../common/cl_entity.h"
 	"../../common/com_model.h"
 	"../../common/const.h"
 	"../../common/dlight.h"
 	"../../common/entity_state.h"
-	"cl_util.h"
-	"hud_spectator.h"
 	"../../public/engine/cdll_int.h"
 )
 source_group("HL1\\Headers" FILES ${HL1_Headers})
 
 set(MS
+	"steamhelper.cpp"
 	"entity.cpp"
 	"ms/action.cpp"
 	"ms/clglobal.cpp"
@@ -165,12 +166,34 @@ set(MS
 	"ms/hudscript.cpp"
 	"ms/menu.cpp"
 	"richpresence.cpp"
-	"richpresence.h"
 	"../shared/movement/pm_shared.cpp"
 	"../../../thirdparty/tartan/textureloader.cpp"
 	"../../../thirdparty/tartan/tgaloader.cpp"
 )
 source_group("MS" FILES ${MS})
+
+set(MS_Headers
+	"inc_huditem.h"
+	"ms/clenv.h"
+	"ms/clglobal.h"
+	"ms/health.h"
+	"ms/hudid.h"
+	"ms/hudmagic.h"
+	"ms/hudmisc.h"
+	"ms/hudmusic.h"
+	"ms/hudscript.h"
+	"ms/menu.h"
+	"richpresence.h"
+	"steamhelper.h"
+	"../server/monsters/msmonster.h"
+	"../server/player/player.h"
+	"../shared/ms/global.h"
+	"../shared/ms/groupfile.h"
+	"../shared/ms/msfileio.h"
+	"../shared/ms/saytext.h"
+	"../shared/stats/statdefs.h"
+)
+source_group("MS\\Headers" FILES ${MS_Headers})
 
 set(MS_Generic_Item
 	"../shared/genitemlist.cpp"
@@ -185,27 +208,6 @@ set(MS_Generic_Item
 	"../shared/weapons/weapons.h"
 )
 source_group("MS\\Generic Item" FILES ${MS_Generic_Item})
-
-set(MS_Headers
-	"inc_huditem.h"
-	"ms/clenv.h"
-	"ms/clglobal.h"
-	"ms/health.h"
-	"ms/hudid.h"
-	"ms/hudmagic.h"
-	"ms/hudmisc.h"
-	"ms/hudmusic.h"
-	"ms/hudscript.h"
-	"ms/menu.h"
-	"../server/monsters/msmonster.h"
-	"../server/player/player.h"
-	"../shared/ms/global.h"
-	"../shared/ms/groupfile.h"
-	"../shared/ms/msfileio.h"
-	"../shared/ms/saytext.h"
-	"../shared/stats/statdefs.h"
-)
-source_group("MS\\Headers" FILES ${MS_Headers})
 
 set(Misc
 	"../../public/tier0/pointeroverride.asm"
@@ -317,8 +319,6 @@ set(SDK2013
 source_group("SDK2013" FILES ${SDK2013})
 
 set(Shared
-	"steamhelper.cpp"
-	"steamhelper.h"
 	"../server/player/playershared.cpp"
 	"../server/store.h"
 	"../shared/ms/buildcontrol.h"
@@ -451,8 +451,8 @@ set(ALL_FILES
 	${HL1}
 	${HL1_Headers}
 	${MS}
-	${MS_Generic_Item}
 	${MS_Headers}
+	${MS_Generic_Item}
 	${Misc}
 	${Render}
 	${SDK2013}

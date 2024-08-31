@@ -9,7 +9,7 @@
 #include "mscharacter.h"
 #include "magic.h"
 #include "script.h"
-#include "fndatahandler.h"
+#include "fn/FNSharedDefs.h"
 
 #ifndef _WIN32
 #include "sys/io.h"
@@ -107,7 +107,7 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 
 #ifdef VALVE_DLL
 	//Update player's character list, so the new char is sent down to client
-	if (!FnDataHandler::IsEnabled())
+	if (!FNShared::IsEnabled())
 		PreLoadChars();
 #endif
 }
@@ -115,9 +115,9 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 {
 #ifdef VALVE_DLL
-	if (FnDataHandler::IsEnabled())
+	if (FNShared::IsEnabled())
 	{
-		FnDataHandler::DeleteCharacter(pPlayer, iCharacter);
+		FNShared::DeleteCharacter(pPlayer, iCharacter);
 		return true;
 	}
 #endif
@@ -138,7 +138,7 @@ void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 	if (gpGlobals->time <= pPlayer->m_TimeNextSave) return;
 
 	SaveChar(pPlayer, NULL); // Don't auto save too often when using FN.
-	pPlayer->m_TimeNextSave = gpGlobals->time + (FnDataHandler::IsEnabled() ? RANDOM_FLOAT(4.0f, 8.0f) : 3.0f);
+	pPlayer->m_TimeNextSave = gpGlobals->time + (FNShared::IsEnabled() ? RANDOM_FLOAT(4.0f, 8.0f) : 3.0f);
 }
 
 //
@@ -739,11 +739,11 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	gFile.m_BufferSize = gFile.GetWritePtr();
 	
-	if (FnDataHandler::IsEnabled())
+	if (FNShared::IsEnabled())
 	{
 		dbg("Write to FN");
 		// If Central Server is enabled, save to the Central Server instead of locally
-		FnDataHandler::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, (const char*)gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
+		FNShared::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
 		gFile.Close();
 		return;
 	}
