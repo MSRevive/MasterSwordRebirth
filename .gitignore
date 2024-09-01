@@ -54,19 +54,6 @@ ms.dylib.dSYM/
 client_osx32_msc
 server_osx32_msc
 
-# Misc Folders
-# ipch
-# /ipch/*
-# /Debug_msc/*
-# /Release_msc/*
-# /Debug/*
-# /Release/*
-# /stdshaders/game/*
-# Debug_msc
-# Release_msc
-# Debug
-# Release
-
 # shader files
 *.TMP
 *.tmp
@@ -216,3 +203,5 @@ CMakeUserPresets.json
 
 # Ignore build contents
 build/*
+bins/debug/*
+bins/release/*
