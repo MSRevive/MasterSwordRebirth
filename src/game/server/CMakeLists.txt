@@ -10,6 +10,8 @@ endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 
+set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
+
 set_common_properties(server)
 
 target_link_libraries(server PRIVATE
