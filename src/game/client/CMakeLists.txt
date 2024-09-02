@@ -3,8 +3,6 @@ add_library(SDL2 SHARED IMPORTED)
 add_library(fmod SHARED IMPORTED)
 add_library(discord SHARED IMPORTED)
 add_library(steam_api SHARED IMPORTED)
-add_library(cg SHARED IMPORTED)
-add_library(cgGL SHARED IMPORTED)
 find_package(OpenGL REQUIRED)
 
 target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
@@ -12,8 +10,6 @@ target_include_directories(SDL2 INTERFACE ${BASEDIR}/thirdparty/SDL2)
 target_include_directories(fmod INTERFACE ${BASEDIR}/thirdparty/fmod)
 target_include_directories(discord INTERFACE ${BASEDIR}/thirdparty/discord)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
-target_include_directories(cg INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
-target_include_directories(cgGL INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
 
 if (WIN32)
 	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
@@ -21,8 +17,6 @@ if (WIN32)
 	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/fmod_vc.lib")
 	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/discord-rpc.lib")
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
-	set_target_properties(cg PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cg.lib")
-	set_target_properties(cgGL PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cgGL.lib")
 #else()
 	# Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
 	#configure_file(../../../utils/vgui/lib/linux/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} COPYONLY)
@@ -45,8 +39,6 @@ target_link_libraries(client PRIVATE
 	fmod
 	discord
 	steam_api
-	cgGL
-	cg
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
@@ -223,6 +215,8 @@ set(Render
 	"render/studiomodelrenderer.h"
 	"../../../thirdparty/tartan/textureloader.cpp"
 	"../../../thirdparty/tartan/tgaloader.cpp"
+	"../../../thirdparty/gl/glext.h"
+	"../../../thirdparty/gl/wglext.h"
 )
 source_group("Render" FILES ${Render})
 
