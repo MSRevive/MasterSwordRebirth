@@ -5,7 +5,6 @@ add_library(discord SHARED IMPORTED)
 add_library(steam_api SHARED IMPORTED)
 add_library(cg SHARED IMPORTED)
 add_library(cgGL SHARED IMPORTED)
-add_library(glaux SHARED IMPORTED)
 find_package(OpenGL REQUIRED)
 
 target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
@@ -15,7 +14,6 @@ target_include_directories(discord INTERFACE ${BASEDIR}/thirdparty/discord)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 target_include_directories(cg INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
 target_include_directories(cgGL INTERFACE ${BASEDIR}/thirdparty/nvidia/cg)
-target_include_directories(glaux INTERFACE ${BASEDIR}/thirdparty/nvidia/gl)
 
 if (WIN32)
 	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
@@ -25,7 +23,6 @@ if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
 	set_target_properties(cg PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cg.lib")
 	set_target_properties(cgGL PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/cgGL.lib")
-	set_target_properties(glaux PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/glaux.lib")
 #else()
 	# Copy libraries provided by the game to the build directory so we can point the compiler and linker to the files.
 	#configure_file(../../../utils/vgui/lib/linux/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_CURRENT_BINARY_DIR}/vgui${CMAKE_SHARED_LIBRARY_SUFFIX} COPYONLY)
@@ -48,7 +45,6 @@ target_link_libraries(client PRIVATE
 	fmod
 	discord
 	steam_api
-	glaux
 	cgGL
 	cg
 	${OPENGL_LIBRARIES})
@@ -167,8 +163,6 @@ set(MS
 	"ms/menu.cpp"
 	"richpresence.cpp"
 	"../shared/movement/pm_shared.cpp"
-	"../../../thirdparty/tartan/textureloader.cpp"
-	"../../../thirdparty/tartan/tgaloader.cpp"
 )
 source_group("MS" FILES ${MS})
 
@@ -227,6 +221,8 @@ set(Render
 	"render/studio_util.h"
 	"render/studiomodelrenderer.cpp"
 	"render/studiomodelrenderer.h"
+	"../../../thirdparty/tartan/textureloader.cpp"
+	"../../../thirdparty/tartan/tgaloader.cpp"
 )
 source_group("Render" FILES ${Render})
 
