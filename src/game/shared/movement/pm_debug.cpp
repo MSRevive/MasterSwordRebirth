@@ -13,6 +13,7 @@
 *
 ****/
 
+#include "Platform.h"
 #include "mathlib.h"
 #include "const.h"
 #include "usercmd.h"
@@ -26,7 +27,7 @@
 #pragma warning(disable : 4244)
 #pragma warning(disable : 4305)
 
-extern playermove_t *pmove;
+extern playermove_t* pmove;
 
 // Expand debugging BBOX particle hulls by this many units.
 #define BOX_GAP 0.0f
@@ -41,13 +42,13 @@ static int PM_boxpnt[6][4] =
 		{7, 6, 4, 5}, // -Z
 };
 
-void PM_ShowClipBox(void)
+void PM_ShowClipBox()
 {
 #if defined(_DEBUG)
 	vec3_t org;
 	vec3_t offset = {0, 0, 0};
 
-	if (!pmove->runfuncs)
+	if (0 == pmove->runfuncs)
 		return;
 
 	// More debugging, draw the particle bbox for player and for the entity we are looking directly at.
@@ -62,7 +63,7 @@ void PM_ShowClipBox(void)
 
 	VectorCopy(pmove->origin, org);
 
-	if (pmove->server)
+	if (0 != pmove->server)
 	{
 		VectorAdd(org, offset, org);
 	}
@@ -72,9 +73,9 @@ void PM_ShowClipBox(void)
 	}
 
 	// Show our BBOX in particles.
-	PM_DrawBBox(pmove->player_mins[pmove->usehull], pmove->player_maxs[pmove->usehull], org, pmove->server ? 132 : 0, 0.1);
+	PM_DrawBBox(pmove->player_mins[pmove->usehull], pmove->player_maxs[pmove->usehull], org, 0 != pmove->server ? 132 : 0, 0.1);
 
-	PM_ParticleLine(org, org, pmove->server ? 132 : 0, 0.1, 5.0);
+	PM_ParticleLine(org, org, 0 != pmove->server ? 132 : 0, 0.1, 5.0);
 /*
 	{
 		int i;
@@ -92,7 +93,7 @@ void PM_ShowClipBox(void)
 
 /*
 ===============
-PM_ParticleLine(vec3_t start, vec3_t end, int color, float life)
+PM_ParticleLine(Vector start, Vector end, int color, float life)
 
 ================
 */
@@ -123,7 +124,7 @@ void PM_ParticleLine(vec3_t start, vec3_t end, int pcolor, float life, float ver
 
 /*
 ================
-PM_DrawRectangle(vec3_t tl, vec3_t br)
+PM_DrawRectangle(Vector tl, Vector br)
 
 ================
 */
@@ -143,7 +144,7 @@ PM_DrawPhysEntBBox(int num)
 */
 void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 {
-	physent_t *pe;
+	physent_t* pe;
 	vec3_t org;
 	int j;
 	vec3_t tmp;
@@ -164,19 +165,19 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 		pmove->PM_GetModelBounds(pe->model, modelmins, modelmaxs);
 		for (j = 0; j < 8; j++)
 		{
-			tmp[0] = (j & 1) ? modelmins[0] - gap : modelmaxs[0] + gap;
-			tmp[1] = (j & 2) ? modelmins[1] - gap : modelmaxs[1] + gap;
-			tmp[2] = (j & 4) ? modelmins[2] - gap : modelmaxs[2] + gap;
+			tmp[0] = (j & 1) != 0 ? modelmins[0] - gap : modelmaxs[0] + gap;
+			tmp[1] = (j & 2) != 0 ? modelmins[1] - gap : modelmaxs[1] + gap;
+			tmp[2] = (j & 4) != 0 ? modelmins[2] - gap : modelmaxs[2] + gap;
 
 			VectorCopy(tmp, p[j]);
 		}
 
 		// If the bbox should be rotated, do that
-		if (pe->angles[0] || pe->angles[1] || pe->angles[2])
+		if (pe->angles != g_vecZero)
 		{
 			vec3_t forward, right, up;
 
-			AngleVectorsTranspose(pe->angles, forward, right, up);
+			AngleVectorsTranspose(pe->angles, &forward, &right, &up);
 			for (j = 0; j < 8; j++)
 			{
 				VectorCopy(p[j], tmp);
@@ -204,9 +205,9 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 	{
 		for (j = 0; j < 8; j++)
 		{
-			tmp[0] = (j & 1) ? pe->mins[0] : pe->maxs[0];
-			tmp[1] = (j & 2) ? pe->mins[1] : pe->maxs[1];
-			tmp[2] = (j & 4) ? pe->mins[2] : pe->maxs[2];
+			tmp[0] = (j & 1) != 0 ? pe->mins[0] : pe->maxs[0];
+			tmp[1] = (j & 2) != 0 ? pe->mins[1] : pe->maxs[1];
+			tmp[2] = (j & 4) != 0 ? pe->mins[2] : pe->maxs[2];
 
 			VectorAdd(tmp, pe->origin, tmp);
 			VectorCopy(tmp, p[j]);
@@ -226,7 +227,7 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 
 /*
 ================
-PM_DrawBBox(vec3_t mins, vec3_t maxs, vec3_t origin, int pcolor, float life)
+PM_DrawBBox(Vector mins, Vector maxs, Vector origin, int pcolor, float life)
 
 ================
 */
@@ -240,9 +241,9 @@ void PM_DrawBBox(vec3_t mins, vec3_t maxs, vec3_t origin, int pcolor, float life
 
 	for (j = 0; j < 8; j++)
 	{
-		tmp[0] = (j & 1) ? mins[0] - gap : maxs[0] + gap;
-		tmp[1] = (j & 2) ? mins[1] - gap : maxs[1] + gap;
-		tmp[2] = (j & 4) ? mins[2] - gap : maxs[2] + gap;
+		tmp[0] = (j & 1) != 0 ? mins[0] - gap : maxs[0] + gap;
+		tmp[1] = (j & 2) != 0 ? mins[1] - gap : maxs[1] + gap;
+		tmp[2] = (j & 4) != 0 ? mins[2] - gap : maxs[2] + gap;
 
 		VectorAdd(tmp, origin, tmp);
 		VectorCopy(tmp, p[j]);
@@ -259,8 +260,6 @@ void PM_DrawBBox(vec3_t mins, vec3_t maxs, vec3_t origin, int pcolor, float life
 	}
 }
 
-#ifndef DEDICATED
-
 /*
 ================
 PM_ViewEntity
@@ -271,7 +270,7 @@ Shows particles at that entities bbox
 Tries to shoot a ray out by about 128 units.
 ================
 */
-void PM_ViewEntity(void)
+void PM_ViewEntity()
 {
 	vec3_t forward, right, up;
 	float raydist = 256.0f;
@@ -287,7 +286,7 @@ void PM_ViewEntity(void)
 		return;
 #endif
 
-	AngleVectors(pmove->angles, forward, right, up); // Determine movement angles
+	AngleVectors(pmove->angles, &forward, &right, &up); // Determine movement angles
 
 	VectorCopy(pmove->origin, origin);
 
@@ -313,5 +312,3 @@ void PM_ViewEntity(void)
 		PM_DrawPhysEntBBox(trace.ent, pcolor, 0.3f);
 	}
 }
-
-#endif
