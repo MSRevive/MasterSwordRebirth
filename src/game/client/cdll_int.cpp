@@ -52,10 +52,6 @@ TeamFortressViewport *gViewPort = NULL;
 extern CHud gHUD;
 extern float g_fMenuLastClosed;
 
-// IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in CLRender.cpp
-extern void InitScreenGlow(void);
-extern void RenderScreenGlow(void);
-
 void InitInput(void);
 void EV_HookEvents(void);
 void IN_Commands(void);
@@ -312,10 +308,6 @@ int DLLEXPORT HUD_VidInit(void)
 	dbg("Call VGui_Startup");
 	VGui_Startup();
 
-	dbg("Call Glow");
-	// IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in tri.cpp
-	InitScreenGlow();
-
 	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]\n";
 
 	enddbg;
@@ -359,20 +351,11 @@ redraw the HUD.
 
 int DLLEXPORT HUD_Redraw(float time, int intermission)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call gHUD.Redraw");
-
 	logfileopt << "HUD_Redraw...";
-
-	// IMAGE-SPACE GLOW - Thothie TWHL JUN2010_22 - see comments in tri.cpp
-	RenderScreenGlow();
 
 	gHUD.Redraw(time, intermission);
 
 	//logfileopt << "END\r\n";
-	enddbg;
 	return 1;
 }
 
