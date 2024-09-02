@@ -48,8 +48,6 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_help", "1", FCVAR_ARCHIVE); // Whether help tips are shown
 	CVAR_CREATE("ms_reflect", "1", FCVAR_ARCHIVE);						// Allow reflective surfaces
 	CVAR_CREATE("ms_reflect_dbg", "0", FCVAR_ARCHIVE);					// Debug reflective surfaces
-	CVAR_CREATE("ms_bloom_darken", "-1", FCVAR_ARCHIVE);				// MiB DEC2010 - Darken bloom
-	CVAR_CREATE("ms_bloom_level", "0", FCVAR_ARCHIVE);					// Thothie DEC2010_30 - Fix ms_bloom_level stickiness
 	//CVAR_CREATE("ms_reconnect_delay", "5", FCVAR_ARCHIVE);				// Thothie AUG2017 - Make reconnect delay adjustable client side
 	CVAR_CREATE("ms_quickslot_timeout", "2.5", FCVAR_ARCHIVE);		// Timeout for the quickslots
 	CVAR_CREATE("ms_autocharge", "1", FCVAR_ARCHIVE);					// MiB MAR2012_05 - Let's you auto-charge your attack
