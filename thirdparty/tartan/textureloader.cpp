@@ -55,10 +55,6 @@ namespace Tartan
 	{
 		return LoadTexturePCX( iTextureID, sFilePath );
 	}*/
-		else if (strcmp(filetypestring, ".bmp") == 0)
-		{
-			return LoadTextureBMP(sFilePath, LoadTex);
-		}
 		else
 		{
 			std::cout << "Tartan::LoadTextureFile() Error: file type for file " << sFilePath << " unknown." << std::endl;
