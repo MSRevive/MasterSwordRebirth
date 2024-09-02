@@ -104,7 +104,7 @@ set(HL1
 	"world.cpp"
 	"../shared/cbase.h"
 	"../shared/movement/pm_defs.h"
-	"../shared/movement/pm_math.c"
+	"../shared/movement/pm_math.cpp"
 	"../shared/movement/pm_movevars.h"
 	"../shared/voice_gamemgr.cpp"
 	"../../public/engine/progdefs.h"

@@ -155,6 +155,7 @@ typedef struct hull_s
 #define VEC_HULL_MAX 36
 #define VEC_VIEW 28
 #define STOP_EPSILON 0.1
+#define	DIST_EPSILON 0.125f	// Max error from network coordinate quantization
 
 #define CTEXTURESMAX 512	// max number of textures loaded
 #define CBTEXTURENAMEMAX 13 // only load first n chars of name
