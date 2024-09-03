@@ -1,4 +1,4 @@
-#include "steamhelper.h"
+#include "SteamClientHelper.h"
 #include "strhelper.h"
 #include "hud.h"
 #include "cl_util.h"
@@ -6,25 +6,25 @@
 static CSteamAPIContext s_SteamAPIContext;
 CSteamAPIContext* steamapicontext = &s_SteamAPIContext;
 
-static CSteamHelper s_SteamHelper;
-CSteamHelper* steamhelper = &s_SteamHelper;
+static CSteamClientHelper s_SteamHelper;
+CSteamClientHelper* steamhelper = &s_SteamHelper;
 
 static bool g_bTryLoadSteamAPI = false;
 
-CSteamHelper::CSteamHelper() :
-	m_CallbackUserStatsReceived(this, &CSteamHelper::OnUserStatsReceived),
-	m_CallbackUserStatsStored(this, &CSteamHelper::OnUserStatsStored),
-	m_CallbackAchievementStored(this, &CSteamHelper::OnAchievementStored)
+CSteamClientHelper::CSteamClientHelper() :
+	m_CallbackUserStatsReceived(this, &CSteamClientHelper::OnUserStatsReceived),
+	m_CallbackUserStatsStored(this, &CSteamClientHelper::OnUserStatsStored),
+	m_CallbackAchievementStored(this, &CSteamClientHelper::OnAchievementStored)
 {
 	g_bTryLoadSteamAPI = true;
 	m_bHasLoadedSteamStats = false;
 }
 
-CSteamHelper::~CSteamHelper()
+CSteamClientHelper::~CSteamClientHelper()
 {
 }
 
-void CSteamHelper::Think()
+void CSteamClientHelper::Think()
 {
 	if (g_bTryLoadSteamAPI) // Load Steam API
 	{
@@ -36,7 +36,7 @@ void CSteamHelper::Think()
 	}
 }
 
-void CSteamHelper::SetAchievement(const char* str)
+void CSteamClientHelper::SetAchievement(const char* str)
 {
 	if (!m_bHasLoadedSteamStats)
 		return;
@@ -45,7 +45,7 @@ void CSteamHelper::SetAchievement(const char* str)
 	steamapicontext->SteamUserStats()->StoreStats();
 }
 
-void CSteamHelper::SetStat(const char* str, int value)
+void CSteamClientHelper::SetStat(const char* str, int value)
 {
 	if (!m_bHasLoadedSteamStats)
 		return;
@@ -54,7 +54,7 @@ void CSteamHelper::SetStat(const char* str, int value)
 	steamapicontext->SteamUserStats()->StoreStats();
 }
 
-void CSteamHelper::OnUserStatsReceived(UserStatsReceived_t* pUserStatsReceived)
+void CSteamClientHelper::OnUserStatsReceived(UserStatsReceived_t* pUserStatsReceived)
 {
 	if (m_bHasLoadedSteamStats || !steamapicontext || !steamapicontext->SteamUserStats() || (pUserStatsReceived == NULL) || (pUserStatsReceived->m_eResult != k_EResultOK))
 		return;
@@ -69,12 +69,12 @@ void CSteamHelper::OnUserStatsReceived(UserStatsReceived_t* pUserStatsReceived)
 	steamapicontext->SteamUserStats()->GetStat("DEATHS", &iDeaths);
 }
 
-void CSteamHelper::OnUserStatsStored(UserStatsStored_t* pCallback)
+void CSteamClientHelper::OnUserStatsStored(UserStatsStored_t* pCallback)
 {
 	// unused
 }
 
-void CSteamHelper::OnAchievementStored(UserAchievementStored_t* pCallback)
+void CSteamClientHelper::OnAchievementStored(UserAchievementStored_t* pCallback)
 {
 	// unused
 }

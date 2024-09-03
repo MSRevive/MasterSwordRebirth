@@ -11,7 +11,7 @@
 #include "hudscript.h"
 #include "ms/vgui_hud.h"
 #include "logger.h"
-#include "steamhelper.h"
+//#include "SteamClientHelper.h"
 //#include "richpresence.h"
 
 void VGUI_Think();

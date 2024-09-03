@@ -140,7 +140,7 @@ set(HL1_Headers
 source_group("HL1\\Headers" FILES ${HL1_Headers})
 
 set(MS
-	"steamhelper.cpp"
+	"SteamClientHelper.cpp"
 	"entity.cpp"
 	"ms/action.cpp"
 	"ms/clglobal.cpp"
@@ -170,7 +170,7 @@ set(MS_Headers
 	"ms/hudscript.h"
 	"ms/menu.h"
 	"richpresence.h"
-	"steamhelper.h"
+	"SteamClientHelper.h"
 	"../server/monsters/msmonster.h"
 	"../server/player/player.h"
 	"../shared/ms/global.h"

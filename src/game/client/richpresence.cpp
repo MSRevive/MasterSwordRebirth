@@ -11,7 +11,7 @@
 #include "hud_iface.h"
 #include "vgui_scorepanel.h"
 #include "richpresence.h"
-#include "steamhelper.h"
+#include "SteamClientHelper.h"
 #include "discord/discord_rpc.h"
 #include <time.h>
 

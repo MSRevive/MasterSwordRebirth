@@ -4,7 +4,7 @@
 #include "netadr.h"
 #include "net_api.h"
 #include "filesystem_shared.h"
-#include "steamhelper.h"
+#include "SteamClientHelper.h"
 #include "richpresence.h"
 #include "fmod/soundengine.h"
 
