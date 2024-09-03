@@ -66,6 +66,8 @@ void HTTPRequest::SendRequest()
 {
 	requestState = RequestState::REQUEST_EXECUTED;
 	handle = steamHTTP->CreateHTTPRequest(httpMethod, pchApiUrl);
+	steamHTTP->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
+	steamHTTP->SetHTTPRequestHeaderValue(handle, "User-Agent", "MSRebith SteamHTTP");
 	if (handle == NULL)
 	{
 		Cleanup();

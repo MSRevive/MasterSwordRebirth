@@ -5,7 +5,9 @@ void CRequestManager::Init(void)
 {
 	// FN Doesn't work on listen servers.
 	if (!IS_DEDICATED_SERVER())
+	{
 		return;
+	}
 
 	if (!m_bLoaded) 
 	{

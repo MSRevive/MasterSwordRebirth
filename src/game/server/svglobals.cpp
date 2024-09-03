@@ -193,7 +193,12 @@ void MSWorldSpawn()
 	// 	}
 	// }
 
-	FNShared::Validate();
+	if (FNShared::IsEnabled())
+	{	
+		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
+		g_FNRequestManager.Init();
+		FNShared::Validate();
+	}
 
 	WriteCrashCfg();
 }
