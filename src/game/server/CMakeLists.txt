@@ -1,6 +1,6 @@
 add_library(steam_api SHARED IMPORTED)
 
-target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/thirdparty/steam)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
