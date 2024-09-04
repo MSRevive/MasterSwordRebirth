@@ -11,6 +11,7 @@
 #include "cstringpool.h"
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
+#include "SteamServerHelper.h"
 #include "fn/FNSharedDefs.h"
 #include "fn/RequestManager.h"
 #include "fn/HTTPRequest.h"
@@ -31,6 +32,7 @@ mslist<modelprecachelist_t> gSoundPrecacheList;
 
 CStringPool g_StringPool;
 CRequestManager g_FNRequestManager;
+CSteamServerHelper g_SteamServerHelper;
 
 //Master Sword CVARs
 /*
@@ -112,7 +114,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_debug_mem);
 	CVAR_REGISTER(&ms_fake_hp);		 //AUG2011_17 Thothie - moving fakehp functions to cvar
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
-	//CVAR_REGISTER(&ms_crashcfg);
 
 #ifdef DEV_BUILD
 	CVAR_REGISTER(&ms_devlog);
@@ -163,6 +164,9 @@ void MSWorldSpawn()
 
 	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
 
+	//TODO: move to MSGlobalInit so it's not called every map change.
+	g_SteamServerHelper.Init();
+
 	// if (MSGlobals::CentralEnabled)
 	// {
 	// 	// Initialize FN Request Manager
@@ -196,7 +200,7 @@ void MSWorldSpawn()
 	if (FNShared::IsEnabled())
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
-		g_FNRequestManager.Init();
+		g_FNRequestManager.Init(g_SteamServerHelper.GetHTTP());
 		FNShared::Validate();
 	}
 
@@ -207,6 +211,7 @@ void MSWorldSpawn()
 void MSGameThink()
 {
 	g_FNRequestManager.Think();
+	g_SteamServerHelper.Think();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -287,6 +292,9 @@ void MSGameEnd()
 	HighestPrecache = -1;
 	TotalModelPrecaches = 1;
 	CSVGlobals::LogScripts = true;
+
+	//TODO: Move this to when the DLL is shutdown on server close.
+	g_SteamServerHelper.Shutdown();
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.

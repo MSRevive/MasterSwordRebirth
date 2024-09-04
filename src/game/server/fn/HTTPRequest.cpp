@@ -11,7 +11,6 @@
 #include "player.h"
 #include <string>
 
-static bool g_bSuppressResponse = false;
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
 JSONDocument* ParseJSON(const char* data, size_t length)
@@ -121,8 +120,6 @@ void HTTPRequest::Cleanup()
 	delete pJSONData;
 	pJSONData = nullptr;
 
-	steamHTTP = nullptr;
-
 	ReleaseHandle();
 }
 
@@ -138,7 +135,7 @@ void HTTPRequest::ReleaseHandle()
 
 void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 {
-	if (g_bSuppressResponse || (handle == NULL) || (p == nullptr) || (p->m_hRequest != handle))
+	if (suppressResponse || (handle == NULL) || (p == nullptr) || (p->m_hRequest != handle))
 	{
 		ReleaseHandle();
 		return;

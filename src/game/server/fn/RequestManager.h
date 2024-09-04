@@ -11,10 +11,9 @@ class CRequestManager
 public:
 	CRequestManager() = default;
 	~CRequestManager() = default;
-	void Init(void);
-	void Think(void);
+	void Init(ISteamHTTP* steamHTTP);
+	void Think(bool suppressResp = false);
 	void Shutdown(void);
-	void RunCallbacks(void);
 	void SendAndWait(void);
 	static void SetBaseURL(const char* url);
 

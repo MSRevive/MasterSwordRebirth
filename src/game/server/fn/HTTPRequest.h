@@ -24,10 +24,10 @@ public:
 	virtual const char* GetName() { return "N/A"; }
 	virtual void OnResponse(bool bSuccessful) { }
 
-	static void SetBaseUrl(const char* url);
+	static void SetBaseURL(const char* url);
 	void SetHTTPContext(ISteamHTTP* steamHTTP) { this->steamHTTP = steamHTTP; };
 	void SendRequest();
-	static void SetBaseURL(const char* url);
+	void SuppressResponse(bool suppressResp) { this->suppressResponse = suppressResp; }
 
 	int requestState;
 
@@ -63,6 +63,8 @@ private: // Keep this private.
 	CCallResult<HTTPRequest, HTTPRequestCompleted_t> m_CallbackOnHTTPRequestCompleted;
 	HTTPRequestHandle handle;
 	EHTTPMethod httpMethod;
+
+	bool suppressResponse = false;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.

@@ -1,7 +1,7 @@
 #include "RequestManager.h"
 #include "msdllheaders.h"
 
-void CRequestManager::Init(void)
+void CRequestManager::Init(ISteamHTTP* steamHTTP)
 {
 	// FN Doesn't work on listen servers.
 	if (!IS_DEDICATED_SERVER())
@@ -11,24 +11,25 @@ void CRequestManager::Init(void)
 
 	if (!m_bLoaded) 
 	{
-		//m_SteamGameServerAPIContext = &CSteamGameServerAPIContext.Init();
-		m_SteamHTTP = SteamGameServerHTTP();
+		m_SteamHTTP = steamHTTP;
 		m_bLoaded = true;
 	}
 }
 
-void CRequestManager::Think(void)
+void CRequestManager::Think(bool suppressResp)
 {
 	if (m_bLoaded)
 	{
-		if (!m_SteamHTTP)
-		{
-			m_SteamHTTP = SteamGameServerHTTP();
-		}
+		// if (!m_SteamHTTP)
+		// {
+		// 	m_SteamHTTP = SteamGameServerHTTP();
+		// }
 
 		for (int i = (m_vRequests.size() - 1); i >= 0; i--)
 		{
 			HTTPRequest* req = m_vRequests[i];
+			req->SuppressResponse(suppressResp);
+			req->SetHTTPContext(m_SteamHTTP);
 			switch (req->requestState)
 			{
 			case HTTPRequest::RequestState::REQUEST_QUEUED:
@@ -46,16 +47,8 @@ void CRequestManager::Think(void)
 
 void CRequestManager::Shutdown(void)
 {	
-	//m_SteamGameServerAPIContext.Shutdown();
-	m_SteamHTTP	= nullptr;
 	m_vRequests.clear();
 	m_bLoaded = false;
-}
-
-void CRequestManager::RunCallbacks(void) 
-{
-	if (SteamGameServerHTTP())
-		SteamGameServer_RunCallbacks();
 }
 
 extern void wait(unsigned long ms);
@@ -63,17 +56,14 @@ void CRequestManager::SendAndWait(void)
 {
 	if (m_bLoaded)
 	{
-		//g_bSuppressResponse = true;
-
 		do
 		{
-			Think();
-			RunCallbacks();
+			Think(true);
+			SteamGameServer_RunCallbacks();
 			wait(10);
 		} while ((m_SteamHTTP != nullptr) && m_vRequests.size());
 
 		Shutdown();
-		//g_bSuppressResponse = false;
 	}
 }
 
