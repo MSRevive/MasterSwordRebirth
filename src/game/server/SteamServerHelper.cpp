@@ -4,6 +4,11 @@
 static CSteamAPIContext s_SteamAPIContext;
 static CSteamGameServerAPIContext s_SteamGameServerAPIContext;
 
+extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDebugText )
+{
+	g_engfuncs.pfnServerPrint(pchDebugText);
+}
+
 CSteamServerHelper::CSteamServerHelper()
 {
 	m_SteamGameServerContext = &s_SteamGameServerAPIContext;
@@ -12,12 +17,15 @@ CSteamServerHelper::CSteamServerHelper()
 
 void CSteamServerHelper::Init(void)
 {
-	if (!IS_DEDICATED_SERVER())
-	{
-		s_SteamAPIContext.Init();
-	}else{
-		s_SteamGameServerAPIContext.Init();
-	}
+	s_SteamAPIContext.Init();
+	g_engfuncs.pfnServerPrint("steam init\n");
+	s_SteamGameServerAPIContext.Init();
+	m_SteamGameServerContext->SteamGameServerUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);
+	// if (!IS_DEDICATED_SERVER())
+	// {
+	// }else{
+		
+	// }
 
 	m_bLoaded = true;
 }
@@ -37,7 +45,9 @@ void CSteamServerHelper::Shutdown(void)
 
 void CSteamServerHelper::Think(void)
 {
-	return;
+	ISteamHTTP* m_steamHTTP = m_SteamGameServerContext->SteamHTTP();
+	if (m_steamHTTP == nullptr)
+		g_engfuncs.pfnServerPrint("http is null \n");
 }
 
 // Should be handled by the engine?

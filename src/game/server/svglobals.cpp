@@ -165,7 +165,7 @@ void MSWorldSpawn()
 	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
 
 	//TODO: move to MSGlobalInit so it's not called every map change.
-	g_SteamServerHelper.Init();
+	//g_SteamServerHelper.Init();
 
 	// if (MSGlobals::CentralEnabled)
 	// {
@@ -210,8 +210,8 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	g_FNRequestManager.Think();
-	g_SteamServerHelper.Think();
+	//g_SteamServerHelper.Think();
+	//g_FNRequestManager.Think();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -294,7 +294,7 @@ void MSGameEnd()
 	CSVGlobals::LogScripts = true;
 
 	//TODO: Move this to when the DLL is shutdown on server close.
-	g_SteamServerHelper.Shutdown();
+	//g_SteamServerHelper.Shutdown();
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.

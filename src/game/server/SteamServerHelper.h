@@ -3,7 +3,7 @@
 
 // This is required to use CSteamAPIContext and such, 
 // which we have to do this because the API isn't exposed by the engine.
-// We could probably expose it ourselves sense we're using ReHLDS, but too lazy.
+// We could probably expose it ourselves since we're using ReHLDS, but too lazy.
 #define VERSION_SAFE_STEAM_API_INTERFACES
 
 #include <steam/steam_api.h>

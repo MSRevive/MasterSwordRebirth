@@ -9,7 +9,7 @@ target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/thirdparty/SDL2)
 target_include_directories(fmod INTERFACE ${BASEDIR}/thirdparty/fmod)
 target_include_directories(discord INTERFACE ${BASEDIR}/thirdparty/discord)
-target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/thirdparty/steam)
 
 if (WIN32)
 	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
