@@ -1,15 +1,3 @@
-add_executable(maphash ${CMAKE_CURRENT_SOURCE_DIR}/maphash.cpp)
-
-set_common_properties(maphash)
-
-target_include_directories(maphash PRIVATE
-	${BASEDIR}/src/game/server
-	${BASEDIR}/src/game/shared
-	${BASEDIR}/src/game/shared/ms
-	${BASEDIR}/src/game/shared/ms/crc
-	${BASEDIR}/thirdparty
-	${CMAKE_CURRENT_SOURCE_DIR})
-
 ################################################################################
 # Source groups
 ################################################################################
@@ -28,5 +16,20 @@ source_group("Source Files" FILES ${Source_Files})
 set(ALL_FILES
 	${Source_Files}
 )
+
+add_executable(maphash ${ALL_FILES})
+
+################################################################################
+# Target Properties
+################################################################################
+set_common_properties(maphash)
+
+target_include_directories(maphash PRIVATE
+	${BASEDIR}/src/game/server
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/src/game/shared/ms/crc
+	${BASEDIR}/thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR})
 
 target_sources(maphash PRIVATE ${ALL_FILES})
