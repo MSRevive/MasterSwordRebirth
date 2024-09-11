@@ -8,12 +8,12 @@
 /*******************************************************************************/
 
 //#include "stream_safe.h"
+//using namespace std;
 
 #include "tgastruct.h"
 
 #include <gl/gl.h>	  // Header File For The OpenGL32 Library
 #include <gl/glu.h>	  // Header File For The GLu32 Library
-#include <nvidia/gl/glaux.h> // Header File For The GLaux Library
 
 #include "msfileio.h"
 #include "textureloader.h"
@@ -344,41 +344,6 @@ namespace Tartan
 		while (currentpixel < pixelcount); // Loop while there are still pixels left
 		File.Close();					   // Close the file
 		return true;					   // return success
-	}
-
-	bool LoadTextureBMP(const char *sFilepath, loadtex_t &LoadTex)
-	{
-		// load the image
-		AUX_RGBImageRec *pImg = auxDIBImageLoad(sFilepath);
-		if (!pImg)
-			return false;
-
-		LoadTex.Width = pImg->sizeX;
-		LoadTex.Height = pImg->sizeY;
-
-		// Typical Texture Generation Using Data From The TGA ( CHANGE )
-		glGenTextures(1, (GLuint *)&LoadTex.GLTexureID); // Create The Texture ( CHANGE )
-		glBindTexture(GL_TEXTURE_2D, LoadTex.GLTexureID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-		// load the texture, generating mipmaps for it at the same time
-		gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pImg->sizeX, pImg->sizeY, GL_RGB, GL_UNSIGNED_BYTE, pImg->data);
-		/*glTexImage2D( GL_TEXTURE_2D, 0,
-		3,
-		pImg->sizeX, pImg->sizeY,
-		0,
-		GL_RGB, GL_UNSIGNED_BYTE,
-		pImg->data );*/
-
-		free(pImg->data);
-		free(pImg);
-
-		return true;
 	}
 
 } // namespace Tartan

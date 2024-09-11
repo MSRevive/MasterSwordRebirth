@@ -21,7 +21,6 @@ namespace Tartan
 
 	//bool LoadTexturePCX( int &iReturnedTextureID, const char *sFilepath ); //!< Load pcx texture file in sFilePath, returns OpenGL textureid in textureid
 	bool LoadTextureTGA(const char *sFilepath, loadtex_t &LoadTex); //!< Load tga texture file in sFilePath, returns OpenGL textureid in textureid
-	bool LoadTextureBMP(const char *sFilepath, loadtex_t &LoadTex);
 }
 
 void GetCompatibleTextureSize(uint SizeW, uint SizeH, uint &outNewSizeW, uint &outNewSizeH, float &outTexCoordU, float &outTexCoordV);
