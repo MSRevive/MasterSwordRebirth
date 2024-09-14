@@ -1,3 +1,18 @@
+add_executable(scriptpack)
+
+################################################################################
+# Target Properties
+################################################################################
+set_common_properties(scriptpack)
+
+target_include_directories(scriptpack PRIVATE
+	${BASEDIR}/src/game/server
+	${BASEDIR}/src/game/shared
+	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/thirdparty
+	${CMAKE_CURRENT_SOURCE_DIR}
+	tclap)
+
 ################################################################################
 # Source groups
 ################################################################################
@@ -24,20 +39,5 @@ source_group("Source Files" FILES ${Source_Files})
 set(ALL_FILES
 	${Source_Files}
 )
-
-add_executable(scriptpack ${ALL_FILES})
-
-################################################################################
-# Target Properties
-################################################################################
-set_common_properties(scriptpack)
-
-target_include_directories(scriptpack PRIVATE
-	${BASEDIR}/src/game/server
-	${BASEDIR}/src/game/shared
-	${BASEDIR}/src/game/shared/ms
-	${BASEDIR}/thirdparty
-	${CMAKE_CURRENT_SOURCE_DIR}
-	tclap)
 
 target_sources(scriptpack PRIVATE ${ALL_FILES})

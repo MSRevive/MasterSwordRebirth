@@ -1,4 +1,4 @@
-//========= Copyright Valve Corporation, All rights reserved. ============//
+//====== Copyright � 1996-2008, Valve Corporation, All rights reserved. =======
 //
 // Purpose: public interface to user remote file storage in Steam
 //
@@ -41,6 +41,7 @@ struct SteamParamStringArray_t
 typedef uint64 UGCHandle_t;
 typedef uint64 PublishedFileUpdateHandle_t;
 typedef uint64 PublishedFileId_t;
+const PublishedFileId_t k_PublishedFileIdInvalid = 0;
 const UGCHandle_t k_UGCHandleInvalid = 0xffffffffffffffffull;
 const PublishedFileUpdateHandle_t k_PublishedFileUpdateHandleInvalid = 0xffffffffffffffffull;
 
@@ -56,12 +57,6 @@ const uint32 k_cchTagListMax = 1024 + 1;
 const uint32 k_cchFilenameMax = 260;
 const uint32 k_cchPublishedFileURLMax = 256;
 
-// Ways to handle a synchronization conflict
-enum EResolveConflict
-{
-	k_EResolveConflictKeepClient = 1,		// The local version of each file will be used to overwrite the server version
-	k_EResolveConflictKeepServer = 2,		// The server version of each file will be used to overwrite the local version
-};
 
 enum ERemoteStoragePlatform
 {
@@ -87,21 +82,25 @@ enum EWorkshopFileType
 {
 	k_EWorkshopFileTypeFirst = 0,
 
-	k_EWorkshopFileTypeCommunity = 0,
-	k_EWorkshopFileTypeMicrotransaction = 1,
-	k_EWorkshopFileTypeCollection = 2,
-	k_EWorkshopFileTypeArt = 3,
-	k_EWorkshopFileTypeVideo = 4,
-	k_EWorkshopFileTypeScreenshot = 5,
-	k_EWorkshopFileTypeGame = 6,
-	k_EWorkshopFileTypeSoftware = 7,
-	k_EWorkshopFileTypeConcept = 8,
-	k_EWorkshopFileTypeWebGuide = 9,
-	k_EWorkshopFileTypeIntegratedGuide = 10,
-	k_EWorkshopFileTypeMerch = 11,
+	k_EWorkshopFileTypeCommunity			  = 0,		// normal Workshop item that can be subscribed to
+	k_EWorkshopFileTypeMicrotransaction		  = 1,		// Workshop item that is meant to be voted on for the purpose of selling in-game
+	k_EWorkshopFileTypeCollection			  = 2,		// a collection of Workshop or Greenlight items
+	k_EWorkshopFileTypeArt					  = 3,		// artwork
+	k_EWorkshopFileTypeVideo				  = 4,		// external video
+	k_EWorkshopFileTypeScreenshot			  = 5,		// screenshot
+	k_EWorkshopFileTypeGame					  = 6,		// Greenlight game entry
+	k_EWorkshopFileTypeSoftware				  = 7,		// Greenlight software entry
+	k_EWorkshopFileTypeConcept				  = 8,		// Greenlight concept
+	k_EWorkshopFileTypeWebGuide				  = 9,		// Steam web guide
+	k_EWorkshopFileTypeIntegratedGuide		  = 10,		// application integrated guide
+	k_EWorkshopFileTypeMerch				  = 11,		// Workshop merchandise meant to be voted on for the purpose of being sold
+	k_EWorkshopFileTypeControllerBinding	  = 12,		// Steam Controller bindings
+	k_EWorkshopFileTypeSteamworksAccessInvite = 13,		// internal
+	k_EWorkshopFileTypeSteamVideo			  = 14,		// Steam video
+	k_EWorkshopFileTypeGameManagedItem		  = 15,		// managed completely by the game, not the user, and not shown on the web
 
-	// Update k_EWorkshopFileTypeMax if you add values
-	k_EWorkshopFileTypeMax = 12
+	// Update k_EWorkshopFileTypeMax if you add values.
+	k_EWorkshopFileTypeMax = 16
 	
 };
 
@@ -110,6 +109,7 @@ enum EWorkshopVote
 	k_EWorkshopVoteUnvoted = 0,
 	k_EWorkshopVoteFor = 1,
 	k_EWorkshopVoteAgainst = 2,
+	k_EWorkshopVoteLater = 3,
 };
 
 enum EWorkshopFileAction
@@ -135,6 +135,24 @@ enum EWorkshopVideoProvider
 	k_EWorkshopVideoProviderYoutube = 1
 };
 
+
+enum EUGCReadAction
+{
+	// Keeps the file handle open unless the last byte is read.  You can use this when reading large files (over 100MB) in sequential chunks.
+	// If the last byte is read, this will behave the same as k_EUGCRead_Close.  Otherwise, it behaves the same as k_EUGCRead_ContinueReading.
+	// This value maintains the same behavior as before the EUGCReadAction parameter was introduced.
+	k_EUGCRead_ContinueReadingUntilFinished = 0,
+
+	// Keeps the file handle open.  Use this when using UGCRead to seek to different parts of the file.
+	// When you are done seeking around the file, make a final call with k_EUGCRead_Close to close it.
+	k_EUGCRead_ContinueReading = 1,
+
+	// Frees the file handle.  Use this when you're done reading the content.  
+	// To read the file from Steam again you will need to call UGCDownload again. 
+	k_EUGCRead_Close = 2,	
+};
+
+
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing, reading and writing files stored remotely 
 //			and cached locally
@@ -152,8 +170,17 @@ class ISteamRemoteStorage
 		// file operations
 		virtual bool	FileWrite( const char *pchFile, const void *pvData, int32 cubData ) = 0;
 		virtual int32	FileRead( const char *pchFile, void *pvData, int32 cubDataToRead ) = 0;
+		
+		CALL_RESULT( RemoteStorageFileWriteAsyncComplete_t )
+		virtual SteamAPICall_t FileWriteAsync( const char *pchFile, const void *pvData, uint32 cubData ) = 0;
+		
+		CALL_RESULT( RemoteStorageFileReadAsyncComplete_t )
+		virtual SteamAPICall_t FileReadAsync( const char *pchFile, uint32 nOffset, uint32 cubToRead ) = 0;
+		virtual bool	FileReadAsyncComplete( SteamAPICall_t hReadCall, void *pvBuffer, uint32 cubToRead ) = 0;
+		
 		virtual bool	FileForget( const char *pchFile ) = 0;
 		virtual bool	FileDelete( const char *pchFile ) = 0;
+		CALL_RESULT( RemoteStorageFileShareResult_t )
 		virtual SteamAPICall_t FileShare( const char *pchFile ) = 0;
 		virtual bool	SetSyncPlatforms( const char *pchFile, ERemoteStoragePlatform eRemoteStoragePlatform ) = 0;
 
@@ -175,7 +202,7 @@ class ISteamRemoteStorage
 		virtual const char *GetFileNameAndSize( int iFile, int32 *pnFileSizeInBytes ) = 0;
 
 		// configuration management
-		virtual bool GetQuota( int32 *pnTotalBytes, int32 *puAvailableBytes ) = 0;
+		virtual bool GetQuota( uint64 *pnTotalBytes, uint64 *puAvailableBytes ) = 0;
 		virtual bool IsCloudEnabledForAccount() = 0;
 		virtual bool IsCloudEnabledForApp() = 0;
 		virtual void SetCloudEnabledForApp( bool bEnabled ) = 0;
@@ -185,6 +212,7 @@ class ISteamRemoteStorage
 		// Downloads a UGC file.  A priority value of 0 will download the file immediately,
 		// otherwise it will wait to download the file until all downloads with a lower priority
 		// value are completed.  Downloads with equal priority will occur simultaneously.
+		CALL_RESULT( RemoteStorageDownloadUGCResult_t )
 		virtual SteamAPICall_t UGCDownload( UGCHandle_t hContent, uint32 unPriority ) = 0;
 		
 		// Gets the amount of data downloaded so far for a piece of content. pnBytesExpected can be 0 if function returns false
@@ -192,7 +220,7 @@ class ISteamRemoteStorage
 		virtual bool	GetUGCDownloadProgress( UGCHandle_t hContent, int32 *pnBytesDownloaded, int32 *pnBytesExpected ) = 0;
 
 		// Gets metadata for a file after it has been downloaded. This is the same metadata given in the RemoteStorageDownloadUGCResult_t call result
-		virtual bool	GetUGCDetails( UGCHandle_t hContent, AppId_t *pnAppID, char **ppchName, int32 *pnFileSizeInBytes, CSteamID *pSteamIDOwner ) = 0;
+		virtual bool	GetUGCDetails( UGCHandle_t hContent, AppId_t *pnAppID, OUT_STRING() char **ppchName, int32 *pnFileSizeInBytes, OUT_STRUCT() CSteamID *pSteamIDOwner ) = 0;
 
 		// After download, gets the content of the file.  
 		// Small files can be read all at once by calling this function with an offset of 0 and cubDataToRead equal to the size of the file.
@@ -200,7 +228,7 @@ class ISteamRemoteStorage
 		// enough memory for each chunk).  Once the last byte is read, the file is implicitly closed and further calls to UGCRead will fail
 		// unless UGCDownload is called again.
 		// For especially large files (anything over 100MB) it is a requirement that the file is read in chunks.
-		virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead, uint32 cOffset ) = 0;
+		virtual int32	UGCRead( UGCHandle_t hContent, void *pvData, int32 cubDataToRead, uint32 cOffset, EUGCReadAction eAction ) = 0;
 
 		// Functions to iterate through UGC that has finished downloading but has not yet been read via UGCRead()
 		virtual int32	GetCachedUGCCount() = 0;
@@ -225,6 +253,7 @@ class ISteamRemoteStorage
 #endif
 
 		// publishing UGC
+		CALL_RESULT( RemoteStoragePublishFileProgress_t )
 		virtual SteamAPICall_t	PublishWorkshopFile( const char *pchFile, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags, EWorkshopFileType eWorkshopFileType ) = 0;
 		virtual PublishedFileUpdateHandle_t CreatePublishedFileUpdateRequest( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual bool UpdatePublishedFileFile( PublishedFileUpdateHandle_t updateHandle, const char *pchFile ) = 0;
@@ -233,32 +262,48 @@ class ISteamRemoteStorage
 		virtual bool UpdatePublishedFileDescription( PublishedFileUpdateHandle_t updateHandle, const char *pchDescription ) = 0;
 		virtual bool UpdatePublishedFileVisibility( PublishedFileUpdateHandle_t updateHandle, ERemoteStoragePublishedFileVisibility eVisibility ) = 0;
 		virtual bool UpdatePublishedFileTags( PublishedFileUpdateHandle_t updateHandle, SteamParamStringArray_t *pTags ) = 0;
+		CALL_RESULT( RemoteStorageUpdatePublishedFileResult_t )
 		virtual SteamAPICall_t	CommitPublishedFileUpdate( PublishedFileUpdateHandle_t updateHandle ) = 0;
 		// Gets published file details for the given publishedfileid.  If unMaxSecondsOld is greater than 0,
-		// cached data may be returned, depending on how long ago it was cached.  A value of 0 will force a refresh,
-		// a value of -1 will use cached data if it exists, no matter how old it is.
+		// cached data may be returned, depending on how long ago it was cached.  A value of 0 will force a refresh.
+		// A value of k_WorkshopForceLoadPublishedFileDetailsFromCache will use cached data if it exists, no matter how old it is.
+		CALL_RESULT( RemoteStorageGetPublishedFileDetailsResult_t )
 		virtual SteamAPICall_t	GetPublishedFileDetails( PublishedFileId_t unPublishedFileId, uint32 unMaxSecondsOld ) = 0;
+		CALL_RESULT( RemoteStorageDeletePublishedFileResult_t )
 		virtual SteamAPICall_t	DeletePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 		// enumerate the files that the current user published with this app
+		CALL_RESULT( RemoteStorageEnumerateUserPublishedFilesResult_t )
 		virtual SteamAPICall_t	EnumerateUserPublishedFiles( uint32 unStartIndex ) = 0;
+		CALL_RESULT( RemoteStorageSubscribePublishedFileResult_t )
 		virtual SteamAPICall_t	SubscribePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
+		CALL_RESULT( RemoteStorageEnumerateUserSubscribedFilesResult_t )
 		virtual SteamAPICall_t	EnumerateUserSubscribedFiles( uint32 unStartIndex ) = 0;
+		CALL_RESULT( RemoteStorageUnsubscribePublishedFileResult_t )
 		virtual SteamAPICall_t	UnsubscribePublishedFile( PublishedFileId_t unPublishedFileId ) = 0;
 		virtual bool UpdatePublishedFileSetChangeDescription( PublishedFileUpdateHandle_t updateHandle, const char *pchChangeDescription ) = 0;
+		CALL_RESULT( RemoteStorageGetPublishedItemVoteDetailsResult_t )
 		virtual SteamAPICall_t	GetPublishedItemVoteDetails( PublishedFileId_t unPublishedFileId ) = 0;
+		CALL_RESULT( RemoteStorageUpdateUserPublishedItemVoteResult_t )
 		virtual SteamAPICall_t	UpdateUserPublishedItemVote( PublishedFileId_t unPublishedFileId, bool bVoteUp ) = 0;
+		CALL_RESULT( RemoteStorageGetPublishedItemVoteDetailsResult_t )
 		virtual SteamAPICall_t	GetUserPublishedItemVoteDetails( PublishedFileId_t unPublishedFileId ) = 0;
+		CALL_RESULT( RemoteStorageEnumerateUserPublishedFilesResult_t )
 		virtual SteamAPICall_t	EnumerateUserSharedWorkshopFiles( CSteamID steamId, uint32 unStartIndex, SteamParamStringArray_t *pRequiredTags, SteamParamStringArray_t *pExcludedTags ) = 0;
+		CALL_RESULT( RemoteStoragePublishFileProgress_t )
 		virtual SteamAPICall_t	PublishVideo( EWorkshopVideoProvider eVideoProvider, const char *pchVideoAccount, const char *pchVideoIdentifier, const char *pchPreviewFile, AppId_t nConsumerAppId, const char *pchTitle, const char *pchDescription, ERemoteStoragePublishedFileVisibility eVisibility, SteamParamStringArray_t *pTags ) = 0;
+		CALL_RESULT( RemoteStorageSetUserPublishedFileActionResult_t )
 		virtual SteamAPICall_t	SetUserPublishedFileAction( PublishedFileId_t unPublishedFileId, EWorkshopFileAction eAction ) = 0;
+		CALL_RESULT( RemoteStorageEnumeratePublishedFilesByUserActionResult_t )
 		virtual SteamAPICall_t	EnumeratePublishedFilesByUserAction( EWorkshopFileAction eAction, uint32 unStartIndex ) = 0;
 		// this method enumerates the public view of workshop files
+		CALL_RESULT( RemoteStorageEnumerateWorkshopFilesResult_t )
 		virtual SteamAPICall_t	EnumeratePublishedWorkshopFiles( EWorkshopEnumerationType eEnumerationType, uint32 unStartIndex, uint32 unCount, uint32 unDays, SteamParamStringArray_t *pTags, SteamParamStringArray_t *pUserTags ) = 0;
 
+		CALL_RESULT( RemoteStorageDownloadUGCResult_t )
 		virtual SteamAPICall_t UGCDownloadToLocation( UGCHandle_t hContent, const char *pchLocation, uint32 unPriority ) = 0;
 };
 
-#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION011"
+#define STEAMREMOTESTORAGE_INTERFACE_VERSION "STEAMREMOTESTORAGE_INTERFACE_VERSION014"
 
 
 // callbacks
@@ -324,15 +369,6 @@ struct RemoteStorageAppSyncStatusCheck_t
 	EResult m_eResult;
 };
 
-//-----------------------------------------------------------------------------
-// Purpose: Sent after a conflict resolution attempt.
-//-----------------------------------------------------------------------------
-struct RemoteStorageConflictResolution_t
-{
-	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 6 };
-	AppId_t m_nAppID;
-	EResult m_eResult;
-};
 
 //-----------------------------------------------------------------------------
 // Purpose: The result of a call to FileShare()
@@ -342,6 +378,7 @@ struct RemoteStorageFileShareResult_t
 	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 7 };
 	EResult m_eResult;			// The result of the operation
 	UGCHandle_t m_hFile;		// The handle that can be shared with users and features
+	char m_rgchFilename[k_cchFilenameMax]; // The name of the file that was shared
 };
 
 
@@ -480,6 +517,7 @@ struct RemoteStorageGetPublishedFileDetailsResult_t
 	int32 m_nPreviewFileSize;		// Size of the preview file
 	char m_rgchURL[k_cchPublishedFileURLMax];	// URL (for a video or a website)
 	EWorkshopFileType m_eFileType;	// Type of the file
+	bool m_bAcceptedForUse;			// developer has specifically flagged this item as accepted in the Workshop
 };
 
 
@@ -491,6 +529,8 @@ struct RemoteStorageEnumerateWorkshopFilesResult_t
 	int32 m_nTotalResultCount;
 	PublishedFileId_t m_rgPublishedFileId[ k_unEnumeratePublishedFilesMaxResults ];
 	float m_rgScore[ k_unEnumeratePublishedFilesMaxResults ];
+	AppId_t m_nAppId;
+	uint32 m_unStartIndex;
 };
 
 
@@ -603,6 +643,37 @@ struct RemoteStoragePublishFileProgress_t
 };
 
 
+//-----------------------------------------------------------------------------
+// Purpose: Called when the content for a published file is updated
+//-----------------------------------------------------------------------------
+struct RemoteStoragePublishedFileUpdated_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 30 };
+	PublishedFileId_t m_nPublishedFileId;	// The published file id
+	AppId_t m_nAppID;						// ID of the app that will consume this file.
+	uint64 m_ulUnused;						// not used anymore
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when a FileWriteAsync completes
+//-----------------------------------------------------------------------------
+struct RemoteStorageFileWriteAsyncComplete_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 31 };
+	EResult	m_eResult;						// result
+};
+
+//-----------------------------------------------------------------------------
+// Purpose: Called when a FileReadAsync completes
+//-----------------------------------------------------------------------------
+struct RemoteStorageFileReadAsyncComplete_t
+{
+	enum { k_iCallback = k_iClientRemoteStorageCallbacks + 32 };
+	SteamAPICall_t m_hFileReadAsync;		// call handle of the async read which was made
+	EResult	m_eResult;						// result
+	uint32 m_nOffset;						// offset in the file this read was at
+	uint32 m_cubRead;						// amount read - will the <= the amount requested
+};
 
 #pragma pack( pop )
 
