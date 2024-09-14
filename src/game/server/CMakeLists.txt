@@ -1,6 +1,6 @@
 add_library(steam_api SHARED IMPORTED)
 
-target_include_directories(steam_api INTERFACE ${BASEDIR}/thirdparty/steam)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
@@ -40,7 +40,8 @@ target_include_directories(server PRIVATE
 	fn)
 
 target_compile_definitions(server PRIVATE
-	VALVE_DLL)
+	VALVE_DLL
+	VERSION_SAFE_STEAM_API_INTERFACES)
 
 if (UNIX)
 	target_compiler_definitions(server PRIVATE
@@ -131,7 +132,7 @@ set(MS
 	"store.cpp"
 	"sv_character.cpp"
 	"svglobals.cpp"
-	#"SteamServerHelper.cpp"
+	"SteamServerHelper.cpp"
 	"../shared/movement/pm_shared.cpp"
 	"../shared/movement/pm_shared.h"
 	"../shared/ms/msmonstershared.cpp"
@@ -157,7 +158,7 @@ set(MS_Headers
 	"shield.h"
 	"store.h"
 	"svglobals.h"
-	#"SteamServerHelper.h"
+	"SteamServerHelper.h"
 	"../shared/ms/groupfile.h"
 	"../shared/ms/mscharacter.h"
 	"../shared/ms/mscharacterheader.h"

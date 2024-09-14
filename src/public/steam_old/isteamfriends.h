@@ -1,4 +1,4 @@
-//====== Copyright (C) 1996-2008, Valve Corporation, All rights reserved. =====
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: interface to both friends list data and general information about users
 //
@@ -20,13 +20,13 @@
 enum EFriendRelationship
 {
 	k_EFriendRelationshipNone = 0,
-	k_EFriendRelationshipBlocked = 1,			// this doesn't get stored; the user has just done an Ignore on an friendship invite
+	k_EFriendRelationshipBlocked = 1,
 	k_EFriendRelationshipRequestRecipient = 2,
 	k_EFriendRelationshipFriend = 3,
 	k_EFriendRelationshipRequestInitiator = 4,
-	k_EFriendRelationshipIgnored = 5,			// this is stored; the user has explicit blocked this other user from comments/chat/etc
+	k_EFriendRelationshipIgnored = 5,
 	k_EFriendRelationshipIgnoredFriend = 6,
-	k_EFriendRelationshipSuggested_DEPRECATED = 7,		// was used by the original implementation of the facebook linking feature, but now unused.
+	k_EFriendRelationshipSuggested = 7,
 
 	// keep this updated
 	k_EFriendRelationshipMax = 8,
@@ -37,12 +37,6 @@ const int k_cchMaxFriendsGroupName = 64;
 
 // maximum number of groups a single user is allowed
 const int k_cFriendsGroupLimit = 100;
-
-// friends group identifier type
-typedef int16 FriendsGroupID_t;
-
-// invalid friends group identifier constant
-const FriendsGroupID_t k_FriendsGroupID_Invalid = -1;
 
 const int k_cEnumerateFollowersMax = 50;
 
@@ -81,7 +75,6 @@ enum EFriendFlags
 	k_EFriendFlagIgnored		= 0x200,
 	k_EFriendFlagIgnoredFriend	= 0x400,
 	k_EFriendFlagSuggested		= 0x800,
-	k_EFriendFlagChatMember		= 0x1000,
 	k_EFriendFlagAll			= 0xFFFF,
 };
 
@@ -176,7 +169,6 @@ public:
 	//
 	// If the name change fails to happen on the server, then an additional global PersonaStateChange_t will be posted
 	// to change the name back, in addition to the SetPersonaNameResponse_t callback.
-	CALL_RESULT( SetPersonaNameResponse_t )
 	virtual SteamAPICall_t SetPersonaName( const char *pchPersonaName ) = 0;
 
 	// gets the status of the current user
@@ -207,26 +199,9 @@ public:
 	virtual const char *GetFriendPersonaName( CSteamID steamIDFriend ) = 0;
 
 	// returns true if the friend is actually in a game, and fills in pFriendGameInfo with an extra details 
-	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, OUT_STRUCT() FriendGameInfo_t *pFriendGameInfo ) = 0;
+	virtual bool GetFriendGamePlayed( CSteamID steamIDFriend, FriendGameInfo_t *pFriendGameInfo ) = 0;
 	// accesses old friends names - returns an empty string when their are no more items in the history
 	virtual const char *GetFriendPersonaNameHistory( CSteamID steamIDFriend, int iPersonaName ) = 0;
-	// friends steam level
-	virtual int GetFriendSteamLevel( CSteamID steamIDFriend ) = 0;
-
-	// Returns nickname the current user has set for the specified player. Returns NULL if the no nickname has been set for that player.
-	virtual const char *GetPlayerNickname( CSteamID steamIDPlayer ) = 0;
-
-	// friend grouping (tag) apis
-	// returns the number of friends groups
-	virtual int GetFriendsGroupCount() = 0;
-	// returns the friends group ID for the given index (invalid indices return k_FriendsGroupID_Invalid)
-	virtual FriendsGroupID_t GetFriendsGroupIDByIndex( int iFG ) = 0;
-	// returns the name for the given friends group (NULL in the case of invalid friends group IDs)
-	virtual const char *GetFriendsGroupName( FriendsGroupID_t friendsGroupID ) = 0;
-	// returns the number of members in a given friends group
-	virtual int GetFriendsGroupMembersCount( FriendsGroupID_t friendsGroupID ) = 0;
-	// gets up to nMembersCount members of the given friends group, if fewer exist than requested those positions' SteamIDs will be invalid
-	virtual void GetFriendsGroupMembersList( FriendsGroupID_t friendsGroupID, OUT_ARRAY_CALL(nMembersCount, GetFriendsGroupMembersCount, friendsGroupID ) CSteamID *pOutSteamIDMembers, int nMembersCount ) = 0;
 
 	// returns true if the specified user meets any of the criteria specified in iFriendFlags
 	// iFriendFlags can be the union (binary or, |) of one or more k_EFriendFlags values
@@ -240,7 +215,7 @@ public:
 	// returns the most recent information we have about what's happening in a clan
 	virtual bool GetClanActivityCounts( CSteamID steamIDClan, int *pnOnline, int *pnInGame, int *pnChatting ) = 0;
 	// for clans a user is a member of, they will have reasonably up-to-date information, but for others you'll have to download the info to have the latest
-	virtual SteamAPICall_t DownloadClanActivityCounts( ARRAY_COUNT(cClansToRequest) CSteamID *psteamIDClans, int cClansToRequest ) = 0;
+	virtual SteamAPICall_t DownloadClanActivityCounts( CSteamID *psteamIDClans, int cClansToRequest ) = 0;
 
 	// iterators for getting users in a chat room, lobby, game server or clan
 	// note that large clans that cannot be iterated by the local user
@@ -309,7 +284,6 @@ public:
 	// you can only ask about clans that a user is a member of
 	// note that this won't download avatars automatically; if you get an officer,
 	// and no avatar image is available, call RequestUserInformation( steamID, false ) to download the avatar
-	CALL_RESULT( ClanOfficerListResponse_t )
 	virtual SteamAPICall_t RequestClanOfficerList( CSteamID steamIDClan ) = 0;
 
 	// iteration of clan officers - can only be done when a RequestClanOfficerList() call has completed
@@ -327,7 +301,7 @@ public:
 
 	// Rich Presence data is automatically shared between friends who are in the same game
 	// Each user has a set of Key/Value pairs
-	// Note the following limits: k_cchMaxRichPresenceKeys, k_cchMaxRichPresenceKeyLength, k_cchMaxRichPresenceValueLength
+	// Up to 20 different keys can be set
 	// There are two magic keys:
 	//		"status"  - a UTF-8 string that will show up in the 'view game info' dialog in the Steam friends list
 	//		"connect" - a UTF-8 string that contains the command-line for how a friend can connect to a game
@@ -361,13 +335,12 @@ public:
 	// this allows in-game access to group (clan) chats from in the game
 	// the behavior is somewhat sophisticated, because the user may or may not be already in the group chat from outside the game or in the overlay
 	// use ActivateGameOverlayToUser( "chat", steamIDClan ) to open the in-game overlay version of the chat
-	CALL_RESULT( JoinClanChatRoomCompletionResult_t )
 	virtual SteamAPICall_t JoinClanChatRoom( CSteamID steamIDClan ) = 0;
 	virtual bool LeaveClanChatRoom( CSteamID steamIDClan ) = 0;
 	virtual int GetClanChatMemberCount( CSteamID steamIDClan ) = 0;
 	virtual CSteamID GetChatMemberByIndex( CSteamID steamIDClan, int iUser ) = 0;
 	virtual bool SendClanChatMessage( CSteamID steamIDClanChat, const char *pchText ) = 0;
-	virtual int GetClanChatMessage( CSteamID steamIDClanChat, int iMessage, void *prgchText, int cchTextMax, EChatEntryType *peChatEntryType, OUT_STRUCT() CSteamID *psteamidChatter ) = 0;
+	virtual int GetClanChatMessage( CSteamID steamIDClanChat, int iMessage, void *prgchText, int cchTextMax, EChatEntryType *, CSteamID * ) = 0;
 	virtual bool IsClanChatAdmin( CSteamID steamIDClanChat, CSteamID steamIDUser ) = 0;
 
 	// interact with the Steam (game overlay / desktop)
@@ -382,15 +355,12 @@ public:
 	virtual int GetFriendMessage( CSteamID steamIDFriend, int iMessageID, void *pvData, int cubData, EChatEntryType *peChatEntryType ) = 0;
 
 	// following apis
-	CALL_RESULT( FriendsGetFollowerCount_t )
 	virtual SteamAPICall_t GetFollowerCount( CSteamID steamID ) = 0;
-	CALL_RESULT( FriendsIsFollowing_t )
 	virtual SteamAPICall_t IsFollowing( CSteamID steamID ) = 0;
-	CALL_RESULT( FriendsEnumerateFollowingList_t )
 	virtual SteamAPICall_t EnumerateFollowingList( uint32 unStartIndex ) = 0;
 };
 
-#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends015"
+#define STEAMFRIENDS_INTERFACE_VERSION "SteamFriends013"
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )
