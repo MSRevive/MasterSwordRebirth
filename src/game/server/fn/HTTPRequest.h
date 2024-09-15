@@ -25,7 +25,6 @@ public:
 	virtual void OnResponse(bool bSuccessful) { }
 
 	static void SetBaseURL(const char* url);
-	void SetHTTPContext(ISteamHTTP* steamHTTP) { this->steamHTTP = steamHTTP; };
 	void SendRequest();
 	void SuppressResponse(bool suppressResp) { this->suppressResponse = suppressResp; }
 
@@ -51,8 +50,6 @@ protected: // Expose data to inheriting classes.
 
 	ID64 steamID64;
 	ID64 slot;
-
-	ISteamHTTP* steamHTTP;
 
 private: // Keep this private.
 	void Cleanup();

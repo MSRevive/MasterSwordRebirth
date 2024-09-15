@@ -32,7 +32,6 @@ mslist<modelprecachelist_t> gSoundPrecacheList;
 
 CStringPool g_StringPool;
 CRequestManager g_FNRequestManager;
-CSteamServerHelper g_SteamServerHelper;
 
 //Master Sword CVARs
 /*
@@ -200,7 +199,7 @@ void MSWorldSpawn()
 	if (FNShared::IsEnabled())
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
-		g_FNRequestManager.Init(g_SteamServerHelper.GetHTTP());
+		g_FNRequestManager.Init();
 		FNShared::Validate();
 	}
 
@@ -210,8 +209,8 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	//g_SteamServerHelper.Think();
-	//g_FNRequestManager.Think();
+	g_SteamServerHelper->Think();
+	g_FNRequestManager.Think();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -276,7 +275,7 @@ void MSGameEnd()
 	if (g_pGameRules)
 	{
 		delete g_pGameRules;
-		g_pGameRules = NULL;
+		g_pGameRules = nullptr;
 	}
 
 	//We handle all remaining requests and shutdown.
@@ -294,7 +293,7 @@ void MSGameEnd()
 	CSVGlobals::LogScripts = true;
 
 	//TODO: Move this to when the DLL is shutdown on server close.
-	//g_SteamServerHelper.Shutdown();
+	g_SteamServerHelper->Shutdown();
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.

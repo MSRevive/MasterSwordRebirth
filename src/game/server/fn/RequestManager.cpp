@@ -1,5 +1,7 @@
 #include "RequestManager.h"
 #include "msdllheaders.h"
+#include <steam/steam_api.h>
+#include <steam/steam_gameserver.h>
 
 void CRequestManager::Init(ISteamHTTP* steamHTTP)
 {
@@ -11,7 +13,6 @@ void CRequestManager::Init(ISteamHTTP* steamHTTP)
 
 	if (!m_bLoaded) 
 	{
-		m_SteamHTTP = steamHTTP;
 		m_bLoaded = true;
 	}
 }
@@ -20,11 +21,6 @@ void CRequestManager::Think(bool suppressResp)
 {
 	if (m_bLoaded)
 	{
-		// if (!m_SteamHTTP)
-		// {
-		// 	m_SteamHTTP = SteamGameServerHTTP();
-		// }
-
 		for (int i = (m_vRequests.size() - 1); i >= 0; i--)
 		{
 			HTTPRequest* req = m_vRequests[i];
@@ -59,7 +55,8 @@ void CRequestManager::SendAndWait(void)
 		do
 		{
 			Think(true);
-			SteamGameServer_RunCallbacks();
+			//SteamGameServer_RunCallbacks();
+			g_SteamServerHelper->RunCallbacks();
 			wait(10);
 		} while ((m_SteamHTTP != nullptr) && m_vRequests.size());
 
@@ -69,6 +66,5 @@ void CRequestManager::SendAndWait(void)
 
 void CRequestManager::QueueRequest(HTTPRequest* req)
 {
-	req->SetHTTPContext(m_SteamHTTP);
 	m_vRequests.push_back(req);
 }

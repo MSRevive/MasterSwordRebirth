@@ -40,8 +40,8 @@ target_include_directories(server PRIVATE
 	fn)
 
 target_compile_definitions(server PRIVATE
-	VALVE_DLL
-	VERSION_SAFE_STEAM_API_INTERFACES)
+	VERSION_SAFE_STEAM_API_INTERFACES
+	VALVE_DLL)
 
 if (UNIX)
 	target_compiler_definitions(server PRIVATE
