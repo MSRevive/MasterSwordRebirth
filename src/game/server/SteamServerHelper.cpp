@@ -1,5 +1,7 @@
 #include "SteamServerHelper.h"
 #include "msdllheaders.h"
+#include <steam/steam_api.h>
+#include <steam/steam_gameserver.h>
 
 // this context is not available on dedicated servers
 // WARNING! always check if interfaces are available before using
@@ -11,8 +13,8 @@ CSteamAPIContext* steamapicontext = &s_SteamAPIContext;
 static CSteamGameServerAPIContext s_SteamGameServerAPIContext;
 CSteamGameServerAPIContext* steamgameserverapicontext = &s_SteamGameServerAPIContext;
 
-static CSteamClientHelper s_SteamHelper;
-CSteamClientHelper* g_SteamServerHelper = &s_SteamHelper;
+static CSteamServerHelper s_SteamHelper;
+CSteamServerHelper* g_SteamServerHelper = &s_SteamHelper;
 
 ISteamHTTP* g_SteamHTTPContext = nullptr;
 static bool g_bTryLoadSteamAPI = false;

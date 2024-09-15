@@ -9,6 +9,7 @@
 #include "msdllheaders.h"
 #include "global.h"
 #include "player.h"
+#include "SteamServerHelper.h"
 #include <string>
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];

@@ -1,13 +1,6 @@
 #ifndef MS_STEAM_SERVER_HELPER_H
 #define MS_STEAM_SERVER_HELPER_H
 
-#include <steam/steam_api.h>
-#include <steam/steam_gameserver.h>
-
-// class CSteamGameServerAPIContext;
-// class CSteamAPIContext;
-// class ISteamHTTP;
-
 class CSteamServerHelper 
 {
 public:
@@ -19,6 +12,10 @@ public:
 	void Think(void);
 	void RunCallbacks(void);
 };
+
+class CSteamGameServerAPIContext;
+class CSteamAPIContext;
+class ISteamHTTP;
 
 extern CSteamAPIContext* steamapicontext;
 extern CSteamGameServerAPIContext* steamgameserverapicontext;

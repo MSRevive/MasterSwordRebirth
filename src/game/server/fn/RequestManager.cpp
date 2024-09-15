@@ -1,9 +1,10 @@
 #include "RequestManager.h"
 #include "msdllheaders.h"
+#include "SteamServerHelper.h"
 #include <steam/steam_api.h>
 #include <steam/steam_gameserver.h>
 
-void CRequestManager::Init(ISteamHTTP* steamHTTP)
+void CRequestManager::Init()
 {
 	// FN Doesn't work on listen servers.
 	if (!IS_DEDICATED_SERVER())
@@ -25,7 +26,6 @@ void CRequestManager::Think(bool suppressResp)
 		{
 			HTTPRequest* req = m_vRequests[i];
 			req->SuppressResponse(suppressResp);
-			req->SetHTTPContext(m_SteamHTTP);
 			switch (req->requestState)
 			{
 			case HTTPRequest::RequestState::REQUEST_QUEUED:
@@ -58,7 +58,7 @@ void CRequestManager::SendAndWait(void)
 			//SteamGameServer_RunCallbacks();
 			g_SteamServerHelper->RunCallbacks();
 			wait(10);
-		} while ((m_SteamHTTP != nullptr) && m_vRequests.size());
+		} while ((g_SteamHTTPContext != nullptr) && m_vRequests.size());
 
 		Shutdown();
 	}
