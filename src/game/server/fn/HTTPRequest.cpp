@@ -147,7 +147,10 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 	{
 		if (!p->m_bRequestSuccessful)
 		{
-			FNShared::Print("The data hasn't been received. No response from the server.\n");
+			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), pchApiUrl);
+			OnResponse(bError == false);
+			ReleaseHandle();
+			return;
 		}
 	}
 
@@ -160,7 +163,10 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 		if (unBytes <= 0)
 		{
 			FNShared::Print("The data hasn't been received. HTTP error %d\n", p->m_eStatusCode);
-			delete []responseBody;
+			delete[] responseBody;
+			OnResponse(bError == false);
+			ReleaseHandle();
+			return;
 		}
 
 		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
