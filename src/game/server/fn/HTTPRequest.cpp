@@ -2,7 +2,7 @@
 // Steam HTTP Request Handler Class
 //
 
-#include "rapidjson/document_safe.h"
+#include <rapidjson/document_safe.h>
 #include "base64/base64.h"
 #include "HTTPRequest.h"
 #include "FNShareddefs.h"
@@ -40,7 +40,7 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, bool priority, uin
 {
 	httpMethod = method;
 	requestState = RequestState::REQUEST_QUEUED;
-	_snprintf(pchApiUrl, REQUEST_URL_SIZE, "%s%s", g_szBaseUrl, url);
+	_snprintf(pchApiUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
 
 	requestBody = responseBody = NULL;
 	requestBodySize = responseBodySize = 0;
@@ -106,14 +106,12 @@ void HTTPRequest::SendRequest()
 		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
 	}
 
+	if (bPriorityReq)
+		g_SteamHTTPContext->PrioritizeHTTPRequest(handle);
+
 	SteamAPICall_t apiCall = k_uAPICallInvalid;
 	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
-	{	
-		if (bPriorityReq)
-			g_SteamHTTPContext->PrioritizeHTTPRequest(handle);
-
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
-	}
 	else
 		Cleanup();
 }

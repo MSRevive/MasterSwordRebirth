@@ -5,9 +5,9 @@
 #ifndef HTTP_BASE_REQUEST_H
 #define HTTP_BASE_REQUEST_H
 
-#include "rapidjson/fwd.h" // Rapid JSON Helpers from Infestus!
-#include "steam/steam_api.h"
-#include "steam/isteamhttp.h"
+#include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
+#include <steam/steam_api.h>
+#include <steam/isteamhttp.h>
 
 #define REQUEST_URL_SIZE 256
 #define HTTP_CONTENT_TYPE "application/json"
