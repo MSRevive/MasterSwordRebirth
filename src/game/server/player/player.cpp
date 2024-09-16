@@ -4960,6 +4960,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 			Info.TitleIndex = GetPlayerTitleIdx(GetTitle()); //MIB FEB2019_19 - was GetFullTitle( )
 			Info.SkillLevel = SkillAvg();
 			Info.InTransition = CurrentTransArea ? true : false;
+			Info.fl_healthBuffer = m_HP; // add hp to buffer to force update of scoreboard whenever hp changes, hopefully
 			if (memcmp(&Info, &m_ScoreInfoCache, sizeof(scoreinfo_t)))
 			{
 				pev->frags = m_MaxHP; //FEB2008a - Report HP to Scoreboard

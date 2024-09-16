@@ -244,6 +244,7 @@ struct scoreinfo_t
 	int TitleIndex;
 	int SkillLevel;
 	bool IsElite, InTransition;
+	float fl_healthBuffer;
 };
 
 #ifdef _WIN32
