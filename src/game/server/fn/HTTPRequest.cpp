@@ -104,7 +104,7 @@ void HTTPRequest::SendRequest()
 		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
 	}
 
-	SteamAPICall_t apiCall = NULL;
+	SteamAPICall_t apiCall = k_uAPICallInvalid;
 	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
 	else
