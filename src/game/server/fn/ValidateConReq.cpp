@@ -18,13 +18,14 @@ void ValidateConnectivityRequest::OnResponse(bool bSuccessful)
 	if (bSuccessful == false || pJSONData == NULL)
 	{
 		MSGlobals::CentralEnabled = false;
+		FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
 	const JSONValue& value = (*pJSONData);
 	if (!value["data"].GetBool())
 	{
-		FNShared::Print("FuzzNet connection failed\n");
+		FNShared::Print("FuzzNet connection failed!\n");
 		MSGlobals::CentralEnabled = false;
 		return;
 	}

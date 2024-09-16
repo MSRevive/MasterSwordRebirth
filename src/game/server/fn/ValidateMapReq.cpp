@@ -18,6 +18,7 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 	if (bSuccessful == false || pJSONData == NULL)
 	{
 		MSGlobals::CentralEnabled = false;
+		FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
