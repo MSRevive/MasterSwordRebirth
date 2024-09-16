@@ -17,7 +17,6 @@ void ValidateScriptsRequest::OnResponse(bool bSuccessful)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{
-		FNShared::Print("Script file not verified for FN!\n");
 		MSGlobals::CentralEnabled = false;
 		return;
 	}

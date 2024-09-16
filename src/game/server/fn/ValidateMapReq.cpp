@@ -17,8 +17,7 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{
-		FNShared::Print("Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("changelevel edana\n");
+		MSGlobals::CentralEnabled = false;
 		return;
 	}
 
@@ -26,6 +25,6 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 	if (!value["data"].GetBool())
 	{
 		FNShared::Print("Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
-		SERVER_COMMAND("changelevel edana\n");
+		MSGlobals::CentralEnabled = false;
 	}
 }
