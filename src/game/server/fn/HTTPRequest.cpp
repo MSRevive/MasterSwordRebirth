@@ -155,19 +155,17 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 	}
 
 	size_t unBytes = 0;
-	if (!bError && (responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes) && (unBytes != 0))
+	if (!bError && (responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
 	{
-		responseBodySize = unBytes;
-		responseBody = new uint8[responseBodySize];
-
 		if (unBytes <= 0)
 		{
 			FNShared::Print("The data hasn't been received. HTTP error %d\n", p->m_eStatusCode);
-			delete[] responseBody;
-			OnResponse(bError == false);
 			ReleaseHandle();
 			return;
 		}
+
+		responseBodySize = unBytes;
+		responseBody = new uint8[responseBodySize];
 
 		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
