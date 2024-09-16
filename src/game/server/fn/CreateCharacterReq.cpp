@@ -10,7 +10,7 @@
 #include "util.h"
 
 CreateCharacterRequest::CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodPOST, url, body, bodySize, steamID, slot)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodPOST, url, false, body, bodySize, steamID, slot)
 {
 }
 

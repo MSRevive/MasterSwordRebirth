@@ -18,7 +18,7 @@ JSONDocument* ParseJSON(const char* data, size_t length = 0);
 class HTTPRequest
 {
 public:
-	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
+	HTTPRequest(EHTTPMethod method, const char* url, bool priority = false, uint8* body = NULL, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
@@ -50,6 +50,8 @@ protected: // Expose data to inheriting classes.
 
 	ID64 steamID64;
 	ID64 slot;
+
+	bool bPriorityReq = false;
 
 private: // Keep this private.
 	void Cleanup();

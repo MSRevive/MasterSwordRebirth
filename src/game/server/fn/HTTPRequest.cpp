@@ -36,7 +36,7 @@ JSONDocument* ParseJSON(const char* data, size_t length)
 	return document;
 }
 
-HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
+HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, bool priority, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
 	httpMethod = method;
 	requestState = RequestState::REQUEST_QUEUED;
@@ -49,6 +49,8 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_
 
 	this->steamID64 = steamID64;
 	this->slot = slot;
+
+	bPriorityReq = priority;
 
 	if ((body != NULL) && (bodySize > 0))
 	{
@@ -106,7 +108,12 @@ void HTTPRequest::SendRequest()
 
 	SteamAPICall_t apiCall = k_uAPICallInvalid;
 	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
+	{	
+		if (bPriorityReq)
+			g_SteamHTTPContext->PrioritizeHTTPRequest(handle);
+
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
+	}
 	else
 		Cleanup();
 }
