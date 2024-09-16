@@ -200,6 +200,7 @@ void MSWorldSpawn()
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
 		g_FNRequestManager.Init();
+		FNShared::ValidateFN();
 		FNShared::Validate();
 	}
 
@@ -292,7 +293,6 @@ void MSGameEnd()
 	TotalModelPrecaches = 1;
 	CSVGlobals::LogScripts = true;
 
-	//TODO: Move this to when the DLL is shutdown on server close.
 	g_SteamServerHelper->Shutdown();
 	
 	//Clear the string pool now, after any references to its strings have been released.

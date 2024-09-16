@@ -22,6 +22,7 @@ namespace FNShared
 	bool IsSlotValid(int slot);
 	bool IsEnabled(void);
 	void Validate(void);
+	void ValidateFN(void);
 	int GetPlayerFlags(const JSONValue& doc);
 	void LoadCharacter(CBasePlayer* pPlayer);
 	void LoadCharacter(CBasePlayer* pPlayer, int slot);

@@ -59,9 +59,16 @@ void FNShared::Validate(void)
 	_snprintf(mapFile, sizeof(mapFile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
 	unsigned int mapFileHash = GetFileCheckSum(mapFile);
 
-	g_FNRequestManager.QueueRequest(new ValidateConnectivityRequest("/api/v1/ping"));
 	g_FNRequestManager.QueueRequest(new ValidateScriptsRequest(UTIL_VarArgs("/api/v1/sc/%u", scFileHash)));
 	g_FNRequestManager.QueueRequest(new ValidateMapRequest(UTIL_VarArgs("/api/v1/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
+}
+
+void FNShared::ValidateFN(void)
+{
+	if (IsEnabled() == false)
+		return;
+
+	g_FNRequestManager.QueueRequest(new ValidateConnectivityRequest("/api/v1/ping"));
 }
 
 // Get Player Flags from response.
