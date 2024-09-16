@@ -1,66 +1,57 @@
 #include "SteamServerHelper.h"
 #include "msdllheaders.h"
+#include <steam/steam_api.h>
+#include <steam/steam_gameserver.h>
 
+// this context is not available on dedicated servers
+// WARNING! always check if interfaces are available before using
 static CSteamAPIContext s_SteamAPIContext;
-static CSteamGameServerAPIContext s_SteamGameServerAPIContext;
+CSteamAPIContext* steamapicontext = &s_SteamAPIContext;
 
-extern "C" void __cdecl SteamAPIDebugTextHook( int nSeverity, const char *pchDebugText )
-{
-	g_engfuncs.pfnServerPrint(pchDebugText);
-}
+// this context is not available on a pure client connected to a remote server.
+// WARNING! always check if interfaces are available before using
+static CSteamGameServerAPIContext s_SteamGameServerAPIContext;
+CSteamGameServerAPIContext* steamgameserverapicontext = &s_SteamGameServerAPIContext;
+
+static CSteamServerHelper s_SteamHelper;
+CSteamServerHelper* g_SteamServerHelper = &s_SteamHelper;
+
+ISteamHTTP* g_SteamHTTPContext = nullptr;
+static bool g_bTryLoadSteamAPI = false;
 
 CSteamServerHelper::CSteamServerHelper()
 {
-	m_SteamGameServerContext = &s_SteamGameServerAPIContext;
-	m_SteamContext = &s_SteamAPIContext;
-}
-
-void CSteamServerHelper::Init(void)
-{
-	s_SteamAPIContext.Init();
-	g_engfuncs.pfnServerPrint("steam init\n");
-	s_SteamGameServerAPIContext.Init();
-	m_SteamGameServerContext->SteamGameServerUtils()->SetWarningMessageHook(&SteamAPIDebugTextHook);
-	// if (!IS_DEDICATED_SERVER())
-	// {
-	// }else{
-		
-	// }
-
-	m_bLoaded = true;
-}
-
-void CSteamServerHelper::Shutdown(void)
-{
-	if (m_bLoaded)
-	{
-		s_SteamAPIContext.Clear();
-		s_SteamGameServerAPIContext.Clear();
-
-		m_SteamGameServerContext = nullptr;
-		m_SteamContext = nullptr;
-		m_bLoaded = false;
-	}
+	Shutdown();
+	g_bTryLoadSteamAPI = true;
 }
 
 void CSteamServerHelper::Think(void)
 {
-	ISteamHTTP* m_steamHTTP = m_SteamGameServerContext->SteamHTTP();
-	if (m_steamHTTP == nullptr)
-		g_engfuncs.pfnServerPrint("http is null \n");
+	if (g_bTryLoadSteamAPI)
+	{
+		g_bTryLoadSteamAPI = false;
+
+		s_SteamAPIContext.Init();
+		s_SteamGameServerAPIContext.Init();
+
+		g_SteamHTTPContext = (IS_DEDICATED_SERVER() ? steamgameserverapicontext->SteamHTTP() : steamapicontext->SteamHTTP());
+	}
+}
+
+void CSteamServerHelper::Shutdown(void)
+{
+	s_SteamAPIContext.Clear();
+	s_SteamGameServerAPIContext.Clear();
+	g_SteamHTTPContext = nullptr;
+	g_bTryLoadSteamAPI = true;
 }
 
 // Should be handled by the engine?
 void CSteamServerHelper::RunCallbacks(void)
 {
-	if (m_SteamGameServerContext->SteamHTTP())
+	if (steamgameserverapicontext->SteamHTTP())
 		SteamGameServer_RunCallbacks();
 
-	if (m_SteamContext->SteamHTTP())
+	if (steamapicontext->SteamHTTP())
 		SteamAPI_RunCallbacks();
-}
-
-ISteamHTTP* CSteamServerHelper::GetHTTP(void)
-{
-	return (IS_DEDICATED_SERVER() ? m_SteamGameServerContext->SteamHTTP() : m_SteamContext->SteamHTTP());
 }

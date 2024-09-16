@@ -1,7 +1,7 @@
 #ifndef MS_STEAM_CLIENT_HELPER_H
 #define MS_STEAM_CLIENT_HELPER_H
 
-#include "steam/steam_api.h"
+#include <steam/steam_api.h>
 
 class CSteamClientHelper
 {

@@ -11,7 +11,7 @@ class CRequestManager
 public:
 	CRequestManager() = default;
 	~CRequestManager() = default;
-	void Init(ISteamHTTP* steamHTTP);
+	void Init();
 	void Think(bool suppressResp = false);
 	void Shutdown(void);
 	void SendAndWait(void);
@@ -22,8 +22,6 @@ public:
 
 private:
 	bool m_bLoaded = false;
-
-	ISteamHTTP* m_SteamHTTP;
 
 	std::vector<HTTPRequest*> m_vRequests;
 };

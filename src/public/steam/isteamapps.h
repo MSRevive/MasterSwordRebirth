@@ -1,4 +1,4 @@
-//====== Copyright © 1996-2008, Valve Corporation, All rights reserved. =======
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: interface to app data in Steam
 //
@@ -10,7 +10,7 @@
 #pragma once
 #endif
 
-const int k_cubAppProofOfPurchaseKeyMax = 240;			// max supported length of a legacy cd key 
+const int k_cubAppProofOfPurchaseKeyMax = 64;			// max bytes of a legacy cd key we support
 
 
 //-----------------------------------------------------------------------------
@@ -49,8 +49,8 @@ public:
 	// Install/Uninstall control for optional DLC
 	virtual void InstallDLC( AppId_t nAppID ) = 0;
 	virtual void UninstallDLC( AppId_t nAppID ) = 0;
-	
-	// Request legacy cd-key for yourself or owned DLC. If you are interested in this
+
+	// Request cd-key for yourself or owned DLC. If you are interested in this
 	// data then make sure you provide us with a list of valid keys to be distributed
 	// to users when they purchase the game, before the game ships.
 	// You'll receive an AppProofOfPurchaseKeyResponse_t callback when
@@ -59,37 +59,18 @@ public:
 
 	virtual bool GetCurrentBetaName( char *pchName, int cchNameBufferSize ) = 0; // returns current beta branch name, 'public' is the default branch
 	virtual bool MarkContentCorrupt( bool bMissingFilesOnly ) = 0; // signal Steam that game files seems corrupt or missing
-	virtual uint32 GetInstalledDepots( AppId_t appID, DepotId_t *pvecDepots, uint32 cMaxDepots ) = 0; // return installed depots in mount order
+	virtual uint32 GetInstalledDepots( DepotId_t *pvecDepots, uint32 cMaxDepots ) = 0; // return installed depots in mount order
 
 	// returns current app install folder for AppID, returns folder name length
 	virtual uint32 GetAppInstallDir( AppId_t appID, char *pchFolder, uint32 cchFolderBufferSize ) = 0;
-	virtual bool BIsAppInstalled( AppId_t appID ) = 0; // returns true if that app is installed (not necessarily owned)
-	
-	virtual CSteamID GetAppOwner() = 0; // returns the SteamID of the original owner. If different from current user, it's borrowed
 
-	// Returns the associated launch param if the game is run via steam://run/<appid>//?param1=value1;param2=value2;param3=value3 etc.
-	// Parameter names starting with the character '@' are reserved for internal use and will always return and empty string.
-	// Parameter names starting with an underscore '_' are reserved for steam features -- they can be queried by the game,
-	// but it is advised that you not param names beginning with an underscore for your own features.
-	virtual const char *GetLaunchQueryParam( const char *pchKey ) = 0;
-
-	// get download progress for optional DLC
-	virtual bool GetDlcDownloadProgress( AppId_t nAppID, uint64 *punBytesDownloaded, uint64 *punBytesTotal ) = 0; 
-
-	// return the buildid of this app, may change at any time based on backend updates to the game
-	virtual int GetAppBuildId() = 0;
-
-	// Request all proof of purchase keys for the calling appid and asociated DLC.
-	// A series of AppProofOfPurchaseKeyResponse_t callbacks will be sent with
-	// appropriate appid values, ending with a final callback where the m_nAppId
-	// member is k_uAppIdInvalid (zero).
-	virtual void RequestAllProofOfPurchaseKeys() = 0;
-
-	CALL_RESULT( FileDetailsResult_t )
-	virtual SteamAPICall_t GetFileDetails( const char* pszFileName ) = 0;
+#ifdef _PS3
+	// Result returned in a RegisterActivationCodeResponse_t callresult
+	virtual SteamAPICall_t RegisterActivationCode( const char *pchActivationCode ) = 0;
+#endif
 };
 
-#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION008"
+#define STEAMAPPS_INTERFACE_VERSION "STEAMAPPS_INTERFACE_VERSION005"
 
 // callbacks
 #if defined( VALVE_CALLBACK_PACK_SMALL )
@@ -132,45 +113,15 @@ struct RegisterActivationCodeResponse_t
 	uint32 m_unPackageRegistered;						// package that was registered. Only set on success
 };
 
-
-//---------------------------------------------------------------------------------
-// Purpose: posted after the user gains executes a steam url with query parameters
-// such as steam://run/<appid>//?param1=value1;param2=value2;param3=value3; etc
-// while the game is already running.  The new params can be queried
-// with GetLaunchQueryParam.
-//---------------------------------------------------------------------------------
-struct NewLaunchQueryParameters_t
-{
-	enum { k_iCallback = k_iSteamAppsCallbacks + 14 };
-};
-
-
 //-----------------------------------------------------------------------------
-// Purpose: response to RequestAppProofOfPurchaseKey/RequestAllProofOfPurchaseKeys
-// for supporting third-party CD keys, or other proof-of-purchase systems.
+// Purpose: response to RegisterActivationCode()
 //-----------------------------------------------------------------------------
 struct AppProofOfPurchaseKeyResponse_t
 {
-	enum { k_iCallback = k_iSteamAppsCallbacks + 21 };
+	enum { k_iCallback = k_iSteamAppsCallbacks + 13 };
 	EResult m_eResult;
 	uint32	m_nAppID;
-	uint32	m_cchKeyLength;
-	char	m_rgchKey[k_cubAppProofOfPurchaseKeyMax];
+	char	m_rgchKey[ k_cubAppProofOfPurchaseKeyMax ];
 };
-
-
-//-----------------------------------------------------------------------------
-// Purpose: response to GetFileDetails
-//-----------------------------------------------------------------------------
-struct FileDetailsResult_t
-{
-	enum { k_iCallback = k_iSteamAppsCallbacks + 23 };
-	EResult		m_eResult;
-	uint64		m_ulFileSize;	// original file size in bytes
-	uint8		m_FileSHA[20];	// original file SHA1 hash
-	uint32		m_unFlags;		// 
-};
-
-
 #pragma pack( pop )
 #endif // ISTEAMAPPS_H

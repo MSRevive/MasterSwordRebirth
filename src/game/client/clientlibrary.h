@@ -1,3 +1,6 @@
+#ifndef CLIENT_LIBRARY_H
+#define CLIENT_LIBRARY_H
+
 #include "netadr.h"
 
 class CClientLibrary {
@@ -19,3 +22,5 @@ private:
 	float m_ConnectionTime;
 	netadr_t m_ServerAddress;
 };
+
+#endif //CLIENT_LIBRARY_H

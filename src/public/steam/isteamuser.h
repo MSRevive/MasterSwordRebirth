@@ -1,4 +1,4 @@
-//====== Copyright (c) 1996-2008, Valve Corporation, All rights reserved. =======
+//========= Copyright Valve Corporation, All rights reserved. ============//
 //
 // Purpose: interface to user account information in Steam
 //
@@ -30,6 +30,8 @@ struct CallbackMsg_t
 };
 #pragma pack( pop )
 
+// reference to a steam call, to filter results by
+typedef int32 HSteamCall;
 
 //-----------------------------------------------------------------------------
 // Purpose: Functions for accessing and manipulating a steam account
@@ -95,7 +97,7 @@ public:
 	// levels of speech are detected.
 	// nUncompressedVoiceDesiredSampleRate is necessary to know the number of bytes to return in pcbUncompressed - can be set to 0 if you don't need uncompressed (the usual case)
 	// If you're upgrading from an older Steamworks API, you'll want to pass in 11025 to nUncompressedVoiceDesiredSampleRate
-	virtual EVoiceResult GetAvailableVoice( uint32 *pcbCompressed, uint32 *pcbUncompressed, uint32 nUncompressedVoiceDesiredSampleRate ) = 0;
+	virtual EVoiceResult GetAvailableVoice(uint32 *pcbCompressed, uint32 *pcbUncompressed, uint32 nUncompressedVoiceDesiredSampleRate) = 0;
 
 	// Gets the latest voice data from the microphone. Compressed data is an arbitrary format, and is meant to be handed back to 
 	// DecompressVoice() for playback later as a binary blob. Uncompressed data is 16-bit, signed integer, 11025Hz PCM format.
@@ -151,48 +153,51 @@ public:
 	// Requests a ticket encrypted with an app specific shared key
 	// pDataToInclude, cbDataToInclude will be encrypted into the ticket
 	// ( This is asynchronous, you must wait for the ticket to be completed by the server )
-	CALL_RESULT( EncryptedAppTicketResponse_t )
 	virtual SteamAPICall_t RequestEncryptedAppTicket( void *pDataToInclude, int cbDataToInclude ) = 0;
 
 	// retrieve a finished ticket
 	virtual bool GetEncryptedAppTicket( void *pTicket, int cbMaxTicket, uint32 *pcbTicket ) = 0;
 
-	// Trading Card badges data access
-	// if you only have one set of cards, the series will be 1
-	// the user has can have two different badges for a series; the regular (max level 5) and the foil (max level 1)
-	virtual int GetGameBadgeLevel( int nSeries, bool bFoil ) = 0;
+#ifdef _PS3
+	// Initiates PS3 Logon request using just PSN ticket.  
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
+	//
+	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
+	// may return with EResult k_EResultExternalAccountUnlinked if the PSN account is unknown to Steam.  You should
+	// then call LogOnAndLinkSteamAccountToPSN() after prompting the user for credentials to establish a link. 
+	// Future calls to LogOn() after the one time link call should succeed as long as the user is connected to PSN.
+	virtual void LogOn( bool bInteractive ) = 0;
 
-	// gets the Steam Level of the user, as shown on their profile
-	virtual int GetPlayerSteamLevel() = 0;
+	// Initiates a request to logon with a specific steam username/password and create a PSN account link at 
+	// the same time.  Should call this only if LogOn() has failed and indicated the PSN account is unlinked.
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.  pchUserName 
+	// should be the users Steam username, and pchPassword should be the users Steam password.
+	// 
+	// Listen for SteamServersConnected_t or SteamServerConnectFailure_t for status.  SteamServerConnectFailure_t
+	// may return with EResult k_EResultOtherAccountAlreadyLinked if already linked to another account. 
+	virtual void LogOnAndLinkSteamAccountToPSN( bool bInteractive, const char *pchUserName, const char *pchPassword ) = 0;
 
-	// Requests a URL which authenticates an in-game browser for store check-out,
-	// and then redirects to the specified URL. As long as the in-game browser
-	// accepts and handles session cookies, Steam microtransaction checkout pages
-	// will automatically recognize the user instead of presenting a login page.
-	// The result of this API call will be a StoreAuthURLResponse_t callback.
-	// NOTE: The URL has a very short lifetime to prevent history-snooping attacks,
-	// so you should only call this API when you are about to launch the browser,
-	// or else immediately navigate to the result URL using a hidden browser window.
-	// NOTE 2: The resulting authorization cookie has an expiration time of one day,
-	// so it would be a good idea to request and visit a new auth URL every 12 hours.
-	CALL_RESULT( StoreAuthURLResponse_t )
-	virtual SteamAPICall_t RequestStoreAuthURL( const char *pchRedirectURL ) = 0;
+	// Final logon option for PS3, this logs into an existing account if already linked, but if not already linked
+	// creates a new account using the info in the PSN ticket to generate a unique account name.  The new account is
+	// then linked to the PSN ticket.  This is the faster option for new users who don't have an existing Steam account
+	// to get into multiplayer.
+	//
+	// PARAMS: bInteractive - If set tells Steam to go ahead and show the PS3 NetStart dialog if needed to
+	// prompt the user for network setup/PSN logon before initiating the Steam side of the logon.
+	virtual void LogOnAndCreateNewSteamAccountIfNeeded( bool bInteractive ) = 0;
 
-	// gets whether the users phone number is verified 
-	virtual bool BIsPhoneVerified() = 0;
-
-	// gets whether the user has two factor enabled on their account
-	virtual bool BIsTwoFactorEnabled() = 0;
-
-	// gets whether the users phone number is identifying
-	virtual bool BIsPhoneIdentifying() = 0;
-
-	// gets whether the users phone number is awaiting (re)verification
-	virtual bool BIsPhoneRequiringVerification() = 0;
+	// Returns a special SteamID that represents the user's PSN information. Can be used to query the user's PSN avatar,
+	// online name, etc. through the standard Steamworks interfaces.
+	virtual CSteamID GetConsoleSteamID() = 0;
+#endif
 
 };
 
-#define STEAMUSER_INTERFACE_VERSION "SteamUser019"
+#define STEAMUSER_INTERFACE_VERSION "SteamUser016"
 
 
 // callbacks
@@ -225,7 +230,6 @@ struct SteamServerConnectFailure_t
 {
 	enum { k_iCallback = k_iSteamUserCallbacks + 2 };
 	EResult m_eResult;
-	bool m_bStillRetrying;
 };
 
 
@@ -276,15 +280,6 @@ struct IPCFailure_t
 
 
 //-----------------------------------------------------------------------------
-// Purpose: Signaled whenever licenses change
-//-----------------------------------------------------------------------------
-struct LicensesUpdated_t
-{
-	enum { k_iCallback = k_iSteamUserCallbacks + 25 };
-};
-
-
-//-----------------------------------------------------------------------------
 // callback for BeginAuthSession
 //-----------------------------------------------------------------------------
 struct ValidateAuthTicketResponse_t
@@ -292,7 +287,6 @@ struct ValidateAuthTicketResponse_t
 	enum { k_iCallback = k_iSteamUserCallbacks + 43 };
 	CSteamID m_SteamID;
 	EAuthSessionResponse m_eAuthSessionResponse;
-	CSteamID m_OwnerSteamID; // different from m_SteamID if borrowed
 };
 
 
@@ -338,16 +332,6 @@ struct GameWebCallback_t
 	enum { k_iCallback = k_iSteamUserCallbacks + 64 };
 	char m_szURL[256];
 };
-
-//-----------------------------------------------------------------------------
-// Purpose: sent to your game in response to ISteamUser::RequestStoreAuthURL
-//-----------------------------------------------------------------------------
-struct StoreAuthURLResponse_t
-{
-	enum { k_iCallback = k_iSteamUserCallbacks + 65 };
-	char m_szURL[512];
-};
-
 
 
 #pragma pack( pop )

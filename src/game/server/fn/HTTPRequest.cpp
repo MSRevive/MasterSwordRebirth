@@ -9,6 +9,7 @@
 #include "msdllheaders.h"
 #include "global.h"
 #include "player.h"
+#include "SteamServerHelper.h"
 #include <string>
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
@@ -64,9 +65,9 @@ HTTPRequest::~HTTPRequest()
 void HTTPRequest::SendRequest()
 {
 	requestState = RequestState::REQUEST_EXECUTED;
-	handle = steamHTTP->CreateHTTPRequest(httpMethod, pchApiUrl);
-	steamHTTP->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
-	steamHTTP->SetHTTPRequestHeaderValue(handle, "User-Agent", "MSRebith SteamHTTP");
+	handle = g_SteamHTTPContext->CreateHTTPRequest(httpMethod, pchApiUrl);
+	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
+	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "User-Agent", "MSRebith SteamHTTP");
 	if (handle == NULL)
 	{
 		Cleanup();
@@ -99,11 +100,11 @@ void HTTPRequest::SendRequest()
 
 		std::string buffer = s.GetString();
 
-		steamHTTP->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
+		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
 	}
 
 	SteamAPICall_t apiCall = NULL;
-	if (steamHTTP->SendHTTPRequest(handle, &apiCall) && apiCall)
+	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
 	else
 		Cleanup();
@@ -127,7 +128,7 @@ void HTTPRequest::ReleaseHandle()
 {
 	if (handle)
 	{
-		steamHTTP->ReleaseHTTPRequest(handle);
+		g_SteamHTTPContext->ReleaseHTTPRequest(handle);
 		handle = NULL;
 	}
 	requestState = RequestState::REQUEST_FINISHED;
@@ -142,11 +143,11 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 	}
 
 	size_t unBytes = 0;
-	if (!bError && (responseBody == nullptr) && steamHTTP->GetHTTPResponseBodySize(handle, &unBytes) && (unBytes != 0))
+	if (!bError && (responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes) && (unBytes != 0))
 	{
 		responseBodySize = unBytes;
 		responseBody = new uint8[responseBodySize];
-		if (steamHTTP->GetHTTPResponseBodyData(handle, responseBody, unBytes))
+		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
 	}
 
