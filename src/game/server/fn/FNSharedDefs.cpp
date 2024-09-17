@@ -67,8 +67,10 @@ void FNShared::ValidateFN(void)
 {
 	if (IsEnabled() == false)
 		return;
-
-	g_FNRequestManager.QueueRequest(new ValidateConnectivityRequest("/api/v1/ping"));
+	
+	HTTPRequest* request = new ValidateConnectivityRequest("/api/v1/ping");
+	g_FNRequestManager.QueueRequest(request);
+	//request->SendRequest();
 }
 
 // Get Player Flags from response.

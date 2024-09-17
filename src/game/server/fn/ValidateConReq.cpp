@@ -17,8 +17,8 @@ void ValidateConnectivityRequest::OnResponse(bool bSuccessful)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{
-		MSGlobals::CentralEnabled = false;
 		FNShared::Print("FuzzNet has been disabled!\n");
+		MSGlobals::CentralEnabled = false;
 		return;
 	}
 

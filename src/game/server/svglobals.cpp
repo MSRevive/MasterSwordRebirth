@@ -20,6 +20,7 @@ std::ofstream modelout;
 int HighestPrecache = -1;
 int TotalModelPrecaches = 1;
 int PreCount = 0; //Thothie OCT2007a Precache map verification
+bool gFNInitialized = false;
 
 bool CSVGlobals::LogScripts = true;
 mslist<CSVGlobals::scriptlistitem_t> CSVGlobals::ScriptList[SCRIPT_TYPES];
@@ -201,7 +202,6 @@ void MSWorldSpawn()
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
 		g_FNRequestManager.Init();
 		FNShared::ValidateFN();
-		FNShared::Validate();
 	}
 
 	WriteCrashCfg();
@@ -212,6 +212,17 @@ void MSGameThink()
 {
 	g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
+
+	if(!gFNInitialized && FNShared::IsEnabled())
+	{
+		MSConnectFN();
+		gFNInitialized = true;
+	}
+}
+
+void MSConnectFN()
+{
+	FNShared::Validate();
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -294,6 +305,8 @@ void MSGameEnd()
 	CSVGlobals::LogScripts = true;
 
 	g_SteamServerHelper->Shutdown();
+
+	gFNInitialized = false;
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.

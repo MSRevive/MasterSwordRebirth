@@ -32,7 +32,7 @@ void CRequestManager::Think(bool suppressResp)
 				req->SendRequest();
 				break;
 
-			case  HTTPRequest::RequestState::REQUEST_FINISHED:
+			case HTTPRequest::RequestState::REQUEST_FINISHED:
 				delete req;
 				m_vRequests.erase(m_vRequests.begin() + i);
 				break;
