@@ -15,7 +15,6 @@ public:
 	void Think(bool suppressResp = false);
 	void Shutdown(void);
 	void SendAndWait(void);
-	static void SetBaseURL(const char* url);
 
 	void Clear(void) { m_vRequests.clear(); }
 	void QueueRequest(HTTPRequest* req);
