@@ -17,8 +17,8 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{
-		MSGlobals::CentralEnabled = false;
-		FNShared::Print("FuzzNet has been disabled!\n");
+		// MSGlobals::CentralEnabled = false;
+		// FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
@@ -26,6 +26,7 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 	if (!value["data"].GetBool())
 	{
 		FNShared::Print("Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
+		SERVER_COMMAND("map edana");
 		MSGlobals::CentralEnabled = false;
 	}
 }
