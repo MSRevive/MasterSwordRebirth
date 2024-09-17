@@ -201,7 +201,7 @@ void MSWorldSpawn()
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
 		g_FNRequestManager.Init();
-		FNShared::ValidateFN();
+		//FNShared::ValidateFN();
 	}
 
 	WriteCrashCfg();
@@ -213,11 +213,14 @@ void MSGameThink()
 	g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
 
-	// if(!gFNInitialized && MSGlobals::CentralEnabled)
-	// {
-	// 	MSConnectFN();
-	// 	gFNInitialized = true;
-	// }
+	if(!gFNInitialized && MSGlobals::CentralEnabled)
+	{
+		if (FNShared::ValidateFN() == true)
+		{
+			MSConnectFN();
+		}
+		gFNInitialized = true;
+	}
 }
 
 void MSConnectFN()
