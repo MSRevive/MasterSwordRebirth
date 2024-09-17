@@ -25,6 +25,7 @@ public:
 	virtual void OnResponse(bool bSuccessful) { }
 
 	static void SetBaseURL(const char* url);
+
 	void SendRequest();
 	void SuppressResponse(bool suppressResp) { this->suppressResponse = suppressResp; }
 

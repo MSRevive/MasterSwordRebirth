@@ -159,7 +159,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 
 		if (p->m_eStatusCode == 401)
 		{
-			FNShared::Print("FN Authorization failed!");
+			FNShared::Print("FN Authorization failed! %s", GetName());
 			ReleaseHandle();
 			return;
 		}
@@ -182,7 +182,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
 	}
 
-	OnResponse(false, false);
+	OnResponse(false);
 	ReleaseHandle();
 }
 
