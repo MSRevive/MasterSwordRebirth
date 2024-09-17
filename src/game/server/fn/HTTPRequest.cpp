@@ -152,25 +152,30 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 	{
 		if (!p->m_bRequestSuccessful)
 		{
-			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), pchApiUrl);
+			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), g_szBaseUrl);
+			OnResponse(false);
 			ReleaseHandle();
 			return;
 		}
 
 		if (p->m_eStatusCode == 401)
 		{
-			FNShared::Print("FN Authorization failed! %s", GetName());
+			FNShared::Print("FN Authorization failed! %s\n", GetName());
 			ReleaseHandle();
 			return;
 		}
+
+		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), p->m_eStatusCode);
+		ReleaseHandle();
+		return;
 	}
 
 	size_t unBytes = 0;
-	if (!bError && (responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
+	if ((responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
 	{
 		if (unBytes <= 0)
 		{
-			FNShared::Print("The data hasn't been received. HTTP error %d\n", p->m_eStatusCode);
+			FNShared::Print("The data hasn't been received. HTTP code: %d\n", p->m_eStatusCode);
 			ReleaseHandle();
 			return;
 		}
@@ -182,7 +187,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
 	}
 
-	OnResponse(false);
+	OnResponse(true);
 	ReleaseHandle();
 }
 
