@@ -201,7 +201,7 @@ void MSWorldSpawn()
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
 		g_FNRequestManager.Init();
-		FNShared::ValidateFN();
+		//FNShared::ValidateFN();
 	}
 
 	WriteCrashCfg();
