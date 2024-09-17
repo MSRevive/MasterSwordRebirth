@@ -63,13 +63,17 @@ void FNShared::Validate(void)
 	g_FNRequestManager.QueueRequest(new ValidateMapRequest(UTIL_VarArgs("/api/v1/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
 }
 
-void FNShared::ValidateFN(void)
+bool FNShared::ValidateFN(void)
 {
 	if (IsEnabled() == false)
-		return;
+		return false;
 	
 	HTTPRequest* request = new ValidateConnectivityRequest("/api/v1/ping");
-	g_FNRequestManager.QueueRequest(request);
+	HTTPRequestCompleted_t* resp = request->SendAndWaitRequest();
+	if (resp != nullptr)
+		return true;
+
+	return false;
 	//request->SendRequest();
 }
 

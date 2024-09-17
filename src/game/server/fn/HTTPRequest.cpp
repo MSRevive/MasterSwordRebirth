@@ -12,6 +12,7 @@
 #include "SteamServerHelper.h"
 #include "FNSharedDefs.h"
 #include <string>
+#include <thread>
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
@@ -36,7 +37,7 @@ JSONDocument* ParseJSON(const char* data, size_t length)
 	return document;
 }
 
-HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, bool priority, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
+HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
 	httpMethod = method;
 	requestState = RequestState::REQUEST_QUEUED;
@@ -49,8 +50,6 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, bool priority, uin
 
 	this->steamID64 = steamID64;
 	this->slot = slot;
-
-	bPriorityReq = priority;
 
 	if ((body != NULL) && (bodySize > 0))
 	{
@@ -106,14 +105,69 @@ void HTTPRequest::SendRequest()
 		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
 	}
 
-	if (bPriorityReq)
-		g_SteamHTTPContext->PrioritizeHTTPRequest(handle);
-
 	SteamAPICall_t apiCall = k_uAPICallInvalid;
 	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
 		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
 	else
 		Cleanup();
+}
+
+HTTPRequestCompleted_t* HTTPRequest::SendAndWaitRequest()
+{	
+	future = promise.get_future();
+	requestState = RequestState::REQUEST_EXECUTED;
+	handle = g_SteamHTTPContext->CreateHTTPRequest(httpMethod, pchApiUrl);
+	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
+	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "User-Agent", "MSRebith SteamHTTP");
+	if (handle == NULL)
+	{
+		Cleanup();
+		return nullptr;
+	}
+
+	if (requestBody != NULL)
+	{
+		char steamID64String[REQUEST_URL_SIZE];
+		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", steamID64);
+
+		rapidjson::StringBuffer s;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+
+		writer.StartObject();
+
+		writer.Key("steamid");
+		writer.String(steamID64String);
+
+		writer.Key("slot");
+		writer.Int(slot);
+
+		writer.Key("size");
+		writer.Int(requestBodySize);
+
+		writer.Key("data");
+		writer.String(base64_encode(requestBody, requestBodySize).c_str());
+
+		writer.EndObject();
+
+		std::string buffer = s.GetString();
+
+		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
+	}
+
+	SteamAPICall_t apiCall = k_uAPICallInvalid;
+	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
+	{
+		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
+	}
+	else
+	{
+		Cleanup();
+		return nullptr;
+	}
+		
+
+	future.wait();
+	return future.get();
 }
 
 void HTTPRequest::Cleanup()
@@ -176,6 +230,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
 	}
 
+	promise.set_value(p);
 	OnResponse(bError == false);
 	ReleaseHandle();
 }

@@ -8,6 +8,7 @@
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
 #include <steam/steam_api.h>
 #include <steam/isteamhttp.h>
+#include <future>
 
 #define REQUEST_URL_SIZE 256
 #define HTTP_CONTENT_TYPE "application/json"
@@ -18,7 +19,7 @@ JSONDocument* ParseJSON(const char* data, size_t length = 0);
 class HTTPRequest
 {
 public:
-	HTTPRequest(EHTTPMethod method, const char* url, bool priority = false, uint8* body = NULL, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
+	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = NULL, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
@@ -37,6 +38,8 @@ public:
 		REQUEST_FINISHED,
 	};
 
+	HTTPRequestCompleted_t* SendAndWaitRequest();
+
 protected: // Expose data to inheriting classes.
 	char pchApiUrl[REQUEST_URL_SIZE];
 
@@ -51,8 +54,6 @@ protected: // Expose data to inheriting classes.
 	ID64 steamID64;
 	ID64 slot;
 
-	bool bPriorityReq = false;
-
 private: // Keep this private.
 	void Cleanup();
 	void ReleaseHandle();
@@ -64,6 +65,9 @@ private: // Keep this private.
 	EHTTPMethod httpMethod;
 
 	bool suppressResponse = false;
+
+	std::promise<HTTPRequestCompleted_t*> promise;
+	std::future<HTTPRequestCompleted_t*> future;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
