@@ -153,7 +153,13 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 		if (!p->m_bRequestSuccessful)
 		{
 			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), pchApiUrl);
-			OnResponse(bError == false);
+			ReleaseHandle();
+			return;
+		}
+
+		if (p->m_eStatusCode == 401)
+		{
+			FNShared::Print("FN Authorization failed!");
 			ReleaseHandle();
 			return;
 		}
@@ -176,7 +182,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
 	}
 
-	OnResponse(bError == false);
+	OnResponse(false, false);
 	ReleaseHandle();
 }
 
