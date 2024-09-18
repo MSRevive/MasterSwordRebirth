@@ -268,7 +268,7 @@ void Host_Say(edict_t *pEntity, int teamonly)
 	if (player->m_flNextChatTime > gpGlobals->time)
 		return;
 
-	if (!stricmp(pcmd, cpSay) || !stricmp(pcmd, cpSayTeam))
+	if (!_stricmp(pcmd, cpSay) || !_stricmp(pcmd, cpSayTeam))
 	{
 		if (CMD_ARGC() >= 2)
 		{
@@ -1929,11 +1929,11 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 const char *GetGameDescription()
 {
 #if DEBUG
-	char gameDesc[64];
+	static char gameDesc[64];
 	sprintf(gameDesc, "MS:R Ver.%s", "Canaery");
 #else
 	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[8], __DATE__[9], __DATE__[10], __DATE__[11]};
-	char gameDesc[64];
+	static char gameDesc[64];
 	sprintf(gameDesc, "MS:R Ver.%s", build);
 #endif
 
