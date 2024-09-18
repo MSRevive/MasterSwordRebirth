@@ -1928,14 +1928,16 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 */
 const char *GetGameDescription()
 {
-	#if DEBUG
-		static msstring GameDesc = UTIL_VarArgs("MS:R Ver.%s", "Canary");
-	#else
-		char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[4], __DATE__[5], __DATE__[6]};
-		static msstring GameDesc = UTIL_VarArgs("MS:R Ver.%s", build);
-	#endif
+#if DEBUG
+	char gameDesc[64];
+	sprintf(gameDesc, "MS:R Ver.%s", "Canaery");
+#else
+	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[8], __DATE__[9], __DATE__[10], __DATE__[11]};
+	char gameDesc[64];
+	sprintf(gameDesc, "MS:R Ver.%s", build);
+#endif
 
-	return GameDesc;
+	return gameDesc;
 }
 
 /*
