@@ -42,7 +42,6 @@
 #include "svglobals.h"
 #include "mscharacter.h"
 #include "global.h"
-#include "versioncontrol.h"
 
 extern void PlayerPrecache();
 
@@ -1817,12 +1816,8 @@ void StartFrame(void)
 
 void ClientPrecache(void)
 {
-	startdbg;
-	dbg("Begin");
 	// setup precaches always needed
 	PRECACHE_SOUND("player/sprayer.wav"); // spray paint sound for PreAlpha
-
-	// PRECACHE_SOUND("player/pl_jumpland2.wav");		// UNDONE: play 2x step sound
 
 	PRECACHE_SOUND("player/pl_fallpain2.wav");
 	PRECACHE_SOUND("player/pl_fallpain3.wav");
@@ -1902,34 +1897,10 @@ void ClientPrecache(void)
 	PRECACHE_SOUND("debris/glass2.wav");
 	PRECACHE_SOUND("debris/glass3.wav");
 
-	//	PRECACHE_SOUND( SOUND_FLASHLIGHT_ON );
-	//	PRECACHE_SOUND( SOUND_FLASHLIGHT_OFF );
-
-	// hud sounds
-	//Thothie MAR2012_26 - cutting down on sound precaches
-	/*
-	PRECACHE_SOUND("common/wpn_hudoff.wav");
-	PRECACHE_SOUND("common/wpn_hudon.wav");
-	PRECACHE_SOUND("common/wpn_moveselect.wav");
-	PRECACHE_SOUND("common/wpn_select.wav");
-	PRECACHE_SOUND("common/wpn_denyselect.wav");
-	*/
-	//Thothie MAR2012_26 - cutting down on sound precaches
-	// geiger sounds
-	/*
-	PRECACHE_SOUND("player/geiger6.wav");
-	PRECACHE_SOUND("player/geiger5.wav");
-	PRECACHE_SOUND("player/geiger4.wav");
-	PRECACHE_SOUND("player/geiger3.wav");
-	PRECACHE_SOUND("player/geiger2.wav");
-	PRECACHE_SOUND("player/geiger1.wav");
-	*/
-
 	if (giPrecacheGrunt)
 		UTIL_PrecacheOther("monster_human_grunt");
 
 	PlayerPrecache();
-	enddbg;
 }
 
 /*
@@ -1957,8 +1928,13 @@ Returns the descriptive name of this .dll.  E.g., Half-Life, or Team Fortress 2
 */
 const char *GetGameDescription()
 {
-	DBG_INPUT;
-	static msstring GameDesc = UTIL_VarArgs("MS:R %s", MS_VERSION);
+	#if DEBUG
+		static msstring GameDesc = UTIL_VarArgs("MS:R Ver.%s", "Canary");
+	#else
+		char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[4], __DATE__[5], __DATE__[6]};
+		static msstring GameDesc = UTIL_VarArgs("MS:R Ver.%s", build);
+	#endif
+
 	return GameDesc;
 }
 

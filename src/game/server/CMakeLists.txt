@@ -239,7 +239,6 @@ set(Shared
 	"../shared/ms/stackstring.cpp"
 	"../shared/ms/stackstring.h"
 	"../shared/ms/storeshared.h"
-	"../shared/ms/versioncontrol.h"
 	"../shared/ms/vgui_menudefsshared.h"
 	"../shared/stats/stats.cpp"
 	"../shared/strhelper.cpp"

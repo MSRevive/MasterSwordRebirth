@@ -7,7 +7,6 @@
 #include "weapons/genericitem.h"
 #include "gamerules/gamerules.h"
 #include "store.h"
-#include "versioncontrol.h"
 #include "cstringpool.h"
 #include "crc/crchash.h"
 #include "filesystem_shared.h"
@@ -44,7 +43,7 @@ cvar_t msallowkickvote = {"ms_allowkickvote", "1", FCVAR_SERVER};
 cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
 cvar_t ms_reset_time = {"ms_reset_time", "10", FCVAR_SERVER};
 cvar_t ms_reset_map = {"ms_reset_map", "edana", FCVAR_SERVER};
-cvar_t ms_version = {"ms_version", MS_VERSION, FCVAR_EXTDLL};
+cvar_t ms_version = {"ms_version", __DATE__, FCVAR_EXTDLL};
 cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER};
 //cvar_t	ms_trans_req	= {"ms_trans_req","0", FCVAR_SERVER }; //Thothie JUN2007 - max players required to activate a transition (0 = all on server) - nvm, changed method - nvm, changed method
 cvar_t ms_fxlimit = {"ms_fxlimit", "0", FCVAR_SERVER};
