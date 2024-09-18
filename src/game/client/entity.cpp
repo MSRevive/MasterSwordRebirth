@@ -1891,9 +1891,9 @@ void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, const struct 
 	case 8500:
 		if (event->options)
 		{
-			if (!stricmp(event->options, "twohandanim"))
+			if (!_stricmp(event->options, "twohandanim"))
 				ViewModel_InactiveModelVisible(true, entity);
-			else if (!stricmp(event->options, "onehandanim"))
+			else if (!_stricmp(event->options, "onehandanim"))
 				ViewModel_InactiveModelVisible(false, entity);
 		}
 		break;

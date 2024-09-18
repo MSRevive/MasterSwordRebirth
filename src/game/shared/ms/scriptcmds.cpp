@@ -3196,9 +3196,9 @@ bool CScript::ScriptCmd_GetEnts(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		if ( !pEnt->IsMSMonster() && !pEnt->IsPlayer() ) continue;
 
 		bool bStoreEnt = false;
-		if( !stricmp("player",Name) && pEnt->IsPlayer() ) bStoreEnt = true;
-		if( !stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() ) bStoreEnt = true;
-		if( !stricmp("any",Name) ) bStoreEnt = true;
+		if( !_stricmp("player",Name) && pEnt->IsPlayer() ) bStoreEnt = true;
+		if( !_stricmp("monster",Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer() ) bStoreEnt = true;
+		if( !_stricmp("any",Name) ) bStoreEnt = true;
 
 		if ( bStoreEnt )
 		{

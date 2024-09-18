@@ -2125,7 +2125,7 @@ int TeamFortressViewport::MsgFunc_TeamScore(const char *pszName, int iSize, void
 	// find the team matching the name
 	for (i = 1; i <= m_pScoreBoard->m_iNumTeams; i++)
 	{
-		if (!stricmp(TeamName, g_TeamInfo[i].name))
+		if (!_stricmp(TeamName, g_TeamInfo[i].name))
 			break;
 	}
 

@@ -726,7 +726,7 @@ int HUD_IsGame(const char *game)
 	if (gamedir && gamedir[0])
 	{
 		COM_FileBase(gamedir, gd);
-		if (!stricmp(gd, game))
+		if (!_stricmp(gd, game))
 			return 1;
 	}
 	return 0;

@@ -2125,15 +2125,15 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 		if (Params.size() >= 1)
 		{
 			msstring& ReqHand = Params[0];
-			if (!stricmp(ReqHand, "left"))
+			if (!_stricmp(ReqHand, "left"))
 				m_PrefHand = LEFT_HAND;
-			else if (!stricmp(ReqHand, "right"))
+			else if (!_stricmp(ReqHand, "right"))
 				m_PrefHand = RIGHT_HAND;
-			else if (!stricmp(ReqHand, "any"))
+			else if (!_stricmp(ReqHand, "any"))
 				m_PrefHand = ANY_HAND;
-			else if (!stricmp(ReqHand, "both"))
+			else if (!_stricmp(ReqHand, "both"))
 				m_PrefHand = BOTH_HANDS;
-			else if (!stricmp(ReqHand, "undroppable"))
+			else if (!_stricmp(ReqHand, "undroppable"))
 				m_PrefHand = HAND_PLAYERHANDS;
 		}
 		else

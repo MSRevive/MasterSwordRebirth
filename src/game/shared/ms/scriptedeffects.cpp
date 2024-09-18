@@ -14,7 +14,7 @@ void CGlobalScriptedEffects::RegisterEffect(globalscripteffect_t &Effect)
 
 	for (int i = 0; i < Effects.size(); i++)
 	{
-		if (!stricmp(Effects[i].m_Name, Effect.m_Name))
+		if (!_stricmp(Effects[i].m_Name, Effect.m_Name))
 			return;
 	} //Effect already exists
 

@@ -1450,7 +1450,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	curplayers = UTIL_NumPlayers();
 
 	// Has the map cycle filename changed?
-	if ( stricmp( mapcfile, szPreviousMapCycleFile ) )
+	if ( _stricmp( mapcfile, szPreviousMapCycleFile ) )
 	{
 		 strncpy(szPreviousMapCycleFile,  mapcfile, sizeof(szPreviousMapCycleFile) );
 
@@ -1838,7 +1838,7 @@ void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *info
 	// prevent skin/color/model changes
 	char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
 
-	if ( stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
+	if ( _stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
 	{
 		g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "model", PLAYERMODEL_HUMAN_MALE1 );
 		//_snprintf( text, sizeof(text), "* Unkwnown forces prevent you from shapeshifting...\n" );

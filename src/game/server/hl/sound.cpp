@@ -1494,7 +1494,7 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 	// and give to engine as string.
 	for (i = 0; i < gcallsentences; i++)
 	{
-		if (!stricmp(gszallsentencenames[i], sample + 1))
+		if (!_stricmp(gszallsentencenames[i], sample + 1))
 		{
 			if (sentencenum)
 			{

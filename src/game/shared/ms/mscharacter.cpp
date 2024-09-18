@@ -191,8 +191,8 @@ jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, msstringlist &Visi
 	jointype_e JoinType = JN_NOTALLOWED;
 	if (MSGlobals::CanCreateCharOnMap)
 		JoinType = JN_STARTMAP;							   //Can create a character on this map
-	else if (!stricmp(Data.MapName, MSGlobals::MapName) || //Already in this map Or trying to
-			 !stricmp(Data.NextMap, MSGlobals::MapName))   //transition to this map
+	else if (!_stricmp(Data.MapName, MSGlobals::MapName) || //Already in this map Or trying to
+			 !_stricmp(Data.NextMap, MSGlobals::MapName))   //transition to this map
 		JoinType = JN_TRAVEL;
 	else if (HasVisited(MSGlobals::MapName, VisitedMaps) &&
 			 GetOtherPlayerTransition(NULL))
@@ -219,8 +219,8 @@ jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &
 	jointype_e JoinType = JN_NOTALLOWED;
 	if (MSGlobals::CanCreateCharOnMap)
 		JoinType = JN_STARTMAP;								   //Can create a character on this map
-	else if (!stricmp(CharData.MapName, MSGlobals::MapName) || //Already in this map Or trying to
-			 !stricmp(CharData.NextMap, MSGlobals::MapName))   //transition to this map
+	else if (!_stricmp(CharData.MapName, MSGlobals::MapName) || //Already in this map Or trying to
+			 !_stricmp(CharData.NextMap, MSGlobals::MapName))   //transition to this map
 		JoinType = JN_TRAVEL;
 	else if (HasVisited(MSGlobals::MapName, VisitedMaps) &&
 			 GetOtherPlayerTransition(NULL))

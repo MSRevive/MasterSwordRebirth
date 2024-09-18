@@ -303,7 +303,7 @@ void PM_SortTextures(void)
 	{
 		for (j = i + 1; j < gcTextures; j++)
 		{
-			if (stricmp(grgszTextureName[i], grgszTextureName[j]) > 0)
+			if (_stricmp(grgszTextureName[i], grgszTextureName[j]) > 0)
 			{
 				// Swap
 				//

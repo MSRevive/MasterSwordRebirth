@@ -2051,13 +2051,13 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 			continue;
 		}
 
-		if (!stricmp("player", Name) && pEnt->IsPlayer())
+		if (!_stricmp("player", Name) && pEnt->IsPlayer())
 			return EntToString(pEnt);
 
-		if (!stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
+		if (!_stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
 			return EntToString(pEnt);
 
-		if (!stricmp("any", Name))
+		if (!_stricmp("any", Name))
 			return EntToString(pEnt);
 
 		//This doesn't work here - works in $get_tsphere though :(
@@ -2833,7 +2833,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 
 			if (m.pScriptedEnt->entindex() == pEnt->entindex()) continue; //dont count self
 
-			if (!stricmp("player", Name) && pEnt->IsPlayer())
+			if (!_stricmp("player", Name) && pEnt->IsPlayer())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 				int total_len = msTokenString.len() + ent_str.len();
@@ -2844,7 +2844,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				}
 			}
 
-			if (!stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
+			if (!_stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 				int total_len = msTokenString.len() + ent_str.len();
@@ -2855,7 +2855,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				}
 			}
 
-			if (!stricmp("any", Name) && !pEnt->IsMSItem())
+			if (!_stricmp("any", Name) && !pEnt->IsMSItem())
 			{
 				ent_str = return_idx ? msstring(UTIL_VarArgs("%i", pEnt->entindex())) : EntToString(pEnt); //Thothie APR2016_17 - isphere
 				int total_len = msTokenString.len() + ent_str.len();
@@ -2960,7 +2960,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 
 			if (m.pScriptedEnt->entindex() == pEnt->entindex()) continue; //dont count self
 
-			if (!stricmp("player", Name) && pEnt->IsPlayer())
+			if (!_stricmp("player", Name) && pEnt->IsPlayer())
 			{
 				ent_str = EntToString(pEnt);
 				int total_len = msTokenString.len() + ent_str.len();
@@ -2971,7 +2971,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				}
 			}
 
-			if (!stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
+			if (!_stricmp("monster", Name) && pEnt->IsMSMonster() && !pEnt->IsPlayer())
 			{
 				ent_str = EntToString(pEnt);
 				int total_len = msTokenString.len() + ent_str.len();
@@ -2982,7 +2982,7 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 				}
 			}
 
-			if (!stricmp("any", Name) && !pEnt->IsMSItem())
+			if (!_stricmp("any", Name) && !pEnt->IsMSItem())
 			{
 				ent_str = EntToString(pEnt);
 				int total_len = msTokenString.len() + ent_str.len();
@@ -4825,7 +4825,7 @@ bool CScript::Spawn(string_i Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 	{
 		for (int i = 0; i < m_Dependencies.size(); i++)
 		{
-			if (!stricmp(m_Dependencies[i], Filename))
+			if (!_stricmp(m_Dependencies[i], Filename))
 			{
 				return true;	//Return true here, so its a 'fake' successful.  This should only happen on #includes
 			}
@@ -5832,7 +5832,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 	//ALERT( at_console, "CommandFound: %s\n", TestCommand );
 
 	//Check if this word is a pre-command.
-	if (!stricmp(TestCommand, "{"))
+	if (!_stricmp(TestCommand, "{"))
 	{
 		if (!*pCurrentEvent)
 		{
@@ -5896,7 +5896,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		}
 		return 1;
 	}
-	else if (!stricmp(TestCommand, "#include"))
+	else if (!_stricmp(TestCommand, "#include"))
 	{	//#include [scope] <name> [allowduplicate]
 		//Include another script file
 		msstring FileName = Line.thru_char(SKIP_STR);
@@ -5937,7 +5937,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		}
 		return 1;
 	}
-	else if (!stricmp(TestCommand, "#scope"))
+	else if (!_stricmp(TestCommand, "#scope"))
 	{
 		msstring Scope = Line.thru_char(SKIP_STR);
 		if (Scope == "client")		m.DefaultScope = EVENTSCOPE_CLIENT;
@@ -5956,7 +5956,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 	//			The pre-commands below require that we be inside of an event
 	bool KeepCmd = false;
 
-	if (!stricmp(TestCommand, "}"))
+	if (!_stricmp(TestCommand, "}"))
 	{
 		if (!ParentCmds.size())
 		{
@@ -5985,7 +5985,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			ParentCmds.erase(ParentCmds.size() - 1);
 		}
 	}
-	else if (!stricmp(msstring(TestCommand).substr(0, 2), "if"))
+	else if (!_stricmp(msstring(TestCommand).substr(0, 2), "if"))
 	{
 		//This could be a new-style if or an old-style if
 		if (!strstr(TestCommand, "(") && *CmdLineTmp != '(') //Old: if var == var
@@ -6040,7 +6040,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
 		}
 	}
-	else if (!stricmp(TestCommand, "else"))
+	else if (!_stricmp(TestCommand, "else"))
 	{
 		scriptcmd_t& ParentCmd = CurrentCmds.m_Cmds[CurrentCmds.m_Cmds.size() - 1];
 		if (ParentCmd.m_Conditional)
@@ -6063,7 +6063,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		}
 		else MSErrorConsoleText("CSript::ParseLine", UTIL_VarArgs("Script: %s, Line: %i - %s \"else\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer));
 	}
-	else if (!stricmp(TestCommand, "eventname"))
+	else if (!_stricmp(TestCommand, "eventname"))
 	{
 		//Set a name for the current event
 		sscanf(CmdLineTmp, "%s", cBuffer);
@@ -6071,7 +6071,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		CurrentEvent->fNextExecutionTime = -1;
 		CurrentEvent->fRepeatDelay = -1;
 	}
-	else if (!stricmp(TestCommand, "repeatdelay"))
+	else if (!_stricmp(TestCommand, "repeatdelay"))
 	{
 		//Set a delay timer for the current event
 		sscanf(CmdLineTmp, "%s", cBuffer);
@@ -6079,8 +6079,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
 		KeepCmd = true;
 	}
-	else if (!stricmp(TestCommand, "setvar") ||
-		!stricmp(TestCommand, "const"))
+	else if (!_stricmp(TestCommand, "setvar") ||
+		!_stricmp(TestCommand, "const"))
 	{
 		if (CurrentEvent->Scope !=
 #ifdef VALVE_DLL
@@ -6099,8 +6099,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			msstring testvar = VarName;
 			msstring testvar_type;
 			msstring testvar_scope = "preload";
-			if (!stricmp(TestCommand, "setvar")) testvar_type = "setvar";
-			if (!stricmp(TestCommand, "const")) testvar_type = "const";
+			if (!_stricmp(TestCommand, "setvar")) testvar_type = "setvar";
+			if (!_stricmp(TestCommand, "const")) testvar_type = "const";
 			conflict_check(testvar, testvar_type, testvar_scope, LineNum);
 #endif
 
@@ -6110,9 +6110,9 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			else VarValue = Line.thru_char(SKIP_STR);				//No quotes
 
 			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));				//Resolve both constants and variables -- TODO: Remove the variables - should be constants only
-			if (!stricmp(TestCommand, "setvar"))
+			if (!_stricmp(TestCommand, "setvar"))
 			{
-				SetVar(VarName, VarValue, !stricmp(TestCommand, "setvarg") ? true : false);
+				SetVar(VarName, VarValue, !_stricmp(TestCommand, "setvarg") ? true : false);
 				KeepCmd = true;
 			}
 			else
@@ -6132,11 +6132,11 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				{
 					m_Constants.add(scriptvar_t(VarName, VarValue));//Create new constant
 				}
-				//else if( !stricmp(TestCommand, "const_ovrd") ) m_Constants[i].Value = VarValue; //NOV2014_18 - no good here, runs at load time
+				//else if( !_stricmp(TestCommand, "const_ovrd") ) m_Constants[i].Value = VarValue; //NOV2014_18 - no good here, runs at load time
 			}
 		}
 	}
-	else if (!stricmp(TestCommand, "removeconst"))
+	else if (!_stricmp(TestCommand, "removeconst"))
 	{
 		msstring VarName = Line.thru_char(SKIP_STR);
 
@@ -6147,7 +6147,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				break;
 			}
 	}
-	else if (!stricmp(TestCommand, "setvard"))
+	else if (!_stricmp(TestCommand, "setvard"))
 	{
 		//Really just a setvar that skips the loadtime execution
 #if !TURN_OFF_ALERT
@@ -6162,7 +6162,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		KeepCmd = true;
 	}
 	//this fails, as it sometimes runs at load time (not sure why)
-	else if (!stricmp(TestCommand, "const_ovrd"))
+	else if (!_stricmp(TestCommand, "const_ovrd"))
 	{
 		//Thothie NOV2014_18 - fixing const_ovrd to only work during run time
 		msstring VarName = Line.thru_char(SKIP_STR);
@@ -6192,7 +6192,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		}
 		KeepCmd = true;
 	}
-	/*else if( !stricmp(TestCommand,	"precachefile"		) )
+	/*else if( !_stricmp(TestCommand,	"precachefile"		) )
 	{
 		//precache another script file
 		sscanf( CmdLineTmp, "%[^\t \r\n]", cBuffer );
@@ -6205,18 +6205,18 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			ALERT( at_console, "Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer );
 		return 1;
 	}*/
-	else if (!stricmp(TestCommand, "setmodel") ||
-		!stricmp(TestCommand, "setviewmodel") ||
-		!stricmp(TestCommand, "setworldmodel") ||
-		!stricmp(TestCommand, "setpmodel") ||
-		!stricmp(TestCommand, "setshield") ||
-		!stricmp(TestCommand, "attachsprite") ||
-		!stricmp(TestCommand, "svplaysound") ||
-		//!stricmp(TestCommand,	"playsoundcl"		) ||  //never used
-		!stricmp(TestCommand, "svplayrandomsound") ||
-		!stricmp(TestCommand, "svsound.play3d") ||
-		!stricmp(TestCommand, "precache") ||
-		!stricmp(TestCommand, "say")
+	else if (!_stricmp(TestCommand, "setmodel") ||
+		!_stricmp(TestCommand, "setviewmodel") ||
+		!_stricmp(TestCommand, "setworldmodel") ||
+		!_stricmp(TestCommand, "setpmodel") ||
+		!_stricmp(TestCommand, "setshield") ||
+		!_stricmp(TestCommand, "attachsprite") ||
+		!_stricmp(TestCommand, "svplaysound") ||
+		//!_stricmp(TestCommand,	"playsoundcl"		) ||  //never used
+		!_stricmp(TestCommand, "svplayrandomsound") ||
+		!_stricmp(TestCommand, "svsound.play3d") ||
+		!_stricmp(TestCommand, "precache") ||
+		!_stricmp(TestCommand, "say")
 		)
 	{
 #ifdef VALVE_DLL
@@ -6228,7 +6228,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		char* pSearchLine = "%s";
 		cBuffer[0] = 0;
 		int SndType = 0;
-		if (!stricmp(TestCommand, "sound.play3d") || !stricmp(TestCommand, "svsound.play3d")) SndType = 1;	//Sound name is first parameter
+		if (!_stricmp(TestCommand, "sound.play3d") || !_stricmp(TestCommand, "svsound.play3d")) SndType = 1;	//Sound name is first parameter
 
 		while (sscanf(CmdLineTmp, pSearchLine, cSpaces, cBuffer) > 0) //The first time preceding spaces aren't checked and the result is in cSpaces
 		{
@@ -6323,7 +6323,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			switch (Precachetype)
 			{
 			case pctype_sound:
-				if (stricmp(TestCommand, "precache"))
+				if (_stricmp(TestCommand, "precache"))
 					PRECACHE_SOUND(pszGlobalPointer); //Thothie MAR2012_27 - no longer precahing sounds from here, using client side sounds wherever possible
 				break;
 			case pctype_sprite:
@@ -6333,7 +6333,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			}
 		}
 #endif
-		if (stricmp(TestCommand, "precache")) //Don't keep the precache command
+		if (_stricmp(TestCommand, "precache")) //Don't keep the precache command
 			KeepCmd = true;
 	}
 	else KeepCmd = true; //Normal command
@@ -6646,7 +6646,7 @@ int IScripted::Script_ParseLine(CScript* Script, msstring_ref pszCommandLine, sc
 		for (int icommand = 0; icommand < m_pScriptCommands->size(); icommand++)
 		{
 			scriptcmdname_t& Checkcmd = (*m_pScriptCommands)[icommand];
-			if (!stricmp(TestCommand, Checkcmd.m_Name.c_str()))
+			if (!_stricmp(TestCommand, Checkcmd.m_Name.c_str()))
 				return Checkcmd.m_Conditional ? 2 : 1;
 		}
 
@@ -6711,11 +6711,11 @@ void IScripted::SetScriptVar(msstring_ref VarName, float flValue) { if (m_Script
 
 msstring_ref SCRIPT_EVENT::GetLocal(msstring_ref Name)
 {
-	if (!stricmp(Name, "game.event.params"))
+	if (!_stricmp(Name, "game.event.params"))
 	{
 		return Params ? UTIL_VarArgs("%i", Params->size()) : "0";
 	}
-	else if (!stricmp(Name, "game.event.params.token") || !stricmp(Name, "game.event.params.tokenize"))
+	else if (!_stricmp(Name, "game.event.params.token") || !_stricmp(Name, "game.event.params.tokenize"))
 	{
 		//Thothie MAY2016_04 - so you can process a set of parameters as a token set
 		//- some other command to dump to array would be good too, as sometimes parameters are long

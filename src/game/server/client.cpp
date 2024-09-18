@@ -681,7 +681,7 @@ void ClientCommand2(edict_t *pEntity)
 			//OfferItem() converts it to the src idx
 			OfferInfo.SrcMonsterIDX = atoi(CMD_ARGV(1));
 
-			if (!stricmp(CMD_ARGV(2), "gold"))
+			if (!_stricmp(CMD_ARGV(2), "gold"))
 			{
 				if (CMD_ARGC() >= 4)
 				{
@@ -713,12 +713,12 @@ void ClientCommand2(edict_t *pEntity)
 		bool fDoTrade = false;
 		tradeinfo_t tiTradeInfo;
 		clrmem(tiTradeInfo);
-		if (!stricmp(CMD_ARGV(1), "buy"))
+		if (!_stricmp(CMD_ARGV(1), "buy"))
 		{
 			tiTradeInfo.iStatus = TRADE_BUY;
 			fDoTrade = true;
 		}
-		else if (!stricmp(CMD_ARGV(1), "sell"))
+		else if (!_stricmp(CMD_ARGV(1), "sell"))
 		{
 			tiTradeInfo.iStatus = TRADE_SELL;
 			fDoTrade = true;
@@ -740,7 +740,7 @@ void ClientCommand2(edict_t *pEntity)
 		if (CMD_ARGC() < 2)
 			return;
 
-		if (!stricmp(CMD_ARGV(1), "stop"))
+		if (!_stricmp(CMD_ARGV(1), "stop"))
 			pPlayer->m_CurrentStorage.Active = false;
 
 		if (CMD_ARGC() < 3)
@@ -751,7 +751,7 @@ void ClientCommand2(edict_t *pEntity)
 			storage_t *pStorage = pPlayer->Storage_GetStorage(pPlayer->m_CurrentStorage.StorageName);
 			if (pStorage)
 			{
-				if (!stricmp(CMD_ARGV(1), "add"))
+				if (!_stricmp(CMD_ARGV(1), "add"))
 				{
 					CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
 					if (pItem)
@@ -780,7 +780,7 @@ void ClientCommand2(edict_t *pEntity)
 						pItem->SUB_Remove();
 					}
 				}
-				else if (!stricmp(CMD_ARGV(1), "remove"))
+				else if (!_stricmp(CMD_ARGV(1), "remove"))
 				{
 					if (CMD_ARGC() < 4)
 						return;
@@ -1930,7 +1930,7 @@ const char *GetGameDescription()
 {
 #if DEBUG
 	static char gameDesc[64];
-	sprintf(gameDesc, "MS:R Ver.%s", "Canaery");
+	sprintf(gameDesc, "MS:R Ver.%s", "Canary");
 #else
 	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[8], __DATE__[9], __DATE__[10], __DATE__[11]};
 	static char gameDesc[64];

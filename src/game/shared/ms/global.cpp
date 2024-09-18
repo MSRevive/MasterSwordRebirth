@@ -326,7 +326,7 @@ char *g_EntTypeByName[ENT_TYPE_TOTAL] =
 int EntityNameToType(const char *pszName)
 {
 	for (int i = 0; i < ENT_TYPE_TOTAL; i++)
-		if (!stricmp(pszName, g_EntTypeByName[i]))
+		if (!_stricmp(pszName, g_EntTypeByName[i]))
 			return i;
 	return -1;
 }

@@ -505,7 +505,7 @@ CStat *CMSMonster::FindStat(int idx)
 CStat *CMSMonster::FindStat(msstring_ref Name)
 {
 	for (int i = 0; i < m_Stats.size(); i++)
-		if (!stricmp(m_Stats[i].m_Name, Name)) //case in-sensitive compare
+		if (!_stricmp(m_Stats[i].m_Name, Name)) //case in-sensitive compare
 			return &m_Stats[i];
 
 	return NULL;

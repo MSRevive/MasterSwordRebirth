@@ -110,7 +110,7 @@ bool cl_entity_s::PlayAnim(msstring_ref Anim)
 
 	for (int i = 0; i < pstudiohdr->numseq; i++)
 	{
-		if (stricmp(pseqdesc[i].label, Anim) != 0)
+		if (_stricmp(pseqdesc[i].label, Anim) != 0)
 			continue;
 
 		PlayAnim(i);

@@ -189,7 +189,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 
 		// if( Surface.texinfo->texture->name[0] == '!' )
 
-		if (!stricmp(MSTexture.Name, Surface.texinfo->texture->name)) //Case in-sensitive compare for the texture name
+		if (!_stricmp(MSTexture.Name, Surface.texinfo->texture->name)) //Case in-sensitive compare for the texture name
 		{
 			pCustomTexture = &MSCLGlobals::Textures[t];
 			break;

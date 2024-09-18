@@ -1153,7 +1153,7 @@ void CStudioModelRenderer::StudioMergeBones(model_t* m_pSubModel)
 			{
 				//if( strstr(pbones[i].name,"rhand") )
 
-				if (stricmp(pbones[i].name, m_nCachedBoneNames[j]) == 0)
+				if (_stricmp(pbones[i].name, m_nCachedBoneNames[j]) == 0)
 				{
 					MatrixCopy(m_rgCachedBoneTransform[j], (*m_pbonetransform)[i]);
 					MatrixCopy(m_rgCachedLightTransform[j], (*m_plighttransform)[i]);
@@ -2573,11 +2573,11 @@ void CStudioModelRenderer::ModifyBone(mstudiobone_t* pbone, Vector& angle)
 	//return; //Don't work in multiplayer for some reason
 
 	int Bone = 0;
-	if (!stricmp(pbone->name, "Bip01 Spine"))
+	if (!_stricmp(pbone->name, "Bip01 Spine"))
 		Bone = 0;
-	else if (!stricmp(pbone->name, "Bip01 Spine1"))
+	else if (!_stricmp(pbone->name, "Bip01 Spine1"))
 		Bone = 1;
-	else if (!stricmp(pbone->name, "Bip01 Spine2"))
+	else if (!_stricmp(pbone->name, "Bip01 Spine2"))
 		Bone = 2;
 	else
 		return;

@@ -48,7 +48,7 @@ static CBasePlayer *FindPlayerByName(const char *pTestName)
 			if (pEnt && pEnt->IsPlayer())
 			{
 				const char *pNetName = STRING(pEnt->pev->netname);
-				if (stricmp(pNetName, pTestName) == 0)
+				if (_stricmp(pNetName, pTestName) == 0)
 				{
 					return (CBasePlayer *)pEnt;
 				}
@@ -161,7 +161,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer *pPlayer, const char *cmd)
 		return true;
 	}
 
-	bool bBan = stricmp(cmd, "vban") == 0;
+	bool bBan = _stricmp(cmd, "vban") == 0;
 	if (bBan && CMD_ARGC() >= 2)
 	{
 		for (int i = 1; i < CMD_ARGC(); i++)
@@ -184,7 +184,7 @@ bool CVoiceGameMgr::ClientCommand(CBasePlayer *pPlayer, const char *cmd)
 		//UpdateMasks();
 		return true;
 	}
-	else if (stricmp(cmd, "VModEnable") == 0 && CMD_ARGC() >= 2)
+	else if (_stricmp(cmd, "VModEnable") == 0 && CMD_ARGC() >= 2)
 	{
 		VoiceServerDebug("CVoiceGameMgr::ClientCommand: VModEnable (%d)\n", !!atoi(CMD_ARGV(1)));
 		g_PlayerModEnable[playerClientIndex] = !!atoi(CMD_ARGV(1));

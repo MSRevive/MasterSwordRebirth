@@ -23,7 +23,7 @@ race_t *CRaceManager::GetRacePtr(msstring_ref pszName)
 	for (int r = 0; r < Races.size(); r++)
 	{
 		race_t &Race = Races[r];
-		if (!stricmp(Race.Name, pszName))
+		if (!_stricmp(Race.Name, pszName))
 			return &Race; //Valid race
 	}
 	return NULL; //Race not found
@@ -34,10 +34,10 @@ bool CRaceManager::RelationshipContains(msstringlist &RaceList, msstring_ref psz
 	{
 		msstring_ref pszRaceName = RaceList[i];
 
-		if (!stricmp(pszRaceName, "all"))
+		if (!_stricmp(pszRaceName, "all"))
 			return true;
 
-		if (!stricmp(pszRaceName, pszTargetRace))
+		if (!_stricmp(pszRaceName, pszTargetRace))
 			return true;
 	}
 
@@ -53,7 +53,7 @@ relationship_e CRaceManager::Relationship(msstring_ref pszSourceRace, msstring_r
 	if (!pTargetRace)
 		return RELATIONSHIP_NO;
 
-	//if( !stricmp(pszSourceRace,pszTargetRace) )									//Same race, assume we're friends
+	//if( !_stricmp(pszSourceRace,pszTargetRace) )									//Same race, assume we're friends
 	//	return RELATIONSHIP_AL;
 
 	//it's possible for one race to be wary of another one even if that race isn't wary of them.

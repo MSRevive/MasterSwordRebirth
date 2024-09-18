@@ -52,7 +52,7 @@ char* SpellTypeList[5] =
 int GetSkillStatByName(const char* pszName) // Index lookup by name (Skill stats only)
 {
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
-		if (!stricmp(pszName, SkillStatList[i].DllName))
+		if (!_stricmp(pszName, SkillStatList[i].DllName))
 			return SKILL_FIRSTSKILL + i;
 	return -1;
 }
@@ -68,20 +68,20 @@ const char* GetSkillName(int Skill) // Name lookup by index (Any stat)
 }
 int GetSubSkillByName(const char* pszName)
 {
-	if (!stricmp(pszName, "prof")) // alias for proficiency
+	if (!_stricmp(pszName, "prof")) // alias for proficiency
 		return 0;
 	for (int i = 0; i < STATPROP_TOTAL; i++)
-		if (!stricmp(pszName, SkillTypeList[i]))
+		if (!_stricmp(pszName, SkillTypeList[i]))
 			return i;
 	for (int i = 0; i < STAT_MAGIC_TOTAL; i++)
-		if (!stricmp(pszName, SpellTypeList[i]))
+		if (!_stricmp(pszName, SpellTypeList[i]))
 			return i;
 	return -1;
 }
 int GetNatStatByName(const char* pszName)
 {
 	for (int i = 0; i < NATURAL_MAX_STATS; i++)
-		if (!stricmp(pszName, NatStatList[i].Name))
+		if (!_stricmp(pszName, NatStatList[i].Name))
 			return i;
 	return -1;
 }

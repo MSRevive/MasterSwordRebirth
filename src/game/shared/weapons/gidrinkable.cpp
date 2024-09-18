@@ -34,7 +34,7 @@ void CGenericItem::RegisterDrinkable( )
 
 	DrinkData = msnew(drinkdata_t);
 	memset(DrinkData, 0, sizeof(drinkdata_t));
-	//if( !stricmp(GetFirstScriptVar("DRINK_TYPE"),"givehealth") )
+	//if( !_stricmp(GetFirstScriptVar("DRINK_TYPE"),"givehealth") )
 	//	DrinkData->Type = DRINK_GIVEHEALTH;
 
 	DrinkData->Intensity = atof(GetFirstScriptVar("DRINK_EFFECTAMT"));

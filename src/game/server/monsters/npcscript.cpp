@@ -585,11 +585,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			/*int iGiveFlags = (1<<1);
 
 			msstring_ref Location = Params[0];
-			if( !stricmp(Location,"use") )
+			if( !_stricmp(Location,"use") )
 				SetBits( iGiveFlags, (1<<0) );
-			else if( !stricmp(Location,"hide") )
+			else if( !_stricmp(Location,"hide") )
 				SetBits( iGiveFlags, (1<<1) );
-			else if( !stricmp(Location,"hand") )
+			else if( !_stricmp(Location,"hand") )
 				SetBits( iGiveFlags, (1<<2) );
 
 			msstring_ref ItemName = Params[0];*/
@@ -651,7 +651,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				int GoldAmt = 0;
 				itemtype_e ItemType = ITEM_NORMAL;
-				if (!stricmp("gold", Params[1]) && Params.size() >= 2)
+				if (!_stricmp("gold", Params[1]) && Params.size() >= 2)
 				{
 					ItemType = ITEM_GOLD;
 					GoldAmt = atoi(Params[2]);
@@ -1512,18 +1512,18 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			MONSTER_ANIM AnimType = MONSTER_ANIM_WALK;
 			bool Priority = false;
 
-			if (!stricmp(pszAnimType, "move"))
+			if (!_stricmp(pszAnimType, "move"))
 				AnimType = MONSTER_ANIM_WALK;
-			else if (!stricmp(pszAnimType, "once"))
+			else if (!_stricmp(pszAnimType, "once"))
 				AnimType = MONSTER_ANIM_ONCE;
-			else if (!stricmp(pszAnimType, "hold"))
+			else if (!_stricmp(pszAnimType, "hold"))
 				AnimType = MONSTER_ANIM_HOLD;
-			else if (!stricmp(pszAnimType, "critical"))
+			else if (!_stricmp(pszAnimType, "critical"))
 			{
 				AnimType = MONSTER_ANIM_ONCE;
 				Priority = true;
 			}
-			else if (!stricmp(pszAnimType, "break"))
+			else if (!_stricmp(pszAnimType, "break"))
 				BreakAnimation(MONSTER_ANIM_BREAK, "", NULL);
 			//^^^Thothie JUN2007b - attempting to stop ms.dll from calling break anims
 			//- causing AI issues, want to restrict to scripts only
@@ -1801,7 +1801,7 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 					FStrEq(pSighted->DisplayName(), Name))
 					fSawTarget = true;
 
-				if (!stricmp("enemy", Name))
+				if (!_stricmp("enemy", Name))
 				{
 					switch(IRelationship(pSighted))
 					{
@@ -1813,11 +1813,11 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 						break;
 					}
 				}
-				else if (!stricmp("ally", Name) && IRelationship(pSighted) == RELATIONSHIP_AL)
+				else if (!_stricmp("ally", Name) && IRelationship(pSighted) == RELATIONSHIP_AL)
 					fSawTarget = true;
-				else if (!stricmp("wary", Name) && IRelationship(pSighted) == RELATIONSHIP_WA)
+				else if (!_stricmp("wary", Name) && IRelationship(pSighted) == RELATIONSHIP_WA)
 					fSawTarget = true;
-				else if (!stricmp("player", Name) && pSighted->IsPlayer())
+				else if (!_stricmp("player", Name) && pSighted->IsPlayer())
 					fSawTarget = true;
 			}
 
@@ -1874,9 +1874,9 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 
 				if( pEnt->edict() == edict() )
 				{
-					if( (!stricmp("enemy",Name) && IRelationship(pEnt) < 0) ||
-						(!stricmp("ally",Name) && IRelationship(pEnt) > 0) ||
-						(!stricmp("player",Name) && pEnt->IsPlayer()) )
+					if( (!_stricmp("enemy",Name) && IRelationship(pEnt) < 0) ||
+						(!_stricmp("ally",Name) && IRelationship(pEnt) > 0) ||
+						(!_stricmp("player",Name) && pEnt->IsPlayer()) )
 					{
 						Return = EntToString(pEnt);
 						return true;
@@ -1895,7 +1895,7 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 int CMSMonster::Script_ParseLine(CScript *Script, msstring_ref pszCommandLine, scriptcmd_t &Cmd)
 {
 	msstring CmdName = msstring(pszCommandLine).thru_char(SKIP_STR);
-	if (!stricmp(CmdName.c_str(), "see"))
+	if (!_stricmp(CmdName.c_str(), "see"))
 	{
 		Cmd.m_NewConditional = false;
 		return 2;

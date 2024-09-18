@@ -54,8 +54,8 @@ void CGenericItem::RegisterContainer()
 
 	PackData = new (packdata_t);
 
-	/*	if( !stricmp(GetFirstScriptVar("CONTAINER_TYPE"),"quiver") ) PackData->Type = PACK_QUIVER;
-	else if( !stricmp(GetFirstScriptVar("CONTAINER_TYPE"),"sheath") ) PackData->Type = PACK_SHEATH;
+	/*	if( !_stricmp(GetFirstScriptVar("CONTAINER_TYPE"),"quiver") ) PackData->Type = PACK_QUIVER;
+	else if( !_stricmp(GetFirstScriptVar("CONTAINER_TYPE"),"sheath") ) PackData->Type = PACK_SHEATH;
 	else PackData->Type = PACK_NORMAL;
 	PackData->Volume = atof(GetFirstScriptVar("reg.container.space"));*/
 	PackData->fCanClose = (bool)atoi(GetFirstScriptVar("reg.container.canclose"));

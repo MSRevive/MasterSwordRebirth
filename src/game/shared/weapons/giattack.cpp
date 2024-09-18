@@ -989,7 +989,7 @@ bool CGenericItem::UseAmmo(int iAmt)
 				else
 				{
 					//Player not carrying any of the required ammo
-					if (!stricmp(CurrentAttack->sProjectileType, "arrow"))
+					if (!_stricmp(CurrentAttack->sProjectileType, "arrow"))
 					{
 						//New! Give free 'blunt' arrows
 						CurrentAttack->sProjectile = "";
@@ -999,7 +999,7 @@ bool CGenericItem::UseAmmo(int iAmt)
 
 						CurrentAttack->iLoadedAmmo = iAmt;
 					}
-					else if (!stricmp(CurrentAttack->sProjectileType, "bolt"))
+					else if (!_stricmp(CurrentAttack->sProjectileType, "bolt"))
 					{
 						CurrentAttack->sProjectile = "";
 						CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName("proj_bolt_generic");

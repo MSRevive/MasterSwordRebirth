@@ -328,7 +328,7 @@ void ScorePanel::SortTeams()
 		int j = 0;
 		for (j = 1; j <= m_iNumTeams; j++)
 		{
-			if (!stricmp(g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name))
+			if (!_stricmp(g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name))
 				break;
 		}
 		if (j > m_iNumTeams) // player is not in a team, skip to the next guy
@@ -424,7 +424,7 @@ void ScorePanel::SortPlayers(int iTeam, char *team)
 		{
 			extra_player_info_t &ExtraInfo = g_PlayerExtraInfo[i];
 			if (m_bHasBeenSorted[i] || !g_PlayerInfoList[i].name ||
-				(best_player && stricmp(g_PlayerExtraInfo[best_player].Title, ExtraInfo.Title) < 0))
+				(best_player && _stricmp(g_PlayerExtraInfo[best_player].Title, ExtraInfo.Title) < 0))
 				continue;
 
 			cl_entity_t *ent = gEngfuncs.GetEntityByIndex(i);
@@ -489,7 +489,7 @@ void ScorePanel::RebuildTeams()
 			if (g_TeamInfo[j].name[0] == '\0')
 				break;
 
-			if (!stricmp(g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name))
+			if (!_stricmp(g_PlayerExtraInfo[i].teamname, g_TeamInfo[j].name))
 				break;
 		}
 
