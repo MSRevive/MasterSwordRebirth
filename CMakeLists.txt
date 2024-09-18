@@ -43,6 +43,14 @@ set(BASEDIR "${CMAKE_CURRENT_SOURCE_DIR}")
 function(set_common_properties TARGET_NAME)
 	# Compile Flags and such.
 	set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
+	
+	if (UNIX)
+		target_compiler_definitions(${TARGET_NAME} PRIVATE
+			_stricmp=strcasecmp
+			_strnicmp=strncasecmp
+			_strdup=strdup
+			_vsnprintf=vsnprintf)
+	endif(UNIX)
 
 	target_compile_definitions(${TARGET_NAME} PRIVATE
 			_CRT_SECURE_NO_WARNINGS
