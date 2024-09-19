@@ -3,35 +3,37 @@ name: Deploy game on Linux
 on:
   workflow_dispatch:
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
     runs-on: ubuntu-20.04
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repsoitory
+        uses: actions/checkout@v4
 
-    - name: C/C++ dev tools
-      run: |
-        echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial main' | sudo tee --append /etc/apt/sources.list
-        echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe' | sudo tee --append /etc/apt/sources.list
-        sudo apt update
-        sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
+      - name: C/C++ dev tools
+        run: |
+          echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial main' | sudo tee --append /etc/apt/sources.list
+          echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe' | sudo tee --append /etc/apt/sources.list
+          sudo apt update
+          sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
 
-    - name: Create makefile
-      run: |
-        sudo chmod +x ./createall
-        sudo chmod +x ./devtools/gendbg.sh
-        sudo chmod +x ./devtools/bin/vpc
-        sudo chmod +x ./devtools/bin/vpc_linux
-        sudo chmod +x ./devtools/bin/linux/ccache
-        ./createall
+      - uses: lukka/get-cmake@latest
+      
+      - name: Configure CMake
+        run: > 
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/LinuxToolchain.cmake
 
-    - name: Build
-      run: make -f msc.mak
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
 
-    - name: Upload Binaries
-      uses: actions/upload-artifact@v4
-      with:
-        name: Linux Binaries
-        path: |
-          build/*.so
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86
+          path: |
+           bin/*.so

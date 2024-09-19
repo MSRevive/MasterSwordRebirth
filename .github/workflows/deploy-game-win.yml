@@ -3,28 +3,29 @@ name: Deploy game on Windows
 on:
   workflow_dispatch:
 
+env:
+  BUILD_TYPE: Release
+
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repsoitory
+        uses: actions/checkout@v4
 
-    - name: Create makefile
-      run: ./createall.bat
+      - uses: lukka/get-cmake@latest
 
-    - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      - name: Configure CMake
+        run: > 
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-    - name: Build Client
-      run: msbuild game\client\client.vcxproj -t:rebuild -verbosity:diag -property:Configuration=Release
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
 
-    - name: Build Server
-      run: msbuild game\server\server.vcxproj -t:rebuild -verbosity:diag -property:Configuration=Release
-
-    - name: Upload Binaries
-      uses: actions/upload-artifact@v4
-      with:
-        name: Windows Binaries
-        path: |
-          build/*.dll
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: win32
+          path: |
+            bin/*.dll
