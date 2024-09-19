@@ -574,8 +574,14 @@ void CStudioModelRenderer::StudioSetUpTransform(int trivial_accept)
 				else
 					f = 0;
 
-				for (i = 0; i < 3; i++)
-					modelpos[i] += (Ent.origin[i] - Ent.latched.prevorigin[i]) * f;
+				const auto pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + Ent.curstate.sequence;
+				if ((pseqdesc->motiontype & STUDIO_LX) != 0 || (Ent.curstate.eflags & EFLAG_SLERP) != 0)
+				{
+					for (i = 0; i < 3; i++)
+					{
+						modelpos[i] += (Ent.origin[i] - Ent.latched.prevorigin[i]) * f;
+					}
+				}
 
 				//			Con_DPrintf("%.0f %.0f\n",Ent.msg_angles[0][YAW], Ent.msg_angles[1][YAW] );
 				for (i = 0; i < 3; i++)

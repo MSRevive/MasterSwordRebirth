@@ -2051,8 +2051,6 @@ NOTE:  Do not cache the values of pas and pvs, as they depend on reusable memory
 */
 void SetupVisibility(edict_t *pViewEntity, edict_t *pClient, unsigned char **pvs, unsigned char **pas)
 {
-	DBG_INPUT;
-	startdbg;
 	Vector org;
 	edict_t *pView = pClient;
 
@@ -2077,7 +2075,6 @@ void SetupVisibility(edict_t *pViewEntity, edict_t *pClient, unsigned char **pvs
 
 	*pvs = ENGINE_SET_PVS((float *)&org);
 	*pas = ENGINE_SET_PAS((float *)&org);
-	enddbg;
 }
 
 #include "entity_state.h"
@@ -2098,14 +2095,11 @@ we could also use the pas/ pvs that we set in SetupVisibility, if we wanted to. 
 //Dogg - basically decide whether or not to send an entity
 int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *host, int hostflags, int player, unsigned char *pSet)
 {
-	DBG_INPUT;
-	startdbg;
-	dbg("Begin");
-
 	// Entities with an index greater than this will corrupt the client's heap because 
 	// the index is sent with only 11 bits of precision (2^11 == 2048).
 	// So we don't send them, just like having too many entities would result
 	// in the entity not being sent.
+	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	if (e >= MAX_EDICTS)
 		return 0;
 
@@ -2230,6 +2224,18 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		state->eflags |= EFLAG_SLERP;
 	}*/
 
+	// This replaces the above code.
+	if ((ent->v.flags & FL_FLY) != 0)
+	{
+		state->eflags |= EFLAG_SLERP;
+	}
+	else
+	{
+		state->eflags &= ~EFLAG_SLERP;
+	}
+
+	state->eflags |= entity->m_EFlags;
+
 	//Master Sword - interpolate arrows in the air
 	//if( ent->v.movetype == MOVETYPE_TOSS && ent->v.scale == 1 )
 	//	state->eflags |= EFLAG_SLERP;
@@ -2317,7 +2323,6 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		state->fuser1 = pPlayer->m_GaitFramerateGauge;
 	}
 
-	enddbg;
 	return 1;
 }
 
