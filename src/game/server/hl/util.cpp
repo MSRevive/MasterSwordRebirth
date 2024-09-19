@@ -2009,11 +2009,11 @@ float UTIL_DotPoints(const Vector &vecSrc, const Vector &vecCheck, const Vector 
 //=========================================================
 // UTIL_StripToken - for redundant keynames
 //=========================================================
-void UTIL_StripToken(const char *pKey, char *pDest)
+void UTIL_StripToken(const char *pKey, char *pDest, int nLen)
 {
 	int i = 0;
 
-	while (pKey[i] && pKey[i] != '#')
+	while (i < nLen - 1 && pKey[i] && pKey[i] != '#')
 	{
 		pDest[i] = pKey[i];
 		i++;
@@ -2027,25 +2027,25 @@ void UTIL_StripToken(const char *pKey, char *pDest)
 //
 // --------------------------------------------------------------
 static int gSizes[FIELD_TYPECOUNT] =
-	{
-		sizeof(float),	   // FIELD_FLOAT
-		sizeof(int),	   // FIELD_STRING
-		sizeof(int),	   // FIELD_ENTITY
-		sizeof(int),	   // FIELD_CLASSPTR
-		sizeof(int),	   // FIELD_EHANDLE
-		sizeof(int),	   // FIELD_entvars_t
-		sizeof(int),	   // FIELD_EDICT
-		sizeof(float) * 3, // FIELD_VECTOR
-		sizeof(float) * 3, // FIELD_POSITION_VECTOR
-		sizeof(int *),	   // FIELD_POINTER
-		sizeof(int),	   // FIELD_INTEGER
-		sizeof(int *),	   // FIELD_FUNCTION
-		sizeof(int),	   // FIELD_BOOLEAN
-		sizeof(short),	   // FIELD_SHORT
-		sizeof(char),	   // FIELD_CHARACTER
-		sizeof(float),	   // FIELD_TIME
-		sizeof(int),	   // FIELD_MODELNAME
-		sizeof(int),	   // FIELD_SOUNDNAME
+{
+	sizeof(float),	   // FIELD_FLOAT
+	sizeof(int),	   // FIELD_STRING
+	sizeof(int),	   // FIELD_ENTITY
+	sizeof(int),	   // FIELD_CLASSPTR
+	sizeof(int),	   // FIELD_EHANDLE
+	sizeof(int),	   // FIELD_entvars_t
+	sizeof(int),	   // FIELD_EDICT
+	sizeof(float) * 3, // FIELD_VECTOR
+	sizeof(float) * 3, // FIELD_POSITION_VECTOR
+	sizeof(int *),	   // FIELD_POINTER
+	sizeof(int),	   // FIELD_INTEGER
+	sizeof(int *),	   // FIELD_FUNCTION
+	sizeof(int),	   // FIELD_BOOLEAN
+	sizeof(short),	   // FIELD_SHORT
+	sizeof(char),	   // FIELD_CHARACTER
+	sizeof(float),	   // FIELD_TIME
+	sizeof(int),	   // FIELD_MODELNAME
+	sizeof(int),	   // FIELD_SOUNDNAME
 };
 
 // Base class includes common SAVERESTOREDATA pointer, and manages the entity table
