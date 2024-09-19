@@ -396,14 +396,9 @@ void ClientCommand2(edict_t *pEntity);
 
 void ClientCommand(edict_t *pEntity)
 {
-	DBG_INPUT;
-	startdbg;
-	//logfile << "[CC START] " << CMD_ARGC() << " " << CMD_ARGV(0) << " " << (CMD_ARGC() >= 2 ? CMD_ARGS() : "") << " ";
 	if (!CMD_ARGC())
 		return;
 	ClientCommand2(pEntity);
-	//logfile << "[CC END]\r\n";
-	enddbg;
 }
 
 void ClientCommand2(edict_t *pEntity)
@@ -1930,11 +1925,11 @@ const char *GetGameDescription()
 {
 #if DEBUG
 	static char gameDesc[64];
-	sprintf(gameDesc, "MS:R Ver.%s", "Canary");
+	sprintf(gameDesc, "MS:R - %s", "Canary");
 #else
-	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[8], __DATE__[9], __DATE__[10], __DATE__[11]};
+	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10]};
 	static char gameDesc[64];
-	sprintf(gameDesc, "MS:R Ver.%s", build);
+	sprintf(gameDesc, "MS:R - %sa", strupr(build));
 #endif
 
 	return gameDesc;
