@@ -80,6 +80,20 @@ set(FMOD
 )
 source_group("FMOD" FILES ${FMOD})
 
+set(ParticleMan
+	"particleman/CBaseParticle.cpp"
+	"particleman/CBaseParticle.h"
+	"particleman/CFrustum.cpp"
+	"particleman/CFrustum.h"
+	"particleman/CMiniMem.cpp"
+	"particleman/CMiniMen.cpp"
+	"particleman/IParticleMan_Active.cpp"
+	"particleman/IParticleMan_Active.h"
+	"particleman/particleman.h"
+	"particleman/particleman_internal.h"
+)
+source_group("ParticleMan" FILES ${ParticleMan})
+
 set(HL1
 	"../../common/mathlib.h"
 	"ammo_secondary.cpp"
@@ -449,6 +463,7 @@ set(ALL_FILES
 	${Shared_base64}
 	${VGUI}
 	${VGUI_ms}
+	${ParticleMan}
 )
 
 target_sources(client PRIVATE ${ALL_FILES})
