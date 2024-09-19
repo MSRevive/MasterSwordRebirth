@@ -100,11 +100,18 @@ endfunction(set_common_properties)
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 
-add_subdirectory(src/game/client)
-add_subdirectory(src/game/server)
+# Add Projects
+if (WIN32)
+	add_subdirectory(src/game/client)
+	add_subdirectory(src/game/server)
+else()
+	add_subdirectory(src/game/server)
+endif()
 
 # Set Visual Studio starting project
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client)
+if (MSVC)
+	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT client)
+endif()
 
 set_target_properties(client PROPERTIES 
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
