@@ -121,7 +121,6 @@ set(HL1
 	"train.cpp"
 	"util.cpp"
 	"view.cpp"
-	"../shared/cbase.h"
 	"../shared/movement/pm_math.cpp"
 	"../shared/voice_banmgr.cpp"
 	"../shared/voice_status.cpp"
