@@ -2836,24 +2836,26 @@ GetHullBounds
 */
 int GetHullBounds(int hullnumber, float *mins, float *maxs)
 {
-	DBG_INPUT;
 	int iret = 0;
+
+	Vector& vecMins = *reinterpret_cast<Vector*>(mins);
+	Vector& vecMaxs = *reinterpret_cast<Vector*>(maxs);
 
 	switch (hullnumber)
 	{
 	case 0: // Normal player
-		mins = VEC_HULL_MIN;
-		maxs = VEC_HULL_MAX;
+		vecMins = VEC_HULL_MIN;
+		vecMaxs = VEC_HULL_MAX;
 		iret = 1;
 		break;
 	case 1: // Crouched player
-		mins = VEC_DUCK_HULL_MIN;
-		maxs = VEC_DUCK_HULL_MAX;
+		vecMins = VEC_DUCK_HULL_MIN;
+		vecMaxs = VEC_DUCK_HULL_MAX;
 		iret = 1;
 		break;
 	case 2: // Point based hull
-		mins = Vector(0, 0, 0);
-		maxs = Vector(0, 0, 0);
+		vecMins = Vector(0, 0, 0);
+		vecMaxs = Vector(0, 0, 0);
 		iret = 1;
 		break;
 	}
