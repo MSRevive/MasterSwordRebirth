@@ -922,6 +922,8 @@ public:
 
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
+	void EXPORT DoorMoveDone(void);
+	void EXPORT StopMoveSound(void);
 	static TYPEDESCRIPTION m_SaveData[];
 
 	BYTE m_bMoveSnd; // sound a door makes while moving
@@ -930,8 +932,8 @@ public:
 LINK_ENTITY_TO_CLASS(momentary_door, CMomentaryDoor);
 
 TYPEDESCRIPTION CMomentaryDoor::m_SaveData[] =
-	{
-		DEFINE_FIELD(CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER),
+{
+	DEFINE_FIELD(CMomentaryDoor, m_bMoveSnd, FIELD_CHARACTER),
 };
 
 IMPLEMENT_SAVERESTORE(CMomentaryDoor, CBaseToggle);
@@ -1057,4 +1059,17 @@ void CMomentaryDoor::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 		LinearMove(move, speed);
 	}
+}
+
+void CMomentaryDoor::DoorMoveDone(void)
+{
+	SetThink(&CMomentaryDoor::StopMoveSound);
+	pev->nextthink = pev->ltime + 0.1f;
+}
+
+void CMomentaryDoor::StopMoveSound(void)
+{
+	STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving));
+	EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
+	SetThink(nullptr);
 }
