@@ -21,6 +21,7 @@
 #include "usercmd.h"
 #include "pm_defs.h"
 #include "pm_materials.h"
+#include "movement/pm_shared.h"
 
 #include "eventscripts.h"
 #include "ev_hldm.h"
@@ -34,13 +35,10 @@
 
 static int tracerCount[32];
 
-extern "C" char PM_FindTextureType(char *name);
-
 void V_PunchAxis(int axis, float punch);
 
 extern "C"
 {
-
 	// HLDM
 	void EV_FireGlock1(struct event_args_s *args);
 	void EV_FireGlock2(struct event_args_s *args);

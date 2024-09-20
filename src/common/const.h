@@ -772,4 +772,6 @@ typedef struct
 	int hitgroup;	// 0 == generic, non zero is specific body part
 } trace_t;
 
+constexpr int NUM_HULLS = 4;
+
 #endif

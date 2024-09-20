@@ -97,7 +97,7 @@ extern "C" void AngleVectors(const float *angles, float *forward, float *right, 
 IScripted *PMScript = NULL;
 //------------------
 
-static int pm_shared_initialized = 0;
+static bool pm_shared_initialized = false;
 
 #pragma warning(disable : 4305)
 
@@ -138,21 +138,13 @@ typedef struct hull_s
 
 // Ducking time
 #define TIME_TO_DUCK 0.4
-#undef VEC_DUCK_HULL_MIN
-#undef VEC_DUCK_HULL_MAX
 #undef VEC_DUCK_VIEW
-#define VEC_DUCK_HULL_MIN -18
-#define VEC_DUCK_HULL_MAX 18
 #define VEC_DUCK_VIEW 12
 #define PM_DEAD_VIEWHEIGHT -8
 #define MAX_CLIMB_SPEED 200
 #define STUCK_MOVEUP 1
 #define STUCK_MOVEDOWN -1
 #undef VEC_VIEW
-#undef VEC_HULL_MIN
-#undef VEC_HULL_MAX
-#define VEC_HULL_MIN -36
-#define VEC_HULL_MAX 36
 #define VEC_VIEW 28
 #define STOP_EPSILON 0.1
 #define	DIST_EPSILON 0.125f	// Max error from network coordinate quantization
@@ -335,7 +327,7 @@ void PM_InitTextureTypes()
 	std::size_t filePos = 0;
 
 	// for each line in the file...
-	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, sizeof(buffer) - 1) != nullptr && (gcTextures < CTEXTURESMAX))
+	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, 511) != NULL && (gcTextures < CTEXTURESMAX))
 	{
 		// skip whitespace
 		i = 0;
@@ -709,7 +701,7 @@ void PM_CatagorizeTextureType(void)
 		pTextureName++;
 	// '}}'
 
-	 strncpy(pmove->sztexturename,  pTextureName, sizeof(pmove->sztexturename) );
+	strncpy(pmove->sztexturename,  pTextureName, sizeof(pmove->sztexturename) );
 	pmove->sztexturename[CBTEXTURENAMEMAX - 1] = 0;
 
 	// get texture type
@@ -718,7 +710,6 @@ void PM_CatagorizeTextureType(void)
 
 void PM_UpdateStepSound(void)
 {
-	int fWalking;
 	float fvol;
 	vec3_t knee;
 	vec3_t feet;
@@ -763,9 +754,9 @@ void PM_UpdateStepSound(void)
 	//  sound right away - we just started moving in new level.
 	if ((fLadder || (pmove->onground != -1)) &&
 		(Length(pmove->velocity) > 0.0) &&
-		(speed >= velwalk || !pmove->flTimeStepSound))
+		(speed >= velwalk || pmove->flTimeStepSound == 0))
 	{
-		fWalking = speed < velrun;
+		const bool fWalking = speed < velrun;
 
 		VectorCopy(pmove->origin, center);
 		VectorCopy(pmove->origin, knee);
@@ -866,7 +857,7 @@ PM_AddToTouched
 Add's the trace result to touch list, if contact is not already in list.
 ================
 */
-qboolean PM_AddToTouched(pmtrace_t tr, Vector &impactvelocity)
+bool PM_AddToTouched(pmtrace_t tr, Vector &impactvelocity)
 {
 	int i;
 
@@ -939,7 +930,7 @@ returns the blocked flags:
 0x02 == step / wall
 ==================
 */
-int PM_ClipVelocity(Vector &in, Vector &normal, Vector &out, float overbounce)
+int PM_ClipVelocity(Vector in, Vector normal, Vector &out, float overbounce)
 {
 	float backoff;
 	float change;
@@ -951,7 +942,7 @@ int PM_ClipVelocity(Vector &in, Vector &normal, Vector &out, float overbounce)
 	blocked = 0x00;		 // Assume unblocked.
 	if (angle > 0)		 // If the plane that is blocking us has a positive z component, then assume it's a floor.
 		blocked |= 0x01; //
-	if (!angle)			 // If the plane has no Z, it is vertical (wall/step)
+	if (angle == 0)			 // If the plane has no Z, it is vertical (wall/step)
 		blocked |= 0x02; //
 
 	// Determine how far along plane to slide based on incoming direction.
@@ -1219,7 +1210,7 @@ int PM_FlyMove(void)
 PM_Accelerate
 ==============
 */
-void PM_Accelerate(Vector &wishdir, float wishspeed, float accel)
+void PM_Accelerate(Vector wishdir, float wishspeed, float accel)
 {
 	int i;
 	float addspeed, accelspeed, currentspeed;
@@ -1505,7 +1496,7 @@ void PM_Friction(void)
 	VectorCopy(newvel, pmove->velocity);
 }
 
-void PM_AirAccelerate(Vector &wishdir, float wishspeed, float accel)
+void PM_AirAccelerate(Vector wishdir, float wishspeed, float accel)
 {
 	int i;
 	float addspeed, accelspeed, currentspeed, wishspd = wishspeed;
@@ -2269,7 +2260,7 @@ void PM_Duck(void)
 				}
 				else
 				{
-					float fMore = (VEC_DUCK_HULL_MIN - VEC_HULL_MIN);
+					float fMore = (VEC_DUCK_HULL_MIN[3] - VEC_HULL_MIN[3]);
 
 					// Calc parametric time
 					duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
@@ -3578,10 +3569,6 @@ extern "C" int PM_GetPhysEntInfo(int ent)
 
 void PM_Init(struct playermove_s *ppmove)
 {
-	DBG_INPUT;
-	startdbg;
-	dbg("Begin()");
-
 	assert(!pm_shared_initialized);
 
 	pmove = ppmove;
@@ -3589,9 +3576,38 @@ void PM_Init(struct playermove_s *ppmove)
 	PM_CreateStuckTable();
 	PM_InitTextureTypes();
 
-	pm_shared_initialized = 1;
+	//The engine copies the hull sizes initialized by PM_GetHullBounds *before* PM_GetHullBounds is actually called, so manually initialize these.
+	for (int i = 0; i < NUM_HULLS; ++i)
+	{
+		if (!PM_GetHullBounds(i, pmove->player_mins[i], pmove->player_maxs[i]))
+		{
+			//Matches the engine's behavior in ignoring the remaining hull sizes if any hull isn't provided.
+			break;
+		}
+	}
 
-	enddbg("PM_Init()");
+	pm_shared_initialized = true;
+}
+
+bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs)
+{
+	switch (hullnumber)
+	{
+	case 0: // Normal player
+		VEC_HULL_MIN.CopyToArray(mins);
+		VEC_HULL_MAX.CopyToArray(maxs);
+		return true;
+	case 1: // Crouched player
+		VEC_DUCK_HULL_MIN.CopyToArray(mins);
+		VEC_DUCK_HULL_MAX.CopyToArray(maxs);
+		return true;
+	case 2: // Point based hull
+		g_vecZero.CopyToArray(mins);
+		g_vecZero.CopyToArray(maxs);
+		return true;
+	}
+
+	return false;
 }
 
 msstring_ref PM_GetValue(msstringlist &Params)

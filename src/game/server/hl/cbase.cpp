@@ -19,6 +19,7 @@
 #include "gamerules.h"
 #include "game.h"
 #include "logger.h"
+#include "movement/pm_shared.h"
 
 #define LOG_BASECALLBACKS
 
@@ -27,10 +28,6 @@
 #else
 #define logfileopt NullFile
 #endif
-
-extern "C" void PM_Move(struct playermove_s* ppmove, int server);
-extern "C" void PM_Init(struct playermove_s* ppmove);
-extern "C" char PM_FindTextureType(char* name);
 
 void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd);
 

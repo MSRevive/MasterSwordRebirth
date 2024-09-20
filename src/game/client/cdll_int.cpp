@@ -24,6 +24,7 @@
 #include "vgui_schememanager.h"
 #include "logger.h"
 #include "clientlibrary.h"
+#include "movement/pm_shared.h"
 #include <windows.h>
 
 //#define LOG_ALLEXPORTS //more exports in entity.cpp
@@ -34,11 +35,6 @@
 #define logfileopt NullFile
 #endif
 
-extern "C"
-{
-#include "pm_shared.h"
-}
-
 #include <string.h>
 #include "vgui_int.h"
 #include "interface.h"
@@ -48,7 +44,7 @@ extern "C"
 
 cl_enginefunc_t gEngfuncs;
 CClientLibrary gClient;
-TeamFortressViewport *gViewPort = NULL;
+TeamFortressViewport *gViewPort = nullptr;
 extern CHud gHUD;
 extern float g_fMenuLastClosed;
 
