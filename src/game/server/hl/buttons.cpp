@@ -180,11 +180,13 @@ void CMultiSource::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 	// Find the entity in our list
 	while (i < m_iTotal)
+	{
 		if (m_rgEntities[i++] == pCaller->GetSelf())
 		{
 			fFound = true;
 			break;
 		}
+	}
 	i--;
 
 	// if we didn't find it, report error and leave
