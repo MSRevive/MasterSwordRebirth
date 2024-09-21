@@ -124,49 +124,6 @@ public:
 //------------
 #endif
 
-//=====================================================
-//-----------------------------------------------------
-//=====================================================
-class CHudAmmo : public CHudBase
-{
-public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Think(void);
-	void Reset(void);
-	int DrawWList(float flTime);
-	int MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_AmmoPickup(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_WeapPickup(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_ItemPickup(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_HideWeapon(const char *pszName, int iSize, void *pbuf);
-
-	void SlotInput(int iSlot);
-	void _cdecl UserCmd_Slot1(void);
-	void _cdecl UserCmd_Slot2(void);
-	void _cdecl UserCmd_Slot3(void);
-	void _cdecl UserCmd_Slot4(void);
-	void _cdecl UserCmd_Slot5(void);
-	void _cdecl UserCmd_Slot6(void);
-	void _cdecl UserCmd_Slot7(void);
-	void _cdecl UserCmd_Slot8(void);
-	void _cdecl UserCmd_Slot9(void);
-	void _cdecl UserCmd_Slot10(void);
-	void _cdecl UserCmd_Close(void);
-	void _cdecl UserCmd_NextWeapon(void);
-	void _cdecl UserCmd_PrevWeapon(void);
-
-private:
-	float m_fFade;
-	RGBA m_rgba;
-	WEAPON *m_pWeapon;
-	int m_HUD_bucket0;
-	int m_HUD_selection;
-};
-
 //
 //-----------------------------------------------------
 //
@@ -229,30 +186,6 @@ private:
 //
 //-----------------------------------------------------
 //
-// REMOVED: Vgui has replaced this.
-//
-/*
-class CHudMOTD : public CHudBase
-{
-public:
-	int Init( void );
-	int VidInit( void );
-	int Draw( float flTime );
-	void Reset( void );
-
-	int MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf );
-
-protected:
-	static int MOTD_DISPLAY_TIME;
-	char m_szMOTD[ MAX_MOTD_LENGTH ];
-	float m_flActiveRemaining;
-	int m_iLines;
-};
-*/
-
-//
-//-----------------------------------------------------
-//
 class CHudStatusBar : public CHudBase
 {
 public:
@@ -279,41 +212,6 @@ protected:
 
 	int m_bReparseString; // set to TRUE whenever the m_szStatusBar needs to be recalculated
 };
-
-//
-//-----------------------------------------------------
-//
-// REMOVED: Vgui has replaced this.
-//
-/*
-class CHudScoreboard: public CHudBase
-{
-public:
-	int Init( void );
-	void InitHUDData( void );
-	int VidInit( void );
-	int Draw( float flTime );
-	int DrawPlayers( int xoffset, float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
-	void UserCmd_ShowScores( void );
-	void UserCmd_HideScores( void );
-	int MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
-	int MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf );
-	int MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf );
-	void DeathMsg( int killer, int victim );
-
-	int m_iNumTeams;
-
-	int m_iLastKilledBy;
-	int m_fLastKillTime;
-	int m_iPlayerNum;
-	int m_iShowscoresHeld;
-
-	void GetAllPlayersInfo( void );
-private:
-	struct cvar_s *cl_showpacketloss;
-
-};
-*/
 
 extern int g_IsSpectator[MAX_PLAYERS + 1];
 
@@ -352,55 +250,6 @@ public:
 private:
 	struct cvar_s *m_HUD_saytext;
 	struct cvar_s *m_HUD_saytext_time;
-};
-
-//
-//-----------------------------------------------------
-//
-/*class CHudBattery: public CHudBase
-{
-public:
-	int Init( void );
-	int VidInit( void );
-	int Draw(float flTime);
-	int MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf );
-	
-private:
-	HLSPRITE m_hSprite1;
-	HLSPRITE m_hSprite2;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
-	int	  m_iBat;	
-	float m_fFade;
-	int	  m_iHeight;		// width of the battery innards
-};
-*/
-
-//
-//-----------------------------------------------------
-//
-class CHudFlashlight : public CHudBase
-{
-public:
-	int Init(void);
-	int VidInit(void);
-	int Draw(float flTime);
-	void Reset(void);
-	int MsgFunc_Flashlight(const char *pszName, int iSize, void *pbuf);
-	int MsgFunc_FlashBat(const char *pszName, int iSize, void *pbuf);
-
-private:
-	HLSPRITE m_hSprite1;
-	HLSPRITE m_hSprite2;
-	HLSPRITE m_hBeam;
-	wrect_t *m_prc1;
-	wrect_t *m_prc2;
-	wrect_t *m_prcBeam;
-	float m_flBat;
-	int m_iBat;
-	int m_fOn;
-	float m_fFade;
-	int m_iWidth; // width of the battery innards
 };
 
 //
@@ -560,15 +409,15 @@ public:
 	wrect_t& GetSpriteRect(int index)
 	{
 		//wrect_t rect = wrect_t.Rectangle{0,0,0,0};
-		return (index < 0) ? wrect_t{} : m_Sprites[index].Rectangle;
+		//return (index < 0) ? wrect_t{} : m_Sprites[index].Rectangle;
+		wrect_t rect = {0,0,0,0};
+		return (index < 0) ? rect : m_Sprites[index].Rectangle;
 	}
 
 	int GetSpriteIndex(const char *SpriteName); // gets a sprite index, for use in the m_rghSprites[] array
 
 	//CHudAmmo	m_Ammo;
-	//CHudGeiger	m_Geiger; //Thothie MAR2012_26 - fuck you geiger, fuck you
 	CHudTrain m_Train;
-	CHudFlashlight m_Flash;
 	CHudMessage m_Message;
 	CHudStatusBar m_StatusBar;
 	CHudDeathNotice m_DeathNotice;

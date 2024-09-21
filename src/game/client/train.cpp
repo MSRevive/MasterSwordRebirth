@@ -15,7 +15,7 @@
 //
 // Train.cpp
 //
-// implementation of CHudAmmo class
+// implementation of CHudTrain class
 //
 
 #include "hud.h"

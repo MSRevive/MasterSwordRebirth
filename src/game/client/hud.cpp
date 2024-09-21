@@ -331,9 +331,7 @@ void CHud::Init(void)
 	m_flTime = 1.0;
 
 	//m_Ammo.Init();
-	//m_Geiger.Init();
 	m_Train.Init();
-	m_Flash.Init();
 	m_Message.Init();
 	m_StatusBar.Init();
 	m_DeathNotice.Init();

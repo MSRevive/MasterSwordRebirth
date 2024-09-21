@@ -102,8 +102,6 @@ set(HL1
 	"ev_common.cpp"
 	"ev_hldm.cpp"
 	"events.cpp"
-	"flashlight.cpp"
-	"geiger.cpp"
 	"hl/hl_baseentity.cpp"
 	"hl/hl_events.cpp"
 	"hud.cpp"
