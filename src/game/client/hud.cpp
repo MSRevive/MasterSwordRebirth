@@ -63,13 +63,8 @@ int __MsgFunc_StatusIcons(const char *pszName, int iSize, void *pbuf); //Drigien
 
 int __MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	logfile << Logger::LOG_INFO << "[__MsgFunc_InitHUD]\n";
 	gHUD.MsgFunc_InitHUD(pszName, iSize, pbuf);
-
-	enddbg;
 
 	return 1;
 }
@@ -379,9 +374,9 @@ void CHud::Shutdown()
 int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (std::size_t i = 0; i < m_Sprites.size(); ++i)
+	for (int i = 0; i < m_Sprites.size() - 1; ++i)
 	{
-		if (SpriteName == m_Sprites[i].Name)
+		if (m_Sprites[i].Name == SpriteName)
 			return static_cast<int>(i);
 	}
 
@@ -504,12 +499,6 @@ float HUD_GetFOV(void);
 extern cvar_t *sensitivity;
 void CHud::Think(void)
 {
-	startdbg;
-
-	dbg("Begin");
-
-	//Master Sword
-	dbg("Call MSCLGlobals::Think");
 	MSCLGlobals::Think();
 	//------------
 	int newfov = 0;
@@ -522,7 +511,6 @@ void CHud::Think(void)
 		}
 	}	
 
-	dbg("FOV Operations");
 	newfov = HUD_GetFOV();
 	if (newfov == 0)
 	{
@@ -554,17 +542,10 @@ void CHud::Think(void)
 	}
 
 	m_Music->Think();
-
-	dbg("End");
-
-	enddbg;
 }
 
 void CHud::VidInit(void)
 {
-	startdbg;
-
-	dbg("Half-life Video Initialization");
 	m_scrinfo.iSize = sizeof(m_scrinfo);
 	GetScreenInfo(&m_scrinfo);
 
@@ -582,7 +563,6 @@ void CHud::VidInit(void)
 		m_iRes = 640;
 
 	// Only load this once
-	// Only load this once
 	if (m_Sprites.empty())
 	{
 		// we need to load the hud.txt, and all sprites within
@@ -594,6 +574,7 @@ void CHud::VidInit(void)
 			m_Sprites.reserve(spriteCountAllRes);
 
 			client_sprite_t* p = spriteList;
+
 			for (int j = 0; j < spriteCountAllRes; ++j)
 			{
 				if (p->iRes == m_iRes)
@@ -601,6 +582,7 @@ void CHud::VidInit(void)
 					HudSprite hudSprite;
 					strncpy(hudSprite.Name, p->szName, MAX_SPRITE_NAME_LENGTH);
 					strncpy(hudSprite.SpriteName, p->szSprite, 64);
+					// We put each sprite in the list into the vector.
 					m_Sprites.push_back(hudSprite);
 				}
 
@@ -608,13 +590,10 @@ void CHud::VidInit(void)
 			}
 
 			m_Sprites.shrink_to_fit();
-
-			gEngfuncs.COM_FreeFile(spriteList);
 		}
 	}
 
-	// we have already have loaded the sprite reference from hud.txt, but
-	// we need to make sure all the sprites have been loaded (we've gone through a transition, or loaded a save game)
+	// make sure we actually load each sprite from the list now.
 	for (auto& hudSprite : m_Sprites)
 	{
 		char file[256];
@@ -623,14 +602,14 @@ void CHud::VidInit(void)
 		//hudSprite.Handle = SPR_Load(fmt::format("sprites/{}.spr", hudSprite.SpriteName.c_str()).c_str());
 	}
 
+	// These no longer exists so just disabled them for now.
 	// assumption: number_1, number_2, etc, are all listed and loaded sequentially
-	m_HUD_number_0 = GetSpriteIndex("number_0");
+	// m_HUD_number_0 = GetSpriteIndex("number_0");
 
-	const auto& numberRect = m_Sprites[m_HUD_number_0].Rectangle;
-	m_iFontHeight = numberRect.bottom - numberRect.top;
-
+	// const auto& numberRect = m_Sprites[m_HUD_number_0].Rectangle;
+	// m_iFontHeight = numberRect.bottom - numberRect.top;
+	
 	//Master Sword
-	dbg("MS Vid_Initialization - chars");
 	m_HUD_numberSML_0 = GetSpriteIndex("smlnum_0");
 	m_HUD_char_slashSML = GetSpriteIndex("smlslash");
 	m_HUD_char_slash = GetSpriteIndex("charslash");
@@ -646,10 +625,7 @@ void CHud::VidInit(void)
 
 	//Reload the Master Sword global sprite/TGA list
 	//(only sprites are reloaded, not TGAs)
-	dbg("Reload global sprite list");
 	MSBitmap::ReloadSprites();
-
-	enddbg;
 }
 
 //this should get called whenever the client changes levels or servers.

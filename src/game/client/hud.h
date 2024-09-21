@@ -557,9 +557,10 @@ public:
 		return (index < 0) ? 0 : m_Sprites[index].Handle;
 	}
 
-	wrect_t &GetSpriteRect(int index)
+	wrect_t& GetSpriteRect(int index)
 	{
-		return m_Sprites[index].Rectangle;
+		//wrect_t rect = wrect_t.Rectangle{0,0,0,0};
+		return (index < 0) ? wrect_t{} : m_Sprites[index].Rectangle;
 	}
 
 	int GetSpriteIndex(const char *SpriteName); // gets a sprite index, for use in the m_rghSprites[] array

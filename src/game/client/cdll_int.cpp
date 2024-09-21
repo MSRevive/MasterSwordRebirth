@@ -294,17 +294,11 @@ so the HUD can reinitialize itself.
 
 int DLLEXPORT HUD_VidInit(void)
 {
-	DBG_INPUT;
-	startdbg;
-
 	gClient.VideoInit();
 
-	dbg("Call VGui_Startup");
 	VGui_Startup();
 
 	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]\n";
-
-	enddbg;
 
 	return 1;
 }
