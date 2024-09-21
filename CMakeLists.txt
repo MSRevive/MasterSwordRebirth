@@ -30,6 +30,11 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif()
 
+if(MSVC)
+	set(VS_DEBUG_WORK_DIR "" CACHE PATH "Set working directory for VS Debug. This should be the directory where your MSRebirth test server is.")
+	set(VS_DEBUG_CMD_ARGS "" CACHE STRING "The arguements to start the program with.")
+endif()
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Modern VS versions default to C++14 anyway, so make it consistent

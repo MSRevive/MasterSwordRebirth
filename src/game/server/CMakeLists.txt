@@ -48,6 +48,13 @@ if (UNIX)
 		SWDS)
 endif(UNIX)
 
+set_target_properties(server PROPERTIES 
+	VS_DEBUGGER_WORKING_DIRECTORY ${VS_DEBUG_WORK_DIR}
+	VS_DEBUGGER_COMMAND ${VS_DEBUG_WORK_DIR}/hlds.exe
+	VS_DEBUGGER_COMMAND_ARGUMENTS ${VS_DEBUG_CMD_ARGS})
+
+
+
 ################################################################################
 # Source groups
 ################################################################################

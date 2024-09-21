@@ -1,2 +1,2 @@
 #!/bin/bash
-cmake -S . -B ./build --toolchain ./cmake/LinuxToolChain.cmake --fresh $@
+cmake -S . -B ./build --toolchain ./cmake/LinuxToolChain.cmake $@

@@ -69,6 +69,11 @@ target_compile_definitions(client PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
 
+set_target_properties(client PROPERTIES 
+	VS_DEBUGGER_WORKING_DIRECTORY ${VS_DEBUG_WORK_DIR}
+	VS_DEBUGGER_COMMAND ${VS_DEBUG_WORK_DIR}/msr.exe
+	VS_DEBUGGER_COMMAND_ARGUMENTS )
+
 ################################################################################
 # Source groups
 ################################################################################

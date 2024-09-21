@@ -1,2 +1,2 @@
-cmake -S . -B ./build -A Win32 --fresh
+cmake -S . -B ./build -A Win32
 pause
