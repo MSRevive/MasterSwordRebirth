@@ -2178,7 +2178,11 @@ bool CScript::ScriptCmd_CallClItemEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 	if ( Params.size() >= 2 )
 	{
 		CBaseEntity *pTmp = RetrieveEntity( Params[0] );
-		if ( !pTmp ) Print( "callclitemevent - pTmp is illegal! \n" );
+		if (!pTmp)
+		{
+			Print("callclitemevent - pTmp is illegal! \n");
+			return false;
+		}
 		CGenericItem *pItem = pTmp->IsMSItem() ? (CGenericItem *)pTmp : NULL;
 		if ( pItem && pItem->Owner() && pItem->Owner()->IsPlayer() )
 		{
