@@ -2260,7 +2260,7 @@ void PM_Duck(void)
 				}
 				else
 				{
-					float fMore = (VEC_DUCK_HULL_MIN[3] - VEC_HULL_MIN[3]);
+					float fMore = (VEC_DUCK_HULL_MIN[2] - VEC_HULL_MIN[2]);
 
 					// Calc parametric time
 					duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
