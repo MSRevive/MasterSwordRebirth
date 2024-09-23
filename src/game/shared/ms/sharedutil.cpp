@@ -54,9 +54,10 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 void OpenLogFiles()
 {
 	char cLogfile[MAX_PATH];
-	char cChatfile[MAX_PATH];
 	
 #ifdef VALVE_DLL
+	char cChatfile[MAX_PATH];
+	
 	time_t curTime;
 	time(&curTime);
 	struct tm* TheTime = localtime(&curTime);
