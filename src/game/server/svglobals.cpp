@@ -143,7 +143,7 @@ void MSWorldSpawn()
 	//Setup global variables that can't be changed during a game
 	MSGlobals::PKAllowed = ms_pklevel.value > 0 ? true : false;
 	//Thothie attemptitng to remove FN upload sploit (Thanx to MiB)
-	MSGlobals::CentralEnabled = ms_central_enabled.value > 0 ? true : false;
+	MSGlobals::CentralEnabled = CVAR_GET_FLOAT("ms_central_enabled") > 0.0f ? true : false;
 	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0 && !MSGlobals::CentralEnabled ? true : false;
 	//return MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar;
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
