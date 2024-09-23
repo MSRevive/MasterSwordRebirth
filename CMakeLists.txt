@@ -57,6 +57,13 @@ function(set_common_properties TARGET_NAME)
 			_vsnprintf=vsnprintf)
 	endif(UNIX)
 
+	# Disable C++ exceptions, which is enabled by default with CMake?
+	if (MSVC)
+		target_compile_options(${TARGET_NAME} PUBLIC /EHsc)
+	else()
+		target_compile_options(${TARGET_NAME} PUBLIC -fno-exceptions)
+	endif()
+
 	target_compile_definitions(${TARGET_NAME} PRIVATE
 			_CRT_SECURE_NO_WARNINGS
 			$<$<CONFIG:DEBUG>:_DEBUG>
