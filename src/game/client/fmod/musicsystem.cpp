@@ -12,7 +12,7 @@ void CMusicSystem::Init()
 {
 	m_pSystem = gSoundEngine.GetSystem();
 	//If we ever decide to do submixing replace the NULL pointer.
-	m_pChannelGroup = NULL;
+	m_pChannelGroup = nullptr;
 	m_bFadeOut = false;
 
 }
@@ -55,14 +55,14 @@ bool CMusicSystem::Think()
 
 			if ( tempvol > 0.0 )
 			{
-				m_pChannel->setVolume( tempvol - 0.05 );
-				m_fFadeDelay = gEngfuncs.GetClientTime() + 0.1;
+				m_pChannel->setVolume( tempvol - 0.05f );
+				m_fFadeDelay = gEngfuncs.GetClientTime() + 0.1f;
 			}
 			else
 			{
 				m_pChannel->stop(); //stop channel when fadeout is done.
 				m_bFadeOut = false;
-				m_fFadeDelay = 0.0;
+				m_fFadeDelay = 0.0f;
 				m_CurSound = "";
 				if ( m_bShouldTransition )
 				{
@@ -83,14 +83,14 @@ bool CMusicSystem::Think()
 			//we only want to fade up the the wanted volume not to 1.0
 			if ( tempvol < m_fVolume )
 			{
-				m_pChannel->setVolume( tempvol + 0.05 );
+				m_pChannel->setVolume( tempvol + 0.05f );
 				m_fFadeDelay = gEngfuncs.GetClientTime() + 0.1;
 			}
 			else
 			{
 				m_pChannel->setVolume( m_fVolume );
 				m_bFadeIn = false;
-				m_fFadeDelay = 0.0;
+				m_fFadeDelay = 0.0f;
 			}
 		}
 	}
@@ -142,7 +142,7 @@ bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 	m_pChannel->setVolume(m_fVolume);
 	if (fadeIn)
 	{
-		m_pChannel->setVolume( 0.0 );
+		m_pChannel->setVolume( 0.0f );
 		m_bFadeIn = true;
 	}
 
