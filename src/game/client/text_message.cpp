@@ -159,26 +159,27 @@ char *ConvertCRtoNL(char *str)
 // the next (optional) one to four strings are parameters for that string (which can also be message names if they begin with '#')
 int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 {
+	#define MSG_BUF_SIZE 128
 	BEGIN_READ(pbuf, iSize);
 
 	int msg_dest = READ_BYTE();
 
-	static char szBuf[6][128];
+	static char szBuf[6][MSG_BUF_SIZE];
 	char *msg_text = LookupString(READ_STRING(), &msg_dest);
-	msg_text = strncpy(szBuf[0], msg_text, 128);
+	msg_text = strncpy(szBuf[0], msg_text, MSG_BUF_SIZE);
 
 	// keep reading strings and using C format strings for subsituting the strings into the localised text string
 	char *sstr1 = LookupString(READ_STRING());
-	sstr1 = strncpy(szBuf[1], sstr1, 128);
+	sstr1 = strncpy(szBuf[1], sstr1, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr1); // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
 	char *sstr2 = LookupString(READ_STRING());
-	sstr2 = strncpy(szBuf[2], sstr2, 128);
+	sstr2 = strncpy(szBuf[2], sstr2, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr2);
 	char *sstr3 = LookupString(READ_STRING());
-	sstr3 = strncpy(szBuf[3], sstr3, 128);
+	sstr3 = strncpy(szBuf[3], sstr3, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr3);
 	char *sstr4 = LookupString(READ_STRING());
-	sstr4 = strncpy(szBuf[4], sstr4, 128);
+	sstr4 = strncpy(szBuf[4], sstr4, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr4);
 	char *psz = szBuf[5];
 
@@ -188,23 +189,23 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 	switch (msg_dest)
 	{
 	case HUD_PRINTCENTER:
-		 _snprintf(psz, 128,  msg_text,  sstr1,  sstr2,  sstr3,  sstr4 );
+		_snprintf(psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4);
 		CenterPrint(ConvertCRtoNL(psz));
 		break;
 
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1; // mark this message to go into the notify buffer
-		 _snprintf(psz+1, 127,  msg_text,  sstr1,  sstr2,  sstr3,  sstr4 );
+		_snprintf(psz+1, MSG_BUF_SIZE-1, msg_text, sstr1, sstr2, sstr3, sstr4);
 		ConsolePrint(ConvertCRtoNL(psz));
 		break;
 
 	case HUD_PRINTTALK:
-		 _snprintf(psz, 128,  msg_text,  sstr1,  sstr2,  sstr3,  sstr4 );
-		gHUD.m_SayText.SayTextPrint(ConvertCRtoNL(psz), 128);
+		_snprintf(psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4);
+		gHUD.m_SayText.SayTextPrint(ConvertCRtoNL(psz), MSG_BUF_SIZE);
 		break;
 
 	case HUD_PRINTCONSOLE:
-		 _snprintf(psz, 128,  msg_text,  sstr1,  sstr2,  sstr3,  sstr4 );
+		_snprintf(psz, MSG_BUF_SIZE, msg_text, sstr1, sstr2, sstr3, sstr4 );
 		ConsolePrint(ConvertCRtoNL(psz));
 		break;
 	}
@@ -215,6 +216,6 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 void PrintNotifyMsg(char *pszmsg)
 {
 	static char string[1024];
-	 _snprintf(string, sizeof(string),  "%c%s",  HUD_PRINTNOTIFY,  pszmsg );
+	_snprintf(string, sizeof(string), "%c%s", HUD_PRINTNOTIFY, pszmsg);
 	gHUD.m_TextMessage.MsgFunc_TextMsg(string, strlen(string), &string[0]);
 }
