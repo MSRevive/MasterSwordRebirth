@@ -415,7 +415,7 @@ int PRECACHE_MODEL(const char *pszModelname)
 			modelout << "Num\tIndex in Engine" << endl;
 		}
 		char NumStr[512];
-		 _snprintf(NumStr, sizeof(NumStr),  "%.3i\t#%.3i - %s",  TotalModelPrecaches,  LastModel,  pszModelname );
+		_snprintf(NumStr, sizeof(NumStr), "%.3i\t#%.3i - %s", TotalModelPrecaches, LastModel, pszModelname);
 		modelout << NumStr << endl;
 		HighestPrecache = LastModel;
 		TotalModelPrecaches++;
