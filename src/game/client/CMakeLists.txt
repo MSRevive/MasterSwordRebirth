@@ -71,8 +71,8 @@ target_compile_definitions(client PRIVATE
 
 if (MSVC)
 	set_target_properties(client PROPERTIES 
-		VS_DEBUGGER_WORKING_DIRECTORY ${VS_DEBUG_WORK_DIR}
-		VS_DEBUGGER_COMMAND ${VS_DEBUG_WORK_DIR}/msr.exe)
+		VS_DEBUGGER_WORKING_DIRECTORY "${VS_DEBUG_WORK_DIR}"
+		VS_DEBUGGER_COMMAND "${VS_DEBUG_WORK_DIR}/msr.exe)")
 endif()
 
 ################################################################################
