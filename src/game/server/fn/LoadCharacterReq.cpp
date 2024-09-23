@@ -22,8 +22,11 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful)
 
 	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(steamID64);
 	if (pPlayer == NULL)
+	{
+		FNShared::Print("Critical failure, unable to get player with steamID64 %llu\n", steamID64);
 		return;
-
+	}
+	
 	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 
 	if ((pJSONData == NULL) || (bSuccessful == false))
@@ -40,6 +43,7 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful)
 	const int flags = FNShared::GetPlayerFlags(doc);
 	if ((flags & FN_FLAG_BANNED) != 0)
 	{
+		FNShared::Print("Account banned from FN! %llu!\n", steamID64);
 		pPlayer->KickPlayer("You have been banned from FN!");
 		return;
 	}
@@ -50,5 +54,6 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful)
 
 	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
 	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
+	CharInfo.Status = CDS_LOADED;
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 }

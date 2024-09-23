@@ -55,7 +55,6 @@ void CRequestManager::SendAndWait(void)
 		do
 		{
 			Think(true);
-			//SteamGameServer_RunCallbacks();
 			g_SteamServerHelper->RunCallbacks();
 			wait(10);
 		} while ((g_SteamHTTPContext != nullptr) && m_vRequests.size());

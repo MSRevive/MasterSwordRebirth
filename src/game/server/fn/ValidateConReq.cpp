@@ -9,7 +9,7 @@
 #include "global.h"
 
 ValidateConnectivityRequest::ValidateConnectivityRequest(const char* url) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url, true)
+	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
 {
 }
 
