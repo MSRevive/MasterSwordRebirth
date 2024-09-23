@@ -20,9 +20,10 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "parsemsg.h"
+#include <engine/eiface.h>
 #include <string.h>
 #include <stdio.h>
-#include "parsemsg.h"
 
 DECLARE_MESSAGE(m_Message, HudText)
 DECLARE_MESSAGE(m_Message, GameTitle)
@@ -272,7 +273,7 @@ void CHudMessage::MessageDrawScan(client_textmessage_t *pMessage, float time)
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
-		while (*pText && *pText != '\n')
+		while ('\0' != *pText && *pText != '\n' && m_parms.lineLength < ARRAYSIZE(line) - 1)
 		{
 			unsigned char c = *pText;
 			line[m_parms.lineLength] = c;
