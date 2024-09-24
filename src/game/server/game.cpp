@@ -42,6 +42,7 @@ cvar_t forcerespawn = { "mp_forcerespawn", "1", FCVAR_SERVER };
 //cvar_t	flashlight	= {"mp_flashlight","0", FCVAR_SERVER };
 //cvar_t	aimcrosshair= {"mp_autocrosshair","1", FCVAR_SERVER };
 cvar_t decalfrequency = { "decalfrequency", "30", FCVAR_SERVER };
+cvar_t sv_pushable_fixed_tick_fudge = {"sv_pushable_fixed_tick_fudge", "15"};
 //cvar_t	defaultteam = {"mp_defaultteam","0" };
 
 //cvar_t  mp_chattime = {"mp_chattime","10", FCVAR_SERVER };
@@ -73,8 +74,6 @@ void wait(unsigned long ms)
 // This gets called one time when the game is initialied
 void GameDLLInit(void)
 {
-	DBG_INPUT;
-
 	//Master Sword -- Initialize the Master Sword Global items.
 	if (!MSGlobalInit())
 	{
@@ -116,6 +115,7 @@ void GameDLLInit(void)
 	//CVAR_REGISTER (&flashlight);
 	//CVAR_REGISTER (&aimcrosshair);
 	CVAR_REGISTER(&decalfrequency);
+	CVAR_REGISTER(&sv_pushable_fixed_tick_fudge);
 	//CVAR_REGISTER (&defaultteam);
 
 	//CVAR_REGISTER (&mp_chattime);
