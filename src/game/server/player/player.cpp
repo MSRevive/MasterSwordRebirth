@@ -573,7 +573,6 @@ entvars_t *g_pevLastInflictor; // Set in combat.cpp.  Used to pass the damage in
 
 void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 {
-	startdbg;
 	UTIL_ClientPrintAll(HUD_PRINTCENTER, UTIL_VarArgs("%s has fallen!", DisplayName()));
 
 	//	if( AwardFrags )
@@ -600,6 +599,12 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		}
 		else
 			DeathType = KILLED_BY_TRIGGER;
+	}
+
+	// Adrian: always make the players non-solid in multiplayer when they die
+	if (g_pGameRules->IsMultiplayer())
+	{
+		pev->solid = SOLID_NOT;
 	}
 
 	if (DeathType == KILLED_BY_MONSTER)
@@ -782,12 +787,8 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		}
 	}*/
 
-	dbg("Call game_death");
 	CallScriptEvent("game_death");
-	dbg("init bones");
 	InitBoneControllers();
-
-	dbg("spawn corpse");
 
 	//Create a brand new corpse
 	m_Corpse = (CCorpse *)GetClassPtr((CCorpse *)NULL);
@@ -800,8 +801,6 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	pev->solid = SOLID_NOT;
 	SetBits(pev->flags, FL_NOTARGET);
 	m_TimeTillSuicide = 0;
-
-	enddbg;
 }
 
 /*
