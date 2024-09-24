@@ -44,7 +44,7 @@ target_compile_definitions(server PRIVATE
 	VALVE_DLL)
 
 if (UNIX)
-	target_compiler_definitions(server PRIVATE
+	target_compile_definitions(server PRIVATE
 		SWDS)
 endif(UNIX)
 
