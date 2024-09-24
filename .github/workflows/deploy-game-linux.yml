@@ -14,12 +14,12 @@ jobs:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
 
-      - name: C/C++ dev tools
+      - name: Install G++ Multilib & 32 bit OpenGL library
         run: |
-          echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial main' | sudo tee --append /etc/apt/sources.list
-          echo 'deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe' | sudo tee --append /etc/apt/sources.list
+          sudo dpkg --add-architecture i386
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt-get install build-essential gcc-5-multilib g++-5-multilib
+          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libatomic1:i386 libgl1-mesa-dev:i386
 
       - uses: lukka/get-cmake@latest
       
