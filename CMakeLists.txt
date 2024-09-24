@@ -53,17 +53,18 @@ function(set_common_properties TARGET_NAME)
 	
 	if (UNIX)
 		target_compile_definitions(${TARGET_NAME} PRIVATE
+			_snprintf=snprintf
 			_stricmp=strcasecmp
 			_strnicmp=strncasecmp
 			_strdup=strdup
 			_vsnprintf=vsnprintf)
 	endif(UNIX)
 
-	# Disable C++ exceptions, which is enabled by default with CMake?
+	# Make sure C++ exceptions are enabled.
 	if (MSVC)
-		target_compile_options(${TARGET_NAME} PUBLIC /EHa)
+		target_compile_options(${TARGET_NAME} PUBLIC /EHsc)
 	else()
-		target_compile_options(${TARGET_NAME} PUBLIC -fno-exceptions)
+		target_compile_options(${TARGET_NAME} PUBLIC -fexceptions)
 	endif()
 
 	target_compile_definitions(${TARGET_NAME} PRIVATE
