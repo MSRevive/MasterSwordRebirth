@@ -50,7 +50,7 @@ function(set_common_properties TARGET_NAME)
 	set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "")
 	
 	if (UNIX)
-		target_compiler_definitions(${TARGET_NAME} PRIVATE
+		target_compile_definitions(${TARGET_NAME} PRIVATE
 			_stricmp=strcasecmp
 			_strnicmp=strncasecmp
 			_strdup=strdup
