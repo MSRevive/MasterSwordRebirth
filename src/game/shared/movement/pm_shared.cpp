@@ -384,7 +384,7 @@ char PM_FindTextureType(char *name)
 	{
 		pivot = (left + right) / 2;
 
-		val = strnicmp(name, grgszTextureName[pivot], CBTEXTURENAMEMAX - 1);
+		val = _strnicmp(name, grgszTextureName[pivot], CBTEXTURENAMEMAX - 1);
 		if (val == 0)
 		{
 			return grgchTextureType[pivot];
