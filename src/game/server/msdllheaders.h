@@ -20,7 +20,7 @@
 #pragma warning(disable : 4995) // allow use of old headers (such as string.h, iostream.h, etc.)
 #pragma warning(disable : 4288) // loop control variable declared in the for-loop is used outside the for-loop scope
 
-BOOL UTIL_IsPointWithinEntity(Vector &vPoint, CBaseEntity *pEntity);
+bool UTIL_IsPointWithinEntity(Vector &vPoint, CBaseEntity *pEntity);
 void SpriteEffect(CBaseEntity *pEntity, int Effect, char *cSprite);
 Vector GetHighBone(entvars_t *pev, int Bone);
 CBaseEntity *MSInstance(edict_t *pent);

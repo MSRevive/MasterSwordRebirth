@@ -33,7 +33,7 @@ public:
 
     static CFindEntity GetEntity(int vIndx, bool & bValid);
 
-    BOOL IsPlayer();
+    bool IsPlayer();
     Vector GetOrigin();
     int GetEntIndex();
     msstring AsString();

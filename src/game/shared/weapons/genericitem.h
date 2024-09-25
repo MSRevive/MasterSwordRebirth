@@ -369,7 +369,7 @@ public:
 	void Deactivate(void);
 	void Spawn(void);
 	int iItemSlot(void) { return 4; }
-	int GetItemInfo(ItemInfo *p);
+	bool GetItemInfo(ItemInfo *p);
 	void ActivateButtonDown(void);
 	void ActivateButtonUp(void);
 	void Attack2ButtonDown(void);

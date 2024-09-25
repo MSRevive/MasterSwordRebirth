@@ -76,9 +76,6 @@ inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 // More explicit than "int"
 typedef int EOFFSET;
 
-// In case it's not alread defined
-typedef int BOOL;
-
 // In case this ever changes
 #define M_PI 3.14159265358979323846
 
@@ -156,16 +153,16 @@ inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin, entv
 
 // Testing the three types of "entity" for nullity
 #define eoNullEntity 0
-inline BOOL FNullEnt(EOFFSET eoffset)
+inline bool FNullEnt(EOFFSET eoffset)
 {
 	return eoffset == 0;
 }
-inline BOOL FNullEnt(const edict_t *pent) { return pent == NULL || FNullEnt(OFFSET(pent)); }
-inline BOOL FNullEnt(entvars_t *pev) { return pev == NULL || FNullEnt(OFFSET(pev)); }
+inline bool FNullEnt(const edict_t *pent) { return pent == NULL || FNullEnt(OFFSET(pent)); }
+inline bool FNullEnt(entvars_t *pev) { return pev == NULL || FNullEnt(OFFSET(pev)); }
 
 // Testing strings for nullity
 #define iStringNull 0
-inline BOOL FStringNull(int iString)
+inline bool FStringNull(int iString)
 {
 	return iString == iStringNull;
 }
@@ -209,15 +206,15 @@ typedef enum
 } TOGGLE_STATE;
 
 // Misc useful
-inline BOOL FStrEq(const char *sz1, const char *sz2)
+inline bool FStrEq(const char *sz1, const char *sz2)
 {
 	return (strcmp(sz1, sz2) == 0);
 }
-inline BOOL FClassnameIs(edict_t *pent, const char *szClassname)
+inline bool FClassnameIs(edict_t *pent, const char *szClassname)
 {
 	return FStrEq(STRING(VARS(pent)->classname), szClassname);
 }
-inline BOOL FClassnameIs(entvars_t *pev, const char *szClassname)
+inline bool FClassnameIs(entvars_t *pev, const char *szClassname)
 {
 	return FStrEq(STRING(pev->classname), szClassname);
 }
@@ -272,7 +269,7 @@ extern float UTIL_AvgHP();
 
 extern void UTIL_SetOrigin(entvars_t *pev, const Vector &vecOrigin);
 extern void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch);
-extern void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount);
+extern void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, unsigned int ulColor, unsigned int ulCount);
 extern void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, float duration, float radius);
 extern void UTIL_ScreenShakeOne(CBaseEntity* pPlayer, float amplitude, float frequency, float duration); //Thothie APR2016_08 attempting screenshake on one client
 extern void UTIL_ScreenShakeAll(const Vector &center, float amplitude, float frequency, float duration);
@@ -311,10 +308,10 @@ extern int UTIL_IsMasterTriggered(string_t sMaster, CBaseEntity *pActivator);
 extern void UTIL_BloodStream(const Vector &origin, const Vector &direction, int color, int amount);
 extern void UTIL_BloodDrips(const Vector &origin, const Vector &direction, int color, int amount);
 extern Vector UTIL_RandomBloodVector(void);
-extern BOOL UTIL_ShouldShowBlood(int bloodColor);
+extern bool UTIL_ShouldShowBlood(int bloodColor);
 extern void UTIL_BloodDecalTrace(TraceResult *pTrace, int bloodColor);
 extern void UTIL_DecalTrace(TraceResult *pTrace, int decalNumber);
-extern void UTIL_PlayerDecalTrace(TraceResult *pTrace, int playernum, int decalNumber, BOOL bIsCustom);
+extern void UTIL_PlayerDecalTrace(TraceResult *pTrace, int playernum, int decalNumber, bool bIsCustom);
 extern void UTIL_GunshotDecalTrace(TraceResult *pTrace, int decalNumber);
 extern void UTIL_Sparks(const Vector &position);
 extern void UTIL_Ricochet(const Vector &position, float scale);
@@ -327,8 +324,8 @@ extern float UTIL_AngleDistance(float next, float cur);
 
 extern char *UTIL_VarArgs(const char *format, ...);
 extern void UTIL_Remove(CBaseEntity *pEntity);
-extern BOOL UTIL_IsValidEntity(edict_t *pent);
-extern BOOL UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2);
+extern bool UTIL_IsValidEntity(edict_t *pent);
+extern bool UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2);
 
 // Use for ease-in, ease-out style interpolation (accel/decel)
 extern float UTIL_SplineFraction(float value, float scale);
@@ -350,7 +347,7 @@ inline void UTIL_CenterPrintAll(const char *msg_name, const char *param1 = NULL,
 
 class CBasePlayerItem;
 class CBasePlayer;
-extern BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
+extern bool UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);
 
 #define ID64 unsigned long long
 extern CBasePlayer* UTIL_PlayerBySteamID(ID64 steamID64);
@@ -404,7 +401,7 @@ extern int BuildChangeList(LEVELLIST *pLevelList, int maxList);
 // How did I ever live without ASSERT?
 //
 #ifdef DEBUG
-void DBG_AssertFunction(BOOL fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage);
+void DBG_AssertFunction(bool fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage);
 #define ASSERT(f) DBG_AssertFunction(f, #f, __FILE__, __LINE__, NULL)
 #define ASSERTSZ(f, sz) DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz)
 #else // !DEBUG

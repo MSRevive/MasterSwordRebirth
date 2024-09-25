@@ -30,7 +30,7 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
-#include "util_vector.h"
+#include <mathlib.h>
 
 #ifdef EXPORT
 #undef EXPORT
@@ -44,5 +44,6 @@ typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "../engine/cdll_int.h"
 #include "cdll_dll.h"
+#include "Platform.h"
 
 extern cl_enginefunc_t gEngfuncs;

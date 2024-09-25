@@ -27,7 +27,7 @@
 
 #pragma warning(disable : 4244)
 
-vec3_t vec3_origin = {0, 0, 0};
+Vector vec3_origin = {0, 0, 0};
 int nanmask = 255 << 23;
 
 float anglemod(float a)
@@ -36,7 +36,7 @@ float anglemod(float a)
 	return a;
 }
 
-void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+void AngleVectors(const Vector angles, Vector forward, Vector right, Vector up)
 {
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
@@ -71,7 +71,7 @@ void AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 	}
 }
 
-void AngleVectorsTranspose(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+void AngleVectorsTranspose(const Vector angles, Vector forward, Vector right, Vector up)
 {
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
@@ -106,7 +106,7 @@ void AngleVectorsTranspose(const vec3_t angles, vec3_t forward, vec3_t right, ve
 	}
 }
 
-void AngleMatrix(const vec3_t angles, float (*matrix)[4])
+void AngleMatrix(const Vector angles, float (*matrix)[4])
 {
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
@@ -136,7 +136,7 @@ void AngleMatrix(const vec3_t angles, float (*matrix)[4])
 	matrix[2][3] = 0.0;
 }
 
-void AngleIMatrix(const vec3_t angles, float matrix[3][4])
+void AngleIMatrix(const Vector angles, float matrix[3][4])
 {
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
@@ -228,7 +228,7 @@ AngleBetweenVectors
 
 ===================
 */
-float AngleBetweenVectors(const vec3_t v1, const vec3_t v2)
+float AngleBetweenVectors(const Vector v1, const Vector v2)
 {
 	float angle;
 	float l1 = Length(v1);
@@ -243,14 +243,14 @@ float AngleBetweenVectors(const vec3_t v1, const vec3_t v2)
 	return angle;
 }
 
-void VectorTransform(const vec3_t in1, float in2[3][4], vec3_t out)
+void VectorTransform(const Vector in1, float in2[3][4], Vector out)
 {
 	out[0] = DotProduct(in1, in2[0]) + in2[0][3];
 	out[1] = DotProduct(in1, in2[1]) + in2[1][3];
 	out[2] = DotProduct(in1, in2[2]) + in2[2][3];
 }
 
-int VectorCompare(const vec3_t v1, const vec3_t v2)
+int VectorCompare(const Vector v1, const Vector v2)
 {
 	int i;
 
@@ -261,40 +261,40 @@ int VectorCompare(const vec3_t v1, const vec3_t v2)
 	return 1;
 }
 
-void VectorMA(const vec3_t veca, float scale, const vec3_t vecb, vec3_t vecc)
+void VectorMA(const Vector veca, float scale, const Vector vecb, Vector vecc)
 {
 	vecc[0] = veca[0] + scale * vecb[0];
 	vecc[1] = veca[1] + scale * vecb[1];
 	vecc[2] = veca[2] + scale * vecb[2];
 }
 
-vec_t _DotProduct(vec3_t v1, vec3_t v2)
+vec_t _DotProduct(Vector v1, Vector v2)
 {
 	return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
 }
 
-void _VectorSubtract(vec3_t veca, vec3_t vecb, vec3_t out)
+void _VectorSubtract(Vector veca, Vector vecb, Vector out)
 {
 	out[0] = veca[0] - vecb[0];
 	out[1] = veca[1] - vecb[1];
 	out[2] = veca[2] - vecb[2];
 }
 
-void _VectorAdd(vec3_t veca, vec3_t vecb, vec3_t out)
+void _VectorAdd(Vector veca, Vector vecb, Vector out)
 {
 	out[0] = veca[0] + vecb[0];
 	out[1] = veca[1] + vecb[1];
 	out[2] = veca[2] + vecb[2];
 }
 
-void _VectorCopy(vec3_t in, vec3_t out)
+void _VectorCopy(Vector in, Vector out)
 {
 	out[0] = in[0];
 	out[1] = in[1];
 	out[2] = in[2];
 }
 
-void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross)
+void CrossProduct(const Vector v1, const Vector v2, Vector cross)
 {
 	cross[0] = v1[1] * v2[2] - v1[2] * v2[1];
 	cross[1] = v1[2] * v2[0] - v1[0] * v2[2];
@@ -303,7 +303,7 @@ void CrossProduct(const vec3_t v1, const vec3_t v2, vec3_t cross)
 
 double sqrt(double x);
 
-float Length(const vec3_t v)
+float Length(const Vector v)
 {
 	int i;
 	float length = 0.0f;
@@ -315,14 +315,14 @@ float Length(const vec3_t v)
 	return length;
 }
 
-float Distance(const vec3_t v1, const vec3_t v2)
+float Distance(const Vector v1, const Vector v2)
 {
-	vec3_t d;
+	Vector d;
 	VectorSubtract(v2, v1, d);
 	return Length(d);
 }
 
-float VectorNormalize(vec3_t v)
+float VectorNormalize(Vector v)
 {
 	float length, ilength;
 
@@ -340,14 +340,14 @@ float VectorNormalize(vec3_t v)
 	return length;
 }
 
-void VectorInverse(vec3_t v)
+void VectorInverse(Vector v)
 {
 	v[0] = -v[0];
 	v[1] = -v[1];
 	v[2] = -v[2];
 }
 
-void VectorScale(const vec3_t in, vec_t scale, vec3_t out)
+void VectorScale(const Vector in, vec_t scale, Vector out)
 {
 	out[0] = in[0] * scale;
 	out[1] = in[1] * scale;
@@ -362,9 +362,9 @@ int Q_log2(int val)
 	return answer;
 }
 
-void VectorMatrix(vec3_t forward, vec3_t right, vec3_t up)
+void VectorMatrix(Vector forward, Vector right, Vector up)
 {
-	vec3_t tmp;
+	Vector tmp;
 
 	if (forward[0] == 0 && forward[1] == 0)
 	{
@@ -386,7 +386,7 @@ void VectorMatrix(vec3_t forward, vec3_t right, vec3_t up)
 	VectorNormalize(up);
 }
 
-void VectorAngles(const vec3_t forward, vec3_t angles)
+void VectorAngles(const Vector forward, Vector angles)
 {
 	float tmp, yaw, pitch;
 

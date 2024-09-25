@@ -477,7 +477,7 @@ SetupListener
 */
 void CSoundEngine::SetupListener(void)
 {
-	vec3_t vForward, vUp;
+	Vector vForward, vUp;
 	FMOD_VECTOR vOriginFM, vForwardFM, vUpFM;
 	gEngfuncs.pfnAngleVectors(m_vViewAngles, vForward, NULL, vUp);
 
@@ -606,9 +606,9 @@ void CSoundEngine::SetupSounds(void)
 
 			if (pEdict->v.modelindex)
 			{
-				vec3_t vRealMins = pEdict->v.mins + pEdict->v.origin;
-				vec3_t vRealMaxs = pEdict->v.maxs + pEdict->v.origin;
-				vec3_t vCenter = (vRealMins + vRealMaxs) * 0.5;
+				Vector vRealMins = pEdict->v.mins + pEdict->v.origin;
+				Vector vRealMaxs = pEdict->v.maxs + pEdict->v.origin;
+				Vector vCenter = (vRealMins + vRealMaxs) * 0.5;
 
 				VectorCopyFM(vCenter, vPos);
 				_FMOD_Channel_Set3DAttributes(pSound->pChannel, &vPos, NULL);
@@ -912,7 +912,7 @@ PlaySound
 
 ====================
 */
-void CSoundEngine::PlaySound(const char *szFile, vec3_t vOrigin, int iFlags, int iChannel, float fVolume, int iPitch, float flAttenuation, edict_t *pEdict, int iEntIndex)
+void CSoundEngine::PlaySound(const char *szFile, Vector vOrigin, int iFlags, int iChannel, float fVolume, int iPitch, float flAttenuation, edict_t *pEdict, int iEntIndex)
 {
 	char szPath[256];
 	sentence_t *pSentence = NULL;
@@ -1036,8 +1036,8 @@ void CSoundEngine::PlaySound(const char *szFile, vec3_t vOrigin, int iFlags, int
 
 	if (pSound->pEdict)
 	{
-		vec3_t vRealMins = pSound->pEdict->v.maxs + pSound->pEdict->v.origin;
-		vec3_t vRealMaxs = pSound->pEdict->v.mins + pSound->pEdict->v.origin;
+		Vector vRealMins = pSound->pEdict->v.maxs + pSound->pEdict->v.origin;
+		Vector vRealMaxs = pSound->pEdict->v.mins + pSound->pEdict->v.origin;
 		pSound->vOrigin = (vRealMins + vRealMaxs) * 0.5;
 	}
 	else

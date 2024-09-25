@@ -465,7 +465,7 @@ public:
 	float m_TimeWaitedToForgetKill;
 	float m_TimeWaitedToForgetSteal;
 	skillinfo_t SkillInfo;
-	BOOL LockSpeed;
+	bool LockSpeed;
 	int ArrowsStuckInMe;
 
 	//Save file
@@ -572,20 +572,20 @@ public:
 	//	void				UpdateFatigue( );
 	//	void				UpdateMana( );
 	//bool				SwapHands( bool bVerbose = true );
-	void ShowMenu(char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = FALSE);
+	void ShowMenu(char *pszText, int bitsValidSlots, int nDisplayTime = 0, bool fNeedMore = false);
 	int GiveGold(int iAmount, bool bVerbose = true);
 	//float				TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, int iAccuracyRoll);
 	void AttackSound();
 	void PainSound();
 	void StruckSound(CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, TraceResult *ptr, int bitsDamageType);
 	void MovePackSelection(int iUpOrDown);
-	void SendMenu(int iMenu, TCallbackMenu *cbmMenu = NULL);
+	void SendMenu(int iMenu, TCallbackMenu *cbmMenu = nullptr);
 	void ParseMenu(int iMenu, int slot);
 	void InitHUD(); //Don't do anything relating to the client until now!!
 	void PlayerAction(msstring_ref Action);
 	bool PrepareSpell(const char *pszName);
 	void TakeDamageEffect(CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, int bitsDamageType);
-	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = FALSE);
+	void CinematicCamera(bool OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, bool bCreateClone = false);
 	CBaseEntity *GiveNamedItem(const char *szName);
 
 	CGenericItem *ActiveItem();
@@ -612,7 +612,7 @@ public:
 	void Trade();
 	tradeinfo_t *TradeItem(tradeinfo_t *ptiTradeInfo);
 	bool AcceptOffer();
-	BOOL SkinMonster(CMSMonster *pDeadMonster);
+	bool SkinMonster(CMSMonster *pDeadMonster);
 	void LearnSpell(const char *pszSpellScript, bool fVerbose = false);
 	void PlaySound(int channel, const char *sample, float volume, bool fGenderSpecific = false, float attenuation = ATTN_NORM);
 	void KickPlayer(const char *pszMessage);
@@ -720,16 +720,16 @@ public:
 
 	int m_bitsHUDDamage; // Damage bits for the current fame. These get sent to
 						 // the hude via the DAMAGE message
-	BOOL m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
-	BOOL m_fGameHUDInitialized;
+	bool m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
+	bool m_fGameHUDInitialized;
 	int m_iTrain;	// Train control position
-	BOOL m_fWeapon; // Set this to FALSE to force a reset of the current weapon HUD info
+	bool m_fWeapon; // Set this to FALSE to force a reset of the current weapon HUD info
 
 	EHANDLE m_pTank;   // the tank which the player is currently controlling,  NULL if no tank
 	float m_fDeadTime; // the time at which the player died  (used in PlayerDeathThink())
 
-	BOOL m_fNoPlayerSound; // a debugging feature. Player makes no sound if this is true.
-	BOOL m_fLongJump;	   // does this player have the longjump module?
+	bool m_fNoPlayerSound; // a debugging feature. Player makes no sound if this is true.
+	bool m_fLongJump;	   // does this player have the longjump module?
 
 	float m_tSneaking;
 	int m_iUpdateTime; // stores the number of frame ticks before sending HUD update messages
@@ -747,7 +747,7 @@ public:
 	int m_rgAmmoLast[MAX_AMMO_SLOTS];
 
 	Vector m_vecAutoAim;
-	BOOL m_fOnTarget;
+	bool m_fOnTarget;
 	int m_iDeaths;
 	float m_iRespawnFrames; // used in PlayerDeathThink() to make sure players can always respawn
 
@@ -771,11 +771,11 @@ public:
 	virtual Vector BodyTarget(const Vector &posSrc) { return Center() + pev->view_ofs * RANDOM_FLOAT(0.5, 1.1); }; // position to shoot at
 	virtual void StartSneaking(void) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking(void) { m_tSneaking = gpGlobals->time + 30; }
-	virtual BOOL IsSneaking(void) { return m_tSneaking <= gpGlobals->time; }
-	virtual BOOL ShouldFadeOnDeath(void) { return FALSE; }
-	virtual BOOL IsPlayer(void) { return TRUE; } // Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
+	virtual bool IsSneaking(void) { return m_tSneaking <= gpGlobals->time; }
+	virtual bool ShouldFadeOnDeath(void) { return false; }
+	virtual bool IsPlayer(void) { return true; } // Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
 
-	virtual BOOL IsNetClient(void) { return TRUE; } // Bots should return FALSE for this, they can't receive NET messages
+	virtual bool IsNetClient(void) { return true; } // Bots should return FALSE for this, they can't receive NET messages
 													// Spectators should return TRUE for this
 	virtual const char *TeamID(void);
 
@@ -792,10 +792,7 @@ public:
 	// Player is moved across the transition by other means
 	virtual int ObjectCaps(void) { return CBaseMonster ::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	virtual void Precache(void);
-	BOOL IsOnLadder(void);
-	/*	BOOL			FlashlightIsOn( void );
-	void			FlashlightTurnOn( void );
-	void			FlashlightTurnOff( void );*/
+	bool IsOnLadder(void);
 
 	void UpdatePlayerSound(void);
 	void DeathSound(void);
@@ -810,14 +807,14 @@ public:
 	void StartDeathCam(void);
 	void StartObserver(Vector vecPosition, Vector vecViewAngle);
 
-	BOOL HasWeapons(void); // do I have ANY weapons?
+	bool HasWeapons(void); // do I have ANY weapons?
 	void SelectPrevItem(int iItem);
 	void SelectNextItem(int iItem);
 	void SelectLastItem(void);
 	void SelectItem(const char *pstr);
 	void ItemPreFrame(void);
 	void ItemPostFrame(void);
-	void EnableControl(BOOL fControl);
+	void EnableControl(bool fControl);
 
 	void WaterMove(void);
 	void EXPORT PlayerDeathThink(void);
@@ -828,7 +825,7 @@ public:
 	//void UpdateStepSound( void );
 	//void PlayStepSound(int step, float fvol);
 
-	BOOL FBecomeProne(void);
+	bool FBecomeProne(void);
 	void BarnacleVictimBitten(entvars_t *pevBarnacle);
 	void BarnacleVictimReleased(void);
 	int AmmoInventory(int iAmmoIndex);
@@ -878,7 +875,7 @@ extern int playerBodyArray[16];
 #define AUTOAIM_10DEGREES 0.1736481776669
 
 extern int gmsgHudText;
-extern BOOL gInitHUD;
+extern bool gInitHUD;
 
 char *GetOtherPlayerTransition(CBasePlayer *pPlayer);
 

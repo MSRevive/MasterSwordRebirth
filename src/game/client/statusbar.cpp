@@ -162,13 +162,13 @@ void CHudStatusBar ::ParseStatusString(int line_num)
 	}
 }
 
-int CHudStatusBar ::Draw(float fTime)
+bool CHudStatusBar ::Draw(float fTime)
 {
 	if (m_bReparseString)
 	{
 		for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
 			ParseStatusString(i);
-		m_bReparseString = FALSE;
+		m_bReparseString = false;
 	}
 
 	// Draw the status bar lines
@@ -196,7 +196,7 @@ int CHudStatusBar ::Draw(float fTime)
 		DrawConsoleString(x, y, m_szStatusBar[i]);
 	}
 
-	return 1;
+	return true;
 }
 
 // Message handler for StatusText message
@@ -211,14 +211,14 @@ int CHudStatusBar ::Draw(float fTime)
 // if StatusValue[slotnum] != 0, the following string is drawn, upto the next newline - otherwise the text is skipped upto next newline
 // %pX, where X is an integer, will substitute a player name here, getting the player index from StatusValue[X]
 // %iX, where X is an integer, will substitute a number here, getting the number from StatusValue[X]
-int CHudStatusBar ::MsgFunc_StatusText(const char *pszName, int iSize, void *pbuf)
+bool CHudStatusBar::MsgFunc_StatusText(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
 	int line = READ_BYTE();
 
 	if (line < 0 || line >= MAX_STATUSBAR_LINES)
-		return 1;
+		return true;
 
 	strncpy(m_szStatusText[line], READ_STRING(), MAX_STATUSTEXT_LENGTH);
 	m_szStatusText[line][MAX_STATUSTEXT_LENGTH - 1] = 0; // ensure it's null terminated ( strncpy() won't null terminate if read string too long)
@@ -228,9 +228,9 @@ int CHudStatusBar ::MsgFunc_StatusText(const char *pszName, int iSize, void *pbu
 	else
 		m_iFlags |= HUD_ACTIVE; // we have status text, so turn on the status bar
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
-	return 1;
+	return true;
 }
 
 // Message handler for StatusText message
@@ -243,11 +243,11 @@ int CHudStatusBar ::MsgFunc_StatusValue(const char *pszName, int iSize, void *pb
 
 	int index = READ_BYTE();
 	if (index < 1 || index >= MAX_STATUSBAR_VALUES)
-		return 1; // index out of range
+		return true; // index out of range
 
 	m_iStatusValues[index] = READ_SHORT();
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
-	return 1;
+	return true;
 }

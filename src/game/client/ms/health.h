@@ -120,6 +120,6 @@ private:
 	int DrawPain(float fTime);
 	int DrawDamage(float fTime);
 	float m_fAttackFront, m_fAttackRear, m_fAttackLeft, m_fAttackRight;
-	void CalcDamageDirection(vec3_t vecFrom);
+	void CalcDamageDirection(Vector vecFrom);
 	void UpdateTiles(float fTime, long bits);
 };

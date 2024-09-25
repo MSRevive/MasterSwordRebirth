@@ -29,7 +29,7 @@
 typedef struct overviewInfo_s
 {
 	char map[64];  // cl.levelname or empty
-	vec3_t origin; // center of map
+	Vector origin; // center of map
 	float zoom;	   // zoom of map images
 	int layers;	   // how may layers do we have
 	float layersHeights[OVERVIEW_MAX_LAYERS];
@@ -91,7 +91,7 @@ public:
 	int m_iSpectatorNumber;
 
 	float m_mapZoom;	// zoom the user currently uses
-	vec3_t m_mapOrigin; // origin where user rotates around
+	Vector m_mapOrigin; // origin where user rotates around
 	cvar_t *m_drawnames;
 	cvar_t *m_drawcone;
 	cvar_t *m_drawstatus;
@@ -100,11 +100,11 @@ public:
 
 	qboolean m_chatEnabled;
 
-	vec3_t m_cameraOrigin; // a help camera
-	vec3_t m_cameraAngles; // and it's angles
+	Vector m_cameraOrigin; // a help camera
+	Vector m_cameraAngles; // and it's angles
 
 private:
-	vec3_t m_vPlayerPos[MAX_PLAYERS];
+	Vector m_vPlayerPos[MAX_PLAYERS];
 	HLSPRITE m_hsprPlayerBlue;
 	HLSPRITE m_hsprPlayerRed;
 	HLSPRITE m_hsprPlayer;

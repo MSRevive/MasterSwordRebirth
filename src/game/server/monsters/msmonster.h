@@ -354,14 +354,14 @@ public:
 	virtual float MaxMP() { return m_MaxMP; }
 	virtual float GetDefaultMoveProximity() { return m_Width * 1.1; }
 
-	BOOL IsAlive() { return pev ? pev->deadflag == DEAD_NO : FALSE; }
+	bool IsAlive() { return pev ? pev->deadflag == DEAD_NO : false; }
 	virtual void CancelAttack();
 	//virtual void Step( );
 	//virtual void Jump( );
 
 	virtual CGenericItem *GetContainer(const char *pNameSubstring);
-	virtual CGenericItem *GetContainer(ULONG ID);
-	virtual CGenericItem *GetGearItem(ULONG ID);
+	virtual CGenericItem *GetContainer(unsigned int ID);
+	virtual CGenericItem *GetGearItem(unsigned int ID);
 	virtual CGenericItem *GetItem(const char *pAmmoName, CGenericItem **pPack = NULL);
 	virtual bool GetItem(getitem_t &ItemDesc);
 
@@ -370,7 +370,7 @@ public:
 	virtual CGenericItem *FindItem(ulong ID, bool CheckHands, bool CheckWorn, bool CheckPacks);
 	virtual CGenericItem *Hand(int Handidx);
 
-	virtual int NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbose, bool FreeHands = false, char *pszErrorString = NULL);
+	virtual int NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbose, bool FreeHands = false, char *pszErrorString = nullptr);
 	virtual bool CanHold(CGenericItem *pItem, bool bVerbose = true, char *pszErrorString = NULL);
 	virtual bool AddItem(CGenericItem *pItem, bool ToHand, bool CheckWeight, int ForceHand = -1);
 	virtual bool RemoveItem(CGenericItem *pItem);
@@ -426,8 +426,8 @@ public:
 	int MSProperties();
 	float HearingSensitivity(void) { return m_HearingSensitivity; }
 	int ObjectCaps(void) { return CBaseMonster ::ObjectCaps() | FCAP_IMPULSE_USE; }
-	BOOL HasHumanGibs() { return TRUE; }
-	BOOL ShouldFadeOnDeath(void) { return FALSE; }
+	bool HasHumanGibs() { return true; }
+	bool ShouldFadeOnDeath(void) { return false; }
 
 #ifdef VALVE_DLL
 	virtual float GiveHP(float flAmount)

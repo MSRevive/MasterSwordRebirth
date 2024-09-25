@@ -61,6 +61,8 @@ endif()
 # Source groups
 ################################################################################
 set(HL1
+	"../../common/Platform.h"
+	"../../common/PlatformHeaders.h"
 	"../../common/const.h"
 	"../../common/cstringpool.cpp"
 	"../../common/cstringpool.h"
@@ -118,6 +120,7 @@ set(HL1
 	"../shared/movement/pm_movevars.h"
 	"../shared/voice_gamemgr.cpp"
 	"../../public/engine/progdefs.h"
+	"../server/hl/vector.h"
 )
 source_group("HL1" FILES ${HL1})
 

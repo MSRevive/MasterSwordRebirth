@@ -11,7 +11,7 @@ public:
 	virtual ~CHudBase() {}
 	virtual int Init(void) { return 0; }
 	virtual int VidInit(void) { return 0; }
-	virtual int Draw(float flTime) { return 0; }
+	virtual bool Draw(float flTime) { return false; }
 	virtual void Think(void) { return; }
 	virtual void Reset(void) { return; }
 	virtual void InitHUDData(void) {} // called every time a server is connected to

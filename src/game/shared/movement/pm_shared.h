@@ -20,6 +20,8 @@
 #define PM_SHAREDH
 #pragma once
 
+#include "Platform.h"
+
 void PM_Init(struct playermove_s *ppmove);
 void PM_Move(struct playermove_s *ppmove, int server);
 char PM_FindTextureType(char *name);

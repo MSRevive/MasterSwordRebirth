@@ -53,7 +53,7 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 {
 	ViewModel_ExclusiveViewHand = fVisible ? ActiveEntity->curstate.iuser2 : -1;
 }
-extern vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
+extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
 
 cl_entity_t* DrawEnt = NULL;
@@ -220,7 +220,7 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion(int frame, float s, mstudiobo
 {
 	int j, k;
 	vec4_t q1, q2;
-	vec3_t angle1, angle2;
+	Vector angle1, angle2;
 	mstudioanimvalue_t* panimvalue;
 
 	for (j = 0; j < 3; j++)
@@ -524,8 +524,8 @@ Copies model origin and rotation into the transform matrix for rendering
 void CStudioModelRenderer::StudioSetUpTransform(int trivial_accept)
 {
 	int i;
-	vec3_t angles;
-	vec3_t modelpos;
+	Vector angles;
+	Vector modelpos;
 
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
@@ -1614,7 +1614,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
 
 				if (ent)
-					memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(vec3_t) * 4);
+					memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 			}
 		}
 
@@ -1655,7 +1655,7 @@ StudioEstimateGait
 void CStudioModelRenderer::StudioEstimateGait(entity_state_t* pplayer)
 {
 	float frametime = (m_clTime - m_clOldTime);
-	vec3_t est_velocity;
+	Vector est_velocity;
 
 	if (frametime < 0)
 		frametime = 0;
@@ -1983,7 +1983,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 	if (pplayer->gaitsequence)
 	{
-		vec3_t orig_angles;
+		Vector orig_angles;
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		VectorCopy(m_pCurrentEntity->angles, orig_angles);
@@ -2043,7 +2043,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		{
 			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
 
-			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(vec3_t) * 4);
+			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 		}
 	}
 
@@ -2190,7 +2190,7 @@ StudioRenderModel
 void CStudioModelRenderer::StudioRenderModel(void)
 {
 	alight_t lighting;
-	vec3_t lightdir;
+	Vector lightdir;
 
 	HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
 
@@ -2488,8 +2488,8 @@ void CStudioModelRenderer::FlipModel( bool Enable )
 		index = index % pbodypart->nummodels;
 
 		mstudiomodel_t		*m_pmodel = (mstudiomodel_t *)((byte *)m_pStudioHeader + pbodypart->modelindex) + index;
-		vec3_t *pstudioverts = (vec3_t *)((byte *)m_pStudioHeader + m_pmodel->vertindex);
-		vec3_t *pstudionorms = (vec3_t *)((byte *)m_pStudioHeader + m_pmodel->normindex);
+		Vector *pstudioverts = (Vector *)((byte *)m_pStudioHeader + m_pmodel->vertindex);
+		Vector *pstudionorms = (Vector *)((byte *)m_pStudioHeader + m_pmodel->normindex);
 
 		for( int v = 0; v < m_pmodel->numverts; v++ )	pstudioverts[v][0] *= -1;	//Flip the vertices
 		for( int n = 0; n < m_pmodel->numnorms; n++)	pstudionorms[n][0] *= -1;	//Flip the normals
