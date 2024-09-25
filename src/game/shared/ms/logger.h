@@ -123,7 +123,7 @@ extern Logger chatlog;
 extern Logger NullFile;
 extern bool g_log_initialized;
 
-void Print(char* szFmt, ...);
+void Print(const char* szFmt, ...);
 void Log(char* szFmt, ...);
 void OpenLogFiles();
 

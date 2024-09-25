@@ -1459,7 +1459,7 @@ float UTIL_SplineFraction(float value, float scale)
 	return 3 * valueSquared - 2 * valueSquared * value;
 }
 
-char *UTIL_VarArgs(char *format, ...)
+char* UTIL_VarArgs(const char *format, ...)
 {
 	static char string[1024];
 

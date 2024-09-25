@@ -18,7 +18,7 @@ enum FnPlayerFlags
 
 namespace FNShared
 {
-	void Print(char* fmt, ...);
+	void Print(const char* fmt, ...);
 	bool IsSlotValid(int slot);
 	bool IsEnabled(void);
 	void Validate(void);

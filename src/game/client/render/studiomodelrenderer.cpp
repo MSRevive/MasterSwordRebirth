@@ -45,7 +45,7 @@ engine_studio_api_t IEngineStudio;
 
 modelinfo_t CModelMgr::m_ModelInfo[4096];
 
-void Print(char* szFmt, ...);
+void Print(const char* szFmt, ...);
 void VectorAngles(const float* forward, float* angles);
 
 int ViewModel_ExclusiveViewHand = -1;

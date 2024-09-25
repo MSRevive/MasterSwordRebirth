@@ -45,7 +45,7 @@ public:
 #define MACRO_CREATEITEM(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)))
 //#define clrmem( a ) memset( &a, 0, sizeof(a) );
 int numofdigits(int x);
-void Print(char *szFmt, ...);
+void Print(const char *szFmt, ...);
 #define FloatToString( a ) UTIL_VarArgs( "%.2f", a )
 #define IntToString( a ) UTIL_VarArgs( "%i", a )
 

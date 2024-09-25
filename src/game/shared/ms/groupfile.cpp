@@ -26,7 +26,7 @@ void operator delete(void* ptr, const char* pszSourceFile, int LineNum);
 #define msnew new
 #endif
 
-void Print(char* szFmt, ...);
+void Print(const char* szFmt, ...);
 
 /*-----------
 	CGroupFile - File packwout without encryption.

@@ -282,7 +282,7 @@ void AlertMessage(ALERT_TYPE atype, char *szFmt, ...)
 	ConsolePrint("cl: ");
 	ConsolePrint(string);
 }
-char *UTIL_VarArgs(char *format, ...)
+char* UTIL_VarArgs(const char *format, ...)
 {
 	static char string[1024];
 

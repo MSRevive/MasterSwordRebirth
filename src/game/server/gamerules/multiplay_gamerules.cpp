@@ -376,8 +376,7 @@ void CHalfLifeMultiplay::UpdateGameMode( CBasePlayer *pPlayer )
 void CHalfLifeMultiplay::InitHUD( CBasePlayer *pPlayer )
 {
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has joined the game\n", 
-		( pPlayer->pev->netname && STRING(pPlayer->pev->netname)[0] != 0 ) ? STRING(pPlayer->pev->netname) : "unconnected" ) );
+	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs("%s has joined the game\n", (pPlayer->pev->netname && STRING(pPlayer->pev->netname)[0] != 0) ? STRING(pPlayer->pev->netname) : "unconnected" ));
 
 	UTIL_LogPrintf( "\"%s<%i>\" has entered the game\n",  STRING( pPlayer->pev->netname ), GETPLAYERUSERID( pPlayer->edict() ) );
 

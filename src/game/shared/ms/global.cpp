@@ -534,7 +534,7 @@ AlertMessage
 Print debug messages to console
 ======================
 */
-void Print(char *szFmt, ...)
+void Print(const char *szFmt, ...)
 {
 	static char string[1024];
 
