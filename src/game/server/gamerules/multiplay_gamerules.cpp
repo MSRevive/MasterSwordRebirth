@@ -28,7 +28,6 @@
 #include	"global.h"
 #include	"svglobals.h"
 #include	"mscharacter.h"
-#include 	"fn/FNShareddefs.h"
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
