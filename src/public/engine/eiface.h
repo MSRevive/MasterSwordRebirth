@@ -141,7 +141,7 @@ typedef struct enginefuncs_s
 	const char *(*pfnTraceTexture)			(edict_t *pTextureEntity, const float *v1, const float *v2 );
 	void		(*pfnTraceSphere)			(const float *v1, const float *v2, int fNoMonsters, float radius, edict_t *pentToSkip, TraceResult *ptr);
 	void		(*pfnGetAimVector)			(edict_t* ent, float speed, float *rgflReturn);
-	void		(*pfnServerCommand)			(char* str);
+	void		(*pfnServerCommand)			(const char* str);
 	void		(*pfnServerExecute)			(void);
 	void		(*pfnClientCommand)			(edict_t* pEdict, char* szFmt, ...);
 	void		(*pfnParticleEffect)		(const float *org, const float *dir, float color, float count);
@@ -163,7 +163,7 @@ typedef struct enginefuncs_s
 	const char*	(*pfnCVarGetString)			(const char *szVarName);
 	void		(*pfnCVarSetFloat)			(const char *szVarName, float flValue);
 	void		(*pfnCVarSetString)			(const char *szVarName, const char *szValue);
-	void		(*pfnAlertMessage)			(ALERT_TYPE atype, char *szFmt, ...);
+	void		(*pfnAlertMessage)			(ALERT_TYPE atype, const char *szFmt, ...);
 	void		(*pfnEngineFprintf)			(FILE *pfile, char *szFmt, ...);
 	void*		(*pfnPvAllocEntPrivateData)	(edict_t *pEdict, long cb);
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
@@ -236,7 +236,7 @@ typedef struct enginefuncs_s
 
 	void		(*pfnDeltaSetField)			( struct delta_s *pFields, const char *fieldname );
 	void		(*pfnDeltaUnsetField)		( struct delta_s *pFields, const char *fieldname );
-	void		(*pfnDeltaAddEncoder)		( char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
+	void		(*pfnDeltaAddEncoder)		( const char *name, void (*conditionalencode)( struct delta_s *pFields, const unsigned char *from, const unsigned char *to ) );
 	int			(*pfnGetCurrentPlayer)		( void );
 	int			(*pfnCanSkipPlayer)			( const edict_t *player );
 	int			(*pfnDeltaFindField)		( struct delta_s *pFields, const char *fieldname );

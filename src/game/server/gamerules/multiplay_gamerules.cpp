@@ -38,9 +38,9 @@ extern int gmsgMOTD;
 
 bool CheckBanned( msstring_ref SteamID );
 
-float g_TimeTryValidate = 0.0;
+//float g_TimeTryValidate = 0.0f;
 #define VALIDATE_DELAY (60 * 30)// 30 mins
-float g_ServerResetTimer = NULL;
+float g_ServerResetTimer = 0.0f;
 
 #define ITEM_RESPAWN_TIME	30
 #define WEAPON_RESPAWN_TIME	20
@@ -183,8 +183,8 @@ void CHalfLifeMultiplay::Think( void )
 	}
 
 	//if player joins and timer was started than reset timer.
-	if (UTIL_NumPlayers() && g_ServerResetTimer)
-		g_ServerResetTimer = NULL;
+	if (UTIL_NumPlayers() && g_ServerResetTimer > 0.0f)
+		g_ServerResetTimer = 0.0f;
 
 	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
 	{
@@ -196,7 +196,7 @@ void CHalfLifeMultiplay::Think( void )
 		if (gpGlobals->time >= g_ServerResetTimer)
 		{
 			ALERT(at_console, "Resetting server.\n");
-			g_ServerResetTimer = NULL;
+			g_ServerResetTimer = 0.0f;
 			std::string resetMap = CVAR_GET_STRING("ms_reset_map");
 			std::string mapCmd = "map " + resetMap + "\n";
 			SERVER_COMMAND((char*)mapCmd.c_str());

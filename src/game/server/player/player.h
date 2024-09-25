@@ -551,7 +551,7 @@ public:
 	}										 //NPC_PLAYER
 	void CreateChar(createchar_t &CharData); //Create a character (Client or Server)
 	void Deactivate();
-	void SendInfoMsg(char *msg, ...);
+	void SendInfoMsg(const char *msg, ...);
 	void SendHUDMsg(msstring_ref Title, msstring_ref Text);						   //HUD message - top left
 	void SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring_ref Text); //Help tip message
 	void SendEventMsg(msstring_ref Text);										   //Event message - VGUI console

@@ -1089,7 +1089,7 @@ int CBasePlayer::SkillAvg()
 	return iTemp;
 }
 
-void CBasePlayer::SendInfoMsg(char* msg, ...)
+void CBasePlayer::SendInfoMsg(const char* msg, ...)
 {
 	if (!IsNetClient() || !m_fGameHUDInitialized)
 		return;

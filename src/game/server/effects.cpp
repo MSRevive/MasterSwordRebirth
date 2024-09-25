@@ -412,20 +412,20 @@ void CTripBeam::Spawn(void)
 #endif
 
 TYPEDESCRIPTION CLightning::m_SaveData[] =
-	{
-		DEFINE_FIELD(CLightning, m_active, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_iszStartEntity, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_iszEndEntity, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_life, FIELD_FLOAT),
-		DEFINE_FIELD(CLightning, m_boltWidth, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_noiseAmplitude, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_brightness, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_speed, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_restrike, FIELD_FLOAT),
-		DEFINE_FIELD(CLightning, m_spriteTexture, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_iszSpriteName, FIELD_STRING),
-		DEFINE_FIELD(CLightning, m_frameStart, FIELD_INTEGER),
-		DEFINE_FIELD(CLightning, m_radius, FIELD_FLOAT),
+{
+	DEFINE_FIELD(CLightning, m_active, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_iszStartEntity, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_iszEndEntity, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_life, FIELD_FLOAT),
+	DEFINE_FIELD(CLightning, m_boltWidth, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_noiseAmplitude, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_brightness, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_speed, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_restrike, FIELD_FLOAT),
+	DEFINE_FIELD(CLightning, m_spriteTexture, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_iszSpriteName, FIELD_STRING),
+	DEFINE_FIELD(CLightning, m_frameStart, FIELD_INTEGER),
+	DEFINE_FIELD(CLightning, m_radius, FIELD_FLOAT),
 };
 
 IMPLEMENT_SAVERESTORE(CLightning, CBeam);
