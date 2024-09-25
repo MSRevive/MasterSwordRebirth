@@ -3,7 +3,7 @@
 //
 
 #include "rapidjson/document_safe.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
 #include "logger.h"

@@ -4,7 +4,7 @@
 
 #include "rapidjson/document_safe.h"
 #include "ValidateMapReq.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "global.h"
 

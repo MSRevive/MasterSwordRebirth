@@ -5,7 +5,7 @@
 #include "rapidjson/document_safe.h"
 #include "base64/base64.h"
 #include "LoadCharacterReq.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
 #include "util.h"
