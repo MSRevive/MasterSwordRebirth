@@ -233,12 +233,12 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual bool AddDuplicate(CBasePlayerItem *pItem) { return false; } // return TRUE if you want your duplicate removed from world
+	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; } // return TRUE if you want your duplicate removed from world
 	//void EXPORT DestroyItem( void );
 	void EXPORT AttemptToMaterialize(void); // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity *Respawn(void);				// copy a weapon
 	void CheckRespawn(void);
-	virtual bool GetItemInfo(ItemInfo *p) { return false; }; // returns false if struct not filled out
+	virtual int GetItemInfo(ItemInfo *p) { return 0; }; // returns 0 if struct not filled out
 	virtual bool CanDeploy(void) { return true; };
 	virtual bool Deploy(); // returns is deploy was successful
 
@@ -291,27 +291,27 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	// generic weapon versions of CBasePlayerItem calls
-	virtual bool AddDuplicate(CBasePlayerItem *pItem);
+	virtual int AddDuplicate(CBasePlayerItem *pItem);
 
 	virtual void UpdateItemInfo(void){}; // updates HUD state
 
 	int m_iPlayEmptySound;
 	int m_fFireOnEmpty; // True when the gun is empty and the player is still holding down the
 						// attack key(s)
-	virtual bool PlayEmptySound(void);
+	virtual BOOL PlayEmptySound(void);
 	virtual void ResetEmptySound(void);
 
 	virtual void SendWeaponAnim(int iAnim, int skiplocal = 0); // skiplocal is 1 if client is predicting weapon animations
 
 	virtual bool CanDeploy(void);
-	virtual bool IsUseable(void);
-	bool DefaultDeploy(char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal = 0);
+	virtual BOOL IsUseable(void);
+	BOOL DefaultDeploy(char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal = 0);
 	int DefaultReload(int iClipSize, int iAnim, float fDelay);
 
 	virtual void Reload(void) { return; }				// do "+RELOAD"
 	virtual int UpdateClientData(CBasePlayer *pPlayer); // sends hud info to client dll, if things have changed
 	virtual void Holster(int skiplocal = 0);
-	virtual bool UseDecrement(void) { return false; };
+	virtual BOOL UseDecrement(void) { return FALSE; };
 
 	void PrintState(void);
 

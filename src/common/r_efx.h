@@ -106,7 +106,7 @@ typedef struct tempent_s
 					   // if COLLIDEALL, this is the index of the client to ignore
 					   // TENTS with FTENT_PLYRATTACHMENT MUST set the clientindex!
 
-	Vector tentOffset; // if attached, client origin + tentOffset = tent origin.
+	vec3_t tentOffset; // if attached, client origin + tentOffset = tent origin.
 	cl_entity_t entity;
 
 	// baseline.origin		- velocity

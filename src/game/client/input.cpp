@@ -762,12 +762,12 @@ void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s *cmd, int active)
 	dbg("Begin");
 
 	float spd;
-	Vector viewangles;
-	static Vector oldangles;
+	vec3_t viewangles;
+	static vec3_t oldangles;
 
 	if (active)
 	{
-		//memset( viewangles, 0, sizeof( Vector ) );
+		//memset( viewangles, 0, sizeof( vec3_t ) );
 		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
 		gEngfuncs.GetViewAngles((float *)viewangles);
 

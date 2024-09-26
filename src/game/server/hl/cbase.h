@@ -45,7 +45,6 @@ CBaseEntity
 #define FCAP_FORCE_TRANSITION 0x00000080 // ALWAYS goes across transitions
 
 #include "archtypes.h"     // DAL
-#include "Platform.h"
 
 //Master Sword - no save/restore in client dll
 #define MAXPLAYERS 32
@@ -396,7 +395,7 @@ public:
 	// initialization functions
 	virtual void Spawn(void) {}
 	virtual void Precache(void) { return; }
-	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = false; }
+	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = FALSE; }
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 	virtual int ObjectCaps(void) { return FCAP_ACROSS_TRANSITION; }
@@ -417,13 +416,13 @@ public:
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual int BloodColor(void) { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual bool IsTriggered(CBaseEntity *pActivator) { return true; }
+	virtual BOOL IsTriggered(CBaseEntity *pActivator) { return TRUE; }
 	virtual CBaseMonster *MyMonsterPointer(void) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer(void) { return NULL; }
 	virtual bool IsMSMonster(void) { return false; }
 	virtual int GetToggleState(void) { return TS_AT_TOP; }
-	virtual void AddPoints(int score, bool bAllowNegativeScore) {}
-	virtual void AddPointsToTeam(int score, bool bAllowNegativeScore) {}
+	virtual void AddPoints(int score, BOOL bAllowNegativeScore) {}
+	virtual void AddPointsToTeam(int score, BOOL bAllowNegativeScore) {}
 	virtual int GiveAmmo(int iAmount, char *szName, int iMax) { return -1; };
 	virtual float GetDelay(void) { return 0; }
 	virtual int IsMoving(void) { return pev->velocity != g_vecZero; }
@@ -433,15 +432,15 @@ public:
 	virtual void SetToggleState(int state) {}
 	virtual void StartSneaking(void) {}
 	virtual void StopSneaking(void) {}
-	virtual bool OnControls(entvars_t *pev) { return false; }
-	virtual bool IsSneaking(void) { return false; }
-	virtual bool IsAlive(void) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
-	virtual bool IsBSPModel(void) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
-	virtual bool ReflectGauss(void) { return (IsBSPModel() && !pev->takedamage); }
-	virtual bool HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
-	virtual bool IsInWorld(void);
-	virtual bool IsPlayer(void) { return false; }
-	virtual bool IsNetClient(void) { return false; }
+	virtual BOOL OnControls(entvars_t *pev) { return FALSE; }
+	virtual BOOL IsSneaking(void) { return FALSE; }
+	virtual BOOL IsAlive(void) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
+	virtual BOOL IsBSPModel(void) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
+	virtual BOOL ReflectGauss(void) { return (IsBSPModel() && !pev->takedamage); }
+	virtual BOOL HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
+	virtual BOOL IsInWorld(void);
+	virtual BOOL IsPlayer(void) { return FALSE; }
+	virtual BOOL IsNetClient(void) { return FALSE; }
 	virtual const char *TeamID(void) { return ""; }
 
 	//	virtual void	SetActivator( CBaseEntity *pActivator ) {}
@@ -498,8 +497,8 @@ public:
 	void EXPORT SUB_StartFadeOut(void);
 	void EXPORT SUB_FadeOut(void);
 	void EXPORT SUB_CallUseToggle(void) { this->Use(this, this, USE_TOGGLE, 0); }
-	int ShouldToggle(USE_TYPE useType, bool currentState);
-	void FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL);
+	int ShouldToggle(USE_TYPE useType, BOOL currentState);
+	void FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL);
 
 	virtual CBaseEntity *Respawn(void) { return NULL; }
 
@@ -512,7 +511,7 @@ public:
 	int Intersects(CBaseEntity *pOther);
 	void MakeDormant(void);
 	int IsDormant(void);
-	bool IsLockedByMaster(void) { return false; }
+	BOOL IsLockedByMaster(void) { return FALSE; }
 
 	static CBaseEntity *Instance(edict_t *pent)
 	{
@@ -588,7 +587,7 @@ public:
 	//
 	static CBaseEntity *Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
 
-	virtual bool FBecomeProne(void) { return false; };
+	virtual BOOL FBecomeProne(void) { return FALSE; };
 	edict_t *edict()
 	{ //Master Sword... Client has no edict_t !
 #ifdef VALVE_DLL
@@ -607,11 +606,11 @@ public:
 
 	virtual int Illumination() { return GETENTITYILLUM(ENT(pev)); };
 
-	virtual bool FMVisible(CBaseEntity *pEntity);
-	virtual bool FMVisible(const Vector &vecOrigin);
+	virtual BOOL FMVisible(CBaseEntity *pEntity);
+	virtual BOOL FMVisible(const Vector &vecOrigin);
 
-	virtual bool FVisible(CBaseEntity *pEntity);
-	virtual bool FVisible(const Vector &vecOrigin);
+	virtual BOOL FVisible(CBaseEntity *pEntity);
+	virtual BOOL FVisible(const Vector &vecOrigin);
 	
 #ifdef VALVE_DLL
 	bool NOSEND;
@@ -676,8 +675,8 @@ typedef struct locksounds // sounds that doors and buttons make when locked/unlo
 
 	float flwaitSound;	  // time delay between playing consecutive 'locked/unlocked' sounds
 	float flwaitSentence; // time delay between playing consecutive sentences
-	byte bEOFLocked;	  // true if hit end of list of locked sentences
-	byte bEOFUnlocked;	  // true if hit end of list of unlocked sentences
+	BYTE bEOFLocked;	  // true if hit end of list of locked sentences
+	BYTE bEOFUnlocked;	  // true if hit end of list of unlocked sentences
 } locksound_t;
 
 void PlayLockSounds(entvars_t *pev, locksound_t *pls, int flocked, int fbutton);
@@ -696,7 +695,7 @@ public:
 	void KeyValue(KeyValueData *pkvd);
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	int ObjectCaps(void) { return (CPointEntity::ObjectCaps() | FCAP_MASTER); }
-	bool IsTriggered(CBaseEntity *pActivator);
+	BOOL IsTriggered(CBaseEntity *pActivator);
 	void EXPORT Register(void);
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
@@ -768,8 +767,8 @@ public:
 	float m_flFrameRate;	  // computed FPS for current sequence
 	float m_flGroundSpeed;	  // computed linear movement rate for current sequence
 	float m_flLastEventCheck; // last time the event list was checked
-	bool m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
-	bool m_fSequenceLoops;	  // true if the sequence loops
+	BOOL m_fSequenceFinished; // flag set when StudioAdvanceFrame moves across a frame boundry
+	BOOL m_fSequenceLoops;	  // true if the sequence loops
 };
 
 //
@@ -817,7 +816,7 @@ public:
 	void EXPORT LinearMoveDone(void);
 	void AngularMove(Vector vecDestAngle, float flSpeed);
 	void EXPORT AngularMoveDone(void);
-	bool IsLockedByMaster(void);
+	BOOL IsLockedByMaster(void);
 
 	static float AxisValue(int flags, const Vector &angles);
 	static void AxisDir(entvars_t *pev);
@@ -994,8 +993,8 @@ public:
 	// Buttons that don't take damage can be IMPULSE used
 	virtual int ObjectCaps(void) { return (CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage ? 0 : FCAP_IMPULSE_USE); }
 
-	bool m_fStayPushed; // button stays pushed in until touched again?
-	bool m_fRotating;	// a rotating button?  default is a sliding button.
+	BOOL m_fStayPushed; // button stays pushed in until touched again?
+	BOOL m_fRotating;	// a rotating button?  default is a sliding button.
 
 	string_t m_strChangeTarget; // if this field is not null, this is an index into the engine string array.
 								// when this button is touched, it's target entity's TARGET field will be set
@@ -1003,10 +1002,10 @@ public:
 
 	locksound_t m_ls; // door lock sounds
 
-	byte m_bLockedSound; // ordinals from entity selection
-	byte m_bLockedSentence;
-	byte m_bUnlockedSound;
-	byte m_bUnlockedSentence;
+	BYTE m_bLockedSound; // ordinals from entity selection
+	BYTE m_bLockedSentence;
+	BYTE m_bUnlockedSound;
+	BYTE m_bUnlockedSentence;
 	int m_sounds;
 };
 
@@ -1068,10 +1067,10 @@ push_trigger_data
 
 typedef struct _SelAmmo
 {
-	byte Ammo1Type;
-	byte Ammo1;
-	byte Ammo2Type;
-	byte Ammo2;
+	BYTE Ammo1Type;
+	BYTE Ammo1;
+	BYTE Ammo2Type;
+	BYTE Ammo2;
 } SelAmmo;
 
 #endif

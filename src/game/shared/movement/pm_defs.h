@@ -35,7 +35,6 @@
 
 // PM_PlayerTrace results.
 #include "pmtrace.h"
-#include "Platform.h"
 
 #if !defined(USERCMD_H)
 #include "usercmd.h"
@@ -46,12 +45,12 @@ typedef struct physent_s
 {
 	char name[32]; // Name of model, or "player" or "world".
 	int player;
-	Vector origin;				 // Model's origin in world coordinates.
+	vec3_t origin;				 // Model's origin in world coordinates.
 	struct model_s *model;		 // only for bsp models
 	struct model_s *studiomodel; // SOLID_BBOX, but studio clip intersections.
-	Vector mins, maxs;			 // only for non-bsp models
+	vec3_t mins, maxs;			 // only for non-bsp models
 	int info;					 // For client or server to use to identify (index into edicts or cl_entities)
-	Vector angles;				 // rotated entities need this info for hull testing to work.
+	vec3_t angles;				 // rotated entities need this info for hull testing to work.
 
 	int solid;		// Triggers and func_door type WATER brushes are SOLID_NOT
 	int skin;		// BSP Contents for such things like fun_door water brushes.
@@ -78,10 +77,10 @@ typedef struct physent_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector vuser1;
-	Vector vuser2;
-	Vector vuser3;
-	Vector vuser4;
+	vec3_t vuser1;
+	vec3_t vuser2;
+	vec3_t vuser3;
+	vec3_t vuser4;
 } physent_t;
 
 typedef struct playermove_s
@@ -93,17 +92,17 @@ typedef struct playermove_s
 	float time;			  // realtime on host, for reckoning duck timing
 	float frametime;	  // Duration of this frame
 
-	Vector forward, right, up; // Vectors for angles
+	vec3_t forward, right, up; // Vectors for angles
 	// player state
-	Vector origin;		 // Movement origin.
-	Vector angles;		 // Movement view angles.
-	Vector oldangles;	 // Angles before movement view angles were looked at.
-	Vector velocity;	 // Current movement direction.
-	Vector movedir;		 // For waterjumping, a forced forward velocity so we can fly over lip of ledge.
-	Vector basevelocity; // Velocity of the conveyor we are standing, e.g.
+	vec3_t origin;		 // Movement origin.
+	vec3_t angles;		 // Movement view angles.
+	vec3_t oldangles;	 // Angles before movement view angles were looked at.
+	vec3_t velocity;	 // Current movement direction.
+	vec3_t movedir;		 // For waterjumping, a forced forward velocity so we can fly over lip of ledge.
+	vec3_t basevelocity; // Velocity of the conveyor we are standing, e.g.
 
 	// For ducking/dead
-	Vector view_ofs;  // Our eye position.
+	vec3_t view_ofs;  // Our eye position.
 	float flDuckTime; // Time we started duck
 	qboolean bInDuck; // In process of ducking or ducked already?
 
@@ -112,7 +111,7 @@ typedef struct playermove_s
 	int iStepLeft;
 
 	float flFallVelocity;
-	Vector punchangle;
+	vec3_t punchangle;
 
 	float flSwimTime;
 
@@ -151,10 +150,10 @@ typedef struct playermove_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector vuser1;
-	Vector vuser2;
-	Vector vuser3;
-	Vector vuser4;
+	vec3_t vuser1;
+	vec3_t vuser2;
+	vec3_t vuser3;
+	vec3_t vuser4;
 	// world state
 	// Number of entities to clip against.
 	int numphysent;
@@ -178,8 +177,8 @@ typedef struct playermove_s
 	char physinfo[MAX_PHYSINFO_STRING]; // Physics info string
 
 	struct movevars_s *movevars;
-	Vector player_mins[4];
-	Vector player_maxs[4];
+	vec3_t player_mins[4];
+	vec3_t player_maxs[4];
 
 	// Common functions
 	const char *(*PM_Info_ValueForKey)(const char *s, const char *key);

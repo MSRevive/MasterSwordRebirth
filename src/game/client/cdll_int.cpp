@@ -25,7 +25,7 @@
 #include "logger.h"
 #include "clientlibrary.h"
 #include "movement/pm_shared.h"
-#include "Platform.h"
+#include <windows.h>
 
 //#define LOG_ALLEXPORTS //more exports in entity.cpp
 

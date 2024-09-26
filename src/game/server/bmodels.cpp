@@ -927,8 +927,8 @@ public:
 	float m_damp;
 	float m_maxSpeed;
 	float m_dampSpeed;
-	Vector m_center;
-	Vector m_start;
+	vec3_t m_center;
+	vec3_t m_start;
 };
 
 LINK_ENTITY_TO_CLASS(func_pendulum, CPendulum);

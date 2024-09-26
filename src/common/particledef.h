@@ -37,12 +37,12 @@ typedef enum
 typedef struct particle_s
 {
 	// driver-usable fields
-	Vector org;
+	vec3_t org;
 	short color;
 	short packedColor;
 	// drivers never touch the following fields
 	struct particle_s *next;
-	Vector vel;
+	vec3_t vel;
 	float ramp;
 	float die;
 	ptype_t type;

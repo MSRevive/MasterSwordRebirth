@@ -21,7 +21,6 @@
 #define INTERFACE_VERSION		140
 #endif // !HLDEMO_BUILD
 
-#include "Platform.h"
 #include <stdio.h>
 #include <stddef.h>
 #include "custom.h"
@@ -77,9 +76,9 @@ typedef struct
 	int		fInOpen;
 	int		fInWater;
 	float	flFraction;			// time completed, 1.0 = didn't hit anything
-	Vector	vecEndPos;			// final position
+	vec3_t	vecEndPos;			// final position
 	float	flPlaneDist;
-	Vector	vecPlaneNormal;		// surface normal at impact
+	vec3_t	vecPlaneNormal;		// surface normal at impact
 	edict_t	*pHit;				// entity the surface is on
 	int		iHitgroup;			// 0 == generic, non zero is specific body part
 	} TraceResult;
@@ -282,7 +281,7 @@ typedef struct
 	char		mapName[ 32 ];
 	char		landmarkName[ 32 ];
 	edict_t	*pentLandmark;
-	Vector		vecLandmarkOrigin;
+	vec3_t		vecLandmarkOrigin;
 } LEVELLIST;
 #define MAX_LEVEL_CONNECTIONS	16		// These are encoded in the lower 16bits of ENTITYTABLE->flags
 
@@ -326,7 +325,7 @@ struct saverestore_s
 	// smooth transition
 	int			fUseLandmark;
 	char		szLandmarkName[20];// landmark we'll spawn near in next level
-	Vector		vecLandmarkOffset;// for landmark transitions
+	vec3_t		vecLandmarkOffset;// for landmark transitions
 	float		time;
 	char		szCurrentMapName[32];	// To check global entities
 
@@ -382,6 +381,9 @@ typedef struct
 	short			fieldSize;
 	short			flags;
 } TYPEDESCRIPTION;
+
+#undef ARRAYSIZE
+#define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 
 typedef struct 
 {
@@ -442,7 +444,7 @@ typedef struct
 	void			(*pfnSetupVisibility)( struct edict_s *pViewEntity, struct edict_s *pClient, unsigned char **pvs, unsigned char **pas );
 	void			(*pfnUpdateClientData) ( const struct edict_s *ent, int sendweapons, struct clientdata_s *cd );
 	int				(*pfnAddToFullPack)( struct entity_state_s *state, int e, edict_t *ent, edict_t *host, int hostflags, int player, unsigned char *pSet );
-	void			(*pfnCreateBaseline) ( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, Vector player_mins, Vector player_maxs );
+	void			(*pfnCreateBaseline) ( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs );
 	void			(*pfnRegisterEncoders)	( void );
 	int				(*pfnGetWeaponData)		( struct edict_s *player, struct weapon_data_s *info );
 

@@ -93,6 +93,11 @@ typedef struct cvar_s cvar_t;
 void Print(const char *szFmt, ...);
 void ShowVGUIMenu(int iMenu);
 
+//ripped from windef.h
+#ifndef BOOL
+typedef int BOOL;
+#endif
+
 //Moved here from CHudStatusIcons
 #define MAX_SPRITE_NAME_LENGTH 24
 
@@ -129,7 +134,7 @@ public:
 	int Init(void);
 	int VidInit(void);
 	void Reset(void);
-	bool Draw(float flTime);
+	int Draw(float flTime);
 
 	int MsgFunc_SecAmmoVal(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_SecAmmoIcon(const char *pszName, int iSize, void *pbuf);
@@ -155,7 +160,7 @@ class CHudGeiger : public CHudBase
 public:
 	int Init(void);
 	int VidInit(void);
-	bool Draw(float flTime);
+	int Draw(float flTime);
 	int MsgFunc_Geiger(const char *pszName, int iSize, void *pbuf);
 
 private:
@@ -170,7 +175,7 @@ class CHudTrain : public CHudBase
 public:
 	int Init(void);
 	int VidInit(void);
-	bool Draw(float flTime);
+	int Draw(float flTime);
 	int MsgFunc_Train(const char *pszName, int iSize, void *pbuf);
 
 private:
@@ -186,12 +191,12 @@ class CHudStatusBar : public CHudBase
 public:
 	int Init(void);
 	int VidInit(void);
-	bool Draw(float flTime);
+	int Draw(float flTime);
 	void Reset(void);
 	void ParseStatusString(int line_num);
 
-	bool MsgFunc_StatusText(const char *pszName, int iSize, void *pbuf);
-	bool MsgFunc_StatusValue(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_StatusText(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_StatusValue(const char *pszName, int iSize, void *pbuf);
 
 protected:
 	enum

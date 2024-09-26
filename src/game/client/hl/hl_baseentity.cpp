@@ -32,8 +32,6 @@ This file contains "stubs" of class member implementations so that we can predic
 
 #include "cl_entity.h"
 #include "event_api.h"
-#include "hl/extdll.h"
-
 // Globals used by client.dll
 const Vector g_vecZero = Vector(0, 0, 0);
 int gmsgWeapPickup = 0;
@@ -69,8 +67,8 @@ void CBaseEntity::SetObjectCollisionBox(void) {}
 int CBaseEntity ::Intersects(CBaseEntity *pOther) { return 0; }
 void CBaseEntity ::MakeDormant(void) {}
 int CBaseEntity ::IsDormant(void) { return 0; }
-bool CBaseEntity ::IsInWorld(void) { return true; }
-int CBaseEntity::ShouldToggle(USE_TYPE useType, bool currentState) { return 0; }
+BOOL CBaseEntity ::IsInWorld(void) { return TRUE; }
+int CBaseEntity::ShouldToggle(USE_TYPE useType, BOOL currentState) { return 0; }
 int CBaseEntity ::DamageDecal(int bitsDamageType) { return -1; }
 CBaseEntity *CBaseEntity::Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner) { return NULL; }
 void CBaseEntity::SUB_Remove(void)
@@ -104,7 +102,7 @@ int CBaseAnimating::Save(class CSave &) { return 1; }
 
 // DEBUG Stubs
 edict_t *DBG_EntOfVars(const entvars_t *pev) { return NULL; }
-void DBG_AssertFunction(bool fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage) {}
+void DBG_AssertFunction(BOOL fExpr, const char *szExpr, const char *szFile, int szLine, const char *szMessage) {}
 
 // UTIL_* Stubs
 void UTIL_PrecacheOther(const char *szClassname) {}
@@ -112,9 +110,9 @@ void UTIL_BloodDrips(const Vector &origin, const Vector &direction, int color, i
 void UTIL_DecalTrace(TraceResult *pTrace, int decalNumber) {}
 void UTIL_GunshotDecalTrace(TraceResult *pTrace, int decalNumber) {}
 void UTIL_MakeVectors(const Vector &vecAngles) {}
-bool UTIL_IsValidEntity(edict_t *pent) { return true; }
+BOOL UTIL_IsValidEntity(edict_t *pent) { return TRUE; }
 void UTIL_SetOrigin(entvars_t *, const Vector &org) {}
-bool UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon) { return true; }
+BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon) { return TRUE; }
 void UTIL_LogPrintf(const char *, ...) {}
 void UTIL_ClientPrintAll(int, char const *, char const *, char const *, char const *, char const *) {}
 void PrintNotifyMsg(char *pszmsg);
@@ -136,53 +134,53 @@ void CGrenade::Explode(TraceResult *, int) {}
 void CGrenade::Killed(entvars_t *, int) {}
 void CGrenade::Spawn(void) {}
 
-CBaseEntity *CBaseMonster ::CheckTraceHullAttack(float flDist, int iDamage, int iDmgType) { return nullptr; }
+CBaseEntity *CBaseMonster ::CheckTraceHullAttack(float flDist, int iDamage, int iDmgType) { return NULL; }
 void CBaseMonster ::Eat(float flFullDuration) {}
-bool CBaseMonster ::FShouldEat(void) { return true; }
+BOOL CBaseMonster ::FShouldEat(void) { return TRUE; }
 void CBaseMonster ::BarnacleVictimBitten(entvars_t *pevBarnacle) {}
 void CBaseMonster ::BarnacleVictimReleased(void) {}
 void CBaseMonster ::Listen(void) {}
 float CBaseMonster ::FLSoundVolume(CSound *pSound) { return 0.0; }
-bool CBaseMonster ::FValidateHintType(short sHint) { return false; }
+BOOL CBaseMonster ::FValidateHintType(short sHint) { return FALSE; }
 void CBaseMonster ::Look(int iDistance) {}
 int CBaseMonster ::ISoundMask(void) { return 0; }
-CSound *CBaseMonster ::PBestSound(void) { return nullptr; }
-CSound *CBaseMonster ::PBestScent(void) { return nullptr; }
+CSound *CBaseMonster ::PBestSound(void) { return NULL; }
+CSound *CBaseMonster ::PBestScent(void) { return NULL; }
 float CBaseAnimating ::StudioFrameAdvance(float flInterval) { return 0.0; }
 void CBaseMonster ::MonsterThink(void) {}
 void CBaseMonster ::MonsterUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value) {}
 int CBaseMonster ::IgnoreConditions(void) { return 0; }
 void CBaseMonster ::RouteClear(void) {}
 void CBaseMonster ::RouteNew(void) {}
-bool CBaseMonster ::FRouteClear(void) { return false; }
-bool CBaseMonster ::FRefreshRoute(void) { return 0; }
-bool CBaseMonster::MoveToEnemy(Activity movementAct, float waitTime) { return false; }
-bool CBaseMonster::MoveToLocation(Activity movementAct, float waitTime, const Vector &goal) { return false; }
-bool CBaseMonster::MoveToTarget(Activity movementAct, float waitTime) { return false; }
-bool CBaseMonster::MoveToNode(Activity movementAct, float waitTime, const Vector &goal) { return false; }
-int ShouldSimplify(int routeType) { return true; }
+BOOL CBaseMonster ::FRouteClear(void) { return FALSE; }
+BOOL CBaseMonster ::FRefreshRoute(void) { return 0; }
+BOOL CBaseMonster::MoveToEnemy(Activity movementAct, float waitTime) { return FALSE; }
+BOOL CBaseMonster::MoveToLocation(Activity movementAct, float waitTime, const Vector &goal) { return FALSE; }
+BOOL CBaseMonster::MoveToTarget(Activity movementAct, float waitTime) { return FALSE; }
+BOOL CBaseMonster::MoveToNode(Activity movementAct, float waitTime, const Vector &goal) { return FALSE; }
+int ShouldSimplify(int routeType) { return TRUE; }
 void CBaseMonster ::RouteSimplify(CBaseEntity *pTargetEnt) {}
-bool CBaseMonster ::FBecomeProne(void) { return true; }
-bool CBaseMonster ::CheckRangeAttack1(float flDot, float flDist) { return false; }
-bool CBaseMonster ::CheckRangeAttack2(float flDot, float flDist) { return false; }
-bool CBaseMonster ::CheckMeleeAttack1(float flDot, float flDist) { return false; }
-bool CBaseMonster ::CheckMeleeAttack2(float flDot, float flDist) { return false; }
+BOOL CBaseMonster ::FBecomeProne(void) { return TRUE; }
+BOOL CBaseMonster ::CheckRangeAttack1(float flDot, float flDist) { return FALSE; }
+BOOL CBaseMonster ::CheckRangeAttack2(float flDot, float flDist) { return FALSE; }
+BOOL CBaseMonster ::CheckMeleeAttack1(float flDot, float flDist) { return FALSE; }
+BOOL CBaseMonster ::CheckMeleeAttack2(float flDot, float flDist) { return FALSE; }
 void CBaseMonster ::CheckAttacks(CBaseEntity *pTarget, float flDist) {}
-bool CBaseMonster ::FCanCheckAttacks(void) { return false; }
+BOOL CBaseMonster ::FCanCheckAttacks(void) { return FALSE; }
 int CBaseMonster ::CheckEnemy(CBaseEntity *pEnemy) { return 0; }
 void CBaseMonster ::PushEnemy(CBaseEntity *pEnemy, Vector &vecLastKnownPos) {}
-bool CBaseMonster ::PopEnemy() { return false; }
+BOOL CBaseMonster ::PopEnemy() { return FALSE; }
 void CBaseMonster ::SetActivity(Activity NewActivity) {}
 void CBaseMonster ::SetSequenceByName(char *szSequence) {}
 int CBaseMonster ::CheckLocalMove(const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist) { return 0; }
 float CBaseMonster ::OpenDoorAndWait(entvars_t *pevDoor) { return 0.0; }
 void CBaseMonster ::AdvanceRoute(float distance) {}
 int CBaseMonster ::RouteClassify(int iMoveFlag) { return 0; }
-bool CBaseMonster ::BuildRoute(const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget) { return false; }
+BOOL CBaseMonster ::BuildRoute(const Vector &vecGoal, int iMoveFlag, CBaseEntity *pTarget) { return FALSE; }
 void CBaseMonster ::InsertWaypoint(Vector vecLocation, int afMoveFlags) {}
-bool CBaseMonster ::FTriangulate(const Vector &vecStart, const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector *pApex) { return false; }
+BOOL CBaseMonster ::FTriangulate(const Vector &vecStart, const Vector &vecEnd, float flDist, CBaseEntity *pTargetEnt, Vector *pApex) { return FALSE; }
 void CBaseMonster ::Move(float flInterval) {}
-bool CBaseMonster::ShouldAdvanceRoute(float flWaypointDist) { return false; }
+BOOL CBaseMonster::ShouldAdvanceRoute(float flWaypointDist) { return FALSE; }
 void CBaseMonster::MoveExecute(CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval) {}
 void CBaseMonster ::MonsterInit(void) {}
 void CBaseMonster ::MonsterInitThink(void) {}
@@ -190,15 +188,15 @@ void CBaseMonster ::StartMonster(void) {}
 void CBaseMonster ::MovementComplete(void) {}
 int CBaseMonster::TaskIsRunning(void) { return 0; }
 int CBaseMonster::IRelationship(CBaseEntity *pTarget) { return 0; }
-bool CBaseMonster ::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist) { return false; }
-bool CBaseMonster ::BuildNearestRoute(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist) { return false; }
+BOOL CBaseMonster ::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist) { return FALSE; }
+BOOL CBaseMonster ::BuildNearestRoute(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist) { return FALSE; }
 CBaseEntity *CBaseMonster ::BestVisibleEnemy(void) { return NULL; }
-bool CBaseMonster ::FInViewCone(CBaseEntity *pEntity) { return false; }
-bool CBaseMonster ::FInViewCone(Vector &Origin) { return false; }
-bool CBaseEntity ::FVisible(CBaseEntity *pEntity) { return false; }
-bool CBaseEntity ::FVisible(const Vector &vecOrigin) { return false; }
-bool CBaseEntity ::FMVisible(CBaseEntity *pEntity) { return false; }
-bool CBaseEntity ::FMVisible(const Vector &vecOrigin) { return false; }
+bool CBaseMonster ::FInViewCone(CBaseEntity *pEntity) { return FALSE; }
+bool CBaseMonster ::FInViewCone(Vector &Origin) { return FALSE; }
+BOOL CBaseEntity ::FVisible(CBaseEntity *pEntity) { return FALSE; }
+BOOL CBaseEntity ::FVisible(const Vector &vecOrigin) { return FALSE; }
+BOOL CBaseEntity ::FMVisible(CBaseEntity *pEntity) { return FALSE; }
+BOOL CBaseEntity ::FMVisible(const Vector &vecOrigin) { return FALSE; }
 void CBaseMonster ::MakeIdealYaw(Vector vecTarget) {}
 float CBaseMonster::FlYawDiff(void) { return 0.0; }
 float CBaseMonster::ChangeYaw(int yawSpeed) { return 0; }
@@ -208,7 +206,7 @@ int CBaseAnimating ::LookupActivityHeaviest(int activity) { return 0; }
 void CBaseMonster ::SetEyePosition(void) {}
 int CBaseAnimating ::LookupSequence(const char *label) { return 0; }
 void CBaseAnimating ::ResetSequenceInfo() {}
-int CBaseAnimating ::GetSequenceFlags() { return false; }
+BOOL CBaseAnimating ::GetSequenceFlags() { return FALSE; }
 void CBaseAnimating ::DispatchAnimEvents(float flInterval) {}
 void CBaseMonster ::HandleAnimEvent(MonsterEvent_t *pEvent) {}
 float CBaseAnimating ::SetBoneController(int iController, float flValue) { return 0.0; }
@@ -221,35 +219,35 @@ void CBaseAnimating ::GetAutomovement(Vector &origin, Vector &angles, float flIn
 void CBaseAnimating ::SetBodygroup(int iGroup, int iValue) {}
 int CBaseAnimating ::GetBodygroup(int iGroup) { return 0; }
 Vector CBaseMonster ::GetGunPosition(void) { return g_vecZero; }
-void CBaseEntity::FireBullets(unsigned int cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker) {}
+void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker) {}
 void CBaseEntity ::TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) {}
 void CBaseMonster ::MakeDamageBloodDecal(int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir) {}
-bool CBaseMonster ::FGetNodeRoute(Vector vecDest) { return true; }
+BOOL CBaseMonster ::FGetNodeRoute(Vector vecDest) { return TRUE; }
 int CBaseMonster ::FindHintNode(void) { return NO_NODE; }
 void CBaseMonster::ReportAIState(void) {}
 void CBaseMonster ::KeyValue(KeyValueData *pkvd) {}
-bool CBaseMonster ::FCheckAITrigger(void) { return false; }
-int CBaseMonster ::CanPlaySequence(bool fDisregardMonsterState, int interruptLevel) { return false; }
-bool CBaseMonster ::FindLateralCover(const Vector &vecThreat, const Vector &vecViewOffset) { return false; }
+BOOL CBaseMonster ::FCheckAITrigger(void) { return FALSE; }
+int CBaseMonster ::CanPlaySequence(BOOL fDisregardMonsterState, int interruptLevel) { return FALSE; }
+BOOL CBaseMonster ::FindLateralCover(const Vector &vecThreat, const Vector &vecViewOffset) { return FALSE; }
 Vector CBaseMonster ::ShootAtEnemy(const Vector &shootOrigin) { return g_vecZero; }
-bool CBaseMonster ::FacingIdeal(void) { return false; }
-bool CBaseMonster ::FCanActiveIdle(void) { return false; }
+BOOL CBaseMonster ::FacingIdeal(void) { return FALSE; }
+BOOL CBaseMonster ::FCanActiveIdle(void) { return FALSE; }
 void CBaseMonster::PlaySentence(const char *pszSentence, float duration, float volume, float attenuation) {}
-void CBaseMonster::PlayScriptedSentence(const char *pszSentence, float duration, float volume, float attenuation, bool bConcurrent, CBaseEntity *pListener) {}
+void CBaseMonster::PlayScriptedSentence(const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener) {}
 void CBaseMonster::SentenceStop(void) {}
 void CBaseMonster::CorpseFallThink(void) {}
 void CBaseMonster ::MonsterInitDead(void) {}
-bool CBaseMonster ::BBoxFlat(void) { return true; }
-bool CBaseMonster ::GetEnemy(void) { return false; }
+BOOL CBaseMonster ::BBoxFlat(void) { return TRUE; }
+BOOL CBaseMonster ::GetEnemy(void) { return FALSE; }
 void CBaseMonster ::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) {}
 CBaseEntity *CBaseMonster ::DropItem(char *pszItemName, const Vector &vecPos, const Vector &vecAng) { return NULL; }
-bool CBaseMonster ::ShouldFadeOnDeath(void) { return false; }
+BOOL CBaseMonster ::ShouldFadeOnDeath(void) { return FALSE; }
 void CBaseMonster ::RadiusDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType) {}
 void CBaseMonster ::RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int iClassIgnore, int bitsDamageType) {}
 void CBaseMonster::FadeMonster(void) {}
 void CBaseMonster ::GibMonster(void) {}
-bool CBaseMonster ::HasHumanGibs(void) { return false; }
-bool CBaseMonster ::HasAlienGibs(void) { return false; }
+BOOL CBaseMonster ::HasHumanGibs(void) { return FALSE; }
+BOOL CBaseMonster ::HasAlienGibs(void) { return FALSE; }
 Activity CBaseMonster ::GetDeathActivity(void) { return ACT_DIE_HEADSHOT; }
 MONSTERSTATE CBaseMonster ::GetIdealState(void) { return MONSTERSTATE_ALERT; }
 Schedule_t *CBaseMonster ::GetScheduleOfType(int Type) { return NULL; }
@@ -281,7 +279,7 @@ int CBasePlayer::TakeHealth(float flHealth, int bitsDamageType) { return 0; }
 int CBasePlayer::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType) { return 0; }
 void CBasePlayer::PackDeadPlayerItems(void) {}
 void CBasePlayer::WaterMove() {}
-bool CBasePlayer::IsOnLadder(void) { return false; }
+BOOL CBasePlayer::IsOnLadder(void) { return FALSE; }
 void CBasePlayer::PlayerDeathThink(void) {}
 void CBasePlayer::StartDeathCam(void) {}
 void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle) {}
@@ -301,10 +299,10 @@ int CBasePlayer::Save(CSave &save) { return 0; }
 void CBasePlayer::RenewItems(void) {}
 int CBasePlayer::Restore(CRestore &restore) { return 0; }
 void CBasePlayer::SelectNextItem(int iItem) {}
-bool CBasePlayer::HasWeapons(void) { return false; }
+BOOL CBasePlayer::HasWeapons(void) { return FALSE; }
 void CBasePlayer::SelectPrevItem(int iItem) {}
 CBaseEntity *FindEntityForward(CBaseEntity *pMe) { return NULL; }
-//bool CBasePlayer :: FlashlightIsOn( void ) { return false; }
+//BOOL CBasePlayer :: FlashlightIsOn( void ) { return FALSE; }
 //void CBasePlayer :: FlashlightTurnOn( void ) { }
 //void CBasePlayer :: FlashlightTurnOff( void ) { }
 //void CBasePlayer :: ForceClientDllUpdate( void ) { }
@@ -315,11 +313,11 @@ void CBasePlayer::ItemPostFrame() {}
 int CBasePlayer::AmmoInventory(int iAmmoIndex) { return -1; }
 //Master Sword
 void CBasePlayer ::UpdateClientData(void) {}
-bool CBasePlayer ::FBecomeProne(void) { return true; }
+BOOL CBasePlayer ::FBecomeProne(void) { return TRUE; }
 void CBasePlayer ::BarnacleVictimBitten(entvars_t *pevBarnacle) {}
 void CBasePlayer ::BarnacleVictimReleased(void) {}
 int CBasePlayer ::Illumination(void) { return 0; }
-void CBasePlayer ::EnableControl(bool fControl) {}
+void CBasePlayer ::EnableControl(BOOL fControl) {}
 Vector CBasePlayer ::GetAutoaimVector(float flDelta) { return g_vecZero; }
 //Vector CBasePlayer :: AutoaimDeflection( Vector &vecSrc, float flDist, float flDelta  ) { return g_vecZero; }
 void CBasePlayer ::ResetAutoaim() {}
@@ -330,7 +328,7 @@ Vector CBasePlayer ::GetGunPosition(void) { return g_vecZero; }
 void CBasePlayer::Trade() {}
 bool CBasePlayer::AcceptOffer() { return false; }
 tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo) { return NULL; }
-bool CBasePlayer::SkinMonster(CMSMonster *pDeadMonster) { return false; }
+BOOL CBasePlayer::SkinMonster(CMSMonster *pDeadMonster) { return FALSE; }
 void CBasePlayer::AddNoise(float flNoiseAmt) {}
 void CBasePlayer::Attacked(CBaseEntity *pAttacker, float flDamage, int bitsDamageType) {}
 void CBasePlayer::Seen(CMSMonster *pMonster) {}

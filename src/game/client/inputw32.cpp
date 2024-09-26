@@ -23,7 +23,6 @@
 #include "view.h"
 #include "exports.h"
 #include "clientlibrary.h"
-#include "PlatformHeaders.h"
 
 #include "../thirdparty/SDL2/SDL_mouse.h"
 #include "../thirdparty/SDL2/SDL_gamecontroller.h"
@@ -166,7 +165,7 @@ Force_CenterView_f
 */
 void Force_CenterView_f(void)
 {
-	Vector viewangles;
+	vec3_t viewangles;
 
 	if (!iMouseInUse)
 	{
@@ -464,7 +463,7 @@ IN_MouseMove
 void IN_MouseMove(float frametime, usercmd_t *cmd)
 {
 	int mx, my;
-	Vector viewangles;
+	vec3_t viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 
@@ -858,7 +857,7 @@ void IN_JoyMove(float frametime, usercmd_t *cmd)
 	float speed, aspeed;
 	float fAxisValue, fTemp;
 	int i;
-	Vector viewangles;
+	vec3_t viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 

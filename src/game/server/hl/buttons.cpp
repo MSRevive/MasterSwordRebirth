@@ -991,8 +991,8 @@ public:
 	int m_lastUsed;
 	int m_direction;
 	float m_returnSpeed;
-	Vector m_start;
-	Vector m_end;
+	vec3_t m_start;
+	vec3_t m_end;
 	int m_sounds;
 };
 TYPEDESCRIPTION CMomentaryRotButton::m_SaveData[] =

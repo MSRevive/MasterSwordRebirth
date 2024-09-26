@@ -298,7 +298,7 @@ public:
 	void EXPORT ManagerReport(void);
 #endif
 
-	bool HasTarget(string_t targetname);
+	BOOL HasTarget(string_t targetname);
 
 	int ObjectCaps(void) { return CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 
@@ -313,13 +313,13 @@ public:
 	int m_iTargetName[MAX_MULTI_TARGETS];	  // list if indexes into global string array
 	float m_flTargetDelay[MAX_MULTI_TARGETS]; // delay (in seconds) from time of manager fire to target fire
 private:
-	inline bool IsClone(void) { return (pev->spawnflags & SF_MULTIMAN_CLONE) ? true : false; }
-	inline bool ShouldClone(void)
+	inline BOOL IsClone(void) { return (pev->spawnflags & SF_MULTIMAN_CLONE) ? TRUE : FALSE; }
+	inline BOOL ShouldClone(void)
 	{
 		if (IsClone())
 			return FALSE;
 
-		return (pev->spawnflags & SF_MULTIMAN_THREAD) ? true : false;
+		return (pev->spawnflags & SF_MULTIMAN_THREAD) ? TRUE : FALSE;
 	}
 
 	CMultiManager *Clone(void);
@@ -402,13 +402,13 @@ void CMultiManager ::Spawn(void)
 	}
 }
 
-bool CMultiManager::HasTarget(string_t targetname)
+BOOL CMultiManager::HasTarget(string_t targetname)
 {
 	for (int i = 0; i < m_cTargets; i++)
 		if (FStrEq(STRING(targetname), STRING(m_iTargetName[i])))
-			return true;
+			return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 // Designers were using this to fire targets that may or may not exist --

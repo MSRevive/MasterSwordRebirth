@@ -16,10 +16,16 @@
 #ifndef MSSHARED_FILESYSTEM_SHARED_H
 #define MSSHARED_FILESYSTEM_SHARED_H
 
+#ifdef min
+#undef min
+#endif
+
+#ifdef max
+#undef max
+#endif
+
 #include <vector>
 #include "FileSystem.h"
-#include "Platform.h"
-#include "PlatformHeaders.h"
 
 /**
 *	@file

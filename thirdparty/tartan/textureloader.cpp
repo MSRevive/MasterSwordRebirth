@@ -5,7 +5,7 @@
 // or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include <Platform.h>
+#include "stream_safe.h"
 #include <string.h>
 
 #include "texturestruct.h"

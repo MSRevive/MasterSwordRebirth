@@ -5,7 +5,7 @@
 #define _CAMEA_H_
 
 // pitch, yaw, dist
-extern Vector cam_ofs;
+extern vec3_t cam_ofs;
 // Using third person camera
 //extern int cam_thirdperson;	//Master Sword - Moved to MSCLGlobals
 

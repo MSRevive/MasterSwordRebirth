@@ -130,7 +130,7 @@ struct sound_t
 	edict_t *pEdict;
 	TEMPENTITY *pTemp;
 
-	Vector vOrigin;
+	vec3_t vOrigin;
 
 	int iFlags;
 	int iPitch;
@@ -299,7 +299,7 @@ public:
 	void SetupReverbation(void);
 
 	sound_t *PrepareSound(const char *szFile, int iEntIndex, int iFlags, int iChannel);
-	void PlaySound(const char *szFile, Vector vOrigin = g_vecZero, int iFlags = NULL, int iChannel = CHAN_AUTO, float fVolume = VOL_NORM, int iPitch = PITCH_NORM, float flAttenuation = ATTN_NORM, edict_t *pEdict = NULL, int iEntIndex = NULL);
+	void PlaySound(const char *szFile, vec3_t vOrigin = g_vecZero, int iFlags = NULL, int iChannel = CHAN_AUTO, float fVolume = VOL_NORM, int iPitch = PITCH_NORM, float flAttenuation = ATTN_NORM, edict_t *pEdict = NULL, int iEntIndex = NULL);
 	void StopSound(int iEntIndex, int iChannel);
 	void PlaySentenceChunk(sound_t *pSound, sentence_t *pSentence, soption_t *pChunk);
 	void PlayMusic(char *pszFile);
@@ -346,8 +346,8 @@ private:
 
 	cvar_t *m_pCvarRoomType;
 
-	Vector m_vViewOrigin;
-	Vector m_vViewAngles;
+	vec3_t m_vViewOrigin;
+	vec3_t m_vViewAngles;
 
 private:
 	FMOD_RESULT(_stdcall *_FMOD_System_Create)

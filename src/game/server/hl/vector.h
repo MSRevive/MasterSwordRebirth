@@ -60,7 +60,7 @@ inline Vector2D operator*(float fl, const Vector2D &v) { return v * fl; }
 //=========================================================
 // 3D Vector
 //=========================================================
-class Vector // same data-layout as engine's Vector,
+class Vector // same data-layout as engine's vec3_t,
 {			 //		which is a vec_t[3]
 public:
 	// Construction/destruction

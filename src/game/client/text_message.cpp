@@ -183,7 +183,7 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 	StripEndNewlineFromString(sstr4);
 	char *psz = szBuf[5];
 
-	if (gViewPort && gViewPort->AllowedToPrintText() == false)
+	if (gViewPort && gViewPort->AllowedToPrintText() == FALSE)
 		return 1;
 
 	switch (msg_dest)

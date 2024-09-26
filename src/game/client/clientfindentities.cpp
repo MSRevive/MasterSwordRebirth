@@ -15,7 +15,7 @@ Vector CFindEntity::GetOrigin()
 	return GetWrapped()->origin;
 }
 
-bool CFindEntity::IsPlayer()
+BOOL CFindEntity::IsPlayer()
 {
 	return GetWrapped()->player;
 }

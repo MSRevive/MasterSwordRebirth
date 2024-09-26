@@ -20,7 +20,7 @@
 
 typedef struct dlight_s
 {
-	Vector origin;
+	vec3_t origin;
 	float radius;
 	color24 color;
 	float die;		// stop lighting after this time

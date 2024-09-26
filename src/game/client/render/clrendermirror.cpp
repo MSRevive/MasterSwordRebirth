@@ -624,7 +624,7 @@ void CMirrorMgr::SetupNextView()
 #define PLANE_X 0
 #define PLANE_Y 1
 #define PLANE_Z 2
-//extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
+//extern vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 bool Mirror_TraverseVis(TraverseInfo_t &Info);
 void DrawVisLeafs(model_t *pModel, mleaf_t *pStartLeaf, TraverseInfo_t &Info);
 void rdrsky();

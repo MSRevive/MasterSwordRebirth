@@ -87,8 +87,6 @@ set(FMOD
 source_group("FMOD" FILES ${FMOD})
 
 set(HL1
-	"../../common/Platform.h"
-	"../../common/PlatformHeaders.h"
 	"../../common/mathlib.h"
 	"ammo_secondary.cpp"
 	"ammohistory.cpp"
@@ -142,7 +140,6 @@ set(HL1_Headers
 	"../../common/dlight.h"
 	"../../common/entity_state.h"
 	"../../public/engine/cdll_int.h"
-	"../server/hl/vector.h"
 )
 source_group("HL1\\Headers" FILES ${HL1_Headers})
 

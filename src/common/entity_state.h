@@ -38,8 +38,8 @@ struct entity_state_s
 	int messagenum;
 
 	// Fields which can be transmitted and reconstructed over the network stream
-	Vector origin;
-	Vector angles;
+	vec3_t origin;
+	vec3_t angles;
 
 	int modelindex;
 	int sequence;
@@ -64,11 +64,11 @@ struct entity_state_s
 	int body;
 	byte controller[4];
 	byte blending[4];
-	Vector velocity;
+	vec3_t velocity;
 
 	// Send bbox down to client for use during prediction.
-	Vector mins;
-	Vector maxs;
+	vec3_t mins;
+	vec3_t maxs;
 
 	int aiment;
 	// If owned by a player, the index of that player ( for projectiles ).
@@ -87,7 +87,7 @@ struct entity_state_s
 	int weaponmodel;
 	int gaitsequence;
 	// If standing on conveyor, e.g.
-	Vector basevelocity;
+	vec3_t basevelocity;
 	// Use the crouched hull, or the regular player hull.
 	int usehull;
 	// Latched buttons last time state updated.
@@ -102,8 +102,8 @@ struct entity_state_s
 	int weaponanim;
 
 	// Parametric movement overrides
-	Vector startpos;
-	Vector endpos;
+	vec3_t startpos;
+	vec3_t endpos;
 	float impacttime; //MS - Used for model scale
 	float starttime;
 
@@ -116,25 +116,25 @@ struct entity_state_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector vuser1;
-	Vector vuser2;
-	Vector vuser3;
-	Vector vuser4; //MS - vuser4.x used to store idx of extra info (including all current bone positions)
+	vec3_t vuser1;
+	vec3_t vuser2;
+	vec3_t vuser3;
+	vec3_t vuser4; //MS - vuser4.x used to store idx of extra info (including all current bone positions)
 };
 
 #include "pm_info.h"
 
 typedef struct clientdata_s
 {
-	Vector origin;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t velocity;
 
 	int viewmodel;
-	Vector punchangle;
+	vec3_t punchangle;
 	int flags;
 	int waterlevel;
 	int watertype;
-	Vector view_ofs;
+	vec3_t view_ofs;
 	float health;
 
 	int bInDuck;
@@ -175,10 +175,10 @@ typedef struct clientdata_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector vuser1;
-	Vector vuser2;
-	Vector vuser3;
-	Vector vuser4;
+	vec3_t vuser1;
+	vec3_t vuser2;
+	vec3_t vuser3;
+	vec3_t vuser4;
 } clientdata_t;
 
 #include "weaponinfo.h"
