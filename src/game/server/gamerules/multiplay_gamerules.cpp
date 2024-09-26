@@ -1241,15 +1241,15 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 					if ( s && s[0] )
 					{
 						item->minplayers = atoi( s );
-						item->minplayers = max( item->minplayers, 0 );
-						item->minplayers = min( item->minplayers, gpGlobals->maxClients );
+						item->minplayers = V_max( item->minplayers, 0 );
+						item->minplayers = V_min( item->minplayers, gpGlobals->maxClients );
 					}
 					s = g_engfuncs.pfnInfoKeyValue( szBuffer, "maxplayers" );
 					if ( s && s[0] )
 					{
 						item->maxplayers = atoi( s );
-						item->maxplayers = max( item->maxplayers, 0 );
-						item->maxplayers = min( item->maxplayers, gpGlobals->maxClients );
+						item->maxplayers = V_max( item->maxplayers, 0 );
+						item->maxplayers = V_min( item->maxplayers, gpGlobals->maxClients );
 					}
 
 					// Remove keys
@@ -1638,7 +1638,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				//pPlayer->SendInfoMsg( "You report your accidental death to the Guard...\n" );
 				//pPlayer->SendInfoMsg( "%s's murder charges against you have been dropped.\n", pPlayerKiller->DisplayName() );
 				//pPlayerKiller->SendInfoMsg( "*** Your murder charges against %s have been dropped ***\n", pPlayer->DisplayName() );
-				pPlayerKiller->m_PlayersKilled = max(pPlayerKiller->m_PlayersKilled-1,0);
+				pPlayerKiller->m_PlayersKilled = V_max(pPlayerKiller->m_PlayersKilled-1,0);
 				pPlayerKiller->m_TimeWaitedToForgetKill = 0;
 			}
 			pPlayer->m_LastPlayerToKillMe = 0;

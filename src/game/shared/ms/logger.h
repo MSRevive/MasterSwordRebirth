@@ -2,7 +2,8 @@
 #define MS_LOGGER
 
 #include <string>
-#include "stream_safe.h"
+#include <fstream>
+#include <iostream>
 #include "sharedutil.h"
 
 class Logger {

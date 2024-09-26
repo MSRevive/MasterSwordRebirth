@@ -1,7 +1,6 @@
-#include "stream_safe.h"
-
+#include "Platform.h"
 #ifdef _WIN32
-#include "windows.h"
+#include "PlatformWin.h"
 #include "logger.h"
 #else
 #include <ctype.h>
