@@ -18,6 +18,7 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#include <SDL2/SDL_messagebox.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "netadr.h"
@@ -52,7 +53,7 @@ void InitInput(void);
 void EV_HookEvents(void);
 void IN_Commands(void);
 
-static cvar_s *g_pVarBorderless = NULL;
+static cvar_s *g_pVarBorderless = nullptr;
 static int g_iBorderlessMode = 0;
 
 enum BORDERLESS_WINDOW_TYPES
@@ -211,8 +212,6 @@ HUD_ConnectionlessPacket
 */
 int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size)
 {
-	DBG_INPUT;
-	startdbg;
 	logfileopt << "HUD_ConnectionlessPacket\r\n";
 	// Parse stuff from args
 	//int max_buffer_size = *response_buffer_size;
@@ -224,45 +223,27 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const ch
 	// Since we don't listen for anything here, just respond that it's a bogus message
 	// If we didn't reject the message, we'd return 1 for success instead.
 	logfileopt << "HUD_ConnectionlessPacket END\r\n";
-	enddbg;
 	return 0;
 }
 
 void DLLEXPORT HUD_PlayerMoveInit(struct playermove_s *ppmove)
 {
-	DBG_INPUT;
-	startdbg;
-	dbg("Begin");
 	PM_Init(ppmove);
-	enddbg;
 }
 
 char DLLEXPORT HUD_PlayerMoveTexture(char *name)
 {
-	DBG_INPUT;
-	char ret = 'C';
-	startdbg;
-	ret = PM_FindTextureType(name);
-	enddbg;
-	return ret;
+	return PM_FindTextureType(name);
 }
 
 void DLLEXPORT HUD_PlayerMove(struct playermove_s *ppmove, int server)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Begin");
 	//Half-life sets the dead flag if player healh is < 1.  In MS its < 0
 	PM_Move(ppmove, server);
-	enddbg;
 }
 
 int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 {
-	DBG_INPUT;
-	startdbg;
-
 	gEngfuncs = *pEnginefuncs;
 
 	if (iVersion != CLDLL_INTERFACE_VERSION)
@@ -278,7 +259,6 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 
 	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]\n";
 
-	enddbg;
 	return 1;
 }
 
@@ -341,9 +321,8 @@ int DLLEXPORT HUD_Redraw(float time, int intermission)
 {
 	logfileopt << "HUD_Redraw...";
 
-	gHUD.Redraw(time, intermission);
+	gHUD.Redraw(time, 0 != intermission);
 
-	//logfileopt << "END\r\n";
 	return 1;
 }
 
@@ -362,18 +341,8 @@ returns 1 if anything has been changed, 0 otherwise.
 
 int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime)
 {
-	int ret = 0;
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call IN_Commands");
 	IN_Commands();
-
-	dbg("Call gHUD.UpdateClientData");
-	ret = gHUD.UpdateClientData(pcldata, flTime);
-
-	enddbg;
-	return ret;
+	return static_cast<int>(gHUD.UpdateClientData(pcldata, flTime));
 }
 
 /*
@@ -386,15 +355,9 @@ Called at start and end of demos to restore to "non"HUD state.
 
 void DLLEXPORT HUD_Reset(void)
 {
-	DBG_INPUT;
-	startdbg;
-	
-	dbg("Call VidInit");
 	gHUD.VidInit();
 
 	logfile << Logger::LOG_INFO << "[HUD_Reset: Complete]\n";
-
-	enddbg;
 }
 
 /*
@@ -421,13 +384,7 @@ Called when a player starts or stops talking.
 
 void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call GetClientVoiceMgr()->UpdateSpeakerStatus");
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
-
-	enddbg;
 }
 
 /*
@@ -440,11 +397,23 @@ Called when a director event message was received
 
 void DLLEXPORT HUD_DirectorMessage(int iSize, void *pbuf)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call gHUD.m_Spectator.DirectorMessage");
 	gHUD.m_Spectator.DirectorMessage(iSize, pbuf);
-
-	enddbg;
 }
+
+// void CL_UnloadParticleMan()
+// {
+// 	g_pParticleMan = nullptr;
+// }
+
+// void CL_LoadParticleMan()
+// {
+// 	//Now implemented in the client library.
+// 	auto particleManFactory = Sys_GetFactoryThis();
+
+// 	g_pParticleMan = (IParticleMan*)particleManFactory(PARTICLEMAN_INTERFACE, nullptr);
+
+// 	if (g_pParticleMan)
+// 	{
+// 		g_pParticleMan->SetUp(&gEngfuncs);
+// 	}
+// }
