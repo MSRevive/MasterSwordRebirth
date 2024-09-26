@@ -25,21 +25,19 @@
 //		- Drawing the HUD graphics every frame
 //		- Handling the custum HUD-update packets
 //
-typedef unsigned char byte;
-typedef unsigned short word;
-typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
-#include "util_vector.h"
+#include "Platform.h"
+#include "vector.h"
 
 #ifdef EXPORT
 #undef EXPORT
 #endif
 
 #ifdef _WIN32
-#define EXPORT	_declspec( dllexport )
+#define EXPORT _declspec( dllexport )
 #else
-#define EXPORT	__attribute__ ((visibility("default")))
+#define EXPORT __attribute__ ((visibility("default")))
 #endif
 
 #include "../engine/cdll_int.h"

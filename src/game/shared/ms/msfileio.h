@@ -1,8 +1,9 @@
 #include "stream_safe.h"
 #include "stackstring.h"
 
-typedef unsigned char byte;
-typedef int string_t;
+#include "Platform.h"
+//typedef unsigned char byte;
+//typedef int string_t;
 
 class CGameFile
 {

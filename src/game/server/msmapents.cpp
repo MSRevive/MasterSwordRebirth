@@ -887,7 +887,7 @@ public:
 				iHPReq_max = atoi(reqhp_stringlist[1].c_str());
 				if ( iHPReq_max < iHPReq_min )
 				{
-					logfile << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
+					//logfile << "MAP_ERROR: " << this->pev->classname << " - max reqhp set higher than min.";
 					iHPReq_max = 0;
 				}
 				//if ( iHPReq_min == 0 ) iHPReq_min = 1; //OCT2015_28 disabled in case all players flagged AFK

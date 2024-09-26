@@ -169,7 +169,7 @@ typedef struct enginefuncs_s
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
 	void		(*pfnFreeEntPrivateData)	(edict_t *pEdict);
 	const char*	(*pfnSzFromIndex)			(int iString);
-	int			(*pfnAllocString)			(const char *szValue);
+	unsigned int			(*pfnAllocString)			(const char *szValue);
 	struct entvars_s*	(*pfnGetVarsOfEnt)			(edict_t *pEdict);
 	edict_t*	(*pfnPEntityOfEntOffset)	(int iEntOffset);
 	int			(*pfnEntOffsetOfPEntity)	(const edict_t *pEdict);
@@ -381,9 +381,6 @@ typedef struct
 	short			fieldSize;
 	short			flags;
 } TYPEDESCRIPTION;
-
-#undef ARRAYSIZE
-#define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 
 typedef struct 
 {

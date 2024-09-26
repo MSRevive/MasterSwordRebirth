@@ -61,10 +61,6 @@ public:
 	static float AngleDiff(float destAngle, float srcAngle);
 };
 
-//string_i - In debug mode, a normal string.  In release mode its created within the engine and released each level
-#ifndef CONST_H
-typedef int string_t;
-#endif
 /*//#ifdef _DEBUG
 	//	#define STRINGI_SETSTR_STR( a )  msstring::operator = ( a )
 	//	#define STRINGI_SETSTR_INT( a )  msstring::operator = ( EngineFunc::GetString( a ) )
