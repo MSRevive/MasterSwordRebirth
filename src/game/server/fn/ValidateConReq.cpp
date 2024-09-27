@@ -2,9 +2,9 @@
 // Validate if FN connectivity could be established!
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "ValidateConReq.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "global.h"
 

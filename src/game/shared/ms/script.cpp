@@ -352,7 +352,7 @@ msstring_ref CScript::GetConst(msstring_ref Text)
 	return Text;
 }
 
-bool GetString(char* Return, size_t size, const char* sentence, int start, char* endchars)
+bool GetString(char* Return, size_t size, const char* sentence, int start, const char* endchars)
 {
 	// Quickie function to return the next CMD or parameter in a script string
 	int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
@@ -1303,7 +1303,7 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 					int                     vStrtIndx = Params.size() > vParam ? atoi(Params[vParam++]) : 0;
 					bool                    bCaseInsensitive = Params.size() > vParam ? atoi(Params[vParam++]) == 1 : false;
 
-					vStrtIndx = max(vStrtIndx, 0);
+					vStrtIndx = V_max(vStrtIndx, 0);
 					if (bCaseInsensitive) vsSrch = strlwr(vsSrch);
 					for (size_t i = vStrtIndx; i < pArray->size(); ++i)
 					{
@@ -3441,7 +3441,7 @@ msstring CScript::ScriptGetter_MinMax(msstring& FullName, msstring& ParserName, 
 		float best = atof(Params[0].c_str());
 		bool max = ParserName == "$max";
 		for (int i = 0; i < Params.size(); i++)
-			best = max ? max(best, atof(Params[i].c_str())) : min(best, atof(Params[i].c_str()));
+			best = max ? V_max(best, atof(Params[i].c_str())) : V_min(best, atof(Params[i].c_str()));
 		RETURN_FLOAT(best);
 	}
 
@@ -4085,7 +4085,7 @@ msstring CScript::ScriptGetter_StringRightOrLeft(msstring& FullName, msstring& P
 	if (Params.size() >= 2)
 	{
 		int length = atoi(Params[1]); //MAR2008a Thothie - the -1 here fubared this
-		length = max(0, min(length, (signed)Params[0].len()));
+		length = V_max(0, V_min(length, (signed)Params[0].len()));
 		/*Print( "***** %s(%s,%s) == [%s]\n"	, ParserName.c_str()
 											, Params[0].c_str()
 											, Params[1].c_str()
@@ -6460,7 +6460,7 @@ bool CScript::Script_SetupEvent(SCRIPT_EVENT& Event, msstringlist* Parameters)
 
 	return m.pScriptedInterface ? m.pScriptedInterface->Script_SetupEvent(this, Event) : true;
 }
-void CScript::ErrorPrintCommand(char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, char* vsText)
+void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, char* vsText)
 {
 #if !TURN_OFF_ALERT
 	msstring                            vsParams;

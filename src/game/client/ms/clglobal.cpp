@@ -270,7 +270,7 @@ const char *EngineFunc::GetGameDir()
 {
 	return gEngfuncs.pfnGetGameDirectory();
 }
-void AlertMessage(ALERT_TYPE atype, char *szFmt, ...)
+void AlertMessage(ALERT_TYPE atype, const char *szFmt, ...)
 {
 	static char string[1024];
 
@@ -282,7 +282,7 @@ void AlertMessage(ALERT_TYPE atype, char *szFmt, ...)
 	ConsolePrint("cl: ");
 	ConsolePrint(string);
 }
-char *UTIL_VarArgs(char *format, ...)
+char* UTIL_VarArgs(const char *format, ...)
 {
 	static char string[1024];
 

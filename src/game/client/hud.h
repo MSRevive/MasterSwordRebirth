@@ -90,7 +90,7 @@ typedef struct cvar_s cvar_t;
 #endif
 #include "hud_spectator.h" //SDK 2.3
 
-void Print(char *szFmt, ...);
+void Print(const char *szFmt, ...);
 void ShowVGUIMenu(int iMenu);
 
 //ripped from windef.h

@@ -223,10 +223,10 @@ void VGUI_FadeText::MSInit( float FadeDuration, const char *pszText )
 void VGUI_FadeText::Update( )
 {
 	float TimeRatio = (gpGlobals->time - m_StartTime) / m_FadeDuration;
-	TimeRatio = max(min(TimeRatio,1.0f),0);
+	TimeRatio = V_max(V_min(TimeRatio,1.0f),0);
 	if( m_FadeOut ) TimeRatio = 1.0f - TimeRatio;
 	m_Alpha = 255 * TimeRatio;
-	m_Alpha = 255 - min(m_Alpha,255);
+	m_Alpha = 255 - V_min(m_Alpha,255);
 	Color OldColor = getMSFGColor( );
 	setFgColor( OldColor[0], OldColor[1], OldColor[2], m_Alpha );
 }
@@ -725,9 +725,6 @@ void VGUI_Container::PurgeButtons( )
 
 void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBinding )
 {
-	startdbg;
-	dbg( "Begin" );
-
 	if( !m_Active )
 		return;
 
@@ -757,7 +754,7 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	BOOL Success = GetKeyboardState( State );
 	if( !Success ) return;
 
-	WORD Char;
+	unsigned short Char;
 	int Result = ToAscii( VkKeyScan(keynum), keynum, State, &Char, 0 );
 	if( Result != 1 ) return;
 
@@ -768,6 +765,4 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	//char Temp[2] = { m_Caps ? toupper(Char) : Char, '\0' };
 	char Temp[2] = { Char & 0xFF, '\0' };
 	AddLetter( Temp );
-
-	enddbg;
 }

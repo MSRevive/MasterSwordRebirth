@@ -45,7 +45,7 @@ engine_studio_api_t IEngineStudio;
 
 modelinfo_t CModelMgr::m_ModelInfo[4096];
 
-void Print(char* szFmt, ...);
+void Print(const char* szFmt, ...);
 void VectorAngles(const float* forward, float* angles);
 
 int ViewModel_ExclusiveViewHand = -1;
@@ -2107,8 +2107,8 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		m_nTopColor = min(max(0, m_pPlayerInfo->topcolor), 360);
-		m_nBottomColor = min(max(0, m_pPlayerInfo->bottomcolor), 360);
+		m_nTopColor = V_min(V_max(0, m_pPlayerInfo->topcolor), 360);
+		m_nBottomColor = V_min(V_max(0, m_pPlayerInfo->bottomcolor), 360);
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 

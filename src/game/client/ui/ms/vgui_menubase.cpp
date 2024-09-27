@@ -192,7 +192,7 @@ void VGUI_MenuBase::Open(void)
 void VGUI_MenuBase::UpdateFade(void)
 {
 	float FadeTime = gpGlobals->time - m_OpenTime;
-	FadeTime = max(min(FadeTime, MAINMENU_FADETIME), 0);
+	FadeTime = V_max(V_min(FadeTime, MAINMENU_FADETIME), 0);
 	m_FadeAmt = int(255 * FadeTime / MAINMENU_FADETIME);
 	float InveserdFade = 255 - m_FadeAmt;
 

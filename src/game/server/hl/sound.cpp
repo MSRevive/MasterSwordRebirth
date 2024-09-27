@@ -23,7 +23,7 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 #ifdef POSIX
 #include <stdlib.h>
@@ -1595,7 +1595,7 @@ char TEXTURETYPE_Find(char *name)
 
 	for (int i = 0; i < gcTextures; i++)
 	{
-		if (!strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
+		if (!_strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
 			return (grgchTextureType[i]);
 	}
 

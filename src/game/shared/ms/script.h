@@ -114,7 +114,7 @@ public:
 	typedef std::map<msstring,scriptcmdscpp_cmdfunc_t> msfunchash_t;
 	static msfunchash_t m_GlobalCmdHash; // MiB 30NOV_2014 Hashed commands for ScriptCmds.cpp
 
-	void ErrorPrintCommand(char * vsUniqueTag, SCRIPT_EVENT * vEvent, msstring & vsCmdName, msstringlist & vParams, int vParamStrt, char * vsText);
+	void ErrorPrintCommand(const char * vsUniqueTag, SCRIPT_EVENT * vEvent, msstring & vsCmdName, msstringlist & vParams, int vParamStrt, char * vsText);
 
 	static void Script_Setup( );
 	static void ScriptGetterHash_Setup( ); // MiB 30NOV_2014 Function for adding functions to the Script.cpp hash
@@ -383,7 +383,7 @@ public:
 
 #undef SCRIPTVAR
 #define SCRIPTVAR GetFirstScriptVar
-bool GetString(char *Return, size_t size, const char *sentence, int start, char *endchars);
+bool GetString(char *Return, size_t size, const char *sentence, int start, const char *endchars);
 ::mslist<std::string> GetParams(std::string const &str);
 void ReplaceChar(char *pString, char org, char dest);
 float GetNumeric(const char *pszText);

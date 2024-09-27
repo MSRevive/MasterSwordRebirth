@@ -209,7 +209,7 @@ enum enttype_e
 	ENT_CURRENTPLAYER,	//The player that's running a command
 	ENT_TYPE_TOTAL
 };
-extern char *g_EntTypeByName[ENT_TYPE_TOTAL];
+extern const char *g_EntTypeByName[ENT_TYPE_TOTAL];
 int EntityNameToType(const char *pszName);
 
 //
@@ -498,7 +498,7 @@ public:
 	void EXPORT SUB_FadeOut(void);
 	void EXPORT SUB_CallUseToggle(void) { this->Use(this, this, USE_TOGGLE, 0); }
 	int ShouldToggle(USE_TYPE useType, BOOL currentState);
-	void FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL);
+	void FireBullets(unsigned long cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, int iDamage = 0, entvars_t *pevAttacker = NULL);
 
 	virtual CBaseEntity *Respawn(void) { return NULL; }
 
@@ -585,7 +585,7 @@ public:
 	virtual void UpdateOwner(void) { return; };
 
 	//
-	static CBaseEntity *Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
+	static CBaseEntity *Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
 
 	virtual BOOL FBecomeProne(void) { return FALSE; };
 	edict_t *edict()
@@ -675,8 +675,8 @@ typedef struct locksounds // sounds that doors and buttons make when locked/unlo
 
 	float flwaitSound;	  // time delay between playing consecutive 'locked/unlocked' sounds
 	float flwaitSentence; // time delay between playing consecutive sentences
-	BYTE bEOFLocked;	  // true if hit end of list of locked sentences
-	BYTE bEOFUnlocked;	  // true if hit end of list of unlocked sentences
+	byte bEOFLocked;	  // true if hit end of list of locked sentences
+	byte bEOFUnlocked;	  // true if hit end of list of unlocked sentences
 } locksound_t;
 
 void PlayLockSounds(entvars_t *pev, locksound_t *pls, int flocked, int fbutton);
@@ -1002,10 +1002,10 @@ public:
 
 	locksound_t m_ls; // door lock sounds
 
-	BYTE m_bLockedSound; // ordinals from entity selection
-	BYTE m_bLockedSentence;
-	BYTE m_bUnlockedSound;
-	BYTE m_bUnlockedSentence;
+	byte m_bLockedSound; // ordinals from entity selection
+	byte m_bLockedSentence;
+	byte m_bUnlockedSound;
+	byte m_bUnlockedSentence;
 	int m_sounds;
 };
 
@@ -1067,10 +1067,10 @@ push_trigger_data
 
 typedef struct _SelAmmo
 {
-	BYTE Ammo1Type;
-	BYTE Ammo1;
-	BYTE Ammo2Type;
-	BYTE Ammo2;
+	byte Ammo1Type;
+	byte Ammo1;
+	byte Ammo2Type;
+	byte Ammo2;
 } SelAmmo;
 
 #endif

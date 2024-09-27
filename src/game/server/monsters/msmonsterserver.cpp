@@ -1953,7 +1953,7 @@ bool CMSMonster::AcceptOffer()
 		}
 		else
 		{
-			int iGoldAmt = max(min((int)m_OfferInfo.pItemData, pMonster->m_Gold), 0);
+			int iGoldAmt = V_max(V_min((int)m_OfferInfo.pItemData, pMonster->m_Gold), 0);
 			m_Gold += iGoldAmt;
 			pMonster->m_Gold -= iGoldAmt;
 			fRecievedItem = true;
@@ -1987,8 +1987,8 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 		//case GIVE_GOLD: Current = &m; Max = MaxMP( ); break;
 	}
 
-	float AddAmount = min(Max - *Current, Amt); //Max amount that can be added
-	AddAmount = max(-*Current, AddAmount);		//Max health that can be taken
+	float AddAmount = V_min(Max - *Current, Amt); //Max amount that can be added
+	AddAmount = V_max(-*Current, AddAmount);		//Max health that can be taken
 
 	if (AddAmount < 0 && FBitSet(pev->flags, FL_GODMODE))
 		AddAmount = 0;
@@ -2497,7 +2497,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 
 			float xpsend = 0.0;
 			// MiB JUN2010_19 - Decreases the exp-damage ratio if monster was overkilled
-			float mult = min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
+			float mult = V_min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
 			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
 				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
@@ -2747,7 +2747,7 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 			return std::make_tuple(false, 0);
 	}
 	//MiB JAN2010_15 Global Level Cap [/END]
-	int iExpHandout = max(int(max(EnemySkillLevel, 0) * LearnMultiplier), 0);
+	int iExpHandout = V_max(int(V_max(EnemySkillLevel, 0) * LearnMultiplier), 0);
 
 	//moved up since it's needed here
 	int OldVal = SubStat.Value;

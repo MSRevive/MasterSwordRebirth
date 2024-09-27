@@ -10,7 +10,7 @@
 #include "vgui.h"
 #include "vgui_loadtga.h"
 #include "vgui_inputstream.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 //Deuplicated from msdebug.h
 // #ifdef DEV_BUILD

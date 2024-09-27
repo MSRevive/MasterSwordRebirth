@@ -1393,7 +1393,7 @@ void UTIL_SetOrigin(entvars_t *pev, const Vector &vecOrigin)
 	SET_ORIGIN(ENT(pev), vecOrigin);
 }
 
-void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount)
+void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, unsigned long ulColor, unsigned long ulCount)
 {
 	PARTICLE_EFFECT(vecOrigin, vecDirection, (float)ulColor, (float)ulCount);
 }
@@ -1459,7 +1459,7 @@ float UTIL_SplineFraction(float value, float scale)
 	return 3 * valueSquared - 2 * valueSquared * value;
 }
 
-char *UTIL_VarArgs(char *format, ...)
+char* UTIL_VarArgs(const char *format, ...)
 {
 	static char string[1024];
 
@@ -1538,7 +1538,7 @@ void UTIL_BloodStream(const Vector &origin, const Vector &direction, int color, 
 	WRITE_COORD(direction.y);
 	WRITE_COORD(direction.z);
 	WRITE_BYTE(color);
-	WRITE_BYTE(min(amount, 255));
+	WRITE_BYTE(V_min(amount, 255));
 	MESSAGE_END();
 }
 
@@ -1570,7 +1570,7 @@ void UTIL_BloodDrips(const Vector &origin, const Vector &direction, int color, i
 	WRITE_SHORT(g_sModelIndexBloodSpray);	  // initial sprite model
 	WRITE_SHORT(g_sModelIndexBloodDrop);	  // droplet sprite models
 	WRITE_BYTE(color);						  // color index into host_basepal
-	WRITE_BYTE(min(max(3, amount / 10), 16)); // size
+	WRITE_BYTE(V_min(V_max(3, amount / 10), 16)); // size
 	MESSAGE_END();
 }
 
@@ -2358,21 +2358,21 @@ void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd)
 			case FIELD_MODELNAME:
 			case FIELD_SOUNDNAME:
 			case FIELD_STRING:
-				(*(int *)((char *)pev + pField->fieldOffset)) = ALLOC_STRING(pkvd->szValue);
+				(*(int *)((const char *)pev + pField->fieldOffset)) = ALLOC_STRING(pkvd->szValue);
 				break;
 
 			case FIELD_TIME:
 			case FIELD_FLOAT:
-				(*(float *)((char *)pev + pField->fieldOffset)) = atof(pkvd->szValue);
+				(*(float *)((const char *)pev + pField->fieldOffset)) = atof(pkvd->szValue);
 				break;
 
 			case FIELD_INTEGER:
-				(*(int *)((char *)pev + pField->fieldOffset)) = atoi(pkvd->szValue);
+				(*(int *)((const char *)pev + pField->fieldOffset)) = atoi(pkvd->szValue);
 				break;
 
 			case FIELD_POSITION_VECTOR:
 			case FIELD_VECTOR:
-				UTIL_StringToVector((float *)((char *)pev + pField->fieldOffset), pkvd->szValue);
+				UTIL_StringToVector((float *)((const char *)pev + pField->fieldOffset), pkvd->szValue);
 				break;
 
 			default:

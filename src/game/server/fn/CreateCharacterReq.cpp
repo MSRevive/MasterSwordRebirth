@@ -2,9 +2,9 @@
 // Create a new FN character
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "CreateCharacterReq.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
 #include "util.h"

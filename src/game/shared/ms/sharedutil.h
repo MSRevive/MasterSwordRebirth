@@ -45,7 +45,7 @@ public:
 #define MACRO_CREATEITEM(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)))
 //#define clrmem( a ) memset( &a, 0, sizeof(a) );
 int numofdigits(int x);
-void Print(char *szFmt, ...);
+void Print(const char *szFmt, ...);
 #define FloatToString( a ) UTIL_VarArgs( "%.2f", a )
 #define IntToString( a ) UTIL_VarArgs( "%i", a )
 
@@ -98,6 +98,6 @@ void dbgtxt( msstring_ref Text );
 #define ERRORPRINT_INFOMSG  (1 << 2)
 #define ERRORPRINT_CVAR     (1 << 3)
 #define ERRORPRINT_POPUP    (1 << 4)
-void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...);
+void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...);
 
 #endif // SHAREDUTIL_H

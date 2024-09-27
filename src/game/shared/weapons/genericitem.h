@@ -96,7 +96,7 @@ struct attackdata_t
 	string_i sProjectile; //Name of the next projectile item to be fired
 };
 
-#define GET_CHARGE_FROM_TIME(a) (a + max(a - 1, 0) * .5)
+#define GET_CHARGE_FROM_TIME(a) (a + V_max(a - 1, 0) * .5)
 
 // Global GenericItem
 class CGenericItem;
@@ -182,12 +182,12 @@ public:
 	long lProperties;				//Properties held over a frame, like JUSTSPAWNED
 	char m_Name[64];				//Only for debugging... so I can see the item's name
 	mslist<attackdata_t> m_Attacks; //Actions (mostly attacks) that the owner can activate with this item
-	attackdata_t *CurrentAttack;
-	struct packdata_t *PackData;
-	struct drinkdata_t *DrinkData;
-	struct armordata_t *ArmorData;
-	struct projectiledata_t *ProjectileData;
-	struct spelldata_t *SpellData;
+	attackdata_t *CurrentAttack = nullptr;
+	struct packdata_t *PackData = nullptr;
+	struct drinkdata_t *DrinkData = nullptr;
+	struct armordata_t *ArmorData = nullptr;
+	struct projectiledata_t *ProjectileData = nullptr;
+	struct spelldata_t *SpellData = nullptr;
 
 	int m_Location,																	 //Location of the item on the monster (Hands, back, etc)
 		m_Hand;																		 //The hand I'm in... if I'm in a hand

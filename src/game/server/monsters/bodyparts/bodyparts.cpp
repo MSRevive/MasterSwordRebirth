@@ -2,7 +2,7 @@
 //#include "Bodyparts.h"
 //#include "Bodyparts_Human.h" //Have to include this because of the armor inclusion below
 
-void CBodypart::Initialize(CBaseEntity *pOwner, char *ModelName, int idx)
+void CBodypart::Initialize(CBaseEntity *pOwner, const char *ModelName, int idx)
 {
 	SET_MODEL(edict(), ModelName);
 	pev->rendermode = 0;

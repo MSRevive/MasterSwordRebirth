@@ -130,9 +130,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 {
 	bool ValidVersion = false;
 
-	startdbg;
-	dbg("Begin");
-
 	CPlayer_DataBuffer m_File(Size);
 	m_File.Write(pData, Size);
 	byte DataID = CHARDATA_UNKNOWN;
@@ -167,7 +164,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 	} while (!m_File.Eof());
 
 	m_File.Close();
-	enddbg;
 
 	return ValidVersion;
 }
@@ -240,11 +236,6 @@ bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMap
 	return false;
 }
 
-#define RWVar Write
-#define RWByte WriteByte
-#define RWString WriteString
-#define RWShort WriteShort
-
 /*void WriteItem( CDataBuffer &gFile, CGenericItem *pItem )
 {
 	if( !pItem || FBitSet(pItem->MSProperties(), ITEM_SPELL) )
@@ -286,32 +277,32 @@ void WriteItem(CPlayer_DataBuffer &gFile, genericitem_full_t &Item)
 	if (FBitSet(Item.Properties, ITEM_SPELL))
 	{
 		//No item or item is a spell
-		gFile.RWByte(0);
+		gFile.WriteByte(0);
 		return;
 	}
 
-	gFile.RWString(Item.Name); //[STRING] Item Type
+	gFile.WriteString(Item.Name); //[STRING] Item Type
 
-	gFile.RWShort(Item.Properties); //[SHORT] Item Properties
-	gFile.RWShort(Item.Location);	//[SHORT] Item Location
-	gFile.RWByte(Item.Hand);		//[BYTE] Item Hand
+	gFile.WriteShort(Item.Properties); //[SHORT] Item Properties
+	gFile.WriteShort(Item.Location);	//[SHORT] Item Location
+	gFile.WriteByte(Item.Hand);		//[BYTE] Item Hand
 	gFile.WriteInt(Item.ID);		//[INT] Item ID at last save (used by quickslots to identify this item)
 
 	if (FBitSet(Item.Properties, ITEM_PERISHABLE) ||
 		FBitSet(Item.Properties, ITEM_DRINKABLE))
 	{
-		gFile.RWShort(Item.Quality);	//[SHORT] Current quality
-		gFile.RWShort(Item.MaxQuality); //[SHORT] Max quality
+		gFile.WriteShort(Item.Quality);	//[SHORT] Current quality
+		gFile.WriteShort(Item.MaxQuality); //[SHORT] Max quality
 										//Print( "Write Shield Quality: %i\n", pItem->Quality );
 	}
 
 	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
-		gFile.RWShort(Item.Quantity); //[SHORT] Grouped amount
+		gFile.WriteShort(Item.Quantity); //[SHORT] Grouped amount
 
 	//Writing contained items should be the *LAST* thing you do
 	if (FBitSet(Item.Properties, ITEM_CONTAINER))
 	{
-		gFile.RWShort(Item.ContainerItems.size()); //[SHORT] Container Item Total
+		gFile.WriteShort(Item.ContainerItems.size()); //[SHORT] Container Item Total
 
 		for (int i = 0; i < Item.ContainerItems.size(); i++)
 			WriteItem(gFile, Item.ContainerItems[i]);

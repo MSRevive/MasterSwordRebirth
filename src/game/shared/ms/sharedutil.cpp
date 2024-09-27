@@ -330,7 +330,7 @@ extern "C" char *strlwr(char *str)
 	return FStrEq( EngineFunc::GetString( m_string ), a ) ? true : false;
 }*/
 
-void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...)
+void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
 {
 	static char	string[1024];
 

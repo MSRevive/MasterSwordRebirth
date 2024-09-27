@@ -28,7 +28,6 @@
 #include	"global.h"
 #include	"svglobals.h"
 #include	"mscharacter.h"
-#include 	"fn/FNShareddefs.h"
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -39,9 +38,9 @@ extern int gmsgMOTD;
 
 bool CheckBanned( msstring_ref SteamID );
 
-float g_TimeTryValidate = 0.0;
+//float g_TimeTryValidate = 0.0f;
 #define VALIDATE_DELAY (60 * 30)// 30 mins
-float g_ServerResetTimer = NULL;
+float g_ServerResetTimer = 0.0f;
 
 #define ITEM_RESPAWN_TIME	30
 #define WEAPON_RESPAWN_TIME	20
@@ -184,8 +183,8 @@ void CHalfLifeMultiplay::Think( void )
 	}
 
 	//if player joins and timer was started than reset timer.
-	if (UTIL_NumPlayers() && g_ServerResetTimer)
-		g_ServerResetTimer = NULL;
+	if (UTIL_NumPlayers() && g_ServerResetTimer > 0.0f)
+		g_ServerResetTimer = 0.0f;
 
 	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
 	{
@@ -197,7 +196,7 @@ void CHalfLifeMultiplay::Think( void )
 		if (gpGlobals->time >= g_ServerResetTimer)
 		{
 			ALERT(at_console, "Resetting server.\n");
-			g_ServerResetTimer = NULL;
+			g_ServerResetTimer = 0.0f;
 			std::string resetMap = CVAR_GET_STRING("ms_reset_map");
 			std::string mapCmd = "map " + resetMap + "\n";
 			SERVER_COMMAND((char*)mapCmd.c_str());
@@ -377,8 +376,7 @@ void CHalfLifeMultiplay::UpdateGameMode( CBasePlayer *pPlayer )
 void CHalfLifeMultiplay::InitHUD( CBasePlayer *pPlayer )
 {
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has joined the game\n", 
-		( pPlayer->pev->netname && STRING(pPlayer->pev->netname)[0] != 0 ) ? STRING(pPlayer->pev->netname) : "unconnected" ) );
+	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs("%s has joined the game\n", (pPlayer->pev->netname && STRING(pPlayer->pev->netname)[0] != 0) ? STRING(pPlayer->pev->netname) : "unconnected" ));
 
 	UTIL_LogPrintf( "\"%s<%i>\" has entered the game\n",  STRING( pPlayer->pev->netname ), GETPLAYERUSERID( pPlayer->edict() ) );
 
@@ -1243,15 +1241,15 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 					if ( s && s[0] )
 					{
 						item->minplayers = atoi( s );
-						item->minplayers = max( item->minplayers, 0 );
-						item->minplayers = min( item->minplayers, gpGlobals->maxClients );
+						item->minplayers = V_max( item->minplayers, 0 );
+						item->minplayers = V_min( item->minplayers, gpGlobals->maxClients );
 					}
 					s = g_engfuncs.pfnInfoKeyValue( szBuffer, "maxplayers" );
 					if ( s && s[0] )
 					{
 						item->maxplayers = atoi( s );
-						item->maxplayers = max( item->maxplayers, 0 );
-						item->maxplayers = min( item->maxplayers, gpGlobals->maxClients );
+						item->maxplayers = V_max( item->maxplayers, 0 );
+						item->maxplayers = V_min( item->maxplayers, gpGlobals->maxClients );
 					}
 
 					// Remove keys
@@ -1640,7 +1638,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				//pPlayer->SendInfoMsg( "You report your accidental death to the Guard...\n" );
 				//pPlayer->SendInfoMsg( "%s's murder charges against you have been dropped.\n", pPlayerKiller->DisplayName() );
 				//pPlayerKiller->SendInfoMsg( "*** Your murder charges against %s have been dropped ***\n", pPlayer->DisplayName() );
-				pPlayerKiller->m_PlayersKilled = max(pPlayerKiller->m_PlayersKilled-1,0);
+				pPlayerKiller->m_PlayersKilled = V_max(pPlayerKiller->m_PlayersKilled-1,0);
 				pPlayerKiller->m_TimeWaitedToForgetKill = 0;
 			}
 			pPlayer->m_LastPlayerToKillMe = 0;

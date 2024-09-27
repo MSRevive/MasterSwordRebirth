@@ -537,7 +537,7 @@ void CBasePlayer::TakeDamageEffect(CBaseEntity *pInflictor, CBaseEntity *pAttack
 	if (flDamage > 0 && IsAlive())
 	{
 		float Amt = flDamage / MaxHP() * 255;
-		int alpha = max(Amt, 0);
+		int alpha = V_max(Amt, 0);
 
 		if (flDamage > 0.5) //If too small, don't even waste the bandwidth
 			UTIL_ScreenFade(this, Vector(255, 0, 0), 1, 0.5, alpha, FFADE_IN);
@@ -1756,7 +1756,7 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage()
 {
 	int i;
-	BYTE bDuration = 0;
+	byte bDuration = 0;
 
 	static float gtbdPrev = 0.0;
 
@@ -1797,7 +1797,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					int idif = min(m_idrowndmg - m_idrownrestored, 10);
+					int idif = V_min(m_idrowndmg - m_idrownrestored, 10);
 
 					GiveHP(idif);
 					m_idrownrestored += idif;
@@ -1921,7 +1921,7 @@ Things powered by the battery
 
 void CBasePlayer ::UpdateGeigerCounter(void)
 {
-	BYTE range;
+	byte range;
 
 	// delay per update ie: don't flood net with these msgs
 	if (gpGlobals->time < m_flgeigerDelay)
@@ -1931,7 +1931,7 @@ void CBasePlayer ::UpdateGeigerCounter(void)
 
 	// send range to radition source to client
 
-	range = (BYTE)(m_flgeigerRange / 4);
+	range = (byte)(m_flgeigerRange / 4);
 
 	if (range != m_igeigerRangePrev)
 	{
@@ -2309,7 +2309,7 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 }
 void CBasePlayer::AddNoise(float flNoiseAmt)
 {
-	m_iTargetVolume = min(m_iTargetVolume + flNoiseAmt, 1500);
+	m_iTargetVolume = V_min(m_iTargetVolume + flNoiseAmt, 1500);
 	//if (m_iTargetVolume + flNoiseAmt<1500)
 	//	m_iTargetVolume = m_iTargetVolume + flNoiseAmt;
 	//else
@@ -5168,7 +5168,7 @@ void CBasePlayer::GetAnyItems()
 					if (((CGenericItem *)pTestItem)->iQuantity +
 							pOwnerDesc->iGroupedItemTotal +
 							pItem->iQuantity <
-						min(pItem->iMaxGroupable, 256))
+						V_min(pItem->iMaxGroupable, 256))
 					{
 						pOwnerDesc->GroupListEntidx[pOwnerDesc->iGroupedItems] = pItem->entindex();
 						pOwnerDesc->pGroupList[pOwnerDesc->iGroupedItems++] = pItem;
@@ -5931,7 +5931,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 						SendInfoMsg("You receive %s.", SPEECH_GetItemName(ptiTradeAnswer->pItem));
 						ptiTradeAnswer->pItem->GiveTo(this);
 						GiveGold(-ptiTradeAnswer->iPrice, false);
-						ptiTradeAnswer->psiStoreItem->Quantity -= max(ptiTradeAnswer->pItem->iQuantity, 1);
+						ptiTradeAnswer->psiStoreItem->Quantity -= V_max(ptiTradeAnswer->pItem->iQuantity, 1);
 
 						//Thothie FEB2008a - allow informing of other players of item transfer
 						static msstringlist Params;
@@ -5975,7 +5975,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 
 				SendInfoMsg("You sell %s for %i gold.", SPEECH_GetItemName(ptiTradeAnswer->pItem), ptiTradeAnswer->iPrice);
 				GiveGold(ptiTradeAnswer->iPrice, false);
-				ptiTradeAnswer->psiStoreItem->Quantity += (short)max(ptiTradeAnswer->pItem->iQuantity, 1);
+				ptiTradeAnswer->psiStoreItem->Quantity += (short)V_max(ptiTradeAnswer->pItem->iQuantity, 1);
 				RemoveItem(ptiTradeAnswer->pItem);
 				ptiTradeAnswer->pItem->SUB_Remove();
 
@@ -6393,8 +6393,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	if (Data.HP > 0)
 	{
-		float CappedHP = max(Data.HP, 0);
-		float CappedMP = max(Data.MP, 0);
+		float CappedHP = V_max(Data.HP, 0);
+		float CappedMP = V_max(Data.MP, 0);
 		pev->health = m_HP = CappedHP;
 		m_MP = CappedMP;
 		m_MaxHP = Data.MaxHP;
@@ -6621,7 +6621,7 @@ void CBasePlayer::Think_SendCharData()
 		// Send items data
 		if (CharInfo.Status == CDS_LOADED)
 		{
-			const int maxItemsToSend = min(CharInfo.GearInfo.size(), 20);
+			const int maxItemsToSend = V_min(CharInfo.GearInfo.size(), 20);
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CHARINFO], NULL, pev);
 			WRITE_BYTE(CHAR_TYPE_ITEMS);
 			WRITE_BYTE(CharInfo.Index);

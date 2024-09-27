@@ -70,7 +70,7 @@ int CBaseEntity ::IsDormant(void) { return 0; }
 BOOL CBaseEntity ::IsInWorld(void) { return TRUE; }
 int CBaseEntity::ShouldToggle(USE_TYPE useType, BOOL currentState) { return 0; }
 int CBaseEntity ::DamageDecal(int bitsDamageType) { return -1; }
-CBaseEntity *CBaseEntity::Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner) { return NULL; }
+CBaseEntity *CBaseEntity::Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner) { return NULL; }
 void CBaseEntity::SUB_Remove(void)
 {
 	startdbg;
@@ -113,7 +113,7 @@ void UTIL_MakeVectors(const Vector &vecAngles) {}
 BOOL UTIL_IsValidEntity(edict_t *pent) { return TRUE; }
 void UTIL_SetOrigin(entvars_t *, const Vector &org) {}
 BOOL UTIL_GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon) { return TRUE; }
-void UTIL_LogPrintf(char *, ...) {}
+void UTIL_LogPrintf(const char *, ...) {}
 void UTIL_ClientPrintAll(int, char const *, char const *, char const *, char const *, char const *) {}
 void PrintNotifyMsg(char *pszmsg);
 void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1, const char *param2, const char *param3, const char *param4)
@@ -219,7 +219,7 @@ void CBaseAnimating ::GetAutomovement(Vector &origin, Vector &angles, float flIn
 void CBaseAnimating ::SetBodygroup(int iGroup, int iValue) {}
 int CBaseAnimating ::GetBodygroup(int iGroup) { return 0; }
 Vector CBaseMonster ::GetGunPosition(void) { return g_vecZero; }
-void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker) {}
+void CBaseEntity::FireBullets(unsigned long cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker) {}
 void CBaseEntity ::TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType) {}
 void CBaseMonster ::MakeDamageBloodDecal(int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir) {}
 BOOL CBaseMonster ::FGetNodeRoute(Vector vecDest) { return TRUE; }

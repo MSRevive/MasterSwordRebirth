@@ -1,7 +1,6 @@
-#include "stream_safe.h"
-
+#include "Platform.h"
 #ifdef _WIN32
-#include "windows.h"
+#include "PlatformWin.h"
 #include "logger.h"
 #else
 #include <ctype.h>
@@ -26,7 +25,7 @@ void operator delete(void* ptr, const char* pszSourceFile, int LineNum);
 #define msnew new
 #endif
 
-void Print(char* szFmt, ...);
+void Print(const char* szFmt, ...);
 
 /*-----------
 	CGroupFile - File packwout without encryption.

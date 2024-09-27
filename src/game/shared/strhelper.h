@@ -5,13 +5,9 @@
 char* strupr(char* start);
 char* strlower(char* start);
 
+// These need to be defined here otherwise we could fuck up SDL2's headers.
 #define _strupr strupr
 #define _strlwr strlower
-#define _snprintf snprintf
-#define _vsnprintf(a, b, c, d) vsnprintf(a, b, c, d)
-#define strnicmp strncasecmp
-#define _strnicmp strncasecmp
-#define _stricmp strcasecmp
 #endif
 
 #endif	// STR_HELPER_H

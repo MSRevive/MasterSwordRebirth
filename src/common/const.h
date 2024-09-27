@@ -19,6 +19,8 @@
 // This header file included by engine files and DLL files.
 // Most came from server.h
 
+#include "Platform.h"
+
 // edict->flags
 #define FL_FLY (1 << 0)	 // Changes the SV_Movestep() behavior to not need to be on ground
 #define FL_SWIM (1 << 1) // Changes the SV_Movestep() behavior to not need to be on ground (but stay in water)
@@ -705,10 +707,10 @@ enum
 	kRenderFxLightMultiplier,   //CTM !!!CZERO added to tell the studiorender that the value in iuser2 is a lightmultiplier
 };
 
-typedef int func_t;
-typedef int string_t;
+//typedef int func_t;
+//typedef int string_t;
 
-typedef unsigned char byte;
+//typedef unsigned char byte;
 typedef unsigned short word;
 #define _DEF_BYTE_
 

@@ -47,8 +47,8 @@ public:
 	virtual int Restore(CRestore &restore);
 	static TYPEDESCRIPTION m_SaveData[];
 
-	BYTE m_bMoveSnd; // sound a plat makes while moving
-	BYTE m_bStopSnd; // sound a plat makes when it stops
+	byte m_bMoveSnd; // sound a plat makes while moving
+	byte m_bStopSnd; // sound a plat makes when it stops
 	float m_volume;	 // Sound volume
 };
 

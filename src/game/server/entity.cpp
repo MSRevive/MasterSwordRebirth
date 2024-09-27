@@ -1,3 +1,4 @@
+#include "Platform.h"
 #include "msdllheaders.h"
 #include "msitemdefs.h"
 
@@ -80,8 +81,8 @@ void CBaseEntity::Think_FadeOut(void)
 
 	float FadeRatio = Duration / m_FadeDuration;
 
-	FadeRatio = max(FadeRatio, 0.0f);
-	FadeRatio = min(FadeRatio, 1.0f);
+	FadeRatio = V_max(FadeRatio, 0.0f);
+	FadeRatio = V_min(FadeRatio, 1.0f);
 
 	pev->renderamt = 255 * FadeRatio;
 	pev->nextthink = gpGlobals->time + 0.1f;

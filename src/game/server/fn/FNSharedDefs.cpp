@@ -2,8 +2,8 @@
 // FN Shared Definitions
 //
 
-#include "rapidjson/document_safe.h"
-#include "FNShareddefs.h"
+#include "rapidjson/document.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
 #include "logger.h"
@@ -22,7 +22,7 @@
 
 #define STRING_BUFFER 1024
 
-void FNShared::Print(char* fmt, ...)
+void FNShared::Print(const char* fmt, ...)
 {
 	static char string[STRING_BUFFER];
 

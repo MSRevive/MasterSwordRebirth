@@ -86,7 +86,7 @@ void CHudFatigue::DoThink()
 		flExtraFatigue += (1 / 10.0) * player.GetNatStat(NATURAL_STR); // 30.0
 
 		player.Stamina += flFrameIncrement * flExtraFatigue;
-		player.Stamina = max(min(player.Stamina, MaxStamina), 0);
+		player.Stamina = V_max(V_min(player.Stamina, MaxStamina), 0);
 	}
 
 	LastGainStaminaTime = gpGlobals->time;
@@ -108,7 +108,7 @@ int CHudFatigue::MsgFunc_Fatigue(const char *pszName, int iSize, void *pbuf)
 	else if (READ_BYTE() == 1)
 		player.Stamina *= (1 - (READ_BYTE() / 100.0));
 
-	player.Stamina = max(min(player.Stamina, player.MaxStamina()), 0);
+	player.Stamina = V_max(V_min(player.Stamina, player.MaxStamina()), 0);
 	return 1;
 }
 void CHudFatigue::UserCmd_ToggleFatigue(void)

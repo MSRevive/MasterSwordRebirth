@@ -47,17 +47,17 @@ cvar_t sv_pushable_fixed_tick_fudge = {"sv_pushable_fixed_tick_fudge", "15"};
 
 //cvar_t  mp_chattime = {"mp_chattime","10", FCVAR_SERVER };
 
-cvar_t* g_psv_gravity = NULL;
-cvar_t* g_psv_aim = NULL;
-cvar_t* g_footsteps = NULL;
-cvar_t* g_maxspeed = NULL;
-cvar_t* g_accelerate = NULL;
-cvar_t* g_airaccelerate = NULL;
-cvar_t* g_wateraccelerate = NULL;
-cvar_t* g_stepsize = NULL;
-cvar_t* g_friction = NULL;
-cvar_t* g_stopspeed = NULL;
-cvar_t* g_waterfriction = NULL;
+cvar_t* g_psv_gravity = nullptr;
+cvar_t* g_psv_aim = nullptr;
+cvar_t* g_footsteps = nullptr;
+cvar_t* g_maxspeed = nullptr;
+cvar_t* g_accelerate = nullptr;
+cvar_t* g_airaccelerate = nullptr;
+cvar_t* g_wateraccelerate = nullptr;
+cvar_t* g_stepsize = nullptr;
+cvar_t* g_friction = nullptr;
+cvar_t* g_stopspeed = nullptr;
+cvar_t* g_waterfriction = nullptr;
 
 char g_pTempStringLimit[WRITE_STRING_MAX];
 

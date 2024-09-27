@@ -169,7 +169,6 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 
 void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_SKILLS1)
 	{
 		// Read skills
@@ -228,17 +227,13 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 			Stat.m_SubStats[Stat.m_SubStats.size() - 1].Value = 1;
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_SPELLS1)
 	{
 		//Read Magic spells
-		dbg("Read Magic spells");
-
 		byte Spells = 0;
 		m_File.ReadByte(Spells); //[BYTE]
 		for (int s = 0; s < Spells; s++)
@@ -247,17 +242,13 @@ void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_Spells.add(cTemp);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_ITEMS1 || DataID == CHARDATA_ITEMS2)
 	{
 		//Read Items
-		dbg("Read Items");
-
 		byte GearItems = 0;
 		m_File.ReadByte(GearItems); //[SHORT]
 		for (int i = 0; i < GearItems; i++)
@@ -269,16 +260,13 @@ void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_Items.add(Item);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_STORAGE1)
 	{
 		//Read storage items
-		dbg("Read Storage Items");
 
 		short Storages = 0;
 		m_File.ReadShort(Storages); //[SHORT]
@@ -301,17 +289,13 @@ void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_Storages.add(Storage);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_COMPANIONS1)
 	{
 		//Read Companions
-		dbg("Read Companions");
-
 		short Companions = 0;
 		m_File.ReadShort(Companions); //[SHORT]
 		for (int c = 0; c < Companions; c++)
@@ -333,12 +317,10 @@ void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 			}
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_HELPTIPS1)
 	{
 		//Read Help tips
@@ -351,12 +333,10 @@ void chardata_t::ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_ViewedHelpTips.add(cTemp);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_QUESTS1)
 	{
 		//Read Quests
@@ -373,12 +353,10 @@ void chardata_t::ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_Quests.add(Quest);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_QUICKSLOTS1)
 	{
 		//Read Quickslots
@@ -408,7 +386,6 @@ void chardata_t::ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_QuickSlots.add(QuickSlot);
 		}
 	}
-	enddbg;
 }
 
 bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_full_t &outItem)

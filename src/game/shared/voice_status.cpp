@@ -22,7 +22,7 @@
 #include "vgui_loadtga.h"
 #include "vgui_helpers.h"
 #include "vgui_mousecode.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 using namespace vgui;
 
@@ -705,7 +705,7 @@ void CVoiceStatus::RepositionLabels()
 		// Setup the background label to fit everything in.
 		int border = 2;
 		int bgWide = textWide + iconWide + border * 3;
-		int bgTall = max(textTall, iconTall) + border * 2;
+		int bgTall = V_max(textTall, iconTall) + border * 2;
 		pLabel->m_pBackground->setBounds(ScreenWidth - bgWide - 8, y, bgWide, bgTall);
 
 		// Put the text at the left.

@@ -26,9 +26,9 @@
 #include "msdllheaders.h"
 #include "soundent.h"
 
-DLL_GLOBAL ULONG g_ulFrameCount;
-DLL_GLOBAL ULONG g_ulModelIndexEyes;
-DLL_GLOBAL ULONG g_ulModelIndexPlayer;
+DLL_GLOBAL unsigned long g_ulFrameCount;
+DLL_GLOBAL unsigned long g_ulModelIndexEyes;
+DLL_GLOBAL unsigned long g_ulModelIndexPlayer;
 DLL_GLOBAL Vector g_vecAttackDir;
 DLL_GLOBAL int g_iSkillLevel;
 DLL_GLOBAL int gDisplayTitle;

@@ -6,7 +6,7 @@
 #else
 #include "sharedutil.h"
 #endif
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 //
 //	Implementation of CGameFile and CPlayer_DataBuffer

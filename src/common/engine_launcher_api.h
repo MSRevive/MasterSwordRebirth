@@ -34,8 +34,8 @@ typedef struct engine_api_s
 	int (*Cmd_Argc)(void);
 	char *(*Cmd_Args)(void);
 	char *(*Cmd_Argv)(int arg);
-	void (*Con_Printf)(char *, ...);
-	void (*Con_SafePrintf)(char *, ...);
+	void (*Con_Printf)(const char *, ...);
+	void (*Con_SafePrintf)(const char *, ...);
 	void (*Cvar_Set)(char *var_name, char *value);
 	void (*Cvar_SetValue)(char *var_name, float value);
 	int (*Cvar_VariableInt)(char *var_name);

@@ -2308,7 +2308,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 					{
 						//might not work without changing this loop to a while
 						int reset_to_iteration = atoi(GetScriptVar("MSC_RESET_LOOP"));
-						m.m_Iteration = ULONG(reset_to_iteration);
+						m.m_Iteration = static_cast<unsigned long>(reset_to_iteration);
 						i = reset_to_iteration;
 						SetVar("MSC_RESET_LOOP", "-5");
 					}
@@ -3457,7 +3457,7 @@ bool CScript::ScriptCmd_GiveHPMP(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 bool CScript::ScriptCmd_Gravity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
 	if (Params.size() >= 1)
-		m.pScriptedEnt->pev->gravity = max(atof(Params[0]), 0.001f);
+		m.pScriptedEnt->pev->gravity = V_max(atof(Params[0]), 0.001f);
 	else ERROR_MISSING_PARMS;
 	return true;
 }

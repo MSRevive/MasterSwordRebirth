@@ -78,16 +78,114 @@ endif()
 ################################################################################
 # Source groups
 ################################################################################
-set(FMOD
-	"fmod/musicsystem.cpp"
-	"fmod/musicsystem.h"
-	"fmod/soundengine.cpp"
-	"fmod/soundengine.h"
+set(Common
+	"../../common/mathlib.h"
+	"../../common/cl_entity.h"
+	"../../common/com_model.h"
+	"../../common/const.h"
+	"../../common/dlight.h"
+	"../../common/entity_state.h"
+	"../../common/Platform.h"
+	"../../common/PlatformWin.h"
+	"../../common/const.h"
 )
-source_group("FMOD" FILES ${FMOD})
+source_group("Common" FILES ${Common})
+
+set(Engine
+	"../../public/engine/cdll_int.h"
+)
+source_group("Engine" FILES ${Engine})
+
+set(SDL2
+	"../../../thirdparty/SDL2/begin_code.h"
+	"../../../thirdparty/SDL2/close_code.h"
+	"../../../thirdparty/SDL2/SDL.h"
+	"../../../thirdparty/SDL2/SDL_assert.h"
+	"../../../thirdparty/SDL2/SDL_atomic.h"
+	"../../../thirdparty/SDL2/SDL_audio.h"
+	"../../../thirdparty/SDL2/SDL_bits.h"
+	"../../../thirdparty/SDL2/SDL_blendmode.h"
+	"../../../thirdparty/SDL2/SDL_clipboard.h"
+	"../../../thirdparty/SDL2/SDL_config.h"
+	"../../../thirdparty/SDL2/SDL_config_android.h"
+	"../../../thirdparty/SDL2/SDL_config_iphoneos.h"
+	"../../../thirdparty/SDL2/SDL_config_macosx.h"
+	"../../../thirdparty/SDL2/SDL_config_minimal.h"
+	"../../../thirdparty/SDL2/SDL_config_nintendods.h"
+	"../../../thirdparty/SDL2/SDL_config_pandora.h"
+	"../../../thirdparty/SDL2/SDL_config_windows.h"
+	"../../../thirdparty/SDL2/SDL_config_wiz.h"
+	"../../../thirdparty/SDL2/SDL_copying.h"
+	"../../../thirdparty/SDL2/SDL_cpuinfo.h"
+	"../../../thirdparty/SDL2/SDL_endian.h"
+	"../../../thirdparty/SDL2/SDL_error.h"
+	"../../../thirdparty/SDL2/SDL_events.h"
+	"../../../thirdparty/SDL2/SDL_gamecontroller.h"
+	"../../../thirdparty/SDL2/SDL_gesture.h"
+	"../../../thirdparty/SDL2/SDL_haptic.h"
+	"../../../thirdparty/SDL2/SDL_hints.h"
+	"../../../thirdparty/SDL2/SDL_input.h"
+	"../../../thirdparty/SDL2/SDL_joystick.h"
+	"../../../thirdparty/SDL2/SDL_keyboard.h"
+	"../../../thirdparty/SDL2/SDL_keycode.h"
+	"../../../thirdparty/SDL2/SDL_loadso.h"
+	"../../../thirdparty/SDL2/SDL_log.h"
+	"../../../thirdparty/SDL2/SDL_main.h"
+	"../../../thirdparty/SDL2/SDL_messagebox.h"
+	"../../../thirdparty/SDL2/SDL_mouse.h"
+	"../../../thirdparty/SDL2/SDL_mutex.h"
+	"../../../thirdparty/SDL2/SDL_name.h"
+	"../../../thirdparty/SDL2/SDL_opengl.h"
+	"../../../thirdparty/SDL2/SDL_opengles.h"
+	"../../../thirdparty/SDL2/SDL_opengles2.h"
+	"../../../thirdparty/SDL2/SDL_pixels.h"
+	"../../../thirdparty/SDL2/SDL_platform.h"
+	"../../../thirdparty/SDL2/SDL_power.h"
+	"../../../thirdparty/SDL2/SDL_quit.h"
+	"../../../thirdparty/SDL2/SDL_rect.h"
+	"../../../thirdparty/SDL2/SDL_render.h"
+	"../../../thirdparty/SDL2/SDL_revision.h"
+	"../../../thirdparty/SDL2/SDL_rwops.h"
+	"../../../thirdparty/SDL2/SDL_scancode.h"
+	"../../../thirdparty/SDL2/SDL_shape.h"
+	"../../../thirdparty/SDL2/SDL_stdinc.h"
+	"../../../thirdparty/SDL2/SDL_surface.h"
+	"../../../thirdparty/SDL2/SDL_system.h"
+	"../../../thirdparty/SDL2/SDL_syswm.h"
+	"../../../thirdparty/SDL2/SDL_test.h"
+	"../../../thirdparty/SDL2/SDL_test_assert.h"
+	"../../../thirdparty/SDL2/SDL_test_common.h"
+	"../../../thirdparty/SDL2/SDL_test_compare.h"
+	"../../../thirdparty/SDL2/SDL_test_crc32.h"
+	"../../../thirdparty/SDL2/SDL_test_font.h"
+	"../../../thirdparty/SDL2/SDL_test_fuzzer.h"
+	"../../../thirdparty/SDL2/SDL_test_harness.h"
+	"../../../thirdparty/SDL2/SDL_test_images.h"
+	"../../../thirdparty/SDL2/SDL_test_log.h"
+	"../../../thirdparty/SDL2/SDL_test_md5.h"
+	"../../../thirdparty/SDL2/SDL_test_random.h"
+	"../../../thirdparty/SDL2/SDL_thread.h"
+	"../../../thirdparty/SDL2/SDL_timer.h"
+	"../../../thirdparty/SDL2/SDL_touch.h"
+	"../../../thirdparty/SDL2/SDL_types.h"
+	"../../../thirdparty/SDL2/SDL_version.h"
+	"../../../thirdparty/SDL2/SDL_video.h"
+)
+source_group("SDL2" FILES ${SDL2})
+
+set(SDK
+	"exports.h"
+	"../../public/archtypes.h"
+	"../../public/cl_dll/IGameClientExports.h"
+	"../../public/FileSystem.h"
+	"../../public/interface.cpp"
+	"../../public/interface.h"
+	"../../public/keydefs.h"
+	"../../public/steam/steamtypes.h"
+)
+source_group("SDK" FILES ${SDK})
 
 set(HL1
-	"../../common/mathlib.h"
 	"ammo_secondary.cpp"
 	"ammohistory.cpp"
 	"ammohistory.h"
@@ -109,6 +207,7 @@ set(HL1
 	"hud_msg.cpp"
 	"hud_redraw.cpp"
 	"hud_spectator.cpp"
+	"hud_spectator.h"
 	"hud_update.cpp"
 	"in_camera.cpp"
 	"input.cpp"
@@ -125,23 +224,20 @@ set(HL1
 	"train.cpp"
 	"util.cpp"
 	"view.cpp"
+	"cl_util.h"
 	"../shared/movement/pm_math.cpp"
 	"../shared/voice_banmgr.cpp"
 	"../shared/voice_status.cpp"
 )
 source_group("HL1" FILES ${HL1})
 
-set(HL1_Headers
-	"cl_util.h"
-	"hud_spectator.h"
-	"../../common/cl_entity.h"
-	"../../common/com_model.h"
-	"../../common/const.h"
-	"../../common/dlight.h"
-	"../../common/entity_state.h"
-	"../../public/engine/cdll_int.h"
+set(FMOD
+	"fmod/musicsystem.cpp"
+	"fmod/musicsystem.h"
+	"fmod/soundengine.cpp"
+	"fmod/soundengine.h"
 )
-source_group("HL1\\Headers" FILES ${HL1_Headers})
+source_group("FMOD" FILES ${FMOD})
 
 set(MS
 	"SteamClientHelper.cpp"
@@ -224,98 +320,13 @@ set(Render
 )
 source_group("Render" FILES ${Render})
 
-set(SDK2013
-	"exports.h"
-	"../../public/archtypes.h"
-	"../../public/cl_dll/IGameClientExports.h"
-	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
-	"../../public/keydefs.h"
-	"../../public/steam/steamtypes.h"
-	"../../../thirdparty/SDL2/begin_code.h"
-	"../../../thirdparty/SDL2/close_code.h"
-	"../../../thirdparty/SDL2/SDL.h"
-	"../../../thirdparty/SDL2/SDL_assert.h"
-	"../../../thirdparty/SDL2/SDL_atomic.h"
-	"../../../thirdparty/SDL2/SDL_audio.h"
-	"../../../thirdparty/SDL2/SDL_bits.h"
-	"../../../thirdparty/SDL2/SDL_blendmode.h"
-	"../../../thirdparty/SDL2/SDL_clipboard.h"
-	"../../../thirdparty/SDL2/SDL_config.h"
-	"../../../thirdparty/SDL2/SDL_config_android.h"
-	"../../../thirdparty/SDL2/SDL_config_iphoneos.h"
-	"../../../thirdparty/SDL2/SDL_config_macosx.h"
-	"../../../thirdparty/SDL2/SDL_config_minimal.h"
-	"../../../thirdparty/SDL2/SDL_config_nintendods.h"
-	"../../../thirdparty/SDL2/SDL_config_pandora.h"
-	"../../../thirdparty/SDL2/SDL_config_windows.h"
-	"../../../thirdparty/SDL2/SDL_config_wiz.h"
-	"../../../thirdparty/SDL2/SDL_copying.h"
-	"../../../thirdparty/SDL2/SDL_cpuinfo.h"
-	"../../../thirdparty/SDL2/SDL_endian.h"
-	"../../../thirdparty/SDL2/SDL_error.h"
-	"../../../thirdparty/SDL2/SDL_events.h"
-	"../../../thirdparty/SDL2/SDL_gamecontroller.h"
-	"../../../thirdparty/SDL2/SDL_gesture.h"
-	"../../../thirdparty/SDL2/SDL_haptic.h"
-	"../../../thirdparty/SDL2/SDL_hints.h"
-	"../../../thirdparty/SDL2/SDL_input.h"
-	"../../../thirdparty/SDL2/SDL_joystick.h"
-	"../../../thirdparty/SDL2/SDL_keyboard.h"
-	"../../../thirdparty/SDL2/SDL_keycode.h"
-	"../../../thirdparty/SDL2/SDL_loadso.h"
-	"../../../thirdparty/SDL2/SDL_log.h"
-	"../../../thirdparty/SDL2/SDL_main.h"
-	"../../../thirdparty/SDL2/SDL_messagebox.h"
-	"../../../thirdparty/SDL2/SDL_mouse.h"
-	"../../../thirdparty/SDL2/SDL_mutex.h"
-	"../../../thirdparty/SDL2/SDL_name.h"
-	"../../../thirdparty/SDL2/SDL_opengl.h"
-	"../../../thirdparty/SDL2/SDL_opengles.h"
-	"../../../thirdparty/SDL2/SDL_opengles2.h"
-	"../../../thirdparty/SDL2/SDL_pixels.h"
-	"../../../thirdparty/SDL2/SDL_platform.h"
-	"../../../thirdparty/SDL2/SDL_power.h"
-	"../../../thirdparty/SDL2/SDL_quit.h"
-	"../../../thirdparty/SDL2/SDL_rect.h"
-	"../../../thirdparty/SDL2/SDL_render.h"
-	"../../../thirdparty/SDL2/SDL_revision.h"
-	"../../../thirdparty/SDL2/SDL_rwops.h"
-	"../../../thirdparty/SDL2/SDL_scancode.h"
-	"../../../thirdparty/SDL2/SDL_shape.h"
-	"../../../thirdparty/SDL2/SDL_stdinc.h"
-	"../../../thirdparty/SDL2/SDL_surface.h"
-	"../../../thirdparty/SDL2/SDL_system.h"
-	"../../../thirdparty/SDL2/SDL_syswm.h"
-	"../../../thirdparty/SDL2/SDL_test.h"
-	"../../../thirdparty/SDL2/SDL_test_assert.h"
-	"../../../thirdparty/SDL2/SDL_test_common.h"
-	"../../../thirdparty/SDL2/SDL_test_compare.h"
-	"../../../thirdparty/SDL2/SDL_test_crc32.h"
-	"../../../thirdparty/SDL2/SDL_test_font.h"
-	"../../../thirdparty/SDL2/SDL_test_fuzzer.h"
-	"../../../thirdparty/SDL2/SDL_test_harness.h"
-	"../../../thirdparty/SDL2/SDL_test_images.h"
-	"../../../thirdparty/SDL2/SDL_test_log.h"
-	"../../../thirdparty/SDL2/SDL_test_md5.h"
-	"../../../thirdparty/SDL2/SDL_test_random.h"
-	"../../../thirdparty/SDL2/SDL_thread.h"
-	"../../../thirdparty/SDL2/SDL_timer.h"
-	"../../../thirdparty/SDL2/SDL_touch.h"
-	"../../../thirdparty/SDL2/SDL_types.h"
-	"../../../thirdparty/SDL2/SDL_version.h"
-	"../../../thirdparty/SDL2/SDL_video.h"
-)
-source_group("SDK2013" FILES ${SDK2013})
-
 set(Shared
 	"../server/player/playershared.cpp"
 	"../server/store.h"
+	"../shared/filesystem_shared.cpp"
+	"../shared/filesystem_shared.h"
 	"../shared/ms/buildcontrol.h"
 	"../shared/ms/dbginputs.cpp"
-	"../shared/ms/filesystem_shared.cpp"
-	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
 	"../shared/ms/global.cpp"
@@ -394,7 +405,7 @@ set(VGUI
 )
 source_group("VGUI" FILES ${VGUI})
 
-set(VGUI_ms
+set(VGUI_MS
 	"ui/ms/vgui_choosecharacter.cpp"
 	"ui/ms/vgui_choosecharacter.h"
 	"ui/ms/vgui_container.cpp"
@@ -435,23 +446,25 @@ set(VGUI_ms
 	"ui/ms/vgui_storesell.h"
 	"ui/ms/vgui_vote.h"
 )
-source_group("VGUI\\ms" FILES ${VGUI_ms})
+source_group("VGUI\\ms" FILES ${VGUI_MS})
 
 set(ALL_FILES
-	${FMOD}
+	${Common}
+	${Engine}
+	${SDL2}
+	${SDK}
 	${HL1}
-	${HL1_Headers}
+	${FMOD}
 	${MS}
 	${MS_Headers}
 	${MS_Generic_Item}
 	${Misc}
 	${Render}
-	${SDK2013}
 	${Shared}
 	${Shared_CRC}
 	${Shared_base64}
 	${VGUI}
-	${VGUI_ms}
+	${VGUI_MS}
 )
 
 target_sources(client PRIVATE ${ALL_FILES})

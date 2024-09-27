@@ -629,13 +629,13 @@ void CSoundEngine::SetupSounds(void)
 		{
 			if (pEntity)
 			{
-				BYTE *pData, *pEnd;
+				byte *pData, *pEnd;
 				double nInput[2] = {0, 0}, nOutput[2] = {0, 0};
 				int iMouthOpen = NULL;
 
 				// Get pointer to sound data at this position
-				pData = (BYTE *)pSound->pCache->pFile + iChanPos;
-				pEnd = (BYTE *)pSound->pCache->pFile + pSound->pCache->iSize;
+				pData = (byte *)pSound->pCache->pFile + iChanPos;
+				pEnd = (byte *)pSound->pCache->pFile + pSound->pCache->iSize;
 
 				// Something can go wrong so to be sure
 				if (pData >= pEnd)
@@ -1271,9 +1271,9 @@ GetLoopPoint
 */
 void CSoundEngine::GetLoopPoint(scache_t *pCache)
 {
-	BYTE *pFile = (BYTE *)pCache->pFile;
-	BYTE *pEnd = (BYTE *)pCache->pFile + pCache->iSize;
-	BYTE *pPosition = pFile;
+	byte *pFile = (byte *)pCache->pFile;
+	byte *pEnd = (byte *)pCache->pFile + pCache->iSize;
+	byte *pPosition = pFile;
 
 	Int32BigEndian nChunkName;
 

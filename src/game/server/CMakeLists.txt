@@ -5,7 +5,7 @@ target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
 else()
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux/libsteam_api.so")
+	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libsteam_api.so")
 endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
@@ -60,10 +60,28 @@ endif()
 ################################################################################
 # Source groups
 ################################################################################
-set(HL1
+set(Common
 	"../../common/const.h"
 	"../../common/cstringpool.cpp"
 	"../../common/cstringpool.h"
+	"../../common/Platform.h"
+	"../../common/PlatformWin.h"
+)
+source_group("Common" FILES ${Common})
+
+set(Engine
+	"../../public/engine/progdefs.h"
+)
+source_group("Engine" FILES ${Engine})
+
+set(SDK
+	"../../public/FileSystem.h"
+	"../../public/interface.cpp"
+	"../../public/interface.h"
+)
+source_group("SDK" FILES ${SDK})
+
+set(HL1
 	"basemonster.h"
 	"bmodels.cpp"
 	"cdll_dll.h"
@@ -117,7 +135,6 @@ set(HL1
 	"../shared/movement/pm_math.cpp"
 	"../shared/movement/pm_movevars.h"
 	"../shared/voice_gamemgr.cpp"
-	"../../public/engine/progdefs.h"
 )
 source_group("HL1" FILES ${HL1})
 
@@ -184,13 +201,6 @@ set(Misc
 )
 source_group("Misc" FILES ${Misc})
 
-set(SDK2013
-	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
-)
-source_group("SDK2013" FILES ${SDK2013})
-
 set(FN
 	"fn/CreateCharacterReq.cpp"
 	"fn/CreateCharacterReq.h"
@@ -217,10 +227,10 @@ source_group("FN" FILES ${FN})
 
 set(Shared
 	"player/playershared.cpp"
+	"../shared/filesystem_shared.cpp"
+	"../shared/filesystem_shared.h"
 	"../shared/ms/buildcontrol.h"
 	"../shared/ms/dbginputs.cpp"
-	"../shared/ms/filesystem_shared.cpp"
-	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
 	"../shared/ms/global.cpp"
@@ -287,11 +297,13 @@ set(Shared_base64
 source_group("Shared\\base64" FILES ${Shared__base64})
 
 set(ALL_FILES
+	${Common}
+	${Engine}
+	${SDK}
 	${HL1}
 	${MS}
 	${MS_Headers}
 	${Misc}
-	${SDK2013}
 	${FN}
 	${Shared}
 	${Shared_CRC}

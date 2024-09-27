@@ -180,8 +180,8 @@ inline BOOL FStringNull(int iString)
 
 // All monsters need this data
 #define DONT_BLEED -1
-#define BLOOD_COLOR_RED (BYTE)247
-#define BLOOD_COLOR_YELLOW (BYTE)195
+#define BLOOD_COLOR_RED (byte)247
+#define BLOOD_COLOR_YELLOW (byte)195
 #define BLOOD_COLOR_GREEN BLOOD_COLOR_YELLOW
 
 typedef enum
@@ -272,7 +272,7 @@ extern float UTIL_AvgHP();
 
 extern void UTIL_SetOrigin(entvars_t *pev, const Vector &vecOrigin);
 extern void UTIL_EmitAmbientSound(edict_t *entity, const Vector &vecOrigin, const char *samp, float vol, float attenuation, int fFlags, int pitch);
-extern void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, ULONG ulColor, ULONG ulCount);
+extern void UTIL_ParticleEffect(const Vector &vecOrigin, const Vector &vecDirection, unsigned long ulColor, unsigned long ulCount);
 extern void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, float duration, float radius);
 extern void UTIL_ScreenShakeOne(CBaseEntity* pPlayer, float amplitude, float frequency, float duration); //Thothie APR2016_08 attempting screenshake on one client
 extern void UTIL_ScreenShakeAll(const Vector &center, float amplitude, float frequency, float duration);
@@ -325,7 +325,7 @@ extern float UTIL_Approach(float target, float value, float speed);
 extern float UTIL_ApproachAngle(float target, float value, float speed);
 extern float UTIL_AngleDistance(float next, float cur);
 
-extern char *UTIL_VarArgs(char *format, ...);
+extern char *UTIL_VarArgs(const char *format, ...);
 extern void UTIL_Remove(CBaseEntity *pEntity);
 extern BOOL UTIL_IsValidEntity(edict_t *pent);
 extern BOOL UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2);

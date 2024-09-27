@@ -2,7 +2,8 @@
 #define MS_LOGGER
 
 #include <string>
-#include "stream_safe.h"
+#include <fstream>
+#include <iostream>
 #include "sharedutil.h"
 
 class Logger {
@@ -123,8 +124,8 @@ extern Logger chatlog;
 extern Logger NullFile;
 extern bool g_log_initialized;
 
-void Print(char* szFmt, ...);
-void Log(char* szFmt, ...);
+void Print(const char* szFmt, ...);
+void Log(const char* szFmt, ...);
 void OpenLogFiles();
 
 #define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, msstring_ref(Text))

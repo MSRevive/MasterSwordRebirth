@@ -443,7 +443,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 	dbg("Load global items");
 
 	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
-	while (GetString(cString, min(FileSize, sizeof(cString)), (char*)pStringPtr, i, "\r\n"))
+	while (GetString(cString, V_min(FileSize, sizeof(cString)), (const char*)pStringPtr, i, "\r\n"))
 	{
 		n = i;
 		i += strlen(cString) + 1;
@@ -562,50 +562,42 @@ CGenericItem::~CGenericItem()
 
 void CGenericItem::Deactivate()
 {
-	startdbg;
-
-	dbg("Deallocate Attacks");
 	m_Attacks.clear();
 	m_WearPositions.clear();
 	m_WearModelPositions.clear();
 
-	CurrentAttack = NULL;
+	CurrentAttack = nullptr;
 
-	dbg("Deallocate Pack data");
 	Container_Deactivate();
-	dbg("Deallocate Drink data");
-	if (DrinkData)
+
+	if (DrinkData != nullptr)
 	{
-		delete (void*)DrinkData;
-		DrinkData = NULL;
+		delete DrinkData;
+		DrinkData = nullptr;
 	}
-	dbg("Deallocate Armor data");
-	if (ArmorData)
+
+	if (ArmorData != nullptr)
 	{
-		delete (void*)ArmorData;
-		ArmorData = NULL;
+		delete ArmorData;
+		ArmorData = nullptr;
 	}
-	dbg("Deallocate Projectile data");
-	if (ProjectileData)
+
+	if (ProjectileData != nullptr)
 	{
-		delete (void*)ProjectileData;
-		ProjectileData = NULL;
+		delete ProjectileData;
+		ProjectileData = nullptr;
 	}
 #ifdef VALVE_DLL
-	dbg("Deallocate Spell data");
 	Spell_Deactivate();
 #endif
 
-	dbg("Deallocate Script");
 	IScripted::Deactivate();
-
-	enddbg;
 }
 
 void CGenericItem::Spawn()
 {
 	StoreEntity(this, ENT_ME);
-	CurrentAttack = NULL;
+	CurrentAttack = nullptr;
 	SetBits(Properties, ITEM_GENERIC);
 	m_PrefHand = ANY_HAND;
 	ExpireTime = MSITEM_TIME_EXPIRE;

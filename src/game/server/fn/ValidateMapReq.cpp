@@ -2,9 +2,9 @@
 // Verify if a map is eligible for FN play
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "ValidateMapReq.h"
-#include "FNShareddefs.h"
+#include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "global.h"
 
