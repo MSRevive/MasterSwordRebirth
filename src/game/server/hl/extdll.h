@@ -31,16 +31,11 @@
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
 typedef unsigned long ULONG;
-typedef unsigned char BYTE;
-typedef unsigned char byte;
 typedef unsigned int uint;
 typedef int BOOL;
 
 #include <limits.h>
 #include <stdarg.h>
-
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #ifndef MAX_PATH
 #define MAX_PATH PATH_MAX
@@ -56,9 +51,6 @@ typedef int BOOL;
 
 // Vector class
 #include "vector.h"
-
-// Defining it as a (bogus) struct helps enforce type-checking
-//#define vec3_t Vector
 
 // Shared engine/DLL constants
 #include "const.h"
