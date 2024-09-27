@@ -443,7 +443,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 	dbg("Load global items");
 
 	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
-	while (GetString(cString, V_min(FileSize, sizeof(cString)), (char*)pStringPtr, i, "\r\n"))
+	while (GetString(cString, V_min(FileSize, sizeof(cString)), (const char*)pStringPtr, i, "\r\n"))
 	{
 		n = i;
 		i += strlen(cString) + 1;
@@ -570,19 +570,19 @@ void CGenericItem::Deactivate()
 
 	Container_Deactivate();
 
-	if (DrinkData)
+	if (DrinkData != nullptr)
 	{
 		delete DrinkData;
 		DrinkData = nullptr;
 	}
 
-	if (ArmorData)
+	if (ArmorData != nullptr)
 	{
 		delete ArmorData;
 		ArmorData = nullptr;
 	}
 
-	if (ProjectileData)
+	if (ProjectileData != nullptr)
 	{
 		delete ProjectileData;
 		ProjectileData = nullptr;
