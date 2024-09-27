@@ -302,7 +302,7 @@ void WriteItem(CPlayer_DataBuffer &gFile, genericitem_full_t &Item)
 	//Writing contained items should be the *LAST* thing you do
 	if (FBitSet(Item.Properties, ITEM_CONTAINER))
 	{
-		gFile.RWShort(Item.ContainerItems.size()); //[SHORT] Container Item Total
+		gFile.WriteShort(Item.ContainerItems.size()); //[SHORT] Container Item Total
 
 		for (int i = 0; i < Item.ContainerItems.size(); i++)
 			WriteItem(gFile, Item.ContainerItems[i]);
