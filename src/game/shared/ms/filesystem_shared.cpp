@@ -16,8 +16,18 @@ IFileSystem* g_pFileSystem = nullptr;
 
 bool FileSystem_Init()
 {
-	// Determine which filesystem to use.
-	const char* szFsModule = "filesystem_stdio" DEFAULT_SO_EXT;
+	// Don't load filesystem if already loaded.
+	if (g_pFileSystem)
+		return true;
+
+	// Determine which filesystem module to use.
+#if defined(_WIN32)
+	const char* szFsModule = "filesystem_stdio.dll";
+#elif defined(LINUX)
+	const char* szFsModule = "filesystem_stdio.so";
+#else
+#error
+#endif
 
 	char szFSDir[MAX_PATH];
 	szFSDir[0] = '\0';
@@ -113,9 +123,7 @@ bool FileSystem_WriteTextToFile(const char* fileName, const char* text, const ch
 
 	const size_t length = strlen(text);
 
-	//std::numeric_limits<int>::max() doesn't work cause of macro for max/min
-	//if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
-	if (length > INT_MAX)
+	if (length > static_cast<std::size_t>(std::numeric_limits<int>::max()))
 	{
 		ALERT(at_console, "FileSystem_WriteTextToFile: text too long\n");
 		return false;
