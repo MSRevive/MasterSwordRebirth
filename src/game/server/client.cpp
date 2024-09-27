@@ -49,10 +49,10 @@ extern void PlayerPrecache();
 #define MAX_MONSTERS 5
 int g_SummonedMonsters = 0;
 
-extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
+extern DLL_GLOBAL unsigned long g_ulModelIndexPlayer;
 extern DLL_GLOBAL BOOL g_fGameOver;
 extern DLL_GLOBAL int g_iSkillLevel;
-extern DLL_GLOBAL ULONG g_ulFrameCount;
+extern DLL_GLOBAL unsigned long g_ulFrameCount;
 
 extern int giPrecacheGrunt;
 extern int gmsgSayText;

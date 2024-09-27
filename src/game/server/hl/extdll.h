@@ -30,7 +30,6 @@
 
 typedef unsigned short WORD;
 typedef unsigned long DWORD;
-typedef unsigned long ULONG;
 typedef unsigned int uint;
 typedef int BOOL;
 

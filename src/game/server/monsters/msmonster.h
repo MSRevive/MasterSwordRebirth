@@ -360,8 +360,8 @@ public:
 	//virtual void Jump( );
 
 	virtual CGenericItem *GetContainer(const char *pNameSubstring);
-	virtual CGenericItem *GetContainer(ULONG ID);
-	virtual CGenericItem *GetGearItem(ULONG ID);
+	virtual CGenericItem *GetContainer(unsigned long ID);
+	virtual CGenericItem *GetGearItem(unsigned long ID);
 	virtual CGenericItem *GetItem(const char *pAmmoName, CGenericItem **pPack = NULL);
 	virtual bool GetItem(getitem_t &ItemDesc);
 

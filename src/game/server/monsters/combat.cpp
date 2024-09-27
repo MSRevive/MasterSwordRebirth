@@ -1419,7 +1419,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker)
+void CBaseEntity::FireBullets(unsigned long cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker)
 {
 	static int tracerCount;
 	int tracer;
@@ -1436,7 +1436,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
-	for (ULONG iShot = 1; iShot <= cShots; iShot++)
+	for (unsigned long iShot = 1; iShot <= cShots; iShot++)
 	{
 		// get circular gaussian spread
 		float x, y, z;
