@@ -725,9 +725,6 @@ void VGUI_Container::PurgeButtons( )
 
 void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBinding )
 {
-	startdbg;
-	dbg( "Begin" );
-
 	if( !m_Active )
 		return;
 
@@ -757,7 +754,7 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	BOOL Success = GetKeyboardState( State );
 	if( !Success ) return;
 
-	WORD Char;
+	unsigned short Char;
 	int Result = ToAscii( VkKeyScan(keynum), keynum, State, &Char, 0 );
 	if( Result != 1 ) return;
 
@@ -768,6 +765,4 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	//char Temp[2] = { m_Caps ? toupper(Char) : Char, '\0' };
 	char Temp[2] = { Char & 0xFF, '\0' };
 	AddLetter( Temp );
-
-	enddbg;
 }
