@@ -2,7 +2,7 @@
 // Delete FN character
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "DeleteCharacterReq.h"
 #include "FNSharedDefs.h"
 #include "msdllheaders.h"

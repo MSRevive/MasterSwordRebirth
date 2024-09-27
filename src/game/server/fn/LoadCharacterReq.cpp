@@ -2,7 +2,7 @@
 // Load FN character
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "base64/base64.h"
 #include "LoadCharacterReq.h"
 #include "FNSharedDefs.h"

@@ -2,7 +2,9 @@
 // Steam HTTP Request Handler Class
 //
 
-#include <rapidjson/document_safe.h>
+#include <rapidjson/document.h>
+#include <rapidjson/writer.h>
+
 #include "base64/base64.h"
 #include "HTTPRequest.h"
 #include "FNSharedDefs.h"

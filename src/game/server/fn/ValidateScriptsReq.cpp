@@ -2,7 +2,7 @@
 // Validate sc.dll
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "ValidateScriptsReq.h"
 #include "FNSharedDefs.h"
 #include "msdllheaders.h"

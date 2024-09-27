@@ -2,7 +2,7 @@
 // FN Shared Definitions
 //
 
-#include "rapidjson/document_safe.h"
+#include "rapidjson/document.h"
 #include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
