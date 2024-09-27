@@ -28,7 +28,7 @@ jobs:
           cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/LinuxToolchain.cmake --fresh
       
-      - Name: all files
+      - name: all files
         run: ls build
 
       # - name: Build
