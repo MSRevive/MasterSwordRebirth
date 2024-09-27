@@ -17,6 +17,7 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #include "hud.h"
 #include "cl_util.h"
 #include "ms/hudscript.h"
+#include "SDL2/SDL_messagebox.h"
 #endif
 
 #ifndef _WIN32
@@ -4915,19 +4916,14 @@ bool CScript::Spawn(string_i Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 #ifndef RELEASE_LOCKDOWN
 #ifdef VALVE_DLL
 			logfile << "ERROR: Script not found: " << ScriptName.c_str() << "\n";
-#ifndef POSIX
-			MessageBox(NULL, msstring("Script not found: ") + ScriptName + "\r\n\r\nThis is probably caused by a script using #include on a non-existant script.", "FIX THIS QUICK!", MB_OK);
-#endif
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Not Found", msstring("Script not found: ") + ScriptName, NULL);
 #endif
 #else
 			//In the release build, this is a fatal error
 			//SERVER_COMMAND( "exit\n" ); This crashes the game, currently
 //server side so we can retain ability to add server side only scripts
-#ifdef VALVE_DLL
-#ifndef POSIX
-			MessageBox(NULL, msstring("Script not found: ") + ScriptName, "MAP SCRIPT ERROR", MB_OK); //Thothie - JUN2007 Trying to get script bugs to report
-			//exit( 0 ); //MAR2008a Thothie - making non-fatal so it can report multiple
-#endif
+#ifndef VALVE_DLL
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Map Script Error", msstring("Script not found: ") + ScriptName, NULL);
 #endif
 #endif
 #endif
@@ -5929,8 +5925,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			m.AllowDupInclude = AllowDupInclude;
 			if (!fSucces && !Casual)
 			{
-#ifndef POSIX
-				MessageBox(NULL, msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + FileName + "\r\n\r\nThis is a fatal error in the public build.", "FIX THIS QUICK!", MB_OK);
+#ifndef VALVE_DLL
+				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Scripts Error", msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + FileName + "\r\n\r\nThis is a fatal error in the public build.", NULL);
 #endif
 				ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, FileName.c_str());
 			}

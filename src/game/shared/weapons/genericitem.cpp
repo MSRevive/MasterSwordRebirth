@@ -16,6 +16,7 @@
 #include "../common/const.h"
 #include "../engine/studio.h"
 #include "r_studioint.h"
+#include "SDL2/SDL_messagebox.h"
 #endif
 
 #include "inc_weapondefs.h"
@@ -420,9 +421,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #ifdef RELEASE_LOCKDOWN
 			exit(0);
 #else
-#ifndef POSIX
-			MessageBox(NULL, "Missing items.txt inside sc.dll! This is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
-#endif
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SC Error", "Missing items.txt!", NULL);
 #endif
 #endif
 			goto end;
@@ -503,9 +502,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #ifdef RELEASE_LOCKDOWN
 			exit(0);
 #else
-#ifndef POSIX
-			MessageBox(NULL, msstring("Item script not found: ") + cItemFileName + "\r\n\r\nThis is a fatal error in the public build", "FIX THIS QUICK!", MB_OK);
-#endif
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing Item Script!", msstring("Item script not found: ") + cItemFileName, NULL);
 #endif
 #endif
 		}

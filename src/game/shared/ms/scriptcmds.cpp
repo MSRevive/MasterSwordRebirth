@@ -17,6 +17,7 @@
 #ifndef VALVE_DLL
 #include "render/clrender.h"
 #include "ms/clglobal.h"
+#include "SDL2/SDL_messagebox.h"
 
 // MiB MAR2015_01 [LOCAL_PANEL] - Includes for VGUI elements
 #include "hud.h"
@@ -3123,15 +3124,15 @@ bool CScript::ScriptCmd_ErrorMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	//Print( "* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str() );
 	if (Cmd.Name() == "errormessage")
 	{
-#ifndef POSIX
-		MessageBox(NULL, sTemp.c_str(), "ERROR", MB_OK | MB_ICONEXCLAMATION);
+#ifndef VALVE_DLL
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Error", sTemp.c_str(), NULL);
 #endif
 		exit(-1);
 	}
 	if (Cmd.Name() == "popup")
 	{
-#ifndef POSIX
-		MessageBox(NULL, sTemp.c_str(), "DEBUG POPUP", MB_OK | MB_ICONEXCLAMATION);
+#ifndef VALVE_DLL
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Error", sTemp.c_str(), NULL);
 #endif
 	}
 

@@ -9,6 +9,7 @@
 #define NOMCX
 #define NOIME
 #define NOMINMAX
+#define NOMB
 
 #pragma push_macro("ARRAYSIZE")
 #ifdef ARRAYSIZE

@@ -9,6 +9,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "player/player.h"
+#include "SDL2/SDL_messagebox.h"
 extern CBasePlayer player;
 #endif
 
@@ -44,9 +45,7 @@ void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress
 	else
 	{
 		//This is prety fatal - We got an error before the logs were initialized
-#ifndef POSIX
-		MessageBox(NULL, msstring(pszLabel) + msstring(" (Logs not yet initialized)"), Progress, MB_OK);
-#endif
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, msstring(pszLabel) + msstring(" (Logs not yet initialized)"), Progress, NULL);
 	}
 #endif
 }
@@ -378,8 +377,8 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_POPUP)
     {
-#ifndef POSIX
-        MessageBox(NULL, string, vsShortTitle.c_str(), MB_OK);
+#ifndef VALVE_DLL
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, vsShortTitle.c_str(), string, NULL);
 #endif
     }
 }

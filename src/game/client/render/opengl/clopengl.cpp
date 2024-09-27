@@ -14,6 +14,7 @@
 #include "../gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
 #include "clopengl.h" // OpenGL stuff
+#include "SDL2/SDL_messagebox.h"
 
 // WGL_ARB_extensions_string
 PFNWGLGETEXTENSIONSSTRINGARBPROC wglGetExtensionsStringARB = NULL;
@@ -117,6 +118,7 @@ void CRender::RT_BindTexture()
 	if (!wglBindTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
 		//MessageBox(NULL, "Could not bind p-buffer to render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not bind p-buffer to render texture!", NULL);
 		logfile << Logger::LOG_ERROR << "Error: Could not bind p-buffer to render texture!\n";
 		Print("Could not bind p-buffer to render texture!");
 		//exit(-1);
@@ -131,7 +133,8 @@ void CRender::RT_ReleaseTexture()
 
 	if (!wglReleaseTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
-		MessageBox(NULL, "Could not release p-buffer from render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		//MessageBox(NULL, "Could not release p-buffer from render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not release p-buffer from render texture!", NULL);
 		//exit(-1);
 	}
 }
@@ -201,7 +204,8 @@ void CRender::SetRenderTarget(bool ToTexture, bool ClearDepth)
 	{
 		if (!wglMakeCurrent(g_pbuffer.hDC, g_pbuffer.hRC))
 		{
-			MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not make the p-buffer's context current!", NULL);
+			//MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 			//exit(-1);
 		}
 		if (ClearDepth)
@@ -237,7 +241,8 @@ void CRender::SetRenderTarget(bool ToTexture, bool ClearDepth)
 
 		if (!wglMakeCurrent(OldhDC, OldhRC))
 		{
-			MessageBox(NULL, "Could not make the normal half-life context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not make the normal half-life context current!", NULL);
+			//MessageBox(NULL, "Could not make the normal half-life context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 			//exit(-1);
 		}
 	}
@@ -324,7 +329,8 @@ bool CMirrorMgr::InitMirrors()
 
 	if (count == 0)
 	{
-		MessageBox(NULL, "Could not find an acceptable pixel format!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not find an acceptable pixel format!", NULL);
+		//MessageBox(NULL, "Could not find an acceptable pixel format!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 
@@ -354,7 +360,8 @@ bool CMirrorMgr::InitMirrors()
 
 	if (!g_pbuffer.hPBuffer)
 	{
-		MessageBox(NULL, "Could not create Offscreen buffer", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not create Offscreen buffer", NULL);
+		//MessageBox(NULL, "Could not create Offscreen buffer", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 
@@ -391,7 +398,8 @@ bool CMirrorMgr::InitMirrors()
 
 	if (!wglMakeCurrent(g_pbuffer.hDC, g_pbuffer.hRC))
 	{
-		MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not make the p-buffer's context current!", NULL);
+		//MessageBox(NULL, "Could not make the p-buffer's context current!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
 		//exit(-1);
 	}
 
@@ -458,9 +466,10 @@ void CRender::CleanupWGL()
 bool CRender::CheckOpenGL()
 {
 	//Thothie attempting to enable D3D (failed)
-	if (!IEngineStudio.IsHardware() || EngineFunc::CVAR_GetFloat("vid_d3d"))
+	if (!IEngineStudio.IsHardware())
 	{
-		MessageBox(NULL, "Master Sword uses features only available in OpenGL mode! Attempting other modes may result in instability.", "Invalid Video Mode", MB_OK);
+		//MessageBox(NULL, "Master Sword uses features only available in OpenGL mode! Attempting other modes may result in instability.", "Invalid Video Mode", MB_OK);
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Invalid Video Mode", "We make use of features only in OpenGL!", NULL);
 		MSErrorConsoleText("CRender::CheckOpenGL", "User chose non-opengl video mode (semi-fatal)");
 		//exit( 0 );
 		return false;
