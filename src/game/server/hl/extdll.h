@@ -28,7 +28,6 @@
 #define FALSE 0
 #define TRUE 1
 
-typedef unsigned long DWORD;
 typedef unsigned int uint;
 typedef int BOOL;
 
