@@ -29,7 +29,8 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/LinuxToolchain.cmake --fresh
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
+        # run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} -j3
+        run: make -f ${{github.workspace}}/build/msr.mak
 
       - name: Upload Binaries
         uses: actions/upload-artifact@v4
