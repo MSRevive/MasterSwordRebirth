@@ -22,7 +22,7 @@
 #include "hud.h"
 #include "vgui_schememanager.h"
 #include "cvardef.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 #include <string.h>
 #include <vector>

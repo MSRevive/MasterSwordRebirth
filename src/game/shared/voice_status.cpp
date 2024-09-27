@@ -22,7 +22,7 @@
 #include "vgui_loadtga.h"
 #include "vgui_helpers.h"
 #include "vgui_mousecode.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 using namespace vgui;
 

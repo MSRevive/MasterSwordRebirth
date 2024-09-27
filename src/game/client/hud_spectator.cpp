@@ -30,7 +30,7 @@
 #include "vgui_scorepanel.h"
 #include "vgui_menudefsshared.h"
 #include "logger.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 #pragma warning(disable : 4244)
 

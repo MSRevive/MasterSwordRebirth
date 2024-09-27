@@ -227,10 +227,10 @@ source_group("FN" FILES ${FN})
 
 set(Shared
 	"player/playershared.cpp"
+	"../shared/filesystem_shared.cpp"
+	"../shared/filesystem_shared.h"
 	"../shared/ms/buildcontrol.h"
 	"../shared/ms/dbginputs.cpp"
-	"../shared/ms/filesystem_shared.cpp"
-	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
 	"../shared/ms/global.cpp"

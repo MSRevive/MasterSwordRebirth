@@ -323,10 +323,10 @@ source_group("Render" FILES ${Render})
 set(Shared
 	"../server/player/playershared.cpp"
 	"../server/store.h"
+	"../shared/filesystem_shared.cpp"
+	"../shared/filesystem_shared.h"
 	"../shared/ms/buildcontrol.h"
 	"../shared/ms/dbginputs.cpp"
-	"../shared/ms/filesystem_shared.cpp"
-	"../shared/ms/filesystem_shared.h"
 	"../shared/ms/findentities.cpp"
 	"../shared/ms/findentities.h"
 	"../shared/ms/global.cpp"

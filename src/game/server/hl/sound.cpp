@@ -23,7 +23,7 @@
 #include "weapons.h"
 #include "player.h"
 #include "gamerules.h"
-#include "ms/filesystem_shared.h"
+#include "filesystem_shared.h"
 
 #ifdef POSIX
 #include <stdlib.h>
