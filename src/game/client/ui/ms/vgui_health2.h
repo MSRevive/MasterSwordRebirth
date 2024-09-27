@@ -65,16 +65,16 @@ public:
 		//[/Thothie]
 
 		if (m_CurrentAmt < Amt)
-			m_CurrentAmt += min(MaxChange, Amt - m_CurrentAmt);
+			m_CurrentAmt += V_min(MaxChange, Amt - m_CurrentAmt);
 		else if (m_CurrentAmt > Amt)
-			m_CurrentAmt -= min(MaxChange, m_CurrentAmt - Amt);
+			m_CurrentAmt -= V_min(MaxChange, m_CurrentAmt - Amt);
 
 		float frame = (m_CurrentAmt / MaxAmt) * LastFrame;
 		if (frame > 0 && frame < 1)
 			frame = 1; //Cap at 1, unless dead
 		if (frame > LastFrame)
 			frame = LastFrame;
-		frame = max(frame, 0);
+		frame = V_max(frame, 0);
 
 		m_Image.SetFrame(frame);
 

@@ -223,10 +223,10 @@ void VGUI_FadeText::MSInit( float FadeDuration, const char *pszText )
 void VGUI_FadeText::Update( )
 {
 	float TimeRatio = (gpGlobals->time - m_StartTime) / m_FadeDuration;
-	TimeRatio = max(min(TimeRatio,1.0f),0);
+	TimeRatio = V_max(V_min(TimeRatio,1.0f),0);
 	if( m_FadeOut ) TimeRatio = 1.0f - TimeRatio;
 	m_Alpha = 255 * TimeRatio;
-	m_Alpha = 255 - min(m_Alpha,255);
+	m_Alpha = 255 - V_min(m_Alpha,255);
 	Color OldColor = getMSFGColor( );
 	setFgColor( OldColor[0], OldColor[1], OldColor[2], m_Alpha );
 }

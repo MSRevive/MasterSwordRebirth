@@ -297,9 +297,9 @@ void CBeam::SetObjectCollisionBox( void )
 	pev->absmin.x = min( startPos.x, endPos.x );
 	pev->absmin.y = min( startPos.y, endPos.y );
 	pev->absmin.z = min( startPos.z, endPos.z );
-	pev->absmax.x = max( startPos.x, endPos.x );
-	pev->absmax.y = max( startPos.y, endPos.y );
-	pev->absmax.z = max( startPos.z, endPos.z );
+	pev->absmax.x = V_max( startPos.x, endPos.x );
+	pev->absmax.y = V_max( startPos.y, endPos.y );
+	pev->absmax.z = V_max( startPos.z, endPos.z );
 }
 #endif
 

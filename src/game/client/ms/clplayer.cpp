@@ -131,9 +131,9 @@ bool IsPlayerActing()
 void Player_UseStamina(float flAddAmt)
 {
 	player.Stamina -= flAddAmt;
-	player.Stamina = max(player.Stamina, 0);
+	player.Stamina = V_max(player.Stamina, 0);
 	float MaxStamina = player.MaxStamina();
-	player.Stamina = min(player.Stamina, MaxStamina);
+	player.Stamina = V_min(player.Stamina, MaxStamina);
 }
 
 void Player_DoJump()
@@ -143,7 +143,7 @@ void Player_DoJump()
 	//loss for jumping ... TODO: Consider weight?
 	int Weight = player.Weight();
 	float FilledRatio = Weight / player.Volume();
-	FilledRatio = min(FilledRatio, 1.0f);
+	FilledRatio = V_min(FilledRatio, 1.0f);
 	int JumpEnergy = FilledRatio * 4;
 	//player.UseStamina(JumpEnergy);
 	Player_UseStamina(JumpEnergy);
@@ -315,7 +315,7 @@ void CBasePlayer::CheckSpeed()
 	if (player.pev->maxspeed)
 		fSpeed *= (player.pev->maxspeed / 100.0f);
 
-	m_MaxSpeed = max(fSpeed, 0.001);
+	m_MaxSpeed = V_max(fSpeed, 0.001);
 
 	gEngfuncs.Cvar_SetValue("cl_forwardspeed", fSpeed);
 	//if( player.Class && player.Class->id == CLASS_ROGUE )

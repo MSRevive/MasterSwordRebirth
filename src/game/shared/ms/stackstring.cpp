@@ -1,14 +1,7 @@
+#include "Platform.h"
 #include "stackstring.h"
 
 #undef msstring
-
-#ifndef max
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#endif
-
-#ifndef min
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#endif
 
 msstring::msstring()
 {
@@ -56,7 +49,7 @@ char *msstring::c_str() { return data; }
 void msstring::append(const msstring_ref a, size_t length)
 {
 	size_t my_sz = len();
-	size_t capped_sz = min(length, MSSTRING_MAXLEN - my_sz);
+	size_t capped_sz = V_min(length, MSSTRING_MAXLEN - my_sz);
 	if (capped_sz <= 0)
 		return;
 	strncpy(&data[my_sz], a, capped_sz);

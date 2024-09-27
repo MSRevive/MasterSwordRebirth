@@ -103,10 +103,10 @@ int CHudSayText :: Draw( float flTime )
 		return 1;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
+	flScrollTime = V_min( flScrollTime, flTime + m_HUD_saytext_time->value );
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
-	flScrollTime = min( flScrollTime, flTime + m_HUD_saytext_time->value );
+	flScrollTime = V_min( flScrollTime, flTime + m_HUD_saytext_time->value );
 
 	if ( flScrollTime <= flTime )
 	{
@@ -133,7 +133,7 @@ int CHudSayText :: Draw( float flTime )
 				strncpy(line, g_szLineBuffer[i], sizeof(line) - 1);
 				line[sizeof(line) - 1] = '\0';
 
-				const std::size_t playerNameEndIndex = min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
+				const std::size_t playerNameEndIndex = V_min(g_iNameLengths[i], MAX_PLAYER_NAME_LENGTH + 31);
 
 				//Cut off the actual text so we can print player name
 				line[playerNameEndIndex] = '\0';
@@ -225,7 +225,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		}
 	}*/
 
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
+	strncpy( g_szLineBuffer[i], pszBuf, V_max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );

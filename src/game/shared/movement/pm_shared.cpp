@@ -188,8 +188,6 @@ typedef struct hull_s
 
 // double to float warning
 #pragma warning(disable : 4244)
-#define max(a, b) (((a) > (b)) ? (a) : (b))
-#define min(a, b) (((a) < (b)) ? (a) : (b))
 // up / down
 #define PITCH 0
 // left / right
@@ -360,7 +358,7 @@ void PM_InitTextureTypes()
 			continue;
 
 		// null-terminate name and save in sentences array
-		j = min(j, CBTEXTURENAMEMAX - 1 + i);
+		j = V_min(j, CBTEXTURENAMEMAX - 1 + i);
 		buffer[j] = 0;
 		strncpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]), CBTEXTURENAMEMAX);
 	}
@@ -963,7 +961,7 @@ int PM_ClipVelocity(Vector in, Vector normal, Vector &out, float overbounce)
 	if (adjust <= 0.0f)
 	{
 		// min this against a small number (but no further from zero than -DIST_EPSILON) to account for crossing a plane with a near-parallel normal
-		adjust = min(adjust, -DIST_EPSILON);
+		adjust = V_min(adjust, -DIST_EPSILON);
 		for (i=0 ; i<3 ; i++)
 			out[i] -= normal[i]*adjust;
 	}
@@ -2231,7 +2229,7 @@ void PM_Duck(void)
 				pmove->bInDuck = true;
 			}
 
-			time = max(0.0, (1.0 - (float)pmove->flDuckTime / 1000.0));
+			time = V_max(0.0, (1.0 - (float)pmove->flDuckTime / 1000.0));
 
 			if (pmove->bInDuck)
 			{
@@ -3026,7 +3024,7 @@ void PM_DropPunchAngle(Vector &punchangle)
 
 	len = VectorNormalize(punchangle);
 	len -= (10.0 + len * 0.5) * pmove->frametime;
-	len = max(len, 0.0);
+	len = V_max(len, 0.0);
 	VectorScale(punchangle, len, punchangle);
 }
 
@@ -3050,7 +3048,7 @@ void PM_CheckParamters(void)
 	maxspeed = pmove->clientmaxspeed; //atof( pmove->PM_Info_ValueForKey( pmove->physinfo, "maxspd" ) );
 	if (maxspeed != 0.0)
 	{
-		pmove->maxspeed = min(maxspeed, pmove->maxspeed);
+		pmove->maxspeed = V_min(maxspeed, pmove->maxspeed);
 	}
 
 	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground

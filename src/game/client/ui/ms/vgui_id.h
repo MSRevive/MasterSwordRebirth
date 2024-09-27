@@ -157,7 +157,7 @@ public:
 			for (int i = 0; i < 3; i++)
 			{
 				float PrevDelta = gpGlobals->time - m_Label[i]->m_StartTime;
-				PrevDelta = min(PrevDelta, m_Label[i]->m_FadeDuration);
+				PrevDelta = V_min(PrevDelta, m_Label[i]->m_FadeDuration);
 				m_Label[i]->StartFade(true);
 				m_Label[i]->m_StartTime = gpGlobals->time - (m_Label[i]->m_FadeDuration - PrevDelta);
 			}
