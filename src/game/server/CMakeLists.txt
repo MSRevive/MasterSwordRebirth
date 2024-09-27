@@ -60,10 +60,28 @@ endif()
 ################################################################################
 # Source groups
 ################################################################################
-set(HL1
+set(Common
 	"../../common/const.h"
 	"../../common/cstringpool.cpp"
 	"../../common/cstringpool.h"
+	"../../common/Platform.h"
+	"../../common/PlatformWin.h"
+)
+source_group("Common" FILES ${Common})
+
+set(Engine
+	"../../public/engine/progdefs.h"
+)
+source_group("Engine" FILES ${Engine})
+
+set(SDK
+	"../../public/FileSystem.h"
+	"../../public/interface.cpp"
+	"../../public/interface.h"
+)
+source_group("SDK" FILES ${SDK})
+
+set(HL1
 	"basemonster.h"
 	"bmodels.cpp"
 	"cdll_dll.h"
@@ -117,7 +135,6 @@ set(HL1
 	"../shared/movement/pm_math.cpp"
 	"../shared/movement/pm_movevars.h"
 	"../shared/voice_gamemgr.cpp"
-	"../../public/engine/progdefs.h"
 )
 source_group("HL1" FILES ${HL1})
 
@@ -183,13 +200,6 @@ set(Misc
 	"../../public/tier0/pointeroverride.asm"
 )
 source_group("Misc" FILES ${Misc})
-
-set(SDK2013
-	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
-)
-source_group("SDK2013" FILES ${SDK2013})
 
 set(FN
 	"fn/CreateCharacterReq.cpp"
@@ -287,11 +297,13 @@ set(Shared_base64
 source_group("Shared\\base64" FILES ${Shared__base64})
 
 set(ALL_FILES
+	${Common}
+	${Engine}
+	${SDK}
 	${HL1}
 	${MS}
 	${MS_Headers}
 	${Misc}
-	${SDK2013}
 	${FN}
 	${Shared}
 	${Shared_CRC}
