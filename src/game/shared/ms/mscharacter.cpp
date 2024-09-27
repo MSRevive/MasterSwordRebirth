@@ -130,9 +130,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 {
 	bool ValidVersion = false;
 
-	startdbg;
-	dbg("Begin");
-
 	CPlayer_DataBuffer m_File(Size);
 	m_File.Write(pData, Size);
 	byte DataID = CHARDATA_UNKNOWN;
@@ -167,7 +164,6 @@ bool chardata_t::ReadData(void *pData, ulong Size)
 	} while (!m_File.Eof());
 
 	m_File.Close();
-	enddbg;
 
 	return ValidVersion;
 }
