@@ -5,7 +5,7 @@ target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
 else()
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux/libsteam_api.so")
+	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libsteam_api.so")
 endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
