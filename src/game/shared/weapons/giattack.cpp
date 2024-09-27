@@ -26,7 +26,7 @@
 #endif
 
 //extern iBeam;
-bool GetString(char *Return, size_t size, const char *sentence, int start, char *endchars);
+bool GetString(char *Return, size_t size, const char *sentence, int start, const char *endchars);
 #define ReadStat(Name, StatVar, PropVar)            \
 	{                                               \
 		Temp = GetFirstScriptVar(Name);             \

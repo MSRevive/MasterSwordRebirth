@@ -352,7 +352,7 @@ msstring_ref CScript::GetConst(msstring_ref Text)
 	return Text;
 }
 
-bool GetString(char* Return, size_t size, const char* sentence, int start, char* endchars)
+bool GetString(char* Return, size_t size, const char* sentence, int start, const char* endchars)
 {
 	// Quickie function to return the next CMD or parameter in a script string
 	int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
