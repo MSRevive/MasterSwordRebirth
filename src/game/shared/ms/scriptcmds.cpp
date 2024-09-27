@@ -2308,7 +2308,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 					{
 						//might not work without changing this loop to a while
 						int reset_to_iteration = atoi(GetScriptVar("MSC_RESET_LOOP"));
-						m.m_Iteration = unsigned long(reset_to_iteration);
+						m.m_Iteration = static_cast<unsigned long>(reset_to_iteration);
 						i = reset_to_iteration;
 						SetVar("MSC_RESET_LOOP", "-5");
 					}
