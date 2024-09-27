@@ -98,6 +98,6 @@ void dbgtxt( msstring_ref Text );
 #define ERRORPRINT_INFOMSG  (1 << 2)
 #define ERRORPRINT_CVAR     (1 << 3)
 #define ERRORPRINT_POPUP    (1 << 4)
-void ErrorPrint(msstring vsUnqeTag, int vFlags, char *szFmt, ...);
+void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...);
 
 #endif // SHAREDUTIL_H

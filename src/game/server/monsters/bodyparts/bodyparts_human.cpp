@@ -4,8 +4,8 @@
 #include "bodyparts_human.h"
 #include "monsters.h"
 
-extern char * ModelListHumanMale[HUMAN_BODYPARTS];
-extern char* ModelListHumanFemale[HUMAN_BODYPARTS];
+extern const char* ModelListHumanMale[HUMAN_BODYPARTS];
+extern const char* ModelListHumanFemale[HUMAN_BODYPARTS];
 
 CHumanBodypart *CHumanBodypart::Duplicate()
 {

@@ -19,7 +19,7 @@ class CGenericItem;
 class CBodypart : public CBaseEntity
 {
 public:
-	virtual void Initialize(CBaseEntity *pOwner, char *ModelName, int idx);
+	virtual void Initialize(CBaseEntity *pOwner, const char *ModelName, int idx);
 	//virtual float TraceAttack( int iLastHitGroup, CBaseEntity *pInflictor, CBaseEntity *pAttacker, float flDamage, int bitsDamageType );
 	virtual CBodypart *Duplicate(CBodypart *pExistingBodypart = NULL);
 	virtual void Set(int iState, void *vData);

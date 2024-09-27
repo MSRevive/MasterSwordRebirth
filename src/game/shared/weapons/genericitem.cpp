@@ -562,50 +562,42 @@ CGenericItem::~CGenericItem()
 
 void CGenericItem::Deactivate()
 {
-	startdbg;
-
-	dbg("Deallocate Attacks");
 	m_Attacks.clear();
 	m_WearPositions.clear();
 	m_WearModelPositions.clear();
 
-	CurrentAttack = NULL;
+	CurrentAttack = nullptr;
 
-	dbg("Deallocate Pack data");
 	Container_Deactivate();
-	dbg("Deallocate Drink data");
+
 	if (DrinkData)
 	{
-		delete (void*)DrinkData;
-		DrinkData = NULL;
+		delete DrinkData;
+		DrinkData = nullptr;
 	}
-	dbg("Deallocate Armor data");
+
 	if (ArmorData)
 	{
-		delete (void*)ArmorData;
-		ArmorData = NULL;
+		delete ArmorData;
+		ArmorData = nullptr;
 	}
-	dbg("Deallocate Projectile data");
+
 	if (ProjectileData)
 	{
-		delete (void*)ProjectileData;
-		ProjectileData = NULL;
+		delete ProjectileData;
+		ProjectileData = nullptr;
 	}
 #ifdef VALVE_DLL
-	dbg("Deallocate Spell data");
 	Spell_Deactivate();
 #endif
 
-	dbg("Deallocate Script");
 	IScripted::Deactivate();
-
-	enddbg;
 }
 
 void CGenericItem::Spawn()
 {
 	StoreEntity(this, ENT_ME);
-	CurrentAttack = NULL;
+	CurrentAttack = nullptr;
 	SetBits(Properties, ITEM_GENERIC);
 	m_PrefHand = ANY_HAND;
 	ExpireTime = MSITEM_TIME_EXPIRE;

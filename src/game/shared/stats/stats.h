@@ -85,7 +85,7 @@ struct skillcache_t
 
 struct statinfo_t
 {
-	char *Name;
+	const char *Name;
 };
 
 struct skillstatinfo_t

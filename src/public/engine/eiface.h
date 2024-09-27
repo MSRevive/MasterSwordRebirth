@@ -143,9 +143,9 @@ typedef struct enginefuncs_s
 	void		(*pfnGetAimVector)			(edict_t* ent, float speed, float *rgflReturn);
 	void		(*pfnServerCommand)			(const char* str);
 	void		(*pfnServerExecute)			(void);
-	void		(*pfnClientCommand)			(edict_t* pEdict, char* szFmt, ...);
+	void		(*pfnClientCommand)			(edict_t* pEdict, const char* szFmt, ...);
 	void		(*pfnParticleEffect)		(const float *org, const float *dir, float color, float count);
-	void		(*pfnLightStyle)			(int style, char* val);
+	void		(*pfnLightStyle)			(int style, const char* val);
 	int			(*pfnDecalIndex)			(const char *name);
 	int			(*pfnPointContents)			(const float *rgflVector);
 	void		(*pfnMessageBegin)			(int msg_dest, int msg_type, const float *pOrigin, edict_t *ed);
@@ -213,8 +213,8 @@ typedef struct enginefuncs_s
 	void		(*pfnSetKeyValue)			(char *infobuffer, char *key, char *value);
 	void		(*pfnSetClientKeyValue)		(int clientIndex, char *infobuffer, char *key, char *value);
 	int			(*pfnIsMapValid)			(char *filename);
-	void		(*pfnStaticDecal)			( const float *origin, int decalIndex, int entityIndex, int modelIndex );
-	int			(*pfnPrecacheGeneric)		(char* s);
+	void		(*pfnStaticDecal)			(const float *origin, int decalIndex, int entityIndex, int modelIndex);
+	int			(*pfnPrecacheGeneric)		(const char* s);
 	int			(*pfnGetPlayerUserId)		(edict_t *e ); // returns the server assigned userid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
 	void		(*pfnBuildSoundMsg)			(edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch, int msg_dest, int msg_type, const float *pOrigin, edict_t *ed);
 	int			(*pfnIsDedicatedServer)		(void);// is this a dedicated server?

@@ -209,7 +209,7 @@ enum enttype_e
 	ENT_CURRENTPLAYER,	//The player that's running a command
 	ENT_TYPE_TOTAL
 };
-extern char *g_EntTypeByName[ENT_TYPE_TOTAL];
+extern const char *g_EntTypeByName[ENT_TYPE_TOTAL];
 int EntityNameToType(const char *pszName);
 
 //
@@ -585,7 +585,7 @@ public:
 	virtual void UpdateOwner(void) { return; };
 
 	//
-	static CBaseEntity *Create(char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
+	static CBaseEntity *Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
 
 	virtual BOOL FBecomeProne(void) { return FALSE; };
 	edict_t *edict()

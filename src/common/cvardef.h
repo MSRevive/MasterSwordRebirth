@@ -33,7 +33,7 @@
 typedef struct cvar_s
 {
 	char *name;
-	char *string;
+	const char *string;
 	int flags;
 	float value;
 	struct cvar_s *next;

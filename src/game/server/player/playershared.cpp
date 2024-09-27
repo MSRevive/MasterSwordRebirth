@@ -31,7 +31,7 @@ void ShowWeaponDesc(CGenericItem* pItem);
 #include "game.h"
 //END NOTE
 
-char* ModelListHumanMale[HUMAN_BODYPARTS] =
+const char* ModelListHumanMale[HUMAN_BODYPARTS] =
 {
 	MODEL_HUMAN_LEGS,
 	MODEL_HUMAN_HEAD,
@@ -39,7 +39,7 @@ char* ModelListHumanMale[HUMAN_BODYPARTS] =
 	MODEL_HUMAN_ARMS,
 };
 
-char* ModelListHumanFemale[HUMAN_BODYPARTS] =
+const char* ModelListHumanFemale[HUMAN_BODYPARTS] =
 {
 	MODEL_HUMAN_FEM_LEGS,
 	MODEL_HUMAN_FEM_HEAD,

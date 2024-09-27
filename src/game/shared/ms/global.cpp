@@ -65,7 +65,7 @@ msstringlist MSGlobals::DefaultFreeItems; //Free items that come with a new char
 int MSGlobals::DefaultGold = 10;		  //Starting gold
 string_i MSGlobals::DefaultSpawnBoxModel;
 
-IScripted *MSGlobals::GameScript = NULL;
+IScripted *MSGlobals::GameScript = nullptr;
 char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else
 int MSGlobals::ClEntities[CLPERMENT_TOTAL] = {500, 501, 502};
 int MSGlobals::gSoundPrecacheCount = 0;
@@ -302,7 +302,7 @@ genericitem_full_t::operator class CGenericItem *()
 	return pItem;
 }
 
-char *g_EntTypeByName[ENT_TYPE_TOTAL] =
+const char *g_EntTypeByName[ENT_TYPE_TOTAL] =
 	{
 		"ent_lastseen",
 		"ent_lastheard",
@@ -546,7 +546,7 @@ void Print(const char *szFmt, ...)
 	ALERT(at_console, "%s", string);
 }
 
-void Log(char *szFmt, ...)
+void Log(const char *szFmt, ...)
 {
 	if (!logfile.is_open())
 		return;

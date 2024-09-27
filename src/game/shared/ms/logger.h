@@ -125,7 +125,7 @@ extern Logger NullFile;
 extern bool g_log_initialized;
 
 void Print(const char* szFmt, ...);
-void Log(char* szFmt, ...);
+void Log(const char* szFmt, ...);
 void OpenLogFiles();
 
 #define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, msstring_ref(Text))

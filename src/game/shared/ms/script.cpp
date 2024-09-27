@@ -6460,7 +6460,7 @@ bool CScript::Script_SetupEvent(SCRIPT_EVENT& Event, msstringlist* Parameters)
 
 	return m.pScriptedInterface ? m.pScriptedInterface->Script_SetupEvent(this, Event) : true;
 }
-void CScript::ErrorPrintCommand(char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, char* vsText)
+void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, char* vsText)
 {
 #if !TURN_OFF_ALERT
 	msstring                            vsParams;
