@@ -28,4 +28,6 @@ void ValidateScriptsRequest::OnResponse(bool bSuccessful)
 		FNShared::Print("Script file not verified for FN!\n");
 		MSGlobals::CentralEnabled = false;
 	}
+
+	FNShared::Print("Scripts verified for FN.\n");
 }

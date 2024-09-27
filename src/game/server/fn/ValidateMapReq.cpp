@@ -29,4 +29,6 @@ void ValidateMapRequest::OnResponse(bool bSuccessful)
 		SERVER_COMMAND("map edana");
 		MSGlobals::CentralEnabled = false;
 	}
+
+	FNShared::Print("Map '%s' verified for FN.\n", MSGlobals::MapName.c_str());
 }
