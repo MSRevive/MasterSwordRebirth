@@ -13,7 +13,8 @@ class CBasePlayer;
 enum FNPlayerFlags
 {
 	FN_FLAG_BANNED = 0x01,
-	FN_FLAG_ADMIN = 0x02,
+	FN_FLAG_DONOR = 0x02,
+	FN_FLAG_ADMIN = 0x03,
 };
 
 namespace FNShared
