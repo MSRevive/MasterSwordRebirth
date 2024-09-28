@@ -10,7 +10,7 @@
 
 class CBasePlayer;
 
-enum FnPlayerFlags
+enum FNPlayerFlags
 {
 	FN_FLAG_BANNED = 0x01,
 	FN_FLAG_ADMIN = 0x02,
