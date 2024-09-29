@@ -14,7 +14,8 @@ enum FNPlayerFlags
 {
 	FN_FLAG_BANNED = (1 << 0),
 	FN_FLAG_DONOR = (1 << 1),
-	FN_FLAG_ADMIN = (1 << 2),
+	FN_FLAG_DEV = (1 << 2),
+	FN_FLAG_ADMIN = (1 << 3),
 };
 
 namespace FNShared
