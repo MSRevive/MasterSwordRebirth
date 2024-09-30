@@ -73,18 +73,22 @@ void FNShared::ValidateFN(void)
 	//request->SendRequest();
 }
 
-// Get Player Flags from response.
-int FNShared::GetPlayerFlags(const JSONValue& doc)
+// Check if player has BANNED flag.
+bool FNShared::IsBanned(int flags)
 {
-	int flags = 0;
+	return (flags & FN_FLAG_BANNED) == FN_FLAG_BANNED;
+}
 
-	if (doc["isBanned"].GetBool())
-		flags |= FN_FLAG_BANNED;
+// Check if player has DONOR flag.
+bool FNShared::IsDonor(int flags)
+{
+	return (flags & FN_FLAG_DONOR) == FN_FLAG_DONOR;
+}
 
-	if (doc["isAdmin"].GetBool())
-		flags |= FN_FLAG_ADMIN;
-
-	return flags;
+// Check if player has ADMIN flag.
+bool FNShared::IsAdmin(int flags)
+{
+	return (flags & FN_FLAG_ADMIN) == FN_FLAG_ADMIN;
 }
 
 // Load all characters!
