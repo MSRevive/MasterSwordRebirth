@@ -54,6 +54,7 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful)
 
 	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
 	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
+	CharInfo.Flags = flags;
 	CharInfo.Status = CDS_LOADED;
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 }
