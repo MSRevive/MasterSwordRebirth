@@ -1869,7 +1869,7 @@ bool CScript::ScriptCmd_ApplyEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	{
 		CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Params[0] ) : NULL;
 
-		if( pEntity && pEntity->GetScripted() && pEntity->IsAlive() )
+		if( pEntity && pEntity->GetScripted() && ( pEntity->IsAlive() || pEntity->IsMSItem() ) )
 		{
 			IScripted *pScripted = pEntity->GetScripted();
 
