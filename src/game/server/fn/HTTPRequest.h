@@ -22,7 +22,7 @@ public:
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
-	virtual void OnResponse(bool bSuccessful) { }
+	virtual void OnResponse(bool bSuccessful, int iRespCode = 200) { }
 
 	static void SetBaseURL(const char* url);
 

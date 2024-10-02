@@ -147,17 +147,25 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 
 	if (bError || p->m_eStatusCode < 200 || p->m_eStatusCode > 299)
 	{
-		if (!p->m_bRequestSuccessful)
+		if (p->m_eStatusCode == 401)
 		{
-			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), g_szBaseUrl);
-			OnResponse(false);
+			FNShared::Print("FN Authorization failed! %s\n", GetName());
 			ReleaseHandle();
 			return;
 		}
 
-		if (p->m_eStatusCode == 401)
+		if (!p->m_bRequestSuccessful)
 		{
-			FNShared::Print("FN Authorization failed! %s\n", GetName());
+			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), g_szBaseUrl);
+			OnResponse(false, p->m_eStatusCode);
+			ReleaseHandle();
+			return;
+		}
+
+		// Specifically let the children handle 204 errors so they can do what they want.
+		if (p->m_eStatusCode == 204)
+		{
+			OnResponse(true, p->m_eStatusCode);
 			ReleaseHandle();
 			return;
 		}
@@ -184,7 +192,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			pJSONData = ParseJSON(reinterpret_cast<char*>(responseBody), responseBodySize);
 	}
 
-	OnResponse(true);
+	OnResponse(true, p->m_eStatusCode);
 	ReleaseHandle();
 }
 

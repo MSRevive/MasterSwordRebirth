@@ -14,7 +14,7 @@ CreateCharacterRequest::CreateCharacterRequest(ID64 steamID, ID64 slot, const ch
 {
 }
 
-void CreateCharacterRequest::OnResponse(bool bSuccessful)
+void CreateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
 		FNShared::Print("Unable to create character for SteamID %llu!\n", steamID64);

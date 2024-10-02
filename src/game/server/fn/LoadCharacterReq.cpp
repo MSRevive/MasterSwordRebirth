@@ -15,18 +15,18 @@ LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* 
 {
 }
 
-void LoadCharacterRequest::OnResponse(bool bSuccessful)
+void LoadCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
 		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (slot + 1), steamID64);
 
 	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(steamID64);
-	if (pPlayer == NULL)
+	if (pPlayer == nullptr)
 	{
 		FNShared::Print("FATALITY: Unable to get player with SteamID64 %llu\n", steamID64);
 		return;
 	}
-	
+
 	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 
 	if ((pJSONData == NULL) || (bSuccessful == false))

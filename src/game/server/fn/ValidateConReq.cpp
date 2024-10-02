@@ -13,7 +13,7 @@ ValidateConnectivityRequest::ValidateConnectivityRequest(const char* url) :
 {
 }
 
-void ValidateConnectivityRequest::OnResponse(bool bSuccessful)
+void ValidateConnectivityRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

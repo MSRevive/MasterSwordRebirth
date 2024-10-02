@@ -14,6 +14,6 @@ UpdateCharacterRequest::UpdateCharacterRequest(ID64 steamID, ID64 slot, const ch
 {
 }
 
-void UpdateCharacterRequest::OnResponse(bool bSuccessful)
+void UpdateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 }

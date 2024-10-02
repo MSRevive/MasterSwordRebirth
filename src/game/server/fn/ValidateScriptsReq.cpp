@@ -13,7 +13,7 @@ ValidateScriptsRequest::ValidateScriptsRequest(const char* url) :
 {
 }
 
-void ValidateScriptsRequest::OnResponse(bool bSuccessful)
+void ValidateScriptsRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

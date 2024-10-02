@@ -13,7 +13,7 @@ ValidateMapRequest::ValidateMapRequest(const char* url) :
 {
 }
 
-void ValidateMapRequest::OnResponse(bool bSuccessful)
+void ValidateMapRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

@@ -14,7 +14,7 @@ DeleteCharacterRequest::DeleteCharacterRequest(ID64 steamID, ID64 slot, const ch
 {
 }
 
-void DeleteCharacterRequest::OnResponse(bool bSuccessful)
+void DeleteCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
 		FNShared::Print("Unable to delete character for SteamID %llu!\n", steamID64);
