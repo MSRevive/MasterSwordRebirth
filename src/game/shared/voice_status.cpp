@@ -237,7 +237,6 @@ int CVoiceStatus::VidInit()
 {
 	FreeBitmaps();
 
-
 	if (m_pLocalBitmap = vgui_LoadTGA("gfx/vgui/icntlk_pl.tga"))
 	{
 		m_pLocalBitmap->setColor(Color(255, 255, 255, 135));
@@ -250,7 +249,6 @@ int CVoiceStatus::VidInit()
 
 	m_pLocalLabel->setImage(m_pLocalBitmap);
 	m_pLocalLabel->setVisible(false);
-
 
 	if (m_pSpeakerLabelIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/speaker4.tga"))
 		m_pSpeakerLabelIcon->setColor(Color(255, 255, 255, 1));		// Give just a tiny bit of translucency so software draws correctly.
