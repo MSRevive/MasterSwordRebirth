@@ -44,7 +44,7 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_
 	requestState = RequestState::REQUEST_QUEUED;
 	_snprintf(pchApiUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
 
-	requestBody = responseBody = NULL;
+	requestBody = responseBody = nullptr;
 	requestBodySize = responseBodySize = 0;
 	pJSONData = nullptr;
 	handle = NULL;
@@ -52,7 +52,7 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_
 	this->steamID64 = steamID64;
 	this->slot = slot;
 
-	if ((body != NULL) && (bodySize > 0))
+	if ((body != nullptr) && (bodySize > 0))
 	{
 		requestBodySize = bodySize;
 		requestBody = new uint8[requestBodySize];
@@ -77,7 +77,7 @@ void HTTPRequest::SendRequest()
 		return;
 	}
 
-	if (requestBody != NULL)
+	if (requestBody != nullptr)
 	{
 		char steamID64String[REQUEST_URL_SIZE];
 		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", steamID64);
@@ -101,9 +101,9 @@ void HTTPRequest::SendRequest()
 
 		writer.EndObject();
 
-		std::string buffer = s.GetString();
+		const char* buffer = s.GetString();
 
-		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer.data(), buffer.length());
+		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer, strlen(buffer));
 	}
 
 	SteamAPICall_t apiCall = k_uAPICallInvalid;
@@ -181,7 +181,7 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 		responseBody = new uint8[responseBodySize];
 
 		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
-			pJSONData = ParseJSON((char*)responseBody, responseBodySize);
+			pJSONData = ParseJSON(reinterpret_cast<char*>(responseBody), responseBodySize);
 	}
 
 	OnResponse(true);

@@ -35,14 +35,6 @@ void CreateCharacterRequest::OnResponse(bool bSuccessful)
 	}
 
 	const JSONDocument& doc = (*pJSONData);
-
-	const int flags = FNShared::GetPlayerFlags(doc);
-	if ((flags & FN_FLAG_BANNED) != 0)
-	{
-		pPlayer->KickPlayer("You have been banned from FN!");
-		return;
-	}
-
 	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
 	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!

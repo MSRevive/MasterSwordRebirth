@@ -10,10 +10,12 @@
 
 class CBasePlayer;
 
-enum FnPlayerFlags
+// This has match up with user flags defined in the FN server!
+enum FNPlayerFlags
 {
-	FN_FLAG_BANNED = 0x01,
-	FN_FLAG_ADMIN = 0x02,
+	FN_FLAG_BANNED = (1 << 0),
+	FN_FLAG_DONOR = (1 << 1),
+	FN_FLAG_ADMIN = (1 << 2),
 };
 
 namespace FNShared
@@ -23,7 +25,9 @@ namespace FNShared
 	bool IsEnabled(void);
 	void Validate(void);
 	void ValidateFN(void);
-	int GetPlayerFlags(const JSONValue& doc);
+	bool IsBanned(int flags);
+	bool IsDonor(int flags);
+	bool IsAdmin(int flags);
 	void LoadCharacter(CBasePlayer* pPlayer);
 	void LoadCharacter(CBasePlayer* pPlayer, int slot);
 	void CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, uint8* data, size_t size, bool bIsUpdate);

@@ -59,8 +59,8 @@ void FNShared::Validate(void)
 	_snprintf(mapFile, sizeof(mapFile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
 	unsigned int mapFileHash = GetFileCheckSum(mapFile);
 
-	g_FNRequestManager.QueueRequest(new ValidateScriptsRequest(UTIL_VarArgs("/api/v1/sc/%u", scFileHash)));
-	g_FNRequestManager.QueueRequest(new ValidateMapRequest(UTIL_VarArgs("/api/v1/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
+	g_FNRequestManager.QueueRequest(new ValidateScriptsRequest(UTIL_VarArgs("/api/v2/internal/sc/%u", scFileHash)));
+	g_FNRequestManager.QueueRequest(new ValidateMapRequest(UTIL_VarArgs("/api/v2/internal/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
 }
 
 void FNShared::ValidateFN(void)
@@ -68,23 +68,27 @@ void FNShared::ValidateFN(void)
 	if (IsEnabled() == false)
 		return;
 	
-	HTTPRequest* request = new ValidateConnectivityRequest("/api/v1/ping");
+	HTTPRequest* request = new ValidateConnectivityRequest("/api/v2/internal/ping");
 	g_FNRequestManager.QueueRequest(request);
 	//request->SendRequest();
 }
 
-// Get Player Flags from response.
-int FNShared::GetPlayerFlags(const JSONValue& doc)
+// Check if player has BANNED flag.
+bool FNShared::IsBanned(int flags)
 {
-	int flags = 0;
+	return (flags & FN_FLAG_BANNED) == FN_FLAG_BANNED;
+}
 
-	if (doc["isBanned"].GetBool())
-		flags |= FN_FLAG_BANNED;
+// Check if player has DONOR flag.
+bool FNShared::IsDonor(int flags)
+{
+	return (flags & FN_FLAG_DONOR) == FN_FLAG_DONOR;
+}
 
-	if (doc["isAdmin"].GetBool())
-		flags |= FN_FLAG_ADMIN;
-
-	return flags;
+// Check if player has ADMIN flag.
+bool FNShared::IsAdmin(int flags)
+{
+	return (flags & FN_FLAG_ADMIN) == FN_FLAG_ADMIN;
 }
 
 // Load all characters!
@@ -101,7 +105,7 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer)
 		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
 
-		g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, i)));
+		g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)));
 	}
 }
 
@@ -114,7 +118,7 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 
-	g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%llu/%i", pPlayer->steamID64, slot)));
+	g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)));
 }
 
 // Create or Update FN character!
@@ -133,13 +137,13 @@ void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, uint8* da
 
 	if (bIsUpdate)
 	{
-		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid);
+		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid);
 		
 		g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
 	}
 	else
 	{
-		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v1/character/");
+		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/");
 		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 		
@@ -155,5 +159,5 @@ void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 
-	g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v1/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid)));
 }
