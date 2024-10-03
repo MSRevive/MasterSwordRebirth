@@ -162,14 +162,6 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 			return;
 		}
 
-		// Specifically let the children handle 204 errors so they can do what they want.
-		if (p->m_eStatusCode == 204)
-		{
-			OnResponse(true, p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
 		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), p->m_eStatusCode);
 		ReleaseHandle();
 		return;
@@ -178,6 +170,14 @@ void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
 	size_t unBytes = 0;
 	if ((responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
 	{
+		// it should've never gotten to this point but okay.
+		if (p->m_eStatusCode == 204)
+		{
+			OnResponse(true, p->m_eStatusCode);
+			ReleaseHandle();
+			return;
+		}
+
 		if (unBytes <= 0)
 		{
 			FNShared::Print("The data hasn't been received. HTTP code: %d\n", p->m_eStatusCode);
