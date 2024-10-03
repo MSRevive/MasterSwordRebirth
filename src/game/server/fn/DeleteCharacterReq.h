@@ -11,7 +11,8 @@ class DeleteCharacterRequest : public HTTPRequest
 {
 public:
 	DeleteCharacterRequest(ID64 steamID, ID64 slot, const char* url);
-	void OnResponse(bool bSuccessful);
+	void OnResponse(bool bSuccessful, int iRespCode);
+	const char* GetName() { return "DeleteCharacterRequest"; }
 
 private:
 	DeleteCharacterRequest(const DeleteCharacterRequest&);

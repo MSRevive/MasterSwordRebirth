@@ -11,7 +11,7 @@ class ValidateMapRequest : public HTTPRequest
 {
 public:
 	ValidateMapRequest(const char* url);
-	void OnResponse(bool bSuccessful);
+	void OnResponse(bool bSuccessful, int iRespCode);
 	const char* GetName() { return "ValidateMapRequest"; }
 
 private:
