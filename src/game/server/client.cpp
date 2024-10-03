@@ -2103,14 +2103,13 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		return 0;
 
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
-	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	
 	CBaseEntity* pEntity = static_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	// if entity isn't flagged for force send then go through checks.
 	if (!pEntity->FORCESEND)
 	{
 		// don't send if flagged for NODRAW and it's not the host getting the message
-		if ((ent->v.effects == EF_NODRAW) && (ent != host))
+		if ((ent->v.effects & EF_NODRAW) != 0 && (ent != host))
 			return 0;	
 		
 		// Ignore ents without valid / visible models
@@ -2122,7 +2121,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			return 0;
 	
 		// Don't send spectators to other players
-		if ((ent->v.flags & FL_SPECTATOR) && (ent != host))
+		if ((ent->v.flags & FL_SPECTATOR) != 0 && (ent != host))
 			return 0;
 	
 		// Ignore if not the host and not touching a PVS/PAS leaf
@@ -2136,19 +2135,19 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		}
 	
 		// Don't send entity to local client if the client says it's predicting the entity itself.
-		if (ent->v.flags & FL_SKIPLOCALHOST)
+		if ((ent->v.flags & FL_SKIPLOCALHOST) != 0)
 		{
-			if ((hostflags & 1) && (ent->v.owner == host))
+			if ((hostflags & 1) != 0 && (ent->v.owner == host))
 				return 0;
 		}
 	}
 
-	if (host->v.groupinfo)
+	if (0 != host->v.groupinfo)
 	{
 		UTIL_SetGroupTrace(host->v.groupinfo, GROUP_OP_AND);
 
 		// Should always be set, of course
-		if (ent->v.groupinfo)
+		if (0 != ent->v.groupinfo)
 		{
 			if (g_groupop == GROUP_OP_AND)
 			{
@@ -2157,7 +2156,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			}
 			else if (g_groupop == GROUP_OP_NAND)
 			{
-				if (ent->v.groupinfo & host->v.groupinfo)
+				if ((ent->v.groupinfo & host->v.groupinfo) != 0)
 					return 0;
 			}
 		}
@@ -2181,7 +2180,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	state->entityType = ENTITY_NORMAL;
 
 	// Flag custom entities.
-	if (ent->v.flags & FL_CUSTOMENTITY)
+	if ((ent->v.flags & FL_CUSTOMENTITY) != 0)
 	{
 		state->entityType = ENTITY_BEAM;
 	}
@@ -2234,7 +2233,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		state->eflags &= ~EFLAG_SLERP;
 	}
 
-	state->eflags |= entity->m_EFlags;
+	state->eflags |= pEntity->m_EFlags;
 
 	//Master Sword - interpolate arrows in the air
 	//if( ent->v.movetype == MOVETYPE_TOSS && ent->v.scale == 1 )
