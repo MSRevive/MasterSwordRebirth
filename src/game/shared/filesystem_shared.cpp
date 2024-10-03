@@ -108,7 +108,9 @@ std::vector<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileConten
 		return buffer;
 	}
 
+#if DEBUG
 	ALERT(at_console, "FileSystem_LoadFileIntoBuffer: couldn't open file \"%s\" for reading\n", fileName);
+#endif
 	return {};
 }
 
