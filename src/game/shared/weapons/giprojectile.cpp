@@ -17,22 +17,6 @@
 #include "stats/statdefs.h"
 #include "logger.h"
 
-struct projectiledata_t
-{
-	float Damage;
-	float flDamageAOERange;
-	float flDamageAOEAttn;
-	string_i sDamageType;
-	bool CollideHitBox; //Collide with hitboxes instead of just bboxes
-	//Dynamic Data
-	int StatPower, PropPower;
-	int StatExp, PropExp; //Stat and prop that receives exp from this attack
-	entityinfo_t OriginalOwner;
-	float Speed;
-	bool IgnoreNPC;	  //Ignore NPCs, collide with world only
-	bool IgnoreWorld; //Float through walls
-};
-
 #define TypeCheck        \
 	if (!ProjectileData) \
 	return

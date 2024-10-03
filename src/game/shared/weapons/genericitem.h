@@ -171,6 +171,42 @@ CGenericItem *MSUtil_GetItemByID(ulong m_iId, CMSMonster *pOwner); //Retreives a
 #define GI_JUSTSPAWNED (1 << 0)
 #define GI_INPACK (1 << 1)
 
+struct drinkdata_t {
+	int Type, Intensity, IdleAnim;
+	float flEffectDelay, flDrinkDelay;
+	//Dynamic Data
+	bool fDrinking;
+	bool fGulped;
+	float TimeDrinkStart;
+	~drinkdata_t() {}
+};
+
+struct armordata_t
+{
+	int SwapBodyParts; //bodyparts to make invisible when this armor is worn
+	float Protection;
+	string_i Type;
+	mslist<int> m_ProtectionAreas; //bodyparts that the armor protects
+	~armordata_t() {}
+};
+
+struct projectiledata_t
+{
+	float Damage;
+	float flDamageAOERange;
+	float flDamageAOEAttn;
+	string_i sDamageType;
+	bool CollideHitBox; //Collide with hitboxes instead of just bboxes
+	//Dynamic Data
+	int StatPower, PropPower;
+	int StatExp, PropExp; //Stat and prop that receives exp from this attack
+	entityinfo_t OriginalOwner;
+	float Speed;
+	bool IgnoreNPC;	  //Ignore NPCs, collide with world only
+	bool IgnoreWorld; //Float through walls
+	~projectiledata_t() {}
+};
+
 class CGenericItem : public CBasePlayerItem
 {
 public:

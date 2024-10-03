@@ -17,15 +17,6 @@
 	#include "cl_util.h"
 #endif
 
-struct drinkdata_t {
-	int Type, Intensity, IdleAnim;
-	float flEffectDelay, flDrinkDelay;
-	//Dynamic Data
-	bool fDrinking;
-	bool fGulped;
-	float TimeDrinkStart;
-};
-
 #define DrinkableCheck if( !DrinkData ) return
 
 void CGenericItem::RegisterDrinkable( )

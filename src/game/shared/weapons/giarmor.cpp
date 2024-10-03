@@ -12,14 +12,6 @@
 
 #include "inc_weapondefs.h"
 
-struct armordata_t
-{
-	int SwapBodyParts; //bodyparts to make invisible when this armor is worn
-	float Protection;
-	string_i Type;
-	mslist<int> m_ProtectionAreas; //bodyparts that the armor protects
-};
-
 #define TypeCheck   \
 	if (!ArmorData) \
 	return
