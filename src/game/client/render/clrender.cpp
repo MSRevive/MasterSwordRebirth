@@ -461,11 +461,6 @@ void CRender::PopHLStates()
 
 void DLLEXPORT HUD_DrawNormalTriangles(void)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Begin");
-
 	/*if( CMirrorMgr::m_CurrentMirror.Enabled 
 		&& OldVisFrame > -1 )
 	{
@@ -489,8 +484,6 @@ void DLLEXPORT HUD_DrawNormalTriangles(void)
 			CMirrorMgr::m_CurrentMirror.Mirror->Frame_NoRender = true;
 		}
 	}*/
-
-	enddbg;
 }
 
 /*
@@ -504,11 +497,6 @@ Render any triangles with transparent rendermode needs here
 //Draw Mirrors
 void DLLEXPORT HUD_DrawTransparentTriangles(void)
 {
-	DBG_INPUT;
-
-	startdbg;
-	dbg("Begin");
-
 	CRender::PushHLStates();
 
 	RenderFog();
@@ -524,8 +512,6 @@ void DLLEXPORT HUD_DrawTransparentTriangles(void)
 		if( clWorldEnt->model->nodes[0].visframe == 0 )
 			clWorldEnt->model->nodes[0].visframe = OldVisFrame;
 	}*/
-
-	enddbg;
 }
 
 void CRender::Cleanup()
@@ -591,7 +577,6 @@ void VGUI_Image3D::init()
 
 void VGUI_Image3D::LoadImg()
 {
-	startdbg;
 	if (m_ImageLoaded)
 		return;
 
@@ -600,24 +585,18 @@ void VGUI_Image3D::LoadImg()
 
 	if (m_TGAorSprite)
 	{
-		dbg("Load TGA");
 		msstring FileName = msstring("gfx/vgui/") + m_ImageName + ".tga";
 
-		dbg(msstring("TGA Name = ") + FileName);
-
 		loadtex_t LoadTex;
-		dbg("Call LoadGLTexture");
 		m_ImageLoaded = LoadGLTexture(FileName, LoadTex);
 		if (m_ImageLoaded)
 		{
-			dbg("LoadGLTexture Succeeded");
 			m_Particle->m_GLTex = LoadTex.GLTexureID;
 			m_Particle->m_TexCoords[0] = Vector2D(LoadTex.CoordU, 0);
 			m_Particle->m_TexCoords[1] = Vector2D(LoadTex.CoordU, LoadTex.CoordV);
 			m_Particle->m_TexCoords[2] = Vector2D(0, LoadTex.CoordV);
 			m_Particle->m_TexCoords[3] = Vector2D(0, 0);
 		}
-		dbg("Post Call LoadGLTexture");
 	}
 	else
 	{
@@ -625,8 +604,6 @@ void VGUI_Image3D::LoadImg()
 		m_Particle->m_Texture = (model_s *)gEngfuncs.GetSpritePointer(m_SpriteHandle);
 		m_ImageLoaded = m_Particle->m_Texture ? true : false;
 	}
-
-	enddbg;
 }
 void VGUI_Image3D::paintBackground()
 {
@@ -680,26 +657,19 @@ bool LoadGLTexture(const char *FileName, loadtex_t &LoadTex)
 {
 	bool Loaded = false;
 
-	startdbg;
-
-	dbg("Enter LoadGLTexture()");
-	dbg("Find Existing texture...");
 	for (int i = 0; i < g_TextureList.size(); i++)
 	{
 		if (g_TextureList[i].Name == FileName)
 		{
 			LoadTex = (loadtex_t)g_TextureList[i];
-			dbg("Existing texture found");
 			return true;
 		}
 	}
 
-	dbg("Existing texture not found, Call LoadTextureFile");
 	Loaded = Tartan::LoadTextureFile(FileName, LoadTex);
 
 	if (Loaded)
 	{
-		dbg("Texture Found");
 		gltexture_t Newtexture;
 		loadtex_t &LT = Newtexture;
 		LT = LoadTex;
@@ -708,11 +678,8 @@ bool LoadGLTexture(const char *FileName, loadtex_t &LoadTex)
 	}
 	else
 	{
-		dbg("Texture not found");
 		Print("Missing MS Texture: %s\n", FileName);
 	}
-
-	enddbg;
 
 	return Loaded;
 }

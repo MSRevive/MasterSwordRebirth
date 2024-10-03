@@ -438,8 +438,6 @@ DLL_GLOBAL bool g_fInPrecache = false; //Used in CWorld::Precache and CMSMonster
 
 void CWorld ::Precache(void)
 {
-	startdbg;
-
 	g_fInPrecache = true;
 
 	//CVAR_SET_STRING("sv_gravity", "800"); // 67ft/sec
@@ -605,8 +603,6 @@ void CWorld ::Precache(void)
 		gDisplayTitle = FALSE;
 
 	g_fInPrecache = false;
-
-	enddbg;
 }
 
 //

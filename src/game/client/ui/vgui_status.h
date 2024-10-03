@@ -119,8 +119,8 @@ public:
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
 
-		 strncpy(m_ImgName,  Img, sizeof(m_ImgName) );
-		 strncpy(m_Name,  Name, sizeof(m_Name) );
+		strncpy(m_ImgName, Img, sizeof(m_ImgName));
+		strncpy(m_Name, Name, sizeof(m_Name));
 		m_Time = gpGlobals->time;
 		m_Dur = Dur;
 
