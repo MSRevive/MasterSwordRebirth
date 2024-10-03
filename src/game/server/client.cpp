@@ -2099,13 +2099,13 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	// the index is sent with only 11 bits of precision (2^11 == 2048).
 	// So we don't send them, just like having too many entities would result
 	// in the entity not being sent.
-	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	if (e >= MAX_EDICTS)
 		return 0;
 
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
+	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	
-	CBaseEntity *pEntity = GetClassPtr((CBaseEntity *)&ent->v);
+	CBaseEntity* pEntity = static_cast<CBaseEntity*>(GET_PRIVATE(ent));
 	// if entity isn't flagged for force send then go through checks.
 	if (!pEntity->FORCESEND)
 	{
@@ -2293,7 +2293,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 
 	// HACK:  Somewhat...
 	// Class is overridden for non-players to signify a breakable glass object ( sort of a class? )
-	//if ( !player )
+	if ( !player )
 	{
 		state->playerclass = ent->v.playerclass;
 	}
@@ -2322,6 +2322,11 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)&ent->v);
 		state->fuser1 = pPlayer->m_GaitFramerateGauge;
 	}
+
+	if (pEntity && pEntity->Classify() != CLASS_NONE && pEntity->Classify() != CLASS_MACHINE)
+		state->eflags |= EFLAG_FLESH_SOUND;
+	else
+		state->eflags &= ~EFLAG_FLESH_SOUND;
 
 	return 1;
 }

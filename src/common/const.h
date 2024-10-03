@@ -112,6 +112,7 @@
 
 // entity flags
 #define EFLAG_SLERP 1 // do studio interpolation of this entity
+#define EFLAG_FLESH_SOUND 2
 
 //
 // temp entity events
