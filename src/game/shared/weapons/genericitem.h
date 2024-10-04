@@ -431,7 +431,7 @@ public:
 };
 #ifdef VALVE_DLL
 void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage);
-void SendGenericItem(CBasePlayer *pPlayer, genericitem_full_t &Item, bool fNewMessage);
+//void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage);
 #else
 CGenericItem *ReadGenericItem(bool fAllowCreateNew);
 #endif
