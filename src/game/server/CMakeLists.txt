@@ -196,11 +196,6 @@ set(MS_Headers
 )
 source_group("MS\\Headers" FILES ${MS_Headers})
 
-set(Misc
-	"../../public/tier0/pointeroverride.asm"
-)
-source_group("Misc" FILES ${Misc})
-
 set(FN
 	"fn/CreateCharacterReq.cpp"
 	"fn/CreateCharacterReq.h"
@@ -303,7 +298,6 @@ set(ALL_FILES
 	${HL1}
 	${MS}
 	${MS_Headers}
-	${Misc}
 	${FN}
 	${Shared}
 	${Shared_CRC}

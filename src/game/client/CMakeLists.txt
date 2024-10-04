@@ -295,11 +295,6 @@ set(MS_Generic_Item
 )
 source_group("MS\\Generic Item" FILES ${MS_Generic_Item})
 
-set(Misc
-	"../../public/tier0/pointeroverride.asm"
-)
-source_group("Misc" FILES ${Misc})
-
 set(Render
 	"render/clrender.cpp"
 	"render/clrender.h"
@@ -458,7 +453,6 @@ set(ALL_FILES
 	${MS}
 	${MS_Headers}
 	${MS_Generic_Item}
-	${Misc}
 	${Render}
 	${Shared}
 	${Shared_CRC}
