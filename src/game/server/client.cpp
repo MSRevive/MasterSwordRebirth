@@ -2104,7 +2104,8 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 
 	//if( FBitSet( ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE ) )
 	
-	CBaseEntity* pEntity = static_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	auto entity = reinterpret_cast<CBaseEntity*>(GET_PRIVATE(ent));
+	CBaseEntity* pEntity = GetClassPtr((CBaseEntity*)&ent->v);
 	// if entity isn't flagged for force send then go through checks.
 	if (!pEntity->FORCESEND)
 	{
@@ -2233,7 +2234,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 		state->eflags &= ~EFLAG_SLERP;
 	}
 
-	state->eflags |= pEntity->m_EFlags;
+	state->eflags |= entity->m_EFlags;
 
 	//Master Sword - interpolate arrows in the air
 	//if( ent->v.movetype == MOVETYPE_TOSS && ent->v.scale == 1 )
