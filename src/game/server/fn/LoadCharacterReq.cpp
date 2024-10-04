@@ -39,7 +39,7 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 	}
 
 	const JSONDocument& doc = (*pJSONData);
-	const int flags = doc["extradata"]["userflags"].GetInt();
+	const int flags = doc["data"]["flags"].GetInt();
 
 	if (FNShared::IsBanned(flags) == true)
 	{

@@ -35,10 +35,10 @@ void CreateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 	}
 
 	const JSONDocument& doc = (*pJSONData);
-	const int flags = doc["extradata"]["userflags"].GetInt();
+	const int flags = doc["data"]["flags"].GetInt();
 
 	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
-	strncpy(CharInfo.Guid, doc["data"].GetString(), MSSTRING_SIZE);
+	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
 	CharInfo.Flags = flags;
 	CharInfo.Status = CDS_LOADED;
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
