@@ -342,6 +342,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		dbg("Initiate attack");
 		SetBits(m_pOwner->m_StatusFlags, PLAYER_MOVE_ATTACKING);
 		CallScriptEvent(CurrentAttack->CallbackName + "_start");
+		if (!CurrentAttack) return true; //Was canceled at the start
 
 		CurrentAttack->tStart = CurrentAttack->tTrueStart = (gpGlobals ? gpGlobals->time : 0.0f);
 		CurrentAttack->fAttackLanded = false;
