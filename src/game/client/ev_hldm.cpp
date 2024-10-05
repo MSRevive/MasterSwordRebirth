@@ -69,7 +69,7 @@ extern "C"
 // returns volume of strike instrument (crowbar) to play
 float EV_HLDM_PlayTextureSound(int idx, pmtrace_t *ptr, float *vecSrc, float *vecEnd, int iBulletType)
 {
-	//return 0;
+	return 0;
 	// hit the world, try to play sound based on texture material type
 	char chTextureType = CHAR_TEX_CONCRETE;
 	cl_entity_t* cl_entity = nullptr;
