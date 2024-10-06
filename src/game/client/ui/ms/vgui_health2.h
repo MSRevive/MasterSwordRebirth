@@ -117,9 +117,9 @@ public:
 		SetBGColorRGB(Color_Transparent);
 
 		m_HUDImage.setParent(this);
-		m_HUDImage.LoadImg("hud_main2", true, false);
+		//m_HUDImage.LoadImg("hud_main2", true, false);
 		//m_HUDImage.setFgColor( 255, 255, 255, 255 );
-		m_HUDImage.setSize(getWide(), getTall());
+		//m_HUDImage.setSize(getWide(), getTall());
 
 //Health and mana flasks
 #define FLASK_START_X XRES(30)
