@@ -276,7 +276,7 @@ int DLLEXPORT HUD_VidInit(void)
 {
 	gClient.VideoInit();
 
-	VGUISystem::Startup();
+	VGui_Startup();
 
 	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]\n";
 
