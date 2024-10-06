@@ -171,12 +171,10 @@ void MSCLGlobals::InitializePlayer()
 		MSCLGlobals::CLViewEntities[i].curstate.number = MSGlobals::ClEntities[(i != 2) ? CLPERMENT_LEFTVIEW + i : CLPERMENT_LEFTVIEW];
 	}
 }
+
 //Global think - sure to be called every frame
 void MSCLGlobals::Think()
 {
-	startdbg;
-	dbg("Begin");
-
 	static float flLastThinkTime = 0;
 	gpGlobals->time = gEngfuncs.GetClientTime();
 	gpGlobals->frametime = gpGlobals->time - flLastThinkTime;
@@ -185,24 +183,21 @@ void MSCLGlobals::Think()
 
 	//Delete entities with |FL_KILLME
 	//Count backward
-	dbg("Delete entities with |FL_KILLME");
 	for (int e = m_ClEntites.size() - 1; e >= 0; e--)
 		if (FBitSet(m_ClEntites[e]->pev->flags, FL_KILLME))
 			RemoveEnt(m_ClEntites[e]);
 
 	//Call entity Think() functions
-	dbg("Call entity Think() functions");
 	for (int e = 0; e < m_ClEntites.size(); e++)
 		if (flLastThinkTime <= m_ClEntites[e]->pev->nextthink && m_ClEntites[e]->pev->nextthink < gpGlobals->time)
 			m_ClEntites[e]->Think();
 
-	dbg("Update GUI");
 	VGUI_Think();
 
 	//Last task
 	flLastThinkTime = gpGlobals->time;
-	enddbg;
 }
+
 void MSCLGlobals::PrintAllEntites()
 {
 	Print("Global Items...\n");
@@ -251,14 +246,17 @@ void MSCLGlobals::RemoveAllEntities()
 	//Re-initialize player
 	InitializePlayer();
 }
+
 void MSCLGlobals::EndMap()
 {
 	ChooseChar_Interface::CentralServer = false; //Reset
 }
+
 void MSCLGlobals::DLLDetach()
 {
 	player.Deactivate();
 }
+
 int MSCLGlobals::GetLocalPlayerIndex()
 {
 	cl_entity_t *clPlayer = gEngfuncs.GetLocalPlayer();
@@ -270,6 +268,7 @@ const char *EngineFunc::GetGameDir()
 {
 	return gEngfuncs.pfnGetGameDirectory();
 }
+
 void AlertMessage(ALERT_TYPE atype, const char *szFmt, ...)
 {
 	static char string[1024];
@@ -282,6 +281,7 @@ void AlertMessage(ALERT_TYPE atype, const char *szFmt, ...)
 	ConsolePrint("cl: ");
 	ConsolePrint(string);
 }
+
 char* UTIL_VarArgs(const char *format, ...)
 {
 	static char string[1024];

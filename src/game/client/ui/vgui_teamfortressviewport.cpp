@@ -99,19 +99,12 @@ void VGUI_Think()
 	if (!gViewPort)
 		return;
 
-	/*
-	 for (int i = 0; i < gViewPort->m_Menus.size(); i++) 
-		gViewPort->m_Menus[i]->Think( );
-	*/
-
-	startdbg;
 	for (int i = 0; i < gViewPort->m_Menus.size(); i++)
 	{
-		dbg(i);
 		gViewPort->m_Menus[i]->Think();
 	}
-	enddbg;
 }
+
 class CMenuPanel *CreateNewCharacterPanel();
 
 extern int g_iVisibleMouse;

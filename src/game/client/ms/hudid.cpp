@@ -60,20 +60,15 @@ void CHudID ::InitHUDData(void)
 
 int CHudID::Draw(float flTime)
 {
-	startdbg;
-	dbg("Begin");
-
 	if (!FBitSet(m_iFlags, HUD_ACTIVE) || !ShowHUD())
 		return 1;
 	if (player.m_CharacterState == CHARSTATE_UNLOADED)
 		return 1;
 
-	dbg("Call SearchThink");
 	SearchThink();
 	//if( Alpha <= 0 || !pDrawInfo || !pDrawInfo->Name.len() ) return 1;
 
 	HUD_DrawID(pDrawInfo);
-	enddbg;
 
 	return 1;
 

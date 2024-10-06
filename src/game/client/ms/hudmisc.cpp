@@ -149,14 +149,10 @@ HLSPRITE CHudMisc::GetCrosshairSprite(int type)
 
 void CHudMisc::Think(void)
 {
-	startdbg;
 	//SaveCharSend(); //Done every frame so I can retry the connect
 
 	//Handle character upload to server
-	dbg("Think_SendCharData");
 	MSChar_Interface::Think_SendChar(&player);
-
-	enddbg;
 }
 
 void CHudMisc ::UserCmd_ChangeSayType(void)

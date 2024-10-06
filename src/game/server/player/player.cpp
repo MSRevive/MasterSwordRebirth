@@ -3619,9 +3619,6 @@ extern cvar_t ms_serverchar;
 
 void CBasePlayer::UpdateClientData(void)
 {
-	startdbg;
-	dbg("Begin");
-
 	bool fConnectedThisFrame = false;
 	bool bShouldSaveChar = false;
 
@@ -3631,7 +3628,6 @@ void CBasePlayer::UpdateClientData(void)
 		//Thothie nothing changed here, but somewhere whithin we are getting:
 		//Error (SERVER): Error: CBasePlayer::UpdateClientData --> Call InitHUD
 		//Maybe caused by a script, not sure
-		dbg("Init HUD");
 		m_fInitHUD = FALSE;
 		gInitHUD = FALSE;
 
@@ -3641,7 +3637,6 @@ void CBasePlayer::UpdateClientData(void)
 
 		if (!m_fGameHUDInitialized)
 		{
-			dbg("Send InitHUD MSG");
 			MESSAGE_BEGIN(MSG_ONE, gmsgInitHUD, NULL, pev);
 			WRITE_STRING_LIMIT(CVAR_GET_STRING("hostname"), 64);
 			WRITE_STRING_LIMIT(STRING(gpGlobals->mapname), 32);
@@ -3692,7 +3687,6 @@ void CBasePlayer::UpdateClientData(void)
 			MESSAGE_END();
 
 			m_fGameHUDInitialized = TRUE;
-			dbg("Call InitHUD");
 			InitHUD();
 			fConnectedThisFrame = true;
 		}
@@ -3701,7 +3695,6 @@ void CBasePlayer::UpdateClientData(void)
 		FireTargets("game_playerspawn", this, this, USE_TOGGLE, 0);
 	}
 
-	dbg("Other Messages");
 	if (FBitSet(m_iHideHUD, HIDEHUD_ALL))
 		return;
 
@@ -4117,8 +4110,6 @@ void CBasePlayer::UpdateClientData(void)
 		UpdateStatusBar();
 		m_flNextSBarUpdateTime = gpGlobals->time + 0.2;
 	}*/
-
-	enddbg("CBasePlayer::UpdateClientData()");
 }
 
 //=========================================================

@@ -151,9 +151,6 @@ void Player_DoJump()
 
 void CBasePlayer::Think(void)
 {
-	startdbg;
-
-	dbg("Begin");
 	cl_entity_s* clplayer = gEngfuncs.GetLocalPlayer();
 	pev->iuser1 = clplayer->index;
 	pev->origin = clplayer->origin;
@@ -169,13 +166,10 @@ void CBasePlayer::Think(void)
 
 	//g_flHealth = m_HP; //For code that doesn't include entity headers
 
-	dbg("Call CheckSpeed");
 	CheckSpeed();
 
-	dbg("Call gHUD.m_Fatigue->DoThink");
 	gHUD.m_Fatigue->DoThink();
 
-	dbg("Call Script Event game_think");
 	gHUD.m_HUDScript->CallScriptEvent("game_think");
 
 	//If I auto-used an item, return to original item when the attack is done
@@ -199,13 +193,10 @@ void CBasePlayer::Think(void)
 
 	//	Print( "Entities: %i\n", MS_CLGlobals->num_ents );
 	pev->nextthink = gpGlobals->time;
-
-	enddbg;
 }
 
 void CBasePlayer::DoSprint()
 {
-
 	//she's dead jim
 	if (pev->deadflag != DEAD_NO)
 		return;
@@ -541,9 +532,6 @@ Run ItemPostFrame() as nessesary
 */
 void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd, double time, unsigned int random_seed)
 {
-	startdbg;
-	dbg("Begin");
-
 	if (player.m_CharacterState == CHARSTATE_UNLOADED)
 		return;
 
@@ -565,7 +553,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	player.pev->button = cmd->buttons;
 
-	dbg("SetKeys");
 	player.SetKeys();
 
 	if (FBitSet(player.pbs.ButtonsDown, IN_ATTACK))
@@ -615,8 +602,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	//if( !player.IsAlive() ) return;
 
-	dbg("Set variables");
-
 	// For random weapon events, use this seed to seed random # generator
 	player.random_seed = random_seed;
 
@@ -662,7 +647,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	}*/
 
 	// Assume that we are not going to switch weapons
-	dbg("Preserve states");
 	to->client.m_iId = from->client.m_iId;
 
 	// Copy in results of prediction code
@@ -682,8 +666,6 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 
 	// Wipe it so we can't use it after this frame
 	g_finalstate = NULL;
-
-	enddbg;
 }
 /*
 =====================
@@ -698,16 +680,12 @@ be ignored
 */
 void _DLLEXPORT HUD_PostRunCmd(struct local_state_s* from, struct local_state_s* to, struct usercmd_s* cmd, int runfuncs, double time, unsigned int random_seed)
 {
-	DBG_INPUT;
-	startdbg;
 	g_runfuncs = runfuncs;
 
 	// Only run post think on client-predicted frames, not the server
 	// sync frames (which are usually late)
 	if (runfuncs)
 		HUD_WeaponsPostThink(from, to, cmd, time, random_seed);
-
-	enddbg;
 	//Print( "%f %f / %f %f\n", from->playerstate.origin.x, from->playerstate.origin.y, to->playerstate.origin.x, to->playerstate.origin.y );
 }
 

@@ -254,7 +254,7 @@ void W_Precache(void)
 	//NOV2010_28 - Thothie: Major ancient bugger up fix masked by casual
 	//- this was often resulting in wrong map script name, as was not set to lower case!
 	char toconv[256];
-	 strncpy(toconv,  STRING(gpGlobals->mapname), sizeof(toconv) );
+	strncpy(toconv, STRING(gpGlobals->mapname), sizeof(toconv));
 	MSGlobals::MapName = _strlwr(toconv);
 
 	MSGlobalItemInit();
@@ -306,13 +306,13 @@ void W_Precache(void)
 #endif
 
 TYPEDESCRIPTION CBasePlayerItem::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBasePlayerItem, m_pPlayer, FIELD_CLASSPTR),
-		DEFINE_FIELD(CBasePlayerItem, m_pNext, FIELD_CLASSPTR),
-		//DEFINE_FIELD( CBasePlayerItem, m_fKnown, FIELD_INTEGER ),Reset to zero on load
-		DEFINE_FIELD(CBasePlayerItem, m_iId, FIELD_INTEGER),
-		// DEFINE_FIELD( CBasePlayerItem, m_iIdPrimary, FIELD_INTEGER ),
-		// DEFINE_FIELD( CBasePlayerItem, m_iIdSecondary, FIELD_INTEGER ),
+{
+	DEFINE_FIELD(CBasePlayerItem, m_pPlayer, FIELD_CLASSPTR),
+	DEFINE_FIELD(CBasePlayerItem, m_pNext, FIELD_CLASSPTR),
+	//DEFINE_FIELD( CBasePlayerItem, m_fKnown, FIELD_INTEGER ),Reset to zero on load
+	DEFINE_FIELD(CBasePlayerItem, m_iId, FIELD_INTEGER),
+	// DEFINE_FIELD( CBasePlayerItem, m_iIdPrimary, FIELD_INTEGER ),
+	// DEFINE_FIELD( CBasePlayerItem, m_iIdSecondary, FIELD_INTEGER ),
 };
 
 #ifndef ISCLIENT
@@ -320,16 +320,16 @@ IMPLEMENT_SAVERESTORE(CBasePlayerItem, CBaseAnimating);
 #endif
 
 TYPEDESCRIPTION CBasePlayerWeapon::m_SaveData[] =
-	{
-		DEFINE_FIELD(CBasePlayerWeapon, m_flNextPrimaryAttack, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayerWeapon, m_flNextSecondaryAttack, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayerWeapon, m_flTimeWeaponIdle, FIELD_TIME),
-		DEFINE_FIELD(CBasePlayerWeapon, m_iPrimaryAmmoType, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayerWeapon, m_iSecondaryAmmoType, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
-		DEFINE_FIELD(CBasePlayerWeapon, m_iDefaultAmmo, FIELD_INTEGER),
-		//	DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER )	 , reset to zero on load so hud gets updated correctly
-		//  DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
+{
+	DEFINE_FIELD(CBasePlayerWeapon, m_flNextPrimaryAttack, FIELD_TIME),
+	DEFINE_FIELD(CBasePlayerWeapon, m_flNextSecondaryAttack, FIELD_TIME),
+	DEFINE_FIELD(CBasePlayerWeapon, m_flTimeWeaponIdle, FIELD_TIME),
+	DEFINE_FIELD(CBasePlayerWeapon, m_iPrimaryAmmoType, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayerWeapon, m_iSecondaryAmmoType, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayerWeapon, m_iClip, FIELD_INTEGER),
+	DEFINE_FIELD(CBasePlayerWeapon, m_iDefaultAmmo, FIELD_INTEGER),
+	//	DEFINE_FIELD( CBasePlayerWeapon, m_iClientClip, FIELD_INTEGER )	 , reset to zero on load so hud gets updated correctly
+	//  DEFINE_FIELD( CBasePlayerWeapon, m_iClientWeaponState, FIELD_INTEGER ), reset to zero on load so hud gets updated correctly
 };
 
 #ifndef ISCLIENT

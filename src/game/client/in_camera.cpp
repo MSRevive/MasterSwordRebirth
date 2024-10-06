@@ -147,9 +147,6 @@ extern trace_t SV_ClipMoveToEntity (edict_t *ent, vec3_t start, vec3_t mins, vec
 */
 void DLLEXPORT CAM_Think(void)
 {
-	DBG_INPUT;
-	startdbg;
-
 	vec3_t origin;
 	vec3_t ext, pnt, camForward, camRight, camUp;
 	//moveclip_t	clip;
@@ -445,8 +442,6 @@ void DLLEXPORT CAM_Think(void)
 	cam_ofs[ 1 ] = camAngles[ 1 ];
 	cam_ofs[ 2 ] = camAngles[ 2 ];//dist;*/
 	cam_ofs = camAngles;
-
-	enddbg;
 }
 
 extern void KeyDown(kbutton_t *b); // HACK

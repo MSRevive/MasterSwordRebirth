@@ -89,10 +89,7 @@ void CHudScript::InitHUDData( void )
 // Think
 void CHudScript::Think( )
 {
-	startdbg;
-	dbg( "RunScriptEvents" );
 	RunScriptEvents( );
-	enddbg;
 }
 
 //Receieved new client-side script

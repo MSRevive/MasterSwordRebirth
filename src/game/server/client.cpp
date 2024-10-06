@@ -157,11 +157,8 @@ void ClientDisconnect(edict_t *pEntity)
 // called by ClientKill and DeadThink
 void respawn(entvars_t *pev, BOOL fCopyCorpse)
 {
-	startdbg;
 	// respawn player
 	GetClassPtr((CBasePlayer *)pev)->Spawn();
-
-	enddbg;
 }
 
 /*
@@ -1732,16 +1729,10 @@ Called every frame before physics are run
 */
 void PlayerPreThink(edict_t *pEntity)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Begin");
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
 		pPlayer->PreThink();
-
-	enddbg;
 }
 
 /*
@@ -1754,26 +1745,18 @@ Called every frame after physics are run
 
 void PlayerPostThink(edict_t *pEntity)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Begin");
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
 		pPlayer->PostThink();
-
-	enddbg;
 }
 
 void ParmsNewLevel(void)
 {
-	DBG_INPUT;
 }
 
 void ParmsChangeLevel(void)
 {
-	DBG_INPUT;
 	// retrieve the pointer to the save data
 	SAVERESTOREDATA *pSaveData = (SAVERESTOREDATA *)gpGlobals->pSaveData;
 
@@ -1786,16 +1769,11 @@ void ParmsChangeLevel(void)
 //
 void StartFrame(void)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Call MSGlobals::SharedThink");
 	MSGlobals::SharedThink();
 
 	if (gpGlobals->time > CSoundEnt::m_gSoundEnt.m_TimeLastThink + 0.3f)
 		CSoundEnt::m_gSoundEnt.Think();
 
-	dbg("Call g_pGameRules->Think");
 	if (g_pGameRules)
 		g_pGameRules->Think();
 
@@ -1805,8 +1783,6 @@ void StartFrame(void)
 	//gpGlobals->teamplay = CVAR_GET_FLOAT("teamplay");
 	//g_iSkillLevel = CVAR_GET_FLOAT("skill");
 	g_ulFrameCount++;
-
-	enddbg;
 }
 
 void ClientPrecache(void)
@@ -2006,7 +1982,6 @@ A spectator has left the game
 */
 void SpectatorDisconnect(edict_t *pEntity)
 {
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
@@ -2023,7 +1998,6 @@ A spectator has sent a usercmd
 */
 void SpectatorThink(edict_t *pEntity)
 {
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
