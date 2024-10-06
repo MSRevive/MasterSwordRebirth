@@ -1063,6 +1063,7 @@ public:
 		}
 	}
 };
+
 class VGUI_MainPanel : public CTransparentPanel
 {
 public:
