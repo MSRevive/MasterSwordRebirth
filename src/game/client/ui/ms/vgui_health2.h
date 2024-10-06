@@ -88,7 +88,7 @@ public:
 	}
 };
 
-class VGUI_Health2 : public Panel, public IHUD_Interface
+class VGUI_Health2 : public Panel, public IHUD
 {
 protected:
 	float vChargeLevelAmt = 0;

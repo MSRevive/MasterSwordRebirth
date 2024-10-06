@@ -2,9 +2,11 @@
 //  This should only be included by vgui_HUD.cpp
 //
 
+#include "vgui_ihud.h"
+
 static COLOR Color_VoteTitle(255, 0, 0, 20);
 
-class VGUI_VoteInfo : public Panel, public IHUD_Interface
+class VGUI_VoteInfo : public Panel, public IHUD
 {
 public:
 	CTransparentPanel *m_pVotePanel;
