@@ -246,6 +246,7 @@ public:
 	}
 	void NewLevel()
 	{
+		m_LastID = NULL;
 		for (int i = 0; i < 3; i++)
 		{
 			m_Label[i]->m_StartTime = -1000; //Ensure ID doesn't show up after a level change

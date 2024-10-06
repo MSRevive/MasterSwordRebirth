@@ -5116,7 +5116,7 @@ void CBasePlayer::GetAnyItems()
 		if(pArray)
 		{
 			ALLOW = false;
-			for(int i = 0; pArray->size(); i++)
+			for(int i = 0; i < pArray->size(); i++)
 			{
 				if (EntToString(this) == (*pArray)[i])
 				{
