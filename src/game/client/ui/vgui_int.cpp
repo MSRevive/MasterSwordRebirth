@@ -21,69 +21,56 @@
 #include "logger.h"
 #include "clenv.h"
 
-namespace
+class TexturePanel : public Panel, public ActionSignal
 {
+private:
+	int _bindIndex;
+	TextEntry *_textEntry;
 
-	class TexturePanel : public Panel, public ActionSignal
+public:
+	TexturePanel() : Panel(0, 0, 256, 276)
 	{
-	private:
-		int _bindIndex;
-		TextEntry *_textEntry;
+		_bindIndex = 2700;
+		_textEntry = new TextEntry("2700", 0, 0, 128, 20);
+		_textEntry->setParent(this);
+		_textEntry->addActionSignal(this);
+	}
 
-	public:
-		TexturePanel() : Panel(0, 0, 256, 276)
-		{
-			_bindIndex = 2700;
-			_textEntry = new TextEntry("2700", 0, 0, 128, 20);
-			_textEntry->setParent(this);
-			_textEntry->addActionSignal(this);
-		}
+public:
+	virtual bool isWithin(int x, int y)
+	{
+		return _textEntry->isWithin(x, y);
+	}
 
-	public:
-		virtual bool isWithin(int x, int y)
-		{
-			return _textEntry->isWithin(x, y);
-		}
+public:
+	virtual void actionPerformed(Panel *panel)
+	{
+		char buf[256];
+		_textEntry->getText(0, buf, 256);
+		sscanf(buf, "%d", &_bindIndex);
+	}
 
-	public:
-		virtual void actionPerformed(Panel *panel)
-		{
-			char buf[256];
-			_textEntry->getText(0, buf, 256);
-			sscanf(buf, "%d", &_bindIndex);
-		}
+protected:
+	virtual void paintBackground()
+	{
+		Panel::paintBackground();
 
-	protected:
-		virtual void paintBackground()
-		{
-			Panel::paintBackground();
+		int wide, tall;
+		getPaintSize(wide, tall);
 
-			int wide, tall;
-			getPaintSize(wide, tall);
-
-			drawSetColor(0, 0, 255, 0);
-			drawSetTexture(_bindIndex);
-			drawTexturedRect(0, 19, 257, 257);
-		}
-	};
-
-}
-
-using namespace vgui;
-
-void VGui_ViewportPaintBackground(int extents[4])
-{
-	gEngfuncs.VGui_ViewportPaintBackground(extents);
-}
+		drawSetColor(0, 0, 255, 0);
+		drawSetTexture(_bindIndex);
+		drawTexturedRect(0, 19, 257, 257);
+	}
+};
 
 void *VGui_GetPanel()
 {
-	return (Panel *)gEngfuncs.VGui_GetPanel();
+	return (Panel*)gEngfuncs.VGui_GetPanel();
 }
 
-void VGui_Startup()
+void VGUISystem::Startup()
 {
-	startdbg;
 	if (!CRender::CheckOpenGL()) //This exits if not in OpenGL mode
 		return;
 
@@ -95,14 +82,8 @@ void VGui_Startup()
 
 	//root->getSurfaceBase()->setEmulatedCursorVisible(true);
 
-	if (gViewPort != NULL)
+	if (gViewPort != nullptr)
 	{
-		//		root->removeChild(gViewPort);
-
-		// free the memory
-		//		delete gViewPort;
-		//		gViewPort = NULL;
-
 		gViewPort->Initialize();
 	}
 	else
@@ -118,11 +99,15 @@ void VGui_Startup()
 	TexturePanel* texturePanel=new TexturePanel();
 	texturePanel->setParent(gViewPort);
 	*/
-	enddbg;
 }
 
-void VGui_Shutdown()
+void VGUISystem::Shutdown()
 {
 	delete gViewPort;
-	gViewPort = NULL;
+	gViewPort = nullptr;
+}
+
+void VGUISystem::ViewportPaintBackground(int extents[4])
+{
+	gEngfuncs.VGui_ViewportPaintBackground(extents);
 }
