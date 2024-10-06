@@ -42,7 +42,11 @@ void CRichPresence::Update(void)
 	if (!m_bLoaded)
 		return;
 
+#if WIN32
+	const float timeNow = (GetTickCount64() / 1000);
+#else
 	const float timeNow = gEngfuncs.GetClientTime();
+#endif
 	if (m_fLastUpdate >= timeNow)
 		return;
 	
