@@ -401,7 +401,6 @@ set(VGUI
 source_group("VGUI" FILES ${VGUI})
 
 set(VGUI_MS
-	"ui/ms/vgui_ihud.h"
 	"ui/ms/vgui_choosecharacter.cpp"
 	"ui/ms/vgui_choosecharacter.h"
 	"ui/ms/vgui_container.cpp"

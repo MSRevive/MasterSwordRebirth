@@ -1,6 +1,6 @@
-#pragma once
+#ifndef VALVE_DLL
 
-#include <VGUI_Color.h>
+#include "vgui_color.h"
 
 class VGUI_MainPanel *CreateHUDPanel(class Panel *pParent);
 class VGUI_MainPanel *CreateHUD_MenuMain(class Panel *pParent);
@@ -24,3 +24,16 @@ void HUD_NewLevel();
 bool QuickSlotConfirm();
 
 extern COLOR Color_Transparent, Color_Text_White;
+
+class IHUD_Interface
+{
+public:
+	virtual void Init() {}
+	virtual void Reset() {}									//New level
+	virtual void Update() {}								//Every frame
+	virtual void SetVisible(bool fVisible) {}				//Show/Hide
+	virtual void Close() {}									//Close
+	virtual IHUD_Interface *GetInterface() { return this; } //Get pointer to this interface
+};
+
+#endif

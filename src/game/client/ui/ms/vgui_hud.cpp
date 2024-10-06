@@ -89,11 +89,39 @@ enum
 	CON_SAYTEXT,
 };
 
+#define m_EventConsole m_Consoles[CON_EVENT]
+#define m_SayTextConsole m_Consoles[CON_SAYTEXT]
+
 class CHUDPanel : public VGUI_MainPanel
 {
 public:
+	//Voting ----------------------------
+	VGUI_VoteInfo* m_VoteInfo;
+
+	VGUI_Health2* m_RetroHealth;
+	VGUI_Health* m_Health;
+
+	//Status Icons ----------------------
+	VGUI_Status* m_Status; //Drigien MAY2008
+
+	//Text Windows ----------------------
+	mslist<class CInfoWindow*> InfoWindows;
+	mslist<class CInfoWindow*> HelpWindows;
+	void AddInfoWin(msstring_ref Title, msstring_ref Text);
+	void AddHelpWin(msstring_ref Title, msstring_ref Text);
+	void UpdateInfoWindows(mslist<CInfoWindow*>& Windows);
+	void RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx);
+
+	//Event Console ---------------------
+	mslist<VGUI_EventConsole*> m_Consoles;
+	void PrintEvent(Color color, msstring_ref Text);
+	void PrintSayText(Color color, msstring_ref Text);
+	void StepInput(hudscroll_e ScrollCmd);
+	VGUI_EventConsole* m_ActiveConsole;
+
 	//Start Say Text Panel --------------
 	VGUI_SendTextPanel* m_StartSayText;
+	bool KeyInput(int down, int keynum, const char* pszCurrentBinding);
 
 	//ID Panel --------------------------
 	VGUI_ID* m_ID;
@@ -108,135 +136,18 @@ public:
 	//-----------------------------------
 
 	CHUDPanel(Panel* pParent);
-	~CHUDPanel();
 
-	virtual bool SlotInput(int iSlot) { return false; }
-	virtual void Open(void) { }
-	virtual void Close(void) { }
+	virtual bool SlotInput(int iSlot);
+	virtual void Open(void);
+	virtual void Close(void);
 	virtual void Think(void);
 	//virtual void SetActiveInfo( int iInput );
 	virtual void Initialize(void);
 
-	void AddInfoWin(msstring_ref Title, msstring_ref Text);
-	void AddHelpWin(msstring_ref Title, msstring_ref Text);
-	void UpdateInfoWindows(mslist<CInfoWindow*>& Windows);
-	void RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx);
-	void PrintEvent(Color color, msstring_ref Text);
-	void PrintSayText(Color color, msstring_ref Text);
-	void StepInput(hudscroll_e ScrollCmd);
-	bool KeyInput(int down, int keynum, const char* pszCurrentBinding);
-
-private:
-	std::vector<IHUD*> m_HUDElements;
-	std::vector<VGUI_EventConsole*> m_Consoles;
-	mslist<CInfoWindow*> m_InfoWindows;
-	mslist<CInfoWindow*> m_HelpWindows;
-
-	VGUI_VoteInfo* m_VoteInfo;
-	VGUI_Health2* m_RetroHealth;
-	VGUI_Health* m_Health;
-	VGUI_Status* m_Status; //Drigien MAY2008
-	VGUI_EventConsole* m_ActiveConsole;
-
-	const int INFOWIN_HELP_DISPLAY_X = XRES(640) - XRES(260);
-	const int INFOWIN_HELP_DISPLAY_Y = YRES(300);
-	const int EVENTCON_SIZE_X = XRES(230);
-	const int EVENTCON_X = XRES(640) - EVENTCON_SIZE_X - XRES(20);
-	const int EVENTCON_Y = (YRES(480) - YRES(10));
-	const int EVENTCON_SIZE_Y = 0;
-	const int SAYTEXTCON_X = XRES(10);
-	const int SAYTEXTCON_Y = YRES(180);
-	const int SAYTEXTCON_SIZE_X = XRES(300);
+	mslist<IHUD_Interface*> m_HUDElements;
 };
 
 VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); }
-
-CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
-{
-	setParent(pParent);
-	
-	m_HUDElements.push_back(m_RetroHealth = new VGUI_Health2(this));
-	m_HUDElements.push_back(m_Health = new VGUI_Health(this));
-
-	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
-	{
-		m_RetroHealth->setVisible(true);
-		m_Health->setVisible(false);
-	}else{
-		m_RetroHealth->setVisible(false);
-		m_Health->setVisible(true);
-	}
-
-	//Status Icons
-	m_Status = new VGUI_Status(this);
-	m_HUDElements.push_back(m_Status); //Drigien MAY2008
-
-	//ID Panel
-	m_ID = new VGUI_ID(this, ID_X, ID_Y);
-
-	//Vote Info Panel
-	m_HUDElements.push_back(m_VoteInfo = new VGUI_VoteInfo(this));
-
-	//Event Console
-	VGUI_EventConsole::prefs_t Prefs;
-	Prefs.VisLines = "ms_evthud_size";
-	Prefs.MaxLines = "ms_evthud_history";
-	Prefs.DecayTime = "ms_evthud_decaytime";
-	Prefs.BGTrans = "ms_evthud_bgtrans";
-	Prefs.Width = NULL;
-
-	m_Consoles.push_back(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
-
-	Prefs.VisLines = "ms_txthud_size";
-	Prefs.MaxLines = "ms_txthud_history";
-	Prefs.DecayTime = "ms_txthud_decaytime";
-	Prefs.BGTrans = "ms_txthud_bgtrans";
-	Prefs.Width = "ms_txthud_width";
-
-	m_Consoles.push_back(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
-
-	//Start Say text panel
-	m_StartSayText = new VGUI_SendTextPanel(this, XRES(100), YRES(300), XRES(640) - XRES(100), YRES(16));
-
-	//Debug Text
-	m_DebugText = new MSLabel(this, "", 0, YRES(16));
-
-	//Quick Slot Text
-	m_HUDElements.push_back(m_QuickSlot = new VGUI_QuickSlot(this));
-}
-
-CHUDPanel::~CHUDPanel() 
-{
-	delete m_ID;
-	delete m_StartSayText;
-	delete m_DebugText;
-
-	for(int i = 0; i < m_HUDElements.size(); i++)
-	{
-		delete m_HUDElements[i];
-	}
-
-	for(int i = 0; i < m_Consoles.size(); i++)
-	{
-		delete m_Consoles[i];
-	}
-
-	for (int i = 0; i < m_InfoWindows.size(); i++)
-	{
-		RemoveInfoWindow(m_InfoWindows, 0);
-	}
-
-	for (int i = 0; i < m_HelpWindows.size(); i++)
-	{
-		RemoveInfoWindow(m_HelpWindows, 0);
-	}
-		
-	std::vector<IHUD*>().swap(m_HUDElements);
-	std::vector<VGUI_EventConsole*>().swap(m_Consoles);
-
-	m_InfoWindows.clear();
-	m_HelpWindows.clear();
-}
 
 // Create new Info window
 void CHUDPanel::AddInfoWin(msstring_ref Title, msstring_ref Text)
@@ -246,10 +157,12 @@ void CHUDPanel::AddInfoWin(msstring_ref Title, msstring_ref Text)
 	NewInfoWin.m_TimeDisplayed = gpGlobals->time;
 	NewInfoWin.m_Duration = INFOWIN_DURATION;
 	NewInfoWin.setVisible(false);
-	m_InfoWindows.push_back(&NewInfoWin);
+	InfoWindows.push_back(&NewInfoWin);
 }
 
 // Create new Help window
+#define INFOWIN_HELP_DISPLAY_X XRES(640) - XRES(260)
+#define INFOWIN_HELP_DISPLAY_Y YRES(300)
 
 void CHUDPanel::AddHelpWin(msstring_ref Title, msstring_ref Text)
 {
@@ -274,23 +187,83 @@ void CHUDPanel::AddHelpWin(msstring_ref Title, msstring_ref Text)
 	NewInfoWin.m_TimeDisplayed = gpGlobals->time;
 	NewInfoWin.m_Duration = INFOWIN_DURATION + (strlen(Text) / 60.0f);
 	NewInfoWin.setVisible(false);
-	m_HelpWindows.push_back(&NewInfoWin);
+	HelpWindows.push_back(&NewInfoWin);
 }
 
 // Write to the Event Console
 void CHUDPanel::PrintEvent(Color color, msstring_ref Text)
 {
-	m_Consoles[CON_EVENT]->Print(color, Text);
+	m_EventConsole->Print(color, Text);
 }
-
 // Write to the Event Console
 void CHUDPanel::PrintSayText(Color color, msstring_ref Text)
 {
-	m_Consoles[CON_SAYTEXT]->Print(color, Text);
+	m_SayTextConsole->Print(color, Text);
 }
 
 // VGUI HUD Creation
 // -----------------
+CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
+{
+	setParent(pParent);
+	
+	m_HUDElements.add(m_RetroHealth = new VGUI_Health2(this));
+	m_HUDElements.add(m_Health = new VGUI_Health(this));
+
+	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
+	{
+		m_RetroHealth->setVisible(true);
+		m_Health->setVisible(false);
+	}else{
+		m_RetroHealth->setVisible(false);
+		m_Health->setVisible(true);
+	}
+
+	//Status Icons
+	m_HUDElements.add(m_Status = new VGUI_Status(this)); //Drigien MAY2008
+
+	//ID Panel
+	m_ID = new VGUI_ID(this, ID_X, ID_Y);
+
+	//Vote Info Panel
+	m_HUDElements.add(m_VoteInfo = new VGUI_VoteInfo(this));
+
+	//Event Console
+#define EVENTCON_SIZE_X XRES(230)
+#define EVENTCON_X XRES(640) - EVENTCON_SIZE_X - XRES(20)
+#define EVENTCON_Y (YRES(480) - YRES(10)) //Starts here, and moves upward as it grows
+#define EVENTCON_SIZE_Y 0				  //Stars with no height.  Gains height when lines are added
+	VGUI_EventConsole::prefs_t Prefs;
+	Prefs.VisLines = "ms_evthud_size";
+	Prefs.MaxLines = "ms_evthud_history";
+	Prefs.DecayTime = "ms_evthud_decaytime";
+	Prefs.BGTrans = "ms_evthud_bgtrans";
+	Prefs.Width = NULL;
+
+	m_Consoles.add(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
+
+	//SayText Console
+#define SAYTEXTCON_X XRES(10)
+	//thothie was 220, moving to 180
+#define SAYTEXTCON_Y YRES(180) //Starts here, and moves upward as it grows
+#define SAYTEXTCON_SIZE_X XRES(300)
+	Prefs.VisLines = "ms_txthud_size";
+	Prefs.MaxLines = "ms_txthud_history";
+	Prefs.DecayTime = "ms_txthud_decaytime";
+	Prefs.BGTrans = "ms_txthud_bgtrans";
+	Prefs.Width = "ms_txthud_width";
+
+	m_Consoles.add(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
+
+	//Start Say text panel
+	m_StartSayText = new VGUI_SendTextPanel(this, XRES(100), YRES(300), XRES(640) - XRES(100), YRES(16));
+
+	//Debug Text
+	m_DebugText = new MSLabel(this, "", 0, YRES(16));
+
+	//Quick Slot Text
+	m_HUDElements.add(m_QuickSlot = new VGUI_QuickSlot(this));
+}
 
 // Update
 void CHUDPanel::Think()
@@ -317,8 +290,8 @@ void CHUDPanel::Think()
 		m_Health->setVisible(true);
 	}
 
-	UpdateInfoWindows(m_InfoWindows); //Update Info windows
-	UpdateInfoWindows(m_HelpWindows); //Update Help windows
+	UpdateInfoWindows(InfoWindows); //Update Info windows
+	UpdateInfoWindows(HelpWindows); //Update Help windows
 
 	//Update Text Consoles
 	for (int i = 0; i < m_Consoles.size(); i++)
@@ -355,6 +328,23 @@ void CHUDPanel::RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx)
 	pInfoWin->Remove();
 }
 
+void CHUDPanel::Close(void)
+{
+}
+
+//======================================
+// Key inputs for the Class Menu
+bool CHUDPanel::SlotInput(int iSlot)
+{
+	return false;
+}
+
+//======================================
+// Update the menu before opening it
+void CHUDPanel::Open(void)
+{
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Called each time a new level is started.
 //-----------------------------------------------------------------------------
@@ -363,13 +353,14 @@ void CHUDPanel::Initialize(void)
 	MSGlobals::CurrentVote.fActive = false;
 
 	//Remove all info windows
-	for (int i = 0; i < m_InfoWindows.size(); i++)
-		RemoveInfoWindow(m_InfoWindows, 0);
-
-	for (int i = 0; i < m_HelpWindows.size(); i++)
-		RemoveInfoWindow(m_HelpWindows, 0);
-
+	int windows = InfoWindows.size(); //Store the amount, because it changes
+	for (int i = 0; i < windows; i++)
+		RemoveInfoWindow(InfoWindows, 0); //Keep deleting the first item
+	windows = HelpWindows.size();
+	for (int i = 0; i < windows; i++)
+		RemoveInfoWindow(HelpWindows, 0);
 	m_ID->NewLevel();
+
 	Update(); //Update, to hide everything
 }
 
@@ -389,7 +380,6 @@ void CHUDPanel::StepInput(hudscroll_e ScrollCmd)
 	else
 		m_ActiveConsole->StepInput(ScrollCmd == HUDSCROLL_DOWN);
 }
-
 bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)
 {
 	if (m_StartSayText->isVisible())
@@ -398,6 +388,65 @@ bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)
 		return true;
 	}
 	return false;
+}
+
+void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
+		return;
+
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddInfoWin(Title, Text);
+}
+void HUD_ShowHelpWin(msstring_ref Title, msstring_ref Text)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
+		return;
+
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddHelpWin(Title, Text);
+}
+void HUD_StepInput(hudscroll_e ScrollCmd)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->StepInput(ScrollCmd);
+}
+bool HUD_KeyInput(int down, int keynum, const char* pszCurrentBinding)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return false;
+	return ((CHUDPanel*)gViewPort->m_pHUDPanel)->KeyInput(down, keynum, pszCurrentBinding);
+}
+void HUD_PrintEvent(Color color, msstring_ref Text)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintEvent(color, Text);
+}
+void HUD_SayTextEvent(Color color, msstring_ref Text)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel ||!ShowHUD())
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintSayText(color, Text);
+}
+
+void HUD_StartSayText(int Type)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->Open(Type);
+}
+void HUD_CancelSayText()
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->setVisible(false);
+}
+
+void HUD_DrawID(entinfo_t* pEntinfo)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel)
+		return;
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_ID->Update(pEntinfo);
 }
 
 msstringlist HelpParts;
@@ -462,7 +511,6 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 	}
 	return 0;
 }
-
 void __CmdFunc_StartSayText()
 {
 	if (gEngfuncs.Cmd_Argc() < 2)
@@ -472,7 +520,6 @@ void __CmdFunc_StartSayText()
 	if (Type >= 0 && Type <= 2)
 		HUD_StartSayText(Type);
 }
-
 void __CmdFunc_QuickSlot()
 {
 	if (gEngfuncs.Cmd_Argc() < 2)
@@ -503,7 +550,6 @@ void __CmdFunc_QuickSlotStart()
 {
 	QuickSlotPressed(true);
 }
-
 void __CmdFunc_QuickSlotEnd()
 {
 	QuickSlotPressed(false);
@@ -521,69 +567,4 @@ void dbgtxt(msstring_ref Text)
 	if (!gViewPort || !gViewPort->m_pHUDPanel)
 		return;
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_DebugText->setText(Text);
-}
-
-void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
-		return;
-
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddInfoWin(Title, Text);
-}
-
-void HUD_ShowHelpWin(msstring_ref Title, msstring_ref Text)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
-		return;
-
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddHelpWin(Title, Text);
-}
-
-void HUD_StepInput(hudscroll_e ScrollCmd)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->StepInput(ScrollCmd);
-}
-
-bool HUD_KeyInput(int down, int keynum, const char* pszCurrentBinding)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return false;
-	return ((CHUDPanel*)gViewPort->m_pHUDPanel)->KeyInput(down, keynum, pszCurrentBinding);
-}
-
-void HUD_PrintEvent(Color color, msstring_ref Text)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintEvent(color, Text);
-}
-
-void HUD_SayTextEvent(Color color, msstring_ref Text)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel ||!ShowHUD())
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintSayText(color, Text);
-}
-
-void HUD_StartSayText(int Type)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->Open(Type);
-}
-
-void HUD_CancelSayText()
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->setVisible(false);
-}
-
-void HUD_DrawID(entinfo_t* pEntinfo)
-{
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_ID->Update(pEntinfo);
 }

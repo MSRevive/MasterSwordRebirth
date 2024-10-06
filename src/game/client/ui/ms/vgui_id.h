@@ -1,7 +1,6 @@
 //
 //  This should only be included by vgui_HUD.cpp
 //
-#pragma once
 
 class VGUI_ID : public Panel
 {

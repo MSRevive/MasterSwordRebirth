@@ -1,10 +1,8 @@
 //
 //  This should only be included by vgui_HUD.cpp
 //
-#pragma once
 
 #include "syntax/syntax.h"
-#include "vgui_ihud.h"
 
 static COLOR Color_Text_QuickSlot_Weapon(255, 255, 255, 0);
 static COLOR Color_Text_QuickSlot_Spell(120, 255, 255, 0);
@@ -16,7 +14,7 @@ static COLOR Color_Text_QuickSlot_Arrow(0, 255, 128, 0);
 #define QUICKSLOT_ARROW "arrow"
 #define QUICKSLOT_USE "use"
 
-class VGUI_QuickSlot : public Panel, public IHUD
+class VGUI_QuickSlot : public Panel, public IHUD_Interface
 {
 public:
 	MSLabel *m_Name;

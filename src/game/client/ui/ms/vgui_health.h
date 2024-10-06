@@ -3,7 +3,6 @@
 //
 
 #include <vector>
-#include "vgui_ihud.h"
 
 //Scales flasks down to only 40% wide of the screen if sprites are too big
 #define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenWidth))
@@ -120,7 +119,7 @@ public:
 	}
 };
 
-class VGUI_Health : public Panel, public IHUD
+class VGUI_Health : public Panel, public IHUD_Interface
 {
 protected:
 	float vChargeLevelAmt = 0;
