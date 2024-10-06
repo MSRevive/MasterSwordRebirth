@@ -1,4 +1,6 @@
 //Drigien MAY2008
+#pragma once
+
 class VGUI_Status;
 class VGUI_StatusIcon;
 
@@ -176,7 +178,7 @@ public:
 	}
 };
 
-class VGUI_Status : public Panel, public IHUD_Interface
+class VGUI_Status : public Panel, public IHUD
 {
 public:
 	mslist<VGUI_StatusIcon *> m_Status;

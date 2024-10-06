@@ -1,3 +1,5 @@
+#pragma once
+
 class CMSMonster;
 
 class SPEECH

@@ -1,3 +1,5 @@
+#pragma once
+
 enum saytext_e
 {
 	SAYTEXT_GLOBAL,

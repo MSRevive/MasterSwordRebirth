@@ -37,9 +37,9 @@
 #include "logger.h"
 #include "mscharacter.h"
 #include "vgui_scorepanel.h"
-#include "ms/vgui_hud.h"
 #include "action.h"
 #include "vgui_teamfortressviewport.h"
+#include "ms/vgui_hud.h"
 #include "ms/vgui_containerlist.h"
 
 void ShowVGUIMenu(int iMenu);
