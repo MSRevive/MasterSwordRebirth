@@ -1074,13 +1074,12 @@ void CGenericItem::ChargeThrowProj()
 		if (m_pPlayer)
 			vAngle += CurrentAttack->AimOffset;
 
-		EngineFunc::MakeVectors(vAngle, vForward, NULL, NULL);
-
 		Vector vOffsets(CurrentAttack->StartOffset.x * (!m_Hand ? -1 : 1),CurrentAttack->StartOffset.y, CurrentAttack->StartOffset.z);
+		Vector vStartPos = GetRelativePos(vAngle, vOffsets);
+		vStartPos += vOrigin;
 
+		EngineFunc::MakeVectors(vAngle, vForward, NULL, NULL);
 		float flRange = CurrentAttack->flRange * flTimeHeldAdjusted;
-		Vector vStartPos = vOrigin + vOffsets;
-
 		Vector vTemp = vForward * flRange;
 		pProjectile->TossProjectile(this, vStartPos, vTemp);
 	}
