@@ -583,7 +583,19 @@ void ClientCommand2(edict_t *pEntity)
 					NewChar.Name = CMD_ARGV(2);
 					NewChar.Gender = atoi(CMD_ARGV(3));
 					NewChar.Weapon = CMD_ARGV(4);
-					pPlayer->CreateChar(NewChar);
+
+					//Validate default weapon spawn
+					bool validItem = false;
+					for (int i = 0; i < MSGlobals::DefaultWeapons.size(); i++)
+					{
+						if (MSGlobals::DefaultWeapons[i] == NewChar.Weapon)
+						{
+							validItem = true;
+							break;
+						}
+					}
+
+					if ( validItem ) pPlayer->CreateChar(NewChar);
 				}
 				else
 					ClientPrint(pPlayer->pev, at_console, "*** You can't create a new character on this map! ***\n");
