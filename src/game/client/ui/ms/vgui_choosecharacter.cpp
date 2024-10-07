@@ -670,9 +670,8 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 }
 
 // Update
-void CNewCharacterPanel::Update( )
+void CNewCharacterPanel::Update()
 {
-	startdbg;
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
 	//If client-side characters, load the data from file right now
 	//If server-side characters, then the data is loaded via Server Msg "CharInfo" before this is ever called
@@ -691,15 +690,17 @@ void CNewCharacterPanel::Update( )
 	if( MSGlobals::ServerSideChar )
 	{
 		cTemp2[0] = 0;
-		if (MSGlobals::IsLanGame) _snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
-		if( ChooseChar_Interface::CentralServer )
+		if (MSGlobals::IsLanGame) 
+			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
+
+		if(ChooseChar_Interface::CentralServer)
 			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
 
-		 _snprintf(cTemp, sizeof(cTemp),  "%s%s",  Localized("#CHOOSECHAR_SERVER"),  cTemp2 );
+		_snprintf(cTemp, sizeof(cTemp), "%s%s", Localized("#CHOOSECHAR_SERVER"), cTemp2);
 		Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
 	}
 	else
-		Choose_CharHandlingLabel->setText( Localized("#CHOOSECHAR_LOCAL") );		//Character are stored on the client
+		Choose_CharHandlingLabel->setText(Localized("#CHOOSECHAR_LOCAL"));		//Character are stored on the client
 
 	switch( m_Stage )
 	{
@@ -828,7 +829,6 @@ void CNewCharacterPanel::Update( )
 	if( player.m_CharacterState == CHARSTATE_UNLOADED )
 		m_pCancelButton->setVisible( false );
 	m_pScrollPanel->validate( );
-	enddbg;
 }
 void CNewCharacterPanel::Gender_SelectItem( int Btn )
 {
