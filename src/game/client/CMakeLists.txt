@@ -410,7 +410,7 @@ set(VGUI_MS
 	"ui/ms/vgui_containerlist.h"
 	"ui/ms/vgui_eventconsole.h"
 	"ui/ms/vgui_health.h"
-	"ui/ms/vgui_health2.h"
+	"ui/ms/vgui_healthretro.h"
 	"ui/ms/vgui_hud.cpp"
 	"ui/ms/vgui_hud.h"
 	"ui/ms/vgui_id.h"
