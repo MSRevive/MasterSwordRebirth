@@ -5,23 +5,24 @@
 #include <vector>
 #include "vgui_ihud.h"
 
+//Scales flasks down to only 40% wide of the screen if sprites are too big
+#define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenHeight))
+#define BAR_W (320 * BAR_SCALE)
+#define BAR_H (40 * BAR_SCALE)
+
+#define EMBLEM_SIZE (90 * BAR_SCALE)
+
 namespace PrimaryHUD
 {
-	//Scales flasks down to only 40% wide of the screen if sprites are too big
-	constexpr int BAR_SCALE = (1.0 - ((730 - (gHUD.m_scrinfo.iWidth * 0.40)) / gHUD.m_scrinfo.iHeight));
-	constexpr int BAR_W = (320 * BAR_SCALE);
-	constexpr int BAR_H = (40 * BAR_SCALE);
-
-	constexpr int EMBLEM_SIZE = (90 * BAR_SCALE);
-
 	class VGUI_Bar : public Panel
 	{
-	public:
+	private:
 		VGUI_Image3D m_Image;
 		MSLabel *m_Label;
-		int m_Type;
+		short m_Type;
 		float m_CurrentAmt;
 
+	public:
 		VGUI_Bar(Panel *pParent, int Type, int x, int y) : Panel(x, y, BAR_W, BAR_H)
 		{
 			setParent(pParent);
@@ -129,9 +130,9 @@ namespace PrimaryHUD
 		int mCurChargeLevel = 1;
 		int vCurChargeLevel = 0;
 
-		const int CHARGE_W = XRES(30);
-		const int CHARGE_H = YRES(6);
-		const int CHARGE_SPACER_W = XRES(2);
+		int CHARGE_W = 0;
+		int CHARGE_H = 0;
+		int CHARGE_SPACER_W = 0;
 
 		class VGUI_Bar *m_Bar[4];
 
@@ -145,6 +146,10 @@ namespace PrimaryHUD
 		//Main HUD Image
 		VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 		{
+			CHARGE_W = XRES(30);
+			CHARGE_H = YRES(6);
+			CHARGE_SPACER_W = XRES(2);
+
 			setParent(pParent);
 			SetBGColorRGB(Color_Transparent);
 

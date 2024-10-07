@@ -4,24 +4,28 @@
 
 #include <vector>
 
-static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
+#define FLASK_W YRES(64 * 0.625) //I want 64x104 in 1024x768 res, and smaller in lower res
+#define FLASK_H YRES(104 * 0.625)
 
 namespace RetroHUD 
 {
-	const int FLASK_W = YRES(64 * 0.625); //I want 64x104 in 1024x768 res, and smaller in lower res
-	const int FLASK_H = YRES(104 * 0.625);
-	const int FLASK_SPACER = XRES(10);
+	static COLOR HighColor(0, 255, 0, 128), MedColor(255, 255, 0, 128), LowColor(255, 0, 0, 128);
 
 	class VGUI_Flask : public Panel
 	{
-	public:
+	private:
 		VGUI_Image3D m_Image;
 		MSLabel *m_Label;
 		int m_Type;
 		float m_CurrentAmt;
 
+		int FLASK_SPACER = 0;
+
+	public:
 		VGUI_Flask(Panel *pParent, int Type, int x, int y) : Panel(x, y, FLASK_W, FLASK_H)
 		{
+			FLASK_SPACER = XRES(10);
+
 			setParent(pParent);
 			setBgColor(0, 0, 0, 255);
 			m_Type = Type;
@@ -93,22 +97,24 @@ namespace RetroHUD
 	class VGUI_Health : public Panel, public IHUD
 	{
 	private:
-		const int FLASK_START_X = XRES(30);
-		const int FLASK_START_Y = YRES(480) - YRES(30) - FLASK_H;
-		const int MANA_FLASK_X = FLASK_START_X + FLASK_W + FLASK_SPACER;
+		int FLASK_SPACER = 0;
 
-		const int STAMINA_X = FLASK_START_X;
-		const int STAMINA_Y = YRES(453);
-		const int STAMINA_SIZE_X = FLASK_W + FLASK_SPACER + FLASK_W;
-		const int STAMINA_SIZE_Y = YRES(12);
-		const int STAMINA_LBL_SIZE_Y = YRES(10);
+		int FLASK_START_X = 0;
+		int FLASK_START_Y = 0;
+		int MANA_FLASK_X = 0;
 
-		const int WEIGHT_SIZE_Y = YRES(10);
-		const int WEIGHT_LBL_SIZE_Y = WEIGHT_SIZE_Y;
+		int STAMINA_X = 0;
+		int STAMINA_Y = 0;
+		int STAMINA_SIZE_X = 0;
+		int STAMINA_SIZE_Y = 0;
+		int STAMINA_LBL_SIZE_Y = 0;
 
-		const int CHARGE_W = XRES(30);
-		const int CHARGE_H = YRES(6);
-		const int CHARGE_SPACER_W = XRES(2);
+		int WEIGHT_SIZE_Y = 0;
+		int WEIGHT_LBL_SIZE_Y = 0;
+
+		int CHARGE_W = 0;
+		int CHARGE_H = 0;
+		int CHARGE_SPACER_W = 0;
 
 		float vChargeLevelAmt = 0;
 		float vCurChargeAmt = 0;
@@ -132,6 +138,25 @@ namespace RetroHUD
 	public:
 		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 		{
+			FLASK_SPACER = XRES(10);
+
+			FLASK_START_X = XRES(30);
+			FLASK_START_Y = YRES(480) - YRES(30) - FLASK_H;
+			MANA_FLASK_X = FLASK_START_X + FLASK_W + FLASK_SPACER;
+
+			STAMINA_X = FLASK_START_X;
+			STAMINA_Y = YRES(453);
+			STAMINA_SIZE_X = FLASK_W + FLASK_SPACER + FLASK_W;
+			STAMINA_SIZE_Y = YRES(12);
+			STAMINA_LBL_SIZE_Y = YRES(10);
+
+			WEIGHT_SIZE_Y = YRES(10);
+			WEIGHT_LBL_SIZE_Y = WEIGHT_SIZE_Y;
+
+			CHARGE_W = XRES(30);
+			CHARGE_H = YRES(6);
+			CHARGE_SPACER_W = XRES(2);
+
 			setParent(pParent);
 			SetBGColorRGB(Color_Transparent);
 
