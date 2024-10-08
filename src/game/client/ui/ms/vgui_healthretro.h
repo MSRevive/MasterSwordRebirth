@@ -161,9 +161,11 @@ namespace RetroHUD
 			SetBGColorRGB(Color_Transparent);
 
 			m_HUDImage.setParent(this);
-			//m_HUDImage.LoadImg("hud_main2", true, false);
-			//m_HUDImage.setFgColor( 255, 255, 255, 255 );
-			//m_HUDImage.setSize(getWide(), getTall());
+			// TODO: make the new hud image scale with the resolution.
+			// m_HUDImage.LoadImg("hud_main3", true, false);
+			// m_HUDImage.setFgColor(255, 255, 255, 255);
+			// m_HUDImage.setSize(256, 256);
+			// m_HUDImage.setPos(0, ScreenHeight - 256);
 
 			//Health and mana flasks
 			m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);
