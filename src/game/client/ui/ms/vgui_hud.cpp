@@ -76,7 +76,7 @@
 #include "vgui_eventconsole.h"
 #include "vgui_id.h"
 #include "vgui_health.h"
-#include "vgui_health2.h"
+#include "vgui_healthretro.h"
 #include "vgui_vote.h"
 #include "vgui_quickslot.h"
 
@@ -133,8 +133,8 @@ private:
 	mslist<CInfoWindow*> m_HelpWindows;
 
 	VGUI_VoteInfo* m_VoteInfo;
-	VGUI_Health2* m_RetroHealth;
-	VGUI_Health* m_Health;
+	RetroHUD::VGUI_Health* m_RetroHealth;
+	PrimaryHUD::VGUI_Health* m_Health;
 	VGUI_Status* m_Status; //Drigien MAY2008
 	VGUI_EventConsole* m_ActiveConsole;
 
@@ -155,8 +155,8 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 {
 	setParent(pParent);
 	
-	m_HUDElements.push_back(m_RetroHealth = new VGUI_Health2(this));
-	m_HUDElements.push_back(m_Health = new VGUI_Health(this));
+	m_HUDElements.push_back(m_RetroHealth = new RetroHUD::VGUI_Health(this));
+	m_HUDElements.push_back(m_Health = new PrimaryHUD::VGUI_Health(this));
 
 	if (CVAR_GET_FLOAT("cl_retrohud") > 0)
 	{
