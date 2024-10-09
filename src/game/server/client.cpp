@@ -606,6 +606,12 @@ void ClientCommand2(edict_t *pEntity)
 	}
 	else if (FStrEq(pcmd, "ul") && CMD_ARGC() >= 2)
 	{
+		if (!MSGlobals::ServerSideChar)
+			return;
+
+		if (MSGlobals::CentralEnabled)
+			return;
+
 		char Buffer[256];
 		strncpy(Buffer, CMD_ARGV(1), 3);
 		Buffer[3] = 0;
