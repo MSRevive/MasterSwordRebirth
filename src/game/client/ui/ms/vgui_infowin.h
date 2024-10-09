@@ -31,6 +31,7 @@ public:
 		setParent(pParent);
 		setPos(x, y);
 		m_StartY = y;
+		isVisible = false;
 
 		CSchemeManager *pSchemes = gViewPort->GetSchemeManager();
 		SchemeHandle_t hClassWindowText = pSchemes->getSchemeHandle("Briefing Text");
