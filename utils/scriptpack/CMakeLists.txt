@@ -32,7 +32,6 @@ set(Source_Files
 	"../../src/game/shared/ms/groupfile.h"
 	"../../src/game/shared/ms/msfileio.cpp"
 	"../../src/game/shared/ms/stackstring.cpp"
-	"../../public/tier0/pointeroverride.asm"
 )
 source_group("Source Files" FILES ${Source_Files})
 
