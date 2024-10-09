@@ -221,15 +221,12 @@ CHUDPanel::~CHUDPanel()
 		delete m_Consoles[i];
 	}
 
-	for (int i = 0; i < m_InfoWindows.size(); i++)
-	{
+	//Remove all info windows
+	while (m_InfoWindows.size() != 0)
 		RemoveInfoWindow(m_InfoWindows, 0);
-	}
 
-	for (int i = 0; i < m_HelpWindows.size(); i++)
-	{
+	while (m_InfoWindows.size() != 0)
 		RemoveInfoWindow(m_HelpWindows, 0);
-	}
 		
 	std::vector<IHUD*>().swap(m_HUDElements);
 	std::vector<VGUI_EventConsole*>().swap(m_Consoles);
@@ -363,10 +360,10 @@ void CHUDPanel::Initialize(void)
 	MSGlobals::CurrentVote.fActive = false;
 
 	//Remove all info windows
-	for (int i = 0; i < m_InfoWindows.size(); i++)
+	while (m_InfoWindows.size() != 0)
 		RemoveInfoWindow(m_InfoWindows, 0);
 
-	for (int i = 0; i < m_HelpWindows.size(); i++)
+	while (m_InfoWindows.size() != 0)
 		RemoveInfoWindow(m_HelpWindows, 0);
 
 	m_ID->NewLevel();
