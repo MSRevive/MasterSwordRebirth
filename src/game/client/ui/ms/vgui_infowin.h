@@ -6,6 +6,9 @@
 
 class CInfoWindow : public CTransparentPanel
 {
+private:
+	bool isVisible = false;
+
 public:
 #define INFOWIN_INTIAL_SIZE_X 120 //Default size, it's dynamic based on the text
 #define INFOWIN_INTIAL_SIZE_Y 100 //Default size, it's dynamic based on the text
@@ -53,11 +56,13 @@ public:
 		//setBorder( m_Border=new LineBorder( 2, BorderColor ) );
 		//setBorder( NULL );
 	}
+	
 	void SetTitle(msstring_ref NewTitle)
 	{
 		Title->setText(NewTitle);
 		Resize();
 	}
+
 	void SetText(msstring_ref NewText)
 	{
 		Text->setText(NewText);
@@ -66,6 +71,7 @@ public:
 		Text->setSize(TextX, TextY);
 		Resize();
 	}
+
 	void Resize()
 	{
 		int TitleX, TitleY;
@@ -121,8 +127,13 @@ public:
 		int x, y;
 		getPos(x, y);
 		setPos(x, yPos);
-		setVisible(true);
+		if (isVisible == false)
+		{
+			setVisible(true);
+			isVisible = true;
+		}
 	}
+
 	void Remove()
 	{
 		removeChild(Title);
