@@ -28,4 +28,4 @@ jobs:
         with:
           name: win32
           path: |
-            bin/release/*.dll
+            bins/release/*.dll
