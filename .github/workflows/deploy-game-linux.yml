@@ -36,4 +36,4 @@ jobs:
         with:
           name: linux-x86
           path: |
-           bins/release/*.so
+           ../bins/release/*.so
