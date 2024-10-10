@@ -1,9 +1,12 @@
 add_library(steam_api SHARED IMPORTED)
+add_library(libcurl SHARED IMPORTED)
 
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/libcurl)
 
 if (WIN32)
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
+	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
 else()
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libsteam_api.so")
 endif()
@@ -16,7 +19,8 @@ set_common_properties(server)
 
 target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
-	steam_api)
+	steam_api
+	libcurl)
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -41,7 +45,8 @@ target_include_directories(server PRIVATE
 
 target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
-	VALVE_DLL)
+	VALVE_DLL
+	CURL_STATICLIB)
 
 if (UNIX)
 	target_compile_definitions(server PRIVATE
