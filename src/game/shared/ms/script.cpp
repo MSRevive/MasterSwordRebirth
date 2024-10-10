@@ -2740,7 +2740,11 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 		//Thothie AUG2010_05 (comment only)
 		//This probably won't work right client side
 		//can we work a version that would return hit model indexes?
-		CBaseEntity* pHitEnt = Tr.HitEnt ? MSInstance(INDEXENT(Tr.HitEnt)) : NULL;
+		CBaseEntity* pHitEnt = NULL;
+		if (Tr.HitEnt > 0)
+		{
+			CBaseEntity* pHitEnt = MSInstance(INDEXENT(Tr.HitEnt));
+		}
 		//msstring dbg_result = pHitEnt ? EntToString(pHitEnt) : VecToString(Tr.EndPos);
 		return (pHitEnt ? EntToString(pHitEnt) : msstring(VecToString(Tr.EndPos)));
 	}
