@@ -1005,7 +1005,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "scriptname")
 	{
 		//Thothie DEC2008a - return the full scriptname, with path
-		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts.size() ? pScripted->m_Scripts[0]->m.ScriptFile.c_str() : "0";
 		return msScriptNameReturn.c_str();
 		//MiB's attempt:
 		//static msstring Return = (msstring_ref) pTarget->ScriptFName;
@@ -1014,7 +1014,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "itemname")
 	{
 		//Thothie DEC2008a - return the truncated script name (mostly for items)
-		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts.size() ? pScripted->m_Scripts[0]->m.ScriptFile.c_str() : "0";
 		bool found_last_slash = false;
 		int last_slash = msScriptNameReturn.len();
 		while (!found_last_slash)
