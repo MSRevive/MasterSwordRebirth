@@ -76,6 +76,7 @@ bool HTTPRequest::SendRequest()
 			break;
 	}
 
+	// Process request body.
 	if (m_sRequestBody != nullptr)
 	{
 		char steamID64String[REQUEST_URL_SIZE];
@@ -110,7 +111,7 @@ bool HTTPRequest::SendRequest()
 	{
 		int httpCode = 200;
 		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode)
+		ResponseCallback(httpCode, false)
 	}else{
 		ResponseCallback(0, true)
 	}
@@ -122,13 +123,16 @@ bool HTTPRequest::SendRequest()
 void HTTPRequest::DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
 	m_sResponseBody.append(buf, size * nmemb)
+	return (size * nmemb);
 }
 
 void HTTPRequest::ResponseCallback(int httpCode, bool bError = false)
 {
 	if (bError)
 	{
-		return
+		FNShared::Print("Request Failed. %s, '%s'\n", GetName(), g_szBaseUrl);
+		m_iRequestState = RequestState::REQUEST_FINISHED;
+		return;
 	}
 
 	if (httpCode < 200 || httpCode > 299)
@@ -136,50 +140,34 @@ void HTTPRequest::ResponseCallback(int httpCode, bool bError = false)
 		if (httpCode == 401)
 		{
 			FNShared::Print("FN Authorization failed! %s\n", GetName());
-			ReleaseHandle();
+			m_iRequestState = RequestState::REQUEST_FINISHED;
 			return;
 		}
 
-		if (!p->m_bRequestSuccessful)
-		{
-			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), g_szBaseUrl);
-			OnResponse(false, p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), p->m_eStatusCode);
-		ReleaseHandle();
+		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), httpCode);
+		m_iRequestState = RequestState::REQUEST_FINISHED;
 		return;
 	}
 
-	size_t unBytes = 0;
-	if ((responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
+	if (httpCode == 204)
 	{
-		// it should've never gotten to this point but okay.
-		if (p->m_eStatusCode == 204)
-		{
-			OnResponse(true, p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		if (unBytes <= 0)
-		{
-			FNShared::Print("The data hasn't been received. HTTP code: %d\n", p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		responseBodySize = unBytes;
-		responseBody = new uint8[responseBodySize];
-
-		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
-			pJSONData = ParseJSON(reinterpret_cast<char*>(responseBody), responseBodySize);
+		OnResponse(true, nullptr, httpCode);
+		m_iRequestState = RequestState::REQUEST_FINISHED;
+		return;
 	}
 
-	OnResponse(true, p->m_eStatusCode);
-	ReleaseHandle();
+	JSONDocument* jsonDoc = ParseJSON(g_pDataBuffer.c_str());
+	if (!jsonResp)
+	{
+		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
+		OnResponse(true, nullptr, httpCode);
+		m_iRequestState = RequestState::REQUEST_FINISHED;
+		return;
+	}
+
+	OnResponse(true, jsonDoc);
+	delete jsonDoc;
+	m_iRequestState = RequestState::REQUEST_FINISHED;
 }
 
 JSONDocument* HTTPRequest::ParseJSON(const char* data, size_t length)
@@ -201,6 +189,12 @@ JSONDocument* HTTPRequest::ParseJSON(const char* data, size_t length)
 	}
 
 	return document;
+}
+
+void Cleanup()
+{
+	delete m_sRequestBody;
+	m_sResponseBody.clear();
 }
 
 /*

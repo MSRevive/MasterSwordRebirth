@@ -25,12 +25,12 @@ public:
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
-	virtual void OnResponse(bool bSuccessful, int iRespCode = 200) { }
+	virtual void OnResponse(bool bSuccessful, JSONDocument* document, int iRespCode = 200) { }
 
 	static void SetBaseURL(const char* url);
 
+	bool AsyncSendRequest();
 	bool SendRequest();
-	void SuppressResponse(bool suppressResp) { m_bSuppressResponse = suppressResp; }
 
 	int m_iRequestState;
 
@@ -50,20 +50,16 @@ protected: // Expose data to inheriting classes.
 	std::string m_sResponseBody;
 	size_t m_iResponseBodySize;
 
-	JSONDocument* m_pJSONData;
-
 	ID64 m_iSteamID64;
 	ID64 m_iSlot;
 
 private: // Keep this private.
-	void Cleanup();
-	void DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up);
+	size_t DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up);
 	void ResponseCallback(int httpCode);
-	JSONDocument* ParseJSON(const char* data, size_t length = 0);
+	static JSONDocument* ParseJSON(const char* data, size_t length = 0);
+	void Cleanup();
 
 	HTTPMethod m_eHTTPMethod;
-
-	bool m_bSuppressResponse = false;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
