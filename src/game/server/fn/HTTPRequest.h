@@ -6,19 +6,22 @@
 #define HTTP_BASE_REQUEST_H
 
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
-#include <steam/steam_api.h>
-#include <steam/isteamhttp.h>
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
 #define ID64 unsigned long long
 
-JSONDocument* ParseJSON(const char* data, size_t length = 0);
+enum HTTPMethod {
+	GET
+	POST
+	DELETE
+	PUT
+};
 
 class HTTPRequest
 {
 public:
-	HTTPRequest(EHTTPMethod method, const char* url, uint8* body = nullptr, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
+	HTTPRequest(HTTPMethod method, const char* url, uint8* body = nullptr, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
@@ -26,10 +29,10 @@ public:
 
 	static void SetBaseURL(const char* url);
 
-	void SendRequest();
-	void SuppressResponse(bool suppressResp) { this->suppressResponse = suppressResp; }
+	bool SendRequest();
+	void SuppressResponse(bool suppressResp) { m_bSuppressResponse = suppressResp; }
 
-	int requestState;
+	int m_iRequestState;
 
 	enum RequestState
 	{
@@ -39,30 +42,28 @@ public:
 	};
 
 protected: // Expose data to inheriting classes.
-	char pchApiUrl[REQUEST_URL_SIZE];
+	char m_sPchAPIUrl[REQUEST_URL_SIZE];
 
-	uint8* requestBody;
-	size_t requestBodySize;
+	uint8* m_sRequestBody;
+	size_t m_iRequestBodySize;
 
-	uint8* responseBody;
-	size_t responseBodySize;
+	std::string m_sResponseBody;
+	size_t m_iResponseBodySize;
 
-	JSONDocument* pJSONData;
+	JSONDocument* m_pJSONData;
 
-	ID64 steamID64;
-	ID64 slot;
+	ID64 m_iSteamID64;
+	ID64 m_iSlot;
 
 private: // Keep this private.
 	void Cleanup();
-	void ReleaseHandle();
-	
-	void OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError);
+	void DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up);
+	void ResponseCallback(int httpCode);
+	JSONDocument* ParseJSON(const char* data, size_t length = 0);
 
-	CCallResult<HTTPRequest, HTTPRequestCompleted_t> m_CallbackOnHTTPRequestCompleted;
-	HTTPRequestHandle handle;
-	EHTTPMethod httpMethod;
+	HTTPMethod m_eHTTPMethod;
 
-	bool suppressResponse = false;
+	bool m_bSuppressResponse = false;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
