@@ -2111,6 +2111,8 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 
 			bool SETAPROP = false;
 
+			if (!AttData) return true;
+
 			if( PropName == "type" ) { AttData->sDamageType = PropValue; SETAPROP = true; }
 			if( PropName == "range" ) { AttData->flRange = Float; SETAPROP = true; }
 			if( PropName == "dmg" ) { AttData->flDamage = Float; SETAPROP = true; }
