@@ -6520,10 +6520,11 @@ bool CScript::ScriptCmd_SetTrans(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 	if ( Params.size() >= 2 )
 	{
 		CBaseEntity *pEntity = RetrieveEntity( Params[0] );
-		CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
-		if( pPlayer )
+		if(pEntity->IsPlayer()) //Should never be null if player is in world
 		{
-			strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
+			CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+			if (pPlayer->m_SpawnTransition != NULL)
+				strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
 		}
 		else
 		{
