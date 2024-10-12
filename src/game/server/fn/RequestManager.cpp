@@ -18,14 +18,14 @@ void CRequestManager::Init()
 	}
 }
 
-void CRequestManager::Think(bool suppressResp)
+void CRequestManager::Think()
 {
 	if (m_bLoaded)
 	{
 		for (int i = (m_vRequests.size() - 1); i >= 0; i--)
 		{
 			HTTPRequest* req = m_vRequests[i];
-			req->SuppressResponse(suppressResp);
+			
 			switch (req->requestState)
 			{
 			case HTTPRequest::RequestState::REQUEST_QUEUED:

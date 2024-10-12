@@ -6,6 +6,7 @@
 #define HTTP_BASE_REQUEST_H
 
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
+#include <curl/curl.h>
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
@@ -60,6 +61,7 @@ private: // Keep this private.
 	void Cleanup();
 
 	HTTPMethod m_eHTTPMethod;
+	CURL* m_Handle;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.

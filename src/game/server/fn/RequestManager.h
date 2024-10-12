@@ -12,7 +12,7 @@ public:
 	CRequestManager() = default;
 	~CRequestManager() = default;
 	void Init();
-	void Think(bool suppressResp = false);
+	void Think();
 	void Shutdown(void);
 	void SendAndWait(void);
 

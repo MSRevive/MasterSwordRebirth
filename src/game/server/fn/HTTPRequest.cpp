@@ -5,7 +5,6 @@
 #include <string>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
-#include <curl/curl.h>
 
 #include "base64/base64.h"
 #include "HTTPRequest.h"
@@ -55,18 +54,18 @@ bool HTTPRequest::SendRequest()
 {
 	m_iRequestState = RequestState::REQUEST_EXECUTED;
 
-	CURL* curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, m_sPchAPIUrl);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+	m_Handle = curl_easy_init();
+	curl_easy_setopt(m_Handle, CURLOPT_URL, m_sPchAPIUrl);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_NOSIGNAL, 1L);
 
 	switch (m_eHTTPMethod)
 	{
 		case HTTPRequest::GET:
 			break;
 		case HTTPRequest::POST:
-			curl_easy_setopt(curl, CURLOPT_POST, 1);
+			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
 			break;
 		case HTTPRequest::DELETE:
 			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
