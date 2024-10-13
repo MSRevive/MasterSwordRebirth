@@ -1679,7 +1679,7 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 		if (pEnt->edict() == edict())
 		{
 			//Thothie FEB2008b - admin_gag
-			CBasePlayer* pPlayer = (CBasePlayer*)pEnt;
+			CBasePlayer* pPlayer = pEnt->IsPlayer() ? (CBasePlayer*)pEnt : nullptr;
 			if (pPlayer)
 			{
 				if (pPlayer->m_Gagged)

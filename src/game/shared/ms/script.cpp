@@ -6259,6 +6259,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			}
 
 			ResourceIdx++;
+			cSpaces[0] = '\0';
+			cBuffer[0] = '\0';
 
 			if (strstr(TestCommand, "sprite") || strstr(TestCommand, "model") || strstr(TestCommand, "setshield") || SndType == 1) break;	//If a sprite or model, only use the first parameter
 			pSearchLine = "%[ \t\r\n]%s";
