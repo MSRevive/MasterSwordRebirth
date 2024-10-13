@@ -376,7 +376,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			}
 			//else if ( m_HPReq_min == 0 ) m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 		}
-		if (reqhp_stringlist.size() > 2 || reqhp_stringlist[1].contains("avg"))
+		if (reqhp_stringlist.size() >= 2 && reqhp_stringlist[1].contains("avg"))
 			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
 		pkvd->fHandled = TRUE;
 	}
