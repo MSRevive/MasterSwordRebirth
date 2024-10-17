@@ -2571,9 +2571,13 @@ msstring CScript::ScriptGetter_GetTakeDmg(msstring& FullName, msstring& ParserNa
 	//priority: high, scope: server
 #ifdef VALVE_DLL
 	//$get_takedmg(<target>,<type>) FEB2009 Thothie
-	CMSMonster* pTarget = (CMSMonster*)RetrieveEntity(Params[0]);
-	msstring Return;
+	CBaseEntity* pEnt = RetrieveEntity(Params[0]);
+	if (!pEnt) return "-1"; //ent_me can not be interpreted if the entity is not scripted
+
+	CMSMonster* pTarget = pEnt->IsMSMonster() ? (CMSMonster*)pEnt : nullptr;
 	if (!pTarget) return "-1"; //FEB2009
+
+	msstring Return;
 	if (Params[1] == "all") RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
 	for (int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
 	{

@@ -1210,6 +1210,10 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 			}
 		}
 
+		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
+		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
+		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
+
 		if (remove_on_find && pPlayer->m_ChosenArrow && !msstring(pPlayer->m_ChosenArrow->m_Name).ends_with("_generic"))
 		{
 			pPlayer->m_ChosenArrow->iQuantity -= 1;
@@ -1223,9 +1227,6 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 #endif
 		}
 
-		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
-		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
-		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
 		return msScriptNameReturn.c_str();
 	}
 	else if (Prop == "steamid")
