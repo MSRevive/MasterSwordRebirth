@@ -9,11 +9,11 @@
 #include "global.h"
 
 ValidateConnectivityRequest::ValidateConnectivityRequest(const char* url) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(HTTPMethod::GET, url)
 {
 }
 
-void ValidateConnectivityRequest::OnResponse(bool bSuccessful, int iRespCode)
+void ValidateConnectivityRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

@@ -9,11 +9,11 @@
 #include "global.h"
 
 ValidateScriptsRequest::ValidateScriptsRequest(const char* url) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(HTTPMethod::GET, url)
 {
 }
 
-void ValidateScriptsRequest::OnResponse(bool bSuccessful, int iRespCode)
+void ValidateScriptsRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

@@ -11,11 +11,11 @@
 #include "util.h"
 
 LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* url) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url, NULL, NULL, steamID, slot)
+	HTTPRequest(HTTPMethod::GET, url, NULL, NULL, steamID, slot)
 {
 }
 
-void LoadCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
+void LoadCharacterRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
 		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (slot + 1), steamID64);

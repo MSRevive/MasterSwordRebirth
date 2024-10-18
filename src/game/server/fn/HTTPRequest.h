@@ -7,7 +7,7 @@
 
 #include <future>
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
-#include <curl/curl.h>
+#include <libcurl/curl.h>
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
@@ -27,7 +27,7 @@ public:
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
-	virtual void OnResponse(bool bSuccessful, JSONDocument* document, int iRespCode = 200) { }
+	virtual void OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode = 200) { }
 
 	static void SetBaseURL(const char* url);
 
@@ -56,7 +56,7 @@ protected: // Expose data to inheriting classes.
 	ID64 m_iSlot;
 
 private: // Keep this private.
-	size_t DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up);
+	size_t WriteCallbackEvent(char* buf, size_t size, size_t nmemb, void* up);
 	void ResponseCallback(int httpCode);
 	static JSONDocument* ParseJSON(const char* data, size_t length = 0);
 	void Cleanup();

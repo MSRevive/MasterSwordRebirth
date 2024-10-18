@@ -133,15 +133,15 @@ void HTTPRequest::AsyncSendRequest()
 
 	switch (m_eHTTPMethod)
 	{
-		case HTTPRequest::GET:
+		case HTTPMethod::GET:
 			break;
-		case HTTPRequest::POST:
+		case HTTPMethod::POST:
 			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
 			break;
-		case HTTPRequest::DELETE:
+		case HTTPMethod::DELETE:
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 			break;
-		case HTTPRequest::PUT:
+		case HTTPMethod::PUT:
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "PUT");
 			break;
 	}
@@ -196,7 +196,7 @@ void HTTPRequest::PerformRequestAsync()
 	m_Handle = nullptr;
 }
 
-void HTTPRequest::DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
+size_t HTTPRequest::WriteCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
 	m_sResponseBody.append(buf, size * nmemb)
 	return (size * nmemb);

@@ -9,11 +9,11 @@
 #include "global.h"
 
 ValidateMapRequest::ValidateMapRequest(const char* url) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodGET, url)
+	HTTPRequest(HTTPMethod::GET, url)
 {
 }
 
-void ValidateMapRequest::OnResponse(bool bSuccessful, int iRespCode)
+void ValidateMapRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
 {
 	if (bSuccessful == false || pJSONData == NULL)
 	{

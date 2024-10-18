@@ -10,24 +10,24 @@
 #include "util.h"
 
 CreateCharacterRequest::CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodPOST, url, body, bodySize, steamID, slot)
+	HTTPRequest(HTTPMethod::POST, url, body, bodySize, steamID, slot)
 {
 }
 
-void CreateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
+void CreateCharacterRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
 {
 	if ((pJSONData == NULL) || (bSuccessful == false))
-		FNShared::Print("Unable to create character for SteamID %llu!\n", steamID64);
+		FNShared::Print("Unable to create character for SteamID %llu!\n", m_iSteamID64);
 
-	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(steamID64);
+	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(m_iSteamID64s);
 	if (pPlayer == NULL)
 		return;
 
-	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[m_iSlot];
 
 	if ((pJSONData == NULL) || (bSuccessful == false))
 	{
-		CharInfo.Index = slot;
+		CharInfo.Index = m_iSlot;
 		CharInfo.Location = LOC_CENTRAL;
 		CharInfo.Status = CDS_NOTFOUND;
 		CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
@@ -37,7 +37,7 @@ void CreateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 	const JSONDocument& doc = (*pJSONData);
 	const int flags = doc["data"]["flags"].GetInt();
 
-	CharInfo.AssignChar(slot, LOC_CENTRAL, (char*)requestBody, requestBodySize, pPlayer);
+	CharInfo.AssignChar(m_iSlot, LOC_CENTRAL, (char*)m_sRequestBody, m_iRequestBodySize, pPlayer);
 	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
 	CharInfo.Flags = flags;
 	CharInfo.Status = CDS_LOADED;
