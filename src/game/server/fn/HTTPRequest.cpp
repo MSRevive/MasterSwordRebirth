@@ -45,13 +45,11 @@ HTTPRequest::~HTTPRequest()
 	Cleanup();
 }
 
-bool HTTPRequest::AsyncSendRequest()
-{
-	m_iRequestState = RequestState::REQUEST_EXECUTED;
-}
-
 bool HTTPRequest::SendRequest()
 {
+	if (m_Handle) 
+		return false;
+
 	m_iRequestState = RequestState::REQUEST_EXECUTED;
 
 	m_Handle = curl_easy_init();
@@ -68,10 +66,10 @@ bool HTTPRequest::SendRequest()
 			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
 			break;
 		case HTTPRequest::DELETE:
-			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 			break;
 		case HTTPRequest::PUT:
-			curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "PUT");
 			break;
 	}
 
@@ -101,22 +99,101 @@ bool HTTPRequest::SendRequest()
 		writer.EndObject();
 
 		const std::string buffer = s.GetString();
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, buffer.c_str());
+		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, buffer.c_str());
 	}
 
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
-	CURLcode result = curl_easy_perform(curl);
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	CURLcode result = curl_easy_perform(m_Handle);
 	if (result == CURLE_OK)
 	{
 		int httpCode = 200;
-		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
 		ResponseCallback(httpCode, false)
 	}else{
 		ResponseCallback(0, true)
 	}
-	curl_easy_cleanup(curl);
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
 
 	return (result == CURLE_OK)
+}
+
+void HTTPRequest::AsyncSendRequest()
+{
+	if (m_Handle) 
+		return;
+
+	m_iRequestState = RequestState::REQUEST_EXECUTED;
+
+	m_Handle = curl_easy_init();
+	curl_easy_setopt(m_Handle, CURLOPT_URL, m_sPchAPIUrl);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_NOSIGNAL, 1L);
+
+	switch (m_eHTTPMethod)
+	{
+		case HTTPRequest::GET:
+			break;
+		case HTTPRequest::POST:
+			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
+			break;
+		case HTTPRequest::DELETE:
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+			break;
+		case HTTPRequest::PUT:
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "PUT");
+			break;
+	}
+
+	// Process request body.
+	if (m_sRequestBody != nullptr)
+	{
+		char steamID64String[REQUEST_URL_SIZE];
+		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", m_iSteamID64);
+
+		rapidjson::StringBuffer s;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+
+		writer.StartObject();
+
+		writer.Key("steamid");
+		writer.String(steamID64String);
+
+		writer.Key("slot");
+		writer.Int(m_iSlot);
+
+		writer.Key("size");
+		writer.Int(m_iRequestBodySize);
+
+		writer.Key("data");
+		writer.String(base64_encode(m_sRequestBody, m_iRequestBodySize).c_str());
+
+		writer.EndObject();
+
+		const std::string buffer = s.GetString();
+		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, buffer.c_str());
+	}
+
+	std::async(std::launch::async, &HTTPRequest::PerformRequestAsync, this);
+}
+
+void HTTPRequest::PerformRequestAsync()
+{
+	if (!m_Handle) 
+		return;
+
+	CURLcode result = curl_easy_perform(m_Handle);
+	if (result == CURLE_OK)
+	{
+		int httpCode = 200;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
+		ResponseCallback(httpCode, false)
+	}else{
+		ResponseCallback(0, true)
+	}
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
 }
 
 void HTTPRequest::DataCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
@@ -194,6 +271,13 @@ void Cleanup()
 {
 	delete m_sRequestBody;
 	m_sResponseBody.clear();
+
+	// just incase it's not cleanuped already.
+	if (m_Handle)
+	{
+		curl_easy_cleanup(m_Handle);
+		m_Handle = nullptr;
+	}
 }
 
 /*

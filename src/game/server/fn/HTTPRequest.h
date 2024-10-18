@@ -5,12 +5,13 @@
 #ifndef HTTP_BASE_REQUEST_H
 #define HTTP_BASE_REQUEST_H
 
+#include <future>
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
 #include <curl/curl.h>
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
-#define ID64 unsigned long long
+using ID64 = unsigned long long;
 
 enum HTTPMethod {
 	GET
@@ -30,8 +31,8 @@ public:
 
 	static void SetBaseURL(const char* url);
 
-	bool AsyncSendRequest();
 	bool SendRequest();
+	void AsyncSendRequest();
 
 	int m_iRequestState;
 
@@ -59,6 +60,8 @@ private: // Keep this private.
 	void ResponseCallback(int httpCode);
 	static JSONDocument* ParseJSON(const char* data, size_t length = 0);
 	void Cleanup();
+
+	void PerformRequestAsync();
 
 	HTTPMethod m_eHTTPMethod;
 	CURL* m_Handle;
