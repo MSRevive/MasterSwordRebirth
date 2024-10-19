@@ -211,7 +211,7 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	g_SteamServerHelper->Think();
+	//g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
 
 	if(!gFNInitialized && FNShared::IsEnabled())
@@ -292,7 +292,7 @@ void MSGameEnd()
 	}
 
 	//We handle all remaining requests and shutdown.
-	g_FNRequestManager.SendAndWait();
+	//g_FNRequestManager.SendAndWait();
 
 	//Thothie - I've not added anything here but there's a game error that generates here
 	//MSGameEnd --> Call MSGlobals::EndMap
@@ -305,7 +305,7 @@ void MSGameEnd()
 	TotalModelPrecaches = 1;
 	CSVGlobals::LogScripts = true;
 
-	g_SteamServerHelper->Shutdown();
+	//g_SteamServerHelper->Shutdown();
 
 	gFNInitialized = false;
 	
