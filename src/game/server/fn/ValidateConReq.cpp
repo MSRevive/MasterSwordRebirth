@@ -13,17 +13,17 @@ ValidateConnectivityRequest::ValidateConnectivityRequest(const char* url) :
 {
 }
 
-void ValidateConnectivityRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
+void ValidateConnectivityRequest::OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode)
 {
-	if (bSuccessful == false || pJSONData == NULL)
+	if (bSuccessful == false)
 	{
 		FNShared::Print("FuzzNet has been disabled!\n");
 		MSGlobals::CentralEnabled = false;
 		return;
 	}
 
-	const JSONValue& value = (*pJSONData);
-	if (!value["data"].GetBool())
+	JSONDocument& doc = (*jsonDoc);
+	if (!doc["data"].GetBool())
 	{
 		FNShared::Print("FuzzNet connection failed!\n");
 		MSGlobals::CentralEnabled = false;

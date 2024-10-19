@@ -13,17 +13,17 @@ ValidateScriptsRequest::ValidateScriptsRequest(const char* url) :
 {
 }
 
-void ValidateScriptsRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
+void ValidateScriptsRequest::OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode)
 {
-	if (bSuccessful == false || pJSONData == NULL)
+	if (bSuccessful == false)
 	{
 		// MSGlobals::CentralEnabled = false;
 		// FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
-	const JSONValue& value = (*pJSONData);
-	if (!value["data"].GetBool())
+	JSONDocument& doc = (*jsonDoc);
+	if (!doc["data"].GetBool())
 	{
 		FNShared::Print("Script file not verified for FN!\n");
 		MSGlobals::CentralEnabled = false;

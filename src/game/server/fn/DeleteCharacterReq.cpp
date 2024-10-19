@@ -10,13 +10,13 @@
 #include "util.h"
 
 DeleteCharacterRequest::DeleteCharacterRequest(ID64 steamID, ID64 slot, const char* url) :
-	HTTPRequest(HTTPMethod::DELETE, url, NULL, NULL, steamID, slot)
+	HTTPRequest(HTTPMethod::DEL, url, NULL, NULL, steamID, slot)
 {
 }
 
-void DeleteCharacterRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
+void DeleteCharacterRequest::OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode)
 {
-	if ((pJSONData == NULL) || (bSuccessful == false))
+	if (bSuccessful == false)
 		FNShared::Print("Unable to delete character for SteamID %llu!\n", m_iSteamID64);
 
 	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(m_iSteamID64);

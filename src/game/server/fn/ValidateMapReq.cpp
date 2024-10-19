@@ -13,17 +13,17 @@ ValidateMapRequest::ValidateMapRequest(const char* url) :
 {
 }
 
-void ValidateMapRequest::OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode)
+void ValidateMapRequest::OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode)
 {
-	if (bSuccessful == false || pJSONData == NULL)
+	if (bSuccessful == false)
 	{
 		// MSGlobals::CentralEnabled = false;
 		// FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
-	const JSONValue& value = (*pJSONData);
-	if (!value["data"].GetBool())
+	JSONDocument& doc = (*jsonDoc);
+	if (!doc["data"].GetBool())
 	{
 		FNShared::Print("Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());
 		SERVER_COMMAND("map edana");

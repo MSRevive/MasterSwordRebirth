@@ -16,16 +16,15 @@
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
-HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
+HTTPRequest::HTTPRequest(HTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
-	m_eHTTPMethodhttpMethod = method;
+	m_eHTTPMethod = method;
 	m_iRequestState = RequestState::REQUEST_QUEUED;
 	_snprintf(m_sPchAPIUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
 
-	m_sRequestBody = responseBody = nullptr;
-	m_iRequestBodySize = responseBodySize = 0;
-	m_pJSONData = nullptr;
-	handle = NULL;
+	m_sRequestBody = nullptr;
+	m_iRequestBodySize = 0;
+	m_Handle = nullptr;
 
 	m_iSteamID64 = steamID64;
 	m_iSlot = slot;
@@ -34,7 +33,7 @@ HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_
 	{
 		m_iRequestBodySize = bodySize;
 		m_sRequestBody = new uint8[m_iRequestBodySize];
-		memcpy(m_sRequestBody, body, m_sRequestBodySize);
+		memcpy(m_sRequestBody, body, m_iRequestBodySize);
 	}
 
 	m_sResponseBody.clear();
@@ -65,7 +64,7 @@ bool HTTPRequest::SendRequest()
 		case HTTPRequest::POST:
 			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
 			break;
-		case HTTPRequest::DELETE:
+		case HTTPRequest::DEL:
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 			break;
 		case HTTPRequest::PUT:
@@ -102,20 +101,20 @@ bool HTTPRequest::SendRequest()
 		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, buffer.c_str());
 	}
 
-	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, &DataCallbackEvent);
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, &HTTPRequest::WriteCallbackEvent);
 	CURLcode result = curl_easy_perform(m_Handle);
 	if (result == CURLE_OK)
 	{
 		int httpCode = 200;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode, false)
+		ResponseCallback(httpCode);
 	}else{
-		ResponseCallback(0, true)
+		ResponseCallback(0);
 	}
 	curl_easy_cleanup(m_Handle);
 	m_Handle = nullptr;
 
-	return (result == CURLE_OK)
+	return (result == CURLE_OK);
 }
 
 void HTTPRequest::AsyncSendRequest()
@@ -138,7 +137,7 @@ void HTTPRequest::AsyncSendRequest()
 		case HTTPMethod::POST:
 			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
 			break;
-		case HTTPMethod::DELETE:
+		case HTTPMethod::DEL:
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
 			break;
 		case HTTPMethod::PUT:
@@ -188,9 +187,9 @@ void HTTPRequest::PerformRequestAsync()
 	{
 		int httpCode = 200;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode, false)
+		ResponseCallback(httpCode);
 	}else{
-		ResponseCallback(0, true)
+		ResponseCallback(0);
 	}
 	curl_easy_cleanup(m_Handle);
 	m_Handle = nullptr;
@@ -198,13 +197,13 @@ void HTTPRequest::PerformRequestAsync()
 
 size_t HTTPRequest::WriteCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
-	m_sResponseBody.append(buf, size * nmemb)
+	m_sResponseBody.append(buf, size * nmemb);
 	return (size * nmemb);
 }
 
-void HTTPRequest::ResponseCallback(int httpCode, bool bError = false)
+void HTTPRequest::ResponseCallback(int httpCode)
 {
-	if (bError)
+	if (httpCode == 0)
 	{
 		FNShared::Print("Request Failed. %s, '%s'\n", GetName(), g_szBaseUrl);
 		m_iRequestState = RequestState::REQUEST_FINISHED;
@@ -232,8 +231,8 @@ void HTTPRequest::ResponseCallback(int httpCode, bool bError = false)
 		return;
 	}
 
-	JSONDocument* jsonDoc = ParseJSON(g_pDataBuffer.c_str());
-	if (!jsonResp)
+	JSONDocument* jsonDoc = ParseJSON(m_sResponseBody.c_str());
+	if (!jsonDoc)
 	{
 		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
 		OnResponse(true, nullptr, httpCode);
@@ -267,7 +266,7 @@ JSONDocument* HTTPRequest::ParseJSON(const char* data, size_t length)
 	return document;
 }
 
-void Cleanup()
+void HTTPRequest::Cleanup()
 {
 	delete m_sRequestBody;
 	m_sResponseBody.clear();

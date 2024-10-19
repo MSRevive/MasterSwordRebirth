@@ -11,7 +11,7 @@ class CreateCharacterRequest : public HTTPRequest
 {
 public:
 	CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize);
-	void OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode);
+	void OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode);
 	const char* GetName() { return "CreateCharacterRequest"; }
 
 private:

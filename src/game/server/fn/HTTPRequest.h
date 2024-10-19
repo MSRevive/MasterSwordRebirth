@@ -11,23 +11,24 @@
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
-using ID64 = unsigned long long;
-
-enum HTTPMethod {
-	GET
-	POST
-	DELETE
-	PUT
-};
+#define ID64 unsigned long long
+using uint8 = unsigned char;
 
 class HTTPRequest
 {
 public:
+	enum HTTPMethod {
+		GET,
+		POST,
+		DEL, //DELETE is reserved by windows.
+		PUT
+	};
+
 	HTTPRequest(HTTPMethod method, const char* url, uint8* body = nullptr, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
-	virtual void OnResponse(bool bSuccessful, JSONDocument* doc, int iRespCode = 200) { }
+	virtual void OnResponse(bool bSuccessful, JSONDocument* jsonDoc, int iRespCode = 200) { }
 
 	static void SetBaseURL(const char* url);
 
