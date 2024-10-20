@@ -15,7 +15,10 @@ set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 set_common_properties(server)
 
 target_link_libraries(server PRIVATE
-	$<$<PLATFORM_ID:Windows>:wsock32>
+	$<$<PLATFORM_ID:Windows>:Ws2_32>
+	$<$<PLATFORM_ID:Windows>:Wldap32>
+	$<$<PLATFORM_ID:Windows>:Crypt32>
+	$<$<PLATFORM_ID:Windows>:Normaliz>
 	libcurl)
 
 # Include directories
