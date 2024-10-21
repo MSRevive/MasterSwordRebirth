@@ -2,6 +2,13 @@
 // Steam HTTP Request Handler Class
 //
 
+#ifndef _WIN32
+#define CURL_PULL_SYS_TYPES_H
+#define CURL_PULL_STDINT_H
+#define CURL_PULL_INTTYPES_H
+#define HAVE_SYS_SOCKET_H
+#endif
+
 #include <string>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
@@ -13,6 +20,13 @@
 #include "global.h"
 #include "player.h"
 #include "FNSharedDefs.h"
+
+// this is needed for our version of libcurl (7.31.0).
+// we could upgrade but that means requiring ZLIB and the bins are much larger.
+#if defined(_WIN32)
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
+#endif
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
