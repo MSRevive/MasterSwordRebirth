@@ -1,12 +1,12 @@
-add_library(libcurl SHARED IMPORTED)
+find_package(CURL REQUIRED)
 
-target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/libcurl)
+# target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/libcurl)
 
-if (WIN32)
-	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
-else()
-	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libcurl.lib")
-endif()
+# if (WIN32)
+# 	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
+# else()
+# 	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libcurl.lib")
+# endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 
@@ -17,9 +17,9 @@ set_common_properties(server)
 target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Ws2_32>
 	$<$<PLATFORM_ID:Windows>:Wldap32>
-	#$<$<PLATFORM_ID:Windows>:Crypt32>
-	#$<$<PLATFORM_ID:Windows>:Normaliz>
-	libcurl)
+	$<$<PLATFORM_ID:Windows>:Crypt32>
+	$<$<PLATFORM_ID:Windows>:Normaliz>
+	CURL::libcurl)
 
 # Include directories
 target_include_directories(server PRIVATE 
