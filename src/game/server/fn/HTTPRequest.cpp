@@ -21,13 +21,6 @@
 #include "player.h"
 #include "FNSharedDefs.h"
 
-// this is needed for our version of libcurl (7.31.0).
-// we could upgrade but that means requiring ZLIB and the bins are much larger.
-#if defined(_WIN32)
-FILE _iob[] = { *stdin, *stdout, *stderr };
-extern "C" FILE * __cdecl __iob_func(void) { return _iob; }
-#endif
-
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
 HTTPRequest::HTTPRequest(HTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
@@ -115,26 +108,13 @@ bool HTTPRequest::SendRequest()
 		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, buffer.c_str());
 	}
 
-	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, &HTTPRequest::WriteCallbackEvent);
-	CURLcode result = curl_easy_perform(m_Handle);
-	if (result == CURLE_OK)
-	{
-		int httpCode = 200;
-		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode);
-	}else{
-		ResponseCallback(0);
-	}
-	curl_easy_cleanup(m_Handle);
-	m_Handle = nullptr;
-
-	return (result == CURLE_OK);
+	return PerformRequest();
 }
 
-void HTTPRequest::AsyncSendRequest()
+bool HTTPRequest::AsyncSendRequest()
 {
-	if (m_Handle) 
-		return;
+	if (m_Handle)
+		return false;
 
 	m_iRequestState = RequestState::REQUEST_EXECUTED;
 
@@ -188,29 +168,37 @@ void HTTPRequest::AsyncSendRequest()
 		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, buffer.c_str());
 	}
 
-	std::async(std::launch::async, &HTTPRequest::PerformRequestAsync, this);
+	m_ResponseFuture = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
+	return m_Promise.get_future().get();
 }
 
-void HTTPRequest::PerformRequestAsync()
+bool HTTPRequest::PerformRequest()
 {
 	if (!m_Handle) 
-		return;
+		return false;
 
+	bool success = false;
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, &HTTPRequest::WriteCallbackEvent);
 	CURLcode result = curl_easy_perform(m_Handle);
 	if (result == CURLE_OK)
 	{
 		int httpCode = 200;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
 		ResponseCallback(httpCode);
+		success = true;
 	}else{
 		ResponseCallback(0);
+		success = false;
 	}
 	curl_easy_cleanup(m_Handle);
 	m_Handle = nullptr;
+	m_Promise.set_value(success);
+	return success;
 }
 
 size_t HTTPRequest::WriteCallbackEvent(char* buf, size_t size, size_t nmemb, void* up)
 {
+	m_sResponseBody.clear();
 	m_sResponseBody.append(buf, size * nmemb);
 	return (size * nmemb);
 }

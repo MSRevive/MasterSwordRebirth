@@ -33,7 +33,7 @@ public:
 	static void SetBaseURL(const char* url);
 
 	bool SendRequest();
-	void AsyncSendRequest();
+	bool AsyncSendRequest();
 
 	int m_iRequestState;
 
@@ -43,6 +43,8 @@ public:
 		REQUEST_EXECUTED,
 		REQUEST_FINISHED,
 	};
+
+	std::future<bool> m_ResponseFuture;
 
 protected: // Expose data to inheriting classes.
 	char m_sPchAPIUrl[REQUEST_URL_SIZE];
@@ -62,10 +64,12 @@ private: // Keep this private.
 	static JSONDocument* ParseJSON(const char* data, size_t length = 0);
 	void Cleanup();
 
-	void PerformRequestAsync();
+	bool PerformRequest();
 
 	HTTPMethod m_eHTTPMethod;
 	CURL* m_Handle;
+
+	std::promise<bool> m_Promise;
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
