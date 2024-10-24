@@ -8,6 +8,10 @@
 #include <future>
 #include <rapidjson/fwd.h> // Rapid JSON Helpers from Infestus!
 #include <libcurl/curl.h>
+#ifdef _WIN32
+#include <PlatformWin.h>
+#endif
+#include <Platform.h>
 
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
