@@ -556,7 +556,7 @@ void CAmbientGeneric ::ToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		//ALERT( at_console,"Deactivated");
 		//m_fActive = false;
 		//UTIL_EmitAmbientSound(ENT(pev), pev->origin, STRING(pev->message), 0, 0, SND_STOP, 0);
-		UTIL_EmitAmbientSound(ENT(pActivator->pev), pev->origin, STRING(pev->message), 0, 0, SND_STOP, 0);
+		UTIL_EmitAmbientSound(ENT(pCaller->pev), pev->origin, STRING(pev->message), 0, 0, SND_STOP, 0);
 		//EMIT_SOUND_DYN(edict(), 2, STRING(pev->message), 0.0, ATTN_NORM, 0, 100); //Thothie - force play
 	}
 

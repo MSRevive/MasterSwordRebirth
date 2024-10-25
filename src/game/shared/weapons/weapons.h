@@ -188,8 +188,8 @@ class CBasePlayerItem : public CBaseAnimating
 {
 public:
 	//Master Sword
-	CBasePlayer *m_pPlayer;
-	CMSMonster *m_pOwner;
+	CBasePlayer *m_pPlayer = nullptr;
+	CMSMonster *m_pOwner = nullptr;
 	ulong m_iId;
 	uint m_Value; //Agreed value of this item (in gold)
 	bool m_NotUseable;

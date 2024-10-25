@@ -2571,9 +2571,13 @@ msstring CScript::ScriptGetter_GetTakeDmg(msstring& FullName, msstring& ParserNa
 	//priority: high, scope: server
 #ifdef VALVE_DLL
 	//$get_takedmg(<target>,<type>) FEB2009 Thothie
-	CMSMonster* pTarget = (CMSMonster*)RetrieveEntity(Params[0]);
-	msstring Return;
+	CBaseEntity* pEnt = RetrieveEntity(Params[0]);
+	if (!pEnt) return "-1"; //ent_me can not be interpreted if the entity is not scripted
+
+	CMSMonster* pTarget = pEnt->IsMSMonster() ? (CMSMonster*)pEnt : nullptr;
 	if (!pTarget) return "-1"; //FEB2009
+
+	msstring Return;
 	if (Params[1] == "all") RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
 	for (int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
 	{
@@ -2741,9 +2745,9 @@ msstring CScript::ScriptGetter_GetTraceLine(msstring& FullName, msstring& Parser
 		//This probably won't work right client side
 		//can we work a version that would return hit model indexes?
 		CBaseEntity* pHitEnt = NULL;
-		if (Tr.HitEnt > 0)
+		if (Tr.HitEnt > 0) //Crashes if hitent is 0 on client
 		{
-			CBaseEntity* pHitEnt = MSInstance(INDEXENT(Tr.HitEnt));
+			pHitEnt = MSInstance(INDEXENT(Tr.HitEnt));
 		}
 		//msstring dbg_result = pHitEnt ? EntToString(pHitEnt) : VecToString(Tr.EndPos);
 		return (pHitEnt ? EntToString(pHitEnt) : msstring(VecToString(Tr.EndPos)));
@@ -6259,6 +6263,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			}
 
 			ResourceIdx++;
+			cSpaces[0] = '\0';
+			cBuffer[0] = '\0';
 
 			if (strstr(TestCommand, "sprite") || strstr(TestCommand, "model") || strstr(TestCommand, "setshield") || SndType == 1) break;	//If a sprite or model, only use the first parameter
 			pSearchLine = "%[ \t\r\n]%s";

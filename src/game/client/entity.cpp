@@ -1448,9 +1448,11 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 	{
 		if (Params.size() >= 2 && Params[1] == "removeall")
 		{
-			for (int i = 0; i < m_Beams.size(); i++)
+			size_t size = m_Beams.size();
+			for (int i = 0; i < size; i++)
 			{
-				m_Beams[i]->die = 0;
+				BEAM* pBeam = m_Beams[i];
+				if ( pBeam ) pBeam->die = 0;
 			}
 			m_Beams.clearitems();
 		}

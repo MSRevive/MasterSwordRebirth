@@ -1005,7 +1005,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "scriptname")
 	{
 		//Thothie DEC2008a - return the full scriptname, with path
-		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts.size() ? pScripted->m_Scripts[0]->m.ScriptFile.c_str() : "0";
 		return msScriptNameReturn.c_str();
 		//MiB's attempt:
 		//static msstring Return = (msstring_ref) pTarget->ScriptFName;
@@ -1014,7 +1014,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 	else if (Prop == "itemname")
 	{
 		//Thothie DEC2008a - return the truncated script name (mostly for items)
-		msstring msScriptNameReturn = pScripted->m_Scripts[0]->m.ScriptFile.c_str();
+		msstring msScriptNameReturn = pScripted->m_Scripts.size() ? pScripted->m_Scripts[0]->m.ScriptFile.c_str() : "0";
 		bool found_last_slash = false;
 		int last_slash = msScriptNameReturn.len();
 		while (!found_last_slash)
@@ -1210,6 +1210,10 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 			}
 		}
 
+		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
+		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
+		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
+
 		if (remove_on_find && pPlayer->m_ChosenArrow && !msstring(pPlayer->m_ChosenArrow->m_Name).ends_with("_generic"))
 		{
 			pPlayer->m_ChosenArrow->iQuantity -= 1;
@@ -1223,9 +1227,6 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 #endif
 		}
 
-		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
-		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
-		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
 		return msScriptNameReturn.c_str();
 	}
 	else if (Prop == "steamid")
@@ -2110,6 +2111,8 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			bool Bool = PropValue == "true" || PropValue == "1";
 
 			bool SETAPROP = false;
+
+			if (!AttData) return true;
 
 			if( PropName == "type" ) { AttData->sDamageType = PropValue; SETAPROP = true; }
 			if( PropName == "range" ) { AttData->flRange = Float; SETAPROP = true; }
@@ -6518,10 +6521,11 @@ bool CScript::ScriptCmd_SetTrans(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 	if ( Params.size() >= 2 )
 	{
 		CBaseEntity *pEntity = RetrieveEntity( Params[0] );
-		CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
-		if( pPlayer )
+		if(pEntity->IsPlayer()) //Should never be null if player is in world
 		{
-			strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
+			CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
+			if (pPlayer->m_SpawnTransition != NULL)
+				strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
 		}
 		else
 		{

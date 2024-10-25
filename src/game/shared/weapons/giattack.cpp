@@ -186,12 +186,12 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 
 bool CGenericItem::Attack_CanAttack()
 {
+	if (!m_Attacks.size())
+		return false; //Must have registered an attack
 	if (!m_pOwner || !m_pOwner->IsAlive())
 		return false; //Owner must be alive
 	if (m_Location != ITEMPOS_HANDS)
 		return false; //Must be in owner's hands
-	if (!m_Attacks.size())
-		return false; //Must have registered an attack
 	if (!Spell_CanAttack())
 		return false; //Can't be in the process of preparing this spell
 
