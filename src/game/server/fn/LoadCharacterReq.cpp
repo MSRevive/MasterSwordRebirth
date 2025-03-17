@@ -17,7 +17,7 @@ LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* 
 
 void LoadCharacterRequest::OnResponse(int iRespCode)
 {
-	if ((iRespCode != 200) || (iRespCode != 204))
+	if ((iRespCode != 200) && (iRespCode != 204))
 	{
 		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (m_iSlot + 1), m_iSteamID64);
 		return;

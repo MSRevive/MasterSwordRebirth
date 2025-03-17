@@ -59,7 +59,7 @@ void HTTPRequest::Cleanup()
 
 	m_sResponseBody.clear();
 	
-	// just incase it's not cleanuped already.
+	// just incase it's not cleaned up already.
 	if (m_Handle)
 	{
 		curl_easy_cleanup(m_Handle);
@@ -192,10 +192,10 @@ void HTTPRequest::AsyncSendRequestDiscard()
 	m_Handle = curl_easy_init();
 	SetupRequest();
 
-	// we use a lambda here because we don't care about the result
-	auto future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
-	curl_easy_cleanup(m_Handle);
-	m_Handle = nullptr;
+	std::thread(&HTTPRequest::PerformRequest, this).detach();
+	//auto future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
+	//curl_easy_cleanup(m_Handle);
+	//m_Handle = nullptr;
 }
 
 bool HTTPRequest::PerformRequest()

@@ -145,7 +145,11 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer)
 		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
 
-		g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)));
+		//g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)));
+
+		std::unique_ptr<HTTPRequest> pReq(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)));
+		const auto req = pReq.get();
+		req->AsyncSendRequest();
 	}
 }
 
@@ -158,7 +162,11 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 
-	g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)));
+	//g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)));
+
+	std::unique_ptr<HTTPRequest> pReq(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)));
+	const auto req = pReq.get();
+	req->AsyncSendRequest();
 }
 
 // Create or Update FN character!
@@ -187,7 +195,10 @@ void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const cha
 		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 		
-		g_FNRequestManager.QueueRequest(new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
+		//g_FNRequestManager.QueueRequest(new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
+		std::unique_ptr<HTTPRequest> pReq(new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
+		const auto req = pReq.get();
+		req->AsyncSendRequest();
 	}
 }
 
@@ -199,5 +210,8 @@ void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
 	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
 
-	g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	//g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	std::unique_ptr<HTTPRequest> pReq(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	const auto req = pReq.get();
+	req->AsyncSendRequest();
 }
