@@ -15,9 +15,9 @@ LoadCharacterRequest::LoadCharacterRequest(ID64 steamID, ID64 slot, const char* 
 {
 }
 
-void LoadCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
+void LoadCharacterRequest::OnResponse(int iRespCode)
 {
-	if (bSuccessful == false)
+	if ((iRespCode != 200) || (iRespCode != 204))
 	{
 		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (m_iSlot + 1), m_iSteamID64);
 		return;
@@ -41,7 +41,7 @@ void LoadCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
 		return;
 	}
 
-	JSONDocument& doc = (*m_JSONResponse);
+	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
 	const int flags = doc["data"]["flags"].GetInt();
 
 	if (FNShared::IsBanned(flags) == true)

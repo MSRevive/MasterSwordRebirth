@@ -13,16 +13,16 @@ ValidateMapRequest::ValidateMapRequest(const char* url) :
 {
 }
 
-void ValidateMapRequest::OnResponse(bool bSuccessful, int iRespCode)
+void ValidateMapRequest::OnResponse(int iRespCode)
 {
-	if (bSuccessful == false)
+	if (iRespCode != 200)
 	{
 		// MSGlobals::CentralEnabled = false;
 		// FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
-	JSONDocument& doc = (*m_JSONResponse);
+	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
 	if (!doc["data"].GetBool())
 	{
 		FNShared::Print("Map '%s' is not verified for FN!\n", MSGlobals::MapName.c_str());

@@ -32,17 +32,18 @@ public:
 	virtual ~HTTPRequest();
 
 	virtual const char* GetName() { return "N/A"; }
-	virtual void OnResponse(bool bSuccessful, int iRespCode = 200) { }
+	virtual void OnResponse(int iRespCode = 200) { }
 
 	static void SetBaseURL(const char* url);
 
 	bool SendRequest();
 	bool AsyncSendRequest();
 	void AsyncSendRequestDiscard();
+	static JSONDocument ParseJSON(const char* data);
 
 	int m_iRequestState;
 	bool m_bSkipCallback = false;
-	JSONDocument* m_JSONResponse;
+	std::string m_sResponseBody;
 
 	enum RequestState
 	{
@@ -58,8 +59,6 @@ protected: // Expose data to inheriting classes.
 	size_t m_iRequestBodySize;
 	std::string m_sRequestBuffer;
 
-	std::string m_sResponseBody;
-
 	ID64 m_iSteamID64;
 	ID64 m_iSlot;
 
@@ -68,7 +67,6 @@ private: // Keep this private.
 	size_t WriteCallback(void* ptr, size_t size, size_t nmemb);
 
 	void ResponseCallback(int httpCode);
-	static JSONDocument* ParseJSON(const char* data, size_t length = 0);
 	void Cleanup();
 
 	void SetupRequest();

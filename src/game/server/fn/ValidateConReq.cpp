@@ -13,7 +13,7 @@ ValidateConRequest::ValidateConRequest(const char* url) :
 {
 }
 
-void ValidateConRequest::OnResponse(bool bSuccessful, int iRespCode)
+void ValidateConRequest::OnResponse(int iRespCode)
 {
 	return;
 }

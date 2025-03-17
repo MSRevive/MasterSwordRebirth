@@ -57,8 +57,6 @@ void HTTPRequest::Cleanup()
 	m_sRequestBody = nullptr;
 	m_sRequestBuffer.clear();
 
-	delete m_JSONResponse;
-	m_JSONResponse = nullptr;
 	m_sResponseBody.clear();
 	
 	// just incase it's not cleanuped already.
@@ -245,18 +243,20 @@ void HTTPRequest::ResponseCallback(int httpCode)
 		if (httpCode == 401)
 		{
 			FNShared::Print("FN Authorization failed! %s\n", GetName());
+			OnResponse(httpCode);
 			m_iRequestState = RequestState::REQUEST_FINISHED;
 			return;
 		}
 
 		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), httpCode);
+		OnResponse(httpCode);
 		m_iRequestState = RequestState::REQUEST_FINISHED;
 		return;
 	}
 
 	if (httpCode == 204)
 	{
-		OnResponse(true, httpCode);
+		OnResponse(httpCode);
 		m_iRequestState = RequestState::REQUEST_FINISHED;
 		return;
 	}
@@ -264,39 +264,27 @@ void HTTPRequest::ResponseCallback(int httpCode)
 	if (m_sResponseBody.empty())
 	{
 		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
-		OnResponse(true, httpCode);
+		OnResponse(httpCode);
 		m_iRequestState = RequestState::REQUEST_FINISHED;
 		return;
 	}
 
-	JSONDocument* m_JSONResponse = ParseJSON(m_sResponseBody.c_str());
-	if (m_JSONResponse)
-		OnResponse(true);
-	else
-		OnResponse(false);
+	//JSONDocument* m_JSONResponse = ParseJSON(m_sResponseBody.c_str());
+	OnResponse();
 	
 	m_iRequestState = RequestState::REQUEST_FINISHED;
 }
 
-JSONDocument* HTTPRequest::ParseJSON(const char* data, size_t length)
+JSONDocument HTTPRequest::ParseJSON(const char* data)
 {
-	if (!(data && data[0]))
-		return nullptr;
+	JSONDocument doc;
 
-	JSONDocument* document = new JSONDocument;
+	if (!data)
+		return doc;
 
-	if (length > 0)
-		document->Parse(data, length);
-	else
-		document->Parse(data);
+	doc.Parse(data);
 
-	if (document->HasParseError())
-	{
-		delete document;
-		return nullptr;
-	}
-
-	return document;
+	return doc;
 }
 
 /* static */ void HTTPRequest::SetBaseURL(const char* url)

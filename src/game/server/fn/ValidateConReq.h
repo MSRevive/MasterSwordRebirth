@@ -11,7 +11,7 @@ class ValidateConRequest : public HTTPRequest
 {
 public:
 	ValidateConRequest(const char* url);
-	void OnResponse(bool bSuccessful, int iRespCode);
+	void OnResponse(int iRespCode);
 	const char* GetName() { return "ValidateConRequest"; }
 
 private:

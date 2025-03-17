@@ -63,9 +63,10 @@ bool FNShared::ValidateFN(void)
 		return true;
 	
 	std::unique_ptr<HTTPRequest> pReq(new ValidateConRequest("/api/v2/internal/ping"));
-	if (pReq.get()->AsyncSendRequest())
+	const auto req = pReq.get();
+	if (req->AsyncSendRequest())
 	{
-		JSONDocument& doc = (*pReq.get()->m_JSONResponse);
+		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
 		return doc["data"].GetBool();
 	}
 
@@ -82,9 +83,10 @@ bool FNShared::ValidateMap(void)
 	unsigned int mapFileHash = GetFileCheckSum(mapFile);
 
 	std::unique_ptr<HTTPRequest> pReq(new ValidateMapRequest(UTIL_VarArgs("/api/v2/internal/map/%s/%u", MSGlobals::MapName.c_str(), mapFileHash)));
-	if (pReq.get()->AsyncSendRequest())
+	const auto req = pReq.get();
+	if (req->AsyncSendRequest())
 	{
-		JSONDocument& doc = (*pReq.get()->m_JSONResponse);
+		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
 		return doc["data"].GetBool();
 	}
 
@@ -101,9 +103,10 @@ bool FNShared::ValidateSC(void)
 	unsigned int scFileHash = GetFileCheckSum(scFile);
 
 	std::unique_ptr<HTTPRequest> pReq(new ValidateScriptsRequest(UTIL_VarArgs("/api/v2/internal/sc/%u", scFileHash)));
-	if (pReq.get()->AsyncSendRequest())
+	const auto req = pReq.get();
+	if (req->AsyncSendRequest())
 	{
-		JSONDocument& doc = (*pReq.get()->m_JSONResponse);
+		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
 		return doc["data"].GetBool();
 	}
 
