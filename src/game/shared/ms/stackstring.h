@@ -170,7 +170,7 @@ public:
 	msstring(const msstring_ref a);
 	msstring(const msstring_ref a, size_t length);
 	msstring(const msstring &a);
-	msstring(const string_i &a);
+	//msstring(const string_i &a);
 	msstring &operator=(const msstring_ref a);
 	msstring &operator=(int a);
 	msstring &operator=(const msstring &a);
