@@ -24,6 +24,13 @@ jobs:
           sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libatomic1:i386 libgl1-mesa-dev:i386
 
       - uses: lukka/get-cmake@latest
+
+      - name: Restore artifacts, setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{env.VCPKG_ROOT}}'
+          runVcpkgInstall: false
+          vcpkgJsonIgnores: "['**/vcpkg/**', '**/vcpkg_config/**', '**/utils/**']"
       
       - name: Configure CMake
         run: > 
