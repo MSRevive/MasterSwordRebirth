@@ -169,8 +169,12 @@ public:
 	msstring();
 	msstring(const msstring_ref a);
 	msstring(const msstring_ref a, size_t length);
-	msstring(const msstring &a);
-	//msstring(const string_i &a);
+	
+#ifdef _WIN32
+	msstring(const msstring& a);
+#else
+	msstring(const string_i& a);
+#endif
 	msstring &operator=(const msstring_ref a);
 	msstring &operator=(int a);
 	msstring &operator=(const msstring &a);
