@@ -14,10 +14,9 @@ msstring::msstring(const msstring_ref a, size_t length)
 	strncpy(data, a, length);
 	data[length] = 0;
 }
-msstring::msstring(const msstring &a) { operator=(a); }
 
 #ifdef _WIN32
-msstring::msstring(const string_i &a) { operator=(a); }
+msstring::msstring(const msstring& a) { operator=(a); }
 #else
 msstring::msstring(const string_i& a) { operator=(&a); }
 #endif // _WIN32
