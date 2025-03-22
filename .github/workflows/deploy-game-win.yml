@@ -13,6 +13,8 @@ jobs:
     steps:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - uses: lukka/get-cmake@latest
 
