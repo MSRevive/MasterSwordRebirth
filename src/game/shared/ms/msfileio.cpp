@@ -160,6 +160,7 @@ void CMemFile::WriteToFile(const char* pszFileName)
 	CGameFile::Close();
 }
 
+#ifndef _MSR_UTILS
 bool CMemFile::ReadFromGameFile(const char* pszFileName)
 {
 	// Load a half-life engine file - could be compressed in a package
@@ -175,6 +176,7 @@ bool CMemFile::ReadFromGameFile(const char* pszFileName)
 
 	return true;
 }
+#endif // _MSR_UTILS
 
 bool CMemFile::ReadFromFile(const char* pszFileName)
 {
