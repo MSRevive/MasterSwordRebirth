@@ -80,7 +80,7 @@ void dbgtxt( msstring_ref Text );
 		genericitem_t( class CGenericItem *pItem );
 		operator class CGenericItem *( );
 		ulong ID;
-		string_i Name;						//Itemname
+		msstring Name;						//Itemname
 		ulong Properties;
 		unsigned short Quantity;
 		unsigned short Quality, MaxQuality;

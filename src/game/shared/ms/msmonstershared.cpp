@@ -158,7 +158,7 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 				|| (!Loop_CheckHands && pItem->m_Location == ITEMPOS_HANDS)) //On inv loop and item is in hand
 				continue;
 
-			if ((ItemDesc.CheckPartialName && pItem->ItemName.m_string.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItem->ItemName == ItemDesc.Name))
+			if ((ItemDesc.CheckPartialName && pItem->ItemName.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItem->ItemName == ItemDesc.Name))
 			{
 				ItemDesc.retFound = true;
 				ItemDesc.retItem = pItem;
@@ -172,7 +172,7 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 			{
 				CGenericItem *pItemInPack = pItem->Container_GetItem(n);
 
-				if ((ItemDesc.CheckPartialName && pItem->ItemName.m_string.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItemInPack->ItemName == ItemDesc.Name))
+				if ((ItemDesc.CheckPartialName && pItem->ItemName.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItemInPack->ItemName == ItemDesc.Name))
 				{
 					ItemDesc.retFound = true;
 					ItemDesc.retItem = pItemInPack;

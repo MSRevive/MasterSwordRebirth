@@ -161,7 +161,6 @@ private:
 #define msstring_error ((size_t)-1)
 
 typedef const char *msstring_ref;
-struct string_i;
 
 class msstring
 {
@@ -169,12 +168,7 @@ public:
 	msstring();
 	msstring(const msstring_ref a);
 	msstring(const msstring_ref a, size_t length);
-	
-#ifdef _WIN32
 	msstring(const msstring& a);
-#else
-	msstring(const string_i& a);
-#endif
 	msstring &operator=(const msstring_ref a);
 	msstring &operator=(int a);
 	msstring &operator=(const msstring &a);
@@ -182,7 +176,6 @@ public:
 	msstring &operator+=(int a);
 	msstring operator+(const msstring_ref a);
 	msstring operator+(const msstring &a);
-	msstring operator+(const string_i &a);
 	msstring operator+(int a);
 	bool operator==(char *a) const;
 	bool operator==(const char *a) const;
@@ -192,6 +185,8 @@ public:
 	bool operator<(const char *a) const { return strcmp(data,a) < 0; }
 	bool operator<(msstring& a) const { return strcmp(data,a.data) < 0; }
 	bool operator<(const msstring& a) const { return strcmp(data,a.data) < 0; }
+	operator bool() { return len() ? true : false; }
+	bool operator!() { return !operator bool(); }
 	operator char *();
 	operator void *() { return operator char *(); }
 	char *c_str();

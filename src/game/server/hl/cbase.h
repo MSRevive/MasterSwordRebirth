@@ -306,7 +306,7 @@ public:
 	
 	//MasterSword
 	//MiB DEC2007a
-	string_i ScriptFName;
+	msstring ScriptFName;
 	mslist<scriptfile_t> filesOpen;		  //MiB FEB2008a - file i/o
 
 	msscriptarrayhash scriptedArrays; //MiB JAN2010_27 - Arrays, new type.

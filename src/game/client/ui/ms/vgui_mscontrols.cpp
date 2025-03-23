@@ -105,7 +105,7 @@ void CImageDelayed::LoadImg( )
 	if( m_TGAorSprite )
 	{
 		dbg( "Calling setImage" );
-		dbg( msstring("Image Name = ") + m_ImageName.c_str() );
+		dbg( msstring("Image Name = ") + m_ImageName );
 		setImage( m_pTGA=MSBitmap::GetTGA( m_ImageName ) ); //load image
 	}
 	else

@@ -18,14 +18,14 @@ public:
 struct globalscripteffect_t
 {
 	globalscripteffect_t() {}
-	globalscripteffect_t(string_i Name, string_i Scriptname, int Flags)
+	globalscripteffect_t(msstring Name, msstring Scriptname, int Flags)
 	{
 		m_Name = Name;
 		m_ScriptName = Scriptname;
 		m_Flags = Flags;
 	}
 
-	string_i m_Name, m_ScriptName;
+	msstring m_Name, m_ScriptName;
 	int m_Flags;
 };
 

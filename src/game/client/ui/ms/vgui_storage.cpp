@@ -189,7 +189,7 @@ bool CStoragePanel::GearItemClicked(ulong ID)
 //MiB FEB2008a
 bool CStoragePanel::checkValid(containeritem_t &item)
 {
-	msstring name = item.Name.m_string;
+	msstring name = item.Name;
 	if (name.starts_with("pack_"))
 		return false;
 	if (name.starts_with("sheath_"))

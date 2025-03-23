@@ -18,7 +18,7 @@ public:
 	static mslist<storeitem_t> StoreItems;
 	static unsigned long StoreGold;
 	static int iStoreBuyFlags, StoreItemMsgCount;
-	static string_i Text_StoreGold;
+	static msstring Text_StoreGold;
 };
 
 #endif //MS_STORE_MAINWIN

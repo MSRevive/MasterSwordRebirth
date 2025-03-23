@@ -1015,7 +1015,7 @@ bool CGenericItem::UseAmmo(int iAmt)
 						{
 #ifndef VALVE_DLL
 							CallScriptEvent(CurrentAttack->CallbackName + "_noammo");
-							m_pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You don't have any ") + CurrentAttack->sProjectileType.c_str());
+							m_pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You don't have any ") + (const char*)CurrentAttack->sProjectileType.c_str());
 #endif
 							m_pPlayer->BlockButton(IN_ATTACK);
 						}

@@ -63,7 +63,7 @@ msstring MSGlobals::AbsGamePath;
 msstringlist MSGlobals::DefaultWeapons;
 msstringlist MSGlobals::DefaultFreeItems; //Free items that come with a new character
 int MSGlobals::DefaultGold = 10;		  //Starting gold
-string_i MSGlobals::DefaultSpawnBoxModel;
+msstring MSGlobals::DefaultSpawnBoxModel;
 
 IScripted *MSGlobals::GameScript = nullptr;
 char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else

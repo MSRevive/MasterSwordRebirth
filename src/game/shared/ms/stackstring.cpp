@@ -15,11 +15,7 @@ msstring::msstring(const msstring_ref a, size_t length)
 	data[length] = 0;
 }
 
-#ifdef _WIN32
 msstring::msstring(const msstring& a) { operator=(a); }
-#else
-msstring::msstring(const string_i& a) { operator=(&a); }
-#endif // _WIN32
 
 msstring &msstring::operator=(const msstring_ref a)
 {
@@ -48,7 +44,6 @@ msstring &msstring::operator+=(int a)
 }
 msstring msstring::operator+(const msstring_ref a) { return msstring(data) += a; }
 msstring msstring::operator+(const msstring &a) { return msstring(data) += a.data; }
-msstring msstring::operator+(const string_i &a) { return msstring(data) += ((string_i)a).c_str(); }
 msstring msstring::operator+(int a) { return msstring(data) += a; }
 bool msstring::operator==(char *a) const { return !strcmp(data, a); }
 bool msstring::operator==(const char *a) const { return !strcmp(data, a); }

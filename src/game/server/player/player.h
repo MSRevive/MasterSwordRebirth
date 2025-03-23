@@ -321,7 +321,7 @@ struct companion_t
 {
 	bool Active;
 	entityinfo_t Entity;
-	string_i ScriptName;
+	msstring ScriptName;
 	msstringlist SaveVarName,
 		SaveVarValue;
 };
@@ -337,12 +337,12 @@ struct quest_t
 struct wearpos_t
 {
 	wearpos_t() {}
-	wearpos_t(string_i name, int maxamt)
+	wearpos_t(msstring name, int maxamt)
 	{
 		Name = name;
 		MaxAmt = maxamt;
 	}
-	string_i Name;
+	msstring Name;
 	union
 	{
 		int MaxAmt; //Max slots available (player)  or

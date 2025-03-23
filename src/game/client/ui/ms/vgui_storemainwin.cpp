@@ -41,7 +41,7 @@ msstring CStorePanel::StoreVendorName;
 mslist<storeitem_t> CStorePanel::StoreItems;
 unsigned long CStorePanel::StoreGold;
 int CStorePanel::iStoreBuyFlags, CStorePanel::StoreItemMsgCount;
-string_i CStorePanel::Text_StoreGold;
+msstring CStorePanel::Text_StoreGold;
 
 static COLOR Color_TitleText = COLOR(255, 0, 0, 0), //255, 100, 100
 	Color_SubtitleText = COLOR(160, 160, 160, 0),

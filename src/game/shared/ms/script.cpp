@@ -4826,7 +4826,7 @@ CScript::~CScript()
 }
 
 
-bool CScript::Spawn(string_i Filename, CBaseEntity* pScriptedEnt, IScripted* pScriptedInterface, bool PrecacheOnly, bool Casual)
+bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pScriptedInterface, bool PrecacheOnly, bool Casual)
 {
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
@@ -5299,7 +5299,7 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 // 			bool AllowDupInclude = m.AllowDupInclude;
 // 			m.AllowDupInclude = (pszCommandLine.find("[allowduplicate]") != std::string::npos) != msstring_error;
 
-// 			string_i CurrentScriptFile = m.ScriptFile;
+// 			msstring CurrentScriptFile = m.ScriptFile;
 // 			bool fSucces = Spawn(FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
 // 			m.ScriptFile = CurrentScriptFile;
 // 			m.AllowDupInclude = AllowDupInclude;
@@ -5925,7 +5925,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		{
 			msstring AllowDup = msstring(Line.substr(FileName.len())).skip(SKIP_STR).thru_char(SKIP_STR);
 
-			string_i CurrentScriptFile = m.ScriptFile;
+			msstring CurrentScriptFile = m.ScriptFile;
 			bool AllowDupInclude = m.AllowDupInclude;
 			m.AllowDupInclude = AllowDup.find("allowduplicate") != msstring_error;
 			bool fSucces = Spawn(FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
@@ -6041,7 +6041,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				}
 			}
 			else
-				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
+				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + (const char*)m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
 		}
 	}
 	else if (!_stricmp(TestCommand, "else"))
@@ -6608,7 +6608,7 @@ void IScripted::Deactivate()
 	m_Scripts.clear();		//explicitly delete the list, to reclaim the memory
 
 }
-CScript* IScripted::Script_Add(string_i ScriptName, CBaseEntity* pEntity)
+CScript* IScripted::Script_Add(msstring ScriptName, CBaseEntity* pEntity)
 {
 	//Adds a new script to the list
 	CScript* Script = msnew CScript();
@@ -6626,7 +6626,7 @@ CScript* IScripted::Script_Add(string_i ScriptName, CBaseEntity* pEntity)
 
 	return Script;
 }
-CScript* IScripted::Script_Get(string_i ScriptName)
+CScript* IScripted::Script_Get(msstring ScriptName)
 {
 	for (int i = 0; i < m_Scripts.size(); i++)
 		if (!strcmp(m_Scripts[i]->m.ScriptFile, ScriptName))

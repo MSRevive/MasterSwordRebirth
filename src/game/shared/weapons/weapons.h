@@ -195,7 +195,7 @@ public:
 	bool m_NotUseable;
 	int Properties, iViewModel;
 	int SpriteFrame;	 //Shuriken FEB2008a
-	string_i ItemName,	 //MS classname (i.e "dagger", "broadwsord")
+	msstring ItemName,	 //MS classname (i.e "dagger", "broadwsord")
 		WorldModel,		 //Sets this model automatically on drop & fall
 		HandSpriteName,	 //Name of the hand sprite
 		TradeSpriteName; //Name of the trade/barter sprite

@@ -484,8 +484,8 @@ public:
 			CBaseEntity::KeyValue(pkvd);
 	}
 
-	string_i m_WeatherName;
-	string_i m_WeatherOptions;
+	msstring m_WeatherName;
+	msstring m_WeatherOptions;
 };
 LINK_ENTITY_TO_CLASS(mstrig_weather, CMSWeather);
 

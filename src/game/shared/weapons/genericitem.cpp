@@ -2428,7 +2428,7 @@ CGenericItem* ReadGenericItem(bool fAllowCreateNew)
 		pItem = CGenericItemMgr::NewGenericItem(idx); //ItemScript ); // MiB - See above
 	if (!pItem)
 	{
-		MSErrorConsoleText("ReadGenericItem", msstring("Item doesn't exist and couldn't be created  ID: ") + (int)lID + " Script: " + CGenericItemMgr::Item(idx)->Name.c_str());
+		MSErrorConsoleText("ReadGenericItem", msstring("Item doesn't exist and couldn't be created  ID: ") + (int)lID + " Script: " + (const char*)CGenericItemMgr::Item(idx)->Name.c_str());
 		return NULL;
 	}
 
