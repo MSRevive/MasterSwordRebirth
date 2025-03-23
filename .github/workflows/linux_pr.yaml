@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
 
       - name: Install G++ Multilib & 32 bit OpenGL library
         run: |
