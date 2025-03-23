@@ -119,7 +119,7 @@ int CHudScript::MsgFunc_ClientScript( const char *pszName, int iSize, void *pbuf
 				continue;
 
 			 for (int p = 0; p < Parameters.size(); p++) 
-				Script->SetVar( msstring("PARAM") + (p+1), Parameters[p] );
+				Script->SetVar( msstring("PARAM") + (p+1), Parameters[p].c_str() );
 			Script->RunScriptEventByName( EventName, Parameters.size() ? &Parameters : NULL );
 			break;
 		}
@@ -146,7 +146,7 @@ CScript *CHudScript::CreateScript( msstring_ref ScriptName, msstringlist &Parame
 	{
 		int events = m_Scripts.size();
 		 for (int i = 0; i < events; i++) 
-			if( strstr( m_Scripts[i]->m.ScriptFile, ScriptName ) )
+			if( strstr( m_Scripts[i]->m.ScriptFile.c_str(), ScriptName ) )
 			{
 				UniqueID = m_Scripts[i]->m.UniqueID;
 				return m_Scripts[i];	//Found a prev copy.  Just return it and don't call initialization again
@@ -183,7 +183,7 @@ void CHudScript::HandleAnimEvent( msstring_ref Options, const cl_entity_s *clEnt
 	{
 		int events = m_Scripts.size( );
 		 for (int i = 0; i < events; i++) 
-			if( strstr( m_Scripts[i]->m.ScriptFile, ScriptName ) )
+			if( strstr( m_Scripts[i]->m.ScriptFile.c_str(), ScriptName ) )
 				{ Script = m_Scripts[i]; break; }
 	}
 

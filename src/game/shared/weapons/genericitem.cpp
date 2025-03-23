@@ -1159,12 +1159,12 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	bool fSuccess = false;
 	CGenericItem* pPack = NULL;
 
-	if (strstr(ItemName, "arrow"))
+	if (strstr(ItemName.c_str(), "arrow"))
 		pPack = pPlayer->GetContainer("quiver");
-	else if (strstr(ItemName, "swords"))
+	else if (strstr(ItemName.c_str(), "swords"))
 		pPack = pPlayer->GetContainer("sheath");
-	else if (strstr(ItemName, "blunt") ||
-		strstr(ItemName, "axes"))
+	else if (strstr(ItemName.c_str(), "blunt") ||
+		strstr(ItemName.c_str(), "axes"))
 		pPack = pPlayer->GetContainer("holster");
 		
 
@@ -2428,7 +2428,7 @@ CGenericItem* ReadGenericItem(bool fAllowCreateNew)
 		pItem = CGenericItemMgr::NewGenericItem(idx); //ItemScript ); // MiB - See above
 	if (!pItem)
 	{
-		MSErrorConsoleText("ReadGenericItem", msstring("Item doesn't exist and couldn't be created  ID: ") + (int)lID + " Script: " + CGenericItemMgr::Item(idx)->Name.c_str());
+		MSErrorConsoleText("ReadGenericItem", msstring("Item doesn't exist and couldn't be created  ID: ") + (int)lID + " Script: " + (const char*)CGenericItemMgr::Item(idx)->Name.c_str());
 		return NULL;
 	}
 

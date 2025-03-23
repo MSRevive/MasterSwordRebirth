@@ -751,9 +751,9 @@ void CNewCharacterPanel::Update()
 				Choose_MainBtn[i]->setText( "" );
 				Choose_CharLabel[i][0]->setText( CharSlot.Name );
 				char cMapInfo[128];
-				CharSlot.MapName[0] = toupper(CharSlot.MapName[0]);
-				CharSlot.NextMap[0] = toupper(CharSlot.NextMap[0]);
-				if( CharSlot.NextMap[0] )
+				CharSlot.MapName.c_str()[0] = toupper(CharSlot.MapName.c_str()[0]);
+				CharSlot.NextMap.c_str()[0] = toupper(CharSlot.NextMap.c_str()[0]);
+				if( CharSlot.NextMap.c_str()[0] )
 					 _snprintf(cMapInfo, sizeof(cMapInfo),  "%s -> %s",  CharSlot.MapName.c_str(),  CharSlot.NextMap.c_str() );
 				else
 					 _snprintf(cMapInfo, sizeof(cMapInfo),  "At %s",  CharSlot.MapName.c_str() );

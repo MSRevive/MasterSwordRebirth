@@ -11,7 +11,7 @@ inline CBaseEntity *PrivData(entvars_t *pev) { return (CBaseEntity *)pev->pConta
 
 struct mstexture_t
 {
-	string_i Name;
+	msstring Name;
 	bool IsReflective, //Reflect world
 		IsWater;	   //Do splashes, refractions
 	//Color4F Color;
@@ -28,7 +28,7 @@ struct mstexture_t
 
 struct hudcharanims_t
 {
-	string_i Idle_NoWeapon,
+	msstring Idle_NoWeapon,
 		Idle_Weapon,
 		Fidget,
 		Highlighted,
@@ -38,7 +38,7 @@ struct hudcharanims_t
 
 struct hudsounds_t
 {
-	string_i QuickSlot_Select,
+	msstring QuickSlot_Select,
 		QuickSlot_Confirm,
 		QuickSlot_Assign;
 };

@@ -328,7 +328,7 @@ public:
 	bool m_TGAorSprite; //True = TGA, False = Sprite
 	bool m_ImageLoaded; //For delayed images... is it loaded yet?
 
-	CImageDelayed( ) : CImageLabel( "", 0, 0, 10, 10 ) { m_ImageName[0] = 0; m_ImageLoaded = false; }
+	CImageDelayed( ) : CImageLabel( "", 0, 0, 10, 10 ) { m_ImageName = ""; m_ImageLoaded = false; }
 	CImageDelayed( const char *pszImageName, bool TGAorSprite, bool Delayed, int x = 0, int y = 0, int wide = 10, int tall = 10 );
 
 	virtual int getImageTall();

@@ -153,7 +153,7 @@ char *GetFullResourceName(msstring_ref pszPartialName)
 	static msstring sReturn;
 
 	sReturn = PartialName;
-	msstring Extension = &PartialName[PartialName.len() - 4];
+	msstring Extension = &PartialName.c_str()[PartialName.len() - 4];
 	if (Extension == ".spr")
 		sReturn = msstring("sprites/") + PartialName;
 	else if (Extension == ".mdl")

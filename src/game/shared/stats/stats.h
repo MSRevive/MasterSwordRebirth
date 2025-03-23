@@ -37,7 +37,7 @@ public:
 	mslist<CSubStat> m_SubStats; //For regular stats, there are three - Speed, balance, power
 								 //For spellcasting, there is more
 								 //For parry, there is only one
-	string_i m_Name;
+	msstring m_Name;
 	bool bNeedsUpdate;
 	enum skilltype_e
 	{

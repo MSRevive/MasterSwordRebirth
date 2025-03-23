@@ -68,7 +68,7 @@ struct attackdata_t
 		StatPower, PropPower,
 		StatProf, PropProf,
 		StatExp, PropExp;
-	string_i sDamageType, //A custom damage type, specified in the script
+	msstring sDamageType, //A custom damage type, specified in the script
 		sProjectileType,  //Name (substring) of the desired projectile type
 		sSkillType;		  //Thothie OCT2007a - need dodamage to be sent to selectable skills (not used yet)
 	Vector StartOffset;	  //Offset from the viewangles that the attack should start
@@ -93,7 +93,7 @@ struct attackdata_t
 		fAttackThisFrame, //Used by monsters to align attacks w/ anims
 		fCanCancel;		  //Helps control when attacks can end
 	int iLoadedAmmo;	  //Amount of ammo currently loaded
-	string_i sProjectile; //Name of the next projectile item to be fired
+	msstring sProjectile; //Name of the next projectile item to be fired
 };
 
 #define GET_CHARGE_FROM_TIME(a) (a + V_max(a - 1, 0) * .5)
@@ -185,7 +185,7 @@ struct armordata_t
 {
 	int SwapBodyParts; //bodyparts to make invisible when this armor is worn
 	float Protection;
-	string_i Type;
+	msstring Type;
 	mslist<int> m_ProtectionAreas; //bodyparts that the armor protects
 	~armordata_t() {}
 };
@@ -195,7 +195,7 @@ struct projectiledata_t
 	float Damage;
 	float flDamageAOERange;
 	float flDamageAOEAttn;
-	string_i sDamageType;
+	msstring sDamageType;
 	bool CollideHitBox; //Collide with hitboxes instead of just bboxes
 	//Dynamic Data
 	int StatPower, PropPower;
@@ -211,7 +211,7 @@ class CGenericItem : public CBasePlayerItem
 {
 public:
 	float flNextThink;				//replacement for pev->nextthink
-	string_i m_AnimExt,				//Local copy of the anim extention
+	msstring m_AnimExt,				//Local copy of the anim extention
 		m_AnimExtLegs,				//Local copy of the legs anim extention
 		m_ViewModel,				//Local copy of the view anim
 		m_PlayerHoldModel;			//p_model name for players

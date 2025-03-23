@@ -24,14 +24,14 @@ struct dest_t //Destination
 
 struct word_t
 { //For talking with mouth syncronization
-	string_i Soundfile;
+	msstring Soundfile;
 	float Duration;
 	bool Spoken;
 };
 struct listenphrase_t
 { //For listening for player-typed messages
-	mslist<string_i> Phrases;
-	string_i ScriptEvent;
+	mslist<msstring> Phrases;
+	msstring ScriptEvent;
 };
 
 enum
@@ -100,7 +100,7 @@ struct damage_t
 	int iHitGroup;				  //Player hitgroup that was hit
 	bool ExpUseProps;			  //Give exp to the following stat/prop
 	int ExpStat, ExpProp;		  //Stat and prop that receives exp from this attack
-	string_i sDamageType;		  //Custom damage type from script
+	msstring sDamageType;		  //Custom damage type from script
 	msstring *ItemCallBackPrefix; //Item callback prefix, if this attack was caused by an item
 	float flHitPercentage;
 	float flCritMutli;		//how much to multiply the hit by
@@ -184,7 +184,7 @@ struct random_monster_t
 	msstring m_title, //title
 		m_addparams;  //params
 
-	string_i m_ScriptName; //scriptfile
+	msstring m_ScriptName; //scriptfile
 
 	float m_HPMulti, //hpmulti
 		m_DMGMulti;	 //dmgmulti
@@ -289,7 +289,7 @@ public:
 
 		m_TradeCallBackEvent; //Prefix for the trade callbacks
 							  // Skin;			//Name of the skin I become when skinned
-	string_i m_ScriptName;	  //Name of my main script
+	msstring m_ScriptName;	  //Name of my main script
 
 	mslist<random_monster_t> random_monsterdata; //NOV2014_20 - Thothie msmonster_random
 
@@ -332,7 +332,7 @@ public:
 
 	struct takedamagemodifier_t
 	{
-		string_i DamageType;
+		msstring DamageType;
 		float modifier;
 	};
 

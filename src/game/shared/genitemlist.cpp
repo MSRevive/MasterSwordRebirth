@@ -36,7 +36,7 @@ bool CItemList ::ItemExists(CGenericItem *pItem)
 CGenericItem *CItemList ::GetItem(const char *pszName)
 {
 	for (int i = 0; i < size(); i++)
-		if (strstr(operator[](i)->ItemName, pszName))
+		if (strstr(operator[](i)->ItemName.c_str(), pszName))
 			return operator[](i);
 
 	return NULL;

@@ -10,7 +10,7 @@ public:
 	bool AddItem(const char *pszItemName, int iQuantity, int CostPercent, float flSellRatio, int iBundleAmt);
 	storeitem_t *GetItem(const char *pszItemName);
 	storeitem_t *GetItem(int idx);
-	string_i m_Name;
+	msstring m_Name;
 	void Deactivate();
 	void RemoveItem(msstring_ref Name);
 	void RemoveAllItems();

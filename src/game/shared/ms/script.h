@@ -54,7 +54,7 @@ public:
 
 	struct props
 	{
-		string_i ScriptFile;
+		msstring ScriptFile;
 		CBaseEntity	*pScriptedEnt;
 		IScripted	*pScriptedInterface;
 		CEventList Events;
@@ -84,7 +84,7 @@ public:
 #if !TURN_OFF_ALERT
 	void conflict_check(msstring testvar, msstring testvar_type, msstring testvar_scope, int linenum); //Thothie JAN2013_09 variable conflict checks
 #endif
-	bool Spawn(string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
+	bool Spawn(msstring Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
 	void RunScriptEventByName( msstring_ref pszEventName, msstringlist *Parameters = NULL );	//Run one named event
 	void CallLogged(msstring_ref title, std::clock_t start);

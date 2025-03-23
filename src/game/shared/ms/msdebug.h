@@ -61,65 +61,6 @@ public:
 	static float AngleDiff(float destAngle, float srcAngle);
 };
 
-/*//#ifdef _DEBUG
-	//	#define STRINGI_SETSTR_STR( a )  msstring::operator = ( a )
-	//	#define STRINGI_SETSTR_INT( a )  msstring::operator = ( EngineFunc::GetString( a ) )
-	//	#define STRINGI_BASECLASS struct string_i  : msstring
-	//#else
-		#define STRINGI_SETSTR_STR( a )
-		#define STRINGI_SETSTR_INT( a )
-		#define STRINGI_BASECLASS struct string_i
-	//#endif
-
-		STRINGI_BASECLASS
-		{
-			string_i( )								{ m_string = 0; }
-
-			string_i( msstring_ref a )				{ operator = ( a ); }
-			string_i( string_t a )					{ operator = ( a ); }
-			string_t operator = ( string_t a )		{ m_string = a; STRINGI_SETSTR_INT( m_string ); return m_string;  }
-			operator string_t ( )					{ return m_string; }
-			string_i operator = ( msstring_ref a )	{ m_string = EngineFunc::AllocString( a ); STRINGI_SETSTR_STR( a ); return m_string; }
-			operator msstring_ref ( )				{ return EngineFunc::GetString( m_string ); }
-			bool operator == ( msstring_ref a )	const;
-			inline bool operator != ( msstring_ref a )	const { return !operator == ( a ); }
-
-			operator bool ( )						{ return m_string ? true : false; }
-			operator ! ( )							{ return !operator bool( ); }
-			string_t m_string;
-		};*/
-
-//#define string_i msstring
-struct string_i
-{
-	string_i() {}
-
-	string_i(msstring_ref a) { operator=(a); }
-	string_i(const msstring &a) { operator=(a); }
-	msstring_ref operator=(msstring_ref a)
-	{
-		m_string = a;
-		return m_string;
-	}
-	msstring_ref operator=(const msstring &a)
-	{
-		m_string = a;
-		return m_string;
-	}
-	operator msstring_ref() { return m_string; }
-	operator const msstring &() { return m_string; }
-	bool operator==(msstring_ref a) const { return m_string == a; }
-	inline bool operator!=(msstring_ref a) const { return !operator==(a); }
-
-	operator bool() { return m_string.len() ? true : false; }
-	bool operator!() { return !operator bool(); }
-
-	msstring_ref c_str() { return m_string.c_str(); }
-	size_t len() { return m_string.len(); }
-
-	msstring m_string;
-};
-
 #ifdef DEV_BUILD
 void *operator new(size_t size, const char *pszSourceFile, int LineNum);
 void operator delete(void *ptr, const char *pszSourceFile, int LineNum);

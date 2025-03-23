@@ -56,7 +56,7 @@ public:
 		FXLimit;							//Server FX Limit
 	static msstringlist DefaultWeapons;		//Default starting weapons
 	static msstringlist DefaultFreeItems;	//Free items that come with a new character
-	static string_i DefaultSpawnBoxModel;	//Model surrounding the player when he first spawns in
+	static msstring DefaultSpawnBoxModel;	//Model surrounding the player when he first spawns in
 	static class IScripted *GameScript;		//Controls global events, like weather, etc
 	static char Buffer[32768];				//A huge buffer for text or anything else
 	static int ClEntities[CLPERMENT_TOTAL]; //Index of the permanent client entities.  Must be allocated on server & client

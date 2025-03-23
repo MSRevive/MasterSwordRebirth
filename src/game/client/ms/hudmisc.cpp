@@ -214,7 +214,6 @@ void CHudMisc ::UserCmd_RemovePack(void)
 
 		msstring ItemName;
 		ItemName += SPEECH_GetItemName(pGearItem);
-		toupper(ItemName[0]);
 
 		msstring SendString;
 		int Size = m_RemoveList.size();

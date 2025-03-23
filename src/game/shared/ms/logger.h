@@ -78,6 +78,12 @@ public:
 		//logger.file.flush();
 		return logger;
 	}
+
+        friend Logger &operator<<(Logger &logger, msstring text)
+	{
+		logger.file << text.c_str();
+		return logger;
+	}
 	
 	friend Logger &operator<<(Logger &logger, unsigned char c)
 	{

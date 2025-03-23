@@ -90,7 +90,7 @@ void CMSMonster::CancelAttack()
 CGenericItem *CMSMonster::GetContainer(const char *pNameSubstring)
 {
 	for (int i = 0; i < Gear.size(); i++)
-		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) && strstr(Gear[i]->ItemName, pNameSubstring))
+		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) && strstr(Gear[i]->ItemName.c_str(), pNameSubstring))
 			return Gear[i];
 
 	return NULL;
@@ -158,7 +158,7 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 				|| (!Loop_CheckHands && pItem->m_Location == ITEMPOS_HANDS)) //On inv loop and item is in hand
 				continue;
 
-			if ((ItemDesc.CheckPartialName && pItem->ItemName.m_string.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItem->ItemName == ItemDesc.Name))
+			if ((ItemDesc.CheckPartialName && pItem->ItemName.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItem->ItemName == ItemDesc.Name))
 			{
 				ItemDesc.retFound = true;
 				ItemDesc.retItem = pItem;
@@ -172,7 +172,7 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 			{
 				CGenericItem *pItemInPack = pItem->Container_GetItem(n);
 
-				if ((ItemDesc.CheckPartialName && pItem->ItemName.m_string.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItemInPack->ItemName == ItemDesc.Name))
+				if ((ItemDesc.CheckPartialName && pItem->ItemName.contains(ItemDesc.Name)) || (!ItemDesc.CheckPartialName && pItemInPack->ItemName == ItemDesc.Name))
 				{
 					ItemDesc.retFound = true;
 					ItemDesc.retItem = pItemInPack;
@@ -196,7 +196,7 @@ CGenericItem *CMSMonster::GetItem(const char *pItemName, CGenericItem **rpPack)
 
 	//Check hands first
 	for (int i = 0; i < MAX_NPC_HANDS; i++)
-		if (Hand(i) && strstr(Hand(i)->ItemName, pItemName))
+		if (Hand(i) && strstr(Hand(i)->ItemName.c_str(), pItemName))
 			return Hand(i);
 
 	//Check inside each pack
@@ -210,7 +210,7 @@ CGenericItem *CMSMonster::GetItem(const char *pItemName, CGenericItem **rpPack)
 		for (int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			CGenericItem *pProjInPack = pPack->Container_GetItem(n);
-			if (!strstr(pProjInPack->ItemName, pItemName))
+			if (!strstr(pProjInPack->ItemName.c_str(), pItemName))
 				continue;
 
 			if (rpPack)

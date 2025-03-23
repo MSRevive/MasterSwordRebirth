@@ -116,7 +116,7 @@ enum eventscope_e
 //The basic 'event' of a script.  Contains a list of commands
 struct SCRIPT_EVENT : public IVariables
 {
-	string_i Name;				   //Event name
+	msstring Name;				   //Event name
 	scriptcmd_list Commands;	   //The comamnds in this event
 	msstringlist *Params;		   //The parameters passed to this event (Can be NULL)
 	float fNextExecutionTime,	   //Next time to be run with repeatdelay
@@ -145,8 +145,8 @@ struct scriptsendcmd_t
 class IScripted
 {
 public:
-	virtual CScript *Script_Add(string_i ScriptName, CBaseEntity *pEntity); //Adds a new script to the list
-	virtual CScript *Script_Get(string_i ScriptName);
+	virtual CScript *Script_Add(msstring ScriptName, CBaseEntity *pEntity); //Adds a new script to the list
+	virtual CScript *Script_Get(msstring ScriptName);
 	virtual void Script_Remove(int idx);																						   //Removes a script
 	virtual void Script_InitHUD(class CBasePlayer *pPlayer);																	   //Called when a player joins the game
 	virtual void Script_Setup() {}																								   //Ties m_pScriptCommands to a global somewhere

@@ -44,7 +44,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 	msstring FileID;
 	//if( MSGlobals::IsLanGame ) pszFileID = LanID = msstring("LAN_") + STRING(pPlayer->DisplayName) + g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "ms_id" );
 	if (MSGlobals::IsLanGame)
-		FileID = msstring("LAN_") + g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
+		FileID = msstring("LAN_") + (const char*)g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
 	else
 		FileID = GETPLAYERAUTHID(pPlayer->edict());
 	msstring Prefix = FNShared::IsEnabled() ? "central_" : "";

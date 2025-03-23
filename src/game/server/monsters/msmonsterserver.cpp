@@ -143,7 +143,7 @@ void CMSMonster::Spawn()
 	if (m_nRndMobs > 0)
 	{
 		//precache all random mob scripts
-		string_i orig_scriptName = m_ScriptName;
+		msstring orig_scriptName = m_ScriptName;
 		for (int i = 0; i < m_nRndMobs; i++)
 		{
 			logfile << UTIL_VarArgs("DEBUG: msmonster_random precache #%i / %i as %s\n", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
@@ -625,7 +625,7 @@ void CMSMonster::Think()
 	if (TempConditions & FC_AVOID)
 		FrameConditions |= FC_AVOID;
 
-	enddbgprt(m_ScriptName.c_str());
+	enddbgprt((const char*)m_ScriptName.c_str());
 }
 /*int CMSMonster :: MoveExecute ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist, bool fTestMove )
 {
