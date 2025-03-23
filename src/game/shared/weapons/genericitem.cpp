@@ -1159,12 +1159,12 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	bool fSuccess = false;
 	CGenericItem* pPack = NULL;
 
-	if (strstr(ItemName, "arrow"))
+	if (strstr(ItemName.c_str(), "arrow"))
 		pPack = pPlayer->GetContainer("quiver");
-	else if (strstr(ItemName, "swords"))
+	else if (strstr(ItemName.c_str(), "swords"))
 		pPack = pPlayer->GetContainer("sheath");
-	else if (strstr(ItemName, "blunt") ||
-		strstr(ItemName, "axes"))
+	else if (strstr(ItemName.c_str(), "blunt") ||
+		strstr(ItemName.c_str(), "axes"))
 		pPack = pPlayer->GetContainer("holster");
 		
 

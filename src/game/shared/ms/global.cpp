@@ -407,7 +407,7 @@ Vector CBaseEntity::DetermineOrigin(msstring & vsOrigin)
 	if (pEntity) 
 		return pEntity->pev->origin;
 #else
-	int vEntIndx = vsOrigin[0] == '(' ? -1 : atoi(vsOrigin);
+	int vEntIndx = vsOrigin.c_str()[0] == '(' ? -1 : atoi(vsOrigin);
 	cl_entity_t * pEntity = vEntIndx > -1 ? gEngfuncs.GetEntityByIndex( vEntIndx ) : NULL;
 	if (pEntity) 
 		return pEntity->origin;

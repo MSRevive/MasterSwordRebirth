@@ -740,7 +740,7 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	else if( keynum == 127 )
 	{
 		if( m_Message.len() )
-			m_Message[m_Message.len()-1] = 0;
+			m_Message.c_str()[m_Message.len()-1] = 0;
 		m_VisibleMsg = m_Message;
 		UpdateText( );
 		return;

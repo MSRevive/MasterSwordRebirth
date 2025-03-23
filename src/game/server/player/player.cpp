@@ -3248,7 +3248,7 @@ CBaseEntity *CBasePlayer::GiveNamedItem(const char *pszName)
 	for (int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
 		GenItem_t &GlobalItem = *CGenericItemMgr::Item(i);
-		if (strstr(GlobalItem.pItem->ItemName, pszName))
+		if (strstr(GlobalItem.pItem->ItemName.c_str(), pszName))
 		{
 			WeaponScript = GlobalItem.pItem->ItemName;
 			break;
