@@ -212,7 +212,7 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 	int len = DllFileName.len();
 	for (int i = 0; i < len; i++)
 	{
-		if (DllFileName[len - 1 - i] == '\\' || DllFileName[len - 1 - i] == '/')
+		if (DllFileName.c_str()[len - 1 - i] == '\\' || DllFileName.c_str()[len - 1 - i] == '/')
 		{
 			AbsGamePath = DllFileName.substr(0, len - i - 1);
 			break;
