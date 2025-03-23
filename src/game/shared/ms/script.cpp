@@ -37,7 +37,7 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
-#define GETCONST_COMPATIBLE( a ) ( a[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
+#define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
 //int CountPlayers( void );
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
@@ -202,7 +202,7 @@ void CScript::ScriptGetterHash_Setup()
 
 bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParams)
 {
-	if (Line[0] != '$') //Example: $cansee(ent_lastseen,ATTACK_RANGE)
+	if (Line.c_str()[0] != '$') //Example: $cansee(ent_lastseen,ATTACK_RANGE)
 		return true;	 //Was not a parser, ignore
 
 	//'P' here stands for parenthesis
@@ -220,7 +220,7 @@ bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParam
 	//PCount starts at 1
 	for (int i = StartP; i < (signed)Line.len(); i++)
 	{
-		char Char = Line[i];
+		char Char = Line.c_str()[i];
 		if (Char == '(') PCount++;						//Increase counter when open P found
 		else if (Char == ')') PCount--;				//Decrease counter when close P found
 
@@ -721,7 +721,7 @@ msstring CScript::ScriptGetter_CapFirst(msstring& FullName, msstring& ParserName
 		msstring sen = Params[0];
 		msstring f = sen;
 		f = strupr(f);
-		sen[0] = f[0];
+		sen.c_str()[0] = f.c_str()[0];
 		return sen;
 	}
 	else
@@ -3332,7 +3332,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 		}
 		else
 		{
-			if (isdigit(Params[2][0])) Result = StringToVec(Params[1]) * atof(Params[2]);
+			if (isdigit(Params[2].c_str()[0])) Result = StringToVec(Params[1]) * atof(Params[2]);
 			else Result = VecMultiply(StringToVec(Params[1]), StringToVec(Params[2]));
 			return VecToString(Result);
 		}
@@ -3547,7 +3547,7 @@ msstring CScript::ScriptGetter_Rand(msstring& FullName, msstring& ParserName, ms
 {
 	//priority: very high, scope: shared
 	msstring Return;
-	if (ParserName[5] == 'f') //float version
+	if (ParserName.c_str()[5] == 'f') //float version
 		RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])))
 	else  //int version
 		RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])))
@@ -3568,7 +3568,7 @@ msstring CScript::ScriptGetter_RelPos(msstring& FullName, msstring& ParserName, 
 	msstring Return;
 	if (m.pScriptedEnt && Params.size() >= 1)
 	{
-		if (Params[0][0] != '(')	//(x,y,z)
+		if (Params[0].c_str()[0] != '(')	//(x,y,z)
 		{
 			if (m.pScriptedEnt)
 			{
@@ -3607,10 +3607,10 @@ msstring CScript::ScriptGetter_RelVel(msstring& FullName, msstring& ParserName, 
 	if (m.pScriptedEnt && Params.size() >= 1)
 	{
 		Vector Angle, RelVel;
-		if (Params[0][0] != '(')	//(x,y,z)
+		if (Params[0].c_str()[0] != '(')	//(x,y,z)
 		{
 			Angle = ((m.pScriptedEnt->IsPlayer() || FBitSet(m.pScriptedEnt->pev->flags, FL_FLY | FL_SWIM)) ? m.pScriptedEnt->pev->v_angle : m.pScriptedEnt->pev->angles);
-			RelVel = StringToVec(&FullName[7]);
+			RelVel = StringToVec(&FullName.c_str()[7]);
 		}
 		else	//(pitch,yaw,roll),(x,y,z)
 		{
@@ -3663,7 +3663,7 @@ msstring CScript::ScriptGetter_ShapeRect(msstring& FullName, msstring& ParserNam
 		float vHalfY;
 		float vHalfZ;
 
-		if (Params[1][0] == '(')
+		if (Params[1].c_str()[0] == '(')
 		{
 			Vector vPointMin = vOrigin;
 			Vector vPointMax = StringToVec(Params[1]);
@@ -4399,10 +4399,10 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 	msstring FullName = pszText;
 	msstring Name;
 	static msstring Return;
-	Return[0] = 0;
+	Return = "";
 	if (m.CurrentEvent) pszText = m.CurrentEvent->GetLocal(pszText);
 
-	if (FullName[0] == '\'' && FullName[FullName.len() - 1] == '\'')	//String literal.  Don't try to resolve it
+	if (FullName.c_str()[0] == '\'' && FullName.c_str()[FullName.len() - 1] == '\'')	//String literal.  Don't try to resolve it
 	{
 		Return = FullName.substr(1).thru_char("'");
 		return Return;
@@ -4692,7 +4692,7 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				Params.clearitems();
 				TokenizeString(Name, Params, ".");
 				Name = Params[0];
-				msstring FullProp = &FullName[5 + Name.len() + 1];
+				msstring FullProp = &FullName.c_str()[5 + Name.len() + 1];
 				msstring_ref Value = RETURN_NOTHING_STR;
 				if ((Name == "entity" || Name == "monster" || Name == "player" || Name == "item" || Name == "container") && m.pScriptedEnt)
 				{
@@ -5907,7 +5907,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		eventscope_e Scope = EVENTSCOPE_SHARED;
 		bool Casual = false;
 
-		if (FileName[0] == '[')	//#include [scope][casual] <name>
+		if (FileName.c_str()[0] == '[')	//#include [scope][casual] <name>
 		{
 			if (FileName.contains("[server]")) Scope = EVENTSCOPE_SERVER;
 			else if (FileName.contains("[client]")) Scope = EVENTSCOPE_CLIENT;
@@ -6016,12 +6016,12 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			{
 				ScriptCmd.m_Params.add(GetConst(ParamStr.thru_char(SKIP_STR)));			//Save the next parameter - Resolve Contants but not variables
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);	//Skip over the parameter's text and any spaces
-				if (!i && ParamStr[0] == ')')
+				if (!i && ParamStr.c_str()[0] == ')')
 					break;																	//Compare parameter was ')' -- this if statement only has one parameter Ex: if( var ) command
 
 			}
 
-			if (ParamStr[0] == ')')
+			if (ParamStr.c_str()[0] == ')')
 			{
 				ParentCmds.add(*pCurrentCmds);											//Store the current commands list
 				*pCurrentCmds = &ScriptCmd.m_IfCmds;										//Set the new parent command list to my true statment child list
@@ -6030,7 +6030,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				//Check if there are any commands at the end of the if line and parse them under this if statement
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);	//Skip the ')' and any spaces
 
-				if (!ParamStr[0] || ParamStr[0] == ')')
+				if (!ParamStr.c_str()[0] || ParamStr.c_str()[0] == ')')
 					return 2;  //Return 2 so any parent command knows I'm not done yet
 				else
 				{
@@ -6110,13 +6110,13 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 
 			Line = Line.substr(VarName.len()).skip(SKIP_STR);
 			msstring VarValue;
-			if (Line[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
+			if (Line.c_str()[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
 			else VarValue = Line.thru_char(SKIP_STR);				//No quotes
 
 			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));				//Resolve both constants and variables -- TODO: Remove the variables - should be constants only
 			if (!_stricmp(TestCommand, "setvar"))
 			{
-				SetVar(VarName, VarValue, !_stricmp(TestCommand, "setvarg") ? true : false);
+				SetVar(VarName.c_str(), VarValue.c_str(), !_stricmp(TestCommand, "setvarg") ? true : false);
 				KeepCmd = true;
 			}
 			else
@@ -6173,7 +6173,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 
 		Line = Line.substr(VarName.len()).skip(SKIP_STR);
 		msstring VarValue;
-		if (Line[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
+		if (Line.c_str()[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
 		else VarValue = Line.thru_char(SKIP_STR);				//No quotes
 
 		VarValue = msstring(GETCONST_COMPATIBLE(VarValue));
@@ -6258,7 +6258,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 							Resolved = msstring("npc/") + Resolved + ".wav"; //still total h4x, but there's no good way to fix this without changing how the command works
 					}
 				}
-				if (Resolved.len() && strstr(Resolved, "."))
+				if (Resolved.len() && strstr(Resolved.c_str(), "."))
 					Resources.add(Resolved);
 			}
 
@@ -6286,7 +6286,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			}
 			*/
 
-			msstring Extension = &FileName[FileName.len() - 4];
+			msstring Extension = &FileName.c_str()[FileName.len() - 4];
 			//Thothie - Fail
 			/*if ( !FileName.contains("items") )
 			{

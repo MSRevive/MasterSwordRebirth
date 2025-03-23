@@ -319,7 +319,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 1)
 		{
-			SetScriptVar("IMMUNE_PUSH", Params[0]);
+			SetScriptVar("IMMUNE_PUSH", Params[0].c_str());
 			if (atoi(Params[0]))
 				m_nopush = true;
 			else
@@ -401,7 +401,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			float oldxp = atof(GetFirstScriptVar("NPC_ORIG_EXP"));
 			if (oldxp == 0)
 			{
-				GetScripted()->SetScriptVar("NPC_ORIG_EXP", Params[0]); //iffy
+				GetScripted()->SetScriptVar("NPC_ORIG_EXP", Params[0].c_str()); //iffy
 			}
 			//[end]
 
@@ -1123,7 +1123,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			if (Params.size() >= 5) //Thothie
 			{
-				if (Params[0][0] != '(')
+				if (Params[0].c_str()[0] != '(')
 					Damage.sDamageType = Params[4];
 			}
 
@@ -1142,7 +1142,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			else
 			{
 				//FEB2010_28 Thothie - Add monster width to range if non-AOE/Direct
-				if (Params[0][0] != '(')
+				if (Params[0].c_str()[0] != '(')
 				{
 					float flMonsterDamageRange = atof(Params[1]);
 					CMSMonster *pMonsterMe = IsMSMonster() ? (CMSMonster *)this : NULL;
@@ -1171,7 +1171,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			Vector vForward;
 			CBaseEntity *pTargetEnt = NULL;
-			if (Params[0][0] == '(')
+			if (Params[0].c_str()[0] == '(')
 			{
 				//Radius damage
 				Damage.flAOERange = Damage.flDamageRange;
@@ -1248,7 +1248,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool fLocation = false;
 			Vector Location;
 
-			if (Params[2][0] == '(')
+			if (Params[2].c_str()[0] == '(')
 			{
 				Location = StringToVec(Params[2]); //Specified origin to shoot at
 				fLocation = true;				   //MIB JUL2010_23 - fix tossing at specific location - Dogg forgot to set this
@@ -1321,7 +1321,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				if (!msInputStatName.contains("."))
 				{
-					CStat *pStat = FindStat(Params[0]);
+					CStat *pStat = FindStat(Params[0].c_str());
 					if (pStat)
 					{
 						int NextParm = 1;
@@ -1341,7 +1341,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				{
 					//Thothie DEC2007a - more detailed stat settings (can't set some magic skills under old)
 					msstring parse_stat = msInputStatName.thru_char(".");
-					CStat *pStat = FindStat(parse_stat);
+					CStat *pStat = FindStat(parse_stat.c_str());
 					if (pStat)
 					{
 						msstring PropName = msInputStatName.substr(parse_stat.len() + 1);
@@ -1617,7 +1617,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				dest_t NewDest;
 				clrmem(NewDest);
 
-				if (Params[0][0] == '(')
+				if (Params[0].c_str()[0] == '(')
 				{
 					NewDest.Origin = StringToVec(Params[0]);
 					NewDest.Proximity = atof(Params[1]);

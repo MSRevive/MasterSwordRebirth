@@ -888,7 +888,7 @@ bool CScript::ScriptCmd_resetloop(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	msstring reset_loop_stage = "-1";
 	if (Params.size() > 0) reset_loop_stage = Params[0];
 	//m.m_Iteration = reset_loop_stage; //not gonna work
-	SetVar("MSC_RESET_LOOP", reset_loop_stage);
+	SetVar("MSC_RESET_LOOP", reset_loop_stage.c_str());
 	return true;
 }
 
@@ -1019,7 +1019,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 		int last_slash = msScriptNameReturn.len();
 		while (!found_last_slash)
 		{
-			if (msScriptNameReturn[last_slash] == 47 || last_slash == 0)
+			if (msScriptNameReturn.c_str()[last_slash] == 47 || last_slash == 0)
 			{
 				found_last_slash = true;
 			}
@@ -1671,7 +1671,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 						if (Stat > -1)
 						{
 							int Amount;
-							if (SubSkill > -1) Amount = pPlayer->GetSkillStat(Skill, SubSkill);
+							if (SubSkill > -1) Amount = pPlayer->GetSkillStat(Skill.c_str(), SubSkill);
 							else Amount = pPlayer->GetSkillStat(Stat);
 
 							if (Prop.contains(".ratio")) RETURN_FLOAT_PRECISION(Amount / (float)Max)
@@ -2259,7 +2259,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 
 		else if (Params.size() > NextParm + 1)
 		{
-			if (isdigit(Params[NextParm][0]) && Type != CE_EXTERNAL_ALL) //CE_EXTERNAL_ALL doesn't allow timed calls
+			if (isdigit(Params[NextParm].c_str()[0]) && Type != CE_EXTERNAL_ALL) //CE_EXTERNAL_ALL doesn't allow timed calls
 			{
 				Delay = atof(Params[NextParm]);
 				EventName = Params[(++NextParm)++]; //callevent [entity] <delay> <eventname> x x x
@@ -3963,7 +3963,7 @@ bool CScript::ScriptCmd_If(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &
 		msstring Value = Params[0];
 
 		bool Opposite = false;
-		if (Params[0][0] == '!')
+		if (Params[0].c_str()[0] == '!')
 		{
 			Opposite = true;
 			Value = SCRIPTVAR(Params[0].substr(1));	//The '!' interferes with the default variable resolution, so remove it and resolve the variable again
@@ -4644,7 +4644,7 @@ bool CScript::ScriptCmd_PlayMP3(SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringl
 		if (iMode != MUSIC_STOP_COMBAT)
 		{
 			MSGlobals::AllMusicMode = iMode;
-			MSGlobals::AllMusic = SFile;
+			MSGlobals::AllMusic = SFile.c_str();
 		}
 	}
 	else
@@ -4699,7 +4699,7 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			int NextParm = 1;
 			float Volume = -1;
 
-			if (isdigit(Params[1][0]))
+			if (isdigit(Params[1].c_str()[0]))
 			{
 				Volume = atof(Params[1]) / 10.0f;
 				if (Volume > 1) Volume = 1.0; //Thothie - AUG2007a - Weirdness causing volume to be > 10 sometimes
@@ -5181,7 +5181,7 @@ bool CScript::ScriptCmd_Return(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 				return true; //handled
 			}
 			
-			if (m.pScriptedInterface->m_ReturnData[0]) m.pScriptedInterface->m_ReturnData += ";";
+			if (m.pScriptedInterface->m_ReturnData.c_str()[0]) m.pScriptedInterface->m_ReturnData += ";";
 			
 			for(int i = 0; i < Params.size(); i++)
 			{
@@ -7100,12 +7100,12 @@ bool CScript::ScriptCmd_VectorMultiply(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, ms
 		{
 			if (Params.size() < 3)
 			{
-				if (isdigit(Params[1][0])) Result = StringToVec(Params[0]) * atof(Params[1]);
+				if (isdigit(Params[1].c_str()[0])) Result = StringToVec(Params[0]) * atof(Params[1]);
 				else Result = VecMultiply(StringToVec(Params[0]), StringToVec(Params[1]));
 			}
 			else
 			{
-				if (isdigit(Params[1][0])) Result = StringToVec(Params[1]) * atof(Params[2]);
+				if (isdigit(Params[1].c_str()[0])) Result = StringToVec(Params[1]) * atof(Params[2]);
 				else Result = VecMultiply(StringToVec(Params[1]), StringToVec(Params[2]));
 			}
 		}
@@ -7383,7 +7383,7 @@ bool CScript::ScriptCmd_XDoDamage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 		//if ( Damage.pInflictor != Damage.pAttacker ) Damage.isSummon
 
 		//AOE attack
-		if ( Params[0][0] == '(' && Params[1][0] != '(' )
+		if ( Params[0].c_str()[0] == '(' && Params[1].c_str()[0] != '(' )
 		{
 			Damage.flRange = Damage.flDamageRange = atof(Params[1]);
 			Vector Location;
@@ -7398,7 +7398,7 @@ bool CScript::ScriptCmd_XDoDamage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			SetBits( Damage.iDamageType, DMG_REFLECTIVE );
 		}
 		//vector to vector attack
-		else if ( Params[0][0] == '(' && Params[1][0] == '(' )
+		else if ( Params[0].c_str()[0] == '(' && Params[1].c_str()[0] == '(' )
 		{
 			//Damage.flRange = Damage.flDamageRange = atof(Params[1]);
 			//pTarget = RetrieveEntity( Params[0] );

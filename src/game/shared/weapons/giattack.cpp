@@ -56,7 +56,7 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	//Count the number of keys required
 	for (int i = 0; i < pAttData->ComboKeys.size(); i++)
 	{
-		if (pAttData->ComboKeys[i][0] == '~')
+		if (pAttData->ComboKeys[i].c_str()[0] == '~')
 			iThisCmd += 2;
 		else
 			iThisCmd++;
@@ -96,9 +96,9 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 
 		msstring CmdString = FullCmdString;
 		if (FullCmdString.len() > 1 &&
-			(FullCmdString[0] == '+' || FullCmdString[0] == '~' || FullCmdString[0] == '-'))
+			(FullCmdString.c_str()[0] == '+' || FullCmdString.c_str()[0] == '~' || FullCmdString.c_str()[0] == '-'))
 		{
-			LastType = FullCmdString[0];
+			LastType = FullCmdString.c_str()[0];
 			CmdString = FullCmdString.substr(1);
 		}
 		else
