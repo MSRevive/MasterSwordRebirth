@@ -352,8 +352,11 @@ void CHudSpectator::SetSpectatorStartPosition()
 	else
 	{
 		// jump to 0,0,0 if no better position was found
-		VectorCopy(vec3_origin, m_cameraOrigin);
-		VectorCopy(vec3_origin, m_cameraAngles);
+		if (vec3_origin != NULL)
+		{
+			VectorCopy(vec3_origin, m_cameraOrigin);
+			VectorCopy(vec3_origin, m_cameraAngles);
+		}
 	}
 
 	VectorCopy(m_cameraOrigin, vJumpOrigin);
