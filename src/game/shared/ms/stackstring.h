@@ -9,7 +9,6 @@ extern "C" char *strlwr(char *str);
 #include <string.h>
 #include <string>
 #include <sstream>
-//#include <algorithm>
 
 #ifndef STD_MAP
 #define STD_MAP
@@ -160,22 +159,20 @@ private:
 #define MSSTRING_MAXLEN (MSSTRING_SIZE-1)
 #define msstring_error ((size_t)-1)
 
-typedef const char *msstring_ref;
-
 class msstring
 {
 public:
 	msstring();
-	msstring(const msstring_ref a);
-	msstring(const msstring_ref a, size_t length);
+	msstring(const char* a);
+	msstring(const char* a, size_t length);
 	msstring(const msstring& a);
-	msstring &operator=(const msstring_ref a);
+	msstring &operator=(const char* a);
 	msstring &operator=(int a);
 	msstring &operator=(const msstring &a);
-	msstring &operator+=(const msstring_ref a);
+	msstring &operator+=(const char* a);
 	msstring &operator+=(msstring a);
 	msstring &operator+=(int a);
-	msstring operator+(const msstring_ref a);
+	msstring operator+(const char* a);
 	msstring operator+(const msstring &a);
 	msstring operator+(int a);
 	bool operator==(char *a) const;
@@ -195,20 +192,20 @@ public:
 	operator void *() { return operator char *(); }
 	char *c_str();
 	size_t len() const;
-	void append(const msstring_ref a);
-	void append(const msstring_ref a, size_t length);
-	size_t find(const msstring_ref a, size_t start = 0) const;				 //Returns position of the string "a"
-	msstring_ref find_str(const msstring_ref a, size_t start = 0) const;	 //Returns a substring starting at "find(a,start)". Returns full string if "a" not found
-	size_t findchar(const msstring_ref a, size_t start = 0) const;			 //Returns position of the first char within "a"
-	msstring_ref findchar_str(const msstring_ref a, size_t start = 0) const; //Returns a substring starting at "findchar(a,start)". Returns full string if text didn't contain any chars from "a"
-	bool contains(const msstring_ref a) const;								 //Reutrns true if substring "a" is contained within the main string
-	bool starts_with(const msstring_ref a) const;							 //Reutrns true if the main string starts with "a"
-	bool ends_with(const msstring_ref a) const;								 //MIB FEB2008a returns true if last character is "a"
+	void append(const char* a);
+	void append(const char* a, size_t length);
+	size_t find(const char* a, size_t start = 0) const;				 //Returns position of the string "a"
+	const char* find_str(const char* a, size_t start = 0) const;	 //Returns a substring starting at "find(a,start)". Returns full string if "a" not found
+	size_t findchar(const char* a, size_t start = 0) const;			 //Returns position of the first char within "a"
+	const char* findchar_str(const char* a, size_t start = 0) const; //Returns a substring starting at "findchar(a,start)". Returns full string if text didn't contain any chars from "a"
+	bool contains(const char* a) const;								 //Reutrns true if substring "a" is contained within the main string
+	bool starts_with(const char* a) const;							 //Reutrns true if the main string starts with "a"
+	bool ends_with(const char* a) const;								 //MIB FEB2008a returns true if last character is "a"
 	msstring substr(size_t start, size_t length);
 	msstring substr(size_t start);
-	msstring thru_substr(const msstring_ref a, size_t start = 0) const; //Returns a substring spanning from "start" to "find(a,start)". Returns full string if "find(a,start)" not found
-	msstring thru_char(const msstring_ref a, size_t start = 0) const;	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
-	msstring skip(const msstring_ref a) const;							//Returns a substring starting at the first char that isn't within "a"
+	msstring thru_substr(const char* a, size_t start = 0) const; //Returns a substring spanning from "start" to "find(a,start)". Returns full string if "find(a,start)" not found
+	msstring thru_char(const char* a, size_t start = 0) const;	//Returns a substring spanning from "start" to "findchar(a,start)". Returns full string if "findchar(a,start)" not found
+	msstring skip(const char* a) const;							//Returns a substring starting at the first char that isn't within "a"
 	msstring tolower(void) const;
 
 protected:
@@ -217,8 +214,8 @@ protected:
 
 typedef mslist<msstring> msstringlist;
 
-bool TokenizeString(msstring_ref pszString, msstringlist &Tokens, msstring_ref Separator);
-inline bool TokenizeString(msstring_ref pszString, msstringlist &Tokens) { return TokenizeString(pszString, Tokens, ";"); }
+bool TokenizeString(const char* pszString, msstringlist &Tokens, const char* Separator);
+inline bool TokenizeString(const char* pszString, msstringlist &Tokens) { return TokenizeString(pszString, Tokens, ";"); }
 void ReplaceChar(char *pString, char org, char dest);
 
 //It's an int, a float, and a string
@@ -238,8 +235,8 @@ public:
 	msvariant();
 	msvariant(int a) { operator=(a); }
 	msvariant(float a) { operator=(a); }
-	msvariant(msstring_ref a) { operator=(a); }
-	msvariant &operator=(msstring_ref a)
+	msvariant(const char* a) { operator=(a); }
+	msvariant &operator=(const char* a)
 	{
 		SetFromString(a);
 		m_Type = STRING;
@@ -258,13 +255,13 @@ public:
 		return *this;
 	}
 
-	void SetFromString(msstring_ref a);
+	void SetFromString(const char* a);
 	void SetFromInt(int a);
 	void SetFromFloat(float a);
 
 	operator int() { return m_Int; }
 	operator float() { return m_Float; }
-	operator msstring_ref() { return m_String.c_str(); }
+	operator const char* () { return m_String.c_str(); }
 };
 
 typedef std::map<msstring,msstring> msstringstringhash;

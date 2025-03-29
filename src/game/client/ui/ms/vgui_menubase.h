@@ -46,7 +46,7 @@ public:
 	VGUI_MenuBase(Panel *myParent);
 	virtual void UpdateFade(void);
 	virtual void Init();
-	virtual MSButton *AddButton(msstring_ref Name, int Width, msvariant ID);
+	virtual MSButton *AddButton(const char* Name, int Width, msvariant ID);
 	virtual void Select(int BtnIdx, msvariant &Data){};
 
 	virtual bool SlotInput(int iSlot);

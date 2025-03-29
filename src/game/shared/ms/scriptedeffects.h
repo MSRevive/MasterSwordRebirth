@@ -35,6 +35,6 @@ public:
 	static mslist<globalscripteffect_t> Effects;
 
 	static void RegisterEffect(globalscripteffect_t &Effect);
-	static CScript *ApplyEffect(msstring_ref ScriptName, IScripted *pScriptTarget, CBaseEntity *pTarget, msstringlist *Parameters = NULL);
+	static CScript *ApplyEffect(const char* ScriptName, IScripted *pScriptTarget, CBaseEntity *pTarget, msstringlist *Parameters = NULL);
 	static void DeleteEffects();
 };

@@ -3610,7 +3610,7 @@ bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs)
 	return false;
 }
 
-msstring_ref PM_GetValue(msstringlist &Params)
+const char* PM_GetValue(msstringlist &Params)
 {
 	static msstring Return;
 	msstring &Name = Params[1];

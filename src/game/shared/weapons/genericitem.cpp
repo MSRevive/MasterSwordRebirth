@@ -296,7 +296,7 @@ void CGenericItemMgr::DeleteItems()
 }
 
 //Temporarily create an item to determine it's name
-msstring_ref CGenericItemMgr::GetItemDisplayName(msstring_ref ItemName, bool Capital, bool Fullname, int Amt)
+const char* CGenericItemMgr::GetItemDisplayName(const char* ItemName, bool Capital, bool Fullname, int Amt)
 {
 	CGenericItem* pItem = GetGlobalGenericItemByName(ItemName, true);
 	static msstring DisplayName = ItemName;
@@ -1051,7 +1051,7 @@ bool CGenericItem::CanWearItem()
 			wearpos_t* pPlayerPos = NULL;
 			for (int ploc = 0; ploc < m_pPlayer->m_WearPositions.size(); ploc++)
 			{
-				msstring_ref PlayerPosName = m_pPlayer->m_WearPositions[ploc].Name;
+				const char* PlayerPosName = m_pPlayer->m_WearPositions[ploc].Name;
 				if (m_WearPositions[iloc].Name != m_pPlayer->m_WearPositions[ploc].Name)
 					continue;
 

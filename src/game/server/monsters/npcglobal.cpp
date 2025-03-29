@@ -14,7 +14,7 @@ void CMSMonster::DynamicPrecache()
 
 	for (int i = 0; i < NPCs.size(); i++)
 	{
-		msstring_ref ScriptFile = NPCs[i];
+		const char* ScriptFile = NPCs[i];
 
 		CMSMonster *pMonster = (CMSMonster *)CREATE_ENT("ms_npc");
 		if (!pMonster)

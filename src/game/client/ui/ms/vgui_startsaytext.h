@@ -34,7 +34,7 @@ public:
 	void Open(int Type)
 	{
 		m_Type = (saytext_e)Type;
-		msstring_ref ImageName = "hud_shout";
+		const char* ImageName = "hud_shout";
 		if (m_Type == SAYTEXT_LOCAL)
 			ImageName = "hud_talk";
 		else if (m_Type == SAYTEXT_PARTY)

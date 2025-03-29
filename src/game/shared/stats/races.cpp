@@ -15,7 +15,7 @@ void CRaceManager::DeleteAllRaces()
 {
 	Races.clear();
 }
-race_t *CRaceManager::GetRacePtr(msstring_ref pszName)
+race_t *CRaceManager::GetRacePtr(const char* pszName)
 {
 	if (!pszName || strlen(pszName) < 1) //Null or empty string
 		return NULL;
@@ -28,11 +28,11 @@ race_t *CRaceManager::GetRacePtr(msstring_ref pszName)
 	}
 	return NULL; //Race not found
 }
-bool CRaceManager::RelationshipContains(msstringlist &RaceList, msstring_ref pszTargetRace)
+bool CRaceManager::RelationshipContains(msstringlist &RaceList, const char* pszTargetRace)
 {
 	for (int i = 0; i < RaceList.size(); i++)
 	{
-		msstring_ref pszRaceName = RaceList[i];
+		const char* pszRaceName = RaceList[i];
 
 		if (!_stricmp(pszRaceName, "all"))
 			return true;
@@ -43,7 +43,7 @@ bool CRaceManager::RelationshipContains(msstringlist &RaceList, msstring_ref psz
 
 	return false;
 }
-relationship_e CRaceManager::Relationship(msstring_ref pszSourceRace, msstring_ref pszTargetRace)
+relationship_e CRaceManager::Relationship(const char* pszSourceRace, const char* pszTargetRace)
 {
 	race_t *pSourceRace = GetRacePtr(pszSourceRace); //Source race doesn't exist
 	if (!pSourceRace)

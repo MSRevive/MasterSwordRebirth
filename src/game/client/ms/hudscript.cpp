@@ -139,7 +139,7 @@ int CHudScript::MsgFunc_ClientScript( const char *pszName, int iSize, void *pbuf
 	return 1;
 }
 
-CScript *CHudScript::CreateScript( msstring_ref ScriptName, msstringlist &Parameters, bool AllowDupe, int UniqueID )
+CScript *CHudScript::CreateScript(const char* ScriptName, msstringlist &Parameters, bool AllowDupe, int UniqueID )
 {
 	//If I don't allow dupes, try to find a prev copy of this script
 	if( !AllowDupe )
@@ -164,7 +164,7 @@ CScript *CHudScript::CreateScript( msstring_ref ScriptName, msstringlist &Parame
 	Script->m.UniqueID = (UniqueID == -1) ? CScript::m_gLastSendID++ : UniqueID;
 	return Script;
 }
-void CHudScript::HandleAnimEvent( msstring_ref Options, const cl_entity_s *clEntity, hae_e Type )
+void CHudScript::HandleAnimEvent(const char* Options, const cl_entity_s *clEntity, hae_e Type )
 {
 	static msstringlist ParsedOptions;
 	ParsedOptions.clearitems();
@@ -173,8 +173,8 @@ void CHudScript::HandleAnimEvent( msstring_ref Options, const cl_entity_s *clEnt
 	if( ParsedOptions.size() < 2 ) 
 		return;
 
-	msstring_ref ScriptName = ParsedOptions[0];
-	msstring_ref EventName = ParsedOptions[1];
+	const char* ScriptName = ParsedOptions[0];
+	const char* EventName = ParsedOptions[1];
 
 	CScript *Script = NULL;
 

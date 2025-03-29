@@ -919,7 +919,7 @@ bool CScript::ScriptCmd_endgame(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 //Param1 = Property name
 //Param2 = Extra data
-msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params)
+const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params)
 {
 	if (!pTarget) pTarget = this;
 	CGenericItem *pItem = pTarget->IsMSItem() ? (CGenericItem *)pTarget : NULL;
@@ -1008,7 +1008,7 @@ msstring_ref CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, ms
 		msstring msScriptNameReturn = pScripted->m_Scripts.size() ? pScripted->m_Scripts[0]->m.ScriptFile.c_str() : "0";
 		return msScriptNameReturn.c_str();
 		//MiB's attempt:
-		//static msstring Return = (msstring_ref) pTarget->ScriptFName;
+		//static msstring Return = (const char*) pTarget->ScriptFName;
 		//return Return.thru_substr( SCRIPT_EXT );
 	}
 	else if (Prop == "itemname")
@@ -2223,7 +2223,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 	{
 		float Delay = 0;
 		IScripted *pScripted = NULL;
-		msstring_ref EventName = "<none>";
+		const char* EventName = "<none>";
 		size_t NextParm = 0;
 		int Loops = 1;
 		msstringlist Parameters;
@@ -2853,7 +2853,7 @@ bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 		sTemp += "*\n";
 	}
 
-	msstring_ref LocationString = "Server";
+	const char* LocationString = "Server";
 #ifndef VALVE_DLL
 	LocationString = "Client";
 #endif
@@ -3443,7 +3443,7 @@ bool CScript::ScriptCmd_GiveHPMP(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		//Must be in braces for logic
 	{
 		CBaseEntity *pTarget = m.pScriptedEnt;
-		msstring_ref Amt = Params[0];
+		const char* Amt = Params[0];
 		if( Params.size() >= 2 ) { pTarget = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity( Params[0] ) : NULL; Amt = Params[1]; }
 
 		if( pTarget ) pTarget->Give( Cmd.Name() == "givehp" ? GIVE_HP : GIVE_MP, atof(Amt) );
@@ -4707,7 +4707,7 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 				NextParm++;
 			}
 
-			msstring_ref pszSound = ((signed)Params.size() > NextParm) ? Params[NextParm].c_str() : "common/null.wav";
+			const char* pszSound = ((signed)Params.size() > NextParm) ? Params[NextParm].c_str() : "common/null.wav";
 
 			//Thothie debugary
 			/*
@@ -6548,8 +6548,8 @@ bool CScript::ScriptCmd_SetVar(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 	msstring sTemp;
 	if (Params.size() >= 2)
 	{
-		msstring_ref VarName = Cmd.m_Params[1];
-		msstring_ref VarValue = Params[1];
+		const char* VarName = Cmd.m_Params[1];
+		const char* VarValue = Params[1];
 
 #if !TURN_OFF_ALERT
 		//Thothie JUN2013_08 - check for conflicts in developer builds as we go
@@ -7484,7 +7484,7 @@ class InFile : public std::ifstream
 public:
 	msstring buffered;
 
-	void Open(msstring_ref FileName)
+	void Open(const char* FileName)
 	{
 		std::ifstream::open(FileName);
 		buffered = "";
@@ -7603,7 +7603,7 @@ void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwri
 
 
 //Easy way to open files
-scriptfile_t &scriptfile_t::operator=(const msstring_ref a)
+scriptfile_t &scriptfile_t::operator=(const char* a)
 {
 	/* Example:
 		scriptfile_t file;
@@ -7616,7 +7616,7 @@ scriptfile_t &scriptfile_t::operator=(const msstring_ref a)
 }
 
 //Open a specified file and input its lines for later "reading"
-void scriptfile_t::Open(msstring_ref a)
+void scriptfile_t::Open(const char* a)
 {
 	char cFileName[MAX_PATH];
 #ifdef VALVE_DLL

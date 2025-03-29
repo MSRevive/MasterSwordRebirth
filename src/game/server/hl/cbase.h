@@ -244,9 +244,9 @@ public:
 
 	void JumpToLine(int line) { curline = line; }
 
-	scriptfile_t &operator=(const msstring_ref a);
+	scriptfile_t &operator=(const char* a);
 
-	void Open(msstring_ref a);
+	void Open(const char* a);
 	void Reset();
 	void AddLine(msstring line, int lineNum, bool overwrite);
 
@@ -317,7 +317,7 @@ public:
 	virtual bool IsMSItem() { return false; }
 	virtual int MSProperties() { return 0; }														//Useful for identification
 	virtual void *MSQuery(int iRequest) { return NULL; }											//Useful for obtaining specific information
-	virtual msstring_ref GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params); //Gets a property of the specified entity. Can be myself, or another entity for determining relationships
+	virtual const char* GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params); //Gets a property of the specified entity. Can be myself, or another entity for determining relationships
 	virtual float Give(givetype_e Type, float Amt) { return 0.0f; }									//Give/Take Health, MP, Gold, etc
 	virtual void Deactivate() {}																	//Called when the server shuts down
 	//CounterEffect: Fists hit a player with armor.  Armor class calls

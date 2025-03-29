@@ -27,11 +27,11 @@ class CRaceManager
 {
 public:
 	//Relationship of source race to target race
-	static relationship_e Relationship(msstring_ref pszSourceRace, msstring_ref pszTargetRace);
+	static relationship_e Relationship(const char* pszSourceRace, const char* pszTargetRace);
 	static void AddRace(race_t &Race);
 	static void DeleteAllRaces();
-	static race_t *GetRacePtr(msstring_ref pszName);
-	static bool RelationshipContains(msstringlist &RaceList, msstring_ref pszTargetRace);
+	static race_t *GetRacePtr(const char* pszName);
+	static bool RelationshipContains(msstringlist &RaceList, const char* pszTargetRace);
 	static mslist<race_t> Races;
 };
 

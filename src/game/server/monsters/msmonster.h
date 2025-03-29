@@ -397,9 +397,9 @@ public:
 #ifdef VALVE_DLL
 	void Script_Setup();																				  //Ties m_pScriptActions and m_pScriptConditions to
 	bool Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params); //Runs a single command
-	int Script_ParseLine(CScript *Script, msstring_ref pszCommandLine, scriptcmd_t &Cmd);
+	int Script_ParseLine(CScript *Script, const char* pszCommandLine, scriptcmd_t &Cmd);
 	bool GetScriptVar(msstring &ParserName, msstringlist &Params, CScript *BaseScript, msstring &Return);
-	msstring_ref GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params);
+	const char* GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params);
 #endif
 
 	static scriptcmdname_list m_ScriptCommands; //Global monster script commands
@@ -415,10 +415,10 @@ public:
 	int GetNatStat(int iStatName) { return GetStat(iStatName, 0); }
 	int GetSkillStat(int iStatIdx) { return GetStat(iStatIdx, 1); }
 	int GetSkillStat(int iStatIdx, int StatProperty);
-	int GetSkillStat(msstring_ref StatName, int StatProperty);
+	int GetSkillStat(const char* StatName, int StatProperty);
 	int GetSkillStatCount();
 	CStat *FindStat(int idx);			//False = Natural Stat / True = Skill Stat
-	CStat *FindStat(msstring_ref Name); //Find any stat
+	CStat *FindStat(const char* Name); //Find any stat
 	int GetStat(int iStat, int iStatType);
 	int GiveGold(int iAmount, bool fVerbose = true);
 
@@ -462,7 +462,7 @@ public:
 
 	void Activate();
 	void KeyValue(KeyValueData *pkvd);
-	void Spawn(msstring_ref ScriptName)
+	void Spawn(const char* ScriptName)
 	{
 		m_ScriptName = ScriptName;
 		Spawn();
@@ -470,7 +470,7 @@ public:
 	void Spawn();
 	void Precache();
 	virtual void Act();												   //Handle actions, like attacks
-	virtual void Say(msstring_ref Sound, float fDuration);			   //Stores the next word if already playing one
+	virtual void Say(const char* Sound, float fDuration);			   //Stores the next word if already playing one
 	virtual void HearPhrase(CMSMonster *pSpeaker, const char *phrase); //Called when a player talks (normal mode)
 	virtual void Talk();											   // Called every frame, Talk if it's time to speak up
 	void Touch(CBaseEntity *pOther);
