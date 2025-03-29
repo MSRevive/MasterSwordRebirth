@@ -77,7 +77,7 @@ CStoreSellPanel::CStoreSellPanel(Panel *pParent) : CStorePanel()
 	m_ActButton->addActionSignal(new CAction_Sell(this));
 }
 
-bool CStoreSellPanel::InterestedInItem(msstring_ref pszItemName)
+bool CStoreSellPanel::InterestedInItem(const char* pszItemName)
 {
 	for (int i = 0; i < CStorePanel::StoreItems.size(); i++)
 		if (CStorePanel::StoreItems[i].Name == pszItemName)

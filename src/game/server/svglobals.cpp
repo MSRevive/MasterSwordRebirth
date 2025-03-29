@@ -314,7 +314,7 @@ void MSGameEnd()
 	ClearStringPool();
 }
 
-void SendHUDMsgAll(msstring_ref Title, msstring_ref Text)
+void SendHUDMsgAll(const char* Title, const char* Text)
 {
 	for (int p = 0; p < gpGlobals->maxClients; p++)
 		if (MSInstance(INDEXENT(p + 1)))
@@ -435,7 +435,7 @@ void ClearStringPool()
 	g_StringPool.Clear();
 }
 
-void CSVGlobals::LogScript(msstring_ref ScriptName, CBaseEntity *pOwner, int includelevel, bool PrecacheOnly, bool Sucess)
+void CSVGlobals::LogScript(const char* ScriptName, CBaseEntity *pOwner, int includelevel, bool PrecacheOnly, bool Sucess)
 {
 #ifdef DEV_BUILD
 	if (!LogScripts ||
@@ -482,7 +482,7 @@ void CSVGlobals::WriteScriptLog()
 	{
 		scriptout << endl;
 
-		msstring_ref Name = "Global:";
+		const char* Name = "Global:";
 		if (i == 1)
 			Name = "Monsters:";
 		else if (i == 2)

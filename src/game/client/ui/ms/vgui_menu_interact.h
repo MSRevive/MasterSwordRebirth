@@ -146,7 +146,7 @@ public:
 		SetButton(m_LastButton++, Localized(MenuOption.Title), MenuOption.Type);
 		SetButton(m_LastButton, Localized("#CANCEL"), MOT_CALLBACK);
 	}
-	void SetButton(int idx, msstring_ref Name, menuoptiontype_e Type)
+	void SetButton(int idx, const char* Name, menuoptiontype_e Type)
 	{
 		MSButton &Button = *m_Buttons[idx];
 		Button.setText(Name);

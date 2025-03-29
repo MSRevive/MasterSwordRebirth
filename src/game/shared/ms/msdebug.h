@@ -33,19 +33,19 @@ struct sharedtrace_t
 class EngineFunc
 {
 public:
-	static msstring_ref GetGameDir();
-	static msstring_ref GetString(int string);
-	static int AllocString(msstring_ref String);
-	static float CVAR_GetFloat(msstring_ref Cvar);
-	static msstring_ref CVAR_GetString(msstring_ref Cvar);
-	static void CVAR_SetFloat(msstring_ref Cvar, float Value);
-	static void CVAR_SetString(msstring_ref Cvar, msstring_ref Value);
+	static const char* GetGameDir();
+	static const char* GetString(int string);
+	static int AllocString(const char* String);
+	static float CVAR_GetFloat(const char* Cvar);
+	static const char* CVAR_GetString(const char* Cvar);
+	static void CVAR_SetFloat(const char* Cvar, float Value);
+	static void CVAR_SetString(const char* Cvar, const char* Value);
 #ifdef VECTOR_H
 	static void MakeVectors(const Vector &vecAngles, float *p_vForward, float *p_vRight = NULL, float *p_vUp = NULL);
 #endif
 #ifdef CVARDEF_H
 #ifndef VALVE_DLL
-	static cvar_s *CVAR_Create(msstring_ref Cvar, msstring_ref Value, const int Flags);
+	static cvar_s *CVAR_Create(const char* Cvar, const char* Value, const int Flags);
 #endif
 #ifdef VALVE_DLL
 	static void CVAR_Create(cvar_t &Cvar);
@@ -55,8 +55,8 @@ public:
 	static void Shared_TraceLine(const Vector &vecStart, const Vector &vecEnd, int ignore_monsters, sharedtrace_t &Tr, int CLFlags, int CLIgnoreFlags, edict_t *SVIgnoreEnt = NULL);
 	static int Shared_PointContents(const Vector &Origin);
 	static float Shared_GetWaterHeight(const Vector &Origin, float minz, float maxz);											 //Find height between a minx and maxs
-	static void Shared_PlaySound3D(msstring_ref Sound, float Volume, const Vector &Origin, float Attn);							 //Play sound independent of an entity
-	static void Shared_PlaySound3D2(msstring_ref Sound, float Volume, const Vector &Origin, float Attn, int Chan, float sPitch); //MAR2012 Thothie - Same diff + Channel Control
+	static void Shared_PlaySound3D(const char* Sound, float Volume, const Vector &Origin, float Attn);							 //Play sound independent of an entity
+	static void Shared_PlaySound3D2(const char* Sound, float Volume, const Vector &Origin, float Attn, int Chan, float sPitch); //MAR2012 Thothie - Same diff + Channel Control
 #endif
 	static float AngleDiff(float destAngle, float srcAngle);
 };

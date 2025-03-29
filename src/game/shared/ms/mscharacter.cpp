@@ -228,7 +228,7 @@ jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &
 	return JoinType;
 }
 
-bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMaps)
+bool MSChar_Interface::HasVisited(const char* MapName, msstringlist &VisitedMaps)
 {
 	for (int m = 0; m < VisitedMaps.size(); m++)
 		if (VisitedMaps[m] == MSGlobals::MapName)

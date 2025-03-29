@@ -137,7 +137,7 @@ public:
 	static void DeleteItem(int idx);																	 //Delete one item by index
 	static void DeleteItems();																			 //On map startup, delete all the previous map's items
 	static void GenericItemPrecache(void);																 //On DLL load, precache all scripts
-	static msstring_ref GetItemDisplayName(msstring_ref ItemName, bool Capital, bool Fullname, int Amt); //Temporarily creates an item to determine it's name
+	static const char* GetItemDisplayName(const char* ItemName, bool Capital, bool Fullname, int Amt); //Temporarily creates an item to determine it's name
 	static int LookUpItemIdx(msstring item_name);														 // [PackSwap]
 	static const CGenericItem *SampleItem(int idx);														 // [PackSwap]
 

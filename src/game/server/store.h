@@ -12,10 +12,10 @@ public:
 	storeitem_t *GetItem(int idx);
 	msstring m_Name;
 	void Deactivate();
-	void RemoveItem(msstring_ref Name);
+	void RemoveItem(const char* Name);
 	void RemoveAllItems();
 
-	static CStore *GetStoreByName(msstring_ref Name)
+	static CStore *GetStoreByName(const char* Name)
 	{
 		for (int i = 0; i < m_gStores.size(); i++)
 			if (FStrEq(m_gStores[i]->m_Name, Name))

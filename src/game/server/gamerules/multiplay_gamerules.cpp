@@ -38,7 +38,7 @@ extern int gmsgScoreInfo;
 extern int gmsgMOTD;
 //int CountPlayers( void );
 
-bool CheckBanned( msstring_ref SteamID );
+bool CheckBanned(const char* SteamID );
 
 //float g_TimeTryValidate = 0.0f;
 #define VALIDATE_DELAY (60 * 30)// 30 mins
@@ -1352,7 +1352,7 @@ void UnBanAll( )
 {
 	g_BanList.clear( );
 }
-bool CheckBanned( msstring_ref SteamID )
+bool CheckBanned(const char* SteamID )
 {
 	if( g_BanList.size() <= 0 ) return false;
 

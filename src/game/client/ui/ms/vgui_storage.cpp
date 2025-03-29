@@ -44,8 +44,8 @@
 #include "vgui_menudefsshared.h"
 #include "logger.h"
 
-msstring_ref CStoragePanel::Text_Subtitle_Storage = "#STORAGE_SUBTITLE_STORAGE";
-msstring_ref CStoragePanel::Text_Subtitle_Inventory = "#STORAGE_SUBTITLE_INVENTORY";
+const char* CStoragePanel::Text_Subtitle_Storage = "#STORAGE_SUBTITLE_STORAGE";
+const char* CStoragePanel::Text_Subtitle_Inventory = "#STORAGE_SUBTITLE_INVENTORY";
 
 /*class CAction_Take : public ActionSignal
 {
@@ -350,7 +350,7 @@ void Storage_ItemMsg()
 	Storage_Update();
 }
 
-void Storage_Show(msstring_ref DisplayName, msstring_ref StorageName, float flFeeRatio)
+void Storage_Show(const char* DisplayName, const char* StorageName, float flFeeRatio)
 {
 	player.m_CurrentStorage.Active = true;
 	player.m_CurrentStorage.DisplayName = DisplayName;

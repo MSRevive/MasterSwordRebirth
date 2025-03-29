@@ -46,7 +46,7 @@ public:
 	} m_Type; //Stat type
 
 	CStat() { bNeedsUpdate = true; }
-	CStat(msstring_ref Name, skilltype_e Type)
+	CStat(const char* Name, skilltype_e Type)
 	{
 		m_Name = Name;
 		m_Type = Type;

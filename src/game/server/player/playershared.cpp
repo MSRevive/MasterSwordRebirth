@@ -1103,7 +1103,7 @@ void CBasePlayer::SendInfoMsg(const char* msg, ...)
 	SendEventMsg(string);
 }
 
-void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)
+void CBasePlayer::SendHUDMsg(const char* Title, const char* Text)
 {
 #ifdef VALVE_DLL
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
@@ -1116,7 +1116,7 @@ void CBasePlayer::SendHUDMsg(msstring_ref Title, msstring_ref Text)
 #endif
 }
 
-void CBasePlayer::SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring_ref Text)
+void CBasePlayer::SendHelpMsg(const char* Tipname, const char* Title, const char* Text)
 {
 	if (m_CharacterState != CHARSTATE_LOADED)
 		return;
@@ -1181,17 +1181,17 @@ static COLOR HUDEventColor[] =
 	COLOR(0, 0, 240, 0),			   //HUDEVENT_BLUE
 };
 
-void CBasePlayer::SendEventMsg(msstring_ref Text)
+void CBasePlayer::SendEventMsg(const char* Text)
 {
 	SendEventMsg((hudevent_e)HUDEVENT_NORMAL, Text);
 }
 
-void CBasePlayer::SendEventMsg(hudevent_e HudEvent, msstring_ref Text)
+void CBasePlayer::SendEventMsg(hudevent_e HudEvent, const char* Text)
 {
 	SendEventMsg(HUDEventColor[HudEvent], Text);
 }
 
-void CBasePlayer::SendEventMsg(COLOR& color, msstring_ref Text)
+void CBasePlayer::SendEventMsg(COLOR& color, const char* Text)
 {
 #ifdef VALVE_DLL
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
@@ -1375,7 +1375,7 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 #endif
 }
 
-storage_t* CBasePlayer::Storage_GetStorage(msstring_ref pszStorageName)
+storage_t* CBasePlayer::Storage_GetStorage(const char* pszStorageName)
 {
 	for (int s = 0; s < m_Storages.size(); s++)
 		if (m_Storages[s].Name == pszStorageName)

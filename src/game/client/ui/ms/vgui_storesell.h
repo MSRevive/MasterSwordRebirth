@@ -5,7 +5,7 @@ class CStoreSellPanel : public CStorePanel
 public:
 	mslist<containeritem_t> m_SelectedItems;
 
-	bool InterestedInItem(msstring_ref pszItemName);
+	bool InterestedInItem(const char* pszItemName);
 	void SellAll();
 
 	CStoreSellPanel(Panel *pParent);

@@ -30,7 +30,7 @@ void CGenericItem::RegisterArmor()
 
 	ArmorData->Protection = atof(GetFirstScriptVar("ARMOR_PROTECTION"));
 
-	msstring_ref ProtectionArea = GetFirstScriptVar("ARMOR_PROTECTION_AREA");
+	const char* ProtectionArea = GetFirstScriptVar("ARMOR_PROTECTION_AREA");
 	if (strstr(ProtectionArea, "head"))
 		ArmorData->m_ProtectionAreas.add(HBP_HEAD);
 	if (strstr(ProtectionArea, "chest"))
@@ -40,7 +40,7 @@ void CGenericItem::RegisterArmor()
 	if (strstr(ProtectionArea, "legs"))
 		ArmorData->m_ProtectionAreas.add(HBP_LEGS);
 
-	msstring_ref ReplaceBodyParts = GetFirstScriptVar("ARMOR_REPLACE_BODYPARTS");
+	const char* ReplaceBodyParts = GetFirstScriptVar("ARMOR_REPLACE_BODYPARTS");
 	if (strstr(ReplaceBodyParts, "head"))
 		m_WearModelPositions.add(HBP_HEAD);
 	if (strstr(ReplaceBodyParts, "chest"))

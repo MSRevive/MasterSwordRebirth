@@ -198,7 +198,7 @@ int CSoundEnt :: IAllocSound( void )
 // sound info.
 //=========================================================
 //Master Sword
-void CSoundEnt :: InsertSound( CBaseEntity *pSrcEntity, msstring_ref Type, const Vector &vecOrigin, int iVolume, float flDuration, float flDangerRadius )
+void CSoundEnt :: InsertSound( CBaseEntity *pSrcEntity, const char* Type, const Vector &vecOrigin, int iVolume, float flDuration, float flDangerRadius )
 {
 	int idx = InsertSound( bits_SOUND_WORLD, vecOrigin, iVolume, flDuration );
 	if( idx < 0 ) return;

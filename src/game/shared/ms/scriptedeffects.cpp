@@ -22,7 +22,7 @@ void CGlobalScriptedEffects::RegisterEffect(globalscripteffect_t &Effect)
 }
 
 //Apply an effect
-CScript *CGlobalScriptedEffects::ApplyEffect(msstring_ref ScriptName, IScripted *pScriptTarget, CBaseEntity *pTarget, msstringlist *Parameters)
+CScript *CGlobalScriptedEffects::ApplyEffect(const char* ScriptName, IScripted *pScriptTarget, CBaseEntity *pTarget, msstringlist *Parameters)
 {
 	CScript *Script = pScriptTarget->Script_Add(ScriptName, pTarget);
 	if (!Script)

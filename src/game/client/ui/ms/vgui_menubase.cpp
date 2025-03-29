@@ -132,7 +132,7 @@ void VGUI_MenuBase::Init()
 	enddbg;
 }
 
-MSButton *VGUI_MenuBase::AddButton(msstring_ref Name, int Width, msvariant ID)
+MSButton *VGUI_MenuBase::AddButton(const char* Name, int Width, msvariant ID)
 {
 	int w, h;
 	g_FontSml->getTextSize(Name, w, h);

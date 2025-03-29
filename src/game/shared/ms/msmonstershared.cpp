@@ -473,7 +473,7 @@ void CMSMonster::DeleteStats()
 	m_Stats.clear();
 }
 
-int CMSMonster::GetSkillStat(msstring_ref StatName, int StatProperty)
+int CMSMonster::GetSkillStat(const char* StatName, int StatProperty)
 {
 
 	CStat *pStat = FindStat(StatName);
@@ -502,7 +502,7 @@ CStat *CMSMonster::FindStat(int idx)
 
 	return &m_Stats[idx];
 }
-CStat *CMSMonster::FindStat(msstring_ref Name)
+CStat *CMSMonster::FindStat(const char* Name)
 {
 	for (int i = 0; i < m_Stats.size(); i++)
 		if (!_stricmp(m_Stats[i].m_Name, Name)) //case in-sensitive compare

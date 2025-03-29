@@ -41,7 +41,7 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 //int CountPlayers( void );
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
-msstring_ref PM_GetValue(msstringlist& Params);
+const char* PM_GetValue(msstringlist& Params);
 bool GetModelBounds(void* pModel, Vector Bounds[2]);
 
 CScript::msfunchash_t CScript::m_GlobalCmdHash;	// MiB 30NOV_14  Hashed Commands for ScriptCmds.cpp
@@ -244,12 +244,12 @@ bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParam
 	return true;
 }
 
-msstring_ref CScript::GetConst(msstring_ref Text)
+const char* CScript::GetConst(const char* Text)
 {
 	static msstring ReturnString;
 	if (!strcmp(Text, "$currentscript"))
 	{
-		ReturnString = (msstring_ref)m.ScriptFile;
+		ReturnString = (const char*)m.ScriptFile;
 		ReturnString = ReturnString.thru_substr(SCRIPT_EXT);	//Remove the file extention
 		return ReturnString;
 	}
@@ -375,7 +375,7 @@ bool GetString(char* Return, size_t size, const char* sentence, int start, const
 	return true;
 }
 
-scriptvar_t* IVariables::FindVar(msstring_ref Name)
+scriptvar_t* IVariables::FindVar(const char* Name)
 {
 	//Check local variables
 	for (int i = 0; i < m_Variables.size(); i++)
@@ -385,14 +385,14 @@ scriptvar_t* IVariables::FindVar(msstring_ref Name)
 
 	return NULL;
 }
-msstring_ref IVariables::GetVar(msstring_ref Name)
+const char* IVariables::GetVar(const char* Name)
 {
 	scriptvar_t* pScriptvar = FindVar(Name);
 	if (pScriptvar) return pScriptvar->Value;
 
 	return Name;
 }
-scriptvar_t* IVariables::SetVar(msstring_ref Name, msstring_ref Value)
+scriptvar_t* IVariables::SetVar(const char* Name, const char* Value)
 {
 	scriptvar_t* pScriptvar = FindVar(Name);
 	if (pScriptvar) { pScriptvar->Value = Value; return pScriptvar; }
@@ -434,7 +434,7 @@ scriptvar_t* CScript::FindVar(const char* pszName)
 
 	return NULL;
 }
-bool CScript::VarExists(msstring_ref pszText)
+bool CScript::VarExists(const char* pszText)
 {
 	return (GetVar(pszText) != pszText);
 }
@@ -4164,7 +4164,7 @@ msstring CScript::ScriptGetter_TimeStamp(msstring& FullName, msstring& ParserNam
 	//priority: moderate, scope: shared
 	time_t Time;
 	time(&Time);
-	msstring_ref TimeString = ctime(&Time);
+	const char* TimeString = ctime(&Time);
 	msstring out_timestr = TimeString;
 	out_timestr = out_timestr.substr(0, out_timestr.len() - 1);
 	if (Params.size() > 0) out_timestr += Params[0];
@@ -4392,7 +4392,7 @@ msstring CScript::ScriptGetter_FileHash(msstring& FullName, msstring& ParserName
 	}
 }
 
-msstring_ref CScript::GetVar(msstring_ref pszText)
+const char* CScript::GetVar(const char* pszText)
 {
 	static char cReturn[1024];
 
@@ -4693,7 +4693,7 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				TokenizeString(Name, Params, ".");
 				Name = Params[0];
 				msstring FullProp = &FullName.c_str()[5 + Name.len() + 1];
-				msstring_ref Value = RETURN_NOTHING_STR;
+				const char* Value = RETURN_NOTHING_STR;
 				if ((Name == "entity" || Name == "monster" || Name == "player" || Name == "item" || Name == "container") && m.pScriptedEnt)
 				{
 					Value = m.pScriptedEnt->GetProp(m.pScriptedEnt, FullProp, Params);
@@ -4740,7 +4740,7 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 	return pszText;
 	}
 
-Vector CScript::StringToVec(msstring_ref String)
+Vector CScript::StringToVec(const char* String)
 {
 	msstring Inside = SCRIPTVAR(msstring(String).thru_char(")"));
 
@@ -4803,7 +4803,7 @@ void CScript::CopyAllData(CScript* pDestScript, CBaseEntity* pScriptedEnt, IScri
 float GetNumeric(const char* pszText) {
 	return atof(pszText);
 }
-msstring_ref CScript::GetScriptVar(msstring_ref VarName)
+const char* CScript::GetScriptVar(const char* VarName)
 {
 	return SCRIPTVAR(VarName);
 }
@@ -5003,7 +5003,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 
 	enddbg;
 }
-void CScript::RunScriptEventByName(msstring_ref pszEventName, msstringlist* Parameters)
+void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Parameters)
 {
 	SCRIPT_EVENT* CurrentEvent = m.CurrentEvent; //Save the event currently executing
 
@@ -5020,7 +5020,7 @@ void CScript::RunScriptEventByName(msstring_ref pszEventName, msstringlist* Para
 	m.CurrentEvent = CurrentEvent;	//Restore the current event
 }
 
-void CScript::CallLogged(msstring_ref title, std::clock_t start)
+void CScript::CallLogged(const char* title, std::clock_t start)
 {
 	std::clock_t end = std::clock();
 	msstringlist Parameters;
@@ -6567,7 +6567,7 @@ void CScript::SendScript(scriptsendcmd_t& SendCmd)
 #endif
 }
 
-CBaseEntity* CScript::RetrieveEntity(msstring_ref Name)
+CBaseEntity* CScript::RetrieveEntity(const char* Name)
 {
 	return m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Name) : StringToEnt(Name);
 }
@@ -6577,7 +6577,7 @@ Vector CScript::DetermineOrigin(msstring& vsOrigin)
 	return m.pScriptedEnt ? m.pScriptedEnt->DetermineOrigin(vsOrigin) : StringToVec(vsOrigin);
 }
 
-void CScript::CallEventTimed(msstring_ref EventName, float Delay)
+void CScript::CallEventTimed(const char* EventName, float Delay)
 {
 	float Time = gpGlobals->time + Delay;
 	for (int e = 0; e < m.Events.size(); e++)
@@ -6639,7 +6639,7 @@ void IScripted::Script_Remove(int idx)
 	m_Scripts.erase(idx);
 }
 
-int IScripted::Script_ParseLine(CScript* Script, msstring_ref pszCommandLine, scriptcmd_t& Cmd)
+int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scriptcmd_t& Cmd)
 {
 	//Script is checking if MSMonster sees this line as a command
 	char TestCommand[MSSTRING_SIZE];
@@ -6679,13 +6679,13 @@ void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 	}
 }
 
-void IScripted::CallScriptEventTimed(msstring_ref EventName, float Delay)
+void IScripted::CallScriptEventTimed(const char* EventName, float Delay)
 {
 	for (int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->CallEventTimed(EventName, Delay);
 }
 
-void IScripted::CallScriptEvent(msstring_ref EventName, msstringlist* Parameters)
+void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 {
 	m_ReturnData = "";
 	for (int i = 0; i < m_Scripts.size(); i++)
@@ -6702,7 +6702,7 @@ void IScripted::Script_InitHUD(CBasePlayer* pPlayer)
 			Script->SendScript(Script->m.PersistentSendCmds[e]);
 	}
 }
-msstring_ref IScripted::GetFirstScriptVar(msstring_ref VarName)
+const char* IScripted::GetFirstScriptVar(const char* VarName)
 {
 	//Only use the first script!
 	if (!m_Scripts.size())
@@ -6710,12 +6710,12 @@ msstring_ref IScripted::GetFirstScriptVar(msstring_ref VarName)
 
 	return m_Scripts[0]->GetVar(VarName);
 }
-void IScripted::SetScriptVar(msstring_ref VarName, msstring_ref Value) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, Value); }
-void IScripted::SetScriptVar(msstring_ref VarName, int iValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, iValue); }
-void IScripted::SetScriptVar(msstring_ref VarName, float flValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, flValue); }
+void IScripted::SetScriptVar(const char* VarName, const char* Value) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, Value); }
+void IScripted::SetScriptVar(const char* VarName, int iValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, iValue); }
+void IScripted::SetScriptVar(const char* VarName, float flValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, flValue); }
 
 
-msstring_ref SCRIPT_EVENT::GetLocal(msstring_ref Name)
+const char* SCRIPT_EVENT::GetLocal(const char* Name)
 {
 	if (!_stricmp(Name, "game.event.params"))
 	{
@@ -6743,7 +6743,7 @@ msstring_ref SCRIPT_EVENT::GetLocal(msstring_ref Name)
 
 //Calls every scripted entity
 //Also calls world.script
-void CScript::CallScriptEventAll(msstring_ref EventName, msstringlist* Parameters)
+void CScript::CallScriptEventAll(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	edict_t* pEdict = NULL;
@@ -6776,7 +6776,7 @@ void CScript::CallScriptEventAll(msstring_ref EventName, msstringlist* Parameter
 		MSGlobals::GameScript->CallScriptEvent(EventName, Parameters);
 	}
 //Thothie JUN2007a, allows callexternal on all players, via "callexternal players [delay] <event> <params...>"
-void CScript::CallScriptPlayers(msstring_ref EventName, msstringlist* Parameters)
+void CScript::CallScriptPlayers(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	//edict_t		*pEdict = NULL;
@@ -6804,7 +6804,7 @@ void CScript::CallScriptPlayers(msstring_ref EventName, msstringlist* Parameters
 
 //Thothie MAR2012_27 - send a client event to all CL player scripts
 //equiv of: clientevent update all const.localplayer.scriptID <event> [params...]
-void CScript::ClCallScriptPlayers(msstring_ref EventName, msstringlist* Parameters)
+void CScript::ClCallScriptPlayers(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	if (g_netmsg[NETMSG_CLDLLFUNC]) //g_netmsgs aren't initialized until the player is spawned... but this may be called earlier from the world.script
@@ -6827,7 +6827,7 @@ void CScript::ClCallScriptPlayers(msstring_ref EventName, msstringlist* Paramete
 //MAR2012_28 - Client Message Sound Function
 //ClXPlaySoundAll( pszSound, m.pScriptedEnt->pev->origin, iChannel, m.pScriptedEnt->SndVolume, sAttn, sPitch );
 //gEngfuncs.pEventAPI->EV_PlaySound( 0, *(Vector *)&Origin, CHAN_AUTO, Sound, Volume, Attn, 0, 100 );
-void CScript::ClXPlaySoundAll(msstring_ref sSample, const Vector& Origin, int sChannel, float sVolume, float sAttn, int sPitch)
+void CScript::ClXPlaySoundAll(const char* sSample, const Vector& Origin, int sChannel, float sVolume, float sAttn, int sPitch)
 {
 #ifdef VALVE_DLL
 	if (g_netmsg[NETMSG_CLDLLFUNC]) //g_netmsgs aren't initialized until the player is spawned... but this may be called earlier from the world.script

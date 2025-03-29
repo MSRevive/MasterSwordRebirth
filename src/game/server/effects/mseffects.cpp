@@ -729,7 +729,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			REQPARAMS(10);
 		}
 
-		msstring_ref ModelName = GetFullResourceName(Params[2]);
+		const char* ModelName = GetFullResourceName(Params[2]);
 		int Modelindex = MODEL_INDEX(ModelName);
 		if (!Modelindex)
 		{

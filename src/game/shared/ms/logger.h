@@ -134,8 +134,8 @@ void Print(const char* szFmt, ...);
 void Log(const char* szFmt, ...);
 void OpenLogFiles();
 
-#define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, msstring_ref(Text))
-void LogExtensive(msstring_ref Text);
+#define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, Text)
+void LogExtensive(const char* Text);
 #define DBG_ENTR_FUNCTION_TEXT (msstring("Enter - ") + __FUNCTION__)
 #define DBG_EXIT_FUNCTION_TEXT (msstring("Exit - ") + __FUNCTION__)
 
@@ -170,7 +170,7 @@ void LogExtensive(msstring_ref Text);
 #define enddbgprt
 #endif
 
-void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress);
+void MSErrorConsoleText(const char* pszLabel, const char* Progress);
 
 extern msstring ItemThinkProgress;
 

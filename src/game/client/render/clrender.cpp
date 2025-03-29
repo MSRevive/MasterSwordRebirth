@@ -90,7 +90,7 @@ void CParticle::BillBoard()
 	m_DirRight = ViewMgr.Params->right;
 	m_DirUp = ViewMgr.Params->up;
 }
-bool CParticle::LoadTexture(msstring_ref Name)
+bool CParticle::LoadTexture(const char* Name)
 {
 	HLSPRITE Sprite = MSBitmap::GetSprite(Name);
 	if (!Sprite)
@@ -189,7 +189,7 @@ struct skyface_t
 struct
 {
 	Vector Dir; //Dir the wall is facing.  It gets scooted back in the opp. direction
-	msstring_ref FileNameSuffix;
+	const char* FileNameSuffix;
 	bool Rotate;
 } g_SkyBoxInfo[6] =
 	{
@@ -244,7 +244,7 @@ public:
 	}
 
 	//Dynamic.  Can change textures anytime
-	void ChangeTexture(msstring_ref NewTexture)
+	void ChangeTexture(const char* NewTexture)
 	{
 		m_SkyName = NewTexture;
 		for (int i = 0; i < Faces.size(); i++)
@@ -287,7 +287,7 @@ void CEnvMgr::InitNewLevel()
 	VGUIImages_NewLevel();
 	logfile << Logger::LOG_INFO << "[InitNewLevel Complete]\n";
 }
-void CEnvMgr::ChangeSkyTexture(msstring_ref NewTexture)
+void CEnvMgr::ChangeSkyTexture(const char* NewTexture)
 {
 	g_CustomSkyBox.ChangeTexture(NewTexture);
 	g_CustomSkyBox.Setup();	 //Thothie DEC2014_02 - trying to make setenv sky.texture work.

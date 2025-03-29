@@ -133,7 +133,7 @@ public:
 		MSInit( pParent, pszText, Alignment );
 	}
 
-	void MSInit( Panel *pParent, msstring_ref Text, MSLabel::Alignment Alignment )
+	void MSInit( Panel *pParent, const char* Text, MSLabel::Alignment Alignment )
 	{
 		setParent( pParent );
 		//setFont( gViewPort->GetSchemeManager()->getFont( gViewPort->GetSchemeManager()->getSchemeHandle( "Briefing Text" ) ) );
@@ -484,7 +484,7 @@ public:
 		m_Line->setVisible( m_Active );
 	}
 
-	void AddLetter( msstring_ref Letter )
+	void AddLetter(const char* Letter )
 	{
 		int x, y;
 		m_MessageLabel->getPos( x, y );
@@ -518,7 +518,7 @@ public:
 	}
 
 	//Instantly update to this text
-	void SetText( msstring_ref Text )
+	void SetText(const char* Text )
 	{
 		m_Message = Text;
 		UpdateText( );

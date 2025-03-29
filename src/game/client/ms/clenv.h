@@ -12,7 +12,7 @@ public:
 	static void RenderSky();
 	static void Cleanup();
 
-	static void ChangeSkyTexture(msstring_ref NewTexture);
+	static void ChangeSkyTexture(const char* NewTexture);
 	static void ChangeTint(const Color4F &Color);
 	static void SetLightGamma(float Value);
 

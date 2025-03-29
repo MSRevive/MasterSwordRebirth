@@ -74,7 +74,7 @@ public:
 class VoteButton : public MSButton
 {
 public:
-	VoteButton(Panel *pParent, msstring_ref Text, int x, int y, int wide, int tall) : MSButton(pParent, Text, x, y, wide, tall, Color_BtnHighlight, Color_FadedWhite) {}
+	VoteButton(Panel *pParent, const char* Text, int x, int y, int wide, int tall) : MSButton(pParent, Text, x, y, wide, tall, Color_BtnHighlight, Color_FadedWhite) {}
 };
 
 class CAction_SelectList : public ActionSignal
@@ -267,7 +267,7 @@ class CInitVotePanel : public VGUI_Options
 public:
 	CInitVotePanel(Panel *pParent) : VGUI_Options(pParent) {}
 
-	virtual void Open(msstring_ref VoteType)
+	virtual void Open(const char* VoteType)
 	{
 		m_VoteType = VoteType;
 

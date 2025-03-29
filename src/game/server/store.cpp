@@ -44,7 +44,7 @@ storeitem_t *CStore ::GetItem(int idx)
 
 	return &Items[idx];
 }
-void CStore::RemoveItem(msstring_ref Name)
+void CStore::RemoveItem(const char* Name)
 {
 	for (int i = 0; i < Items.size(); i++)
 		if (FStrEq(Items[i].Name, Name))
