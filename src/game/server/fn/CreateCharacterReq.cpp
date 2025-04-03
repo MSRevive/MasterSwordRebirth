@@ -33,7 +33,7 @@ void CreateCharacterRequest::OnResponse(int iRespCode)
 		return;
 	}
 	
-	JSONDocument& doc = ParseJSON(m_sResponseBody.c_str());
+	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
 	const int flags = doc["data"]["flags"].GetInt();
 
 	CharInfo.AssignChar(m_iSlot, LOC_CENTRAL, (char*)m_sRequestBody, m_iRequestBodySize, pPlayer);

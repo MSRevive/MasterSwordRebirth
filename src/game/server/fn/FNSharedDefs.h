@@ -7,6 +7,7 @@
 
 #include "rapidjson/fwd.h"
 #include <Platform.h>
+#include <memory>
 
 class CBasePlayer;
 
