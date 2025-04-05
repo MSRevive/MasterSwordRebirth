@@ -1,9 +1,6 @@
 name: Linux PR Compile Check
 
-on:
-  pull_request:
-    branches:
-      - "dev"
+on: pull_request
 
 env:
   BUILD_TYPE: Release
