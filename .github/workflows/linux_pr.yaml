@@ -32,7 +32,7 @@ jobs:
       - name: Restore artifacts, setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
-          vcpkgDirectory: '${{env.VCPKG_ROOT}}'
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           runVcpkgInstall: false
           vcpkgJsonIgnores: "['**/vcpkg/**', '**/vcpkg_config/**', '**/utils/**']"
       
