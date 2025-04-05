@@ -105,7 +105,7 @@ void CImageDelayed::LoadImg( )
 	if( m_TGAorSprite )
 	{
 		dbg( "Calling setImage" );
-		dbg( msstring("Image Name = ") + m_ImageName.c_str() );
+		dbg( msstring("Image Name = ") + m_ImageName );
 		setImage( m_pTGA=MSBitmap::GetTGA( m_ImageName ) ); //load image
 	}
 	else
@@ -740,7 +740,7 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	else if( keynum == 127 )
 	{
 		if( m_Message.len() )
-			m_Message[m_Message.len()-1] = 0;
+			m_Message.c_str()[m_Message.len()-1] = 0;
 		m_VisibleMsg = m_Message;
 		UpdateText( );
 		return;

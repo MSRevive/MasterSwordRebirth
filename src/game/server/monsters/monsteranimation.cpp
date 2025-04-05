@@ -28,7 +28,7 @@ CAnimation *CAnimation::ChangeTo(MONSTER_ANIM NewAnim)
 	}
 	return this;
 }
-bool CAnimation ::SetAnim(msstring_ref pszSequence)
+bool CAnimation ::SetAnim(const char* pszSequence)
 {
 	if (!pszSequence || !pszSequence[0])
 		return false;
@@ -50,7 +50,7 @@ bool CAnimation ::SetAnim(msstring_ref pszSequence)
 
 	return true;
 }
-bool CAnimation ::SetGaitAnim(msstring_ref pszSequence)
+bool CAnimation ::SetGaitAnim(const char* pszSequence)
 {
 	int animDesired = LookupSequence(pszSequence);
 	if (animDesired <= -1)
@@ -147,8 +147,8 @@ bool CWalkAnim ::CanChangeTo(MONSTER_ANIM NewAnim, void *vData)
 }
 void CWalkAnim ::Animate()
 {
-	msstring_ref TorsoAnimName = m_pOwner->pszCurrentAnimName;
-	msstring_ref LegsAnimName = NULL;
+	const char* TorsoAnimName = m_pOwner->pszCurrentAnimName;
+	const char* LegsAnimName = NULL;
 
 	if (m_pOwner->IsPlayer())
 	{

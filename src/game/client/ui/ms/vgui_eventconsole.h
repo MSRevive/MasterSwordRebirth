@@ -56,11 +56,11 @@ public:
 
 	struct prefs_t
 	{
-		msstring_ref VisLines;
-		msstring_ref MaxLines;
-		msstring_ref DecayTime;
-		msstring_ref BGTrans;
-		msstring_ref Width;
+		const char* VisLines;
+		const char* MaxLines;
+		const char* DecayTime;
+		const char* BGTrans;
+		const char* Width;
 	};
 	
 	VGUI_EventConsole( Panel *pParent, int x, int y, int w, int h, prefs_t &Prefs, bool DynamicWidth = false, Font *TextFont = NULL ) : Panel( x, y, w, h )
@@ -102,12 +102,12 @@ public:
 		Resize( );
 
 	}
-	void Print( Color color, msstring_ref Text )
+	void Print( Color color, const char* Text )
 	{
 		Print( color, Text, false );
 	}
 
-	void Print( Color color, msstring_ref Text, bool WrappedFromLastLine )
+	void Print( Color color, const char* Text, bool WrappedFromLastLine )
 	{
 		if (!Text || !Text[0])
 			return;
@@ -139,7 +139,7 @@ public:
 		m_ShrinkTime = 0;											//Reset shrinktime
 		NewLine.m_SpansFromPrevLine = WrappedFromLastLine;
 		
-		msstring_ref ThisLineText = Text;
+		const char* ThisLineText = Text;
 		msstring NextLineText;
 		char ctemp[512] = "";
 

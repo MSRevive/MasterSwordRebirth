@@ -37,11 +37,11 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
-#define GETCONST_COMPATIBLE( a ) ( a[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
+#define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
 //int CountPlayers( void );
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
-msstring_ref PM_GetValue(msstringlist& Params);
+const char* PM_GetValue(msstringlist& Params);
 bool GetModelBounds(void* pModel, Vector Bounds[2]);
 
 CScript::msfunchash_t CScript::m_GlobalCmdHash;	// MiB 30NOV_14  Hashed Commands for ScriptCmds.cpp
@@ -202,7 +202,7 @@ void CScript::ScriptGetterHash_Setup()
 
 bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParams)
 {
-	if (Line[0] != '$') //Example: $cansee(ent_lastseen,ATTACK_RANGE)
+	if (Line.c_str()[0] != '$') //Example: $cansee(ent_lastseen,ATTACK_RANGE)
 		return true;	 //Was not a parser, ignore
 
 	//'P' here stands for parenthesis
@@ -220,7 +220,7 @@ bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParam
 	//PCount starts at 1
 	for (int i = StartP; i < (signed)Line.len(); i++)
 	{
-		char Char = Line[i];
+		char Char = Line.c_str()[i];
 		if (Char == '(') PCount++;						//Increase counter when open P found
 		else if (Char == ')') PCount--;				//Decrease counter when close P found
 
@@ -244,12 +244,12 @@ bool BreakUpLine(msstring& Line, msstring& outParserName, msstringlist& outParam
 	return true;
 }
 
-msstring_ref CScript::GetConst(msstring_ref Text)
+const char* CScript::GetConst(const char* Text)
 {
 	static msstring ReturnString;
 	if (!strcmp(Text, "$currentscript"))
 	{
-		ReturnString = (msstring_ref)m.ScriptFile;
+		ReturnString = (const char*)m.ScriptFile;
 		ReturnString = ReturnString.thru_substr(SCRIPT_EXT);	//Remove the file extention
 		return ReturnString;
 	}
@@ -375,7 +375,7 @@ bool GetString(char* Return, size_t size, const char* sentence, int start, const
 	return true;
 }
 
-scriptvar_t* IVariables::FindVar(msstring_ref Name)
+scriptvar_t* IVariables::FindVar(const char* Name)
 {
 	//Check local variables
 	for (int i = 0; i < m_Variables.size(); i++)
@@ -385,14 +385,14 @@ scriptvar_t* IVariables::FindVar(msstring_ref Name)
 
 	return NULL;
 }
-msstring_ref IVariables::GetVar(msstring_ref Name)
+const char* IVariables::GetVar(const char* Name)
 {
 	scriptvar_t* pScriptvar = FindVar(Name);
 	if (pScriptvar) return pScriptvar->Value;
 
 	return Name;
 }
-scriptvar_t* IVariables::SetVar(msstring_ref Name, msstring_ref Value)
+scriptvar_t* IVariables::SetVar(const char* Name, const char* Value)
 {
 	scriptvar_t* pScriptvar = FindVar(Name);
 	if (pScriptvar) { pScriptvar->Value = Value; return pScriptvar; }
@@ -434,7 +434,7 @@ scriptvar_t* CScript::FindVar(const char* pszName)
 
 	return NULL;
 }
-bool CScript::VarExists(msstring_ref pszText)
+bool CScript::VarExists(const char* pszText)
 {
 	return (GetVar(pszText) != pszText);
 }
@@ -721,7 +721,7 @@ msstring CScript::ScriptGetter_CapFirst(msstring& FullName, msstring& ParserName
 		msstring sen = Params[0];
 		msstring f = sen;
 		f = strupr(f);
-		sen[0] = f[0];
+		sen.c_str()[0] = f.c_str()[0];
 		return sen;
 	}
 	else
@@ -3332,7 +3332,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 		}
 		else
 		{
-			if (isdigit(Params[2][0])) Result = StringToVec(Params[1]) * atof(Params[2]);
+			if (isdigit(Params[2].c_str()[0])) Result = StringToVec(Params[1]) * atof(Params[2]);
 			else Result = VecMultiply(StringToVec(Params[1]), StringToVec(Params[2]));
 			return VecToString(Result);
 		}
@@ -3547,7 +3547,7 @@ msstring CScript::ScriptGetter_Rand(msstring& FullName, msstring& ParserName, ms
 {
 	//priority: very high, scope: shared
 	msstring Return;
-	if (ParserName[5] == 'f') //float version
+	if (ParserName.c_str()[5] == 'f') //float version
 		RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])))
 	else  //int version
 		RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])))
@@ -3568,7 +3568,7 @@ msstring CScript::ScriptGetter_RelPos(msstring& FullName, msstring& ParserName, 
 	msstring Return;
 	if (m.pScriptedEnt && Params.size() >= 1)
 	{
-		if (Params[0][0] != '(')	//(x,y,z)
+		if (Params[0].c_str()[0] != '(')	//(x,y,z)
 		{
 			if (m.pScriptedEnt)
 			{
@@ -3607,10 +3607,10 @@ msstring CScript::ScriptGetter_RelVel(msstring& FullName, msstring& ParserName, 
 	if (m.pScriptedEnt && Params.size() >= 1)
 	{
 		Vector Angle, RelVel;
-		if (Params[0][0] != '(')	//(x,y,z)
+		if (Params[0].c_str()[0] != '(')	//(x,y,z)
 		{
 			Angle = ((m.pScriptedEnt->IsPlayer() || FBitSet(m.pScriptedEnt->pev->flags, FL_FLY | FL_SWIM)) ? m.pScriptedEnt->pev->v_angle : m.pScriptedEnt->pev->angles);
-			RelVel = StringToVec(&FullName[7]);
+			RelVel = StringToVec(&FullName.c_str()[7]);
 		}
 		else	//(pitch,yaw,roll),(x,y,z)
 		{
@@ -3663,7 +3663,7 @@ msstring CScript::ScriptGetter_ShapeRect(msstring& FullName, msstring& ParserNam
 		float vHalfY;
 		float vHalfZ;
 
-		if (Params[1][0] == '(')
+		if (Params[1].c_str()[0] == '(')
 		{
 			Vector vPointMin = vOrigin;
 			Vector vPointMax = StringToVec(Params[1]);
@@ -4164,7 +4164,7 @@ msstring CScript::ScriptGetter_TimeStamp(msstring& FullName, msstring& ParserNam
 	//priority: moderate, scope: shared
 	time_t Time;
 	time(&Time);
-	msstring_ref TimeString = ctime(&Time);
+	const char* TimeString = ctime(&Time);
 	msstring out_timestr = TimeString;
 	out_timestr = out_timestr.substr(0, out_timestr.len() - 1);
 	if (Params.size() > 0) out_timestr += Params[0];
@@ -4392,17 +4392,17 @@ msstring CScript::ScriptGetter_FileHash(msstring& FullName, msstring& ParserName
 	}
 }
 
-msstring_ref CScript::GetVar(msstring_ref pszText)
+const char* CScript::GetVar(const char* pszText)
 {
 	static char cReturn[1024];
 
 	msstring FullName = pszText;
 	msstring Name;
 	static msstring Return;
-	Return[0] = 0;
+	Return = "";
 	if (m.CurrentEvent) pszText = m.CurrentEvent->GetLocal(pszText);
 
-	if (FullName[0] == '\'' && FullName[FullName.len() - 1] == '\'')	//String literal.  Don't try to resolve it
+	if (FullName.c_str()[0] == '\'' && FullName.c_str()[FullName.len() - 1] == '\'')	//String literal.  Don't try to resolve it
 	{
 		Return = FullName.substr(1).thru_char("'");
 		return Return;
@@ -4692,8 +4692,8 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 				Params.clearitems();
 				TokenizeString(Name, Params, ".");
 				Name = Params[0];
-				msstring FullProp = &FullName[5 + Name.len() + 1];
-				msstring_ref Value = RETURN_NOTHING_STR;
+				msstring FullProp = &FullName.c_str()[5 + Name.len() + 1];
+				const char* Value = RETURN_NOTHING_STR;
 				if ((Name == "entity" || Name == "monster" || Name == "player" || Name == "item" || Name == "container") && m.pScriptedEnt)
 				{
 					Value = m.pScriptedEnt->GetProp(m.pScriptedEnt, FullProp, Params);
@@ -4740,7 +4740,7 @@ msstring_ref CScript::GetVar(msstring_ref pszText)
 	return pszText;
 	}
 
-Vector CScript::StringToVec(msstring_ref String)
+Vector CScript::StringToVec(const char* String)
 {
 	msstring Inside = SCRIPTVAR(msstring(String).thru_char(")"));
 
@@ -4803,7 +4803,7 @@ void CScript::CopyAllData(CScript* pDestScript, CBaseEntity* pScriptedEnt, IScri
 float GetNumeric(const char* pszText) {
 	return atof(pszText);
 }
-msstring_ref CScript::GetScriptVar(msstring_ref VarName)
+const char* CScript::GetScriptVar(const char* VarName)
 {
 	return SCRIPTVAR(VarName);
 }
@@ -4826,7 +4826,7 @@ CScript::~CScript()
 }
 
 
-bool CScript::Spawn(string_i Filename, CBaseEntity* pScriptedEnt, IScripted* pScriptedInterface, bool PrecacheOnly, bool Casual)
+bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pScriptedInterface, bool PrecacheOnly, bool Casual)
 {
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
@@ -5003,7 +5003,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 
 	enddbg;
 }
-void CScript::RunScriptEventByName(msstring_ref pszEventName, msstringlist* Parameters)
+void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Parameters)
 {
 	SCRIPT_EVENT* CurrentEvent = m.CurrentEvent; //Save the event currently executing
 
@@ -5020,7 +5020,7 @@ void CScript::RunScriptEventByName(msstring_ref pszEventName, msstringlist* Para
 	m.CurrentEvent = CurrentEvent;	//Restore the current event
 }
 
-void CScript::CallLogged(msstring_ref title, std::clock_t start)
+void CScript::CallLogged(const char* title, std::clock_t start)
 {
 	std::clock_t end = std::clock();
 	msstringlist Parameters;
@@ -5299,7 +5299,7 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 // 			bool AllowDupInclude = m.AllowDupInclude;
 // 			m.AllowDupInclude = (pszCommandLine.find("[allowduplicate]") != std::string::npos) != msstring_error;
 
-// 			string_i CurrentScriptFile = m.ScriptFile;
+// 			msstring CurrentScriptFile = m.ScriptFile;
 // 			bool fSucces = Spawn(FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
 // 			m.ScriptFile = CurrentScriptFile;
 // 			m.AllowDupInclude = AllowDupInclude;
@@ -5907,7 +5907,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		eventscope_e Scope = EVENTSCOPE_SHARED;
 		bool Casual = false;
 
-		if (FileName[0] == '[')	//#include [scope][casual] <name>
+		if (FileName.c_str()[0] == '[')	//#include [scope][casual] <name>
 		{
 			if (FileName.contains("[server]")) Scope = EVENTSCOPE_SERVER;
 			else if (FileName.contains("[client]")) Scope = EVENTSCOPE_CLIENT;
@@ -5925,7 +5925,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		{
 			msstring AllowDup = msstring(Line.substr(FileName.len())).skip(SKIP_STR).thru_char(SKIP_STR);
 
-			string_i CurrentScriptFile = m.ScriptFile;
+			msstring CurrentScriptFile = m.ScriptFile;
 			bool AllowDupInclude = m.AllowDupInclude;
 			m.AllowDupInclude = AllowDup.find("allowduplicate") != msstring_error;
 			bool fSucces = Spawn(FileName, m.pScriptedEnt, m.pScriptedInterface, m.PrecacheOnly, Casual);
@@ -6016,12 +6016,12 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			{
 				ScriptCmd.m_Params.add(GetConst(ParamStr.thru_char(SKIP_STR)));			//Save the next parameter - Resolve Contants but not variables
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);	//Skip over the parameter's text and any spaces
-				if (!i && ParamStr[0] == ')')
+				if (!i && ParamStr.c_str()[0] == ')')
 					break;																	//Compare parameter was ')' -- this if statement only has one parameter Ex: if( var ) command
 
 			}
 
-			if (ParamStr[0] == ')')
+			if (ParamStr.c_str()[0] == ')')
 			{
 				ParentCmds.add(*pCurrentCmds);											//Store the current commands list
 				*pCurrentCmds = &ScriptCmd.m_IfCmds;										//Set the new parent command list to my true statment child list
@@ -6030,7 +6030,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				//Check if there are any commands at the end of the if line and parse them under this if statement
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);	//Skip the ')' and any spaces
 
-				if (!ParamStr[0] || ParamStr[0] == ')')
+				if (!ParamStr.c_str()[0] || ParamStr.c_str()[0] == ')')
 					return 2;  //Return 2 so any parent command knows I'm not done yet
 				else
 				{
@@ -6041,7 +6041,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				}
 			}
 			else
-				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
+				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + (const char*)m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
 		}
 	}
 	else if (!_stricmp(TestCommand, "else"))
@@ -6110,13 +6110,13 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 
 			Line = Line.substr(VarName.len()).skip(SKIP_STR);
 			msstring VarValue;
-			if (Line[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
+			if (Line.c_str()[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
 			else VarValue = Line.thru_char(SKIP_STR);				//No quotes
 
 			VarValue = msstring(GETCONST_COMPATIBLE(VarValue));				//Resolve both constants and variables -- TODO: Remove the variables - should be constants only
 			if (!_stricmp(TestCommand, "setvar"))
 			{
-				SetVar(VarName, VarValue, !_stricmp(TestCommand, "setvarg") ? true : false);
+				SetVar(VarName.c_str(), VarValue.c_str(), !_stricmp(TestCommand, "setvarg") ? true : false);
 				KeepCmd = true;
 			}
 			else
@@ -6173,7 +6173,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 
 		Line = Line.substr(VarName.len()).skip(SKIP_STR);
 		msstring VarValue;
-		if (Line[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
+		if (Line.c_str()[0] == '"') VarValue = Line.substr(1).thru_char("\"");		//Starting quote found, read until the next quote
 		else VarValue = Line.thru_char(SKIP_STR);				//No quotes
 
 		VarValue = msstring(GETCONST_COMPATIBLE(VarValue));
@@ -6258,7 +6258,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 							Resolved = msstring("npc/") + Resolved + ".wav"; //still total h4x, but there's no good way to fix this without changing how the command works
 					}
 				}
-				if (Resolved.len() && strstr(Resolved, "."))
+				if (Resolved.len() && strstr(Resolved.c_str(), "."))
 					Resources.add(Resolved);
 			}
 
@@ -6286,7 +6286,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			}
 			*/
 
-			msstring Extension = &FileName[FileName.len() - 4];
+			msstring Extension = &FileName.c_str()[FileName.len() - 4];
 			//Thothie - Fail
 			/*if ( !FileName.contains("items") )
 			{
@@ -6567,7 +6567,7 @@ void CScript::SendScript(scriptsendcmd_t& SendCmd)
 #endif
 }
 
-CBaseEntity* CScript::RetrieveEntity(msstring_ref Name)
+CBaseEntity* CScript::RetrieveEntity(const char* Name)
 {
 	return m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Name) : StringToEnt(Name);
 }
@@ -6577,7 +6577,7 @@ Vector CScript::DetermineOrigin(msstring& vsOrigin)
 	return m.pScriptedEnt ? m.pScriptedEnt->DetermineOrigin(vsOrigin) : StringToVec(vsOrigin);
 }
 
-void CScript::CallEventTimed(msstring_ref EventName, float Delay)
+void CScript::CallEventTimed(const char* EventName, float Delay)
 {
 	float Time = gpGlobals->time + Delay;
 	for (int e = 0; e < m.Events.size(); e++)
@@ -6608,7 +6608,7 @@ void IScripted::Deactivate()
 	m_Scripts.clear();		//explicitly delete the list, to reclaim the memory
 
 }
-CScript* IScripted::Script_Add(string_i ScriptName, CBaseEntity* pEntity)
+CScript* IScripted::Script_Add(msstring ScriptName, CBaseEntity* pEntity)
 {
 	//Adds a new script to the list
 	CScript* Script = msnew CScript();
@@ -6626,7 +6626,7 @@ CScript* IScripted::Script_Add(string_i ScriptName, CBaseEntity* pEntity)
 
 	return Script;
 }
-CScript* IScripted::Script_Get(string_i ScriptName)
+CScript* IScripted::Script_Get(msstring ScriptName)
 {
 	for (int i = 0; i < m_Scripts.size(); i++)
 		if (!strcmp(m_Scripts[i]->m.ScriptFile, ScriptName))
@@ -6639,7 +6639,7 @@ void IScripted::Script_Remove(int idx)
 	m_Scripts.erase(idx);
 }
 
-int IScripted::Script_ParseLine(CScript* Script, msstring_ref pszCommandLine, scriptcmd_t& Cmd)
+int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scriptcmd_t& Cmd)
 {
 	//Script is checking if MSMonster sees this line as a command
 	char TestCommand[MSSTRING_SIZE];
@@ -6679,13 +6679,13 @@ void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 	}
 }
 
-void IScripted::CallScriptEventTimed(msstring_ref EventName, float Delay)
+void IScripted::CallScriptEventTimed(const char* EventName, float Delay)
 {
 	for (int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->CallEventTimed(EventName, Delay);
 }
 
-void IScripted::CallScriptEvent(msstring_ref EventName, msstringlist* Parameters)
+void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 {
 	m_ReturnData = "";
 	for (int i = 0; i < m_Scripts.size(); i++)
@@ -6702,7 +6702,7 @@ void IScripted::Script_InitHUD(CBasePlayer* pPlayer)
 			Script->SendScript(Script->m.PersistentSendCmds[e]);
 	}
 }
-msstring_ref IScripted::GetFirstScriptVar(msstring_ref VarName)
+const char* IScripted::GetFirstScriptVar(const char* VarName)
 {
 	//Only use the first script!
 	if (!m_Scripts.size())
@@ -6710,12 +6710,12 @@ msstring_ref IScripted::GetFirstScriptVar(msstring_ref VarName)
 
 	return m_Scripts[0]->GetVar(VarName);
 }
-void IScripted::SetScriptVar(msstring_ref VarName, msstring_ref Value) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, Value); }
-void IScripted::SetScriptVar(msstring_ref VarName, int iValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, iValue); }
-void IScripted::SetScriptVar(msstring_ref VarName, float flValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, flValue); }
+void IScripted::SetScriptVar(const char* VarName, const char* Value) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, Value); }
+void IScripted::SetScriptVar(const char* VarName, int iValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, iValue); }
+void IScripted::SetScriptVar(const char* VarName, float flValue) { if (m_Scripts.size()) m_Scripts[0]->SetVar(VarName, flValue); }
 
 
-msstring_ref SCRIPT_EVENT::GetLocal(msstring_ref Name)
+const char* SCRIPT_EVENT::GetLocal(const char* Name)
 {
 	if (!_stricmp(Name, "game.event.params"))
 	{
@@ -6743,7 +6743,7 @@ msstring_ref SCRIPT_EVENT::GetLocal(msstring_ref Name)
 
 //Calls every scripted entity
 //Also calls world.script
-void CScript::CallScriptEventAll(msstring_ref EventName, msstringlist* Parameters)
+void CScript::CallScriptEventAll(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	edict_t* pEdict = NULL;
@@ -6776,7 +6776,7 @@ void CScript::CallScriptEventAll(msstring_ref EventName, msstringlist* Parameter
 		MSGlobals::GameScript->CallScriptEvent(EventName, Parameters);
 	}
 //Thothie JUN2007a, allows callexternal on all players, via "callexternal players [delay] <event> <params...>"
-void CScript::CallScriptPlayers(msstring_ref EventName, msstringlist* Parameters)
+void CScript::CallScriptPlayers(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	//edict_t		*pEdict = NULL;
@@ -6804,7 +6804,7 @@ void CScript::CallScriptPlayers(msstring_ref EventName, msstringlist* Parameters
 
 //Thothie MAR2012_27 - send a client event to all CL player scripts
 //equiv of: clientevent update all const.localplayer.scriptID <event> [params...]
-void CScript::ClCallScriptPlayers(msstring_ref EventName, msstringlist* Parameters)
+void CScript::ClCallScriptPlayers(const char* EventName, msstringlist* Parameters)
 {
 #ifdef VALVE_DLL
 	if (g_netmsg[NETMSG_CLDLLFUNC]) //g_netmsgs aren't initialized until the player is spawned... but this may be called earlier from the world.script
@@ -6827,7 +6827,7 @@ void CScript::ClCallScriptPlayers(msstring_ref EventName, msstringlist* Paramete
 //MAR2012_28 - Client Message Sound Function
 //ClXPlaySoundAll( pszSound, m.pScriptedEnt->pev->origin, iChannel, m.pScriptedEnt->SndVolume, sAttn, sPitch );
 //gEngfuncs.pEventAPI->EV_PlaySound( 0, *(Vector *)&Origin, CHAN_AUTO, Sound, Volume, Attn, 0, 100 );
-void CScript::ClXPlaySoundAll(msstring_ref sSample, const Vector& Origin, int sChannel, float sVolume, float sAttn, int sPitch)
+void CScript::ClXPlaySoundAll(const char* sSample, const Vector& Origin, int sChannel, float sVolume, float sAttn, int sPitch)
 {
 #ifdef VALVE_DLL
 	if (g_netmsg[NETMSG_CLDLLFUNC]) //g_netmsgs aren't initialized until the player is spawned... but this may be called earlier from the world.script

@@ -20,7 +20,7 @@ Logger chatlog;
 #endif
 Logger NullFile;
 bool g_log_initialized = false;
-void MSErrorConsoleText(const msstring_ref pszLabel, const msstring_ref Progress)
+void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 {
 	//Print("%s, %s\n", pszLabel, Progress);
 #ifndef TURN_OFF_ALERT
@@ -88,7 +88,7 @@ msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a stri
 
 	return RetString;
 }
-CBaseEntity *StringToEnt(msstring_ref EntString) // Converts an string of format "PentP(idx,addr)" to an entity
+CBaseEntity *StringToEnt(const char* EntString) // Converts an string of format "PentP(idx,addr)" to an entity
 {
 	int Idx = -1;
 	unsigned int Addr = ~0;
@@ -103,7 +103,7 @@ CBaseEntity *StringToEnt(msstring_ref EntString) // Converts an string of format
 	return pEntity;
 }
 
-msstring_ref VecToString(const Vector& Vec, bool bAs2D)
+const char* VecToString(const Vector& Vec, bool bAs2D)
 {
 	static char RetString[128];
 	if (bAs2D)
@@ -112,7 +112,7 @@ msstring_ref VecToString(const Vector& Vec, bool bAs2D)
 		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
 	return RetString;
 }
-Vector StringToVec(msstring_ref String)
+Vector StringToVec(const char* String)
 {
 	Vector Vec;
 
@@ -122,7 +122,7 @@ Vector StringToVec(msstring_ref String)
 			return g_vecZero;
 	return Vec;
 }
-Color4F StringToColor(msstring_ref String) //Converts a string of the format "(r,g,b,a)" Color class
+Color4F StringToColor(const char* String) //Converts a string of the format "(r,g,b,a)" Color class
 {
 	Color4F Color(0, 0, 0, 0);
 
@@ -144,7 +144,7 @@ Vector GetRelativePos(Vector &Ang, Vector &Dir)
 	return vPosition;
 }
 //Adds models/ or sprites/ to a model or sprite filename
-char *GetFullResourceName(msstring_ref pszPartialName)
+char *GetFullResourceName(const char* pszPartialName)
 {
 	msstring PartialName = pszPartialName;
 	if (PartialName.len() < 4)
@@ -153,7 +153,7 @@ char *GetFullResourceName(msstring_ref pszPartialName)
 	static msstring sReturn;
 
 	sReturn = PartialName;
-	msstring Extension = &PartialName[PartialName.len() - 4];
+	msstring Extension = &PartialName.c_str()[PartialName.len() - 4];
 	if (Extension == ".spr")
 		sReturn = msstring("sprites/") + PartialName;
 	else if (Extension == ".mdl")

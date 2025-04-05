@@ -8,20 +8,16 @@ msstring::msstring()
 {
 	data[0] = 0;
 }
-msstring::msstring(const msstring_ref a) { operator=(a); }
-msstring::msstring(const msstring_ref a, size_t length)
+msstring::msstring(const char* a) { operator=(a); }
+msstring::msstring(const char* a, size_t length)
 {
 	strncpy(data, a, length);
 	data[length] = 0;
 }
 
-#ifdef _WIN32
 msstring::msstring(const msstring& a) { operator=(a); }
-#else
-msstring::msstring(const string_i& a) { operator=(&a); }
-#endif // _WIN32
 
-msstring &msstring::operator=(const msstring_ref a)
+msstring &msstring::operator=(const char* a)
 {
 	if (a == data)
 		return *this;
@@ -35,26 +31,32 @@ msstring &msstring::operator=(int a)
 	return *this;
 }
 msstring &msstring::operator=(const msstring &a) { return operator=(a.data); }
-msstring &msstring::operator+=(const msstring_ref a)
+msstring &msstring::operator+=(const char* a)
 {
 	append(a);
+	return *this;
+}
+msstring &msstring::operator+=(msstring a)
+{
+	append(a.data);
 	return *this;
 }
 msstring &msstring::operator+=(int a)
 {
 	msstring tmp;
 	tmp = a;
-	return operator+=((const msstring_ref &)(tmp));
+	return operator+=(tmp);
 }
-msstring msstring::operator+(const msstring_ref a) { return msstring(data) += a; }
+msstring msstring::operator+(const char* a) { return msstring(data) += a; }
 msstring msstring::operator+(const msstring &a) { return msstring(data) += a.data; }
-msstring msstring::operator+(const string_i &a) { return msstring(data) += ((string_i)a).c_str(); }
 msstring msstring::operator+(int a) { return msstring(data) += a; }
 bool msstring::operator==(char *a) const { return !strcmp(data, a); }
 bool msstring::operator==(const char *a) const { return !strcmp(data, a); }
+bool msstring::operator==(msstring a) const { return !strcmp(data, a.data); }
 msstring::operator char *() { return data; }
+msstring::operator const char *() { return data; }
 char *msstring::c_str() { return data; }
-void msstring::append(const msstring_ref a, size_t length)
+void msstring::append(const char* a, size_t length)
 {
 	size_t my_sz = len();
 	size_t capped_sz = V_min(length, MSSTRING_MAXLEN - my_sz);
@@ -63,23 +65,23 @@ void msstring::append(const msstring_ref a, size_t length)
 	strncpy(&data[my_sz], a, capped_sz);
 	data[my_sz + capped_sz] = 0;
 }
-void msstring::append(const msstring_ref a)
+void msstring::append(const char* a)
 {
 	size_t len = strlen(a);
 	append(a, len);
 }
 size_t msstring::len() const { return strlen(data); }
-size_t msstring::find(const msstring_ref a, size_t start) const
+size_t msstring::find(const char* a, size_t start) const
 {
-	msstring_ref substring = strstr(&data[start], a);
+	const char* substring = strstr(&data[start], a);
 	return substring ? (substring - &data[start]) : msstring_error;
 }
-msstring_ref msstring::find_str(const msstring_ref a, size_t start) const
+const char* msstring::find_str(const char* a, size_t start) const
 {
 	size_t ret = find(a, start);
 	return (ret != msstring_error) ? &data[ret] : &data[start];
 }
-size_t msstring::findchar(const msstring_ref a, size_t start) const
+size_t msstring::findchar(const char* a, size_t start) const
 {
 	for (int i = start; i < (signed)len(); i++)
 	{
@@ -89,14 +91,14 @@ size_t msstring::findchar(const msstring_ref a, size_t start) const
 	}
 	return msstring_error;
 }
-msstring_ref msstring::findchar_str(const msstring_ref a, size_t start) const
+const char* msstring::findchar_str(const char* a, size_t start) const
 {
 	size_t ret = findchar(a, start);
 	return (ret != msstring_error) ? &data[ret] : &data[start];
 }
-bool msstring::contains(const msstring_ref a) const { return find(a) != msstring_error; }
-bool msstring::starts_with(const msstring_ref a) const { return find(a) == 0; }
-bool msstring::ends_with(const msstring_ref a) const
+bool msstring::contains(const char* a) const { return find(a) != msstring_error; }
+bool msstring::starts_with(const char* a) const { return find(a) == 0; }
+bool msstring::ends_with(const char* a) const
 {
 	msstring temp = a;
 	int loc = len() - temp.len();
@@ -104,17 +106,17 @@ bool msstring::ends_with(const msstring_ref a) const
 }
 msstring msstring::substr(size_t start, size_t length) { return msstring(&data[start], length); }
 msstring msstring::substr(size_t start) { return msstring(&data[start]); }
-msstring msstring::thru_substr(const msstring_ref a, size_t start) const
+msstring msstring::thru_substr(const char* a, size_t start) const
 {
 	size_t ret = find(a, start);
 	return (ret != msstring_error) ? msstring(&data[start], ret) : msstring(&data[start]);
 }
-msstring msstring::thru_char(const msstring_ref a, size_t start) const
+msstring msstring::thru_char(const char* a, size_t start) const
 {
 	size_t ret = findchar(a, start);
 	return (ret != msstring_error) ? msstring(&data[start], ret) : msstring(&data[start]);
 }
-msstring msstring::skip(const msstring_ref a) const
+msstring msstring::skip(const char* a) const
 {
 	size_t my_sz = len();
 	for (int i = 0; i < my_sz; i++)
@@ -137,9 +139,8 @@ msstring msstring::tolower(void) const
 
 	return ret;
 }
-//#define msstring str256
 
-bool TokenizeString(const char *pszString, msstringlist &Tokens, msstring_ref Separator)
+bool TokenizeString(const char *pszString, msstringlist &Tokens, const char* Separator)
 {
 	char cTemp[MSSTRING_SIZE - 1];
 	int i = 0;
@@ -176,7 +177,7 @@ void ReplaceChar(char *pString, char org, char dest)
 
 msvariant::msvariant() { clrmem(*this); }
 
-void msvariant::SetFromString(msstring_ref a)
+void msvariant::SetFromString(const char* a)
 {
 	m_String = a;
 	m_Int = atoi(a);

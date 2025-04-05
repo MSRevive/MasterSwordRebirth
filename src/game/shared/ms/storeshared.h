@@ -5,7 +5,7 @@ struct containeritem_t : public genericitem_t
 	containeritem_t(class CGenericItem *pItem);
 	void init(class CGenericItem *pItem);
 
-	string_i SpriteName;
+	msstring SpriteName;
 
 	msstring DebugName;					//Remove
 	bool Disabled;

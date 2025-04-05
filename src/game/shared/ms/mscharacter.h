@@ -156,7 +156,7 @@ public:
 
 	static enum jointype_e CanJoinThisMap(savedata_t &Data, msstringlist &VisitedMaps);		//Client & Server
 	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, msstringlist &VisitedMaps); //Client & Server
-	static bool HasVisited(msstring_ref MapName, msstringlist &VisitedMaps);				//Client & Server
+	static bool HasVisited(const char* MapName, msstringlist &VisitedMaps);				//Client & Server
 
 	static void PacketAcknowledged(int PacketIdx);			//Client & Server
 	static void Think_SendChar(class CBasePlayer *pPlayer); //Client & Server

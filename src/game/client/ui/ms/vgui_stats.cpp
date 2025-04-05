@@ -329,7 +329,7 @@ void CStatPanel::Update()
 			if (SubStat.Value == 0)
 				Percent = 0.0;
 
-			msstring_ref Name = "";
+			const char* Name = "";
 			if (iSubStats <= STATPROP_TOTAL)
 				Name = SkillTypeList[i];
 			else

@@ -54,7 +54,7 @@ public:
 
 	struct props
 	{
-		string_i ScriptFile;
+		msstring ScriptFile;
 		CBaseEntity	*pScriptedEnt;
 		IScripted	*pScriptedInterface;
 		CEventList Events;
@@ -84,28 +84,28 @@ public:
 #if !TURN_OFF_ALERT
 	void conflict_check(msstring testvar, msstring testvar_type, msstring testvar_scope, int linenum); //Thothie JAN2013_09 variable conflict checks
 #endif
-	bool Spawn(string_i Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
+	bool Spawn(msstring Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
-	void RunScriptEventByName( msstring_ref pszEventName, msstringlist *Parameters = NULL );	//Run one named event
-	void CallLogged(msstring_ref title, std::clock_t start);
+	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = NULL );	//Run one named event
+	void CallLogged(const char* title, std::clock_t start);
 	bool ParseScriptFile( const char *pszScriptData );
 	SCRIPT_EVENT *EventByName( const char *pszEventName );
-	msstring_ref GetConst( msstring_ref pszText );
+	const char* GetConst(const char* pszText );
 	scriptvar_t *FindVar( const char *pszName );
-	msstring_ref GetVar( msstring_ref pszText );
-	bool VarExists( msstring_ref pszText );
+	const char* GetVar(const char* pszText );
+	bool VarExists(const char* pszText );
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, bool fGlobal = false );
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, SCRIPT_EVENT &Event );
 	scriptvar_t *SetVar( const char *pszVarName, int iValue, bool fGlobal = false );
 	scriptvar_t *SetVar( const char *pszVarName, float flValue, bool fGlobal = false );
-	Vector StringToVec( msstring_ref String );
+	Vector StringToVec(const char* String );
 	void CopyAllData( CScript *pDestScript, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface );
 	//int NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, mslist<scriptcmd_list *> &ParentCmds);
 	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/);
 	void SendScript( scriptsendcmd_t &SendCmd );	//Send script to client
-	CBaseEntity *RetrieveEntity( msstring_ref Name );
+	CBaseEntity *RetrieveEntity(const char* Name );
   Vector DetermineOrigin(msstring & vsOrigin);
-	void CallEventTimed(msstring_ref EventName, float Delay);
+	void CallEventTimed(const char* EventName, float Delay);
 
 	//IScripted - Don't make CScript a part of IScripted or they allocate each other in a recursive loop
 	//			  These functions are just imitating IScripted
@@ -118,12 +118,12 @@ public:
 
 	static void Script_Setup( );
 	static void ScriptGetterHash_Setup( ); // MiB 30NOV_2014 Function for adding functions to the Script.cpp hash
-	static void CallScriptEventAll( msstring_ref EventName, msstringlist *Parameters );
-	static void CallScriptPlayers( msstring_ref EventName, msstringlist *Parameters ); //Thothie - JUN2007a
-	static void ClCallScriptPlayers( msstring_ref EventName, msstringlist *Parameters ); //Thothie - MAR2012_27
-	static void ClXPlaySoundAll( msstring_ref sSample, const Vector &Origin, int sChannel, float sVolume, float sAttn, int sPitch ); //Thothie - MAR2012_28
+	static void CallScriptEventAll(const char* EventName, msstringlist *Parameters );
+	static void CallScriptPlayers(const char* EventName, msstringlist *Parameters ); //Thothie - JUN2007a
+	static void ClCallScriptPlayers(const char* EventName, msstringlist *Parameters ); //Thothie - MAR2012_27
+	static void ClXPlaySoundAll(const char* sSample, const Vector &Origin, int sChannel, float sVolume, float sAttn, int sPitch ); //Thothie - MAR2012_28
 
-	int Script_ParseLine( msstring_ref *pszCommandLine, scriptcmd_t &Cmd );
+	int Script_ParseLine( const char** pszCommandLine, scriptcmd_t &Cmd );
 	bool Script_SetupEvent( SCRIPT_EVENT &Event, msstringlist *Parameters );
 	bool Script_ExecuteEvent( SCRIPT_EVENT &Event, msstringlist *Parameters = NULL );
 	bool Script_ExecuteCmds( SCRIPT_EVENT &Event, scriptcmd_list &Cmds );
@@ -367,14 +367,14 @@ public:
 
 	//bool ScriptCmd_Hud( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params );
 	//bool ScriptCmd_NpcMove( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params );
-	msstring_ref GetScriptVar( msstring_ref EventName );
+	const char* GetScriptVar(const char* EventName );
 
 	void ScriptedEffect( msstringlist &Params );
 	void CLScriptedEffect( msstringlist &Params );
 #ifndef VALVE_DLL
-	msstring_ref CLGetCurrentTempEntProp( msstring &Prop );
-	msstring_ref CLGetEntProp( struct cl_entity_s *pclEntity, msstringlist &Params );
-	msstring_ref CLGetBeamProp( int beamid, msstringlist &Params ); //DEC2014_09 Thothie - beam_update
+	const char* CLGetCurrentTempEntProp( msstring &Prop );
+	const char* CLGetEntProp( struct cl_entity_s *pclEntity, msstringlist &Params );
+	const char* CLGetBeamProp( int beamid, msstringlist &Params ); //DEC2014_09 Thothie - beam_update
 #endif
 
 	CScript( );
@@ -409,34 +409,3 @@ extern globalscriptinfo_t *g_MSScriptInfo;
 #else
 	#define SCRIPT_ID_START 10000	//Client: ID of next script to be created
 #endif
-
-//MiB Feb2008a - for the scriptio system File I/O
-//- moved somewhere else?
-/*struct scriptfile_t
-{
-private:
-		int curline;
-public:
-	msstring fileName;
-	bool endoffile;
-	bool nofile;
-
-	msstringlist Lines;
-
-	void JumpToLine( int line ) { curline = line; }
-
-	scriptfile_t &operator = ( const msstring_ref a );
-
-	void Open( msstring_ref a );
-	void DeleteFile();
-	void Reset();
-
-	msstring ScriptFile_ReadLine();
-	msstring ScriptFile_ReadLine( int line );
-	//void ChatLog( msstring_ref a, msstring action, msstring line ); //Thothie Phayle
-	void ScriptFile_WriteLine( msstring line );
-	void ScriptFile_WriteLine( msstring line, int lineNum, bool overwrite = false);
-														 //Only used if you're "inserting" a line
-														 //Choice between inserting or overwriting
-};
-*/

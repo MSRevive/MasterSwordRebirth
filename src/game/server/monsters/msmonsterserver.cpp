@@ -143,7 +143,7 @@ void CMSMonster::Spawn()
 	if (m_nRndMobs > 0)
 	{
 		//precache all random mob scripts
-		string_i orig_scriptName = m_ScriptName;
+		msstring orig_scriptName = m_ScriptName;
 		for (int i = 0; i < m_nRndMobs; i++)
 		{
 			logfile << UTIL_VarArgs("DEBUG: msmonster_random precache #%i / %i as %s\n", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
@@ -625,7 +625,7 @@ void CMSMonster::Think()
 	if (TempConditions & FC_AVOID)
 		FrameConditions |= FC_AVOID;
 
-	enddbgprt(m_ScriptName.c_str());
+	enddbgprt((const char*)m_ScriptName.c_str());
 }
 /*int CMSMonster :: MoveExecute ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist, bool fTestMove )
 {
@@ -964,7 +964,7 @@ void CMSMonster::ListenForSound()
 			{
 				//Create a temporary entity for the script so it can react to the sound properly
 				relationship_e RelationShip = CRaceManager::Relationship( m_Race, pSound->m_Race );
-				msstring_ref pszRelationShip = "neutral";
+				const char* pszRelationShip = "neutral";
 				if( RelationShip > RELATIONSHIP_NO ) pszRelationShip = "ally";
 				else if( RelationShip < RELATIONSHIP_NO ) pszRelationShip = "enemy";
 				SetScriptVar( "game.monster.lastsound.relationship", pszRelationShip );
@@ -1528,7 +1528,7 @@ void CMSMonster :: Jump( ) {
 //
 //   Say - Have the Monster say something...
 //   ���
-void CMSMonster::Say(msstring_ref Sound, float fDuration)
+void CMSMonster::Say(const char* Sound, float fDuration)
 {
 
 	//Thothie JUN2007b
@@ -1770,8 +1770,8 @@ void CMSMonster::HearPhrase(CMSMonster* pSpeaker, const char* phrase)
 		listenphrase_t& Phrase = m_Phrases[i];
 		for (int p = 0; p < Phrase.Phrases.size(); p++)
 		{
-			msstring_ref CheckPhrase = Phrase.Phrases[p];
-			msstring_ref SubPhrase = NULL;
+			const char* CheckPhrase = Phrase.Phrases[p];
+			const char* SubPhrase = NULL;
 			if (SubPhrase = strstr(cTemp1, CheckPhrase))
 			{
 				int Matched = 0;

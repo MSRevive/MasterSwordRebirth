@@ -37,7 +37,7 @@ public:
 	mslist<CSubStat> m_SubStats; //For regular stats, there are three - Speed, balance, power
 								 //For spellcasting, there is more
 								 //For parry, there is only one
-	string_i m_Name;
+	msstring m_Name;
 	bool bNeedsUpdate;
 	enum skilltype_e
 	{
@@ -46,7 +46,7 @@ public:
 	} m_Type; //Stat type
 
 	CStat() { bNeedsUpdate = true; }
-	CStat(msstring_ref Name, skilltype_e Type)
+	CStat(const char* Name, skilltype_e Type)
 	{
 		m_Name = Name;
 		m_Type = Type;

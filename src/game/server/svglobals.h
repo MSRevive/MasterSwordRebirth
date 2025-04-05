@@ -7,7 +7,7 @@ bool MSGlobalInit();
 void MSWorldSpawn();
 void MSGameThink();
 void MSGameEnd();
-void SendHUDMsgAll(msstring_ref Title, msstring_ref Text);
+void SendHUDMsgAll(const char* Title, const char* Text);
 
 #define SCRIPT_TYPES 4
 
@@ -15,7 +15,7 @@ class CSVGlobals
 {
 public:
 	static bool LogScripts;
-	static void LogScript(msstring_ref ScriptName, class CBaseEntity *pOwner, int includelevel, bool PrecacheOnly, bool Sucess);
+	static void LogScript(const char* ScriptName, class CBaseEntity *pOwner, int includelevel, bool PrecacheOnly, bool Sucess);
 	static void WriteScriptLog();
 
 	struct scriptlistitem_t

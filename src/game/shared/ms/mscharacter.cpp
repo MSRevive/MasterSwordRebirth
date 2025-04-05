@@ -44,7 +44,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 	msstring FileID;
 	//if( MSGlobals::IsLanGame ) pszFileID = LanID = msstring("LAN_") + STRING(pPlayer->DisplayName) + g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "ms_id" );
 	if (MSGlobals::IsLanGame)
-		FileID = msstring("LAN_") + g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
+		FileID = msstring("LAN_") + (const char*)g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
 	else
 		FileID = GETPLAYERAUTHID(pPlayer->edict());
 	msstring Prefix = FNShared::IsEnabled() ? "central_" : "";
@@ -228,7 +228,7 @@ jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &
 	return JoinType;
 }
 
-bool MSChar_Interface::HasVisited(msstring_ref MapName, msstringlist &VisitedMaps)
+bool MSChar_Interface::HasVisited(const char* MapName, msstringlist &VisitedMaps)
 {
 	for (int m = 0; m < VisitedMaps.size(); m++)
 		if (VisitedMaps[m] == MSGlobals::MapName)

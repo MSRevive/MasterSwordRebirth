@@ -30,7 +30,7 @@ void CGenericItem::RegisterArmor()
 
 	ArmorData->Protection = atof(GetFirstScriptVar("ARMOR_PROTECTION"));
 
-	msstring_ref ProtectionArea = GetFirstScriptVar("ARMOR_PROTECTION_AREA");
+	const char* ProtectionArea = GetFirstScriptVar("ARMOR_PROTECTION_AREA");
 	if (strstr(ProtectionArea, "head"))
 		ArmorData->m_ProtectionAreas.add(HBP_HEAD);
 	if (strstr(ProtectionArea, "chest"))
@@ -40,7 +40,7 @@ void CGenericItem::RegisterArmor()
 	if (strstr(ProtectionArea, "legs"))
 		ArmorData->m_ProtectionAreas.add(HBP_LEGS);
 
-	msstring_ref ReplaceBodyParts = GetFirstScriptVar("ARMOR_REPLACE_BODYPARTS");
+	const char* ReplaceBodyParts = GetFirstScriptVar("ARMOR_REPLACE_BODYPARTS");
 	if (strstr(ReplaceBodyParts, "head"))
 		m_WearModelPositions.add(HBP_HEAD);
 	if (strstr(ReplaceBodyParts, "chest"))
@@ -100,7 +100,7 @@ float CGenericItem::Armor_Protect(damage_t Damage)
 	if( !ShouldProtect ) return Damage.flDamage;
 	*/
 
-	m_ReturnData[0] = 0;
+	m_ReturnData.c_str()[0] = 0;
 
 	msstringlist Parameters;
 	Parameters.add(EntToString(Damage.pAttacker));
@@ -112,7 +112,7 @@ float CGenericItem::Armor_Protect(damage_t Damage)
 	float flDamage = Damage.flDamage * ((100 - ArmorData->Protection) * 0.01);
 
 	//Override damage with the damage set in script
-	if (m_ReturnData[0])
+	if (m_ReturnData.c_str()[0])
 		flDamage = atof(m_ReturnData);
 
 	if (Damage.pInflictor && Damage.pInflictor->GetScripted())

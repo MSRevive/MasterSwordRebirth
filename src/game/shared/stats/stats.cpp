@@ -229,7 +229,7 @@ void CStat::InitStatList(statlist& Stats)
 	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
 	for (int i = 0; i < STATS_TOTAL; i++)
 	{
-		msstring_ref Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
+		const char* Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
 		CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;
 		CStat& Stat = Stats[i];
 		Stat.m_Name = Name;

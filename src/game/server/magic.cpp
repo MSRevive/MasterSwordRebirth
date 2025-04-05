@@ -19,7 +19,7 @@ bool Magic::Prepare(const char *pszName, CBasePlayer *pPlayer)
 	{
 		if (Error == -2)
 		{
-			msstring_ref Hands = "a hand";
+			const char* Hands = "a hand";
 			if (pItem->m_PrefHand == BOTH_HANDS)
 				Hands = "both hands";
 

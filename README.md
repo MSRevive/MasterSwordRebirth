@@ -17,8 +17,7 @@ Currently the project relies on C++14, but we do plan on upgrading to a newer ve
 * `sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
 * `sudo apt update`
 * `sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libatomic1:i386 libgl1-mesa-dev:i386`
-* `./creatall`
-* `make -C build`
+* `./build-linux.sh`
 
 ## Troubleshooting
 Please see the [Valve Dev Wiki](https://developer.valvesoftware.com/wiki/Source_SDK_2013#Troubleshooting).

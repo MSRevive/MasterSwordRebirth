@@ -27,7 +27,7 @@
 unsigned int g_iNumBytesWritten = 0;
 int g_iUserMessageType = -1;
 
-void LogMemoryUsage(msstring_ref Title);
+void LogMemoryUsage(const char* Title);
 
 //Global Declarations.  Both Client & Server
 int MSGlobals::FXLimit = 20;
@@ -63,7 +63,7 @@ msstring MSGlobals::AbsGamePath;
 msstringlist MSGlobals::DefaultWeapons;
 msstringlist MSGlobals::DefaultFreeItems; //Free items that come with a new character
 int MSGlobals::DefaultGold = 10;		  //Starting gold
-string_i MSGlobals::DefaultSpawnBoxModel;
+msstring MSGlobals::DefaultSpawnBoxModel;
 
 IScripted *MSGlobals::GameScript = nullptr;
 char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else
@@ -212,7 +212,7 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 	int len = DllFileName.len();
 	for (int i = 0; i < len; i++)
 	{
-		if (DllFileName[len - 1 - i] == '\\' || DllFileName[len - 1 - i] == '/')
+		if (DllFileName.c_str()[len - 1 - i] == '\\' || DllFileName.c_str()[len - 1 - i] == '/')
 		{
 			AbsGamePath = DllFileName.substr(0, len - i - 1);
 			break;
@@ -407,7 +407,7 @@ Vector CBaseEntity::DetermineOrigin(msstring & vsOrigin)
 	if (pEntity) 
 		return pEntity->pev->origin;
 #else
-	int vEntIndx = vsOrigin[0] == '(' ? -1 : atoi(vsOrigin);
+	int vEntIndx = vsOrigin.c_str()[0] == '(' ? -1 : atoi(vsOrigin);
 	cl_entity_t * pEntity = vEntIndx > -1 ? gEngfuncs.GetEntityByIndex( vEntIndx ) : NULL;
 	if (pEntity) 
 		return pEntity->origin;
@@ -561,7 +561,7 @@ void Log(const char *szFmt, ...)
 	logfile << string << "\n";
 }
 
-void LogExtensive(msstring_ref Text)
+void LogExtensive(const char* Text)
 {
 #ifdef EXTENSIVE_LOGGING
 	LogCurrentLine(Text);
@@ -585,11 +585,11 @@ void DbgLog(char *szFmt, ...)
 #endif
 }
 
-msstring_ref EngineFunc::GetString(int string)
+const char* EngineFunc::GetString(int string)
 {
 	return STRING(string);
 }
-int EngineFunc::AllocString(msstring_ref String)
+int EngineFunc::AllocString(const char* String)
 {
 	return ALLOC_STRING(String);
 }
@@ -601,16 +601,16 @@ void EngineFunc::MakeVectors(const Vector &vecAngles, float *p_vForward, float *
 	AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
 #endif
 }
-float EngineFunc::CVAR_GetFloat(msstring_ref Cvar)
+float EngineFunc::CVAR_GetFloat(const char* Cvar)
 {
 	return CVAR_GET_FLOAT(Cvar);
 }
-msstring_ref EngineFunc::CVAR_GetString(msstring_ref Cvar)
+const char* EngineFunc::CVAR_GetString(const char* Cvar)
 {
 	return CVAR_GET_STRING(Cvar);
 }
 #ifndef VALVE_DLL
-cvar_s *EngineFunc::CVAR_Create(msstring_ref Cvar, msstring_ref Value, const int Flags)
+cvar_s *EngineFunc::CVAR_Create(const char* Cvar, const char* Value, const int Flags)
 {
 	return CVAR_CREATE(Cvar, Value, Flags);
 }
@@ -621,7 +621,7 @@ void EngineFunc::CVAR_Create(cvar_t &Cvar)
 }
 #endif
 
-void EngineFunc::CVAR_SetFloat(msstring_ref Cvar, float Value)
+void EngineFunc::CVAR_SetFloat(const char* Cvar, float Value)
 {
 #ifdef VALVE_DLL
 	CVAR_SET_FLOAT(Cvar, Value);
@@ -630,7 +630,7 @@ void EngineFunc::CVAR_SetFloat(msstring_ref Cvar, float Value)
 #endif
 }
 
-void EngineFunc::CVAR_SetString(msstring_ref Cvar, msstring_ref Value)
+void EngineFunc::CVAR_SetString(const char* Cvar, const char* Value)
 {
 #ifdef VALVE_DLL
 	CVAR_SET_STRING(Cvar, Value);
@@ -756,7 +756,7 @@ float EngineFunc::AngleDiff(float destAngle, float srcAngle)
 	return delta;
 }
 //Play sound independent of an entity
-void EngineFunc::Shared_PlaySound3D(msstring_ref Sound, float Volume, const Vector &Origin, float Attn)
+void EngineFunc::Shared_PlaySound3D(const char* Sound, float Volume, const Vector &Origin, float Attn)
 {
 #ifdef VALVE_DLL
 	//UTIL_EmitAmbientSound( ENT(0), Origin, Sound, Volume, ATTN_NORM, 0, 100 );
@@ -769,7 +769,7 @@ void EngineFunc::Shared_PlaySound3D(msstring_ref Sound, float Volume, const Vect
 
 //Thothie MAR2012 - As above, plus channel control
 //- prob didn't need a new command, but didn't want to risk conflicts
-void EngineFunc::Shared_PlaySound3D2(msstring_ref Sound, float Volume, const Vector &Origin, float Attn, int Chan, float sPitch)
+void EngineFunc::Shared_PlaySound3D2(const char* Sound, float Volume, const Vector &Origin, float Attn, int Chan, float sPitch)
 {
 #ifdef VALVE_DLL
 	//UTIL_EmitAmbientSound( ENT(0), Origin, Sound, Volume, ATTN_NORM, 0, 100 );

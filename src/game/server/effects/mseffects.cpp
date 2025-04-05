@@ -645,7 +645,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			Beam->SetEndAttachment(atoi(Params[NextParam++]));
 			//Thothie OCT2016_20 - storing all storable beam types
 			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
-			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam).c_str(), true);
 		}
 		else if (Type == 1)
 		{
@@ -653,7 +653,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			Beam->PointsInit(StringToVec(Params[StartPoint]), StringToVec(Params[NextParam++])); //Can't use NextParam++ twice
 			//Thothie OCT2016_20 - storing all storable beam types
 			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
-			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam).c_str(), true);
 		}
 		else if (Type == 2)
 		{
@@ -680,7 +680,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			}
 
 			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
-			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam).c_str(), true);
 
 			Beam->EntsInit(pTargetStart->entindex(), pTargetEnd->entindex());
 			Beam->SetStartAttachment(start_attach);
@@ -688,7 +688,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 			//Thothie OCT2016_20 - storing all storable beam types
 			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
-			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam).c_str(), true);
 		}
 		else if (Type == 3)
 		{
@@ -697,7 +697,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			Beam->PointsInit(StringToVec(Params[StartPoint]), StringToVec(Params[NextParam++])); //Can't use NextParam++ twice
 
 			m.pScriptedEnt->StoreEntity(Beam, ENT_LASTCREATED);
-			SetVar("G_LAST_BEAM_ID", EntToString(Beam), true);
+			SetVar("G_LAST_BEAM_ID", EntToString(Beam).c_str(), true);
 		}
 
 		Vector Color = StringToVec(Params[NextParam++]);
@@ -729,7 +729,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 			REQPARAMS(10);
 		}
 
-		msstring_ref ModelName = GetFullResourceName(Params[2]);
+		const char* ModelName = GetFullResourceName(Params[2]);
 		int Modelindex = MODEL_INDEX(ModelName);
 		if (!Modelindex)
 		{

@@ -117,12 +117,12 @@ public:
 	//virtual void SetActiveInfo( int iInput );
 	virtual void Initialize(void);
 
-	void AddInfoWin(msstring_ref Title, msstring_ref Text);
-	void AddHelpWin(msstring_ref Title, msstring_ref Text);
+	void AddInfoWin(const char* Title, const char* Text);
+	void AddHelpWin(const char* Title, const char* Text);
 	void UpdateInfoWindows(mslist<CInfoWindow*>& Windows);
 	void RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx);
-	void PrintEvent(Color color, msstring_ref Text);
-	void PrintSayText(Color color, msstring_ref Text);
+	void PrintEvent(Color color, const char* Text);
+	void PrintSayText(Color color, const char* Text);
 	void StepInput(hudscroll_e ScrollCmd);
 	bool KeyInput(int down, int keynum, const char* pszCurrentBinding);
 
@@ -236,7 +236,7 @@ CHUDPanel::~CHUDPanel()
 }
 
 // Create new Info window
-void CHUDPanel::AddInfoWin(msstring_ref Title, msstring_ref Text)
+void CHUDPanel::AddInfoWin(const char* Title, const char* Text)
 {
 	CInfoWindow& NewInfoWin = *new CInfoWindow(Title, Text, INFOWIN_DISPLAY_X, INFOWIN_DISPLAY_Y, this);
 
@@ -248,7 +248,7 @@ void CHUDPanel::AddInfoWin(msstring_ref Title, msstring_ref Text)
 
 // Create new Help window
 
-void CHUDPanel::AddHelpWin(msstring_ref Title, msstring_ref Text)
+void CHUDPanel::AddHelpWin(const char* Title, const char* Text)
 {
 	if (!EngineFunc::CVAR_GetFloat("ms_help"))
 		return;
@@ -275,13 +275,13 @@ void CHUDPanel::AddHelpWin(msstring_ref Title, msstring_ref Text)
 }
 
 // Write to the Event Console
-void CHUDPanel::PrintEvent(Color color, msstring_ref Text)
+void CHUDPanel::PrintEvent(Color color, const char* Text)
 {
 	m_Consoles[CON_EVENT]->Print(color, Text);
 }
 
 // Write to the Event Console
-void CHUDPanel::PrintSayText(Color color, msstring_ref Text)
+void CHUDPanel::PrintSayText(Color color, const char* Text)
 {
 	m_Consoles[CON_SAYTEXT]->Print(color, Text);
 }
@@ -513,14 +513,14 @@ bool QuickSlotConfirm()
 	return ((CHUDPanel*)gViewPort->m_pHUDPanel)->m_QuickSlot->ConfirmItem();
 }
 
-void dbgtxt(msstring_ref Text)
+void dbgtxt(const char* Text)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel)
 		return;
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_DebugText->setText(Text);
 }
 
-void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text)
+void HUD_ShowInfoWin(const char* Title, const char* Text)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
 		return;
@@ -528,7 +528,7 @@ void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text)
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddInfoWin(Title, Text);
 }
 
-void HUD_ShowHelpWin(msstring_ref Title, msstring_ref Text)
+void HUD_ShowHelpWin(const char* Title, const char* Text)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
 		return;
@@ -550,14 +550,14 @@ bool HUD_KeyInput(int down, int keynum, const char* pszCurrentBinding)
 	return ((CHUDPanel*)gViewPort->m_pHUDPanel)->KeyInput(down, keynum, pszCurrentBinding);
 }
 
-void HUD_PrintEvent(Color color, msstring_ref Text)
+void HUD_PrintEvent(Color color, const char* Text)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel)
 		return;
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->PrintEvent(color, Text);
 }
 
-void HUD_SayTextEvent(Color color, msstring_ref Text)
+void HUD_SayTextEvent(Color color, const char* Text)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel ||!ShowHUD())
 		return;
