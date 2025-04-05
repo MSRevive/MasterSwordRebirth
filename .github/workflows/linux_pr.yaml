@@ -6,7 +6,7 @@ on:
       - "dev"
 
 env:
-  BUILD_TYPE: release
+  BUILD_TYPE: Release
 
 jobs:
   build:
