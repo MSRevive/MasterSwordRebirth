@@ -26,4 +26,4 @@ gcc -v
 
 ./createall.sh -p $path -t $type
 
-cmake --build $path/build --config $type
+make -C $path/build
