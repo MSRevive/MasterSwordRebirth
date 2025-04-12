@@ -24,8 +24,8 @@ if (UNIX)
 	set(VCPKG_TARGET_TRIPLET x86-linux)
 
 	# TODO: ultra-hack - cmake seems to be failing to create a directory to do a test compile in, so it won't run, but pretending that the compiler is fine works
-	set(CMAKE_CXX_COMPILER_FORCED true)
-	include(${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+	# set(CMAKE_CXX_COMPILER_FORCED true)
+	# include(${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif()
 
 project(msr
