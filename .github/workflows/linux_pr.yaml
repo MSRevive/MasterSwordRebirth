@@ -26,6 +26,8 @@ jobs:
           sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config
 
       - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.28.3
 
       - name: Build
         run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
