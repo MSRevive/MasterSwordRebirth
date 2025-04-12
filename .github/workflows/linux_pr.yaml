@@ -26,4 +26,4 @@ jobs:
       - uses: lukka/get-cmake@latest
 
       - name: Build
-        run: ${{github.workspace}}/createall.sh
+        run: ${{github.workspace}}/createall.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}

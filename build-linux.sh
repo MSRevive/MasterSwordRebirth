@@ -18,6 +18,12 @@ while getopts "p:t:" opt; do
 	esac
 done
 
+echo "cmake --version"
+cmake --version
+
+echo "gcc -v"
+gcc -v
+
 ./createall.sh -p $path -t $type
 
 cmake --build $path/build --config $type
