@@ -6,7 +6,7 @@ on:
       - "dev"
 
 env:
-  BUILD_TYPE: release
+  BUILD_TYPE: Release
 
 jobs:
   build:
@@ -15,20 +15,19 @@ jobs:
     steps:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Install G++ Multilib & 32 bit OpenGL library
         run: |
           sudo dpkg --add-architecture i386
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libatomic1:i386 libgl1-mesa-dev:i386
+          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config
 
       - uses: lukka/get-cmake@latest
-      
-      - name: Configure CMake
-        run: > 
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
-          -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/cmake/LinuxToolchain.cmake --fresh
+        with:
+          cmakeVersion: 3.28.3
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
