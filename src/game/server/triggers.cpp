@@ -2295,6 +2295,15 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
 		return;
 
+	if (!(pev->spawnflags & SF_TRIGGER_PUSHABLES))
+	{
+		// only pushables allowed!
+		if (!FClassnameIs(pevToucher, "func_pushable"))
+		{
+			return;
+		}
+	}
+
 	if (!(pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
 	{ // no monsters allowed!
 		if (FBitSet(pevToucher->flags, FL_MONSTER))
