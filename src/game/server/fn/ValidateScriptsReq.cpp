@@ -1,5 +1,5 @@
 //
-// Validate pak0.pak
+// Validate scripts.pak
 //
 
 #include "rapidjson/document.h"

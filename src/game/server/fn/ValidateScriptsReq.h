@@ -1,5 +1,5 @@
 //
-// Validate pak0.pak
+// Validate scripts.pak
 //
 
 #ifndef HTTP_VALIDATE_SCRIPTS_REQUEST_H

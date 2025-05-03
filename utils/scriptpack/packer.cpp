@@ -102,7 +102,7 @@ void Packer::processScripts()
 			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 				
 				char createFile[MAX_PATH];
 				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
@@ -129,7 +129,7 @@ void Packer::processScripts()
 			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 
 				if (g_Verbose)
 					printf("Error checking script: %s\n", cRelativePath);
@@ -147,91 +147,72 @@ void Packer::processScripts()
 //packs the scripts.
 void Packer::packScripts()
 {
-	//we want to make sc.dll in via root dir.
+	//we want to make scripts.pak in via root dir.
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\sc.dll", m_OutDir);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir);
 	
 	struct stat info;
 	if(stat(cWriteFile, &info) == 0)
 		std::remove(cWriteFile);
-	
-	CGroupFile GroupFile;
-	try {
-		GroupFile.Open(cWriteFile);
-	}
-	catch(...)
+
+	FILE* fp = fopen(cWriteFile, "wb+");
+
+	if (fp == NULL)
 	{
 		printf("Failed to create %s\n", cWriteFile);
 		exit(-1);
 	}
-	
-	if (!GroupFile.WriteEntry("/dev/null", (byte*)"", (size_t)0))
-		printf("Failed to write first entry\n");
 
-	if(g_Release)
+	pakHeader_t Header;
+	Header.MagicNumber = 1262698832;
+	Header.DirectoryOffset = sizeof(pakHeader_t);
+	Header.DirectoryCount = m_CookedFiles.size();
+
+	msstringlist files;
+
+	if (g_Release)
 	{
-		CMemFile InFile;
-		size_t listSize = m_CookedFiles.size();
+		files = m_CookedFiles;
+	}
+	else
+	{
+		files = m_StoredFiles;
+	}
 
-		if (listSize > 0)
+	CMemFile InFile;
+	size_t listSize = files.size();
+
+	if (listSize > 0)
+	{
+		for (size_t i = 0; i < listSize; i++)
 		{
-			for (size_t i = 0; i < listSize; i++)
+			msstring &FullPath = files[i];
+			if (InFile.ReadFromFile(FullPath))
 			{
-				msstring &FullPath = m_CookedFiles[i];
-				if (InFile.ReadFromFile(FullPath))
-				{
-					char cRelativePath[MAX_PATH];
-					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
-					
-					if (g_Verbose == true)
-						printf("Packing file: %s\n", cRelativePath);
+				pakDirectory_t File;
+				strncpy(File.cFilename, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), sizeof(File.cFilename));
+				File.FileOffset = ftell(fp);
+				File.FileSize = InFile.m_BufferSize;
+
+				if (g_Verbose == true)
+					printf("Packing file: %s\n", File.cFilename);
+
+				size_t BytesWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
 		
-					if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-						printf("Failed to write entry: %s\n", cRelativePath);
-				}
+				if (BytesWritten != sizeof(pakDirectory_t))
+					printf("Failed to write entry: %s\n", File.cFilename);
 			}
-		}
-		else
-		{
-			std::cout << "ERROR: No cooked files found!" << std::endl;
-			exit(-1);
 		}
 	}
 	else
 	{
-		std::cout << "Release set to 0" << std::endl;
-
-		CMemFile InFile;
-		size_t listSize = m_StoredFiles.size();
-
-		if (listSize > 0)
-		{
-			for (size_t i = 0; i < listSize; i++)
-			{
-				msstring &FullPath = m_StoredFiles[i];
-				if (InFile.ReadFromFile(FullPath))
-				{
-					char cRelativePath[MAX_PATH];
-					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
-					
-					if (g_Verbose == true)
-						printf("Packing file: %s\n", cRelativePath);
-		
-					if (!GroupFile.WriteEntry(cRelativePath, InFile.m_Buffer, InFile.m_BufferSize))
-						printf("Failed to write entry: %s\n", cRelativePath);
-				}
-			}
-		}
-		else
-		{
-			std::cout << "ERROR: No stored files found!" << std::endl;
-			exit(-1);
-		}
+		std::cout << "ERROR: No files found!" << std::endl;
+		exit(-1);
 	}
 	
-	//close and flush GroupFile
-	GroupFile.Flush();
-	GroupFile.Close();
+	// close and flush
+	fflush(fp);
+	fclose(fp);
 }
 
 void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)

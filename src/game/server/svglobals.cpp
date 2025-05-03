@@ -159,7 +159,7 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.so");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
-	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "pak0.pak");
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "scripts.pak");
 #endif
 
 	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
