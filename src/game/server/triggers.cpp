@@ -2295,7 +2295,7 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
 		return;
 
-	if (!(pev->spawnflags & SF_TRIGGER_PUSHABLES))
+	if (pev->spawnflags & SF_TRIGGER_PUSHABLES)
 	{
 		// only pushables allowed!
 		if (!FClassnameIs(pevToucher, "func_pushable"))
