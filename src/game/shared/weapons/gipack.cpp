@@ -296,7 +296,7 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 		{
 			for (int i = 0; i < PackData->RejectItemsTypes.size(); i++)
 			{
-				if (strstr(pItem->ItemName, PackData->RejectItemsTypes[i]))
+				if (strstr(pItem->ItemName.c_str(), PackData->RejectItemsTypes[i]))
 				{
 					fAccepted = false;
 					break;
@@ -312,7 +312,7 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 	for (int i = 0; i < PackData->AcceptItemsTypes.size(); i++)
 	{
 		//fAccepted = false;
-		if (strstr(pItem->ItemName, PackData->AcceptItemsTypes[i]))
+		if (strstr(pItem->ItemName.c_str(), PackData->AcceptItemsTypes[i]))
 		{
 			fAccepted = true;
 			break;

@@ -18,12 +18,12 @@ inline RGBA MakeRGBA( uchar r, uchar g, uchar b, uchar a )
 class MSButton : public CommandButton
 {
 public:
-	MSButton::MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h ) :
+	MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h ) :
 		CommandButton( pszText, x, y, w, h, false )
 	{
 		MSInit( pParent, "", x, y, w, h );
 	}
-	MSButton::MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h, COLOR ArmedColor, COLOR UnArmedColor ) :
+	MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h, COLOR ArmedColor, COLOR UnArmedColor ) :
 		CommandButton( pszText, x, y, w, h, false )
 	{
 		MSInit( pParent, pszText, x, y, w, h );
@@ -121,19 +121,19 @@ public:
 		a_southeast,
 	};
 
-	MSLabel::MSLabel( Panel *pParent, const char *pszText, int x, int y, int w, int h, MSLabel::Alignment Alignment = a_west ) :
+	MSLabel( Panel *pParent, const char *pszText, int x, int y, int w, int h, MSLabel::Alignment Alignment = a_west ) :
 		Label( pszText, x, y, w, h )
 	{
 		MSInit( pParent, pszText, Alignment );
 		setSize( w, h );
 	}
-	MSLabel::MSLabel( Panel *pParent, const char *pszText, int x, int y, MSLabel::Alignment Alignment = a_west ) :
+	MSLabel( Panel *pParent, const char *pszText, int x, int y, MSLabel::Alignment Alignment = a_west ) :
 		Label( pszText, x, y )
 	{
 		MSInit( pParent, pszText, Alignment );
 	}
 
-	void MSInit( Panel *pParent, msstring_ref Text, MSLabel::Alignment Alignment )
+	void MSInit( Panel *pParent, const char* Text, MSLabel::Alignment Alignment )
 	{
 		setParent( pParent );
 		//setFont( gViewPort->GetSchemeManager()->getFont( gViewPort->GetSchemeManager()->getSchemeHandle( "Briefing Text" ) ) );
@@ -328,7 +328,7 @@ public:
 	bool m_TGAorSprite; //True = TGA, False = Sprite
 	bool m_ImageLoaded; //For delayed images... is it loaded yet?
 
-	CImageDelayed( ) : CImageLabel( "", 0, 0, 10, 10 ) { m_ImageName[0] = 0; m_ImageLoaded = false; }
+	CImageDelayed( ) : CImageLabel( "", 0, 0, 10, 10 ) { m_ImageName = ""; m_ImageLoaded = false; }
 	CImageDelayed( const char *pszImageName, bool TGAorSprite, bool Delayed, int x = 0, int y = 0, int wide = 10, int tall = 10 );
 
 	virtual int getImageTall();
@@ -484,7 +484,7 @@ public:
 		m_Line->setVisible( m_Active );
 	}
 
-	void AddLetter( msstring_ref Letter )
+	void AddLetter(const char* Letter )
 	{
 		int x, y;
 		m_MessageLabel->getPos( x, y );
@@ -518,7 +518,7 @@ public:
 	}
 
 	//Instantly update to this text
-	void SetText( msstring_ref Text )
+	void SetText(const char* Text )
 	{
 		m_Message = Text;
 		UpdateText( );

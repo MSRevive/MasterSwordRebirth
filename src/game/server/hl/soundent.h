@@ -78,7 +78,7 @@ public:
 	void Think(void);
 	void Initialize(void);
 
-	static void InsertSound(CBaseEntity *pSrcEntity, msstring_ref Type, const Vector &vecOrigin, int iVolume, float flDuration, float flDangerRadius);
+	static void InsertSound(CBaseEntity *pSrcEntity, const char* Type, const Vector &vecOrigin, int iVolume, float flDuration, float flDangerRadius);
 	static int InsertSound(int iType, const Vector &vecOrigin, int iVolume, float flDuration);
 	static void FreeSound(int iSound, int iPrevious);
 	static int ActiveList(void);					 // return the head of the active list

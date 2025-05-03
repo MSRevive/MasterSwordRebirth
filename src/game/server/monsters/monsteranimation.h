@@ -29,8 +29,8 @@ public:
 	virtual void Initialize(void *vData = NULL) { IsNewAnim = true; }
 	virtual void PostAnimate() { IsNewAnim = false; }
 	virtual void Animate() = 0;
-	virtual bool SetAnim(msstring_ref pszSequence);
-	virtual bool SetGaitAnim(msstring_ref pszSequence);
+	virtual bool SetAnim(const char* pszSequence);
+	virtual bool SetGaitAnim(const char* pszSequence);
 	virtual void GaitAnimate();
 	virtual MONSTER_ANIM GetID() { return m_Anim; }
 };

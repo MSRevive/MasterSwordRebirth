@@ -17,7 +17,7 @@ extern int g_iVisibleMouse;
 //	VGUI Global Class
 //
 
-bool VGUI::ShowMenu(msstring_ref Name)
+bool VGUI::ShowMenu(const char* Name)
 {
 	if (!gViewPort)
 		return false;
@@ -40,7 +40,7 @@ bool VGUI::ShowMenu(msstring_ref Name)
 
 	return false;
 }
-bool VGUI::ToggleMenuVisible(msstring_ref Name)
+bool VGUI::ToggleMenuVisible(const char* Name)
 {
 	if (!gViewPort)
 		return false;
@@ -74,7 +74,7 @@ bool VGUI::HideMenu(VGUI_MainPanel *pPanel)
 	return false;
 }
 
-VGUI_MainPanel *VGUI::FindPanel(msstring_ref Name)
+VGUI_MainPanel *VGUI::FindPanel(const char* Name)
 {
 	for (int i = 0; i < gViewPort->m_Menus.size(); i++)
 	{

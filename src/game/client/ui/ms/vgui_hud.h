@@ -9,10 +9,10 @@ class VGUI_MainPanel *CreateHUD_MenuInteract(class Panel *pParent);
 void VGUI_AddMenuOption();
 void VGUI_ShowMenuInteract();
 
-void HUD_ShowInfoWin(msstring_ref Title, msstring_ref Text);
-void HUD_ShowHelpWin(msstring_ref Title, msstring_ref Text);
-void HUD_PrintEvent(vgui::Color color, msstring_ref Text);
-void HUD_SayTextEvent(vgui::Color color, msstring_ref Text);
+void HUD_ShowInfoWin(const char* Title, const char* Text);
+void HUD_ShowHelpWin(const char* Title, const char* Text);
+void HUD_PrintEvent(vgui::Color color, const char* Text);
+void HUD_SayTextEvent(vgui::Color color, const char* Text);
 #ifdef TEAMFORTRESSVIEWPORT_H
 void HUD_StepInput(hudscroll_e ScrollCmd);
 #endif

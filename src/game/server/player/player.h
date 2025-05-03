@@ -321,7 +321,7 @@ struct companion_t
 {
 	bool Active;
 	entityinfo_t Entity;
-	string_i ScriptName;
+	msstring ScriptName;
 	msstringlist SaveVarName,
 		SaveVarValue;
 };
@@ -337,12 +337,12 @@ struct quest_t
 struct wearpos_t
 {
 	wearpos_t() {}
-	wearpos_t(string_i name, int maxamt)
+	wearpos_t(msstring name, int maxamt)
 	{
 		Name = name;
 		MaxAmt = maxamt;
 	}
-	string_i Name;
+	msstring Name;
 	union
 	{
 		int MaxAmt; //Max slots available (player)  or
@@ -530,11 +530,11 @@ public:
 	bool IsInAttackStance();
 	const char *DisplayName();
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
-	void Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStorageName, float flFeeRatio, entityinfo_t &Entity);
+	void Storage_Open(const char* pszDisplayName, const char* pszStorageName, float flFeeRatio, entityinfo_t &Entity);
 	void Storage_Send();
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
-	void SetQuest(bool SetData, msstring_ref Name, msstring_ref Data);
+	void SetQuest(bool SetData, const char* Name, const char* Data);
 	float TraceAttack(damage_t &Damage);
 	void SUB_Remove(void);
 	bool LoadCharacter(int Num); //Load a server-side character
@@ -548,11 +548,11 @@ public:
 	void CreateChar(createchar_t &CharData); //Create a character (Client or Server)
 	void Deactivate();
 	void SendInfoMsg(const char *msg, ...);
-	void SendHUDMsg(msstring_ref Title, msstring_ref Text);						   //HUD message - top left
-	void SendHelpMsg(msstring_ref Tipname, msstring_ref Title, msstring_ref Text); //Help tip message
-	void SendEventMsg(msstring_ref Text);										   //Event message - VGUI console
-	void SendEventMsg(COLOR &color, msstring_ref Text);							   //Event message - VGUI console
-	void SendEventMsg(hudevent_e HudEvent, msstring_ref Text);					   //Event message - VGUI console
+	void SendHUDMsg(const char* Title, const char* Text);						   //HUD message - top left
+	void SendHelpMsg(const char* Tipname, const char* Title, const char* Text); //Help tip message
+	void SendEventMsg(const char* Text);										   //Event message - VGUI console
+	void SendEventMsg(COLOR &color, const char* Text);							   //Event message - VGUI console
+	void SendEventMsg(hudevent_e HudEvent, const char* Text);					   //Event message - VGUI console
 	void SetModel(const char *Newmodel);
 	void SetModel(int Newmodel);
 	void SetTeam(CTeam *pNewTeam);
@@ -578,7 +578,7 @@ public:
 	void SendMenu(int iMenu, TCallbackMenu *cbmMenu = NULL);
 	void ParseMenu(int iMenu, int slot);
 	void InitHUD(); //Don't do anything relating to the client until now!!
-	void PlayerAction(msstring_ref Action);
+	void PlayerAction(const char* Action);
 	bool PrepareSpell(const char *pszName);
 	void TakeDamageEffect(CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, int bitsDamageType);
 	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = FALSE);
@@ -626,7 +626,7 @@ public:
 	void SetKeys();
 	void BlockButton(int Button);
 	storage_t *Storage_CreateAccount(storage_t &Storage);
-	storage_t *Storage_GetStorage(msstring_ref pszStorageName);
+	storage_t *Storage_GetStorage(const char* pszStorageName);
 	void InitialSpawn(void);
 	bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event);
 	const char *GetPartyName();

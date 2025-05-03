@@ -1275,7 +1275,7 @@ void CBasePlayer::Duck()
 {
 }
 
-void CBasePlayer::PlayerAction(msstring_ref Action)
+void CBasePlayer::PlayerAction(const char* Action)
 {
 	CScript *EventScript = NULL;
 
@@ -2345,7 +2345,7 @@ enum spawnspot_e
 	SS_FOUND,
 	SS_ALLFULL
 };
-spawnspot_e GetRandomSpawnSpot(msstring_ref Name, msstring_ref TransitionName, CBaseEntity *pPlayer, CBaseEntity **pFoundSpot)
+spawnspot_e GetRandomSpawnSpot(const char* Name, const char* TransitionName, CBaseEntity *pPlayer, CBaseEntity **pFoundSpot)
 {
 	mslist<CBaseEntity *> Spawnpoints;
 	if (!Name)
@@ -2811,7 +2811,9 @@ void CBasePlayer::Spawn(void)
 		if (!ClientInfo.fDisplayedGreeting)
 		{
 			msstring InfoString;
-			msstring_ref PKString = NULL, SaveString = NULL, CharString = NULL;
+			char* PKString = NULL;
+			const char* SaveString = NULL;
+			char* CharString = NULL;
 			if (MSGlobals::PKAllowedinTown)
 				PKString = "Player killing is allowed outside of town";
 			else if (MSGlobals::PKAllowed)
@@ -3244,11 +3246,11 @@ CBaseEntity *CBasePlayer::GiveNamedItem(const char *pszName)
 	if (!pszName || !pszName[0])
 		return NULL;
 
-	msstring_ref WeaponScript = NULL;
+	const char* WeaponScript = NULL;
 	for (int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
 		GenItem_t &GlobalItem = *CGenericItemMgr::Item(i);
-		if (strstr(GlobalItem.pItem->ItemName, pszName))
+		if (strstr(GlobalItem.pItem->ItemName.c_str(), pszName))
 		{
 			WeaponScript = GlobalItem.pItem->ItemName;
 			break;
@@ -3646,7 +3648,7 @@ void CBasePlayer::UpdateClientData(void)
 			//If he matches my lan address, I'll send that one.
 			//If otherwise send MS_IP
 			/*msstring PlayerInterface = g_NetCode.GetServerIPForPlayer( this );
-				PlayerInterface += msstring_ref(msstring(":") + (int)g_NetCode.s.FilePort);
+				PlayerInterface += const char*(msstring(":") + (int)g_NetCode.s.FilePort);
 				logfile << "Sending server IP to " << DisplayName() << ": " << PlayerInterface.c_str() << "\r\n";
 				WRITE_STRING( PlayerInterface.c_str() );*/
 			for (int i = 0; i < CLPERMENT_TOTAL; i++)
@@ -6262,7 +6264,7 @@ void CBasePlayer::Seen(CMSMonster *pMonster)
 	Parameters.add(EntToString(pMonster));
 	CallScriptEvent("game_seen", &Parameters);
 }
-void CBasePlayer::SetQuest(bool SetData, msstring_ref Name, msstring_ref Data)
+void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 {
 	//if( SetData ) ALERT( at_aiconsole, UTIL_VarArgs("Got Quest String1(%s) String2(%s) \n", Name, Data));
 
@@ -6650,7 +6652,7 @@ bool CBasePlayer::IsInAttackStance()
 
 	return false;
 }
-void CBasePlayer::Storage_Open(msstring_ref pszDisplayName, msstring_ref pszStorageName, float flFeeRatio, entityinfo_t &Entity)
+void CBasePlayer::Storage_Open(const char* pszDisplayName, const char* pszStorageName, float flFeeRatio, entityinfo_t &Entity)
 {
 	m_CurrentStorage.Active = true;
 	m_CurrentStorage.StorageName = pszStorageName;

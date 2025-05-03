@@ -617,7 +617,7 @@ void TempEntHitCallback(struct tempent_s *ent, struct pmtrace_s *ptr)
 	enddbg;
 }
 
-void CHudScript::Effects_UpdateTempEnt(msstring_ref EventName, msstringlist *Parameters)
+void CHudScript::Effects_UpdateTempEnt(const char* EventName, msstringlist *Parameters)
 {
 	startdbg;
 	//Update tempents
@@ -638,7 +638,7 @@ void CHudScript::Effects_UpdateTempEnt(msstring_ref EventName, msstringlist *Par
 	}
 	enddbg;
 }
-msstring_ref CScript::CLGetCurrentTempEntProp(msstring &Prop)
+const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)
 {
 	if (!g_CurrentTempEnt)
 		RETURN_NOTHING;
@@ -678,7 +678,7 @@ msstring_ref CScript::CLGetCurrentTempEntProp(msstring &Prop)
 
 //[begin] DEC2014_09 Thothie - beam_update
 //$getcl_beam(<idx|all>,<property>)
-msstring_ref CScript::CLGetBeamProp(int beamid, msstringlist &Params)
+const char* CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 {
 	bool found_beam = (beamid <= (int)m_Beams.size() - 1) ? true : false;
 	BEAM *pBeam = found_beam ? m_Beams[beamid] : NULL;
@@ -746,7 +746,7 @@ msstring_ref CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 }
 //[end] DEC2014_09 Thothie - beam_update
 
-msstring_ref CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
+const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 {
 	if (!pclEntity)
 		RETURN_NOTHING;
@@ -945,7 +945,7 @@ msstring_ref CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	RETURN_ZERO;
 }
 
-int CL_LoadModel(msstring_ref RelativePathname, model_s **ppModel = NULL)
+int CL_LoadModel(const char* RelativePathname, model_s **ppModel = NULL)
 {
 	int modelindex = 0;
 	msstring FullName = GetFullResourceName(RelativePathname);
@@ -1292,7 +1292,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int p = 1;
 			Vector StartPos = StringToVec(Params[p++]);
 			Vector EndPos = StringToVec(Params[p++]);
-			msstring_ref ModelName = Params[p++];
+			const char* ModelName = Params[p++];
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
@@ -1326,7 +1326,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			int p = 1;
 			int startIdx = (atoi(Params[p++]) & 0x0FFF) | ((atoi(Params[p++]) & 0xF) << 12);
 			int endIdx = (atoi(Params[p++]) & 0x0FFF) | ((atoi(Params[p++]) & 0xF) << 12);
-			msstring_ref ModelName = Params[p++];
+			const char* ModelName = Params[p++];
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
@@ -1357,7 +1357,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		{
 			int startIdx = (atoi(Params[1]) & 0x0FFF) | ((atoi(Params[2]) & 0xF) << 12);
 			Vector EndPos = StringToVec(Params[3]);
-			msstring_ref ModelName = Params[4];
+			const char* ModelName = Params[4];
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{
@@ -1388,7 +1388,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		{
 			int p = 1;
 			int startIdx = (atoi(Params[p++]) & 0x0FFF) | ((atoi(Params[p++]) & 0xF) << 12);
-			msstring_ref ModelName = Params[p++];
+			const char* ModelName = Params[p++];
 			int ModelIdx = CL_LoadModel(ModelName);
 			if (ModelIdx <= 0)
 			{

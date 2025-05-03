@@ -96,7 +96,7 @@ void cl_entity_s::SetBody(int Group, int Value)
 		}
 }
 
-bool cl_entity_s::PlayAnim(msstring_ref Anim)
+bool cl_entity_s::PlayAnim(const char* Anim)
 {
 	studiohdr_t *pstudiohdr;
 

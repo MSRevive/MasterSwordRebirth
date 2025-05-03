@@ -342,7 +342,7 @@ public:
 	CParticle();
 	void SetAngles(Vector Angles);
 	void BillBoard();
-	bool LoadTexture(msstring_ref Name);
+	bool LoadTexture(const char* Name);
 	void Render();
 
 	Vector m_Origin;

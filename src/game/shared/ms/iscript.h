@@ -11,7 +11,7 @@ class CBaseEntity;
 struct scriptvar_t
 {
 	scriptvar_t() {}
-	scriptvar_t(msstring_ref name, msstring_ref value)
+	scriptvar_t(const char* name, const char* value)
 	{
 		Name = name;
 		Value = value;
@@ -28,9 +28,9 @@ class IVariables
 public:
 	mslist<scriptvar_t> m_Variables; //Local script variables
 
-	scriptvar_t *FindVar(msstring_ref Name);
-	msstring_ref GetVar(msstring_ref Name);
-	scriptvar_t *SetVar(msstring_ref Name, msstring_ref Value);
+	scriptvar_t *FindVar(const char* Name);
+	const char* GetVar(const char* Name);
+	scriptvar_t *SetVar(const char* Name, const char* Value);
 	~IVariables()
 	{
 	}
@@ -43,12 +43,12 @@ struct scriptcmdname_t
 	{ 
 		m_Conditional = false; 
 	}
-	scriptcmdname_t(msstring_ref Name)
+	scriptcmdname_t(const char* Name)
 	{
 		m_Name = Name;
 		m_Conditional = false;
 	}
-	scriptcmdname_t(msstring_ref Name, bool Conditional)
+	scriptcmdname_t(const char* Name, bool Conditional)
 	{
 		m_Name = Name;
 		m_Conditional = Conditional;
@@ -64,7 +64,7 @@ typedef mslist<scriptcmdname_t> scriptcmdname_list;
 struct scriptcmd_t
 {
 	scriptcmd_t() { init(); }
-	scriptcmd_t(msstring_ref Name, bool Conditional = false)
+	scriptcmd_t(const char* Name, bool Conditional = false)
 	{
 		init();
 		m_Params.add(Name);
@@ -116,7 +116,7 @@ enum eventscope_e
 //The basic 'event' of a script.  Contains a list of commands
 struct SCRIPT_EVENT : public IVariables
 {
-	string_i Name;				   //Event name
+	msstring Name;				   //Event name
 	scriptcmd_list Commands;	   //The comamnds in this event
 	msstringlist *Params;		   //The parameters passed to this event (Can be NULL)
 	float fNextExecutionTime,	   //Next time to be run with repeatdelay
@@ -125,8 +125,8 @@ struct SCRIPT_EVENT : public IVariables
 	mslist<float> TimedExecutions; //Clock times in the future that this event should be executed
 	bool bFullStop;				   //MiB DEC2014_07 - "exitevent" command (exit.rtf)
 
-	void SetLocal(msstring_ref Name, msstring_ref Value) { SetVar(Name, Value); }
-	msstring_ref GetLocal(msstring_ref Name);
+	void SetLocal(const char* Name, const char* Value) { SetVar(Name, Value); }
+	const char* GetLocal(const char* Name);
 	~SCRIPT_EVENT()
 	{
 	}
@@ -145,24 +145,24 @@ struct scriptsendcmd_t
 class IScripted
 {
 public:
-	virtual CScript *Script_Add(string_i ScriptName, CBaseEntity *pEntity); //Adds a new script to the list
-	virtual CScript *Script_Get(string_i ScriptName);
+	virtual CScript *Script_Add(msstring ScriptName, CBaseEntity *pEntity); //Adds a new script to the list
+	virtual CScript *Script_Get(msstring ScriptName);
 	virtual void Script_Remove(int idx);																						   //Removes a script
 	virtual void Script_InitHUD(class CBasePlayer *pPlayer);																	   //Called when a player joins the game
 	virtual void Script_Setup() {}																								   //Ties m_pScriptCommands to a global somewhere
-	virtual int Script_ParseLine(CScript *Script, msstring_ref pszCommandLine, scriptcmd_t &Cmd);								   //Parses a line of script text and returns the command type
+	virtual int Script_ParseLine(CScript *Script, const char* pszCommandLine, scriptcmd_t &Cmd);								   //Parses a line of script text and returns the command type
 	virtual void RunScriptEvents(bool fOnlyRunNamedEvents = false);																   //Runs all events
 	virtual bool Script_ExecuteEvent(CScript *Script, SCRIPT_EVENT &Event, msstringlist *Parameters = NULL) { return false; }	   //Runs an event
 	virtual bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event) { return true; }										   //Set up variables for the event to use
 	virtual bool Script_ExecuteCmds(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_list &Cmds) { return false; }				   //Runs all commands in an event
 	virtual bool Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params) { return false; } //Runs a single command
-	virtual void CallScriptEventTimed(msstring_ref EventName, float Delay);														   //Call all events with name after a delay
-	virtual void CallScriptEvent(msstring_ref EventName, msstringlist *Parameters = NULL);										   //Call all events with name right now
+	virtual void CallScriptEventTimed(const char* EventName, float Delay);														   //Call all events with name after a delay
+	virtual void CallScriptEvent(const char* EventName, msstringlist *Parameters = NULL);										   //Call all events with name right now
 	virtual bool GetScriptVar(msstring &ParserName, msstringlist &Params, CScript *BaseScript, msstring &Return) { return false; } //Get script var from derived class
-	virtual msstring_ref GetFirstScriptVar(msstring_ref EventName);																   //Get script var from first script
-	virtual void SetScriptVar(msstring_ref VarName, msstring_ref Value);														   //Set var in first script
-	virtual void SetScriptVar(msstring_ref VarName, int iValue);																   //Set var in first script
-	virtual void SetScriptVar(msstring_ref VarName, float flValue);																   //Set var in first script
+	virtual const char* GetFirstScriptVar(const char* EventName);																   //Get script var from first script
+	virtual void SetScriptVar(const char* VarName, const char* Value);														   //Set var in first script
+	virtual void SetScriptVar(const char* VarName, int iValue);																   //Set var in first script
+	virtual void SetScriptVar(const char* VarName, float flValue);																   //Set var in first script
 	virtual void Deactivate();																									   //Deallocate resources
 	//virtual void Script_Use( CBaseEntity *pActivator, CBaseEntity *pCaller, int useType, float value );
 	

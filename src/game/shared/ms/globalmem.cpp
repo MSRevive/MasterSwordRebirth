@@ -161,7 +161,7 @@ void operator delete(void* ptr)
 	}
 }
 
-void LogMemoryUsage(msstring_ref Title)
+void LogMemoryUsage(const char* Title)
 {
 #ifdef TRACK_MEMORY
 	logfile << Logger::LOG_INFO << Title << "\n";

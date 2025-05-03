@@ -57,19 +57,19 @@ void Print(const char *szFmt, ...);
 #include "msdebug.h"
 
 #ifdef VECTOR_H
-	msstring_ref VecToString(const Vector& Vec, bool bAs2D = false); //Converts a vector to a string of format "(x,y,z)"
-	Vector StringToVec( msstring_ref String );			//Converts a string of the format "(x,y)" or "(x,y,z)" to a Vector class
-	Color4F StringToColor( msstring_ref String );		//Converts a string of the format "(r,g,b,a)" Color class
+	const char* VecToString(const Vector& Vec, bool bAs2D = false); //Converts a vector to a string of format "(x,y,z)"
+	Vector StringToVec(const char* String );			//Converts a string of the format "(x,y)" or "(x,y,z)" to a Vector class
+	Color4F StringToColor(const char* String );		//Converts a string of the format "(r,g,b,a)" Color class
 	Vector GetRelativePos( Vector &Ang, Vector &Dir );	//Uses Dir.x for right-left, Dir.y for forward-back, and Dir.z as up-down, relative to the angle
 #endif
 
 #define ENT_PREFIX "PentP"
 msstring EntToString( class CBaseEntity *pEntity );			//Converts an entity to a string of format "PentP(idx,addr)"
-CBaseEntity *StringToEnt( msstring_ref EntString);			//Converts an string of format "PentP(idx,addr)" to an entity
+CBaseEntity *StringToEnt(const char* EntString);			//Converts an string of format "PentP(idx,addr)" to an entity
 
 void WRITE_FLOAT( float Float );
-char *GetFullResourceName( msstring_ref PartialName );	//Adds models/ or sprites/ to a model or sprite filename
-void dbgtxt( msstring_ref Text );
+char *GetFullResourceName(const char* PartialName );	//Adds models/ or sprites/ to a model or sprite filename
+void dbgtxt(const char* Text );
 
 #ifdef CONST_H
 	//Data used in the client item delta comparison
@@ -80,7 +80,7 @@ void dbgtxt( msstring_ref Text );
 		genericitem_t( class CGenericItem *pItem );
 		operator class CGenericItem *( );
 		ulong ID;
-		string_i Name;						//Itemname
+		msstring Name;						//Itemname
 		ulong Properties;
 		unsigned short Quantity;
 		unsigned short Quality, MaxQuality;

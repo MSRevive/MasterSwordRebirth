@@ -319,7 +319,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 1)
 		{
-			SetScriptVar("IMMUNE_PUSH", Params[0]);
+			SetScriptVar("IMMUNE_PUSH", Params[0].c_str());
 			if (atoi(Params[0]))
 				m_nopush = true;
 			else
@@ -401,7 +401,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			float oldxp = atof(GetFirstScriptVar("NPC_ORIG_EXP"));
 			if (oldxp == 0)
 			{
-				GetScripted()->SetScriptVar("NPC_ORIG_EXP", Params[0]); //iffy
+				GetScripted()->SetScriptVar("NPC_ORIG_EXP", Params[0].c_str()); //iffy
 			}
 			//[end]
 
@@ -584,7 +584,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		{
 			/*int iGiveFlags = (1<<1);
 
-			msstring_ref Location = Params[0];
+			const char* Location = Params[0];
 			if( !_stricmp(Location,"use") )
 				SetBits( iGiveFlags, (1<<0) );
 			else if( !_stricmp(Location,"hide") )
@@ -592,7 +592,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			else if( !_stricmp(Location,"hand") )
 				SetBits( iGiveFlags, (1<<2) );
 
-			msstring_ref ItemName = Params[0];*/
+			const char* ItemName = Params[0];*/
 
 			CGenericItem *NewItem = NewGenericItem(Params[0]);
 			if (NewItem)
@@ -760,8 +760,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			/*
 			int iParam = 1, iQuantity = 1, iCost = 100, iBundleAmt = 0;
 			float flSellRatio = 0.25;
-			msstring_ref StoreName = Params[0];
-			msstring_ref ItemName = Params[1];
+			const char* StoreName = Params[0];
+			const char* ItemName = Params[1];
 			if( Params.size() >= 3 ) iQuantity = atoi(Params[2]);
 			if( Params.size() >= 4 ) iCost = atoi(Params[3]);		
 			if( Params.size() >= 5 ) flSellRatio = atof(Params[4]);		
@@ -771,8 +771,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			//MIB JAN2010_16 - cap resell values
 			int iParam = 1, iQuantity = 1, iCost = 100, iBundleAmt = 0;
 			float flSellRatio = 0.25;
-			msstring_ref StoreName = Params[0];
-			msstring_ref ItemName = Params[1];
+			const char* StoreName = Params[0];
+			const char* ItemName = Params[1];
 			if (Params.size() >= 3)
 				iQuantity = atoi(Params[2]);
 			if (Params.size() >= 4)
@@ -832,10 +832,10 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		if (Params.size() >= 3)
 		{
 			//old style, 3 parameter... target is assumed
-			msstring_ref StoreName = Params[0];
+			const char* StoreName = Params[0];
 			CMSMonster *pDestMonster = NULL;
-			msstring_ref BuyFlags = Params[1];
-			msstring_ref CallBack = Params[2];
+			const char* BuyFlags = Params[1];
+			const char* CallBack = Params[2];
 
 			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
 			CBasePlayer *pPlayer = pTarget ? (pTarget->IsPlayer() ? (CBasePlayer *)pTarget : NULL) : NULL;
@@ -1123,7 +1123,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			if (Params.size() >= 5) //Thothie
 			{
-				if (Params[0][0] != '(')
+				if (Params[0].c_str()[0] != '(')
 					Damage.sDamageType = Params[4];
 			}
 
@@ -1142,7 +1142,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			else
 			{
 				//FEB2010_28 Thothie - Add monster width to range if non-AOE/Direct
-				if (Params[0][0] != '(')
+				if (Params[0].c_str()[0] != '(')
 				{
 					float flMonsterDamageRange = atof(Params[1]);
 					CMSMonster *pMonsterMe = IsMSMonster() ? (CMSMonster *)this : NULL;
@@ -1171,7 +1171,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			Vector vForward;
 			CBaseEntity *pTargetEnt = NULL;
-			if (Params[0][0] == '(')
+			if (Params[0].c_str()[0] == '(')
 			{
 				//Radius damage
 				Damage.flAOERange = Damage.flDamageRange;
@@ -1248,7 +1248,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool fLocation = false;
 			Vector Location;
 
-			if (Params[2][0] == '(')
+			if (Params[2].c_str()[0] == '(')
 			{
 				Location = StringToVec(Params[2]); //Specified origin to shoot at
 				fLocation = true;				   //MIB JUL2010_23 - fix tossing at specific location - Dogg forgot to set this
@@ -1321,7 +1321,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				if (!msInputStatName.contains("."))
 				{
-					CStat *pStat = FindStat(Params[0]);
+					CStat *pStat = FindStat(Params[0].c_str());
 					if (pStat)
 					{
 						int NextParm = 1;
@@ -1341,7 +1341,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				{
 					//Thothie DEC2007a - more detailed stat settings (can't set some magic skills under old)
 					msstring parse_stat = msInputStatName.thru_char(".");
-					CStat *pStat = FindStat(parse_stat);
+					CStat *pStat = FindStat(parse_stat.c_str());
 					if (pStat)
 					{
 						msstring PropName = msInputStatName.substr(parse_stat.len() + 1);
@@ -1396,7 +1396,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 3)
 		{
-			msstring_ref StorageName = Params[1];
+			const char* StorageName = Params[1];
 			CBaseEntity *pTarget = RetrieveEntity(Params[2]);
 			if (pTarget && pTarget->IsPlayer())
 			{
@@ -1488,8 +1488,8 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 1)
 		{
-			msstring_ref pszAnimType = Params[0];
-			msstring_ref pszAnimName = NULL;
+			const char* pszAnimType = Params[0];
+			const char* pszAnimName = NULL;
 
 			if (Params.size() >= 2)
 			{
@@ -1617,7 +1617,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				dest_t NewDest;
 				clrmem(NewDest);
 
-				if (Params[0][0] == '(')
+				if (Params[0].c_str()[0] == '(')
 				{
 					NewDest.Origin = StringToVec(Params[0]);
 					NewDest.Proximity = atof(Params[1]);
@@ -1892,7 +1892,7 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 	return false; //IScripted::GetScriptVar( pszText, BaseScript );
 }
 
-int CMSMonster::Script_ParseLine(CScript *Script, msstring_ref pszCommandLine, scriptcmd_t &Cmd)
+int CMSMonster::Script_ParseLine(CScript *Script, const char* pszCommandLine, scriptcmd_t &Cmd)
 {
 	msstring CmdName = msstring(pszCommandLine).thru_char(SKIP_STR);
 	if (!_stricmp(CmdName.c_str(), "see"))
@@ -1904,7 +1904,7 @@ int CMSMonster::Script_ParseLine(CScript *Script, msstring_ref pszCommandLine, s
 	return IScripted::Script_ParseLine(Script, pszCommandLine, Cmd);
 }
 
-msstring_ref CMSMonster::GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params)
+const char* CMSMonster::GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params)
 {
 	if (!pTarget)
 		pTarget = this;

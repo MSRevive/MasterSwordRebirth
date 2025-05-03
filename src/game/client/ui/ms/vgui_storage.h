@@ -21,6 +21,6 @@ public:
 	bool GearItemClicked(ulong ID);
 	bool checkValid(containeritem_t &Item); //MiB Feb2008a
 
-	static msstring_ref Text_Subtitle_Storage;
-	static msstring_ref Text_Subtitle_Inventory;
+	static const char* Text_Subtitle_Storage;
+	static const char* Text_Subtitle_Inventory;
 };

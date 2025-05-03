@@ -288,7 +288,7 @@ namespace PrimaryHUD
 					mCurChargeLevel = vCurChargeLevel;
 
 					if (vDisplayChargeLevel)
-						ChargeLbl.setText(msstring() + vDisplayChargeLevel);
+						ChargeLbl.setText(msstring() + std::to_string(vDisplayChargeLevel).c_str());
 					else
 						ChargeLbl.setText(" ");
 
