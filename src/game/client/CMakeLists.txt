@@ -405,6 +405,8 @@ set(VGUI
 	"ui/vgui_teamfortressviewport.cpp"
 	"ui/vgui_teamfortressviewport.h"
 	"ui/vgui_voice_tweakdlg.cpp"
+	"vgui2/CClientVGUI.cpp"
+	"vgui2/CClientVGUI.h"
 	"../../../utils/vgui/include/VGUI_Panel.h"
 )
 source_group("VGUI" FILES ${VGUI})
