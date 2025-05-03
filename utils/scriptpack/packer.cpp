@@ -29,15 +29,6 @@ Packer::Packer(char *wDir, char *rDir, char *oDir)
 			printf("Failed to create %s\n", m_CookedDir);
 			exit(-1);
 		}
-		/*
-		try {
-			CreateDirectory(m_CookedDir, NULL);
-			
-		}catch(...)
-		{
-			printf("Failed to create %s\n", m_CookedDir);
-			exit(-1);
-		}*/
 	}
 }
 
@@ -163,11 +154,6 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	pakHeader_t Header;
-	Header.MagicNumber = 1262698832;
-	Header.DirectoryOffset = sizeof(pakHeader_t);
-	Header.DirectoryCount = m_CookedFiles.size();
-
 	msstringlist files;
 
 	if (g_Release)
@@ -178,6 +164,13 @@ void Packer::packScripts()
 	{
 		files = m_StoredFiles;
 	}
+
+	pakHeader_t Header;
+	Header.MagicNumber = 1262698832;
+	Header.DirectoryOffset = sizeof(pakHeader_t);
+	Header.DirectoryCount = files.size();
+
+	fwrite(&Header, sizeof(pakHeader_t), 1, fp);
 
 	CMemFile InFile;
 	size_t listSize = files.size();
@@ -197,9 +190,9 @@ void Packer::packScripts()
 				if (g_Verbose == true)
 					printf("Packing file: %s\n", File.cFilename);
 
-				size_t BytesWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
+				size_t ObjectsWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
 		
-				if (BytesWritten != sizeof(pakDirectory_t))
+				if (ObjectsWritten != 1)
 					printf("Failed to write entry: %s\n", File.cFilename);
 			}
 		}
