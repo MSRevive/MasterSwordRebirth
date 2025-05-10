@@ -25,13 +25,8 @@ if (UNIX)
 
 	# TODO: ultra-hack - cmake seems to be failing to create a directory to do a test compile in, so it won't run, but pretending that the compiler is fine works
 	set(CMAKE_CXX_COMPILER_FORCED true)
-	include(${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+	# include(${CMAKE_CURRENT_LIST_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif()
-
-# Here we include our custom triplets for VCPKG
-# The reason for the custom triplets is if we want to mix static and dynamic libraries.
-# Currently we are using static libraries for everything.
-set(VCPKG_OVERLAY_TRIPLETS ${CMAKE_SOURCE_DIR}/vcpkg_config/triplets)
 
 project(msr
 	VERSION 1.0.0
