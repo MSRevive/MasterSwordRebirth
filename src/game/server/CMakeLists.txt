@@ -1,3 +1,7 @@
+add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
+
+set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
+
 target_include_directories(zlib INTERFACE ${BASEDIR}/thirdparty/libcurl)
 target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/libcurl/curl)
 
@@ -5,13 +9,9 @@ if (WIN32)
 	set_target_properties(zlib PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/zlib.lib")
 	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
 else()
-	set_target_properties(zlib PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/zlib.so")
-	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libcurl.so")
+	set_target_properties(server PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/zlib.so")
+	set_target_properties(server PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libcurl.so")
 endif()
-
-add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
-
-set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
 set_common_properties(server)
 
