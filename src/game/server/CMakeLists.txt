@@ -1,4 +1,6 @@
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
+add_library(zlib SHARED IMPORTED)
+add_library(libcurl SHARED IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
