@@ -4,7 +4,7 @@ if (MSVC)
 	set(CMAKE_SYSTEM_VERSION 10.0)
 endif()
 
-project(msr LANGUAGES C CXX)
+project(utils LANGUAGES C CXX)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
@@ -90,6 +90,7 @@ endfunction(set_common_properties)
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 
+add_subdirectory(apidoc)
 # TODO: charimport is quite broken
 # add_subdirectory(charimport)
 add_subdirectory(maphash)
