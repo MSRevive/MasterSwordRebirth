@@ -11,7 +11,7 @@ if (WIN32)
 	set_target_properties(zlib PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/zlib.lib")
 	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/libcurl.lib")
 else()
-	set_target_properties(zlib PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/zlib.a")
+	set_target_properties(zlib PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libz.a")
 	set_target_properties(libcurl PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libcurl.a")
 endif()
 
