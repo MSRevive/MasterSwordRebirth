@@ -1,19 +1,23 @@
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
-add_library(zlib STATIC IMPORTED)
+#add_library(zlib STATIC IMPORTED)
 add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
-target_include_directories(zlib INTERFACE ${BASEDIR}/thirdparty/libcurl)
+#target_include_directories(zlib INTERFACE ${BASEDIR}/thirdparty/libcurl)
 target_include_directories(libcurl INTERFACE ${BASEDIR}/thirdparty/libcurl/curl)
 
 if (WIN32)
-	set_target_properties(zlib PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/zlib.lib")
+	#set_target_properties(zlib PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/zlib.lib")
 	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/libcurl.lib")
 else()
-	set_target_properties(zlib PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libz.a")
+	#set_target_properties(zlib PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libz.a")
 	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libcurl.a")
 endif()
+
+set(ZLIB_USE_STATIC_LIBS "ON")
+set(ZLIB_ROOT "${BASEDIR}/lib/public/zlib")
+find_package(ZLIB REQUIRED)
 
 set_common_properties(server)
 
@@ -22,7 +26,7 @@ target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Wldap32>
 	$<$<PLATFORM_ID:Windows>:Crypt32>
 	$<$<PLATFORM_ID:Windows>:Normaliz>
-	zlib
+	ZLIB:ZLIB
 	libcurl)
 
 # Include directories
@@ -49,7 +53,8 @@ target_include_directories(server PRIVATE
 target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	VALVE_DLL
-	CURL_STATICLIB)
+	CURL_STATICLIB
+	HTTP_ONLY)
 
 if (UNIX)
 	target_compile_definitions(server PRIVATE
