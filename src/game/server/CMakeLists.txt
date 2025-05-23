@@ -19,9 +19,6 @@ else()
 		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
 endif()
 
-# set(CURL_USE_STATIC_LIBS true)
-# find_package(CURL REQUIRED PATHS "${BASEDIR}/share")
-
 set_common_properties(server)
 
 target_link_libraries(server PRIVATE
