@@ -15,7 +15,7 @@ if (WIN32)
 		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
 else()
 	set_target_properties(libcurl PROPERTIES 
-		IMPORTED_LOCATION "${BASEDIR}/lib/public/curl/libcurl.a"
+		IMPORTED_LOCATION "${BASEDIR}/lib/curl/libcurl.a"
 		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
 endif()
 
