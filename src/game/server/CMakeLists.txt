@@ -1,19 +1,26 @@
+set(ZLIB_USE_STATIC_LIBS "ON")
+set(ZLIB_ROOT "${BASEDIR}/lib/zlib")
+find_package(ZLIB REQUIRED)
+
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
-target_include_directories(libcurl INTERFACE ${BASEDIR}/lib/public/curl/include)
+target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/curl/include")
 
 if (WIN32)
-	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/curl/libcurl.lib")
+	set_target_properties(libcurl PROPERTIES 
+		IMPORTED_LOCATION "${BASEDIR}/lib/curl/libcurl.lib"
+		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
 else()
-	set_target_properties(libcurl PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/curl/libcurl.a")
+	set_target_properties(libcurl PROPERTIES 
+		IMPORTED_LOCATION "${BASEDIR}/lib/public/curl/libcurl.a"
+		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
 endif()
 
-set(ZLIB_USE_STATIC_LIBS "ON")
-set(ZLIB_ROOT "${BASEDIR}/lib/public/zlib")
-find_package(ZLIB REQUIRED)
+# set(CURL_USE_STATIC_LIBS true)
+# find_package(CURL REQUIRED PATHS "${BASEDIR}/share")
 
 set_common_properties(server)
 
