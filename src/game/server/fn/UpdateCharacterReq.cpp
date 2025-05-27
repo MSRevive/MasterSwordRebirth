@@ -12,6 +12,7 @@
 UpdateCharacterRequest::UpdateCharacterRequest(ID64 steamID, ID64 slot, const char* url, const char* body, size_t bodySize) :
 	HTTPRequest(HTTPMethod::PUT, url, body, bodySize, steamID, slot)
 {
+	m_bNoCallback = true;
 }
 
 void UpdateCharacterRequest::OnResponse(int iRespCode)

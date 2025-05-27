@@ -26,7 +26,7 @@ static char g_szBaseUrl[REQUEST_URL_SIZE];
 HTTPRequest::HTTPRequest(HTTPMethod method, const char* url, const char* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
 	m_eHTTPMethod = method;
-	m_iRequestState = RequestState::REQUEST_QUEUED;
+	m_iRequestState = RequestState::QUEUED;
 	_snprintf(m_sPchAPIUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
 
 	m_sRequestBody = nullptr;
@@ -136,7 +136,7 @@ bool HTTPRequest::SendRequest()
 	if (m_Handle) 
 		return false;
 		
-	m_iRequestState = RequestState::REQUEST_EXECUTED;
+	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
 	SetupRequest();
 	
@@ -161,7 +161,7 @@ bool HTTPRequest::AsyncSendRequest()
 	if (m_Handle)
 		return false;
 
-	m_iRequestState = RequestState::REQUEST_EXECUTED;
+	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
 	SetupRequest();
 
@@ -188,7 +188,7 @@ void HTTPRequest::AsyncSendRequestDiscard()
 	if (m_Handle)
 		return;
 
-	m_iRequestState = RequestState::REQUEST_EXECUTED;
+	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
 	SetupRequest();
 
@@ -225,16 +225,16 @@ size_t HTTPRequest::WriteCallback(void* ptr, size_t size, size_t nmemb)
 
 void HTTPRequest::ResponseCallback(int httpCode)
 {
-	if (m_bSkipCallback)
+	if (m_bNoCallback)
 	{
-		m_iRequestState = RequestState::REQUEST_FINISHED;
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 	
 	if (httpCode == 0)
 	{
 		FNShared::Print("Request Failed. %s, '%s'\n", GetName(), g_szBaseUrl);
-		m_iRequestState = RequestState::REQUEST_FINISHED;
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
@@ -244,20 +244,20 @@ void HTTPRequest::ResponseCallback(int httpCode)
 		{
 			FNShared::Print("FN Authorization failed! %s\n", GetName());
 			OnResponse(httpCode);
-			m_iRequestState = RequestState::REQUEST_FINISHED;
+			m_iRequestState = RequestState::FINISHED;
 			return;
 		}
 
 		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), httpCode);
 		OnResponse(httpCode);
-		m_iRequestState = RequestState::REQUEST_FINISHED;
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
 	if (httpCode == 204)
 	{
 		OnResponse(httpCode);
-		m_iRequestState = RequestState::REQUEST_FINISHED;
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
@@ -265,14 +265,14 @@ void HTTPRequest::ResponseCallback(int httpCode)
 	{
 		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
 		OnResponse(httpCode);
-		m_iRequestState = RequestState::REQUEST_FINISHED;
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
 	//JSONDocument* m_JSONResponse = ParseJSON(m_sResponseBody.c_str());
 	OnResponse();
 	
-	m_iRequestState = RequestState::REQUEST_FINISHED;
+	m_iRequestState = RequestState::FINISHED;
 }
 
 JSONDocument HTTPRequest::ParseJSON(const char* data)

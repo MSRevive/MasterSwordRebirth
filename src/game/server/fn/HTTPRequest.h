@@ -28,6 +28,13 @@ public:
 		PUT
 	};
 
+	enum RequestState
+	{
+		QUEUED = 0,
+		EXECUTED,
+		FINISHED,
+	};
+
 	HTTPRequest(HTTPMethod method, const char* url, const char* body = nullptr, size_t bodySize = 0, ID64 steamID64 = 0ULL, ID64 slot = 0ULL);
 	virtual ~HTTPRequest();
 
@@ -42,15 +49,8 @@ public:
 	static JSONDocument ParseJSON(const char* data);
 
 	int m_iRequestState;
-	bool m_bSkipCallback = false;
+	bool m_bNoCallback = false;
 	std::string m_sResponseBody;
-
-	enum RequestState
-	{
-		REQUEST_QUEUED = 0,
-		REQUEST_EXECUTED,
-		REQUEST_FINISHED,
-	};
 
 protected: // Expose data to inheriting classes.
 	char m_sPchAPIUrl[REQUEST_URL_SIZE];
