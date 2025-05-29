@@ -102,7 +102,7 @@ void Packer::processScripts()
 			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 				
 				char createFile[MAX_PATH];
 				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
@@ -129,7 +129,7 @@ void Packer::processScripts()
 			if(InFile.ReadFromFile(FullPath))
 			{
 				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 
 				if (g_Verbose)
 					printf("Error checking script: %s\n", cRelativePath);
@@ -181,7 +181,7 @@ void Packer::packScripts()
 				if (InFile.ReadFromFile(FullPath))
 				{
 					char cRelativePath[MAX_PATH];
-					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+					strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 					
 					if (g_Verbose == true)
 						printf("Packing file: %s\n", cRelativePath);
@@ -212,7 +212,7 @@ void Packer::packScripts()
 				if (InFile.ReadFromFile(FullPath))
 				{
 					char cRelativePath[MAX_PATH];
-					strncpy(cRelativePath, &FullPath[strlen(m_WorkDir) + 1], MAX_PATH);
+					strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
 					
 					if (g_Verbose == true)
 						printf("Packing file: %s\n", cRelativePath);

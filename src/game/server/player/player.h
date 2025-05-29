@@ -18,7 +18,9 @@
 #include "monsters/msmonster.h"
 #include "sharedutil.h"
 #include "monsters/bodyparts/bodyparts_human.h"
+#ifndef _MSR_UTILS
 #include "pm_materials.h"
+#endif // _MSR_UTILS
 #include "mscharacter.h"
 
 #define MAX_ID_RANGE 2048
