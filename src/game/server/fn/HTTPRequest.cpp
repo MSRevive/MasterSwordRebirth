@@ -161,7 +161,6 @@ bool HTTPRequest::AsyncSendRequest()
 	if (m_Handle)
 		return false;
 
-	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
 	SetupRequest();
 
@@ -188,7 +187,6 @@ void HTTPRequest::AsyncSendRequestDiscard()
 	if (m_Handle)
 		return;
 
-	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
 	SetupRequest();
 
@@ -206,6 +204,7 @@ bool HTTPRequest::PerformRequest()
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
 	CURLcode result = curl_easy_perform(m_Handle);
+	m_iRequestState = RequestState::EXECUTED;
 	if (result == CURLE_OK)
 		return true;
 	else
