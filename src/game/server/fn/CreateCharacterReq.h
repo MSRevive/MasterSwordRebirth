@@ -10,8 +10,8 @@
 class CreateCharacterRequest : public HTTPRequest
 {
 public:
-	CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize);
-	void OnResponse(bool bSuccessful, int iRespCode);
+	CreateCharacterRequest(ID64 steamID, ID64 slot, const char* url, const char* body, size_t bodySize);
+	void OnResponse(int iRespCode);
 	const char* GetName() { return "CreateCharacterRequest"; }
 
 private:

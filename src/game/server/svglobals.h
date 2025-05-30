@@ -6,7 +6,6 @@
 bool MSGlobalInit();
 void MSWorldSpawn();
 void MSGameThink();
-void MSConnectFN();
 void MSGameEnd();
 void SendHUDMsgAll(const char* Title, const char* Text);
 

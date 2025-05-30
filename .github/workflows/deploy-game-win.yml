@@ -13,8 +13,17 @@ jobs:
     steps:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - uses: lukka/get-cmake@latest
+
+      - name: Restore artifacts, setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{env.VCPKG_ROOT}}'
+          runVcpkgInstall: false
+          vcpkgJsonIgnores: "['**/vcpkg/**', '**/vcpkg_config/**', '**/utils/**']"
 
       - name: Configure CMake
         run: > 
