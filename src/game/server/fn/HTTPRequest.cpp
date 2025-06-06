@@ -2,6 +2,14 @@
 // Steam HTTP Request Handler Class
 //
 
+#ifndef _WIN32
+#define CURL_PULL_SYS_TYPES_H
+#define CURL_PULL_STDINT_H
+#define CURL_PULL_INTTYPES_H
+#define HAVE_SYS_SOCKET_H
+#endif
+
+#include <future>
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 
@@ -11,53 +19,31 @@
 #include "msdllheaders.h"
 #include "global.h"
 #include "player.h"
-#include "SteamServerHelper.h"
 #include "FNSharedDefs.h"
-#include <string>
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
-JSONDocument* ParseJSON(const char* data, size_t length)
+HTTPRequest::HTTPRequest(HTTPMethod method, const char* url, const char* body, size_t bodySize, ID64 steamID64, ID64 slot)
 {
-	if (!(data && data[0]))
-		return nullptr;
+	m_eHTTPMethod = method;
+	m_iRequestState = RequestState::QUEUED;
+	_snprintf(m_sPchAPIUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
 
-	JSONDocument* document = new JSONDocument;
+	m_sRequestBody = nullptr;
+	m_iRequestBodySize = 0;
+	m_Handle = nullptr;
 
-	if (length > 0)
-		document->Parse(data, length);
-	else
-		document->Parse(data);
+	m_iSteamID64 = steamID64;
+	m_iSlot = slot;
 
-	if (document->HasParseError())
+	if (body && (bodySize > 0))
 	{
-		delete document;
-		return nullptr;
+		m_iRequestBodySize = bodySize;
+		m_sRequestBody = new char[bodySize];
+		memcpy(m_sRequestBody, body, m_iRequestBodySize);
 	}
 
-	return document;
-}
-
-HTTPRequest::HTTPRequest(EHTTPMethod method, const char* url, uint8* body, size_t bodySize, ID64 steamID64, ID64 slot)
-{
-	httpMethod = method;
-	requestState = RequestState::REQUEST_QUEUED;
-	_snprintf(pchApiUrl, REQUEST_URL_SIZE, "http://%s%s", g_szBaseUrl, url);
-
-	requestBody = responseBody = nullptr;
-	requestBodySize = responseBodySize = 0;
-	pJSONData = nullptr;
-	handle = NULL;
-
-	this->steamID64 = steamID64;
-	this->slot = slot;
-
-	if ((body != nullptr) && (bodySize > 0))
-	{
-		requestBodySize = bodySize;
-		requestBody = new uint8[requestBodySize];
-		memcpy(requestBody, body, requestBodySize);
-	}
+	m_sResponseBody.clear();
 }
 
 HTTPRequest::~HTTPRequest()
@@ -65,22 +51,58 @@ HTTPRequest::~HTTPRequest()
 	Cleanup();
 }
 
-void HTTPRequest::SendRequest()
+void HTTPRequest::Cleanup()
 {
-	requestState = RequestState::REQUEST_EXECUTED;
-	handle = g_SteamHTTPContext->CreateHTTPRequest(httpMethod, pchApiUrl);
-	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "Cache-Control", "no-cache");
-	g_SteamHTTPContext->SetHTTPRequestHeaderValue(handle, "User-Agent", "MSRebith SteamHTTP");
-	if (handle == NULL)
-	{
-		Cleanup();
-		return;
-	}
+	delete m_sRequestBody;
+	m_sRequestBody = nullptr;
+	m_sRequestBuffer.clear();
 
-	if (requestBody != nullptr)
+	m_sResponseBody.clear();
+	
+	// just incase it's not cleaned up already.
+	if (m_Handle)
 	{
+		curl_easy_cleanup(m_Handle);
+		m_Handle = nullptr;
+	}
+}
+
+void HTTPRequest::SetupRequest()
+{
+	// might be better to use assert here instead.
+	if (!m_Handle)
+		return;
+
+	switch (m_eHTTPMethod)
+	{
+		case HTTPRequest::GET:
+			break;
+		case HTTPRequest::POST:
+			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
+			break;
+		case HTTPRequest::DEL:
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
+			break;
+		case HTTPRequest::PUT:
+			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "PUT");
+			break;
+	}
+	
+	curl_easy_setopt(m_Handle, CURLOPT_URL, m_sPchAPIUrl);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(m_Handle, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(m_Handle, CURLOPT_USERAGENT, "MSR Game Server");
+
+	// Process request body.
+	if (m_sRequestBody != nullptr)
+	{
+		struct curl_slist *list = nullptr;
+		list = curl_slist_append(list, "Content-Type: application/json; charset=UTF-8");
+		curl_easy_setopt(m_Handle, CURLOPT_HTTPHEADER, list);
+
 		char steamID64String[REQUEST_URL_SIZE];
-		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", steamID64);
+		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", m_iSteamID64);
 
 		rapidjson::StringBuffer s;
 		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
@@ -91,109 +113,177 @@ void HTTPRequest::SendRequest()
 		writer.String(steamID64String);
 
 		writer.Key("slot");
-		writer.Int(slot);
+		writer.Int(m_iSlot);
 
 		writer.Key("size");
-		writer.Int(requestBodySize);
+		writer.Int(m_iRequestBodySize);
 
 		writer.Key("data");
-		writer.String(base64_encode(requestBody, requestBodySize).c_str());
+		writer.String(base64_encode(reinterpret_cast<byte*>(m_sRequestBody), m_iRequestBodySize).c_str());
 
 		writer.EndObject();
 
-		const char* buffer = s.GetString();
-
-		g_SteamHTTPContext->SetHTTPRequestRawPostBody(handle, HTTP_CONTENT_TYPE, (uint8*)buffer, strlen(buffer));
+		std::string buffer = s.GetString();
+		m_sRequestBuffer = buffer; //we have to make a copy of the data because it will go out of scope otherwise.
+		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDSIZE, m_sRequestBuffer.size());
+		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, m_sRequestBuffer.c_str());
 	}
+}
 
-	SteamAPICall_t apiCall = k_uAPICallInvalid;
-	if (g_SteamHTTPContext->SendHTTPRequest(handle, &apiCall) && apiCall)
-		m_CallbackOnHTTPRequestCompleted.Set(apiCall, this, &HTTPRequest::OnHTTPRequestCompleted);
+// This is a blocking call.
+bool HTTPRequest::SendRequest()
+{
+	if (m_Handle) 
+		return false;
+		
+	m_iRequestState = RequestState::EXECUTED;
+	m_Handle = curl_easy_init();
+	SetupRequest();
+	
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
+	CURLcode curlResult = curl_easy_perform(m_Handle);
+	bool result = false;
+	if (curlResult == CURLE_OK)
+		result = true;
 	else
-		Cleanup();
+		result = false;
+
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
+	return result;
 }
 
-void HTTPRequest::Cleanup()
+// This will pause the main thread until the async thread finishes it's task.
+// This will return true/false if the async thread completed it's task sucessfully.
+bool HTTPRequest::AsyncSendRequest()
 {
-	delete[] requestBody;
-	delete[] responseBody;
+	if (m_Handle)
+		return false;
 
-	requestBody = responseBody = nullptr;
-	requestBodySize = responseBodySize = 0;
+	m_Handle = curl_easy_init();
+	SetupRequest();
 
-	delete pJSONData;
-	pJSONData = nullptr;
+	std::future<bool> future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
 
-	ReleaseHandle();
-}
-
-void HTTPRequest::ReleaseHandle()
-{
-	if (handle)
+	bool result = false;
+	if (future.get() == true)
 	{
-		g_SteamHTTPContext->ReleaseHTTPRequest(handle);
-		handle = NULL;
+		int httpCode = 200;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
+		ResponseCallback(httpCode);
+		result = true;
+	}else{
+		ResponseCallback(0);
+		result = false;
 	}
-	requestState = RequestState::REQUEST_FINISHED;
+	
+	return result;
 }
 
-void HTTPRequest::OnHTTPRequestCompleted(HTTPRequestCompleted_t* p, bool bError)
+// This ignores the result of the async thread.
+void HTTPRequest::AsyncSendRequestDiscard()
 {
-	if (suppressResponse || (handle == NULL) || (p == nullptr) || (p->m_hRequest != handle))
+	if (m_Handle)
+		return;
+
+	m_Handle = curl_easy_init();
+	SetupRequest();
+
+	std::thread(&HTTPRequest::PerformRequest, this).detach();
+	//auto future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
+	//curl_easy_cleanup(m_Handle);
+	//m_Handle = nullptr;
+}
+
+bool HTTPRequest::PerformRequest()
+{
+	if (!m_Handle) 
+		return false;
+
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
+	CURLcode result = curl_easy_perform(m_Handle);
+	m_iRequestState = RequestState::EXECUTED;
+	if (result == CURLE_OK)
+		return true;
+	else
+		return false;
+}
+
+size_t HTTPRequest::WriteCallbackDispatcher(void* buf, size_t sz, size_t n, void* curlGet)
+{
+	return static_cast<HTTPRequest*>(curlGet)->WriteCallback(buf, sz, n);
+}
+
+size_t HTTPRequest::WriteCallback(void* ptr, size_t size, size_t nmemb)
+{
+	m_sResponseBody.append((char*)ptr, size * nmemb);
+	return size * nmemb;
+}
+
+void HTTPRequest::ResponseCallback(int httpCode)
+{
+	if (m_bNoCallback)
 	{
-		ReleaseHandle();
+		m_iRequestState = RequestState::FINISHED;
+		return;
+	}
+	
+	if (httpCode == 0)
+	{
+		FNShared::Print("Request Failed. %s, '%s'\n", GetName(), g_szBaseUrl);
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
-	if (bError || p->m_eStatusCode < 200 || p->m_eStatusCode > 299)
+	if (httpCode < 200 || httpCode > 299)
 	{
-		if (p->m_eStatusCode == 401)
+		if (httpCode == 401)
 		{
 			FNShared::Print("FN Authorization failed! %s\n", GetName());
-			ReleaseHandle();
+			OnResponse(httpCode);
+			m_iRequestState = RequestState::FINISHED;
 			return;
 		}
 
-		if (!p->m_bRequestSuccessful)
-		{
-			FNShared::Print("The data hasn't been received. No response from the server. %s, '%s'\n", GetName(), g_szBaseUrl);
-			OnResponse(false, p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), p->m_eStatusCode);
-		ReleaseHandle();
+		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), httpCode);
+		OnResponse(httpCode);
+		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
 
-	size_t unBytes = 0;
-	if ((responseBody == nullptr) && g_SteamHTTPContext->GetHTTPResponseBodySize(handle, &unBytes))
+	if (httpCode == 204)
 	{
-		// it should've never gotten to this point but okay.
-		if (p->m_eStatusCode == 204)
-		{
-			OnResponse(true, p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		if (unBytes <= 0)
-		{
-			FNShared::Print("The data hasn't been received. HTTP code: %d\n", p->m_eStatusCode);
-			ReleaseHandle();
-			return;
-		}
-
-		responseBodySize = unBytes;
-		responseBody = new uint8[responseBodySize];
-
-		if (g_SteamHTTPContext->GetHTTPResponseBodyData(handle, responseBody, unBytes))
-			pJSONData = ParseJSON(reinterpret_cast<char*>(responseBody), responseBodySize);
+		OnResponse(httpCode);
+		m_iRequestState = RequestState::FINISHED;
+		return;
 	}
 
-	OnResponse(true, p->m_eStatusCode);
-	ReleaseHandle();
+	if (m_sResponseBody.empty())
+	{
+		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
+		OnResponse(httpCode);
+		m_iRequestState = RequestState::FINISHED;
+		return;
+	}
+
+	//JSONDocument* m_JSONResponse = ParseJSON(m_sResponseBody.c_str());
+	OnResponse();
+	
+	m_iRequestState = RequestState::FINISHED;
+}
+
+JSONDocument HTTPRequest::ParseJSON(const char* data)
+{
+	JSONDocument doc;
+
+	if (!data)
+		return doc;
+
+	doc.Parse(data);
+
+	return doc;
 }
 
 /* static */ void HTTPRequest::SetBaseURL(const char* url)

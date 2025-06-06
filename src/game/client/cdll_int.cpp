@@ -387,6 +387,31 @@ void DLLEXPORT HUD_DirectorMessage(int iSize, void *pbuf)
 	gHUD.m_Spectator.DirectorMessage(iSize, pbuf);
 }
 
+/*
+==========================
+HUD_GetPlayerTeam
+==========================
+*/
+int DLLEXPORT HUD_GetPlayerTeam(int iplayer)
+{
+	return gEngfuncs.GetEntityByIndex(iplayer)->curstate.team;
+}
+
+void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
+{
+	if (g_iUser1 != 0 || gEngfuncs.IsSpectateOnly())
+	{
+		if (gHUD.m_Spectator.m_pip->value == INSET_OFF)
+		{
+			*y = YRES(64);
+		}
+		else
+		{
+			*y = YRES(gHUD.m_Spectator.m_OverviewData.insetWindowHeight + 5);
+		}
+	}
+}
+
 // void CL_UnloadParticleMan()
 // {
 // 	g_pParticleMan = nullptr;

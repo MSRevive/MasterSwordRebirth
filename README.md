@@ -1,7 +1,10 @@
 # Master Sword Rebirth
 The continuation of Master Sword Continued, a total HL1 conversion mod.
 
-## Compiling For Windows
+## Building
+* Lastest version of [CMake](https://cmake.org/download/) 3.24 or greater.
+
+### Windows
 * Visual Studios 2015 or higher, prefered [Visual Studios 2022](https://visualstudio.microsoft.com/vs/community/).
 * Latest version of [CMake](https://cmake.org/download/) 3.24 or greater.
 * You can either generate project files by running ``createall.bat`` or manually run CMake by ``cmake -S . -B ./build -A Win32``
