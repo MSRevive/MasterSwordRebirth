@@ -170,10 +170,25 @@ void Packer::packScripts()
 	Header.DirectoryOffset = sizeof(pakHeader_t);
 	Header.DirectoryCount = files.size();
 
+	pakDirectory_t dummy;
+	strcpy(dummy.cFilename, "");
+	dummy.FileSize = 0;
+	dummy.FileOffset = 0;
+
+	// write the file header
 	fwrite(&Header, sizeof(pakHeader_t), 1, fp);
 
 	CMemFile InFile;
 	size_t listSize = files.size();
+
+	// write out dummy data to occupy the file metadata position
+	for (int i = 0; i < listSize; i++)
+		fwrite(&dummy, sizeof(pakDirectory_t), 1, fp);
+
+	size_t currentFileBytesWritten = ftell(fp);
+
+	// jump back to just after the header
+	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
 
 	if (listSize > 0)
 	{
@@ -184,13 +199,41 @@ void Packer::packScripts()
 			{
 				pakDirectory_t File;
 				strncpy(File.cFilename, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), sizeof(File.cFilename));
-				File.FileOffset = ftell(fp);
+				File.FileOffset = 0;
 				File.FileSize = InFile.m_BufferSize;
 
 				if (g_Verbose == true)
 					printf("Packing file: %s\n", File.cFilename);
 
+				// remember where this entry is
+				size_t currentPosition = ftell(fp);
+
+				// write this entry
 				size_t ObjectsWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
+
+				if (ObjectsWritten != 1)
+					printf("Failed to write entry: %s\n", File.cFilename);
+
+				// jump to where the file data should be
+				fseek(fp, currentFileBytesWritten, SEEK_SET);
+
+				// remember the current position as where this file starts
+				File.FileOffset = ftell(fp);
+
+				// write the file data
+				ObjectsWritten = fwrite(InFile.m_Buffer, InFile.m_BufferSize, 1, fp);
+
+				if (ObjectsWritten != 1)
+					printf("Failed to write file: %s\n", File.cFilename);
+
+				// remember the current position as where to pick up from when writing the next file
+				currentFileBytesWritten = ftell(fp);
+
+				// jump back to the entry
+				fseek(fp, currentPosition, SEEK_SET);
+
+				// write the entry with the correct FileOffset
+				ObjectsWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
 		
 				if (ObjectsWritten != 1)
 					printf("Failed to write entry: %s\n", File.cFilename);
