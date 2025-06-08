@@ -1,5 +1,5 @@
 //
-// Validate sc.dll
+// Validate scripts.pak
 //
 
 #include "rapidjson/document.h"

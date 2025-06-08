@@ -1,5 +1,5 @@
 //
-// Validate sc.dll
+// Validate scripts.pak
 //
 
 #ifndef HTTP_VALIDATE_SCRIPTS_REQUEST_H

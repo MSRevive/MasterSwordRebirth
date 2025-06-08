@@ -99,7 +99,7 @@ bool FNShared::ValidateSC(void)
 		return true;
 
 	char scFile[MAX_PATH];
-	_snprintf(scFile, sizeof(scFile), "%s/dlls/sc.dll", MSGlobals::AbsGamePath.c_str());
+	_snprintf(scFile, sizeof(scFile), "%s/scripts.pak", MSGlobals::AbsGamePath.c_str());
 	unsigned int scFileHash = GetFileCheckSum(scFile);
 
 	std::unique_ptr<HTTPRequest> pReq(new ValidateScriptsRequest(UTIL_VarArgs("/api/v2/internal/sc/%u", scFileHash)));
