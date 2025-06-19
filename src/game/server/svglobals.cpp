@@ -159,8 +159,7 @@ void MSWorldSpawn()
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dll");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.so");
 	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "cl_dlls/client.dylib");
-	PRECACHE_GENERIC("dlls/sc.dll");
-	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "dlls/sc.dll");
+	ENGINE_FORCE_UNMODIFIED(force_exactfile, NULL, NULL, "scripts.pak");
 #endif
 
 	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
@@ -202,7 +201,40 @@ void MSWorldSpawn()
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
 		g_FNRequestManager.Init();
-		//FNShared::ValidateFN();
+		
+		// here we try to connect to FN and retry 5 times if it fails.
+		bool fail = true;
+		for (int retry = 0; retry < 5; retry++)
+		{
+			if (FNShared::ValidateFN())
+			{
+				fail = false;
+				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
+				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+				break;
+			}
+			else if (retry != 5)
+			{
+				g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
+			}
+		}
+
+		if (fail == true)
+		{
+			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
+			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
+			MSGlobals::CentralEnabled = false;
+		}
+	}
+
+	if (!FNShared::ValidateSC())
+	{
+		MSGlobals::CentralEnabled = false;
+	}
+
+	if (!FNShared::ValidateMap())
+	{
+		SERVER_COMMAND("map edana");
 	}
 
 	WriteCrashCfg();
@@ -211,19 +243,14 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
-	g_SteamServerHelper->Think();
+	//g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
 
-	if(!gFNInitialized && FNShared::IsEnabled())
-	{
-		MSConnectFN();
-		gFNInitialized = true;
-	}
-}
-
-void MSConnectFN()
-{
-	FNShared::Validate();
+	// if(!gFNInitialized && FNShared::IsEnabled())
+	// {
+	// 	MSConnectFN();
+	// 	gFNInitialized = true;
+	// }
 }
 
 //Called when the map changes or server is shutdown from ServerDeactivate
@@ -292,7 +319,7 @@ void MSGameEnd()
 	}
 
 	//We handle all remaining requests and shutdown.
-	g_FNRequestManager.SendAndWait();
+	//g_FNRequestManager.SendAndWait();
 
 	//Thothie - I've not added anything here but there's a game error that generates here
 	//MSGameEnd --> Call MSGlobals::EndMap
@@ -305,7 +332,7 @@ void MSGameEnd()
 	TotalModelPrecaches = 1;
 	CSVGlobals::LogScripts = true;
 
-	g_SteamServerHelper->Shutdown();
+	//g_SteamServerHelper->Shutdown();
 
 	gFNInitialized = false;
 	

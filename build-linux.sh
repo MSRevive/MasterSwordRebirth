@@ -4,7 +4,7 @@ set -eu
 
 cd $(dirname "${BASH_SOURCE[0]}")
 
-path=.
+path=$(realpath .)
 type=Release
 
 while getopts "p:t:" opt; do

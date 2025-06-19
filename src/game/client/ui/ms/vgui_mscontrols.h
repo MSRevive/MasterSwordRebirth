@@ -18,12 +18,12 @@ inline RGBA MakeRGBA( uchar r, uchar g, uchar b, uchar a )
 class MSButton : public CommandButton
 {
 public:
-	MSButton::MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h ) :
+	MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h ) :
 		CommandButton( pszText, x, y, w, h, false )
 	{
 		MSInit( pParent, "", x, y, w, h );
 	}
-	MSButton::MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h, COLOR ArmedColor, COLOR UnArmedColor ) :
+	MSButton( Panel *pParent, const char *pszText, int x, int y, int w, int h, COLOR ArmedColor, COLOR UnArmedColor ) :
 		CommandButton( pszText, x, y, w, h, false )
 	{
 		MSInit( pParent, pszText, x, y, w, h );
@@ -121,13 +121,13 @@ public:
 		a_southeast,
 	};
 
-	MSLabel::MSLabel( Panel *pParent, const char *pszText, int x, int y, int w, int h, MSLabel::Alignment Alignment = a_west ) :
+	MSLabel( Panel *pParent, const char *pszText, int x, int y, int w, int h, MSLabel::Alignment Alignment = a_west ) :
 		Label( pszText, x, y, w, h )
 	{
 		MSInit( pParent, pszText, Alignment );
 		setSize( w, h );
 	}
-	MSLabel::MSLabel( Panel *pParent, const char *pszText, int x, int y, MSLabel::Alignment Alignment = a_west ) :
+	MSLabel( Panel *pParent, const char *pszText, int x, int y, MSLabel::Alignment Alignment = a_west ) :
 		Label( pszText, x, y )
 	{
 		MSInit( pParent, pszText, Alignment );

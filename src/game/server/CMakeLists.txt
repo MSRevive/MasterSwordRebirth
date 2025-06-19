@@ -1,22 +1,33 @@
-add_library(steam_api SHARED IMPORTED)
-
-target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
-
-if (WIN32)
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
-else()
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/linux-x86/libsteam_api.so")
-endif()
+set(ZLIB_USE_STATIC_LIBS "ON")
+set(ZLIB_ROOT "${BASEDIR}/lib/zlib")
+find_package(ZLIB REQUIRED)
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
+add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
+
+target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/curl/include")
+
+if (WIN32)
+	set_target_properties(libcurl PROPERTIES 
+		IMPORTED_LOCATION "${BASEDIR}/lib/curl/libcurl.lib"
+		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
+else()
+	set_target_properties(libcurl PROPERTIES 
+		IMPORTED_LOCATION "${BASEDIR}/lib/curl/libcurl.a"
+		INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ZLIB::ZLIB>")
+endif()
 
 set_common_properties(server)
 
 target_link_libraries(server PRIVATE
-	$<$<PLATFORM_ID:Windows>:wsock32>
-	steam_api)
+	$<$<PLATFORM_ID:Windows>:Ws2_32>
+	$<$<PLATFORM_ID:Windows>:Wldap32>
+	$<$<PLATFORM_ID:Windows>:Crypt32>
+	$<$<PLATFORM_ID:Windows>:Normaliz>
+	${ZLIB_LIBRARIES}
+	libcurl)
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -37,11 +48,14 @@ target_include_directories(server PRIVATE
 	hl
 	monsters
 	player
-	fn)
+	fn
+	${ZLIB_INCLUDE_DIRS})
 
 target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
-	VALVE_DLL)
+	VALVE_DLL
+	CURL_STATICLIB
+	HTTP_ONLY)
 
 if (UNIX)
 	target_compile_definitions(server PRIVATE
@@ -158,7 +172,7 @@ set(MS
 	"store.cpp"
 	"sv_character.cpp"
 	"svglobals.cpp"
-	"SteamServerHelper.cpp"
+	#"SteamServerHelper.cpp"
 	"../shared/movement/pm_shared.cpp"
 	"../shared/movement/pm_shared.h"
 	"../shared/ms/msmonstershared.cpp"
@@ -184,7 +198,7 @@ set(MS_Headers
 	"shield.h"
 	"store.h"
 	"svglobals.h"
-	"SteamServerHelper.h"
+	#"SteamServerHelper.h"
 	"../shared/ms/groupfile.h"
 	"../shared/ms/mscharacter.h"
 	"../shared/ms/mscharacterheader.h"

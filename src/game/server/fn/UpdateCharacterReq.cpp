@@ -9,11 +9,13 @@
 #include "player.h"
 #include "util.h"
 
-UpdateCharacterRequest::UpdateCharacterRequest(ID64 steamID, ID64 slot, const char* url, uint8* body, size_t bodySize) :
-	HTTPRequest(EHTTPMethod::k_EHTTPMethodPUT, url, body, bodySize, steamID, slot)
+UpdateCharacterRequest::UpdateCharacterRequest(ID64 steamID, ID64 slot, const char* url, const char* body, size_t bodySize) :
+	HTTPRequest(HTTPMethod::PUT, url, body, bodySize, steamID, slot)
 {
+	m_bNoCallback = true;
 }
 
-void UpdateCharacterRequest::OnResponse(bool bSuccessful, int iRespCode)
+void UpdateCharacterRequest::OnResponse(int iRespCode)
 {
+	return;
 }
