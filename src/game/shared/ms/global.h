@@ -32,6 +32,7 @@ public:
 		PKAllowedinTown,					 //PK and stealing allowed anywhere
 		IsLanGame,							 //Lan game
 		CentralEnabled,						 //Thothie attempting to fix FN upload sploit
+		FNConnected,						 //Connected to FuzzNet
 		DevModeEnabled,						 //MiB JUL2010_13 - Making it so dev-mode makes it so you can't save.
 		CanCreateCharOnMap,					 //Can create character on this map
 		ServerSideChar,						 //Whether characters are saved/loaded server-side

@@ -38,6 +38,7 @@ CRequestManager g_FNRequestManager;
 cvar_t	debug			= {"ms_debug","0", FCVAR_SERVER };
 cvar_t	betakey			= {"ms_key","", FCVAR_PROTECTED|FCVAR_EXTDLL };*/
 cvar_t ms_dev_mode = {"ms_dev_mode", "0", FCVAR_SERVER}; //MiB JUL2010_13 - Dev mode..
+cvar_t ms_developer = { "ms_developer", "0", FCVAR_SERVER };
 cvar_t ms_dynamicnpc = {"ms_dynamicnpc", "", 0};
 cvar_t msallowkickvote = {"ms_allowkickvote", "1", FCVAR_SERVER};
 cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
@@ -89,6 +90,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	//CVAR_REGISTER (&debug);
 	//CVAR_REGISTER (&betakey);
 	CVAR_REGISTER(&ms_dev_mode); //MiB "Mapper Scripts.rtf"
+	CVAR_REGISTER(&ms_developer);
 	CVAR_REGISTER(&ms_dynamicnpc);
 	CVAR_REGISTER(&msallowkickvote);
 	CVAR_REGISTER(&msallowtimevote);
@@ -145,7 +147,6 @@ void MSWorldSpawn()
 	//Thothie attemptitng to remove FN upload sploit (Thanx to MiB)
 	MSGlobals::CentralEnabled = CVAR_GET_FLOAT("ms_central_enabled") > 0.0f ? true : false;
 	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0 && !MSGlobals::CentralEnabled ? true : false;
-	//return MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar;
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
 	MSGlobals::PKAllowedinTown = ms_pklevel.value > 1 ? true : false;
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") ? true : false;
@@ -164,39 +165,6 @@ void MSWorldSpawn()
 
 	HTTPRequest::SetBaseURL(CVAR_GET_STRING("ms_central_addr"));
 
-	//TODO: move to MSGlobalInit so it's not called every map change.
-	//g_SteamServerHelper.Init();
-
-	// if (MSGlobals::CentralEnabled)
-	// {
-	// 	// Initialize FN Request Manager
-	// 	g_FNRequestManager.Init();
-
-	// 	bool fail = true;
-
-	// 	for (int retry = 0; retry < 5; retry++)
-	// 	{
-	// 		if (FNShared::IsValidConnection())
-	// 		{
-	// 			fail = false;
-	// 			g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-	// 			logfile << Logger::LOG_INFO << "FuzzNet connected\n";
-	// 			break;
-	// 		}
-	// 		else if (retry != 5)
-	// 		{
-	// 			g_engfuncs.pfnServerPrint("FuzzNet connection failed! Retrying...\n");
-	// 		}
-	// 	}
-
-	// 	if (fail == true)
-	// 	{
-	// 		g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
-	// 		logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
-	// 		MSGlobals::CentralEnabled = false;
-	// 	}
-	// }
-
 	if (FNShared::IsEnabled())
 	{	
 		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
@@ -211,6 +179,7 @@ void MSWorldSpawn()
 				fail = false;
 				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
 				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+				MSGlobals::FNConnected = true;
 				break;
 			}
 			else if (retry != 5)
@@ -224,6 +193,7 @@ void MSWorldSpawn()
 			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
 			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
 			MSGlobals::CentralEnabled = false;
+			MSGlobals::FNConnected = false;
 		}
 	}
 

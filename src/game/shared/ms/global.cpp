@@ -34,6 +34,7 @@ int MSGlobals::FXLimit = 20;
 bool MSGlobals::PKAllowed = false;
 bool MSGlobals::PKAllowedinTown = false;
 bool MSGlobals::CentralEnabled = false; //Thothie attempting to fix FN upload sploit
+bool MSGlobals::FNConnected = false;
 bool MSGlobals::DevModeEnabled = false; //Thothie JUL2010_22 attempting to fix "Mapper Scripts.rtf"
 bool MSGlobals::IsLanGame = false;
 bool MSGlobals::CanCreateCharOnMap = false;

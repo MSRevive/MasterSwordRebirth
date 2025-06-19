@@ -17,8 +17,6 @@ void ValidateScriptsRequest::OnResponse(int iRespCode)
 {
 	if (iRespCode == 200)
 	{
-		// MSGlobals::CentralEnabled = false;
-		// FNShared::Print("FuzzNet has been disabled!\n");
 		return;
 	}
 
