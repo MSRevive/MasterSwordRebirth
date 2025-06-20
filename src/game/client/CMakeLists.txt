@@ -20,12 +20,12 @@ target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 
 if (WIN32)
 	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
-	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/sdl2/SDL2.lib")
+	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/SDL2/SDL2.lib")
 	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/fmod/fmod_vc.lib")
 	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/discord/discord-rpc.lib")
 	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/steamapi/steam_api.lib")
 else()
-	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/sdl2/libSDL2.so")
+	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/SDL2/libSDL2.so")
 	set_target_properties(fmod PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/fmod/libfmod.so")
 	set_target_properties(discord PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/discord/libdiscord-rpc.a")
 	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/steamapi/libsteam_api.so")
@@ -42,7 +42,7 @@ else()
 	# to avoid vgui.so linked by the absolute path
 	# and CMake refuses to use -l: instead of -l (which makes linker to expect `lib` prefix)
 	# yes, in 2024 it's still a bug!
-	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib/public/linux-x86 -l:vgui.so")
+	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib -l:vgui.so")
 endif()
 
 target_link_libraries(client PRIVATE
@@ -68,6 +68,7 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
+	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
@@ -107,83 +108,6 @@ set(Engine
 	"../../public/engine/cdll_int.h"
 )
 source_group("Engine" FILES ${Engine})
-
-set(SDL2
-	"../../../lib/sdl2/begin_code.h"
-	"../../../lib/sdl2/close_code.h"
-	"../../../lib/sdl2/SDL.h"
-	"../../../lib/sdl2/SDL_assert.h"
-	"../../../lib/sdl2/SDL_atomic.h"
-	"../../../lib/sdl2/SDL_audio.h"
-	"../../../lib/sdl2/SDL_bits.h"
-	"../../../lib/sdl2/SDL_blendmode.h"
-	"../../../lib/sdl2/SDL_clipboard.h"
-	"../../../lib/sdl2/SDL_config.h"
-	"../../../lib/sdl2/SDL_config_android.h"
-	"../../../lib/sdl2/SDL_config_iphoneos.h"
-	"../../../lib/sdl2/SDL_config_macosx.h"
-	"../../../lib/sdl2/SDL_config_minimal.h"
-	"../../../lib/sdl2/SDL_config_nintendods.h"
-	"../../../lib/sdl2/SDL_config_pandora.h"
-	"../../../lib/sdl2/SDL_config_windows.h"
-	"../../../lib/sdl2/SDL_config_wiz.h"
-	"../../../lib/sdl2/SDL_copying.h"
-	"../../../lib/sdl2/SDL_cpuinfo.h"
-	"../../../lib/sdl2/SDL_endian.h"
-	"../../../lib/sdl2/SDL_error.h"
-	"../../../lib/sdl2/SDL_events.h"
-	"../../../lib/sdl2/SDL_gamecontroller.h"
-	"../../../lib/sdl2/SDL_gesture.h"
-	"../../../lib/sdl2/SDL_haptic.h"
-	"../../../lib/sdl2/SDL_hints.h"
-	"../../../lib/sdl2/SDL_input.h"
-	"../../../lib/sdl2/SDL_joystick.h"
-	"../../../lib/sdl2/SDL_keyboard.h"
-	"../../../lib/sdl2/SDL_keycode.h"
-	"../../../lib/sdl2/SDL_loadso.h"
-	"../../../lib/sdl2/SDL_log.h"
-	"../../../lib/sdl2/SDL_main.h"
-	"../../../lib/sdl2/SDL_messagebox.h"
-	"../../../lib/sdl2/SDL_mouse.h"
-	"../../../lib/sdl2/SDL_mutex.h"
-	"../../../lib/sdl2/SDL_name.h"
-	"../../../lib/sdl2/SDL_opengl.h"
-	"../../../lib/sdl2/SDL_opengles.h"
-	"../../../lib/sdl2/SDL_opengles2.h"
-	"../../../lib/sdl2/SDL_pixels.h"
-	"../../../lib/sdl2/SDL_platform.h"
-	"../../../lib/sdl2/SDL_power.h"
-	"../../../lib/sdl2/SDL_quit.h"
-	"../../../lib/sdl2/SDL_rect.h"
-	"../../../lib/sdl2/SDL_render.h"
-	"../../../lib/sdl2/SDL_revision.h"
-	"../../../lib/sdl2/SDL_rwops.h"
-	"../../../lib/sdl2/SDL_scancode.h"
-	"../../../lib/sdl2/SDL_shape.h"
-	"../../../lib/sdl2/SDL_stdinc.h"
-	"../../../lib/sdl2/SDL_surface.h"
-	"../../../lib/sdl2/SDL_system.h"
-	"../../../lib/sdl2/SDL_syswm.h"
-	"../../../lib/sdl2/SDL_test.h"
-	"../../../lib/sdl2/SDL_test_assert.h"
-	"../../../lib/sdl2/SDL_test_common.h"
-	"../../../lib/sdl2/SDL_test_compare.h"
-	"../../../lib/sdl2/SDL_test_crc32.h"
-	"../../../lib/sdl2/SDL_test_font.h"
-	"../../../lib/sdl2/SDL_test_fuzzer.h"
-	"../../../lib/sdl2/SDL_test_harness.h"
-	"../../../lib/sdl2/SDL_test_images.h"
-	"../../../lib/sdl2/SDL_test_log.h"
-	"../../../lib/sdl2/SDL_test_md5.h"
-	"../../../lib/sdl2/SDL_test_random.h"
-	"../../../lib/sdl2/SDL_thread.h"
-	"../../../lib/sdl2/SDL_timer.h"
-	"../../../lib/sdl2/SDL_touch.h"
-	"../../../lib/sdl2/SDL_types.h"
-	"../../../lib/sdl2/SDL_version.h"
-	"../../../lib/sdl2/SDL_video.h"
-)
-source_group("SDL2" FILES ${SDL2})
 
 set(SDK
 	"exports.h"

@@ -24,8 +24,8 @@
 #include "exports.h"
 #include "clientlibrary.h"
 
-#include "../thirdparty/SDL2/SDL_mouse.h"
-#include "../thirdparty/SDL2/SDL_gamecontroller.h"
+#include <SDL2/SDL_mouse.h>
+#include <SDL2/SDL_gamecontroller.h>
 
 #define MOUSE_BUTTON_COUNT 5
 
