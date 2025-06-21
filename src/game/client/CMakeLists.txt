@@ -55,7 +55,8 @@ target_link_libraries(client PRIVATE
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
-	${BASEDIR}/utils/vgui/include
+	${BASEDIR}/lib/include
+	${BASEDIR}/lib/include/vgui
 	${BASEDIR}/src/public
 	${BASEDIR}/src/public/engine
 	${BASEDIR}/src/common
@@ -68,7 +69,6 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
-	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
