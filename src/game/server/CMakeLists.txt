@@ -7,7 +7,7 @@ add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
-target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/curl/include")
+target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/include/curl")
 
 if (WIN32)
 	set_target_properties(libcurl PROPERTIES 
@@ -42,6 +42,7 @@ target_include_directories(server PRIVATE
 	${BASEDIR}/src/game/shared/syntax
 	${BASEDIR}/src/game/shared/weapons
 	${BASEDIR}/thirdparty
+	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
 	gamerules
