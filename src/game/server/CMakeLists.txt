@@ -146,6 +146,8 @@ set(HL1
 	"shurispritedefs.h"
 	"triggers.cpp"
 	"world.cpp"
+	"entities.cpp"
+	"entities.h"
 	"../shared/movement/pm_defs.h"
 	"../shared/movement/pm_math.cpp"
 	"../shared/movement/pm_movevars.h"
