@@ -12,14 +12,14 @@ endif()
 
 find_package(OpenGL REQUIRED)
 
-target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
+target_include_directories(vgui INTERFACE ${BASEDIR}/lib/include/vgui)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/lib/include/SDL2)
 target_include_directories(fmod INTERFACE ${BASEDIR}/lib/include/fmod)
 target_include_directories(discord INTERFACE ${BASEDIR}/lib/include/discord)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 
 if (WIN32)
-	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
+	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/vgui/vgui.lib")
 	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/SDL2/SDL2.lib")
 	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/fmod/fmod_vc.lib")
 	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/discord/discord-rpc.lib")
@@ -42,7 +42,7 @@ else()
 	# to avoid vgui.so linked by the absolute path
 	# and CMake refuses to use -l: instead of -l (which makes linker to expect `lib` prefix)
 	# yes, in 2024 it's still a bug!
-	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib -l:vgui.so")
+	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib/vgui -l:vgui.so")
 endif()
 
 target_link_libraries(client PRIVATE
@@ -329,7 +329,6 @@ set(VGUI
 	"ui/vgui_teamfortressviewport.cpp"
 	"ui/vgui_teamfortressviewport.h"
 	"ui/vgui_voice_tweakdlg.cpp"
-	"../../../utils/vgui/include/VGUI_Panel.h"
 )
 source_group("VGUI" FILES ${VGUI})
 
