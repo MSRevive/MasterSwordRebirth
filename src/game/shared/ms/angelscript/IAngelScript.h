@@ -68,6 +68,21 @@ struct ASScriptEvent
                       fNextExecutionTime(0), fRepeatDelay(0) {}
 };
 
+// Timed event for scheduling future execution
+struct ASTimedEvent
+{
+    std::string eventName;               // Name of event to execute
+    float fExecuteTime;                  // When to execute (game time)
+    ASEventParams params;                // Parameters to pass to event
+    CAngelScript* pTargetScript;         // Specific script target (nullptr for all)
+    bool bRepeat;                        // Whether this is a repeating event
+    float fRepeatDelay;                  // Delay between repeats
+    
+    ASTimedEvent() : fExecuteTime(0), pTargetScript(nullptr), bRepeat(false), fRepeatDelay(0) {}
+    ASTimedEvent(const char* name, float execTime) : eventName(name), fExecuteTime(execTime), 
+                                                     pTargetScript(nullptr), bRepeat(false), fRepeatDelay(0) {}
+};
+
 //==========================================================================
 // IAngelScript Interface
 //==========================================================================
@@ -91,7 +106,10 @@ public:
     // Event management
     virtual void CallScriptEvent(const char* eventName, ASEventParams* pParams = nullptr);
     virtual void CallScriptEventTimed(const char* eventName, float delay);
+    virtual void CallScriptEventTimed(const char* eventName, float delay, ASEventParams* pParams);
+    virtual void CallScriptEventRepeating(const char* eventName, float delay, float repeatDelay, ASEventParams* pParams = nullptr);
     virtual bool HasScriptEvent(const char* eventName);
+    virtual void CancelTimedEvents(const char* eventName = nullptr);  // Cancel specific or all timed events
     
     // Variable management
     virtual const char* GetScriptVar(const char* varName);
@@ -116,11 +134,20 @@ public:
 protected:
     std::vector<CAngelScript*> m_Scripts;     // Active scripts
     std::string m_ReturnData;                 // Data returned from events
+    std::vector<ASTimedEvent> m_TimedEvents;  // Pending timed events
     
     // Internal helpers
     virtual asIScriptContext* PrepareContext(asIScriptFunction* pFunc);
     virtual void UnprepareContext(asIScriptContext* pCtx);
     virtual bool SetEventParameters(asIScriptContext* pCtx, ASEventParams* pParams);
+    
+    // Timing helpers
+    virtual float GetCurrentTime();           // Get current game time (shared code compatible)
+    virtual void ProcessTimedEvents();        // Process pending timed events
+    virtual void ScheduleEvent(const char* eventName, float delay, ASEventParams* pParams = nullptr, 
+                              CAngelScript* pTargetScript = nullptr);
+    virtual void ScheduleRepeatingEvent(const char* eventName, float delay, float repeatDelay, 
+                                       ASEventParams* pParams = nullptr, CAngelScript* pTargetScript = nullptr);
 };
 
 // Conversion helpers for legacy code

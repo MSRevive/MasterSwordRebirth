@@ -5,6 +5,7 @@
 #include "msbasic.h"
 #include "stackstring.h"
 #include "global.h"
+#include <ctime>
 
 // Include for CBasePlayer if needed
 #ifdef GAME_DLL
@@ -208,21 +209,32 @@ void IAngelScript::CallScriptEventTimed(const char* eventName, float delay)
     if (!eventName || !eventName[0] || delay < 0)
         return;
         
-    float executeTime = gpGlobals->time + delay;
-    
-    // Schedule event on all scripts
-    for (size_t i = 0; i < m_Scripts.size(); i++)
-    {
-        CAngelScript* pScript = m_Scripts[i];
-        if (!pScript || !pScript->IsRunning())
-            continue;
-            
-        ASScriptEvent* pEvent = pScript->GetEvent(eventName);
-        if (pEvent)
-        {
-            pEvent->timedExecutions.push_back(executeTime);
-        }
-    }
+    // Schedule the event for future execution
+    ScheduleEvent(eventName, delay);
+}
+
+//==========================================================================
+// Call script event with delay and parameters
+//==========================================================================
+void IAngelScript::CallScriptEventTimed(const char* eventName, float delay, ASEventParams* pParams)
+{
+    if (!eventName || !eventName[0] || delay < 0)
+        return;
+        
+    // Schedule the event for future execution with parameters
+    ScheduleEvent(eventName, delay, pParams);
+}
+
+//==========================================================================
+// Call script event repeatedly with delay
+//==========================================================================
+void IAngelScript::CallScriptEventRepeating(const char* eventName, float delay, float repeatDelay, ASEventParams* pParams)
+{
+    if (!eventName || !eventName[0] || delay < 0 || repeatDelay <= 0)
+        return;
+        
+    // Schedule the repeating event
+    ScheduleRepeatingEvent(eventName, delay, repeatDelay, pParams);
 }
 
 //==========================================================================
@@ -241,6 +253,28 @@ bool IAngelScript::HasScriptEvent(const char* eventName)
     }
     
     return false;
+}
+
+//==========================================================================
+// Cancel timed events
+//==========================================================================
+void IAngelScript::CancelTimedEvents(const char* eventName)
+{
+    if (!eventName || !eventName[0])
+    {
+        // Cancel all timed events
+        m_TimedEvents.clear();
+        return;
+    }
+    
+    // Cancel specific event by name
+    for (int i = (int)m_TimedEvents.size() - 1; i >= 0; i--)
+    {
+        if (m_TimedEvents[i].eventName == eventName)
+        {
+            m_TimedEvents.erase(m_TimedEvents.begin() + i);
+        }
+    }
 }
 
 //==========================================================================
@@ -328,6 +362,7 @@ void IAngelScript::Deactivate()
 {
     Script_RemoveAll();
     m_ReturnData.clear();
+    m_TimedEvents.clear();  // Clear any pending timed events
 }
 
 //==========================================================================
@@ -335,18 +370,8 @@ void IAngelScript::Deactivate()
 //==========================================================================
 void IAngelScript::Think()
 {
-    float currentTime = gpGlobals->time;
-    
-    // Check timed events
-    for (size_t i = 0; i < m_Scripts.size(); i++)
-    {
-        CAngelScript* pScript = m_Scripts[i];
-        if (!pScript || !pScript->IsRunning())
-            continue;
-            
-        // This would check for timed event execution
-        // Implementation details depend on how events are stored in CAngelScript
-    }
+    // Process timed events
+    ProcessTimedEvents();
 }
 
 //==========================================================================
@@ -436,4 +461,122 @@ bool IAngelScript::SetEventParameters(asIScriptContext* pCtx, ASEventParams* pPa
     }
     
     return true;
+}
+
+//==========================================================================
+// Get current game time (shared code compatible)
+//==========================================================================
+float IAngelScript::GetCurrentTime()
+{
+    // For shared code, we need to handle timing differently than server/client
+    // Use a simple clock-based timing system that works across all contexts
+    static clock_t startTime = clock();
+    clock_t currentTime = clock();
+    return (float)(currentTime - startTime) / CLOCKS_PER_SEC;
+}
+
+//==========================================================================
+// Schedule an event for future execution
+//==========================================================================
+void IAngelScript::ScheduleEvent(const char* eventName, float delay, ASEventParams* pParams, CAngelScript* pTargetScript)
+{
+    if (!eventName || !eventName[0] || delay < 0)
+        return;
+        
+    ASTimedEvent timedEvent;
+    timedEvent.eventName = eventName;
+    timedEvent.fExecuteTime = GetCurrentTime() + delay;
+    timedEvent.pTargetScript = pTargetScript;
+    timedEvent.bRepeat = false;
+    timedEvent.fRepeatDelay = 0;
+    
+    // Copy parameters if provided
+    if (pParams)
+    {
+        for (size_t i = 0; i < pParams->Count(); i++)
+        {
+            timedEvent.params.Add(pParams->Get(i));
+        }
+    }
+    
+    m_TimedEvents.push_back(timedEvent);
+}
+
+//==========================================================================
+// Schedule a repeating event
+//==========================================================================
+void IAngelScript::ScheduleRepeatingEvent(const char* eventName, float delay, float repeatDelay, 
+                                         ASEventParams* pParams, CAngelScript* pTargetScript)
+{
+    if (!eventName || !eventName[0] || delay < 0 || repeatDelay <= 0)
+        return;
+        
+    ASTimedEvent timedEvent;
+    timedEvent.eventName = eventName;
+    timedEvent.fExecuteTime = GetCurrentTime() + delay;
+    timedEvent.pTargetScript = pTargetScript;
+    timedEvent.bRepeat = true;
+    timedEvent.fRepeatDelay = repeatDelay;
+    
+    // Copy parameters if provided
+    if (pParams)
+    {
+        for (size_t i = 0; i < pParams->Count(); i++)
+        {
+            timedEvent.params.Add(pParams->Get(i));
+        }
+    }
+    
+    m_TimedEvents.push_back(timedEvent);
+}
+
+//==========================================================================
+// Process pending timed events
+//==========================================================================
+void IAngelScript::ProcessTimedEvents()
+{
+    if (m_TimedEvents.empty())
+        return;
+        
+    float currentTime = GetCurrentTime();
+    
+    // Process events in reverse order so we can safely remove them
+    for (int i = (int)m_TimedEvents.size() - 1; i >= 0; i--)
+    {
+        ASTimedEvent& timedEvent = m_TimedEvents[i];
+        
+        // Check if this event is ready to execute
+        if (currentTime >= timedEvent.fExecuteTime)
+        {
+            // Execute the event
+            if (timedEvent.pTargetScript)
+            {
+                // Execute on specific script
+                if (timedEvent.params.Count() > 0)
+                    timedEvent.pTargetScript->ExecuteEvent(timedEvent.eventName.c_str(), &timedEvent.params);
+                else
+                    timedEvent.pTargetScript->ExecuteEvent(timedEvent.eventName.c_str());
+            }
+            else
+            {
+                // Execute on all scripts
+                if (timedEvent.params.Count() > 0)
+                    Script_ExecuteEvent(timedEvent.eventName.c_str(), &timedEvent.params);
+                else
+                    Script_ExecuteEvent(timedEvent.eventName.c_str());
+            }
+            
+            // Handle repeating events
+            if (timedEvent.bRepeat)
+            {
+                // Schedule next execution
+                timedEvent.fExecuteTime = currentTime + timedEvent.fRepeatDelay;
+            }
+            else
+            {
+                // Remove one-time event
+                m_TimedEvents.erase(m_TimedEvents.begin() + i);
+            }
+        }
+    }
 }
