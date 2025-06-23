@@ -306,7 +306,48 @@ set(Shared_base64
 	"../../../thirdparty/base64/base64.cpp"
 	"../../../thirdparty/base64/base64.h"
 )
-source_group("Shared\\base64" FILES ${Shared__base64})
+source_group("Shared\\base64" FILES ${Shared_base64})
+
+set(Shared_AngelScript
+	"../shared/ms/angelscript/CAngelScriptManager.cpp"
+	"../shared/ms/angelscript/CAngelScriptManager.h"
+	"../shared/ms/angelscript/ASTest.cpp"
+	"../shared/ms/angelscript/ASTest.h"
+)
+source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(ThirdParty_AngelScript
+	"../../../thirdparty/angelscript/as_atomic.cpp"
+	"../../../thirdparty/angelscript/as_builder.cpp"
+	"../../../thirdparty/angelscript/as_bytecode.cpp"
+	"../../../thirdparty/angelscript/as_callfunc.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_compiler.cpp"
+	"../../../thirdparty/angelscript/as_configgroup.cpp"
+	"../../../thirdparty/angelscript/as_context.cpp"
+	"../../../thirdparty/angelscript/as_datatype.cpp"
+	"../../../thirdparty/angelscript/as_gc.cpp"
+	"../../../thirdparty/angelscript/as_generic.cpp"
+	"../../../thirdparty/angelscript/as_globalproperty.cpp"
+	"../../../thirdparty/angelscript/as_memory.cpp"
+	"../../../thirdparty/angelscript/as_module.cpp"
+	"../../../thirdparty/angelscript/as_objecttype.cpp"
+	"../../../thirdparty/angelscript/as_outputbuffer.cpp"
+	"../../../thirdparty/angelscript/as_parser.cpp"
+	"../../../thirdparty/angelscript/as_restore.cpp"
+	"../../../thirdparty/angelscript/as_scriptcode.cpp"
+	"../../../thirdparty/angelscript/as_scriptengine.cpp"
+	"../../../thirdparty/angelscript/as_scriptfunction.cpp"
+	"../../../thirdparty/angelscript/as_scriptnode.cpp"
+	"../../../thirdparty/angelscript/as_scriptobject.cpp"
+	"../../../thirdparty/angelscript/as_string.cpp"
+	"../../../thirdparty/angelscript/as_string_util.cpp"
+	"../../../thirdparty/angelscript/as_thread.cpp"
+	"../../../thirdparty/angelscript/as_tokenizer.cpp"
+	"../../../thirdparty/angelscript/as_typeinfo.cpp"
+	"../../../thirdparty/angelscript/as_variablescope.cpp"
+)
+source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
 set(ALL_FILES
 	${Common}
@@ -320,6 +361,8 @@ set(ALL_FILES
 	${Shared_CRC}
 	${Shared_Generic_Item}
 	${Shared_base64}
+	${Shared_AngelScript}
+	${ThirdParty_AngelScript}
 )
 
 target_sources(server PRIVATE ${ALL_FILES})

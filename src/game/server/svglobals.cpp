@@ -14,6 +14,7 @@
 #include "fn/FNSharedDefs.h"
 #include "fn/RequestManager.h"
 #include "fn/HTTPRequest.h"
+#include "angelscript/CAngelScriptManager.h"
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -69,6 +70,14 @@ cvar_t ms_central_addr = {"ms_central_addr", "0", FCVAR_PROTECTED};
 cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
 
+//AngelScript CVARs
+cvar_t as_enabled = {"as_enabled", "0", FCVAR_SERVER};
+cvar_t as_memory_limit = {"as_memory_limit", "134217728", FCVAR_SERVER}; // 128MB
+cvar_t as_memory_debug = {"as_memory_debug", "0", FCVAR_SERVER};
+cvar_t as_gc_interval = {"as_gc_interval", "60", FCVAR_SERVER};
+cvar_t as_stack_size = {"as_stack_size", "4096", FCVAR_SERVER}; // 4KB
+cvar_t as_debug_mode = {"as_debug_mode", "0", FCVAR_SERVER};
+
 #ifdef DEV_BUILD
 cvar_t ms_devlog = {"ms_devlog", "1", 0};
 cvar_t ms_allowdev = {"ms_allowdev", "1", 0};
@@ -114,12 +123,37 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_fake_hp);		 //AUG2011_17 Thothie - moving fakehp functions to cvar
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
 
+	//AngelScript CVARs
+	CVAR_REGISTER(&as_enabled);
+	CVAR_REGISTER(&as_memory_limit);
+	CVAR_REGISTER(&as_memory_debug);
+	CVAR_REGISTER(&as_gc_interval);
+	CVAR_REGISTER(&as_stack_size);
+	CVAR_REGISTER(&as_debug_mode);
+
 #ifdef DEV_BUILD
 	CVAR_REGISTER(&ms_devlog);
 	CVAR_REGISTER(&ms_allowdev);
 #endif
 	
 	g_log_initialized = true;
+
+	// Initialize AngelScript if enabled
+	if (as_enabled.value > 0)
+	{
+		if (!CAngelScriptManager::Instance()->Initialize())
+		{
+			ALERT(at_console, "AngelScript initialization FAILED!\n");
+			// Don't fail the entire initialization, just disable AngelScript
+			CVAR_SET_FLOAT("as_enabled", 0);
+		}
+		else
+		{
+			// Configure memory limit
+			CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
+			ALERT(at_console, "AngelScript initialized successfully\n");
+		}
+	}
 
 	SERVER_COMMAND("exec msstartup.cfg\n");
 
@@ -246,6 +280,12 @@ void MSGameThink()
 	//g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
 
+	// AngelScript maintenance
+	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	{
+		CAngelScriptManager::Instance()->Think();
+	}
+
 	// if(!gFNInitialized && FNShared::IsEnabled())
 	// {
 	// 	MSConnectFN();
@@ -335,6 +375,12 @@ void MSGameEnd()
 	//g_SteamServerHelper->Shutdown();
 
 	gFNInitialized = false;
+
+	// Cleanup AngelScript
+	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	{
+		CAngelScriptManager::Instance()->Destroy();
+	}
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.
