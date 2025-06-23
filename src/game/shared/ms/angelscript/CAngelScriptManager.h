@@ -2,6 +2,7 @@
 #define ANGELSCRIPTMANAGER_H
 
 #include <cstddef>  // for size_t
+#include <vector>
 
 // Forward declarations
 class asIScriptEngine;
@@ -26,6 +27,10 @@ private:
     // Memory tracking for 32-bit constraints
     size_t m_nMemoryUsed;
     size_t m_nMemoryLimit;
+    
+    // Context pool management
+    std::vector<asIScriptContext*> m_ContextPool;
+    static const size_t MAX_CONTEXT_POOL_SIZE = 8;  // Maximum contexts to keep in pool
     
     // Private constructor for singleton
     CAngelScriptManager();

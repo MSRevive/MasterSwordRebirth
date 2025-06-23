@@ -311,6 +311,10 @@ source_group("Shared\\base64" FILES ${Shared_base64})
 set(Shared_AngelScript
 	"../shared/ms/angelscript/CAngelScriptManager.cpp"
 	"../shared/ms/angelscript/CAngelScriptManager.h"
+	"../shared/ms/angelscript/IAngelScript.cpp"
+	"../shared/ms/angelscript/IAngelScript.h"
+	"../shared/ms/angelscript/CAngelScript.cpp"
+	"../shared/ms/angelscript/CAngelScript.h"
 	"../shared/ms/angelscript/ASTest.cpp"
 	"../shared/ms/angelscript/ASTest.h"
 )

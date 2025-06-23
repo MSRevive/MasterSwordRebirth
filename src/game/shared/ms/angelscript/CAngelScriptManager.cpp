@@ -3,6 +3,7 @@
 #include <cstring> // for memset
 #include <cstdlib> // for malloc, free
 #include <new>     // for placement new
+#include <vector>  // for std::vector
 
 // Only include AngelScript if we're compiling with it enabled
 #ifdef _MSC_VER
@@ -132,6 +133,16 @@ void CAngelScriptManager::Destroy()
     if (!m_bInitialized)
         return;
         
+    // Release all contexts in the pool
+    for (size_t i = 0; i < m_ContextPool.size(); i++)
+    {
+        if (m_ContextPool[i])
+        {
+            m_ContextPool[i]->Release();
+        }
+    }
+    m_ContextPool.clear();
+    
     // Clean up the engine
     if (m_pEngine)
     {
@@ -209,9 +220,28 @@ asIScriptContext* CAngelScriptManager::AcquireContext()
     if (!m_bInitialized || !m_pEngine)
         return nullptr;
         
-    // For now, just create a new context each time
-    // TODO: Implement proper context pooling later
-    return m_pEngine->CreateContext();
+    asIScriptContext* pContext = nullptr;
+    
+    // Check if we have a context available in the pool
+    if (!m_ContextPool.empty())
+    {
+        pContext = m_ContextPool.back();
+        m_ContextPool.pop_back();
+        
+        // Make sure the context is in a clean state
+        pContext->Unprepare();
+    }
+    else
+    {
+        // Create a new context if pool is empty
+        pContext = m_pEngine->CreateContext();
+        if (!pContext)
+        {
+            LogMessage("Failed to create script context", 1);
+        }
+    }
+    
+    return pContext;
 }
 
 //==========================================================================
@@ -219,10 +249,20 @@ asIScriptContext* CAngelScriptManager::AcquireContext()
 //==========================================================================
 void CAngelScriptManager::ReleaseContext(asIScriptContext* pContext)
 {
-    if (pContext)
+    if (!pContext)
+        return;
+        
+    // Reset the context state
+    pContext->Unprepare();
+    
+    // If pool isn't full, add the context back to the pool
+    if (m_ContextPool.size() < MAX_CONTEXT_POOL_SIZE)
     {
-        // For now, just release it immediately
-        // TODO: Implement proper context pooling later
+        m_ContextPool.push_back(pContext);
+    }
+    else
+    {
+        // Pool is full, release the context
         pContext->Release();
     }
 }
