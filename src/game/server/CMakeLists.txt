@@ -42,6 +42,7 @@ target_include_directories(server PRIVATE
 	${BASEDIR}/src/game/shared/syntax
 	${BASEDIR}/src/game/shared/weapons
 	${BASEDIR}/thirdparty
+	${BASEDIR}/thirdparty/angelscript/include
 	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects

@@ -69,6 +69,7 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
+	${BASEDIR}/thirdparty/angelscript/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui

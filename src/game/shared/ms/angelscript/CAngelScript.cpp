@@ -1,8 +1,10 @@
 #include "CAngelScript.h"
 #include "CAngelScriptManager.h"
-#include "angelscript/angelscript.h"
-#include "../global.h"
-#include "../sharedutil.h"
+#include "angelscript.h"
+#include "msbasic.h"
+#include "stackstring.h"
+#include "global.h"
+#include "sharedutil.h"
 #include <algorithm>
 
 //==========================================================================

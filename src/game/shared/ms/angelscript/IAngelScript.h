@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include "msbasic.h"
+#include "stackstring.h"
 
 // Forward declarations
 class CAngelScript;

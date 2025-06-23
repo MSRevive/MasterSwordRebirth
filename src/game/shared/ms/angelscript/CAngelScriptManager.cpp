@@ -12,7 +12,7 @@
 #pragma warning(disable: 4996) // deprecated function warnings
 #endif
 
-#include "angelscript/angelscript.h"
+#include "angelscript.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)

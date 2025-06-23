@@ -1,8 +1,10 @@
 #include "IAngelScript.h"
 #include "CAngelScript.h"
 #include "CAngelScriptManager.h"
-#include "angelscript/angelscript.h"
-#include "../global.h"
+#include "angelscript.h"
+#include "msbasic.h"
+#include "stackstring.h"
+#include "global.h"
 
 // Include for CBasePlayer if needed
 #ifdef GAME_DLL
