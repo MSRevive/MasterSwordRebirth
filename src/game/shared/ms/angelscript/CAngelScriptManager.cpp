@@ -13,6 +13,7 @@
 #endif
 
 #include "angelscript.h"
+#include "ASBindings.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -118,6 +119,15 @@ bool CAngelScriptManager::Initialize()
     if (r < 0)
     {
         LogMessage("Failed to set AngelScript memory functions", 1);
+    }
+    
+    // Register all bindings through integration layer
+    if (!ASBindings::RegisterAll(m_pEngine))
+    {
+        LogMessage("Failed to register AngelScript bindings", 1);
+        m_pEngine->ShutDownAndRelease();
+        m_pEngine = nullptr;
+        return false;
     }
     
     m_bInitialized = true;

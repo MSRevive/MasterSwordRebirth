@@ -318,6 +318,12 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/CAngelScript.h"
 	"../shared/ms/angelscript/ASTest.cpp"
 	"../shared/ms/angelscript/ASTest.h"
+	"../shared/ms/angelscript/ASCoreTypes.cpp"
+	"../shared/ms/angelscript/ASCoreTypes.h"
+	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
+	"../shared/ms/angelscript/ASBuiltinFunctions.h"
+	"../shared/ms/angelscript/ASBindings.cpp"
+	"../shared/ms/angelscript/ASBindings.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
 
