@@ -43,7 +43,7 @@ bool CAngelScript::Init(const char* scriptName, CBaseEntity* pOwner)
     
     // Load the script file
     char fullPath[256];
-    snprintf(fullPath, sizeof(fullPath), "scripts/%s.script", scriptName);
+    snprintf(fullPath, sizeof(fullPath), "scripts/%s.as", scriptName);
     
     if (!LoadScript(fullPath))
     {

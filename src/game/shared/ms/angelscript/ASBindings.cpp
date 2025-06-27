@@ -514,7 +514,7 @@ bool ASBindings::RegisterCoroutineFunctions(asIScriptEngine* pEngine)
     try
     {
         // Register coroutine functions from ASCoroutines
-        RegisterCoroutineFunctions(pEngine);
+        ::RegisterCoroutineFunctions(pEngine);
         
         // Initialize the coroutine manager
         ASCoroutineManager::Instance();

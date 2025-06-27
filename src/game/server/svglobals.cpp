@@ -138,12 +138,13 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	
 	g_log_initialized = true;
 
+	as_enabled.value = 1.f;
 	// Initialize AngelScript if enabled
 	if (as_enabled.value > 0)
 	{
 		if (!CAngelScriptManager::Instance()->Initialize())
 		{
-			ALERT(at_console, "AngelScript initialization FAILED!\n");
+			g_engfuncs.pfnServerPrint("\nAngelScript initialization FAILED!");
 			// Don't fail the entire initialization, just disable AngelScript
 			CVAR_SET_FLOAT("as_enabled", 0);
 		}
@@ -151,7 +152,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 		{
 			// Configure memory limit
 			CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
-			ALERT(at_console, "AngelScript initialized successfully\n");
+			g_engfuncs.pfnServerPrint("\nAngelScript initialized successfully");
 		}
 	}
 
