@@ -12,6 +12,11 @@
 #include "ASCoroutines.h"        
 #include "ASObjectPool.h"      
 #include <angelscript.h>
+
+// AngelScript add-ons
+#include "addons/scriptstdstring/scriptstdstring.h"
+#include "addons/scriptarray/scriptarray.h"
+
 #include <cstdio>
 #include <cstring>
 
@@ -28,8 +33,17 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     
     bool success = true;
     
-    // Step 1: Register core types (Vector3, Color, math functions)
-    printf("\n[1/8] Registering Core Types...\n");
+    // Step 0: Register string type (MUST be first!)
+    printf("\n[0/9] Registering String Type...\n");
+    RegisterStdString(pEngine);
+    RegisterStdStringUtils(pEngine);
+    
+    // Also register array type early
+    printf("\n[1/9] Registering Array Type...\n");
+    RegisterScriptArray(pEngine, true); // true = use native calling convention
+    
+    // Step 2: Register core types (Vector3, Color, math functions)
+    printf("\n[2/9] Registering Core Types...\n");
     if (!RegisterCoreTypes(pEngine))
     {
         printf("   ERROR: Core type registration failed!\n");
@@ -40,8 +54,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Core types registered successfully\n");
     }
     
-    // Step 2: Register builtin functions (strings, utilities, game functions)
-    printf("\n[2/8] Registering Builtin Functions...\n");
+    // Step 3: Register builtin functions (strings, utilities, game functions)
+    printf("\n[3/9] Registering Builtin Functions...\n");
     if (!RegisterBuiltinFunctions(pEngine))
     {
         printf("   ERROR: Builtin function registration failed!\n");
@@ -52,8 +66,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Builtin functions registered successfully\n");
     }
     
-    // Step 3: Register script classes (CGameScript and derivatives)
-    printf("\n[3/8] Registering Script Classes...\n");
+    // Step 4: Register script classes (CGameScript and derivatives)
+    printf("\n[4/9] Registering Script Classes...\n");
     if (!RegisterScriptClasses(pEngine))
     {
         printf("   ERROR: Script class registration failed!\n");
@@ -64,8 +78,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Script classes registered successfully\n");
     }
     
-    // Step 4: Register coroutines system
-    printf("\n[4/8] Registering Coroutines System...\n");
+    // Step 5: Register coroutines system
+    printf("\n[5/9] Registering Coroutines System...\n");
     if (!RegisterCoroutineFunctions(pEngine))
     {
         printf("   ERROR: Coroutines system registration failed!\n");
@@ -76,8 +90,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Coroutines system registered successfully\n");
     }
     
-    // Step 5: Register memory optimization systems
-    printf("\n[5/8] Registering Memory Optimization...\n");
+    // Step 6: Register memory optimization systems
+    printf("\n[6/9] Registering Memory Optimization...\n");
     if (!RegisterMemoryOptimization(pEngine))
     {
         printf("   ERROR: Memory optimization registration failed!\n");
@@ -88,8 +102,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Memory optimization registered successfully\n");
     }
     
-    // Step 6: Register module system
-    printf("\n[6/8] Registering Module System...\n");
+    // Step 7: Register module system
+    printf("\n[7/9] Registering Module System...\n");
     if (!RegisterModuleSystem(pEngine))
     {
         printf("   ERROR: Module system registration failed!\n");
@@ -100,8 +114,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Module system registered successfully\n");
     }
     
-    // Step 7: Validate all registrations
-    printf("\n[7/8] Validating Registrations...\n");
+    // Step 8: Validate all registrations
+    printf("\n[8/9] Validating Registrations...\n");
     if (!ValidateRegistrations(pEngine))
     {
         printf("   ERROR: Registration validation failed!\n");
@@ -112,8 +126,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ All registrations validated successfully\n");
     }
     
-    // Step 8: Log registration summary
-    printf("\n[8/8] Registration Summary:\n");
+    // Step 9: Log registration summary
+    printf("\n[9/9] Registration Summary:\n");
     LogRegistrationInfo(pEngine);
 
     return success;

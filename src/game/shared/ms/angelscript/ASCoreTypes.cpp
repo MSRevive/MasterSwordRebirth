@@ -49,6 +49,7 @@ namespace ASCoreTypes
         
         RegisterVector3(pEngine);
         RegisterColor(pEngine);
+        RegisterEntityHandle(pEngine);
         RegisterMathFunctions(pEngine);
         
         printf("ASCoreTypes: Registration complete\n");
@@ -61,7 +62,8 @@ namespace ASCoreTypes
         printf("ASCoreTypes: Registering Vector3 type...\n");
         
         // Register the Vector type as "Vector3" in AngelScript
-        int r = pEngine->RegisterObjectType("Vector3", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS);
+        // Use asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK for a simple value type with constructor, assignment, and copy constructor
+        int r = pEngine->RegisterObjectType("Vector3", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
         if (r < 0) {
             printf("ASCoreTypes: Failed to register Vector3 type\n");
             return;
@@ -112,7 +114,8 @@ namespace ASCoreTypes
         
         // Register Color as a Vector type (r, g, b stored in x, y, z, alpha in a separate field if needed)
         // For simplicity, we'll use Vector and treat it as RGB with x=r, y=g, z=b
-        int r = pEngine->RegisterObjectType("Color", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_ALLFLOATS);
+        // Register Color type (also uses Vector internally)
+        int r = pEngine->RegisterObjectType("Color", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
         if (r < 0) {
             printf("ASCoreTypes: Failed to register Color type\n");
             return;
@@ -134,6 +137,22 @@ namespace ASCoreTypes
     {
         // TODO: Implement string utilities
         printf("ASCoreTypes: String utilities not yet implemented\n");
+    }
+    
+    void RegisterEntityHandle(asIScriptEngine* pEngine)
+    {
+        if (!pEngine) return;
+        
+        printf("ASCoreTypes: Registering EntityHandle type...\n");
+        
+        // Register EntityHandle as a reference type (handle to an entity)
+        int r = pEngine->RegisterObjectType("EntityHandle", 0, asOBJ_REF | asOBJ_NOCOUNT);
+        if (r < 0) {
+            printf("ASCoreTypes: Failed to register EntityHandle type\n");
+            return;
+        }
+        
+        printf("ASCoreTypes: EntityHandle type registered\n");
     }
     
     void RegisterMathFunctions(asIScriptEngine* pEngine)

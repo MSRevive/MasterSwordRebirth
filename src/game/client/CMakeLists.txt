@@ -363,6 +363,10 @@ set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_tokenizer.cpp"
 	"../../../thirdparty/angelscript/as_typeinfo.cpp"
 	"../../../thirdparty/angelscript/as_variablescope.cpp"
+	# AngelScript add-ons
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
+	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
