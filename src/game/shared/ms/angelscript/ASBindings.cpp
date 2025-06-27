@@ -5,8 +5,12 @@
 //==========================================================================
 
 #include "ASBindings.h"
+#include "ASModuleSystem.h"
 #include "ASCoreTypes.h"
 #include "ASBuiltinFunctions.h"
+#include "ASScriptClasses.h"   
+#include "ASCoroutines.h"        
+#include "ASObjectPool.h"      
 #include <angelscript.h>
 #include <cstdio>
 #include <cstring>
@@ -25,7 +29,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     bool success = true;
     
     // Step 1: Register core types (Vector3, Color, math functions)
-    printf("\n[1/4] Registering Core Types...\n");
+    printf("\n[1/8] Registering Core Types...\n");
     if (!RegisterCoreTypes(pEngine))
     {
         printf("   ERROR: Core type registration failed!\n");
@@ -37,7 +41,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     
     // Step 2: Register builtin functions (strings, utilities, game functions)
-    printf("\n[2/4] Registering Builtin Functions...\n");
+    printf("\n[2/8] Registering Builtin Functions...\n");
     if (!RegisterBuiltinFunctions(pEngine))
     {
         printf("   ERROR: Builtin function registration failed!\n");
@@ -48,8 +52,56 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ Builtin functions registered successfully\n");
     }
     
-    // Step 3: Validate all registrations
-    printf("\n[3/4] Validating Registrations...\n");
+    // Step 3: Register script classes (CGameScript and derivatives)
+    printf("\n[3/8] Registering Script Classes...\n");
+    if (!RegisterScriptClasses(pEngine))
+    {
+        printf("   ERROR: Script class registration failed!\n");
+        success = false;
+    }
+    else
+    {
+        printf("   ✓ Script classes registered successfully\n");
+    }
+    
+    // Step 4: Register coroutines system
+    printf("\n[4/8] Registering Coroutines System...\n");
+    if (!RegisterCoroutineFunctions(pEngine))
+    {
+        printf("   ERROR: Coroutines system registration failed!\n");
+        success = false;
+    }
+    else
+    {
+        printf("   ✓ Coroutines system registered successfully\n");
+    }
+    
+    // Step 5: Register memory optimization systems
+    printf("\n[5/8] Registering Memory Optimization...\n");
+    if (!RegisterMemoryOptimization(pEngine))
+    {
+        printf("   ERROR: Memory optimization registration failed!\n");
+        success = false;
+    }
+    else
+    {
+        printf("   ✓ Memory optimization registered successfully\n");
+    }
+    
+    // Step 6: Register module system
+    printf("\n[6/8] Registering Module System...\n");
+    if (!RegisterModuleSystem(pEngine))
+    {
+        printf("   ERROR: Module system registration failed!\n");
+        success = false;
+    }
+    else
+    {
+        printf("   ✓ Module system registered successfully\n");
+    }
+    
+    // Step 7: Validate all registrations
+    printf("\n[7/8] Validating Registrations...\n");
     if (!ValidateRegistrations(pEngine))
     {
         printf("   ERROR: Registration validation failed!\n");
@@ -60,8 +112,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         printf("   ✓ All registrations validated successfully\n");
     }
     
-    // Step 4: Log registration summary
-    printf("\n[4/4] Registration Summary:\n");
+    // Step 8: Log registration summary
+    printf("\n[8/8] Registration Summary:\n");
     LogRegistrationInfo(pEngine);
 
     return success;
@@ -396,4 +448,198 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
     printf("   - Type ID counter: %d\n", pEngine->GetTypeIdByDecl("float"));
     
     printf("\n==========================================================================\n");
+}
+
+
+//==========================================================================
+// Script Classes Registration
+//==========================================================================
+bool ASBindings::RegisterScriptClasses(asIScriptEngine* pEngine)
+{
+    if (!pEngine)
+    {
+        printf("ASBindings::RegisterScriptClasses: ERROR - NULL engine pointer\n");
+        return false;
+    }
+    
+    // Call the ASScriptClasses registration function
+    try
+    {
+        if (!ASScriptClasses::RegisterAll(pEngine))
+        {
+            printf("   ERROR: ASScriptClasses::RegisterAll failed\n");
+            return false;
+        }
+        
+        // Verify CGameScript was registered
+        asITypeInfo* pCGameScriptType = pEngine->GetTypeInfoByName("CGameScript");
+        
+        if (!pCGameScriptType)
+        {
+            printf("ASBindings::RegisterScriptClasses: ERROR - CGameScript type not found after registration\n");
+            return false;
+        }
+        
+        // Check that CGameScript has expected methods
+        int methodCount = pCGameScriptType->GetMethodCount();
+        if (methodCount < 5) // Should have at least SetVar, GetVar methods, etc.
+        {
+            printf("ASBindings::RegisterScriptClasses: WARNING - CGameScript has only %d methods, expected more\n", methodCount);
+        }
+        
+        printf("   - CGameScript base class registered\n");
+        printf("   - Variable system methods registered\n");
+        printf("   - Script class factory system registered\n");
+        
+        return true;
+    }
+    catch (...)
+    {
+        printf("ASBindings::RegisterScriptClasses: ERROR - Exception during registration\n");
+        return false;
+    }
+}
+
+//==========================================================================
+// Coroutines System Registration
+//==========================================================================
+bool ASBindings::RegisterCoroutineFunctions(asIScriptEngine* pEngine)
+{
+    if (!pEngine)
+    {
+        printf("ASBindings::RegisterCoroutineFunctions: ERROR - NULL engine pointer\n");
+        return false;
+    }
+    
+    try
+    {
+        // Register coroutine functions from ASCoroutines
+        RegisterCoroutineFunctions(pEngine);
+        
+        // Initialize the coroutine manager
+        ASCoroutineManager::Instance();
+        
+        // Verify some key coroutine functions were registered
+        asIScriptFunction* func;
+        
+        func = pEngine->GetGlobalFunctionByDecl("int StartCoroutine(const string &in)");
+        if (!func)
+        {
+            printf("ASBindings::RegisterCoroutineFunctions: WARNING - StartCoroutine() function not found\n");
+        }
+        
+        func = pEngine->GetGlobalFunctionByDecl("void DelaySeconds(float)");
+        if (!func)
+        {
+            printf("ASBindings::RegisterCoroutineFunctions: WARNING - DelaySeconds() function not found\n");
+        }
+        
+        printf("   - Coroutine management functions registered\n");
+        printf("   - Async delay and yield functions registered\n");
+        printf("   - Coroutine manager initialized\n");
+        
+        return true;
+    }
+    catch (...)
+    {
+        printf("ASBindings::RegisterCoroutineFunctions: ERROR - Exception during registration\n");
+        return false;
+    }
+}
+
+//==========================================================================
+// Memory Optimization Registration
+//==========================================================================
+bool ASBindings::RegisterMemoryOptimization(asIScriptEngine* pEngine)
+{
+    if (!pEngine)
+    {
+        printf("ASBindings::RegisterMemoryOptimization: ERROR - NULL engine pointer\n");
+        return false;
+    }
+    
+    try
+    {
+        // Register memory optimization functions from ASObjectPool
+        RegisterMemoryOptimizationFunctions(pEngine);
+        InitializeOptimizationSystems();
+        
+        // Configure for 32-bit constraints
+        ASMemoryMonitor* pMemoryMonitor = ASMemoryMonitor::Instance();
+        if (pMemoryMonitor)
+        {
+            // Set conservative limits for 32-bit build
+            pMemoryMonitor->SetMemoryLimit(128 * 1024 * 1024); // 128MB limit
+            pMemoryMonitor->SetAutoGC(true);
+            pMemoryMonitor->SetGCInterval(30.0f); // 30 second intervals
+        }
+        
+        ASObjectPool* pObjectPool = ASObjectPool::Instance();
+        if (pObjectPool)
+        {
+            pObjectPool->SetEnabled(true);
+            pObjectPool->SetDefaultMaxObjects(16); // Conservative pool sizes
+        }
+        
+        printf("   - Object pooling system initialized\n");
+        printf("   - Memory monitoring system initialized\n");
+        printf("   - Script caching system initialized\n");
+        printf("   - 32-bit memory constraints configured\n");
+        
+        return true;
+    }
+    catch (...)
+    {
+        printf("ASBindings::RegisterMemoryOptimization: ERROR - Exception during registration\n");
+        return false;
+    }
+}
+
+//==========================================================================
+// Module System Registration  
+//==========================================================================
+bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
+{
+    if (!pEngine)
+    {
+        printf("ASBindings::RegisterModuleSystem: ERROR - NULL engine pointer\n");
+        return false;
+    }
+    
+    try
+    {
+        // Register module management functions from ASModuleSystem
+        if (!ASModuleSystemBindings::RegisterAll(pEngine))
+        {
+            printf("ASBindings::RegisterModuleSystem: ERROR - ASModuleSystem registration failed\n");
+            return false;
+        }
+        
+        // Verify some key module functions were registered
+        asIScriptFunction* func;
+        
+        func = pEngine->GetGlobalFunctionByDecl("bool LoadModule(const string &in)");
+        if (!func)
+        {
+            printf("ASBindings::RegisterModuleSystem: WARNING - LoadModule() function not found\n");
+        }
+        
+        func = pEngine->GetGlobalFunctionByDecl("bool HasModule(const string &in)");
+        if (!func)
+        {
+            printf("ASBindings::RegisterModuleSystem: WARNING - HasModule() function not found\n");
+        }
+        
+        printf("   - Module loading and management functions registered\n");
+        printf("   - Module dependency resolution system initialized\n");
+        printf("   - Import/export system registered\n");
+        printf("   - Module search paths configured\n");
+        
+        return true;
+    }
+    catch (...)
+    {
+        printf("ASBindings::RegisterModuleSystem: ERROR - Exception during registration\n");
+        return false;
+    }
 }

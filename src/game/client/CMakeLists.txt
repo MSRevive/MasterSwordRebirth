@@ -320,6 +320,16 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASBuiltinFunctions.h"
 	"../shared/ms/angelscript/ASBindings.cpp"
 	"../shared/ms/angelscript/ASBindings.h"
+	"../shared/ms/angelscript/ASCoroutines.cpp"
+	"../shared/ms/angelscript/ASCoroutines.h"
+	"../shared/ms/angelscript/ASDebugger.cpp"
+	"../shared/ms/angelscript/ASDebugger.h"
+	"../shared/ms/angelscript/ASModuleSystem.cpp"
+	"../shared/ms/angelscript/ASModuleSystem.h"
+	"../shared/ms/angelscript/ASObjectPool.cpp"
+	"../shared/ms/angelscript/ASObjectPool.h"
+	"../shared/ms/angelscript/ASScriptClasses.cpp"
+	"../shared/ms/angelscript/ASScriptClasses.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
 

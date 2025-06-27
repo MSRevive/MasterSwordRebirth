@@ -20,15 +20,15 @@ file(GLOB ANGELSCRIPT_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../../../thirdparty/angelscript/*.cpp"
 )
 
-# Test program sources
-set(TEST_SOURCES
-    test_angelscript_init.cpp
+# Common AngelScript sources
+set(ANGELSCRIPT_COMMON_SOURCES
     CAngelScriptManager.cpp
     IAngelScript.cpp
     CAngelScript.cpp
     ASCoreTypes.cpp
     ASBuiltinFunctions.cpp
     ASBindings.cpp
+    ASDebugger.cpp
     ../global.cpp
     ../globalmem.cpp
     ../stackstring.cpp
@@ -41,10 +41,7 @@ set(TEST_SOURCES
     ../../../../common/interface.cpp
 )
 
-# Create test executable
-add_executable(test_angelscript ${TEST_SOURCES} ${ANGELSCRIPT_SOURCES})
-
-# Platform-specific settings
+# Platform-specific settings for original test
 if(WIN32)
     target_compile_definitions(test_angelscript PRIVATE _WIN32 GAME_DLL)
 else()

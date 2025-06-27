@@ -2,6 +2,7 @@
 #include <cstdio>  // for printf
 #include <cstring> // for memset
 #include <cstdlib> // for malloc, free
+#include <ctime>   // for clock, CLOCKS_PER_SEC
 #include <new>     // for placement new
 #include <vector>  // for std::vector
 
@@ -14,6 +15,8 @@
 
 #include "angelscript.h"
 #include "ASBindings.h"
+#include "ASCoroutines.h"
+#include "ASObjectPool.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -153,6 +156,12 @@ void CAngelScriptManager::Destroy()
     }
     m_ContextPool.clear();
     
+    // Shutdown optimization systems
+    ShutdownOptimizationSystems();
+    
+    // Shutdown coroutine manager
+    ASCoroutineManager::Shutdown();
+    
     // Clean up the engine
     if (m_pEngine)
     {
@@ -287,6 +296,19 @@ void CAngelScriptManager::Think()
         
     // Run garbage collection step
     m_pEngine->GarbageCollect(asGC_ONE_STEP);
+    
+    // Update optimization systems
+    float fCurrentTime = static_cast<float>(clock()) / CLOCKS_PER_SEC;
+    
+    // Process coroutines
+    ASCoroutineManager* pCoroutineManager = ASCoroutineManager::Instance();
+    if (pCoroutineManager)
+    {
+        pCoroutineManager->Think(fCurrentTime);
+    }
+    
+    // Process memory optimization systems
+    ThinkOptimizationSystems();
 }
 
 //==========================================================================

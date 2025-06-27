@@ -9,6 +9,8 @@
 
 class asIScriptEngine;
 
+// Forward declarations for component systems
+class ASModuleSystem;
 //==========================================================================
 // ASBindings - Master Integration Layer
 //==========================================================================
@@ -21,6 +23,10 @@ public:
     // Registration functions for each category
     static bool RegisterCoreTypes(asIScriptEngine* pEngine);
     static bool RegisterBuiltinFunctions(asIScriptEngine* pEngine);
+    static bool RegisterScriptClasses(asIScriptEngine* pEngine);
+    static bool RegisterCoroutineFunctions(asIScriptEngine* pEngine);
+    static bool RegisterMemoryOptimization(asIScriptEngine* pEngine);
+    static bool RegisterModuleSystem(asIScriptEngine* pEngine);
     
     // Validation and diagnostics
     static bool ValidateRegistrations(asIScriptEngine* pEngine);
