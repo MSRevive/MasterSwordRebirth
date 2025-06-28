@@ -70,6 +70,7 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
+	${BASEDIR}/thirdparty/spdlog/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
@@ -82,6 +83,11 @@ target_compile_definitions(client PRIVATE
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
+
+# Check if spdlog is available
+if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
+	target_compile_definitions(client PRIVATE HAS_SPDLOG)
+endif()
 
 if (MSVC)
 	set_target_properties(client PROPERTIES 
@@ -264,6 +270,8 @@ set(Shared
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/logger.h"
+	"../shared/ms/mslogger.cpp"
+	"../shared/ms/mslogger.h"
 	"../shared/ms/msbasic.h"
 	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"

@@ -20,6 +20,9 @@
 #include <cstdio>
 #include <cstring>
 
+// Include MSLogger after other headers to avoid conflicts
+#include "mslogger.h"
+
 //==========================================================================
 // Master Registration Function - Minimal Implementation
 //==========================================================================
@@ -27,107 +30,107 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterAll: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterAll: ERROR - NULL engine pointer");
         return false;
     }
     
     bool success = true;
     
     // Step 0: Register string type (MUST be first!)
-    printf("\n[0/9] Registering String Type...\n");
+    MS_ANGEL_INFO("[0/9] Registering String Type...");
     RegisterStdString(pEngine);
     RegisterStdStringUtils(pEngine);
     
     // Also register array type early
-    printf("\n[1/9] Registering Array Type...\n");
+    MS_ANGEL_INFO("[1/9] Registering Array Type...");
     RegisterScriptArray(pEngine, true); // true = use native calling convention
     
     // Step 2: Register core types (Vector3, Color, math functions)
-    printf("\n[2/9] Registering Core Types...\n");
+    MS_ANGEL_INFO("[2/9] Registering Core Types...");
     if (!RegisterCoreTypes(pEngine))
     {
-        printf("   ERROR: Core type registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Core type registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Core types registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Core types registered successfully");
     }
     
     // Step 3: Register builtin functions (strings, utilities, game functions)
-    printf("\n[3/9] Registering Builtin Functions...\n");
+    MS_ANGEL_INFO("[3/9] Registering Builtin Functions...");
     if (!RegisterBuiltinFunctions(pEngine))
     {
-        printf("   ERROR: Builtin function registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Builtin function registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Builtin functions registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Builtin functions registered successfully");
     }
     
     // Step 4: Register script classes (CGameScript and derivatives)
-    printf("\n[4/9] Registering Script Classes...\n");
+    MS_ANGEL_INFO("[4/9] Registering Script Classes...");
     if (!RegisterScriptClasses(pEngine))
     {
-        printf("   ERROR: Script class registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Script class registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Script classes registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Script classes registered successfully");
     }
     
     // Step 5: Register coroutines system
-    printf("\n[5/9] Registering Coroutines System...\n");
+    MS_ANGEL_INFO("[5/9] Registering Coroutines System...");
     if (!RegisterCoroutineFunctions(pEngine))
     {
-        printf("   ERROR: Coroutines system registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Coroutines system registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Coroutines system registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Coroutines system registered successfully");
     }
     
     // Step 6: Register memory optimization systems
-    printf("\n[6/9] Registering Memory Optimization...\n");
+    MS_ANGEL_INFO("[6/9] Registering Memory Optimization...");
     if (!RegisterMemoryOptimization(pEngine))
     {
-        printf("   ERROR: Memory optimization registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Memory optimization registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Memory optimization registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Memory optimization registered successfully");
     }
     
     // Step 7: Register module system
-    printf("\n[7/9] Registering Module System...\n");
+    MS_ANGEL_INFO("[7/9] Registering Module System...");
     if (!RegisterModuleSystem(pEngine))
     {
-        printf("   ERROR: Module system registration failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Module system registration failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ Module system registered successfully\n");
+        MS_ANGEL_INFO("   ✓ Module system registered successfully");
     }
     
     // Step 8: Validate all registrations
-    printf("\n[8/9] Validating Registrations...\n");
+    MS_ANGEL_INFO("[8/9] Validating Registrations...");
     if (!ValidateRegistrations(pEngine))
     {
-        printf("   ERROR: Registration validation failed!\n");
+        MS_ANGEL_ERROR("   ERROR: Registration validation failed!");
         success = false;
     }
     else
     {
-        printf("   ✓ All registrations validated successfully\n");
+        MS_ANGEL_INFO("   ✓ All registrations validated successfully");
     }
     
     // Step 9: Log registration summary
-    printf("\n[9/9] Registration Summary:\n");
+    MS_ANGEL_INFO("[9/9] Registration Summary:");
     LogRegistrationInfo(pEngine);
 
     return success;
@@ -141,7 +144,7 @@ bool ASBindings::RegisterCoreTypes(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterCoreTypes: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterCoreTypes: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -156,25 +159,25 @@ bool ASBindings::RegisterCoreTypes(asIScriptEngine* pEngine)
         
         if (!pVector3Type)
         {
-            printf("ASBindings::RegisterCoreTypes: ERROR - Vector3 type not found after registration\n");
+            MS_ANGEL_ERROR("ASBindings::RegisterCoreTypes: ERROR - Vector3 type not found after registration");
             return false;
         }
         
         if (!pColorType)
         {
-            printf("ASBindings::RegisterCoreTypes: ERROR - Color type not found after registration\n");
+            MS_ANGEL_ERROR("ASBindings::RegisterCoreTypes: ERROR - Color type not found after registration");
             return false;
         }
         
-        printf("   - Vector3 type registered\n");
-        printf("   - Color type registered\n");
-        printf("   - Math functions registered\n");
+        MS_ANGEL_INFO("   - Vector3 type registered");
+        MS_ANGEL_INFO("   - Color type registered");
+        MS_ANGEL_INFO("   - Math functions registered");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterCoreTypes: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterCoreTypes: ERROR - Exception during registration");
         return false;
     }
 }
@@ -184,7 +187,7 @@ bool ASBindings::RegisterBuiltinFunctions(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterBuiltinFunctions: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterBuiltinFunctions: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -200,26 +203,26 @@ bool ASBindings::RegisterBuiltinFunctions(asIScriptEngine* pEngine)
         func = pEngine->GetGlobalFunctionByDecl("string Left(const string &in, int)");
         if (!func)
         {
-            printf("ASBindings::RegisterBuiltinFunctions: WARNING - Left() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterBuiltinFunctions: WARNING - Left() function not found");
         }
         
         // Check game functions
         func = pEngine->GetGlobalFunctionByDecl("float GetGameTime()");
         if (!func)
         {
-            printf("ASBindings::RegisterBuiltinFunctions: WARNING - GetGameTime() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterBuiltinFunctions: WARNING - GetGameTime() function not found");
         }
         
-        printf("   - String manipulation functions registered\n");
-        printf("   - Math utility functions registered\n");
-        printf("   - Vector utility functions registered\n");
-        printf("   - Game system functions registered\n");
+        MS_ANGEL_INFO("   - String manipulation functions registered");
+        MS_ANGEL_INFO("   - Math utility functions registered");
+        MS_ANGEL_INFO("   - Vector utility functions registered");
+        MS_ANGEL_INFO("   - Game system functions registered");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterBuiltinFunctions: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterBuiltinFunctions: ERROR - Exception during registration");
         return false;
     }
 }
@@ -229,7 +232,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::ValidateRegistrations: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::ValidateRegistrations: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -237,16 +240,16 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
     int warnings = 0;
     int errors = 0;
     
-    printf("   Running comprehensive validation...\n");
+    MS_ANGEL_INFO("   Running comprehensive validation...");
     
     // Validate core types
-    printf("   - Validating core types:\n");
+    MS_ANGEL_INFO("   - Validating core types:");
     
     // Check Vector3
     asITypeInfo* pVector3 = pEngine->GetTypeInfoByName("Vector3");
     if (!pVector3)
     {
-        printf("     ERROR: Vector3 type not registered\n");
+        MS_ANGEL_ERROR("     ERROR: Vector3 type not registered");
         errors++;
         validationSuccess = false;
     }
@@ -256,7 +259,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         int propCount = pVector3->GetPropertyCount();
         if (propCount < 3)
         {
-            printf("     WARNING: Vector3 has %d properties, expected at least 3 (x,y,z)\n", propCount);
+            MS_ANGEL_INFO("     WARNING: Vector3 has %d properties, expected at least 3 (x,y,z)", propCount);
             warnings++;
         }
         
@@ -264,27 +267,27 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         int methodCount = pVector3->GetMethodCount();
         if (methodCount < 3)
         {
-            printf("     WARNING: Vector3 has %d methods, expected at least 3\n", methodCount);
+            MS_ANGEL_INFO("     WARNING: Vector3 has %d methods, expected at least 3", methodCount);
             warnings++;
         }
-        printf("     ✓ Vector3 validated (%d properties, %d methods)\n", propCount, methodCount);
+        MS_ANGEL_INFO("     ✓ Vector3 validated (%d properties, %d methods)", propCount, methodCount);
     }
     
     // Check Color
     asITypeInfo* pColor = pEngine->GetTypeInfoByName("Color");
     if (!pColor)
     {
-        printf("     ERROR: Color type not registered\n");
+        MS_ANGEL_ERROR("     ERROR: Color type not registered");
         errors++;
         validationSuccess = false;
     }
     else
     {
-        printf("     ✓ Color type validated\n");
+        MS_ANGEL_INFO("     ✓ Color type validated");
     }
     
     // Validate global functions
-    printf("   - Validating global functions:\n");
+    MS_ANGEL_INFO("   - Validating global functions:");
     
     // String functions
     const char* stringFuncs[] = {
@@ -305,7 +308,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    printf("     ✓ String functions: %d/%d registered\n", stringFuncCount, 7);
+    MS_ANGEL_INFO("     ✓ String functions: %d/%d registered", stringFuncCount, 7);
     
     // Math functions
     const char* mathFuncs[] = {
@@ -325,7 +328,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    printf("     ✓ Math functions: %d/%d registered\n", mathFuncCount, 6);
+    MS_ANGEL_INFO("     ✓ Math functions: %d/%d registered", mathFuncCount, 6);
     
     // Game functions
     const char* gameFuncs[] = {
@@ -344,25 +347,25 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    printf("     ✓ Game functions: %d/%d registered\n", gameFuncCount, 5);
+    MS_ANGEL_INFO("     ✓ Game functions: %d/%d registered", gameFuncCount, 5);
     
     // Check for EntityHandle type (used by game functions)
     asITypeInfo* pEntityHandle = pEngine->GetTypeInfoByName("EntityHandle");
     if (!pEntityHandle)
     {
-        printf("     WARNING: EntityHandle type not registered (entity functions may not work)\n");
+        MS_ANGEL_INFO("     WARNING: EntityHandle type not registered (entity functions may not work)");
         warnings++;
     }
     
     // Summary
-    printf("   Validation complete: ");
+    MS_ANGEL_INFO("   Validation complete: ");
     if (errors == 0 && warnings == 0)
     {
-        printf("PERFECT - No errors or warnings\n");
+        MS_ANGEL_INFO("PERFECT - No errors or warnings");
     }
     else
     {
-        printf("%d errors, %d warnings\n", errors, warnings);
+        MS_ANGEL_INFO("%d errors, %d warnings", errors, warnings);
         if (errors > 0)
             validationSuccess = false;
     }
@@ -375,30 +378,30 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::LogRegistrationInfo: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::LogRegistrationInfo: ERROR - NULL engine pointer");
         return;
     }
 
     // Count registered types
     int typeCount = pEngine->GetObjectTypeCount();
-    printf("\nRegistered Object Types: %d\n", typeCount);
+    MS_ANGEL_INFO("Registered Object Types: %d", typeCount);
     for (int i = 0; i < typeCount && i < 10; i++) // Show first 10 types
     {
         asITypeInfo* pType = pEngine->GetObjectTypeByIndex(i);
         if (pType)
         {
-            printf("   - %s (Properties: %d, Methods: %d)\n", 
+            MS_ANGEL_INFO("   - %s (Properties: %d, Methods: %d)", 
                    pType->GetName(), 
                    pType->GetPropertyCount(),
                    pType->GetMethodCount());
         }
     }
     if (typeCount > 10)
-        printf("   ... and %d more types\n", typeCount - 10);
+        MS_ANGEL_INFO("   ... and %d more types", typeCount - 10);
     
     // Count global functions
     int globalFuncCount = pEngine->GetGlobalFunctionCount();
-    printf("\nRegistered Global Functions: %d\n", globalFuncCount);
+    MS_ANGEL_INFO("Registered Global Functions: %d", globalFuncCount);
     
     // Count by category
     int stringFuncs = 0, mathFuncs = 0, gameFuncs = 0, vectorFuncs = 0, otherFuncs = 0;
@@ -429,18 +432,18 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
         }
     }
     
-    printf("   - String manipulation: %d functions\n", stringFuncs);
-    printf("   - Math operations: %d functions\n", mathFuncs);
-    printf("   - Game system: %d functions\n", gameFuncs);
-    printf("   - Vector/Angle utilities: %d functions\n", vectorFuncs);
+    MS_ANGEL_INFO("   - String manipulation: %d functions", stringFuncs);
+    MS_ANGEL_INFO("   - Math operations: %d functions", mathFuncs);
+    MS_ANGEL_INFO("   - Game system: %d functions", gameFuncs);
+    MS_ANGEL_INFO("   - Vector/Angle utilities: %d functions", vectorFuncs);
     if (otherFuncs > 0)
-        printf("   - Other: %d functions\n", otherFuncs);
+        MS_ANGEL_INFO("   - Other: %d functions", otherFuncs);
     
     // Count global properties
     int globalPropCount = pEngine->GetGlobalPropertyCount();
     if (globalPropCount > 0)
     {
-        printf("\nRegistered Global Properties: %d\n", globalPropCount);
+        MS_ANGEL_INFO("Registered Global Properties: %d", globalPropCount);
         for (int i = 0; i < globalPropCount && i < 5; i++)
         {
             const char* name;
@@ -449,19 +452,19 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
             bool isConst;
             if (pEngine->GetGlobalPropertyByIndex(i, &name, &nameSpace, &typeId, &isConst) >= 0)
             {
-                printf("   - %s%s\n", isConst ? "const " : "", name);
+                MS_ANGEL_INFO("   - %s%s", isConst ? "const " : "", name);
             }
         }
         if (globalPropCount > 5)
-            printf("   ... and %d more properties\n", globalPropCount - 5);
+            MS_ANGEL_INFO("   ... and %d more properties", globalPropCount - 5);
     }
     
     // Memory usage estimate
-    printf("\nEngine Status:\n");
-    printf("   - Script modules: %d\n", pEngine->GetModuleCount());
-    printf("   - Type ID counter: %d\n", pEngine->GetTypeIdByDecl("float"));
+    MS_ANGEL_INFO("Engine Status:");
+    MS_ANGEL_INFO("   - Script modules: %d", pEngine->GetModuleCount());
+    MS_ANGEL_INFO("   - Type ID counter: %d", pEngine->GetTypeIdByDecl("float"));
     
-    printf("\n==========================================================================\n");
+    MS_ANGEL_INFO("==========================================================================");
 }
 
 
@@ -472,7 +475,7 @@ bool ASBindings::RegisterScriptClasses(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterScriptClasses: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterScriptClasses: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -481,7 +484,7 @@ bool ASBindings::RegisterScriptClasses(asIScriptEngine* pEngine)
     {
         if (!ASScriptClasses::RegisterAll(pEngine))
         {
-            printf("   ERROR: ASScriptClasses::RegisterAll failed\n");
+            MS_ANGEL_ERROR("   ERROR: ASScriptClasses::RegisterAll failed");
             return false;
         }
         
@@ -490,7 +493,7 @@ bool ASBindings::RegisterScriptClasses(asIScriptEngine* pEngine)
         
         if (!pCGameScriptType)
         {
-            printf("ASBindings::RegisterScriptClasses: ERROR - CGameScript type not found after registration\n");
+            MS_ANGEL_ERROR("ASBindings::RegisterScriptClasses: ERROR - CGameScript type not found after registration");
             return false;
         }
         
@@ -498,18 +501,18 @@ bool ASBindings::RegisterScriptClasses(asIScriptEngine* pEngine)
         int methodCount = pCGameScriptType->GetMethodCount();
         if (methodCount < 5) // Should have at least SetVar, GetVar methods, etc.
         {
-            printf("ASBindings::RegisterScriptClasses: WARNING - CGameScript has only %d methods, expected more\n", methodCount);
+            MS_ANGEL_INFO("ASBindings::RegisterScriptClasses: WARNING - CGameScript has only %d methods, expected more", methodCount);
         }
         
-        printf("   - CGameScript base class registered\n");
-        printf("   - Variable system methods registered\n");
-        printf("   - Script class factory system registered\n");
+        MS_ANGEL_INFO("   - CGameScript base class registered");
+        MS_ANGEL_INFO("   - Variable system methods registered");
+        MS_ANGEL_INFO("   - Script class factory system registered");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterScriptClasses: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterScriptClasses: ERROR - Exception during registration");
         return false;
     }
 }
@@ -521,7 +524,7 @@ bool ASBindings::RegisterCoroutineFunctions(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterCoroutineFunctions: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterCoroutineFunctions: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -539,24 +542,24 @@ bool ASBindings::RegisterCoroutineFunctions(asIScriptEngine* pEngine)
         func = pEngine->GetGlobalFunctionByDecl("int StartCoroutine(const string &in)");
         if (!func)
         {
-            printf("ASBindings::RegisterCoroutineFunctions: WARNING - StartCoroutine() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterCoroutineFunctions: WARNING - StartCoroutine() function not found");
         }
         
         func = pEngine->GetGlobalFunctionByDecl("void DelaySeconds(float)");
         if (!func)
         {
-            printf("ASBindings::RegisterCoroutineFunctions: WARNING - DelaySeconds() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterCoroutineFunctions: WARNING - DelaySeconds() function not found");
         }
         
-        printf("   - Coroutine management functions registered\n");
-        printf("   - Async delay and yield functions registered\n");
-        printf("   - Coroutine manager initialized\n");
+        MS_ANGEL_INFO("   - Coroutine management functions registered");
+        MS_ANGEL_INFO("   - Async delay and yield functions registered");
+        MS_ANGEL_INFO("   - Coroutine manager initialized");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterCoroutineFunctions: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterCoroutineFunctions: ERROR - Exception during registration");
         return false;
     }
 }
@@ -568,7 +571,7 @@ bool ASBindings::RegisterMemoryOptimization(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterMemoryOptimization: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterMemoryOptimization: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -595,16 +598,16 @@ bool ASBindings::RegisterMemoryOptimization(asIScriptEngine* pEngine)
             pObjectPool->SetDefaultMaxObjects(16); // Conservative pool sizes
         }
         
-        printf("   - Object pooling system initialized\n");
-        printf("   - Memory monitoring system initialized\n");
-        printf("   - Script caching system initialized\n");
-        printf("   - 32-bit memory constraints configured\n");
+        MS_ANGEL_INFO("   - Object pooling system initialized");
+        MS_ANGEL_INFO("   - Memory monitoring system initialized");
+        MS_ANGEL_INFO("   - Script caching system initialized");
+        MS_ANGEL_INFO("   - 32-bit memory constraints configured");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterMemoryOptimization: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterMemoryOptimization: ERROR - Exception during registration");
         return false;
     }
 }
@@ -616,7 +619,7 @@ bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
 {
     if (!pEngine)
     {
-        printf("ASBindings::RegisterModuleSystem: ERROR - NULL engine pointer\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterModuleSystem: ERROR - NULL engine pointer");
         return false;
     }
     
@@ -625,7 +628,7 @@ bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
         // Register module management functions from ASModuleSystem
         if (!ASModuleSystemBindings::RegisterAll(pEngine))
         {
-            printf("ASBindings::RegisterModuleSystem: ERROR - ASModuleSystem registration failed\n");
+            MS_ANGEL_ERROR("ASBindings::RegisterModuleSystem: ERROR - ASModuleSystem registration failed");
             return false;
         }
         
@@ -635,25 +638,25 @@ bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
         func = pEngine->GetGlobalFunctionByDecl("bool LoadModule(const string &in)");
         if (!func)
         {
-            printf("ASBindings::RegisterModuleSystem: WARNING - LoadModule() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - LoadModule() function not found");
         }
         
         func = pEngine->GetGlobalFunctionByDecl("bool HasModule(const string &in)");
         if (!func)
         {
-            printf("ASBindings::RegisterModuleSystem: WARNING - HasModule() function not found\n");
+            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - HasModule() function not found");
         }
         
-        printf("   - Module loading and management functions registered\n");
-        printf("   - Module dependency resolution system initialized\n");
-        printf("   - Import/export system registered\n");
-        printf("   - Module search paths configured\n");
+        MS_ANGEL_INFO("   - Module loading and management functions registered");
+        MS_ANGEL_INFO("   - Module dependency resolution system initialized");
+        MS_ANGEL_INFO("   - Import/export system registered");
+        MS_ANGEL_INFO("   - Module search paths configured");
         
         return true;
     }
     catch (...)
     {
-        printf("ASBindings::RegisterModuleSystem: ERROR - Exception during registration\n");
+        MS_ANGEL_ERROR("ASBindings::RegisterModuleSystem: ERROR - Exception during registration");
         return false;
     }
 }

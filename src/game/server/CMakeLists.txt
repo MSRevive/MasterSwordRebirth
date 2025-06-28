@@ -43,6 +43,7 @@ target_include_directories(server PRIVATE
 	${BASEDIR}/src/game/shared/weapons
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
+	${BASEDIR}/thirdparty/spdlog/include
 	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
@@ -58,6 +59,11 @@ target_compile_definitions(server PRIVATE
 	VALVE_DLL
 	CURL_STATICLIB
 	HTTP_ONLY)
+
+# Check if spdlog is available
+if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
+	target_compile_definitions(server PRIVATE HAS_SPDLOG)
+endif()
 
 if (UNIX)
 	target_compile_definitions(server PRIVATE
@@ -252,6 +258,8 @@ set(Shared
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/iscript.h"
 	"../shared/ms/logger.h"
+	"../shared/ms/mslogger.cpp"
+	"../shared/ms/mslogger.h"
 	"../shared/ms/magic.h"
 	"../shared/ms/msbasic.h"
 	"../shared/ms/mscharacter.cpp"

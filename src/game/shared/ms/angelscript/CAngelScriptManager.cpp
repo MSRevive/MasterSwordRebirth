@@ -5,6 +5,7 @@
 #include <ctime>   // for clock, CLOCKS_PER_SEC
 #include <new>     // for placement new
 #include <vector>  // for std::vector
+#include "../mslogger.h"  // Include MSLogger for unified logging
 
 // Only include AngelScript if we're compiling with it enabled
 #ifdef _MSC_VER
@@ -73,15 +74,25 @@ void CAngelScriptManager::Shutdown()
 //==========================================================================
 void ASMessageCallback(const asSMessageInfo* msg, void* param)
 {
-    const char* szType = "INFO";
+    // Use MSLogger for proper categorized logging
     if (msg->type == asMSGTYPE_ERROR) 
-        szType = "ERROR";
+    {
+        MS_ANGEL_ERROR("%s (%d, %d): %s", 
+                       msg->section ? msg->section : "Unknown", 
+                       msg->row, msg->col, msg->message);
+    }
     else if (msg->type == asMSGTYPE_WARNING) 
-        szType = "WARNING";
-    
-    // For now, just output to console - will integrate with MS logging later
-    printf("[AngelScript %s] %s (%d, %d): %s\n", 
-           szType, msg->section, msg->row, msg->col, msg->message);
+    {
+        MS_ANGEL_INFO("WARNING: %s (%d, %d): %s", 
+                      msg->section ? msg->section : "Unknown", 
+                      msg->row, msg->col, msg->message);
+    }
+    else
+    {
+        MS_ANGEL_INFO("%s (%d, %d): %s", 
+                      msg->section ? msg->section : "Unknown", 
+                      msg->row, msg->col, msg->message);
+    }
 }
 
 //==========================================================================
@@ -316,8 +327,15 @@ void CAngelScriptManager::Think()
 //==========================================================================
 void CAngelScriptManager::LogMessage(const char* szMessage, int nLevel)
 {
-    // TODO: Integrate with MS logging system
-    // For now, do nothing - will implement when integrated with svglobals
+    // Use MSLogger for proper categorized logging
+    if (nLevel > 0)  // Error level
+    {
+        MS_ANGEL_ERROR("%s", szMessage);
+    }
+    else  // Info level
+    {
+        MS_ANGEL_INFO("%s", szMessage);
+    }
 }
 
 //==========================================================================
@@ -334,8 +352,8 @@ void* ASMalloc(size_t size)
         if (CAngelScriptManager::s_pInstance->m_nMemoryUsed > 
             CAngelScriptManager::s_pInstance->m_nMemoryLimit)
         {
-            printf("[AngelScript] WARNING: Memory limit exceeded! Used: %zu, Limit: %zu\n",
-                   CAngelScriptManager::s_pInstance->m_nMemoryUsed,
+            MS_ANGEL_INFO("WARNING: Memory limit exceeded! Used: %zu, Limit: %zu",
+                          CAngelScriptManager::s_pInstance->m_nMemoryUsed,
                    CAngelScriptManager::s_pInstance->m_nMemoryLimit);
         }
     }
