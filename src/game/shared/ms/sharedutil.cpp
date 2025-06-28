@@ -1,6 +1,7 @@
 #include "msdllheaders.h"
 #include "global.h"
 #include "logger.h"
+#include "mslogger.h"
 #include "time.h"
 
 #ifdef VALVE_DLL
@@ -52,6 +53,14 @@ void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 
 void OpenLogFiles()
 {
+	// Initialize MSLogger first
+#ifdef VALVE_DLL
+	MSLogger::Initialize(MSGlobals::AbsGamePath.c_str(), true);
+#else
+	MSLogger::Initialize(MSGlobals::AbsGamePath.c_str(), false);
+#endif
+	
+	// Keep old logger for backward compatibility during transition
 	char cLogfile[MAX_PATH];
 	
 #ifdef VALVE_DLL
@@ -75,6 +84,10 @@ void OpenLogFiles()
 	logfile.open(cLogfile);
 #endif
 	g_log_initialized = true;
+	
+	// Log initialization message
+	MS_INFO("Master Sword Rebirth logging system initialized");
+	MS_INFO("Game path: %s", MSGlobals::AbsGamePath.c_str());
 }
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
