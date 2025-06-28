@@ -152,7 +152,7 @@ bool MSGlobalInit() //Called upon DLL Initialization
 		{
 			// Configure memory limit
 			CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
-			g_engfuncs.pfnServerPrint("\nAngelScript initialized successfully");
+			// AngelScript initialization is now logged through MSLogger
 		}
 	}
 

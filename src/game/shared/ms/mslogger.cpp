@@ -63,6 +63,20 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
         return;
     }
     
+    // Clean up any existing spdlog loggers to prevent "already exists" errors
+#if SPDLOG_AVAILABLE
+    try {
+        // Drop any existing loggers with our names
+        for (int i = 0; i < CATEGORY_COUNT; i++) {
+            spdlog::drop(GetCategoryName(static_cast<Category>(i)));
+        }
+        spdlog::drop("ERRORS");
+        spdlog::drop("CHAT");
+    } catch (...) {
+        // Ignore cleanup errors
+    }
+#endif
+    
     s_isServer = isServer;
     
     // Create logs directory

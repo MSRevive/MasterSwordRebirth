@@ -187,20 +187,15 @@ namespace ASBuiltinFunctions
     {
         if (!pEngine) return;
         
-        printf("ASBuiltinFunctions: Registering math functions...\n");
+        printf("ASBuiltinFunctions: Registering additional math functions...\n");
         
-        // Register math utility functions
-        pEngine->RegisterGlobalFunction("float sin(float)", asFUNCTION(AS_Sin), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float cos(float)", asFUNCTION(AS_Cos), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float sqrt(float)", asFUNCTION(AS_Sqrt), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float abs(float)", asFUNCTION(AS_Abs), asCALL_CDECL);
+        // Register only additional math functions that ASCoreTypes doesn't provide
+        // Note: Basic functions (sin, cos, sqrt, abs, min, max) are registered in ASCoreTypes
         pEngine->RegisterGlobalFunction("int abs(int)", asFUNCTION(AS_AbsInt), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float min(float, float)", asFUNCTION(AS_Min), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float max(float, float)", asFUNCTION(AS_Max), asCALL_CDECL);
         pEngine->RegisterGlobalFunction("int min(int, int)", asFUNCTION(AS_MinInt), asCALL_CDECL);
         pEngine->RegisterGlobalFunction("int max(int, int)", asFUNCTION(AS_MaxInt), asCALL_CDECL);
         
-        printf("ASBuiltinFunctions: Math functions registered\n");
+        printf("ASBuiltinFunctions: Additional math functions registered\n");
     }
     
     //==========================================================================
@@ -261,7 +256,8 @@ namespace ASBuiltinFunctions
         pEngine->RegisterGlobalFunction("float GetVectorZ(const Vector3 &in)", asFUNCTION(AS_GetVectorZ), asCALL_CDECL);
         pEngine->RegisterGlobalFunction("float Distance(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_Distance), asCALL_CDECL);
         pEngine->RegisterGlobalFunction("float DotProduct(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_DotProduct), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_CrossProduct), asCALL_CDECL);
+        // Note: CrossProduct is registered in ASCoreTypes, not here
+        // pEngine->RegisterGlobalFunction("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_CrossProduct), asCALL_CDECL);
         
         printf("ASBuiltinFunctions: Vector utility functions registered\n");
     }

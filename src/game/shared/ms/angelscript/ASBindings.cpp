@@ -39,11 +39,48 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     // Step 0: Register string type (MUST be first!)
     MS_ANGEL_INFO("[0/9] Registering String Type...");
     RegisterStdString(pEngine);
-    RegisterStdStringUtils(pEngine);
     
-    // Also register array type early
+    // Register array type before string utils (array<string> template dependency)
     MS_ANGEL_INFO("[1/9] Registering Array Type...");
     RegisterScriptArray(pEngine, true); // true = use native calling convention
+    
+    // Now register string utilities that depend on array<string>
+    MS_ANGEL_INFO("[1.5/9] Registering String Utilities...");
+    try {
+        RegisterStdStringUtils(pEngine);
+        
+        // Verify that array<string> template registration worked
+        asITypeInfo* arrayStringType = pEngine->GetTypeInfoByDecl("array<string>");
+        if (!arrayStringType) {
+            MS_ANGEL_ERROR("   WARNING: array<string> type not found - string utilities may not work properly");
+        } else {
+            MS_ANGEL_INFO("   ✓ array<string> template type verified");
+        }
+        
+        // Check if split method was registered successfully on string type
+        asITypeInfo* stringType = pEngine->GetTypeInfoByName("string");
+        if (stringType) {
+            asIScriptFunction* splitFunc = stringType->GetMethodByDecl("array<string>@ split(const string &in) const");
+            if (!splitFunc) {
+                MS_ANGEL_ERROR("   WARNING: string.split() method not found");
+            } else {
+                MS_ANGEL_INFO("   ✓ string.split() method verified");
+            }
+        } else {
+            MS_ANGEL_ERROR("   WARNING: string type not found for split method validation");
+        }
+        
+        // Check if join function was registered successfully  
+        asIScriptFunction* joinFunc = pEngine->GetGlobalFunctionByDecl("string join(const array<string> &in, const string &in)");
+        if (!joinFunc) {
+            MS_ANGEL_ERROR("   WARNING: join() function not found");
+        } else {
+            MS_ANGEL_INFO("   ✓ String utility functions verified");
+        }
+    } catch (...) {
+        MS_ANGEL_ERROR("   ERROR: Exception during string utilities registration");
+        success = false;
+    }
     
     // Step 2: Register core types (Vector3, Color, math functions)
     MS_ANGEL_INFO("[2/9] Registering Core Types...");
