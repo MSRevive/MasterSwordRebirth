@@ -266,29 +266,8 @@ namespace ASBuiltinFunctions
     // Game System Functions
     //==========================================================================
     
-    // Get console variable value
-    std::string AS_GetCvar(const std::string& name)
-    {
-#ifdef CLIENT_DLL
-        const char* value = CVAR_GET_STRING(name.c_str());
-        return value ? std::string(value) : "";
-#else
-        const char* value = CVAR_GET_STRING(name.c_str());
-        return value ? std::string(value) : "";
-#endif
-    }
-    
-    // Get current game time
-    float AS_GetGameTime()
-    {
-#ifdef CLIENT_DLL
-        // On client, use the engine's client time
-        return gEngfuncs.GetClientTime();
-#else
-        // On server, use gpGlobals->time
-        return gpGlobals ? gpGlobals->time : 0.0f;
-#endif
-    }
+    // Note: AS_GetCvar and AS_GetGameTime are now implemented in ASEntityBindings.cpp
+    // to ensure proper engine integration and avoid duplication
     
     // Random float between min and max
     float AS_Random(float min, float max)
@@ -402,11 +381,8 @@ namespace ASBuiltinFunctions
         
         printf("ASBuiltinFunctions: Registering game system functions...\n");
         
-        // Console variable access
-        pEngine->RegisterGlobalFunction("string GetCvar(const string &in)", asFUNCTION(AS_GetCvar), asCALL_CDECL);
-        
-        // Time functions
-        pEngine->RegisterGlobalFunction("float GetGameTime()", asFUNCTION(AS_GetGameTime), asCALL_CDECL);
+        // Note: GetCvar and GetGameTime are now registered in ASEntityBindings.cpp
+        // to avoid duplicate registrations and ensure proper engine integration
         
         // Random functions
         pEngine->RegisterGlobalFunction("float Random(float, float)", asFUNCTION(AS_Random), asCALL_CDECL);
@@ -417,10 +393,10 @@ namespace ASBuiltinFunctions
         pEngine->RegisterGlobalFunction("void DeveloperMessage(int, const string &in)", asFUNCTION(AS_DeveloperMessage), asCALL_CDECL);
         
         // Entity access functions
-        pEngine->RegisterGlobalFunction("EntityHandle@ FindEntityByName(const string &in)", asFUNCTION(AS_FindEntityByName), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("EntityHandle@ GetPlayerByIndex(int)", asFUNCTION(AS_GetPlayerByIndex), asCALL_CDECL);
+        pEngine->RegisterGlobalFunction("EntityHandle FindEntityByName(const string &in)", asFUNCTION(AS_FindEntityByName), asCALL_CDECL);
+        pEngine->RegisterGlobalFunction("EntityHandle GetPlayerByIndex(int)", asFUNCTION(AS_GetPlayerByIndex), asCALL_CDECL);
         pEngine->RegisterGlobalFunction("int GetPlayerCount()", asFUNCTION(AS_GetPlayerCount), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("bool IsValidEntity(EntityHandle@)", asFUNCTION(AS_IsValidEntity), asCALL_CDECL);
+        pEngine->RegisterGlobalFunction("bool IsValidEntity(EntityHandle)", asFUNCTION(AS_IsValidEntity), asCALL_CDECL);
         
         // Angle manipulation functions
         pEngine->RegisterGlobalFunction("Vector3 CreateAngles(float, float, float)", asFUNCTION(AS_CreateAngles), asCALL_CDECL);

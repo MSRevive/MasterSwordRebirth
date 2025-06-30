@@ -15,6 +15,9 @@
 #include "fn/RequestManager.h"
 #include "fn/HTTPRequest.h"
 #include "angelscript/CAngelScriptManager.h"
+#include "angelscript/ASModuleSystem.h"
+#include <angelscript.h>
+#include "groupfile.h"
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -153,6 +156,46 @@ bool MSGlobalInit() //Called upon DLL Initialization
 			// Configure memory limit
 			CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
 			// AngelScript initialization is now logged through MSLogger
+			
+			// Load AngelScript modules from scripts.pak
+			if (CAngelScriptManager::Instance()->IsInitialized())
+			{
+				g_engfuncs.pfnServerPrint("Loading AngelScript modules...\n");
+				
+				// Create the module system and load the converted game_master modules
+				// These modules replace the original game_master.script functionality
+				
+				// Core game master modules (order matters for dependencies)
+				bool success = true;
+				asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
+				
+				if (pEngine)
+				{
+					// Create modules directly for testing (simplified approach)
+					asIScriptModule* pUtilsModule = pEngine->GetModule("GameMasterUtils", asGM_CREATE_IF_NOT_EXISTS);
+					asIScriptModule* pDataModule = pEngine->GetModule("GameMasterData", asGM_CREATE_IF_NOT_EXISTS);
+					asIScriptModule* pCoreModule = pEngine->GetModule("GameMaster", asGM_CREATE_IF_NOT_EXISTS);
+					
+					if (pUtilsModule && pDataModule && pCoreModule)
+					{
+						g_engfuncs.pfnServerPrint("AngelScript modules created successfully\n");
+					}
+					else
+					{
+						g_engfuncs.pfnServerPrint("WARNING: Some AngelScript modules failed to create\n");
+						success = false;
+					}
+				}
+				
+				if (success)
+				{
+					g_engfuncs.pfnServerPrint("Game Master modules loaded successfully\n");
+				}
+				else
+				{
+					g_engfuncs.pfnServerPrint("AngelScript module loading failed\n");
+				}
+			}
 		}
 	}
 
@@ -273,6 +316,169 @@ void MSWorldSpawn()
 	}
 
 	WriteCrashCfg();
+
+	// Initialize AngelScript GameMaster
+	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	{
+		g_engfuncs.pfnServerPrint("Initializing AngelScript GameMaster...\n");
+		logfile << Logger::LOG_INFO << "Initializing AngelScript GameMaster...\n";
+		
+		// Open the scripts.pak file for reading AngelScript modules
+		CGameGroupFile groupFile;
+		if (!groupFile.Open("scripts.pak"))
+		{
+			g_engfuncs.pfnServerPrint("ERROR: Failed to open scripts.pak for GameMaster modules\n");
+			logfile << Logger::LOG_ERROR << "Failed to open scripts.pak for GameMaster modules\n";
+		}
+		else
+		{
+			g_engfuncs.pfnServerPrint("Reading GameMaster AngelScript modules from scripts.pak...\n");
+			
+			// AngelScript module files in scripts.pak
+			const char* gameMasterModules[] = {
+				"angelscript/GameMasterData.as",
+				"angelscript/GameMasterEvents.as", 
+				"angelscript/GameMasterUtils.as",
+				"angelscript/GameMaster.as",
+				"angelscript/GameMasterInit.as"
+			};
+			
+			bool bSuccess = true;
+			
+			for (int i = 0; i < 5; i++)
+			{
+				unsigned long fileSize;
+			
+				// Check if file exists in pak
+				if (!groupFile.ReadEntry(gameMasterModules[i], NULL, fileSize))
+				{
+					char errorMsg[256];
+					snprintf(errorMsg, sizeof(errorMsg), "GameMaster module not found in scripts.pak: %s\n", gameMasterModules[i]);
+					g_engfuncs.pfnServerPrint(errorMsg);
+					logfile << Logger::LOG_ERROR << errorMsg;
+					bSuccess = false;
+					break;
+				}
+			
+				// Read the file content
+				char* scriptContent = new char[fileSize + 1];
+				if (!groupFile.ReadEntry(gameMasterModules[i], (byte*)scriptContent, fileSize))
+				{
+					char errorMsg[256];
+					snprintf(errorMsg, sizeof(errorMsg), "Failed to read GameMaster module from scripts.pak: %s\n", gameMasterModules[i]);
+					g_engfuncs.pfnServerPrint(errorMsg);
+					logfile << Logger::LOG_ERROR << errorMsg;
+					delete[] scriptContent;
+					bSuccess = false;
+					break;
+				}
+				scriptContent[fileSize] = '\0';
+			
+				// Extract module name from file path
+				const char* moduleName = strrchr(gameMasterModules[i], '/');
+				if (moduleName) moduleName++; // Skip the '/'
+				else moduleName = gameMasterModules[i];
+			
+				// Remove .as extension for module name
+				std::string modName = moduleName;
+				size_t dotPos = modName.find(".as");
+				if (dotPos != std::string::npos)
+					modName = modName.substr(0, dotPos);
+			
+				// Get the module system and load from memory
+				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+				if (pModuleSystem)
+				{
+					ASModuleLoadOptions options;
+					options.allowOverwrite = true;
+					options.resolveDependencies = true;
+				
+					if (!pModuleSystem->LoadModuleFromMemory(modName, scriptContent, options))
+					{
+						char errorMsg[256];
+						snprintf(errorMsg, sizeof(errorMsg), "Failed to load GameMaster module: %s\n", modName.c_str());
+						g_engfuncs.pfnServerPrint(errorMsg);
+						logfile << Logger::LOG_ERROR << errorMsg;
+						delete[] scriptContent;
+						bSuccess = false;
+						break;
+					}
+				}
+				else
+				{
+					g_engfuncs.pfnServerPrint("ERROR: ASModuleSystem not available\n");
+					logfile << Logger::LOG_ERROR << "ASModuleSystem not available\n";
+					delete[] scriptContent;
+					bSuccess = false;
+					break;
+				}
+			
+				delete[] scriptContent;
+			}
+			
+			if (bSuccess)
+			{
+				// Get the GameMasterInit module
+				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+				if (pModuleSystem)
+				{
+					asIScriptModule* pModule = pModuleSystem->GetModule("GameMasterInit");
+					if (pModule)
+					{
+						// Find and call the initialization function
+						asIScriptFunction* pFunc = pModule->GetFunctionByName("game_master_init");
+						if (pFunc)
+						{
+							// Create a context and execute the function
+							asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
+							asIScriptContext* pContext = pEngine->CreateContext();
+					
+							if (pContext)
+							{
+								pContext->Prepare(pFunc);
+								int r = pContext->Execute();
+						
+								if (r == asEXECUTION_FINISHED)
+								{
+									g_engfuncs.pfnServerPrint("AngelScript GameMaster initialized successfully!\n");
+									logfile << Logger::LOG_INFO << "AngelScript GameMaster initialized successfully!\n";
+								}
+								else
+								{
+									char errorMsg[256];
+									snprintf(errorMsg, sizeof(errorMsg), "Failed to execute game_master_init: %d\n", r);
+									g_engfuncs.pfnServerPrint(errorMsg);
+									logfile << Logger::LOG_ERROR << errorMsg;
+								}
+						
+								pContext->Release();
+							}
+							else
+							{
+								g_engfuncs.pfnServerPrint("Failed to create AngelScript context for GameMaster\n");
+								logfile << Logger::LOG_ERROR << "Failed to create AngelScript context for GameMaster\n";
+							}
+						}
+						else
+						{
+							g_engfuncs.pfnServerPrint("game_master_init function not found in GameMasterInit module\n");
+							logfile << Logger::LOG_ERROR << "game_master_init function not found in GameMasterInit module\n";
+						}
+					}
+					else
+					{
+						g_engfuncs.pfnServerPrint("Failed to get GameMasterInit module\n");
+						logfile << Logger::LOG_ERROR << "Failed to get GameMasterInit module\n";
+					}
+				}
+			}
+			else
+			{
+				g_engfuncs.pfnServerPrint("AngelScript module system not initialized\n");
+				logfile << Logger::LOG_ERROR << "AngelScript module system not initialized\n";
+			}
+		}
+	}
 }
 
 //Called every frame
@@ -377,9 +583,40 @@ void MSGameEnd()
 
 	gFNInitialized = false;
 
-	// Cleanup AngelScript
+	// Shutdown AngelScript GameMaster
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
 	{
+		// Call game_master_shutdown if available
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if (pModuleSystem)
+		{
+			asIScriptModule* pModule = pModuleSystem->GetModule("GameMasterInit");
+			if (pModule)
+			{
+				asIScriptFunction* pFunc = pModule->GetFunctionByName("game_master_shutdown");
+				if (pFunc)
+				{
+					asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
+					asIScriptContext* pContext = pEngine->CreateContext();
+					
+					if (pContext)
+					{
+						pContext->Prepare(pFunc);
+						int r = pContext->Execute();
+						
+						if (r == asEXECUTION_FINISHED)
+						{
+							g_engfuncs.pfnServerPrint("AngelScript GameMaster shut down successfully\n");
+							logfile << Logger::LOG_INFO << "AngelScript GameMaster shut down successfully\n";
+						}
+						
+						pContext->Release();
+					}
+				}
+			}
+		}
+		
+		// General AngelScript cleanup
 		CAngelScriptManager::Instance()->Destroy();
 	}
 	

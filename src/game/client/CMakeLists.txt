@@ -347,6 +347,7 @@ set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_bytecode.cpp"
 	"../../../thirdparty/angelscript/as_callfunc.cpp"
 	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x64_msvc.cpp"
 	"../../../thirdparty/angelscript/as_compiler.cpp"
 	"../../../thirdparty/angelscript/as_configgroup.cpp"
 	"../../../thirdparty/angelscript/as_context.cpp"

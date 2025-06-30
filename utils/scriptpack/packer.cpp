@@ -52,7 +52,7 @@ void Packer::readDirectory(char *pszName, bool cooked)
 			{
 			case DT_REG:
 				//ignore non script files.
-				if(strstr(ent->d_name, ".script") || !stricmp(ent->d_name, "items.txt"))
+				if(strstr(ent->d_name, ".script") || strstr(ent->d_name, ".as") || !stricmp(ent->d_name, "items.txt"))
 				{
 					if(cooked)
 						m_CookedFiles.add(cFullPath);

@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
-#include "../../../../thirdparty/include/angelscript.h"
+#include <angelscript.h>
 
 // Forward declarations
 class asIScriptEngine;

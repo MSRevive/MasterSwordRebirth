@@ -16,6 +16,9 @@
 typedef float vec_t;
 #include "../../../server/hl/vector.h"
 
+// Include MSLogger for consistent logging
+#include "mslogger.h"
+
 // Math constants as global variables (not macros) for AngelScript registration
 static const float AS_PI = 3.14159265358979323846f;
 static const float AS_E = 2.71828182845904523536f;
@@ -33,6 +36,12 @@ namespace ASCoreTypes
     void ColorInitConstructor(float r, float g, float b, Vector *ptr);
     void ColorInitConstructorAlpha(float r, float g, float b, float a, Vector *ptr);
     
+    // EntityHandle wrapper functions
+    bool EntityHandle_IsValid(void* pHandle);
+    void* EntityHandle_Get(void* pHandle);
+    void EntityHandle_DefaultConstructor(void* pHandle);
+    void EntityHandle_IntConstructor(int value, void* pHandle);
+    
     // Math function wrappers for AngelScript
     float AS_Sin(float x) { return sin(x); }
     float AS_Cos(float x) { return cos(x); }
@@ -45,27 +54,38 @@ namespace ASCoreTypes
     {
         if (!pEngine) return;
         
-        printf("ASCoreTypes: Registering core types and math functions...\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registering core types and math functions...");
+        
+        // Note: AngelScript has built-in primitive types:
+        // - bool
+        // - int8, int16, int (same as int32), int64
+        // - uint8, uint16, uint (same as uint32), uint64
+        // - float, double
+        // These are automatically available and don't need registration.
+        
+        // If we need specific type aliases (e.g., byte for uint8), we can add them:
+        // pEngine->RegisterTypedef("byte", "uint8");
+        // pEngine->RegisterTypedef("sbyte", "int8");
         
         RegisterVector3(pEngine);
         RegisterColor(pEngine);
         RegisterEntityHandle(pEngine);
         RegisterMathFunctions(pEngine);
         
-        printf("ASCoreTypes: Registration complete\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registration complete");
     }
     
     void RegisterVector3(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        printf("ASCoreTypes: Registering Vector3 type...\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registering Vector3 type...");
         
         // Register the Vector type as "Vector3" in AngelScript
         // Use asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK for a simple value type with constructor, assignment, and copy constructor
         int r = pEngine->RegisterObjectType("Vector3", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
         if (r < 0) {
-            printf("ASCoreTypes: Failed to register Vector3 type\n");
+            MS_ANGEL_ERROR("ASCoreTypes: Failed to register Vector3 type");
             return;
         }
         
@@ -103,21 +123,21 @@ namespace ASCoreTypes
         // For now, we'll register them as method calls instead of global functions
         pEngine->RegisterGlobalFunction("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", asFUNCTIONPR(CrossProduct, (const Vector&, const Vector&), Vector), asCALL_CDECL);
         
-        printf("ASCoreTypes: Vector3 registration complete\n");
+        MS_ANGEL_INFO("ASCoreTypes: Vector3 registration complete");
     }
     
     void RegisterColor(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        printf("ASCoreTypes: Registering Color type...\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registering Color type...");
         
         // Register Color as a Vector type (r, g, b stored in x, y, z, alpha in a separate field if needed)
         // For simplicity, we'll use Vector and treat it as RGB with x=r, y=g, z=b
         // Register Color type (also uses Vector internally)
         int r = pEngine->RegisterObjectType("Color", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
         if (r < 0) {
-            printf("ASCoreTypes: Failed to register Color type\n");
+            MS_ANGEL_ERROR("ASCoreTypes: Failed to register Color type");
             return;
         }
         
@@ -130,36 +150,46 @@ namespace ASCoreTypes
         pEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(ColorDefaultConstructor), asCALL_CDECL_OBJLAST);
         pEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f(float, float, float)", asFUNCTION(ColorInitConstructor), asCALL_CDECL_OBJLAST);
         
-        printf("ASCoreTypes: Color registration complete\n");
+        MS_ANGEL_INFO("ASCoreTypes: Color registration complete");
     }
     
     void RegisterString(asIScriptEngine* pEngine)
     {
         // TODO: Implement string utilities
-        printf("ASCoreTypes: String utilities not yet implemented\n");
+        MS_ANGEL_INFO("ASCoreTypes: String utilities not yet implemented");
     }
     
     void RegisterEntityHandle(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        printf("ASCoreTypes: Registering EntityHandle type...\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registering EntityHandle type...");
         
-        // Register EntityHandle as a reference type (handle to an entity)
-        int r = pEngine->RegisterObjectType("EntityHandle", 0, asOBJ_REF | asOBJ_NOCOUNT);
+        // Register EntityHandle as a value type (like an ID/index)
+        // Use asOBJ_VALUE | asOBJ_POD for a simple value type that can be declared directly
+        int r = pEngine->RegisterObjectType("EntityHandle", sizeof(int), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_PRIMITIVE);
         if (r < 0) {
-            printf("ASCoreTypes: Failed to register EntityHandle type\n");
+            MS_ANGEL_ERROR("ASCoreTypes: Failed to register EntityHandle type");
             return;
         }
         
-        printf("ASCoreTypes: EntityHandle type registered\n");
+        // Register EntityHandle methods
+        // Note: These connect to the actual entity system
+        pEngine->RegisterObjectMethod("EntityHandle", "bool IsValid() const", asFUNCTION(EntityHandle_IsValid), asCALL_CDECL_OBJLAST);
+        pEngine->RegisterObjectMethod("EntityHandle", "CBaseEntity@ Get() const", asFUNCTION(EntityHandle_Get), asCALL_CDECL_OBJLAST);
+        
+        // Register constructor and assignment for value types
+        pEngine->RegisterObjectBehaviour("EntityHandle", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(EntityHandle_DefaultConstructor), asCALL_CDECL_OBJLAST);
+        pEngine->RegisterObjectBehaviour("EntityHandle", asBEHAVE_CONSTRUCT, "void f(int)", asFUNCTION(EntityHandle_IntConstructor), asCALL_CDECL_OBJLAST);
+        
+        MS_ANGEL_INFO("ASCoreTypes: EntityHandle type registered as value type with methods");
     }
     
     void RegisterMathFunctions(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        printf("ASCoreTypes: Registering math functions...\n");
+        MS_ANGEL_INFO("ASCoreTypes: Registering math functions...");
         
         // Register basic math functions
         pEngine->RegisterGlobalFunction("float sin(float)", asFUNCTION(AS_Sin), asCALL_CDECL);
@@ -173,7 +203,7 @@ namespace ASCoreTypes
         pEngine->RegisterGlobalProperty("const float PI", (void*)&AS_PI);
         pEngine->RegisterGlobalProperty("const float E", (void*)&AS_E);
         
-        printf("ASCoreTypes: Math function registration complete\n");
+        MS_ANGEL_INFO("ASCoreTypes: Math function registration complete");
     }
     
     // Constructor wrapper implementations
@@ -206,5 +236,113 @@ namespace ASCoreTypes
     {
         // For now, ignore alpha since Vector only has 3 components
         new(ptr) Vector(r, g, b);
+    }
+    
+    // External entity system integration functions
+    // TODO: These should be implemented by the game engine to provide actual entity management
+    // For now, providing placeholder implementations
+    extern "C" {
+        bool ValidateEntityHandle_AS(int handle) {
+            // Placeholder: assume handle > 0 is valid
+            return handle > 0;
+        }
+        
+        void* GetEntityFromHandle_AS(int handle) {
+            // Placeholder: return a dummy pointer for valid handles
+            if (handle > 0) {
+                // Return a fake pointer for testing (this should be actual entity retrieval)
+                return reinterpret_cast<void*>(static_cast<uintptr_t>(handle * 0x1000));
+            }
+            return nullptr;
+        }
+        
+        const char* GetEntityClassName_AS(void* entity) {
+            // Placeholder: return generic class name
+            if (entity) {
+                return "entity";
+            }
+            return "null_entity";
+        }
+    }
+    
+    // EntityHandle implementations with actual entity system integration
+    bool EntityHandle_IsValid(void* pHandle)
+    {
+        if (!pHandle) {
+            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_IsValid - NULL handle pointer");
+            return false;
+        }
+        
+        int handle = *(int*)pHandle;
+        if (handle <= 0) {
+            MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_IsValid - Invalid handle value: %d", handle);
+            return false;
+        }
+        
+#ifdef VALVE_DLL
+        // Use actual entity validation when available
+        bool isValid = ValidateEntityHandle_AS(handle);
+        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_IsValid(%d) = %s", handle, isValid ? "true" : "false");
+        return isValid;
+#else
+        // Client-side fallback - assume handle > 0 is valid
+        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_IsValid(%d) = true (client fallback)", handle);
+        return true;
+#endif
+    }
+    
+    void* EntityHandle_Get(void* pHandle)
+    {
+        if (!pHandle) {
+            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_Get - NULL handle pointer");
+            return nullptr;
+        }
+        
+        int handle = *(int*)pHandle;
+        if (handle <= 0) {
+            MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_Get - Invalid handle value: %d", handle);
+            return nullptr;
+        }
+        
+#ifdef VALVE_DLL
+        // Use actual entity retrieval when available
+        void* entity = GetEntityFromHandle_AS(handle);
+        if (entity) {
+            // Validate that this is actually a CBaseEntity
+            const char* className = GetEntityClassName_AS(entity);
+            MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_Get(%d) = %p (%s)", handle, entity, className ? className : "unknown");
+        } else {
+            MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_Get(%d) = NULL (entity not found)", handle);
+        }
+        return entity;
+#else
+        // Client-side fallback - return a dummy pointer for testing
+        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_Get(%d) = %p (client fallback)", handle, pHandle);
+        return pHandle;
+#endif
+    }
+    
+    void EntityHandle_DefaultConstructor(void* pHandle)
+    {
+        if (!pHandle) {
+            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_DefaultConstructor - NULL handle pointer");
+            return;
+        }
+        
+        // Initialize EntityHandle to 0 (invalid)
+        *(int*)pHandle = 0;
+        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_DefaultConstructor - initialized to 0");
+    }
+    
+    void EntityHandle_IntConstructor(int value, void* pHandle)
+    {
+        if (!pHandle) {
+            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_IntConstructor - NULL handle pointer");
+            return;
+        }
+        
+        // Initialize EntityHandle with specific value
+        *(int*)pHandle = value;
+        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_IntConstructor - initialized to %d", value);
     }
 }

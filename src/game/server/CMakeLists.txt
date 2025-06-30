@@ -163,6 +163,8 @@ set(HL1
 source_group("HL1" FILES ${HL1})
 
 set(MS
+	"ASPlayerBridge.cpp"
+	"ASServerEngine.cpp"
 	"effects/mseffects.cpp"
 	"entity.cpp"
 	"gamerules/team.cpp"
@@ -328,6 +330,9 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASTest.h"
 	"../shared/ms/angelscript/ASCoreTypes.cpp"
 	"../shared/ms/angelscript/ASCoreTypes.h"
+	"../shared/ms/angelscript/ASEntityBindings.cpp"
+	"../shared/ms/angelscript/ASEntityBindings.h"
+	"../shared/ms/angelscript/ASEngineStubs.cpp"
 	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
 	"../shared/ms/angelscript/ASBuiltinFunctions.h"
 	"../shared/ms/angelscript/ASBindings.cpp"
@@ -351,6 +356,7 @@ set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_bytecode.cpp"
 	"../../../thirdparty/angelscript/as_callfunc.cpp"
 	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x64_msvc.cpp"
 	"../../../thirdparty/angelscript/as_compiler.cpp"
 	"../../../thirdparty/angelscript/as_configgroup.cpp"
 	"../../../thirdparty/angelscript/as_context.cpp"
