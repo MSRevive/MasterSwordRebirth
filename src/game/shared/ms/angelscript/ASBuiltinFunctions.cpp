@@ -1,12 +1,12 @@
 //==========================================================================
-// ASBuiltinFunctions.cpp - Comprehensive Implementation
+// ASBuiltinFunctions.cpp - Using asbind20
 //
 // Built-in function implementations for AngelScript integration
 // Converts legacy $-functions to AngelScript global functions
 //==========================================================================
 
 #include "ASBuiltinFunctions.h"
-#include <angelscript.h>
+#include <asbind20/asbind.hpp>
 #include <cstdio>
 #include <string>
 #include <algorithm>
@@ -22,11 +22,55 @@
 #else
     #include "extdll.h"
     #include "util.h"
+    #include "cbase.h"
+    #include "player/player.h"
     extern globalvars_t *gpGlobals;
     extern enginefuncs_t g_engfuncs;
 #endif
 #include <cmath>
 #include "../../../server/hl/vector.h"
+#include <angelscript/addons/scriptarray/scriptarray.h>
+#include "mslogger.h"
+
+// Forward declare EntityHandle struct (defined in ASCoreTypes.cpp)
+struct EntityHandle
+{
+    int value;
+    EntityHandle() : value(0) {}
+    EntityHandle(int v) : value(v) {}
+};
+
+// Helper function to get player by index - implemented differently on server vs client
+static CBasePlayer* GetPlayerByIndexHelper(int index)
+{
+#ifdef CLIENT_DLL
+    return nullptr; // Client doesn't have access to other players
+#else
+    // Server-side implementation
+    if (index < 1 || index > gpGlobals->maxClients) {
+        return nullptr;
+    }
+    
+    // Use engine function to get edict
+    edict_t* pEdict = g_engfuncs.pfnPEntityOfEntIndex(index);
+    if (!pEdict || pEdict->free) {
+        return nullptr;
+    }
+    
+    // Get the entity from the edict
+    CBaseEntity* pEntity = CBaseEntity::Instance(pEdict);
+    if (!pEntity) {
+        return nullptr;
+    }
+    
+    // Check if it's a player
+    if (!(pEntity->edict()->v.flags & FL_CLIENT)) {
+        return nullptr;
+    }
+    
+    return static_cast<CBasePlayer*>(pEntity);
+#endif
+}
 
 //==========================================================================
 // Built-in Functions Registration - Comprehensive Implementation
@@ -249,15 +293,15 @@ namespace ASBuiltinFunctions
         
         printf("ASBuiltinFunctions: Registering vector utility functions...\n");
         
-        // Register vector creation and manipulation functions
-        pEngine->RegisterGlobalFunction("Vector3 CreateVector(float, float, float)", asFUNCTION(AS_CreateVector), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetVectorX(const Vector3 &in)", asFUNCTION(AS_GetVectorX), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetVectorY(const Vector3 &in)", asFUNCTION(AS_GetVectorY), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetVectorZ(const Vector3 &in)", asFUNCTION(AS_GetVectorZ), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float Distance(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_Distance), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float DotProduct(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_DotProduct), asCALL_CDECL);
+        // Register vector creation and manipulation functions with asbind20
+        asbind20::global(pEngine)
+            .function("Vector3 CreateVector(float, float, float)", &AS_CreateVector)
+            .function("float GetVectorX(const Vector3 &in)", &AS_GetVectorX)
+            .function("float GetVectorY(const Vector3 &in)", &AS_GetVectorY)
+            .function("float GetVectorZ(const Vector3 &in)", &AS_GetVectorZ)
+            .function("float Distance(const Vector3 &in, const Vector3 &in)", &AS_Distance)
+            .function("float DotProduct(const Vector3 &in, const Vector3 &in)", &AS_DotProduct);
         // Note: CrossProduct is registered in ASCoreTypes, not here
-        // pEngine->RegisterGlobalFunction("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", asFUNCTION(AS_CrossProduct), asCALL_CDECL);
         
         printf("ASBuiltinFunctions: Vector utility functions registered\n");
     }
@@ -320,35 +364,104 @@ namespace ASBuiltinFunctions
     }
     
     // Find entity by targetname
-    void* AS_FindEntityByName(const std::string& name)
+    EntityHandle AS_FindEntityByName(const std::string& name)
     {
+        MS_ANGEL_DEBUG("FindEntityByName: Searching for '%s'", name.c_str());
         // TODO: Implement proper entity finding
-        // For now, return nullptr (not implemented)
-        return nullptr;
+        // For now, return an invalid handle
+        return EntityHandle(0);
     }
     
     // Get player by index (1-based)
-    void* AS_GetPlayerByIndex(int index)
+    CBasePlayer* AS_GetPlayerByIndex(int index)
     {
-        // TODO: Implement proper player by index lookup
-        // For now, return nullptr (not implemented)
-        return nullptr;
+        #ifdef CLIENT_DLL
+            // Client-side: Limited player access
+            MS_ANGEL_DEBUG("GetPlayerByIndex called on client (index: %d)", index);
+            return nullptr;
+        #else
+            // Server-side: Real player lookup
+            if (index < 1 || index > gpGlobals->maxClients) {
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Invalid index %d (max: %d)", index, gpGlobals->maxClients);
+                return nullptr;
+            }
+            
+            CBasePlayer* pPlayer = GetPlayerByIndexHelper(index);
+            if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Found player %d (%s)", index, STRING(pPlayer->edict()->v.netname));
+                return pPlayer;
+            }
+            
+            MS_ANGEL_DEBUG("GetPlayerByIndex: No valid player at index %d", index);
+            return nullptr;
+        #endif
     }
     
     // Get number of connected players
     int AS_GetPlayerCount()
     {
-        // TODO: Implement proper player counting
-        // For now, return a placeholder value
-        return 1;
+        #ifdef CLIENT_DLL
+            // Client-side: Return 1 (self)
+            return 1;
+        #else
+            // Server-side: Count connected players
+            int playerCount = 0;
+            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+                CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
+                if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
+                    // Additional check: ensure player is fully connected
+                    if (pPlayer->edict()->v.flags & FL_CLIENT) {
+                        playerCount++;
+                    }
+                }
+            }
+            
+            MS_ANGEL_DEBUG("GetPlayerCount: %d connected players", playerCount);
+            return playerCount;
+        #endif
     }
     
-    // Check if entity reference is valid
-    bool AS_IsValidEntity(void* entity)
+    // Get all connected players as an array
+    CScriptArray* AS_GetAllPlayers(asIScriptEngine* engine)
     {
+        // Get the array type for CBasePlayer@[]
+        asITypeInfo* arrayType = engine->GetTypeInfoByDecl("array<CBasePlayer@>");
+        if (!arrayType) {
+            MS_ANGEL_ERROR("Failed to get array<CBasePlayer@> type for GetAllPlayers");
+            return nullptr;
+        }
+        
+        // Create new array
+        CScriptArray* playerArray = CScriptArray::Create(arrayType);
+        
+        #ifndef CLIENT_DLL
+            // Server-side: Populate with real players
+            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+                CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
+                if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
+                    if (pPlayer->edict()->v.flags & FL_CLIENT) {
+                        // Add player to array
+                        playerArray->Resize(playerArray->GetSize() + 1);
+                        *(CBasePlayer**)playerArray->At(playerArray->GetSize() - 1) = pPlayer;
+                    }
+                }
+            }
+            
+            MS_ANGEL_INFO("GetAllPlayers: Returning %d players", playerArray->GetSize());
+        #else
+            // Client-side: Empty array
+            MS_ANGEL_DEBUG("GetAllPlayers called on client side");
+        #endif
+        
+        return playerArray;
+    }
+
+    // Check if entity reference is valid
+    bool AS_IsValidEntity(EntityHandle handle)
+    {
+        MS_ANGEL_DEBUG("IsValidEntity: Checking handle %d", handle.value);
         // TODO: Implement proper entity validation
-        // For now, just check for non-null pointer
-        return (entity != nullptr);
+        return handle.value != 0;
     }
     
     // Create angle vector
@@ -384,25 +497,25 @@ namespace ASBuiltinFunctions
         // Note: GetCvar and GetGameTime are now registered in ASEntityBindings.cpp
         // to avoid duplicate registrations and ensure proper engine integration
         
-        // Random functions
-        pEngine->RegisterGlobalFunction("float Random(float, float)", asFUNCTION(AS_Random), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("int RandomInt(int, int)", asFUNCTION(AS_RandomInt), asCALL_CDECL);
+        // Register game functions with asbind20 - simplified to isolate assertion issue
+        asbind20::global(pEngine)
+            // Random functions
+            .function("float Random(float, float)", &AS_Random)
+            .function("int RandomInt(int, int)", &AS_RandomInt)
+            // Logging functions
+            .function("void LogMessage(const string &in)", &AS_LogMessage)
+            .function("void DeveloperMessage(int, const string &in)", &AS_DeveloperMessage)
+            // Basic functions only for now
+            .function("int GetPlayerCount()", &AS_GetPlayerCount)
+            // Angle manipulation functions
+            .function("Vector3 CreateAngles(float, float, float)", &AS_CreateAngles)
+            .function("float GetAnglePitch(const Vector3 &in)", &AS_GetAnglePitch)
+            .function("float GetAngleYaw(const Vector3 &in)", &AS_GetAngleYaw)
+            .function("float GetAngleRoll(const Vector3 &in)", &AS_GetAngleRoll);
         
-        // Logging functions
-        pEngine->RegisterGlobalFunction("void LogMessage(const string &in)", asFUNCTION(AS_LogMessage), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void DeveloperMessage(int, const string &in)", asFUNCTION(AS_DeveloperMessage), asCALL_CDECL);
-        
-        // Entity access functions
-        pEngine->RegisterGlobalFunction("EntityHandle FindEntityByName(const string &in)", asFUNCTION(AS_FindEntityByName), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("EntityHandle GetPlayerByIndex(int)", asFUNCTION(AS_GetPlayerByIndex), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("int GetPlayerCount()", asFUNCTION(AS_GetPlayerCount), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("bool IsValidEntity(EntityHandle)", asFUNCTION(AS_IsValidEntity), asCALL_CDECL);
-        
-        // Angle manipulation functions
-        pEngine->RegisterGlobalFunction("Vector3 CreateAngles(float, float, float)", asFUNCTION(AS_CreateAngles), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetAnglePitch(const Vector3 &in)", asFUNCTION(AS_GetAnglePitch), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetAngleYaw(const Vector3 &in)", asFUNCTION(AS_GetAngleYaw), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float GetAngleRoll(const Vector3 &in)", asFUNCTION(AS_GetAngleRoll), asCALL_CDECL);
+        // Register GetAllPlayers function separately since it needs engine parameter
+        pEngine->RegisterGlobalFunction("array<CBasePlayer@>@ GetAllPlayers()", 
+            asFUNCTION(AS_GetAllPlayers), asCALL_CDECL);
         
         printf("ASBuiltinFunctions: Game system functions registered\n");
     }

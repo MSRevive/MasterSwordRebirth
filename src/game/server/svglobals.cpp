@@ -74,12 +74,12 @@ cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
 
 //AngelScript CVARs
-cvar_t as_enabled = {"as_enabled", "0", FCVAR_SERVER};
-cvar_t as_memory_limit = {"as_memory_limit", "134217728", FCVAR_SERVER}; // 128MB
-cvar_t as_memory_debug = {"as_memory_debug", "0", FCVAR_SERVER};
-cvar_t as_gc_interval = {"as_gc_interval", "60", FCVAR_SERVER};
-cvar_t as_stack_size = {"as_stack_size", "4096", FCVAR_SERVER}; // 4KB
-cvar_t as_debug_mode = {"as_debug_mode", "0", FCVAR_SERVER};
+cvar_t as_enabled = {const_cast<char*>("as_enabled"), "0", FCVAR_SERVER};
+cvar_t as_memory_limit = {const_cast<char*>("as_memory_limit"), "134217728", FCVAR_SERVER}; // 128MB
+cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "0", FCVAR_SERVER};
+cvar_t as_gc_interval = {const_cast<char*>("as_gc_interval"), "60", FCVAR_SERVER};
+cvar_t as_stack_size = {const_cast<char*>("as_stack_size"), "4096", FCVAR_SERVER}; // 4KB
+cvar_t as_debug_mode = {const_cast<char*>("as_debug_mode"), "0", FCVAR_SERVER};
 
 #ifdef DEV_BUILD
 cvar_t ms_devlog = {"ms_devlog", "1", 0};
@@ -385,7 +385,7 @@ void MSWorldSpawn()
 				if (dotPos != std::string::npos)
 					modName = modName.substr(0, dotPos);
 			
-				// Get the module system and load from memory
+				// Get the module system and load from memory with pak file support
 				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
 				if (pModuleSystem)
 				{
@@ -393,7 +393,8 @@ void MSWorldSpawn()
 					options.allowOverwrite = true;
 					options.resolveDependencies = true;
 				
-					if (!pModuleSystem->LoadModuleFromMemory(modName, scriptContent, options))
+					// Use the pak-aware version that supports #include directives
+					if (!pModuleSystem->LoadModuleFromMemory(modName, scriptContent, &groupFile, options))
 					{
 						char errorMsg[256];
 						snprintf(errorMsg, sizeof(errorMsg), "Failed to load GameMaster module: %s\n", modName.c_str());

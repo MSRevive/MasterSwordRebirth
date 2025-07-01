@@ -203,7 +203,7 @@ void UTIL_StringToVector(float *pVector, const char *pString)
 	}
 }
 
-int UTIL_FindEntityInMap(char *name, float *origin, float *angle)
+int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 {
 	startdbg;
 	int n, found = 0;
@@ -468,7 +468,7 @@ int CHudSpectator::Draw(float flTime)
 void CHudSpectator::DirectorMessage(int iSize, void *pbuf)
 {
 	float value;
-	char *string;
+	const char *string;
 
 	BEGIN_READ(pbuf, iSize);
 

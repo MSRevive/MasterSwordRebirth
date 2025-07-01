@@ -647,8 +647,8 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	int killer_index = 0;
 	
 	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
+	const char *tau = "tau_cannon";
+	const char *gluon = "gluon gun";
 
 	if ( pKiller->flags & FL_CLIENT )
 	{
@@ -1833,10 +1833,10 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 //#define PLAYERMODEL_HUMAN_MALE1 "../../human/male1/male1"
 #define PLAYERMODEL_HUMAN_MALE1 ""
 
-void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )
+void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, const char *infobuffer )
 {
 	// prevent skin/color/model changes
-	char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
+	const char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
 
 	if ( _stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
 	{
@@ -1936,7 +1936,7 @@ void CHalfLifeMultiplay	:: StartVote( CBasePlayer *pPlayer, msstring VoteType, m
 	//Send vote to all players
 	MESSAGE_BEGIN( MSG_ALL, g_netmsg[NETMSG_VOTE], NULL );
 		WRITE_BYTE( 1 ); //Vote has started
-		WRITE_STRING_LIMIT(m_CurrentVote.Type + (SendVoteInfo.len() ? msstring(";") + SendVoteInfo : ""), 128);
+		WRITE_STRING_LIMIT(m_CurrentVote.Type + (SendVoteInfo.len() ? ";" + SendVoteInfo : ""), 128);
 	MESSAGE_END();
 
 	msstringlist Params;
@@ -2002,7 +2002,7 @@ void CHalfLifeMultiplay	:: UpdateVote( )
 	Params.add( m_CurrentVote.Type );
 
 	CBaseEntity *pSourcePlayer = MSInstance( INDEXENT(m_CurrentVote.SourcePlayer) );
-	Params.add( pSourcePlayer ? EntToString(pSourcePlayer) : "<unknown>" );
+	Params.add( pSourcePlayer ? EntToString(pSourcePlayer).str() : "<unknown>");
 
 	if( iYesVotes / (float)iTotalPlayers > 0.50 )
 	{

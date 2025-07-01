@@ -46,7 +46,7 @@ public:
 	*/
 	void Close();
 
-	bool ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize);
+	bool ReadEntry(const char* pszName, unsigned char* pBuffer, unsigned long& DataSize);
 
 private:
 	CFile cFile;

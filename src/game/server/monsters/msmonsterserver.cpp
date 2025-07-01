@@ -2236,7 +2236,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		{
 			//thothie attempting to pass parry vars
 			msstringlist ParametersB;
-			ParametersB.add(pAttacker ? EntToString(pAttacker) : "none");
+			ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
 			ParametersB.add(Damage.sDamageType);
 			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
@@ -2282,11 +2282,11 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 
 	//Allow scripts to affect the damage
 	msstringlist Parameters;
-	Parameters.add(pAttacker ? EntToString(pAttacker) : "none");
+	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
 	Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
 	Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
-	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor) : "none");
+	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
 
 	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
 	CStat* pStat = FindStat(Damage.ExpStat);
@@ -2320,7 +2320,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	}
 
 	Parameters.clearitems();
-	Parameters.add(pAttacker ? EntToString(pAttacker) : "none");
+	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
 	CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
 

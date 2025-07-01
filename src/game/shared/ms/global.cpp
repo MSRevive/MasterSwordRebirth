@@ -200,7 +200,7 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 {
 #ifdef _WIN32
 	msstring DllFileName;
-	GetModuleFileName(hinstDLL, DllFileName.c_str(), MSSTRING_SIZE);
+	GetModuleFileName(hinstDLL, DllFileName.str(), MSSTRING_SIZE);
 
 	// Remove cl_dlls or dlls (plus slash) from the path!
 #ifdef VALVE_DLL
@@ -568,7 +568,7 @@ void LogExtensive(const char* Text)
 #endif
 }
 
-void DbgLog(char *szFmt, ...)
+void DbgLog(const char *szFmt, ...)
 {
 #ifdef EXTENSIVE_LOGGING
 	if (!logfile.is_open())

@@ -102,8 +102,8 @@ typedef struct
 // Engine hands this to DLLs for functionality callbacks
 typedef struct enginefuncs_s
 {
-	int			(*pfnPrecacheModel)			(char* s);
-	int			(*pfnPrecacheSound)			(char* s);
+	int			(*pfnPrecacheModel)			(const char* s);
+	int			(*pfnPrecacheSound)			(const char* s);
 	void		(*pfnSetModel)				(edict_t *e, const char *m);
 	int			(*pfnModelIndex)			(const char *m);
 	int			(*pfnModelFrames)			(int modelIndex);
@@ -209,10 +209,10 @@ typedef struct enginefuncs_s
 	void		(*pfnRunPlayerMove)			(edict_t *fakeclient, const float *viewangles, float forwardmove, float sidemove, float upmove, unsigned short buttons, byte impulse, byte msec );
 	int			(*pfnNumberOfEntities)		(void);
 	char*		(*pfnGetInfoKeyBuffer)		(edict_t *e);	// passing in NULL gets the serverinfo
-	char*		(*pfnInfoKeyValue)			(char *infobuffer, char *key);
-	void		(*pfnSetKeyValue)			(char *infobuffer, char *key, char *value);
-	void		(*pfnSetClientKeyValue)		(int clientIndex, char *infobuffer, char *key, char *value);
-	int			(*pfnIsMapValid)			(char *filename);
+	char*		(*pfnInfoKeyValue)			(const char *infobuffer, const char *key);
+	void		(*pfnSetKeyValue)			(const char*infobuffer, const char*key, const char*value);
+	void		(*pfnSetClientKeyValue)		(int clientIndex, const char*infobuffer, const char*key, const char*value);
+	int			(*pfnIsMapValid)			(const char*filename);
 	void		(*pfnStaticDecal)			(const float *origin, int decalIndex, int entityIndex, int modelIndex);
 	int			(*pfnPrecacheGeneric)		(const char* s);
 	int			(*pfnGetPlayerUserId)		(edict_t *e ); // returns the server assigned userid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
@@ -222,11 +222,11 @@ typedef struct enginefuncs_s
 	unsigned int (*pfnGetPlayerWONId)		(edict_t *e); // returns the server assigned WONid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
 
 	// YWB 8/1/99 TFF Physics additions
-	void		(*pfnInfo_RemoveKey)		( char *s, const char *key );
+	void		(*pfnInfo_RemoveKey)		(const char* s, const char *key );
 	const char *(*pfnGetPhysicsKeyValue)	( const edict_t *pClient, const char *key );
 	void		(*pfnSetPhysicsKeyValue)	( const edict_t *pClient, const char *key, const char *value );
 	const char *(*pfnGetPhysicsInfoString)	( const edict_t *pClient );
-	unsigned short (*pfnPrecacheEvent)		( int type, const char*psz );
+	unsigned short (*pfnPrecacheEvent)		( int type, const char* psz );
 	void		(*pfnPlaybackEvent)			( int flags, const edict_t *pInvoker, unsigned short eventindex, float delay, float *origin, float *angles, float fparam1, float fparam2, int iparam1, int iparam2, int bparam1, int bparam2 );
 
 	unsigned char *(*pfnSetFatPVS)			( float *org );
@@ -269,9 +269,9 @@ typedef struct enginefuncs_s
 // Passed to pfnKeyValue
 typedef struct KeyValueData_s
 {
-	char	*szClassName;	// in: entity classname
-	char	*szKeyName;		// in: name of key
-	char	*szValue;		// in: value of key
+	const char	*szClassName;	// in: entity classname
+	const char	*szKeyName;		// in: name of key
+	const char	*szValue;		// in: value of key
 	long	fHandled;		// out: DLL sets to true if key-value pair was understood
 } KeyValueData;
 
@@ -376,7 +376,7 @@ typedef enum _fieldtypes
 typedef struct 
 {
 	FIELDTYPE		fieldType;
-	char			*fieldName;
+	const char		*fieldName;
 	int				fieldOffset;
 	short			fieldSize;
 	short			flags;

@@ -59,7 +59,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Modern VS versions default to C++14 anyway, so make it consistent
 # But in the future we may want so support C++20
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
@@ -138,6 +138,7 @@ add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 # Add Projects
 add_subdirectory(src/game/client)
 add_subdirectory(src/game/server)
+add_subdirectory(src/game/tools/scriptpack)
 
 # Set Visual Studio starting project
 if (MSVC)

@@ -1560,7 +1560,7 @@ charinfo_t::~charinfo_t()
 	Destroy();
 }
 
-char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
+const char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
 {
 #ifdef VALVE_DLL
 	for (int i = 1; i <= gpGlobals->maxClients; i++)

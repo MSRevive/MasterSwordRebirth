@@ -55,7 +55,14 @@ bool msstring::operator==(const char *a) const { return !strcmp(data, a); }
 bool msstring::operator==(msstring a) const { return !strcmp(data, a.data); }
 msstring::operator char *() { return data; }
 msstring::operator const char *() { return data; }
-char *msstring::c_str() { return data; }
+const char *msstring::c_str() { return data; }
+char* msstring::str()
+{
+    if (data[0] == 0)
+        return data;
+
+    return data;
+}
 void msstring::append(const char* a, size_t length)
 {
 	size_t my_sz = len();
@@ -194,7 +201,7 @@ void msvariant::SetFromInt(int a)
 
 void msvariant::SetFromFloat(float a)
 {
-	_snprintf(m_String.c_str(), MSSTRING_SIZE, "%f", a);
+	_snprintf(m_String, MSSTRING_SIZE, "%f", a);
 	m_Int = (int)a;
 	m_Float = a;
 }

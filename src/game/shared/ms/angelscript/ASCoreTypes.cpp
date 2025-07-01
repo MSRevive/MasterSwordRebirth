@@ -1,12 +1,12 @@
 //==========================================================================
-// ASCoreTypes.cpp - Minimal Implementation
+// ASCoreTypes.cpp - Using asbind20
 // 
 // Core type bindings for AngelScript integration
 // Provides fundamental types and math functions for script usage
 //==========================================================================
 
 #include "ASCoreTypes.h"
-#include <angelscript.h>
+#include <asbind20/asbind.hpp>
 #include <cstdio>
 #include <cmath>
 #include <new>
@@ -23,24 +23,36 @@ typedef float vec_t;
 static const float AS_PI = 3.14159265358979323846f;
 static const float AS_E = 2.71828182845904523536f;
 
+// EntityHandle struct - a proper value type for AngelScript
+struct EntityHandle
+{
+    int value;
+    
+    EntityHandle() : value(0) {}
+    EntityHandle(int v) : value(v) {}
+    EntityHandle(const EntityHandle& other) : value(other.value) {}
+    
+    EntityHandle& operator=(const EntityHandle& other) {
+        value = other.value;
+        return *this;
+    }
+    
+    bool operator==(const EntityHandle& other) const {
+        return value == other.value;
+    }
+};
+
 //==========================================================================
-// Core Type Registration Functions - Minimal Implementation
+// Core Type Registration Functions - Using asbind20
 //==========================================================================
 namespace ASCoreTypes
 {
-    // Forward declarations for wrapper functions
-    void Vector3DefaultConstructor(Vector *ptr);
-    void Vector3InitConstructor(float x, float y, float z, Vector *ptr);
-    void Vector3CopyConstructor(const Vector &other, Vector *ptr);
-    void ColorDefaultConstructor(Vector *ptr);
-    void ColorInitConstructor(float r, float g, float b, Vector *ptr);
-    void ColorInitConstructorAlpha(float r, float g, float b, float a, Vector *ptr);
+    // Forward declarations for EntityHandle helper functions
+    bool EntityHandle_IsValid_Impl(void* pHandle);
+    void* EntityHandle_Get_Impl(void* pHandle);
     
-    // EntityHandle wrapper functions
-    bool EntityHandle_IsValid(void* pHandle);
-    void* EntityHandle_Get(void* pHandle);
-    void EntityHandle_DefaultConstructor(void* pHandle);
-    void EntityHandle_IntConstructor(int value, void* pHandle);
+    // EntityHandle wrapper functions (still needed for custom behavior)
+    bool EntityHandle_IsValid(const EntityHandle& handle);
     
     // Math function wrappers for AngelScript
     float AS_Sin(float x) { return sin(x); }
@@ -81,47 +93,37 @@ namespace ASCoreTypes
         
         MS_ANGEL_INFO("ASCoreTypes: Registering Vector3 type...");
         
-        // Register the Vector type as "Vector3" in AngelScript
-        // Use asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK for a simple value type with constructor, assignment, and copy constructor
-        int r = pEngine->RegisterObjectType("Vector3", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
-        if (r < 0) {
-            MS_ANGEL_ERROR("ASCoreTypes: Failed to register Vector3 type");
-            return;
-        }
+        // Register Vector3 type with asbind20
+        asbind20::value_class<Vector>(pEngine, "Vector3", asOBJ_APP_CLASS_CDAK)
+            // Properties
+            .property("float x", &Vector::x)
+            .property("float y", &Vector::y) 
+            .property("float z", &Vector::z)
+            // Constructors
+            .default_constructor()
+            .constructor<float, float, float>("float, float, float")
+            .copy_constructor()
+            .destructor()
+            // Operators
+            .method("Vector3 opAdd(const Vector3 &in) const", static_cast<Vector(Vector::*)(const Vector&) const>(&Vector::operator+))
+            .method("Vector3 opSub(const Vector3 &in) const", static_cast<Vector(Vector::*)(const Vector&) const>(&Vector::operator-))
+            .method("Vector3 opMul(float) const", static_cast<Vector(Vector::*)(float) const>(&Vector::operator*))
+            .method("Vector3 opDiv(float) const", static_cast<Vector(Vector::*)(float) const>(&Vector::operator/))
+            .method("bool opEquals(const Vector3 &in) const", static_cast<int(Vector::*)(const Vector&) const>(&Vector::operator==))
+            .method("Vector3 opNeg() const", static_cast<Vector(Vector::*)() const>(&Vector::operator-))
+            // Assignment operators
+            .method("Vector3& opAddAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator+=))
+            .method("Vector3& opSubAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator-=))
+            .method("Vector3& opMulAssign(float)", static_cast<Vector&(Vector::*)(float)>(&Vector::operator*=))
+            .method("Vector3& opDivAssign(float)", static_cast<Vector&(Vector::*)(float)>(&Vector::operator/=))
+            // Methods
+            .method("float Length() const", &Vector::Length)
+            .method("Vector3 Normalize() const", &Vector::Normalize)
+            .method("float Length2D() const", &Vector::Length2D);
         
-        // Register properties
-        pEngine->RegisterObjectProperty("Vector3", "float x", offsetof(Vector, x));
-        pEngine->RegisterObjectProperty("Vector3", "float y", offsetof(Vector, y));
-        pEngine->RegisterObjectProperty("Vector3", "float z", offsetof(Vector, z));
-        
-        // Register constructors
-        pEngine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(Vector3DefaultConstructor), asCALL_CDECL_OBJLAST);
-        pEngine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(float, float, float)", asFUNCTION(Vector3InitConstructor), asCALL_CDECL_OBJLAST);
-        pEngine->RegisterObjectBehaviour("Vector3", asBEHAVE_CONSTRUCT, "void f(const Vector3 &in)", asFUNCTION(Vector3CopyConstructor), asCALL_CDECL_OBJLAST);
-        
-        // Register operators
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 opAdd(const Vector3 &in) const", asMETHODPR(Vector, operator+, (const Vector&) const, Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 opSub(const Vector3 &in) const", asMETHODPR(Vector, operator-, (const Vector&) const, Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 opMul(float) const", asMETHODPR(Vector, operator*, (float) const, Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 opDiv(float) const", asMETHODPR(Vector, operator/, (float) const, Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "bool opEquals(const Vector3 &in) const", asMETHODPR(Vector, operator==, (const Vector&) const, int), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 opNeg() const", asMETHODPR(Vector, operator-, (void) const, Vector), asCALL_THISCALL);
-        
-        // Register assignment operators
-        pEngine->RegisterObjectMethod("Vector3", "Vector3& opAddAssign(const Vector3 &in)", asMETHODPR(Vector, operator+=, (const Vector&), Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3& opSubAssign(const Vector3 &in)", asMETHODPR(Vector, operator-=, (const Vector&), Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3& opMulAssign(float)", asMETHODPR(Vector, operator*=, (const float), Vector), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3& opDivAssign(float)", asMETHODPR(Vector, operator/=, (const float), Vector), asCALL_THISCALL);
-        
-        // Register methods
-        pEngine->RegisterObjectMethod("Vector3", "float Length() const", asMETHOD(Vector, Length), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "Vector3 Normalize() const", asMETHOD(Vector, Normalize), asCALL_THISCALL);
-        pEngine->RegisterObjectMethod("Vector3", "float Length2D() const", asMETHOD(Vector, Length2D), asCALL_THISCALL);
-        
-        // Register global Vector3 functions
-        // Note: DotProduct and CrossProduct functions are defined in vector.h but have macro conflicts
-        // For now, we'll register them as method calls instead of global functions
-        pEngine->RegisterGlobalFunction("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", asFUNCTIONPR(CrossProduct, (const Vector&, const Vector&), Vector), asCALL_CDECL);
+        // Register global Vector3 functions with asbind20
+        asbind20::global(pEngine)
+            .function("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", static_cast<Vector(*)(const Vector&, const Vector&)>(&CrossProduct));
         
         MS_ANGEL_INFO("ASCoreTypes: Vector3 registration complete");
     }
@@ -132,23 +134,17 @@ namespace ASCoreTypes
         
         MS_ANGEL_INFO("ASCoreTypes: Registering Color type...");
         
-        // Register Color as a Vector type (r, g, b stored in x, y, z, alpha in a separate field if needed)
-        // For simplicity, we'll use Vector and treat it as RGB with x=r, y=g, z=b
-        // Register Color type (also uses Vector internally)
-        int r = pEngine->RegisterObjectType("Color", sizeof(Vector), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_CLASS_CAK);
-        if (r < 0) {
-            MS_ANGEL_ERROR("ASCoreTypes: Failed to register Color type");
-            return;
-        }
-        
-        // Register properties
-        pEngine->RegisterObjectProperty("Color", "float r", offsetof(Vector, x));
-        pEngine->RegisterObjectProperty("Color", "float g", offsetof(Vector, y));
-        pEngine->RegisterObjectProperty("Color", "float b", offsetof(Vector, z));
-        
-        // Register constructors
-        pEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(ColorDefaultConstructor), asCALL_CDECL_OBJLAST);
-        pEngine->RegisterObjectBehaviour("Color", asBEHAVE_CONSTRUCT, "void f(float, float, float)", asFUNCTION(ColorInitConstructor), asCALL_CDECL_OBJLAST);
+        // Register Color type with asbind20 (using Vector internally)
+        asbind20::value_class<Vector>(pEngine, "Color", asOBJ_APP_CLASS_CDAK)
+            // Properties mapped to x,y,z as r,g,b
+            .property("float r", &Vector::x)
+            .property("float g", &Vector::y)
+            .property("float b", &Vector::z)
+            // Constructors
+            .default_constructor()
+            .constructor<float, float, float>("float, float, float")
+            .copy_constructor()
+            .destructor();
         
         MS_ANGEL_INFO("ASCoreTypes: Color registration complete");
     }
@@ -159,30 +155,54 @@ namespace ASCoreTypes
         MS_ANGEL_INFO("ASCoreTypes: String utilities not yet implemented");
     }
     
+    // EntityHandle helper functions
+    bool EntityHandle_IsValid(const EntityHandle& handle)
+    {
+        // TODO: Implement actual validation logic
+        return handle.value != 0;
+    }
+    
     void RegisterEntityHandle(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
         MS_ANGEL_INFO("ASCoreTypes: Registering EntityHandle type...");
         
-        // Register EntityHandle as a value type (like an ID/index)
-        // Use asOBJ_VALUE | asOBJ_POD for a simple value type that can be declared directly
-        int r = pEngine->RegisterObjectType("EntityHandle", sizeof(int), asOBJ_VALUE | asOBJ_POD | asOBJ_APP_PRIMITIVE);
-        if (r < 0) {
-            MS_ANGEL_ERROR("ASCoreTypes: Failed to register EntityHandle type");
-            return;
-        }
+        // Register EntityHandle as a value type with asbind20 - basic version without CBaseEntity dependency
+        asbind20::value_class<EntityHandle>(pEngine, "EntityHandle", asOBJ_APP_CLASS_CDAK)
+            // Constructors
+            .default_constructor()
+            .constructor<int>("int")
+            .copy_constructor()
+            .destructor()
+            // Assignment operator
+            .method("EntityHandle& opAssign(const EntityHandle &in)", 
+                static_cast<EntityHandle&(EntityHandle::*)(const EntityHandle&)>(&EntityHandle::operator=))
+            // Comparison operator
+            .method("bool opEquals(const EntityHandle &in) const",
+                static_cast<bool(EntityHandle::*)(const EntityHandle&) const>(&EntityHandle::operator==))
+            // Methods
+            .method("bool IsValid() const", 
+                +[](const EntityHandle* self) -> bool { return EntityHandle_IsValid(*self); })
+            // Property for the value
+            .property("int value", &EntityHandle::value);
         
-        // Register EntityHandle methods
-        // Note: These connect to the actual entity system
-        pEngine->RegisterObjectMethod("EntityHandle", "bool IsValid() const", asFUNCTION(EntityHandle_IsValid), asCALL_CDECL_OBJLAST);
-        pEngine->RegisterObjectMethod("EntityHandle", "CBaseEntity@ Get() const", asFUNCTION(EntityHandle_Get), asCALL_CDECL_OBJLAST);
+        MS_ANGEL_INFO("ASCoreTypes: EntityHandle type registered as value type (Get method will be added later)");
+    }
+    
+    // Function to add EntityHandle methods that depend on entity types - call this after entity types are registered
+    void RegisterEntityHandleMethods(asIScriptEngine* pEngine)
+    {
+        if (!pEngine) return;
         
-        // Register constructor and assignment for value types
-        pEngine->RegisterObjectBehaviour("EntityHandle", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION(EntityHandle_DefaultConstructor), asCALL_CDECL_OBJLAST);
-        pEngine->RegisterObjectBehaviour("EntityHandle", asBEHAVE_CONSTRUCT, "void f(int)", asFUNCTION(EntityHandle_IntConstructor), asCALL_CDECL_OBJLAST);
+        MS_ANGEL_INFO("ASCoreTypes: Registering EntityHandle methods that depend on entity types...");
         
-        MS_ANGEL_INFO("ASCoreTypes: EntityHandle type registered as value type with methods");
+        // Add the Get() method now that CBaseEntity is available
+        pEngine->RegisterObjectMethod("EntityHandle", "CBaseEntity@ Get() const", 
+            asFUNCTION(+[](const EntityHandle* self) -> void* { return EntityHandle_Get_Impl((void*)&self->value); }), 
+            asCALL_CDECL_OBJFIRST);
+        
+        MS_ANGEL_INFO("ASCoreTypes: EntityHandle Get() method registered successfully");
     }
     
     void RegisterMathFunctions(asIScriptEngine* pEngine)
@@ -191,13 +211,14 @@ namespace ASCoreTypes
         
         MS_ANGEL_INFO("ASCoreTypes: Registering math functions...");
         
-        // Register basic math functions
-        pEngine->RegisterGlobalFunction("float sin(float)", asFUNCTION(AS_Sin), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float cos(float)", asFUNCTION(AS_Cos), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float sqrt(float)", asFUNCTION(AS_Sqrt), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float abs(float)", asFUNCTION(AS_Abs), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float min(float, float)", asFUNCTION(AS_Min), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("float max(float, float)", asFUNCTION(AS_Max), asCALL_CDECL);
+        // Register basic math functions with asbind20
+        asbind20::global(pEngine)
+            .function("float sin(float)", &AS_Sin)
+            .function("float cos(float)", &AS_Cos)
+            .function("float sqrt(float)", &AS_Sqrt)
+            .function("float abs(float)", &AS_Abs)
+            .function("float min(float, float)", &AS_Min)
+            .function("float max(float, float)", &AS_Max);
         
         // Register math constants
         pEngine->RegisterGlobalProperty("const float PI", (void*)&AS_PI);
@@ -206,37 +227,6 @@ namespace ASCoreTypes
         MS_ANGEL_INFO("ASCoreTypes: Math function registration complete");
     }
     
-    // Constructor wrapper implementations
-    void Vector3DefaultConstructor(Vector *ptr)
-    {
-        new(ptr) Vector();
-    }
-    
-    void Vector3InitConstructor(float x, float y, float z, Vector *ptr)
-    {
-        new(ptr) Vector(x, y, z);
-    }
-    
-    void Vector3CopyConstructor(const Vector &other, Vector *ptr)
-    {
-        new(ptr) Vector(other);
-    }
-    
-    void ColorDefaultConstructor(Vector *ptr)
-    {
-        new(ptr) Vector(0.0f, 0.0f, 0.0f);
-    }
-    
-    void ColorInitConstructor(float r, float g, float b, Vector *ptr)
-    {
-        new(ptr) Vector(r, g, b);
-    }
-    
-    void ColorInitConstructorAlpha(float r, float g, float b, float a, Vector *ptr)
-    {
-        // For now, ignore alpha since Vector only has 3 components
-        new(ptr) Vector(r, g, b);
-    }
     
     // External entity system integration functions
     // TODO: These should be implemented by the game engine to provide actual entity management
@@ -266,7 +256,7 @@ namespace ASCoreTypes
     }
     
     // EntityHandle implementations with actual entity system integration
-    bool EntityHandle_IsValid(void* pHandle)
+    bool EntityHandle_IsValid_Impl(void* pHandle)
     {
         if (!pHandle) {
             MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_IsValid - NULL handle pointer");
@@ -291,7 +281,7 @@ namespace ASCoreTypes
 #endif
     }
     
-    void* EntityHandle_Get(void* pHandle)
+    void* EntityHandle_Get_Impl(void* pHandle)
     {
         if (!pHandle) {
             MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_Get - NULL handle pointer");
@@ -322,27 +312,4 @@ namespace ASCoreTypes
 #endif
     }
     
-    void EntityHandle_DefaultConstructor(void* pHandle)
-    {
-        if (!pHandle) {
-            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_DefaultConstructor - NULL handle pointer");
-            return;
-        }
-        
-        // Initialize EntityHandle to 0 (invalid)
-        *(int*)pHandle = 0;
-        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_DefaultConstructor - initialized to 0");
-    }
-    
-    void EntityHandle_IntConstructor(int value, void* pHandle)
-    {
-        if (!pHandle) {
-            MS_ANGEL_ERROR("ASCoreTypes: EntityHandle_IntConstructor - NULL handle pointer");
-            return;
-        }
-        
-        // Initialize EntityHandle with specific value
-        *(int*)pHandle = value;
-        MS_ANGEL_DEBUG("ASCoreTypes: EntityHandle_IntConstructor - initialized to %d", value);
-    }
 }

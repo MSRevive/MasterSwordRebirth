@@ -1178,7 +1178,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "target")
 	{
 		CBaseEntity *pPlayerTarget = pTarget->RetrieveEntity(ENT_TARGET);
-		return pPlayerTarget ? EntToString(pPlayerTarget) : "0";
+		return pPlayerTarget ? EntToString(pPlayerTarget) : msstring("0");
 	}
 	//Thothie MAR2011_10 - return bolt type
 	//- $get(<player>,bolt,[remove])
@@ -1233,7 +1233,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	{
 		//Thothie JUN2007a - return steamID
 		CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
-		return pPlayer ? pPlayer->AuthID() : "0";
+		return pPlayer ? msstring(pPlayer->AuthID()) : msstring("0");
 	}
 	else if (Prop == "playerspawn")
 	{
@@ -1246,7 +1246,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "spawner")
 	{
 		//DEC2007a - Return msmonster spawn ID to verify still exists
-		return (pMonster ? pMonster->m_spawnedby : "0");
+		return (pMonster ? msstring(pMonster->m_spawnedby) : msstring("0"));
 	}
 	else if (Prop == "roam")
 	{
@@ -1292,7 +1292,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 
 	else if (pScripted)
 	{
-		if (Prop == "scriptvar") return pScripted->GetFirstScriptVar(Params.size() >= 3 ? Params[2] : "");
+		if (Prop == "scriptvar") return pScripted->GetFirstScriptVar(Params.size() >= 3 ? msstring(Params[2]) : msstring(""));
 		//Thothie JAN2013_15 - has effect
 		else if (Prop == "haseffect")
 		{
@@ -1473,7 +1473,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			else if (Prop == "stepsize") RETURN_FLOAT(pMonster->m_StepSize)	//MiB DEC2007a
 			else if (Prop == "movetype") RETURN_INT(pTarget->pev->movetype) //Thothie JAN2013_20 (post patch)
 			else if (Prop == "name.full") return SPEECH::NPCName(pMonster);
-			else if (Prop == "name.prefix") return pMonster->DisplayPrefix.len() ? (pMonster->DisplayPrefix) : (""); //Thothie JAN2011_30
+			else if (Prop == "name.prefix") return pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix) : msstring(""); //Thothie JAN2011_30
 			else if (Prop == "name.full.capital")	return SPEECH::NPCName(pMonster, true);
 			else if (Prop == "dmgmulti") RETURN_FLOAT(pMonster->m_DMGMulti) //APR2008a
 			else if (Prop == "hpmulti") RETURN_FLOAT(pMonster->m_HPMulti) //APR2008a
@@ -2353,7 +2353,7 @@ bool CScript::ScriptCmd_ChangeLevel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 	{
 		sTemp = Params[0];
 		//CHANGE_LEVEL( (char *)STRING(sDestMap), NULL );
-		CHANGE_LEVEL(sTemp.c_str(), NULL);
+		CHANGE_LEVEL(sTemp, NULL);
 		//clear music/weather for next map
 		MSGlobals::map_addparams = ""; //DEC2014_17 Thothie - global addparams
 		MSGlobals::map_flags = ""; //DEC2014_17 Thothie - map flags
@@ -4575,7 +4575,7 @@ bool CScript::ScriptCmd_PlayerName(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			sTemp = Params[1];
 			//Print("Setting name %s on %s\n", sTemp.c_str(), pEntity->m_DisplayName.c_str() );
 			pEntity->m_DisplayName = sTemp;
-			g_engfuncs.pfnSetClientKeyValue(pEntity->entindex(), g_engfuncs.pfnGetInfoKeyBuffer(pEntity->edict()), "name", (char *)pEntity->m_DisplayName);
+			g_engfuncs.pfnSetClientKeyValue(pEntity->entindex(), g_engfuncs.pfnGetInfoKeyBuffer(pEntity->edict()), const_cast<char*>("name"), const_cast<char*>(pEntity->m_DisplayName.c_str()));
 			(pEntity->DisplayName());
 			pEntity->m_NetName = pEntity->DisplayName();
 			pEntity->pev->netname = MAKE_STRING(pEntity->m_NetName.c_str());
@@ -6525,7 +6525,7 @@ bool CScript::ScriptCmd_SetTrans(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		{
 			CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
 			if (pPlayer->m_SpawnTransition != NULL)
-				strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
+				strncpy((char*)pPlayer->m_SpawnTransition, Params[1], 32);
 		}
 		else
 		{
@@ -7029,7 +7029,7 @@ bool CScript::ScriptCmd_ToSpawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
 		if( pPlayer )
 		{
-			if ( Params.size() >= 2 ) strncpy(pPlayer->m_SpawnTransition, Params[1], 32);
+			if ( Params.size() >= 2 ) strncpy((char*)pPlayer->m_SpawnTransition, Params[1], 32);
 			pPlayer->m_JoinType = 2;
 			CBaseEntity *pSpawnSpot = pPlayer->FindSpawnSpot();
 			UTIL_SetOrigin( pPlayer->pev, pSpawnSpot->pev->origin );

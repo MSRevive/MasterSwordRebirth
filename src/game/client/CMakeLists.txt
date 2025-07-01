@@ -183,6 +183,7 @@ source_group("FMOD" FILES ${FMOD})
 
 set(MS
 	"SteamClientHelper.cpp"
+	"ASClientEngine.cpp"
 	"entity.cpp"
 	"ms/action.cpp"
 	"ms/clglobal.cpp"
@@ -328,6 +329,8 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASBuiltinFunctions.h"
 	"../shared/ms/angelscript/ASBindings.cpp"
 	"../shared/ms/angelscript/ASBindings.h"
+	"../shared/ms/angelscript/ASEntityBindings.cpp"
+	"../shared/ms/angelscript/ASEntityBindings.h"
 	"../shared/ms/angelscript/ASCoroutines.cpp"
 	"../shared/ms/angelscript/ASCoroutines.h"
 	"../shared/ms/angelscript/ASDebugger.cpp"
@@ -338,6 +341,7 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASObjectPool.h"
 	"../shared/ms/angelscript/ASScriptClasses.cpp"
 	"../shared/ms/angelscript/ASScriptClasses.h"
+	"../shared/ms/angelscript/ASEngineStubs.cpp"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
 
@@ -376,6 +380,7 @@ set(ThirdParty_AngelScript
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
 	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
+	"../shared/ms/angelscript/addons/scriptbuilder/scriptbuilder.cpp"
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 

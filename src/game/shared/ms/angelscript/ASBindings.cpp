@@ -1,5 +1,5 @@
 //==========================================================================
-// AngelScript Integration Layer Implementation - Minimal Version
+// AngelScript Integration Layer Implementation - Using asbind20
 // 
 // Master registration and coordination for all AngelScript bindings
 //==========================================================================
@@ -12,7 +12,9 @@
 #include "ASScriptClasses.h"   
 #include "ASCoroutines.h"        
 #include "ASObjectPool.h"      
-#include <angelscript.h>
+
+// Include asbind20
+#include <asbind20/asbind.hpp>
 
 // AngelScript add-ons
 #include "addons/scriptstdstring/scriptstdstring.h"
@@ -25,7 +27,7 @@
 #include "mslogger.h"
 
 //==========================================================================
-// Master Registration Function - Minimal Implementation
+// Master Registration Function - Using asbind20
 //==========================================================================
 bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
 {
@@ -101,6 +103,10 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     {
         ASEntityBindings::RegisterAll(pEngine);
         MS_ANGEL_INFO("   ✓ Entity types registered successfully");
+        
+        // Now register EntityHandle methods that depend on entity types
+        ASCoreTypes::RegisterEntityHandleMethods(pEngine);
+        MS_ANGEL_INFO("   ✓ EntityHandle dependent methods registered successfully");
     }
     catch (...)
     {

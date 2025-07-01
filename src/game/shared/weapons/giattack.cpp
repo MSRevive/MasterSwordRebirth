@@ -859,7 +859,7 @@ void CGenericItem::StrikeLand()
 	msstringlist Parameters;
 	Parameters.add(pHit ? (pHit->IsMSMonster() ? "npc" : "world") : "none");
 	Parameters.add(VecToString(Damage.outTraceResult.vecEndPos));
-	Parameters.add(pHit ? EntToString(pHit) : "¯NONE¯");
+	Parameters.add(pHit ? msstring(EntToString(pHit)) : msstring("¯NONE¯"));
 	Parameters.add(Damage.AttackHit ? "1" : "0");
 	CallScriptEvent(CurrentAttack->CallbackName + "_strike", &Parameters);
 
@@ -1152,8 +1152,8 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	//Handle shields, anything else that absorbs damage
 	static msstringlist Params;
 	Params.clearitems();
-	Params.add(Damage.pAttacker ? EntToString(Damage.pAttacker) : "none");
-	Params.add(Damage.pInflictor ? EntToString(Damage.pInflictor) : "none");
+	Params.add(Damage.pAttacker ? msstring(EntToString(Damage.pAttacker)) : msstring("none"));
+	Params.add(Damage.pInflictor ? msstring(EntToString(Damage.pInflictor)) : msstring("none"));
 	Params.add(FloatToString(Damage.flDamage));
 	Params.add(Damage.sDamageType);
 	m_CurrentDamage = &Damage; //m_CurrentDamage used by script commands to change damage
@@ -2020,7 +2020,7 @@ EndDamage:
 		static msstringlist Parameters;
 		Parameters.clearitems();
 		Parameters.add(Damage.AttackHit ? "1" : "0");
-		Parameters.add(pTarget ? EntToString(pTarget) : "none");
+		Parameters.add(pTarget ? msstring(EntToString(pTarget)) : msstring("none"));
 		Parameters.add(VecToString(Damage.vecSrc));
 		Parameters.add(VecToString(EndPos));
 		Parameters.add(Damage.sDamageType.c_str());

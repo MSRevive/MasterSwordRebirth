@@ -800,11 +800,12 @@ void CBasePlayerWeapon::Holster(int skiplocal /* = 0 */)
 void CBasePlayerWeapon::PrintState(void)
 {
 #ifndef VALVE_DLL
-	COM_Log("c:\\hl.log", "%.4f ", gpGlobals->time);
-	COM_Log("c:\\hl.log", "%.4f ", m_pPlayer->m_flNextAttack);
-	COM_Log("c:\\hl.log", "%.4f ", m_flNextPrimaryAttack);
-	COM_Log("c:\\hl.log", "%.4f ", m_flTimeWeaponIdle - gpGlobals->time);
-	COM_Log("c:\\hl.log", "%i ", m_iClip);
+    ALERT(at_console, "Weapon: %s\n", STRING(pev->classname));
+    ALERT(at_console, "  m_flNextPrimaryAttack: %f\n", m_flNextPrimaryAttack);
+    ALERT(at_console, "  m_flNextSecondaryAttack: %f\n", m_flNextSecondaryAttack);
+    ALERT(at_console, "  m_flTimeWeaponIdle: %f\n", m_flTimeWeaponIdle);
+    ALERT(at_console, "  m_iPrimaryAmmoType: %d\n", m_iPrimaryAmmoType);
+    ALERT(at_console, "  m_iClip: %d\n", m_iClip);
 #endif
 }
 

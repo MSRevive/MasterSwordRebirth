@@ -12,7 +12,7 @@
 #include "tgaloader.h"
 #include "textureloader.h"
 
-void DbgLog(char *szFmt, ...);
+void DbgLog(const char *szFmt, ...);
 
 namespace Tartan
 {

@@ -5,6 +5,8 @@
 //==========================================================================
 
 #include "ASModuleSystem.h"
+#include "addons/scriptbuilder/scriptbuilder.h"
+#include "groupfile.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -12,6 +14,59 @@
 
 // Singleton instance
 ASModuleSystem* ASModuleSystem::s_pInstance = nullptr;
+
+//==========================================================================
+// Pak File Include Callback for CScriptBuilder
+//==========================================================================
+int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder *builder, void *userParam)
+{
+    if (!include || !builder || !userParam)
+    {
+        printf("PakFileIncludeCallback: ERROR - Invalid parameters\n");
+        return -1;
+    }
+    
+    CGameGroupFile* groupFile = static_cast<CGameGroupFile*>(userParam);
+    
+    // Build the full path for the include file within the angelscript directory
+    std::string includePath = "angelscript/";
+    includePath += include;
+    
+    printf("PakFileIncludeCallback: Loading include '%s' from pak file\n", includePath.c_str());
+    
+    // First check if the file exists and get its size
+    unsigned long fileSize;
+    if (!groupFile->ReadEntry(includePath.c_str(), nullptr, fileSize))
+    {
+        printf("PakFileIncludeCallback: ERROR - Include file not found in pak: %s\n", includePath.c_str());
+        return -1;
+    }
+    
+    // Allocate buffer and read the file content
+    char* scriptContent = new char[fileSize + 1];
+    if (!groupFile->ReadEntry(includePath.c_str(), (unsigned char*)scriptContent, fileSize))
+    {
+        printf("PakFileIncludeCallback: ERROR - Failed to read include file from pak: %s\n", includePath.c_str());
+        delete[] scriptContent;
+        return -1;
+    }
+    scriptContent[fileSize] = '\0';
+    
+    // Add the script section to the builder
+    int result = builder->AddSectionFromMemory(include, scriptContent, fileSize);
+    
+    // Clean up allocated memory
+    delete[] scriptContent;
+    
+    if (result < 0)
+    {
+        printf("PakFileIncludeCallback: ERROR - Failed to add script section: %s\n", include);
+        return result;
+    }
+    
+    printf("PakFileIncludeCallback: Successfully loaded include '%s' (%lu bytes)\n", include, fileSize);
+    return result;
+}
 
 //==========================================================================
 // Constructor/Destructor
@@ -143,7 +198,7 @@ bool ASModuleSystem::LoadModule(const std::string& filename, const ASModuleLoadO
     return LoadModuleFromMemory(info.name, content, options);
 }
 
-bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options)
+bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, CGameGroupFile* pakFile, const ASModuleLoadOptions& options)
 {
     if (!m_pEngine)
     {
@@ -179,32 +234,52 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
         }
     }
     
-    // Create or get the module
-    info.pModule = m_pEngine->GetModule(name.c_str(), asGM_CREATE_IF_NOT_EXISTS);
-    if (!info.pModule)
+    // Use CScriptBuilder to handle #include directives and preprocessing
+    CScriptBuilder builder;
+    
+    // Set up pak file include callback if pakFile is provided
+    if (pakFile)
     {
-        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to create module: %s\n", name.c_str());
+        builder.SetIncludeCallback(PakFileIncludeCallback, pakFile);
+        printf("ASModuleSystem: Pak file include callback configured for module '%s'\n", name.c_str());
+    }
+    else
+    {
+        printf("ASModuleSystem: No pak file provided - #include directives will not be supported\n");
+    }
+    
+    int r = builder.StartNewModule(m_pEngine, name.c_str());
+    if (r < 0)
+    {
+        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to start new module: %s\n", name.c_str());
         return false;
     }
     
-    // Add the script section
-    int r = info.pModule->AddScriptSection(name.c_str(), content.c_str(), content.length());
+    // Add the script content to the builder
+    r = builder.AddSectionFromMemory(name.c_str(), content.c_str(), content.length());
     if (r < 0)
     {
         printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to add script section for module: %s\n", name.c_str());
         return false;
     }
     
-    // Build the module if not compile-only
+    // Build the module if not compile-only (CScriptBuilder handles this)
     if (!options.compileOnly)
     {
-        if (!BuildModule(info))
+        r = builder.BuildModule();
+        if (r < 0)
         {
+            printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to build module: %s\n", name.c_str());
             return false;
         }
+        
+        // Get the module from the builder
+        info.pModule = builder.GetModule();
     }
     else
     {
+        // Get the module for compile-only mode
+        info.pModule = builder.GetModule(); 
         m_nModulesCompiled++;
     }
     
@@ -213,9 +288,15 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
     UpdateDependencyGraph(name, info.dependencies);
     m_nModulesLoaded++;
     
-    printf("ASModuleSystem: Module '%s' loaded successfully\n", name.c_str());
+    printf("ASModuleSystem: Module '%s' loaded successfully with pak file support\n", name.c_str());
     
     return true;
+}
+
+bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options)
+{
+    // Delegate to the pak-aware version with no pak file (traditional loading)
+    return LoadModuleFromMemory(name, content, nullptr, options);
 }
 
 //==========================================================================

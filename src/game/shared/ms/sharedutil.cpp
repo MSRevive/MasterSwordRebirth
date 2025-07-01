@@ -279,7 +279,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     msstring vsTitle = "[MSC_ERROR]";
     vsTitle += vsShortTitle;
 
-    msstring vsAsOne = vsTitle + ": " + string + "\n";
+    msstring vsAsOne = vsTitle + ": " + msstring(string) + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
         logfile << vsAsOne << "\n";
@@ -302,7 +302,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     }
     if (vFlags & ERRORPRINT_CVAR)
     {
-        CVAR_SET_STRING("ms_error_tracker", vsShortTitle + string);
+        CVAR_SET_STRING("ms_error_tracker", (vsShortTitle + msstring(string)).c_str());
     }
     if (vFlags & ERRORPRINT_POPUP)
     {

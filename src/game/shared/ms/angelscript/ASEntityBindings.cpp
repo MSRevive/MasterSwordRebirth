@@ -1,12 +1,12 @@
 //==========================================================================
-// ASEntityBindings.cpp
+// ASEntityBindings.cpp - Using asbind20
 // 
 // Entity-related type bindings for AngelScript integration
 // Provides CBaseEntity, CBasePlayer, and related functions for script usage
 //==========================================================================
 
 #include "CAngelScript.h"
-#include <angelscript.h>
+#include <asbind20/asbind.hpp>
 #include "addons/scriptarray/scriptarray.h"
 #include <cstdio>
 #include <new>
@@ -21,6 +21,21 @@ typedef float vec_t;
 
 // Include MSLogger with proper path
 #include "mslogger.h"
+
+// Dummy type definitions for asbind20 registration
+// These are only used for type registration and not actual implementation
+namespace {
+    struct CBaseEntity_Dummy { 
+        void* _dummy; 
+    };
+    struct CBasePlayer_Dummy { 
+        void* _dummy; 
+    };
+}
+
+// Use the dummy types for registration
+#define CBaseEntity CBaseEntity_Dummy
+#define CBasePlayer CBasePlayer_Dummy
 
 // Forward declarations and external functions for player management
 #ifdef VALVE_DLL
@@ -58,16 +73,14 @@ extern "C" {
     void GetEngineEntityOrigin(void* entity, float* x, float* y, float* z);
 }
 
-// Forward declarations for types we need
-class CBaseEntity;
-class CBasePlayer;
+// Remove forward declarations - using dummy types via macros
 
 namespace ASEntityBindings
 {
     // Forward declarations for casting functions
     CBaseEntity* PlayerToEntity_Cast(CBasePlayer* pPlayer);
     CBasePlayer* EntityToPlayer_Cast(CBaseEntity* pEntity);
-    template<class T> T* Template_Cast(CBaseEntity* pEntity);
+    template<class T> T* Template_Cast(void* pEntity);
     
     // Placeholder implementations for entity methods
     // These need to be connected to actual game code later
@@ -131,7 +144,7 @@ namespace ASEntityBindings
         return isAlive;
     }
     
-    // CBasePlayer methods
+    // CBasePlayer methods (using dummy type)
     std::string Player_GetName(CBasePlayer* pPlayer)
     {
         if (!pPlayer)
@@ -415,9 +428,8 @@ namespace ASEntityBindings
         }
         
         // Direct cast - CBasePlayer inherits from CBaseEntity
-        CBaseEntity* pEntity = reinterpret_cast<CBaseEntity*>(pPlayer);
         MS_ANGEL_DEBUG("PlayerToEntity_Cast: Successfully cast player to entity");
-        return pEntity;
+        return reinterpret_cast<CBaseEntity*>(pPlayer);
     }
     
     CBasePlayer* EntityToPlayer_Cast(CBaseEntity* pEntity)
@@ -437,14 +449,13 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        CBasePlayer* pPlayer = reinterpret_cast<CBasePlayer*>(pEntity);
         MS_ANGEL_DEBUG("EntityToPlayer_Cast: Successfully cast entity to player");
-        return pPlayer;
+        return reinterpret_cast<CBasePlayer*>(pEntity);
     }
     
     // Template casting function for AngelScript cast<T>() support
     template<class T>
-    T* Template_Cast(CBaseEntity* pEntity)
+    T* Template_Cast(void* pEntity)
     {
         if (!pEntity)
         {
@@ -456,7 +467,7 @@ namespace ASEntityBindings
         // This can be extended for other entity types later
         if (std::is_same<T, CBasePlayer>::value)
         {
-            return reinterpret_cast<T*>(EntityToPlayer_Cast(pEntity));
+            return reinterpret_cast<T*>(EntityToPlayer_Cast(reinterpret_cast<CBaseEntity*>(pEntity)));
         }
         
         MS_ANGEL_DEBUG("Template_Cast: Unsupported cast type");
@@ -560,34 +571,14 @@ namespace ASEntityBindings
         // Since this AngelScript version doesn't have implicit/explicit casting behaviors,
         // we'll use global functions for casting operations
         
-        // Register template casting function for cast<T>() support
-        int r = pEngine->RegisterGlobalFunction("CBasePlayer@ cast(CBaseEntity@)", 
-            asFUNCTIONPR(Template_Cast<CBasePlayer>, (CBaseEntity*), CBasePlayer*), asCALL_CDECL);
-        if (r < 0) {
-            MS_ANGEL_ERROR("Failed to register template cast<CBasePlayer> function");
-        } else {
-            MS_ANGEL_DEBUG("   ✓ Template cast<CBasePlayer@>() function registered");
-        }
-        
-        // Register convenience casting functions
-        r = pEngine->RegisterGlobalFunction("CBasePlayer@ ToPlayer(CBaseEntity@)", 
-            asFUNCTION(EntityToPlayer_Cast), asCALL_CDECL);
-        if (r < 0) {
-            MS_ANGEL_ERROR("Failed to register ToPlayer() function");
-        } else {
-            MS_ANGEL_DEBUG("   ✓ ToPlayer() function registered");
-        }
-        
-        r = pEngine->RegisterGlobalFunction("CBaseEntity@ ToEntity(CBasePlayer@)", 
-            asFUNCTION(PlayerToEntity_Cast), asCALL_CDECL);
-        if (r < 0) {
-            MS_ANGEL_ERROR("Failed to register ToEntity() function");
-        } else {
-            MS_ANGEL_DEBUG("   ✓ ToEntity() function registered");
-        }
+        // Register casting functions with asbind20
+        asbind20::global(pEngine)
+            // Direct casting functions (simpler approach)
+            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", &EntityToPlayer_Cast)
+            .function("CBaseEntity@ ToEntity(CBasePlayer@)", &PlayerToEntity_Cast);
         
         MS_ANGEL_INFO("[ASEntityBindings] Entity inheritance setup complete");
-        MS_ANGEL_INFO("   Note: Use cast<CBasePlayer@>(entity) or ToPlayer(entity) for casting");
+        MS_ANGEL_INFO("   Note: Use ToPlayer(entity) or ToEntity(player) for casting");
     }
     
     void RegisterEntityTypes(asIScriptEngine* pEngine)
@@ -596,79 +587,44 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Registering entity types...");
         
-        // First register CBaseEntity as a reference type
-        int r = pEngine->RegisterObjectType("CBaseEntity", 0, asOBJ_REF | asOBJ_NOCOUNT);
-        if (r < 0) {
-            MS_ANGEL_ERROR("Failed to register CBaseEntity type");
-            return;
-        }
+        // Register CBaseEntity as a reference type with asbind20
+        asbind20::ref_class<CBaseEntity>(pEngine, "CBaseEntity", asOBJ_NOCOUNT)
+            .method("Vector3 GetOrigin() const", 
+                +[](CBaseEntity* self) -> Vector { return Entity_GetOrigin(self); })
+            .method("string GetClassName() const", 
+                +[](CBaseEntity* self) -> std::string { return Entity_GetClassName(self); })
+            .method("void SetOrigin(const Vector3 &in)", 
+                +[](CBaseEntity* self, const Vector& origin) { Entity_SetOrigin(origin, self); })
+            .method("bool IsAlive() const", 
+                +[](CBaseEntity* self) -> bool { return Entity_IsAlive(self); });
+        
         MS_ANGEL_DEBUG("   ✓ CBaseEntity type registered");
         
-        // Register CBaseEntity methods
-        r = pEngine->RegisterObjectMethod("CBaseEntity", "Vector3 GetOrigin() const", 
-            asFUNCTION(Entity_GetOrigin), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBaseEntity::GetOrigin");
+        // Register CBasePlayer as a reference type with asbind20
+        asbind20::ref_class<CBasePlayer>(pEngine, "CBasePlayer", asOBJ_NOCOUNT)
+            // Since AngelScript inheritance isn't working as expected in this version,
+            // we need to manually register CBaseEntity methods on CBasePlayer as well
+            .method("Vector3 GetOrigin() const", 
+                +[](CBasePlayer* self) -> Vector { return Entity_GetOrigin(reinterpret_cast<CBaseEntity*>(self)); })
+            .method("string GetClassName() const", 
+                +[](CBasePlayer* self) -> std::string { return Entity_GetClassName(reinterpret_cast<CBaseEntity*>(self)); })
+            .method("void SetOrigin(const Vector3 &in)", 
+                +[](CBasePlayer* self, const Vector& origin) { Entity_SetOrigin(origin, reinterpret_cast<CBaseEntity*>(self)); })
+            .method("bool IsAlive() const", 
+                +[](CBasePlayer* self) -> bool { return Entity_IsAlive(reinterpret_cast<CBaseEntity*>(self)); })
+            // CBasePlayer-specific methods
+            .method("string GetName() const", 
+                +[](CBasePlayer* self) -> std::string { return Player_GetName(self); })
+            .method("string GetSteamID() const", 
+                +[](CBasePlayer* self) -> std::string { return Player_GetSteamID(self); })
+            .method("string GetIPAddress() const", 
+                +[](CBasePlayer* self) -> std::string { return Player_GetIPAddress(self); })
+            .method("void SendMessage(const string &in, bool = true)", 
+                +[](CBasePlayer* self, const std::string& msg, bool center) { Player_SendMessage(msg, center, self); })
+            .method("void EmitSound(const string &in, float = 1.0f)", 
+                +[](CBasePlayer* self, const std::string& sound, float volume) { Player_EmitSound(sound, volume, self); });
         
-        r = pEngine->RegisterObjectMethod("CBaseEntity", "string GetClassName() const", 
-            asFUNCTION(Entity_GetClassName), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBaseEntity::GetClassName");
-        
-        r = pEngine->RegisterObjectMethod("CBaseEntity", "void SetOrigin(const Vector3 &in)", 
-            asFUNCTION(Entity_SetOrigin), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBaseEntity::SetOrigin");
-        
-        r = pEngine->RegisterObjectMethod("CBaseEntity", "bool IsAlive() const", 
-            asFUNCTION(Entity_IsAlive), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBaseEntity::IsAlive");
-        
-        // Now register CBasePlayer as inheriting from CBaseEntity
-        r = pEngine->RegisterObjectType("CBasePlayer", 0, asOBJ_REF | asOBJ_NOCOUNT);
-        if (r < 0) {
-            MS_ANGEL_ERROR("Failed to register CBasePlayer type");
-            return;
-        }
         MS_ANGEL_DEBUG("   ✓ CBasePlayer type registered");
-        
-        // Since AngelScript inheritance isn't working as expected in this version,
-        // we need to manually register CBaseEntity methods on CBasePlayer as well
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "Vector3 GetOrigin() const", 
-            asFUNCTION(Entity_GetOrigin), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::GetOrigin");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "string GetClassName() const", 
-            asFUNCTION(Entity_GetClassName), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::GetClassName");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "void SetOrigin(const Vector3 &in)", 
-            asFUNCTION(Entity_SetOrigin), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::SetOrigin");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "bool IsAlive() const", 
-            asFUNCTION(Entity_IsAlive), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::IsAlive");
-        
-        // Now register CBasePlayer-specific methods
-        
-        // Register CBasePlayer specific methods
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "string GetName() const", 
-            asFUNCTION(Player_GetName), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::GetName");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "string GetSteamID() const", 
-            asFUNCTION(Player_GetSteamID), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::GetSteamID");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "string GetIPAddress() const", 
-            asFUNCTION(Player_GetIPAddress), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::GetIPAddress");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "void SendMessage(const string &in, bool = true)", 
-            asFUNCTION(Player_SendMessage), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::SendMessage");
-        
-        r = pEngine->RegisterObjectMethod("CBasePlayer", "void EmitSound(const string &in, float = 1.0f)", 
-            asFUNCTION(Player_EmitSound), asCALL_CDECL_OBJLAST);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CBasePlayer::EmitSound");
         
         // Set up inheritance relationships after both types are registered
         RegisterEntityInheritance(pEngine);
@@ -682,84 +638,29 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Registering global entity functions...");
         
-        // Register GetGameTime (override the one from ASBuiltinFunctions if needed)
-        int r = pEngine->RegisterGlobalFunction("float GetGameTime()", 
-            asFUNCTION(AS_GetGameTime), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetGameTime");
-        
-        // Register GetAllPlayers
-        r = pEngine->RegisterGlobalFunction("array<CBasePlayer@>@ GetAllPlayers()", 
-            asFUNCTION(AS_GetAllPlayers), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetAllPlayers");
-        
-        // Register GetTimestamp
-        r = pEngine->RegisterGlobalFunction("string GetTimestamp()", 
-            asFUNCTION(AS_GetTimestamp), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetTimestamp");
-        
-        // Register GetCvar
-        r = pEngine->RegisterGlobalFunction("string GetCvar(const string &in)", 
-            asFUNCTION(AS_GetCvar), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetCvar");
-        
-        // Register GetMapName
-        r = pEngine->RegisterGlobalFunction("string GetMapName()", 
-            asFUNCTION(AS_GetMapName), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetMapName");
-        
-        // Register CreateEntity
-        r = pEngine->RegisterGlobalFunction("EntityHandle CreateEntity(const string &in)", 
-            asFUNCTION(AS_CreateEntity), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register CreateEntity");
-        
-        // Register entity property functions
-        r = pEngine->RegisterGlobalFunction("void SetEntityName(EntityHandle, const string &in)", 
-            asFUNCTION(AS_SetEntityName), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register SetEntityName");
-        
-        r = pEngine->RegisterGlobalFunction("void SetEntityTargetName(EntityHandle, const string &in)", 
-            asFUNCTION(AS_SetEntityTargetName), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register SetEntityTargetName");
-        
-        r = pEngine->RegisterGlobalFunction("void SetEntityHealth(EntityHandle, float)", 
-            asFUNCTION(AS_SetEntityHealth), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register SetEntityHealth");
-        
-        // Register IsEntityDead
-        r = pEngine->RegisterGlobalFunction("bool IsEntityDead(EntityHandle)", 
-            asFUNCTION(AS_IsEntityDead), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register IsEntityDead");
-        
-        // Register ChatLog
-        r = pEngine->RegisterGlobalFunction("void ChatLog(const string &in)", 
-            asFUNCTION(AS_ChatLog), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register ChatLog");
-        
-        // Register player management functions
-        r = pEngine->RegisterGlobalFunction("string GetPlayerCurrentMap()", 
-            asFUNCTION(AS_GetPlayerCurrentMap), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetPlayerCurrentMap");
-        
-        r = pEngine->RegisterGlobalFunction("int GetCurrentPlayerID()", 
-            asFUNCTION(AS_GetCurrentPlayerID), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register GetCurrentPlayerID");
-        
-        r = pEngine->RegisterGlobalFunction("void SendPlayerMessage(const string &in, const string &in, const string &in)", 
-            asFUNCTION(AS_SendPlayerMessage), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register SendPlayerMessage");
-        
-        // Register logging functions to replace MS_ANGEL_INFO macro
-        r = pEngine->RegisterGlobalFunction("void MS_ANGEL_INFO(const string &in)", 
-            asFUNCTION(AS_LogAngelInfo), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register MS_ANGEL_INFO");
-        
-        r = pEngine->RegisterGlobalFunction("void MS_ANGEL_DEBUG(const string &in)", 
-            asFUNCTION(AS_LogAngelDebug), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register MS_ANGEL_DEBUG");
-        
-        r = pEngine->RegisterGlobalFunction("void MS_ANGEL_ERROR(const string &in)", 
-            asFUNCTION(AS_LogAngelError), asCALL_CDECL);
-        if (r < 0) MS_ANGEL_ERROR("Failed to register MS_ANGEL_ERROR");
+        // Register global functions with asbind20
+        asbind20::global(pEngine)
+            // Core game functions
+            .function("float GetGameTime()", &AS_GetGameTime)
+            .function("string GetTimestamp()", &AS_GetTimestamp)
+            .function("string GetCvar(const string &in)", &AS_GetCvar)
+            .function("string GetMapName()", &AS_GetMapName)
+            // Entity management
+            .function("EntityHandle CreateEntity(const string &in)", &AS_CreateEntity)
+            .function("void SetEntityName(EntityHandle, const string &in)", &AS_SetEntityName)
+            .function("void SetEntityTargetName(EntityHandle, const string &in)", &AS_SetEntityTargetName)
+            .function("void SetEntityHealth(EntityHandle, float)", &AS_SetEntityHealth)
+            .function("bool IsEntityDead(EntityHandle)", &AS_IsEntityDead)
+            // Chat and communication
+            .function("void ChatLog(const string &in)", &AS_ChatLog)
+            // Player management
+            .function("string GetPlayerCurrentMap()", &AS_GetPlayerCurrentMap)
+            .function("int GetCurrentPlayerID()", &AS_GetCurrentPlayerID)
+            .function("void SendPlayerMessage(const string &in, const string &in, const string &in)", &AS_SendPlayerMessage)
+            // Logging functions
+            .function("void MS_ANGEL_INFO(const string &in)", &AS_LogAngelInfo)
+            .function("void MS_ANGEL_DEBUG(const string &in)", &AS_LogAngelDebug)
+            .function("void MS_ANGEL_ERROR(const string &in)", &AS_LogAngelError);
         
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
     }

@@ -14,6 +14,9 @@
 #include <vector>
 #include <set>
 
+// Forward declaration for pak file support
+class CGameGroupFile;
+
 //==========================================================================
 // Module dependency information
 //==========================================================================
@@ -104,6 +107,7 @@ public:
     // Module loading
     bool LoadModule(const std::string& filename, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     bool LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options = ASModuleLoadOptions());
+    bool LoadModuleFromMemory(const std::string& name, const std::string& content, CGameGroupFile* pakFile, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     
     // Module management
     bool UnloadModule(const std::string& name);
