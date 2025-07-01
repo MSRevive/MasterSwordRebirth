@@ -341,11 +341,19 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASObjectPool.h"
 	"../shared/ms/angelscript/ASScriptClasses.cpp"
 	"../shared/ms/angelscript/ASScriptClasses.h"
-	"../shared/ms/angelscript/ASEngineStubs.cpp"
+	"../shared/ms/angelscript/ASEngineProvider.cpp"
+	"../shared/ms/angelscript/ASEngineInterface.h"
+	"../shared/ms/angelscript/ASEngineBindings.h"
 	"../shared/ms/angelscript/ASEngineEventManager.cpp"
 	"../shared/ms/angelscript/ASEngineEventManager.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(Client_AngelScript
+	"angelscript/ASClientEngineImpl.cpp"
+	"angelscript/ASClientEngineImpl.h"
+)
+source_group("Client\\AngelScript" FILES ${Client_AngelScript})
 
 set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_atomic.cpp"
@@ -474,6 +482,7 @@ set(ALL_FILES
 	${Shared_CRC}
 	${Shared_base64}
 	${Shared_AngelScript}
+	${Client_AngelScript}
 	${ThirdParty_AngelScript}
 	${VGUI}
 	${VGUI_MS}

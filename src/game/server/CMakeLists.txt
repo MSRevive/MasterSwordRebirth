@@ -163,8 +163,6 @@ set(HL1
 source_group("HL1" FILES ${HL1})
 
 set(MS
-	"ASPlayerBridge.cpp"
-	"ASServerEngine.cpp"
 	"effects/mseffects.cpp"
 	"entity.cpp"
 	"gamerules/team.cpp"
@@ -332,7 +330,9 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASCoreTypes.h"
 	"../shared/ms/angelscript/ASEntityBindings.cpp"
 	"../shared/ms/angelscript/ASEntityBindings.h"
-	"../shared/ms/angelscript/ASEngineStubs.cpp"
+	"../shared/ms/angelscript/ASEngineProvider.cpp"
+	"../shared/ms/angelscript/ASEngineInterface.h"
+	"../shared/ms/angelscript/ASEngineBindings.h"
 	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
 	"../shared/ms/angelscript/ASBuiltinFunctions.h"
 	"../shared/ms/angelscript/ASBindings.cpp"
@@ -351,6 +351,12 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASEngineEventManager.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(Server_AngelScript
+	"angelscript/ASServerEngineImpl.cpp"
+	"angelscript/ASServerEngineImpl.h"
+)
+source_group("Server\\AngelScript" FILES ${Server_AngelScript})
 
 set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_atomic.cpp"
@@ -405,6 +411,7 @@ set(ALL_FILES
 	${Shared_Generic_Item}
 	${Shared_base64}
 	${Shared_AngelScript}
+	${Server_AngelScript}
 	${ThirdParty_AngelScript}
 )
 

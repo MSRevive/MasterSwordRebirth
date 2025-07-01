@@ -22,6 +22,10 @@ typedef float vec_t;
 // Include MSLogger with proper path
 #include "mslogger.h"
 
+// Include new template-based engine interface
+#include "ASEngineInterface.h"
+#include "ASEngineBindings.h"
+
 // Dummy type definitions for asbind20 registration
 // These are only used for type registration and not actual implementation
 namespace {
@@ -37,41 +41,8 @@ namespace {
 #define CBaseEntity CBaseEntity_Dummy
 #define CBasePlayer CBasePlayer_Dummy
 
-// Forward declarations and external functions for player management
-#ifdef VALVE_DLL
-    // Avoid header conflicts by using external declarations
-    extern "C" {
-        // Engine function prototypes
-        const char* GetPlayerAuthId_AS(void* edict);
-        void EmitSound_AS(void* edict, int channel, const char* sound, float volume, float attn, int flags, int pitch);
-        void SendInfoMsg_AS(void* player, const char* message);
-        void* PlayerByIndex_AS(int index);
-        int GetMaxClients_AS();
-        const char* GetPlayerDisplayName_AS(void* player);
-        const char* GetPlayerClientAddress_AS(void* player);
-        int GetPlayerEntIndex_AS(void* player);
-        int IsValidPlayer_AS(void* player);
-    }
-#endif
-
-// Engine integration - using external function declarations to avoid header conflicts
-// These will be linked from the actual game modules at runtime
-
-// External function prototypes for engine integration
-extern "C" {
-    float GetEngineGameTime();
-    const char* GetEngineCvarString(const char* name);
-    const char* GetEngineMapName();
-    void* CreateEngineEntity(const char* classname);
-    void SetEngineEntityOrigin(void* entity, float x, float y, float z);
-    void SetEngineEntityName(void* entity, const char* name);
-    void SetEngineEntityTargetName(void* entity, const char* targetname);
-    void SetEngineEntityHealth(void* entity, float health);
-    float GetEngineEntityHealth(void* entity);
-    int GetEngineEntityDeadFlag(void* entity);
-    const char* GetEngineEntityClassName(void* entity);
-    void GetEngineEntityOrigin(void* entity, float* x, float* y, float* z);
-}
+// Note: All external C function declarations have been removed.
+// All engine integration now uses ASEngineProvider directly.
 
 // Remove forward declarations - using dummy types via macros
 
@@ -94,10 +65,9 @@ namespace ASEntityBindings
             return Vector(0, 0, 0);
         }
         
-        float x, y, z;
-        GetEngineEntityOrigin((void*)pEntity, &x, &y, &z);
-        MS_ANGEL_DEBUG("Entity_GetOrigin: (%f, %f, %f)", x, y, z);
-        return Vector(x, y, z);
+        Vector origin = ASEngineProvider::GetEntityOrigin((void*)pEntity);
+        MS_ANGEL_DEBUG("Entity_GetOrigin: (%f, %f, %f)", origin.x, origin.y, origin.z);
+        return origin;
     }
     
     std::string Entity_GetClassName(CBaseEntity* pEntity)
@@ -108,8 +78,7 @@ namespace ASEntityBindings
             return "null_entity";
         }
         
-        const char* className = GetEngineEntityClassName((void*)pEntity);
-        std::string result = className ? className : "unknown_entity";
+        std::string result = ASEngineProvider::GetEntityClassName((void*)pEntity);
         MS_ANGEL_DEBUG("Entity_GetClassName: %s", result.c_str());
         return result;
     }
@@ -122,7 +91,7 @@ namespace ASEntityBindings
             return;
         }
         
-        SetEngineEntityOrigin((void*)pEntity, origin.x, origin.y, origin.z);
+        ASEngineProvider::SetEntityOrigin((void*)pEntity, origin);
         MS_ANGEL_DEBUG("Entity_SetOrigin: Set to (%f, %f, %f)", origin.x, origin.y, origin.z);
     }
     
@@ -134,8 +103,8 @@ namespace ASEntityBindings
             return false;
         }
         
-        float health = GetEngineEntityHealth((void*)pEntity);
-        int deadFlag = GetEngineEntityDeadFlag((void*)pEntity);
+        float health = ASEngineProvider::GetEntityHealth((void*)pEntity);
+        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)pEntity);
         
         // Check both health and deadflag (DEAD_NO = 0)
         bool isAlive = (deadFlag == 0) && (health > 0);
@@ -153,12 +122,7 @@ namespace ASEntityBindings
             return "Unknown Player";
         }
         
-#ifdef VALVE_DLL
-        const char* displayName = GetPlayerDisplayName_AS((void*)pPlayer);
-        std::string result = displayName ? displayName : "Unnamed Player";
-#else
-        std::string result = "Player"; // Client-side fallback
-#endif
+        std::string result = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
         MS_ANGEL_DEBUG("Player_GetName: %s", result.c_str());
         return result;
     }
@@ -171,12 +135,7 @@ namespace ASEntityBindings
             return "STEAM_ID_INVALID";
         }
         
-#ifdef VALVE_DLL
-        const char* authId = GetPlayerAuthId_AS((void*)pPlayer);
-        std::string result = authId ? authId : "STEAM_ID_UNKNOWN";
-#else
-        std::string result = "STEAM_0:0:00000"; // Client-side fallback
-#endif
+        std::string result = ASEngineProvider::GetPlayerAuthId((void*)pPlayer);
         MS_ANGEL_DEBUG("Player_GetSteamID: %s", result.c_str());
         return result;
     }
@@ -189,13 +148,7 @@ namespace ASEntityBindings
             return "0.0.0.0";
         }
         
-#ifdef VALVE_DLL
-        // Get IP from player's client address
-        const char* address = GetPlayerClientAddress_AS((void*)pPlayer);
-        std::string result = address ? address : "Unknown";
-#else
-        std::string result = "127.0.0.1"; // Client-side fallback
-#endif
+        std::string result = ASEngineProvider::GetPlayerClientAddress((void*)pPlayer);
         MS_ANGEL_DEBUG("Player_GetIPAddress: %s", result.c_str());
         return result;
     }
@@ -214,14 +167,9 @@ namespace ASEntityBindings
             return;
         }
         
-#ifdef VALVE_DLL
-        // Send as InfoMsg to the player
-        SendInfoMsg_AS((void*)pPlayer, message.c_str());
-        const char* playerName = GetPlayerDisplayName_AS((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_SendMessage sent to %s: %s", playerName ? playerName : "Unknown", message.c_str());
-#else
-        MS_ANGEL_DEBUG("Player_SendMessage: %s (client-side stub)", message.c_str());
-#endif
+        ASEngineProvider::SendInfoMsg((void*)pPlayer, message);
+        std::string playerName = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
+        MS_ANGEL_DEBUG("Player_SendMessage sent to %s: %s", playerName.c_str(), message.c_str());
     }
     
     void Player_EmitSound(const std::string& sound, float volume, CBasePlayer* pPlayer)
@@ -241,20 +189,16 @@ namespace ASEntityBindings
         // Clamp volume to valid range
         float clampedVolume = std::max(0.0f, std::min(1.0f, volume));
         
-#ifdef VALVE_DLL
         // Emit sound at player's location (CHAN_AUTO=0, ATTN_NORM=0.8, PITCH_NORM=100)
-        EmitSound_AS((void*)pPlayer, 0, sound.c_str(), clampedVolume, 0.8f, 0, 100);
-        const char* playerName = GetPlayerDisplayName_AS((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_EmitSound: %s at volume %f for %s", sound.c_str(), clampedVolume, playerName ? playerName : "Unknown");
-#else
-        MS_ANGEL_DEBUG("Player_EmitSound: %s at volume %f (client-side stub)", sound.c_str(), clampedVolume);
-#endif
+        ASEngineProvider::EmitSound((void*)pPlayer, 0, sound, clampedVolume, 0.8f, 0, 100);
+        std::string playerName = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
+        MS_ANGEL_DEBUG("Player_EmitSound: %s at volume %f for %s", sound.c_str(), clampedVolume, playerName.c_str());
     }
     
     // Global functions
     float AS_GetGameTime()
     {
-        float gameTime = GetEngineGameTime();
+        float gameTime = ASEngineProvider::GetGameTime();
         MS_ANGEL_DEBUG("GetGameTime: %f", gameTime);
         return gameTime;
     }
@@ -304,8 +248,7 @@ namespace ASEntityBindings
             return "";
         }
         
-        const char* value = GetEngineCvarString(cvarName.c_str());
-        std::string result = value ? value : "";
+        std::string result = ASEngineProvider::GetCvarString(cvarName);
         MS_ANGEL_DEBUG("GetCvar '%s': '%s'", cvarName.c_str(), result.c_str());
         return result;
     }
@@ -319,8 +262,7 @@ namespace ASEntityBindings
     // Get current map name
     std::string AS_GetMapName()
     {
-        const char* mapName = GetEngineMapName();
-        std::string result = mapName ? mapName : "unknown_map";
+        std::string result = ASEngineProvider::GetMapName();
         MS_ANGEL_DEBUG("GetMapName: %s", result.c_str());
         return result;
     }
@@ -334,7 +276,7 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        void* entity = CreateEngineEntity(scriptName.c_str());
+        void* entity = ASEngineProvider::CreateEntity(scriptName);
         if (entity)
         {
             MS_ANGEL_INFO("CreateEntity: Successfully created '%s'", scriptName.c_str());
@@ -355,7 +297,7 @@ namespace ASEntityBindings
             return;
         }
         
-        SetEngineEntityName((void*)pEntity, name.c_str());
+        ASEngineProvider::SetEntityName((void*)pEntity, name);
         MS_ANGEL_DEBUG("SetEntityName: Set name to '%s'", name.c_str());
     }
     
@@ -367,7 +309,7 @@ namespace ASEntityBindings
             return;
         }
         
-        SetEngineEntityTargetName((void*)pEntity, targetName.c_str());
+        ASEngineProvider::SetEntityTargetName((void*)pEntity, targetName);
         MS_ANGEL_DEBUG("SetEntityTargetName: Set targetname to '%s'", targetName.c_str());
     }
     
@@ -379,7 +321,7 @@ namespace ASEntityBindings
             return;
         }
         
-        SetEngineEntityHealth((void*)pEntity, health);
+        ASEngineProvider::SetEntityHealth((void*)pEntity, health);
         MS_ANGEL_DEBUG("SetEntityHealth: Set health to %f", health);
     }
     
@@ -392,8 +334,8 @@ namespace ASEntityBindings
             return true;
         }
         
-        float health = GetEngineEntityHealth((void*)pEntity);
-        int deadFlag = GetEngineEntityDeadFlag((void*)pEntity);
+        float health = ASEngineProvider::GetEntityHealth((void*)pEntity);
+        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)pEntity);
         
         // Check if entity is dead by health or deadflag (DEAD_NO = 0)
         bool isDead = (deadFlag != 0) || (health <= 0);
@@ -478,8 +420,7 @@ namespace ASEntityBindings
     std::string AS_GetPlayerCurrentMap()
     {
         // Get current map name - this is the same for all players on the server
-        const char* mapName = GetEngineMapName();
-        std::string result = mapName ? mapName : "unknown_map";
+        std::string result = ASEngineProvider::GetMapName();
         MS_ANGEL_DEBUG("GetPlayerCurrentMap: %s", result.c_str());
         return result;
     }
@@ -490,12 +431,8 @@ namespace ASEntityBindings
     void AS_SetCurrentPlayerContext(CBasePlayer* pPlayer)
     {
         g_pCurrentScriptPlayer = (void*)pPlayer;
-#ifdef VALVE_DLL
-        const char* playerName = pPlayer ? GetPlayerDisplayName_AS((void*)pPlayer) : "NULL";
-        MS_ANGEL_DEBUG("SetCurrentPlayerContext: %s", playerName);
-#else
-        MS_ANGEL_DEBUG("SetCurrentPlayerContext: %p", pPlayer);
-#endif
+        std::string playerName = pPlayer ? ASEngineProvider::GetPlayerDisplayName((void*)pPlayer) : "NULL";
+        MS_ANGEL_DEBUG("SetCurrentPlayerContext: %s", playerName.c_str());
     }
     
     int AS_GetCurrentPlayerID()
@@ -506,15 +443,10 @@ namespace ASEntityBindings
             return -1;
         }
         
-#ifdef VALVE_DLL
-        int playerID = GetPlayerEntIndex_AS(g_pCurrentScriptPlayer);
-        const char* playerName = GetPlayerDisplayName_AS(g_pCurrentScriptPlayer);
-        MS_ANGEL_DEBUG("GetCurrentPlayerID: %d (%s)", playerID, playerName ? playerName : "Unknown");
+        int playerID = ASEngineProvider::GetPlayerEntIndex(g_pCurrentScriptPlayer);
+        std::string playerName = ASEngineProvider::GetPlayerDisplayName(g_pCurrentScriptPlayer);
+        MS_ANGEL_DEBUG("GetCurrentPlayerID: %d (%s)", playerID, playerName.c_str());
         return playerID;
-#else
-        MS_ANGEL_DEBUG("GetCurrentPlayerID: stub - returning -1");
-        return -1;
-#endif
     }
     
     void AS_SendPlayerMessage(const std::string& playerName, const std::string& title, const std::string& message)
@@ -525,28 +457,27 @@ namespace ASEntityBindings
             return;
         }
         
-#ifdef VALVE_DLL
-        // Find player by name
-        int maxClients = GetMaxClients_AS();
+        // Find player by name using ASEngineProvider
+        int maxClients = ASEngineProvider::GetMaxClients();
         for (int i = 1; i <= maxClients; i++)
         {
-            void* pPlayer = PlayerByIndex_AS(i);
-            if (!pPlayer || !IsValidPlayer_AS(pPlayer))
+            void* pPlayer = ASEngineProvider::PlayerByIndex(i);
+            if (!pPlayer || !ASEngineProvider::IsValidPlayer(pPlayer))
                 continue;
                 
             // Compare display names
-            const char* displayName = GetPlayerDisplayName_AS(pPlayer);
-            if (displayName && strcmp(displayName, playerName.c_str()) == 0)
+            std::string displayName = ASEngineProvider::GetPlayerDisplayName(pPlayer);
+            if (displayName == playerName)
             {
                 // Send HUD message with title if provided
                 if (!title.empty())
                 {
                     std::string fullMsg = title + "\\n" + message;
-                    SendInfoMsg_AS(pPlayer, fullMsg.c_str());
+                    ASEngineProvider::SendInfoMsg(pPlayer, fullMsg);
                 }
                 else
                 {
-                    SendInfoMsg_AS(pPlayer, message.c_str());
+                    ASEngineProvider::SendInfoMsg(pPlayer, message);
                 }
                 
                 MS_ANGEL_DEBUG("SendPlayerMessage sent to %s: [%s] %s", 
@@ -556,10 +487,6 @@ namespace ASEntityBindings
         }
         
         MS_ANGEL_ERROR("SendPlayerMessage: Player '%s' not found", playerName.c_str());
-#else
-        MS_ANGEL_DEBUG("SendPlayerMessage: %s - [%s] %s (client-side stub)", 
-                      playerName.c_str(), title.c_str(), message.c_str());
-#endif
     }
     
     void RegisterEntityInheritance(asIScriptEngine* pEngine)
@@ -671,6 +598,10 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Starting entity bindings registration...");
         
+        // Register the new template-based engine bindings first
+        ASEngineBindings::RegisterAll(pEngine);
+        
+        // Register entity types and legacy functions
         RegisterEntityTypes(pEngine);
         RegisterGlobalFunctions(pEngine);
         
