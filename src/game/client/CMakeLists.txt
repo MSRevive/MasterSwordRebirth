@@ -342,6 +342,8 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASScriptClasses.cpp"
 	"../shared/ms/angelscript/ASScriptClasses.h"
 	"../shared/ms/angelscript/ASEngineStubs.cpp"
+	"../shared/ms/angelscript/ASEngineEventManager.cpp"
+	"../shared/ms/angelscript/ASEngineEventManager.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
 

@@ -43,6 +43,7 @@
 #include "mscharacter.h"
 #include "global.h"
 #include "pm_shared.h" // PM_GetHullBounds
+#include "ms/angelscript/ASEngineEventManager.h"
 
 extern void PlayerPrecache();
 
@@ -108,6 +109,29 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
 		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
+		
+		// Fire AngelScript engine event for player connection
+		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+		if (pEventManager)
+		{
+			// Extract Steam ID from address if available (format: "SteamID:12345" or just IP)
+			std::string steamID = "Unknown";
+			if (pszAddress && strlen(pszAddress) > 0)
+			{
+				std::string addr(pszAddress);
+				size_t steamPos = addr.find("SteamID:");
+				if (steamPos != std::string::npos)
+				{
+					steamID = addr.substr(steamPos + 8); // Skip "SteamID:"
+				}
+				else
+				{
+					steamID = addr; // Use full address as fallback
+				}
+			}
+			
+			pEventManager->FirePlayerConnectEvent(pszName ? pszName : "Unknown", steamID.c_str());
+		}
 	}
 	else
 		logfile << "Client rejected: " << szRejectReason << "\n";
@@ -147,6 +171,43 @@ void ClientDisconnect(edict_t *pEntity)
 		pSound->Reset();*/
 
 	dbg("Call g_pGameRules->ClientDisconnected");
+
+	// Fire AngelScript engine event for player disconnection (before cleanup)
+	ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+	if (pEventManager && pEntity)
+	{
+		// Get player information before cleanup
+		const char* pszPlayerName = "Unknown";
+		std::string steamID = "Unknown";
+		
+		// Try to get player name from entity
+		if (pEntity->v.netname && STRING(pEntity->v.netname)[0])
+		{
+			pszPlayerName = STRING(pEntity->v.netname);
+		}
+		
+		// Try to get Steam ID from client info
+		int iPlayerIndex = ENTINDEX(pEntity) - 1;
+		if (iPlayerIndex >= 0 && iPlayerIndex < gpGlobals->maxClients)
+		{
+			clientaddr_t &ClientInfo = g_NewClients[iPlayerIndex];
+			if (ClientInfo.Addr[0])
+			{
+				std::string addr(ClientInfo.Addr);
+				size_t steamPos = addr.find("SteamID:");
+				if (steamPos != std::string::npos)
+				{
+					steamID = addr.substr(steamPos + 8); // Skip "SteamID:"
+				}
+				else
+				{
+					steamID = addr; // Use full address as fallback
+				}
+			}
+		}
+		
+		pEventManager->FirePlayerDisconnectEvent(pszPlayerName, steamID.c_str());
+	}
 
 	//When the server is shutdown, this ClientDisconnect is called after gamerules has been deleted
 	if (g_pGameRules)

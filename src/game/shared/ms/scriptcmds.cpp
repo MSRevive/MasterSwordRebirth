@@ -28,6 +28,7 @@
 #else
 #include "svglobals.h"
 #include "global.h"
+#include "angelscript/ASEngineEventManager.h"
 #endif
 
 #undef SCRIPTVAR
@@ -2788,7 +2789,55 @@ bool CScript::ScriptCmd_Create(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringli
 			CGenericItem *pNewItem = NewGenericItem( Params[0] );
 			pEntity = pNewItem; pScript = pNewItem;
 			if( pNewItem )
+			{
 				pNewItem->pev->origin = Position;
+				
+#ifdef VALVE_DLL
+				// Fire AngelScript engine event for treasure/item spawning
+				ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+				if (pEventManager)
+				{
+					// Check if this looks like a treasure/loot item by checking the script name
+					bool isTreasure = false;
+					const char* pszItemName = Params[0].c_str();
+					
+					// Consider it treasure if the script name contains treasure-related keywords
+					if (strstr(pszItemName, "treasure") || 
+					    strstr(pszItemName, "chest") ||
+					    strstr(pszItemName, "loot") ||
+					    strstr(pszItemName, "artifact") ||
+					    strstr(pszItemName, "rare") ||
+					    strstr(pszItemName, "epic") ||
+					    strstr(pszItemName, "legendary"))
+					{
+						isTreasure = true;
+					}
+					
+					// Also consider items created by treasure-related scripts as treasure
+					if (m.pScriptedEnt && m.pScriptedEnt->pev->classname)
+					{
+						const char* pszCreatorClass = STRING(m.pScriptedEnt->pev->classname);
+						if (strstr(pszCreatorClass, "treasure") || 
+						    strstr(pszCreatorClass, "chest") ||
+						    strstr(pszCreatorClass, "loot"))
+						{
+							isTreasure = true;
+						}
+					}
+					
+					// Fire the event if this is considered treasure
+					if (isTreasure)
+					{
+						pEventManager->FireTreasureSpawnedEvent(
+							pszItemName,
+							Position.x,
+							Position.y,
+							Position.z
+						);
+					}
+				}
+#endif
+			}
 		}
 
 		if( pEntity )

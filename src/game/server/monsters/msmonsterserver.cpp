@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
+#include "ms/angelscript/ASEngineEventManager.h"
 #include <set>
 #include <cmath>
 
@@ -2603,6 +2604,47 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 
 			//ALERT( at_console, "called game_death\n" );
 			CallScriptEvent("game_death");
+			
+			// Fire AngelScript engine event for monster death
+			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+			if (pEventManager)
+			{
+				// Get monster name
+				const char* pszMonsterName = "Unknown";
+				if (pev->classname && STRING(pev->classname)[0])
+				{
+					pszMonsterName = STRING(pev->classname);
+				}
+				
+				// Get killer name
+				const char* pszKillerName = "Unknown";
+				if (pevAttacker)
+				{
+					if (pevAttacker->classname && STRING(pevAttacker->classname)[0])
+					{
+						if (FStrEq(STRING(pevAttacker->classname), "player"))
+						{
+							// It's a player, get their netname
+							if (pevAttacker->netname && STRING(pevAttacker->netname)[0])
+							{
+								pszKillerName = STRING(pevAttacker->netname);
+							}
+						}
+						else
+						{
+							// It's another entity, use classname
+							pszKillerName = STRING(pevAttacker->classname);
+						}
+					}
+				}
+				
+				// Get monster position at death
+				Vector deathPos = pev->origin;
+				
+				pEventManager->FireMonsterKilledEvent(pszMonsterName, pszKillerName, 
+													  deathPos.x, deathPos.y, deathPos.z);
+			}
+			
 			m_SkillLevel = 0; //Thothie APR2011_06 - attempt to make sure monster does not give additional skill post mortem
 		}
 		else

@@ -11,7 +11,8 @@
 #include "ASBuiltinFunctions.h"
 #include "ASScriptClasses.h"   
 #include "ASCoroutines.h"        
-#include "ASObjectPool.h"      
+#include "ASObjectPool.h"
+#include "ASEngineEventManager.h"      
 
 // Include asbind20
 #include <asbind20/asbind.hpp>
@@ -177,6 +178,30 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     else
     {
         MS_ANGEL_INFO("   ✓ Module system registered successfully");
+    }
+    
+    // Step 8.5: Register engine event system
+    MS_ANGEL_INFO("[8.5/10] Registering Engine Event System...");
+    if (!ASEngineEvents::RegisterEngineEventFunctions(pEngine))
+    {
+        MS_ANGEL_ERROR("   ERROR: Engine event system registration failed!");
+        success = false;
+    }
+    else
+    {
+        MS_ANGEL_INFO("   ✓ Engine event system registered successfully");
+        
+        // Initialize the engine event manager with this engine
+        ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+        if (pEventManager && !pEventManager->Initialize(pEngine))
+        {
+            MS_ANGEL_ERROR("   ERROR: Engine event manager initialization failed!");
+            success = false;
+        }
+        else
+        {
+            MS_ANGEL_INFO("   ✓ Engine event manager initialized successfully");
+        }
     }
     
     // Step 9: Validate all registrations
