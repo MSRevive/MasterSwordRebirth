@@ -752,12 +752,24 @@ void CNewCharacterPanel::Update()
 				Choose_MainBtn[i]->setText( "" );
 				Choose_CharLabel[i][0]->setText( CharSlot.Name );
 				char cMapInfo[128];
-				CharSlot.MapName.str()[0] = toupper(CharSlot.MapName.str()[0]);
-				CharSlot.NextMap.str()[0] = toupper(CharSlot.NextMap.str()[0]);
-				if( CharSlot.NextMap.str()[0] )
-					 _snprintf(cMapInfo, sizeof(cMapInfo),  "%s -> %s",  CharSlot.MapName,  CharSlot.NextMap );
+				msstring mapName = CharSlot.MapName;
+				msstring nextMap = CharSlot.NextMap;
+				
+				// Safely capitalize first character if string is not empty
+				if (mapName.len() > 0)
+				{
+					mapName = toupper(mapName);
+				}
+				if (nextMap.len() > 0)
+				{
+					nextMap = toupper(nextMap);
+				}
+				
+				if (nextMap.len() > 0)
+					_snprintf(cMapInfo, sizeof(cMapInfo), "%s -> %s", mapName.c_str(), nextMap.c_str());
 				else
-					 _snprintf(cMapInfo, sizeof(cMapInfo),  "At %s",  CharSlot.MapName );
+					_snprintf(cMapInfo, sizeof(cMapInfo), "At %s", mapName.c_str());
+
 				Choose_CharLabel[i][1]->setText( cMapInfo );
 				Choose_DeleteChar[i]->setVisible( true );
 

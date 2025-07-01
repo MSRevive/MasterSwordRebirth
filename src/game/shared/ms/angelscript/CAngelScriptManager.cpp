@@ -111,6 +111,7 @@ bool CAngelScriptManager::Initialize()
         return false;
     }
     
+    
     // Set the message callback
     int r = m_pEngine->SetMessageCallback(asFUNCTION(ASMessageCallback), 0, asCALL_CDECL);
     if (r < 0)
@@ -121,11 +122,30 @@ bool CAngelScriptManager::Initialize()
         return false;
     }
     
-    // Configure engine properties for 32-bit constraints
+    // Configure engine properties for 32-bit constraints and class support
     r = m_pEngine->SetEngineProperty(asEP_MAX_STACK_SIZE, 1024*1024); // 1MB stack
     if (r < 0)
     {
         LogMessage("Failed to set AngelScript stack size", 1);
+    }
+    
+    // Enable class support and modern syntax features
+    r = m_pEngine->SetEngineProperty(asEP_ALLOW_UNSAFE_REFERENCES, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable unsafe references", 1);
+    }
+    
+    r = m_pEngine->SetEngineProperty(asEP_OPTIMIZE_BYTECODE, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable bytecode optimization", 1);
+    }
+    
+    r = m_pEngine->SetEngineProperty(asEP_COPY_SCRIPT_SECTIONS, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable script section copying", 1);
     }
     
     // Set up memory allocation hooks

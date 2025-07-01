@@ -19,6 +19,7 @@
 // AngelScript add-ons
 #include "addons/scriptstdstring/scriptstdstring.h"
 #include "addons/scriptarray/scriptarray.h"
+#include "addons/scriptdictionary/scriptdictionary.h"
 
 #include <cstdio>
 #include <cstring>
@@ -46,6 +47,10 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     // Register array type before string utils (array<string> template dependency)
     MS_ANGEL_INFO("[1/10] Registering Array Type...");
     RegisterScriptArray(pEngine, true); // true = use native calling convention
+    
+    // Register dictionary type
+    MS_ANGEL_INFO("[1.3/10] Registering Dictionary Type...");
+    RegisterScriptDictionary(pEngine);
     
     // Now register string utilities that depend on array<string>
     MS_ANGEL_INFO("[1.5/10] Registering String Utilities...");

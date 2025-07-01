@@ -111,7 +111,9 @@ namespace ASCoreTypes
             .method("Vector3 opDiv(float) const", static_cast<Vector(Vector::*)(float) const>(&Vector::operator/))
             .method("bool opEquals(const Vector3 &in) const", static_cast<int(Vector::*)(const Vector&) const>(&Vector::operator==))
             .method("Vector3 opNeg() const", static_cast<Vector(Vector::*)() const>(&Vector::operator-))
-            // Assignment operators
+            // Assignment operator
+            .method("Vector3& opAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator=))
+            // Compound assignment operators
             .method("Vector3& opAddAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator+=))
             .method("Vector3& opSubAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator-=))
             .method("Vector3& opMulAssign(float)", static_cast<Vector&(Vector::*)(float)>(&Vector::operator*=))

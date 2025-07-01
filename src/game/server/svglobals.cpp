@@ -336,16 +336,22 @@ void MSWorldSpawn()
 			
 			// AngelScript module files in scripts.pak
 			const char* gameMasterModules[] = {
+				// Load prerequisite modules first (contains the functions GameMasterInit.as calls)
+				"angelscript/AdvancedTriggerSystem.as",
+				"angelscript/EntitySpawner.as",
+				"angelscript/HPSequenceTrigger.as", 
+				"angelscript/EntityCommunicationInit.as",
+				// Then load GameMaster modules that depend on the above
 				"angelscript/GameMasterData.as",
-				"angelscript/GameMasterEvents.as", 
-				"angelscript/GameMasterUtils.as",
+				"angelscript/GameMasterEvents.as",
+				"angelscript/GameMasterUtils.as", 
 				"angelscript/GameMaster.as",
 				"angelscript/GameMasterInit.as"
 			};
 			
 			bool bSuccess = true;
 			
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < 9; i++)
 			{
 				unsigned long fileSize;
 			

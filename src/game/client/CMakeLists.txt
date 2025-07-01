@@ -380,6 +380,7 @@ set(ThirdParty_AngelScript
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
 	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
+	"../shared/ms/angelscript/addons/scriptdictionary/scriptdictionary.cpp"
 	"../shared/ms/angelscript/addons/scriptbuilder/scriptbuilder.cpp"
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
