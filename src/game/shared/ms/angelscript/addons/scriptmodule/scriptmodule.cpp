@@ -71,8 +71,9 @@ bool CScriptModule::DiscoverModulesInPak(CGameGroupFile* pakFile)
     // Process each AngelScript file to look for module declarations
     for (const std::string& filePath : angelscriptFiles)
     {
+#ifdef SCRIPTPACK_TOOL        
         printf("CScriptModule: Examining file: %s\n", filePath.c_str());
-        
+#endif
         // Get file size first
         unsigned long fileSize;
         if (!pakFile->ReadEntry(filePath.c_str(), nullptr, fileSize))
@@ -119,7 +120,9 @@ bool CScriptModule::DiscoverModulesInDirectory(const std::string& directory)
 //==============================================================================
 bool CScriptModule::ProcessModuleFile(const std::string& filePath, const std::string& source)
 {
+#ifdef SCRIPTPACK_TOOL
     printf("CScriptModule: Processing file: %s\n", filePath.c_str());
+#endif
     
     // Input validation
     if (filePath.empty())
@@ -218,15 +221,17 @@ bool CScriptModule::ProcessModuleFile(const std::string& filePath, const std::st
     }
     else
     {
+#ifdef SCRIPTPACK_TOOL
         printf("CScriptModule: No valid module declaration found in file: %s\n", filePath.c_str());
         printf("CScriptModule: File does not contain 'module ModuleName {' pattern\n");
+#endif
         return false;
     }
 }
 
 bool CScriptModule::PreprocessModuleSource(const std::string& source, std::string& output, std::string& moduleName)
 {
-#ifndef SCRIPTPACK_TOOL
+#ifdef SCRIPTPACK_TOOL
     printf("CScriptModule: Starting preprocessing of source (%zu bytes)\n", source.length());
 #endif
     
@@ -244,7 +249,7 @@ bool CScriptModule::PreprocessModuleSource(const std::string& source, std::strin
     // Look for 'module ModuleName {' declaration using enhanced parsing
     if (!ParseModuleDeclaration(source, moduleName, moduleStart))
     {
-#ifndef SCRIPTPACK_TOOL
+#ifdef SCRIPTPACK_TOOL
         printf("CScriptModule: No valid module declaration found during preprocessing\n");
 #endif
         return false; // No module declaration found
@@ -403,7 +408,9 @@ bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::strin
         pos++;
     }
     
+#ifdef SCRIPTPACK_TOOL
     printf("CScriptModule: No module declaration found in source\n");
+#endif
     return false;
 }
 

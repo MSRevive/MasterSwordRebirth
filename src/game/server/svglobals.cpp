@@ -79,7 +79,7 @@ cvar_t as_memory_limit = {const_cast<char*>("as_memory_limit"), "1073741824", FC
 cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "1", FCVAR_SERVER};
 cvar_t as_gc_interval = {const_cast<char*>("as_gc_interval"), "60", FCVAR_SERVER};
 cvar_t as_stack_size = {const_cast<char*>("as_stack_size"), "4096", FCVAR_SERVER}; // 4KB
-cvar_t as_debug_mode = {const_cast<char*>("as_debug_mode"), "1", FCVAR_SERVER};
+cvar_t as_debug_mode = {const_cast<char*>("as_debug_mode"), "0", FCVAR_SERVER};
 cvar_t as_auto_discovery = {const_cast<char*>("as_auto_discovery"), "1", FCVAR_SERVER}; // Enable module auto-discovery
 cvar_t as_module_debug = {const_cast<char*>("as_module_debug"), "1", FCVAR_SERVER}; // Debug module discovery
 
@@ -321,22 +321,6 @@ void MSWorldSpawn()
 						{
 							g_engfuncs.pfnServerPrint("AngelScript modules loaded successfully!\n");
 							logfile << Logger::LOG_INFO << "AngelScript modules loaded successfully!\n";
-							
-							// GameMaster module initialization is handled automatically by LoadDiscoveredModules
-							// Just call any legacy compatibility functions if needed
-							CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-							if (pASManager && pASManager->IsInitialized())
-							{
-								// Call game_spawn for world initialization
-								g_engfuncs.pfnServerPrint("Calling game_spawn for world initialization...\n");
-								logfile << Logger::LOG_INFO << "Calling game_spawn for world initialization...\n";
-								
-								if (!pASManager->CallGlobalFunction("game_spawn"))
-								{
-									g_engfuncs.pfnServerPrint("WARNING: game_spawn function not found - continuing anyway\n");
-									logfile << Logger::LOG_WARN << "game_spawn function not found - continuing anyway\n";
-								}
-							}
 						}
 						else
 						{
