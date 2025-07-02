@@ -91,6 +91,7 @@ private:
     asIScriptContext* AcquireContext();
     void ReleaseContext(asIScriptContext* pContext);
     const char* GetEventTypeName(EngineEventType eventType) const;
+    bool IsParameterByReference(asIScriptFunction* pFunction, int paramIndex);
 };
 
 //==========================================================================

@@ -279,6 +279,27 @@ void ASEngineEventManager::FirePlayerSpawnedEvent(const char* szPlayerName)
 }
 
 //==========================================================================
+// Helper function to determine if parameter should be passed by reference
+//==========================================================================
+bool ASEngineEventManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
+{
+    if (!pFunction || paramIndex >= pFunction->GetParamCount())
+        return false;
+        
+    int typeId;
+    asDWORD flags;
+    const char* name;
+    const char* defaultArg;
+    
+    int r = pFunction->GetParam(paramIndex, &typeId, &flags, &name, &defaultArg);
+    if (r < 0)
+        return false;
+    
+    // Check if parameter has reference flag
+    return (flags & asTM_INREF) != 0;
+}
+
+//==========================================================================
 // Dispatch Event to Handlers
 //==========================================================================
 void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::vector<std::string>& parameters)
@@ -286,7 +307,17 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
     if (!m_bInitialized)
         return;
         
+    MS_ANGEL_INFO("ASEngineEventManager::DispatchEvent - Event: %s, Parameters: %zu", 
+                  GetEventTypeName(eventType), parameters.size());
+    
+    // Log parameters
+    for (size_t i = 0; i < parameters.size(); i++)
+    {
+        MS_ANGEL_INFO("  Parameter[%zu]: '%s'", i, parameters[i].c_str());
+    }
+    
     int handlerCount = 0;
+    int executedCount = 0;
     
     // Find all handlers for this event type
     for (const auto& handler : m_EventHandlers)
@@ -295,6 +326,11 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             continue;
             
         handlerCount++;
+        
+        MS_ANGEL_INFO("ASEngineEventManager: Executing handler #%d for %s", 
+                      handlerCount, GetEventTypeName(eventType));
+        MS_ANGEL_INFO("  Function: %s (Module: %s)", 
+                      handler.pFunction->GetName(), handler.moduleName.c_str());
         
         // Acquire context from the manager's pool
         asIScriptContext* pContext = AcquireContext();
@@ -308,10 +344,39 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         int r = pContext->Prepare(handler.pFunction);
         if (r < 0)
         {
-            MS_ANGEL_ERROR("ASEngineEventManager: Failed to prepare function call for %s", GetEventTypeName(eventType));
+            const char* errorStr = "";
+            switch(r)
+            {
+                case -1: errorStr = "asERROR"; break;
+                case -2: errorStr = "asCONTEXT_ACTIVE"; break;
+                case -3: errorStr = "asCONTEXT_NOT_FINISHED"; break;
+                case -4: errorStr = "asCONTEXT_NOT_PREPARED"; break;
+                case -5: errorStr = "asINVALID_ARG"; break;
+                case -6: errorStr = "asNO_FUNCTION"; break;
+                default: errorStr = "UNKNOWN"; break;
+            }
+            MS_ANGEL_ERROR("ASEngineEventManager: Failed to prepare function call for %s (error: %d - %s)", GetEventTypeName(eventType), r, errorStr);
+            
+            // Additional debugging info
+            if (handler.pFunction)
+            {
+                MS_ANGEL_ERROR("Function details: Name='%s', ParamCount=%d, Module='%s'", 
+                              handler.pFunction->GetName() ? handler.pFunction->GetName() : "NULL",
+                              handler.pFunction->GetParamCount(),
+                              handler.moduleName.c_str());
+            }
+            else
+            {
+                MS_ANGEL_ERROR("Function pointer is NULL!");
+            }
+            
             ReleaseContext(pContext);
             continue;
         }
+        
+        // Create persistent storage for Vector objects
+        std::vector<Vector> vectorStorage;
+        bool parameterError = false;
         
         // Set parameters based on event type
         switch (eventType)
@@ -320,55 +385,139 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             case EngineEventType::PLAYER_DISCONNECT:
                 if (parameters.size() >= 2)
                 {
-                    pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0])); // Player name
-                    pContext->SetArgObject(1, const_cast<std::string*>(&parameters[1])); // Steam ID
+                    // Set string parameters based on their declaration type
+                    if (IsParameterByReference(handler.pFunction, 0))
+                        pContext->SetArgAddress(0, const_cast<std::string*>(&parameters[0]));
+                    else
+                        pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0]));
+                        
+                    if (IsParameterByReference(handler.pFunction, 1))
+                        pContext->SetArgAddress(1, const_cast<std::string*>(&parameters[1]));
+                    else
+                        pContext->SetArgObject(1, const_cast<std::string*>(&parameters[1]));
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Insufficient parameters for %s (need 2, got %zu)", 
+                                  GetEventTypeName(eventType), parameters.size());
+                    parameterError = true;
                 }
                 break;
                 
             case EngineEventType::MONSTER_KILLED:
                 if (parameters.size() >= 5)
                 {
-                    pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0])); // Monster name
-                    pContext->SetArgObject(1, const_cast<std::string*>(&parameters[1])); // Killer name
+                    // Set string parameters
+                    if (IsParameterByReference(handler.pFunction, 0))
+                        pContext->SetArgAddress(0, const_cast<std::string*>(&parameters[0]));
+                    else
+                        pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0]));
+                        
+                    if (IsParameterByReference(handler.pFunction, 1))
+                        pContext->SetArgAddress(1, const_cast<std::string*>(&parameters[1]));
+                    else
+                        pContext->SetArgObject(1, const_cast<std::string*>(&parameters[1]));
                     
-                    // Create a Vector3 for the death position
-                    Vector deathPos(std::stof(parameters[2]), std::stof(parameters[3]), std::stof(parameters[4]));
-                    pContext->SetArgObject(2, &deathPos);
+                    // Create Vector3 for the death position and store it persistently
+                    try
+                    {
+                        vectorStorage.emplace_back(std::stof(parameters[2]), std::stof(parameters[3]), std::stof(parameters[4]));
+                        
+                        if (IsParameterByReference(handler.pFunction, 2))
+                            pContext->SetArgAddress(2, &vectorStorage.back());
+                        else
+                            pContext->SetArgObject(2, &vectorStorage.back());
+                    }
+                    catch (const std::exception& e)
+                    {
+                        MS_ANGEL_ERROR("ASEngineEventManager: Failed to parse Vector3 coordinates for %s: %s", 
+                                      GetEventTypeName(eventType), e.what());
+                        parameterError = true;
+                    }
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Insufficient parameters for %s (need 5, got %zu)", 
+                                  GetEventTypeName(eventType), parameters.size());
+                    parameterError = true;
                 }
                 break;
                 
             case EngineEventType::TREASURE_SPAWNED:
                 if (parameters.size() >= 4)
                 {
-                    pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0])); // Treasure name
+                    // Set string parameter
+                    if (IsParameterByReference(handler.pFunction, 0))
+                        pContext->SetArgAddress(0, const_cast<std::string*>(&parameters[0]));
+                    else
+                        pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0]));
                     
-                    // Create a Vector3 for the position
-                    Vector treasurePos(std::stof(parameters[1]), std::stof(parameters[2]), std::stof(parameters[3]));
-                    pContext->SetArgObject(1, &treasurePos);
+                    // Create Vector3 for the position and store it persistently
+                    try
+                    {
+                        vectorStorage.emplace_back(std::stof(parameters[1]), std::stof(parameters[2]), std::stof(parameters[3]));
+                        
+                        if (IsParameterByReference(handler.pFunction, 1))
+                            pContext->SetArgAddress(1, &vectorStorage.back());
+                        else
+                            pContext->SetArgObject(1, &vectorStorage.back());
+                    }
+                    catch (const std::exception& e)
+                    {
+                        MS_ANGEL_ERROR("ASEngineEventManager: Failed to parse Vector3 coordinates for %s: %s", 
+                                      GetEventTypeName(eventType), e.what());
+                        parameterError = true;
+                    }
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Insufficient parameters for %s (need 4, got %zu)", 
+                                  GetEventTypeName(eventType), parameters.size());
+                    parameterError = true;
                 }
                 break;
                 
             case EngineEventType::PLAYER_SPAWNED:
                 if (parameters.size() >= 1)
                 {
-                    pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0])); // Player name
+                    // Set string parameter
+                    if (IsParameterByReference(handler.pFunction, 0))
+                        pContext->SetArgAddress(0, const_cast<std::string*>(&parameters[0]));
+                    else
+                        pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0]));
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Insufficient parameters for %s (need 1, got %zu)", 
+                                  GetEventTypeName(eventType), parameters.size());
+                    parameterError = true;
                 }
                 break;
         }
         
-        // Execute the function
-        r = pContext->Execute();
-        if (r != asEXECUTION_FINISHED)
+        // Only execute if no parameter errors occurred
+        if (!parameterError)
         {
-            if (r == asEXECUTION_EXCEPTION)
+            // Execute the function
+            r = pContext->Execute();
+            if (r != asEXECUTION_FINISHED)
             {
-                MS_ANGEL_ERROR("ASEngineEventManager: Exception in %s handler: %s", 
-                              GetEventTypeName(eventType), pContext->GetExceptionString());
+                if (r == asEXECUTION_EXCEPTION)
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Exception in %s handler: %s", 
+                                  GetEventTypeName(eventType), pContext->GetExceptionString());
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Failed to execute %s handler (result: %d)", 
+                                  GetEventTypeName(eventType), r);
+                }
             }
             else
             {
-                MS_ANGEL_ERROR("ASEngineEventManager: Failed to execute %s handler (result: %d)", 
-                              GetEventTypeName(eventType), r);
+                executedCount++;
+                MS_ANGEL_INFO("ASEngineEventManager: Successfully executed handler %s::%s", 
+                             handler.moduleName.c_str(), handler.pFunction->GetName());
             }
         }
         
@@ -378,8 +527,13 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
     
     if (handlerCount > 0)
     {
-        MS_ANGEL_INFO("ASEngineEventManager: Dispatched %s event to %d handlers", 
-                     GetEventTypeName(eventType), handlerCount);
+        MS_ANGEL_INFO("ASEngineEventManager: Dispatched %s event to %d handlers (%d executed successfully)", 
+                     GetEventTypeName(eventType), handlerCount, executedCount);
+    }
+    else
+    {
+        MS_ANGEL_INFO("ASEngineEventManager: No handlers registered for %s event", 
+                     GetEventTypeName(eventType));
     }
 }
 

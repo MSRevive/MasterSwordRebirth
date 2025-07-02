@@ -44,6 +44,7 @@
 #include "global.h"
 #include "pm_shared.h" // PM_GetHullBounds
 #include "ms/angelscript/ASEngineEventManager.h"
+#include "ms/angelscript/CAngelScriptManager.h"
 
 extern void PlayerPrecache();
 
@@ -130,7 +131,15 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 				}
 			}
 			
+			// Log handler count before firing event
+			int handlerCount = pEventManager->GetHandlerCount(EngineEventType::PLAYER_CONNECT);
+			logfile << Logger::LOG_INFO << "[DEBUG] Firing PlayerConnect event - handlers registered: " << handlerCount << "\n";
+			
 			pEventManager->FirePlayerConnectEvent(pszName ? pszName : "Unknown", steamID.c_str());
+		}
+		else
+		{
+			logfile << Logger::LOG_ERROR << "[DEBUG] ASEngineEventManager instance is null during player connect!\n";
 		}
 	}
 	else
@@ -538,6 +547,62 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "setsay"))
 	{
 		pPlayer->m_SayType = atoi(CMD_ARGV(1));
+	}
+	else if (FStrEq(pcmd, "as_test"))
+	{
+		// Test AngelScript LogMessage and event system
+		ALERT(at_console, "[AS_TEST] Testing AngelScript functions...\n");
+		
+		// Test calling the TestLogMessage function
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			ALERT(at_console, "[AS_TEST] Calling TestLogMessage function...\n");
+			bool result = pASManager->CallGlobalFunction("TestLogMessage", "GameMaster");
+			ALERT(at_console, "[AS_TEST] TestLogMessage result: %s\n", result ? "SUCCESS" : "FAILED");
+			
+			// Also test a simple function
+			ALERT(at_console, "[AS_TEST] Calling TestSimpleFunction...\n");
+			result = pASManager->CallGlobalFunction("TestSimpleFunction", "GameMaster");
+			ALERT(at_console, "[AS_TEST] TestSimpleFunction result: %s\n", result ? "SUCCESS" : "FAILED");
+		}
+		else
+		{
+			ALERT(at_console, "[AS_TEST] AngelScript manager not initialized!\n");
+		}
+	}
+	else if (FStrEq(pcmd, "as_fire_event"))
+	{
+		// Manually fire a test event
+		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+		if (pEventManager)
+		{
+			const char* eventType = CMD_ARGC() > 1 ? CMD_ARGV(1) : "connect";
+			
+			if (FStrEq(eventType, "connect"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing PlayerConnect event...\n");
+				pEventManager->FirePlayerConnectEvent("TestPlayer", "STEAM_TEST_12345");
+			}
+			else if (FStrEq(eventType, "disconnect"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing PlayerDisconnect event...\n");
+				pEventManager->FirePlayerDisconnectEvent("TestPlayer", "STEAM_TEST_12345");
+			}
+			else if (FStrEq(eventType, "monster"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing MonsterKilled event...\n");
+				pEventManager->FireMonsterKilledEvent("TestMonster", "TestKiller", 100.0f, 200.0f, 50.0f);
+			}
+			else
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Unknown event type. Use: connect, disconnect, or monster\n");
+			}
+		}
+		else
+		{
+			ALERT(at_console, "[AS_FIRE_EVENT] Event manager not initialized!\n");
+		}
 	}
 	else if (FStrEq(pcmd, "localcb")) // MiB MAR2015_01 [LOCAL_PANEL] - For doing server-side callback
 	{

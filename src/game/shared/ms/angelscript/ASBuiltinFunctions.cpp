@@ -343,7 +343,11 @@ namespace ASBuiltinFunctions
 #ifdef CLIENT_DLL
         gEngfuncs.Con_Printf("%s\n", msg.c_str());
 #else
-        ALERT(at_console, "%s\n", msg.c_str());
+        // Use multiple output methods to ensure visibility
+        ALERT(at_console, "[AS] %s\n", msg.c_str());
+        
+        // And log to file using MSLogger
+        MS_ANGEL_INFO("[AS] %s", msg.c_str());
 #endif
     }
     

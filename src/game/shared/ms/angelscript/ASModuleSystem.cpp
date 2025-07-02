@@ -1065,18 +1065,28 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
                 if (pModule)
                 {
                     // Call the auto-generated initialization function
-                    asIScriptFunction* pInitFunc = pModule->GetFunctionByName((moduleInfo.name + "_Initialize").c_str());
+                    std::string initFuncName = moduleInfo.name + "_Initialize";
+                    printf("ASModuleSystem: Looking for initialization function '%s'\n", initFuncName.c_str());
+                    
+                    asIScriptFunction* pInitFunc = pModule->GetFunctionByName(initFuncName.c_str());
                     if (pInitFunc)
                     {
+                        printf("ASModuleSystem: Found initialization function, creating context...\n");
                         asIScriptContext* pContext = m_pEngine->CreateContext();
                         if (pContext)
                         {
+                            printf("ASModuleSystem: Preparing to execute '%s'...\n", initFuncName.c_str());
                             pContext->Prepare(pInitFunc);
                             int r = pContext->Execute();
                             
                             if (r == asEXECUTION_FINISHED)
                             {
                                 printf("ASModuleSystem: Module '%s' initialized successfully\n", moduleInfo.name.c_str());
+                            }
+                            else if (r == asEXECUTION_EXCEPTION)
+                            {
+                                printf("ASModuleSystem: WARNING - Module '%s' initialization threw exception: %s\n", 
+                                       moduleInfo.name.c_str(), pContext->GetExceptionString());
                             }
                             else
                             {
@@ -1085,10 +1095,26 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
                             
                             pContext->Release();
                         }
+                        else
+                        {
+                            printf("ASModuleSystem: ERROR - Failed to create context for initialization\n");
+                        }
                     }
                     else
                     {
-                        printf("ASModuleSystem: WARNING - Module '%s' has no initialization function\n", moduleInfo.name.c_str());
+                        printf("ASModuleSystem: WARNING - Module '%s' has no initialization function '%s'\n", 
+                               moduleInfo.name.c_str(), initFuncName.c_str());
+                        
+                        // List all functions in the module for debugging
+                        printf("ASModuleSystem: Functions in module '%s':\n", moduleInfo.name.c_str());
+                        for (asUINT i = 0; i < pModule->GetFunctionCount(); i++)
+                        {
+                            asIScriptFunction* pFunc = pModule->GetFunctionByIndex(i);
+                            if (pFunc)
+                            {
+                                printf("  - %s\n", pFunc->GetName());
+                            }
+                        }
                     }
                 }
             }

@@ -165,39 +165,8 @@ bool MSGlobalInit() //Called upon DLL Initialization
 			{
 				g_engfuncs.pfnServerPrint("Loading AngelScript modules...\n");
 				
-				// Create the module system and load the converted game_master modules
-				// These modules replace the original game_master.script functionality
-				
-				// Core game master modules (order matters for dependencies)
-				bool success = true;
-				asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
-				
-				if (pEngine)
-				{
-					// Create modules directly for testing (simplified approach)
-					asIScriptModule* pUtilsModule = pEngine->GetModule("GameMasterUtils", asGM_CREATE_IF_NOT_EXISTS);
-					asIScriptModule* pDataModule = pEngine->GetModule("GameMasterData", asGM_CREATE_IF_NOT_EXISTS);
-					asIScriptModule* pCoreModule = pEngine->GetModule("GameMaster", asGM_CREATE_IF_NOT_EXISTS);
-					
-					if (pUtilsModule && pDataModule && pCoreModule)
-					{
-						g_engfuncs.pfnServerPrint("AngelScript modules created successfully\n");
-					}
-					else
-					{
-						g_engfuncs.pfnServerPrint("WARNING: Some AngelScript modules failed to create\n");
-						success = false;
-					}
-				}
-				
-				if (success)
-				{
-					g_engfuncs.pfnServerPrint("Game Master modules loaded successfully\n");
-				}
-				else
-				{
-					g_engfuncs.pfnServerPrint("AngelScript module loading failed\n");
-				}
+				// The module discovery system below will handle loading all modules
+				g_engfuncs.pfnServerPrint("AngelScript core initialized - proceeding to module discovery...\n");
 			}
 		}
 	}
@@ -352,6 +321,22 @@ void MSWorldSpawn()
 						{
 							g_engfuncs.pfnServerPrint("AngelScript modules loaded successfully!\n");
 							logfile << Logger::LOG_INFO << "AngelScript modules loaded successfully!\n";
+							
+							// GameMaster module initialization is handled automatically by LoadDiscoveredModules
+							// Just call any legacy compatibility functions if needed
+							CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+							if (pASManager && pASManager->IsInitialized())
+							{
+								// Call game_spawn for world initialization
+								g_engfuncs.pfnServerPrint("Calling game_spawn for world initialization...\n");
+								logfile << Logger::LOG_INFO << "Calling game_spawn for world initialization...\n";
+								
+								if (!pASManager->CallGlobalFunction("game_spawn"))
+								{
+									g_engfuncs.pfnServerPrint("WARNING: game_spawn function not found - continuing anyway\n");
+									logfile << Logger::LOG_WARN << "game_spawn function not found - continuing anyway\n";
+								}
+							}
 						}
 						else
 						{

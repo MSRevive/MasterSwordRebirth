@@ -16,6 +16,7 @@
 #include "clglobal.h"
 #else
 #include "global.h"
+#include "angelscript/CAngelScriptManager.h"
 #endif
 
 #ifndef _WIN32
@@ -151,6 +152,23 @@ void MSGlobals::NewMap()
 
 		MSGlobals::GameScript->CallScriptEvent("game_precache");
 		MSGlobals::GameScript->CallScriptEvent("game_spawn");
+		
+		// Call AngelScript game_spawn function
+#ifdef VALVE_DLL
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			Log("Calling AngelScript game_spawn...");
+			if (pASManager->CallGlobalFunction("game_spawn"))
+			{
+				Log("AngelScript game_spawn completed successfully");
+			}
+			else
+			{
+				Log("WARNING: AngelScript game_spawn failed or not found");
+			}
+		}
+#endif
 	}
 }
 
