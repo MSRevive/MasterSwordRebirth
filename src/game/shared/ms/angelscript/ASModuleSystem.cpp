@@ -6,6 +6,7 @@
 
 #include "ASModuleSystem.h"
 #include "addons/scriptbuilder/scriptbuilder.h"
+#include "addons/scriptmodule/scriptmodule.h"
 #include "groupfile.h"
 #include <fstream>
 #include <sstream>
@@ -76,10 +77,14 @@ ASModuleSystem::ASModuleSystem()
     , m_nModulesLoaded(0)
     , m_nModulesCompiled(0)
     , m_nDependenciesResolved(0)
+    , m_pScriptModule(nullptr)
 {
     // Add default module search paths
     m_ModulePaths.push_back("scripts/modules/");
     m_ModulePaths.push_back("scripts/");
+    
+    // Initialize script module discovery system
+    m_pScriptModule = new CScriptModule();
 }
 
 ASModuleSystem::~ASModuleSystem()
@@ -143,6 +148,14 @@ void ASModuleSystem::Destroy()
     
     m_Modules.clear();
     m_DependencyGraph.clear();
+    
+    // Clean up script module system
+    if (m_pScriptModule)
+    {
+        delete m_pScriptModule;
+        m_pScriptModule = nullptr;
+    }
+    
     m_pEngine = nullptr;
 }
 
@@ -948,6 +961,155 @@ void ASModuleSystem::ReleaseReference(const std::string& moduleName)
     {
         it->second.refCount--;
     }
+}
+
+//==========================================================================
+// Module Discovery (New Functionality)
+//==========================================================================
+bool ASModuleSystem::DiscoverModulesInPak(CGameGroupFile* pakFile)
+{
+    if (!m_pScriptModule)
+    {
+        printf("ASModuleSystem::DiscoverModulesInPak: ERROR - Script module system not initialized\n");
+        return false;
+    }
+    
+    if (!pakFile)
+    {
+        printf("ASModuleSystem::DiscoverModulesInPak: ERROR - NULL pak file\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem: Starting module discovery in PAK file...\n");
+    
+    // Clear any previously discovered modules
+    m_pScriptModule->ClearModules();
+    
+    // Use the script module system to discover modules
+    bool result = m_pScriptModule->DiscoverModulesInPak(pakFile);
+    
+    if (result)
+    {
+        printf("ASModuleSystem: Module discovery completed successfully\n");
+        m_pScriptModule->PrintDiscoveredModules();
+    }
+    else
+    {
+        printf("ASModuleSystem: Module discovery failed\n");
+    }
+    
+    return result;
+}
+
+std::vector<std::string> ASModuleSystem::GetDiscoveredModules() const
+{
+    std::vector<std::string> moduleNames;
+    
+    if (m_pScriptModule)
+    {
+        const std::vector<ModuleInfo>& discoveredModules = m_pScriptModule->GetDiscoveredModules();
+        
+        for (const ModuleInfo& moduleInfo : discoveredModules)
+        {
+            moduleNames.push_back(moduleInfo.name);
+        }
+    }
+    
+    return moduleNames;
+}
+
+bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
+{
+    if (!m_pScriptModule)
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - Script module system not initialized\n");
+        return false;
+    }
+    
+    if (!pakFile)
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - NULL pak file\n");
+        return false;
+    }
+    
+    const std::vector<ModuleInfo>& discoveredModules = m_pScriptModule->GetDiscoveredModules();
+    
+    if (discoveredModules.empty())
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: No modules discovered. Run DiscoverModulesInPak first.\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem: Loading %d discovered modules...\n", (int)discoveredModules.size());
+    
+    bool allSuccess = true;
+    
+    // Load each discovered module
+    for (const ModuleInfo& moduleInfo : discoveredModules)
+    {
+        printf("ASModuleSystem: Loading module '%s' from %s\n", moduleInfo.name.c_str(), moduleInfo.filePath.c_str());
+        
+        // Use the processed source (module -> class transformation)
+        ASModuleLoadOptions options;
+        options.allowOverwrite = true;
+        options.resolveDependencies = true;
+        
+        if (LoadModuleFromMemory(moduleInfo.name, moduleInfo.processed, pakFile, options))
+        {
+            printf("ASModuleSystem: Successfully loaded module '%s'\n", moduleInfo.name.c_str());
+            
+            // Call the module's initialization function
+            if (moduleInfo.hasMainClass)
+            {
+                asIScriptModule* pModule = GetModule(moduleInfo.name);
+                if (pModule)
+                {
+                    // Call the auto-generated initialization function
+                    asIScriptFunction* pInitFunc = pModule->GetFunctionByName((moduleInfo.name + "_Initialize").c_str());
+                    if (pInitFunc)
+                    {
+                        asIScriptContext* pContext = m_pEngine->CreateContext();
+                        if (pContext)
+                        {
+                            pContext->Prepare(pInitFunc);
+                            int r = pContext->Execute();
+                            
+                            if (r == asEXECUTION_FINISHED)
+                            {
+                                printf("ASModuleSystem: Module '%s' initialized successfully\n", moduleInfo.name.c_str());
+                            }
+                            else
+                            {
+                                printf("ASModuleSystem: WARNING - Module '%s' initialization failed: %d\n", moduleInfo.name.c_str(), r);
+                            }
+                            
+                            pContext->Release();
+                        }
+                    }
+                    else
+                    {
+                        printf("ASModuleSystem: WARNING - Module '%s' has no initialization function\n", moduleInfo.name.c_str());
+                    }
+                }
+            }
+        }
+        else
+        {
+            printf("ASModuleSystem: ERROR - Failed to load module '%s'\n", moduleInfo.name.c_str());
+            allSuccess = false;
+        }
+    }
+    
+    if (allSuccess)
+    {
+        printf("ASModuleSystem: All discovered modules loaded successfully\n");
+    }
+    else
+    {
+        printf("ASModuleSystem: Some modules failed to load\n");
+    }
+    
+    return allSuccess;
 }
 
 //==========================================================================

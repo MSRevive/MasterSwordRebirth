@@ -395,6 +395,7 @@ set(ThirdParty_AngelScript
 	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
 	"../shared/ms/angelscript/addons/scriptdictionary/scriptdictionary.cpp"
 	"../shared/ms/angelscript/addons/scriptbuilder/scriptbuilder.cpp"
+	"../shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 

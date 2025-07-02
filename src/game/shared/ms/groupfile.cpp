@@ -124,4 +124,32 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 	return false;
 }
 
+const pakDirectory_t* CGameGroupFile::GetEntry(size_t index) const
+{
+	if (index >= m_EntryList.size())
+		return nullptr;
+	
+	return &m_EntryList[index];
+}
+
+int CGameGroupFile::EnumerateAngelScriptFiles(std::vector<std::string>& outFiles) const
+{
+	outFiles.clear();
+	
+	for (size_t i = 0; i < m_EntryList.size(); i++)
+	{
+		const pakDirectory_t& entry = m_EntryList[i];
+		std::string filename = entry.cFilename;
+		
+		// Check if this is an AngelScript file (.as extension)
+		if (filename.length() > 3 && 
+			filename.substr(filename.length() - 3) == ".as")
+		{
+			outFiles.push_back(filename);
+		}
+	}
+	
+	return static_cast<int>(outFiles.size());
+}
+
 #endif

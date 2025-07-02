@@ -23,24 +23,7 @@ typedef float vec_t;
 static const float AS_PI = 3.14159265358979323846f;
 static const float AS_E = 2.71828182845904523536f;
 
-// EntityHandle struct - a proper value type for AngelScript
-struct EntityHandle
-{
-    int value;
-    
-    EntityHandle() : value(0) {}
-    EntityHandle(int v) : value(v) {}
-    EntityHandle(const EntityHandle& other) : value(other.value) {}
-    
-    EntityHandle& operator=(const EntityHandle& other) {
-        value = other.value;
-        return *this;
-    }
-    
-    bool operator==(const EntityHandle& other) const {
-        return value == other.value;
-    }
-};
+// EntityHandle struct is now defined in ASCoreTypes.h
 
 //==========================================================================
 // Core Type Registration Functions - Using asbind20
@@ -82,6 +65,7 @@ namespace ASCoreTypes
         RegisterVector3(pEngine);
         RegisterColor(pEngine);
         RegisterEntityHandle(pEngine);
+        RegisterPlayerHandle(pEngine);
         RegisterMathFunctions(pEngine);
         
         MS_ANGEL_INFO("ASCoreTypes: Registration complete");
@@ -190,6 +174,31 @@ namespace ASCoreTypes
             .property("int value", &EntityHandle::value);
         
         MS_ANGEL_INFO("ASCoreTypes: EntityHandle type registered as value type (Get method will be added later)");
+    }
+    
+    void RegisterPlayerHandle(asIScriptEngine* pEngine)
+    {
+        if (!pEngine) return;
+        
+        MS_ANGEL_INFO("ASCoreTypes: Registering PlayerHandle type...");
+        
+        // Register PlayerHandle as a value type with asbind20
+        asbind20::value_class<PlayerHandle>(pEngine, "PlayerHandle", asOBJ_APP_CLASS_CDAK)
+            // Constructors
+            .default_constructor()
+            .constructor<int>("int")
+            .copy_constructor()
+            .destructor()
+            // Assignment operator
+            .method("PlayerHandle& opAssign(const PlayerHandle &in)", 
+                static_cast<PlayerHandle&(PlayerHandle::*)(const PlayerHandle&)>(&PlayerHandle::operator=))
+            // Comparison operator
+            .method("bool opEquals(const PlayerHandle &in) const",
+                static_cast<bool(PlayerHandle::*)(const PlayerHandle&) const>(&PlayerHandle::operator==))
+            // Property for the value
+            .property("int value", &PlayerHandle::value);
+        
+        MS_ANGEL_INFO("ASCoreTypes: PlayerHandle type registered as value type");
     }
     
     // Function to add EntityHandle methods that depend on entity types - call this after entity types are registered

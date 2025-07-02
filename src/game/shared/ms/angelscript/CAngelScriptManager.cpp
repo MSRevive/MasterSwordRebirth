@@ -33,7 +33,7 @@ CAngelScriptManager::CAngelScriptManager()
     : m_pEngine(nullptr)
     , m_bInitialized(false)
     , m_nMemoryUsed(0)
-    , m_nMemoryLimit(134217728) // 128MB default limit
+    , m_nMemoryLimit(268435456) // 256MB default limit
 {
 }
 
@@ -361,6 +361,7 @@ void CAngelScriptManager::LogMessage(const char* szMessage, int nLevel)
 //==========================================================================
 // Memory allocation tracking
 //==========================================================================
+int timesSent = 0;
 void* ASMalloc(size_t size)
 {
     void* ptr = malloc(size);
@@ -370,11 +371,14 @@ void* ASMalloc(size_t size)
         
         // Check if we've exceeded memory limit
         if (CAngelScriptManager::s_pInstance->m_nMemoryUsed > 
-            CAngelScriptManager::s_pInstance->m_nMemoryLimit)
+            CAngelScriptManager::s_pInstance->m_nMemoryLimit && timesSent < 10)
         {
             MS_ANGEL_INFO("WARNING: Memory limit exceeded! Used: %zu, Limit: %zu",
                           CAngelScriptManager::s_pInstance->m_nMemoryUsed,
                    CAngelScriptManager::s_pInstance->m_nMemoryLimit);
+                
+            timesSent++;
+
         }
     }
     return ptr;

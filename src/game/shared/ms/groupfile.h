@@ -48,6 +48,23 @@ public:
 
 	bool ReadEntry(const char* pszName, unsigned char* pBuffer, unsigned long& DataSize);
 
+	/**
+	*	@brief Get the number of entries in the PAK file
+	*/
+	size_t GetEntryCount() const { return m_EntryList.size(); }
+	
+	/**
+	*	@brief Get a specific entry by index
+	*/
+	const pakDirectory_t* GetEntry(size_t index) const;
+	
+	/**
+	*	@brief Enumerate all AngelScript files (.as) in the PAK
+	*	@param outFiles Vector to store found .as file paths
+	*	@return Number of .as files found
+	*/
+	int EnumerateAngelScriptFiles(std::vector<std::string>& outFiles) const;
+
 private:
 	CFile cFile;
 	std::vector<pakDirectory_t> m_EntryList;

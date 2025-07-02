@@ -271,6 +271,9 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 		Parser parser(ffile, name);
 		parser.stripComments();
 
+		// Preprocess module syntax before error checking
+		parser.preprocessModules();
+
 		//we check for errors here because comments were already replaced.
 		parser.checkQuotes(); //check for quote errors
 		parser.checkBrackets(); //check for closing errors

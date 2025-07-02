@@ -9,6 +9,7 @@
 
 #include <asbind20/asbind.hpp>
 #include "ASEngineInterface.h"
+#include "ASCoreTypes.h"
 #include "mslogger.h"
 
 namespace ASEngineBindings
@@ -38,78 +39,96 @@ namespace ASEngineBindings
                 
                 // Entity management functions
                 .function("EntityHandle CreateEntity(const string &in)", 
-                    +[](const std::string& classname) -> void* {
-                        return ASEngineProvider::CreateEntity(classname);
+                    +[](const std::string& classname) -> EntityHandle {
+                        void* entity = ASEngineProvider::CreateEntity(classname);
+                        return EntityHandle(reinterpret_cast<int>(entity));
                     })
                 .function("void SetEntityOrigin(EntityHandle, const Vector3 &in)", 
-                    +[](void* entity, const Vector& origin) {
+                    +[](const EntityHandle& handle, const Vector& origin) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         ASEngineProvider::SetEntityOrigin(entity, origin);
                     })
                 .function("void SetEntityName(EntityHandle, const string &in)", 
-                    +[](void* entity, const std::string& name) {
+                    +[](const EntityHandle& handle, const std::string& name) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         ASEngineProvider::SetEntityName(entity, name);
                     })
                 .function("void SetEntityTargetName(EntityHandle, const string &in)", 
-                    +[](void* entity, const std::string& targetname) {
+                    +[](const EntityHandle& handle, const std::string& targetname) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         ASEngineProvider::SetEntityTargetName(entity, targetname);
                     })
                 .function("void SetEntityHealth(EntityHandle, float)", 
-                    +[](void* entity, float health) {
+                    +[](const EntityHandle& handle, float health) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         ASEngineProvider::SetEntityHealth(entity, health);
                     })
                 .function("Vector3 GetEntityOrigin(EntityHandle)", 
-                    +[](void* entity) -> Vector {
+                    +[](const EntityHandle& handle) -> Vector {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityOrigin(entity);
                     })
                 .function("float GetEntityHealth(EntityHandle)", 
-                    +[](void* entity) -> float {
+                    +[](const EntityHandle& handle) -> float {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityHealth(entity);
                     })
                 .function("int GetEntityDeadFlag(EntityHandle)", 
-                    +[](void* entity) -> int {
+                    +[](const EntityHandle& handle) -> int {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityDeadFlag(entity);
                     })
                 .function("string GetEntityClassName(EntityHandle)", 
-                    +[](void* entity) -> std::string {
+                    +[](const EntityHandle& handle) -> std::string {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityClassName(entity);
                     })
                 .function("bool IsEntityDead(EntityHandle)", 
-                    +[](void* entity) -> bool {
+                    +[](const EntityHandle& handle) -> bool {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityDeadFlag(entity) != 0;
                     })
                 .function("bool IsEntityAlive(EntityHandle)", 
-                    +[](void* entity) -> bool {
+                    +[](const EntityHandle& handle) -> bool {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityDeadFlag(entity) == 0 && 
                                ASEngineProvider::GetEntityHealth(entity) > 0;
                     })
                 
                 // Player-specific functions  
                 .function("string GetPlayerAuthId(PlayerHandle)", 
-                    +[](void* player) -> std::string {
+                    +[](const PlayerHandle& handle) -> std::string {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetPlayerAuthId(player);
                     })
                 .function("string GetPlayerDisplayName(PlayerHandle)", 
-                    +[](void* player) -> std::string {
+                    +[](const PlayerHandle& handle) -> std::string {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetPlayerDisplayName(player);
                     })
                 .function("string GetPlayerClientAddress(PlayerHandle)", 
-                    +[](void* player) -> std::string {
+                    +[](const PlayerHandle& handle) -> std::string {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetPlayerClientAddress(player);
                     })
                 .function("int GetPlayerEntIndex(PlayerHandle)", 
-                    +[](void* player) -> int {
+                    +[](const PlayerHandle& handle) -> int {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetPlayerEntIndex(player);
                     })
                 .function("bool IsValidPlayer(PlayerHandle)", 
-                    +[](void* player) -> bool {
+                    +[](const PlayerHandle& handle) -> bool {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::IsValidPlayer(player);
                     })
                 .function("PlayerHandle PlayerByIndex(int)", 
-                    +[](int index) -> void* {
-                        return ASEngineProvider::PlayerByIndex(index);
+                    +[](int index) -> PlayerHandle {
+                        void* player = ASEngineProvider::PlayerByIndex(index);
+                        return PlayerHandle(reinterpret_cast<int>(player));
                     })
                 .function("void SendPlayerMessage(PlayerHandle, const string &in)", 
-                    +[](void* player, const std::string& message) {
+                    +[](const PlayerHandle& handle, const std::string& message) {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         ASEngineProvider::SendInfoMsg(player, message);
                     })
                 
@@ -145,12 +164,10 @@ namespace ASEngineBindings
         MS_ANGEL_INFO("[ASEngineBindings] Registering engine type definitions...");
         
         try {
-            // Register handle types for type safety
-            asbind20::global(pEngine)
-                .typedef_("EntityHandle", "uint64")
-                .typedef_("PlayerHandle", "uint64");
+            // Note: Both EntityHandle and PlayerHandle are now registered as proper value types in ASCoreTypes
+            // No typedef registrations needed here
             
-            MS_ANGEL_INFO("[ASEngineBindings] Engine type definitions registered successfully");
+            MS_ANGEL_INFO("[ASEngineBindings] Engine type definitions registered successfully (types handled by ASCoreTypes)");
             
         } catch (const std::exception& e) {
             MS_ANGEL_ERROR("[ASEngineBindings] Failed to register type definitions: %s", e.what());
@@ -170,34 +187,40 @@ namespace ASEngineBindings
             // Additional convenience functions that combine multiple engine calls
             asbind20::global(pEngine)
                 .function("bool TeleportEntity(EntityHandle, const Vector3 &in)", 
-                    +[](void* entity, const Vector& origin) -> bool {
+                    +[](const EntityHandle& handle, const Vector& origin) -> bool {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         if (!entity) return false;
                         ASEngineProvider::SetEntityOrigin(entity, origin);
                         return true;
                     })
                 .function("void HealEntity(EntityHandle, float)", 
-                    +[](void* entity, float amount) {
+                    +[](const EntityHandle& handle, float amount) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         if (!entity) return;
                         float currentHealth = ASEngineProvider::GetEntityHealth(entity);
                         ASEngineProvider::SetEntityHealth(entity, currentHealth + amount);
                     })
                 .function("void DamageEntity(EntityHandle, float)", 
-                    +[](void* entity, float amount) {
+                    +[](const EntityHandle& handle, float amount) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         if (!entity) return;
                         float currentHealth = ASEngineProvider::GetEntityHealth(entity);
                         ASEngineProvider::SetEntityHealth(entity, currentHealth - amount);
                     })
                 .function("void KillEntity(EntityHandle)", 
-                    +[](void* entity) {
+                    +[](const EntityHandle& handle) {
+                        void* entity = reinterpret_cast<void*>(handle.value);
                         if (!entity) return;
                         ASEngineProvider::SetEntityHealth(entity, 0.0f);
                     })
                 .function("Vector3 GetPlayerPosition(PlayerHandle)", 
-                    +[](void* player) -> Vector {
+                    +[](const PlayerHandle& handle) -> Vector {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::GetEntityOrigin(player);
                     })
                 .function("bool TeleportPlayer(PlayerHandle, const Vector3 &in)", 
-                    +[](void* player, const Vector& origin) -> bool {
+                    +[](const PlayerHandle& handle, const Vector& origin) -> bool {
+                        void* player = reinterpret_cast<void*>(handle.value);
                         if (!ASEngineProvider::IsValidPlayer(player)) return false;
                         ASEngineProvider::SetEntityOrigin(player, origin);
                         return true;

@@ -10,6 +10,11 @@
 
 #include "cbase.h"
 
+// Include scriptmodule addon for module preprocessing
+#ifdef _MSR_UTILS
+#include "scriptmodule/scriptmodule.h"
+#endif
+
 class Parser
 {
 public:
@@ -223,6 +228,31 @@ public:
 
 			lineNum++;
 		}
+	}
+
+	// Preprocess module syntax using scriptmodule addon
+	void preprocessModules()
+	{
+#ifdef _MSR_UTILS
+		// Check if this file contains module syntax
+		if (m_Result.find("module ") != std::string::npos)
+		{
+			// Use the scriptmodule addon to preprocess the file
+			CScriptModule moduleProcessor;
+			std::string moduleName;
+			std::string processedSource;
+			
+			if (moduleProcessor.PreprocessModuleSource(m_Result, processedSource, moduleName))
+			{
+				m_Result = processedSource;
+				std::cout << "Preprocessed module: " << moduleName << " in " << m_FileName << std::endl;
+			}
+			else
+			{
+				std::cout << "Note: File contains 'module' keyword but is not a valid module: " << m_FileName << std::endl;
+			}
+		}
+#endif
 	}
 
 	void checkBrackets()

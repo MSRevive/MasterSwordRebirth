@@ -16,9 +16,11 @@ target_include_directories(scriptpack PRIVATE
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/src/game/shared
 	${BASEDIR}/src/game/shared/ms
+	${BASEDIR}/src/game/shared/ms/angelscript/addons
 	${BASEDIR}/src/public
 	${BASEDIR}/src/public/engine
 	${BASEDIR}/thirdparty
+	${BASEDIR}/thirdparty/angelscript/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	tclap)
 
@@ -41,6 +43,8 @@ set(Source_Files
 	"${BASEDIR}/src/game/shared/ms/groupfile.h"
 	"${BASEDIR}/src/game/shared/ms/msfileio.cpp"
 	"${BASEDIR}/src/game/shared/ms/stackstring.cpp"
+	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
+	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.h"
 )
 source_group("Source Files" FILES ${Source_Files})
 

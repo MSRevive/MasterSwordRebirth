@@ -14,8 +14,9 @@
 #include <vector>
 #include <set>
 
-// Forward declaration for pak file support
+// Forward declarations
 class CGameGroupFile;
+class CScriptModule;
 
 //==========================================================================
 // Module dependency information
@@ -88,6 +89,9 @@ private:
     int m_nModulesCompiled;
     int m_nDependenciesResolved;
     
+    // Module discovery system
+    CScriptModule* m_pScriptModule;
+    
     // Singleton instance
     static ASModuleSystem* s_pInstance;
     
@@ -134,6 +138,11 @@ public:
     void AddModulePath(const std::string& path);
     void RemoveModulePath(const std::string& path);
     const std::vector<std::string>& GetModulePaths() const { return m_ModulePaths; }
+    
+    // Module discovery (new functionality)
+    bool DiscoverModulesInPak(CGameGroupFile* pakFile);
+    std::vector<std::string> GetDiscoveredModules() const;
+    bool LoadDiscoveredModules(CGameGroupFile* pakFile);
     
     // Utility functions
     bool CompileAllModules();

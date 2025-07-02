@@ -267,75 +267,80 @@ namespace ASEntityBindings
         return result;
     }
     
-    // Create entity by script name
-    void* AS_CreateEntity(const std::string& scriptName)
+    // Create entity by script name (returns EntityHandle)
+    EntityHandle AS_CreateEntity(const std::string& scriptName)
     {
         if (scriptName.empty())
         {
             MS_ANGEL_ERROR("CreateEntity: Empty script name");
-            return nullptr;
+            return EntityHandle(0);
         }
         
         void* entity = ASEngineProvider::CreateEntity(scriptName);
         if (entity)
         {
             MS_ANGEL_INFO("CreateEntity: Successfully created '%s'", scriptName.c_str());
+            return EntityHandle(reinterpret_cast<int>(entity));
         }
         else
         {
             MS_ANGEL_ERROR("CreateEntity: Failed to create entity '%s'", scriptName.c_str());
+            return EntityHandle(0);
         }
-        return entity;
     }
     
-    // Entity property functions
-    void AS_SetEntityName(CBaseEntity* pEntity, const std::string& name)
+    // Entity property functions using EntityHandle
+    void AS_SetEntityName(const EntityHandle& handle, const std::string& name)
     {
-        if (!pEntity)
+        void* entity = reinterpret_cast<void*>(handle.value);
+        if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityName((void*)pEntity, name);
+        ASEngineProvider::SetEntityName(entity, name);
         MS_ANGEL_DEBUG("SetEntityName: Set name to '%s'", name.c_str());
     }
     
-    void AS_SetEntityTargetName(CBaseEntity* pEntity, const std::string& targetName)
+    void AS_SetEntityTargetName(const EntityHandle& handle, const std::string& targetName)
     {
-        if (!pEntity)
+        void* entity = reinterpret_cast<void*>(handle.value);
+        if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityTargetName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityTargetName((void*)pEntity, targetName);
+        ASEngineProvider::SetEntityTargetName(entity, targetName);
         MS_ANGEL_DEBUG("SetEntityTargetName: Set targetname to '%s'", targetName.c_str());
     }
     
-    void AS_SetEntityHealth(CBaseEntity* pEntity, float health)
+    void AS_SetEntityHealth(const EntityHandle& handle, float health)
     {
-        if (!pEntity)
+        void* entity = reinterpret_cast<void*>(handle.value);
+        if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityHealth: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityHealth((void*)pEntity, health);
+        ASEngineProvider::SetEntityHealth(entity, health);
         MS_ANGEL_DEBUG("SetEntityHealth: Set health to %f", health);
     }
     
     // Check if entity is dead (more comprehensive than IsAlive)
-    bool AS_IsEntityDead(CBaseEntity* pEntity)
+    bool AS_IsEntityDead(const EntityHandle& handle)
     {
-        if (!pEntity)
+        void* entity = reinterpret_cast<void*>(handle.value);
+        if (!entity)
         {
             MS_ANGEL_DEBUG("IsEntityDead: NULL entity pointer - considered dead");
             return true;
         }
         
-        float health = ASEngineProvider::GetEntityHealth((void*)pEntity);
-        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)pEntity);
+        float health = ASEngineProvider::GetEntityHealth(entity);
+        int deadFlag = ASEngineProvider::GetEntityDeadFlag(entity);
         
         // Check if entity is dead by health or deadflag (DEAD_NO = 0)
         bool isDead = (deadFlag != 0) || (health <= 0);
@@ -567,17 +572,9 @@ namespace ASEntityBindings
         
         // Register global functions with asbind20
         asbind20::global(pEngine)
-            // Core game functions
-            .function("float GetGameTime()", &AS_GetGameTime)
+            // Core game functions (GetGameTime, GetCvar, GetMapName, CreateEntity are registered by ASEngineBindings)
+            // Entity management functions (SetEntityName, SetEntityTargetName, SetEntityHealth, IsEntityDead are registered by ASEngineBindings)
             .function("string GetTimestamp()", &AS_GetTimestamp)
-            .function("string GetCvar(const string &in)", &AS_GetCvar)
-            .function("string GetMapName()", &AS_GetMapName)
-            // Entity management
-            .function("EntityHandle CreateEntity(const string &in)", &AS_CreateEntity)
-            .function("void SetEntityName(EntityHandle, const string &in)", &AS_SetEntityName)
-            .function("void SetEntityTargetName(EntityHandle, const string &in)", &AS_SetEntityTargetName)
-            .function("void SetEntityHealth(EntityHandle, float)", &AS_SetEntityHealth)
-            .function("bool IsEntityDead(EntityHandle)", &AS_IsEntityDead)
             // Chat and communication
             .function("void ChatLog(const string &in)", &AS_ChatLog)
             // Player management
