@@ -284,16 +284,127 @@ void ASEngineEventManager::FirePlayerSpawnedEvent(const char* szPlayerName)
 void ASEngineEventManager::FirePlayerSayTextEvent(const char* szPlayerName, const char* szSteamID, const char* szText)
 {
     if (!m_bInitialized)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Manager not initialized");
         return;
+    }
+    
+    // Enhanced null pointer validation with detailed logging
+    if (!szPlayerName)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: szPlayerName is NULL");
+        szPlayerName = "Unknown Player";
+    }
+    
+    if (!szSteamID)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: szSteamID is NULL");
+        szSteamID = "Unknown SteamID";
+    }
+    
+    if (!szText)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: szText is NULL - blocking event");
+        return; // Don't fire event with null text as it will crash
+    }
+    
+    // Additional safety checks for valid string pointers
+    std::string safePlayerName;
+    std::string safeSteamID;
+    std::string safeText;
+    
+    // Safe string construction with exception handling
+    try
+    {
+        // Validate and safely copy player name
+        if (szPlayerName && strlen(szPlayerName) > 0 && strlen(szPlayerName) < 256)
+        {
+            safePlayerName = std::string(szPlayerName);
+        }
+        else
+        {
+            safePlayerName = "Unknown Player";
+            if (szPlayerName)
+            {
+                MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Invalid player name length (%zu)", 
+                              szPlayerName ? strlen(szPlayerName) : 0);
+            }
+        }
         
+        // Validate and safely copy Steam ID
+        if (szSteamID && strlen(szSteamID) > 0 && strlen(szSteamID) < 128)
+        {
+            safeSteamID = std::string(szSteamID);
+        }
+        else
+        {
+            safeSteamID = "Unknown SteamID";
+            if (szSteamID)
+            {
+                MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Invalid Steam ID length (%zu)", 
+                              szSteamID ? strlen(szSteamID) : 0);
+            }
+        }
+        
+        // Validate and safely copy text (most critical)
+        if (szText && strlen(szText) > 0 && strlen(szText) < 512)
+        {
+            safeText = std::string(szText);
+        }
+        else
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Invalid text length (%zu) - blocking event", 
+                          szText ? strlen(szText) : 0);
+            return; // Don't fire event with invalid text
+        }
+    }
+    catch (const std::exception& e)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Exception during string construction: %s", e.what());
+        return; // Don't fire event if string construction fails
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Unknown exception during string construction");
+        return; // Don't fire event if string construction fails
+    }
+    
+    // Create parameter vector with safe strings
     std::vector<std::string> params;
-    params.push_back(szPlayerName ? szPlayerName : "");
-    params.push_back(szSteamID ? szSteamID : "");
-    params.push_back(szText ? szText : "");
+    try
+    {
+        params.reserve(3); // Pre-allocate to avoid reallocation
+        params.push_back(safePlayerName);
+        params.push_back(safeSteamID);
+        params.push_back(safeText);
+    }
+    catch (const std::exception& e)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Exception during parameter creation: %s", e.what());
+        return;
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Unknown exception during parameter creation");
+        return;
+    }
     
     MS_ANGEL_INFO("ASEngineEventManager: Firing PlayerSayText event for %s: '%s'", 
-                 szPlayerName ? szPlayerName : "Unknown", szText ? szText : "");
-    DispatchEvent(EngineEventType::PLAYER_SAY_TEXT, params);
+                 safePlayerName.c_str(), safeText.c_str());
+    
+    // Dispatch with additional exception handling
+    try
+    {
+        DispatchEvent(EngineEventType::PLAYER_SAY_TEXT, params);
+    }
+    catch (const std::exception& e)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Exception during event dispatch: %s", e.what());
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Unknown exception during event dispatch");
+    }
 }
 
 //==========================================================================
@@ -325,13 +436,23 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
     if (!m_bInitialized)
         return;
         
-    MS_ANGEL_INFO("ASEngineEventManager::DispatchEvent - Event: %s, Parameters: %zu", 
-                  GetEventTypeName(eventType), parameters.size());
+    MS_ANGEL_INFO("ASEngineEventManager::DispatchEvent - Event: %s (type=%d), Parameters: %zu", 
+                  GetEventTypeName(eventType), static_cast<int>(eventType), parameters.size());
     
     // Log parameters
     for (size_t i = 0; i < parameters.size(); i++)
     {
         MS_ANGEL_INFO("  Parameter[%zu]: '%s'", i, parameters[i].c_str());
+    }
+    
+    // Debug: Log all registered handlers first
+    MS_ANGEL_INFO("ASEngineEventManager: Total registered handlers: %zu", m_EventHandlers.size());
+    for (size_t i = 0; i < m_EventHandlers.size(); i++)
+    {
+        const auto& h = m_EventHandlers[i];
+        MS_ANGEL_INFO("  Handler[%zu]: %s -> %s (type=%d)", i, 
+                     h.pFunction ? h.pFunction->GetName() : "NULL",
+                     GetEventTypeName(h.eventType), static_cast<int>(h.eventType));
     }
     
     int handlerCount = 0;
@@ -340,8 +461,19 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
     // Find all handlers for this event type
     for (const auto& handler : m_EventHandlers)
     {
+        MS_ANGEL_INFO("ASEngineEventManager: Checking handler %s (type=%d) against event %s (type=%d)",
+                     handler.pFunction ? handler.pFunction->GetName() : "NULL",
+                     static_cast<int>(handler.eventType),
+                     GetEventTypeName(eventType),
+                     static_cast<int>(eventType));
+        
         if (handler.eventType != eventType)
+        {
+            MS_ANGEL_INFO("  -> SKIPPED: Event type mismatch");
             continue;
+        }
+        
+        MS_ANGEL_INFO("  -> SELECTED: Event type matches");
             
         handlerCount++;
         
@@ -683,8 +815,12 @@ namespace ASEngineEvents
             return EngineEventType::TREASURE_SPAWNED;
         else if (eventName == "OnEnginePlayerSpawned" || eventName == "PlayerSpawned")
             return EngineEventType::PLAYER_SPAWNED;
+        else if (eventName == "OnEnginePlayerSayText" || eventName == "PlayerSayText")
+            return EngineEventType::PLAYER_SAY_TEXT;
         
-        return EngineEventType::PLAYER_CONNECT; // Default fallback
+        // Log unknown event name and return an invalid value
+        MS_ANGEL_ERROR("StringToEventType: Unknown event name '%s' - registration will fail", eventName.c_str());
+        return static_cast<EngineEventType>(-1); // Return invalid event type instead of defaulting
     }
 
     // Register engine event (called from AngelScript)
@@ -711,9 +847,19 @@ namespace ASEngineEvents
             
         EngineEventType eventType = StringToEventType(*eventName);
         
+        // Validate that we got a valid event type
+        if (static_cast<int>(eventType) == -1)
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: Invalid event name '%s' - registration failed", eventName->c_str());
+            return;
+        }
+        
         // Get the module name from the function
         asIScriptModule* pModule = pFunction->GetModule();
         const char* szModuleName = pModule ? pModule->GetName() : "Unknown";
+        
+        MS_ANGEL_INFO("RegisterEngineEvent_Generic: Registering '%s' -> %s (%s)", 
+                     eventName->c_str(), pManager->GetEventTypeName(eventType), szModuleName);
         
         pManager->RegisterEventHandler(eventType, pFunction, szModuleName);
     }

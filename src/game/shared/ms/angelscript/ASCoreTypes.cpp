@@ -75,25 +75,73 @@ namespace ASCoreTypes
     {
         if (!pEngine) return;
         
-        MS_ANGEL_INFO("ASCoreTypes: Registering Vector3 type...");
+        MS_ANGEL_INFO("ASCoreTypes: Registering comprehensive Vector3 type with enhanced asbind20 patterns...");
         
-        // Register Vector3 type with asbind20 - minimal registration to avoid crashes
+        // Enhanced Vector3 registration using asbind20 - comprehensive with operator overloads
         try {
-            asbind20::value_class<Vector>(pEngine, "Vector3")
+            asbind20::value_class<Vector>(pEngine, "Vector3", asOBJ_APP_CLASS_ALLFLOATS)
                 // Properties
                 .property("float x", &Vector::x)
                 .property("float y", &Vector::y) 
                 .property("float z", &Vector::z)
-                // Basic constructors
+                // Constructors with comprehensive support
                 .default_constructor()
                 .constructor<float, float, float>("float, float, float")
                 .copy_constructor()
                 .destructor()
-                // Essential methods only
+                // Essential methods
                 .method("float Length() const", &Vector::Length)
-                .method("float Length2D() const", &Vector::Length2D);
+                .method("float Length2D() const", &Vector::Length2D)
+                .method("Vector3 Normalize() const", [](const Vector& v) -> Vector {
+                    Vector result = v;
+                    float len = result.Length();
+                    if (len > 0.0f) {
+                        result.x /= len;
+                        result.y /= len;
+                        result.z /= len;
+                    }
+                    return result;
+                })
+                // Arithmetic operator overloads using manual implementation for better compatibility
+                .method("Vector3 opAdd(const Vector3 &in) const", [](const Vector& a, const Vector& b) -> Vector {
+                    return Vector(a.x + b.x, a.y + b.y, a.z + b.z);
+                })
+                .method("Vector3 opSub(const Vector3 &in) const", [](const Vector& a, const Vector& b) -> Vector {
+                    return Vector(a.x - b.x, a.y - b.y, a.z - b.z);
+                })
+                .method("Vector3 opMul(float) const", [](const Vector& v, float scalar) -> Vector {
+                    return Vector(v.x * scalar, v.y * scalar, v.z * scalar);
+                })
+                .method("Vector3 opDiv(float) const", [](const Vector& v, float scalar) -> Vector {
+                    if (scalar != 0.0f) {
+                        return Vector(v.x / scalar, v.y / scalar, v.z / scalar);
+                    }
+                    return Vector(0, 0, 0);
+                })
+                .method("bool opEquals(const Vector3 &in) const", [](const Vector& a, const Vector& b) -> bool {
+                    return (a.x == b.x && a.y == b.y && a.z == b.z);
+                })
+                // Assignment operators
+                .method("Vector3& opAssign(const Vector3 &in)", [](Vector* self, const Vector& other) -> Vector& {
+                    *self = other;
+                    return *self;
+                })
+                .method("Vector3& opAddAssign(const Vector3 &in)", [](Vector* self, const Vector& other) -> Vector& {
+                    *self = *self + other;
+                    return *self;
+                })
+                .method("Vector3& opSubAssign(const Vector3 &in)", [](Vector* self, const Vector& other) -> Vector& {
+                    *self = *self - other;
+                    return *self;
+                })
+                .method("Vector3& opMulAssign(float)", [](Vector* self, float scalar) -> Vector& {
+                    self->x *= scalar;
+                    self->y *= scalar;
+                    self->z *= scalar;
+                    return *self;
+                });
             
-            MS_ANGEL_INFO("ASCoreTypes: Basic Vector3 registration successful");
+            MS_ANGEL_INFO("ASCoreTypes: Enhanced Vector3 registration successful with operator overloads");
         } catch (const std::exception& e) {
             MS_ANGEL_ERROR("ASCoreTypes: Vector3 registration failed: %s", e.what());
             return;
@@ -104,12 +152,12 @@ namespace ASCoreTypes
             asbind20::global(pEngine)
                 .function("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", 
                          static_cast<Vector(*)(const Vector&, const Vector&)>(&CrossProduct));
-            MS_ANGEL_INFO("ASCoreTypes: Vector3 global functions registered");
+            MS_ANGEL_INFO("ASCoreTypes: Vector3 global functions registered (Distance/DotProduct in ASBuiltinFunctions)");
         } catch (const std::exception& e) {
             MS_ANGEL_ERROR("ASCoreTypes: Vector3 global function registration failed: %s", e.what());
         }
         
-        MS_ANGEL_INFO("ASCoreTypes: Vector3 registration complete");
+        MS_ANGEL_INFO("ASCoreTypes: Comprehensive Vector3 registration complete with enhanced asbind20 patterns");
     }
     
     void RegisterColor(asIScriptEngine* pEngine)

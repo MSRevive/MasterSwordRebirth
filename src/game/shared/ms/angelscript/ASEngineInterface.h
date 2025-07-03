@@ -167,6 +167,37 @@ public:
         return static_cast<const Derived*>(this)->IsPlayerAdminImpl(player);
     }
     
+    // Master Sword specific player methods
+    std::string GetPlayerTitle(void* player) const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerTitleImpl(player);
+    }
+    
+    float GetPlayerMaxHP(void* player) const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerMaxHPImpl(player);
+    }
+    
+    float GetPlayerMaxMP(void* player) const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerMaxMPImpl(player);
+    }
+    
+    bool IsPlayerElite(void* player) const
+    {
+        return static_cast<const Derived*>(this)->IsPlayerEliteImpl(player);
+    }
+    
+    std::string GetPlayerPartyName(void* player) const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerPartyNameImpl(player);
+    }
+    
+    bool IsPlayerLocalHost(void* player) const
+    {
+        return static_cast<const Derived*>(this)->IsPlayerLocalHostImpl(player);
+    }
+    
     std::string GetPlayerQuestData(const std::string& playerID, const std::string& key) const
     {
         return static_cast<const Derived*>(this)->GetPlayerQuestDataImpl(playerID, key);
@@ -261,6 +292,15 @@ protected:
     virtual int GetPlayerCountImpl() const = 0;
     virtual bool IsPlayerConnectedImpl(void* player) const = 0;
     virtual bool IsPlayerAdminImpl(void* player) const = 0;
+    
+    // Master Sword specific player function implementations
+    virtual std::string GetPlayerTitleImpl(void* player) const = 0;
+    virtual float GetPlayerMaxHPImpl(void* player) const = 0;
+    virtual float GetPlayerMaxMPImpl(void* player) const = 0;
+    virtual bool IsPlayerEliteImpl(void* player) const = 0;
+    virtual std::string GetPlayerPartyNameImpl(void* player) const = 0;
+    virtual bool IsPlayerLocalHostImpl(void* player) const = 0;
+    
     virtual std::string GetPlayerQuestDataImpl(const std::string& playerID, const std::string& key) const = 0;
     virtual void SetPlayerQuestDataImpl(const std::string& playerID, const std::string& key, const std::string& value) = 0;
     
@@ -318,6 +358,15 @@ public:
     static int GetPlayerCount();
     static bool IsPlayerConnected(void* player);
     static bool IsPlayerAdmin(void* player);
+    
+    // Master Sword specific player functions
+    static std::string GetPlayerTitle(void* player);
+    static float GetPlayerMaxHP(void* player);
+    static float GetPlayerMaxMP(void* player);
+    static bool IsPlayerElite(void* player);
+    static std::string GetPlayerPartyName(void* player);
+    static bool IsPlayerLocalHost(void* player);
+    
     static std::string GetPlayerQuestData(const std::string& playerID, const std::string& key);
     static void SetPlayerQuestData(const std::string& playerID, const std::string& key, const std::string& value);
     

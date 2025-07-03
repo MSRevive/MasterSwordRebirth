@@ -673,36 +673,102 @@ namespace ASEntityBindings
     {
         if (!pEngine) return;
         
-        MS_ANGEL_INFO("[ASEntityBindings] Registering CBasePlayer type with asbind20...");
+        MS_ANGEL_INFO("[ASEntityBindings] Registering comprehensive CBasePlayer type with asbind20...");
         
-        // Register CBasePlayer type with asbind20
-        // Note: Inheritance removed to avoid opImplConv template issues - using explicit casting functions instead
+        // Comprehensive CBasePlayer registration using enhanced asbind20 patterns
         asbind20::ref_class<CBasePlayer>(pEngine, "CBasePlayer")
             // Reference counting behaviors (required for reference types)
             .addref(&AddRef_CBasePlayer)
             .release(&Release_CBasePlayer)
-            // CBaseEntity methods (using lambdas for wrapper functions - inheritance via explicit casting)
-            .method("Vector3 GetOrigin()", [](CBasePlayer* player) { return GetEntityOrigin(static_cast<CBaseEntity*>(player)); })
-            .method("string GetClassName()", [](CBasePlayer* player) { return GetEntityClassName(static_cast<CBaseEntity*>(player)); })
-            .method("void SetOrigin(const Vector3 &in)", [](CBasePlayer* player, const Vector& origin) { SetEntityOrigin(static_cast<CBaseEntity*>(player), origin); })
-            .method("float GetHealth()", [](CBasePlayer* player) { return GetEntityHealth(static_cast<CBaseEntity*>(player)); })
-            .method("void SetHealth(float)", [](CBasePlayer* player, float health) { SetEntityHealth(static_cast<CBaseEntity*>(player), health); })
-            // Direct inherited methods
-            .method("bool IsAlive()", &CBasePlayer::IsAlive)
-            .method("string DisplayName()", &CBasePlayer::DisplayName)
-            .method("Vector3 Center()", &CBasePlayer::Center)
-            .method("float Volume()", &CBasePlayer::Volume)
-            .method("float Weight()", &CBasePlayer::Weight)
-            .method("bool IsPlayer()", &CBasePlayer::IsPlayer)
-            // CBasePlayer-specific methods
-            .method("string GetName()", [](CBasePlayer* player) { return GetPlayerDisplayName(player); })
-            .method("string GetAuthID()", [](CBasePlayer* player) { return GetPlayerAuthID(player); })
-            .method("string GetTitle()", [](CBasePlayer* player) { return GetPlayerTitle(player); })
-            .method("float MaxHP()", [](CBasePlayer* player) { return GetPlayerMaxHP(player); })
-            .method("float MaxMP()", [](CBasePlayer* player) { return GetPlayerMaxMP(player); })
-            .method("void PlaySound(const string &in)", &CBasePlayer::PlaySound);
+            
+            // Essential identification methods with automatic calling convention detection
+            .method("string DisplayName() const", &CBasePlayer::DisplayName)
+            .method("string GetName() const", &CBasePlayer::DisplayName)  // Alias for GameMaster script compatibility
+            .method("string GETPLAYERAUTHID() const", [](CBasePlayer* player) { 
+                return player ? player->AuthID().c_str() : std::string("STEAM_ID_INVALID"); 
+            })
+            .method("int GetEntIndex() const", [](CBasePlayer* player) { 
+                return player ? player->entindex() : 0; 
+            })
+            
+            // State checking with automatic type conversion
+            .method("bool IsConnected() const", [](CBasePlayer* player) {
+                if (!player || !player->pev) return false;
+                return !(player->pev->flags & FL_SPECTATOR) && player->IsAlive();
+            })
+            .method("bool IsAlive() const", &CBasePlayer::IsAlive)
+            .method("bool IsAdmin() const", [](CBasePlayer* player) {
+                if (!player) return false;
+                return ASEngineProvider::IsPlayerAdmin((void*)player);
+            })
+            
+            // Positional and game state methods
+            .method("Vector3 GetOrigin() const", [](CBasePlayer* player) { 
+                return GetEntityOrigin(static_cast<CBaseEntity*>(player)); 
+            })
+            .method("float GetHealth() const", [](CBasePlayer* player) { 
+                return GetEntityHealth(static_cast<CBaseEntity*>(player)); 
+            })
+            
+            // Master Sword specific methods for command system
+            .method("string GetTitle() const", [](CBasePlayer* player) { 
+                if (!player) return std::string("Unknown");
+                return ASEngineProvider::GetPlayerTitle((void*)player);
+            })
+            .method("float MaxHP() const", [](CBasePlayer* player) { 
+                if (!player) return 0.0f;
+                return ASEngineProvider::GetPlayerMaxHP((void*)player);
+            })
+            .method("float MaxMP() const", [](CBasePlayer* player) { 
+                if (!player) return 0.0f;
+                return ASEngineProvider::GetPlayerMaxMP((void*)player);
+            })
+            .method("bool IsElite() const", [](CBasePlayer* player) { 
+                if (!player) return false;
+                return ASEngineProvider::IsPlayerElite((void*)player);
+            })
+            .method("string GetPartyName() const", [](CBasePlayer* player) { 
+                if (!player) return std::string("");
+                return ASEngineProvider::GetPlayerPartyName((void*)player);
+            })
+            .method("bool IsLocalHost() const", [](CBasePlayer* player) { 
+                if (!player) return false;
+                return ASEngineProvider::IsPlayerLocalHost((void*)player);
+            })
+            
+            // CBaseEntity inherited methods (using lambdas for wrapper functions)
+            .method("string GetClassName() const", [](CBasePlayer* player) { 
+                return GetEntityClassName(static_cast<CBaseEntity*>(player)); 
+            })
+            .method("void SetOrigin(const Vector3 &in)", [](CBasePlayer* player, const Vector& origin) { 
+                SetEntityOrigin(static_cast<CBaseEntity*>(player), origin); 
+            })
+            .method("void SetHealth(float)", [](CBasePlayer* player, float health) { 
+                SetEntityHealth(static_cast<CBaseEntity*>(player), health); 
+            })
+            .method("Vector3 Center() const", &CBasePlayer::Center)
+            .method("float Volume() const", &CBasePlayer::Volume)
+            .method("float Weight() const", &CBasePlayer::Weight)
+            .method("bool IsPlayer() const", &CBasePlayer::IsPlayer)
+            
+            // Additional useful methods for command processing
+            .method("void PlaySound(const string &in)", [](CBasePlayer* player, const std::string& sound) {
+                if (player) player->PlaySound(CHAN_AUTO, sound.c_str(), 1.0f);
+            })
+            .method("void SendInfoMsg(const string &in)", [](CBasePlayer* player, const std::string& msg) {
+                if (player) player->SendInfoMsg("%s", msg.c_str());
+            })
+            .method("void SendEventMsg(const string &in)", [](CBasePlayer* player, const std::string& msg) {
+                if (player) player->SendEventMsg(msg.c_str());
+            })
+            
+            // Custom equality comparison using pointer comparison (most appropriate for commands)
+            .method("bool opEquals(const CBasePlayer@+ other) const", [](CBasePlayer* player, CBasePlayer* other) {
+                return player == other;  // Simple pointer comparison
+            })
+            ;
         
-        MS_ANGEL_INFO("CBasePlayer registration complete");
+        MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
 
     void RegisterEntityTypes(asIScriptEngine* pEngine)
@@ -753,6 +819,7 @@ namespace ASEntityBindings
             .function("bool IsConnected(CBasePlayer@)", AS_IsConnected)
             .function("string GetDisplayName(CBasePlayer@)", AS_GetDisplayName)
             .function("string GetSteamID(CBasePlayer@)", AS_GetSteamID)
+            .function("string GetPlayerSteamID(CBasePlayer@)", AS_GetSteamID)  // Alias for VotingCommands.as compatibility
             .function("bool IsAdmin(CBasePlayer@)", AS_IsAdmin)
             .function("string GetClientAddress(CBasePlayer@)", AS_GetClientAddress)
             // Quest data functions

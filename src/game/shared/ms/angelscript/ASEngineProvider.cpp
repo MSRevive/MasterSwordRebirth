@@ -265,6 +265,70 @@ bool ASEngineProvider::IsPlayerAdmin(void* player)
 #endif
 }
 
+//==========================================================================
+// Master Sword Specific Player Functions
+//==========================================================================
+
+std::string ASEngineProvider::GetPlayerTitle(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerTitle(player);
+#else
+    MS_ANGEL_DEBUG("GetPlayerTitle: No engine implementation available");
+    return "Unknown";
+#endif
+}
+
+float ASEngineProvider::GetPlayerMaxHP(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerMaxHP(player);
+#else
+    MS_ANGEL_DEBUG("GetPlayerMaxHP: No engine implementation available");
+    return 0.0f;
+#endif
+}
+
+float ASEngineProvider::GetPlayerMaxMP(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerMaxMP(player);
+#else
+    MS_ANGEL_DEBUG("GetPlayerMaxMP: No engine implementation available");
+    return 0.0f;
+#endif
+}
+
+bool ASEngineProvider::IsPlayerElite(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsPlayerElite(player);
+#else
+    MS_ANGEL_DEBUG("IsPlayerElite: No engine implementation available");
+    return false;
+#endif
+}
+
+std::string ASEngineProvider::GetPlayerPartyName(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerPartyName(player);
+#else
+    MS_ANGEL_DEBUG("GetPlayerPartyName: No engine implementation available");
+    return "";
+#endif
+}
+
+bool ASEngineProvider::IsPlayerLocalHost(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsPlayerLocalHost(player);
+#else
+    MS_ANGEL_DEBUG("IsPlayerLocalHost: No engine implementation available");
+    return false;
+#endif
+}
+
 std::string ASEngineProvider::GetPlayerQuestData(const std::string& playerID, const std::string& key)
 {
 #ifndef NO_ENGINE_IMPL

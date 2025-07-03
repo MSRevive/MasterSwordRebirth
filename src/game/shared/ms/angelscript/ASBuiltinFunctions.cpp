@@ -649,9 +649,9 @@ namespace ASBuiltinFunctions
         
         // Register game functions with asbind20 - comprehensive implementation
         // Note: GetTimestamp, GetPlayerCount, GetAllPlayers are registered in ASEntityBindings.cpp
+        // Note: formatInt is provided by scriptstdstring addon with enhanced functionality
         asbind20::global(pEngine)
             // String utility functions
-            .function("string formatInt(int)", &AS_FormatInt)
             .function("string formatFloat(float, const string &in, int, int)", &AS_FormatFloat)
             // Random functions
             .function("float Random(float, float)", &AS_Random)

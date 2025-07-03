@@ -53,6 +53,15 @@ public:
     int GetPlayerCountImpl() const;
     bool IsPlayerConnectedImpl(void* player) const;
     bool IsPlayerAdminImpl(void* player) const;
+    
+    // Master Sword specific player function implementations
+    std::string GetPlayerTitleImpl(void* player) const;
+    float GetPlayerMaxHPImpl(void* player) const;
+    float GetPlayerMaxMPImpl(void* player) const;
+    bool IsPlayerEliteImpl(void* player) const;
+    std::string GetPlayerPartyNameImpl(void* player) const;
+    bool IsPlayerLocalHostImpl(void* player) const;
+    
     std::string GetPlayerQuestDataImpl(const std::string& playerID, const std::string& key) const;
     void SetPlayerQuestDataImpl(const std::string& playerID, const std::string& key, const std::string& value);
     

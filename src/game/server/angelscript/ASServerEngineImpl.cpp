@@ -449,6 +449,96 @@ void ASServerEngine::SetPlayerQuestDataImpl(const std::string& playerID, const s
 }
 
 //==========================================================================
+// Master Sword Specific Player Functions
+//==========================================================================
+
+std::string ASServerEngine::GetPlayerTitleImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("GetPlayerTitle: Invalid player pointer");
+        return "Unknown";
+    }
+    
+    const char* title = pPlayer->GetTitle();
+    std::string result = title ? title : "Unknown";
+    MS_ANGEL_DEBUG("GetPlayerTitle: Player '%s' title = '%s'", pPlayer->DisplayName(), result.c_str());
+    return result;
+}
+
+float ASServerEngine::GetPlayerMaxHPImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("GetPlayerMaxHP: Invalid player pointer");
+        return 0.0f;
+    }
+    
+    float maxHP = pPlayer->MaxHP();
+    MS_ANGEL_DEBUG("GetPlayerMaxHP: Player '%s' maxHP = %.1f", pPlayer->DisplayName(), maxHP);
+    return maxHP;
+}
+
+float ASServerEngine::GetPlayerMaxMPImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("GetPlayerMaxMP: Invalid player pointer");
+        return 0.0f;
+    }
+    
+    float maxMP = pPlayer->MaxMP();
+    MS_ANGEL_DEBUG("GetPlayerMaxMP: Player '%s' maxMP = %.1f", pPlayer->DisplayName(), maxMP);
+    return maxMP;
+}
+
+bool ASServerEngine::IsPlayerEliteImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("IsPlayerElite: Invalid player pointer");
+        return false;
+    }
+    
+    bool isElite = pPlayer->IsElite();
+    MS_ANGEL_DEBUG("IsPlayerElite: Player '%s' elite = %s", pPlayer->DisplayName(), isElite ? "true" : "false");
+    return isElite;
+}
+
+std::string ASServerEngine::GetPlayerPartyNameImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("GetPlayerPartyName: Invalid player pointer");
+        return "";
+    }
+    
+    const char* partyName = pPlayer->GetPartyName();
+    std::string result = partyName ? partyName : "";
+    MS_ANGEL_DEBUG("GetPlayerPartyName: Player '%s' party = '%s'", pPlayer->DisplayName(), result.c_str());
+    return result;
+}
+
+bool ASServerEngine::IsPlayerLocalHostImpl(void* player) const
+{
+    CBasePlayer* pPlayer = static_cast<CBasePlayer*>(ValidatePlayer(player));
+    if (!pPlayer)
+    {
+        MS_ANGEL_DEBUG("IsPlayerLocalHost: Invalid player pointer");
+        return false;
+    }
+    
+    bool isLocalHost = pPlayer->IsLocalHost();
+    MS_ANGEL_DEBUG("IsPlayerLocalHost: Player '%s' localhost = %s", pPlayer->DisplayName(), isLocalHost ? "true" : "false");
+    return isLocalHost;
+}
+
+//==========================================================================
 // Player Management Helper Functions
 //==========================================================================
 
