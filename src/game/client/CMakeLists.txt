@@ -12,23 +12,23 @@ endif()
 
 find_package(OpenGL REQUIRED)
 
-target_include_directories(vgui INTERFACE ${BASEDIR}/utils/vgui/include)
-target_include_directories(SDL2 INTERFACE ${BASEDIR}/thirdparty/SDL2)
-target_include_directories(fmod INTERFACE ${BASEDIR}/thirdparty/fmod)
-target_include_directories(discord INTERFACE ${BASEDIR}/thirdparty/discord)
+target_include_directories(vgui INTERFACE ${BASEDIR}/lib/include/vgui)
+target_include_directories(SDL2 INTERFACE ${BASEDIR}/lib/include/SDL2)
+target_include_directories(fmod INTERFACE ${BASEDIR}/lib/include/fmod)
+target_include_directories(discord INTERFACE ${BASEDIR}/lib/include/discord)
 target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
 
 if (WIN32)
-	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/utils/vgui/lib/win32/vgui.lib")
-	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/SDL2.lib")
-	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/fmod_vc.lib")
-	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/discord-rpc.lib")
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/public/steam_api.lib")
+	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/vgui/vgui.lib")
+	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/SDL2/SDL2.lib")
+	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/fmod/fmod_vc.lib")
+	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/discord/discord-rpc.lib")
+	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/steamapi/steam_api.lib")
 else()
-	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libSDL2.so")
-	set_target_properties(fmod PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libfmod.so")
-	set_target_properties(discord PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libdiscord-rpc.a")
-	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/public/linux-x86/libsteam_api.so")
+	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/SDL2/libSDL2.so")
+	set_target_properties(fmod PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/fmod/libfmod.so")
+	set_target_properties(discord PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/discord/libdiscord-rpc.a")
+	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/steamapi/libsteam_api.so")
 endif()
 
 add_library(client SHARED)
@@ -42,7 +42,7 @@ else()
 	# to avoid vgui.so linked by the absolute path
 	# and CMake refuses to use -l: instead of -l (which makes linker to expect `lib` prefix)
 	# yes, in 2024 it's still a bug!
-	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib/public/linux-x86 -l:vgui.so")
+	target_link_libraries(client PRIVATE "-L${BASEDIR}/lib/vgui -l:vgui.so")
 endif()
 
 target_link_libraries(client PRIVATE
@@ -55,7 +55,8 @@ target_link_libraries(client PRIVATE
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
-	${BASEDIR}/utils/vgui/include
+	${BASEDIR}/lib/include
+	${BASEDIR}/lib/include/vgui
 	${BASEDIR}/src/public
 	${BASEDIR}/src/public/engine
 	${BASEDIR}/src/common
@@ -68,6 +69,8 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
+	${BASEDIR}/thirdparty/angelscript/include
+	${BASEDIR}/thirdparty/spdlog/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
@@ -80,6 +83,11 @@ target_compile_definitions(client PRIVATE
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
+
+# Check if spdlog is available
+if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
+	target_compile_definitions(client PRIVATE HAS_SPDLOG)
+endif()
 
 if (MSVC)
 	set_target_properties(client PROPERTIES 
@@ -107,83 +115,6 @@ set(Engine
 	"../../public/engine/cdll_int.h"
 )
 source_group("Engine" FILES ${Engine})
-
-set(SDL2
-	"../../../thirdparty/SDL2/begin_code.h"
-	"../../../thirdparty/SDL2/close_code.h"
-	"../../../thirdparty/SDL2/SDL.h"
-	"../../../thirdparty/SDL2/SDL_assert.h"
-	"../../../thirdparty/SDL2/SDL_atomic.h"
-	"../../../thirdparty/SDL2/SDL_audio.h"
-	"../../../thirdparty/SDL2/SDL_bits.h"
-	"../../../thirdparty/SDL2/SDL_blendmode.h"
-	"../../../thirdparty/SDL2/SDL_clipboard.h"
-	"../../../thirdparty/SDL2/SDL_config.h"
-	"../../../thirdparty/SDL2/SDL_config_android.h"
-	"../../../thirdparty/SDL2/SDL_config_iphoneos.h"
-	"../../../thirdparty/SDL2/SDL_config_macosx.h"
-	"../../../thirdparty/SDL2/SDL_config_minimal.h"
-	"../../../thirdparty/SDL2/SDL_config_nintendods.h"
-	"../../../thirdparty/SDL2/SDL_config_pandora.h"
-	"../../../thirdparty/SDL2/SDL_config_windows.h"
-	"../../../thirdparty/SDL2/SDL_config_wiz.h"
-	"../../../thirdparty/SDL2/SDL_copying.h"
-	"../../../thirdparty/SDL2/SDL_cpuinfo.h"
-	"../../../thirdparty/SDL2/SDL_endian.h"
-	"../../../thirdparty/SDL2/SDL_error.h"
-	"../../../thirdparty/SDL2/SDL_events.h"
-	"../../../thirdparty/SDL2/SDL_gamecontroller.h"
-	"../../../thirdparty/SDL2/SDL_gesture.h"
-	"../../../thirdparty/SDL2/SDL_haptic.h"
-	"../../../thirdparty/SDL2/SDL_hints.h"
-	"../../../thirdparty/SDL2/SDL_input.h"
-	"../../../thirdparty/SDL2/SDL_joystick.h"
-	"../../../thirdparty/SDL2/SDL_keyboard.h"
-	"../../../thirdparty/SDL2/SDL_keycode.h"
-	"../../../thirdparty/SDL2/SDL_loadso.h"
-	"../../../thirdparty/SDL2/SDL_log.h"
-	"../../../thirdparty/SDL2/SDL_main.h"
-	"../../../thirdparty/SDL2/SDL_messagebox.h"
-	"../../../thirdparty/SDL2/SDL_mouse.h"
-	"../../../thirdparty/SDL2/SDL_mutex.h"
-	"../../../thirdparty/SDL2/SDL_name.h"
-	"../../../thirdparty/SDL2/SDL_opengl.h"
-	"../../../thirdparty/SDL2/SDL_opengles.h"
-	"../../../thirdparty/SDL2/SDL_opengles2.h"
-	"../../../thirdparty/SDL2/SDL_pixels.h"
-	"../../../thirdparty/SDL2/SDL_platform.h"
-	"../../../thirdparty/SDL2/SDL_power.h"
-	"../../../thirdparty/SDL2/SDL_quit.h"
-	"../../../thirdparty/SDL2/SDL_rect.h"
-	"../../../thirdparty/SDL2/SDL_render.h"
-	"../../../thirdparty/SDL2/SDL_revision.h"
-	"../../../thirdparty/SDL2/SDL_rwops.h"
-	"../../../thirdparty/SDL2/SDL_scancode.h"
-	"../../../thirdparty/SDL2/SDL_shape.h"
-	"../../../thirdparty/SDL2/SDL_stdinc.h"
-	"../../../thirdparty/SDL2/SDL_surface.h"
-	"../../../thirdparty/SDL2/SDL_system.h"
-	"../../../thirdparty/SDL2/SDL_syswm.h"
-	"../../../thirdparty/SDL2/SDL_test.h"
-	"../../../thirdparty/SDL2/SDL_test_assert.h"
-	"../../../thirdparty/SDL2/SDL_test_common.h"
-	"../../../thirdparty/SDL2/SDL_test_compare.h"
-	"../../../thirdparty/SDL2/SDL_test_crc32.h"
-	"../../../thirdparty/SDL2/SDL_test_font.h"
-	"../../../thirdparty/SDL2/SDL_test_fuzzer.h"
-	"../../../thirdparty/SDL2/SDL_test_harness.h"
-	"../../../thirdparty/SDL2/SDL_test_images.h"
-	"../../../thirdparty/SDL2/SDL_test_log.h"
-	"../../../thirdparty/SDL2/SDL_test_md5.h"
-	"../../../thirdparty/SDL2/SDL_test_random.h"
-	"../../../thirdparty/SDL2/SDL_thread.h"
-	"../../../thirdparty/SDL2/SDL_timer.h"
-	"../../../thirdparty/SDL2/SDL_touch.h"
-	"../../../thirdparty/SDL2/SDL_types.h"
-	"../../../thirdparty/SDL2/SDL_version.h"
-	"../../../thirdparty/SDL2/SDL_video.h"
-)
-source_group("SDL2" FILES ${SDL2})
 
 set(SDK
 	"exports.h"
@@ -339,6 +270,8 @@ set(Shared
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/logger.h"
+	"../shared/ms/mslogger.cpp"
+	"../shared/ms/mslogger.h"
 	"../shared/ms/msbasic.h"
 	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"
@@ -379,6 +312,71 @@ set(Shared_base64
 	"../../../thirdparty/base64/base64.h"
 )
 source_group("Shared\\base64" FILES ${Shared_base64})
+
+set(Shared_AngelScript
+	"../shared/ms/angelscript/CAngelScriptManager.cpp"
+	"../shared/ms/angelscript/CAngelScriptManager.h"
+	"../shared/ms/angelscript/IAngelScript.cpp"
+	"../shared/ms/angelscript/IAngelScript.h"
+	"../shared/ms/angelscript/CAngelScript.cpp"
+	"../shared/ms/angelscript/CAngelScript.h"
+	"../shared/ms/angelscript/ASTest.cpp"
+	"../shared/ms/angelscript/ASTest.h"
+	"../shared/ms/angelscript/ASCoreTypes.cpp"
+	"../shared/ms/angelscript/ASCoreTypes.h"
+	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
+	"../shared/ms/angelscript/ASBuiltinFunctions.h"
+	"../shared/ms/angelscript/ASBindings.cpp"
+	"../shared/ms/angelscript/ASBindings.h"
+	"../shared/ms/angelscript/ASCoroutines.cpp"
+	"../shared/ms/angelscript/ASCoroutines.h"
+	"../shared/ms/angelscript/ASDebugger.cpp"
+	"../shared/ms/angelscript/ASDebugger.h"
+	"../shared/ms/angelscript/ASModuleSystem.cpp"
+	"../shared/ms/angelscript/ASModuleSystem.h"
+	"../shared/ms/angelscript/ASObjectPool.cpp"
+	"../shared/ms/angelscript/ASObjectPool.h"
+	"../shared/ms/angelscript/ASScriptClasses.cpp"
+	"../shared/ms/angelscript/ASScriptClasses.h"
+)
+source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(ThirdParty_AngelScript
+	"../../../thirdparty/angelscript/as_atomic.cpp"
+	"../../../thirdparty/angelscript/as_builder.cpp"
+	"../../../thirdparty/angelscript/as_bytecode.cpp"
+	"../../../thirdparty/angelscript/as_callfunc.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_compiler.cpp"
+	"../../../thirdparty/angelscript/as_configgroup.cpp"
+	"../../../thirdparty/angelscript/as_context.cpp"
+	"../../../thirdparty/angelscript/as_datatype.cpp"
+	"../../../thirdparty/angelscript/as_gc.cpp"
+	"../../../thirdparty/angelscript/as_generic.cpp"
+	"../../../thirdparty/angelscript/as_globalproperty.cpp"
+	"../../../thirdparty/angelscript/as_memory.cpp"
+	"../../../thirdparty/angelscript/as_module.cpp"
+	"../../../thirdparty/angelscript/as_objecttype.cpp"
+	"../../../thirdparty/angelscript/as_outputbuffer.cpp"
+	"../../../thirdparty/angelscript/as_parser.cpp"
+	"../../../thirdparty/angelscript/as_restore.cpp"
+	"../../../thirdparty/angelscript/as_scriptcode.cpp"
+	"../../../thirdparty/angelscript/as_scriptengine.cpp"
+	"../../../thirdparty/angelscript/as_scriptfunction.cpp"
+	"../../../thirdparty/angelscript/as_scriptnode.cpp"
+	"../../../thirdparty/angelscript/as_scriptobject.cpp"
+	"../../../thirdparty/angelscript/as_string.cpp"
+	"../../../thirdparty/angelscript/as_string_util.cpp"
+	"../../../thirdparty/angelscript/as_thread.cpp"
+	"../../../thirdparty/angelscript/as_tokenizer.cpp"
+	"../../../thirdparty/angelscript/as_typeinfo.cpp"
+	"../../../thirdparty/angelscript/as_variablescope.cpp"
+	# AngelScript add-ons
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
+	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
+)
+source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
 set(VGUI
 	"ui/vgui_checkbutton2.cpp"
@@ -469,6 +467,8 @@ set(ALL_FILES
 	${Shared}
 	${Shared_CRC}
 	${Shared_base64}
+	${Shared_AngelScript}
+	${ThirdParty_AngelScript}
 	${VGUI}
 	${VGUI_MS}
 )
