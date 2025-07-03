@@ -279,6 +279,24 @@ void ASEngineEventManager::FirePlayerSpawnedEvent(const char* szPlayerName)
 }
 
 //==========================================================================
+// Fire Player Say Text Event
+//==========================================================================
+void ASEngineEventManager::FirePlayerSayTextEvent(const char* szPlayerName, const char* szSteamID, const char* szText)
+{
+    if (!m_bInitialized)
+        return;
+        
+    std::vector<std::string> params;
+    params.push_back(szPlayerName ? szPlayerName : "");
+    params.push_back(szSteamID ? szSteamID : "");
+    params.push_back(szText ? szText : "");
+    
+    MS_ANGEL_INFO("ASEngineEventManager: Firing PlayerSayText event for %s: '%s'", 
+                 szPlayerName ? szPlayerName : "Unknown", szText ? szText : "");
+    DispatchEvent(EngineEventType::PLAYER_SAY_TEXT, params);
+}
+
+//==========================================================================
 // Helper function to determine if parameter should be passed by reference
 //==========================================================================
 bool ASEngineEventManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
@@ -493,6 +511,33 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
                     parameterError = true;
                 }
                 break;
+                
+            case EngineEventType::PLAYER_SAY_TEXT:
+                if (parameters.size() >= 3)
+                {
+                    // Set string parameters for player name, steam ID, and text
+                    if (IsParameterByReference(handler.pFunction, 0))
+                        pContext->SetArgAddress(0, const_cast<std::string*>(&parameters[0]));
+                    else
+                        pContext->SetArgObject(0, const_cast<std::string*>(&parameters[0]));
+                        
+                    if (IsParameterByReference(handler.pFunction, 1))
+                        pContext->SetArgAddress(1, const_cast<std::string*>(&parameters[1]));
+                    else
+                        pContext->SetArgObject(1, const_cast<std::string*>(&parameters[1]));
+                        
+                    if (IsParameterByReference(handler.pFunction, 2))
+                        pContext->SetArgAddress(2, const_cast<std::string*>(&parameters[2]));
+                    else
+                        pContext->SetArgObject(2, const_cast<std::string*>(&parameters[2]));
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Insufficient parameters for %s (need 3, got %zu)", 
+                                  GetEventTypeName(eventType), parameters.size());
+                    parameterError = true;
+                }
+                break;
         }
         
         // Only execute if no parameter errors occurred
@@ -579,6 +624,7 @@ const char* ASEngineEventManager::GetEventTypeName(EngineEventType eventType) co
         case EngineEventType::MONSTER_KILLED:    return "MonsterKilled";
         case EngineEventType::TREASURE_SPAWNED:  return "TreasureSpawned";
         case EngineEventType::PLAYER_SPAWNED:    return "PlayerSpawned";
+        case EngineEventType::PLAYER_SAY_TEXT:   return "PlayerSayText";
         default: return "Unknown";
     }
 }

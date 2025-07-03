@@ -25,7 +25,8 @@ enum class EngineEventType
     PLAYER_DISCONNECT, 
     MONSTER_KILLED,
     TREASURE_SPAWNED,
-    PLAYER_SPAWNED
+    PLAYER_SPAWNED,
+    PLAYER_SAY_TEXT
 };
 
 //==========================================================================
@@ -78,6 +79,7 @@ public:
     void FireMonsterKilledEvent(const char* szMonsterName, const char* szKillerName, float fPosX, float fPosY, float fPosZ);
     void FireTreasureSpawnedEvent(const char* szTreasureName, float fPosX, float fPosY, float fPosZ);
     void FirePlayerSpawnedEvent(const char* szPlayerName);
+    void FirePlayerSayTextEvent(const char* szPlayerName, const char* szSteamID, const char* szText);
     
     // Utility
     void LogEventHandlers();

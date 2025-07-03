@@ -28,6 +28,7 @@
 #include	"global.h"
 #include	"svglobals.h"
 #include	"mscharacter.h"
+#include	"ms/angelscript/ASEngineEventManager.h"
 
 #include <climits>
 
@@ -1822,6 +1823,79 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			}
 		}
 		return TRUE;
+	}
+	else if( FStrEq( pcmd, "say" ) )
+	{
+		// Server-side validation and command processing
+		const char* pszText = CMD_ARGS();
+		
+		// Comprehensive null and empty validation
+		if( !pszText || !*pszText )
+		{
+			// Empty or null text - let default handling continue
+			return FALSE;
+		}
+		
+		// Validate text length before any string operations
+		size_t textLen = strlen(pszText);
+		if( textLen == 0 )
+		{
+			return FALSE; // Empty text
+		}
+		
+		if( textLen > 256 )
+		{
+			// Reject excessively long messages
+			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "Message too long" );
+			return TRUE; // Block this command
+		}
+		
+		// Safe vote command detection with length validation
+		bool isVoteCommand = false;
+		if( textLen >= 7 ) // Minimum length for "votepvp"
+		{
+			if( (textLen >= 8 && strncmp(pszText, "votemap ", 8) == 0) ||
+				(textLen >= 9 && strncmp(pszText, "/votemap ", 9) == 0) ||
+				(textLen >= 7 && strncmp(pszText, "votepvp", 7) == 0) ||
+				(textLen >= 8 && strncmp(pszText, "/votepvp", 8) == 0) ||
+				(textLen >= 8 && strncmp(pszText, "votelock", 8) == 0) ||
+				(textLen >= 9 && strncmp(pszText, "/votelock", 9) == 0) )
+			{
+				isVoteCommand = true;
+			}
+		}
+		
+		if( isVoteCommand )
+		{
+			// Validate player information before firing event
+			const char* pszPlayerName = pPlayer ? pPlayer->DisplayName() : nullptr;
+			const char* pszSteamID = pPlayer ? GETPLAYERAUTHID(pPlayer->edict()) : nullptr;
+			
+			// Ensure we have valid player information
+			if( !pszPlayerName || !*pszPlayerName )
+				pszPlayerName = "Unknown Player";
+			if( !pszSteamID || !*pszSteamID )
+				pszSteamID = "Unknown SteamID";
+			
+			// Fire the PlayerSayText event to AngelScript for vote command processing
+			// Server maintains authority over vote validation and execution
+			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+			if( pEventManager )
+			{
+				pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, pszText);
+			}
+			else
+			{
+				// Log if event manager is not available
+				ALERT( at_console, "Vote command received but AngelScript event manager not available\n" );
+			}
+			
+			// Block the normal chat message since this is a command
+			return TRUE;
+		}
+		
+		// Let normal chat messages continue through default handling
+		return FALSE;
 	}
 	return FALSE;
 }
