@@ -125,9 +125,112 @@ public:
         static_cast<Derived*>(this)->SendInfoMsgImpl(player, message);
     }
     
+    // Communication functions for GameMaster
+    void SendPlayerMessage(const std::string& playerID, const std::string& message)
+    {
+        static_cast<Derived*>(this)->SendPlayerMessageImpl(playerID, message);
+    }
+    
+    void SendConsoleMessage(const std::string& playerID, const std::string& message)
+    {
+        static_cast<Derived*>(this)->SendConsoleMessageImpl(playerID, message);
+    }
+    
+    void SendMessageToAllPlayers(const std::string& color, const std::string& message)
+    {
+        static_cast<Derived*>(this)->SendMessageToAllPlayersImpl(color, message);
+    }
+    
+    void SendInfoMessageToAll(const std::string& title, const std::string& message)
+    {
+        static_cast<Derived*>(this)->SendInfoMessageToAllImpl(title, message);
+    }
+    
     void EmitSound(void* entity, int channel, const std::string& sound, float volume, float attn, int flags, int pitch)
     {
         static_cast<Derived*>(this)->EmitSoundImpl(entity, channel, sound, volume, attn, flags, pitch);
+    }
+    
+    // Player management functions
+    int GetPlayerCount() const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerCountImpl();
+    }
+    
+    bool IsPlayerConnected(void* player) const
+    {
+        return static_cast<const Derived*>(this)->IsPlayerConnectedImpl(player);
+    }
+    
+    bool IsPlayerAdmin(void* player) const
+    {
+        return static_cast<const Derived*>(this)->IsPlayerAdminImpl(player);
+    }
+    
+    std::string GetPlayerQuestData(const std::string& playerID, const std::string& key) const
+    {
+        return static_cast<const Derived*>(this)->GetPlayerQuestDataImpl(playerID, key);
+    }
+    
+    void SetPlayerQuestData(const std::string& playerID, const std::string& key, const std::string& value)
+    {
+        static_cast<Derived*>(this)->SetPlayerQuestDataImpl(playerID, key, value);
+    }
+    
+    // Server management functions
+    std::string GetServerCVar(const std::string& name, const std::string& defaultValue) const
+    {
+        return static_cast<const Derived*>(this)->GetServerCVarImpl(name, defaultValue);
+    }
+    
+    bool IsServerLocked() const
+    {
+        return static_cast<const Derived*>(this)->IsServerLockedImpl();
+    }
+    
+    std::string GetServerPassword() const
+    {
+        return static_cast<const Derived*>(this)->GetServerPasswordImpl();
+    }
+    
+    bool IsServerPvpEnabled() const
+    {
+        return static_cast<const Derived*>(this)->IsServerPvpEnabledImpl();
+    }
+    
+    bool IsOnFNServer() const
+    {
+        return static_cast<const Derived*>(this)->IsOnFNServerImpl();
+    }
+    
+    bool IsDeveloperMode() const
+    {
+        return static_cast<const Derived*>(this)->IsDeveloperModeImpl();
+    }
+    
+    void ExecuteServerCommand(const std::string& command)
+    {
+        static_cast<Derived*>(this)->ExecuteServerCommandImpl(command);
+    }
+    
+    void SetGlobalVariable(const std::string& name, const std::string& value)
+    {
+        static_cast<Derived*>(this)->SetGlobalVariableImpl(name, value);
+    }
+    
+    bool EngineMapExists(const std::string& mapName) const
+    {
+        return static_cast<const Derived*>(this)->EngineMapExistsImpl(mapName);
+    }
+    
+    bool MapExists(const std::string& mapName) const
+    {
+        return static_cast<const Derived*>(this)->MapExistsImpl(mapName);
+    }
+    
+    void ScheduleDelayedEvent(float delay, const std::string& eventName)
+    {
+        static_cast<Derived*>(this)->ScheduleDelayedEventImpl(delay, eventName);
     }
 
 protected:
@@ -153,6 +256,32 @@ protected:
     virtual int GetMaxClientsImpl() const = 0;
     virtual void SendInfoMsgImpl(void* player, const std::string& message) = 0;
     virtual void EmitSoundImpl(void* entity, int channel, const std::string& sound, float volume, float attn, int flags, int pitch) = 0;
+    
+    // Player management function implementations
+    virtual int GetPlayerCountImpl() const = 0;
+    virtual bool IsPlayerConnectedImpl(void* player) const = 0;
+    virtual bool IsPlayerAdminImpl(void* player) const = 0;
+    virtual std::string GetPlayerQuestDataImpl(const std::string& playerID, const std::string& key) const = 0;
+    virtual void SetPlayerQuestDataImpl(const std::string& playerID, const std::string& key, const std::string& value) = 0;
+    
+    // Server management function implementations
+    virtual std::string GetServerCVarImpl(const std::string& name, const std::string& defaultValue) const = 0;
+    virtual bool IsServerLockedImpl() const = 0;
+    virtual std::string GetServerPasswordImpl() const = 0;
+    virtual bool IsServerPvpEnabledImpl() const = 0;
+    virtual bool IsOnFNServerImpl() const = 0;
+    virtual bool IsDeveloperModeImpl() const = 0;
+    virtual void ExecuteServerCommandImpl(const std::string& command) = 0;
+    virtual void SetGlobalVariableImpl(const std::string& name, const std::string& value) = 0;
+    virtual bool EngineMapExistsImpl(const std::string& mapName) const = 0;
+    virtual bool MapExistsImpl(const std::string& mapName) const = 0;
+    virtual void ScheduleDelayedEventImpl(float delay, const std::string& eventName) = 0;
+    
+    // Communication function implementations
+    virtual void SendPlayerMessageImpl(const std::string& playerID, const std::string& message) = 0;
+    virtual void SendConsoleMessageImpl(const std::string& playerID, const std::string& message) = 0;
+    virtual void SendMessageToAllPlayersImpl(const std::string& color, const std::string& message) = 0;
+    virtual void SendInfoMessageToAllImpl(const std::string& title, const std::string& message) = 0;
 };
 
 //==========================================================================
@@ -184,6 +313,32 @@ public:
     static int GetMaxClients();
     static void SendInfoMsg(void* player, const std::string& message);
     static void EmitSound(void* entity, int channel, const std::string& sound, float volume, float attn, int flags, int pitch);
+    
+    // Player management functions
+    static int GetPlayerCount();
+    static bool IsPlayerConnected(void* player);
+    static bool IsPlayerAdmin(void* player);
+    static std::string GetPlayerQuestData(const std::string& playerID, const std::string& key);
+    static void SetPlayerQuestData(const std::string& playerID, const std::string& key, const std::string& value);
+    
+    // Server management functions
+    static std::string GetServerCVar(const std::string& name, const std::string& defaultValue);
+    static bool IsServerLocked();
+    static std::string GetServerPassword();
+    static bool IsServerPvpEnabled();
+    static bool IsOnFNServer();
+    static bool IsDeveloperMode();
+    static void ExecuteServerCommand(const std::string& command);
+    static void SetGlobalVariable(const std::string& name, const std::string& value);
+    static bool EngineMapExists(const std::string& mapName);
+    static bool MapExists(const std::string& mapName);
+    static void ScheduleDelayedEvent(float delay, const std::string& eventName);
+    
+    // Communication functions
+    static void SendPlayerMessage(const std::string& playerID, const std::string& message);
+    static void SendConsoleMessage(const std::string& playerID, const std::string& message);
+    static void SendMessageToAllPlayers(const std::string& color, const std::string& message);
+    static void SendInfoMessageToAll(const std::string& title, const std::string& message);
 };
 
 //==========================================================================

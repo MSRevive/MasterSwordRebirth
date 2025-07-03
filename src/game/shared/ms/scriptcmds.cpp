@@ -387,7 +387,7 @@ bool GetNextDebugEntity(
 	{
 		if ( rDebugInfo.mTimesLooked == 1 )
 		{
-			rDebugInfo.mpFoundEntity = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			rDebugInfo.mpFoundEntity = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		}
 	}
 	else
@@ -1684,7 +1684,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			}
 		}
 	}
-	else return "¯NA¯";
+	else return "-NA-";
 
 	return fSuccess ? "1" : "0";
 }
@@ -4460,8 +4460,8 @@ bool CScript::ScriptCmd_Name(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist
 
 			if (m.pScriptedEnt->pev && !m.pScriptedEnt->pev->netname)
 			{
-				//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("¯") + Name );
-				m.pScriptedEnt->m_NetName = msstring("¯") + Name;
+				//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("-") + Name );
+				m.pScriptedEnt->m_NetName = msstring("-") + Name;
 				m.pScriptedEnt->pev->netname = MAKE_STRING(m.pScriptedEnt->m_NetName.c_str());
 			}
 			m.pScriptedEnt->m_DisplayName = GetScriptVar(Name);
@@ -4498,8 +4498,8 @@ bool CScript::ScriptCmd_NameUnique(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	{
 		if (m.pScriptedEnt)
 		{
-			//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("¯") + Params[0] );
-			m.pScriptedEnt->m_NetName = msstring("¯") + Params[0];
+			//m.pScriptedEnt->pev->netname = ALLOC_STRING( msstring("-") + Params[0] );
+			m.pScriptedEnt->m_NetName = msstring("-") + Params[0];
 			m.pScriptedEnt->pev->netname = MAKE_STRING(m.pScriptedEnt->m_NetName.c_str());
 		}
 	}	//Need braces
@@ -7369,11 +7369,11 @@ bool CScript::ScriptCmd_WriteLine(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 //- if first param is an entity and the second is not 'direct', then auto-aimed hitscan damage, the second param defining the max range of the attack.
 //- <inflictor> and <attacker> should usually match, save when used in weapons or projectiles, in which case <inflicter> should indicate said items.
 //- [flag_string] - multiple flags can be added, if seperated by semi-colons, flags follow:
-//-- � "dmgevent:<prefix>"
+//-- (c) "dmgevent:<prefix>"
 //-- You can use this to setup seperate _dodamage processing events for each attack
 //-- This will call <prefix>_dodamage, in addition to the usual game_dodamage, on the <attacker>
 //-- If prefix begins with * - <prefix>_dodamage will be called on <inflictor> instead of <attacker>, sans the * (for weapons)
-//� "nodecal"
+//(c) "nodecal"
 //-- Causes trace damage events not to decal walls (note that they still fire hitwall/game_hitworld when calling from an item/weapon script)
 bool CScript::ScriptCmd_XDoDamage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {

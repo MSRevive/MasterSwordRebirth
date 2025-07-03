@@ -63,7 +63,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         if (!arrayStringType) {
             MS_ANGEL_ERROR("   WARNING: array<string> type not found - string utilities may not work properly");
         } else {
-            MS_ANGEL_INFO("   ✓ array<string> template type verified");
+            MS_ANGEL_INFO("   OK array<string> template type verified");
         }
         
         // Check if split method was registered successfully on string type
@@ -73,7 +73,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
             if (!splitFunc) {
                 MS_ANGEL_ERROR("   WARNING: string.split() method not found");
             } else {
-                MS_ANGEL_INFO("   ✓ string.split() method verified");
+                MS_ANGEL_INFO("   OK string.split() method verified");
             }
         } else {
             MS_ANGEL_ERROR("   WARNING: string type not found for split method validation");
@@ -84,7 +84,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         if (!joinFunc) {
             MS_ANGEL_ERROR("   WARNING: join() function not found");
         } else {
-            MS_ANGEL_INFO("   ✓ String utility functions verified");
+            MS_ANGEL_INFO("   OK String utility functions verified");
         }
     } catch (...) {
         MS_ANGEL_ERROR("   ERROR: Exception during string utilities registration");
@@ -100,7 +100,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Core types registered successfully");
+        MS_ANGEL_INFO("   OK Core types registered successfully");
     }
     
     // Step 3: Register entity types (CBaseEntity, CBasePlayer)
@@ -108,11 +108,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     try
     {
         ASEntityBindings::RegisterAll(pEngine);
-        MS_ANGEL_INFO("   ✓ Entity types registered successfully");
+        MS_ANGEL_INFO("   OK Entity types registered successfully");
         
         // Now register EntityHandle methods that depend on entity types
         ASCoreTypes::RegisterEntityHandleMethods(pEngine);
-        MS_ANGEL_INFO("   ✓ EntityHandle dependent methods registered successfully");
+        MS_ANGEL_INFO("   OK EntityHandle dependent methods registered successfully");
     }
     catch (...)
     {
@@ -129,7 +129,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Builtin functions registered successfully");
+        MS_ANGEL_INFO("   OK Builtin functions registered successfully");
     }
     
     // Step 5: Register script classes (CGameScript and derivatives)
@@ -141,7 +141,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Script classes registered successfully");
+        MS_ANGEL_INFO("   OK Script classes registered successfully");
     }
     
     // Step 6: Register coroutines system
@@ -153,7 +153,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Coroutines system registered successfully");
+        MS_ANGEL_INFO("   OK Coroutines system registered successfully");
     }
     
     // Step 7: Register memory optimization systems
@@ -165,7 +165,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Memory optimization registered successfully");
+        MS_ANGEL_INFO("   OK Memory optimization registered successfully");
     }
     
     // Step 8: Register module system
@@ -177,7 +177,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Module system registered successfully");
+        MS_ANGEL_INFO("   OK Module system registered successfully");
     }
     
     // Step 8.5: Register engine event system
@@ -189,7 +189,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Engine event system registered successfully");
+        MS_ANGEL_INFO("   OK Engine event system registered successfully");
         
         // Initialize the engine event manager with this engine
         ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -200,7 +200,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         }
         else
         {
-            MS_ANGEL_INFO("   ✓ Engine event manager initialized successfully");
+            MS_ANGEL_INFO("   OK Engine event manager initialized successfully");
         }
     }
     
@@ -213,7 +213,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ All registrations validated successfully");
+        MS_ANGEL_INFO("   OK All registrations validated successfully");
     }
     
     // Step 10: Log registration summary
@@ -357,7 +357,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
             MS_ANGEL_INFO("     WARNING: Vector3 has %d methods, expected at least 3", methodCount);
             warnings++;
         }
-        MS_ANGEL_INFO("     ✓ Vector3 validated (%d properties, %d methods)", propCount, methodCount);
+        MS_ANGEL_INFO("     OK Vector3 validated (%d properties, %d methods)", propCount, methodCount);
     }
     
     // Check Color
@@ -370,7 +370,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("     ✓ Color type validated");
+        MS_ANGEL_INFO("     OK Color type validated");
     }
     
     // Validate global functions
@@ -395,7 +395,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ String functions: %d/%d registered", stringFuncCount, 7);
+    MS_ANGEL_INFO("     OK String functions: %d/%d registered", stringFuncCount, 7);
     
     // Math functions
     const char* mathFuncs[] = {
@@ -415,7 +415,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ Math functions: %d/%d registered", mathFuncCount, 6);
+    MS_ANGEL_INFO("     OK Math functions: %d/%d registered", mathFuncCount, 6);
     
     // Game functions
     const char* gameFuncs[] = {
@@ -434,7 +434,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ Game functions: %d/%d registered", gameFuncCount, 5);
+    MS_ANGEL_INFO("     OK Game functions: %d/%d registered", gameFuncCount, 5);
     
     // Check for EntityHandle type (used by game functions)
     asITypeInfo* pEntityHandle = pEngine->GetTypeInfoByName("EntityHandle");

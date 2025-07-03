@@ -231,6 +231,210 @@ void ASEngineProvider::EmitSound(void* entity, int channel, const std::string& s
 #endif
 }
 
+//==========================================================================
+// Player Management Functions
+//==========================================================================
+
+int ASEngineProvider::GetPlayerCount()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerCount();
+#else
+    MS_ANGEL_DEBUG("GetPlayerCount: No engine implementation available");
+    return 0;
+#endif
+}
+
+bool ASEngineProvider::IsPlayerConnected(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsPlayerConnected(player);
+#else
+    MS_ANGEL_DEBUG("IsPlayerConnected: No engine implementation available");
+    return false;
+#endif
+}
+
+bool ASEngineProvider::IsPlayerAdmin(void* player)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsPlayerAdmin(player);
+#else
+    MS_ANGEL_DEBUG("IsPlayerAdmin: No engine implementation available");
+    return false;
+#endif
+}
+
+std::string ASEngineProvider::GetPlayerQuestData(const std::string& playerID, const std::string& key)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetPlayerQuestData(playerID, key);
+#else
+    MS_ANGEL_DEBUG("GetPlayerQuestData: No engine implementation available");
+    return "";
+#endif
+}
+
+void ASEngineProvider::SetPlayerQuestData(const std::string& playerID, const std::string& key, const std::string& value)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SetPlayerQuestData(playerID, key, value);
+#else
+    MS_ANGEL_DEBUG("SetPlayerQuestData: No engine implementation available");
+#endif
+}
+
+//==========================================================================
+// Server Management Functions
+//==========================================================================
+
+std::string ASEngineProvider::GetServerCVar(const std::string& name, const std::string& defaultValue)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetServerCVar(name, defaultValue);
+#else
+    MS_ANGEL_DEBUG("GetServerCVar: No engine implementation available");
+    return defaultValue;
+#endif
+}
+
+bool ASEngineProvider::IsServerLocked()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsServerLocked();
+#else
+    MS_ANGEL_DEBUG("IsServerLocked: No engine implementation available");
+    return false;
+#endif
+}
+
+std::string ASEngineProvider::GetServerPassword()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.GetServerPassword();
+#else
+    MS_ANGEL_DEBUG("GetServerPassword: No engine implementation available");
+    return "";
+#endif
+}
+
+bool ASEngineProvider::IsServerPvpEnabled()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsServerPvpEnabled();
+#else
+    MS_ANGEL_DEBUG("IsServerPvpEnabled: No engine implementation available");
+    return false;
+#endif
+}
+
+bool ASEngineProvider::IsOnFNServer()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsOnFNServer();
+#else
+    MS_ANGEL_DEBUG("IsOnFNServer: No engine implementation available");
+    return false;
+#endif
+}
+
+bool ASEngineProvider::IsDeveloperMode()
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.IsDeveloperMode();
+#else
+    MS_ANGEL_DEBUG("IsDeveloperMode: No engine implementation available");
+    return false;
+#endif
+}
+
+void ASEngineProvider::ExecuteServerCommand(const std::string& command)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.ExecuteServerCommand(command);
+#else
+    MS_ANGEL_DEBUG("ExecuteServerCommand: No engine implementation available");
+#endif
+}
+
+void ASEngineProvider::SetGlobalVariable(const std::string& name, const std::string& value)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SetGlobalVariable(name, value);
+#else
+    MS_ANGEL_DEBUG("SetGlobalVariable: No engine implementation available");
+#endif
+}
+
+bool ASEngineProvider::EngineMapExists(const std::string& mapName)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.EngineMapExists(mapName);
+#else
+    MS_ANGEL_DEBUG("EngineMapExists: No engine implementation available");
+    return false;
+#endif
+}
+
+bool ASEngineProvider::MapExists(const std::string& mapName)
+{
+#ifndef NO_ENGINE_IMPL
+    return ENGINE_IMPL.MapExists(mapName);
+#else
+    MS_ANGEL_DEBUG("MapExists: No engine implementation available");
+    return false;
+#endif
+}
+
+void ASEngineProvider::ScheduleDelayedEvent(float delay, const std::string& eventName)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.ScheduleDelayedEvent(delay, eventName);
+#else
+    MS_ANGEL_DEBUG("ScheduleDelayedEvent: No engine implementation available");
+#endif
+}
+
+//==========================================================================
+// Communication Functions
+//==========================================================================
+
+void ASEngineProvider::SendPlayerMessage(const std::string& playerID, const std::string& message)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SendPlayerMessage(playerID, message);
+#else
+    MS_ANGEL_DEBUG("SendPlayerMessage: No engine implementation available");
+#endif
+}
+
+void ASEngineProvider::SendConsoleMessage(const std::string& playerID, const std::string& message)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SendConsoleMessage(playerID, message);
+#else
+    MS_ANGEL_DEBUG("SendConsoleMessage: No engine implementation available");
+#endif
+}
+
+void ASEngineProvider::SendMessageToAllPlayers(const std::string& color, const std::string& message)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SendMessageToAllPlayers(color, message);
+#else
+    MS_ANGEL_DEBUG("SendMessageToAllPlayers: No engine implementation available");
+#endif
+}
+
+void ASEngineProvider::SendInfoMessageToAll(const std::string& title, const std::string& message)
+{
+#ifndef NO_ENGINE_IMPL
+    ENGINE_IMPL.SendInfoMessageToAll(title, message);
+#else
+    MS_ANGEL_DEBUG("SendInfoMessageToAll: No engine implementation available");
+#endif
+}
+
 // Note: All C-style wrapper functions have been removed.
 // The new template system uses ASEngineProvider directly through asbind20.
 // If legacy C linkage is needed, it should be minimal and specific.

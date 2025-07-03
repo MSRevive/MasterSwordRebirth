@@ -10,6 +10,7 @@
 #define NOIME
 #define NOMINMAX
 #define NOMB
+#define NOGDI  // Prevent GetObject macro definition that conflicts with AngelScript
 
 #pragma push_macro("ARRAYSIZE")
 #ifdef ARRAYSIZE
@@ -22,6 +23,11 @@
 #endif
 
 #include <Windows.h>
+
+// Undefine problematic Windows macros that conflict with AngelScript/asbind20
+#ifdef GetObject
+#undef GetObject
+#endif
 
 #endif
 

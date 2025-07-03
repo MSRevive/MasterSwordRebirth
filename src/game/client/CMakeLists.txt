@@ -48,6 +48,7 @@ endif()
 target_link_libraries(client PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
 	$<$<PLATFORM_ID:Windows>:vgui>
+	$<$<PLATFORM_ID:Windows>:gdi32>
 	SDL2
 	fmod
 	discord

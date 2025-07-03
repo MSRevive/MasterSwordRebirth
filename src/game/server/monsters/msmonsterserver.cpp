@@ -500,7 +500,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 //
 //	Think
-//	�����
+//	(c)(c)(c)(c)(c)
 void CMSMonster::Think()
 {
 	pev->vuser3.x = MaxHP();
@@ -1416,7 +1416,7 @@ void CMSMonster::StopWalking()
 
 //
 // Attack
-// ������
+// (c)(c)(c)(c)(c)(c)
 
 void CMSMonster::Act()
 {
@@ -1528,7 +1528,7 @@ void CMSMonster :: Jump( ) {
 }*/
 //
 //   Say - Have the Monster say something...
-//   ���
+//   (c)(c)(c)
 void CMSMonster::Say(const char* Sound, float fDuration)
 {
 
@@ -1585,7 +1585,7 @@ void CMSMonster::Talk()
 }
 //
 // Speak - Text speech for both NPCs and players
-// �����
+// (c)(c)(c)(c)(c)
 void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 {
 	if (!pszSentence || !pszSentence[0])
@@ -1832,7 +1832,7 @@ void CMSMonster::Used(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 }
 //
 // Trade - Manage trading with others
-// �����
+// (c)(c)(c)(c)(c)
 void CMSMonster::Trade()
 {
 	if (!HasConditions(MONSTER_TRADING))
@@ -1923,7 +1923,7 @@ tradeinfo_t* CMSMonster::TradeItem(tradeinfo_t* ptiTradeInfo)
 }
 //
 // AcceptOffer - Accept an offer from a player or monster
-// �����������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 bool CMSMonster::AcceptOffer()
 {
 	bool fRecievedItem = false;
@@ -2748,7 +2748,7 @@ void CMSMonster::ReportAIState()
 
 /*
 	LearnSkill - Called after certain actions to increase your skill stats.
-	����������   Caller gets EnemySkillLevel experience pts and then
+	(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   Caller gets EnemySkillLevel experience pts and then
 				 it checks whether it should advance his stats
 */
 

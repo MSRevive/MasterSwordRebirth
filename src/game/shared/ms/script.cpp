@@ -551,12 +551,12 @@ msstring CScript::ScriptGetter_AngleDiff(msstring& FullName, msstring& ParserNam
 }
 
 //$angles(<start_origin>,<end_origin>)
-//� returns the 2d angle between two vectors
+//(c) returns the 2d angle between two vectors
 //- priority: very high, scope: shared
 msstring CScript::ScriptGetter_Angles(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
 	//Thothie MAR 2008a
-	//- $angles(<start_origin>,<end_origin>) � returns the 2d angle between two vectors
+	//- $angles(<start_origin>,<end_origin>) (c) returns the 2d angle between two vectors
 	//- worried atan2 maybe CPU intensive. :/
 	//priority: very high, scope: shared
 	msstring Return;
@@ -1439,7 +1439,7 @@ msstring CScript::ScriptGetter_GetByName(msstring& FullName, msstring& ParserNam
 	msstring Return;
 	if (Params.size() >= 1)
 	{
-		CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + Params[0]);
+		CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "netname", msstring("-") + Params[0]);
 		if (pEntity)
 			return EntToString(pEntity);
 		else
@@ -1678,7 +1678,7 @@ msstring CScript::ScriptGetter_GetCVar(msstring& FullName, msstring& ParserName,
 //- priority: very low, scope: server
 msstring CScript::ScriptGetter_GetFileLine(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
-	//MiB Feb2008a � �Read� a line from a file
+	//MiB Feb2008a (c) (c)Read(c) a line from a file
 	//- $get_fileline(<file>,[line])
 	//priority: very low, scope: server
 //#ifdef VALVE_DLL //Thothie MAR2019_02 - MiB says removing this will allow client file access

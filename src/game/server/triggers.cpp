@@ -1814,7 +1814,7 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	MESSAGE_END();
 	*/
 	//NOV2014_12 Thothie - wanted to axe this ent entirely, but just making MSC friendly instead.
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 	if (pGMScript)
 	{

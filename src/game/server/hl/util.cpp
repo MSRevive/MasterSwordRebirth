@@ -675,7 +675,7 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 	msstring m_scriptevent = tokenevents;
 	if (m_scriptevent.starts_with("gm_"))
 	{
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript)
 		{
@@ -1933,7 +1933,7 @@ void UTIL_Remove(CBaseEntity *pEntity)
 	msstring msEntClassName = STRING(pEntity->pev->classname);
 	if (msEntClassName.contains("msarea_monsterspawn") || msEntClassName.contains("ms_monsterspawn"))
 	{
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript)
 		{

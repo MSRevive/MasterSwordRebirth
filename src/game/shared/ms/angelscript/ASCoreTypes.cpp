@@ -77,39 +77,37 @@ namespace ASCoreTypes
         
         MS_ANGEL_INFO("ASCoreTypes: Registering Vector3 type...");
         
-        // Register Vector3 type with asbind20
-        asbind20::value_class<Vector>(pEngine, "Vector3", asOBJ_APP_CLASS_CDAK)
-            // Properties
-            .property("float x", &Vector::x)
-            .property("float y", &Vector::y) 
-            .property("float z", &Vector::z)
-            // Constructors
-            .default_constructor()
-            .constructor<float, float, float>("float, float, float")
-            .copy_constructor()
-            .destructor()
-            // Operators
-            .method("Vector3 opAdd(const Vector3 &in) const", static_cast<Vector(Vector::*)(const Vector&) const>(&Vector::operator+))
-            .method("Vector3 opSub(const Vector3 &in) const", static_cast<Vector(Vector::*)(const Vector&) const>(&Vector::operator-))
-            .method("Vector3 opMul(float) const", static_cast<Vector(Vector::*)(float) const>(&Vector::operator*))
-            .method("Vector3 opDiv(float) const", static_cast<Vector(Vector::*)(float) const>(&Vector::operator/))
-            .method("bool opEquals(const Vector3 &in) const", static_cast<int(Vector::*)(const Vector&) const>(&Vector::operator==))
-            .method("Vector3 opNeg() const", static_cast<Vector(Vector::*)() const>(&Vector::operator-))
-            // Assignment operator
-            .method("Vector3& opAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator=))
-            // Compound assignment operators
-            .method("Vector3& opAddAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator+=))
-            .method("Vector3& opSubAssign(const Vector3 &in)", static_cast<Vector&(Vector::*)(const Vector&)>(&Vector::operator-=))
-            .method("Vector3& opMulAssign(float)", static_cast<Vector&(Vector::*)(float)>(&Vector::operator*=))
-            .method("Vector3& opDivAssign(float)", static_cast<Vector&(Vector::*)(float)>(&Vector::operator/=))
-            // Methods
-            .method("float Length() const", &Vector::Length)
-            .method("Vector3 Normalize() const", &Vector::Normalize)
-            .method("float Length2D() const", &Vector::Length2D);
+        // Register Vector3 type with asbind20 - minimal registration to avoid crashes
+        try {
+            asbind20::value_class<Vector>(pEngine, "Vector3")
+                // Properties
+                .property("float x", &Vector::x)
+                .property("float y", &Vector::y) 
+                .property("float z", &Vector::z)
+                // Basic constructors
+                .default_constructor()
+                .constructor<float, float, float>("float, float, float")
+                .copy_constructor()
+                .destructor()
+                // Essential methods only
+                .method("float Length() const", &Vector::Length)
+                .method("float Length2D() const", &Vector::Length2D);
+            
+            MS_ANGEL_INFO("ASCoreTypes: Basic Vector3 registration successful");
+        } catch (const std::exception& e) {
+            MS_ANGEL_ERROR("ASCoreTypes: Vector3 registration failed: %s", e.what());
+            return;
+        }
         
         // Register global Vector3 functions with asbind20
-        asbind20::global(pEngine)
-            .function("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", static_cast<Vector(*)(const Vector&, const Vector&)>(&CrossProduct));
+        try {
+            asbind20::global(pEngine)
+                .function("Vector3 CrossProduct(const Vector3 &in, const Vector3 &in)", 
+                         static_cast<Vector(*)(const Vector&, const Vector&)>(&CrossProduct));
+            MS_ANGEL_INFO("ASCoreTypes: Vector3 global functions registered");
+        } catch (const std::exception& e) {
+            MS_ANGEL_ERROR("ASCoreTypes: Vector3 global function registration failed: %s", e.what());
+        }
         
         MS_ANGEL_INFO("ASCoreTypes: Vector3 registration complete");
     }

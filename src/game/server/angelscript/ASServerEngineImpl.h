@@ -42,6 +42,32 @@ public:
     int GetMaxClientsImpl() const;
     void SendInfoMsgImpl(void* player, const std::string& message);
     void EmitSoundImpl(void* entity, int channel, const std::string& sound, float volume, float attn, int flags, int pitch);
+    
+    // Communication function implementations
+    void SendPlayerMessageImpl(const std::string& playerID, const std::string& message);
+    void SendConsoleMessageImpl(const std::string& playerID, const std::string& message);
+    void SendMessageToAllPlayersImpl(const std::string& color, const std::string& message);
+    void SendInfoMessageToAllImpl(const std::string& title, const std::string& message);
+    
+    // Player management function implementations
+    int GetPlayerCountImpl() const;
+    bool IsPlayerConnectedImpl(void* player) const;
+    bool IsPlayerAdminImpl(void* player) const;
+    std::string GetPlayerQuestDataImpl(const std::string& playerID, const std::string& key) const;
+    void SetPlayerQuestDataImpl(const std::string& playerID, const std::string& key, const std::string& value);
+    
+    // Server management function implementations
+    std::string GetServerCVarImpl(const std::string& name, const std::string& defaultValue) const;
+    bool IsServerLockedImpl() const;
+    std::string GetServerPasswordImpl() const;
+    bool IsServerPvpEnabledImpl() const;
+    bool IsOnFNServerImpl() const;
+    bool IsDeveloperModeImpl() const;
+    void ExecuteServerCommandImpl(const std::string& command);
+    void SetGlobalVariableImpl(const std::string& name, const std::string& value);
+    bool EngineMapExistsImpl(const std::string& mapName) const;
+    bool MapExistsImpl(const std::string& mapName) const;
+    void ScheduleDelayedEventImpl(float delay, const std::string& eventName);
 
 private:
     ASServerEngine() = default;
@@ -53,6 +79,11 @@ private:
     void* ValidateEntity(void* entity) const;
     void* ValidatePlayer(void* player) const;
     void* GetEdict(void* entity) const;
+    
+    // Player management helper functions
+    void* FindPlayerBySteamID(const std::string& steamID) const;
+    void* FindPlayerByName(const std::string& playerName) const;
+    bool IsPlayerIdValid(const std::string& playerID) const;
 };
 
 // Note: All C-style function declarations have been removed.

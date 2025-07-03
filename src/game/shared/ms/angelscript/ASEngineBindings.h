@@ -121,11 +121,6 @@ namespace ASEngineBindings
                         void* player = reinterpret_cast<void*>(handle.value);
                         return ASEngineProvider::IsValidPlayer(player);
                     })
-                .function("PlayerHandle PlayerByIndex(int)", 
-                    +[](int index) -> PlayerHandle {
-                        void* player = ASEngineProvider::PlayerByIndex(index);
-                        return PlayerHandle(reinterpret_cast<int>(player));
-                    })
                 .function("void SendPlayerMessage(PlayerHandle, const string &in)", 
                     +[](const PlayerHandle& handle, const std::string& message) {
                         void* player = reinterpret_cast<void*>(handle.value);

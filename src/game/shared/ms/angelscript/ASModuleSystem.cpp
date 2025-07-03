@@ -1172,7 +1172,7 @@ namespace ASModuleSystemBindings
         }
         else
         {
-            printf("   ✓ Module functions registered successfully\n");
+            printf("   OK Module functions registered successfully\n");
         }
         
         // Register import/export functions
@@ -1184,7 +1184,7 @@ namespace ASModuleSystemBindings
         }
         else
         {
-            printf("   ✓ Import/export functions registered successfully\n");
+            printf("   OK Import/export functions registered successfully\n");
         }
         
         if (success)

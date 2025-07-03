@@ -1,50 +1,59 @@
 //==========================================================================
-// ASEntityBindings.cpp - Using asbind20
+// ASEntityBindings.cpp - asbind20 Implementation
 // 
 // Entity-related type bindings for AngelScript integration
 // Provides CBaseEntity, CBasePlayer, and related functions for script usage
+// Uses asbind20 for clean, type-safe binding syntax
 //==========================================================================
 
-#include "CAngelScript.h"
-#include <asbind20/asbind.hpp>
-#include "addons/scriptarray/scriptarray.h"
+// Include standard library headers first
 #include <cstdio>
 #include <new>
 #include <vector>
 #include <string>
 #include <ctime>
+#include <cmath>    // For sqrt in vector.h
 #include <type_traits>
+#include <angelscript.h>  // For asIContext and asGetActiveContext
+#include "addons/scriptarray/scriptarray.h"
+
+// Include asbind20 for modern binding syntax
+#include "../../../../../thirdparty/asbind20/asbind.hpp"
 
 // Include vector.h directly for Vector type
 typedef float vec_t;
-#include "hl/vector.h"
+#include "../../../server/hl/vector.h"
 
 // Include MSLogger with proper path
 #include "mslogger.h"
 
-// Include new template-based engine interface
+// Include real Master Sword entity classes first
+#ifdef CLIENT_DLL
+    // Client-side includes
+    #include "hud.h"
+    #include "cl_util.h"
+#else
+    // Server-side includes
+    #include "extdll.h"
+    #include "util.h"
+    #include "hl/cbase.h"
+    #include "player/player.h"
+#endif
+
+// Include AngelScript headers after engine headers
+// Using asbind20 for clean, type-safe binding syntax
 #include "ASEngineInterface.h"
 #include "ASEngineBindings.h"
-
-// Dummy type definitions for asbind20 registration
-// These are only used for type registration and not actual implementation
-namespace {
-    struct CBaseEntity_Dummy { 
-        void* _dummy; 
-    };
-    struct CBasePlayer_Dummy { 
-        void* _dummy; 
-    };
-}
-
-// Use the dummy types for registration
-#define CBaseEntity CBaseEntity_Dummy
-#define CBasePlayer CBasePlayer_Dummy
+#include "ASCoreTypes.h"
 
 // Note: All external C function declarations have been removed.
 // All engine integration now uses ASEngineProvider directly.
 
-// Remove forward declarations - using dummy types via macros
+// Engine globals - declared globally to avoid namespace issues
+#ifndef CLIENT_DLL
+extern globalvars_t *gpGlobals;
+extern enginefuncs_t g_engfuncs;
+#endif
 
 namespace ASEntityBindings
 {
@@ -53,149 +62,105 @@ namespace ASEntityBindings
     CBasePlayer* EntityToPlayer_Cast(CBaseEntity* pEntity);
     template<class T> T* Template_Cast(void* pEntity);
     
-    // Placeholder implementations for entity methods
-    // These need to be connected to actual game code later
-    
-    // CBaseEntity methods
-    Vector Entity_GetOrigin(CBaseEntity* pEntity)
+    // Reference counting functions for AngelScript reference types
+    // Note: These are no-ops since entities are managed by the game engine
+    void AddRef_CBaseEntity(CBaseEntity* entity)
     {
-        if (!pEntity)
-        {
-            MS_ANGEL_ERROR("Entity_GetOrigin: NULL entity pointer");
+        // No-op: Engine manages entity lifetime
+        MS_ANGEL_DEBUG("AddRef_CBaseEntity called for entity %p", entity);
+    }
+    
+    void Release_CBaseEntity(CBaseEntity* entity) 
+    {
+        // No-op: Engine manages entity lifetime
+        MS_ANGEL_DEBUG("Release_CBaseEntity called for entity %p", entity);
+    }
+    
+    void AddRef_CBasePlayer(CBasePlayer* player)
+    {
+        // No-op: Engine manages player lifetime
+        MS_ANGEL_DEBUG("AddRef_CBasePlayer called for player %p", player);
+    }
+    
+    void Release_CBasePlayer(CBasePlayer* player)
+    {
+        // No-op: Engine manages player lifetime
+        MS_ANGEL_DEBUG("Release_CBasePlayer called for player %p", player);
+    }
+    
+    // Helper functions for CBaseEntity methods that need extra logic
+    Vector GetEntityOrigin(CBaseEntity* pEntity)
+    {
+        if (!pEntity || !pEntity->pev)
             return Vector(0, 0, 0);
-        }
-        
-        Vector origin = ASEngineProvider::GetEntityOrigin((void*)pEntity);
-        MS_ANGEL_DEBUG("Entity_GetOrigin: (%f, %f, %f)", origin.x, origin.y, origin.z);
-        return origin;
+        return pEntity->pev->origin;
     }
     
-    std::string Entity_GetClassName(CBaseEntity* pEntity)
+    std::string GetEntityClassName(CBaseEntity* pEntity)
     {
-        if (!pEntity)
-        {
-            MS_ANGEL_ERROR("Entity_GetClassName: NULL entity pointer");
+        if (!pEntity || !pEntity->pev)
             return "null_entity";
-        }
-        
-        std::string result = ASEngineProvider::GetEntityClassName((void*)pEntity);
-        MS_ANGEL_DEBUG("Entity_GetClassName: %s", result.c_str());
-        return result;
+        return STRING(pEntity->pev->classname);
     }
     
-    void Entity_SetOrigin(const Vector& origin, CBaseEntity* pEntity)
+    void SetEntityOrigin(CBaseEntity* pEntity, const Vector& origin)
     {
-        if (!pEntity)
-        {
-            MS_ANGEL_ERROR("Entity_SetOrigin: NULL entity pointer");
+        if (!pEntity || !pEntity->pev)
             return;
-        }
-        
-        ASEngineProvider::SetEntityOrigin((void*)pEntity, origin);
-        MS_ANGEL_DEBUG("Entity_SetOrigin: Set to (%f, %f, %f)", origin.x, origin.y, origin.z);
+        UTIL_SetOrigin(pEntity->pev, origin);
     }
     
-    bool Entity_IsAlive(CBaseEntity* pEntity)
+    float GetEntityHealth(CBaseEntity* pEntity)
     {
-        if (!pEntity)
-        {
-            MS_ANGEL_DEBUG("Entity_IsAlive: NULL entity pointer - considered dead");
-            return false;
-        }
-        
-        float health = ASEngineProvider::GetEntityHealth((void*)pEntity);
-        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)pEntity);
-        
-        // Check both health and deadflag (DEAD_NO = 0)
-        bool isAlive = (deadFlag == 0) && (health > 0);
-        MS_ANGEL_DEBUG("Entity_IsAlive: %s (health: %f, deadflag: %d)", 
-                      isAlive ? "alive" : "dead", health, deadFlag);
-        return isAlive;
+        if (!pEntity || !pEntity->pev)
+            return 0.0f;
+        return pEntity->pev->health;
     }
     
-    // CBasePlayer methods (using dummy type)
-    std::string Player_GetName(CBasePlayer* pPlayer)
+    void SetEntityHealth(CBaseEntity* pEntity, float health)
     {
-        if (!pPlayer)
-        {
-            MS_ANGEL_ERROR("Player_GetName: NULL player pointer");
+        if (!pEntity || !pEntity->pev)
+            return;
+        pEntity->pev->health = health;
+    }
+    
+    // Helper functions for CBasePlayer methods
+    std::string GetPlayerDisplayName(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer || !pPlayer->pev)
             return "Unknown Player";
-        }
-        
-        std::string result = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_GetName: %s", result.c_str());
-        return result;
+        return STRING(pPlayer->pev->netname);
     }
     
-    std::string Player_GetSteamID(CBasePlayer* pPlayer)
+    std::string GetPlayerAuthID(CBasePlayer* pPlayer)
     {
         if (!pPlayer)
-        {
-            MS_ANGEL_ERROR("Player_GetSteamID: NULL player pointer");
             return "STEAM_ID_INVALID";
-        }
-        
-        std::string result = ASEngineProvider::GetPlayerAuthId((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_GetSteamID: %s", result.c_str());
-        return result;
+        return pPlayer->AuthID().c_str();
     }
     
-    std::string Player_GetIPAddress(CBasePlayer* pPlayer)
+    std::string GetPlayerTitle(CBasePlayer* pPlayer)
     {
         if (!pPlayer)
-        {
-            MS_ANGEL_ERROR("Player_GetIPAddress: NULL player pointer");
-            return "0.0.0.0";
-        }
-        
-        std::string result = ASEngineProvider::GetPlayerClientAddress((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_GetIPAddress: %s", result.c_str());
-        return result;
+            return "Unknown";
+        return pPlayer->GetTitle();
     }
     
-    void Player_SendMessage(const std::string& message, bool reliable, CBasePlayer* pPlayer)
+    float GetPlayerMaxHP(CBasePlayer* pPlayer)
     {
         if (!pPlayer)
-        {
-            MS_ANGEL_ERROR("Player_SendMessage: NULL player pointer");
-            return;
-        }
-        
-        if (message.empty())
-        {
-            MS_ANGEL_ERROR("Player_SendMessage: Empty message");
-            return;
-        }
-        
-        ASEngineProvider::SendInfoMsg((void*)pPlayer, message);
-        std::string playerName = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_SendMessage sent to %s: %s", playerName.c_str(), message.c_str());
+            return 0.0f;
+        return pPlayer->MaxHP();
     }
     
-    void Player_EmitSound(const std::string& sound, float volume, CBasePlayer* pPlayer)
+    float GetPlayerMaxMP(CBasePlayer* pPlayer)
     {
         if (!pPlayer)
-        {
-            MS_ANGEL_ERROR("Player_EmitSound: NULL player pointer");
-            return;
-        }
-        
-        if (sound.empty())
-        {
-            MS_ANGEL_ERROR("Player_EmitSound: Empty sound name");
-            return;
-        }
-        
-        // Clamp volume to valid range
-        float clampedVolume = std::max(0.0f, std::min(1.0f, volume));
-        
-        // Emit sound at player's location (CHAN_AUTO=0, ATTN_NORM=0.8, PITCH_NORM=100)
-        ASEngineProvider::EmitSound((void*)pPlayer, 0, sound, clampedVolume, 0.8f, 0, 100);
-        std::string playerName = ASEngineProvider::GetPlayerDisplayName((void*)pPlayer);
-        MS_ANGEL_DEBUG("Player_EmitSound: %s at volume %f for %s", sound.c_str(), clampedVolume, playerName.c_str());
+            return 0.0f;
+        return pPlayer->MaxMP();
     }
     
-    // Global functions
+    // Global functions - use ASEngineProvider for cross-platform compatibility
     float AS_GetGameTime()
     {
         float gameTime = ASEngineProvider::GetGameTime();
@@ -203,7 +168,7 @@ namespace ASEntityBindings
         return gameTime;
     }
     
-    // Static player list for GetAllPlayers
+    // Static player list for GetAllPlayers - uses real CBasePlayer instances
     CScriptArray* AS_GetAllPlayers(asIScriptEngine* engine)
     {
         MS_ANGEL_DEBUG("GetAllPlayers called");
@@ -219,10 +184,178 @@ namespace ASEntityBindings
         // Create a new array
         CScriptArray* array = CScriptArray::Create(arrayType);
         
-        // TODO: Populate with actual players
-        // For now, return empty array
+#ifndef CLIENT_DLL
+        // Server-side: Populate with actual connected players using real engine functions
         
+        for (int i = 1; i <= gpGlobals->maxClients; i++)
+        {
+            edict_t* pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
+            if (!pEdict || pEdict->free)
+                continue;
+                
+            CBaseEntity* pEntity = CBaseEntity::Instance(pEdict);
+            if (!pEntity || !pEntity->IsPlayer())
+                continue;
+                
+            CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pEntity);
+            // Validate player is connected and has valid data
+            if (pPlayer && pPlayer->pev && (pPlayer->pev->flags & FL_CLIENT))
+            {
+                array->InsertLast(&pPlayer);
+                MS_ANGEL_DEBUG("Added player %d: %s", i, STRING(pPlayer->pev->netname));
+            }
+        }
+#else
+        // Client-side: Can't access other players, return empty array
+        MS_ANGEL_DEBUG("GetAllPlayers: Client-side, returning empty array");
+#endif
+        
+        MS_ANGEL_DEBUG("GetAllPlayers: Added %d players to array", array->GetSize());
         return array;
+    }
+    
+    // Player management functions for AngelScript
+    int AS_GetPlayerCount()
+    {
+        int count = ASEngineProvider::GetPlayerCount();
+        MS_ANGEL_DEBUG("GetPlayerCount: %d players", count);
+        return count;
+    }
+    
+    CBasePlayer* AS_PlayerByIndex(int index)
+    {
+#ifndef CLIENT_DLL
+        
+        if (index < 1 || index > gpGlobals->maxClients)
+        {
+            MS_ANGEL_ERROR("PlayerByIndex: Invalid index %d", index);
+            return nullptr;
+        }
+        
+        edict_t* pEdict = g_engfuncs.pfnPEntityOfEntIndex(index);
+        if (!pEdict || pEdict->free)
+        {
+            MS_ANGEL_DEBUG("PlayerByIndex: No valid edict at index %d", index);
+            return nullptr;
+        }
+        
+        CBaseEntity* pEntity = CBaseEntity::Instance(pEdict);
+        if (!pEntity || !pEntity->IsPlayer())
+        {
+            MS_ANGEL_DEBUG("PlayerByIndex: Entity at index %d is not a player", index);
+            return nullptr;
+        }
+        
+        CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pEntity);
+        if (!pPlayer->pev || !(pPlayer->pev->flags & FL_CLIENT))
+        {
+            MS_ANGEL_DEBUG("PlayerByIndex: Player at index %d is not connected", index);
+            return nullptr;
+        }
+        
+        MS_ANGEL_DEBUG("PlayerByIndex: Found connected player at index %d: %s", index, STRING(pPlayer->pev->netname));
+        return pPlayer;
+#else
+        // Client-side: Can't access other players
+        MS_ANGEL_DEBUG("PlayerByIndex: Client-side, returning nullptr");
+        return nullptr;
+#endif
+    }
+    
+    bool AS_IsConnected(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer || !pPlayer->pev)
+        {
+            MS_ANGEL_DEBUG("IsConnected: NULL player pointer or pev");
+            return false;
+        }
+        
+        // Check if player is connected using real engine data
+        bool connected = !(pPlayer->pev->flags & FL_SPECTATOR) && pPlayer->IsAlive();
+        MS_ANGEL_DEBUG("IsConnected: Player %s", connected ? "connected" : "disconnected");
+        return connected;
+    }
+    
+    std::string AS_GetDisplayName(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer)
+        {
+            MS_ANGEL_ERROR("GetDisplayName: NULL player pointer");
+            return "Unknown Player";
+        }
+        
+        std::string name = GetPlayerDisplayName(pPlayer);
+        MS_ANGEL_DEBUG("GetDisplayName: '%s'", name.c_str());
+        return name;
+    }
+    
+    std::string AS_GetSteamID(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer)
+        {
+            MS_ANGEL_ERROR("GetSteamID: NULL player pointer");
+            return "STEAM_ID_INVALID";
+        }
+        
+        std::string steamID = GetPlayerAuthID(pPlayer);
+        MS_ANGEL_DEBUG("GetSteamID: '%s'", steamID.c_str());
+        return steamID;
+    }
+    
+    bool AS_IsAdmin(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer)
+        {
+            MS_ANGEL_DEBUG("IsAdmin: NULL player pointer");
+            return false;
+        }
+        
+        // Use ASEngineProvider for admin check since this requires server-specific logic
+        bool isAdmin = ASEngineProvider::IsPlayerAdmin((void*)pPlayer);
+        MS_ANGEL_DEBUG("IsAdmin: Player %s admin", isAdmin ? "is" : "is not");
+        return isAdmin;
+    }
+    
+    std::string AS_GetClientAddress(CBasePlayer* pPlayer)
+    {
+        if (!pPlayer)
+        {
+            MS_ANGEL_ERROR("GetClientAddress: NULL player pointer");
+            return "0.0.0.0";
+        }
+        
+        // Use ASEngineProvider for client address since this requires engine access
+        std::string address = ASEngineProvider::GetPlayerClientAddress((void*)pPlayer);
+        MS_ANGEL_DEBUG("GetClientAddress: '%s'", address.c_str());
+        return address;
+    }
+    
+    // Quest data functions
+    std::string AS_GetPlayerQuestData(const std::string& playerID, const std::string& key)
+    {
+        if (playerID.empty() || key.empty())
+        {
+            MS_ANGEL_ERROR("GetPlayerQuestData: Empty playerID or key");
+            return "";
+        }
+        
+        std::string value = ASEngineProvider::GetPlayerQuestData(playerID, key);
+        MS_ANGEL_DEBUG("GetPlayerQuestData: Player '%s', key '%s' = '%s'", 
+                      playerID.c_str(), key.c_str(), value.c_str());
+        return value;
+    }
+    
+    void AS_SetPlayerQuestData(const std::string& playerID, const std::string& key, const std::string& value)
+    {
+        if (playerID.empty() || key.empty())
+        {
+            MS_ANGEL_ERROR("SetPlayerQuestData: Empty playerID or key");
+            return;
+        }
+        
+        ASEngineProvider::SetPlayerQuestData(playerID, key, value);
+        MS_ANGEL_DEBUG("SetPlayerQuestData: Player '%s', set key '%s' = '%s'", 
+                      playerID.c_str(), key.c_str(), value.c_str());
     }
     
     std::string AS_GetTimestamp()
@@ -374,10 +507,12 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        // Direct cast - CBasePlayer inherits from CBaseEntity
+        // Safe cast - CBasePlayer inherits from CBaseEntity (through CMSMonster)
         MS_ANGEL_DEBUG("PlayerToEntity_Cast: Successfully cast player to entity");
-        return reinterpret_cast<CBaseEntity*>(pPlayer);
+        return static_cast<CBaseEntity*>(pPlayer);
     }
+    
+    // Note: RefCastPlayer function removed - asbind20 handles inheritance automatically
     
     CBasePlayer* EntityToPlayer_Cast(CBaseEntity* pEntity)
     {
@@ -387,17 +522,15 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        // Check if this entity is actually a player
-        // This should integrate with actual game logic to validate entity type
-        std::string className = Entity_GetClassName(pEntity);
-        if (className != "player" && className != "CBasePlayer")
+        // Check if this entity is actually a player using the real IsPlayer() method
+        if (!pEntity->IsPlayer())
         {
-            MS_ANGEL_DEBUG("EntityToPlayer_Cast: Entity '%s' is not a player", className.c_str());
+            MS_ANGEL_DEBUG("EntityToPlayer_Cast: Entity is not a player");
             return nullptr;
         }
         
         MS_ANGEL_DEBUG("EntityToPlayer_Cast: Successfully cast entity to player");
-        return reinterpret_cast<CBasePlayer*>(pEntity);
+        return static_cast<CBasePlayer*>(pEntity);
     }
     
     // Template casting function for AngelScript cast<T>() support
@@ -494,99 +627,185 @@ namespace ASEntityBindings
         MS_ANGEL_ERROR("SendPlayerMessage: Player '%s' not found", playerName.c_str());
     }
     
-    void RegisterEntityInheritance(asIScriptEngine* pEngine)
+    
+    // Global engine pointer for wrapper functions
+    static asIScriptEngine* g_pStaticEngine = nullptr;
+    
+    // Wrapper function that doesn't need asIContext
+    CScriptArray* AS_GetAllPlayersWrapper()
+    {
+        if (!g_pStaticEngine) {
+            MS_ANGEL_ERROR("AS_GetAllPlayersWrapper: Engine not initialized");
+            return nullptr;
+        }
+        return AS_GetAllPlayers(g_pStaticEngine);
+    }
+    
+    void RegisterCBaseEntity(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        MS_ANGEL_INFO("[ASEntityBindings] Setting up entity inheritance...");
+        MS_ANGEL_INFO("[ASEntityBindings] Registering CBaseEntity type with asbind20...");
         
-        // Since this AngelScript version doesn't have implicit/explicit casting behaviors,
-        // we'll use global functions for casting operations
+        // Register CBaseEntity type with asbind20
+        asbind20::ref_class<CBaseEntity>(pEngine, "CBaseEntity")
+            // Reference counting behaviors (required for reference types)
+            .addref(&AddRef_CBaseEntity)
+            .release(&Release_CBaseEntity)
+            // Helper methods using lambdas - return type must match AngelScript registration
+            .method("Vector3 GetOrigin()", [](CBaseEntity* entity) { return GetEntityOrigin(entity); })
+            .method("string GetClassName()", [](CBaseEntity* entity) { return GetEntityClassName(entity); })
+            .method("void SetOrigin(const Vector3 &in)", [](CBaseEntity* entity, const Vector& origin) { SetEntityOrigin(entity, origin); })
+            .method("float GetHealth()", [](CBaseEntity* entity) { return GetEntityHealth(entity); })
+            .method("void SetHealth(float)", [](CBaseEntity* entity, float health) { SetEntityHealth(entity, health); })
+            // Direct CBaseEntity methods
+            .method("bool IsAlive()", &CBaseEntity::IsAlive)
+            .method("string DisplayName()", &CBaseEntity::DisplayName)
+            .method("Vector3 Center()", &CBaseEntity::Center)
+            .method("float Volume()", &CBaseEntity::Volume)
+            .method("float Weight()", &CBaseEntity::Weight)
+            .method("bool IsPlayer()", &CBaseEntity::IsPlayer);
         
-        // Register casting functions with asbind20
-        asbind20::global(pEngine)
-            // Direct casting functions (simpler approach)
-            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", &EntityToPlayer_Cast)
-            .function("CBaseEntity@ ToEntity(CBasePlayer@)", &PlayerToEntity_Cast);
-        
-        MS_ANGEL_INFO("[ASEntityBindings] Entity inheritance setup complete");
-        MS_ANGEL_INFO("   Note: Use ToPlayer(entity) or ToEntity(player) for casting");
+        MS_ANGEL_INFO("CBaseEntity registration complete");
     }
-    
+
+    void RegisterCBasePlayer(asIScriptEngine* pEngine)
+    {
+        if (!pEngine) return;
+        
+        MS_ANGEL_INFO("[ASEntityBindings] Registering CBasePlayer type with asbind20...");
+        
+        // Register CBasePlayer type with asbind20
+        // Note: Inheritance removed to avoid opImplConv template issues - using explicit casting functions instead
+        asbind20::ref_class<CBasePlayer>(pEngine, "CBasePlayer")
+            // Reference counting behaviors (required for reference types)
+            .addref(&AddRef_CBasePlayer)
+            .release(&Release_CBasePlayer)
+            // CBaseEntity methods (using lambdas for wrapper functions - inheritance via explicit casting)
+            .method("Vector3 GetOrigin()", [](CBasePlayer* player) { return GetEntityOrigin(static_cast<CBaseEntity*>(player)); })
+            .method("string GetClassName()", [](CBasePlayer* player) { return GetEntityClassName(static_cast<CBaseEntity*>(player)); })
+            .method("void SetOrigin(const Vector3 &in)", [](CBasePlayer* player, const Vector& origin) { SetEntityOrigin(static_cast<CBaseEntity*>(player), origin); })
+            .method("float GetHealth()", [](CBasePlayer* player) { return GetEntityHealth(static_cast<CBaseEntity*>(player)); })
+            .method("void SetHealth(float)", [](CBasePlayer* player, float health) { SetEntityHealth(static_cast<CBaseEntity*>(player), health); })
+            // Direct inherited methods
+            .method("bool IsAlive()", &CBasePlayer::IsAlive)
+            .method("string DisplayName()", &CBasePlayer::DisplayName)
+            .method("Vector3 Center()", &CBasePlayer::Center)
+            .method("float Volume()", &CBasePlayer::Volume)
+            .method("float Weight()", &CBasePlayer::Weight)
+            .method("bool IsPlayer()", &CBasePlayer::IsPlayer)
+            // CBasePlayer-specific methods
+            .method("string GetName()", [](CBasePlayer* player) { return GetPlayerDisplayName(player); })
+            .method("string GetAuthID()", [](CBasePlayer* player) { return GetPlayerAuthID(player); })
+            .method("string GetTitle()", [](CBasePlayer* player) { return GetPlayerTitle(player); })
+            .method("float MaxHP()", [](CBasePlayer* player) { return GetPlayerMaxHP(player); })
+            .method("float MaxMP()", [](CBasePlayer* player) { return GetPlayerMaxMP(player); })
+            .method("void PlaySound(const string &in)", &CBasePlayer::PlaySound);
+        
+        MS_ANGEL_INFO("CBasePlayer registration complete");
+    }
+
     void RegisterEntityTypes(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        MS_ANGEL_INFO("[ASEntityBindings] Registering entity types...");
+        // Store engine for wrapper functions
+        g_pStaticEngine = pEngine;
         
-        // Register CBaseEntity as a reference type with asbind20
-        asbind20::ref_class<CBaseEntity>(pEngine, "CBaseEntity", asOBJ_NOCOUNT)
-            .method("Vector3 GetOrigin() const", 
-                +[](CBaseEntity* self) -> Vector { return Entity_GetOrigin(self); })
-            .method("string GetClassName() const", 
-                +[](CBaseEntity* self) -> std::string { return Entity_GetClassName(self); })
-            .method("void SetOrigin(const Vector3 &in)", 
-                +[](CBaseEntity* self, const Vector& origin) { Entity_SetOrigin(origin, self); })
-            .method("bool IsAlive() const", 
-                +[](CBaseEntity* self) -> bool { return Entity_IsAlive(self); });
+        MS_ANGEL_INFO("[ASEntityBindings] Registering real entity types...");
         
-        MS_ANGEL_DEBUG("   ✓ CBaseEntity type registered");
+        // Register CBaseEntity with direct AngelScript API
+        RegisterCBaseEntity(pEngine);
         
-        // Register CBasePlayer as a reference type with asbind20
-        asbind20::ref_class<CBasePlayer>(pEngine, "CBasePlayer", asOBJ_NOCOUNT)
-            // Since AngelScript inheritance isn't working as expected in this version,
-            // we need to manually register CBaseEntity methods on CBasePlayer as well
-            .method("Vector3 GetOrigin() const", 
-                +[](CBasePlayer* self) -> Vector { return Entity_GetOrigin(reinterpret_cast<CBaseEntity*>(self)); })
-            .method("string GetClassName() const", 
-                +[](CBasePlayer* self) -> std::string { return Entity_GetClassName(reinterpret_cast<CBaseEntity*>(self)); })
-            .method("void SetOrigin(const Vector3 &in)", 
-                +[](CBasePlayer* self, const Vector& origin) { Entity_SetOrigin(origin, reinterpret_cast<CBaseEntity*>(self)); })
-            .method("bool IsAlive() const", 
-                +[](CBasePlayer* self) -> bool { return Entity_IsAlive(reinterpret_cast<CBaseEntity*>(self)); })
-            // CBasePlayer-specific methods
-            .method("string GetName() const", 
-                +[](CBasePlayer* self) -> std::string { return Player_GetName(self); })
-            .method("string GetSteamID() const", 
-                +[](CBasePlayer* self) -> std::string { return Player_GetSteamID(self); })
-            .method("string GetIPAddress() const", 
-                +[](CBasePlayer* self) -> std::string { return Player_GetIPAddress(self); })
-            .method("void SendMessage(const string &in, bool = true)", 
-                +[](CBasePlayer* self, const std::string& msg, bool center) { Player_SendMessage(msg, center, self); })
-            .method("void EmitSound(const string &in, float = 1.0f)", 
-                +[](CBasePlayer* self, const std::string& sound, float volume) { Player_EmitSound(sound, volume, self); });
+        // Register CBasePlayer with inheritance support
+        RegisterCBasePlayer(pEngine);
         
-        MS_ANGEL_DEBUG("   ✓ CBasePlayer type registered");
+        // Register casting functions with asbind20
+        asbind20::global(pEngine)
+            .function("CBaseEntity@ ToEntity(CBasePlayer@)", PlayerToEntity_Cast)
+            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", EntityToPlayer_Cast);
         
-        // Set up inheritance relationships after both types are registered
-        RegisterEntityInheritance(pEngine);
-        
-        MS_ANGEL_INFO("[ASEntityBindings] Entity types registered successfully");
+        MS_ANGEL_INFO("[ASEntityBindings] Entity types registration complete");
     }
     
     void RegisterGlobalFunctions(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
         
-        MS_ANGEL_INFO("[ASEntityBindings] Registering global entity functions...");
+        MS_ANGEL_INFO("[ASEntityBindings] Registering global entity functions with asbind20...");
         
-        // Register global functions with asbind20
+        // Register all global functions with asbind20
         asbind20::global(pEngine)
-            // Core game functions (GetGameTime, GetCvar, GetMapName, CreateEntity are registered by ASEngineBindings)
-            // Entity management functions (SetEntityName, SetEntityTargetName, SetEntityHealth, IsEntityDead are registered by ASEngineBindings)
-            .function("string GetTimestamp()", &AS_GetTimestamp)
+            // Core utility functions
+            .function("string GetTimestamp()", AS_GetTimestamp)
             // Chat and communication
-            .function("void ChatLog(const string &in)", &AS_ChatLog)
+            .function("void ChatLog(const string &in)", [](const std::string& message) { AS_ChatLog(message); })
             // Player management
-            .function("string GetPlayerCurrentMap()", &AS_GetPlayerCurrentMap)
-            .function("int GetCurrentPlayerID()", &AS_GetCurrentPlayerID)
-            .function("void SendPlayerMessage(const string &in, const string &in, const string &in)", &AS_SendPlayerMessage)
-            // Logging functions
-            .function("void MS_ANGEL_INFO(const string &in)", &AS_LogAngelInfo)
-            .function("void MS_ANGEL_DEBUG(const string &in)", &AS_LogAngelDebug)
-            .function("void MS_ANGEL_ERROR(const string &in)", &AS_LogAngelError);
+            .function("string GetPlayerCurrentMap()", AS_GetPlayerCurrentMap)
+            .function("int GetCurrentPlayerID()", AS_GetCurrentPlayerID)
+            .function("void SendPlayerMessage(const string &in, const string &in, const string &in)", [](const std::string& playerName, const std::string& title, const std::string& message) {
+                AS_SendPlayerMessage(playerName, title, message);
+            })
+            // Real player management functions that work with actual CBasePlayer objects
+            .function("array<CBasePlayer@>@ GetAllPlayers()", AS_GetAllPlayersWrapper)
+            .function("int GetPlayerCount()", AS_GetPlayerCount)
+            .function("CBasePlayer@ PlayerByIndex(int)", AS_PlayerByIndex)
+            .function("bool IsConnected(CBasePlayer@)", AS_IsConnected)
+            .function("string GetDisplayName(CBasePlayer@)", AS_GetDisplayName)
+            .function("string GetSteamID(CBasePlayer@)", AS_GetSteamID)
+            .function("bool IsAdmin(CBasePlayer@)", AS_IsAdmin)
+            .function("string GetClientAddress(CBasePlayer@)", AS_GetClientAddress)
+            // Quest data functions
+            .function("string GetPlayerQuestData(const string &in, const string &in)", [](const std::string& playerID, const std::string& key) {
+                return AS_GetPlayerQuestData(playerID, key);
+            })
+            .function("void SetPlayerQuestData(const string &in, const string &in, const string &in)", [](const std::string& playerID, const std::string& key, const std::string& value) {
+                AS_SetPlayerQuestData(playerID, key, value);
+            })
+            // Logging functions for scripts
+            .function("void MS_ANGEL_INFO(const string &in)", [](const std::string& message) { AS_LogAngelInfo(message); })
+            .function("void MS_ANGEL_DEBUG(const string &in)", [](const std::string& message) { AS_LogAngelDebug(message); })
+            .function("void MS_ANGEL_ERROR(const string &in)", [](const std::string& message) { AS_LogAngelError(message); });
         
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
+    }
+    
+    // Test function to validate entity bindings are working
+    void AS_TestEntityBindings()
+    {
+        MS_ANGEL_INFO("[ASEntityBindings] Testing entity bindings...");
+        
+#ifndef CLIENT_DLL
+        // Test player access
+        CBasePlayer* pTestPlayer = AS_PlayerByIndex(1);
+        if (pTestPlayer)
+        {
+            std::string playerName = GetPlayerDisplayName(pTestPlayer);
+            float maxHP = GetPlayerMaxHP(pTestPlayer);
+            float maxMP = GetPlayerMaxMP(pTestPlayer);
+            std::string title = GetPlayerTitle(pTestPlayer);
+            
+            MS_ANGEL_INFO("Test Player Found: %s, MaxHP: %.1f, MaxMP: %.1f, Title: %s", 
+                         playerName.c_str(), maxHP, maxMP, title.c_str());
+        }
+        else
+        {
+            MS_ANGEL_INFO("No test player found for entity binding validation");
+        }
+        
+        // Test GetAllPlayers
+        if (g_pStaticEngine)
+        {
+            CScriptArray* playerArray = AS_GetAllPlayers(g_pStaticEngine);
+            if (playerArray)
+            {
+                MS_ANGEL_INFO("GetAllPlayers returned %d players", playerArray->GetSize());
+                playerArray->Release();
+            }
+        }
+#endif
+        
+        MS_ANGEL_INFO("[ASEntityBindings] Entity binding test complete");
     }
     
     void RegisterAll(asIScriptEngine* pEngine)
@@ -595,12 +814,18 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Starting entity bindings registration...");
         
-        // Register the new template-based engine bindings first
+        // Note: Core types (Vector3, EntityHandle, etc.) are registered by ASBindings.cpp
+        // We only register entity-specific bindings here
+        
+        // Register the new template-based engine bindings
         ASEngineBindings::RegisterAll(pEngine);
         
         // Register entity types and legacy functions
         RegisterEntityTypes(pEngine);
         RegisterGlobalFunctions(pEngine);
+        
+        // Test the entity bindings to ensure they work
+        AS_TestEntityBindings();
         
         MS_ANGEL_INFO("[ASEntityBindings] Entity bindings registration complete");
     }

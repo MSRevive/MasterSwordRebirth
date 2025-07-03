@@ -1535,7 +1535,7 @@ void CGenericItem::Move()
 #endif
 //
 // RemoveFromOwner - cleanup
-// ���������������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 
 void CGenericItem::RemoveFromOwner()
 {
@@ -1609,7 +1609,7 @@ void CGenericItem::DelayedRemove()
 
 //
 // Fall - fall if an owner wasn't set on the same frame that I spawned
-// ����
+// (c)(c)(c)(c)
 #ifdef VALVE_DLL
 void CGenericItem::Fall()
 {

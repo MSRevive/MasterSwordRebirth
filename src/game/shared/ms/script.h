@@ -4,25 +4,25 @@
 
 */
 #include <ctime>
-class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
+class CEventList : public mslist<LegacyScriptEvent *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
-	CEventList() : mslist<SCRIPT_EVENT *>() {}
-	SCRIPT_EVENT &add( SCRIPT_EVENT &Event ) {
-		SCRIPT_EVENT *pEvent = msnew(SCRIPT_EVENT);
-		*pEvent = Event; mslist<SCRIPT_EVENT *>::add(pEvent);
+	CEventList() : mslist<LegacyScriptEvent *>() {}
+	LegacyScriptEvent &add( LegacyScriptEvent &Event ) {
+		LegacyScriptEvent *pEvent = msnew(LegacyScriptEvent);
+		*pEvent = Event; mslist<LegacyScriptEvent *>::add(pEvent);
 		return *pEvent;
 	}
 
 	void erase(int idx)
 	{
-		SCRIPT_EVENT *pEvent = mslist<SCRIPT_EVENT *>::operator [] (idx);
-		mslist<SCRIPT_EVENT *>::erase(idx);
+		LegacyScriptEvent *pEvent = mslist<LegacyScriptEvent *>::operator [] (idx);
+		mslist<LegacyScriptEvent *>::erase(idx);
 		delete pEvent;
 	}
 
-	SCRIPT_EVENT &operator [] (const int idx) const {
-		return *mslist<SCRIPT_EVENT *>::operator[](idx);
+	LegacyScriptEvent &operator [] (const int idx) const {
+		return *mslist<LegacyScriptEvent *>::operator[](idx);
 	}
 
 	CEventList &operator = (const CEventList &OtherList)
@@ -59,10 +59,10 @@ public:
 		IScripted	*pScriptedInterface;
 		CEventList Events;
 		//Not copied
-		SCRIPT_EVENT *CurrentEvent;
+		LegacyScriptEvent *CurrentEvent;
 		bool PrecacheOnly;
 		bool RemoveNextFrame;
-		eventscope_e DefaultScope;
+		LegacyEventScope DefaultScope;
 		bool AllowDupInclude;	//Allow duplicate include files
 		bool Included;			//Whether this script file is included by another
 		mslist<scriptsendcmd_t> PersistentSendCmds;	//Client event command that get transmitted to each joining player
@@ -89,19 +89,19 @@ public:
 	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = NULL );	//Run one named event
 	void CallLogged(const char* title, std::clock_t start);
 	bool ParseScriptFile( const char *pszScriptData );
-	SCRIPT_EVENT *EventByName( const char *pszEventName );
+	LegacyScriptEvent *EventByName( const char *pszEventName );
 	const char* GetConst(const char* pszText );
 	scriptvar_t *FindVar( const char *pszName );
 	const char* GetVar(const char* pszText );
 	bool VarExists(const char* pszText );
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, bool fGlobal = false );
-	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, SCRIPT_EVENT &Event );
+	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, LegacyScriptEvent &Event );
 	scriptvar_t *SetVar( const char *pszVarName, int iValue, bool fGlobal = false );
 	scriptvar_t *SetVar( const char *pszVarName, float flValue, bool fGlobal = false );
 	Vector StringToVec(const char* String );
 	void CopyAllData( CScript *pDestScript, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface );
 	//int NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, mslist<scriptcmd_list *> &ParentCmds);
-	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/);
+	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, LegacyScriptEvent **pCurrentEvent /*in/out*/, legacy_scriptcmd_list **pCurrentCmds /*in/out*/, mslist<legacy_scriptcmd_list *> &ParentCmds /*in/out*/);
 	void SendScript( scriptsendcmd_t &SendCmd );	//Send script to client
 	CBaseEntity *RetrieveEntity(const char* Name );
   Vector DetermineOrigin(msstring & vsOrigin);
@@ -110,11 +110,11 @@ public:
 	//IScripted - Don't make CScript a part of IScripted or they allocate each other in a recursive loop
 	//			  These functions are just imitating IScripted
 
-	typedef scriptcmdbase_t<bool (CScript::*)(SCRIPT_EVENT &, scriptcmd_t &, msstringlist & )> scriptcmdscpp_cmdfunc_t;
+	typedef scriptcmdbase_t<bool (CScript::*)(LegacyScriptEvent &, LegacyScriptCmd &, msstringlist & )> scriptcmdscpp_cmdfunc_t;
 	typedef std::map<msstring,scriptcmdscpp_cmdfunc_t> msfunchash_t;
 	static msfunchash_t m_GlobalCmdHash; // MiB 30NOV_2014 Hashed commands for ScriptCmds.cpp
 
-	void ErrorPrintCommand(const char * vsUniqueTag, SCRIPT_EVENT * vEvent, msstring & vsCmdName, msstringlist & vParams, int vParamStrt, const char * vsText);
+	void ErrorPrintCommand(const char * vsUniqueTag, LegacyScriptEvent * vEvent, msstring & vsCmdName, msstringlist & vParams, int vParamStrt, const char * vsText);
 
 	static void Script_Setup( );
 	static void ScriptGetterHash_Setup( ); // MiB 30NOV_2014 Function for adding functions to the Script.cpp hash
@@ -123,13 +123,13 @@ public:
 	static void ClCallScriptPlayers(const char* EventName, msstringlist *Parameters ); //Thothie - MAR2012_27
 	static void ClXPlaySoundAll(const char* sSample, const Vector &Origin, int sChannel, float sVolume, float sAttn, int sPitch ); //Thothie - MAR2012_28
 
-	int Script_ParseLine( const char** pszCommandLine, scriptcmd_t &Cmd );
-	bool Script_SetupEvent( SCRIPT_EVENT &Event, msstringlist *Parameters );
-	bool Script_ExecuteEvent( SCRIPT_EVENT &Event, msstringlist *Parameters = NULL );
-	bool Script_ExecuteCmds( SCRIPT_EVENT &Event, scriptcmd_list &Cmds );
-	bool Script_ExecuteCmd( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params );
+	int Script_ParseLine( const char** pszCommandLine, LegacyScriptCmd &Cmd );
+	bool Script_SetupEvent( LegacyScriptEvent &Event, msstringlist *Parameters );
+	bool Script_ExecuteEvent( LegacyScriptEvent &Event, msstringlist *Parameters = NULL );
+	bool Script_ExecuteCmds( LegacyScriptEvent &Event, legacy_scriptcmd_list &Cmds );
+	bool Script_ExecuteCmd( LegacyScriptEvent &Event, LegacyScriptCmd &Cmd, msstringlist &Params );
 	// Below are the functions for the ScriptCmds.cpp hash. Please keep them in alphabetical order here and where they are defined.
-#define SCRIPTCMDSCPP_CMDS(a) bool ScriptCmd_##a( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params )
+#define SCRIPTCMDSCPP_CMDS(a) bool ScriptCmd_##a( LegacyScriptEvent &Event, LegacyScriptCmd &Cmd, msstringlist &Params )
 	SCRIPTCMDSCPP_CMDS( ApplyEffect );
 	SCRIPTCMDSCPP_CMDS( Array );
 	SCRIPTCMDSCPP_CMDS( AttackProp );

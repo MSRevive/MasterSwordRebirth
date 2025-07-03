@@ -530,7 +530,7 @@ void ClientCommand2(edict_t *pEntity)
 			msstring Text = msstring(Args).find_str(" "); //skip the first parameter
 			Text = Text.substr(1);
 
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			if (pGMScript)
 			{
@@ -1284,7 +1284,7 @@ void ClientCommand2(edict_t *pEntity)
 		if (!strcmp(CMD_ARGV(1), "GM"))
 		{
 			ALERT(at_console, "DEBUG: ce - requested GM as target\n");
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 			if (pGameMasterEnt)
 			{
 				pScripted = pGameMasterEnt->GetScripted();
@@ -1843,7 +1843,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	LinkUserMessages();
 
 	//If the game master hasn't been created yet, create it now - Solokiller
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	if (!pGameMasterEnt)
 	{
 		logfile << Logger::LOG_INFO << "Spawning game master\n";

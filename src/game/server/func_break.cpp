@@ -585,7 +585,7 @@ int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			{
 				if (m_scriptevent.starts_with("gm_"))
 				{
-					CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+					CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 					IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 					if (pGMScript)
 					{

@@ -5402,7 +5402,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 }
 //
 // OfferItem - Offers an item or gold to another monster or player
-// ���������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)
 void CBasePlayer ::OfferItem(offerinfo_t &OfferInfo)
 {
 	edict_t *peEnt = INDEXENT(OfferInfo.SrcMonsterIDX);
@@ -5779,7 +5779,7 @@ void CBasePlayer::StruckSound(CBaseEntity *pInflicter, CBaseEntity *pAttacker, f
 }
 //
 // Trade - Manage trading with others
-// �����
+// (c)(c)(c)(c)(c)
 void CBasePlayer::Trade()
 {
 	if (!HasConditions(MONSTER_TRADING))
@@ -5986,7 +5986,7 @@ EndTrade:
 }
 //
 // AcceptOffer - Accept an offer from a player or monster
-// �����������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 bool CBasePlayer ::AcceptOffer()
 {
 	//Save the Offer info
