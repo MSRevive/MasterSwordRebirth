@@ -71,7 +71,7 @@ int main(int argc, char** argv)
 		if(!packSwitch.getValue())
 		{
 			packer.packScripts();
-			printf("Wrote changes to the script dll. Hash %u\n\n", GetFileCheckSum("./sc.dll"));
+			printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
 		}
 		std::cout << "Finished..." << std::endl;
 	} catch (TCLAP::ArgException &err)

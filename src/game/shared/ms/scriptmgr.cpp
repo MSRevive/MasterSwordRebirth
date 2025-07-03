@@ -8,7 +8,7 @@ int ScriptMgr::m_TotalScripts = 0;
 void ScriptMgr::RegisterScript(CScript *NewScript)
 {
 	if (!m_GroupFile.IsOpen())
-		m_GroupFile.Open("dlls/sc.dll");
+		m_GroupFile.Open("scripts.pak");
 	m_TotalScripts++;
 }
 

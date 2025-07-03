@@ -1,0 +1,50 @@
+# Legacy Function Mapping Guide
+
+## String Functions
+$left(string, count) -> string Left(const string &in str, int count)
+$right(string, count) -> string Right(const string &in str, int count)
+$mid(string, start, count) -> string Mid(const string &in str, int start, int count)
+$len(string) -> int Length(const string &in str)
+$ucase(string) -> string ToUpper(const string &in str)
+$lcase(string) -> string ToLower(const string &in str)
+$replace(string, find, replace) -> string Replace(const string &in str, const string &in find, const string &in replace)
+
+## Math Functions
+$vec(x, y, z) -> Vector3 CreateVector(float x, float y, float z)
+$vec_x(vector) -> float GetVectorX(const Vector3 &in v)
+$vec_y(vector) -> float GetVectorY(const Vector3 &in v)
+$vec_z(vector) -> float GetVectorZ(const Vector3 &in v)
+$dist(vec1, vec2) -> float Distance(const Vector3 &in a, const Vector3 &in b)
+$angles(pitch, yaw, roll) -> Vector3 CreateAngles(float p, float y, float r)
+
+## Game Functions
+$get_cvar(name) -> string GetCvar(const string &in name)
+$get_time() -> float GetGameTime()
+$get_random(min, max) -> float Random(float min, float max)
+$get_tsphere(origin, radius) -> array<CBaseEntity@> GetEntitiesInSphere(const Vector3 &in origin, float radius)
+
+## Entity Functions
+$get_ent(name) -> CBaseEntity@ FindEntityByName(const string &in name)
+$get_player(index) -> CBasePlayer@ GetPlayerByIndex(int index)
+$get_players() -> array<CBasePlayer@> GetAllPlayers()
+
+## Debug Functions
+$log(message) -> void LogMessage(const string &in msg)
+$developer(level, message) -> void DeveloperMessage(int level, const string &in msg)
+
+## Example Implementation:
+```cpp
+// String function example
+void RegisterStringFunctions(asIScriptEngine* pEngine)
+{
+    pEngine->RegisterGlobalFunction("string Left(const string &in, int)", 
+        asFUNCTION(ScriptStringLeft), asCALL_CDECL);
+}
+
+string ScriptStringLeft(const std::string& str, int count)
+{
+    if (count <= 0) return "";
+    if (count >= str.length()) return str;
+    return str.substr(0, count);
+}
+```

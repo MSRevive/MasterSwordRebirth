@@ -1,6 +1,7 @@
 #ifndef VOTE_H
 #define VOTE_H
 
+
 struct vote_t
 {
 	bool fActive;		//If a current vote is active
@@ -11,7 +12,7 @@ struct vote_t
 	msstring TargetPlayerName,
 		TargetPlayerWonID;
 	float EndTime;
-	ulong VoteTally;
+	unsigned long VoteTally;
 	msstring Title, Desc;
 	static msstringlist VotesTypes;		   //All The vote types
 	static msstringlist VotesTypesAllowed; //The vote types that are allowed
