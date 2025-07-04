@@ -735,6 +735,11 @@ namespace ASEntityBindings
                 if (!player) return false;
                 return ASEngineProvider::IsPlayerLocalHost((void*)player);
             })
+
+            .method("string GetSteamID() const", [](CBasePlayer* player) { 
+                if (!player) return std::string("");
+                return ASEngineProvider::GetPlayerAuthId((void*)player);
+            })
             
             // CBaseEntity inherited methods (using lambdas for wrapper functions)
             .method("string GetClassName() const", [](CBasePlayer* player) { 

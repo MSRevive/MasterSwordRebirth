@@ -54,6 +54,21 @@ private:
     asIScriptEngine* m_pEngine;
     bool m_bInitialized;
 
+    // Recursion protection for PLAYER_SAY_TEXT events
+    static int s_nSayTextEventDepth;
+    static const int MAX_SAY_TEXT_EVENT_DEPTH = 2;
+
+    // RAII helper for depth management
+    class SayTextEventDepthGuard
+    {
+    public:
+        SayTextEventDepthGuard() { ++s_nSayTextEventDepth; }
+        ~SayTextEventDepthGuard() { --s_nSayTextEventDepth; }
+        
+        bool IsMaxDepthExceeded() const { return s_nSayTextEventDepth > MAX_SAY_TEXT_EVENT_DEPTH; }
+        int GetCurrentDepth() const { return s_nSayTextEventDepth; }
+    };
+
     // Private constructor for singleton
     ASEngineEventManager();
     

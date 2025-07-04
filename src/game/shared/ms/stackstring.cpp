@@ -223,7 +223,7 @@ bool strutil::isSpace(const char &ch)
 
 bool strutil::isBadChar(int c)
 {
-	return (c == '(' || c == ')' || c == '$' || c == '-');
+	return (c == '(' || c == ')' || c == '$' || c == '¯');
 }
 
 char* strutil::stripBadChars(char* data)

@@ -92,9 +92,6 @@ namespace ASBuiltinFunctions
             
             printf("ASBuiltinFunctions: Registering comprehensive builtin functions...\n");
             
-            // Register string functions
-            RegisterStringFunctions(pEngine);
-            
             // Register math utility functions  
             RegisterMathFunctions(pEngine);
             
@@ -109,82 +106,6 @@ namespace ASBuiltinFunctions
             
             printf("ASBuiltinFunctions: Registration complete\n");
         }
-    
-    //==========================================================================
-    // String Manipulation Functions
-    //==========================================================================
-    
-    // C++ wrapper functions for AngelScript string operations
-    std::string AS_Left(const std::string& str, int count)
-    {
-        if (count <= 0 || str.empty()) return "";
-        if (count >= (int)str.length()) return str;
-        return str.substr(0, count);
-    }
-    
-    std::string AS_Right(const std::string& str, int count)
-    {
-        if (count <= 0 || str.empty()) return "";
-        if (count >= (int)str.length()) return str;
-        return str.substr(str.length() - count);
-    }
-    
-    std::string AS_Mid(const std::string& str, int start, int count)
-    {
-        if (start < 0 || count <= 0 || str.empty() || start >= (int)str.length()) return "";
-        if (start + count > (int)str.length()) count = str.length() - start;
-        return str.substr(start, count);
-    }
-    
-    int AS_Length(const std::string& str)
-    {
-        return (int)str.length();
-    }
-    
-    std::string AS_ToUpper(const std::string& str)
-    {
-        std::string result = str;
-        std::transform(result.begin(), result.end(), result.begin(), ::toupper);
-        return result;
-    }
-    
-    std::string AS_ToLower(const std::string& str)
-    {
-        std::string result = str;
-        std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-        return result;
-    }
-    
-    std::string AS_Replace(const std::string& str, const std::string& find, const std::string& replace)
-    {
-        if (find.empty()) return str;
-        
-        std::string result = str;
-        size_t pos = 0;
-        while ((pos = result.find(find, pos)) != std::string::npos) {
-            result.replace(pos, find.length(), replace);
-            pos += replace.length();
-        }
-        return result;
-    }
-    
-    void RegisterStringFunctions(asIScriptEngine* pEngine)
-    {
-        if (!pEngine) return;
-        
-        printf("ASBuiltinFunctions: Registering string functions...\n");
-        
-        // Register string manipulation functions
-        pEngine->RegisterGlobalFunction("string Left(const string &in, int)", asFUNCTION(AS_Left), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("string Right(const string &in, int)", asFUNCTION(AS_Right), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("string Mid(const string &in, int, int)", asFUNCTION(AS_Mid), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("int Length(const string &in)", asFUNCTION(AS_Length), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("string ToUpper(const string &in)", asFUNCTION(AS_ToUpper), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("string ToLower(const string &in)", asFUNCTION(AS_ToLower), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("string Replace(const string &in, const string &in, const string &in)", asFUNCTION(AS_Replace), asCALL_CDECL);
-        
-        printf("ASBuiltinFunctions: String functions registered\n");
-    }
     
     //==========================================================================
     // Math Utility Functions

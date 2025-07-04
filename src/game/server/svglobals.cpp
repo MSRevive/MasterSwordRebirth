@@ -76,12 +76,12 @@ cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //AngelScript CVARs
 cvar_t as_enabled = {const_cast<char*>("as_enabled"), "1", FCVAR_SERVER};
 cvar_t as_memory_limit = {const_cast<char*>("as_memory_limit"), "1073741824", FCVAR_SERVER}; // 1GB
-cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "1", FCVAR_SERVER};
+cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "0", FCVAR_SERVER};
 cvar_t as_gc_interval = {const_cast<char*>("as_gc_interval"), "60", FCVAR_SERVER};
 cvar_t as_stack_size = {const_cast<char*>("as_stack_size"), "4096", FCVAR_SERVER}; // 4KB
 cvar_t as_debug_mode = {const_cast<char*>("as_debug_mode"), "0", FCVAR_SERVER};
 cvar_t as_auto_discovery = {const_cast<char*>("as_auto_discovery"), "1", FCVAR_SERVER}; // Enable module auto-discovery
-cvar_t as_module_debug = {const_cast<char*>("as_module_debug"), "1", FCVAR_SERVER}; // Debug module discovery
+cvar_t as_module_debug = {const_cast<char*>("as_module_debug"), "0", FCVAR_SERVER}; // Debug module discovery
 
 #ifdef DEV_BUILD
 cvar_t ms_devlog = {"ms_devlog", "1", 0};

@@ -30,10 +30,13 @@
 #include	"mscharacter.h"
 #include	"ms/angelscript/ASEngineEventManager.h"
 #include	"ms/angelscript/CAngelScriptManager.h"
+#include	"ms/angelscript/ASModuleSystem.h"
+#include	"ms/scriptmgr.h"
 #include	<asbind20/asbind.hpp>
 
 #include <climits>
 #include <string>
+#include <algorithm>
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -1932,6 +1935,177 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				AcceptType = 3;
 			}
 		}
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "as_reload_scripts" ) )
+	{
+		// Developer-only console command for script hot-reload
+		const char* pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
+		if( !pszSteamID || strcmp(pszSteamID, "STEAM_0:1:630973602") != 0 )
+		{
+			// Check if player has elite/GM status as fallback
+			if( !pPlayer->IsElite() )
+			{
+				pPlayer->SendInfoMsg("Error: This command requires developer permissions.");
+				ALERT(at_console, "as_reload_scripts: Permission denied for %s (Steam ID: %s)\n", pPlayer->DisplayName(), pszSteamID ? pszSteamID : "Unknown");
+				return TRUE;
+			}
+		}
+		
+		// Check if development mode is enabled (optional additional check)
+		if( CVAR_GET_FLOAT("ms_dev_mode") < 1.0f )
+		{
+			pPlayer->SendInfoMsg("Error: Development mode must be enabled (ms_dev_mode 1).");
+			ALERT(at_console, "as_reload_scripts: Development mode not enabled\n");
+			return TRUE;
+		}
+		
+		pPlayer->SendInfoMsg("Initiating script hot-reload...");
+		ALERT(at_console, "as_reload_scripts: Starting script hot-reload process by %s\n", pPlayer->DisplayName());
+		
+		// Call the ASModuleSystem reload function directly
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			bool reloadSuccess = pModuleSystem->ReloadAllModules();
+			
+			if( reloadSuccess )
+			{
+				pPlayer->SendInfoMsg("Script hot-reload completed successfully!");
+				ALERT(at_console, "as_reload_scripts: Script hot-reload completed successfully\n");
+				
+				// Send notification to all players
+				for( int i = 1; i <= gpGlobals->maxClients; i++ )
+				{
+					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
+					if( pOtherPlayer && pOtherPlayer != pPlayer )
+					{
+						pOtherPlayer->SendInfoMsg("Server scripts have been reloaded by %s", pPlayer->DisplayName());
+					}
+				}
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("Script hot-reload failed! Check server console for details.");
+				ALERT(at_console, "as_reload_scripts: Script hot-reload failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: Module system not available.");
+			ALERT(at_console, "as_reload_scripts: Module system not available\n");
+		}
+		
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "as_pak_status" ) )
+	{
+		// Console command to check PAK file status
+		if( !pPlayer )
+			return TRUE;
+		
+		// Check developer permissions
+		msstring steamid = pPlayer->AuthID();
+		const char* szSteamID = steamid.c_str();
+		
+		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
+		{
+			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
+			return TRUE;
+		}
+		
+		// Display PAK file diagnostic information
+		pPlayer->SendInfoMsg("=== PAK File Diagnostic Information ===");
+		ALERT(at_console, "=== PAK File Diagnostic Information ===\n");
+		
+		// Check if PAK file is open
+		bool pakOpen = ScriptMgr::m_GroupFile.IsOpen();
+		size_t entryCount = ScriptMgr::m_GroupFile.GetEntryCount();
+		std::string filename = ScriptMgr::m_GroupFile.GetFilename();
+		
+		pPlayer->SendInfoMsg("PAK File Status: %s", pakOpen ? "OPEN" : "CLOSED");
+		pPlayer->SendInfoMsg("Entry Count: %zu", entryCount);
+		pPlayer->SendInfoMsg("Filename: %s", filename.empty() ? "Not set" : filename.c_str());
+		
+		ALERT(at_console, "PAK File Status: %s\n", pakOpen ? "OPEN" : "CLOSED");
+		ALERT(at_console, "Entry Count: %zu\n", entryCount);
+		ALERT(at_console, "Filename: %s\n", filename.empty() ? "Not set" : filename.c_str());
+		
+		// Try to enumerate AngelScript files
+		std::vector<std::string> asFiles;
+		int asCount = ScriptMgr::m_GroupFile.EnumerateAngelScriptFiles(asFiles);
+		
+		pPlayer->SendInfoMsg("AngelScript Files: %d", asCount);
+		ALERT(at_console, "AngelScript Files Found: %d\n", asCount);
+		
+		if( asCount > 0 && asCount <= 10 ) // Show first 10 files
+		{
+			pPlayer->SendInfoMsg("Sample .as files:");
+			ALERT(at_console, "Sample .as files:\n");
+			for( int i = 0; i < std::min(asCount, 10); i++ )
+			{
+				pPlayer->SendInfoMsg("  %s", asFiles[i].c_str());
+				ALERT(at_console, "  %s\n", asFiles[i].c_str());
+			}
+		}
+		
+		// Check module system status
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			std::vector<std::string> loadedModules = pModuleSystem->GetLoadedModules();
+			pPlayer->SendInfoMsg("Loaded Modules: %d", (int)loadedModules.size());
+			ALERT(at_console, "Loaded Modules: %d\n", (int)loadedModules.size());
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Module System: NOT AVAILABLE");
+			ALERT(at_console, "Module System: NOT AVAILABLE\n");
+		}
+		
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "as_pak_test" ) )
+	{
+		// Console command to test PAK file access
+		if( !pPlayer )
+			return TRUE;
+		
+		// Check developer permissions
+		msstring steamid = pPlayer->AuthID();
+		const char* szSteamID = steamid.c_str();
+		
+		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
+		{
+			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
+			return TRUE;
+		}
+		
+		pPlayer->SendInfoMsg("Testing PAK file refresh...");
+		ALERT(at_console, "as_pak_test: Testing PAK file refresh by %s\n", pPlayer->DisplayName());
+		
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			bool refreshSuccess = pModuleSystem->RefreshFromPak();
+			
+			if( refreshSuccess )
+			{
+				pPlayer->SendInfoMsg("PAK file refresh test: SUCCESS");
+				ALERT(at_console, "as_pak_test: PAK refresh test successful\n");
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("PAK file refresh test: FAILED - Check console for details");
+				ALERT(at_console, "as_pak_test: PAK refresh test failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: Module system not available.");
+			ALERT(at_console, "as_pak_test: Module system not available\n");
+		}
+		
 		return TRUE;
 	}
 	else if( FStrEq( pcmd, "say" ) )

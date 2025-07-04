@@ -7,6 +7,7 @@
 #include <vector>  // for std::vector
 #include "../mslogger.h"  // Include MSLogger for unified logging
 #include "cvardef.h"        // For cvar_t definition
+#include "ASEngineEventManager.h"  // Include for event manager cleanup
 
 // Only include AngelScript if we're compiling with it enabled
 #ifdef _MSC_VER
@@ -200,6 +201,21 @@ bool CAngelScriptManager::Initialize()
         return false;
     }
     
+    // Initialize the event manager with the new engine
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        if (pEventManager->Initialize(m_pEngine))
+        {
+            LogMessage("AngelScript Event Manager initialized successfully");
+        }
+        else
+        {
+            LogMessage("Failed to initialize AngelScript Event Manager", 1);
+            // Don't fail the entire initialization for event manager issues
+        }
+    }
+    
     m_bInitialized = true;
     LogMessage("AngelScript Manager initialized successfully");
     return true;
@@ -213,6 +229,15 @@ void CAngelScriptManager::Destroy()
     if (!m_bInitialized)
         return;
         
+    // Destroy the event manager first to clear all event handlers
+    // This prevents dangling function references when the engine is destroyed
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        pEventManager->Destroy();
+        LogMessage("AngelScript Event Manager destroyed");
+    }
+    
     // Release all contexts in the pool
     for (size_t i = 0; i < m_ContextPool.size(); i++)
     {

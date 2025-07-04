@@ -17,6 +17,9 @@ typedef float vec_t;
 // Static instance
 ASEngineEventManager* ASEngineEventManager::s_pInstance = nullptr;
 
+// Static recursion depth for PLAYER_SAY_TEXT events
+int ASEngineEventManager::s_nSayTextEventDepth = 0;
+
 //==========================================================================
 // Constructor
 //==========================================================================
@@ -86,19 +89,39 @@ void ASEngineEventManager::Destroy()
 {
     if (!m_bInitialized)
         return;
+    
+    MS_ANGEL_INFO("ASEngineEventManager: Starting destruction process...");
         
-    // Release all function references
+    // Enhanced cleanup to prevent memory corruption
+    // First, mark as not initialized to prevent new operations
+    m_bInitialized = false;
+    
+    // Release all function references safely
+    MS_ANGEL_INFO("ASEngineEventManager: Releasing %zu event handlers", m_EventHandlers.size());
     for (auto& handler : m_EventHandlers)
     {
         if (handler.pFunction)
         {
-            handler.pFunction->Release();
+            MS_ANGEL_INFO("ASEngineEventManager: Releasing function %s from module %s", 
+                         handler.pFunction->GetName(), handler.moduleName.c_str());
+            try
+            {
+                handler.pFunction->Release();
+            }
+            catch (...)
+            {
+                MS_ANGEL_ERROR("ASEngineEventManager: Exception while releasing function %s", 
+                              handler.pFunction->GetName());
+            }
+            handler.pFunction = nullptr; // Ensure pointer is nulled
         }
     }
     
+    // Clear the handlers list completely
     m_EventHandlers.clear();
+    
+    // Null the engine pointer to prevent further access
     m_pEngine = nullptr;
-    m_bInitialized = false;
     
     MS_ANGEL_INFO("ASEngineEventManager destroyed");
 }
@@ -283,6 +306,27 @@ void ASEngineEventManager::FirePlayerSpawnedEvent(const char* szPlayerName)
 //==========================================================================
 void ASEngineEventManager::FirePlayerSayTextEvent(const char* szPlayerName, const char* szSteamID, const char* szText)
 {
+    // Create RAII depth guard for recursion protection
+    SayTextEventDepthGuard depthGuard;
+    
+    // Check for recursion overflow before any other processing
+    if (depthGuard.IsMaxDepthExceeded())
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Recursion depth exceeded (%d > %d) - blocking event to prevent infinite loop", 
+                       depthGuard.GetCurrentDepth(), MAX_SAY_TEXT_EVENT_DEPTH);
+        MS_ANGEL_ERROR("  Player: %s, Text: '%s'", 
+                       szPlayerName ? szPlayerName : "NULL", 
+                       szText ? szText : "NULL");
+        return;
+    }
+    
+    // Log recursion depth for debugging (only at depth > 1 to avoid spam)
+    if (depthGuard.GetCurrentDepth() > 1)
+    {
+        MS_ANGEL_INFO("ASEngineEventManager::FirePlayerSayTextEvent: Nested call detected (depth=%d) for player %s", 
+                      depthGuard.GetCurrentDepth(), szPlayerName ? szPlayerName : "NULL");
+    }
+    
     if (!m_bInitialized)
     {
         MS_ANGEL_ERROR("ASEngineEventManager::FirePlayerSayTextEvent: Manager not initialized");
@@ -433,8 +477,21 @@ bool ASEngineEventManager::IsParameterByReference(asIScriptFunction* pFunction, 
 //==========================================================================
 void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::vector<std::string>& parameters)
 {
-    if (!m_bInitialized)
+    // Enhanced safety checks to prevent memory corruption
+    if (!m_bInitialized || !m_pEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::DispatchEvent: Event manager not properly initialized (initialized=%d, engine=%p)", 
+                       m_bInitialized, m_pEngine);
         return;
+    }
+    
+    // Verify the AngelScript manager is still valid
+    CAngelScriptManager* pManager = CAngelScriptManager::Instance();
+    if (!pManager || !pManager->IsInitialized())
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::DispatchEvent: AngelScript manager is invalid or not initialized");
+        return;
+    }
         
     MS_ANGEL_INFO("ASEngineEventManager::DispatchEvent - Event: %s (type=%d), Parameters: %zu", 
                   GetEventTypeName(eventType), static_cast<int>(eventType), parameters.size());
@@ -479,6 +536,33 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         
         MS_ANGEL_INFO("ASEngineEventManager: Executing handler #%d for %s", 
                       handlerCount, GetEventTypeName(eventType));
+                      
+        // Validate function pointer before use to prevent memory corruption
+        if (!handler.pFunction)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: Function pointer is NULL for %s", GetEventTypeName(eventType));
+            continue;
+        }
+        
+        // Additional validation: check if function is still part of a valid module
+        asIScriptModule* pModule = handler.pFunction->GetModule();
+        if (!pModule)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: Function module is NULL for %s::%s", 
+                          handler.moduleName.c_str(), handler.pFunction->GetName());
+            continue;
+        }
+        
+        // Verify the module name matches to detect stale references
+        const char* actualModuleName = pModule->GetName();
+        if (!actualModuleName || handler.moduleName != actualModuleName)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: Module name mismatch for %s (expected: %s, actual: %s)", 
+                          handler.pFunction->GetName(), handler.moduleName.c_str(), 
+                          actualModuleName ? actualModuleName : "NULL");
+            continue;
+        }
+        
         MS_ANGEL_INFO("  Function: %s (Module: %s)", 
                       handler.pFunction->GetName(), handler.moduleName.c_str());
         
@@ -490,7 +574,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             continue;
         }
         
-        // Prepare the function call
+        // Prepare the function call with additional error handling
         int r = pContext->Prepare(handler.pFunction);
         if (r < 0)
         {
@@ -719,12 +803,36 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
 //==========================================================================
 asIScriptContext* ASEngineEventManager::AcquireContext()
 {
-    if (!m_bInitialized)
+    // Enhanced safety checks to prevent memory corruption
+    if (!m_bInitialized || !m_pEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::AcquireContext: Event manager not properly initialized (initialized=%d, engine=%p)", 
+                       m_bInitialized, m_pEngine);
         return nullptr;
+    }
         
     CAngelScriptManager* pManager = CAngelScriptManager::Instance();
     if (!pManager)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::AcquireContext: AngelScript manager instance is null");
         return nullptr;
+    }
+    
+    // Verify the manager is still initialized
+    if (!pManager->IsInitialized())
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::AcquireContext: AngelScript manager is not initialized");
+        return nullptr;
+    }
+    
+    // Verify the engine is still valid
+    asIScriptEngine* pCurrentEngine = pManager->GetEngine();
+    if (!pCurrentEngine || pCurrentEngine != m_pEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::AcquireContext: Engine mismatch or invalid (current=%p, expected=%p)", 
+                       pCurrentEngine, m_pEngine);
+        return nullptr;
+    }
         
     return pManager->AcquireContext();
 }

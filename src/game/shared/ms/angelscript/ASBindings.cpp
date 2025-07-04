@@ -722,10 +722,10 @@ bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
         // Verify some key module functions were registered
         asIScriptFunction* func;
         
-        func = pEngine->GetGlobalFunctionByDecl("bool LoadModule(const string &in)");
+        func = pEngine->GetGlobalFunctionByDecl("bool LoadASModule(const string &in)");
         if (!func)
         {
-            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - LoadModule() function not found");
+            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - LoadASModule() function not found");
         }
         
         func = pEngine->GetGlobalFunctionByDecl("bool HasModule(const string &in)");

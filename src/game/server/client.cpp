@@ -45,6 +45,7 @@
 #include "pm_shared.h" // PM_GetHullBounds
 #include "ms/angelscript/ASEngineEventManager.h"
 #include "ms/angelscript/CAngelScriptManager.h"
+#include "ms/angelscript/ASModuleSystem.h"
 
 extern void PlayerPrecache();
 
@@ -519,6 +520,7 @@ void ClientCommand2(edict_t *pEntity)
 	if (FStrEq(pcmd, "say"))
 	{
 		char *Args = (char *)CMD_ARGS();
+		
 		pPlayer->Speak(Args, (speech_type)pPlayer->m_SayType);
 	}
 	else if (FStrEq(pcmd, "say_text") && !pPlayer->m_Gagged)
@@ -539,6 +541,15 @@ void ClientCommand2(edict_t *pEntity)
 				Parameters.add(CMD_ARGV(1));
 				Parameters.add(Text);
 				pGMScript->CallScriptEvent("game_playerspeak", &Parameters);
+			}
+			
+			// Fire the PlayerSayText event to AngelScript
+			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+			if( pEventManager && pPlayer )
+			{
+				const char* pszPlayerName = pPlayer->DisplayName();
+				const char* pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
+				pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, Text.c_str());
 			}
 
 			pPlayer->Speak(Text, (speech_type)SayType);
@@ -602,6 +613,57 @@ void ClientCommand2(edict_t *pEntity)
 		else
 		{
 			ALERT(at_console, "[AS_FIRE_EVENT] Event manager not initialized!\n");
+		}
+	}
+	else if (FStrEq(pcmd, "as_reload_scripts"))
+	{
+		// Developer-only console command for AngelScript hot-reload
+		ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script reload console command executed by %s\n", pPlayer->DisplayName());
+		
+		// Check for elite/developer permissions (same logic as chat command)
+		/*
+		if (!pPlayer->IsElite())
+		{
+			pPlayer->SendInfoMsg("Error: This command requires developer permissions.");
+			ALERT(at_console, "[AS_RELOAD_SCRIPTS] Permission denied for %s\n", pPlayer->DisplayName());
+			return;
+		}
+		*/
+
+		pPlayer->SendInfoMsg("Initiating script hot-reload via console command...");
+		ALERT(at_console, "[AS_RELOAD_SCRIPTS] Starting script hot-reload process\n");
+		
+		// Call the native C++ hot-reload functionality
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if (pModuleSystem)
+		{
+			bool reloadSuccess = pModuleSystem->ReloadAllModules();
+			
+			if (reloadSuccess)
+			{
+				pPlayer->SendInfoMsg("Script hot-reload completed successfully!");
+				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload completed successfully\n");
+				
+				// Send notification to all players
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				{
+					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
+					if (pOtherPlayer && pOtherPlayer != pPlayer && pOtherPlayer->m_Initialized)
+					{
+						pOtherPlayer->SendInfoMsg(msstring("Server scripts have been reloaded by ") + pPlayer->DisplayName());
+					}
+				}
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("Script hot-reload failed! Check server console for details.");
+				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: AngelScript module system not available.");
+			ALERT(at_console, "[AS_RELOAD_SCRIPTS] ASModuleSystem instance not available\n");
 		}
 	}
 	else if (FStrEq(pcmd, "localcb")) // MiB MAR2015_01 [LOCAL_PANEL] - For doing server-side callback

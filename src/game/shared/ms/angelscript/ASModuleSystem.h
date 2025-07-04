@@ -109,7 +109,7 @@ public:
     void Destroy();
     
     // Module loading
-    bool LoadModule(const std::string& filename, const ASModuleLoadOptions& options = ASModuleLoadOptions());
+    bool LoadASModule(const std::string& filename, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     bool LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     bool LoadModuleFromMemory(const std::string& name, const std::string& content, CGameGroupFile* pakFile, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     
@@ -143,6 +143,10 @@ public:
     bool DiscoverModulesInPak(CGameGroupFile* pakFile);
     std::vector<std::string> GetDiscoveredModules() const;
     bool LoadDiscoveredModules(CGameGroupFile* pakFile);
+    
+    // Hot-reload functionality
+    bool ReloadAllModules();
+    bool RefreshFromPak();
     
     // Utility functions
     bool CompileAllModules();
@@ -184,11 +188,12 @@ namespace ASModuleSystemBindings
 //==========================================================================
 // AngelScript global functions for module management
 //==========================================================================
-bool LoadModule(const std::string& filename);
+bool LoadASModule(const std::string& filename);
 bool UnloadModule(const std::string& name);
 bool ReloadModule(const std::string& name);
 bool HasModule(const std::string& name);
 bool ImportModule(const std::string& moduleName);
 bool ImportModule(const std::string& moduleName, const std::string& asNamespace);
+bool ReloadAllScriptModules();
 
 #endif // AS_MODULE_SYSTEM_H
