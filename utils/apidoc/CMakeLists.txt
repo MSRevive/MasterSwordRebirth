@@ -6,15 +6,30 @@ add_executable(apidoc)
 set_common_properties(apidoc)
 
 target_include_directories(apidoc PRIVATE
+	${BASEDIR}/../lib/include
+	${BASEDIR}/../lib/include/vgui
 	${BASEDIR}/../src/common
+	${BASEDIR}/../src/game/client
+	${BASEDIR}/../src/game/client/ms
+	${BASEDIR}/../src/game/client/ui
 	${BASEDIR}/../src/game/server
+	${BASEDIR}/../src/game/server/gamerules
 	${BASEDIR}/../src/game/server/hl
+	${BASEDIR}/../src/game/server/monsters
+	${BASEDIR}/../src/game/server/player
 	${BASEDIR}/../src/game/shared
+	${BASEDIR}/../src/game/shared/movement
 	${BASEDIR}/../src/game/shared/ms
+	${BASEDIR}/../src/game/shared/stats
+	${BASEDIR}/../src/game/shared/weapons
 	${BASEDIR}/../src/public
 	${BASEDIR}/../src/public/engine
+	${BASEDIR}/../thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR}
 )
+
+target_compile_definitions(apidoc PRIVATE
+			VALVE_DLL)
 
 ################################################################################
 # Source groups
@@ -23,6 +38,26 @@ set(Source_Files
 	"main.cpp"
 	"../../src/game/server/monsters/npcscript.cpp"
 	"../../src/game/shared/weapons/genericitem.cpp"
+
+	# sigh, need to include all this so that all the declared functions and methods can resolve
+	"../../src/game/server/effects.cpp"
+	"../../src/game/server/entity.cpp"
+	"../../src/game/server/hl/animating.cpp"
+	"../../src/game/server/hl/cbase.cpp"
+	"../../src/game/server/hl/subs.cpp"
+	"../../src/game/server/hl/util.cpp"
+	"../../src/game/server/monsters/combat.cpp"
+	"../../src/game/server/monsters/msmonsterserver.cpp"
+	"../../src/game/server/player/player.cpp"
+	"../../src/game/server/player/playershared.cpp"
+	"../../src/game/shared/ms/global.cpp"
+	"../../src/game/shared/ms/msmonstershared.cpp"
+	"../../src/game/shared/ms/script.cpp"
+	"../../src/game/shared/ms/scriptcmds.cpp"
+	"../../src/game/shared/ms/scriptedeffects.cpp"
+	"../../src/game/shared/ms/sharedutil.cpp"
+	"../../src/game/shared/ms/stackstring.cpp"
+	"../../src/game/shared/stats/stats.cpp"
 
 )
 source_group("Source Files" FILES ${Source_Files})

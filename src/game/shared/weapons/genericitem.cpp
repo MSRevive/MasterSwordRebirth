@@ -10,17 +10,13 @@
 	Generic Item: All Items are defined here
 */
 #ifndef VALVE_DLL
-#ifndef _MSR_UTILS
 #include "hud.h"
 #include "cl_util.h"
 #include "cl_dll.h"
-#endif // _MSR_UTILS
 #include "../common/const.h"
 #include "../engine/studio.h"
 #include "r_studioint.h"
-#ifndef _MSR_UTILS
 #include "SDL2/SDL_messagebox.h"
-#endif // _MSR_UTILS
 #endif // VALVE_DLL
 
 #include "inc_weapondefs.h"
@@ -35,10 +31,8 @@ void ContainerWindowClose();
 void ContainerWindowUpdate();
 void ContainerWindowOpen(ulong ContainerID);
 extern engine_studio_api_t IEngineStudio;
-#ifndef _MSR_UTILS
 #include "ms/clglobal.h"
 #include "render/clrender.h"
-#endif // _MSR_UTILS
 #endif
 
 #include "soundent.h"
