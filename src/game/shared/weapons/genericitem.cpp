@@ -17,7 +17,7 @@
 #include "../engine/studio.h"
 #include "r_studioint.h"
 #include "SDL2/SDL_messagebox.h"
-#endif // VALVE_DLL
+#endif
 
 #include "inc_weapondefs.h"
 #include "script.h"
