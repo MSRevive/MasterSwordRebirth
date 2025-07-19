@@ -9,6 +9,7 @@
 #pragma once
 
 #include <string>
+#include <cmath>
 
 // Forward declarations
 typedef float vec_t;
