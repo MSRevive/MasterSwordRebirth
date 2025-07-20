@@ -2141,7 +2141,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		const size_t MAX_SAFE_LENGTH = 512; // Safety limit
 		
 		// Manually calculate length with bounds checking to avoid buffer overrun
-		while( (*pCheck != nullptr) && (textLen < MAX_SAFE_LENGTH) )
+		while( *pCheck && textLen < MAX_SAFE_LENGTH )
 		{
 			pCheck++;
 			textLen++;
