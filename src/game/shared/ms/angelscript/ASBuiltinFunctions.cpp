@@ -34,7 +34,7 @@
 #endif
 #include <cmath>
 #include <map>
-#include "../../../../server/hl/vector.h"
+#include "hl/vector.h"
 #include "mslogger.h"
 #include "ASEngineEventManager.h"
 

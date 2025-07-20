@@ -28,7 +28,7 @@
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
 #include "Platform.h"
-#include "vector.h"
+#include "../shared/hl/vector.h"
 
 #ifdef EXPORT
 #undef EXPORT
