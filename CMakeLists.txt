@@ -10,6 +10,15 @@ if (MSVC)
 	set(CMAKE_SYSTEM_VERSION 10.0)
 endif()
 
+if (UNIX)
+	set(CMAKE_SYSTEM_NAME Linux)
+	set(CMAKE_SYSTEM_PROCESSOR i386)
+
+	set(CMAKE_MAKE_PROGRAM make)
+
+	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++ -D_GLIBCXX_USE_CXX11_ABI=0")
+endif()
+
 project(msr
 	VERSION 1.0.0
 	LANGUAGES CXX)
