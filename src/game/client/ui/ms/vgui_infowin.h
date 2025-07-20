@@ -26,7 +26,7 @@ public:
 #define INFOWIN_DISPLAY_Y YRES(50)
 #define INFOWIN_DISPLAY_SPACER_Y YRES(4)
 
-	CInfoWindow::CInfoWindow(const char* NewTitle, const char* NewText, int x, int y, Panel *pParent) : CTransparentPanel(0, 0, 0, INFOWIN_INTIAL_SIZE_X, INFOWIN_INTIAL_SIZE_Y)
+	CInfoWindow(const char* NewTitle, const char* NewText, int x, int y, Panel *pParent) : CTransparentPanel(0, 0, 0, INFOWIN_INTIAL_SIZE_X, INFOWIN_INTIAL_SIZE_Y)
 	{
 		setParent(pParent);
 		setPos(x, y);
@@ -57,7 +57,6 @@ public:
 		//setBorder( m_Border=new LineBorder( 2, BorderColor ) );
 		//setBorder( NULL );
 	}
-	
 	void SetTitle(const char* NewTitle)
 	{
 		Title->setText(NewTitle);

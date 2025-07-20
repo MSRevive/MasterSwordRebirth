@@ -30,10 +30,11 @@ long double GetExpNeeded(int StatValue);
 
 int TestExpArray[SKILL_MAX_ATTACK][STAT_MAGIC_TOTAL];
 
-char *GenderList[] =
-	{
+const char *GenderList[] =
+{
 		"Male",
-		"Female"};
+		"Female"
+};
 
 //------------
 

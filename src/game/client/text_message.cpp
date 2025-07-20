@@ -98,7 +98,7 @@ char *CHudTextMessage::BufferedLocaliseTextString(const char *msg)
 }
 
 // Simplified version of LocaliseTextString;  assumes string is only one word
-char *CHudTextMessage::LookupString(const char *msg, int *msg_dest)
+const char *CHudTextMessage::LookupString(const char *msg, int *msg_dest)
 {
 	if (!msg)
 		return "";
@@ -110,7 +110,7 @@ char *CHudTextMessage::LookupString(const char *msg, int *msg_dest)
 		client_textmessage_t *clmsg = TextMessageGet(msg + 1);
 
 		if (!clmsg || !(clmsg->pMessage))
-			return (char *)msg; // lookup failed, so return the original string
+			return msg; // lookup failed, so return the original string
 
 		if (msg_dest)
 		{
@@ -120,19 +120,26 @@ char *CHudTextMessage::LookupString(const char *msg, int *msg_dest)
 				*msg_dest = -clmsg->effect;
 		}
 
-		return (char *)clmsg->pMessage;
+		return clmsg->pMessage;
 	}
 	else
 	{ // nothing special about this message, so just return the same string
-		return (char *)msg;
+		return msg;
 	}
 }
 
-void StripEndNewlineFromString(char *str)
+void StripEndNewlineFromString(const char* str)
 {
-	int s = strlen(str) - 1;
-	if (str[s] == '\n' || str[s] == '\r')
-		str[s] = 0;
+	if (!str)
+		return;
+	
+	int len = strlen(str);
+	if (len > 0)
+	{
+		char* mutable_str = const_cast<char*>(str);
+		if (mutable_str[len - 1] == '\n' || mutable_str[len - 1] == '\r')
+			mutable_str[len - 1] = '\0';
+	}
 }
 
 // converts all '\r' characters to '\n', so that the engine can deal with the properly
@@ -165,23 +172,23 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 	int msg_dest = READ_BYTE();
 
 	static char szBuf[6][MSG_BUF_SIZE];
-	char *msg_text = LookupString(READ_STRING(), &msg_dest);
+	const char *msg_text = LookupString(READ_STRING(), &msg_dest);
 	msg_text = strncpy(szBuf[0], msg_text, MSG_BUF_SIZE);
 
 	// keep reading strings and using C format strings for subsituting the strings into the localised text string
-	char *sstr1 = LookupString(READ_STRING());
+	const char *sstr1 = LookupString(READ_STRING());
 	sstr1 = strncpy(szBuf[1], sstr1, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr1); // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	char *sstr2 = LookupString(READ_STRING());
+	const char* sstr2 = LookupString(READ_STRING());
 	sstr2 = strncpy(szBuf[2], sstr2, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr2);
-	char *sstr3 = LookupString(READ_STRING());
+	const char* sstr3 = LookupString(READ_STRING());
 	sstr3 = strncpy(szBuf[3], sstr3, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr3);
-	char *sstr4 = LookupString(READ_STRING());
+	const char* sstr4 = LookupString(READ_STRING());
 	sstr4 = strncpy(szBuf[4], sstr4, MSG_BUF_SIZE);
 	StripEndNewlineFromString(sstr4);
-	char *psz = szBuf[5];
+	char* psz = szBuf[5];
 
 	if (gViewPort && gViewPort->AllowedToPrintText() == FALSE)
 		return 1;

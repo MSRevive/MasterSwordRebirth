@@ -96,10 +96,10 @@ public:
 	inline Vector operator/(float fl) const { return Vector(x / fl, y / fl, z / fl); }
 
 	// By Dogg
-	inline Vector operator+=(const Vector &v) { return Vector(x += v.x, y += v.y, z += v.z); }
-	inline Vector operator-=(const Vector &v) { return Vector(x -= v.x, y -= v.y, z -= v.z); }
-	inline Vector operator*=(const float fl) { return Vector(x *= fl, y *= fl, z *= fl); }
-	inline Vector operator/=(const float fl) { return Vector(x /= fl, y /= fl, z /= fl); }
+	inline Vector& operator+=(const Vector &v) { x += v.x; y += v.y; z += v.z; return *this; }
+	inline Vector& operator-=(const Vector &v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+	inline Vector& operator*=(const float fl) { x *= fl; y *= fl; z *= fl; return *this; }
+	inline Vector& operator/=(const float fl) { x /= fl; y /= fl; z /= fl; return *this; }
 
 	// Methods
 	inline void CopyToArray(float *rgfl) const { rgfl[0] = x, rgfl[1] = y, rgfl[2] = z; }

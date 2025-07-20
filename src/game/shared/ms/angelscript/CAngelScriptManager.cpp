@@ -6,6 +6,8 @@
 #include <new>     // for placement new
 #include <vector>  // for std::vector
 #include "../mslogger.h"  // Include MSLogger for unified logging
+#include "cvardef.h"        // For cvar_t definition
+#include "ASEngineEventManager.h"  // Include for event manager cleanup
 
 // Only include AngelScript if we're compiling with it enabled
 #ifdef _MSC_VER
@@ -18,6 +20,8 @@
 #include "ASBindings.h"
 #include "ASCoroutines.h"
 #include "ASObjectPool.h"
+#include "ASDebugger.h"
+#include "ASEngineInterface.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -26,6 +30,12 @@
 // Static instance
 CAngelScriptManager* CAngelScriptManager::s_pInstance = nullptr;
 
+// Helper function to check if debug mode is enabled
+static bool IsDebugModeEnabled()
+{
+        return ASEngineProvider::GetCvarString("as_debug_mode") == "1";
+}
+
 //==========================================================================
 // Constructor
 //==========================================================================
@@ -33,7 +43,8 @@ CAngelScriptManager::CAngelScriptManager()
     : m_pEngine(nullptr)
     , m_bInitialized(false)
     , m_nMemoryUsed(0)
-    , m_nMemoryLimit(134217728) // 128MB default limit
+    , m_nMemoryLimit(268435456) // 256MB default limit
+    , m_pDebugger(nullptr)
 {
 }
 
@@ -111,6 +122,7 @@ bool CAngelScriptManager::Initialize()
         return false;
     }
     
+    
     // Set the message callback
     int r = m_pEngine->SetMessageCallback(asFUNCTION(ASMessageCallback), 0, asCALL_CDECL);
     if (r < 0)
@@ -121,11 +133,30 @@ bool CAngelScriptManager::Initialize()
         return false;
     }
     
-    // Configure engine properties for 32-bit constraints
+    // Configure engine properties for 32-bit constraints and class support
     r = m_pEngine->SetEngineProperty(asEP_MAX_STACK_SIZE, 1024*1024); // 1MB stack
     if (r < 0)
     {
         LogMessage("Failed to set AngelScript stack size", 1);
+    }
+    
+    // Enable class support and modern syntax features
+    r = m_pEngine->SetEngineProperty(asEP_ALLOW_UNSAFE_REFERENCES, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable unsafe references", 1);
+    }
+    
+    r = m_pEngine->SetEngineProperty(asEP_OPTIMIZE_BYTECODE, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable bytecode optimization", 1);
+    }
+    
+    r = m_pEngine->SetEngineProperty(asEP_COPY_SCRIPT_SECTIONS, true);
+    if (r < 0)
+    {
+        LogMessage("Failed to enable script section copying", 1);
     }
     
     // Set up memory allocation hooks
@@ -135,6 +166,32 @@ bool CAngelScriptManager::Initialize()
         LogMessage("Failed to set AngelScript memory functions", 1);
     }
     
+    // Initialize debugger if debug mode is enabled
+    if (IsDebugModeEnabled())
+    {
+        LogMessage("Initializing AngelScript Debugger...");
+        m_pDebugger = new ASDebugger();
+        if (m_pDebugger->Initialize(m_pEngine))
+        {
+            LogMessage("AngelScript Debugger initialized successfully");
+            
+            // Enable stepping for debugging
+            m_pDebugger->EnableStepping(true);
+            
+            // Add a breakpoint in GameMaster constructor for debugging
+            m_pDebugger->AddBreakpoint("GameMaster", 156); // Constructor line
+            m_pDebugger->AddBreakpoint("GameMaster", 496); // OnEnginePlayerConnect line
+            
+            LogMessage("Debugger breakpoints set for GameMaster");
+        }
+        else
+        {
+            LogMessage("Failed to initialize AngelScript Debugger", 1);
+            delete m_pDebugger;
+            m_pDebugger = nullptr;
+        }
+    }
+    
     // Register all bindings through integration layer
     if (!ASBindings::RegisterAll(m_pEngine))
     {
@@ -142,6 +199,21 @@ bool CAngelScriptManager::Initialize()
         m_pEngine->ShutDownAndRelease();
         m_pEngine = nullptr;
         return false;
+    }
+    
+    // Initialize the event manager with the new engine
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        if (pEventManager->Initialize(m_pEngine))
+        {
+            LogMessage("AngelScript Event Manager initialized successfully");
+        }
+        else
+        {
+            LogMessage("Failed to initialize AngelScript Event Manager", 1);
+            // Don't fail the entire initialization for event manager issues
+        }
     }
     
     m_bInitialized = true;
@@ -157,6 +229,15 @@ void CAngelScriptManager::Destroy()
     if (!m_bInitialized)
         return;
         
+    // Destroy the event manager first to clear all event handlers
+    // This prevents dangling function references when the engine is destroyed
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        pEventManager->Destroy();
+        LogMessage("AngelScript Event Manager destroyed");
+    }
+    
     // Release all contexts in the pool
     for (size_t i = 0; i < m_ContextPool.size(); i++)
     {
@@ -166,6 +247,14 @@ void CAngelScriptManager::Destroy()
         }
     }
     m_ContextPool.clear();
+    
+    // Shutdown debugger
+    if (m_pDebugger)
+    {
+        m_pDebugger->Shutdown();
+        delete m_pDebugger;
+        m_pDebugger = nullptr;
+    }
     
     // Shutdown optimization systems
     ShutdownOptimizationSystems();
@@ -271,6 +360,13 @@ asIScriptContext* CAngelScriptManager::AcquireContext()
         }
     }
     
+    // Set line callback for debugging if debugger is enabled
+    if (pContext && m_pDebugger && IsDebugModeEnabled())
+    {
+        pContext->SetLineCallback(asFUNCTION(ASDebugger::LineCallback), m_pDebugger, asCALL_CDECL_OBJLAST);
+        pContext->SetExceptionCallback(asFUNCTION(ASDebugger::ExceptionCallback), m_pDebugger, asCALL_CDECL_OBJLAST);
+    }
+    
     return pContext;
 }
 
@@ -339,8 +435,181 @@ void CAngelScriptManager::LogMessage(const char* szMessage, int nLevel)
 }
 
 //==========================================================================
+// CallGlobalFunction - Execute a global AngelScript function
+//==========================================================================
+bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const char* szModuleName)
+{
+    if (!m_bInitialized || !m_pEngine || !szFunctionName)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Invalid state or parameters");
+        return false;
+    }
+
+    MS_ANGEL_INFO("=== CallGlobalFunction: Looking for '%s' in module '%s' ===", 
+                  szFunctionName, szModuleName ? szModuleName : "ALL");
+
+    // If module name is specified, search only in that module
+    if (szModuleName)
+    {
+        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName);
+        if (!pModule)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Module '%s' not found", szModuleName);
+            return false;
+        }
+
+        asIScriptFunction* pFunction = pModule->GetFunctionByName(szFunctionName);
+        if (!pFunction)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Function '%s' not found in module '%s'", 
+                          szFunctionName, szModuleName);
+            
+            // List all functions in the module for debugging
+            MS_ANGEL_INFO("Functions in module '%s':", szModuleName);
+            for (asUINT j = 0; j < pModule->GetFunctionCount(); j++)
+            {
+                asIScriptFunction* pFunc = pModule->GetFunctionByIndex(j);
+                if (pFunc)
+                {
+                    MS_ANGEL_INFO("  - %s", pFunc->GetName());
+                }
+            }
+            
+            return false;
+        }
+
+        MS_ANGEL_INFO("Found function '%s' in module '%s', executing...", szFunctionName, szModuleName);
+        return this->ExecuteFunction(pFunction, szFunctionName);
+    }
+    
+    // Search all modules for the function
+    bool functionFound = false;
+    bool anySuccess = false;
+    
+    MS_ANGEL_INFO("Searching all %d modules for function '%s'...", m_pEngine->GetModuleCount(), szFunctionName);
+    
+    for (asUINT i = 0; i < m_pEngine->GetModuleCount(); i++)
+    {
+        asIScriptModule* pModule = m_pEngine->GetModuleByIndex(i);
+        if (!pModule) continue;
+        
+        MS_ANGEL_INFO("Checking module '%s'...", pModule->GetName());
+        
+        asIScriptFunction* pFunction = pModule->GetFunctionByName(szFunctionName);
+        if (pFunction)
+        {
+            functionFound = true;
+            MS_ANGEL_INFO("CAngelScriptManager::CallGlobalFunction: Calling '%s' in module '%s'", 
+                         szFunctionName, pModule->GetName());
+            
+            if (this->ExecuteFunction(pFunction, szFunctionName))
+            {
+                anySuccess = true;
+            }
+        }
+    }
+    
+    if (!functionFound)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Function '%s' not found in any module", 
+                      szFunctionName);
+        
+        // List all modules and their functions for debugging
+        MS_ANGEL_INFO("=== Module Summary ===");
+        for (asUINT i = 0; i < m_pEngine->GetModuleCount(); i++)
+        {
+            asIScriptModule* pModule = m_pEngine->GetModuleByIndex(i);
+            if (!pModule) continue;
+            
+            MS_ANGEL_INFO("Module '%s' has %d functions:", pModule->GetName(), pModule->GetFunctionCount());
+            for (asUINT j = 0; j < pModule->GetFunctionCount() && j < 10; j++) // Show first 10
+            {
+                asIScriptFunction* pFunc = pModule->GetFunctionByIndex(j);
+                if (pFunc)
+                {
+                    MS_ANGEL_INFO("  - %s", pFunc->GetName());
+                }
+            }
+            if (pModule->GetFunctionCount() > 10)
+            {
+                MS_ANGEL_INFO("  ... and %d more functions", pModule->GetFunctionCount() - 10);
+            }
+        }
+        
+        return false;
+    }
+    
+    return anySuccess;
+}
+
+//==========================================================================
+// ExecuteFunction - Helper to execute a function with proper context handling
+//==========================================================================
+bool CAngelScriptManager::ExecuteFunction(asIScriptFunction* pFunction, const char* szFunctionName)
+{
+    if (!pFunction)
+        return false;
+    
+    MS_ANGEL_INFO("ExecuteFunction: About to execute '%s'", szFunctionName);
+        
+    // Acquire context from pool
+    asIScriptContext* pContext = this->AcquireContext();
+    if (!pContext)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Failed to acquire context for '%s'", szFunctionName);
+        return false;
+    }
+    
+    // Prepare the function call
+    int r = pContext->Prepare(pFunction);
+    if (r < 0)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Failed to prepare function '%s' (error: %d)", 
+                      szFunctionName, r);
+        this->ReleaseContext(pContext);
+        return false;
+    }
+    
+    MS_ANGEL_INFO("ExecuteFunction: Function '%s' prepared, executing...", szFunctionName);
+    
+    // Execute the function
+    r = pContext->Execute();
+    if (r != asEXECUTION_FINISHED)
+    {
+        if (r == asEXECUTION_EXCEPTION)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Exception in function '%s': %s", 
+                          szFunctionName, pContext->GetExceptionString());
+            
+            // Get exception details
+            int line = pContext->GetExceptionLineNumber();
+            const char* section = nullptr;
+            asIScriptFunction* func = pContext->GetExceptionFunction();
+            if (func)
+            {
+                MS_ANGEL_ERROR("  Exception in: %s", func->GetDeclaration());
+                MS_ANGEL_ERROR("  Module: %s", func->GetModuleName());
+                MS_ANGEL_ERROR("  Line: %d", line);
+            }
+        }
+        else
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Failed to execute function '%s' (result: %d)", 
+                          szFunctionName, r);
+        }
+        this->ReleaseContext(pContext);
+        return false;
+    }
+    
+    MS_ANGEL_INFO("CAngelScriptManager::ExecuteFunction: Successfully executed function '%s'", szFunctionName);
+    this->ReleaseContext(pContext);
+    return true;
+}
+
+//==========================================================================
 // Memory allocation tracking
 //==========================================================================
+int timesSent = 0;
 void* ASMalloc(size_t size)
 {
     void* ptr = malloc(size);
@@ -350,11 +619,14 @@ void* ASMalloc(size_t size)
         
         // Check if we've exceeded memory limit
         if (CAngelScriptManager::s_pInstance->m_nMemoryUsed > 
-            CAngelScriptManager::s_pInstance->m_nMemoryLimit)
+            CAngelScriptManager::s_pInstance->m_nMemoryLimit && timesSent < 10)
         {
             MS_ANGEL_INFO("WARNING: Memory limit exceeded! Used: %zu, Limit: %zu",
                           CAngelScriptManager::s_pInstance->m_nMemoryUsed,
                    CAngelScriptManager::s_pInstance->m_nMemoryLimit);
+                
+            timesSent++;
+
         }
     }
     return ptr;

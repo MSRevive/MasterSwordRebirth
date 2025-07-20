@@ -43,6 +43,9 @@
 #include "mscharacter.h"
 #include "global.h"
 #include "pm_shared.h" // PM_GetHullBounds
+#include "ms/angelscript/ASEngineEventManager.h"
+#include "ms/angelscript/CAngelScriptManager.h"
+#include "ms/angelscript/ASModuleSystem.h"
 
 extern void PlayerPrecache();
 
@@ -108,6 +111,37 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
 		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
+		
+		// Fire AngelScript engine event for player connection
+		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+		if (pEventManager)
+		{
+			// Extract Steam ID from address if available (format: "SteamID:12345" or just IP)
+			std::string steamID = "Unknown";
+			if (pszAddress && strlen(pszAddress) > 0)
+			{
+				std::string addr(pszAddress);
+				size_t steamPos = addr.find("SteamID:");
+				if (steamPos != std::string::npos)
+				{
+					steamID = addr.substr(steamPos + 8); // Skip "SteamID:"
+				}
+				else
+				{
+					steamID = addr; // Use full address as fallback
+				}
+			}
+			
+			// Log handler count before firing event
+			int handlerCount = pEventManager->GetHandlerCount(EngineEventType::PLAYER_CONNECT);
+			logfile << Logger::LOG_INFO << "[DEBUG] Firing PlayerConnect event - handlers registered: " << handlerCount << "\n";
+			
+			pEventManager->FirePlayerConnectEvent(pszName ? pszName : "Unknown", steamID.c_str());
+		}
+		else
+		{
+			logfile << Logger::LOG_ERROR << "[DEBUG] ASEngineEventManager instance is null during player connect!\n";
+		}
 	}
 	else
 		logfile << "Client rejected: " << szRejectReason << "\n";
@@ -147,6 +181,43 @@ void ClientDisconnect(edict_t *pEntity)
 		pSound->Reset();*/
 
 	dbg("Call g_pGameRules->ClientDisconnected");
+
+	// Fire AngelScript engine event for player disconnection (before cleanup)
+	ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+	if (pEventManager && pEntity)
+	{
+		// Get player information before cleanup
+		const char* pszPlayerName = "Unknown";
+		std::string steamID = "Unknown";
+		
+		// Try to get player name from entity
+		if (pEntity->v.netname && STRING(pEntity->v.netname)[0])
+		{
+			pszPlayerName = STRING(pEntity->v.netname);
+		}
+		
+		// Try to get Steam ID from client info
+		int iPlayerIndex = ENTINDEX(pEntity) - 1;
+		if (iPlayerIndex >= 0 && iPlayerIndex < gpGlobals->maxClients)
+		{
+			clientaddr_t &ClientInfo = g_NewClients[iPlayerIndex];
+			if (ClientInfo.Addr[0])
+			{
+				std::string addr(ClientInfo.Addr);
+				size_t steamPos = addr.find("SteamID:");
+				if (steamPos != std::string::npos)
+				{
+					steamID = addr.substr(steamPos + 8); // Skip "SteamID:"
+				}
+				else
+				{
+					steamID = addr; // Use full address as fallback
+				}
+			}
+		}
+		
+		pEventManager->FirePlayerDisconnectEvent(pszPlayerName, steamID.c_str());
+	}
 
 	//When the server is shutdown, this ClientDisconnect is called after gamerules has been deleted
 	if (g_pGameRules)
@@ -366,7 +437,7 @@ void Host_Say(edict_t *pEntity, int teamonly)
 	// echo to server console
 	g_engfuncs.pfnServerPrint(text);
 
-	char *temp;
+	const char *temp;
 	if (teamonly)
 		temp = "say_team";
 	else
@@ -449,6 +520,7 @@ void ClientCommand2(edict_t *pEntity)
 	if (FStrEq(pcmd, "say"))
 	{
 		char *Args = (char *)CMD_ARGS();
+		
 		pPlayer->Speak(Args, (speech_type)pPlayer->m_SayType);
 	}
 	else if (FStrEq(pcmd, "say_text") && !pPlayer->m_Gagged)
@@ -460,7 +532,7 @@ void ClientCommand2(edict_t *pEntity)
 			msstring Text = msstring(Args).find_str(" "); //skip the first parameter
 			Text = Text.substr(1);
 
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			if (pGMScript)
 			{
@@ -470,6 +542,15 @@ void ClientCommand2(edict_t *pEntity)
 				Parameters.add(Text);
 				pGMScript->CallScriptEvent("game_playerspeak", &Parameters);
 			}
+			
+			// Fire the PlayerSayText event to AngelScript
+			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+			if( pEventManager && pPlayer )
+			{
+				const char* pszPlayerName = pPlayer->DisplayName();
+				const char* pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
+				pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, Text.c_str());
+			}
 
 			pPlayer->Speak(Text, (speech_type)SayType);
 		}
@@ -477,6 +558,113 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "setsay"))
 	{
 		pPlayer->m_SayType = atoi(CMD_ARGV(1));
+	}
+	else if (FStrEq(pcmd, "as_test"))
+	{
+		// Test AngelScript LogMessage and event system
+		ALERT(at_console, "[AS_TEST] Testing AngelScript functions...\n");
+		
+		// Test calling the TestLogMessage function
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			ALERT(at_console, "[AS_TEST] Calling TestLogMessage function...\n");
+			bool result = pASManager->CallGlobalFunction("TestLogMessage", "GameMaster");
+			ALERT(at_console, "[AS_TEST] TestLogMessage result: %s\n", result ? "SUCCESS" : "FAILED");
+			
+			// Also test a simple function
+			ALERT(at_console, "[AS_TEST] Calling TestSimpleFunction...\n");
+			result = pASManager->CallGlobalFunction("TestSimpleFunction", "GameMaster");
+			ALERT(at_console, "[AS_TEST] TestSimpleFunction result: %s\n", result ? "SUCCESS" : "FAILED");
+		}
+		else
+		{
+			ALERT(at_console, "[AS_TEST] AngelScript manager not initialized!\n");
+		}
+	}
+	else if (FStrEq(pcmd, "as_fire_event"))
+	{
+		// Manually fire a test event
+		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+		if (pEventManager)
+		{
+			const char* eventType = CMD_ARGC() > 1 ? CMD_ARGV(1) : "connect";
+			
+			if (FStrEq(eventType, "connect"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing PlayerConnect event...\n");
+				pEventManager->FirePlayerConnectEvent("TestPlayer", "STEAM_TEST_12345");
+			}
+			else if (FStrEq(eventType, "disconnect"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing PlayerDisconnect event...\n");
+				pEventManager->FirePlayerDisconnectEvent("TestPlayer", "STEAM_TEST_12345");
+			}
+			else if (FStrEq(eventType, "monster"))
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Firing MonsterKilled event...\n");
+				pEventManager->FireMonsterKilledEvent("TestMonster", "TestKiller", 100.0f, 200.0f, 50.0f);
+			}
+			else
+			{
+				ALERT(at_console, "[AS_FIRE_EVENT] Unknown event type. Use: connect, disconnect, or monster\n");
+			}
+		}
+		else
+		{
+			ALERT(at_console, "[AS_FIRE_EVENT] Event manager not initialized!\n");
+		}
+	}
+	else if (FStrEq(pcmd, "as_reload_scripts"))
+	{
+		// Developer-only console command for AngelScript hot-reload
+		ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script reload console command executed by %s\n", pPlayer->DisplayName());
+		
+		// Check for elite/developer permissions (same logic as chat command)
+		/*
+		if (!pPlayer->IsElite())
+		{
+			pPlayer->SendInfoMsg("Error: This command requires developer permissions.");
+			ALERT(at_console, "[AS_RELOAD_SCRIPTS] Permission denied for %s\n", pPlayer->DisplayName());
+			return;
+		}
+		*/
+
+		pPlayer->SendInfoMsg("Initiating script hot-reload via console command...");
+		ALERT(at_console, "[AS_RELOAD_SCRIPTS] Starting script hot-reload process\n");
+		
+		// Call the native C++ hot-reload functionality
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if (pModuleSystem)
+		{
+			bool reloadSuccess = pModuleSystem->ReloadAllModules();
+			
+			if (reloadSuccess)
+			{
+				pPlayer->SendInfoMsg("Script hot-reload completed successfully!");
+				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload completed successfully\n");
+				
+				// Send notification to all players
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				{
+					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
+					if (pOtherPlayer && pOtherPlayer != pPlayer && pOtherPlayer->m_Initialized)
+					{
+						pOtherPlayer->SendInfoMsg(msstring("Server scripts have been reloaded by ") + pPlayer->DisplayName());
+					}
+				}
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("Script hot-reload failed! Check server console for details.");
+				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: AngelScript module system not available.");
+			ALERT(at_console, "[AS_RELOAD_SCRIPTS] ASModuleSystem instance not available\n");
+		}
 	}
 	else if (FStrEq(pcmd, "localcb")) // MiB MAR2015_01 [LOCAL_PANEL] - For doing server-side callback
 	{
@@ -1158,7 +1346,7 @@ void ClientCommand2(edict_t *pEntity)
 		if (!strcmp(CMD_ARGV(1), "GM"))
 		{
 			ALERT(at_console, "DEBUG: ce - requested GM as target\n");
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 			if (pGameMasterEnt)
 			{
 				pScripted = pGameMasterEnt->GetScripted();
@@ -1717,7 +1905,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	LinkUserMessages();
 
 	//If the game master hasn't been created yet, create it now - Solokiller
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	if (!pGameMasterEnt)
 	{
 		logfile << Logger::LOG_INFO << "Spawning game master\n";

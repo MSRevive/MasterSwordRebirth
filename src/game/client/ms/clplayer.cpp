@@ -1226,7 +1226,7 @@ void __CmdFunc_DynamicNPC(void)
 
 	char MenuText[2048] = "Spawn NPC:\n\n";
 
-	char* pszNPCList = gEngfuncs.pfnGetCvarString("ms_dynamicnpc");
+	const char* pszNPCList = gEngfuncs.pfnGetCvarString("ms_dynamicnpc");
 
 	if (!pszNPCList)
 	{

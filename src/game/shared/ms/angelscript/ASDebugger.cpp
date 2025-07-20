@@ -214,13 +214,15 @@ std::vector<ASVariableInfo> ASDebugger::GetLocalVariables(asIScriptContext* pCon
     {
         ASVariableInfo varInfo;
         
-        const char* varName = pContext->GetVarName(i);
+        const char* varName = nullptr;
+        int typeId = 0;
+        pContext->GetVar(i, 0, &varName, &typeId);
+        
         if (varName)
         {
             varInfo.name = varName;
         }
         
-        int typeId = pContext->GetVarTypeId(i);
         const char* typeName = m_pEngine->GetTypeDeclaration(typeId);
         if (typeName)
         {
@@ -303,10 +305,11 @@ ASVariableInfo ASDebugger::GetVariableInfo(const std::string& varName, asIScript
     int varCount = pContext->GetVarCount();
     for (int i = 0; i < varCount; i++)
     {
-        const char* localVarName = pContext->GetVarName(i);
+        const char* localVarName = nullptr;
+        int typeId = 0;
+        pContext->GetVar(i, 0, &localVarName, &typeId);
         if (localVarName && varName == localVarName)
         {
-            int typeId = pContext->GetVarTypeId(i);
             const char* typeName = m_pEngine->GetTypeDeclaration(typeId);
             if (typeName)
             {
@@ -384,7 +387,9 @@ std::vector<ASCallFrame> ASDebugger::GetCallStack(asIScriptContext* pContext)
             frame.functionName = pFunc->GetName();
             
             // Get script section name (approximates script name)
-            const char* sectionName = pFunc->GetScriptSectionName();
+            const char* sectionName = nullptr;
+            int row, col;
+            pFunc->GetDeclaredAt(&sectionName, &row, &col);
             if (sectionName)
             {
                 frame.scriptName = sectionName;
@@ -452,7 +457,9 @@ void ASDebugger::LineCallback(asIScriptContext* pContext, void* pUserData)
     if (!pFunc)
         return;
     
-    const char* sectionName = pFunc->GetScriptSectionName();
+    const char* sectionName = nullptr;
+    int row, col;
+    pFunc->GetDeclaredAt(&sectionName, &row, &col);
     std::string scriptName = sectionName ? sectionName : "unknown";
     
     int lineNumber = pContext->GetLineNumber();
@@ -483,7 +490,12 @@ void ASDebugger::ExceptionCallback(asIScriptContext* pContext, void* pUserData)
         return;
     
     asIScriptFunction* pFunc = pContext->GetFunction();
-    const char* sectionName = pFunc ? pFunc->GetScriptSectionName() : "unknown";
+    const char* sectionName = "unknown";
+    if (pFunc) {
+        int row, col;
+        pFunc->GetDeclaredAt(&sectionName, &row, &col);
+        if (!sectionName) sectionName = "unknown";
+    }
     int lineNumber = pContext->GetLineNumber();
     
     std::string errorMsg = "Script exception at ";
@@ -514,7 +526,12 @@ bool ASDebugger::CheckBreakpoint(const std::string& scriptName, int lineNumber)
 void ASDebugger::HandleBreakpoint(asIScriptContext* pContext)
 {
     asIScriptFunction* pFunc = pContext->GetFunction();
-    const char* sectionName = pFunc ? pFunc->GetScriptSectionName() : "unknown";
+    const char* sectionName = "unknown";
+    if (pFunc) {
+        int row, col;
+        pFunc->GetDeclaredAt(&sectionName, &row, &col);
+        if (!sectionName) sectionName = "unknown";
+    }
     int lineNumber = pContext->GetLineNumber();
     
     LogMessage("Breakpoint hit at " + std::string(sectionName) + ":" + std::to_string(lineNumber));
@@ -819,7 +836,9 @@ void ASProfiler::FunctionStartCallback(asIScriptContext* pContext, void* pUserDa
     if (pFunc)
     {
         const char* funcName = pFunc->GetName();
-        const char* sectionName = pFunc->GetScriptSectionName();
+        const char* sectionName = nullptr;
+        int row, col;
+        pFunc->GetDeclaredAt(&sectionName, &row, &col);
         
         if (funcName && sectionName)
         {
@@ -838,7 +857,9 @@ void ASProfiler::FunctionEndCallback(asIScriptContext* pContext, void* pUserData
     if (pFunc)
     {
         const char* funcName = pFunc->GetName();
-        const char* sectionName = pFunc->GetScriptSectionName();
+        const char* sectionName = nullptr;
+        int row, col;
+        pFunc->GetDeclaredAt(&sectionName, &row, &col);
         
         if (funcName && sectionName)
         {

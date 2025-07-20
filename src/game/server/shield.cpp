@@ -89,7 +89,7 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 
 //
 //  CShieldArea
-//  �����������
+//  (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 void CShieldArea ::Spawn()
 {
 	pev->movetype = MOVETYPE_FLY;

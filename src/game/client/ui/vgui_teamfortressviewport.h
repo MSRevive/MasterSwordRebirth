@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright (c) 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose:
 //
@@ -71,9 +71,9 @@ class CTeamMenuPanel;
 char *GetVGUITGAName(const char *pszName);
 BitmapTGA *LoadTGAForRes(const char *pImageName);
 void ScaleColors(int &r, int &g, int &b, int a);
-extern char *sTFClassSelection[];
+extern const char *sTFClassSelection[];
 extern int sTFValidClassInts[];
-extern char *sLocalisedClasses[];
+extern const char *sLocalisedClasses[];
 extern int iTeamColors[5][3];
 
 #define MAX_SERVERNAME_LENGTH 32
@@ -459,14 +459,14 @@ protected:
 	int m_iCloseVGUIMenu;
 
 public:
-	CMenuHandler_StringCommand(char *pszCommand)
+	CMenuHandler_StringCommand(const char *pszCommand)
 	{
 		 strncpy(m_pszCommand,  pszCommand, sizeof(m_pszCommand) );
 		m_pszCommand[MAX_COMMAND_SIZE - 1] = '\0';
 		m_iCloseVGUIMenu = false;
 	}
 
-	CMenuHandler_StringCommand(char *pszCommand, int iClose)
+	CMenuHandler_StringCommand(const char* pszCommand, int iClose)
 	{
 		 strncpy(m_pszCommand,  pszCommand, sizeof(m_pszCommand) );
 		m_pszCommand[MAX_COMMAND_SIZE - 1] = '\0';
@@ -490,11 +490,11 @@ class CMenuHandler_StringCommandWatch : public CMenuHandler_StringCommand
 {
 private:
 public:
-	CMenuHandler_StringCommandWatch(char *pszCommand) : CMenuHandler_StringCommand(pszCommand)
+	CMenuHandler_StringCommandWatch(const char *pszCommand) : CMenuHandler_StringCommand(pszCommand)
 	{
 	}
 
-	CMenuHandler_StringCommandWatch(char *pszCommand, int iClose) : CMenuHandler_StringCommand(pszCommand, iClose)
+	CMenuHandler_StringCommandWatch(const char *pszCommand, int iClose) : CMenuHandler_StringCommand(pszCommand, iClose)
 	{
 	}
 

@@ -146,13 +146,13 @@ using namespace vgui;
 	"CIVILIAN",
 };*/
 
-char *sLocalisedClasses[] =
+const char *sLocalisedClasses[] =
 	{
 		"Buy",
 		"Sell",
 };
 
-char *sTFClassSelection[] =
+const char *sTFClassSelection[] =
 	{
 		"Buy",
 		"Sell",
@@ -1241,7 +1241,7 @@ void TeamFortressViewport::SetCurrentMenu(CMenuPanel *pMenu)
 CMenuPanel *TeamFortressViewport::CreateTextWindow(int iTextToShow)
 {
 	//char sz[256];
-	char *cText = "N/A";
+	const char *cText = "N/A";
 	char *pfile = NULL;
 	static const int MAX_TITLE_LENGTH = 32;
 	char cTitle[MAX_TITLE_LENGTH];
@@ -2112,7 +2112,7 @@ int TeamFortressViewport::MsgFunc_ScoreInfo(const char *pszName, int iSize, void
 int TeamFortressViewport::MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
-	char *TeamName = READ_STRING();
+	const char *TeamName = READ_STRING();
 	int i = 0;
 
 	// find the team matching the name

@@ -77,7 +77,7 @@
 #undef CVAR_GET_STRING
 #undef CVAR_CREATE
 inline float CVAR_GET_FLOAT(const char *x) { return gEngfuncs.pfnGetCvarFloat((char *)x); }
-inline char *CVAR_GET_STRING(const char *x) { return gEngfuncs.pfnGetCvarString((char *)x); }
+inline const char *CVAR_GET_STRING(const char *x) { return gEngfuncs.pfnGetCvarString((char *)x); }
 inline struct cvar_s *CVAR_CREATE(const char *cv, const char *val, const int flags) { return gEngfuncs.pfnRegisterVariable((char *)cv, (char *)val, flags); }
 
 #define SPR_Load (*gEngfuncs.pfnSPR_Load)
@@ -160,7 +160,7 @@ inline void CenterPrint(const char *string)
 #define GetPlayerInfo (*gEngfuncs.pfnGetPlayerInfo)
 
 // sound functions
-inline void PlaySound(char *szSound, float vol) { gEngfuncs.pfnPlaySoundByName(szSound, vol); }
+inline void PlaySound(const char *szSound, float vol) { gEngfuncs.pfnPlaySoundByName(szSound, vol); }
 inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSound, vol); }
 inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound, vol); }
 

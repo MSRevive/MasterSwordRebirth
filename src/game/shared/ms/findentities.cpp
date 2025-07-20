@@ -116,7 +116,8 @@ bool CTraceLineFilter::Allow(CFindEntity &vEntity) const
 	UTIL_TraceLine(mOrigin, vEntity.Center(), ignore_monsters, mpIgnoreEntity ? mpIgnoreEntity->edict() : NULL, &tr);
 	return tr.flFraction == 1;
 #else
-	pmtrace_s pTrace = *gEngfuncs.PM_TraceLine((float *)&mOrigin, (float *)&vEntity.Center(), PM_TRACELINE_PHYSENTSONLY, 2, ignore_monsters);
+	Vector vEntityCenter = vEntity.Center();
+	pmtrace_s pTrace = *gEngfuncs.PM_TraceLine((float *)&mOrigin, (float *)&vEntityCenter, PM_TRACELINE_PHYSENTSONLY, 2, ignore_monsters);
 	return pTrace.fraction == 1;
 #endif
 }
