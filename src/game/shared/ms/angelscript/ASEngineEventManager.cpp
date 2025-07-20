@@ -8,6 +8,7 @@
 #include <asbind20/asbind.hpp>
 #include <angelscript.h>
 #include <algorithm>
+#include <cmath> //required for vector.h
 
 // Include vector.h directly to avoid mathlib.h macro conflicts
 // We need the vec_t typedef but not the DotProduct macro

@@ -2122,11 +2122,11 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		
 		// Additional memory validation - check if pointer is in valid memory range
 		// This helps catch cases where CMD_ARGS() returns a non-null but invalid pointer
-		if( IsBadReadPtr( pszText, 1 ) )
+		/*if( IsBadReadPtr( pszText, 1 ) )
 		{
 			ALERT( at_console, "Say command: CMD_ARGS() returned invalid memory pointer\n" );
 			return FALSE;
-		}
+		}*/
 		
 		// Check for empty string
 		if( !*pszText )
@@ -2143,12 +2143,6 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		// Manually calculate length with bounds checking to avoid buffer overrun
 		while( *pCheck && textLen < MAX_SAFE_LENGTH )
 		{
-			// Additional memory validation during iteration
-			if( IsBadReadPtr( pCheck, 1 ) )
-			{
-				ALERT( at_console, "Say command: Invalid memory detected during string traversal at position %zu\n", textLen );
-				return FALSE;
-			}
 			pCheck++;
 			textLen++;
 		}
@@ -2205,7 +2199,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			pszPlayerName = pPlayer->DisplayName();
 			
 			// Validate player name pointer
-			if( pszPlayerName && IsBadReadPtr( pszPlayerName, 1 ) )
+			if( pszPlayerName == nullptr )
 			{
 				ALERT( at_console, "Say command: Player DisplayName() returned invalid pointer\n" );
 				pszPlayerName = nullptr;
@@ -2213,7 +2207,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			
 			// Get Steam ID with validation
 			pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
-			if( pszSteamID && IsBadReadPtr( pszSteamID, 1 ) )
+			if( pszSteamID == nullptr )
 			{
 				ALERT( at_console, "Say command: GETPLAYERAUTHID() returned invalid pointer\n" );
 				pszSteamID = nullptr;
