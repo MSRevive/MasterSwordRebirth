@@ -18,11 +18,11 @@
 #include "addons/scriptarray/scriptarray.h"
 
 // Include asbind20 for modern binding syntax
-#include "../../../../../thirdparty/asbind20/asbind.hpp"
+#include <asbind20/asbind.hpp>
 
 // Include vector.h directly for Vector type
 typedef float vec_t;
-#include "../../../server/hl/vector.h"
+#include "../../../../server/hl/vector.h"
 
 // Include MSLogger with proper path
 #include "mslogger.h"
