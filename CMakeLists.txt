@@ -137,7 +137,10 @@ add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 # Add Projects
 add_subdirectory(src/game/client)
 add_subdirectory(src/game/server)
-add_subdirectory(src/game/tools/scriptpack)
+# TODO: make scriptpack tool Linux compatible.
+if (WIN32)
+	add_subdirectory(src/game/tools/scriptpack)
+endif()
 
 # Set Visual Studio starting project
 if (MSVC)
