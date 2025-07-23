@@ -113,7 +113,7 @@ typedef struct cl_enginefuncs_s
 	void						( *pfnSPR_DrawAdditive )	( int frame, int x, int y, const wrect_t *prc );
 	void						( *pfnSPR_EnableScissor )	( int x, int y, int width, int height );
 	void						( *pfnSPR_DisableScissor )	( void );
-	client_sprite_t				*( *pfnSPR_GetList )			( char *psz, int *piCount );
+	client_sprite_t				*( *pfnSPR_GetList )			( const char *psz, int *piCount );
 
 	// screen handlers
 	void						( *pfnFillRGBA )			( int x, int y, int width, int height, int r, int g, int b, int a );
@@ -121,20 +121,20 @@ typedef struct cl_enginefuncs_s
 	void						( *pfnSetCrosshair )		( HLSPRITE hspr, wrect_t rc, int r, int g, int b );
 
 	// cvar handlers
-	struct cvar_s				*( *pfnRegisterVariable )	( char *szName, char *szValue, int flags );
-	float						( *pfnGetCvarFloat )		( char *szName );
-	char*						( *pfnGetCvarString )		( char *szName );
+	struct cvar_s				*( *pfnRegisterVariable )	( const char *szName, const char *szValue, int flags );
+	float						( *pfnGetCvarFloat )		( const char *szName );
+	const char*						( *pfnGetCvarString )		( const char *szName );
 
 	// command handlers
-	int							( *pfnAddCommand )			( char *cmd_name, void (*function)(void) );
-	int							( *pfnHookUserMsg )			( char *szMsgName, pfnUserMsgHook pfn );
-	int							( *pfnServerCmd )			( char *szCmdString );
-	int							( *pfnClientCmd )			( char *szCmdString );
+	int							( *pfnAddCommand )			( const char *cmd_name, void (*function)(void) );
+	int							( *pfnHookUserMsg )			( const char *szMsgName, pfnUserMsgHook pfn );
+	int							( *pfnServerCmd )			( const char *szCmdString );
+	int							( *pfnClientCmd )			( const char *szCmdString );
 
 	void						( *pfnGetPlayerInfo )		( int ent_num, hud_player_info_t *pinfo );
 
 	// sound handlers
-	void						( *pfnPlaySoundByName )		( char *szSound, float volume );
+	void						( *pfnPlaySoundByName )		( const char *szSound, float volume );
 	void						( *pfnPlaySoundByIndex )	( int iSound, float volume );
 
 	// vector helpers
@@ -157,19 +157,19 @@ typedef struct cl_enginefuncs_s
 	void						( *GetViewAngles )			( float * );
 	void						( *SetViewAngles )			( float * );
 	int							( *GetMaxClients )			( void );
-	void						( *Cvar_SetValue )			( char *cvar, float value );
+	void						( *Cvar_SetValue )			( const char *cvar, float value );
 
 	int       					(*Cmd_Argc)					(void);	
 	char						*( *Cmd_Argv )				( int arg );
-	void						( *Con_Printf )				( char *fmt, ... );
-	void						( *Con_DPrintf )			( char *fmt, ... );
-	void						( *Con_NPrintf )			( int pos, char *fmt, ... );
-	void						( *Con_NXPrintf )			( struct con_nprint_s *info, char *fmt, ... );
+	void						( *Con_Printf )				( const char *fmt, ... );
+	void						( *Con_DPrintf )			( const char *fmt, ... );
+	void						( *Con_NPrintf )			( int pos, const char *fmt, ... );
+	void						( *Con_NXPrintf )			( struct con_nprint_s *info, const char *fmt, ... );
 
 	const char					*( *PhysInfo_ValueForKey )	( const char *key );
 	const char					*( *ServerInfo_ValueForKey )( const char *key );
 	float						( *GetClientMaxspeed )		( void );
-	int							( *CheckParm )				( char *parm, char **ppnext );
+	int							( *CheckParm )				( const char *parm, char **ppnext );
 	void						( *Key_Event )				( int key, int down );
 	void						( *GetMousePosition )		( int *mx, int *my );
 	int							( *IsNoClipping )			( void );

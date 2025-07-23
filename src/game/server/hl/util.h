@@ -261,7 +261,7 @@ extern void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarge
 extern float UTIL_StringToSecs(const char *timein);									//DEC2014_21 Thothie - Centralizing music/time conversion
 
 extern void Util_ScriptArray(CBaseEntity *pEntity, const char *array_operation, const char *array_name, const char *array_value); //NOV2014_16 Thothie - making code side array changes easier
-extern char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation, const char *array_name, int subIdx);	  //NOV2014_16 Thothie - making code side array changes easier
+extern const char *Util_ScriptArrayGetProps(CBaseEntity *pEntity, const char *array_operation, const char *array_name, int subIdx);	  //NOV2014_16 Thothie - making code side array changes easier
 
 //[begin] NOV2014_09 Thothie - centralizing afk/bot checking
 extern int UTIL_NumPlayers();
@@ -388,7 +388,7 @@ extern char *UTIL_dtos3(int d);
 extern char *UTIL_dtos4(int d);
 
 // Writes message to console with timestamp and FragLog header.
-extern void UTIL_LogPrintf(char *fmt, ...);
+extern void UTIL_LogPrintf(const char *fmt, ...);
 
 // Sorta like FInViewCone, but for nonmonsters.
 extern float UTIL_DotPoints(const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir);

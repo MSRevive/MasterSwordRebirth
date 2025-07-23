@@ -114,13 +114,34 @@ int CScriptBuilder::AddSectionFromFile(const char *filename)
 // Returns <0 if there was an error
 int CScriptBuilder::AddSectionFromMemory(const char *sectionName, const char *scriptCode, unsigned int scriptLength, int lineOffset)
 {
+	printf("[CScriptBuilder] AddSectionFromMemory called for section '%s' (length: %u)\n", sectionName, scriptLength);
+	
+	// Log first 200 chars of script content for debugging
+	if (scriptCode && scriptLength > 0)
+	{
+		unsigned int previewLen = scriptLength < 200 ? scriptLength : 200;
+		printf("[CScriptBuilder] Script preview: %.*s%s\n", previewLen, scriptCode, 
+		       scriptLength > 200 ? "..." : "");
+	}
+	
 	if( IncludeIfNotAlreadyIncluded(sectionName) )
 	{
+		printf("[CScriptBuilder] Processing script section '%s'\n", sectionName);
 		int r = ProcessScriptSection(scriptCode, scriptLength, sectionName, lineOffset);
 		if( r < 0 )
+		{
+			printf("[CScriptBuilder] ProcessScriptSection failed with error: %d\n", r);
 			return r;
+		}
 		else
+		{
+			printf("[CScriptBuilder] ProcessScriptSection succeeded for '%s'\n", sectionName);
 			return 1;
+		}
+	}
+	else
+	{
+		printf("[CScriptBuilder] Section '%s' already included, skipping\n", sectionName);
 	}
 
 	return 0;
@@ -128,7 +149,48 @@ int CScriptBuilder::AddSectionFromMemory(const char *sectionName, const char *sc
 
 int CScriptBuilder::BuildModule()
 {
-	return Build();
+	printf("[CScriptBuilder] BuildModule called for module '%s'\n", module ? module->GetName() : "NULL");
+	
+	// Log module state before build
+	if (module)
+	{
+		printf("[CScriptBuilder] Module '%s' state before build:\n", module->GetName());
+		printf("  - Function count: %d\n", module->GetFunctionCount());
+		printf("  - Global var count: %d\n", module->GetGlobalVarCount());
+		printf("  - Type count: %d\n", module->GetObjectTypeCount());
+	}
+	
+	int result = Build();
+	
+	// Log module state after build
+	if (module && result >= 0)
+	{
+		printf("[CScriptBuilder] Module '%s' built successfully:\n", module->GetName());
+		printf("  - Function count: %d\n", module->GetFunctionCount());
+		printf("  - Global var count: %d\n", module->GetGlobalVarCount());
+		printf("  - Type count: %d\n", module->GetObjectTypeCount());
+		
+		// Log first few functions for debugging
+		printf("[CScriptBuilder] Functions in module:\n");
+		for (asUINT i = 0; i < module->GetFunctionCount() && i < 10; i++)
+		{
+			asIScriptFunction* func = module->GetFunctionByIndex(i);
+			if (func)
+			{
+				printf("    - %s\n", func->GetName());
+			}
+		}
+		if (module->GetFunctionCount() > 10)
+		{
+			printf("    ... and %d more functions\n", module->GetFunctionCount() - 10);
+		}
+	}
+	else if (result < 0)
+	{
+		printf("[CScriptBuilder] Module build failed with error: %d\n", result);
+	}
+	
+	return result;
 }
 
 void CScriptBuilder::DefineWord(const char *word)
@@ -522,7 +584,21 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 
 	// Build the actual script
 	engine->SetEngineProperty(asEP_COPY_SCRIPT_SECTIONS, true);
-	module->AddScriptSection(sectionname, modifiedScript.c_str(), modifiedScript.size(), lineOffset);
+	
+	printf("[CScriptBuilder] Adding script section '%s' to module (size: %zu)\n", 
+	       sectionname, modifiedScript.size());
+	
+	// Log the processed script content preview
+	if (modifiedScript.size() > 0)
+	{
+		size_t previewLen = modifiedScript.size() < 300 ? modifiedScript.size() : 300;
+		printf("[CScriptBuilder] Processed script preview:\n%.*s%s\n", 
+		       (int)previewLen, modifiedScript.c_str(), 
+		       modifiedScript.size() > 300 ? "\n..." : "");
+	}
+	
+	int addResult = module->AddScriptSection(sectionname, modifiedScript.c_str(), modifiedScript.size(), lineOffset);
+	printf("[CScriptBuilder] AddScriptSection returned: %d\n", addResult);
 
 	if( includes.size() > 0 )
 	{
@@ -571,9 +647,17 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 
 int CScriptBuilder::Build()
 {
+	printf("[CScriptBuilder::Build] Starting build for module '%s'\n", module ? module->GetName() : "NULL");
+	
 	int r = module->Build();
+	
+	printf("[CScriptBuilder::Build] module->Build() returned: %d\n", r);
+	
 	if( r < 0 )
+	{
+		printf("[CScriptBuilder::Build] Build failed with error code: %d\n", r);
 		return r;
+	}
 
 #if AS_PROCESS_METADATA == 1
 	// After the script has been built, the metadata strings should be

@@ -60,7 +60,7 @@ void FileSystem_Shutdown();
 *		with a zero byte (null terminator) appended to it if @p format is @c FileContentFormat::Text.
 *		If the file could not be loaded an empty buffer is returned.
 */
-std::vector<byte> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID = nullptr);
+std::vector<unsigned char> FileSystem_LoadFileIntoBuffer(const char* fileName, FileContentFormat format, const char* pathID = nullptr);
 
 /**
 *	@brief Writes a text file to disk.
@@ -150,7 +150,7 @@ public:
 	}
 
 	template <typename... Args>
-	int Printf(char* format, Args&&... args)
+	int Printf(const char* format, Args&&... args)
 	{
 		return g_pFileSystem->FPrintf(m_Handle, format, std::forward<Args>(args)...);
 	}

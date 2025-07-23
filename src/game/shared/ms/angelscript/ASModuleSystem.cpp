@@ -5,13 +5,77 @@
 //==========================================================================
 
 #include "ASModuleSystem.h"
+#include "addons/scriptbuilder/scriptbuilder.h"
+#include "addons/scriptmodule/scriptmodule.h"
+#include "groupfile.h"
+#include "scriptmgr.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <cstring>
 
+// Platform-specific includes for sleep functionality
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 // Singleton instance
 ASModuleSystem* ASModuleSystem::s_pInstance = nullptr;
+
+//==========================================================================
+// Pak File Include Callback for CScriptBuilder
+//==========================================================================
+int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder *builder, void *userParam)
+{
+    if (!include || !builder || !userParam)
+    {
+        printf("PakFileIncludeCallback: ERROR - Invalid parameters\n");
+        return -1;
+    }
+    
+    CGameGroupFile* groupFile = static_cast<CGameGroupFile*>(userParam);
+    
+    // Build the full path for the include file within the angelscript directory
+    std::string includePath = "angelscript/";
+    includePath += include;
+    
+    printf("PakFileIncludeCallback: Loading include '%s' from pak file\n", includePath.c_str());
+    
+    // First check if the file exists and get its size
+    unsigned long fileSize;
+    if (!groupFile->ReadEntry(includePath.c_str(), nullptr, fileSize))
+    {
+        printf("PakFileIncludeCallback: ERROR - Include file not found in pak: %s\n", includePath.c_str());
+        return -1;
+    }
+    
+    // Allocate buffer and read the file content
+    char* scriptContent = new char[fileSize + 1];
+    if (!groupFile->ReadEntry(includePath.c_str(), (unsigned char*)scriptContent, fileSize))
+    {
+        printf("PakFileIncludeCallback: ERROR - Failed to read include file from pak: %s\n", includePath.c_str());
+        delete[] scriptContent;
+        return -1;
+    }
+    scriptContent[fileSize] = '\0';
+    
+    // Add the script section to the builder
+    int result = builder->AddSectionFromMemory(include, scriptContent, fileSize);
+    
+    // Clean up allocated memory
+    delete[] scriptContent;
+    
+    if (result < 0)
+    {
+        printf("PakFileIncludeCallback: ERROR - Failed to add script section: %s\n", include);
+        return result;
+    }
+    
+    printf("PakFileIncludeCallback: Successfully loaded include '%s' (%lu bytes)\n", include, fileSize);
+    return result;
+}
 
 //==========================================================================
 // Constructor/Destructor
@@ -21,10 +85,14 @@ ASModuleSystem::ASModuleSystem()
     , m_nModulesLoaded(0)
     , m_nModulesCompiled(0)
     , m_nDependenciesResolved(0)
+    , m_pScriptModule(nullptr)
 {
     // Add default module search paths
     m_ModulePaths.push_back("scripts/modules/");
     m_ModulePaths.push_back("scripts/");
+    
+    // Initialize script module discovery system
+    m_pScriptModule = new CScriptModule();
 }
 
 ASModuleSystem::~ASModuleSystem()
@@ -88,17 +156,25 @@ void ASModuleSystem::Destroy()
     
     m_Modules.clear();
     m_DependencyGraph.clear();
+    
+    // Clean up script module system
+    if (m_pScriptModule)
+    {
+        delete m_pScriptModule;
+        m_pScriptModule = nullptr;
+    }
+    
     m_pEngine = nullptr;
 }
 
 //==========================================================================
 // Module Loading
 //==========================================================================
-bool ASModuleSystem::LoadModule(const std::string& filename, const ASModuleLoadOptions& options)
+bool ASModuleSystem::LoadASModule(const std::string& filename, const ASModuleLoadOptions& options)
 {
     if (!m_pEngine)
     {
-        printf("ASModuleSystem::LoadModule: ERROR - Not initialized\n");
+        printf("ASModuleSystem::LoadASModule: ERROR - Not initialized\n");
         return false;
     }
     
@@ -106,7 +182,7 @@ bool ASModuleSystem::LoadModule(const std::string& filename, const ASModuleLoadO
     std::string fullPath = FindModuleFile(filename);
     if (fullPath.empty())
     {
-        printf("ASModuleSystem::LoadModule: ERROR - Module file not found: %s\n", filename.c_str());
+        printf("ASModuleSystem::LoadASModule: ERROR - Module file not found: %s\n", filename.c_str());
         return false;
     }
     
@@ -114,7 +190,7 @@ bool ASModuleSystem::LoadModule(const std::string& filename, const ASModuleLoadO
     std::ifstream file(fullPath);
     if (!file.is_open())
     {
-        printf("ASModuleSystem::LoadModule: ERROR - Failed to open file: %s\n", fullPath.c_str());
+        printf("ASModuleSystem::LoadASModule: ERROR - Failed to open file: %s\n", fullPath.c_str());
         return false;
     }
     
@@ -143,7 +219,7 @@ bool ASModuleSystem::LoadModule(const std::string& filename, const ASModuleLoadO
     return LoadModuleFromMemory(info.name, content, options);
 }
 
-bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options)
+bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, CGameGroupFile* pakFile, const ASModuleLoadOptions& options)
 {
     if (!m_pEngine)
     {
@@ -179,32 +255,52 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
         }
     }
     
-    // Create or get the module
-    info.pModule = m_pEngine->GetModule(name.c_str(), asGM_CREATE_IF_NOT_EXISTS);
-    if (!info.pModule)
+    // Use CScriptBuilder to handle #include directives and preprocessing
+    CScriptBuilder builder;
+    
+    // Set up pak file include callback if pakFile is provided
+    if (pakFile)
     {
-        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to create module: %s\n", name.c_str());
+        builder.SetIncludeCallback(PakFileIncludeCallback, pakFile);
+        printf("ASModuleSystem: Pak file include callback configured for module '%s'\n", name.c_str());
+    }
+    else
+    {
+        printf("ASModuleSystem: No pak file provided - #include directives will not be supported\n");
+    }
+    
+    int r = builder.StartNewModule(m_pEngine, name.c_str());
+    if (r < 0)
+    {
+        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to start new module: %s\n", name.c_str());
         return false;
     }
     
-    // Add the script section
-    int r = info.pModule->AddScriptSection(name.c_str(), content.c_str(), content.length());
+    // Add the script content to the builder
+    r = builder.AddSectionFromMemory(name.c_str(), content.c_str(), content.length());
     if (r < 0)
     {
         printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to add script section for module: %s\n", name.c_str());
         return false;
     }
     
-    // Build the module if not compile-only
+    // Build the module if not compile-only (CScriptBuilder handles this)
     if (!options.compileOnly)
     {
-        if (!BuildModule(info))
+        r = builder.BuildModule();
+        if (r < 0)
         {
+            printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to build module: %s\n", name.c_str());
             return false;
         }
+        
+        // Get the module from the builder
+        info.pModule = builder.GetModule();
     }
     else
     {
+        // Get the module for compile-only mode
+        info.pModule = builder.GetModule(); 
         m_nModulesCompiled++;
     }
     
@@ -213,9 +309,15 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
     UpdateDependencyGraph(name, info.dependencies);
     m_nModulesLoaded++;
     
-    printf("ASModuleSystem: Module '%s' loaded successfully\n", name.c_str());
+    printf("ASModuleSystem: Module '%s' loaded successfully with pak file support\n", name.c_str());
     
     return true;
+}
+
+bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options)
+{
+    // Delegate to the pak-aware version with no pak file (traditional loading)
+    return LoadModuleFromMemory(name, content, nullptr, options);
 }
 
 //==========================================================================
@@ -317,7 +419,7 @@ bool ASModuleSystem::ReloadModule(const std::string& name)
     options.allowOverwrite = true;
     options.resolveDependencies = true;
     
-    return LoadModule(modulePath, options);
+    return LoadASModule(modulePath, options);
 }
 
 //==========================================================================
@@ -722,7 +824,7 @@ bool ASModuleSystem::LoadDependency(const ASModuleDependency& dep)
     ASModuleLoadOptions options;
     options.resolveDependencies = true;
     
-    return LoadModule(moduleFile, options);
+    return LoadASModule(moduleFile, options);
 }
 
 std::string ASModuleSystem::FindModuleFile(const std::string& moduleName)
@@ -870,6 +972,482 @@ void ASModuleSystem::ReleaseReference(const std::string& moduleName)
 }
 
 //==========================================================================
+// Module Discovery (New Functionality)
+//==========================================================================
+bool ASModuleSystem::DiscoverModulesInPak(CGameGroupFile* pakFile)
+{
+    if (!m_pScriptModule)
+    {
+        printf("ASModuleSystem::DiscoverModulesInPak: ERROR - Script module system not initialized\n");
+        return false;
+    }
+    
+    if (!pakFile)
+    {
+        printf("ASModuleSystem::DiscoverModulesInPak: ERROR - NULL pak file\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem: Starting module discovery in PAK file...\n");
+    
+    // Clear any previously discovered modules
+    m_pScriptModule->ClearModules();
+    
+    // Use the script module system to discover modules
+    bool result = m_pScriptModule->DiscoverModulesInPak(pakFile);
+    
+    if (result)
+    {
+        printf("ASModuleSystem: Module discovery completed successfully\n");
+        m_pScriptModule->PrintDiscoveredModules();
+    }
+    else
+    {
+        printf("ASModuleSystem: Module discovery failed\n");
+    }
+    
+    return result;
+}
+
+std::vector<std::string> ASModuleSystem::GetDiscoveredModules() const
+{
+    std::vector<std::string> moduleNames;
+    
+    if (m_pScriptModule)
+    {
+        const std::vector<ModuleInfo>& discoveredModules = m_pScriptModule->GetDiscoveredModules();
+        
+        for (const ModuleInfo& moduleInfo : discoveredModules)
+        {
+            moduleNames.push_back(moduleInfo.name);
+        }
+    }
+    
+    return moduleNames;
+}
+
+bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
+{
+    if (!m_pScriptModule)
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - Script module system not initialized\n");
+        return false;
+    }
+    
+    if (!pakFile)
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - NULL pak file\n");
+        return false;
+    }
+    
+    const std::vector<ModuleInfo>& discoveredModules = m_pScriptModule->GetDiscoveredModules();
+    
+    if (discoveredModules.empty())
+    {
+        printf("ASModuleSystem::LoadDiscoveredModules: No modules discovered. Run DiscoverModulesInPak first.\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem: Loading %d discovered modules...\n", (int)discoveredModules.size());
+    
+    bool allSuccess = true;
+    
+    // Load each discovered module
+    for (const ModuleInfo& moduleInfo : discoveredModules)
+    {
+        printf("ASModuleSystem: Loading module '%s' from %s\n", moduleInfo.name.c_str(), moduleInfo.filePath.c_str());
+        
+        // Use the processed source (module -> class transformation)
+        ASModuleLoadOptions options;
+        options.allowOverwrite = true;
+        options.resolveDependencies = true;
+        
+        if (LoadModuleFromMemory(moduleInfo.name, moduleInfo.processed, pakFile, options))
+        {
+            printf("ASModuleSystem: Successfully loaded module '%s'\n", moduleInfo.name.c_str());
+            
+            // Call the module's initialization function
+            if (moduleInfo.hasMainClass)
+            {
+                asIScriptModule* pModule = GetModule(moduleInfo.name);
+                if (pModule)
+                {
+                    // Call the auto-generated initialization function
+                    std::string initFuncName = moduleInfo.name + "_Initialize";
+                    printf("ASModuleSystem: Looking for initialization function '%s'\n", initFuncName.c_str());
+                    
+                    asIScriptFunction* pInitFunc = pModule->GetFunctionByName(initFuncName.c_str());
+                    if (pInitFunc)
+                    {
+                        printf("ASModuleSystem: Found initialization function, creating context...\n");
+                        asIScriptContext* pContext = m_pEngine->CreateContext();
+                        if (pContext)
+                        {
+                            printf("ASModuleSystem: Preparing to execute '%s'...\n", initFuncName.c_str());
+                            pContext->Prepare(pInitFunc);
+                            int r = pContext->Execute();
+                            
+                            if (r == asEXECUTION_FINISHED)
+                            {
+                                printf("ASModuleSystem: Module '%s' initialized successfully\n", moduleInfo.name.c_str());
+                            }
+                            else if (r == asEXECUTION_EXCEPTION)
+                            {
+                                printf("ASModuleSystem: WARNING - Module '%s' initialization threw exception: %s\n", 
+                                       moduleInfo.name.c_str(), pContext->GetExceptionString());
+                            }
+                            else
+                            {
+                                printf("ASModuleSystem: WARNING - Module '%s' initialization failed: %d\n", moduleInfo.name.c_str(), r);
+                            }
+                            
+                            pContext->Release();
+                        }
+                        else
+                        {
+                            printf("ASModuleSystem: ERROR - Failed to create context for initialization\n");
+                        }
+                    }
+                    else
+                    {
+                        printf("ASModuleSystem: WARNING - Module '%s' has no initialization function '%s'\n", 
+                               moduleInfo.name.c_str(), initFuncName.c_str());
+                        
+                        // List all functions in the module for debugging
+                        printf("ASModuleSystem: Functions in module '%s':\n", moduleInfo.name.c_str());
+                        for (asUINT i = 0; i < pModule->GetFunctionCount(); i++)
+                        {
+                            asIScriptFunction* pFunc = pModule->GetFunctionByIndex(i);
+                            if (pFunc)
+                            {
+                                printf("  - %s\n", pFunc->GetName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            printf("ASModuleSystem: ERROR - Failed to load module '%s'\n", moduleInfo.name.c_str());
+            allSuccess = false;
+        }
+    }
+    
+    if (allSuccess)
+    {
+        printf("ASModuleSystem: All discovered modules loaded successfully\n");
+    }
+    else
+    {
+        printf("ASModuleSystem: Some modules failed to load\n");
+    }
+    
+    return allSuccess;
+}
+
+//==========================================================================
+// Hot-Reload Functionality
+//==========================================================================
+bool ASModuleSystem::ReloadAllModules()
+{
+    if (!m_pEngine)
+    {
+        printf("ASModuleSystem::ReloadAllModules: ERROR - Not initialized\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem: Starting hot-reload of all modules...\n");
+    
+    // Attempt PAK refresh with retry logic
+    const int maxRetries = 3;
+    bool pakRefreshSuccess = false;
+    
+    for (int attempt = 1; attempt <= maxRetries; attempt++)
+    {
+        printf("ASModuleSystem::ReloadAllModules: PAK refresh attempt %d/%d\n", attempt, maxRetries);
+        
+        if (RefreshFromPak())
+        {
+            pakRefreshSuccess = true;
+            break;
+        }
+        
+        if (attempt < maxRetries)
+        {
+            printf("ASModuleSystem::ReloadAllModules: PAK refresh failed, waiting 1 second before retry...\n");
+#ifdef _WIN32
+            Sleep(1000); // Sleep for 1 second on Windows
+#else
+            sleep(1); // Sleep for 1 second on Unix-like systems
+#endif
+        }
+    }
+    
+    if (!pakRefreshSuccess)
+    {
+        printf("ASModuleSystem::ReloadAllModules: ERROR - Failed to refresh PAK file after %d attempts\n", maxRetries);
+        printf("ASModuleSystem::ReloadAllModules: Hot-reload aborted to prevent system instability\n");
+        return false;
+    }
+    
+    printf("ASModuleSystem::ReloadAllModules: PAK refresh successful\n");
+    
+    // Get list of currently loaded modules to preserve order
+    std::vector<std::string> loadedModules = GetLoadedModules();
+    printf("ASModuleSystem: Found %d loaded modules to reload\n", (int)loadedModules.size());
+    
+    // Store module info before unloading for restoration if needed
+    std::map<std::string, ASModuleInfo> moduleBackup;
+    for (const std::string& moduleName : loadedModules)
+    {
+        auto it = m_Modules.find(moduleName);
+        if (it != m_Modules.end())
+        {
+            moduleBackup[moduleName] = it->second;
+        }
+    }
+    
+    // Unload all modules in reverse dependency order
+    std::vector<std::string> unloadOrder;
+    if (TopologicalSort(unloadOrder))
+    {
+        std::reverse(unloadOrder.begin(), unloadOrder.end());
+        
+        for (const std::string& moduleName : unloadOrder)
+        {
+            printf("ASModuleSystem: Unloading module '%s'\n", moduleName.c_str());
+            
+            // Force unload by temporarily reducing reference count
+            auto it = m_Modules.find(moduleName);
+            if (it != m_Modules.end())
+            {
+                int originalRefCount = it->second.refCount;
+                it->second.refCount = 0;  // Temporarily set to 0 to allow unload
+                it->second.isBuiltin = false;  // Allow unloading even if marked as builtin
+                
+                if (!UnloadModule(moduleName))
+                {
+                    printf("ASModuleSystem: WARNING - Failed to unload module '%s'\n", moduleName.c_str());
+                    // Restore reference count if unload failed
+                    if (m_Modules.find(moduleName) != m_Modules.end())
+                    {
+                        m_Modules[moduleName].refCount = originalRefCount;
+                    }
+                }
+            }
+        }
+    }
+    
+    // Re-discover modules in the refreshed PAK
+    printf("ASModuleSystem::ReloadAllModules: Discovering modules in refreshed PAK...\n");
+    if (!DiscoverModulesInPak(&ScriptMgr::m_GroupFile))
+    {
+        printf("ASModuleSystem::ReloadAllModules: ERROR - Failed to discover modules after PAK refresh\n");
+        printf("ASModuleSystem::ReloadAllModules: This could indicate PAK corruption or missing module files\n");
+        
+        // Try to restore backed up modules
+        printf("ASModuleSystem::ReloadAllModules: Attempting to restore previous module state...\n");
+        for (const auto& backup : moduleBackup)
+        {
+            if (m_Modules.find(backup.first) == m_Modules.end())
+            {
+                printf("ASModuleSystem::ReloadAllModules: Restoring module: %s\n", backup.first.c_str());
+                m_Modules[backup.first] = backup.second;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Load all discovered modules with error recovery
+    printf("ASModuleSystem::ReloadAllModules: Loading discovered modules...\n");
+    bool loadSuccess = LoadDiscoveredModules(&ScriptMgr::m_GroupFile);
+    
+    if (!loadSuccess)
+    {
+        printf("ASModuleSystem::ReloadAllModules: ERROR - Failed to load discovered modules\n");
+        printf("ASModuleSystem::ReloadAllModules: Checking which modules failed to load...\n");
+        
+        // Check which modules are missing and try to restore them
+        int restoredCount = 0;
+        for (const auto& backup : moduleBackup)
+        {
+            if (m_Modules.find(backup.first) == m_Modules.end())
+            {
+                printf("ASModuleSystem::ReloadAllModules: Module '%s' missing after reload, attempting restore...\n", backup.first.c_str());
+                
+                // Try to restore the module state
+                m_Modules[backup.first] = backup.second;
+                restoredCount++;
+            }
+        }
+        
+        if (restoredCount > 0)
+        {
+            printf("ASModuleSystem::ReloadAllModules: Restored %d modules from backup\n", restoredCount);
+            printf("ASModuleSystem::ReloadAllModules: Hot-reload partially failed, but system stability maintained\n");
+        }
+        else
+        {
+            printf("ASModuleSystem::ReloadAllModules: Unable to restore any modules - system may be unstable\n");
+        }
+        
+        return false;
+    }
+    
+    // Verify that all expected modules were reloaded
+    printf("ASModuleSystem::ReloadAllModules: Verifying module reload success...\n");
+    int successfulReloads = 0;
+    int failedReloads = 0;
+    
+    for (const std::string& originalModule : loadedModules)
+    {
+        if (HasModule(originalModule))
+        {
+            successfulReloads++;
+            printf("ASModuleSystem::ReloadAllModules: ✓ Module '%s' reloaded successfully\n", originalModule.c_str());
+        }
+        else
+        {
+            failedReloads++;
+            printf("ASModuleSystem::ReloadAllModules: ✗ Module '%s' failed to reload\n", originalModule.c_str());
+        }
+    }
+    
+    printf("ASModuleSystem: Hot-reload completed\n");
+    printf("ASModuleSystem: Modules successfully reloaded: %d\n", successfulReloads);
+    printf("ASModuleSystem: Modules failed to reload: %d\n", failedReloads);
+    
+    if (failedReloads > 0)
+    {
+        printf("ASModuleSystem: WARNING - Some modules failed to reload, check console for errors\n");
+    }
+    
+    PrintModuleStats();
+    
+    return failedReloads == 0;
+}
+
+bool ASModuleSystem::RefreshFromPak()
+{
+    // Refresh the scripts.pak file to get any changes
+    printf("ASModuleSystem::RefreshFromPak: Starting PAK file refresh process...\n");
+    
+    // Get current status information
+    bool wasOpen = ScriptMgr::m_GroupFile.IsOpen();
+    size_t currentEntries = ScriptMgr::m_GroupFile.GetEntryCount();
+    
+    printf("ASModuleSystem::RefreshFromPak: Current PAK status - %s, %zu entries\n",
+           wasOpen ? "OPEN" : "CLOSED", currentEntries);
+    
+    // Try multiple common locations for scripts.pak
+    const char* pakLocations[] = {
+        "scripts.pak",
+        "./scripts.pak",
+        "../scripts.pak",
+        "scripts/scripts.pak"
+    };
+    const int numLocations = sizeof(pakLocations) / sizeof(pakLocations[0]);
+    
+    if (!wasOpen)
+    {
+        printf("ASModuleSystem::RefreshFromPak: PAK file not currently open, searching for scripts.pak...\n");
+        
+        bool found = false;
+        for (int i = 0; i < numLocations; i++)
+        {
+            printf("ASModuleSystem::RefreshFromPak: Trying location: %s\n", pakLocations[i]);
+            
+            // Use the enhanced file existence check from CGameGroupFile
+            if (ScriptMgr::m_GroupFile.Open(pakLocations[i]))
+            {
+                printf("ASModuleSystem::RefreshFromPak: Successfully opened PAK file at: %s\n", pakLocations[i]);
+                found = true;
+                break;
+            }
+        }
+        
+        if (!found)
+        {
+            printf("ASModuleSystem::RefreshFromPak: ERROR - Could not find scripts.pak in any location\n");
+            printf("ASModuleSystem::RefreshFromPak: Searched locations:\n");
+            for (int i = 0; i < numLocations; i++)
+            {
+                printf("  - %s\n", pakLocations[i]);
+            }
+            return false;
+        }
+    }
+    else
+    {
+        printf("ASModuleSystem::RefreshFromPak: PAK file is open, attempting refresh...\n");
+        
+        // Get the current filename before refresh
+        std::string currentFilename;
+        if (ScriptMgr::m_GroupFile.GetFilename().length() > 0)
+        {
+            currentFilename = ScriptMgr::m_GroupFile.GetFilename();
+            printf("ASModuleSystem::RefreshFromPak: Current PAK filename: %s\n", currentFilename.c_str());
+        }
+        else
+        {
+            printf("ASModuleSystem::RefreshFromPak: WARNING - No stored filename, will try default locations\n");
+        }
+        
+        // Attempt to refresh the existing PAK file
+        bool refreshSuccess = false;
+        
+        if (!currentFilename.empty())
+        {
+            printf("ASModuleSystem::RefreshFromPak: Attempting refresh with stored filename...\n");
+            refreshSuccess = ScriptMgr::m_GroupFile.Refresh();
+        }
+        
+        // If refresh failed and we don't have a filename, try common locations
+        if (!refreshSuccess)
+        {
+            printf("ASModuleSystem::RefreshFromPak: Initial refresh failed, trying fallback locations...\n");
+            
+            for (int i = 0; i < numLocations; i++)
+            {
+                printf("ASModuleSystem::RefreshFromPak: Fallback attempt with: %s\n", pakLocations[i]);
+                
+                if (ScriptMgr::m_GroupFile.Refresh(pakLocations[i]))
+                {
+                    printf("ASModuleSystem::RefreshFromPak: Refresh successful with fallback location: %s\n", pakLocations[i]);
+                    refreshSuccess = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!refreshSuccess)
+        {
+            printf("ASModuleSystem::RefreshFromPak: ERROR - All refresh attempts failed\n");
+            printf("ASModuleSystem::RefreshFromPak: This could indicate:\n");
+            printf("  - scripts.pak file is missing or moved\n");
+            printf("  - File permission issues\n");
+            printf("  - PAK file corruption\n");
+            printf("  - File is locked by another process\n");
+            return false;
+        }
+    }
+    
+    // Verify the refresh was successful
+    size_t newEntries = ScriptMgr::m_GroupFile.GetEntryCount();
+    printf("ASModuleSystem::RefreshFromPak: PAK file refreshed successfully\n");
+    printf("ASModuleSystem::RefreshFromPak: Entry count: %zu (was %zu)\n", newEntries, currentEntries);
+    
+    if (newEntries == 0)
+    {
+        printf("ASModuleSystem::RefreshFromPak: WARNING - PAK file has no entries, this may indicate an empty or corrupted file\n");
+    }
+    
+    return true;
+}
+
+//==========================================================================
 // Global Registration Functions
 //==========================================================================
 namespace ASModuleSystemBindings
@@ -903,7 +1481,7 @@ namespace ASModuleSystemBindings
         }
         else
         {
-            printf("   ✓ Module functions registered successfully\n");
+            printf("   OK Module functions registered successfully\n");
         }
         
         // Register import/export functions
@@ -915,7 +1493,7 @@ namespace ASModuleSystemBindings
         }
         else
         {
-            printf("   ✓ Import/export functions registered successfully\n");
+            printf("   OK Import/export functions registered successfully\n");
         }
         
         if (success)
@@ -935,16 +1513,20 @@ namespace ASModuleSystemBindings
         int r;
         
         // Register module loading functions
-        r = pEngine->RegisterGlobalFunction("bool LoadModule(const string &in)", asFUNCTION(::LoadModule), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool LoadASModule(const string &in)", asFUNCTION(LoadASModule), asCALL_CDECL);
         if (r < 0) return false;
         
-        r = pEngine->RegisterGlobalFunction("bool UnloadModule(const string &in)", asFUNCTION(::UnloadModule), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool UnloadModule(const string &in)", asFUNCTION(UnloadModule), asCALL_CDECL);
         if (r < 0) return false;
         
-        r = pEngine->RegisterGlobalFunction("bool ReloadModule(const string &in)", asFUNCTION(::ReloadModule), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool ReloadModule(const string &in)", asFUNCTION(ReloadModule), asCALL_CDECL);
         if (r < 0) return false;
         
-        r = pEngine->RegisterGlobalFunction("bool HasModule(const string &in)", asFUNCTION(::HasModule), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool HasModule(const string &in)", asFUNCTION(HasModule), asCALL_CDECL);
+        if (r < 0) return false;
+        
+        // Register hot-reload function
+        r = pEngine->RegisterGlobalFunction("bool ReloadAllScriptModules()", asFUNCTION(ReloadAllScriptModules), asCALL_CDECL);
         if (r < 0) return false;
         
         return true;
@@ -955,10 +1537,10 @@ namespace ASModuleSystemBindings
         int r;
         
         // Register import functions
-        r = pEngine->RegisterGlobalFunction("bool ImportModule(const string &in)", asFUNCTION(static_cast<bool(*)(const std::string&)>(::ImportModule)), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool ImportModule(const string &in)", asFUNCTION(static_cast<bool(*)(const std::string&)>(ImportModule)), asCALL_CDECL);
         if (r < 0) return false;
         
-        r = pEngine->RegisterGlobalFunction("bool ImportModule(const string &in, const string &in)", asFUNCTION(static_cast<bool(*)(const std::string&, const std::string&)>(::ImportModule)), asCALL_CDECL);
+        r = pEngine->RegisterGlobalFunction("bool ImportModule(const string &in, const string &in)", asFUNCTION(static_cast<bool(*)(const std::string&, const std::string&)>(ImportModule)), asCALL_CDECL);
         if (r < 0) return false;
         
         return true;
@@ -968,16 +1550,16 @@ namespace ASModuleSystemBindings
 //==========================================================================
 // AngelScript Global Functions Implementation
 //==========================================================================
-bool LoadModule(const std::string& filename)
+bool LoadASModule(const std::string& filename)
 {
     ASModuleSystem* pSystem = ASModuleSystem::Instance();
     if (!pSystem)
     {
-        printf("LoadModule: ERROR - Module system not initialized\n");
+        printf("LoadASModule: ERROR - Module system not initialized\n");
         return false;
     }
     
-    return pSystem->LoadModule(filename);
+    return pSystem->LoadASModule(filename);
 }
 
 bool UnloadModule(const std::string& name)
@@ -1044,4 +1626,16 @@ bool ImportModule(const std::string& moduleName, const std::string& asNamespace)
     }
     
     return pSystem->HasModule(moduleName);
+}
+
+bool ReloadAllScriptModules()
+{
+    ASModuleSystem* pSystem = ASModuleSystem::Instance();
+    if (!pSystem)
+    {
+        printf("ReloadAllScriptModules: ERROR - Module system not initialized\n");
+        return false;
+    }
+    
+    return pSystem->ReloadAllModules();
 }

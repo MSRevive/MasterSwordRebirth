@@ -328,6 +328,11 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASTest.h"
 	"../shared/ms/angelscript/ASCoreTypes.cpp"
 	"../shared/ms/angelscript/ASCoreTypes.h"
+	"../shared/ms/angelscript/ASEntityBindings.cpp"
+	"../shared/ms/angelscript/ASEntityBindings.h"
+	"../shared/ms/angelscript/ASEngineProvider.cpp"
+	"../shared/ms/angelscript/ASEngineInterface.h"
+	"../shared/ms/angelscript/ASEngineBindings.h"
 	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
 	"../shared/ms/angelscript/ASBuiltinFunctions.h"
 	"../shared/ms/angelscript/ASBindings.cpp"
@@ -342,8 +347,16 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASObjectPool.h"
 	"../shared/ms/angelscript/ASScriptClasses.cpp"
 	"../shared/ms/angelscript/ASScriptClasses.h"
+	"../shared/ms/angelscript/ASEngineEventManager.cpp"
+	"../shared/ms/angelscript/ASEngineEventManager.h"
 )
 source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(Server_AngelScript
+	"angelscript/ASServerEngineImpl.cpp"
+	"angelscript/ASServerEngineImpl.h"
+)
+source_group("Server\\AngelScript" FILES ${Server_AngelScript})
 
 set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_atomic.cpp"
@@ -351,6 +364,7 @@ set(ThirdParty_AngelScript
 	"../../../thirdparty/angelscript/as_bytecode.cpp"
 	"../../../thirdparty/angelscript/as_callfunc.cpp"
 	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x64_msvc.cpp"
 	"../../../thirdparty/angelscript/as_compiler.cpp"
 	"../../../thirdparty/angelscript/as_configgroup.cpp"
 	"../../../thirdparty/angelscript/as_context.cpp"
@@ -379,6 +393,9 @@ set(ThirdParty_AngelScript
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
 	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
 	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
+	"../shared/ms/angelscript/addons/scriptdictionary/scriptdictionary.cpp"
+	"../shared/ms/angelscript/addons/scriptbuilder/scriptbuilder.cpp"
+	"../shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
@@ -395,6 +412,7 @@ set(ALL_FILES
 	${Shared_Generic_Item}
 	${Shared_base64}
 	${Shared_AngelScript}
+	${Server_AngelScript}
 	${ThirdParty_AngelScript}
 )
 

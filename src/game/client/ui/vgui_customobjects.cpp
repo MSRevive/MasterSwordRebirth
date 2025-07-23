@@ -39,8 +39,8 @@
 #include "ms/vgui_mscontrols.h"
 
 // Arrow filenames
-char *sArrowFilenames[] =
-	{
+const char *sArrowFilenames[] =
+{
 		"arrowup",
 		"arrowdn",
 		"arrowlt",

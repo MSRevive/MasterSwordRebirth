@@ -8,7 +8,7 @@
 ****/
 //
 //	NPC Script: Basically a scripted_sequence, but for MS
-//  ����������
+//  (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 #include "msdllheaders.h"
 #include "monsters/msmonster.h"
 #include "script.h"

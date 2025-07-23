@@ -100,7 +100,7 @@ float CGenericItem::Armor_Protect(damage_t Damage)
 	if( !ShouldProtect ) return Damage.flDamage;
 	*/
 
-	m_ReturnData.c_str()[0] = 0;
+	m_ReturnData.str()[0] = 0;
 
 	msstringlist Parameters;
 	Parameters.add(EntToString(Damage.pAttacker));

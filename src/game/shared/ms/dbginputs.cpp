@@ -1,7 +1,7 @@
 
 //All functions called by the game should call this
 //Then I can debug each one, in order
-void DbgLog(char *szFmt, ...);
+void DbgLog(const char *szFmt, ...);
 
 void DbgInputs(const char *Function, const char *File, long Line)
 {

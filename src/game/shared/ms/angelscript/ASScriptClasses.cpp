@@ -138,7 +138,7 @@ namespace ASScriptClasses
         }
         else
         {
-            printf("   ✓ CGameScript registered successfully\\n");
+            printf("   OK CGameScript registered successfully\\n");
         }
         
         // Step 2: Register script class factory system
@@ -150,7 +150,7 @@ namespace ASScriptClasses
         }
         else
         {
-            printf("   ✓ Script class factories registered successfully\\n");
+            printf("   OK Script class factories registered successfully\\n");
         }
         
         if (success)

@@ -31,6 +31,7 @@
             void error(const std::string& msg) { printf("[ERROR] %s\n", msg.c_str()); }
             void debug(const std::string& msg) { printf("[DEBUG] %s\n", msg.c_str()); }
             void trace(const std::string& msg) { printf("[TRACE] %s\n", msg.c_str()); }
+            void critical(const std::string& msg) { printf("[CRITICAL] %s\n", msg.c_str()); }
             void flush() {}
         };
         typedef std::shared_ptr<logger> logger_ptr;
@@ -325,6 +326,7 @@ void MSLogger::LogString(Category cat, Level level, const std::string& msg) {
         case LEVEL_INFO: logger->info(msg); break;
         case LEVEL_WARN: logger->warn(msg); break;
         case LEVEL_ERROR: logger->error(msg); break;
+        case LEVEL_CRITICAL: logger->critical(msg); break;
         default: break;
     }
 #endif

@@ -9,12 +9,15 @@
 //==========================================================================
 
 #include "IAngelScript.h"
+#include "../iscript.h"  // For LegacyScriptEvent and LegacyScriptCmd types
 #include <map>
 #include <memory>
 
 // Forward declarations
 class asIScriptModule;
 class asIScriptObject;
+class asIScriptFunction;
+class asIScriptContext;
 class CBaseEntity;
 
 //==========================================================================
@@ -116,8 +119,19 @@ CAngelScript* FindScript(CBaseEntity* pEntity, const char* scriptName);
 bool ExecuteEventOnScripts(CBaseEntity* pEntity, const char* eventName, 
                           ASEventParams* pParams = nullptr);
 
-// Legacy compatibility macros
-#define SCRIPT_EVENT ASScriptEvent
-#define scriptcmd_t void  // No longer used with AngelScript
+// Legacy compatibility bridge functions - no more macro conflicts
+// These bridge functions enable gradual migration from legacy to AngelScript
+namespace LegacyScriptBridge {
+    // Convert between legacy and modern event types
+    ASScriptEvent ConvertEvent(const LegacyScriptEvent& legacyEvent);
+    LegacyScriptEvent ConvertEvent(const ASScriptEvent& modernEvent);
+    
+    // Execute legacy script commands through AngelScript
+    bool ExecuteLegacyCommand(CBaseEntity* pEntity, const LegacyScriptCmd& cmd);
+    
+    // Migration helpers
+    bool IsEntityUsingAngelScript(CBaseEntity* pEntity);
+    void MigrateEntityToAngelScript(CBaseEntity* pEntity);
+}
 
 #endif // CANGELSCRIPT_H
