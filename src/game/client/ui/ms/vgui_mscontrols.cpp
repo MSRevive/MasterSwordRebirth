@@ -272,7 +272,7 @@ void containeritem_t::init( CGenericItem *pItem )
 {
 	Name = pItem->ItemName;
 	DebugName = pItem->ItemName.c_str();
-	SpriteName = pItem->TradeSpriteName ? msstring("items/640_") + pItem->TradeSpriteName : "";
+	SpriteName = pItem->TradeSpriteName ? msstring("items/640_") + pItem->TradeSpriteName : msstring("");
 	SpriteFrame = pItem->SpriteFrame;  //Shuriken FEB2008
 	FullName = SPEECH::ItemName( pItem, true );
 	Disabled = false;
@@ -740,7 +740,7 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	else if( keynum == 127 )
 	{
 		if( m_Message.len() )
-			m_Message.c_str()[m_Message.len()-1] = 0;
+			m_Message.str()[m_Message.len()-1] = 0;
 		m_VisibleMsg = m_Message;
 		UpdateText( );
 		return;

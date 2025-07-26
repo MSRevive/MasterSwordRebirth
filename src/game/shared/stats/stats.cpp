@@ -33,14 +33,14 @@ skillstatinfo_t SkillStatList[9] =
 	//	"Pickpocket", true,
 };
 
-char* SkillTypeList[3] =
+const char* SkillTypeList[3] =
 {
 	"Proficiency",
 	"Balance",
 	"Power" 
 };
 
-char* SpellTypeList[5] =
+const char* SpellTypeList[5] =
 {
 	"Fire",
 	"Ice",

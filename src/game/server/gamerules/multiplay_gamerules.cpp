@@ -28,8 +28,15 @@
 #include	"global.h"
 #include	"svglobals.h"
 #include	"mscharacter.h"
+#include	"ms/angelscript/ASEngineEventManager.h"
+#include	"ms/angelscript/CAngelScriptManager.h"
+#include	"ms/angelscript/ASModuleSystem.h"
+#include	"ms/scriptmgr.h"
+#include	<asbind20/asbind.hpp>
 
 #include <climits>
+#include <string>
+#include <algorithm>
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -647,8 +654,8 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	int killer_index = 0;
 	
 	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
+	const char *tau = "tau_cannon";
+	const char *gluon = "gluon gun";
 
 	if ( pKiller->flags & FL_CLIENT )
 	{
@@ -1601,6 +1608,100 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 	
 //Master Sword ----------------------------------------------------
 //=========================================================
+// Universal AngelScript Command Dispatcher
+// Simple dispatcher that routes commands to AngelScript first
+//=========================================================
+class ASCommandDispatcher
+{
+public:
+	static ASCommandDispatcher* Instance()
+	{
+		static ASCommandDispatcher instance;
+		return &instance;
+	}
+	
+	bool IsInitialized()
+	{
+		// Check if AngelScript manager is available and initialized
+		CAngelScriptManager* pManager = CAngelScriptManager::Instance();
+		return pManager && pManager->IsInitialized();
+	}
+	
+	bool DispatchCommand(CBasePlayer* pPlayer, const char* pcmd, const char* args)
+	{
+		if (!pPlayer || !pcmd)
+			return false;
+		
+		// Get AngelScript manager to access the command system
+		CAngelScriptManager* pManager = CAngelScriptManager::Instance();
+		if (!pManager || !pManager->IsInitialized())
+			return false;
+		
+		// Get the script engine
+		asIScriptEngine* pEngine = pManager->GetEngine();
+		if (!pEngine)
+			return false;
+		
+		// Find the ProcessCommand function in AngelScript
+		asIScriptFunction* pProcessCommandFunc = pEngine->GetGlobalFunctionByDecl("bool ProcessCommand(CBasePlayer@, const string &in, const string &in)");
+		if (!pProcessCommandFunc)
+		{
+			// Function not found, log for debugging but don't spam
+			static bool logged = false;
+			if (!logged)
+			{
+				ALERT(at_console, "ASCommandDispatcher: ProcessCommand function not found in AngelScript\n");
+				logged = true;
+			}
+			return false;
+		}
+		
+		try
+		{
+			// Use asbind20 for cleaner script invocation
+			asbind20::request_context ctx(pEngine);
+			
+			// Create string arguments
+			std::string commandStr(pcmd);
+			std::string argsStr(args ? args : "");
+			
+			// Call ProcessCommand function using asbind20
+			auto result = asbind20::script_invoke<bool>(
+				ctx, pProcessCommandFunc, 
+				pPlayer, commandStr, argsStr
+			);
+			
+			if (result.has_value())
+			{
+				bool commandHandled = result.value();
+				
+				if (commandHandled)
+				{
+					ALERT(at_console, "ASCommandDispatcher: Command '%s' handled by AngelScript\n", pcmd);
+				}
+				
+				return commandHandled;
+			}
+			else
+			{
+				ALERT(at_console, "ASCommandDispatcher: ProcessCommand returned no value for '%s'\n", pcmd);
+				return false;
+			}
+		}
+		catch (const std::exception& e)
+		{
+			ALERT(at_console, "ASCommandDispatcher: Exception calling ProcessCommand for '%s': %s\n", pcmd, e.what());
+			return false;
+		}
+		catch (...)
+		{
+			ALERT(at_console, "ASCommandDispatcher: Unknown exception calling ProcessCommand for '%s'\n", pcmd);
+			return false;
+		}
+	}
+};
+
+//=========================================================
 // ClientCommand
 // the user has typed a command which is unrecognized by everything else;
 // this check to see if the gamerules knows anything about the command
@@ -1609,6 +1710,19 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 {
 	if(g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
 		return TRUE;
+
+	// Universal AngelScript Command Dispatcher
+	// Route ALL commands through AngelScript first with fallback to legacy handling
+	ASCommandDispatcher* dispatcher = ASCommandDispatcher::Instance();
+	if( dispatcher && dispatcher->IsInitialized() )
+	{
+		bool handled = dispatcher->DispatchCommand(pPlayer, pcmd, CMD_ARGS());
+		if( handled )
+		{
+			return TRUE; // Command processed by AngelScript
+		}
+		// If not handled by AngelScript, continue to legacy C++ handling
+	}
 
 	int OldMenu;
 	if( FStrEq( pcmd, "menuselect" ) )
@@ -1823,6 +1937,321 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		}
 		return TRUE;
 	}
+	else if( FStrEq( pcmd, "as_reload_scripts" ) )
+	{
+		// Developer-only console command for script hot-reload
+		const char* pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
+		if( !pszSteamID || strcmp(pszSteamID, "STEAM_0:1:630973602") != 0 )
+		{
+			// Check if player has elite/GM status as fallback
+			if( !pPlayer->IsElite() )
+			{
+				pPlayer->SendInfoMsg("Error: This command requires developer permissions.");
+				ALERT(at_console, "as_reload_scripts: Permission denied for %s (Steam ID: %s)\n", pPlayer->DisplayName(), pszSteamID ? pszSteamID : "Unknown");
+				return TRUE;
+			}
+		}
+		
+		// Check if development mode is enabled (optional additional check)
+		if( CVAR_GET_FLOAT("ms_dev_mode") < 1.0f )
+		{
+			pPlayer->SendInfoMsg("Error: Development mode must be enabled (ms_dev_mode 1).");
+			ALERT(at_console, "as_reload_scripts: Development mode not enabled\n");
+			return TRUE;
+		}
+		
+		pPlayer->SendInfoMsg("Initiating script hot-reload...");
+		ALERT(at_console, "as_reload_scripts: Starting script hot-reload process by %s\n", pPlayer->DisplayName());
+		
+		// Call the ASModuleSystem reload function directly
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			bool reloadSuccess = pModuleSystem->ReloadAllModules();
+			
+			if( reloadSuccess )
+			{
+				pPlayer->SendInfoMsg("Script hot-reload completed successfully!");
+				ALERT(at_console, "as_reload_scripts: Script hot-reload completed successfully\n");
+				
+				// Send notification to all players
+				for( int i = 1; i <= gpGlobals->maxClients; i++ )
+				{
+					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
+					if( pOtherPlayer && pOtherPlayer != pPlayer )
+					{
+						pOtherPlayer->SendInfoMsg("Server scripts have been reloaded by %s", pPlayer->DisplayName());
+					}
+				}
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("Script hot-reload failed! Check server console for details.");
+				ALERT(at_console, "as_reload_scripts: Script hot-reload failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: Module system not available.");
+			ALERT(at_console, "as_reload_scripts: Module system not available\n");
+		}
+		
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "as_pak_status" ) )
+	{
+		// Console command to check PAK file status
+		if( !pPlayer )
+			return TRUE;
+		
+		// Check developer permissions
+		msstring steamid = pPlayer->AuthID();
+		const char* szSteamID = steamid.c_str();
+		
+		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
+		{
+			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
+			return TRUE;
+		}
+		
+		// Display PAK file diagnostic information
+		pPlayer->SendInfoMsg("=== PAK File Diagnostic Information ===");
+		ALERT(at_console, "=== PAK File Diagnostic Information ===\n");
+		
+		// Check if PAK file is open
+		bool pakOpen = ScriptMgr::m_GroupFile.IsOpen();
+		size_t entryCount = ScriptMgr::m_GroupFile.GetEntryCount();
+		std::string filename = ScriptMgr::m_GroupFile.GetFilename();
+		
+		pPlayer->SendInfoMsg("PAK File Status: %s", pakOpen ? "OPEN" : "CLOSED");
+		pPlayer->SendInfoMsg("Entry Count: %zu", entryCount);
+		pPlayer->SendInfoMsg("Filename: %s", filename.empty() ? "Not set" : filename.c_str());
+		
+		ALERT(at_console, "PAK File Status: %s\n", pakOpen ? "OPEN" : "CLOSED");
+		ALERT(at_console, "Entry Count: %zu\n", entryCount);
+		ALERT(at_console, "Filename: %s\n", filename.empty() ? "Not set" : filename.c_str());
+		
+		// Try to enumerate AngelScript files
+		std::vector<std::string> asFiles;
+		int asCount = ScriptMgr::m_GroupFile.EnumerateAngelScriptFiles(asFiles);
+		
+		pPlayer->SendInfoMsg("AngelScript Files: %d", asCount);
+		ALERT(at_console, "AngelScript Files Found: %d\n", asCount);
+		
+		if( asCount > 0 && asCount <= 10 ) // Show first 10 files
+		{
+			pPlayer->SendInfoMsg("Sample .as files:");
+			ALERT(at_console, "Sample .as files:\n");
+			for( int i = 0; i < std::min(asCount, 10); i++ )
+			{
+				pPlayer->SendInfoMsg("  %s", asFiles[i].c_str());
+				ALERT(at_console, "  %s\n", asFiles[i].c_str());
+			}
+		}
+		
+		// Check module system status
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			std::vector<std::string> loadedModules = pModuleSystem->GetLoadedModules();
+			pPlayer->SendInfoMsg("Loaded Modules: %d", (int)loadedModules.size());
+			ALERT(at_console, "Loaded Modules: %d\n", (int)loadedModules.size());
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Module System: NOT AVAILABLE");
+			ALERT(at_console, "Module System: NOT AVAILABLE\n");
+		}
+		
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "as_pak_test" ) )
+	{
+		// Console command to test PAK file access
+		if( !pPlayer )
+			return TRUE;
+		
+		// Check developer permissions
+		msstring steamid = pPlayer->AuthID();
+		const char* szSteamID = steamid.c_str();
+		
+		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
+		{
+			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
+			return TRUE;
+		}
+		
+		pPlayer->SendInfoMsg("Testing PAK file refresh...");
+		ALERT(at_console, "as_pak_test: Testing PAK file refresh by %s\n", pPlayer->DisplayName());
+		
+		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+		if( pModuleSystem )
+		{
+			bool refreshSuccess = pModuleSystem->RefreshFromPak();
+			
+			if( refreshSuccess )
+			{
+				pPlayer->SendInfoMsg("PAK file refresh test: SUCCESS");
+				ALERT(at_console, "as_pak_test: PAK refresh test successful\n");
+			}
+			else
+			{
+				pPlayer->SendInfoMsg("PAK file refresh test: FAILED - Check console for details");
+				ALERT(at_console, "as_pak_test: PAK refresh test failed\n");
+			}
+		}
+		else
+		{
+			pPlayer->SendInfoMsg("Error: Module system not available.");
+			ALERT(at_console, "as_pak_test: Module system not available\n");
+		}
+		
+		return TRUE;
+	}
+	else if( FStrEq( pcmd, "say" ) )
+	{
+		// Server-side validation and command processing with enhanced null pointer protection
+		const char* pszText = CMD_ARGS();
+		
+		// Enhanced null and empty validation with memory safety checks
+		if( !pszText )
+		{
+			ALERT( at_console, "Say command: CMD_ARGS() returned NULL pointer\n" );
+			return FALSE; // Let default handling continue
+		}
+		
+		// Additional memory validation - check if pointer is in valid memory range
+		// This helps catch cases where CMD_ARGS() returns a non-null but invalid pointer
+		/*if( IsBadReadPtr( pszText, 1 ) )
+		{
+			ALERT( at_console, "Say command: CMD_ARGS() returned invalid memory pointer\n" );
+			return FALSE;
+		}*/
+		
+		// Check for empty string
+		if( !*pszText )
+		{
+			// Empty text - let default handling continue
+			return FALSE;
+		}
+		
+		// Safe length calculation with additional bounds checking
+		size_t textLen = 0;
+		const char* pCheck = pszText;
+		const size_t MAX_SAFE_LENGTH = 512; // Safety limit
+		
+		// Manually calculate length with bounds checking to avoid buffer overrun
+		while( *pCheck && textLen < MAX_SAFE_LENGTH )
+		{
+			pCheck++;
+			textLen++;
+		}
+		
+		if( textLen == 0 )
+		{
+			return FALSE; // Empty text
+		}
+		
+		if( textLen >= MAX_SAFE_LENGTH )
+		{
+			ALERT( at_console, "Say command: Text length exceeds safety limit (%zu >= %zu)\n", textLen, MAX_SAFE_LENGTH );
+			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "Message too long" );
+			return TRUE; // Block this command
+		}
+		
+		if( textLen > 256 )
+		{
+			// Reject excessively long messages
+			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "Message too long" );
+			return TRUE; // Block this command
+		}
+		
+		// Create a safe copy of the text for further processing
+		// This protects against the original pointer becoming invalid during processing
+		char safeTextBuffer[513]; // MAX_SAFE_LENGTH + 1
+		safeTextBuffer[0] = '\0'; // Initialize
+		
+		// Safe copy with bounds checking
+		if( textLen > 0 && textLen < sizeof(safeTextBuffer) )
+		{
+			strncpy( safeTextBuffer, pszText, textLen );
+			safeTextBuffer[textLen] = '\0'; // Ensure null termination
+		}
+		else
+		{
+			ALERT( at_console, "Say command: Text length invalid for safe copy (%zu)\n", textLen );
+			return FALSE;
+		}
+		
+		// Use the safe copy for all further operations
+		const char* pszSafeText = safeTextBuffer;
+		
+		// Fire PlayerSayText event for ALL chat messages to AngelScript
+		// This allows AngelScript to process regular chat, commands, and vote requests
+		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+		if( pEventManager && pPlayer )
+		{
+			// Validate player information before firing event
+			const char* pszPlayerName = nullptr;
+			const char* pszSteamID = nullptr;
+			
+			// Enhanced player validation
+			pszPlayerName = pPlayer->DisplayName();
+			
+			// Validate player name pointer
+			if( pszPlayerName == nullptr )
+			{
+				ALERT( at_console, "Say command: Player DisplayName() returned invalid pointer\n" );
+				pszPlayerName = nullptr;
+			}
+			
+			// Get Steam ID with validation
+			pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
+			if( pszSteamID == nullptr )
+			{
+				ALERT( at_console, "Say command: GETPLAYERAUTHID() returned invalid pointer\n" );
+				pszSteamID = nullptr;
+			}
+			
+			// Ensure we have valid player information with safe fallbacks
+			if( !pszPlayerName || !*pszPlayerName )
+				pszPlayerName = "Unknown Player";
+			if( !pszSteamID || !*pszSteamID )
+				pszSteamID = "Unknown SteamID";
+			
+			// Pass the safe copy to avoid any issues with the original pointer
+			pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, pszSafeText);
+		}
+		else if( !pEventManager )
+		{
+			// Log if event manager is not available
+			ALERT( at_console, "Say command received but AngelScript event manager not available\n" );
+		}
+		
+		// Check if this is a vote command that should block normal chat processing
+		bool isVoteCommand = false;
+		if( textLen >= 7 ) // Minimum length for "votepvp"
+		{
+			if( (textLen >= 8 && strncmp(pszSafeText, "votemap ", 8) == 0) ||
+				(textLen >= 9 && strncmp(pszSafeText, "/votemap ", 9) == 0) ||
+				(textLen >= 7 && strncmp(pszSafeText, "votepvp", 7) == 0) ||
+				(textLen >= 8 && strncmp(pszSafeText, "/votepvp", 8) == 0) ||
+				(textLen >= 8 && strncmp(pszSafeText, "votelock", 8) == 0) ||
+				(textLen >= 9 && strncmp(pszSafeText, "/votelock", 9) == 0) )
+			{
+				isVoteCommand = true;
+			}
+		}
+		
+		if( isVoteCommand )
+		{
+			// Block the normal chat message since this is a command
+			return TRUE;
+		}
+		
+		// Let normal chat messages continue through default handling
+		return FALSE;
+	}
 	return FALSE;
 }
 
@@ -1833,10 +2262,10 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 //#define PLAYERMODEL_HUMAN_MALE1 "../../human/male1/male1"
 #define PLAYERMODEL_HUMAN_MALE1 ""
 
-void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer )
+void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, const char *infobuffer )
 {
 	// prevent skin/color/model changes
-	char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
+	const char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
 
 	if ( _stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
 	{
@@ -1936,7 +2365,7 @@ void CHalfLifeMultiplay	:: StartVote( CBasePlayer *pPlayer, msstring VoteType, m
 	//Send vote to all players
 	MESSAGE_BEGIN( MSG_ALL, g_netmsg[NETMSG_VOTE], NULL );
 		WRITE_BYTE( 1 ); //Vote has started
-		WRITE_STRING_LIMIT(m_CurrentVote.Type + (SendVoteInfo.len() ? msstring(";") + SendVoteInfo : ""), 128);
+		WRITE_STRING_LIMIT(m_CurrentVote.Type + (SendVoteInfo.len() ? ";" + SendVoteInfo : ""), 128);
 	MESSAGE_END();
 
 	msstringlist Params;
@@ -2002,7 +2431,7 @@ void CHalfLifeMultiplay	:: UpdateVote( )
 	Params.add( m_CurrentVote.Type );
 
 	CBaseEntity *pSourcePlayer = MSInstance( INDEXENT(m_CurrentVote.SourcePlayer) );
-	Params.add( pSourcePlayer ? EntToString(pSourcePlayer) : "<unknown>" );
+	Params.add( pSourcePlayer ? EntToString(pSourcePlayer).str() : "<unknown>");
 
 	if( iYesVotes / (float)iTotalPlayers > 0.50 )
 	{

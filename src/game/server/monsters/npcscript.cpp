@@ -1405,7 +1405,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				//openaccount storagename target cb_prefix
 				if (Params[0] == "openaccount")
 				{
-					msstring Callback = Params.size() >= 4 ? Params[3] : "game_openaccount";
+					msstring Callback = Params.size() >= 4 ? Params[3].str() : "game_openaccount";
 
 					if (pPlayer->Storage_GetStorage(StorageName))
 						CallScriptEvent(Callback + "_exists");
@@ -1423,7 +1423,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				//checkaccount storagename target cb_prefix
 				else if (Params[0] == "checkaccount")
 				{
-					msstring Callback = Params.size() >= 4 ? Params[3] : "game_checkaccount";
+					msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_checkaccount";
 
 					if (pPlayer->Storage_GetStorage(StorageName))
 						CallScriptEvent(Callback + "_success");
@@ -1435,7 +1435,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				{
 					if (Params.size() >= 5)
 					{
-						msstring Callback = Params.size() >= 6 ? Params[5] : "game_storage_trade";
+						msstring Callback = Params.size() >= 6 ? Params[5].c_str() : "game_storage_trade";
 
 						if (pPlayer->Storage_GetStorage(StorageName))
 						{

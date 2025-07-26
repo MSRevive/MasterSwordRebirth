@@ -17,12 +17,13 @@ struct teamunit_t
 class CTeam
 {
 public:
-	CTeam() { memset(this, 0, sizeof(CTeam)); }
+    CTeam() : m_ID(0), m_TeamName{ 0 }
+	{ memset(this, 0, sizeof(CTeam)); }
 	~CTeam();
 
 	int m_ID;
 
-	char m_TeamName[MAX_TEAMNAME_LEN + 1];
+	const char m_TeamName[MAX_TEAMNAME_LEN + 1];
 
 	mslist<teamunit_t> MemberList;
 

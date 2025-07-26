@@ -20,6 +20,7 @@
 #include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
+#include "iscript.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
@@ -568,7 +569,7 @@ public:
 	//	void				UpdateFatigue( );
 	//	void				UpdateMana( );
 	//bool				SwapHands( bool bVerbose = true );
-	void ShowMenu(char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = FALSE);
+	void ShowMenu(const char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = FALSE);
 	int GiveGold(int iAmount, bool bVerbose = true);
 	//float				TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, int iAccuracyRoll);
 	void AttackSound();
@@ -643,7 +644,7 @@ public:
 	charstate_e m_CharacterState; //Is the character loaded?
 	int m_CharacterNum;			  //Number of the currently loaded character
 	char m_NextMap[32], m_OldTransition[32], m_NextTransition[32];
-	char *m_SpawnTransition; //Transition to spawn at, after a level transition, or after death
+	const char *m_SpawnTransition; //Transition to spawn at, after a level transition, or after death
 
 	bool CreateStats();
 	void DeleteStats();
@@ -876,6 +877,6 @@ extern int playerBodyArray[16];
 extern int gmsgHudText;
 extern BOOL gInitHUD;
 
-char *GetOtherPlayerTransition(CBasePlayer *pPlayer);
+const char *GetOtherPlayerTransition(CBasePlayer *pPlayer);
 
 #endif // PLAYER_H

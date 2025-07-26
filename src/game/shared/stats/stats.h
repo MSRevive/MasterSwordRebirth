@@ -97,7 +97,7 @@ struct skillstatinfo_t
 
 extern statinfo_t NatStatList[6];
 extern skillstatinfo_t SkillStatList[9];
-extern char *SkillTypeList[3];
-extern char *SpellTypeList[5];
+extern const char *SkillTypeList[3];
+extern const char *SpellTypeList[5];
 
 #endif // STATS_H

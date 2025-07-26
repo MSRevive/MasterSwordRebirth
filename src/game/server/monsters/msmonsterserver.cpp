@@ -22,6 +22,7 @@
 #include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
+#include "ms/angelscript/ASEngineEventManager.h"
 #include <set>
 #include <cmath>
 
@@ -499,7 +500,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 //
 //	Think
-//	�����
+//	(c)(c)(c)(c)(c)
 void CMSMonster::Think()
 {
 	pev->vuser3.x = MaxHP();
@@ -1415,7 +1416,7 @@ void CMSMonster::StopWalking()
 
 //
 // Attack
-// ������
+// (c)(c)(c)(c)(c)(c)
 
 void CMSMonster::Act()
 {
@@ -1527,7 +1528,7 @@ void CMSMonster :: Jump( ) {
 }*/
 //
 //   Say - Have the Monster say something...
-//   ���
+//   (c)(c)(c)
 void CMSMonster::Say(const char* Sound, float fDuration)
 {
 
@@ -1584,7 +1585,7 @@ void CMSMonster::Talk()
 }
 //
 // Speak - Text speech for both NPCs and players
-// �����
+// (c)(c)(c)(c)(c)
 void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 {
 	if (!pszSentence || !pszSentence[0])
@@ -1831,7 +1832,7 @@ void CMSMonster::Used(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 }
 //
 // Trade - Manage trading with others
-// �����
+// (c)(c)(c)(c)(c)
 void CMSMonster::Trade()
 {
 	if (!HasConditions(MONSTER_TRADING))
@@ -1922,7 +1923,7 @@ tradeinfo_t* CMSMonster::TradeItem(tradeinfo_t* ptiTradeInfo)
 }
 //
 // AcceptOffer - Accept an offer from a player or monster
-// �����������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 bool CMSMonster::AcceptOffer()
 {
 	bool fRecievedItem = false;
@@ -2236,7 +2237,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		{
 			//thothie attempting to pass parry vars
 			msstringlist ParametersB;
-			ParametersB.add(pAttacker ? EntToString(pAttacker) : "none");
+			ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
 			ParametersB.add(Damage.sDamageType);
 			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
@@ -2282,11 +2283,11 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 
 	//Allow scripts to affect the damage
 	msstringlist Parameters;
-	Parameters.add(pAttacker ? EntToString(pAttacker) : "none");
+	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
 	Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
 	Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
-	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor) : "none");
+	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
 
 	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
 	CStat* pStat = FindStat(Damage.ExpStat);
@@ -2320,7 +2321,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	}
 
 	Parameters.clearitems();
-	Parameters.add(pAttacker ? EntToString(pAttacker) : "none");
+	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
 	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
 	CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
 
@@ -2603,6 +2604,47 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 
 			//ALERT( at_console, "called game_death\n" );
 			CallScriptEvent("game_death");
+			
+			// Fire AngelScript engine event for monster death
+			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+			if (pEventManager)
+			{
+				// Get monster name
+				const char* pszMonsterName = "Unknown";
+				if (pev->classname && STRING(pev->classname)[0])
+				{
+					pszMonsterName = STRING(pev->classname);
+				}
+				
+				// Get killer name
+				const char* pszKillerName = "Unknown";
+				if (pevAttacker)
+				{
+					if (pevAttacker->classname && STRING(pevAttacker->classname)[0])
+					{
+						if (FStrEq(STRING(pevAttacker->classname), "player"))
+						{
+							// It's a player, get their netname
+							if (pevAttacker->netname && STRING(pevAttacker->netname)[0])
+							{
+								pszKillerName = STRING(pevAttacker->netname);
+							}
+						}
+						else
+						{
+							// It's another entity, use classname
+							pszKillerName = STRING(pevAttacker->classname);
+						}
+					}
+				}
+				
+				// Get monster position at death
+				Vector deathPos = pev->origin;
+				
+				pEventManager->FireMonsterKilledEvent(pszMonsterName, pszKillerName, 
+													  deathPos.x, deathPos.y, deathPos.z);
+			}
+			
 			m_SkillLevel = 0; //Thothie APR2011_06 - attempt to make sure monster does not give additional skill post mortem
 		}
 		else
@@ -2706,7 +2748,7 @@ void CMSMonster::ReportAIState()
 
 /*
 	LearnSkill - Called after certain actions to increase your skill stats.
-	����������   Caller gets EnemySkillLevel experience pts and then
+	(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   Caller gets EnemySkillLevel experience pts and then
 				 it checks whether it should advance his stats
 */
 

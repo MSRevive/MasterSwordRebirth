@@ -48,6 +48,7 @@ endif()
 target_link_libraries(client PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
 	$<$<PLATFORM_ID:Windows>:vgui>
+	$<$<PLATFORM_ID:Windows>:gdi32>
 	SDL2
 	fmod
 	discord
@@ -69,6 +70,8 @@ target_include_directories(client PRIVATE
 	${BASEDIR}/src/game/server
 	${BASEDIR}/src/game/server/hl
 	${BASEDIR}/thirdparty
+	${BASEDIR}/thirdparty/angelscript/include
+	${BASEDIR}/thirdparty/spdlog/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	ms
 	ui
@@ -81,6 +84,11 @@ target_compile_definitions(client PRIVATE
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
 	USE_BREAKPAD_HANDLER)
+
+# Check if spdlog is available
+if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
+	target_compile_definitions(client PRIVATE HAS_SPDLOG)
+endif()
 
 if (MSVC)
 	set_target_properties(client PROPERTIES 
@@ -176,6 +184,7 @@ source_group("FMOD" FILES ${FMOD})
 
 set(MS
 	"SteamClientHelper.cpp"
+	"ASClientEngine.cpp"
 	"entity.cpp"
 	"ms/action.cpp"
 	"ms/clglobal.cpp"
@@ -263,6 +272,8 @@ set(Shared
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/logger.h"
+	"../shared/ms/mslogger.cpp"
+	"../shared/ms/mslogger.h"
 	"../shared/ms/msbasic.h"
 	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"
@@ -303,6 +314,88 @@ set(Shared_base64
 	"../../../thirdparty/base64/base64.h"
 )
 source_group("Shared\\base64" FILES ${Shared_base64})
+
+set(Shared_AngelScript
+	"../shared/ms/angelscript/CAngelScriptManager.cpp"
+	"../shared/ms/angelscript/CAngelScriptManager.h"
+	"../shared/ms/angelscript/IAngelScript.cpp"
+	"../shared/ms/angelscript/IAngelScript.h"
+	"../shared/ms/angelscript/CAngelScript.cpp"
+	"../shared/ms/angelscript/CAngelScript.h"
+	"../shared/ms/angelscript/ASTest.cpp"
+	"../shared/ms/angelscript/ASTest.h"
+	"../shared/ms/angelscript/ASCoreTypes.cpp"
+	"../shared/ms/angelscript/ASCoreTypes.h"
+	"../shared/ms/angelscript/ASBuiltinFunctions.cpp"
+	"../shared/ms/angelscript/ASBuiltinFunctions.h"
+	"../shared/ms/angelscript/ASBindings.cpp"
+	"../shared/ms/angelscript/ASBindings.h"
+	"../shared/ms/angelscript/ASEntityBindings.cpp"
+	"../shared/ms/angelscript/ASEntityBindings.h"
+	"../shared/ms/angelscript/ASCoroutines.cpp"
+	"../shared/ms/angelscript/ASCoroutines.h"
+	"../shared/ms/angelscript/ASDebugger.cpp"
+	"../shared/ms/angelscript/ASDebugger.h"
+	"../shared/ms/angelscript/ASModuleSystem.cpp"
+	"../shared/ms/angelscript/ASModuleSystem.h"
+	"../shared/ms/angelscript/ASObjectPool.cpp"
+	"../shared/ms/angelscript/ASObjectPool.h"
+	"../shared/ms/angelscript/ASScriptClasses.cpp"
+	"../shared/ms/angelscript/ASScriptClasses.h"
+	"../shared/ms/angelscript/ASEngineProvider.cpp"
+	"../shared/ms/angelscript/ASEngineInterface.h"
+	"../shared/ms/angelscript/ASEngineBindings.h"
+	"../shared/ms/angelscript/ASEngineEventManager.cpp"
+	"../shared/ms/angelscript/ASEngineEventManager.h"
+)
+source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
+
+set(Client_AngelScript
+	"angelscript/ASClientEngineImpl.cpp"
+	"angelscript/ASClientEngineImpl.h"
+)
+source_group("Client\\AngelScript" FILES ${Client_AngelScript})
+
+set(ThirdParty_AngelScript
+	"../../../thirdparty/angelscript/as_atomic.cpp"
+	"../../../thirdparty/angelscript/as_builder.cpp"
+	"../../../thirdparty/angelscript/as_bytecode.cpp"
+	"../../../thirdparty/angelscript/as_callfunc.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x86.cpp"
+	"../../../thirdparty/angelscript/as_callfunc_x64_msvc.cpp"
+	"../../../thirdparty/angelscript/as_compiler.cpp"
+	"../../../thirdparty/angelscript/as_configgroup.cpp"
+	"../../../thirdparty/angelscript/as_context.cpp"
+	"../../../thirdparty/angelscript/as_datatype.cpp"
+	"../../../thirdparty/angelscript/as_gc.cpp"
+	"../../../thirdparty/angelscript/as_generic.cpp"
+	"../../../thirdparty/angelscript/as_globalproperty.cpp"
+	"../../../thirdparty/angelscript/as_memory.cpp"
+	"../../../thirdparty/angelscript/as_module.cpp"
+	"../../../thirdparty/angelscript/as_objecttype.cpp"
+	"../../../thirdparty/angelscript/as_outputbuffer.cpp"
+	"../../../thirdparty/angelscript/as_parser.cpp"
+	"../../../thirdparty/angelscript/as_restore.cpp"
+	"../../../thirdparty/angelscript/as_scriptcode.cpp"
+	"../../../thirdparty/angelscript/as_scriptengine.cpp"
+	"../../../thirdparty/angelscript/as_scriptfunction.cpp"
+	"../../../thirdparty/angelscript/as_scriptnode.cpp"
+	"../../../thirdparty/angelscript/as_scriptobject.cpp"
+	"../../../thirdparty/angelscript/as_string.cpp"
+	"../../../thirdparty/angelscript/as_string_util.cpp"
+	"../../../thirdparty/angelscript/as_thread.cpp"
+	"../../../thirdparty/angelscript/as_tokenizer.cpp"
+	"../../../thirdparty/angelscript/as_typeinfo.cpp"
+	"../../../thirdparty/angelscript/as_variablescope.cpp"
+	# AngelScript add-ons
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring.cpp"
+	"../shared/ms/angelscript/addons/scriptstdstring/scriptstdstring_utils.cpp"
+	"../shared/ms/angelscript/addons/scriptarray/scriptarray.cpp"
+	"../shared/ms/angelscript/addons/scriptdictionary/scriptdictionary.cpp"
+	"../shared/ms/angelscript/addons/scriptbuilder/scriptbuilder.cpp"
+	"../shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
+)
+source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
 set(VGUI
 	"ui/vgui_checkbutton2.cpp"
@@ -390,6 +483,9 @@ set(ALL_FILES
 	${Shared}
 	${Shared_CRC}
 	${Shared_base64}
+	${Shared_AngelScript}
+	${Client_AngelScript}
+	${ThirdParty_AngelScript}
 	${VGUI}
 	${VGUI_MS}
 )

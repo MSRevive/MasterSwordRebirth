@@ -11,7 +11,7 @@ public:
 	//Master Sword 
 	bool IsAnyPlayerAllowedInMap( );
 	BOOL ClientCommand( CBasePlayer *pPlayer, const char *pcmd );
-	void ClientUserInfoChanged( CBasePlayer *pPlayer, char *infobuffer );
+	void ClientUserInfoChanged( CBasePlayer *pPlayer, const char *infobuffer );
 	void StartVote( CBasePlayer *pPlayer, msstring VoteType, msstring VoteInfo );
 	void TallyVote( CBasePlayer *pPlayer, bool fYesVote );
 	void UpdateVote( );

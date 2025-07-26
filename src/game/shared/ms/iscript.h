@@ -7,6 +7,14 @@
 class CScript;
 class CBaseEntity;
 #include <stdio.h>
+#include "../../../public/archtypes.h"  // For ulong typedef
+
+// Add Windows-specific ulong definition if not already defined
+#ifdef _WIN32
+#ifndef ulong
+typedef unsigned long ulong;
+#endif
+#endif
 
 struct scriptvar_t
 {
@@ -61,10 +69,10 @@ typedef mslist<scriptcmdname_t> scriptcmdname_list;
 
 //A script command with parameters
 //If conditional, contains a list of sub-commands to be run when true
-struct scriptcmd_t
+struct LegacyScriptCmd
 {
-	scriptcmd_t() { init(); }
-	scriptcmd_t(const char* Name, bool Conditional = false)
+	LegacyScriptCmd() { init(); }
+	LegacyScriptCmd(const char* Name, bool Conditional = false)
 	{
 		init();
 		m_Params.add(Name);
@@ -93,41 +101,41 @@ struct scriptcmd_t
 	struct cmdlist_t
 	{
 		bool m_SingleCmd;			//Whether this list is a { } block or a single command at the end of a conditional
-		mslist<scriptcmd_t> m_Cmds; //The commands of this command list
+		mslist<LegacyScriptCmd> m_Cmds; //The commands of this command list
 		~cmdlist_t()
 		{
 		}
 	};
 	cmdlist_t m_IfCmds;			  //If this is a conditional command, here is the group of comamnds to be executed if true
 	mslist<cmdlist_t> m_ElseCmds; //If this is a conditional command, here is the group of comamnds to be executed if false
-	~scriptcmd_t()
+	~LegacyScriptCmd()
 	{
 	}
 };
-typedef scriptcmd_t::cmdlist_t scriptcmd_list;
+typedef LegacyScriptCmd::cmdlist_t legacy_scriptcmd_list;
 
-enum eventscope_e
+enum LegacyEventScope
 {
-	EVENTSCOPE_SERVER,
-	EVENTSCOPE_CLIENT,
-	EVENTSCOPE_SHARED,
+	LEGACY_EVENTSCOPE_SERVER,
+	LEGACY_EVENTSCOPE_CLIENT,
+	LEGACY_EVENTSCOPE_SHARED,
 };
 
 //The basic 'event' of a script.  Contains a list of commands
-struct SCRIPT_EVENT : public IVariables
+struct LegacyScriptEvent : public IVariables
 {
 	msstring Name;				   //Event name
-	scriptcmd_list Commands;	   //The comamnds in this event
+	legacy_scriptcmd_list Commands;	   //The comamnds in this event
 	msstringlist *Params;		   //The parameters passed to this event (Can be NULL)
 	float fNextExecutionTime,	   //Next time to be run with repeatdelay
 		fRepeatDelay;			   //Repeat every x seconds
-	eventscope_e Scope;			   //Scope (delete events that aren't in the right scope... client events on server and vica versa)
+	LegacyEventScope Scope;			   //Scope (delete events that aren't in the right scope... client events on server and vica versa)
 	mslist<float> TimedExecutions; //Clock times in the future that this event should be executed
 	bool bFullStop;				   //MiB DEC2014_07 - "exitevent" command (exit.rtf)
 
 	void SetLocal(const char* Name, const char* Value) { SetVar(Name, Value); }
 	const char* GetLocal(const char* Name);
-	~SCRIPT_EVENT()
+	~LegacyScriptEvent()
 	{
 	}
 };
@@ -150,12 +158,12 @@ public:
 	virtual void Script_Remove(int idx);																						   //Removes a script
 	virtual void Script_InitHUD(class CBasePlayer *pPlayer);																	   //Called when a player joins the game
 	virtual void Script_Setup() {}																								   //Ties m_pScriptCommands to a global somewhere
-	virtual int Script_ParseLine(CScript *Script, const char* pszCommandLine, scriptcmd_t &Cmd);								   //Parses a line of script text and returns the command type
+	virtual int Script_ParseLine(CScript *Script, const char* pszCommandLine, LegacyScriptCmd &Cmd);								   //Parses a line of script text and returns the command type
 	virtual void RunScriptEvents(bool fOnlyRunNamedEvents = false);																   //Runs all events
-	virtual bool Script_ExecuteEvent(CScript *Script, SCRIPT_EVENT &Event, msstringlist *Parameters = NULL) { return false; }	   //Runs an event
-	virtual bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event) { return true; }										   //Set up variables for the event to use
-	virtual bool Script_ExecuteCmds(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_list &Cmds) { return false; }				   //Runs all commands in an event
-	virtual bool Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params) { return false; } //Runs a single command
+	virtual bool Script_ExecuteEvent(CScript *Script, LegacyScriptEvent &Event, msstringlist *Parameters = NULL) { return false; }	   //Runs an event
+	virtual bool Script_SetupEvent(CScript *Script, LegacyScriptEvent &Event) { return true; }										   //Set up variables for the event to use
+	virtual bool Script_ExecuteCmds(CScript *Script, LegacyScriptEvent &Event, legacy_scriptcmd_list &Cmds) { return false; }				   //Runs all commands in an event
+	virtual bool Script_ExecuteCmd(CScript *Script, LegacyScriptEvent &Event, LegacyScriptCmd &Cmd, msstringlist &Params) { return false; } //Runs a single command
 	virtual void CallScriptEventTimed(const char* EventName, float Delay);														   //Call all events with name after a delay
 	virtual void CallScriptEvent(const char* EventName, msstringlist *Parameters = NULL);										   //Call all events with name right now
 	virtual bool GetScriptVar(msstring &ParserName, msstringlist &Params, CScript *BaseScript, msstring &Return) { return false; } //Get script var from derived class
@@ -258,8 +266,21 @@ public:
 		else if (Prop == name ".roll")             \
 			RETURN_FLOAT(angles.z)                 \
 	}
-#define RETURN_NOTHING_STR "¯NA¯"
+#define RETURN_NOTHING_STR "-NA-"
 #define RETURN_NOTHING return RETURN_NOTHING_STR
 #define RETURN_ZERO return "0"
+
+// Legacy compatibility typedefs
+typedef LegacyScriptCmd scriptcmd_t;
+typedef LegacyScriptEvent SCRIPT_EVENT;
+typedef legacy_scriptcmd_list scriptcmd_list;
+typedef LegacyEventScope eventscope_e;
+
+// Legacy EVENTSCOPE macros - only define if not already defined by AngelScript headers
+#ifndef EVENTSCOPE_SERVER
+#define EVENTSCOPE_SERVER LEGACY_EVENTSCOPE_SERVER
+#define EVENTSCOPE_CLIENT LEGACY_EVENTSCOPE_CLIENT
+#define EVENTSCOPE_SHARED LEGACY_EVENTSCOPE_SHARED
+#endif
 
 #endif // MiB MAR2015_01 [LOCAL_PANEL] - Made this include-

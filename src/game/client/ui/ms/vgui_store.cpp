@@ -42,7 +42,7 @@
 
 struct storetext_t
 {
-	char *ButtonTitle,
+	const char *ButtonTitle,
 		 *Title,
 		 *Desc;
 }

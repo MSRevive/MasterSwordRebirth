@@ -506,7 +506,7 @@ msstring CScript::ScriptGetter_AlphaNum(msstring& FullName, msstring& ParserName
 		msstring num_conv = Params[0];
 		msstring out_str;
 		int in_length = num_conv.len();
-		char* cc;
+		const char* cc;
 		bool char_legit;
 		msstring extra_list;
 		bool check_extras = false;
@@ -551,12 +551,12 @@ msstring CScript::ScriptGetter_AngleDiff(msstring& FullName, msstring& ParserNam
 }
 
 //$angles(<start_origin>,<end_origin>)
-//� returns the 2d angle between two vectors
+//(c) returns the 2d angle between two vectors
 //- priority: very high, scope: shared
 msstring CScript::ScriptGetter_Angles(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
 	//Thothie MAR 2008a
-	//- $angles(<start_origin>,<end_origin>) � returns the 2d angle between two vectors
+	//- $angles(<start_origin>,<end_origin>) (c) returns the 2d angle between two vectors
 	//- worried atan2 maybe CPU intensive. :/
 	//priority: very high, scope: shared
 	msstring Return;
@@ -721,7 +721,7 @@ msstring CScript::ScriptGetter_CapFirst(msstring& FullName, msstring& ParserName
 		msstring sen = Params[0];
 		msstring f = sen;
 		f = strupr(f);
-		sen.c_str()[0] = f.c_str()[0];
+		sen.str()[0] = f.str()[0];
 		return sen;
 	}
 	else
@@ -1288,7 +1288,7 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 				if (Params.size() > vParam)
 				{
 					msstring                vsSrch = Params[vParam++];
-					msstring                vsSrchType = Params.size() > vParam ? Params[vParam++] : "equals";
+					msstring                vsSrchType = Params.size() > vParam ? msstring(Params[vParam++]) : msstring("equals");
 
 					int                     vSrchType;
 					if (vsSrchType == "startswith")       vSrchType = 0;
@@ -1439,7 +1439,7 @@ msstring CScript::ScriptGetter_GetByName(msstring& FullName, msstring& ParserNam
 	msstring Return;
 	if (Params.size() >= 1)
 	{
-		CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + Params[0]);
+		CBaseEntity* pEntity = UTIL_FindEntityByString(NULL, "netname", msstring("-") + Params[0]);
 		if (pEntity)
 			return EntToString(pEntity);
 		else
@@ -1678,7 +1678,7 @@ msstring CScript::ScriptGetter_GetCVar(msstring& FullName, msstring& ParserName,
 //- priority: very low, scope: server
 msstring CScript::ScriptGetter_GetFileLine(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
-	//MiB Feb2008a � �Read� a line from a file
+	//MiB Feb2008a (c) (c)Read(c) a line from a file
 	//- $get_fileline(<file>,[line])
 	//priority: very low, scope: server
 //#ifdef VALVE_DLL //Thothie MAR2019_02 - MiB says removing this will allow client file access
@@ -2377,7 +2377,7 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 		sf_add_values = true;
 		sf_array_values = true;
 		msstring arrayext = Params[1];
-		sf_array_name += _strupr(arrayext.c_str());
+		sf_array_name += _strupr(arrayext.str());
 	}
 	else if (Params[2] == "type_exists")
 	{
@@ -3487,7 +3487,7 @@ msstring CScript::ScriptGetter_Num(msstring& FullName, msstring& ParserName, mss
 		msstring num_conv = Params[0];
 		msstring out_str;
 		int in_length = num_conv.len();
-		char* cc;
+		const char* cc;
 		bool char_legit;
 		msstring extra_list;
 		bool check_extras = false;
@@ -6229,7 +6229,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 		enum { pctype_model, pctype_sound, pctype_sprite } Precachetype;
 
 		int ResourceIdx = 0;
-		char* pSearchLine = "%s";
+		const char* pSearchLine = "%s";
 		cBuffer[0] = 0;
 		int SndType = 0;
 		if (!_stricmp(TestCommand, "sound.play3d") || !_stricmp(TestCommand, "svsound.play3d")) SndType = 1;	//Sound name is first parameter
@@ -6311,7 +6311,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 			static msstring Precaches[16384] = { "" };
 			static int PrecachesTotal = 0;
 
-			char* pszGlobalPointer = nullptr; //Precaches MUST be global pointers. Can't use stack memory
+			const char* pszGlobalPointer = nullptr; //Precaches MUST be global pointers. Can't use stack memory
 			for (int p = 0; p < PrecachesTotal; p++)
 				if (Fullpath == Precaches[p])
 				{
@@ -6320,7 +6320,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 				}
 			if (!pszGlobalPointer)
 			{
-				pszGlobalPointer = (Precaches[PrecachesTotal++] = Fullpath).c_str();
+				pszGlobalPointer = (Precaches[PrecachesTotal++] = Fullpath);
 			}
 
 			//if( Fullpath.contains( "human" ) )
@@ -6466,7 +6466,7 @@ bool CScript::Script_SetupEvent(SCRIPT_EVENT& Event, msstringlist* Parameters)
 
 	return m.pScriptedInterface ? m.pScriptedInterface->Script_SetupEvent(this, Event) : true;
 }
-void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, char* vsText)
+void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, msstring& vsCmdName, msstringlist& vParams, int vParamStrt, const char* vsText)
 {
 #if !TURN_OFF_ALERT
 	msstring                            vsParams;

@@ -406,7 +406,7 @@ public:
 			Params.add(ms_npcname.c_str());
 			Params.add(MessageGet());
 
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 			if (pGMScript)
 				pGMScript->CallScriptEvent("gm_ms_text", &Params);
@@ -462,7 +462,7 @@ public:
 		TokenizeString(m_WeatherOptions, Parameters);
 
 		//Thothie DEC2010_27 - lock weather via game master
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript)
 			pGMScript->CallScriptEvent("game_set_weather", &Parameters);
@@ -905,7 +905,7 @@ public:
 		msstring sTemp = STRING(pev->targetname);
 		if (sTemp.starts_with("crit")) return false;
 
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript)
 		{
@@ -1447,7 +1447,7 @@ public:
 			}
 		}
 
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return;
@@ -1664,7 +1664,7 @@ public:
 			}
 		}
 
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return FALSE;
@@ -1755,7 +1755,7 @@ public:
 		if (!pPlayer || pPlayer->CurrentTransArea != this)
 			return;
 
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return;
@@ -1780,7 +1780,7 @@ public:
 	//           (You can either vote yes or not vote, which means no)
 	void *MSQuery(int iRequest)
 	{
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
 			return NULL;

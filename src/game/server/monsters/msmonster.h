@@ -4,6 +4,8 @@
 #include "monsteranimation.h"
 #include "genitemlist.h"
 #include "stats/stats.h"
+#include "iscript.h"
+
 
 class CStore;
 class CMSMonster;

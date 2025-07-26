@@ -1,4 +1,4 @@
-//=========       Copyright © Bernt Andreas Eide!       ============//
+//=========       Copyright (c) Bernt Andreas Eide!       ============//
 //
 // Purpose: POSIX friendly include
 //
