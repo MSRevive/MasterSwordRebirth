@@ -22,6 +22,7 @@
 
 #include "msdllheaders.h"
 #include "nodes.h"
+#include "entities.h"
 #include "soundent.h"
 #include "client.h"
 #include "decals.h"
@@ -555,6 +556,9 @@ void CWorld ::Precache(void)
 	// init the WorldGraph.
 	WorldGraph.InitGraph();
 
+	// init the WorldEntity
+	WorldEntity.InitEntity();
+
 	// make sure the .NOD file is newer than the .BSP file.
 	if (!WorldGraph.CheckNODFile((char *)STRING(gpGlobals->mapname)))
 	{ // NOD file is not present, or is older than the BSP file.
@@ -570,6 +574,21 @@ void CWorld ::Precache(void)
 		else
 		{
 			ALERT(at_console, "\n*Graph Loaded!\n");
+		}
+	}
+
+	// make sure the .ENT file exists
+	if (WorldEntity.CheckENTFile((char*)STRING(gpGlobals->mapname)))
+	{
+		// Load the node graph for this level
+		if (!WorldEntity.FLoadEntity((char*)STRING(gpGlobals->mapname)))
+		{
+			// couldn't parse
+			ALERT(at_console, "*Error parsing .ent file*\n");
+		}
+		else
+		{
+			ALERT(at_console, "\n*Entities Loaded!\n");
 		}
 	}
 

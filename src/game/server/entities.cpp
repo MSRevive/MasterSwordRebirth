@@ -16,7 +16,7 @@
 #include	"entities.h"
 
 extern char *COM_Parse (char *data);
-extern char com_token[];
+char com_token[1500];
 
 CEntity	WorldEntity;
 
@@ -42,7 +42,7 @@ void CEntity::FixKeyName( char *key )
 
 //=========================================================
 // CEntity - FLoadEntity - attempts to load an entity file from disk.
-// if the current level is maps/snar.bsp, maps/graphs/snar.eny
+// if the current level is maps/snar.bsp, maps/graphs/snar.ent
 // will be loaded.
 //=========================================================
 int CEntity::FLoadEntity ( char *szMapName )
