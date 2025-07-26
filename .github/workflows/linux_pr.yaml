@@ -4,6 +4,11 @@ on:
   pull_request:
     branches:
       - "dev"
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
 
 env:
   BUILD_TYPE: Release
@@ -15,15 +20,13 @@ jobs:
     steps:
       - name: Checkout repsoitory
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
 
       - name: Install G++ Multilib & 32 bit OpenGL library
         run: |
           sudo dpkg --add-architecture i386
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config
+          sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config gcc-multilib g++-multilib
 
       - uses: lukka/get-cmake@latest
         with:

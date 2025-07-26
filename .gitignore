@@ -205,3 +205,6 @@ CMakeUserPresets.json
 build/*
 bins/debug/*
 bins/release/*
+/.serena
+/.claude
+/memory

@@ -20,7 +20,7 @@ const char *SPEECH::ItemName(CGenericItem *pItem, bool fCapital)
 
 const char *SPEECH::NPCName(CMSMonster *pMonster, bool fCapital)
 {
-	msstring Prefix = pMonster->DisplayPrefix.len() ? (pMonster->DisplayPrefix + " ") : ("");
+	msstring Prefix = pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix + " ") : msstring("");
 	_snprintf(ReturnString, MAX_SIZE, "%s%s", Prefix.c_str(), pMonster->DisplayName());
 	if (fCapital)
 		ReturnString[0] = toupper(ReturnString[0]);

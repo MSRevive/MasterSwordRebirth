@@ -421,7 +421,7 @@ class CMSChangeLevel : public CBaseEntity
 	{
 		//MAR2008a - Thothie - Let game master handle mstrig_changelevel level changes
 		//- original: CHANGE_LEVEL( (char *)STRING(sDestMap), NULL );
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("¯") + "game_master");
+		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript)
 		{

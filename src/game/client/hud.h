@@ -283,7 +283,7 @@ public:
 	int Init(void);
 	static char *LocaliseTextString(const char *msg, char *dst_buffer, int buffer_size);
 	static char *BufferedLocaliseTextString(const char *msg);
-	char *LookupString(const char *msg_name, int *msg_dest = NULL);
+	const char *LookupString(const char *msg_name, int *msg_dest = NULL);
 	int MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf);
 };
 
@@ -343,8 +343,8 @@ public:
 
 	//had to make these public so CHud could access them (to enable concussion icon)
 	//could use a friend declaration instead...
-	void EnableIcon(char *pszIconName, unsigned char red, unsigned char green, unsigned char blue);
-	void DisableIcon(char *pszIconName);
+	void EnableIcon(const char *pszIconName, unsigned char red, unsigned char green, unsigned char blue);
+	void DisableIcon(const char *pszIconName);
 
 private:
 	icon_sprite_t m_IconList[MAX_ICONSPRITES];

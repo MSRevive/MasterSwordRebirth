@@ -440,7 +440,7 @@ int CHudMessage::MsgFunc_HudText(const char *pszName, int iSize, void *pbuf)
 {
 	BEGIN_READ(pbuf, iSize);
 
-	char *pString = READ_STRING();
+	const char *pString = READ_STRING();
 
 	MessageAdd(pString, gHUD.m_flTime);
 	// Remember the time -- to fix up level transitions

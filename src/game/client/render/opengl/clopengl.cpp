@@ -1,4 +1,12 @@
 //Render mirrors
+
+// Include Windows and OpenGL headers first for proper WGL function declarations
+#ifdef _WIN32
+#include <windows.h>
+#include <GL/gl.h>
+#include "gl/wglext.h"
+#endif
+
 #include "inc_weapondefs.h"
 #include "../hud.h"
 #include "../cl_util.h"

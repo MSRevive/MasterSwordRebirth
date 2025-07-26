@@ -25,7 +25,7 @@ int READ_SHORT(void);
 int READ_WORD(void);
 int READ_LONG(void);
 float READ_FLOAT(void);
-char *READ_STRING(void);
+const char *READ_STRING(void);
 float READ_COORD(void);
 float READ_ANGLE(void);
 float READ_HIRESANGLE(void);

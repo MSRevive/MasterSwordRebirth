@@ -48,7 +48,7 @@ int CHudMusic::MsgFunc_Music(const char* pszName, int iSize, void* pbuf)
 		}
 		default: // area, combat, or system music
 		{
-			char* musicFile = READ_STRING();
+			const char* musicFile = READ_STRING();
 			//gEngfuncs.Con_Printf(musicFile);
 			m_MP3.TransitionMusic(musicFile, iCmd); //sound engine handles the including of dir now.
 			break;

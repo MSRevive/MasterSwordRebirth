@@ -2811,9 +2811,9 @@ void CBasePlayer::Spawn(void)
 		if (!ClientInfo.fDisplayedGreeting)
 		{
 			msstring InfoString;
-			char* PKString = NULL;
+			const char* PKString = NULL;
 			const char* SaveString = NULL;
-			char* CharString = NULL;
+			const char* CharString = NULL;
 			if (MSGlobals::PKAllowedinTown)
 				PKString = "Player killing is allowed outside of town";
 			else if (MSGlobals::PKAllowed)
@@ -4888,7 +4888,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 		}
 	}*/
 
-	char *pszAreaName;
+	const char *pszAreaName;
 	CBaseEntity *pArea = NULL, *pFirstArea = NULL, *pFoundArea = NULL;
 
 	if (gpGlobals->time >= CheckAreaTime)
@@ -5402,7 +5402,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 }
 //
 // OfferItem - Offers an item or gold to another monster or player
-// ���������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)
 void CBasePlayer ::OfferItem(offerinfo_t &OfferInfo)
 {
 	edict_t *peEnt = INDEXENT(OfferInfo.SrcMonsterIDX);
@@ -5689,12 +5689,12 @@ int CBasePlayer ::GiveGold(int iAmount, bool fVerbose)
 		SendInfoMsg("You recieve %i gold coins", iAmount);
 	return CMSMonster::GiveGold(iAmount, fVerbose);
 }
-void CBasePlayer ::ShowMenu(char *pszText, int bitsValidSlots,
+void CBasePlayer ::ShowMenu(const char *pszText, int bitsValidSlots,
 							int nDisplayTime, BOOL fNeedMore)
 {
 	//bitsValidSlots == 0 means hide the menu
 	//Can only send 128 bytes at a time!!
-	char *pszPtr = pszText;
+	const char *pszPtr = pszText;
 	char cTemp[128];
 	unsigned int n = 0, i = 0; //i is to prevent a recursive while()
 	BOOL bLclNeedMore;
@@ -5779,7 +5779,7 @@ void CBasePlayer::StruckSound(CBaseEntity *pInflicter, CBaseEntity *pAttacker, f
 }
 //
 // Trade - Manage trading with others
-// �����
+// (c)(c)(c)(c)(c)
 void CBasePlayer::Trade()
 {
 	if (!HasConditions(MONSTER_TRADING))
@@ -5986,7 +5986,7 @@ EndTrade:
 }
 //
 // AcceptOffer - Accept an offer from a player or monster
-// �����������
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)
 bool CBasePlayer ::AcceptOffer()
 {
 	//Save the Offer info

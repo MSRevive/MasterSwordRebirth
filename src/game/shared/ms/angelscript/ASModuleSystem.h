@@ -14,6 +14,10 @@
 #include <vector>
 #include <set>
 
+// Forward declarations
+class CGameGroupFile;
+class CScriptModule;
+
 //==========================================================================
 // Module dependency information
 //==========================================================================
@@ -85,6 +89,9 @@ private:
     int m_nModulesCompiled;
     int m_nDependenciesResolved;
     
+    // Module discovery system
+    CScriptModule* m_pScriptModule;
+    
     // Singleton instance
     static ASModuleSystem* s_pInstance;
     
@@ -102,8 +109,9 @@ public:
     void Destroy();
     
     // Module loading
-    bool LoadModule(const std::string& filename, const ASModuleLoadOptions& options = ASModuleLoadOptions());
+    bool LoadASModule(const std::string& filename, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     bool LoadModuleFromMemory(const std::string& name, const std::string& content, const ASModuleLoadOptions& options = ASModuleLoadOptions());
+    bool LoadModuleFromMemory(const std::string& name, const std::string& content, CGameGroupFile* pakFile, const ASModuleLoadOptions& options = ASModuleLoadOptions());
     
     // Module management
     bool UnloadModule(const std::string& name);
@@ -130,6 +138,15 @@ public:
     void AddModulePath(const std::string& path);
     void RemoveModulePath(const std::string& path);
     const std::vector<std::string>& GetModulePaths() const { return m_ModulePaths; }
+    
+    // Module discovery (new functionality)
+    bool DiscoverModulesInPak(CGameGroupFile* pakFile);
+    std::vector<std::string> GetDiscoveredModules() const;
+    bool LoadDiscoveredModules(CGameGroupFile* pakFile);
+    
+    // Hot-reload functionality
+    bool ReloadAllModules();
+    bool RefreshFromPak();
     
     // Utility functions
     bool CompileAllModules();
@@ -171,11 +188,12 @@ namespace ASModuleSystemBindings
 //==========================================================================
 // AngelScript global functions for module management
 //==========================================================================
-bool LoadModule(const std::string& filename);
+bool LoadASModule(const std::string& filename);
 bool UnloadModule(const std::string& name);
 bool ReloadModule(const std::string& name);
 bool HasModule(const std::string& name);
 bool ImportModule(const std::string& moduleName);
 bool ImportModule(const std::string& moduleName, const std::string& asNamespace);
+bool ReloadAllScriptModules();
 
 #endif // AS_MODULE_SYSTEM_H

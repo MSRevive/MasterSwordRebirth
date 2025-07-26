@@ -16,8 +16,8 @@ if (UNIX)
 	set(CMAKE_SYSTEM_PROCESSOR i386)
 
 	# which compilers to use for C and C++
-	set(CMAKE_C_COMPILER gcc-11)
-	set(CMAKE_CXX_COMPILER g++-11)
+	set(CMAKE_C_COMPILER gcc)
+	set(CMAKE_CXX_COMPILER g++)
 	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++ -D_GLIBCXX_USE_CXX11_ABI=0")
 
 	set(CMAKE_MAKE_PROGRAM make)
@@ -57,9 +57,8 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-# Modern VS versions default to C++14 anyway, so make it consistent
-# But in the future we may want so support C++20
-set(CMAKE_CXX_STANDARD 14)
+# We now support C++ standard 20
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
@@ -138,6 +137,10 @@ add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 # Add Projects
 add_subdirectory(src/game/client)
 add_subdirectory(src/game/server)
+# TODO: make scriptpack tool Linux compatible.
+if (WIN32)
+	add_subdirectory(src/game/tools/scriptpack)
+endif()
 
 # Set Visual Studio starting project
 if (MSVC)

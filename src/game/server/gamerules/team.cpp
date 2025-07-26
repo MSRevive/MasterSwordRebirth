@@ -19,14 +19,15 @@ CTeam *CTeam::CreateTeam(const char *pszName, ulong ID)
 		return pNewTeam;
 
 	//Create new team
-	CTeam &NewTeam = *msnew CTeam;
-	strncpy(NewTeam.m_TeamName, pszName, MAX_TEAMNAME_LEN);
-	NewTeam.m_TeamName[MAX_TEAMNAME_LEN] = 0;
-	NewTeam.m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
+	CTeam* NewTeam = msnew CTeam;
+    char pszTeamName[MAX_TEAMNAME_LEN + 1];
 
-	Teams.add(&NewTeam);
+	strncpy((char*)NewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
+	NewTeam->m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
 
-	return &NewTeam;
+	Teams.add(NewTeam);
+
+	return NewTeam;
 }
 
 CTeam *CTeam::GetTeam(const char *pszName)

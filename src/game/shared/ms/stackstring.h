@@ -190,7 +190,8 @@ public:
 	operator char *();
 	operator const char *();
 	operator void *() { return operator char *(); }
-	char *c_str();
+	const char *c_str();
+	char* str();
 	size_t len() const;
 	void append(const char* a);
 	void append(const char* a, size_t length);

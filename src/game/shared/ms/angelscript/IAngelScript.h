@@ -151,6 +151,8 @@ protected:
 };
 
 // Conversion helpers for legacy code
+// NOTE: These macros are also defined in iscript.h with conditional compilation
+// to avoid redefinition conflicts during the transition period
 #define EVENTSCOPE_SERVER AS_EVENTSCOPE_SERVER
 #define EVENTSCOPE_CLIENT AS_EVENTSCOPE_CLIENT
 #define EVENTSCOPE_SHARED AS_EVENTSCOPE_SHARED

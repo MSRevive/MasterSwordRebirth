@@ -8,6 +8,8 @@
 class asIScriptEngine;
 class asIScriptModule;
 class asIScriptContext;
+class asIScriptFunction;
+class ASDebugger;
 
 //==========================================================================
 // CAngelScriptManager - Singleton manager for AngelScript engine
@@ -31,6 +33,9 @@ private:
     // Context pool management
     std::vector<asIScriptContext*> m_ContextPool;
     static const size_t MAX_CONTEXT_POOL_SIZE = 8;  // Maximum contexts to keep in pool
+    
+    // Debugger
+    ASDebugger* m_pDebugger;
     
     // Private constructor for singleton
     CAngelScriptManager();
@@ -64,6 +69,17 @@ public:
     asIScriptContext* AcquireContext();
     void ReleaseContext(asIScriptContext* pContext);
     
+    // Global function execution
+    bool CallGlobalFunction(const char* szFunctionName, const char* szModuleName = nullptr);
+    
+    // Debugger access
+    ASDebugger* GetDebugger() const { return m_pDebugger; }
+    
+private:
+    // Helper function for function execution
+    bool ExecuteFunction(asIScriptFunction* pFunction, const char* szFunctionName);
+    
+public:
     // Update and maintenance
     void Think(); // Called from MSGameThink() for garbage collection
     

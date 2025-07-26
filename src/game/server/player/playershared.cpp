@@ -307,7 +307,7 @@ void CBasePlayer::InitialSpawn(void)
 }
 /*
   PlaySound - Save yourself a couple parameters by using this instead of EMIT_SOUND.
-  ���������   It also allows translation to the female versions of the sound
+  (c)(c)(c)(c)(c)(c)(c)(c)(c)   It also allows translation to the female versions of the sound
 */
 
 void CBasePlayer::PlaySound(int channel, const char* sample, float volume, bool fGenderSpecific, float attenuation)
@@ -604,7 +604,7 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 
 //
 // SwitchItem - Specify an Item and this function finds a free hand,
-// ����������   places it in that hand, and uses it
+// (c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   places it in that hand, and uses it
 
 /*int CBasePlayer :: SwitchItem( CGenericItem *pItem, int iHand, bool bVerbose )
 {
@@ -623,7 +623,7 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 }*/
 /*
 	RemovePlayerItem - Removes an item from the player's hands or packlist.
-	����������������   Set bCallItemDropFunc to TRUE if you want to call
+	(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   Set bCallItemDropFunc to TRUE if you want to call
 					   pItem->Drop which completely disassociates the item
 					   from its owner.  Set to FALSE if you're just removing
 					   it from the player's hands (to wear it or something)
@@ -1560,7 +1560,7 @@ charinfo_t::~charinfo_t()
 	Destroy();
 }
 
-char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
+const char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
 {
 #ifdef VALVE_DLL
 	for (int i = 1; i <= gpGlobals->maxClients; i++)

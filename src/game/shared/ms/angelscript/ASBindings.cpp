@@ -1,5 +1,5 @@
 //==========================================================================
-// AngelScript Integration Layer Implementation - Minimal Version
+// AngelScript Integration Layer Implementation - Using asbind20
 // 
 // Master registration and coordination for all AngelScript bindings
 //==========================================================================
@@ -7,15 +7,20 @@
 #include "ASBindings.h"
 #include "ASModuleSystem.h"
 #include "ASCoreTypes.h"
+#include "ASEntityBindings.h"
 #include "ASBuiltinFunctions.h"
 #include "ASScriptClasses.h"   
 #include "ASCoroutines.h"        
-#include "ASObjectPool.h"      
-#include <angelscript.h>
+#include "ASObjectPool.h"
+#include "ASEngineEventManager.h"      
+
+// Include asbind20
+#include <asbind20/asbind.hpp>
 
 // AngelScript add-ons
 #include "addons/scriptstdstring/scriptstdstring.h"
 #include "addons/scriptarray/scriptarray.h"
+#include "addons/scriptdictionary/scriptdictionary.h"
 
 #include <cstdio>
 #include <cstring>
@@ -24,7 +29,7 @@
 #include "mslogger.h"
 
 //==========================================================================
-// Master Registration Function - Minimal Implementation
+// Master Registration Function - Using asbind20
 //==========================================================================
 bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
 {
@@ -37,15 +42,19 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     bool success = true;
     
     // Step 0: Register string type (MUST be first!)
-    MS_ANGEL_INFO("[0/9] Registering String Type...");
+    MS_ANGEL_INFO("[0/10] Registering String Type...");
     RegisterStdString(pEngine);
     
     // Register array type before string utils (array<string> template dependency)
-    MS_ANGEL_INFO("[1/9] Registering Array Type...");
+    MS_ANGEL_INFO("[1/10] Registering Array Type...");
     RegisterScriptArray(pEngine, true); // true = use native calling convention
     
+    // Register dictionary type
+    MS_ANGEL_INFO("[1.3/10] Registering Dictionary Type...");
+    RegisterScriptDictionary(pEngine);
+    
     // Now register string utilities that depend on array<string>
-    MS_ANGEL_INFO("[1.5/9] Registering String Utilities...");
+    MS_ANGEL_INFO("[1.5/10] Registering String Utilities...");
     try {
         RegisterStdStringUtils(pEngine);
         
@@ -54,7 +63,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         if (!arrayStringType) {
             MS_ANGEL_ERROR("   WARNING: array<string> type not found - string utilities may not work properly");
         } else {
-            MS_ANGEL_INFO("   ✓ array<string> template type verified");
+            MS_ANGEL_INFO("   OK array<string> template type verified");
         }
         
         // Check if split method was registered successfully on string type
@@ -64,7 +73,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
             if (!splitFunc) {
                 MS_ANGEL_ERROR("   WARNING: string.split() method not found");
             } else {
-                MS_ANGEL_INFO("   ✓ string.split() method verified");
+                MS_ANGEL_INFO("   OK string.split() method verified");
             }
         } else {
             MS_ANGEL_ERROR("   WARNING: string type not found for split method validation");
@@ -75,7 +84,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         if (!joinFunc) {
             MS_ANGEL_ERROR("   WARNING: join() function not found");
         } else {
-            MS_ANGEL_INFO("   ✓ String utility functions verified");
+            MS_ANGEL_INFO("   OK String utility functions verified");
         }
     } catch (...) {
         MS_ANGEL_ERROR("   ERROR: Exception during string utilities registration");
@@ -83,7 +92,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     
     // Step 2: Register core types (Vector3, Color, math functions)
-    MS_ANGEL_INFO("[2/9] Registering Core Types...");
+    MS_ANGEL_INFO("[2/10] Registering Core Types...");
     if (!RegisterCoreTypes(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Core type registration failed!");
@@ -91,11 +100,28 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Core types registered successfully");
+        MS_ANGEL_INFO("   OK Core types registered successfully");
     }
     
-    // Step 3: Register builtin functions (strings, utilities, game functions)
-    MS_ANGEL_INFO("[3/9] Registering Builtin Functions...");
+    // Step 3: Register entity types (CBaseEntity, CBasePlayer)
+    MS_ANGEL_INFO("[3/10] Registering Entity Types...");
+    try
+    {
+        ASEntityBindings::RegisterAll(pEngine);
+        MS_ANGEL_INFO("   OK Entity types registered successfully");
+        
+        // Now register EntityHandle methods that depend on entity types
+        ASCoreTypes::RegisterEntityHandleMethods(pEngine);
+        MS_ANGEL_INFO("   OK EntityHandle dependent methods registered successfully");
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("   ERROR: Entity type registration failed!");
+        success = false;
+    }
+    
+    // Step 4: Register builtin functions (strings, utilities, game functions)
+    MS_ANGEL_INFO("[4/10] Registering Builtin Functions...");
     if (!RegisterBuiltinFunctions(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Builtin function registration failed!");
@@ -103,11 +129,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Builtin functions registered successfully");
+        MS_ANGEL_INFO("   OK Builtin functions registered successfully");
     }
     
-    // Step 4: Register script classes (CGameScript and derivatives)
-    MS_ANGEL_INFO("[4/9] Registering Script Classes...");
+    // Step 5: Register script classes (CGameScript and derivatives)
+    MS_ANGEL_INFO("[5/10] Registering Script Classes...");
     if (!RegisterScriptClasses(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Script class registration failed!");
@@ -115,11 +141,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Script classes registered successfully");
+        MS_ANGEL_INFO("   OK Script classes registered successfully");
     }
     
-    // Step 5: Register coroutines system
-    MS_ANGEL_INFO("[5/9] Registering Coroutines System...");
+    // Step 6: Register coroutines system
+    MS_ANGEL_INFO("[6/10] Registering Coroutines System...");
     if (!RegisterCoroutineFunctions(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Coroutines system registration failed!");
@@ -127,11 +153,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Coroutines system registered successfully");
+        MS_ANGEL_INFO("   OK Coroutines system registered successfully");
     }
     
-    // Step 6: Register memory optimization systems
-    MS_ANGEL_INFO("[6/9] Registering Memory Optimization...");
+    // Step 7: Register memory optimization systems
+    MS_ANGEL_INFO("[7/10] Registering Memory Optimization...");
     if (!RegisterMemoryOptimization(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Memory optimization registration failed!");
@@ -139,11 +165,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Memory optimization registered successfully");
+        MS_ANGEL_INFO("   OK Memory optimization registered successfully");
     }
     
-    // Step 7: Register module system
-    MS_ANGEL_INFO("[7/9] Registering Module System...");
+    // Step 8: Register module system
+    MS_ANGEL_INFO("[8/10] Registering Module System...");
     if (!RegisterModuleSystem(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Module system registration failed!");
@@ -151,11 +177,35 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ Module system registered successfully");
+        MS_ANGEL_INFO("   OK Module system registered successfully");
     }
     
-    // Step 8: Validate all registrations
-    MS_ANGEL_INFO("[8/9] Validating Registrations...");
+    // Step 8.5: Register engine event system
+    MS_ANGEL_INFO("[8.5/10] Registering Engine Event System...");
+    if (!ASEngineEvents::RegisterEngineEventFunctions(pEngine))
+    {
+        MS_ANGEL_ERROR("   ERROR: Engine event system registration failed!");
+        success = false;
+    }
+    else
+    {
+        MS_ANGEL_INFO("   OK Engine event system registered successfully");
+        
+        // Initialize the engine event manager with this engine
+        ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+        if (pEventManager && !pEventManager->Initialize(pEngine))
+        {
+            MS_ANGEL_ERROR("   ERROR: Engine event manager initialization failed!");
+            success = false;
+        }
+        else
+        {
+            MS_ANGEL_INFO("   OK Engine event manager initialized successfully");
+        }
+    }
+    
+    // Step 9: Validate all registrations
+    MS_ANGEL_INFO("[9/10] Validating Registrations...");
     if (!ValidateRegistrations(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Registration validation failed!");
@@ -163,11 +213,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("   ✓ All registrations validated successfully");
+        MS_ANGEL_INFO("   OK All registrations validated successfully");
     }
     
-    // Step 9: Log registration summary
-    MS_ANGEL_INFO("[9/9] Registration Summary:");
+    // Step 10: Log registration summary
+    MS_ANGEL_INFO("[10/10] Registration Summary:");
     LogRegistrationInfo(pEngine);
 
     return success;
@@ -307,7 +357,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
             MS_ANGEL_INFO("     WARNING: Vector3 has %d methods, expected at least 3", methodCount);
             warnings++;
         }
-        MS_ANGEL_INFO("     ✓ Vector3 validated (%d properties, %d methods)", propCount, methodCount);
+        MS_ANGEL_INFO("     OK Vector3 validated (%d properties, %d methods)", propCount, methodCount);
     }
     
     // Check Color
@@ -320,7 +370,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
     }
     else
     {
-        MS_ANGEL_INFO("     ✓ Color type validated");
+        MS_ANGEL_INFO("     OK Color type validated");
     }
     
     // Validate global functions
@@ -345,7 +395,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ String functions: %d/%d registered", stringFuncCount, 7);
+    MS_ANGEL_INFO("     OK String functions: %d/%d registered", stringFuncCount, 7);
     
     // Math functions
     const char* mathFuncs[] = {
@@ -365,7 +415,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ Math functions: %d/%d registered", mathFuncCount, 6);
+    MS_ANGEL_INFO("     OK Math functions: %d/%d registered", mathFuncCount, 6);
     
     // Game functions
     const char* gameFuncs[] = {
@@ -384,7 +434,7 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
         else
             warnings++;
     }
-    MS_ANGEL_INFO("     ✓ Game functions: %d/%d registered", gameFuncCount, 5);
+    MS_ANGEL_INFO("     OK Game functions: %d/%d registered", gameFuncCount, 5);
     
     // Check for EntityHandle type (used by game functions)
     asITypeInfo* pEntityHandle = pEngine->GetTypeInfoByName("EntityHandle");
@@ -672,10 +722,10 @@ bool ASBindings::RegisterModuleSystem(asIScriptEngine* pEngine)
         // Verify some key module functions were registered
         asIScriptFunction* func;
         
-        func = pEngine->GetGlobalFunctionByDecl("bool LoadModule(const string &in)");
+        func = pEngine->GetGlobalFunctionByDecl("bool LoadASModule(const string &in)");
         if (!func)
         {
-            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - LoadModule() function not found");
+            MS_ANGEL_INFO("ASBindings::RegisterModuleSystem: WARNING - LoadASModule() function not found");
         }
         
         func = pEngine->GetGlobalFunctionByDecl("bool HasModule(const string &in)");

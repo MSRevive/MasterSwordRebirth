@@ -127,7 +127,7 @@ float READ_FLOAT( void )
 	return dat.f;   
 }
 
-char* READ_STRING( void )
+const char* READ_STRING( void )
 {
 	static char     string[2048];
 	int             l,c;
