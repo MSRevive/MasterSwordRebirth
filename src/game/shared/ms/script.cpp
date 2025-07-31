@@ -26,7 +26,6 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #endif
 
 #include "../engine/studio.h"
-#include "logger.h"
 #include "time.h"
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
@@ -6967,7 +6966,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 		else
 			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s at %d\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
 
-		logfile << Logger::LOG_WARN << out_error.c_str();
+		MS_WARN("MSSCRIPT: CONFLICT ERROR %s", out_error.c_str());
 		//be nice to be able to return the top script here, but buggers up if I try to pull the ent to do so
 		Print("%s", out_error.c_str());
 		MSErrorConsoleText("", out_error.c_str());

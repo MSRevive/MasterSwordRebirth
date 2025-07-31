@@ -2,7 +2,6 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "svglobals.h"
-#include "logger.h"
 #include "global.h"
 #include "weapons/genericitem.h"
 #include "gamerules/gamerules.h"

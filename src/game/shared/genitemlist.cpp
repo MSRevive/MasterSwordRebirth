@@ -1,5 +1,4 @@
 #include "inc_weapondefs.h"
-#include "logger.h"
 
 bool CItemList ::CanAddItem(CGenericItem *NewItem)
 {

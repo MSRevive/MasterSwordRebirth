@@ -19,7 +19,6 @@
 #include "weapons/weapons.h"
 #include "syntax/syntax.h"
 #include "weapons/genericitem.h"
-#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "vgui_hud.h"

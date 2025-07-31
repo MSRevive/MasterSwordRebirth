@@ -1,6 +1,5 @@
 #include "msdllheaders.h"
 #include "global.h"
-#include "logger.h"
 #include "mslogger.h"
 #include "time.h"
 
@@ -15,11 +14,6 @@ extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
-Logger logfile;
-#ifdef VALVE_DLL
-Logger chatlog;
-#endif
-Logger NullFile;
 bool g_log_initialized = false;
 void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 {

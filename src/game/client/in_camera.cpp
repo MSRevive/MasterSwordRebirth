@@ -12,8 +12,6 @@
 #include "camera.h"
 #include "in_defs.h"
 
-#include "logger.h"
-
 //#define LATER
 void V_GetChaseOrigin(float *angles, float *origin, float distance, float *returnvec);
 extern float v_lastDistance;

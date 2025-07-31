@@ -11,7 +11,6 @@
 #include "stats/statdefs.h"
 #include "titles.h"
 #include "scriptedeffects.h"
-#include "logger.h"
 #include "pm_defs.h"
 
 #ifndef VALVE_DLL

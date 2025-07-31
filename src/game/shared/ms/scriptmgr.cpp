@@ -1,6 +1,5 @@
 #include "inc_weapondefs.h"
 #include "scriptmgr.h"
-#include "logger.h"
 
 CGameGroupFile ScriptMgr::m_GroupFile;
 int ScriptMgr::m_TotalScripts = 0;

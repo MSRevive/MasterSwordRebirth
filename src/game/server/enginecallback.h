@@ -12,13 +12,10 @@
 *   without written permission from Valve LLC.
 *
 ****/
-#ifndef ENGINECALLBACK_H
-#define ENGINECALLBACK_H
 #pragma once
 
 #include <string.h>
 #include "event_flags.h"
-//include "logger.h"
 
 // Must be provided by user of this code
 extern enginefuncs_t g_engfuncs;
@@ -247,5 +244,3 @@ void ClearStringPool();
 #define ENGINE_FORCE_UNMODIFIED (*g_engfuncs.pfnForceUnmodified)
 
 #define PLAYER_CNX_STATS (*g_engfuncs.pfnGetPlayerStats)
-
-#endif //ENGINECALLBACK_H

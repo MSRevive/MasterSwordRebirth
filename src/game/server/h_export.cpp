@@ -22,7 +22,6 @@
 
 #include "msdllheaders.h"
 #include "global.h"
-#include "logger.h"
 
 // Holds engine functionality callbacks
 enginefuncs_t g_engfuncs;

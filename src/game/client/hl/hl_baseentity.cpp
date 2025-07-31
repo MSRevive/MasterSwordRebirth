@@ -27,7 +27,6 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player/player.h"
 #include "weapons/weapons.h"
 #include "nodes.h"
-#include "logger.h"
 #include "ms/clglobal.h"
 
 #include "cl_entity.h"

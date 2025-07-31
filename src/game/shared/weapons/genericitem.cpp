@@ -24,7 +24,6 @@
 #include "effects/mseffects.h"
 #include "groupfile.h"
 #include "stats/statdefs.h"
-#include "logger.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowClose();
@@ -320,13 +319,8 @@ std::map<msstring, msstring> CGenericItemMgr::mItemAlias;
 
 void CGenericItemMgr::GenericItemPrecache(void)
 {
-	logfile << Logger::LOG_INFO << "Precaching Items...\n";
-
+	MS_INFO("Precaching Items...")
 	ALERT(at_logged, "Precaching Items...\n");
-
-	startdbg;
-
-	dbg("Add Script commands");
 
 	//GenericItem script commands (only add once per game):
 	if (!m_ScriptCommands.size())
@@ -379,8 +373,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		m_ScriptCommands.add(scriptcmdname_t("setviewmodelskin"));
 	}
 
-	dbg("Load Script items.txt");
-
 	byte* pMemFile = NULL, * pStringPtr = NULL;
 	int iFileSize = 65535, i = 0, n;
 	char cString[128], cItemFileName[128];
@@ -431,14 +423,11 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 
 	//Delete old global items
-	dbg("Delete old global items");
 	CGenericItemMgr::DeleteItems();
 
 	/*#ifdef VALVE_DLL
 	ALERT( at_console, "Loading Mastersword items from: %s...\n", g_MSScriptInfo->ContainerName );
 #endif*/
-
-	dbg("Load global items");
 
 	//GetString(cString, min(FileSize, sizeof(cString)), (char *)pStringPtr, i, "\r\n")
 	while (GetString(cString, V_min(FileSize, sizeof(cString)), (const char*)pStringPtr, i, "\r\n"))
@@ -464,7 +453,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		_snprintf(cItemFileName, sizeof(cItemFileName), "items/%s", cString);
 
-		logfileopt << "  (Precache) Creating item " << cString << "...";
+		MS_INFO("	(Precache) Creating item %s...", cString);
 		//Create a new Global Item
 
 		int iD = 0;
@@ -480,9 +469,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		strncpy(pNewItem->m_Name, cString, sizeof(pNewItem->m_Name)); //NewItem.m_Name
 		pNewItem->ItemName = cString;
 
-		dbg(msstring("Load script: ") + msstring(cItemFileName));
-		//Log(cItemFileName);
-
 		bool fSuccess = pNewItem->Script_Add(cItemFileName, pNewItem) ? true : false;
 		//Log("try adding new item scripts");
 		if (fSuccess)
@@ -496,7 +482,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 			//Couldn't load the item's script, don't load the item
 #ifdef DEV_BUILD
 			CGenericItemMgr::DeleteItem(pNewItem);
-			logfileopt << " FAILED\r\n";
+			MS_INFO("	(Precache) Failed to create item %s...", cString);
 #else
 #ifdef RELEASE_LOCKDOWN
 			exit(0);
@@ -506,7 +492,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 		}
 		else
-			logfileopt << " SUCCESS\r\n";
 	}
 
 	if (pMemFile)
@@ -516,7 +501,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		delete[] pStringPtr;
 
 end: //Cleanup time
-	logfile << Logger::LOG_INFO << "Done precaching items\n";
+	MS_INFO("Done precaching items");
 	enddbg;
 }
 

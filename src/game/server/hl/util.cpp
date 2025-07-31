@@ -32,7 +32,6 @@
 #include "weapons.h"
 #include "gamerules.h"
 
-#include "logger.h"
 /*
 =====================
 UTIL_WeaponTimeBase

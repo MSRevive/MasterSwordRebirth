@@ -31,7 +31,6 @@
 
 #include "studiomodelrenderer.h"
 #include "gamestudiomodelrenderer.h"
-#include "logger.h"
 #include "clrender.h"
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"

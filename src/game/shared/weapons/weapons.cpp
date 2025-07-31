@@ -32,7 +32,6 @@
 #endif
 #include "msitemdefs.h"
 #include "syntax/syntax.h"
-#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "usercmd.h"

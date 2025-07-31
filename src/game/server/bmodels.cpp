@@ -21,7 +21,6 @@
 */
 
 #include "msdllheaders.h"
-#include "logger.h"
 #include "doors.h"
 
 extern DLL_GLOBAL Vector g_vecAttackDir;

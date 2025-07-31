@@ -15,7 +15,6 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "stats/statdefs.h"
-#include "logger.h"
 
 #define TypeCheck        \
 	if (!ProjectileData) \

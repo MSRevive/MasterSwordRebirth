@@ -18,12 +18,10 @@
 #include "in_defs.h"
 #include "vgui_teamfortressviewport.h"
 #include "vgui_controlconfigpanel.h"
-#include "logger.h"
 #include "clenv.h"
 
 namespace
 {
-
 	class TexturePanel : public Panel, public ActionSignal
 	{
 	private:

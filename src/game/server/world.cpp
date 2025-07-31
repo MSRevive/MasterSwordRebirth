@@ -407,7 +407,6 @@ LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
-#include "logger.h"
 void CWorld ::Spawn(void)
 {	
 	logfile << Logger::LOG_INFO << "World Spawn...\n";

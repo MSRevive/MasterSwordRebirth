@@ -4,7 +4,6 @@
 
 #include "msdllheaders.h"
 #include "global.h"
-#include "logger.h"
 
 #ifdef VALVE_DLL
 //#define TRACK_MEMORY		//Deterimines whether all memory allocations should be catalogued and dumped to file
