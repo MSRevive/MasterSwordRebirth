@@ -90,7 +90,6 @@ endfunction(set_common_properties)
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 
-add_subdirectory(apidoc)
 # TODO: charimport is quite broken
 # add_subdirectory(charimport)
 add_subdirectory(maphash)

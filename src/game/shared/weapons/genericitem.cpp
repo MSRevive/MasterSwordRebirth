@@ -331,6 +331,8 @@ void CGenericItemMgr::GenericItemPrecache(void)
 	//GenericItem script commands (only add once per game):
 	if (!m_ScriptCommands.size())
 	{
+		ALERT(at_console, "CGenericItemMgr::GenericItemPrecache\n");
+
 		m_ScriptCommands.add(scriptcmdname_t("wipespells"));
 		m_ScriptCommands.add(scriptcmdname_t("callownerevent"));
 		m_ScriptCommands.add(scriptcmdname_t("playanim"));
