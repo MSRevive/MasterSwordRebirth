@@ -4,11 +4,7 @@ on:
   pull_request:
     branches:
       - "dev"
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - ready_for_review
+    types: [review_requested, ready_for_review]
 
 env:
   BUILD_TYPE: Release
