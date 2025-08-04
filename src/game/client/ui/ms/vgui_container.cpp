@@ -385,8 +385,6 @@ void VGUI_ContainerPanel::Update()
 }
 void VGUI_ContainerPanel::AddInventoryItems()
 {
-	try {
-
 	gearitem_t GearItem;
 	mslist<CGenericItem *> Containers;	  //Sort my inventory into Containers and non-containers
 	mslist<CGenericItem *> NonContainers; //The containers get listed first, then non-containers
@@ -443,8 +441,6 @@ void VGUI_ContainerPanel::AddInventoryItems()
 				pGearItemButton->m_ItemContainer->AddItem(vNewItem);
 			}
 		}
-	}
-
 	}
 }
 
