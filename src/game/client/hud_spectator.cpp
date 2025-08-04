@@ -204,7 +204,7 @@ void UTIL_StringToVector(float *pVector, const char *pString)
 
 int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 {
-	startdbg;
+	try {
 	int n, found = 0;
 	char keyname[256];
 	char token[1024];
@@ -325,7 +325,7 @@ int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 			return 1;
 	}
 
-	enddbg;
+	}
 	return 0; // we search all entities, but didn't found the correct
 }
 
@@ -1564,7 +1564,7 @@ int CHudSpectator::ToggleInset(bool allowOff)
 }
 void CHudSpectator::Reset()
 {
-	startdbg;
+	try {
 	// Reset HUD
 	if (strcmp(m_OverviewData.map, gEngfuncs.pfnGetLevelName()))
 	{
@@ -1576,7 +1576,7 @@ void CHudSpectator::Reset()
 	memset(&m_OverviewEntities, 0, sizeof(m_OverviewEntities));
 
 	SetSpectatorStartPosition();
-	enddbg;
+	}
 }
 
 void CHudSpectator::InitHUDData()

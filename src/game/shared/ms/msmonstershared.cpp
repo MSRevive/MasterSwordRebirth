@@ -440,17 +440,15 @@ void CMSMonster ::DropAllItems()
 
 bool CMSMonster::CreateStats()
 {
-	startdbg;
+	try {
 	if (m_StatsCreated)
 		return true;
 
-	dbg("Create Stats");
 	CStat::InitStatList(m_Stats);
 
 	m_PlayerDamage.reserve_once(MAXPLAYERS, MAXPLAYERS);
 	//foreach( i, MAXPLAYERS ) m_PlayerDamage[i] = msnew playerdamage_t;
 
-	dbg("Clear player damage memory");
 	//foreach( i, MAXPLAYERS ) memset( m_PlayerDamage[i], 0, sizeof(playerdamage_t) );
 
 	m_Race[0] = 0;
@@ -459,7 +457,7 @@ bool CMSMonster::CreateStats()
 
 	m_StatsCreated = true;
 
-	enddbg("CMSMonster::CreateStats");
+	}
 	return true;
 }
 void CMSMonster::DeleteStats()

@@ -77,7 +77,6 @@ int CHudID::Draw(float flTime)
 	}
 
 	int TextHeight, TextWidth;
-	dbg( "Call GetConsoleStringSize" );
 	GetConsoleStringSize( pDrawInfo->Name, &TextWidth, &TextHeight );
 
 	int Y_START;
@@ -88,7 +87,6 @@ int CHudID::Draw(float flTime)
 
 	int x = 5;
 	int y = Y_START - TextHeight; // draw along bottom of screen
-	dbg( "Draw Strings" );
 
 	msstring String = pDrawInfo->Name + "\n";
 	CharUpperBuff( String, 1 );
@@ -114,7 +112,7 @@ int CHudID::Draw(float flTime)
 
 	DrawConsoleString( x, y + TextHeight, String );
 
-	enddbg( "CHudID::Draw()" );
+	}
 	return 1; */
 }
 
@@ -140,8 +138,7 @@ void CHudID::SearchThink()
 //		byte   : Relative entity alignment (Neutral, Friendly, Hostile)
 int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	BEGIN_READ(pbuf, iSize);
 
 	entinfo_t EntData;
@@ -161,7 +158,7 @@ int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 	//Not found, create a new one
 	player.m_EntInfo.add(EntData);
 
-	enddbg;
+	}
 	return 1;
 }
 

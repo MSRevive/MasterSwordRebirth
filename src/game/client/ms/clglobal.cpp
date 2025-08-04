@@ -60,9 +60,8 @@ void MSCLGlobals::RemoveEnt(CBaseEntity *pEntity, bool fDelete)
 //Global one-time Initialization - called from CHud :: Init()
 void MSCLGlobals::Initialize()
 {
-	startdbg;
+	try {
 
-	dbg("Begin");
 	//Set up g_engfuncs re-directs
 	gpGlobals = &Globals;
 	SetupGlobalEngFuncRedirects();
@@ -136,13 +135,11 @@ void MSCLGlobals::Initialize()
 		gEngfuncs.pfnClientCmd( msstring("ms_id ") + ID + "\n" );
 	}*/
 
-	dbg("Call InitializePlayer");
 	InitializePlayer();
 
-	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
 
-	enddbg;
+	}
 }
 
 //Player initialization that happens every map
@@ -352,50 +349,44 @@ void ShowVGUIMenu(int iMenu);
 
 void MSCLGlobals::SpawnIntoServer()
 {
-	startdbg;
+	try {
 
 	logfile << Logger::LOG_INFO << "SpawnIntoServer...";
 
 	Cleanup(); //Clean up stuff from the previous map
 
-	dbg("Call player.InitialSpawn");
 	player.InitialSpawn();
 	player.BeginRender();
 
-	dbg("Call CreateStoreMenus");
 	CreateStoreMenus();
 
-	dbg("Call MSChar_Interface::CLInit");
 	MSChar_Interface::CLInit();
 
-	dbg("ShowVGUIMenu( MENU_NEWCHARACTER )");
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
 	logfile << "DONE\n";
 
-	enddbg;
+	}
 }
 
 //Cleans up stuff from the previous map
 void MSCLGlobals::Cleanup()
 {
-	startdbg;
+	try {
 
 	//Remove spell list
 	player.m_SpellList.clear();
 
 	//Kill the client-side entity list
-	dbg("Call CBasePlayeR::RenderCleanup");
 	player.RenderCleanup();
 
 	// Delete all client-side entities
-	dbg("Call MSCLGlobals::RemoveAllEntities( )");
 	RemoveAllEntities();
 
 	//Remove Environment Special Effects
 	CRender::Cleanup();
 
-	enddbg;
+	}
 }
 
 void DLLAttach(HINSTANCE hinstDLL)

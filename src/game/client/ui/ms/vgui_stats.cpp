@@ -66,7 +66,7 @@ static COLOR Color_TitleText = COLOR(255, 255, 255, 0),
 // Creation
 CStatPanel::CStatPanel(Panel *pParent) : CMenuPanel(0, false, 0, 0, ScreenWidth, ScreenHeight)
 {
-	startdbg;
+	try {
 	setParent(pParent);
 	setVisible(false);
 
@@ -197,7 +197,7 @@ CStatPanel::CStatPanel(Panel *pParent) : CMenuPanel(0, false, 0, 0, ScreenWidth,
 
 	m_pScrollPanel->setScrollValue(0, 0);
 	m_pScrollPanel->validate();
-	enddbg;
+	}
 }
 
 //Shuriken read the Exp message from the server.

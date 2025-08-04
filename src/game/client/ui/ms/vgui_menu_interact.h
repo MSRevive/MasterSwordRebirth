@@ -36,7 +36,7 @@ public:
 
 	VGUI_MenuInteract(Panel *pParent) : VGUI_MenuBase(pParent)
 	{
-		startdbg;
+		try {
 
 		m_Name = INTERACT_MENU_NAME;
 
@@ -54,7 +54,7 @@ public:
 		// MiB NOV2014_25, center the title and separator NpcInteractMenus.rft
 		m_AllowKeys = true; // MiB 25NOV_2014 - Disable key-input
 
-		enddbg;
+		}
 	}
 
 	void Open()

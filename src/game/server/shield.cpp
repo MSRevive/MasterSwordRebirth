@@ -7,22 +7,20 @@
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags)
 {
-	startdbg; //Do exception handling on the traceline so if it fails
+	try { //Do exception handling on the traceline so if it fails
 	bool fSolidShields = FBitSet(flags, MSTRACE_SOLIDSHIELDS) ? true : false;
 	bool fEnlargeboxes = FBitSet(flags, MSTRACE_LARGEHITBOXES) ? true : false;
 	bool fEnableCorpses = FBitSet(flags, MSTRACE_HITCORPSES) ? true : false;
 
 	//G_SolidifyEnts( true, fSolidShields, fEnableCorpses, fEnlargeboxes );
-	dbg("Call UTIL_TraceLine");
 	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pentIgnore, &tr); //At least the objects' bboxes will be cleaned up
 	//G_SolidifyEnts( false, fSolidShields, fEnableCorpses, fEnlargeboxes );
-	enddbg;
+	}
 }
 
 void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool fEnlargeboxes)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	//Make corpses solid here too...
 	CBaseEntity *pEnt = NULL;
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(1);
@@ -35,16 +33,13 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 		if (!pEnt)
 			continue;
 
-		dbg("Check if monster");
 		if (pEnt->IsMSMonster())
 		{
-			dbg("Handle Monster");
 			//Enlarge the hitbox on the live monsters
 			if (fEnlargeboxes && pEnt->pev->health > 0 && pEnt->pev->model && (pEnt->pev->solid == SOLID_BBOX))
 			{
 				if (fEnable)
 				{
-					dbg("Expand Monster HitBox");
 					pEnt->OldBounds[0] = pEnt->pev->mins;
 					pEnt->OldBounds[1] = pEnt->pev->maxs;
 					Vector Mins, Maxs;
@@ -53,7 +48,6 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 				}
 				else
 				{
-					dbg("Contract Monster Hitbox");
 					UTIL_SetSize(pEnt->pev, pEnt->OldBounds[0], pEnt->OldBounds[1]);
 				}
 				//UTIL_SetOrigin( pEnt->pev, pEnt->pev->origin );
@@ -69,7 +63,6 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 			if (pEnt->pev->deadflag != DEAD_DEAD)
 				continue;
 
-			//dbg( "Check Skinnable" );
 			//Must be a skinnable monster
 			//CMSMonster *pMonster = (CMSMonster *)pEnt;
 			//if( !pMonster->Skin ) continue;
@@ -77,13 +70,11 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 		else if (!fSolidShields || pEnt->MSProperties() != MS_SHIELD)
 			continue;
 
-		dbg("Set Solididity");
 		pEnt->pev->solid = fEnable ? SOLID_BBOX : SOLID_NOT;
 		//UTIL_SetOrigin( pEnt->pev, pEnt->pev->origin );
 	}
 
-	dbg(msstring("End (") + (fEnable ? "Enabled" : "Disabled") + ")");
-	enddbg;
+	}
 }
 
 //

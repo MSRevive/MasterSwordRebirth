@@ -98,14 +98,12 @@ CImageDelayed::CImageDelayed( const char *pszImageName, bool TGAorSprite, bool D
 
 void CImageDelayed::LoadImg( )
 {
-	startdbg;
+	try {
 	if( m_ImageLoaded )
 		return;	//already loaded image
 
 	if( m_TGAorSprite )
 	{
-		dbg( "Calling setImage" );
-		dbg( msstring("Image Name = ") + m_ImageName );
 		setImage( m_pTGA=MSBitmap::GetTGA( m_ImageName ) ); //load image
 	}
 	else
@@ -122,12 +120,12 @@ void CImageDelayed::LoadImg( )
 	}
 
 	m_ImageLoaded = true;
-	enddbg;
+	}
 }
 
 void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool Delayed )
 {
-	startdbg;
+	try {
 	//The image name is stored, but we may delay loading of the image data until LoadImg() is called.
 	//Some image buttons are never be shown... this saves us from ever loading those
 	ClearImg( );
@@ -137,7 +135,7 @@ void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool De
 	
 	if( !Delayed )
 		LoadImg( );
-	enddbg;
+	}
 }
 
 void CImageDelayed::ClearImg( )

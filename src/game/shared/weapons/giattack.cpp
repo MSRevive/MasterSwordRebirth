@@ -201,8 +201,7 @@ bool CGenericItem::Attack_CanAttack()
 //Can be called with a parameter to force an attack
 bool CGenericItem::StartAttack(int ForceAttackNum)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 #ifdef VALVE_DLL
 
@@ -244,7 +243,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	}
 #endif
 
-	dbg("Check Restrictions");
 	//MiB JUN2010_19 - Letting both hands attack at the same time. Commented out IsActing as we don't care if another
 	//				   weapon is attacking, only if this one is already attacking. We do, however care if the player
 	//				   is using a shield. Would be exploitable to allow attacking from behind a shield
@@ -256,7 +254,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 
 	if (ForceAttackNum >= 0)
 	{
-		dbg("Force Attack");
 		if (ForceAttackNum >= (signed)m_Attacks.size())
 			return true;
 
@@ -266,7 +263,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 #ifndef VALVE_DLL
 	else if (!CurrentAttack)
 	{
-		dbg("Choose attack");
 		//bool thoth_unskill_base = false;
 		for (int a = 0; a < m_Attacks.size(); a++)
 		{
@@ -338,7 +334,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	if (CurrentAttack && ((iNewAttack >= 0) || (iNewAttack == -2)))
 	{
 		//Start attack
-		dbg("Initiate attack");
 		SetBits(m_pOwner->m_StatusFlags, PLAYER_MOVE_ATTACKING);
 		CallScriptEvent(CurrentAttack->CallbackName + "_start");
 		if (!CurrentAttack) return true; //Was canceled at the start
@@ -393,20 +388,18 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		m_LastChargedAmt = 0; //Clear after I've checked for valid attack.  This way if I let go of charge early, it still waits for the attack to finish
 	}
 
-	enddbg;
+	}
 	return true;
 }
 
 //Attack - Called every frame to continue an attack
 void CGenericItem::Attack()
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	if (!m_pOwner || !CurrentAttack)
 		return;
 
-	dbg("Projectile checks");
 
 	//Special stuff for projectiles... move to subroutine?
 	bool fCanLandAttack = true;
@@ -437,7 +430,6 @@ void CGenericItem::Attack()
 		return;
 	}
 
-	dbg("Duration checks");
 	//Quit if the attack is done (it's duration has expired)
 	if (CurrentAttack->tStart + CurrentAttack->tDuration <= gpGlobals->time &&
 		CurrentAttack->tDuration >= 0 && CurrentAttack->fCanCancel)
@@ -462,7 +454,6 @@ void CGenericItem::Attack()
 	//Attack has successfully been landed
 	CurrentAttack->fAttackLanded = true;
 
-	dbg("Call strike function");
 	//Don't refer to CurrentAttack after calling StrikeLand, StrikeHold, etc.
 	//because CancelAttack might get called, which nulls CurrentAttack.
 	int Type = CurrentAttack->Type;
@@ -473,7 +464,7 @@ void CGenericItem::Attack()
 	else if (Type == ATT_CHARGE_THROW_PROJ)
 		ChargeThrowProj();
 
-	enddbg;
+	}
 }
 void CGenericItem::RegisterAttack()
 {
@@ -662,19 +653,17 @@ void CGenericItem::CancelAttack()
 }
 void CGenericItem::ItemPostFrame()
 {
-	startdbg;
+	try {
 
-	dbg("Begin");
 
 	if (!m_pPlayer)
 		return;
 
-	/*dbg( "AttackButtonDown" );
+	/*
 	if( FBitSet(m_pPlayer->pbs.ButtonsDown,IN_ATTACK) )
 		AttackButtonDown( );
 	else AttackButtonUp( );*/
 
-	dbg("Attack2ButtonDown");
 	if (m_pPlayer && FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK2))
 		Attack2ButtonDown(); // +attack2
 	else
@@ -693,11 +682,9 @@ void CGenericItem::ItemPostFrame()
 			ActivateButtonUp(); //Button is currently up
 	}
 
-	dbg("AllButtonsReleased");
 	if (!m_pPlayer || !FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK | IN_ATTACK2))
 		AllButtonsReleased(); // no fire buttons down
 
-	dbg("Idle");
 	if (ShouldIdle())
 		Idle();
 
@@ -722,20 +709,17 @@ void CGenericItem::ItemPostFrame()
 	DrinkThink(); //Run on client & server
 
 #ifdef VALVE_DLL
-	dbg("Think");
 	if (MSProperties() & ITEM_GENERIC)
 		Think();
 #endif
-	dbg("End");
 
-	enddbg;
+	}
 }
 // Attack variations
 void CGenericItem::StrikeLand()
 {
 #ifdef VALVE_DLL
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Begin");
 	//m_pOwner->WorldVolume = LOUD_GUN_VOLUME;
 
 	UTIL_MakeVectors(m_pOwner->pev->v_angle);
@@ -792,7 +776,6 @@ void CGenericItem::StrikeLand()
 		flDamage *= m_LastChargedAmt;
 	}
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
 		bitsDamage |= DMG_SIMPLEBBOX;
@@ -841,7 +824,6 @@ void CGenericItem::StrikeLand()
 	if (!CurrentAttack)
 		return;
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Set script variables");
 
 	//Reset hit/miss variables
 	//SetScriptVar( "game_lastattack.hitwall", 0 );
@@ -854,7 +836,6 @@ void CGenericItem::StrikeLand()
 	//else SetScriptVar( "game_lastattack.hitwall", 1 );
 	//SetScriptVar( "game_lastattack.endpos", VecToString(Damage.outTraceResult.vecEndPos) );
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Script callback: land event");
 	msstringlist Parameters;
 	Parameters.add(pHit ? (pHit->IsMSMonster() ? "npc" : "world") : "none");
 	Parameters.add(VecToString(Damage.outTraceResult.vecEndPos));
@@ -862,7 +843,6 @@ void CGenericItem::StrikeLand()
 	Parameters.add(Damage.AttackHit ? "1" : "0");
 	CallScriptEvent(CurrentAttack->CallbackName + "_strike", &Parameters);
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Reset script variables");
 #endif
 }
 void CGenericItem::StrikeHold()
@@ -873,8 +853,7 @@ void CGenericItem::StrikeHold()
 //Uses ammo.  Projectiles or MP
 bool CGenericItem::UseAmmo(int iAmt)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	if (!m_pOwner || !CurrentAttack)
 		return false;
 
@@ -1036,7 +1015,7 @@ bool CGenericItem::UseAmmo(int iAmt)
 	if (CurrentAttack->flMPDrain)
 		m_pOwner->Give(GIVE_MP, -CurrentAttack->flMPDrain);
 
-	enddbg;
+	}
 	return true;
 }
 
@@ -1184,8 +1163,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 /*CBaseEntity *DoDamage( damage_t &Damage )
 {
-	startdbg;
-	dbg( "Begin" );
+	try {
 
 	//Old DoDamage parameters
 	entvars_t *pInflictor = Damage.pevInflictor;
@@ -1236,12 +1214,10 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 	//BeamEffect( vecSrc, vecEnd, iBeam, 0, 0, 100, 10, 0, 255, 255, 255, 255, 20 );
 
-	//SetDebugProgress( ItemThinkProgress, "DoDamage - Check special power damage (rogue backstab)" );
 	//bActualHit: Did the combination of luck&skill produce a hit?
 	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
 	//	fReportHit = FALSE, fDodged = FALSE;
 
-	SetDebugProgress( ItemThinkProgress, "DoDamage - Check hit" );
 	bool fReportHit = false;
 	Damage.AttackHit = false;
 
@@ -1255,7 +1231,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 		pEntity = CBaseEntity::Instance(Damage.outTraceResult.pHit);
 
-		SetDebugProgress( ItemThinkProgress, "DoDamage - Entity hit" );
 		int iAccuracyRoll = 0;
 		if( pEntity )
 		{
@@ -1344,7 +1319,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 			}
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Check if damage is dealt" );
 			bool fDodged = false;
 			if( Damage.AttackHit )
 			{
@@ -1385,7 +1359,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 					else
 						flDamage = ((CMSMonster *)pEntity)->TraceAttack( Damage );
 
-					SetDebugProgress( ItemThinkProgress, "DoDamage - Apply damage" );
 					if( flDamage > 0 )  // flDamage < 0 means monster dodged it
 						ApplyMultiDamage( pInflictor, pAttacker );
 					else if( !flDamage && !CBaseEntity::Instance(pAttacker)->IsPlayer() )
@@ -1404,7 +1377,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 			if( pVictim ) pVictim->Attacked( CBaseEntity::Instance( pAttacker ), Damage );
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Report damage" );
 			if( fReportHit )
 			{
 				char szStats[32], szDamage[32], szHitMiss[32];
@@ -1427,7 +1399,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 				}
 			}
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Countereffect" );
 			pEntity->CounterEffect( pEntityInflictor, 0, (void *)&flDamage );
 			//if( fHitWorld )
 			//{
@@ -1449,7 +1420,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 EndDamage:
 
 	//Set some script variables
-	dbg( "Set post damage variables" );
 	if( pAttMonster )
 	{
 		Vector &EndPos = Damage.AttackHit ? Damage.outTraceResult.vecEndPos : Damage.vecEnd;
@@ -1466,7 +1436,6 @@ EndDamage:
 
 	//Ranged attack... Find all valid targets and call non-ranged DoDamage on them
 	CBaseEntity *pClosestHit = pEntity;
-	dbg( "Do radius damages" );
 	if( Damage.flAOERange )
 	{
 		CBaseEntity *pTarget = NULL;
@@ -1484,7 +1453,6 @@ EndDamage:
 				continue;	//Only hit the owner if damage is reflective
 
 			TraceResult	tr;
-			dbg( "Do radius Traceline" );
 			UTIL_TraceLine ( Damage.vecSrc, pTarget->Center(), ignore_monsters, ENT(Damage.pevInflictor), &tr );
 
 			if( tr.flFraction < 1.0f )
@@ -1508,18 +1476,17 @@ EndDamage:
 	}
 
 	return pClosestHit;
-	enddbg( "DoDamage()" );
+	}
 	return NULL;
 }*/
 CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget);
 
 void DoDamage(damage_t &Damage, hitent_list &Hits)
 {
-	startdbg;
+	try {
 	//Find all valid targets
 	//If AOE, hit all targets in area
 	//If non-AOE, just hit the closest one in front of me
-	dbg("Find Targets");
 	//mslist<hitent_t> Hits;
 	Hits.clearitems();
 
@@ -1543,7 +1510,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 				continue; //Only hit the owner if damage is reflective
 
 			TraceResult tr;
-			dbg("Do radius Traceline");
 			UTIL_TraceLine(Damage.vecSrc, pTarget->Center(), ignore_monsters, Damage.pInflictor->edict(), &tr);
 
 			if (tr.flFraction < 1.0f)
@@ -1583,7 +1549,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		}
 	}
 
-	dbg("Damage Targets");
 	if (!Damage.flAOERange)
 	{
 		if (Hits.size())
@@ -1592,7 +1557,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 			{
 				//Thothie FEB2009 - critical crash fix - make sure attacker is alive when passing damage
 				//- if he damages multiple targets while dead, it causes crash
-				dbg("Damage Targets->DoDamage");
 				CBaseEntity *pDmgEnt = Damage.pAttacker;
 				//if ( pDmgEnt->IsAlive() ) DoDamage( Damage, Hits[h].pEntity );
 				if (pDmgEnt)
@@ -1611,7 +1575,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		}
 		else
 		{
-			dbg("Damage Targets->Tracelin");
 			//Didn't hit any NPCs with a normal attack.  Do a traceline to hit worldmodels, breakables, etc.
 			int trflags = MSTRACE_SOLIDSHIELDS;
 
@@ -1634,14 +1597,13 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		}
 	}
 
-	enddbg;
+	}
 }
 
 //MIB MAR2008a - massive changes
 CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 {
-	startdbg;
-	dbg("Hit Target");
+	try {
 
 	if (FBitSet(Damage.iDamageType, DMG_NONE))
 		return pTarget; //Don't do any damage, but target the ent
@@ -1670,7 +1632,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
 	//	fReportHit = FALSE, fDodged = FALSE;
 
-	SetDebugProgress(ItemThinkProgress, "DoDamage - Check hit");
 	bool fReportHit = false;
 	Damage.AttackHit = true;
 	Damage.AttackCrit = false;
@@ -1680,7 +1641,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 	int iAccuracyRoll = 0;
 	if (pTarget)
 	{
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Entity hit");
 		//Hit an entity
 		//Check if I can damage it
 		Damage.AttackHit = pEntityAttacker->CanDamage(pTarget);
@@ -1723,7 +1683,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 			}
 		}
 
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Check if damage is dealt");
 		bool fDodged = false;
 		if (Damage.AttackHit) //check again, because it might have been canceled in game_damaged_other
 		{
@@ -1780,24 +1739,20 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 
 			//Deal Damage
 			//===========
-			dbg("Deal Damage->entvars_t");
 			entvars_t *pevInflictor = Damage.pInflictor ? Damage.pInflictor->pev : NULL;
 			entvars_t *pevAttacker = Damage.pAttacker ? Damage.pAttacker->pev : NULL;
 			float flDamage = Damage.flDamage;
 			//Non-ranged attack
-			dbg("Deal Damage->pTarget");
 			if (!pTarget->IsMSMonster())
 				flDamage = pTarget->TraceAttack(pevInflictor, pevAttacker, Damage.flDamage, gpGlobals->v_forward, &Damage.outTraceResult, Damage.iDamageType, Damage.AccuracyRoll);
 			else
 				flDamage = ((CMSMonster *)pTarget)->TraceAttack(Damage);
 
-			SetDebugProgress(ItemThinkProgress, "DoDamage - Apply damage");
 			if (flDamage > 0) // flDamage < 0 means monster dodged it
 			{
 				//MiB Mar2008a - Relocated exp assigning here so that armor and other
 				//damage recalculations could be done (stops exp from parry and things
 				//of that sort)
-				dbg("Store XP for Attack");
 				if (pPlayerAttacker &&				 //Only if player is attacking...
 					pVictim && !pVictim->IsPlayer()) //Only when attacking monsters...
 				{
@@ -1813,7 +1768,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					}
 				}
 
-				dbg("ApplyMultiDamage");
 				//ALERT( at_console,"ApplyMultiDamage: %s \n",pPlayerAttacker->DisplayName());
 				if (pevAttacker)
 					ApplyMultiDamage(pevInflictor, pevAttacker); //Thothie FEB2009 - experimenting
@@ -1823,12 +1777,10 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				//If monsters do 0 damage, just consider it not hitting
 				//This also prevents orc archers arrows from sticking into
 				//other orcs
-				dbg("EndDamage");
 				goto EndDamage;
 			}
 			else if (flDamage == -1)
 			{
-				dbg("NoDamage");
 				ClearMultiDamage();
 				fDodged = true;
 				Damage.AttackHit = false;
@@ -1840,7 +1792,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 		//Report Damage
 		//=============
 
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Report damage");
 		if (fReportHit)
 		{
 			if (Damage.flDamage > 0)
@@ -1989,7 +1940,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 			} //endif Damage.flDamage > 0
 		}
 
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Countereffect");
 		pTarget->CounterEffect(pEntityInflictor, 0, (void *)&Damage.flDamage);
 		//if( fHitWorld )
 		//{
@@ -2011,7 +1961,6 @@ CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 EndDamage:
 
 	//Set some script variables
-	dbg("Set post damage variables");
 	if (pAttMonster)
 	{
 		Vector &EndPos = Damage.AttackHit ? Damage.outTraceResult.vecEndPos : Damage.vecEnd;
@@ -2053,7 +2002,7 @@ EndDamage:
 	}
 
 	return pTarget;
-	enddbg;
+	}
 	return NULL;
 }
 #endif

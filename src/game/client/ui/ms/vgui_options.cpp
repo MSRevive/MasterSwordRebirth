@@ -514,14 +514,12 @@ bool CPanel_Options::SlotInput(int iSlot)
 
 void CPanel_Options::Open(option_e OptionScreen)
 {
-	startdbg;
+	try {
 
-	dbg("Call Reset");
 	Reset();
 
 	setVisible(true);
 
-	dbg("Open option panel");
 	m_OpenScreen = OptionScreen;
 	switch (m_OpenScreen)
 	{
@@ -540,7 +538,7 @@ void CPanel_Options::Open(option_e OptionScreen)
 		break;
 	}
 
-	enddbg;
+	}
 }
 
 //-----------------------------------------------------------------------------

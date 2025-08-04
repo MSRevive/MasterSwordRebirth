@@ -34,9 +34,9 @@
 	{                                                             \
 		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		startdbg;                                                 \
+		try {                                                 \
 		ret = gHUD.y.MsgFunc_##x(pszName, iSize, pbuf);           \
-		enddbg;                                                   \
+		}                                                   \
 		return ret;                                               \
 	}
 
@@ -45,9 +45,9 @@
 	void __CmdFunc_##x(void)    \
 	{                           \
 		DBG_INPUT;              \
-		startdbg;               \
+		try {               \
 		gHUD.y.UserCmd_##x();   \
-		enddbg;                 \
+		}                 \
 	}
 
 //------------ Master Sword ----------------
@@ -56,18 +56,18 @@
 	{                                                             \
 		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		startdbg;                                                 \
+		try {                                                 \
 		ret = gHUD.y->MsgFunc_##x(pszName, iSize, pbuf);          \
-		enddbg;                                                   \
+		}                                                   \
 		return ret;                                               \
 	}
 #define MS_DECLARE_COMMAND(y, x) \
 	void __CmdFunc_##x(void)     \
 	{                            \
 		DBG_INPUT;               \
-		startdbg;                \
+		try {                \
 		gHUD.y->UserCmd_##x();   \
-		enddbg;                  \
+		}                  \
 	}
 //------------------------------------------
 

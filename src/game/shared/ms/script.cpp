@@ -4959,8 +4959,7 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 
 void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
-	startdbg;
-	dbg("Proc_Events");
+	try {
 	//Run script events
 	//~ Runs unnamed events or named events that were specified with calleventtimed ~
 	int events = m.Events.size();
@@ -4971,7 +4970,6 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 		msstring msEventName = (m.ScriptFile.c_str());
 		msEventName.append("->");
 		msEventName.append(Event.Name);
-		dbg(msEventName);
 		if (!Event.Name && fOnlyRunNamedEvents)
 			continue;
 
@@ -5000,7 +4998,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 		}
 	}
 
-	enddbg;
+	}
 }
 void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Parameters)
 {
@@ -5080,9 +5078,8 @@ void CScript::CallLogged(const char* title, std::clock_t start)
 
 bool CScript::ParseScriptFile(const char* pszScriptData)
 {
-	startdbg;
+	try {
 
-	dbg("Begin");
 	if (!m.ScriptFile.len() || !pszScriptData)
 		return false;
 
@@ -5138,7 +5135,7 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 		lineNum++;
 	}
 
-	enddbg("CSript::ParseScriptFile()");
+	}
 	//  Uncomment to print out all this function gathered from the script file
 	//#ifndef VALVE_DLL
 		/*SCRIPT_EVENT *pEvent = seFirstEvent;
@@ -5804,9 +5801,8 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT** pCurrentEvent /*in/out*/,
 	scriptcmd_list** pCurrentCmds /*in/out*/, ::mslist<scriptcmd_list*>& ParentCmds /*in/out*/)
 {
-	startdbg;
+	try {
 
-	dbg("Begin");
 
 	SCRIPT_EVENT* CurrentEvent = *pCurrentEvent;
 	scriptcmd_list& CurrentCmds = **pCurrentCmds;
@@ -5818,7 +5814,6 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SC
 #define CmdLine &pszCommandLine[LineOfs]
 #define CmdLineTmp &pszCommandLine[TmpLineOfs]
 
-	dbg(pszCommandLine);
 
 	//Read the first word of the line
 	if (sscanf(pszCommandLine, "%s", TestCommand) <= 0)
@@ -6424,7 +6419,7 @@ DontKeepCommand:
 		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), LineNum, cBuffer));
 	}
 
-	enddbg("CScript::ParseLine()");
+	}
 
 	return 1;
 }

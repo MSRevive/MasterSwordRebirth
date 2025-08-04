@@ -403,8 +403,7 @@ CMenuPanel *CreateNewCharacterPanel( )
 }
 CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, TRUE, x, y, wide, tall )
 {
-	startdbg;
-	dbg( "Begin" );
+	try {
 
 	SetBits( m_Flags, MENUFLAG_TRAPNUMINPUT );
 
@@ -437,7 +436,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Choose_CharHandlingLabel = new MSLabel( m_ChoosePanel, "", XRES(0), CHOOSE_CHARHANDLING_Y, CHOOSE_SIZEX, CHOOSE_CHARHANDLING_H, MSLabel::a_north );
 	Choose_CharHandlingLabel->SetFGColorRGB( InfoColor );
 	
-	dbg( "Init Main buttons" );
 	float ButtonWidth = CHOOSEPANEL_MAINBTNS * CHOOSE_BTNWIDTH + (CHOOSEPANEL_MAINBTNS-1) * CHOOSE_BTNSPACERX;
 	float StartX = (m_ChoosePanel->getWide()/2.0f) - (ButtonWidth/2.0f);
 	for( int i = 0; i < CHOOSEPANEL_MAINBTNS; i++ )
@@ -524,7 +522,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	#define LABEL_ITEMNAME_SIZE_Y			YRES(16)
 	#define LABEL_ITEM_SPACER_Y				YRES(2)
 
-	dbg( "Init Gender buttons" );
 
 	m_GenderPanel = new CTransparentPanel( 255, 0, 0, CHOOSE_SIZEX, GENDER_SIZEY );
 	m_GenderPanel->setParent( m_pScrollPanel->getClient() );
@@ -561,7 +558,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Gender_GenderLabel->setFont( g_FontID );
 	Gender_GenderLabel->addInputSignal( new GenderInput_ChangeName( this, 1 ) );
 
-	dbg( "Init Gender Panel" );
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), CHOOSE_BTNWIDTH, 2, XRES(32) );
 	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
@@ -580,7 +576,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 
 	//Weapon panel setup
 
-	dbg( "Init Weapon Panel" );
 	m_WeaponPanel = new CTransparentPanel( 255, 0, 0, CHOOSE_SIZEX, GENDER_SIZEY );
 	m_WeaponPanel->setParent( m_pScrollPanel->getClient() );
 	Weapon_MainLabel = new TextPanel( Localized( "#CHOOSECHAR_WEAPON" ), XRES(120), MAINLABEL_TOP_Y, LABEL_ITEMNAME_SIZE_X, LABEL_ITEMNAME_SIZE_Y );
@@ -589,7 +584,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Weapon_MainLabel->SetFGColorRGB( NewCharColor );
 	Weapon_MainLabel->SetBGColorRGB( Color_Transparent );
 
-	dbg( msstring("Init Weapon Buttons (") + (int)WEAPONPANEL_MAINBTNS + ")" );
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), WEAPON_BTN_SIZEX, 3, CHOOSE_BTNSPACERX );
 	int WeaponPanelSizeY = m_WeaponPanel->getTall( );
 	for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
@@ -601,19 +595,16 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 			iy = WEAPON_BTNY + (i/3) * (WEAPON_BTN_SIZEY + WEAPON_BTN_SPACERY),
 			iw = WEAPON_BTN_SIZEX,
 			ih = WEAPON_BTN_SIZEY;
-		dbg( msstring("Create Weapon") + MSGlobals::DefaultWeapons[i] );
 		
 		// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table
 		CGenericItem *ptmpItem = CGenericItemMgr::GetGlobalGenericItemByName( MSGlobals::DefaultWeapons[i], true );
 		if( !ptmpItem )
 		{
-			dbg( msstring("Weapon ") + MSGlobals::DefaultWeapons[i] + " Not found" );
 			Print( "Error: Starting item %s NOT FOUND!\n", MSGlobals::DefaultWeapons[i].c_str() );
 			Weapon_MainBtn[i] = NULL;
 			Weapon_MainActionSig[i] = NULL;
 			continue;
 		}
-		dbg( msstring("Init Weapon") + MSGlobals::DefaultWeapons[i] );
 		Weapon_MainBtnImg[i] = new CImageDelayed( msstring("items/640_") + ptmpItem->TradeSpriteName, false, true, ix, iy, iw, ih );
 		msstring Name = ptmpItem->DisplayName( );
 
@@ -626,7 +617,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 		Weapon_MainActionSig[i] = new CAction_SelectOption( this, STG_CHOOSEWEAPON, i );
 		Weapon_MainBtn[i]->addActionSignal( Weapon_MainActionSig[i] );
 
-		dbg( msstring("Init Weapon Label (") + MSGlobals::DefaultWeapons[i] + ")" );
 		//MiB DEC2007a - moving buttons:
 		Weapon_BtnLabel[i] = new MSLabel( m_WeaponPanel, Name, ix - XRES(Name.len()/2), iy + ih + WEAPON_BTNLABEL_SPACERY, iw + XRES(Name.len())/*+ CHOOSE_BTNSPACERX*/, CHOOSE_CHARLABELSIZEY );
 		//old: Weapon_BtnLabel[i] = new MSLabel( m_WeaponPanel, Name, ix, iy + ih + WEAPON_BTNLABEL_SPACERY, iw /*+ CHOOSE_BTNSPACERX*/, CHOOSE_CHARLABELSIZEY );
@@ -642,7 +632,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	}
 
 	//Resize the weapon panel
-	dbg( "Resize Wepaon panel" );
 	m_WeaponPanel->setSize( m_WeaponPanel->getWide(), WeaponPanelSizeY );
 
 	#define BUTTON_CANCEL_SIZE_X			XRES(200)
@@ -650,13 +639,11 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	#define BUTTON_CANCEL_SPACER_Y			YRES(6)
 
 	// Create the Cancel button
-	dbg( "Init cancel button" );
 	m_pCancelButton = new MSButton( this, Localized("#CANCEL"), MAINWINDOW_X, MAINWINDOW_Y + MAINWINDOW_SIZE_Y + BUTTON_CANCEL_SPACER_Y, BUTTON_CANCEL_SIZE_X, BUTTON_CANCEL_SIZE_Y );
 	((MSButton *)m_pCancelButton)->SetArmedColor( NewCharColor );
 	m_pCancelButton->addActionSignal( new CMenuHandler_TextWindow( HIDE_TEXTWINDOW ) );
 
 	// Create the Back button
-	dbg( "Init back button" );
 	m_BackBtn = new MSButton( this, "", BACK_BTN_X, BACK_BTN_Y, BACK_BTN_SIZEX, BACK_BTN_SIZEY );
 	m_BackBtn->SetArmedColor( NewCharColor );
 	m_BackBtn->addActionSignal( new CGoBack( this ) );
@@ -666,7 +653,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	fClosingMenu = false;
 	iButtons = 0;
 	m_Stage = STG_CHOOSECHAR;
-	enddbg;
+	}
 }
 
 // Update
@@ -885,7 +872,7 @@ void CNewCharacterPanel::Think( )
 
 bool CNewCharacterPanel::KeyInput( int down, int keynum, const char *pszCurrentBinding ) 
 {
-	startdbg;
+	try {
 	switch( m_Stage )
 	{
 	case STG_CHOOSEGENDER:
@@ -898,7 +885,7 @@ bool CNewCharacterPanel::KeyInput( int down, int keynum, const char *pszCurrentB
 		return true;
 	}
 
-	enddbg;
+	}
 
 	return false;
 }
@@ -916,8 +903,7 @@ void CNewCharacterPanel::Close( void )
 
 	//Note - I stopped deleting the resources... it seems to crash HL much later on
 
-	startdbg;
-	dbg( "Begin" );
+	try {
 	MSCLGlobals::CharPanelActive = false;
 
 	/*if( fClosingMenu )
@@ -985,7 +971,7 @@ void CNewCharacterPanel::Close( void )
 			{ gViewPort->m_Menus.erase( i ); break; }
 
 	CMenuPanel::Close( );
-	enddbg;
+	}
 }
 //======================================
 // Key inputs for the Class Menu
@@ -1031,14 +1017,12 @@ bool CNewCharacterPanel::SlotInput( int iSlot )
 
 void CNewCharacterPanel::Open( void )
 {
-	startdbg;
+	try {
 	m_Stage = STG_CHOOSECHAR;
 	MSCLGlobals::CharPanelActive = true;
 
-	dbg( "Call CMenuPanel::Open()" );
 	CMenuPanel::Open();
 
-	dbg( "Init Main 3D models" );
 	 for (int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = m_CharEnts[i];
@@ -1047,7 +1031,6 @@ void CNewCharacterPanel::Open( void )
 		CharEnt.Init( i );
 	}
 
-	dbg( "Init Gender 3D models" );
 	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = Gender_CharEnts[i];
@@ -1056,13 +1039,11 @@ void CNewCharacterPanel::Open( void )
 		CharEnt.Init( i );
 	}
 
-	dbg( "Call Update" );
 	Update( );
 
-	dbg( "setScrollValue" );
 	m_pScrollPanel->setScrollValue( 0, 0 );
 
-	enddbg;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1070,11 +1051,11 @@ void CNewCharacterPanel::Open( void )
 //-----------------------------------------------------------------------------
 void CNewCharacterPanel::Initialize( void )
 {
-	startdbg;
+	try {
 	setVisible( false );
 	m_pScrollPanel->setScrollValue( 0, 0 );
 
-	enddbg;
+	}
 }
 
 void CNewCharacterPanel::UpdateUpload( )
@@ -1104,8 +1085,7 @@ void __CmdFunc_PlayerChooseChar( )
 
 int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	BEGIN_READ(pbuf, iSize);
 
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
@@ -1175,7 +1155,7 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 		if (gViewPort && gViewPort->m_pCurrentMenu)
 			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
 
-	enddbg;
+	}
 	return 1;
 }
 
@@ -1231,7 +1211,7 @@ void CRenderChar::Init( int Idx, msstring model )
 
 void CRenderChar::Render( )
 {
-	startdbg;
+	try {
 
 	if( !MSCLGlobals::CharPanelActive )
 		return;
@@ -1365,7 +1345,7 @@ void CRenderChar::Render( )
 	//foreach( i, HUMAN_BODYPARTS )
 	//	m_Ent.SetBody( i, BodyParts[i] );
 
-	enddbg;
+	}
 }
 void CRenderChar::PlayAttnAnim( )
 {
@@ -1451,7 +1431,7 @@ void CRenderSpawnbox::Init( )
 }
 void CRenderSpawnbox::Render( )
 {
-	startdbg;
+	try {
 	Vector vForward, vRight, vUp;
 	EngineFunc::MakeVectors( ViewMgr.Angles, vForward, vRight, vUp );
 	m_Ent.origin = ViewMgr.Origin;
@@ -1460,7 +1440,7 @@ void CRenderSpawnbox::Render( )
 	m_Ent.curstate.origin = m_Ent.origin;
 
 	CRenderEntity::Render( );
-	enddbg;
+	}
 }
 CRenderSpawnbox::~CRenderSpawnbox( )
 {

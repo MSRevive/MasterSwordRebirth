@@ -459,8 +459,7 @@ LINK_ENTITY_TO_CLASS(mstrig_changelevel, CMSChangeLevel);
 
 void CScript::ScriptedEffect(msstringlist &Params)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	if (!Params.size())
 	{
 		ALERT(at_console, "Script: %s, effect missing parameters!\n", m.ScriptFile.c_str());
@@ -487,7 +486,6 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 	//[/Thothie]
 
-	dbg(Params[0]);
 
 	//Thothie MAR2008a - major changes to beam
 	//- beam ents now works (never could get it to work before), also changed syntax (see below)
@@ -953,5 +951,5 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 		Print("Decal: %i @ %s\n", decalidx, Params[1].c_str());
 	}
-	enddbg("CScript::ScriptedEffect()");
+	}
 }

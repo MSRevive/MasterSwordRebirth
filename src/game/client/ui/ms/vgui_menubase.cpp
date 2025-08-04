@@ -98,7 +98,7 @@ VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenW
 
 void VGUI_MenuBase::Init()
 {
-	startdbg;
+	try {
 
 	SetBits(m_Flags, MENUFLAG_TRAPNUMINPUT);
 
@@ -129,7 +129,7 @@ void VGUI_MenuBase::Init()
 	pSpacer->setParent( m_pMainPanel );
 	*/
 
-	enddbg;
+	}
 }
 
 MSButton *VGUI_MenuBase::AddButton(const char* Name, int Width, msvariant ID)

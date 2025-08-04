@@ -81,7 +81,7 @@ void *VGui_GetPanel()
 
 void VGui_Startup()
 {
-	startdbg;
+	try {
 	if (!CRender::CheckOpenGL()) //This exits if not in OpenGL mode
 		return;
 
@@ -116,7 +116,7 @@ void VGui_Startup()
 	TexturePanel* texturePanel=new TexturePanel();
 	texturePanel->setParent(gViewPort);
 	*/
-	enddbg;
+	}
 }
 
 void VGui_Shutdown()

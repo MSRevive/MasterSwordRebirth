@@ -517,9 +517,8 @@ void CMSMonster::Think()
 	if (IsAlive())
 		flInterval = StudioFrameAdvance();
 
-	startdbg; //MAR2008b - Skipping StudioFrameAdvance errors for now
+	try { //MAR2008b - Skipping StudioFrameAdvance errors for now
 
-	dbg("m_pfnThink");
 
 	if (m_pfnThink)
 	{
@@ -527,17 +526,14 @@ void CMSMonster::Think()
 		return;
 	}
 
-	dbg("!IsAlive()");
 
 	if (!IsAlive())
 		return;
 
-	dbg("pev->button");
 
 	pev->button = 0;
 
 	//Ignore normal script events when possessed by an NPC script ent
-	dbg("Run script events");
 	if (!HasConditions(MONSTER_NOAI))
 		RunScriptEvents();
 	//Only run timed named events when this flag is set
@@ -551,26 +547,20 @@ void CMSMonster::Think()
 
 	Act();
 
-	dbg("Look");
 	if (!HasConditions(MONSTER_BLIND))
 		Look();
 
 	if (!HasConditions(MONSTER_NOAI))
 	{
-		dbg("ListenForSound");
 		ListenForSound();
 	}
 
-	dbg("Trade");
 	Trade();
 
-	dbg("SetSpeed");
 	SetSpeed();
 
-	dbg("SetMoveDest");
 	SetMoveDest();
 
-	dbg("SetWanderDest");
 	SetWanderDest();
 
 	//Clear out single-frame events
@@ -579,10 +569,8 @@ void CMSMonster::Think()
 	case 600:
 		LastEvent.event = 0;
 	}
-	dbg("DispatchAnimEvents");
 	DispatchAnimEvents();
 
-	dbg("Play Movement Anim");
 
 	//NPCScripts override the monster animation
 	if (m_MonsterState != MONSTERSTATE_SCRIPT)
@@ -602,7 +590,6 @@ void CMSMonster::Think()
 		m_OldActivity = m_Activity;
 	}
 
-	dbg("Move");
 	Move(flInterval);
 
 	//Need to check if I'm alive again, because the above MoveExecute will
@@ -618,14 +605,13 @@ void CMSMonster::Think()
 
 	Float(); //Special velocity for floating monsters
 
-	dbg("Talk");
 	Talk();
 	int TempConditions = FrameConditions;
 	FrameConditions = 0;
 	if (TempConditions & FC_AVOID)
 		FrameConditions |= FC_AVOID;
 
-	enddbgprt((const char*)m_ScriptName.c_str());
+	}
 }
 /*int CMSMonster :: MoveExecute ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist, bool fTestMove )
 {
@@ -909,7 +895,7 @@ void CMSMonster::Look()
 }
 void CMSMonster::ListenForSound()
 {
-	startdbg;
+	try {
 
 	if (gpGlobals->time < m_ListenTime)
 		return;
@@ -988,7 +974,7 @@ void CMSMonster::ListenForSound()
 
 	m_ListenTime = gpGlobals->time + 1.0;
 
-	enddbg;
+	}
 }
 void CMSMonster::SetMoveDest()
 {
@@ -1052,7 +1038,7 @@ void CMSMonster::SetMoveDest()
 }
 void CMSMonster::SetWanderDest()
 {
-	startdbg;
+	try {
 	//No enemy, walk around randomly (here m_vecEnemyLKP is the random place to walk)
 	if (!HasConditions(MONSTER_ROAM))
 		return;
@@ -1062,12 +1048,10 @@ void CMSMonster::SetWanderDest()
 	Vector m_vecTarget, VecDest;
 	TraceResult tr;
 
-	dbg("Check m_NodeCancelTime");
 	//Canel a movedest if we've been trying for too long
 	if (!m_NextNodeTime && gpGlobals->time >= m_NodeCancelTime)
 		m_NextNodeTime = gpGlobals->time + m_RoamDelay;
 
-	dbg("Check m_NextNodeTime");
 	if (m_NextNodeTime && gpGlobals->time >= m_NextNodeTime)
 	{
 		//Find another random spot to walk to
@@ -1077,7 +1061,6 @@ void CMSMonster::SetWanderDest()
 		float NewYaw;
 		m_hEnemy = NULL;
 		Vector vForward;
-		dbg("Check 15 random move dirs");
 		while (count < 15)
 		{
 			NewYaw = UTIL_AngleMod(pev->angles.y + RANDOM_FLOAT(-130, 130));
@@ -1105,7 +1088,6 @@ void CMSMonster::SetWanderDest()
 		}
 		if (!FoundPath)
 		{
-			dbg("Check 360 sequential move dirs");
 			//Couldn't randomly find an angle, so brute force one
 			for (count = 0; count < 360; count++)
 			{
@@ -1137,11 +1119,9 @@ void CMSMonster::SetWanderDest()
 				m_NextNodeTime = gpGlobals->time + 10.0; //big delay
 			}
 		}
-		dbg("Check if path found");
 		if (FoundPath)
 		{
 			//pev->angles.x = 0; pev->angles.z = 0;
-			dbg("Setup wander variables");
 			m_MoveDest.Origin = EyePosition() + vForward * RANDOM_FLOAT(300, 6000);
 			m_MoveDest.Proximity = GetDefaultMoveProximity();
 			m_Wandering = true;
@@ -1149,17 +1129,16 @@ void CMSMonster::SetWanderDest()
 			SetConditions(MONSTER_HASMOVEDEST);
 			m_NextNodeTime = 0;
 			m_Activity = ACT_WALK;
-			dbg("CallEvent game_wander");
 			CallScriptEvent("game_wander");
 		}
 	}
-	enddbg;
+	}
 }
 
 Vector StartAng;
 void CMSMonster::Move(float flInterval)
 {
-	startdbg;
+	try {
 	int Side[2] = { 1, -1 };
 
 	if (pev->movetype == MOVETYPE_FOLLOW || pev->movetype == MOVETYPE_NONE)
@@ -1186,7 +1165,6 @@ void CMSMonster::Move(float flInterval)
 		|| m_LastOrigin != pev->origin)
 		FaceForward();
 
-	dbg("Set Movement velocity");
 	if (m_flGroundSpeed)
 	{
 		if (CanSetVelocity())
@@ -1237,7 +1215,6 @@ void CMSMonster::Move(float flInterval)
 	}
 
 	//Gravity has to be done manually...
-	dbg("Gravity");
 	if (!IsFlying() && !FBitSet(FrameConditions, FC_STEP))
 	{
 		bool fAddGravity = true;
@@ -1275,7 +1252,7 @@ void CMSMonster::Move(float flInterval)
 	m_LastYaw = pev->angles.y;
 	m_LastOrigin = pev->origin;
 
-	enddbg;
+	}
 }
 void CMSMonster::AvoidFrontObject(float MoveAmt)
 {
@@ -2003,7 +1980,7 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 // Set the activity based on an event or current state
 void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
-	startdbg;
+	try {
 
 	if (m_Brush)
 		return;
@@ -2015,7 +1992,6 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 
 	m_pAnimHandler->m_pOwner = this;
 	pszCurrentAnimName = pszAnimName;
-	dbg("Check for new animation");
 	//Thothie - JUN2007b
 	//- The code is causing monsters to break anims at weird moments
 	//- if you 'dance' around an affected monster, he can never attack, as his swing anims break
@@ -2042,7 +2018,6 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 		//[/thothie]
 		*/
 
-		dbg("New Animation");
 
 		/*if( AnimType == MONSTER_ANIM_BREAK ) //Special case: PLAYER_BREAK
 		{
@@ -2070,10 +2045,8 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 	{
 		m_pAnimHandler->m_pOwner = this;
 
-		dbg("Animate");
 		m_pAnimHandler->Animate();
 
-		dbg("PostAnimate");
 		m_pAnimHandler->PostAnimate();
 
 		pev->framerate = m_Framerate;
@@ -2081,13 +2054,13 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 			pev->framerate *= m_Framerate_Modifier;
 	}
 
-	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
+	}
 }
 void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
 	//Thothie - Attempting to stop msdll from breaking anims
 
-	startdbg;
+	try {
 
 	if (m_Brush)
 		return;
@@ -2097,9 +2070,7 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 
 	m_pAnimHandler->m_pOwner = this;
 	pszCurrentAnimName = pszAnimName;
-	dbg("Check for new animation");
 
-	dbg("Break Animation");
 
 	if (AnimType == MONSTER_ANIM_BREAK) //Special case: PLAYER_BREAK
 	{
@@ -2128,10 +2099,8 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 	{
 		m_pAnimHandler->m_pOwner = this;
 
-		dbg("Animate");
 		m_pAnimHandler->Animate();
 
-		dbg("PostAnimate");
 		m_pAnimHandler->PostAnimate();
 
 		pev->framerate = m_Framerate;
@@ -2139,7 +2108,7 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 			pev->framerate *= m_Framerate_Modifier;
 	}
 
-	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
+	}
 }
 void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 {
@@ -2156,7 +2125,7 @@ void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 //MiB MAR2008a multiple changes
 float CMSMonster::TraceAttack(damage_t& Damage)
 {
-	startdbg;
+	try {
 
 	//CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 
@@ -2164,7 +2133,6 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	// Attacker - Rolls from [AccuracyRoll - 130       ]
 	// Defender - Rolls from [0            - ParryValue]
 	// Attacker gets that extra 30 so attacks will get through more often
-	dbg("Begin");
 
 	//This is a last-chance check, to make sure that somebody doesn't find an obscure way to hurt another player
 	//The relationship status is first checked in DoDamage()
@@ -2265,7 +2233,6 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 
 	//this was moved to where experience is calculated in GIAttack
 	//Damage Modifiers ( takedmg xxx )
-	dbg("Damage Modifiers");
 	Damage.flDamage *= m.GenericTDM;
 	if (Damage.sDamageType)
 		for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
@@ -2324,7 +2291,6 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
 	CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
 
-	dbg("StruckSound/Bleed");
 	if (Damage.flDamage > 0)
 	{
 		//if( IsAlive() ) StruckSound( CBaseEntity::Instance(Damage.pevInflictor), CBaseEntity::Instance(Damage.pevAttacker), Damage.flDamage, &Damage.outTraceResult, Damage.iDamageType );
@@ -2336,13 +2302,12 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		}
 	}
 
-	dbg("AddMultiDamage");
 	if (!bAttackWasParried)
 		AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
 
 	return Damage.flDamage;
 
-	enddbg;
+	}
 
 	return 0;
 }
@@ -2447,8 +2412,7 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	BOOL DeleteMe = TRUE;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
@@ -2484,7 +2448,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		}
 
 		//Award players with exp proportional to the damage they did
-		dbg("AwardXP");
 		for (int i = 1; i <= MAXPLAYERS; i++)
 		{
 			CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i); // MiB MAR2019_22 [SLOT_EXP] - Need this to be a CBasePlayer, not sure why it wasn't
@@ -2513,7 +2476,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 						xpsend += xp; //Thothie added if ( xpsend < m_SkillLevel ) condition - don't give more than the monsters worth just cuz you hit it a lot!
 						//if( xpsend > 0 ) ALERT( at_console, "Gained XP: %f", xpsend );  //Thothie returns XP
 						//if( xpsend > 0 ) ClientPrint( pPlayer->pev, at_console, "Gained XP: %f", xpsend );
-						dbg("pPlayer->LearnSkill");
 						if (!xp_custom)
 							pPlayer->LearnSkill(n, r, xp); //NOV2014_21 Thothie - script side XP management option
 
@@ -2536,7 +2498,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 					}
 				}
 			}
-			dbg("SendXP");
 			if (xpsend > 0 && !xp_custom)
 			{
 				msstringlist Parameters;
@@ -2655,7 +2616,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			DropAllItems(); //Be sure to drop items
 		GibMonster();
 	}
-	enddbg;
+	}
 }
 void CMSMonster::SUB_Remove()
 {
@@ -2900,10 +2861,9 @@ void CMSMonster::SetSpeed()
 //Opens interact menu from server
 void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 {
-	startdbg;
+	try {
 	m_MenuCurrentOptions = NULL;
 
-	dbg("PrepClient");
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
 	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
@@ -2918,7 +2878,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	WRITE_STRING_LIMIT(DisplayName(), WRITE_STRING_MAX);
 	MESSAGE_END();
 
-	dbg("Read:game_menu_getoptions");
 
 	static msstringlist Params;
 	Params.clearitems();
@@ -2933,7 +2892,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 
 	m_MenuCurrentOptions = NULL;
 
-	dbg("SendMenu");
 
 	for (int i = 0; i < Menuoptions.size(); i++)
 	{
@@ -2950,7 +2908,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 		MESSAGE_END();
 	}
 	pPlayer->InMenu = true;
-	enddbg;
+	}
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {

@@ -143,7 +143,6 @@ extern "C" {
 	}
 }
 
-#define Set_DispatchSpawnDbg(a) dbg(msstring("(") + STRING(pent->v.classname) + ") " + a)
 #include "soundent.h"
 
 int DispatchSpawn(edict_t *pent)
@@ -152,7 +151,7 @@ int DispatchSpawn(edict_t *pent)
 
 	CBaseEntity *pSound = UTIL_FindEntityByClassname(NULL, "soundent");
 
-	startdbg;
+	try {
 	msstring classname = STRING(pent->v.classname);
 
 	//Set_DispatchSpawnDbg( "Begin" );
@@ -209,7 +208,7 @@ int DispatchSpawn(edict_t *pent)
 		}
 	}
 	Set_DispatchSpawnDbg("End");
-	enddbg;
+	}
 
 	return 0;
 }
@@ -218,8 +217,7 @@ void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd)
 {
 	DBG_INPUT;
 
-	startdbg;
-	dbg("DispatchKeyValue - Begin");
+	try {
 	if (!pkvd || !pentKeyvalue)
 		return;
 
@@ -237,21 +235,19 @@ void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd)
 		return;
 
 	pEntity->KeyValue(pkvd);
-	enddbg;
+	}
 }
 
 // HACKHACK -- this is a hack to keep the node graph entity from "touching" things (like triggers)
 // while it builds the graph
 BOOL gTouchDisabled = FALSE;
 
-#define Set_DispatchTouchDbg(a) SetDebugProgress(DispatchTouchPrg, msstring("(") + STRING(pentTouched->v.classname) + "<-- " + STRING(pentOther->v.classname) + ") " + a)
 void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 {
 	DBG_INPUT;
 	msstring DispatchTouchPrg;
 	try
 	{
-		SetDebugProgress(DispatchTouchPrg, "Begin");
 		if (gTouchDisabled)
 			return;
 
@@ -282,7 +278,6 @@ void DispatchUse(edict_t *pentUsed, edict_t *pentOther)
 }
 
 #include "msitemdefs.h"
-#define Set_DispatchThinkDbg(a) dbg(msstring("(") + STRING(pent->v.classname) + ") " + a)
 void DispatchThink(edict_t *pent)
 {
 	//DBG_INPUT;
@@ -318,15 +313,14 @@ void DispatchThink(edict_t *pent)
 void DispatchBlocked(edict_t *pentBlocked, edict_t *pentOther)
 {
 	DBG_INPUT;
-	startdbg;
-	dbg("Begin");
+	try {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pentBlocked);
 	CBaseEntity *pOther = (CBaseEntity *)GET_PRIVATE(pentOther);
 
 	if (pEntity)
 		pEntity->Blocked(pOther);
 
-	enddbg;
+	}
 }
 
 void DispatchSave(edict_t *pent, SAVERESTOREDATA *pSaveData)
@@ -491,8 +485,7 @@ int DispatchRestore(edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity)
 
 void DispatchObjectCollsionBox(edict_t *pent)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 	if (pEntity)
 	{
@@ -501,7 +494,7 @@ void DispatchObjectCollsionBox(edict_t *pent)
 	else
 		SetObjectCollisionBox(&pent->v);
 
-	enddbg;
+	}
 }
 
 void SaveWriteFields(SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount)

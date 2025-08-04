@@ -50,8 +50,7 @@ int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 
 void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Read InitHUD msg");
+	try {
 
 	MS_INFO("[MsgFunc_InitHUD: EndMap]");
 	MSGlobals::EndMap(); //End old map
@@ -87,7 +86,6 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 		if (FBitSet(VotesAllowed, (1 << i)))
 			vote_t::VotesTypesAllowed.add(vote_t::VotesTypes[i]);
 
-	dbg("Call InitHUDData() on all");
 	// prepare all hud data
 
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitHUDData]\n";
@@ -100,7 +98,6 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	//were downloaded... but since downloading new scripts
 	//isn't supported anymore, just call it
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: SpawnIntoServer]\n";
-	dbg("Call SpawnIntoServer( )");
 	MSCLGlobals::SpawnIntoServer();
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: NewMap]\n";
 	MSGlobals::NewMap(); //Start new map
@@ -109,7 +106,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitNewLevel]\n";
 	CEnvMgr::InitNewLevel();
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Complete]\n";
-	enddbg;
+	}
 }
 
 int CHud ::MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf)

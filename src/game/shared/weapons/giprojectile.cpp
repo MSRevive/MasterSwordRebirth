@@ -118,7 +118,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 {
 	//if ( ProjectileData->IgnoreNPC ) return;
 
-	startdbg;
+	try {
 
 	TypeCheck;
 
@@ -201,16 +201,11 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 			return;
 		}
 
-		dbg("Params List");
 		static msstringlist Params;
-		dbg("Clear List");
 		Params.clearitems();
-		dbg("PDamageEnt");
 		Params.add(EntToString(pDamageEnt));
-		dbg("SendEvent");
 		pev->origin = old_location; //Thothie AUG2011_15 - move back to location so sound plays from right spot
 		CallScriptEvent("game_projectile_hitnpc", &Params);
-		dbg("IgnoreNPC");
 		if (ProjectileData->IgnoreNPC)
 		{
 			return;
@@ -246,7 +241,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 	SetTouch(NULL);
 	//Think( );
 
-	enddbg;
+	}
 }
 void CGenericItem::Projectile_Move()
 {
