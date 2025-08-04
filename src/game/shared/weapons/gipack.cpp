@@ -334,13 +334,12 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 	if (!Container_CanAcceptItem(pItem))
 		return 0;
 
-	startdbg;
+	try {
 
 	/*
 	//Thothie MAR2010_15 - trying to restore stackable stacks sans char corruption
 	if ( FBitSet( pItem->Properties, ITEM_GROUPABLE ) )
 	{
-		dbg("Stack Attempt");
 		CBasePlayer	*pOwner = (CBasePlayer *)m_pOwner;
 		if ( pOwner )
 		{
@@ -364,7 +363,6 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 			}
 		}
 	}
-	dbg("Post Stack Attempt");
 	*/
 
 	PackData->ItemList.AddItem(pItem);
@@ -387,7 +385,7 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 	//endif
 	//CallScriptEvent( "game_container_addeditem", &Params );
 
-	enddbg;
+	}
 
 	return 1;
 }

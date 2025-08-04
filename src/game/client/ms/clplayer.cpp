@@ -742,8 +742,7 @@ void __CmdFunc_PlayerDesc(void)
 //Handles all inventory messages
 int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 	byte Operation = READ_BYTE();
@@ -754,8 +753,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//New item
 	case 0:
 	{
-		dbg("Add item");
-		CGenericItem* pItem = ReadGenericItem(true);
+			CGenericItem* pItem = ReadGenericItem(true);
 		if (pItem)
 		{
 			//Add the item, without any checks (free hand, weight, etc.)
@@ -787,7 +785,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Update existing item
 	case 1:
 	{
-		dbg("Update item");
 		ulong lID = READ_LONG();
 		READ_REWIND_LONG(); //I read the ID, put the offset back so that ReadGenericItem() can read it
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
@@ -815,7 +812,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Remove item
 	case 2:
 	{
-		dbg("Remove item");
 		ulong ItemID = READ_LONG();
 		CGenericItem* pItem = MSUtil_GetItemByID(ItemID, &player);
 		if (pItem)
@@ -838,17 +834,13 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Add to container
 	case 3:
 	{
-		dbg("Add item to container");
 		ulong ContainerID = READ_LONG();
 
-		dbg("Read Long");
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 
-		dbg("get pContainer");
 		if (!pContainer)
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't find container") + (int)ContainerID);
 
-		dbg("get pItem");
 		CGenericItem* pItem = ReadGenericItem(true);
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add to container' msg but client couldn't find item");
@@ -863,7 +855,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Remove from container
 	case 4:
 	{
-		dbg("Remove item from container");
 		ulong ContainerID = READ_LONG();
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 		if (!pContainer)
@@ -887,7 +878,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Show storage
 	case 5:
 	{
-		dbg("Show storage window");
 		msstring DisplayName = READ_STRING();
 		msstring StorageName = READ_STRING();
 		float flFeeRatio = READ_FLOAT();
@@ -900,7 +890,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	{
 		//MiB DEC2007a - Redundant skool of redundancy
 		// Params: ID, Attacknum, prop, value
-		dbg("AttackProps");
 		ulong lID = READ_LONG();
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
@@ -986,7 +975,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//Shuriken FEB2008a - setviewmodelprop
 		//setviewmodelprop edits APR2008a MIB
 	{
-		dbg("setviewmodelprop");
 		msstring Mode = READ_STRING();
 		int iHand = READ_SHORT();
 		int iParam1;
@@ -1066,11 +1054,10 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 
 	if (bDoInvUpdate)
 	{
-		dbg("UpdateActiveMenus()");
 		UpdateActiveMenus();
 	}
 
-	enddbg;
+	}
 	return 1;
 }
 
@@ -1282,13 +1269,12 @@ bool ShowChat() { return ShowHUD(); } //Always show chat
 
 int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 	player.SwitchHands(READ_BYTE());
 
-	enddbg;
+	}
 	return 1;
 }
 
@@ -1301,14 +1287,12 @@ extern float g_fMenuLastClosed;
 
 int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 
 	byte Cmd = READ_BYTE();
 
-	dbg(msstring("Cmd: ") + (int)Cmd);
 	switch (Cmd)
 	{
 	case 0: //Spawned
@@ -1541,7 +1525,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	break;
 	}
 
-	enddbg;
+	}
 	return 1;
 }
 

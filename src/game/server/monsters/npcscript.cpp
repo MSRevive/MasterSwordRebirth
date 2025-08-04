@@ -99,11 +99,10 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 #ifdef VALVE_DLL
 
 	// Executes a single script event
-	startdbg;
+	try {
 
 	msstring sTemp;
 
-	dbg(msstring("Command: ") + Cmd.Name());
 
 	//************************** SAY **************************
 	if (Cmd.Name() == "say")
@@ -783,12 +782,10 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				iBundleAmt = atoi(Params[5]);
 
 			msstring StoreDbg = msstring("addstoreitem: ") + StoreName + " " + ItemName + " - ";
-			dbg(StoreDbg + (int)100);
 			CStore *NewStore = CStore::GetStoreByName(StoreName);
 
 			if (NewStore)
 			{
-				dbg(StoreDbg + (int)200);
 				// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table
 				CGenericItem* pItem = CGenericItemMgr::GetGlobalGenericItemByName(ItemName, true);
 				if (pItem)
@@ -805,15 +802,12 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 							iRealCost = int(pItem->m_Value * MaxPercent);
 					}
 
-					dbg(StoreDbg + (int)900);
 					if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) && !iBundleAmt)
 						iBundleAmt = pItem->iMaxGroupable;
 
 					// MiB MAR2019_13 - Clean up of "temporary items" in favor of global table (lines commented out as part of effort)
-					//dbg( StoreDbg + (int)1000 );
 					//pItem->SUB_Remove( ); //MIB MAR2019_12
 
-					dbg(StoreDbg + (int)2000);
 					NewStore->AddItem(ItemName, iQuantity, iRealCost, flSellRatio, iBundleAmt);
 				}
 				else
@@ -1742,7 +1736,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		else
 			ERROR_MISSING_PARMS;
 	}
-	enddbg;
+	}
 
 #endif
 	return false;

@@ -40,8 +40,7 @@ int CHudAction::Init(void)
 
 int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	byte AddOrRemove = READ_BYTE();
 	msstring ID = READ_STRING();
@@ -72,7 +71,7 @@ int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 			}
 	}
 
-	enddbg;
+	}
 	return 1;
 }
 void CHudAction::UserCmd_Action(void)

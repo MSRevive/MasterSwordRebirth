@@ -117,8 +117,7 @@ int CHudHealth::VidInit(void)
 
 int CHudHealth::MsgFunc_HP(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT(), iIsMaxHP = READ_BYTE();
@@ -134,13 +133,12 @@ int CHudHealth::MsgFunc_HP(const char *pszName, int iSize, void *pbuf)
 	else
 		player.m_MaxHP = x;
 
-	enddbg;
+	}
 	return 1;
 }
 int CHudHealth::MsgFunc_MP(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT(), iIsMaxMP = READ_BYTE();
@@ -156,14 +154,13 @@ int CHudHealth::MsgFunc_MP(const char *pszName, int iSize, void *pbuf)
 	else
 		player.m_MaxMP = x;
 
-	enddbg;
+	}
 	return 1;
 }
 
 int CHudHealth::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	BEGIN_READ(pbuf, iSize);
 
@@ -182,7 +179,7 @@ int CHudHealth::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 	if (damageTaken > 0 || armor > 0)
 		CalcDamageDirection(vecFrom);
 
-	enddbg;
+	}
 	return 1;
 }
 

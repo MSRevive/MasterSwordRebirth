@@ -149,12 +149,11 @@ static char cTemp[MSSTRING_SIZE];
 
 void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
+	try {
 	if (DataID == CHARDATA_MAPSVISITED1)
 	{
 		//Read Maps Visited
 		//Must come DIRECTLY after reading the savedata_t Data
-		dbg("Read Stats");
 		int Maps = 0;
 		m_File.ReadInt(Maps); //[INT]
 		m_VisitedMaps.clear();
@@ -164,7 +163,7 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_VisitedMaps.add(cTemp);
 		}
 	}
-	enddbg;
+	}
 }
 
 void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)

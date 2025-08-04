@@ -134,44 +134,5 @@ void Print(const char* szFmt, ...);
 void Log(const char* szFmt, ...);
 void OpenLogFiles();
 
-#define LogCurrentLine(Text) Log("%s:%i %s", __FILE__, __LINE__, Text)
-void LogExtensive(const char* Text);
-#define DBG_ENTR_FUNCTION_TEXT (msstring("Enter - ") + __FUNCTION__)
-#define DBG_EXIT_FUNCTION_TEXT (msstring("Exit - ") + __FUNCTION__)
-
-#ifdef LOG_EXCEPTIONS
-#ifndef EXTENSIVE_LOGGING
-#define SetDebugProgress(a, b) a = b
-#else
-#define SetDebugProgress(a, b) \
-	a = b;                     \
-	LogCurrentLine(a);
-#endif
-
-#define startdbg          \
-	msstring FunctionPrg; \
-	try                   \
-	{                     \
-		LogExtensive(DBG_ENTR_FUNCTION_TEXT)
-
-#define enddbgline(a)                         \
-	LogExtensive(DBG_EXIT_FUNCTION_TEXT + a); \
-	}                                         \
-	catch (...) { MSErrorConsoleText(msstring("Error: ") + __FUNCTION__ + a, FunctionPrg); }
-
-#define dbg(a) SetDebugProgress(FunctionPrg, a)
-#define enddbg enddbgline("")
-#define enddbgprt(a) enddbgline(msstring(" - ") + a);
-#else
-#define startdbg
-#define SetDebugProgress
-#define dbg SetDebugProgress
-#define enddbg
-#define enddbgprt
-#endif
-
-void MSErrorConsoleText(const char* pszLabel, const char* Progress);
-
-extern msstring ItemThinkProgress;
 
 #endif

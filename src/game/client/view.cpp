@@ -1695,7 +1695,7 @@ void ModifyLevel(ref_params_s &Params);
 
 void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 {
-	startdbg;
+	try {
 	ViewMgr.Origin = pparams->vieworg;
 	ViewMgr.Angles = pparams->viewangles;
 	ViewMgr.Params = pparams;
@@ -1759,7 +1759,7 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	ViewMgr.LastAngles = ViewMgr.Angles;
 	ViewMgr.LastOrigin = ViewMgr.Origin;
 
-	enddbg;
+	}
 }
 
 /*

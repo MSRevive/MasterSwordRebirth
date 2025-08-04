@@ -91,8 +91,7 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 
 void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	if (MSGlobals::ServerSideChar)
 		return;
@@ -201,7 +200,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 
 	SendInfo.TimeDataLastSent = gpGlobals->time;
 
-	enddbg;
+	}
 }
 
 #ifdef VALVE_DLL
@@ -220,8 +219,7 @@ void MSChar_Interface::HL_SVNewIncomingChar(CBasePlayer *pPlayer, int CharIdx, u
 }
 void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEncodedData)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	charsendinfo_t &SendInfo = pPlayer->m_CharSend;
 
@@ -247,7 +245,7 @@ void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEnc
 		SendInfo.Status = CSS_DORMANT;
 	}
 
-	enddbg;
+	}
 }
 #endif
 
@@ -281,8 +279,7 @@ void MSChar_Interface::HL_CLNewIncomingChar(int CharIdx, uint DataLen)
 
 void MSChar_Interface::HL_CLReadCharData()
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	charsendinfo_t &SendInfo = player.m_CharSend;
 
@@ -310,6 +307,6 @@ void MSChar_Interface::HL_CLReadCharData()
 		SendInfo.Status = CSS_DORMANT;
 	}
 
-	enddbg;
+	}
 }
 #endif

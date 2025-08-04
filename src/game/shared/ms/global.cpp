@@ -81,8 +81,7 @@ msstringlist vote_t::VotesTypesAllowed; //All The vote types allowed
 //The server calls this every map change, at CWorld::Precache
 void MSGlobalItemInit()
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	MSGlobals::InPrecache = true;
 
 	//Delete the previous titles
@@ -111,7 +110,7 @@ void MSGlobalItemInit()
 
 	MSGlobals::InPrecache = false;
 
-	enddbg;
+	}
 }
 
 //Called on client & server when a new map is loaded
@@ -202,15 +201,14 @@ void MSGlobals::EndMap()
 
 void MSGlobals::SharedThink()
 {
-	startdbg;
+	try {
 
-	dbg("Call MSGlobals->GameScript->Think");
 	if (MSGlobals::GameScript)
 		MSGlobals::GameScript->RunScriptEvents(false);
 
 	MemMgr::Think();
 
-	enddbg;
+	}
 }
 
 //Called on client & server when the dll is loaded
@@ -439,8 +437,7 @@ static msstringlist Parameters; //made static, for speed
 
 void CScriptedEnt::Spawn()
 {
-	startdbg;
-	dbg("Begin");
+	try {
 	StoreEntity(this, ENT_ME);
 	m_HandleThink = true;
 
@@ -448,17 +445,15 @@ void CScriptedEnt::Spawn()
 	CBaseEntity::Spawn();
 	if (!pEdict->free)
 	{
-		dbg("Call game_spawn");
 		CallScriptEvent("spawn");	   //old
 		CallScriptEvent("game_spawn"); //not called by players (dunno about monsters)
 	}
 
-	enddbg;
+	}
 }
 void CScriptedEnt::Think()
 {
-	startdbg;
-	dbg("CScriptedEnt::Think - Begin");
+	try {
 
 	edict_t *pEdict = edict();
 	CBaseEntity::Think();
@@ -473,7 +468,7 @@ void CScriptedEnt::Think()
 
 	CallScriptEvent("game_think");
 
-	enddbg;
+	}
 }
 
 void CScriptedEnt::Touch(CBaseEntity *pOther)
@@ -505,8 +500,7 @@ void CScriptedEnt::Blocked(CBaseEntity *pOther)
 }
 void CScriptedEnt::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	if (m_pfnUse)
 		(this->*m_pfnUse)(pActivator, pCaller, useType, value);
@@ -517,12 +511,11 @@ void CScriptedEnt::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	Parameters.add(UTIL_VarArgs("%i", useType));
 	Parameters.add(UTIL_VarArgs("%f", value));
 	CallScriptEvent("game_used", &Parameters);
-	enddbg;
+	}
 }
 void CScriptedEnt::KeyValue(KeyValueData *pkvd)
 {
-	startdbg;
-	dbg("Begin");
+	try {
 
 	if (!pkvd->fHandled && !strcmp(pkvd->szKeyName, "scriptname"))
 	{
@@ -533,17 +526,16 @@ void CScriptedEnt::KeyValue(KeyValueData *pkvd)
 	else
 		pkvd->fHandled = FALSE;
 
-	enddbg;
+	}
 }
 void CScriptedEnt::Deactivate()
 {
-	startdbg;
-	dbg("CScriptedEnt::Deactivate - Begin");
+	try {
 
 	CBaseEntity::Deactivate();
 	IScripted::Deactivate();
 
-	enddbg;
+	}
 }
 /*
 ======================

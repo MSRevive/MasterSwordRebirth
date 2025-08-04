@@ -68,7 +68,7 @@ void LinkUserMessages(void);
  */
 void set_suicide_frame(entvars_t *pev)
 {
-	startdbg;
+	try {
 	ALERT(at_console, "SUICIDE FRAME\n");
 	if (!pev->model)
 		return; // allready gibbed
@@ -78,7 +78,7 @@ void set_suicide_frame(entvars_t *pev)
 	pev->movetype = MOVETYPE_TOSS;
 	pev->deadflag = DEAD_DEAD;
 	pev->nextthink = -1;
-	enddbg;
+	}
 }
 
 clientaddr_t g_NewClients[32];
@@ -94,7 +94,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 {
 	DBG_INPUT;
 	bool fSuccess = false;
-	startdbg;
+	try {
 
 	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
 	if (g_pGameRules)
@@ -148,7 +148,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 
 	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]\n";
 
-	enddbg;
+	}
 	return fSuccess ? 1 : 0;
 }
 
@@ -166,13 +166,11 @@ GLOBALS ASSUMED SET:  g_fGameOver
 void ClientDisconnect(edict_t *pEntity)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 
-	dbg("Begin");
 	if (g_fGameOver)
 		return;
 
-	dbg("Call pSound->Reset");
 
 	/*CSound *pSound;
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
@@ -180,7 +178,6 @@ void ClientDisconnect(edict_t *pEntity)
 	if ( pSound )
 		pSound->Reset();*/
 
-	dbg("Call g_pGameRules->ClientDisconnected");
 
 	// Fire AngelScript engine event for player disconnection (before cleanup)
 	ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -223,7 +220,7 @@ void ClientDisconnect(edict_t *pEntity)
 	if (g_pGameRules)
 		g_pGameRules->ClientDisconnected(pEntity);
 
-	enddbg;
+	}
 }
 
 // called by ClientKill and DeadThink
@@ -244,7 +241,7 @@ GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
 */
 void ClientKill(edict_t *pEntity)
 {
-	startdbg;
+	try {
 	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 
@@ -257,7 +254,7 @@ void ClientKill(edict_t *pEntity)
 		pPlayer->SendInfoMsg("You will die in 5 seconds...\n");
 	pPlayer->m_TimeTillSuicide = gpGlobals->time + (pPlayer->IsElite() ? 0.1f : 5.0f);
 	pPlayer->m_fNextSuicideTime = pPlayer->m_TimeTillSuicide + 5;
-	enddbg;
+	}
 }
 
 /*
@@ -269,7 +266,7 @@ called each time a player is spawned
 */
 void ClientPutInServer(edict_t *pEntity)
 {
-	startdbg;
+	try {
 	DBG_INPUT;
 
 	logfile << Logger::LOG_INFO << "[ClientPutInServer]\n";
@@ -303,7 +300,7 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Reset interpolation during first frame
 	pPlayer->pev->effects |= EF_NOINTERP;
-	enddbg;
+	}
 }
 
 #include "voice_gamemgr.h"
@@ -1856,7 +1853,7 @@ DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
 void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 	int i;
 	CBaseEntity *pClass;
 	logfile << Logger::LOG_INFO << "World Activate..." << std::flush;
@@ -1885,7 +1882,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			Dbgstr += STRING(pClass->pev->targetname);
 			Dbgstr += ")";
 
-			dbg(Dbgstr);
 			try
 			{
 				pClass->Activate();
@@ -1924,7 +1920,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CSVGlobals::WriteScriptLog();
 
 	logfile << Logger::LOG_INFO << "World Activate END\n";
-	enddbg;
+	}
 }
 
 /*
@@ -2130,7 +2126,7 @@ animation right now.
 void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
@@ -2160,7 +2156,7 @@ void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 		ALERT(at_console, "PlayerCustomization:  Unknown customization type!\n");
 		break;
 	}
-	enddbg;
+	}
 }
 
 /*
@@ -2525,8 +2521,7 @@ Creates baselines used for network encoding, especially for player data since pl
 void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
 {
 	DBG_INPUT;
-	startdbg;
-	dbg("CreateBaseline - Begin");
+	try {
 	baseline->origin = entity->v.origin;
 	baseline->angles = entity->v.angles;
 	baseline->frame = entity->v.frame;
@@ -2573,7 +2568,7 @@ void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, str
 		baseline->gravity = entity->v.gravity;
 	}
 
-	enddbg;
+	}
 }
 
 typedef struct
@@ -2897,7 +2892,7 @@ engine sets cd to 0 before calling.
 void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientdata_s *cd)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 
 	cd->flags = ent->v.flags;
 	cd->health = ent->v.health;
@@ -2936,7 +2931,7 @@ void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientd
 		cd->iuser3 = 0;
 	//---------------
 
-	enddbg;
+	}
 }
 
 /*
@@ -2950,7 +2945,7 @@ This is the time to examine the usercmd for anything extra.  This call happens e
 void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 	CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance((entvars_t *)&player->v);
 
 	if (!pPlayer)
@@ -2963,7 +2958,7 @@ void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int r
 
 	pPlayer->random_seed = random_seed;
 
-	enddbg;
+	}
 }
 
 /*
@@ -2976,7 +2971,7 @@ Each cmdstart is exactly matched with a cmd end, clean up any group trace flags,
 void CmdEnd(const edict_t *player)
 {
 	DBG_INPUT;
-	startdbg;
+	try {
 	entvars_t *pev = (entvars_t *)&player->v;
 	CBasePlayer *pl = (CBasePlayer *)CBasePlayer::Instance(pev);
 
@@ -2987,7 +2982,7 @@ void CmdEnd(const edict_t *player)
 		UTIL_UnsetGroupTrace();
 	}
 
-	enddbg;
+	}
 }
 
 /*
