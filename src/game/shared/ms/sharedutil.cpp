@@ -56,7 +56,8 @@ void OpenLogFiles()
 	
 	// Keep old logger for backward compatibility during transition
 	char cLogfile[MAX_PATH];
-	
+
+/*
 #ifdef VALVE_DLL
 	char cChatfile[MAX_PATH];
 	
@@ -77,6 +78,7 @@ void OpenLogFiles()
 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_cldll");
 	logfile.open(cLogfile);
 #endif
+*/
 	g_log_initialized = true;
 	
 	// Log initialization message
@@ -276,7 +278,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     msstring vsAsOne = vsTitle + ": " + msstring(string) + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
-        logfile << vsAsOne << "\n";
+		MS_ERROR("%s", vsAsOne);
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {

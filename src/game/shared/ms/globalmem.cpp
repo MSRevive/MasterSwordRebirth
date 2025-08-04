@@ -4,6 +4,7 @@
 
 #include "msdllheaders.h"
 #include "global.h"
+#include "mslogger.h"
 
 #ifdef VALVE_DLL
 //#define TRACK_MEMORY		//Deterimines whether all memory allocations should be catalogued and dumped to file
@@ -69,7 +70,7 @@ void* operator new(size_t size)
 				allochighest = MemAlloc.Index;
 			if (allocid >= ARRAYSIZE(Allocations))
 			{
-				logfile << Logger::LOG_ERROR << "Error: Alloc New Memory: Allocations exceed max debug size (" << ARRAYSIZE(Allocations) << ")\n";
+				MS_ERROR("Error: Alloc New Memory: Allocations exceed max debug size %d", ARRAYSIZE(Allocations));
 				//int stop = 0;
 				exit(1);
 				return NULL;
@@ -94,10 +95,10 @@ void* operator new(size_t size)
 		msstring erloc = "client";
 #else
 		msstring erloc = "server";
-		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << "\n";
+		MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s", erloc.c_str());
 #endif
 		Print("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) [%s]\n", erloc.c_str());
-		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) " << erloc.c_str() << "\n";
+		MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s", erloc.c_str());
 	}
 	return NULL;
 }
@@ -136,6 +137,7 @@ void operator delete(void* ptr)
 			if (!found)
 			{
 				logfile << Logger::LOG_ERROR << "Delete Memory: Tried to delete memory that wasn't allocated (" << Allocations[i]->SourceFile.c_str() << ":" << Allocations[i]->LineNum + ")\n";
+				MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s, %d", erloc.c_str());
 				exit(1);
 				return;
 			}
@@ -153,10 +155,10 @@ void operator delete(void* ptr)
 		msstring erloc = "client";
 #else
 		msstring erloc = "server";
-		chatlog << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << "\n";
+		MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s", erloc.c_str());
 #endif
 		Print("MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) [%s]\n", erloc.c_str());
-		logfile << Logger::LOG_ERROR << "MSMEMORY: Unhandled Exception While Deallocating Memory! (*operator delete) " << erloc.c_str() << "\n";
+		MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s", erloc.c_str());
 	}
 }
 

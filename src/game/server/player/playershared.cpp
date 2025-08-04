@@ -13,6 +13,7 @@
 #include "mscharacter.h"
 #include "script.h"
 #include "modeldefs.h"
+#include "logger.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowUpdate();

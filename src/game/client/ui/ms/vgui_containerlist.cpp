@@ -44,17 +44,8 @@
 
 //Master Sword
 #include "vgui_containerlist.h"
-#include "logger.h"
 #include "clglobal.h"
 #include "vgui_menudefsshared.h"
-
-//#define LOG_EXTRA
-
-#ifdef LOG_EXTRA
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
 
 bool fBlockVGUIMouseButton1 = false;
 void ContainerWindowUpdate();
