@@ -354,7 +354,6 @@ void KillAll()
 //This is where the hud.xxxx messages from the client comes in
 int __MsgFunc_StatusIcons(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
 	BEGIN_READ(pbuf, iSize);
 	int Type = READ_SHORT();
 
@@ -416,6 +415,5 @@ int __MsgFunc_StatusIcons(const char *pszName, int iSize, void *pbuf)
 	else if (Type == FN_DW)
 		SetFN(false);
 
-	enddbg;
 	return 0;
 }

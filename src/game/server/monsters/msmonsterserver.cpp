@@ -133,11 +133,9 @@ void CMSMonster::Spawn()
 {
 	m_OldGold = 0;
 
-	//startdbg;
 	//SUB_Remove( ); return;
 	//DelayedRemove( );
 
-	//dbg( "Precache" );
 
 	//NOV2014_20 - Thothie msmonster_random [begin]
 	if (m_nRndMobs > 0)
@@ -161,8 +159,6 @@ void CMSMonster::Spawn()
 	//NOV2014_20 - Thothie msmonster_random [end]
 
 	Precache();
-
-	//dbg( "Setup flags" );
 
 	if (!m_Brush)
 	{
@@ -207,7 +203,6 @@ void CMSMonster::Spawn()
 		m_SpawnChance = 0.0;
 	SetUse(&CMSMonster::Used);
 
-	//dbg( "Create Script" );
 	//This loads the script file and precaches all models/sounds it uses
 	bool fScriptSpawned = Script_Add(m_ScriptName, this) ? true : false;
 
@@ -217,7 +212,6 @@ void CMSMonster::Spawn()
 		return;
 	}
 
-	//dbg( "Delete After Precache" );
 	if (g_fInPrecache)
 	{
 		//This monster was only created to precache its resources
@@ -231,13 +225,9 @@ void CMSMonster::Spawn()
 		return; //wait until Activate(), when everything is spawned
 	}
 
-	//dbg( "Create Stats" );
 	CreateStats();
-
-	//dbg( "Call Script Event: \"Spawn\"" );
 	CScriptedEnt::Spawn();
 
-	//dbg( "Setup BBox" );
 	if (!m_Brush)
 		if (pev->model)
 		{
@@ -281,7 +271,6 @@ void CMSMonster::Spawn()
 
 	//ALERT( at_console, "Postspawn Adj Reads: dmg%f hp%f \n", m_DMGMulti, m_HPMulti);
 
-	//dbg( "Set Custom Params" );
 	msstringlist Parameters;
 	Parameters.add(m_title);
 	Parameters.add(FloatToString(m_DMGMulti));
@@ -289,8 +278,8 @@ void CMSMonster::Spawn()
 	Parameters.add(m_addparams);
 
 	CallScriptEvent("game_postspawn", &Parameters);
-	//enddbg;
 }
+
 void CMSMonster::Precache()
 {
 	CBaseMonster::Precache();
@@ -2318,8 +2307,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	//		m_hEnemy.Set( pevAttacker->pContainingEntity );
 
 	//if( pevAttacker == pev ) return fTookDamage;
-	//startdbg;
-	//dbg( "Begin" );
 	CBaseEntity* pInflictor = NULL, * pAttacker = NULL;
 	if (!FNullEnt(pevInflictor))
 		pInflictor = CBaseEntity::Instance(pevInflictor);
@@ -2330,7 +2317,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	//if( pAttacker && IRelationship(pAttacker) >= RELATIONSHIP_NO )
 	//	return 0;
 
-	//dbg( "TakeDamageEffect" );
 	TakeDamageEffect(pInflictor, pAttacker, flDamage, bitsDamageType);
 
 	if (pevInflictor)
@@ -2341,7 +2327,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if (IsAlive())
 	{
 		//Attacked, store the attacker and run the struck event
-		//dbg( "StoreEntity" );
 		StoreEntity(pAttacker, ENT_LASTSTRUCK);
 
 		//dbg( "CallScriptEvent->game_struck" );
@@ -2355,25 +2340,21 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 			pAttacker->TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 		*/
 
-		//dbg( "GiveHP" );
 		GiveHP(-flDamage);
 		if (pev->health <= 0)
 		{
 			if (FBitSet(bitsDamageType, DMG_NOKILL))
 			{
-				//dbg( "Zero_Health^1" );
 				pev->health = m_HP = 1;
 			}
 			else
 			{
-				//dbg( "Killed" );
 				Killed(pevAttacker, GIB_NEVER);
 			}
 		}
 	}
 	else
 	{
-		//dbg( "AttackCorpse" );
 		//Attack a dead body
 		//Skinning disabled
 		/*if( Skin && pAttacker && pAttacker->MyMonsterPointer() &&
@@ -2395,8 +2376,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 		if (pev->health <= 0)
 			pev->health = 0;
 	}
-
-	//enddbg;
 
 	return flDamage;
 }

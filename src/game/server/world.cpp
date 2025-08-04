@@ -358,21 +358,18 @@ void CGlobalState::ClearStates(void)
 
 void SaveGlobalState(SAVERESTOREDATA *pSaveData)
 {
-	DBG_INPUT;
 	CSave saveHelper(pSaveData);
 	gGlobalState.Save(saveHelper);
 }
 
 void RestoreGlobalState(SAVERESTOREDATA *pSaveData)
 {
-	DBG_INPUT;
 	CRestore restoreHelper(pSaveData);
 	gGlobalState.Restore(restoreHelper);
 }
 
 void ResetGlobalState(void)
 {
-	DBG_INPUT;
 	gGlobalState.ClearStates();
 	gInitHUD = TRUE; // Init the HUD on a new game / load game
 }

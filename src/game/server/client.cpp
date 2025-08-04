@@ -91,9 +91,7 @@ called when a player connects to a server
 */
 BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128])
 {
-	DBG_INPUT;
 	bool fSuccess = false;
-	try {
 
 	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
 	if (g_pGameRules)
@@ -147,7 +145,6 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 
 	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]\n";
 
-	}
 	return fSuccess ? 1 : 0;
 }
 
@@ -164,12 +161,8 @@ GLOBALS ASSUMED SET:  g_fGameOver
 
 void ClientDisconnect(edict_t *pEntity)
 {
-	DBG_INPUT;
-	try {
-
 	if (g_fGameOver)
 		return;
-
 
 	/*CSound *pSound;
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
@@ -218,8 +211,6 @@ void ClientDisconnect(edict_t *pEntity)
 	//When the server is shutdown, this ClientDisconnect is called after gamerules has been deleted
 	if (g_pGameRules)
 		g_pGameRules->ClientDisconnected(pEntity);
-
-	}
 }
 
 // called by ClientKill and DeadThink
@@ -240,8 +231,6 @@ GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
 */
 void ClientKill(edict_t *pEntity)
 {
-	try {
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 
 	CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance(pev);
@@ -253,7 +242,6 @@ void ClientKill(edict_t *pEntity)
 		pPlayer->SendInfoMsg("You will die in 5 seconds...\n");
 	pPlayer->m_TimeTillSuicide = gpGlobals->time + (pPlayer->IsElite() ? 0.1f : 5.0f);
 	pPlayer->m_fNextSuicideTime = pPlayer->m_TimeTillSuicide + 5;
-	}
 }
 
 /*
@@ -265,9 +253,6 @@ called each time a player is spawned
 */
 void ClientPutInServer(edict_t *pEntity)
 {
-	try {
-	DBG_INPUT;
-
 	logfile << Logger::LOG_INFO << "[ClientPutInServer]\n";
 	CBasePlayer *pPlayer;
 
@@ -299,7 +284,6 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Reset interpolation during first frame
 	pPlayer->pev->effects |= EF_NOINTERP;
-	}
 }
 
 #include "voice_gamemgr.h"
@@ -1851,8 +1835,6 @@ DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
 
 void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
-	DBG_INPUT;
-	try {
 	int i;
 	CBaseEntity *pClass;
 	logfile << Logger::LOG_INFO << "World Activate..." << std::flush;
@@ -1919,7 +1901,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CSVGlobals::WriteScriptLog();
 
 	logfile << Logger::LOG_INFO << "World Activate END\n";
-	}
 }
 
 /*
@@ -2085,7 +2066,6 @@ Engine is going to shut down, allows setting a breakpoint in game .dll to catch 
 */
 void Sys_Error(const char *error_string)
 {
-	DBG_INPUT;
 	// Default case, do nothing.  MOD AUTHORS:  Add code ( e.g., _asm { int 3 }; here to cause a breakpoint for debugging your game .dlls
 	msstring Error = msstring("SYS_ERROR: ") + (error_string ? error_string : "[NO STRING]");
 	//logfile << "SYS_ERROR: " << (error_string ? error_string : "[NO STRING]") << endl;
@@ -2124,8 +2104,6 @@ animation right now.
 */
 void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 {
-	DBG_INPUT;
-	try {
 	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
@@ -2155,7 +2133,6 @@ void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 		ALERT(at_console, "PlayerCustomization:  Unknown customization type!\n");
 		break;
 	}
-	}
 }
 
 /*
@@ -2167,7 +2144,6 @@ A spectator has joined the game
 */
 void SpectatorConnect(edict_t *pEntity)
 {
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
@@ -2519,8 +2495,6 @@ Creates baselines used for network encoding, especially for player data since pl
 */
 void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
 {
-	DBG_INPUT;
-	try {
 	baseline->origin = entity->v.origin;
 	baseline->angles = entity->v.angles;
 	baseline->frame = entity->v.frame;
@@ -2565,8 +2539,6 @@ void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, str
 		baseline->solid = entity->v.solid;
 		baseline->framerate = entity->v.framerate;
 		baseline->gravity = entity->v.gravity;
-	}
-
 	}
 }
 
@@ -2867,7 +2839,6 @@ Allows game .dll to override network encoding of certain types of entities and t
 */
 void RegisterEncoders(void)
 {
-	DBG_INPUT;
 	DELTA_ADDENCODER("Entity_Encode", Entity_Encode);
 	DELTA_ADDENCODER("Custom_Encode", Custom_Encode);
 	DELTA_ADDENCODER("Player_Encode", Player_Encode);
@@ -2875,7 +2846,6 @@ void RegisterEncoders(void)
 
 int GetWeaponData(struct edict_s *player, struct weapon_data_s *info)
 {
-	DBG_INPUT;
 	memset(info, 0, 32 * sizeof(weapon_data_t));
 	return 1; //1
 }
@@ -2890,9 +2860,6 @@ engine sets cd to 0 before calling.
 */
 void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientdata_s *cd)
 {
-	DBG_INPUT;
-	try {
-
 	cd->flags = ent->v.flags;
 	cd->health = ent->v.health;
 
@@ -2929,8 +2896,6 @@ void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientd
 	else
 		cd->iuser3 = 0;
 	//---------------
-
-	}
 }
 
 /*
@@ -2943,8 +2908,6 @@ This is the time to examine the usercmd for anything extra.  This call happens e
 */
 void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed)
 {
-	DBG_INPUT;
-	try {
 	CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance((entvars_t *)&player->v);
 
 	if (!pPlayer)
@@ -2956,8 +2919,6 @@ void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int r
 	}
 
 	pPlayer->random_seed = random_seed;
-
-	}
 }
 
 /*
@@ -2969,8 +2930,6 @@ Each cmdstart is exactly matched with a cmd end, clean up any group trace flags,
 */
 void CmdEnd(const edict_t *player)
 {
-	DBG_INPUT;
-	try {
 	entvars_t *pev = (entvars_t *)&player->v;
 	CBasePlayer *pl = (CBasePlayer *)CBasePlayer::Instance(pev);
 
@@ -2979,8 +2938,6 @@ void CmdEnd(const edict_t *player)
 	if (pl->pev->groupinfo != 0)
 	{
 		UTIL_UnsetGroupTrace();
-	}
-
 	}
 }
 
@@ -2994,7 +2951,6 @@ ConnectionlessPacket
 */
 int ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size)
 {
-	DBG_INPUT;
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
 
@@ -3029,7 +2985,6 @@ to be created during play ( e.g., grenades, ammo packs, projectiles, corpses, et
 */
 void CreateInstancedBaselines(void)
 {
-	DBG_INPUT;
 	//int iret = 0;
 	//entity_state_t state;
 
@@ -3052,7 +3007,6 @@ One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the sp
 */
 int InconsistentFile(const edict_t *player, const char *filename, char *disconnect_message)
 {
-	DBG_INPUT;
 	// Server doesn't care?
 	//if ( CVAR_GET_FLOAT( "mp_consistency" ) != 1 )
 	//	return 0;
@@ -3080,6 +3034,5 @@ AllowLagCompensation
 */
 int AllowLagCompensation(void)
 {
-	DBG_INPUT;
 	return 0;
 }

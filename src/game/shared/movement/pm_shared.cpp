@@ -3519,9 +3519,6 @@ and client.  This will ensure that prediction behaves appropriately.
 
 void PM_Move(struct playermove_s *ppmove, int server)
 {
-	DBG_INPUT;
-	try {
-
 	assert(pm_shared_initialized);
 
 	pmove = ppmove;
@@ -3553,16 +3550,15 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	}
 
 	PMScript = NULL;
-	}
 }
 
 extern "C" int PM_GetPhysEntInfo(int ent)
 {
-	DBG_INPUT;
 	if (ent >= 0 && ent <= pmove->numphysent)
 	{
 		return pmove->physents[ent].info;
 	}
+	
 	return -1;
 }
 

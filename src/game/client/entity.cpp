@@ -83,9 +83,6 @@ HUD_AddEntity
 */
 int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s *ent, const char *modelname)
 {
-	DBG_INPUT;
-	try {
-
 	/*switch ( type )
 	{
 	case ET_NORMAL:
@@ -115,7 +112,6 @@ int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s *ent, const char *model
 			return 0; // don't draw the player we are following in eye
 	}
 
-	}
 	return 1;
 }
 
@@ -131,9 +127,6 @@ Dogg: Called on Local Player Only
 */
 void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s *state, const struct clientdata_s *client)
 {
-	DBG_INPUT;
-	try {
-
 	VectorCopy(client->origin, state->origin);
 
 	// Spectator
@@ -145,7 +138,6 @@ void DLLEXPORT HUD_TxferLocalOverrides(struct entity_state_s *state, const struc
 
 	// Fire prevention
 	state->iuser4 = client->iuser4;
-	}
 }
 
 /*
@@ -159,9 +151,6 @@ playerstate structure
 */
 void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s *dst, const struct entity_state_s *src)
 {
-	DBG_INPUT;
-	try {
-
 	// Copy in network data
 	VectorCopy(src->origin, dst->origin);
 	VectorCopy(src->angles, dst->angles);
@@ -231,7 +220,6 @@ void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s *dst, const struct e
 		g_iUser2 = src->iuser2;
 		g_iUser3 = src->iuser3;
 	}
-	}
 }
 
 /*
@@ -249,9 +237,6 @@ Dogg: Called on Players Only
 */
 void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd)
 {
-	DBG_INPUT;
-	try {
-
 	if (player.m_CharacterState == CHARSTATE_LOADED)
 	{
 		//Master Sword: Always use the client-side viewmodel
@@ -306,7 +291,6 @@ void DLLEXPORT HUD_TxferPredictionData(struct entity_state_s *ps, const struct e
 	VectorCopy( ppcd->vuser2, pcd->vuser2 );
 	VectorCopy( ppcd->vuser3, pcd->vuser3 );
 	VectorCopy( ppcd->vuser4, pcd->vuser4 );*/
-	}
 }
 
 /*
@@ -539,9 +523,6 @@ void DLLEXPORT HUD_CreateEntities(void)
 	//Particles();
 	//TempEnts();
 
-	DBG_INPUT;
-	try {
-
 #if defined(BEAM_TEST)
 	Beams();
 #endif
@@ -557,8 +538,6 @@ void DLLEXPORT HUD_CreateEntities(void)
 		gHUD.m_HUDScript->Effects_PreRender();
 
 	player.Render();
-
-	}
 }
 
 //Put here because all the cool headers are already defined here
@@ -1847,9 +1826,6 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s *ActiveEntity);
 void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, const struct cl_entity_s *entity)
 {
-	DBG_INPUT;
-	try {
-
 	switch (event->event)
 	{
 	case 5001:
@@ -1895,7 +1871,6 @@ void DLLEXPORT HUD_StudioEvent(const struct mstudioevent_s *event, const struct 
 	default:
 		break;
 	}
-	}
 }
 
 /*
@@ -1915,15 +1890,11 @@ void DLLEXPORT HUD_TempEntUpdate(
 	int (*Callback_AddVisibleEntity)(cl_entity_t *pEntity),
 	void (*Callback_TempEntPlaySound)(TEMPENTITY *pTemp, float damp))
 {
-	DBG_INPUT;
 
 	static int gTempEntFrame = 0;
 	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
 	float freq, CommonGravity, gravitySlow, life, fastFreq;
-
-	try {
-
 
 	// Nothing to simulate
 	if (!*ppTempEntActive)
@@ -2369,7 +2340,6 @@ void DLLEXPORT HUD_TempEntUpdate(
 finish:
 	// Restore state info
 	gEngfuncs.pEventAPI->EV_PopPMStates();
-	}
 }
 
 /*
@@ -2385,9 +2355,6 @@ Indices must start at 1, not zero.
 */
 cl_entity_t DLLEXPORT *HUD_GetUserEntity(int index)
 {
-	DBG_INPUT;
-	try {
-
 #if defined(BEAM_TEST)
 	// None by default, you would return a valic pointer if you create a client side
 	//  beam and attach it to a client side entity.
@@ -2396,6 +2363,6 @@ cl_entity_t DLLEXPORT *HUD_GetUserEntity(int index)
 		return &beams[index];
 	}
 #endif
-	}
+
 	return NULL;
 }

@@ -303,9 +303,6 @@ BOOL CBaseMonster ::FValidateHintType(short sHint)
 //=========================================================
 void CBaseMonster ::Look(int iDistance)
 {
-
-	//startdbg;
-
 	int iSighted = 0;
 
 	// DON'T let visibility information from last frame sit around!
@@ -404,10 +401,7 @@ void CBaseMonster ::Look(int iDistance)
 		}
 	}
 
-	//dbg("SetConditions");
 	SetConditions(iSighted);
-
-	//enddbg;
 }
 
 //=========================================================

@@ -32,11 +32,8 @@
 #define DECLARE_MESSAGE(y, x)                                     \
 	int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 	{                                                             \
-		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		try {                                                 \
 		ret = gHUD.y.MsgFunc_##x(pszName, iSize, pbuf);           \
-		}                                                   \
 		return ret;                                               \
 	}
 
@@ -44,30 +41,21 @@
 #define DECLARE_COMMAND(y, x)   \
 	void __CmdFunc_##x(void)    \
 	{                           \
-		DBG_INPUT;              \
-		try {               \
 		gHUD.y.UserCmd_##x();   \
-		}                 \
 	}
 
 //------------ Master Sword ----------------
 #define MS_DECLARE_MESSAGE(y, x)                                  \
 	int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 	{                                                             \
-		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		try {                                                 \
 		ret = gHUD.y->MsgFunc_##x(pszName, iSize, pbuf);          \
-		}                                                   \
 		return ret;                                               \
 	}
 #define MS_DECLARE_COMMAND(y, x) \
 	void __CmdFunc_##x(void)     \
 	{                            \
-		DBG_INPUT;               \
-		try {                \
 		gHUD.y->UserCmd_##x();   \
-		}                  \
 	}
 //------------------------------------------
 

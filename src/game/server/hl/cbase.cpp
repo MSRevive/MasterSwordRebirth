@@ -106,7 +106,6 @@ static void SetObjectCollisionBox(entvars_t *pev);
 extern "C" {
 	int GetEntityAPI(DLL_FUNCTIONS* pFunctionTable, int interfaceVersion)
 	{
-		DBG_INPUT;
 		if (!pFunctionTable || interfaceVersion != INTERFACE_VERSION)
 		{
 			return FALSE;
@@ -118,7 +117,6 @@ extern "C" {
 
 	int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
 	{
-		DBG_INPUT;
 		if (!pFunctionTable || *interfaceVersion != INTERFACE_VERSION)
 		{
 			// Tell engine what version we had, so it can figure out who is out of date.
@@ -147,14 +145,10 @@ extern "C" {
 
 int DispatchSpawn(edict_t *pent)
 {
-	DBG_INPUT;
-
 	CBaseEntity *pSound = UTIL_FindEntityByClassname(NULL, "soundent");
 
-	try {
 	msstring classname = STRING(pent->v.classname);
 
-	//Set_DispatchSpawnDbg( "Begin" );
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 
 	if (pEntity)
@@ -172,7 +166,6 @@ int DispatchSpawn(edict_t *pent)
 		pEntity->Spawn();
 		//return;
 
-		Set_DispatchSpawnDbg("After Call Spawn");
 		// Try to get the pointer again, in case the spawn function deleted the entity.
 		// UNDONE: Spawn() should really return a code to ask that the entity be deleted, but
 		// that would touch too much code for me to do that right now.
@@ -207,17 +200,12 @@ int DispatchSpawn(edict_t *pent)
 			}
 		}
 	}
-	Set_DispatchSpawnDbg("End");
-	}
 
 	return 0;
 }
 
 void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd)
 {
-	DBG_INPUT;
-
-	try {
 	if (!pkvd || !pentKeyvalue)
 		return;
 
@@ -235,7 +223,6 @@ void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd)
 		return;
 
 	pEntity->KeyValue(pkvd);
-	}
 }
 
 // HACKHACK -- this is a hack to keep the node graph entity from "touching" things (like triggers)
@@ -244,7 +231,6 @@ BOOL gTouchDisabled = FALSE;
 
 void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 {
-	DBG_INPUT;
 	msstring DispatchTouchPrg;
 	try
 	{
@@ -256,10 +242,8 @@ void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 
 		if (pEntity && pOther && !((pEntity->pev->flags | pOther->pev->flags) & FL_KILLME))
 		{
-			Set_DispatchTouchDbg("Call Touch");
 			pEntity->Touch(pOther);
 		}
-		Set_DispatchTouchDbg("End");
 	}
 	catch (...)
 	{
@@ -269,7 +253,6 @@ void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 
 void DispatchUse(edict_t *pentUsed, edict_t *pentOther)
 {
-	DBG_INPUT;
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pentUsed);
 	CBaseEntity *pOther = (CBaseEntity *)GET_PRIVATE(pentOther);
 
@@ -280,10 +263,6 @@ void DispatchUse(edict_t *pentUsed, edict_t *pentOther)
 #include "msitemdefs.h"
 void DispatchThink(edict_t *pent)
 {
-	//DBG_INPUT;
-	//startdbg;
-
-	//dbg( "Begin" );
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 	if (pEntity)
 	{
@@ -304,28 +283,21 @@ void DispatchThink(edict_t *pent)
 		if (FBitSet(pEntity->pev->flags, FL_DORMANT))
 			ALERT(at_error, "Dormant entity %s is thinking!!\n", STRING(pEntity->pev->classname));
 
-		//Set_DispatchThinkDbg( "Call Think" );
 		pEntity->Think();
 	}
-	//enddbg;
 }
 
 void DispatchBlocked(edict_t *pentBlocked, edict_t *pentOther)
 {
-	DBG_INPUT;
-	try {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pentBlocked);
 	CBaseEntity *pOther = (CBaseEntity *)GET_PRIVATE(pentOther);
 
 	if (pEntity)
 		pEntity->Blocked(pOther);
-
-	}
 }
 
 void DispatchSave(edict_t *pent, SAVERESTOREDATA *pSaveData)
 {
-	DBG_INPUT;
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 
 	if (pEntity && pSaveData)
@@ -485,7 +457,6 @@ int DispatchRestore(edict_t *pent, SAVERESTOREDATA *pSaveData, int globalEntity)
 
 void DispatchObjectCollsionBox(edict_t *pent)
 {
-	try {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE(pent);
 	if (pEntity)
 	{
@@ -493,20 +464,16 @@ void DispatchObjectCollsionBox(edict_t *pent)
 	}
 	else
 		SetObjectCollisionBox(&pent->v);
-
-	}
 }
 
 void SaveWriteFields(SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount)
 {
-	DBG_INPUT;
 	CSave saveHelper(pSaveData);
 	saveHelper.WriteFields(pname, pBaseData, pFields, fieldCount);
 }
 
 void SaveReadFields(SAVERESTOREDATA *pSaveData, const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount)
 {
-	DBG_INPUT;
 	CRestore restoreHelper(pSaveData);
 	restoreHelper.ReadFields(pname, pBaseData, pFields, fieldCount);
 }
