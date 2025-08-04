@@ -67,7 +67,6 @@ void LinkUserMessages(void);
  */
 void set_suicide_frame(entvars_t *pev)
 {
-	try {
 	ALERT(at_console, "SUICIDE FRAME\n");
 	if (!pev->model)
 		return; // allready gibbed
@@ -77,7 +76,6 @@ void set_suicide_frame(entvars_t *pev)
 	pev->movetype = MOVETYPE_TOSS;
 	pev->deadflag = DEAD_DEAD;
 	pev->nextthink = -1;
-	}
 }
 
 clientaddr_t g_NewClients[32];

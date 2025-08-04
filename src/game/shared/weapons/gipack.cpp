@@ -327,8 +327,6 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 	if (!Container_CanAcceptItem(pItem))
 		return 0;
 
-	try {
-
 	/*
 	//Thothie MAR2010_15 - trying to restore stackable stacks sans char corruption
 	if ( FBitSet( pItem->Properties, ITEM_GROUPABLE ) )
@@ -377,8 +375,6 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 	//	Params.add( EntToString(pItem) );
 	//endif
 	//CallScriptEvent( "game_container_addeditem", &Params );
-
-	}
 
 	return 1;
 }

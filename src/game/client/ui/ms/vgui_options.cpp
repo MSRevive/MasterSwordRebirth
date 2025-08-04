@@ -514,8 +514,6 @@ bool CPanel_Options::SlotInput(int iSlot)
 
 void CPanel_Options::Open(option_e OptionScreen)
 {
-	try {
-
 	Reset();
 
 	setVisible(true);
@@ -536,8 +534,6 @@ void CPanel_Options::Open(option_e OptionScreen)
 		else
 			m_pPartyLeavePanel->Open();
 		break;
-	}
-
 	}
 }
 

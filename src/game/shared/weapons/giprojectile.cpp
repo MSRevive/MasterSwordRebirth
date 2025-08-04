@@ -118,8 +118,6 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 {
 	//if ( ProjectileData->IgnoreNPC ) return;
 
-	try {
-
 	TypeCheck;
 
 	if (pev->owner == pOther->edict() || pOther->MSMoveType == MOVETYPE_ARROW || !FBitSet(MSProperties(), ITEM_PROJECTILE))
@@ -240,9 +238,8 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 	//pev->velocity = g_vecZero;
 	SetTouch(NULL);
 	//Think( );
-
-	}
 }
+
 void CGenericItem::Projectile_Move()
 {
 	TypeCheck;

@@ -728,8 +728,6 @@ bool CMirror::Vis_Surface() //Check if the camera is close enough to the mirror
 
 void CMirror::RenderMirroredWorld(int RecurseCall)
 {
-	try {
-
 	CMirror &Mirror = *this;
 	if (RecurseCall >= 2)
 		return;
@@ -925,8 +923,6 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 	//If child, Reset current mirror to parent
 	if (m_Parent)
 		CMirrorMgr::m_CurrentMirror = OldCurrentMirror;
-
-	}
 }
 
 mleaf_t *FindLeaf(Vector &Origin, mnode_t *pNode)
@@ -1125,8 +1121,6 @@ bool IsBoundsVisible(cl_entity_t *pWorldEntity, mleaf_t *pStartLeaf, Vector Boun
 
 bool Mirror_DrawSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 {
-	try {
-
 	//If it's the original glass texture, don't draw
 	msurface_t &Surface = *pSurface;
 	//if( Surface.texinfo->texture->gl_texturenum == Info.Mirror->GLIgnoreTexture )
@@ -1201,7 +1195,7 @@ bool Mirror_DrawSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 		glVertex3fv( Vertex );
 	}
 	glEnd ();*/
-	}
+
 	return true;
 }
 

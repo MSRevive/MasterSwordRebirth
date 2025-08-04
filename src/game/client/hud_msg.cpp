@@ -50,8 +50,6 @@ int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 
 void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
-	try {
-
 	MS_INFO("[MsgFunc_InitHUD: EndMap]");
 	MSGlobals::EndMap(); //End old map
 
@@ -106,7 +104,6 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitNewLevel]\n";
 	CEnvMgr::InitNewLevel();
 	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Complete]\n";
-	}
 }
 
 int CHud ::MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf)

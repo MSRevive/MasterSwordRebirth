@@ -24,8 +24,6 @@ public:
 
 	VGUI_MenuMain(Panel *pParent) : VGUI_MenuBase(pParent)
 	{
-		try {
-
 		m_Name = "main";
 
 		Init();
@@ -48,8 +46,6 @@ public:
 
 		m_OptionsPanel = new CPanel_Options(this);
 		m_OptionsPanel->setVisible(false);
-
-		}
 	}
 
 	// Update

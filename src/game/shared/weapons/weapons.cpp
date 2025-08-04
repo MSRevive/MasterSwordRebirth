@@ -531,9 +531,6 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 }
 void CBasePlayerItem::ItemPostFrame(void)
 {
-	try {
-
-
 	if (!m_pPlayer)
 		return;
 
@@ -557,8 +554,6 @@ void CBasePlayerItem::ItemPostFrame(void)
 	if (MSProperties() & ITEM_GENERIC)
 		Think();
 #endif
-
-	}
 }
 
 bool CBasePlayerWeapon::ShouldIdle(void)
@@ -569,6 +564,7 @@ bool CBasePlayerWeapon::ShouldIdle(void)
 	else
 		return FALSE;
 }
+
 /*void CBasePlayerItem::DestroyItem( void )
 {
 	// if attached to a player, remove. 

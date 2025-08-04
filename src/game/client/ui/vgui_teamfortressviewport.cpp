@@ -482,7 +482,6 @@ public:
 Font *g_FontSml, *g_FontTitle, *g_FontID;
 TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : Panel(x, y, wide, tall), m_SchemeManager(wide, tall)
 {
-	try {
 	gViewPort = this;
 	m_iInitialized = false;
 	//Master Sword
@@ -581,7 +580,6 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	//CreateSpectatorMenu();
 
 	m_iInitialized = true;
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -589,7 +587,6 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 //-----------------------------------------------------------------------------
 void TeamFortressViewport::Initialize(void)
 {
-	try {
 	// Force each menu to Initialize
 	//Master Sword
 	//Turn off HUDs
@@ -653,7 +650,6 @@ void TeamFortressViewport::Initialize(void)
 	}
 
 	App::getInstance()->setCursorOveride(App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_none));
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1183,8 +1179,6 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 //======================================================================
 void TeamFortressViewport::CreateScoreBoard(void)
 {
-	try {
-
 	int xdent = SBOARD_INDENT_X, ydent = SBOARD_INDENT_Y;
 	if (ScreenWidth == 512)
 	{
@@ -1202,8 +1196,6 @@ void TeamFortressViewport::CreateScoreBoard(void)
 	m_pScoreBoard->setVisible(false);
 
 	logfile << Logger::LOG_INFO << "[Scoreboard: Complete]\n";
-
-	}
 }
 
 //======================================================================
@@ -1343,7 +1335,6 @@ CMenuPanel *TeamFortressViewport::CreateTextWindow(int iTextToShow)
 // VGUI Menus
 void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 {
-	try {
 	CMenuPanel *pNewMenu = NULL;
 
 	// Don't open menus in demo playback
@@ -1457,8 +1448,6 @@ void TeamFortressViewport::ShowVGUIMenu(int iMenu)
 		m_pCurrentMenu->Open();
 
 		UpdateCursorState();
-	}
-
 	}
 }
 
@@ -1590,18 +1579,11 @@ void TeamFortressViewport::CreateStoreMenu()
 }
 void TeamFortressViewport::CreateVGUIMenus()
 {
-	try {
-
 	m_Menus.add(m_pHUDPanel = CreateHUDPanel(this)); // Create the HUD panel
-
 	m_Menus.add(new CStatPanel(this)); // Create the stats panel
-
 	m_Menus.add(m_pSpawnScreen = new CSpawnPanel(this)); // Create the spawn panel
-
 	m_Menus.add(CreateHUD_MenuMain(this)); //Create Main menu
-
 	m_Menus.add(CreateHUD_MenuInteract(this)); //Create Interact menu
-
 	m_Menus.add(m_pLocalizedMenu = new CLocalizedPanel(this)); // MiB MAR2015_01 [LOCAL_PANEL] - Add local panel to list and set pointer
 
 	for (int i = 0; i < m_Menus.size(); i++)
@@ -1610,7 +1592,6 @@ void TeamFortressViewport::CreateVGUIMenus()
 	m_pHUDPanel->setVisible(true);
 
 	logfile << Logger::LOG_INFO << "[Create VGUI Menus: Complete]\n";
-	}
 }
 
 //======================================================================================

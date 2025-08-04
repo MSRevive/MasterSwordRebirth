@@ -741,8 +741,6 @@ void __CmdFunc_PlayerDesc(void)
 //Handles all inventory messages
 int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 {
-	try {
-
 	BEGIN_READ(pbuf, iSize);
 	byte Operation = READ_BYTE();
 	bool bDoInvUpdate = false;
@@ -1056,7 +1054,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		UpdateActiveMenus();
 	}
 
-	}
 	return 1;
 }
 
@@ -1268,12 +1265,9 @@ bool ShowChat() { return ShowHUD(); } //Always show chat
 
 int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 {
-	try {
-
 	BEGIN_READ(pbuf, iSize);
 	player.SwitchHands(READ_BYTE());
 
-	}
 	return 1;
 }
 
@@ -1286,8 +1280,6 @@ extern float g_fMenuLastClosed;
 
 int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 {
-	try {
-
 	BEGIN_READ(pbuf, iSize);
 
 	byte Cmd = READ_BYTE();
@@ -1524,7 +1516,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	break;
 	}
 
-	}
 	return 1;
 }
 

@@ -188,7 +188,6 @@ public:
 
 	VGUI_Status(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 	{
-		try {
 		StatusIcons = this;
 
 		setParent(pParent);
@@ -202,8 +201,6 @@ public:
 		m_FN.setPos(XRES(640) - FN_W, 10);
 		m_FN.setFgColor(255, 255, 255, 255);
 		m_FN.setVisible(false);
-
-		}
 	}
 
 	void Update(void)

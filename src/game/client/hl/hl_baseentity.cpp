@@ -72,8 +72,6 @@ int CBaseEntity ::DamageDecal(int bitsDamageType) { return -1; }
 CBaseEntity *CBaseEntity::Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner) { return NULL; }
 void CBaseEntity::SUB_Remove(void)
 {
-	try {
-
 	Deactivate();
 	if (logfileopt.is_open())
 	{
@@ -81,8 +79,6 @@ void CBaseEntity::SUB_Remove(void)
 		logfileopt << " (" << (IsMSItem() ? ((CBasePlayerItem *)this)->m_iId : 0) << ")\r\n";
 	}
 	MSCLGlobals::RemoveEnt(this, true);
-
-	}
 }
 //void CBaseEntity::StruckSound( CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, TraceResult *ptr, int bitsDamageType ) { }
 void CBaseEntity::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtraData) {}

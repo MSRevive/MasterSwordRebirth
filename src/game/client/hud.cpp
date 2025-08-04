@@ -747,8 +747,6 @@ float HUD_GetFOV(void)
 float ClFOV = 0; //FOV, in radians
 int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 {
-	try {
-
 	BEGIN_READ(pbuf, iSize);
 
 	int newfov = READ_BYTE();
@@ -779,7 +777,6 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 	{
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
-	}
 	}
 
 	return 1;

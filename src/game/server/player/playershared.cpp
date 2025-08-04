@@ -243,8 +243,6 @@ void CBasePlayer::DeleteStats()
 //Called once on startup on both client & server
 void CBasePlayer::InitialSpawn(void)
 {
-	try {
-
 	if (m_Initialized)
 		return;
 
@@ -299,14 +297,12 @@ void CBasePlayer::InitialSpawn(void)
 
 	CallScriptEvent("game_reset_wear_positions"); //Initialize the wearable positions, in case the player makes a new char
 	m_Initialized = true;
-
-	}
 }
+
 /*
   PlaySound - Save yourself a couple parameters by using this instead of EMIT_SOUND.
   (c)(c)(c)(c)(c)(c)(c)(c)(c)   It also allows translation to the female versions of the sound
 */
-
 void CBasePlayer::PlaySound(int channel, const char* sample, float volume, bool fGenderSpecific, float attenuation)
 {
 	char SoundName[128];
@@ -722,8 +718,6 @@ bool CBasePlayer::PutInAnyPack(CGenericItem* pItem, bool bVerbose)
 
 bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 {
-	try {
-
 	//bVerbose == true print all failure messages
 	int iUseHand = 0;
 
@@ -788,8 +782,6 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 	if (pUse && pUse->SpellData)
 		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pUse) + " spell is canceled");
-
-	}
 
 	return true;
 }

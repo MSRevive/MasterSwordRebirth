@@ -138,7 +138,6 @@ void CHudID::SearchThink()
 //		byte   : Relative entity alignment (Neutral, Friendly, Hostile)
 int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 {
-	try {
 	BEGIN_READ(pbuf, iSize);
 
 	entinfo_t EntData;
@@ -158,7 +157,6 @@ int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 	//Not found, create a new one
 	player.m_EntInfo.add(EntData);
 
-	}
 	return 1;
 }
 

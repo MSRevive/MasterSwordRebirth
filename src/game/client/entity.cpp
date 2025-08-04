@@ -560,7 +560,6 @@ void TempEntCallback(struct tempent_s *ent, float frametime, float currenttime)
 
 void TempEntHitCallback(struct tempent_s *ent, struct pmtrace_s *ptr)
 {
-	try {
 	if (!ent->entity.curstate.weaponanim)
 		return;
 
@@ -582,13 +581,10 @@ void TempEntHitCallback(struct tempent_s *ent, struct pmtrace_s *ptr)
 		HUDScript->Effects_UpdateTempEnt(TempEntExtra.CBCollide_CallbackEvent, &Params);
 	}
 	g_CurrentTempEnt = NULL;
-
-	}
 }
 
 void CHudScript::Effects_UpdateTempEnt(const char* EventName, msstringlist *Parameters)
 {
-	try {
 	//Update tempents
 	TEMPENTITY *pTempEnt = g_CurrentTempEnt; //Save a copy, because this could get set to NULL during RunScriptEventByName
 	for (int i = 0; i < m_Scripts.size(); i++)
@@ -604,7 +600,6 @@ void CHudScript::Effects_UpdateTempEnt(const char* EventName, msstringlist *Para
 		{
 			Script->RunScriptEventByName(EventName);
 		}
-	}
 	}
 }
 const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)

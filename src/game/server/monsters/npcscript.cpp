@@ -98,10 +98,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 #ifdef VALVE_DLL
 
 	// Executes a single script event
-	try {
-
 	msstring sTemp;
-
 
 	//************************** SAY **************************
 	if (Cmd.Name() == "say")
@@ -1735,11 +1732,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		else
 			ERROR_MISSING_PARMS;
 	}
-	}
-
 #endif
+
 	return false;
 }
+
 bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScript *BaseScript, msstring &Return)
 {
 #ifdef VALVE_DLL

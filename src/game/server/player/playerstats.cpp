@@ -145,9 +145,9 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SpellTypeList[iBestSubstatId]); //Thothie returns XP gained by monsters
 		else
 			ALERT(at_console, "Gained XP: %i in skill %s %s \n", EnemySkillLevel, SkillStatList[iStatIdx].Name, SkillTypeList[iBestSubstatId]); //Thothie returns XP gained by monsters
+
 		if (std::get<0>(tbiSuccess))
 		{
-			try {
 			hudtextparms_t htp;
 			memset(&htp, 0, sizeof(hudtextparms_t));
 			htp.x = 0.02;
@@ -182,13 +182,12 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 				Params.add(SkillTypeList[iBestSubstatId]);
 			else
 				Params.add(SpellTypeList[iBestSubstatId]);
+			
 			Params.add(UTIL_VarArgs("%i", GetSkillStat(iStatIdx, iBestSubstatId)));
 			CallScriptEvent("game_learnskill", &Params);
-			}
 		}
 
 		bSkillLeveled = true;
-
 		iRemainingExp = std::get<1>(tbiSuccess);
 	}
 

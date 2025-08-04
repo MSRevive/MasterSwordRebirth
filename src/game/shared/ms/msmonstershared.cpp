@@ -440,7 +440,6 @@ void CMSMonster ::DropAllItems()
 
 bool CMSMonster::CreateStats()
 {
-	try {
 	if (m_StatsCreated)
 		return true;
 
@@ -457,7 +456,6 @@ bool CMSMonster::CreateStats()
 
 	m_StatsCreated = true;
 
-	}
 	return true;
 }
 void CMSMonster::DeleteStats()

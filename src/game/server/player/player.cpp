@@ -1487,9 +1487,6 @@ void SetKeys(CBasePlayer *pPlayer);
 
 void CBasePlayer::PreThink(void)
 {
-	try {
-
-
 	//Send char info, if character is still unloaded
 	Think_SendCharData();
 
@@ -1662,8 +1659,6 @@ void CBasePlayer::PreThink(void)
 	pev->vuser3.x = MaxHP();
 	pev->vuser3.y = (IsAlive() ? pev->health : 0);
 	pev->vuser3.z = 0.0f;
-
-	}
 }
 
 /* Time based Damage works as follows:
@@ -2050,8 +2045,6 @@ void CBasePlayer ::UpdatePlayerSound(void)
 
 void CBasePlayer::PostThink()
 {
-	try {
-
 	if (g_fGameOver)
 		goto pt_end; // intermission or finale
 
@@ -2241,8 +2234,6 @@ pt_end:
 		if (!hasProximity) {
 			pev->solid = SOLID_SLIDEBOX;
 		}
-	}
-
 	}
 }
 
@@ -2536,8 +2527,6 @@ LINK_ENTITY_TO_CLASS(ms_player_begin, CSpawnPointBegin);
 
 void CBasePlayer::Spawn(void)
 {
-	try {
-
 	//Master Sword spawn code
 	//Note: The player will sometimes have items/packs when this is called
 	Precache();
@@ -2867,15 +2856,11 @@ void CBasePlayer::Spawn(void)
 		Parameters.add(EntToString(this));
 		MSGlobals::GameScript->CallScriptEvent("game_playerspawn", &Parameters);
 	}
-
-	}
 }
 
 bool CBasePlayer::MoveToSpawnSpot()
 {
 	CBaseEntity *pSpawnSpot = NULL;
-	try {
-
 
 	if (pSpawnSpot = FindSpawnSpot())
 	{
@@ -2890,7 +2875,6 @@ bool CBasePlayer::MoveToSpawnSpot()
 	}
 
 	//Thothie - need a loop around here, causing every wearable item the character has to execute it's "game_wear" function
-	}
 	return pSpawnSpot ? true : false;
 }
 
@@ -6263,8 +6247,6 @@ void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 
 bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 {
-	try {
-
 	logfile << Logger::LOG_INFO << "Load Character: " << DisplayName() << "\n";
 
 	//Thothie JAN2010_10 - flag to tell "char" function character is loaded, so no clickie
@@ -6483,8 +6465,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//Send music data 
 
 	Spawn();
-
-	}
 
 	return true;
 }

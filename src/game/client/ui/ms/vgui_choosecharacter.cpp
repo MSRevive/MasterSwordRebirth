@@ -403,8 +403,6 @@ CMenuPanel *CreateNewCharacterPanel( )
 }
 CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, TRUE, x, y, wide, tall )
 {
-	try {
-
 	SetBits( m_Flags, MENUFLAG_TRAPNUMINPUT );
 
 	Gender_Name = gEngfuncs.pfnGetCvarString("name");
@@ -559,7 +557,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Gender_GenderLabel->addInputSignal( new GenderInput_ChangeName( this, 1 ) );
 
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), CHOOSE_BTNWIDTH, 2, XRES(32) );
-	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = CHOOSE_BTNY + CHOOSE_CHARHANDLING_H;
 		//int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = GENDER_BTNY;
@@ -653,7 +651,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	fClosingMenu = false;
 	iButtons = 0;
 	m_Stage = STG_CHOOSECHAR;
-	}
 }
 
 // Update
@@ -872,7 +869,6 @@ void CNewCharacterPanel::Think( )
 
 bool CNewCharacterPanel::KeyInput( int down, int keynum, const char *pszCurrentBinding ) 
 {
-	try {
 	switch( m_Stage )
 	{
 	case STG_CHOOSEGENDER:
@@ -883,8 +879,6 @@ bool CNewCharacterPanel::KeyInput( int down, int keynum, const char *pszCurrentB
 		else
 			Gender_NameTextPanel->KeyInput( down, keynum, pszCurrentBinding ); 
 		return true;
-	}
-
 	}
 
 	return false;
@@ -900,10 +894,7 @@ void CNewCharacterPanel::Gender_NameSelected( )
 
 void CNewCharacterPanel::Close( void )
 {
-
 	//Note - I stopped deleting the resources... it seems to crash HL much later on
-
-	try {
 	MSCLGlobals::CharPanelActive = false;
 
 	/*if( fClosingMenu )
@@ -971,7 +962,6 @@ void CNewCharacterPanel::Close( void )
 			{ gViewPort->m_Menus.erase( i ); break; }
 
 	CMenuPanel::Close( );
-	}
 }
 //======================================
 // Key inputs for the Class Menu
@@ -1017,7 +1007,6 @@ bool CNewCharacterPanel::SlotInput( int iSlot )
 
 void CNewCharacterPanel::Open( void )
 {
-	try {
 	m_Stage = STG_CHOOSECHAR;
 	MSCLGlobals::CharPanelActive = true;
 
@@ -1043,7 +1032,6 @@ void CNewCharacterPanel::Open( void )
 
 	m_pScrollPanel->setScrollValue( 0, 0 );
 
-	}
 }
 
 //-----------------------------------------------------------------------------
@@ -1051,11 +1039,8 @@ void CNewCharacterPanel::Open( void )
 //-----------------------------------------------------------------------------
 void CNewCharacterPanel::Initialize( void )
 {
-	try {
 	setVisible( false );
 	m_pScrollPanel->setScrollValue( 0, 0 );
-
-	}
 }
 
 void CNewCharacterPanel::UpdateUpload( )
@@ -1085,7 +1070,6 @@ void __CmdFunc_PlayerChooseChar( )
 
 int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 {
-	try {
 	BEGIN_READ(pbuf, iSize);
 
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
@@ -1155,7 +1139,6 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 		if (gViewPort && gViewPort->m_pCurrentMenu)
 			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
 
-	}
 	return 1;
 }
 
@@ -1211,8 +1194,6 @@ void CRenderChar::Init( int Idx, msstring model )
 
 void CRenderChar::Render( )
 {
-	try {
-
 	if( !MSCLGlobals::CharPanelActive )
 		return;
 	if( !gViewPort || !gViewPort->m_pCurrentMenu )
@@ -1344,8 +1325,6 @@ void CRenderChar::Render( )
 
 	//foreach( i, HUMAN_BODYPARTS )
 	//	m_Ent.SetBody( i, BodyParts[i] );
-
-	}
 }
 void CRenderChar::PlayAttnAnim( )
 {
@@ -1429,9 +1408,9 @@ void CRenderSpawnbox::Init( )
 		Print("Spawnbox Model %s NOT FOUND!", MSGlobals::DefaultSpawnBoxModel.c_str());
 	}
 }
+
 void CRenderSpawnbox::Render( )
 {
-	try {
 	Vector vForward, vRight, vUp;
 	EngineFunc::MakeVectors( ViewMgr.Angles, vForward, vRight, vUp );
 	m_Ent.origin = ViewMgr.Origin;
@@ -1440,8 +1419,8 @@ void CRenderSpawnbox::Render( )
 	m_Ent.curstate.origin = m_Ent.origin;
 
 	CRenderEntity::Render( );
-	}
 }
+
 CRenderSpawnbox::~CRenderSpawnbox( )
 {
 	if( !m_Done )
@@ -1450,7 +1429,6 @@ CRenderSpawnbox::~CRenderSpawnbox( )
 		MSErrorConsoleText( "~CRenderChar()", "Deallocated improperly" );
 	}
 }
-
 
 CNewCharacterPanel::~CNewCharacterPanel( )
 {

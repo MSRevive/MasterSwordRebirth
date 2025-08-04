@@ -90,8 +90,6 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 
 void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 {
-	try {
-
 	if (MSGlobals::ServerSideChar)
 		return;
 
@@ -198,8 +196,6 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 #endif
 
 	SendInfo.TimeDataLastSent = gpGlobals->time;
-
-	}
 }
 
 #ifdef VALVE_DLL
@@ -218,8 +214,6 @@ void MSChar_Interface::HL_SVNewIncomingChar(CBasePlayer *pPlayer, int CharIdx, u
 }
 void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEncodedData)
 {
-	try {
-
 	charsendinfo_t &SendInfo = pPlayer->m_CharSend;
 
 	if (SendInfo.Status != CSS_RECEIVING)
@@ -242,8 +236,6 @@ void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEnc
 		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
-	}
-
 	}
 }
 #endif
@@ -278,8 +270,6 @@ void MSChar_Interface::HL_CLNewIncomingChar(int CharIdx, uint DataLen)
 
 void MSChar_Interface::HL_CLReadCharData()
 {
-	try {
-
 	charsendinfo_t &SendInfo = player.m_CharSend;
 
 	if (SendInfo.Status != CSS_RECEIVING)
@@ -304,8 +294,6 @@ void MSChar_Interface::HL_CLReadCharData()
 		delete[] SendInfo.Data;
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
-	}
-
 	}
 }
 #endif

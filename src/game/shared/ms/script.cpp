@@ -4959,7 +4959,6 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 
 void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
-	try {
 	//Run script events
 	//~ Runs unnamed events or named events that were specified with calleventtimed ~
 	int events = m.Events.size();
@@ -4996,8 +4995,6 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 		{
 			Script_ExecuteEvent(Event);
 		}
-	}
-
 	}
 }
 void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Parameters)
@@ -5078,8 +5075,6 @@ void CScript::CallLogged(const char* title, std::clock_t start)
 
 bool CScript::ParseScriptFile(const char* pszScriptData)
 {
-	try {
-
 	if (!m.ScriptFile.len() || !pszScriptData)
 		return false;
 
@@ -5135,7 +5130,6 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 		lineNum++;
 	}
 
-	}
 	//  Uncomment to print out all this function gathered from the script file
 	//#ifndef VALVE_DLL
 		/*SCRIPT_EVENT *pEvent = seFirstEvent;
@@ -5798,12 +5792,12 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 // 	return 1;
 // }
 
-int CScript::ParseLine(const char* pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT** pCurrentEvent /*in/out*/,
-	scriptcmd_list** pCurrentCmds /*in/out*/, ::mslist<scriptcmd_list*>& ParentCmds /*in/out*/)
+int CScript::ParseLine(const char* pszCommandLine /*in*/, 
+	int LineNum /*in*/, 
+	SCRIPT_EVENT** pCurrentEvent /*in/out*/,
+	scriptcmd_list** pCurrentCmds /*in/out*/, 
+	::mslist<scriptcmd_list*>& ParentCmds /*in/out*/)
 {
-	try {
-
-
 	SCRIPT_EVENT* CurrentEvent = *pCurrentEvent;
 	scriptcmd_list& CurrentCmds = **pCurrentCmds;
 
@@ -6417,8 +6411,6 @@ DontKeepCommand:
 			ParentCmds.erase(ParentCmds.size() - 1);
 		}
 		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), LineNum, cBuffer));
-	}
-
 	}
 
 	return 1;

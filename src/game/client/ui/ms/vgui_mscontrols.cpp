@@ -98,7 +98,6 @@ CImageDelayed::CImageDelayed( const char *pszImageName, bool TGAorSprite, bool D
 
 void CImageDelayed::LoadImg( )
 {
-	try {
 	if( m_ImageLoaded )
 		return;	//already loaded image
 
@@ -120,12 +119,10 @@ void CImageDelayed::LoadImg( )
 	}
 
 	m_ImageLoaded = true;
-	}
 }
 
 void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool Delayed )
 {
-	try {
 	//The image name is stored, but we may delay loading of the image data until LoadImg() is called.
 	//Some image buttons are never be shown... this saves us from ever loading those
 	ClearImg( );
@@ -135,7 +132,6 @@ void CImageDelayed::LoadImg( const char *pszImageName, bool TGAorSprite, bool De
 	
 	if( !Delayed )
 		LoadImg( );
-	}
 }
 
 void CImageDelayed::ClearImg( )

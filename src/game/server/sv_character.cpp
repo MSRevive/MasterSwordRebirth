@@ -148,7 +148,6 @@ static char cTemp[MSSTRING_SIZE];
 
 void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	try {
 	if (DataID == CHARDATA_MAPSVISITED1)
 	{
 		//Read Maps Visited
@@ -161,7 +160,6 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			m_VisitedMaps.add(cTemp);
 		}
-	}
 	}
 }
 

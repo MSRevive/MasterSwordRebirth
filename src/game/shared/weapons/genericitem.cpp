@@ -158,36 +158,35 @@ CGenericItem* NewGenericItem(CGenericItem* pGlobalItem) {
 CGenericItem* CGenericItemMgr::NewGenericItem(CGenericItem* pGlobalItem)
 {
 	try {
+		if (!pGlobalItem)
+			return NULL;
 
-	if (!pGlobalItem)
-		return NULL;
-
-	if (pGlobalItem && (pGlobalItem->m_Scripts.size() <= 0))
-	{
-		ALERT(at_console, "CGenericItemMgr::NewGenericItem: No scripts for %s %s ID %llu!\n", pGlobalItem->ItemName.c_str(), pGlobalItem->m_Name, pGlobalItem->m_iId);
-		return NULL;
-	}
+		if (pGlobalItem && (pGlobalItem->m_Scripts.size() <= 0))
+		{
+			ALERT(at_console, "CGenericItemMgr::NewGenericItem: No scripts for %s %s ID %llu!\n", pGlobalItem->ItemName.c_str(), pGlobalItem->m_Name, pGlobalItem->m_iId);
+			return NULL;
+		}
 
 #ifdef VALVE_DLL
-	CGenericItem* pItem = GetClassPtr((CGenericItem*)NULL);
-	if ((ulong)pItem == m_LastDestroyedItemID)
-	{
-		//Work around for a bug.
-		//(When new item gets last del'd item memory location (which is used for ID))
-		CGenericItem* NewItem = GetClassPtr((CGenericItem*)NULL);
-		pItem->SUB_Remove();
-		pItem = NewItem;
-	}
+		CGenericItem* pItem = GetClassPtr((CGenericItem*)NULL);
+		if ((ulong)pItem == m_LastDestroyedItemID)
+		{
+			//Work around for a bug.
+			//(When new item gets last del'd item memory location (which is used for ID))
+			CGenericItem* NewItem = GetClassPtr((CGenericItem*)NULL);
+			pItem->SUB_Remove();
+			pItem = NewItem;
+		}
 #else
-	CGenericItem* pItem = ::new CGenericItem; //Allocate from engine.  Don't use msnew
-	entvars_t* tmpPev = pItem->pev;
-	pItem->pev = tmpPev;
-	if (pItem)
-		pItem->m_pfnThink = NULL;
+		CGenericItem* pItem = ::new CGenericItem; //Allocate from engine.  Don't use msnew
+		entvars_t* tmpPev = pItem->pev;
+		pItem->pev = tmpPev;
+		if (pItem)
+			pItem->m_pfnThink = NULL;
 #endif
 
-	if (!pItem)
-		return NULL;
+		if (!pItem)
+			return NULL;
 
 	//Thothie JUN2010_10 - paranoia - this maybe causing char corruption with quest items, not sure
 	/*
@@ -197,32 +196,35 @@ CGenericItem* CGenericItemMgr::NewGenericItem(CGenericItem* pGlobalItem)
 		*/
 
 	//pItem->iWeaponType = pGlobalItem->iWeaponType;
-	pItem->ItemName = pGlobalItem->ItemName;
-	pItem->m_iId = (int)pItem; //RANDOM_LONG(0,32765);
-	strncpy(pItem->m_Name, pGlobalItem->m_Name, sizeof(pItem->m_Name));
-	if (pGlobalItem->m_Scripts[0]) //This should ALWAYS be true!
+		pItem->ItemName = pGlobalItem->ItemName;
+		pItem->m_iId = (int)pItem; //RANDOM_LONG(0,32765);
+		strncpy(pItem->m_Name, pGlobalItem->m_Name, sizeof(pItem->m_Name));
+		if (pGlobalItem->m_Scripts[0]) //This should ALWAYS be true!
+		{
+			pItem->m_Scripts.add(msnew CScript);
+			pGlobalItem->m_Scripts[0]->CopyAllData(pItem->m_Scripts[0], pItem, pItem);
+			pItem->SetScriptVar("IS_NEW_ITEM", "1");
+		}
+
+#ifndef VALVE_DLL
+		MSCLGlobals::AddEnt(pItem);
+#endif
+
+		pItem->CallScriptEvent("game_precache");
+		pItem->Spawn();
+
+#ifndef VALVE_DLL
+		logfileopt << "CREATE ITEM: " << pItem->DisplayName() << "\r\n";
+#endif
+
+		return pItem;
+	}
+	catch(...)
 	{
-		pItem->m_Scripts.add(msnew CScript);
-		pGlobalItem->m_Scripts[0]->CopyAllData(pItem->m_Scripts[0], pItem, pItem);
-		pItem->SetScriptVar("IS_NEW_ITEM", "1");
+		return nullptr;
 	}
 
-#ifndef VALVE_DLL
-	MSCLGlobals::AddEnt(pItem);
-#endif
-
-	pItem->CallScriptEvent("game_precache");
-	pItem->Spawn();
-
-#ifndef VALVE_DLL
-	logfileopt << "CREATE ITEM: " << pItem->DisplayName() << "\r\n";
-#endif
-
-	return pItem;
-
-	}
-
-	return NULL;
+	return nullptr;
 }
 
 //CGenericItem *NewGenericItem( int iD ) { return NewGenericItem( CGenericItemMgr::GetGlobalGenericItemByID(iD) ); }
@@ -280,13 +282,11 @@ void CGenericItemMgr::DeleteItem(int idx)
 
 void CGenericItemMgr::DeleteItems()
 {
-	try {
 	int ItemCount = m_Items.size(); //Save because this will be changing
 	for (int i = 0; i < ItemCount; i++)
 		DeleteItem(0); //Keep deleting the first item
 
 	m_Items.clear();
-	}
 }
 
 //Temporarily create an item to determine it's name
@@ -949,8 +949,6 @@ void CGenericItem::UnWield(void) {}
 
 bool CGenericItem::UseItem(bool Verbose)
 {
-	try {
-
 	if (!m_pOwner)
 		return false;
 	if (CurrentAttack)
@@ -980,7 +978,6 @@ bool CGenericItem::UseItem(bool Verbose)
 	if (!m_pPlayer)
 		return PutInAnyPack(NULL, true);
 
-	}
 	return m_pPlayer->PutInAnyPack(this, true);
 }
 
@@ -1411,8 +1408,6 @@ bool CGenericItem::ActivatedByOwner(void)
 
 void CGenericItem::ListContents()
 {
-	try {
-
 	if (m_pPlayer)
 	{
 		m_pPlayer->SetConditions(MONSTER_OPENCONTAINER);
@@ -1422,14 +1417,11 @@ void CGenericItem::ListContents()
 #ifndef VALVE_DLL
 	ContainerWindowOpen(m_iId);
 #endif
-	}
 }
 
 msstring ItemThinkProgress;
 void CGenericItem::Think()
 {
-	try {
-
 	if (!Owner() && m_TimeExpire && gpGlobals->time >= m_TimeExpire)
 	{
 		m_TimeExpire = 0;
@@ -1490,9 +1482,8 @@ void CGenericItem::Think()
 	else if (bDropAttempted && iDropTickCounter < 100) {
 		iDropTickCounter++;
 	}*/
-
-	}
 }
+
 #ifdef VALVE_DLL
 //
 // Move - For special item behavior
@@ -1508,9 +1499,6 @@ void CGenericItem::Move()
 
 void CGenericItem::RemoveFromOwner()
 {
-	try {
-
-
 	CallScriptEvent("game_removefromowner");
 
 	CancelAttack();
@@ -1547,8 +1535,6 @@ void CGenericItem::RemoveFromOwner()
 #endif
 
 	Wearable_ResetClientUpdate();
-
-	} catch (...) {}
 }
 void CGenericItem::RemoveFromContainer()
 {
@@ -1614,8 +1600,6 @@ void CGenericItem::Script_Setup()
 bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
 	//Parse one command
-	try {
-
 	msstring sTemp;
 
 	msstring DebugString = msstring("Action:");
@@ -2201,8 +2185,6 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 #endif
 	else
 		return false;
-
-	}
 
 	return true;
 }

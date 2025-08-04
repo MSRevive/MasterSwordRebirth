@@ -7,7 +7,6 @@
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags)
 {
-	try { //Do exception handling on the traceline so if it fails
 	bool fSolidShields = FBitSet(flags, MSTRACE_SOLIDSHIELDS) ? true : false;
 	bool fEnlargeboxes = FBitSet(flags, MSTRACE_LARGEHITBOXES) ? true : false;
 	bool fEnableCorpses = FBitSet(flags, MSTRACE_HITCORPSES) ? true : false;
@@ -15,12 +14,10 @@ void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igm
 	//G_SolidifyEnts( true, fSolidShields, fEnableCorpses, fEnlargeboxes );
 	UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pentIgnore, &tr); //At least the objects' bboxes will be cleaned up
 	//G_SolidifyEnts( false, fSolidShields, fEnableCorpses, fEnlargeboxes );
-	}
 }
 
 void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool fEnlargeboxes)
 {
-	try {
 	//Make corpses solid here too...
 	CBaseEntity *pEnt = NULL;
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(1);
@@ -72,8 +69,6 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 
 		pEnt->pev->solid = fEnable ? SOLID_BBOX : SOLID_NOT;
 		//UTIL_SetOrigin( pEnt->pev, pEnt->pev->origin );
-	}
-
 	}
 }
 

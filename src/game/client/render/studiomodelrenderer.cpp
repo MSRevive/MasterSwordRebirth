@@ -1275,8 +1275,6 @@ void RenderModel(cl_entity_t* pEntity)
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
 {
-	try {
-
 	//if( !FBitSet(flags, STUDIO_RENDER) ) return 1;
 
 	if (g_FirstRender && FBitSet(flags, STUDIO_RENDER))
@@ -1632,7 +1630,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				StudioRenderModel();
 		}
 	}
-	}
+	
 	return 1;
 }
 

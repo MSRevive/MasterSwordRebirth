@@ -60,8 +60,6 @@ void MSCLGlobals::RemoveEnt(CBaseEntity *pEntity, bool fDelete)
 //Global one-time Initialization - called from CHud :: Init()
 void MSCLGlobals::Initialize()
 {
-	try {
-
 	//Set up g_engfuncs re-directs
 	gpGlobals = &Globals;
 	SetupGlobalEngFuncRedirects();
@@ -138,8 +136,6 @@ void MSCLGlobals::Initialize()
 	InitializePlayer();
 
 	MSGlobalItemInit();
-
-	}
 }
 
 //Player initialization that happens every map
@@ -349,8 +345,6 @@ void ShowVGUIMenu(int iMenu);
 
 void MSCLGlobals::SpawnIntoServer()
 {
-	try {
-
 	logfile << Logger::LOG_INFO << "SpawnIntoServer...";
 
 	Cleanup(); //Clean up stuff from the previous map
@@ -365,15 +359,11 @@ void MSCLGlobals::SpawnIntoServer()
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
 	logfile << "DONE\n";
-
-	}
 }
 
 //Cleans up stuff from the previous map
 void MSCLGlobals::Cleanup()
 {
-	try {
-
 	//Remove spell list
 	player.m_SpellList.clear();
 
@@ -385,8 +375,6 @@ void MSCLGlobals::Cleanup()
 
 	//Remove Environment Special Effects
 	CRender::Cleanup();
-
-	}
 }
 
 void DLLAttach(HINSTANCE hinstDLL)

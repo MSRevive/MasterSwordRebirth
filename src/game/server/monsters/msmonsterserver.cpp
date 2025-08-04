@@ -506,15 +506,11 @@ void CMSMonster::Think()
 	if (IsAlive())
 		flInterval = StudioFrameAdvance();
 
-	try { //MAR2008b - Skipping StudioFrameAdvance errors for now
-
-
 	if (m_pfnThink)
 	{
 		CBaseEntity::Think();
 		return;
 	}
-
 
 	if (!IsAlive())
 		return;
@@ -545,11 +541,8 @@ void CMSMonster::Think()
 	}
 
 	Trade();
-
 	SetSpeed();
-
 	SetMoveDest();
-
 	SetWanderDest();
 
 	//Clear out single-frame events
@@ -599,9 +592,8 @@ void CMSMonster::Think()
 	FrameConditions = 0;
 	if (TempConditions & FC_AVOID)
 		FrameConditions |= FC_AVOID;
-
-	}
 }
+
 /*int CMSMonster :: MoveExecute ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist, bool fTestMove )
 {
 	Vector	vecStartPos,// Record monster's position before trying the move
@@ -884,8 +876,6 @@ void CMSMonster::Look()
 }
 void CMSMonster::ListenForSound()
 {
-	try {
-
 	if (gpGlobals->time < m_ListenTime)
 		return;
 
@@ -962,8 +952,6 @@ void CMSMonster::ListenForSound()
 	}
 
 	m_ListenTime = gpGlobals->time + 1.0;
-
-	}
 }
 void CMSMonster::SetMoveDest()
 {
@@ -1027,7 +1015,6 @@ void CMSMonster::SetMoveDest()
 }
 void CMSMonster::SetWanderDest()
 {
-	try {
 	//No enemy, walk around randomly (here m_vecEnemyLKP is the random place to walk)
 	if (!HasConditions(MONSTER_ROAM))
 		return;
@@ -1121,13 +1108,11 @@ void CMSMonster::SetWanderDest()
 			CallScriptEvent("game_wander");
 		}
 	}
-	}
 }
 
 Vector StartAng;
 void CMSMonster::Move(float flInterval)
 {
-	try {
 	int Side[2] = { 1, -1 };
 
 	if (pev->movetype == MOVETYPE_FOLLOW || pev->movetype == MOVETYPE_NONE)
@@ -1240,8 +1225,6 @@ void CMSMonster::Move(float flInterval)
 
 	m_LastYaw = pev->angles.y;
 	m_LastOrigin = pev->origin;
-
-	}
 }
 void CMSMonster::AvoidFrontObject(float MoveAmt)
 {
@@ -1969,8 +1952,6 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 // Set the activity based on an event or current state
 void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
-	try {
-
 	if (m_Brush)
 		return;
 
@@ -2042,14 +2023,10 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 		if (m_Framerate_Modifier)
 			pev->framerate *= m_Framerate_Modifier;
 	}
-
-	}
 }
 void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
 	//Thothie - Attempting to stop msdll from breaking anims
-
-	try {
 
 	if (m_Brush)
 		return;
@@ -2096,9 +2073,8 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 		if (m_Framerate_Modifier)
 			pev->framerate *= m_Framerate_Modifier;
 	}
-
-	}
 }
+
 void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 {
 	//Thothie FEB2011_22 - not used by any script, save the call
@@ -2114,188 +2090,192 @@ void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 //MiB MAR2008a multiple changes
 float CMSMonster::TraceAttack(damage_t& Damage)
 {
+	// if it fails then we want to return 0
 	try {
+		//CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 
-	//CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+		// Handle parrying
+		// Attacker - Rolls from [AccuracyRoll - 130       ]
+		// Defender - Rolls from [0            - ParryValue]
+		// Attacker gets that extra 30 so attacks will get through more often
 
-	// Handle parrying
-	// Attacker - Rolls from [AccuracyRoll - 130       ]
-	// Defender - Rolls from [0            - ParryValue]
-	// Attacker gets that extra 30 so attacks will get through more often
+		//This is a last-chance check, to make sure that somebody doesn't find an obscure way to hurt another player
+		//The relationship status is first checked in DoDamage()
+		//---UNDONE: This check should be done before hand.  If TraceAttack is called, we have to accept the damage regardless of who caused it
+		//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
+		//	return 0;
 
-	//This is a last-chance check, to make sure that somebody doesn't find an obscure way to hurt another player
-	//The relationship status is first checked in DoDamage()
-	//---UNDONE: This check should be done before hand.  If TraceAttack is called, we have to accept the damage regardless of who caused it
-	//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
-	//	return 0;
+		bool bAttackWasParried = false;
 
-	bool bAttackWasParried = false;
-
-	CBaseEntity* pAttacker = Damage.pAttacker;
-	if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
-	{
-		CMSMonster* pMonster = (CMSMonster*)pAttacker;
-
-		//PROBLEM: Players get INSANE XP bonus when monsters parry,
-		//- maybe internalize Parry for monsters?
-		//- Thothie note of FEB2008a
-
-		int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
-
-		if (ParryValue > 60)
-			ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
-
-		int AccRoll = RANDOM_LONG(Damage.AccuracyRoll, 100), ParryRoll = RANDOM_LONG(0, ParryValue);
-
-		//Using a weapon that can parry (shield, some swords) gives a parry bonus
-		int iAttackNum = 0, iHand = 0;
-		;
-		CGenericItem* pHandItem = FindParryWeapon(this, iHand, iAttackNum);
-		//NOV2014_09 - this is handled by setting the parry skill now, oh dear
-		/*
-		if( pHandItem )
+		CBaseEntity* pAttacker = Damage.pAttacker;
+		if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
 		{
-			attackdata_t *pAttack = &pHandItem->m_Attacks[iAttackNum];
-			ParryRoll *= 1 + (pAttack->flAccuracyDefault / 100.f);		//If 100% bonus, the roll gets multiplied by 2
-		}
-		*/
+			CMSMonster* pMonster = (CMSMonster*)pAttacker;
 
-		//Thothie comments: Problems with this system
-		//Awareness + (0-Parry Skill) is basically your parry roll
-		//Total caps at 80
-		//mob just rolls 1d100 - (accuracy<100)
+			//PROBLEM: Players get INSANE XP bonus when monsters parry,
+			//- maybe internalize Parry for monsters?
+			//- Thothie note of FEB2008a
 
-		//Awareness gives a small parry bonus
-		ParryRoll += GetNatStat(NATURAL_AWR);
+			int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
 
-		//Thothie - do not parry certain damage types
-		msstring msDamageTypeName = Damage.sDamageType;
-		if (msDamageTypeName.starts_with("target"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("fire"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("poison"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("lightning"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("cold"))
-			ParryRoll = 0;
-		if (msDamageTypeName.contains("effect"))
-			ParryRoll = 0; //do not parry DOT attacks
-		if (msDamageTypeName.starts_with("magic"))
-			ParryRoll = 0;
-		if (Damage.flDamage == 0)
-			ParryRoll = 0; //do not parry 0 damage atks
-		if (ParryRoll > 80)
-			ParryRoll = 80; //always allow at least 20% chance to be hit
+			if (ParryValue > 60)
+				ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
 
-		if (ParryRoll > AccRoll)
-		{
-			//thothie attempting to pass parry vars
-			msstringlist ParametersB;
-			ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
-			ParametersB.add(Damage.sDamageType);
-			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
-			ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
-			ParametersB.add(UTIL_VarArgs("%i", ParryValue));
-			CallScriptEvent("game_parry", &ParametersB);
-			if (pHandItem)
-				pHandItem->CallScriptEvent("game_parry", &ParametersB);
-			Damage.flDamage = -1; // -1 means the monster dodged the attack
-			ClearMultiDamage();
-			bAttackWasParried = true;
-			/* MiB JUL2010_02 - Remove Parry as a levellable stat
-			//Learn parry skill from  a successful parry
-			if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
-				if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
-					LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
-			//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
+			int AccRoll = RANDOM_LONG(Damage.AccuracyRoll, 100), ParryRoll = RANDOM_LONG(0, ParryValue);
 
-				/*if (pMonster->m_SkillLevel * 2 > 0)
-					LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
-				else
-					LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
-				//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
-		}
-	}
-
-	//this was moved to where experience is calculated in GIAttack
-	//Damage Modifiers ( takedmg xxx )
-	Damage.flDamage *= m.GenericTDM;
-	if (Damage.sDamageType)
-		for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
-		{
-			takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
-			//msstring thoth_my_dmgtype = TDM.DamageType;
-			msstring msIncomingDamageType = Damage.sDamageType.c_str();
-			if (msIncomingDamageType.starts_with(TDM.DamageType))
+			//Using a weapon that can parry (shield, some swords) gives a parry bonus
+			int iAttackNum = 0, iHand = 0;
+			;
+			CGenericItem* pHandItem = FindParryWeapon(this, iHand, iAttackNum);
+			//NOV2014_09 - this is handled by setting the parry skill now, oh dear
+			/*
+			if( pHandItem )
 			{
-				//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
-				Damage.flDamage *= TDM.modifier;
+				attackdata_t *pAttack = &pHandItem->m_Attacks[iAttackNum];
+				ParryRoll *= 1 + (pAttack->flAccuracyDefault / 100.f);		//If 100% bonus, the roll gets multiplied by 2
+			}
+			*/
+
+			//Thothie comments: Problems with this system
+			//Awareness + (0-Parry Skill) is basically your parry roll
+			//Total caps at 80
+			//mob just rolls 1d100 - (accuracy<100)
+
+			//Awareness gives a small parry bonus
+			ParryRoll += GetNatStat(NATURAL_AWR);
+
+			//Thothie - do not parry certain damage types
+			msstring msDamageTypeName = Damage.sDamageType;
+			if (msDamageTypeName.starts_with("target"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("fire"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("poison"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("lightning"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("cold"))
+				ParryRoll = 0;
+			if (msDamageTypeName.contains("effect"))
+				ParryRoll = 0; //do not parry DOT attacks
+			if (msDamageTypeName.starts_with("magic"))
+				ParryRoll = 0;
+			if (Damage.flDamage == 0)
+				ParryRoll = 0; //do not parry 0 damage atks
+			if (ParryRoll > 80)
+				ParryRoll = 80; //always allow at least 20% chance to be hit
+
+			if (ParryRoll > AccRoll)
+			{
+				//thothie attempting to pass parry vars
+				msstringlist ParametersB;
+				ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+				ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
+				ParametersB.add(Damage.sDamageType);
+				ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
+				ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
+				ParametersB.add(UTIL_VarArgs("%i", ParryValue));
+				CallScriptEvent("game_parry", &ParametersB);
+				if (pHandItem)
+					pHandItem->CallScriptEvent("game_parry", &ParametersB);
+				Damage.flDamage = -1; // -1 means the monster dodged the attack
+				ClearMultiDamage();
+				bAttackWasParried = true;
+				/* MiB JUL2010_02 - Remove Parry as a levellable stat
+				//Learn parry skill from  a successful parry
+				if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
+					if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
+						LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
+				//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
+
+					/*if (pMonster->m_SkillLevel * 2 > 0)
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
+					else
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
+					//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
 			}
 		}
 
-	//Allow scripts to affect the damage
-	msstringlist Parameters;
-	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
-	Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
-	Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
-	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
+		//this was moved to where experience is calculated in GIAttack
+		//Damage Modifiers ( takedmg xxx )
+		Damage.flDamage *= m.GenericTDM;
+		if (Damage.sDamageType)
+			for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
+			{
+				takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
+				//msstring thoth_my_dmgtype = TDM.DamageType;
+				msstring msIncomingDamageType = Damage.sDamageType.c_str();
+				if (msIncomingDamageType.starts_with(TDM.DamageType))
+				{
+					//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
+					Damage.flDamage *= TDM.modifier;
+				}
+			}
 
-	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
-	CStat* pStat = FindStat(Damage.ExpStat);
-	if (pStat)
-	{
-		msstring out_skill = pStat->m_Name;
-		if (out_skill.contains("spell"))
+		//Allow scripts to affect the damage
+		msstringlist Parameters;
+		Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+		Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
+		Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
+		Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
+		Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
+
+		//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
+		CStat* pStat = FindStat(Damage.ExpStat);
+		if (pStat)
 		{
-			out_skill.append(".");
-			char toconv[256];
-			strncpy(toconv, SpellTypeList[Damage.ExpProp], sizeof(toconv));
-			out_skill.append(msstring(_strlwr(toconv)));
+			msstring out_skill = pStat->m_Name;
+			if (out_skill.contains("spell"))
+			{
+				out_skill.append(".");
+				char toconv[256];
+				strncpy(toconv, SpellTypeList[Damage.ExpProp], sizeof(toconv));
+				out_skill.append(msstring(_strlwr(toconv)));
+			}
+			Parameters.add(out_skill);
 		}
-		Parameters.add(out_skill);
-	}
-	else
-	{
-		Parameters.add("none"); //Thothie OCT2019_11 - MiB Sanity Check
-	}
-	//[end] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
-
-	CallScriptEvent("game_damaged", &Parameters);
-
-	if (m_ReturnData.len())
-	{
-		//Each script sets a ratio of damage you should take.  Factor each one into the damage
-		msstringlist DamageRatios;
-		TokenizeString(m_ReturnData, DamageRatios);
-		for (int i = 0; i < DamageRatios.size(); i++)
-			Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
-	}
-
-	Parameters.clearitems();
-	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
-	CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
-
-	if (Damage.flDamage > 0)
-	{
-		//if( IsAlive() ) StruckSound( CBaseEntity::Instance(Damage.pevInflictor), CBaseEntity::Instance(Damage.pevAttacker), Damage.flDamage, &Damage.outTraceResult, Damage.iDamageType );
-
-		if (pev->health > 0 && pev->takedamage && !FBitSet(pev->flags, FL_GODMODE))
+		else
 		{
-			SpawnBlood(Damage.outTraceResult.vecEndPos, BloodColor(), Damage.flDamage); // a little surface blood.
-			TraceBleed(Damage.flDamage, (Damage.vecEnd - Damage.vecSrc).Normalize(), &Damage.outTraceResult, Damage.iDamageType);
+			Parameters.add("none"); //Thothie OCT2019_11 - MiB Sanity Check
 		}
+		//[end] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
+
+		CallScriptEvent("game_damaged", &Parameters);
+
+		if (m_ReturnData.len())
+		{
+			//Each script sets a ratio of damage you should take.  Factor each one into the damage
+			msstringlist DamageRatios;
+			TokenizeString(m_ReturnData, DamageRatios);
+			for (int i = 0; i < DamageRatios.size(); i++)
+				Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
+		}
+
+		Parameters.clearitems();
+		Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+		Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
+		CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
+
+		if (Damage.flDamage > 0)
+		{
+			//if( IsAlive() ) StruckSound( CBaseEntity::Instance(Damage.pevInflictor), CBaseEntity::Instance(Damage.pevAttacker), Damage.flDamage, &Damage.outTraceResult, Damage.iDamageType );
+
+			if (pev->health > 0 && pev->takedamage && !FBitSet(pev->flags, FL_GODMODE))
+			{
+				SpawnBlood(Damage.outTraceResult.vecEndPos, BloodColor(), Damage.flDamage); // a little surface blood.
+				TraceBleed(Damage.flDamage, (Damage.vecEnd - Damage.vecSrc).Normalize(), &Damage.outTraceResult, Damage.iDamageType);
+			}
+		}
+
+		if (!bAttackWasParried)
+			AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
+
+		return Damage.flDamage;
+
 	}
-
-	if (!bAttackWasParried)
-		AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
-
-	return Damage.flDamage;
-
+	catch(...)
+	{
+		return 0;
 	}
 
 	return 0;
@@ -2391,7 +2371,6 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	try {
 	BOOL DeleteMe = TRUE;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
@@ -2594,7 +2573,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		if (!IsPlayer())
 			DropAllItems(); //Be sure to drop items
 		GibMonster();
-	}
 	}
 }
 void CMSMonster::SUB_Remove()
@@ -2840,9 +2818,7 @@ void CMSMonster::SetSpeed()
 //Opens interact menu from server
 void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 {
-	try {
 	m_MenuCurrentOptions = NULL;
-
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
 	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
@@ -2857,7 +2833,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	WRITE_STRING_LIMIT(DisplayName(), WRITE_STRING_MAX);
 	MESSAGE_END();
 
-
 	static msstringlist Params;
 	Params.clearitems();
 	Params.add(EntToString(pPlayer));
@@ -2870,7 +2845,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	pPlayer->CallScriptEvent("ext_remove_afk"); //NOV2014_15 - flag player as non-afk when first uses a menu
 
 	m_MenuCurrentOptions = NULL;
-
 
 	for (int i = 0; i < Menuoptions.size(); i++)
 	{
@@ -2886,8 +2860,8 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 		WRITE_STRING_LIMIT(MenuOption.Data, 92);
 		MESSAGE_END();
 	}
+	
 	pPlayer->InMenu = true;
-	}
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
