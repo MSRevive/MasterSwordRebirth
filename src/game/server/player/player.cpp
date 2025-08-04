@@ -2409,7 +2409,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << Logger::LOG_INFO << "Looking for valid spawn spots for " << DisplayName() << " (" << JoinTypeText << ")...\n";
+	MS_INFO("Looking for valid spawn spots for %s (%s)", DisplayName(), JoinTypeText);
 
 	//Find all valid spots
 	CBaseEntity *pSpot = NULL;
@@ -2427,7 +2427,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	}
 	else
 	{
-		logfile << Logger::LOG_INFO << "m_JoinType: " << m_JoinType << "\n";
+		MS_INFO("m_JoinType: %s", m_JoinType);
 		switch (m_JoinType)
 		{
 		case JN_VISITED:
@@ -2457,14 +2457,14 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 
 	if (Status > SS_NOSPOT)
 	{
-		logfile << Logger::LOG_INFO << "Found useable spawn spots, testing...\n";
+		MS_INFO("Found useable spawn spots, testing...");
 
 		if (Status == SS_ALLFULL)
 		{
 			//All spots filled, wait.
 			SpawnCheckTime = gpGlobals->time + 2.0;
 			SendEventMsg(HUDEVENT_UNABLE, "Waiting to spawn...\n");
-			logfile << Logger::LOG_INFO << "All spawn spots filled!\n";
+			MS_INFO("All spawn spots filled!");
 			return NULL;
 		}
 
@@ -2475,7 +2475,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		//No valid spots, kick player with message
 
 		msstring TransitionText = m_SpawnTransition ? m_SpawnTransition : "<unknown>";
-		logfile << Logger::LOG_WARN << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText.c_str() << ")!!!\n";
+		MS_WARN("NO valid spawn spots for %s (Transition: %s)", JoinTypeText, TransitionText.c_str());
 		bool fKickPlayer = true;
 
 		if (m_CharacterState == CHARSTATE_LOADED)
@@ -2506,7 +2506,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << Logger::LOG_INFO << "Found VALID SPOT\n";
+	MS_INFO("Found VALID SPOT");
 
 	return pSpot;
 }
@@ -6155,7 +6155,8 @@ void CBasePlayer::KickPlayer(const char *pszMessage)
 			SERVER_COMMAND("disconnect\n");
 		else
 			SERVER_COMMAND(UTIL_VarArgs("kick #%i\n", GETPLAYERUSERID(edict())));
-		logfile << Logger::LOG_INFO << "Kicked " << DisplayName() << " Reason: " << pszMessage << "\n";
+
+		MS_INFO("Kicked %s Reason: %s", DisplayName(), pszMessage);
 	}
 }
 void CBasePlayer::Attacked(CBaseEntity *pAttacker, float flDamage, int bitsDamageType)
@@ -6247,7 +6248,7 @@ void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 
 bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 {
-	logfile << Logger::LOG_INFO << "Load Character: " << DisplayName() << "\n";
+	MS_INFO("Load Character: %s", DisplayName());
 
 	//Thothie JAN2010_10 - flag to tell "char" function character is loaded, so no clickie
 	m_CharacterState = CHARSTATE_LOADING;

@@ -91,7 +91,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 {
 	bool fSuccess = false;
 
-	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
+	MS_INFO("[ClientConnect]	");
 	if (g_pGameRules)
 		fSuccess = g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason) ? true : false;
 
@@ -105,7 +105,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		strncpy(ClientInfo.Addr, pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
-		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
+		MS_INFO("Client Queue: [%i] %s", iPlayerOf, pszAddress);
 		
 		// Fire AngelScript engine event for player connection
 		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -129,19 +129,19 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 			
 			// Log handler count before firing event
 			int handlerCount = pEventManager->GetHandlerCount(EngineEventType::PLAYER_CONNECT);
-			logfile << Logger::LOG_INFO << "[DEBUG] Firing PlayerConnect event - handlers registered: " << handlerCount << "\n";
+			MS_DEBUG("[DEBUG] Firing PlayerConnect event - handlers registered: %i", handlerCount);
 			
 			pEventManager->FirePlayerConnectEvent(pszName ? pszName : "Unknown", steamID.c_str());
 		}
 		else
 		{
-			logfile << Logger::LOG_ERROR << "[DEBUG] ASEngineEventManager instance is null during player connect!\n";
+			MS_ERROR("[DEBUG] ASEngineEventManager instance is null during player connect!");
 		}
 	}
 	else
-		logfile << "Client rejected: " << szRejectReason << "\n";
+		MS_INFO("Client Rejected: %s", szRejectReason);
 
-	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]\n";
+	MS_INFO("[ClientConnect: Complete]");
 
 	return fSuccess ? 1 : 0;
 }
@@ -251,7 +251,7 @@ called each time a player is spawned
 */
 void ClientPutInServer(edict_t *pEntity)
 {
-	logfile << Logger::LOG_INFO << "[ClientPutInServer]\n";
+	MS_INFO("[ClientPutInServer]");
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;
@@ -262,7 +262,7 @@ void ClientPutInServer(edict_t *pEntity)
 	if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
 	{
 		int iPlayerOfs = ENTINDEX(pEntity) - 1;
-		logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
+		MS_INFO("Client Address %s... Slot %i", g_NewClients[iPlayerOfs].Addr, iPlayerOfs);
 
 		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
 	}else{
@@ -272,7 +272,7 @@ void ClientPutInServer(edict_t *pEntity)
 	char msg[256];
 	_snprintf(msg, sizeof(msg), "Connecting %s (%s)\n", pPlayer->DisplayName(), pPlayer->m_ClientAddress);
 	g_engfuncs.pfnServerPrint(msg);
-	logfile << Logger::LOG_INFO << msg;
+	MS_INFO(msg);
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = UTIL_ComputeSteamID64(GETPLAYERAUTHID(pEntity));
@@ -1835,7 +1835,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
 	int i;
 	CBaseEntity *pClass;
-	logfile << Logger::LOG_INFO << "World Activate..." << std::flush;
+	MS_INFO("World Activate...");
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
@@ -1883,7 +1883,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	if (!pGameMasterEnt)
 	{
-		logfile << Logger::LOG_INFO << "Spawning game master\n";
+		MS_INFO("Spawning game master");
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
 		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
 		if (NewMonster)
@@ -1898,7 +1898,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 	CSVGlobals::WriteScriptLog();
 
-	logfile << Logger::LOG_INFO << "World Activate END\n";
+	MS_INFO("World Activate END");
 }
 
 /*

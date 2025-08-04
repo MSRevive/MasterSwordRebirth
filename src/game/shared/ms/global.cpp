@@ -575,10 +575,12 @@ const char* EngineFunc::GetString(int string)
 {
 	return STRING(string);
 }
+
 int EngineFunc::AllocString(const char* String)
 {
 	return ALLOC_STRING(String);
 }
+
 void EngineFunc::MakeVectors(const Vector &vecAngles, float *p_vForward, float *p_vRight, float *p_vUp)
 {
 #ifdef VALVE_DLL
@@ -587,14 +589,17 @@ void EngineFunc::MakeVectors(const Vector &vecAngles, float *p_vForward, float *
 	AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
 #endif
 }
+
 float EngineFunc::CVAR_GetFloat(const char* Cvar)
 {
 	return CVAR_GET_FLOAT(Cvar);
 }
+
 const char* EngineFunc::CVAR_GetString(const char* Cvar)
 {
 	return CVAR_GET_STRING(Cvar);
 }
+
 #ifndef VALVE_DLL
 cvar_s *EngineFunc::CVAR_Create(const char* Cvar, const char* Value, const int Flags)
 {
@@ -822,13 +827,6 @@ bool FindSkyHeight(Vector Origin, float &SkyHeight)
 
 	return false;
 }
-
-/*int	MSAllocateModel( char *pszModel )
-{
-	int idx = g_engfuncs.pfnPrecacheModel( pszModel );
-	logfile << "Loaded Model #" << idx << " (" << pszModel << ")" << endl;
-	return idx;
-}*/
 
 bool g_MemWarningActive = false;
 int MemMgr::m_TotalAllocations = 0;

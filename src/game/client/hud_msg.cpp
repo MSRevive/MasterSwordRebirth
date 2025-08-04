@@ -55,16 +55,18 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 
 	//Copy over the mapname here because the engine doesn't send it
 	//interally until later
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Globals]\n";
+	MS_INFO("[MsgFunc_InitHUD: Globals]");
 	BEGIN_READ(pbuf, iSize);
 	MSGlobals::ServerName = READ_STRING();
 	MSGlobals::MapName = READ_STRING();
 	//g_NetCode.m.HostIP = READ_STRING();
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: CLEnt Readin]\n";
+
+	MS_INFO("[MsgFunc_InitHUD: CLEnt Readin]");
 	for (int i = 0; i < CLPERMENT_TOTALK; i++)
 		MSGlobals::ClEntities[i] = READ_SHORT();
 	int flags = READ_BYTE();
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: SetupDefGlobals]\n";
+
+	MS_INFO("[MsgFunc_InitHUD: SetupDefGlobals]");
 	MSCLGlobals::OnMyOwnListenServer = (flags & (1 << 0)) ? true : false;
 	MSGlobals::IsLanGame = (flags & (1 << 1)) ? true : false;
 	MSGlobals::CanCreateCharOnMap = (flags & (1 << 2)) ? true : false;
@@ -72,13 +74,14 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	MSGlobals::ServerSideChar = (flags & (1 << 4)) ? true : false;
 	MSCLGlobals::OtherPlayers = (flags & (1 << 5)) ? true : false;
 
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: AuthID]\n";
 	MSCLGlobals::AuthID = READ_STRING();
 	int VotesAllowed = READ_BYTE();
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Charnum]\n";
-	ChooseChar_Interface::ServerCharNum = READ_BYTE(); //Number of characters the server allows you to have
+	MS_INFO("[MsgFunc_InitHUD: AuthID] %s", MSCLGlobals::AuthID);
 
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Clearvotes]\n";
+	ChooseChar_Interface::ServerCharNum = READ_BYTE(); //Number of characters the server allows you to have
+	MS_INFO("[MsgFunc_InitHUD: Charnum] %d", ChooseChar_Interface::ServerCharNum);
+
+	MS_INFO("[MsgFunc_InitHUD: Clearvotes]");
 	vote_t::VotesTypesAllowed.clearitems();
 	for (int i = 0; i < vote_t::VotesTypes.size(); i++)
 		if (FBitSet(VotesAllowed, (1 << i)))
@@ -86,7 +89,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 
 	// prepare all hud data
 
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitHUDData]\n";
+	MS_INFO("[MsgFunc_InitHUD: InitHUDData]");
 	for (auto hudElement : m_HudList)
 	{
 		hudElement->InitHUDData();
@@ -95,15 +98,17 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	//This would normally be called only after the scripts
 	//were downloaded... but since downloading new scripts
 	//isn't supported anymore, just call it
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: SpawnIntoServer]\n";
+	MS_INFO("[MsgFunc_InitHUD: SpawnIntoServer]");
 	MSCLGlobals::SpawnIntoServer();
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: NewMap]\n";
+
+	MS_INFO("[MsgFunc_InitHUD: NewMap]");
 	MSGlobals::NewMap(); //Start new map
 
 	//Do this last
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: InitNewLevel]\n";
+	MS_INFO("[MsgFunc_InitHUD: InitNewLevel]");
 	CEnvMgr::InitNewLevel();
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: Complete]\n";
+
+	MS_INFO("[MsgFunc_InitHUD: Complete]");
 }
 
 int CHud ::MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf)

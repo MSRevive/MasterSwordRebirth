@@ -15,26 +15,20 @@ extern CBasePlayer player;
 
 CBaseEntity *MSInstance(edict_t *pent);
 bool g_log_initialized = false;
+
 void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 {
 	//Print("%s, %s\n", pszLabel, Progress);
 #ifndef TURN_OFF_ALERT
 	if (g_log_initialized)
 	{
-		msstring Output = "Error ";
-#ifdef VALVE_DLL
-		Output += "(SERVER): ";
-#else
-		Output += "(CLIENT): ";
-#endif
+		msstring Output = "Error: ";
 		Output += pszLabel;
 		Output += " --> ";
 		Output += Progress;
 		Output += "\r\n";
-		if (logfile.is_open())
-		{
-			logfile << Output;
-		}
+
+		MS_ERROR(Output);
 		Print("%s", Output);
 	}
 	else
@@ -55,7 +49,7 @@ void OpenLogFiles()
 #endif
 	
 	// Keep old logger for backward compatibility during transition
-	char cLogfile[MAX_PATH];
+	//char cLogfile[MAX_PATH];
 
 /*
 #ifdef VALVE_DLL
@@ -97,6 +91,7 @@ msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a stri
 
 	return RetString;
 }
+
 CBaseEntity *StringToEnt(const char* EntString) // Converts an string of format "PentP(idx,addr)" to an entity
 {
 	int Idx = -1;
@@ -121,6 +116,7 @@ const char* VecToString(const Vector& Vec, bool bAs2D)
 		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
 	return RetString;
 }
+
 Vector StringToVec(const char* String)
 {
 	Vector Vec;
@@ -131,6 +127,7 @@ Vector StringToVec(const char* String)
 			return g_vecZero;
 	return Vec;
 }
+
 Color4F StringToColor(const char* String) //Converts a string of the format "(r,g,b,a)" Color class
 {
 	Color4F Color(0, 0, 0, 0);
@@ -152,6 +149,7 @@ Vector GetRelativePos(Vector &Ang, Vector &Dir)
 
 	return vPosition;
 }
+
 //Adds models/ or sprites/ to a model or sprite filename
 char *GetFullResourceName(const char* pszPartialName)
 {
@@ -185,6 +183,7 @@ CBaseEntity *MSInstance(entvars_t *pev)
 #endif
 	return pEnt;
 }
+
 CBaseEntity *MSInstance(edict_t *pent)
 {
 	if (!pent)
@@ -199,7 +198,6 @@ CBaseEntity *MSInstance(edict_t *pent)
 }
 
 int iBeam;
-
 void BeamEffect(float SRCx, float SRCy, float SRCz, float DESTx,
 				float DESTy, float DESTz, int sprite, int startframe,
 				int framerate, int life, int width, int noise,
@@ -226,6 +224,7 @@ void BeamEffect(float SRCx, float SRCy, float SRCz, float DESTx,
 	WRITE_BYTE(ispeed);		// speed
 	MESSAGE_END();
 }
+
 void BeamEffect(Vector vStart, Vector vEnd, int sprite, int startframe,
 				int framerate, int life, int width, int noise,
 				int r, int g, int b, int brightness, int ispeed)
@@ -278,7 +277,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     msstring vsAsOne = vsTitle + ": " + msstring(string) + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
-		MS_ERROR("%s", vsAsOne);
+		MS_ERROR(vsAsOne);
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {

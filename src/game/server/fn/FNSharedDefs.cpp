@@ -31,7 +31,7 @@ void FNShared::Print(const char* fmt, ...)
 	va_end(argptr);
 
 	g_engfuncs.pfnServerPrint(string);
-	logfile << Logger::LOG_INFO << string;
+	MS_INFO("[FuzzNet] %s", string);
 }
 
 bool FNShared::IsSlotValid(int slot)

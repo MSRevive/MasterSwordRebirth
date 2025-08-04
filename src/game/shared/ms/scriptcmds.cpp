@@ -4932,12 +4932,12 @@ bool CScript::ScriptCmd_Quest(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 				msstring qd_outline;
 				qd_outline = UTIL_VarArgs("Dumping Quest Data for %s:\n",pEntity->m_DisplayName.c_str());
 				Print ("%s",qd_outline.c_str());
-				logfile << qd_outline.c_str();
+				MS_DEBUG(qd_outline.c_str());
 				for(int i = 0; i < pPlayer->m_Quests.size(); i++)
 				{
 					qd_outline = UTIL_VarArgs("#%i name: %s data: %s\n",i,pPlayer->m_Quests[i].Name.c_str(),pPlayer->m_Quests[i].Data.c_str());
 					Print ("%s",qd_outline.c_str());
-					logfile << qd_outline.c_str();
+					MS_DEBUG(qd_outline.c_str());
 				}
 			}
 		}

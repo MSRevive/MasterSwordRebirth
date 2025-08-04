@@ -29,14 +29,6 @@
 #include <windows.h>
 #endif
 
-//#define LOG_ALLEXPORTS //more exports in entity.cpp
-
-// #ifdef LOG_ALLEXPORTS
-// #define logfileopt logfile
-// #else
-// #define logfileopt NullFile
-// #endif
-
 #include <string.h>
 #include "vgui_int.h"
 #include "interface.h"

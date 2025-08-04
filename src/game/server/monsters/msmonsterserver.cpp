@@ -144,7 +144,7 @@ void CMSMonster::Spawn()
 		msstring orig_scriptName = m_ScriptName;
 		for (int i = 0; i < m_nRndMobs; i++)
 		{
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random precache #%i / %i as %s\n", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
+			MS_DEBUG("DEBUG: msmonster_random precache #%i / %i as %s", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
 			TempScript.Spawn(random_monsterdata[i].m_ScriptName, this, this->GetScripted(), true);
 			//TempScript.RunScriptEventByName( "game_precache" ); //skipping this, and hoping it behaves, as I'm not sure if it'll remove when done or how to do so
@@ -361,7 +361,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			if (m_HPReq_max < m_HPReq_min)
 			{
 				m_HPReq_max = 0;
-				logfile << "MAP_ERROR: " << m_Scripts[0]->m.ScriptFile.c_str() << " - max reqhp set higher than min.\n";
+				MS_ERROR("MAP_ERROR: %s - max reqhp set higher than min.", m_Scripts[0]->m.ScriptFile.c_str());
 			}
 			//else if ( m_HPReq_min == 0 ) m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 		}
@@ -426,12 +426,15 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			{
 				random_monsterdata.add_blank();
 			};
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i\n", idx, (int)random_monsterdata.size());
+			MS_DEBUG("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i", idx, (int)random_monsterdata.size());
 		}
+
 		if (rndproperty == "title")
 			random_monsterdata[idx].m_title = pkvd->szValue;
+
 		if (rndproperty == "params")
 			random_monsterdata[idx].m_addparams = pkvd->szValue;
+
 		if (rndproperty == "scriptfile")
 		{
 			//is required, and only one of each, so add count here
@@ -440,15 +443,18 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				m_nRndMobs = 1;
 			else
 				++m_nRndMobs;
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, random_monsterdata[idx].m_ScriptName.c_str());
+			MS_DEBUG("DEBUG: msmonster_random added new mob #%i = %s", idx, random_monsterdata[idx].m_ScriptName.c_str());
 		}
+
 		if (rndproperty == "hpmulti")
 			random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
 		if (rndproperty == "dmgmulti")
 			random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
+
 		//if ( rndproperty == "lives" ) random_monsterdata[idx].m_Lives = atoi(pkvd->szValue);
 		if (rndproperty == "nplayers")
 			random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
+
 		//sticky bit
 		if (rndproperty == "reqhp")
 		{
@@ -465,7 +471,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
 				{
 					mrand_m_HPReq_max = 0;
-					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
+					MS_WARN("MAP_ERROR: %s - max reqhp set higher than min.", STRING(random_monsterdata[idx].m_ScriptName));
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
@@ -478,7 +484,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
 		}
 		//Gotta use the logfile here, dernitall
-		logfile << UTIL_VarArgs("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s\n", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
+		MS_DEBUG("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
@@ -495,7 +501,6 @@ void CMSMonster::Think()
 	pev->vuser3.y = (IsAlive() ? pev->health : 0);
 	pev->vuser3.z = 0.0f;
 
-	//dbg( "Start" );
 	pev->ltime = gpGlobals->time;
 	pev->nextthink = gpGlobals->time + 0.1;
 

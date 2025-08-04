@@ -415,7 +415,6 @@ void CWorld ::Spawn(void)
 	pev->nextthink = pev->ltime + 0.1;
 	MSWorldSpawn();
 
-	logfile << Logger::LOG_INFO << "World Spawn END\n";
 	MS_INFO("World Spawn END");
 }
 void CWorld ::Think(void)

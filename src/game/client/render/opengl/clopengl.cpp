@@ -127,9 +127,9 @@ void CRender::RT_BindTexture()
 	if (!wglBindTexImageARB(g_pbuffer.hPBuffer, WGL_FRONT_LEFT_ARB))
 	{
 		//MessageBox(NULL, "Could not bind p-buffer to render texture!", "ERROR", MB_OK | MB_ICONEXCLAMATION);
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not bind p-buffer to render texture!", NULL);
-		logfile << Logger::LOG_ERROR << "Error: Could not bind p-buffer to render texture!\n";
+		MS_ERROR("Error: Could not bind p-buffer to render texture!");
 		Print("Could not bind p-buffer to render texture!");
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Renderer Error", "Could not bind p-buffer to render texture!", NULL);
 		//exit(-1);
 	}
 #endif
@@ -248,18 +248,18 @@ bool CMirrorMgr::InitMirrors()
 	if (!IEngineStudio.IsHardware()) //Not using openGL
 		return false;
 
-	const char *VenderString = (const char *)glGetString(GL_VENDOR);
+	const char *VendorString = (const char *)glGetString(GL_VENDOR);
 	const char *CardString = (const char *)glGetString(GL_RENDERER);
 	const char *VersionString = (const char *)glGetString(GL_VERSION);
 	const char *ExtensionsString = (const char *)glGetString(GL_EXTENSIONS);
-	logfile << Logger::LOG_INFO << "Video Card Vender: " << VenderString << "\n";
-	logfile << Logger::LOG_INFO << "Video Card: " << CardString << "\n";
-	logfile << Logger::LOG_INFO << "OpenGL Version: " << VersionString << "\n";
-	logfile << Logger::LOG_INFO << "OpenGL Extensions: " << ExtensionsString << "\n";
+	MS_RENDER_INFO("Video Card Vendor: %s", VendorString);
+	MS_RENDER_INFO("Video Card: %s", CardString);
+	MS_RENDER_INFO("OpenGL Version: %s", VersionString);
+	MS_RENDER_INFO("OpenGL Extensions: %s", ExtensionsString);
 
 	if (atof(VersionString) < 1.1) //Not high enough OpenGL version
 	{
-		logfile << Logger::LOG_INFO << "\nOpenGL Version Not High Enough For Mirrors (Needs 1.1)!\n";
+		MS_RENDER_WARN("OpenGL Version Not High Enough For Mirrors (Needs 1.1)");
 		return false;
 	}
 
@@ -268,7 +268,7 @@ bool CMirrorMgr::InitMirrors()
 	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)wglGetProcAddress("glActiveTextureARB");
 #endif
 
-	logfile << Logger::LOG_INFO << "OpenGL ActiveTexture Extention: " << (glActiveTextureARB ? "FOUND" : "NOT FOUND") << "\n";
+	MS_RENDER_INFO("OpenGL ActiveTexture Extention: %s", (glActiveTextureARB ? "FOUND" : "NOT FOUND"));
 
 #ifdef _WIN32
 	if (!glActiveTextureARB) //Doesn't support Multitexturing
@@ -281,7 +281,7 @@ bool CMirrorMgr::InitMirrors()
 	//Set up wgl extensions
 	if (!strstr(wglExtensions, "WGL_ARB_pbuffer") || !strstr(wglExtensions, "WGL_ARB_pixel_format") || !strstr(wglExtensions, "WGL_ARB_render_texture"))
 	{
-		logfile << Logger::LOG_WARN << "\nOpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!\n";
+		MS_RENDER_WARN("OpenGL Version Not High Enough For Mirrors (wglExtensions not Present)!");
 		return false;
 	}
 
@@ -432,7 +432,7 @@ bool CMirrorMgr::InitMirrors()
 
 	return true;
 #else
-	logfile << Logger::LOG_WARN << "\nOpenGL mirrors are not implemented on this platform\n";
+	MS_RENDER_WARN("OpenGL mirrors are not implemented on this platform");
 	return false;
 #endif
 }
@@ -470,8 +470,8 @@ bool CRender::CheckOpenGL()
 	if (!IEngineStudio.IsHardware())
 	{
 		//MessageBox(NULL, "Master Sword uses features only available in OpenGL mode! Attempting other modes may result in instability.", "Invalid Video Mode", MB_OK);
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Invalid Video Mode", "We make use of features only in OpenGL!", NULL);
-		MSErrorConsoleText("CRender::CheckOpenGL", "User chose non-opengl video mode (semi-fatal)");
+		//SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Invalid Video Mode", "We make use of features only in OpenGL!", NULL);
+		MS_RENDER_ERROR("CRender::CheckOpenGL - User chose non-opengl video mode (semi-fatal)");
 		//exit( 0 );
 		return false;
 	}

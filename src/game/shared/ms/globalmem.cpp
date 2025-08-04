@@ -70,7 +70,7 @@ void* operator new(size_t size)
 				allochighest = MemAlloc.Index;
 			if (allocid >= ARRAYSIZE(Allocations))
 			{
-				MS_ERROR("Error: Alloc New Memory: Allocations exceed max debug size %d", ARRAYSIZE(Allocations));
+				MS_ERROR("Error: Alloc New Memory: Allocations exceed max debug size %i", ARRAYSIZE(Allocations));
 				//int stop = 0;
 				exit(1);
 				return NULL;
@@ -136,8 +136,7 @@ void operator delete(void* ptr)
 
 			if (!found)
 			{
-				logfile << Logger::LOG_ERROR << "Delete Memory: Tried to delete memory that wasn't allocated (" << Allocations[i]->SourceFile.c_str() << ":" << Allocations[i]->LineNum + ")\n";
-				MS_ERROR("MSMEMORY: Unhandled Exception While Allocating Memory! (*operator new) %s, %d", erloc.c_str());
+				MS_ERROR("Delete Memory: Tried to delete memory that wasn't allocated (%s:%i)", Allocations[i]->SourceFile.c_str(), Allocations[i]->LineNum);
 				exit(1);
 				return;
 			}
@@ -165,12 +164,12 @@ void operator delete(void* ptr)
 void LogMemoryUsage(const char* Title)
 {
 #ifdef TRACK_MEMORY
-	logfile << Logger::LOG_INFO << Title << "\n";
-	logfile << Logger::LOG_INFO << "[Current Memory Allocations: " << alloctotal << "][Highest Ever: " << allochighest << "]\n";
+	MS_INFO(Title);
+	MS_INFO("[Current Memory Allocations: %i][Highest Ever: %i]", alloctotal, allochighest);
 	for (int i = 0; i < alloctotal; i++)
 	{
 		//if( Allocations[i]->Index == 124117 )
-		logfile << Logger::LOG_INFO << "[Unfreed #" << i << "][" << Allocations[i]->Index << "] " << Allocations[i]->SourceFile.c_str() << " : " << Allocations[i]->LineNum << "\n";
+		MS_INFO("[Unfreed #%i][%i] %s:%i", i, Allocations[i]->Index, Allocations[i]->SourceFile.c_str(), Allocations[i]->LineNum);
 	}
 #endif
 }

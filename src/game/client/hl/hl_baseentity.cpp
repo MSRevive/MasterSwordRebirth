@@ -37,13 +37,6 @@ int gmsgWeapPickup = 0;
 enginefuncs_t g_engfuncs;
 globalvars_t *gpGlobals;
 
-//#define LOG_ITEMHANDLING
-
-#ifdef LOG_ITEMHANDLING
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
 //-----------
 
 void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, float pitch)

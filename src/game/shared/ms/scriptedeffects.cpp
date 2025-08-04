@@ -9,8 +9,6 @@ mslist<globalscripteffect_t> CGlobalScriptedEffects::Effects;
 
 void CGlobalScriptedEffects::RegisterEffect(globalscripteffect_t &Effect)
 {
-	//logfile << "DEBUG: CGlobalScriptedEffects - Loading: " << Effect.m_ScriptName.c_str() << "\n";
-
 	for (int i = 0; i < Effects.size(); i++)
 	{
 		if (!_stricmp(Effects[i].m_Name, Effect.m_Name))

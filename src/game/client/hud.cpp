@@ -62,7 +62,7 @@ int __MsgFunc_StatusIcons(const char *pszName, int iSize, void *pbuf); //Drigien
 
 int __MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
-	logfile << Logger::LOG_INFO << "[__MsgFunc_InitHUD]\n";
+	MS_INFO("[__MsgFunc_InitHUD]");
 	gHUD.MsgFunc_InitHUD(pszName, iSize, pbuf);
 
 	return 1;

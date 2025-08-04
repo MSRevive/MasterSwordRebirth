@@ -4922,7 +4922,7 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 #else
 #ifndef RELEASE_LOCKDOWN
 #ifdef VALVE_DLL
-			logfile << "ERROR: Script not found: " << ScriptName.c_str() << "\n";
+			MS_ERROR("ERROR: Script not found: %s", ScriptName.c_str());
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Not Found", msstring("Script not found: ") + ScriptName, NULL);
 #endif
 #else

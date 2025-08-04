@@ -281,12 +281,14 @@ void CEnvMgr::Init()
 	g_CustomSkyBox.Setup();
 	g_Tint.m_Color = Color4F(0, 0, 0, 0);
 }
+
 void CEnvMgr::InitNewLevel()
 {
 	CMirrorMgr::InitMirrors();
 	VGUIImages_NewLevel();
-	logfile << Logger::LOG_INFO << "[InitNewLevel Complete]\n";
+	MS_INFO("[InitNewLevel Complete]");
 }
+
 void CEnvMgr::ChangeSkyTexture(const char* NewTexture)
 {
 	g_CustomSkyBox.ChangeTexture(NewTexture);
@@ -557,7 +559,7 @@ void VGUIImages_NewLevel()
 			g_VGUIImages[i]->LoadImg();
 		}
 	}
-	logfile << Logger::LOG_INFO << "[VGUIImages_NewLevel Complete]\n";
+	MS_INFO("[VGUIImages_NewLevel Complete]");
 }
 
 VGUI_Image3D::VGUI_Image3D(const char *pszImageName, bool TGAorSprite, bool Delayed, int x, int y, int wide, int tall)

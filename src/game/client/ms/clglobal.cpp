@@ -198,6 +198,7 @@ void MSCLGlobals::PrintAllEntites()
 	for (int e = 0; e < m_ClEntites.size(); e++)
 		Print("Item %i: %s", items++, m_ClEntites[e]->DisplayName());
 }
+
 void MSCLGlobals::RemoveAllEntities()
 {
 	//Delete all entites
@@ -229,7 +230,7 @@ void MSCLGlobals::RemoveAllEntities()
 		if (pEntity->pev)
 			SetBits(pEntity->pev->flags, FL_KILLME);
 	}
-	//logfile << "Global Cleanup: " << killed << " unreferenced entites.\r\n";
+	MS_DEBUG("Global Cleanup: %i unreferenced entities", killed);
 	MSCLGlobals::Think();
 
 	m_ClModels.clear(); //Cleanup client-side models/sprites
@@ -345,7 +346,7 @@ void ShowVGUIMenu(int iMenu);
 
 void MSCLGlobals::SpawnIntoServer()
 {
-	logfile << Logger::LOG_INFO << "SpawnIntoServer...";
+	MS_INFO("SpawnIntoServer...");
 
 	Cleanup(); //Clean up stuff from the previous map
 
@@ -358,7 +359,7 @@ void MSCLGlobals::SpawnIntoServer()
 
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
-	logfile << "DONE\n";
+	MS_INFO("DONE");
 }
 
 //Cleans up stuff from the previous map
@@ -384,9 +385,6 @@ void DLLAttach(HINSTANCE hinstDLL)
 
 void DLLDetach()
 {
-	//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
-	if (logfile.is_open())
-		(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
 	//RichPresenceShutdown();
 	MSGlobals::EndMap();
 	MSCLGlobals::DLLDetach();

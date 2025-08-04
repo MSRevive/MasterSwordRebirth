@@ -53,14 +53,6 @@ globalscriptinfo_t g_MSScriptTypes[] =
 },
 * g_MSScriptInfo = &g_MSScriptTypes[0];
 
-//#define LOG_ITEMHANDLING
-
-#ifdef LOG_ITEMHANDLING
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
-
 // Global GenericItem retrieve functions
 // MiB APR2019_07 - $get_item_table
 CGenericItem* GetGenericItemByName(const char* pItemName, bool bCallSpawnIfNeeded = false)
@@ -314,7 +306,7 @@ std::map<msstring, msstring> CGenericItemMgr::mItemAlias;
 
 void CGenericItemMgr::GenericItemPrecache(void)
 {
-	MS_INFO("Precaching Items...")
+	MS_INFO("Precaching Items...");
 	ALERT(at_logged, "Precaching Items...\n");
   
 	//GenericItem script commands (only add once per game):

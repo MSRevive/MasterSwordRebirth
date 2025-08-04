@@ -1287,21 +1287,24 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	switch (Cmd)
 	{
 	case 0: //Spawned
-		logfile << Logger::LOG_INFO << "Received SPAWN message...\n";
+		MS_INFO("Received SPAWN message...");
 		player.m_CharacterState = CHARSTATE_LOADED;
 
 		player.Spawn();
-		logfile << Logger::LOG_INFO << "Player Successfully Spawned\n";
+		MS_INFO("Player Successfully Spawned");
 		g_fMenuLastClosed = 0.0f;
 		break;
+
 	case 1: //Killed
 		if (player.m_CharacterState == CHARSTATE_UNLOADED)
 			break;
 		player.Killed(NULL, NULL);
 		break;
+
 	case 2: //[OPEN]
 		//MSChar_Interface::SaveChar( &player );
 		break;
+
 	case 3: //Client  can now change levels (standing in a transition area)
 	{
 		int iMode = READ_BYTE();
@@ -1325,16 +1328,19 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		//MSChar_Interface::SaveChar( &player );
 	}
 	break;
+
 	case 4: //Character Name
 	{
 		player.m_DisplayName = READ_STRING();
 	}
 	break;
+
 	case 5: //Drain stamina
 	{
 		Player_UseStamina(READ_LONG());
 	}
 	break;
+
 	case 6: // This server connected to a Central Server
 	{
 		int Type = READ_BYTE();
@@ -1342,22 +1348,26 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		ChooseChar_Interface::UpdateCharScreen();
 	}
 	break;
+
 	case 7: //I am a god (dev)
 	{
 		player.m_fIsElite = READ_BYTE() ? true : false;
 		//MSChar_Interface::SaveChar( &player );
 	}
 	break;
+
 	case 8: //Recv number of people I've killed
 	{
 		player.m_PlayersKilled = READ_SHORT();
 	}
 	break;
+
 	case 9: //Recv time I've been waiting to forget a kill
 	{
 		player.m_TimeWaitedToForgetKill = READ_COORD();
 	}
 	break;
+
 	case 10: //Auto-use weapon (like auto-block with shield)
 	{
 		int iHand = READ_BYTE(), iAttackNum = READ_BYTE();
@@ -1381,11 +1391,13 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			pItem->CurrentAttack->tProjMinHold = 0.50;
 	}
 	break;
+
 	case 11: //Recieve char data
 	{
 		MSChar_Interface::HL_CLReadCharData();
 	}
 	break;
+
 	case 12: //Item gain/lose quality
 	{
 		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
@@ -1393,11 +1405,14 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			break;
 		pItem->Quality = READ_SHORT();
 	}
+	break;
+
 	case 13: //Recv time I've been waiting to lose thief status
 	{
 		player.m_TimeWaitedToForgetSteal = READ_COORD();
 	}
 	break;
+
 	case 14: //Cancel shield and change quality at the same time
 	{
 		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
@@ -1409,20 +1424,24 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			player.BlockButton(IN_ATTACK);
 	}
 	break;
+
 	case 15: //Open
 	{
 	}
 	break;
+
 	case 16: //Add/Remove a player action
 	{
 		gHUD.m_Action->MsgFunc_Action(pszName, iSize, pbuf);
 	}
 	break;
+
 	case 17: //Client-side script
 	{
 		gHUD.m_HUDScript->MsgFunc_ClientScript(pszName, iSize, pbuf);
 	}
 	break;
+
 	case 18: //Start receiving char from server
 	{
 		int CharIdx = READ_BYTE();
@@ -1430,6 +1449,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		MSChar_Interface::HL_CLNewIncomingChar(CharIdx, Size);
 	}
 	break;
+
 	case 20: //New quickslot was assigned
 	{
 		int Flags = READ_BYTE();
@@ -1475,6 +1495,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		}
 	}
 	break;
+
 	case 21: //Retrieve all quickslots (Sent at spawn)
 	{
 		for (int i = 0; i < MAX_QUICKSLOTS; i++)
@@ -1497,11 +1518,13 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		VGUI_ShowMenuInteract();
 	}
 	break;
+
 	case 26: //A Menu option for the currently selected NPC
 	{
 		VGUI_AddMenuOption();
 	}
 	break;
+
 	//MIB MAR2010_12 Armor Fix FINAL
 	case 27:
 	{
