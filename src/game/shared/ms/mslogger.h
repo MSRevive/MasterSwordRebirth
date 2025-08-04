@@ -121,6 +121,9 @@ private:
 #define MS_ANGEL_INFO(fmt, ...) MSLogger::Info(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
 #define MS_ANGEL_ERROR(fmt, ...) MSLogger::Error(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
 #define MS_ANGEL_DEBUG(fmt, ...) MSLogger::Debug(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
+#define MS_RENDER_INFO(fmt, ...) MSLogger::Info(MSLogger::RENDER, fmt, ##__VA_ARGS__)
+#define MS_RENDER_WARN(fmt, ...) MSLogger::Warn(MSLogger::RENDER, fmt, ##__VA_ARGS__)
+#define MS_RENDER_ERROR(fmt, ...) MSLogger::Error(MSLogger::RENDER, fmt, ##__VA_ARGS__)
 
 // Compatibility macro for gradual ALERT migration
 // Note: Engine headers should not be included here to avoid circular dependencies
