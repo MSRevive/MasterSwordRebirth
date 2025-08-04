@@ -26,7 +26,6 @@
 
 //Master Sword
 #include "vgui_container.h"
-#include "logger.h"
 
 // Menu Dimensions
 #define GEARPNL_PACK_SPACER_Y YRES(10)

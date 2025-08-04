@@ -32,7 +32,6 @@
 #include "player/player.h"
 #include "render/clrender.h"
 #include "ms/clglobal.h"
-#include "logger.h"
 
 //Master Sword - viewmode testing
 static bool MSTestView = false;

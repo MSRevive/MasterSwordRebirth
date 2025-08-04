@@ -407,10 +407,9 @@ LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
-#include "logger.h"
 void CWorld ::Spawn(void)
 {	
-	logfile << Logger::LOG_INFO << "World Spawn...\n";
+	MS_INFO("World Spawn...");
 
 	g_fGameOver = FALSE;
 	CScriptedEnt::Spawn();
@@ -420,6 +419,7 @@ void CWorld ::Spawn(void)
 	MSWorldSpawn();
 
 	logfile << Logger::LOG_INFO << "World Spawn END\n";
+	MS_INFO("World Spawn END");
 }
 void CWorld ::Think(void)
 {

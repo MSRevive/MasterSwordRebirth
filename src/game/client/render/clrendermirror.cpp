@@ -26,7 +26,6 @@ void GenerateInverseMatrix4f(const float inMatrix[4][4], float outInverse[4][4])
 #include "clrender.h"
 
 #include "hudmisc.h"
-#include "logger.h"
 extern CGameStudioModelRenderer g_StudioRenderer;
 extern float ClFOV;
 

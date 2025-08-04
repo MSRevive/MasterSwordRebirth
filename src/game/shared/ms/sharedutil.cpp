@@ -1,6 +1,5 @@
 #include "msdllheaders.h"
 #include "global.h"
-#include "logger.h"
 #include "mslogger.h"
 #include "time.h"
 
@@ -15,11 +14,6 @@ extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
-Logger logfile;
-#ifdef VALVE_DLL
-Logger chatlog;
-#endif
-Logger NullFile;
 bool g_log_initialized = false;
 void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 {
@@ -62,7 +56,8 @@ void OpenLogFiles()
 	
 	// Keep old logger for backward compatibility during transition
 	char cLogfile[MAX_PATH];
-	
+
+/*
 #ifdef VALVE_DLL
 	char cChatfile[MAX_PATH];
 	
@@ -83,6 +78,7 @@ void OpenLogFiles()
 	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_cldll");
 	logfile.open(cLogfile);
 #endif
+*/
 	g_log_initialized = true;
 	
 	// Log initialization message
@@ -282,7 +278,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     msstring vsAsOne = vsTitle + ": " + msstring(string) + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
-        logfile << vsAsOne << "\n";
+		MS_ERROR("%s", vsAsOne);
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {

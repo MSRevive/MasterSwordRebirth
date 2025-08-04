@@ -38,7 +38,6 @@
 #include "netadr.h"
 #include "com_model.h"
 
-#include "logger.h"
 #include "svglobals.h"
 #include "mscharacter.h"
 #include "global.h"

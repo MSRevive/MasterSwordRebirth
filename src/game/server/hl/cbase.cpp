@@ -18,16 +18,8 @@
 #include "decals.h"
 #include "gamerules.h"
 #include "game.h"
-#include "logger.h"
 #include "movement/pm_shared.h"
-
-#define LOG_BASECALLBACKS
-
-#ifdef LOG_BASECALLBACKS
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
+#include "ms/logger.h"
 
 void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd);
 

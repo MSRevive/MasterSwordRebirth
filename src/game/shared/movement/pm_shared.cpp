@@ -31,7 +31,6 @@
 #include "pm_shared.h"
 #include "pm_movevars.h"
 #include "pm_debug.h"
-#include "logger.h"
 #include "player/player.h"
 #include "filesystem_shared.h"
 

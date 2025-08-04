@@ -31,7 +31,6 @@
 #include "hudmisc.h"
 #include "hudid.h"
 #include "menu.h"
-#include "logger.h"
 
 void VectorAngles(const float *forward, float *angles);
 void CHudMisc_SelectMenuItem(int idx, TCallbackMenu *pcbMenu)

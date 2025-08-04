@@ -14,15 +14,15 @@ CHud gHUD;
 
 bool CClientLibrary::Initialize() 
 {
-	logfile << Logger::LOG_INFO << "[INIT: Loading filesystem]\n";
+	MS_INFO("[INIT: Loading filesystem]");
 	if (!FileSystem_Init())
 		return false;
 
-	logfile << Logger::LOG_INFO << "[INIT: Loading sound engine]\n";
+	MS_INFO("[INIT: Loading sound system]");
 	if (!gSoundEngine.InitFMOD())
 		return false;
 
-	logfile << Logger::LOG_INFO << "[INIT: Loading HUD]\n";
+	MS_INFO("[INIT: Loading HUD]");
 	gHUD.Init();
 
 	return true;
@@ -87,14 +87,13 @@ void CClientLibrary::HUDInit()
 void CClientLibrary::VideoInit()
 {
 	ResetClient(); // this gets called on start of every map
-
-	logfile << Logger::LOG_INFO << "[INIT: Video Init]\n";
+	MS_INFO("[INIT: Video Init]");
 	gHUD.VidInit();
 }
 
 void CClientLibrary::Shutdown()
 {
-	logfile << Logger::LOG_INFO << "[INIT: Shutdown]\n";
+	MS_INFO("[INIT: Shutdown]");
 	gHUD.Shutdown();
 	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
@@ -103,7 +102,7 @@ void CClientLibrary::Shutdown()
 
 void CClientLibrary::ResetClient()
 {
-	logfile << Logger::LOG_INFO << "[INIT: Reset Client]\n";
+	MS_INFO("[INIT: Reset Client]");
 	gHUD.ReloadClient();
 }
 

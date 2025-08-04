@@ -18,7 +18,6 @@
 #include "inc_weapondefs.h"
 #include "global.h"
 #include "stats/statdefs.h"
-#include "logger.h"
 
 #ifdef VALVE_DLL
 #include "shield.h"

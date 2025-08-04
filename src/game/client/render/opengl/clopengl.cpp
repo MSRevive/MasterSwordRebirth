@@ -92,12 +92,9 @@ Vertex g_cubeVertices[] =
 #include "clglobal.h"
 #include "../clrender.h"
 
-#include "logger.h"
-
 #ifdef _WIN32
 typedef struct
 {
-
 	HPBUFFERARB hPBuffer;
 	HDC hDC;
 	HGLRC hRC;

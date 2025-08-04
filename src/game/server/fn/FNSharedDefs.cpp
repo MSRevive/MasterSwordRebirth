@@ -6,7 +6,6 @@
 #include "FNSharedDefs.h"
 #include "msdllheaders.h"
 #include "player.h"
-#include "logger.h"
 #include "global.h"
 #include "crc/crchash.h"
 #include "RequestManager.h"

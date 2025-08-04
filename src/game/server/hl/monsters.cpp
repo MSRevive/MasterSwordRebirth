@@ -34,8 +34,6 @@
 #include "soundent.h"
 #include "gamerules.h"
 
-#include "logger.h" //MAR2008b debug - TEMPORARY
-
 #define MONSTER_CUT_CORNER_DIST 8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
 Vector VecBModelOrigin(entvars_t *pevBModel);

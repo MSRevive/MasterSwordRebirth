@@ -29,7 +29,6 @@
 //Master Sword
 #include "vgui_scorepanel.h"
 #include "vgui_menudefsshared.h"
-#include "logger.h"
 #include "filesystem_shared.h"
 
 extern "C" float* vec3_origin;

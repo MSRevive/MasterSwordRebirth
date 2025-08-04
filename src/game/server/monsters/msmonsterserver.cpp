@@ -19,7 +19,6 @@
 #include "magic.h"
 #include "weapons/genericitem.h"
 #include "syntax/syntax.h"
-#include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
 #include "ms/angelscript/ASEngineEventManager.h"

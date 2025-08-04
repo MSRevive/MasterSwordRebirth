@@ -21,7 +21,6 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include "string.h"
-#include "logger.h"
 #include "mscharacter.h"
 #include "clglobal.h"
 #include "clenv.h"
@@ -53,7 +52,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
 	try {
 
-	logfile << Logger::LOG_INFO << "[MsgFunc_InitHUD: EndMap]\n";
+	MS_INFO("[MsgFunc_InitHUD: EndMap]");
 	MSGlobals::EndMap(); //End old map
 
 	//Copy over the mapname here because the engine doesn't send it

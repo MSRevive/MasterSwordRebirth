@@ -3,7 +3,6 @@
 #include "svglobals.h"
 #include "global.h"
 #include "mscharacter.h"
-#include "logger.h"
 #include "filesystem_shared.h"
 
 class CCycler : public CBaseMonster

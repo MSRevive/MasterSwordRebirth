@@ -13,15 +13,8 @@
 
 #include "inc_weapondefs.h"
 #include "vgui_menudefsshared.h"
-#include "logger.h"
 
 //#define LOG_EXTRA
-
-#ifdef LOG_EXTRA
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
 
 #ifndef VALVE_DLL
 void ShowVGUIMenu(int iMenu);

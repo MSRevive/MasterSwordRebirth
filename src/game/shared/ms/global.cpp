@@ -6,7 +6,6 @@
 #include "script.h"
 #include "titles.h"
 #include "scriptedeffects.h"
-#include "logger.h"
 #ifndef VALVE_DLL
 #include "hud.h"
 #include "cl_util.h"

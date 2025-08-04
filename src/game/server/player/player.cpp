@@ -55,7 +55,6 @@
 #include "global.h"
 #include "mscharacter.h"
 #include "magic.h"
-#include "logger.h"
 #include "fn/FNSharedDefs.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096

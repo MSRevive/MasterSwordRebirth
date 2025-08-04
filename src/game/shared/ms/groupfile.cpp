@@ -1,7 +1,6 @@
 #include "Platform.h"
 #ifdef _WIN32
 #include "PlatformWin.h"
-#include "logger.h"
 #else
 #include <ctype.h>
 #include <string.h>

@@ -6,8 +6,8 @@
 #include "player.h"
 #include "weapons/weapons.h"
 #include "weapons/genericitem.h"
-#include "logger.h"
 #include "modeldefs.h"
+#include "logger.h"
 
 int CBasePlayer::IdealModel()
 {
