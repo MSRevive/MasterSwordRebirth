@@ -4,6 +4,7 @@
 #include "global.h"
 #include "mscharacter.h"
 #include "filesystem_shared.h"
+#include "mslogger.h"
 
 class CCycler : public CBaseMonster
 {
@@ -936,7 +937,7 @@ public:
 				MS_DEBUG("DEBUG: respawn randommob list #%i / %i as %s", pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
 			}
 
-			MS_DEBUG("DEBUG: respawn chose randommob #%i %s", idx, pMonsterData->random_monsterdata[idx].m_ScriptName?pMonsterData->random_monsterdata[idx].m_ScriptName : "???");
+			MS_DEBUG("DEBUG: respawn chose randommob #%i %s", idx, pMonsterData->random_monsterdata[idx].m_ScriptName ? pMonsterData->random_monsterdata[idx].m_ScriptName : "???");
 			//I DIE HERE:
 
 			MS_DEBUG("DEBUG: specifically: %s", pMonsterData->random_monsterdata[idx].m_ScriptName.c_str());

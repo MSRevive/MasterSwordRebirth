@@ -24,6 +24,7 @@
 #include "effects/mseffects.h"
 #include "groupfile.h"
 #include "stats/statdefs.h"
+#include "mslogger.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowClose();
@@ -388,13 +389,12 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		}
 		else
 		{
-
 #ifndef SCRIPT_LOCKDOWN
 			//Couldn't find items.txt in dev build... jump to end.  No items will be loaded
 			ALERT(at_console, "NONEXISTANT file: \"%s\"\nTHIS FILE IS EXTREMELY IMPORTANT. WHY IS IT MISSING?\n", FILE_DEV_ITEMLIST);
 #else
 			//Fatal error in public build... couldn't find items.txt
-			Log("FATAL ERROR: items.txt inside scripts.pak NOT FOUND!");
+			MS_ERROR("FATAL ERROR: items.txt inside scripts.pak NOT FOUND!");
 
 #ifdef RELEASE_LOCKDOWN
 			exit(0);
@@ -478,7 +478,6 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 #endif
 		}
-		else
 	}
 
 	if (pMemFile)

@@ -19,7 +19,8 @@
 #include "gamerules.h"
 #include "game.h"
 #include "movement/pm_shared.h"
-#include "ms/logger.h"
+
+#include "mslogger.h"
 
 void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd);
 

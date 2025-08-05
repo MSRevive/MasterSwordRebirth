@@ -9,6 +9,7 @@
 #include "magic.h"
 #include "script.h"
 #include "fn/FNSharedDefs.h"
+#include "mslogger.h"
 
 #ifndef _WIN32
 #include "sys/io.h"

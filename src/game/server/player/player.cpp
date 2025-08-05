@@ -56,6 +56,7 @@
 #include "mscharacter.h"
 #include "magic.h"
 #include "fn/FNSharedDefs.h"
+#include "mslogger.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];

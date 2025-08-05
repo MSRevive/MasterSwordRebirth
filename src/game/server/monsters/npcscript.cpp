@@ -8,6 +8,9 @@
 #include "stats/races.h"
 #include "msitemdefs.h"
 
+// TODO: get rid of the macro for logging when we get rid of MSScript.
+#include "mslogger.h"
+
 #define ERROR_MISSING_PARMS MSErrorConsoleText("CGenericItem::ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", Script->m.ScriptFile.c_str(), Cmd.Name().c_str()))
 
 scriptcmdname_list CMSMonster::m_ScriptCommands;

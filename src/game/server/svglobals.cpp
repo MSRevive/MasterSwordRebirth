@@ -15,8 +15,9 @@
 #include "fn/HTTPRequest.h"
 #include "angelscript/CAngelScriptManager.h"
 #include "angelscript/ASModuleSystem.h"
-#include <angelscript.h>
 #include "groupfile.h"
+#include "mslogger.h"
+#include <angelscript.h>
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -141,8 +142,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_devlog);
 	CVAR_REGISTER(&ms_allowdev);
 #endif
-	
-	g_log_initialized = true;
 
 	// Initialize AngelScript if enabled
 	if (as_enabled.value > 0)
@@ -572,17 +571,6 @@ const char *EngineFunc::GetGameDir()
 	cGameDir[0] = 0;
 	GET_GAME_DIR(cGameDir);
 	return cGameDir;
-}
-
-extern "C" void LogText(char *szFmt, ...)
-{
-	va_list argptr;
-	static char string[1024];
-	va_start(argptr, szFmt);
-	vsnprintf(string, sizeof(string), szFmt, argptr);
-	va_end(argptr);
-
-	logfile << string;
 }
 
 void WRITE_FLOAT(float Float)

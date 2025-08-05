@@ -45,6 +45,7 @@
 #include "ms/angelscript/ASEngineEventManager.h"
 #include "ms/angelscript/CAngelScriptManager.h"
 #include "ms/angelscript/ASModuleSystem.h"
+#include "mslogger.h"
 
 extern void PlayerPrecache();
 
@@ -105,7 +106,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		strncpy(ClientInfo.Addr, pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
-		MS_INFO("Client Queue: [%i] %s", iPlayerOf, pszAddress);
+		MS_INFO("Client Queue: [%i] %s", iPlayerOfs, pszAddress);
 		
 		// Fire AngelScript engine event for player connection
 		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -2067,7 +2068,7 @@ void Sys_Error(const char *error_string)
 	// Default case, do nothing.  MOD AUTHORS:  Add code ( e.g., _asm { int 3 }; here to cause a breakpoint for debugging your game .dlls
 	msstring Error = msstring("SYS_ERROR: ") + (error_string ? error_string : "[NO STRING]");
 	//logfile << "SYS_ERROR: " << (error_string ? error_string : "[NO STRING]") << endl;
-	LogCurrentLine(Error.c_str());
+	MS_ERROR(Error);
 }
 
 /*

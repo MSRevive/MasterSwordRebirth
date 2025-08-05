@@ -33,6 +33,7 @@
 
 #include "svglobals.h"
 #include "global.h"
+#include "mslogger.h"
 
 extern CGraph WorldGraph;
 extern CSoundEnt *pSoundEnt;

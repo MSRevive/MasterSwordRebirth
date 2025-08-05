@@ -9,6 +9,7 @@
 #include "global.h"
 #include "crc/crchash.h"
 #include "RequestManager.h"
+#include "mslogger.h"
 
 // Requests
 #include "ValidateConReq.h"

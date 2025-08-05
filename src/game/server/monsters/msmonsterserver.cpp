@@ -5,7 +5,8 @@
 	*included by both dlls*
 
 */
-
+#include <set>
+#include <cmath>
 #include "msdllheaders.h"
 #include "hl/monsters.h"
 #include "animation.h"
@@ -21,9 +22,8 @@
 #include "syntax/syntax.h"
 #include "corpse.h"
 #include "saytext.h"
+#include "mslogger.h"
 #include "ms/angelscript/ASEngineEventManager.h"
-#include <set>
-#include <cmath>
 
 #ifdef VALVE_DLL
 

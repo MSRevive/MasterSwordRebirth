@@ -12,6 +12,7 @@
 #include "titles.h"
 #include "scriptedeffects.h"
 #include "pm_defs.h"
+#include "mslogger.h"
 
 #ifndef VALVE_DLL
 #include "render/clrender.h"
@@ -32,7 +33,7 @@
 
 #undef SCRIPTVAR
 #define SCRIPTVAR GetVar								//A script-wide or global variable
-#define ERROR_MISSING_PARMS MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", m.ScriptFile.c_str(), Cmd.Name().c_str()) )
+#define ERROR_MISSING_PARMS MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", m.ScriptFile.c_str(), Cmd.Name().c_str()))
 
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )
 void Player_UseStamina(float flAddAmt);

@@ -6,6 +6,7 @@
 #include "script.h"
 #include "titles.h"
 #include "scriptedeffects.h"
+#include "mslogger.h"
 #ifndef VALVE_DLL
 #include "hud.h"
 #include "cl_util.h"
@@ -112,7 +113,7 @@ void MSGlobalItemInit()
 //Called on client & server when a new map is loaded
 void MSGlobals::NewMap()
 {
-	Log("[NewMap]: %s", MSGlobals::MapName.c_str());
+	MS_INFO("[NewMap]: %s");
 	if (MSGlobals::GameScript)
 	{
 		//GameScript should have been deleted by EndMap() before NewMap() is called
@@ -153,14 +154,14 @@ void MSGlobals::NewMap()
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
-			Log("Calling AngelScript game_spawn...");
+			MS_INFO("Calling AngelScript game_spawn...");
 			if (pASManager->CallGlobalFunction("game_spawn"))
 			{
-				Log("AngelScript game_spawn completed successfully");
+				MS_INFO("AngelScript game_spawn completed successfully");
 			}
 			else
 			{
-				Log("WARNING: AngelScript game_spawn failed or not found");
+				MS_WARN("AngelScript game_spawn failed or not found");
 			}
 		}
 #endif
@@ -235,7 +236,15 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 	AbsGamePath = msstring(szTempPath) + msstring("/msr");
 #endif
 
-	OpenLogFiles();
+	// Initialize MSLogger first
+#ifdef VALVE_DLL
+	MSLogger::Initialize(AbsGamePath.c_str(), true);
+#else
+	MSLogger::Initialize(AbsGamePath.c_str(), false);
+#endif
+
+	MS_INFO("Master Sword Rebirth logging system initialized");
+	MS_INFO("Game path: %s", AbsGamePath.c_str());
 }
 
 //Called on client & server when the dll is unloaded
@@ -311,25 +320,25 @@ genericitem_full_t::operator class CGenericItem *()
 }
 
 const char *g_EntTypeByName[ENT_TYPE_TOTAL] =
-	{
-		"ent_lastseen",
-		"ent_lastheard",
-		"ent_lastspoke",
-		"ent_lastoffered",
-		"ent_lastgave",
-		"ent_laststole",
-		"ent_lastused",
-		"ent_laststruck",
-		"ent_laststruckbyme",
-		"ent_lastprojectile",
-		"ent_lastcreated",
-		"ent_me",
-		"ent_owner",
-		"ent_creationowner",
-		"ent_target",
-		"ent_expowner",
-		"ent_localplayer",
-		"ent_currentplayer",
+{
+	"ent_lastseen",
+	"ent_lastheard",
+	"ent_lastspoke",
+	"ent_lastoffered",
+	"ent_lastgave",
+	"ent_laststole",
+	"ent_lastused",
+	"ent_laststruck",
+	"ent_laststruckbyme",
+	"ent_lastprojectile",
+	"ent_lastcreated",
+	"ent_me",
+	"ent_owner",
+	"ent_creationowner",
+	"ent_target",
+	"ent_expowner",
+	"ent_localplayer",
+	"ent_currentplayer",
 };
 int EntityNameToType(const char *pszName)
 {
@@ -532,28 +541,6 @@ void Print(const char *szFmt, ...)
 	ALERT(at_console, "%s", string);
 }
 
-void Log(const char *szFmt, ...)
-{
-	if (!logfile.is_open())
-		return;
-
-	static char string[1024];
-
-	va_list argptr;	
-	va_start(argptr, szFmt);
-	vsnprintf(string, sizeof(string), szFmt, argptr);
-	va_end(argptr);
-
-	logfile << string << "\n";
-}
-
-void LogExtensive(const char* Text)
-{
-#ifdef EXTENSIVE_LOGGING
-	LogCurrentLine(Text);
-#endif
-}
-
 void DbgLog(const char *szFmt, ...)
 {
 #ifdef EXTENSIVE_LOGGING
@@ -567,7 +554,9 @@ void DbgLog(const char *szFmt, ...)
 	vsnprintf(string, sizeof(string), szFmt, argptr);
 	va_end(argptr);
 
-	logfile << string << "\n";
+	// TODO: call MS_DEBUG directly where needed instead of this shortcut function
+	//logfile << string << "\n";
+	MS_DEBUG(string);
 #endif
 }
 
@@ -729,6 +718,7 @@ float EngineFunc::Shared_GetWaterHeight(const Vector &Origin, float minz, float 
 
 	return midUp.z;
 }
+
 float EngineFunc::AngleDiff(float destAngle, float srcAngle)
 {
 	float delta;
@@ -746,6 +736,7 @@ float EngineFunc::AngleDiff(float destAngle, float srcAngle)
 	}
 	return delta;
 }
+
 //Play sound independent of an entity
 void EngineFunc::Shared_PlaySound3D(const char* Sound, float Volume, const Vector &Origin, float Attn)
 {
