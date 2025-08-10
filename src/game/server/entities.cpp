@@ -176,7 +176,6 @@ fail:
 int CEntity::CheckENTFile ( char *szMapName )
 {
 	int 		retValue;
-
 	char		szEntityFilename[MAX_PATH];
 	
 
@@ -195,6 +194,7 @@ int CEntity::CheckENTFile ( char *szMapName )
 	}
 	else
 	{
+		ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, szEntityFilename );
 		retValue = TRUE;
 	}
 
