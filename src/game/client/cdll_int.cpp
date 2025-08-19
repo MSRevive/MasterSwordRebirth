@@ -34,6 +34,7 @@
 #include "interface.h"
 #include "voice_status.h"
 #include "ms/clglobal.h"
+#include "mslogger.h"
 
 #define DLLEXPORT EXPORT
 

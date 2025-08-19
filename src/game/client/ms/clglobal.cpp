@@ -10,6 +10,7 @@
 #include "hudmisc.h"
 #include "hudscript.h"
 #include "ms/vgui_hud.h"
+#include "mslogger.h"
 //#include "SteamClientHelper.h"
 //#include "richpresence.h"
 

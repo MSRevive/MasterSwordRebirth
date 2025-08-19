@@ -26,6 +26,7 @@
 #include "clenv.h"
 #include "vgui_choosecharacter.h"
 #include "monsters/msmonster.h"
+#include "mslogger.h"
 
 int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 {

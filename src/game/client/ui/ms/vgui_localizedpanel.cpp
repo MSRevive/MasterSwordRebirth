@@ -411,8 +411,10 @@ void CLocalizedPanel::ReadParagraphsFromFile(msstring fname)
 	if (!fname.ends_with(".txt"))
 		fname += ".txt";
 	char cFileName[256];
-	_snprintf(cFileName, sizeof(cFileName),  "%s/%s",  EngineFunc::GetGameDir(),  fname.c_str() );
+	_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fname.c_str() );
 
+	// TODO: convert to valve filesystem.
+	/*
 	std::ifstream file;
 	file.open(cFileName);
 	if (file.is_open())
@@ -441,5 +443,5 @@ void CLocalizedPanel::ReadParagraphsFromFile(msstring fname)
 		msstring sNotFound = "FILE NOT FOUND: ";
 		sNotFound += fname;
 		AddParagraph(sNotFound.c_str());
-	}
+	}*/
 }

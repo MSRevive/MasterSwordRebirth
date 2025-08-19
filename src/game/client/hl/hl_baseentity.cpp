@@ -31,6 +31,8 @@ This file contains "stubs" of class member implementations so that we can predic
 
 #include "cl_entity.h"
 #include "event_api.h"
+#include "mslogger.h"
+
 // Globals used by client.dll
 const Vector g_vecZero = Vector(0, 0, 0);
 int gmsgWeapPickup = 0;
@@ -66,11 +68,7 @@ CBaseEntity *CBaseEntity::Create(const char *szName, const Vector &vecOrigin, co
 void CBaseEntity::SUB_Remove(void)
 {
 	Deactivate();
-	if (logfileopt.is_open())
-	{
-		logfileopt << "DELETE ITEM: " << DisplayName();
-		logfileopt << " (" << (IsMSItem() ? ((CBasePlayerItem *)this)->m_iId : 0) << ")\r\n";
-	}
+	MS_DEBUG("DELETE ITEM: %s (%i)", DisplayName(), IsMSItem() ? ((CBasePlayerItem*)this)->m_iId : 0);
 	MSCLGlobals::RemoveEnt(this, true);
 }
 //void CBaseEntity::StruckSound( CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, TraceResult *ptr, int bitsDamageType ) { }

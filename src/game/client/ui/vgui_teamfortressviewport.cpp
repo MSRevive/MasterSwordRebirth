@@ -76,7 +76,7 @@
 #include "pm_shared.h"
 
 //Master Sword
-#include "sharedutil.h"
+#include "mslogger.h"
 #include "vgui_menudefsshared.h"
 #include "menu.h"
 #include "ms/vgui_mscontrols.h"

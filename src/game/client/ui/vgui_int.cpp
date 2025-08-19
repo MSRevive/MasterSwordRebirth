@@ -19,6 +19,7 @@
 #include "vgui_teamfortressviewport.h"
 #include "vgui_controlconfigpanel.h"
 #include "clenv.h"
+#include "mslogger.h"
 
 namespace
 {

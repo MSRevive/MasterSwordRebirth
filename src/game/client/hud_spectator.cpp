@@ -479,7 +479,6 @@ void CHudSpectator::DirectorMessage(int iSize, void *pbuf)
 		g_iTeamNumber = 0;
 
 		// fake a InitHUD & ResetHUD message
-		MS_INFO("[DRC_CMD_START: MsgFunc_InitHUD]");
 		gHUD.MsgFunc_InitHUD(NULL, 0, NULL);
 		gHUD.MsgFunc_ResetHUD(NULL, 0, NULL);
 

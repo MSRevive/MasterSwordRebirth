@@ -21,6 +21,7 @@
 #include "studio_util.h"
 #include "r_studioint.h"
 #include "ref_params.h"
+#include "mslogger.h"
 
 //OGL
 void DeleteGLTextures();

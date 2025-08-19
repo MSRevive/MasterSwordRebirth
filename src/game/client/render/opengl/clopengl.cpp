@@ -4,8 +4,9 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <GL/gl.h>
-#include "gl/wglext.h"
+#include <gl/wglext.h>
 #endif
+#include <SDL2/SDL_messagebox.h>
 
 #include "inc_weapondefs.h"
 #include "../hud.h"
@@ -22,7 +23,7 @@
 #include "../gamestudiomodelrenderer.h"
 #include "pm_movevars.h"
 #include "clopengl.h" // OpenGL stuff
-#include "SDL2/SDL_messagebox.h"
+#include "mslogger.h"
 
 #ifdef _WIN32
 // WGL_ARB_extensions_string

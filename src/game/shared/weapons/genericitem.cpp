@@ -207,7 +207,7 @@ CGenericItem* CGenericItemMgr::NewGenericItem(CGenericItem* pGlobalItem)
 		pItem->Spawn();
 
 #ifndef VALVE_DLL
-		logfileopt << "CREATE ITEM: " << pItem->DisplayName() << "\r\n";
+		MS_DEBUG("CREATE ITEM: %s", pItem->DisplayName());
 #endif
 
 		return pItem;

@@ -40,6 +40,7 @@
 #include "vgui_teamfortressviewport.h"
 #include "ms/vgui_hud.h"
 #include "ms/vgui_containerlist.h"
+#include "mslogger.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;

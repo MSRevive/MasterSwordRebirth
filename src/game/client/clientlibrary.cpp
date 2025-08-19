@@ -7,6 +7,7 @@
 #include "SteamClientHelper.h"
 #include "richpresence.h"
 #include "fmod/soundengine.h"
+#include "mslogger.h"
 
 CSoundEngine gSoundEngine;
 CRichPresence gRichPresence;
