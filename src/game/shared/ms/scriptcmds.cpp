@@ -2386,7 +2386,8 @@ bool CScript::ScriptCmd_ChatLog(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		}
 
 		//Print ( "chatlog: %s \n", sTemp.c_str() );
-		chatlog << msTemp.c_str() << std::endl;
+		MS_CHAT("%s", msTemp.c_str());
+
 	}
 	else ERROR_MISSING_PARMS;
 #endif
@@ -7617,36 +7618,14 @@ msstring scriptfile_t::ScriptFile_ReadLine(int lineNum)
 //Append a line
 void scriptfile_t::ScriptFile_WriteLine(msstring line)
 {
-	//ScriptFile_WriteLine( line , Lines.size() );
-	AddLine(line, -1, false);
-
-	char cFileName[MAX_PATH];
-	_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
-	Logger mibfile;
-	mibfile.open(cFileName, 1);
-	mibfile << line << "\n";
-
-	mibfile.close();
+	// no more writing to text files, just use AS instead. not used in any script so doesn't hurt anything to remove it.
+	return;
 }
 //Write a line at X, possibly overwriting or just inserting
 void scriptfile_t::ScriptFile_WriteLine(msstring line, int lineNum, bool overwrite)
 {
-	char cFileName[MAX_PATH];
-	_snprintf(cFileName, sizeof(cFileName), "%s/%s", EngineFunc::GetGameDir(), fileName.c_str());
-	Logger mibfile;
-	mibfile.open(cFileName, 0);
-
-	AddLine(line, lineNum, overwrite);
-
-	//Write all the lines to the specified file
-	for(int i = 0; i < Lines.size(); i++)
-	{
-		mibfile << Lines[i]; //<< ";"; //Add the necessary ';' for rereads
-		if (i != (signed)Lines.size() - 1) //If this isn't the last line
-			mibfile << "\n"; //Add a line break
-	}
-
-	mibfile.close(); //Close the file, if not for making sure that changes save, then for making sure we don't get overlapping handles
+	// no more writing to text files, just use AS instead. not used in any script so doesn't hurt anything to remove it.
+	return;
 }
 //==================================
 
