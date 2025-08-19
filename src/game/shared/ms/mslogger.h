@@ -113,6 +113,7 @@ private:
 #define MS_INFO(fmt, ...) MSLogger::Info(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
 #define MS_DEBUG(fmt, ...) MSLogger::Debug(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
 #define MS_TRACE(fmt, ...) MSLogger::Trace(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
+#define MS_CHAT(fmt, ...) MSLogger::Chat(fmt, ##__VA_ARGS__)
 
 // Category-specific macros
 #define MS_SCRIPT_ERROR(fmt, ...) MSLogger::Error(MSLogger::SCRIPT, fmt, ##__VA_ARGS__)
