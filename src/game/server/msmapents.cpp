@@ -934,10 +934,10 @@ public:
 			int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
 			for (int i = 0; i < pMonsterData->m_nRndMobs; i++)
 			{
-				MS_DEBUG("DEBUG: respawn randommob list #%i / %i as %s", pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
+				MS_DEBUG("DEBUG: respawn randommob list #%i / %i as %s", pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName.c_str() ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
 			}
 
-			MS_DEBUG("DEBUG: respawn chose randommob #%i %s", idx, pMonsterData->random_monsterdata[idx].m_ScriptName ? pMonsterData->random_monsterdata[idx].m_ScriptName : "???");
+			MS_DEBUG("DEBUG: respawn chose randommob #%i %s", idx, pMonsterData->random_monsterdata[idx].m_ScriptName.c_str() ? pMonsterData->random_monsterdata[idx].m_ScriptName.c_str() : "???");
 			//I DIE HERE:
 
 			MS_DEBUG("DEBUG: specifically: %s", pMonsterData->random_monsterdata[idx].m_ScriptName.c_str());
@@ -1012,7 +1012,7 @@ public:
 				// logfile << UTIL_VarArgs("DEBUG: spawn adding randommob #%i / %i as %s\n", i, pMonster->m_nRndMobs, pMonster->random_monsterdata[i].m_ScriptName ? pMonster->random_monsterdata[i].m_ScriptName.c_str() : "???");
 				mdSpawnMonster[iMonstersToSpawn].random_monsterdata.add(pMonster->random_monsterdata[i]); //read em in
 			}
-			MS_DEBUG("DEBUG: spawn chose randommob #%i %s", idx, pMonster->random_monsterdata[idx].m_ScriptName ? pMonster->random_monsterdata[idx].m_ScriptName : "???");
+			MS_DEBUG("DEBUG: spawn chose randommob #%i %s", idx, pMonster->random_monsterdata[idx].m_ScriptName ? pMonster->random_monsterdata[idx].m_ScriptName.c_str() : "???");
 
 			//I DIE HERE:
 			MS_DEBUG("DEBUG: specifically %s", pMonster->random_monsterdata[idx].m_ScriptName.c_str());
