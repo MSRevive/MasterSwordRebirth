@@ -541,25 +541,6 @@ void Print(const char *szFmt, ...)
 	ALERT(at_console, "%s", string);
 }
 
-void DbgLog(const char *szFmt, ...)
-{
-#ifdef EXTENSIVE_LOGGING
-	if (!logfile.is_open())
-		return;
-
-	static char string[1024];
-
-	va_list argptr;	
-	va_start(argptr, szFmt);
-	vsnprintf(string, sizeof(string), szFmt, argptr);
-	va_end(argptr);
-
-	// TODO: call MS_DEBUG directly where needed instead of this shortcut function
-	//logfile << string << "\n";
-	MS_DEBUG(string);
-#endif
-}
-
 const char* EngineFunc::GetString(int string)
 {
 	return STRING(string);

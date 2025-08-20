@@ -14,9 +14,6 @@
 //#define EXTENSIVE_LOGGING // Causes EXTENSIVE logging of every dbg operation
 //#endif
 
-//Causes DbgInputs() to be called for each DLL input function in the client and server dlls
-#define TRACK_INPUTS
-
 //In the release build, whether certain errors treated as fatal (release) or not (debug)
 #define RELEASE_LOCKDOWN
 

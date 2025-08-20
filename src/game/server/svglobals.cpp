@@ -694,6 +694,7 @@ void CSVGlobals::LogScript(const char* ScriptName, CBaseEntity *pOwner, int incl
 
 void CSVGlobals::WriteScriptLog()
 {
+	// TODO: use valve's filesystem instead.
 #ifdef DEV_BUILD
 	if (!ms_devlog.value)
 		return;

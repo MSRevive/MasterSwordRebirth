@@ -490,7 +490,4 @@ extern NEW_DLL_FUNCTIONS	gNewDLLFunctions;
 typedef int	(*APIFUNCTION)( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 typedef int	(*APIFUNCTION2)( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
-//Master Sword
-#include "msbasic.h"
-
 #endif // EIFACE_H

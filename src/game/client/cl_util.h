@@ -15,7 +15,6 @@
 //
 // cl_util.h
 //
-#include "msbasic.h"
 #include "sharedutil.h"
 #include "msdebug.h"
 
