@@ -18,12 +18,11 @@
 #include "in_defs.h"
 #include "vgui_teamfortressviewport.h"
 #include "vgui_controlconfigpanel.h"
-#include "logger.h"
 #include "clenv.h"
+#include "mslogger.h"
 
 namespace
 {
-
 	class TexturePanel : public Panel, public ActionSignal
 	{
 	private:
@@ -83,7 +82,6 @@ void *VGui_GetPanel()
 
 void VGui_Startup()
 {
-	startdbg;
 	if (!CRender::CheckOpenGL()) //This exits if not in OpenGL mode
 		return;
 
@@ -112,13 +110,12 @@ void VGui_Startup()
 		gViewPort->Initialize(); //Master Sword - call Initialize the first time the viewport is created
 	}
 
-	logfile << Logger::LOG_INFO << "[VGui_Startup: Complete]\n";
+	MS_INFO("[VGui_Startup: Complete]");
 
 	/*
 	TexturePanel* texturePanel=new TexturePanel();
 	texturePanel->setParent(gViewPort);
 	*/
-	enddbg;
 }
 
 void VGui_Shutdown()

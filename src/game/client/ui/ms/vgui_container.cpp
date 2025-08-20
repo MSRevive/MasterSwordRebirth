@@ -26,7 +26,6 @@
 
 //Master Sword
 #include "vgui_container.h"
-#include "logger.h"
 
 // Menu Dimensions
 #define GEARPNL_PACK_SPACER_Y YRES(10)
@@ -386,9 +385,6 @@ void VGUI_ContainerPanel::Update()
 }
 void VGUI_ContainerPanel::AddInventoryItems()
 {
-	startdbg;
-	dbg("Begin");
-
 	gearitem_t GearItem;
 	mslist<CGenericItem *> Containers;	  //Sort my inventory into Containers and non-containers
 	mslist<CGenericItem *> NonContainers; //The containers get listed first, then non-containers
@@ -398,7 +394,6 @@ void VGUI_ContainerPanel::AddInventoryItems()
 		{
 			//Add container
 			//Update:  Now display all items, so the player can remove them from here too
-			dbg("Add container");
 			CGenericItem *pGearItem = player.Gear[g - 1];
 			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && //Display everything except non-packs that are held
 				pGearItem->m_Location <= ITEMPOS_HANDS)
@@ -411,7 +406,6 @@ void VGUI_ContainerPanel::AddInventoryItems()
 		}
 		else
 		{
-			dbg("Add hands");
 			GearItem.Name = Localized("#PLAYER_HANDS");
 			GearItem.ID = 0;
 			GearItem.IsContainer = true;
@@ -448,8 +442,6 @@ void VGUI_ContainerPanel::AddInventoryItems()
 			}
 		}
 	}
-
-	enddbg;
 }
 
 // MiB FEB2015_07 - Inventory type buttons

@@ -2,7 +2,6 @@
 #include "script.h"
 #include "mseffects.h"
 #include "shake.h"
-#include "logger.h"
 //#include "monsters/bodyparts/bodyparts.h"
 
 void UTIL_ScreenFadeBuild(ScreenFade &fade, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags);
@@ -460,8 +459,6 @@ LINK_ENTITY_TO_CLASS(mstrig_changelevel, CMSChangeLevel);
 
 void CScript::ScriptedEffect(msstringlist &Params)
 {
-	startdbg;
-	dbg("Begin");
 	if (!Params.size())
 	{
 		ALERT(at_console, "Script: %s, effect missing parameters!\n", m.ScriptFile.c_str());
@@ -488,7 +485,6 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 	//[/Thothie]
 
-	dbg(Params[0]);
 
 	//Thothie MAR2008a - major changes to beam
 	//- beam ents now works (never could get it to work before), also changed syntax (see below)
@@ -954,5 +950,4 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 		Print("Decal: %i @ %s\n", decalidx, Params[1].c_str());
 	}
-	enddbg("CScript::ScriptedEffect()");
 }

@@ -27,24 +27,18 @@ This file contains "stubs" of class member implementations so that we can predic
 #include "player/player.h"
 #include "weapons/weapons.h"
 #include "nodes.h"
-#include "logger.h"
 #include "ms/clglobal.h"
 
 #include "cl_entity.h"
 #include "event_api.h"
+#include "mslogger.h"
+
 // Globals used by client.dll
 const Vector g_vecZero = Vector(0, 0, 0);
 int gmsgWeapPickup = 0;
 enginefuncs_t g_engfuncs;
 globalvars_t *gpGlobals;
 
-//#define LOG_ITEMHANDLING
-
-#ifdef LOG_ITEMHANDLING
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
-#endif
 //-----------
 
 void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, float pitch)
@@ -73,19 +67,9 @@ int CBaseEntity ::DamageDecal(int bitsDamageType) { return -1; }
 CBaseEntity *CBaseEntity::Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner) { return NULL; }
 void CBaseEntity::SUB_Remove(void)
 {
-	startdbg;
-
-	dbg("Call Deactivate");
 	Deactivate();
-	if (logfileopt.is_open())
-	{
-		logfileopt << "DELETE ITEM: " << DisplayName();
-		logfileopt << " (" << (IsMSItem() ? ((CBasePlayerItem *)this)->m_iId : 0) << ")\r\n";
-	}
-	dbg("Delete Entity");
+	MS_DEBUG("DELETE ITEM: %s (%i)", DisplayName(), IsMSItem() ? ((CBasePlayerItem*)this)->m_iId : 0);
 	MSCLGlobals::RemoveEnt(this, true);
-
-	enddbg;
 }
 //void CBaseEntity::StruckSound( CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, TraceResult *ptr, int bitsDamageType ) { }
 void CBaseEntity::CounterEffect(CBaseEntity *pInflictor, int iEffect, void *pExtraData) {}

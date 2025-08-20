@@ -24,7 +24,6 @@
 #include "func_break.h"
 #include "decals.h"
 #include "explode.h"
-#include "logger.h"
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 
@@ -497,7 +496,6 @@ void CBreakable::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 
 void CBreakable::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
-	startdbg;
 	// random spark if this is a 'computer' object
 	if (RANDOM_LONG(0, 1))
 	{
@@ -527,7 +525,6 @@ void CBreakable::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecD
 	}
 
 	CBaseDelay::TraceAttack(pev, pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
-	enddbg;
 }
 
 //=========================================================
@@ -537,7 +534,6 @@ void CBreakable::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vecD
 //=========================================================
 int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
-	startdbg;
 	Vector vecTemp;
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
@@ -648,8 +644,6 @@ int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	// Don't play shard noise if cbreakable actually died.
 
 	DamageSound();
-
-	enddbg;
 	return 1;
 }
 

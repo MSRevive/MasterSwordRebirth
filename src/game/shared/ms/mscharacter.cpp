@@ -12,7 +12,6 @@
 #include "ms/clglobal.h"
 #include "vgui_scorepanel.h"
 #endif
-#include "logger.h"
 #include "mscharacter.h"
 #include "magic.h"
 #include "script.h"

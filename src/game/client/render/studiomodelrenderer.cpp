@@ -31,7 +31,6 @@
 
 #include "studiomodelrenderer.h"
 #include "gamestudiomodelrenderer.h"
-#include "logger.h"
 #include "clrender.h"
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"
@@ -1258,8 +1257,8 @@ StudioDrawModel
 ====================
 */
 
-#define rdrdbg(a) dbg(msstring(a) + " Entity #" + m_pCurrentEntity->curstate.number)
-//#define rdrdbg( a )
+//#define rdrdbg(a) dbg(msstring(a) + " Entity #" + m_pCurrentEntity->curstate.number)
+#define rdrdbg( a )
 
 extern bool g_FirstRender;
 extern CGameStudioModelRenderer g_StudioRenderer;
@@ -1276,9 +1275,6 @@ void RenderModel(cl_entity_t* pEntity)
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
 {
-	startdbg;
-	dbg("Begin");
-
 	//if( !FBitSet(flags, STUDIO_RENDER) ) return 1;
 
 	if (g_FirstRender && FBitSet(flags, STUDIO_RENDER))
@@ -1402,7 +1398,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			/*static msstringlist Parameters;
 			Parameters.clearitems( );
 			Parameters.add( UTIL_VarArgs("%i",RenderEnt.curstate.number) );
-			dbg( "call game_render on viewmodel" );
 			pItem->CallScriptEvent( "game_render", &Parameters );*/
 
 			//Check if anim finished
@@ -1414,7 +1409,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				//&& FBitSet(flags, STUDIO_EVENTS) )
 				&& FBitSet(flags, STUDIO_RENDER))
 			{
-				dbg("call game_viewanimdone on viewmodel");
 				pItem->CallScriptEvent("game_viewanimdone");
 				if (ViewModel_ExclusiveViewHand == hand)
 					ViewModel_ExclusiveViewHand = -1;
@@ -1439,7 +1433,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 		cl_entity_t& Ent = *m_pCurrentEntity;
 
-		rdrdbg("Start Render Model");
 		IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 		IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 		IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
@@ -1540,7 +1533,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			return result;
 		}
 
-		rdrdbg("Mod_Extradata Entity");
 		m_pRenderModel = m_pCurrentEntity->model;
 		m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(m_pRenderModel);
 
@@ -1549,7 +1541,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		IEngineStudio.StudioSetHeader(m_pStudioHeader);
 		IEngineStudio.SetRenderModel(m_pRenderModel);
 
-		rdrdbg("StudioSetUpTransform");
 		StudioSetUpTransform(0);
 
 		bool SkipVisCheck = false;
@@ -1576,7 +1567,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				}
 			}
 
-			rdrdbg("StudioCheckBBox");
 			if (!SkipVisCheck)
 			{
 				/*if( CMirrorMgr::m_CurrentMirror.Enabled )
@@ -1602,21 +1592,17 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		if (Ent.curstate.movetype == MOVETYPE_FOLLOW ||
 			FBitSet(Ent.curstate.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 		{
-			rdrdbg("StudioMergeBones");
 			StudioMergeBones(m_pRenderModel);
 		}
 		else
 		{
-			rdrdbg("StudioSetupBones");
 			StudioSetupBones();
 		}
 
 		if (flags & STUDIO_EVENTS)
 		{
-			rdrdbg("StudioCalcAttachments");
 			StudioCalcAttachments();
 
-			rdrdbg("IEngineStudio.StudioClientEvents");
 			IEngineStudio.StudioClientEvents();
 			// copy attachments into global entity array
 			if (m_pCurrentEntity->index > 0)
@@ -1630,7 +1616,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 		if (flags & STUDIO_RENDER)
 		{
-			rdrdbg("Render");
 			//MiB JUN2010_21 - Makes the viewmodels not stick into walls
 			if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
 			{
@@ -1645,7 +1630,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				StudioRenderModel();
 		}
 	}
-	enddbg;
+	
 	return 1;
 }
 

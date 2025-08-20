@@ -13,7 +13,6 @@
 #include "mscharacter.h"
 #include "script.h"
 #include "global.h"
-#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "hud.h"
@@ -91,9 +90,6 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 
 void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 {
-	startdbg;
-	dbg("Begin");
-
 	if (MSGlobals::ServerSideChar)
 		return;
 
@@ -200,8 +196,6 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 #endif
 
 	SendInfo.TimeDataLastSent = gpGlobals->time;
-
-	enddbg;
 }
 
 #ifdef VALVE_DLL
@@ -220,9 +214,6 @@ void MSChar_Interface::HL_SVNewIncomingChar(CBasePlayer *pPlayer, int CharIdx, u
 }
 void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEncodedData)
 {
-	startdbg;
-	dbg("Begin");
-
 	charsendinfo_t &SendInfo = pPlayer->m_CharSend;
 
 	if (SendInfo.Status != CSS_RECEIVING)
@@ -246,8 +237,6 @@ void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEnc
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
 	}
-
-	enddbg;
 }
 #endif
 
@@ -281,9 +270,6 @@ void MSChar_Interface::HL_CLNewIncomingChar(int CharIdx, uint DataLen)
 
 void MSChar_Interface::HL_CLReadCharData()
 {
-	startdbg;
-	dbg("Begin");
-
 	charsendinfo_t &SendInfo = player.m_CharSend;
 
 	if (SendInfo.Status != CSS_RECEIVING)
@@ -309,7 +295,5 @@ void MSChar_Interface::HL_CLReadCharData()
 		SendInfo.Data = NULL;
 		SendInfo.Status = CSS_DORMANT;
 	}
-
-	enddbg;
 }
 #endif

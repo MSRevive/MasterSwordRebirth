@@ -32,7 +32,6 @@
 #include "player/player.h"
 #include "render/clrender.h"
 #include "ms/clglobal.h"
-#include "logger.h"
 
 //Master Sword - viewmode testing
 static bool MSTestView = false;
@@ -1695,7 +1694,6 @@ void ModifyLevel(ref_params_s &Params);
 
 void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 {
-	startdbg;
 	ViewMgr.Origin = pparams->vieworg;
 	ViewMgr.Angles = pparams->viewangles;
 	ViewMgr.Params = pparams;
@@ -1758,8 +1756,6 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	v_ViewDist = pparams->movevars->zmax;
 	ViewMgr.LastAngles = ViewMgr.Angles;
 	ViewMgr.LastOrigin = ViewMgr.Origin;
-
-	enddbg;
 }
 
 /*

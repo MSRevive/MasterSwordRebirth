@@ -17,7 +17,6 @@
 	
 //Master Sword
 #include "vgui_storebuy.h"
-#include "logger.h"
 
 //------------
 const char *CStoreBuyPanel::Text_BuySubtitle = "#BUY_SUBTITLE";

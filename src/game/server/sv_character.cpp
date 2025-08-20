@@ -5,11 +5,11 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "global.h"
-#include "logger.h"
 #include "mscharacter.h"
 #include "magic.h"
 #include "script.h"
 #include "fn/FNSharedDefs.h"
+#include "mslogger.h"
 
 #ifndef _WIN32
 #include "sys/io.h"
@@ -149,12 +149,10 @@ static char cTemp[MSSTRING_SIZE];
 
 void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 {
-	startdbg;
 	if (DataID == CHARDATA_MAPSVISITED1)
 	{
 		//Read Maps Visited
 		//Must come DIRECTLY after reading the savedata_t Data
-		dbg("Read Stats");
 		int Maps = 0;
 		m_File.ReadInt(Maps); //[INT]
 		m_VisitedMaps.clear();
@@ -164,7 +162,6 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 			m_VisitedMaps.add(cTemp);
 		}
 	}
-	enddbg;
 }
 
 void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)

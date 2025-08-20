@@ -50,7 +50,6 @@
 #include "vgui_menudefsshared.h"
 #include "clglobal.h"
 #include "vgui_mscontrols.h"
-#include "logger.h"
 //------------
 
 COLOR Color_Transparent(0, 0, 0, 255), Color_Text_White(255, 255, 255, 0); //Global
@@ -515,14 +514,10 @@ bool CPanel_Options::SlotInput(int iSlot)
 
 void CPanel_Options::Open(option_e OptionScreen)
 {
-	startdbg;
-
-	dbg("Call Reset");
 	Reset();
 
 	setVisible(true);
 
-	dbg("Open option panel");
 	m_OpenScreen = OptionScreen;
 	switch (m_OpenScreen)
 	{
@@ -540,8 +535,6 @@ void CPanel_Options::Open(option_e OptionScreen)
 			m_pPartyLeavePanel->Open();
 		break;
 	}
-
-	enddbg;
 }
 
 //-----------------------------------------------------------------------------

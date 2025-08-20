@@ -33,6 +33,7 @@
 
 #include "svglobals.h"
 #include "global.h"
+#include "mslogger.h"
 
 extern CGraph WorldGraph;
 extern CSoundEnt *pSoundEnt;
@@ -358,21 +359,18 @@ void CGlobalState::ClearStates(void)
 
 void SaveGlobalState(SAVERESTOREDATA *pSaveData)
 {
-	DBG_INPUT;
 	CSave saveHelper(pSaveData);
 	gGlobalState.Save(saveHelper);
 }
 
 void RestoreGlobalState(SAVERESTOREDATA *pSaveData)
 {
-	DBG_INPUT;
 	CRestore restoreHelper(pSaveData);
 	gGlobalState.Restore(restoreHelper);
 }
 
 void ResetGlobalState(void)
 {
-	DBG_INPUT;
 	gGlobalState.ClearStates();
 	gInitHUD = TRUE; // Init the HUD on a new game / load game
 }
@@ -407,10 +405,9 @@ LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
-#include "logger.h"
 void CWorld ::Spawn(void)
 {	
-	logfile << Logger::LOG_INFO << "World Spawn...\n";
+	MS_INFO("World Spawn...");
 
 	g_fGameOver = FALSE;
 	CScriptedEnt::Spawn();
@@ -419,7 +416,7 @@ void CWorld ::Spawn(void)
 	pev->nextthink = pev->ltime + 0.1;
 	MSWorldSpawn();
 
-	logfile << Logger::LOG_INFO << "World Spawn END\n";
+	MS_INFO("World Spawn END");
 }
 void CWorld ::Think(void)
 {

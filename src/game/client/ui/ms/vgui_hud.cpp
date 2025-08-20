@@ -62,7 +62,6 @@
 #include "vgui_teamfortressviewport.h"
 
 //Master Sword
-#include "logger.h"
 #include "clglobal.h"
 #include "script.h"
 #include "../vgui_scorepanel.h"

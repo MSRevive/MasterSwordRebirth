@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#ifndef VALVE_DLL
+#include <SDL2/SDL_messagebox.h>
+#endif
 
 #ifdef _WIN32
     #include <windows.h>
@@ -451,4 +454,31 @@ void MSLoggerLog(const char* fmt, ...) {
     va_end(args);
     
     MSLogger::Debug(MSLogger::GENERAL, "%s", buffer);
+}
+
+void MSErrorConsoleText(const char* pszLabel, const char* Progress)
+{
+    	//Print("%s, %s\n", pszLabel, Progress);
+#ifndef TURN_OFF_ALERT
+	if (MSLogger::IsInitialized() == true)
+	{
+		std::string Output = "Error: ";
+		Output += pszLabel;
+		Output += " --> ";
+		Output += Progress;
+
+		MS_ERROR(Output.c_str());
+		MSLoggerPrint(Output.c_str());
+	}
+	else
+	{
+        //this should only be called client side.
+#ifndef VALVE_DLL
+        //This is prety fatal - We got an error before the logs were initialized
+        std::string errorMsg = pszLabel;
+        errorMsg += " (Logs not yet initialized)";
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorMsg.c_str(), Progress, NULL);
+#endif
+	}
+#endif
 }

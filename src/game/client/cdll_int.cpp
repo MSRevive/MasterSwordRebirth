@@ -23,19 +23,10 @@
 #include "cl_util.h"
 #include "netadr.h"
 #include "vgui_schememanager.h"
-#include "logger.h"
 #include "clientlibrary.h"
 #include "movement/pm_shared.h"
 #ifdef _WIN32
 #include <windows.h>
-#endif
-
-//#define LOG_ALLEXPORTS //more exports in entity.cpp
-
-#ifdef LOG_ALLEXPORTS
-#define logfileopt logfile
-#else
-#define logfileopt NullFile
 #endif
 
 #include <string.h>
@@ -43,6 +34,7 @@
 #include "interface.h"
 #include "voice_status.h"
 #include "ms/clglobal.h"
+#include "mslogger.h"
 
 #define DLLEXPORT EXPORT
 
@@ -180,7 +172,7 @@ int DLLEXPORT HUD_GetHullBounds(int hullnumber, float *mins, float *maxs)
 {
 	int iret = PM_GetHullBounds(hullnumber, mins, maxs) ? 1 : 0;
 
-	logfile << Logger::LOG_INFO << "[HUD_GetHullBounds: Complete]\n";
+	MS_INFO("[HUD_GetHullBounds: Complete]");
 
 	return iret;
 }
@@ -195,7 +187,7 @@ HUD_ConnectionlessPacket
 */
 int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size)
 {
-	logfileopt << "HUD_ConnectionlessPacket\r\n";
+	MS_INFO("HUD_ConnectionlessPacket");
 	// Parse stuff from args
 	//int max_buffer_size = *response_buffer_size;
 
@@ -205,7 +197,7 @@ int DLLEXPORT HUD_ConnectionlessPacket(const struct netadr_s *net_from, const ch
 
 	// Since we don't listen for anything here, just respond that it's a bogus message
 	// If we didn't reject the message, we'd return 1 for success instead.
-	logfileopt << "HUD_ConnectionlessPacket END\r\n";
+	MS_INFO("HUD_ConnectionlessPacket END");
 	return 0;
 }
 
@@ -244,7 +236,7 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	if(!gClient.Initialize())
 		return 0;
 
-	logfile << Logger::LOG_INFO << "[DLLEXPORT Initialize: Complete]\n";
+	MS_INFO("[DLLEXPORT Initialize: Complete]");
 
 	return 1;
 }
@@ -265,7 +257,7 @@ int DLLEXPORT HUD_VidInit(void)
 
 	VGui_Startup();
 
-	logfile << Logger::LOG_INFO << "[HUD_VidInit: Complete]\n";
+	MS_INFO("[HUD_VidInit: Complete]");
 
 	return 1;
 }
@@ -286,13 +278,13 @@ void DLLEXPORT HUD_Init(void)
 
 	gClient.HUDInit();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: InitInput]\n";
+	MS_INFO("[HUD_Init: InitInput]");
 	InitInput();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: Scheme_Init]\n";
+	MS_INFO("[HUD_Init: Scheme_Init]");
 	Scheme_Init();
 
-	logfile << Logger::LOG_INFO << "[HUD_Init: Complete]\n";
+	MS_INFO("[HUD_Init: Complete]");
 }
 
 /*
@@ -306,8 +298,6 @@ redraw the HUD.
 
 int DLLEXPORT HUD_Redraw(float time, int intermission)
 {
-	logfileopt << "HUD_Redraw...";
-
 	gHUD.Redraw(time, 0 != intermission);
 
 	return 1;
@@ -344,7 +334,7 @@ void DLLEXPORT HUD_Reset(void)
 {
 	gHUD.VidInit();
 
-	logfile << Logger::LOG_INFO << "[HUD_Reset: Complete]\n";
+	MS_INFO("[HUD_Reset: Complete]");
 }
 
 /*

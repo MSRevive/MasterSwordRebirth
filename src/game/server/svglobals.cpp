@@ -2,7 +2,6 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "svglobals.h"
-#include "logger.h"
 #include "global.h"
 #include "weapons/genericitem.h"
 #include "gamerules/gamerules.h"
@@ -16,8 +15,9 @@
 #include "fn/HTTPRequest.h"
 #include "angelscript/CAngelScriptManager.h"
 #include "angelscript/ASModuleSystem.h"
-#include <angelscript.h>
 #include "groupfile.h"
+#include "mslogger.h"
+#include <angelscript.h>
 
 std::ofstream modelout;
 int HighestPrecache = -1;
@@ -142,8 +142,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_devlog);
 	CVAR_REGISTER(&ms_allowdev);
 #endif
-	
-	g_log_initialized = true;
 
 	// Initialize AngelScript if enabled
 	if (as_enabled.value > 0)
@@ -249,7 +247,7 @@ void MSWorldSpawn()
 
 	if (FNShared::IsEnabled())
 	{	
-		g_engfuncs.pfnServerPrint("\nInitalize FN Request Manager\n");
+		MS_INFO("[FuzzNet] Initalize FN Request Manager");
 		g_FNRequestManager.Init();
 		
 		// here we try to connect to FN and retry 5 times if it fails.
@@ -260,7 +258,7 @@ void MSWorldSpawn()
 			{
 				fail = false;
 				g_engfuncs.pfnServerPrint("FuzzNet connected!\n");
-				logfile << Logger::LOG_INFO << "FuzzNet connected\n";
+				MS_INFO("[FuzzNet] FuzzNet Connected");
 				break;
 			}
 			else if (retry != 5)
@@ -272,7 +270,7 @@ void MSWorldSpawn()
 		if (fail == true)
 		{
 			g_engfuncs.pfnServerPrint("FuzzNet connection failed. Turning off FN.\n");
-			logfile << Logger::LOG_INFO << "FuzzNet connection failed.\n";
+			MS_INFO("[FuzzNet] FuzzNet Connection Failed");
 			MSGlobals::CentralEnabled = false;
 		}
 	}
@@ -293,14 +291,14 @@ void MSWorldSpawn()
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
 	{
 		g_engfuncs.pfnServerPrint("Initializing AngelScript Module System...\n");
-		logfile << Logger::LOG_INFO << "Initializing AngelScript Module System...\n";
+		MS_INFO("Initializing AngelScript Module System...");
 		
 		// Open the scripts.pak file for reading AngelScript modules
 		CGameGroupFile groupFile;
 		if (!groupFile.Open("scripts.pak"))
 		{
 			g_engfuncs.pfnServerPrint("ERROR: Failed to open scripts.pak for modules\n");
-			logfile << Logger::LOG_ERROR << "Failed to open scripts.pak for modules\n";
+			MS_INFO("Failed to open scripts.pak for modules");
 		}
 		else
 		{
@@ -311,7 +309,7 @@ void MSWorldSpawn()
 				if (as_auto_discovery.value > 0)
 				{
 					g_engfuncs.pfnServerPrint("Using automatic module discovery...\n");
-					logfile << Logger::LOG_INFO << "Using automatic module discovery...\n";
+					MS_INFO("Using automatic module discovery...");
 					
 					// Discover modules with 'module ModuleName {' syntax
 					if (pModuleSystem->DiscoverModulesInPak(&groupFile))
@@ -320,24 +318,24 @@ void MSWorldSpawn()
 						if (pModuleSystem->LoadDiscoveredModules(&groupFile))
 						{
 							g_engfuncs.pfnServerPrint("AngelScript modules loaded successfully!\n");
-							logfile << Logger::LOG_INFO << "AngelScript modules loaded successfully!\n";
+							MS_INFO("AngelScript modules loaded successfully!");
 						}
 						else
 						{
 							g_engfuncs.pfnServerPrint("WARNING: Some AngelScript modules failed to load\n");
-							logfile << Logger::LOG_WARN << "Some AngelScript modules failed to load\n";
+							MS_INFO("Some AngelScript modules failed to load");
 						}
 					}
 					else
 					{
 						g_engfuncs.pfnServerPrint("No modules discovered in scripts.pak\n");
-						logfile << Logger::LOG_INFO << "No modules discovered in scripts.pak\n";
+						MS_INFO("No modules discovered in scripts.pak");
 					}
 				}
 				else
 				{
 					g_engfuncs.pfnServerPrint("Module auto-discovery disabled. Using legacy loading...\n");
-					logfile << Logger::LOG_INFO << "Module auto-discovery disabled. Using legacy loading...\n";
+					MS_INFO("Module auto-discovery disabled. Using legacy loading...");
 					
 					// Fallback to legacy hardcoded loading for backward compatibility
 					// Note: GameMaster.as now uses module syntax and will be auto-discovered
@@ -361,7 +359,7 @@ void MSWorldSpawn()
 							char errorMsg[256];
 							snprintf(errorMsg, sizeof(errorMsg), "Legacy module not found: %s\n", legacyModules[i]);
 							g_engfuncs.pfnServerPrint(errorMsg);
-							logfile << Logger::LOG_ERROR << errorMsg;
+							MS_ERROR(errorMsg);
 							bSuccess = false;
 							break;
 						}
@@ -400,16 +398,16 @@ void MSWorldSpawn()
 					if (bSuccess)
 					{
 						g_engfuncs.pfnServerPrint("Legacy AngelScript support systems loaded successfully\n");
-						logfile << Logger::LOG_INFO << "Legacy AngelScript support systems loaded successfully\n";
+						MS_INFO("Legacy AngelScript support systems loaded successfully");
 						g_engfuncs.pfnServerPrint("Note: GameMaster module will be auto-discovered and initialized separately\n");
-						logfile << Logger::LOG_INFO << "Note: GameMaster module will be auto-discovered and initialized separately\n";
+						MS_INFO("Note: GameMaster module will be auto-discovered and initialized separately");
 					}
 				}
 			}
 			else
 			{
 				g_engfuncs.pfnServerPrint("ERROR: ASModuleSystem not available\n");
-				logfile << Logger::LOG_ERROR << "ASModuleSystem not available\n";
+				MS_INFO("ASModuleSystem not available");
 			}
 		}
 	}
@@ -541,7 +539,7 @@ void MSGameEnd()
 						if (r == asEXECUTION_FINISHED)
 						{
 							g_engfuncs.pfnServerPrint("AngelScript GameMaster shut down successfully\n");
-							logfile << Logger::LOG_INFO << "AngelScript GameMaster shut down successfully\n";
+							MS_INFO("AngelScript GameMaster shut down successfully");
 						}
 						
 						pContext->Release();
@@ -575,17 +573,6 @@ const char *EngineFunc::GetGameDir()
 	return cGameDir;
 }
 
-extern "C" void LogText(char *szFmt, ...)
-{
-	va_list argptr;
-	static char string[1024];
-	va_start(argptr, szFmt);
-	vsnprintf(string, sizeof(string), szFmt, argptr);
-	va_end(argptr);
-
-	logfile << string;
-}
-
 void WRITE_FLOAT(float Float)
 {
 	byte *pData = (byte *)&Float;
@@ -613,7 +600,7 @@ int PRECACHE_SOUND(const char *pszSound)
 		gSoundPrecacheList.add_blank();
 		gSoundPrecacheList[gSoundPrecacheCount].PrecacheName = pszSound;
 		gSoundPrecacheCount++;
-		logfile << "Precache_Sound(" << gSoundPrecacheCount << "):" << pszSound << "\n";
+		MS_INFO("Precache_Sound(%i): %s", gSoundPrecacheCount, pszSound);
 	}
 	return (*g_engfuncs.pfnPrecacheSound)((char *)pszSound);
 }
@@ -638,7 +625,7 @@ int PRECACHE_MODEL(const char *pszModelname)
 		gModelPrecacheList.add_blank();
 		gModelPrecacheList[gModelPrecacheCount].PrecacheName = pszModelname;
 		gModelPrecacheCount++;
-		logfile << "Precache_Model(" << gModelPrecacheCount << "):" << pszModelname << "\n";
+		MS_INFO("Precache_Model(%i): %s", gModelPrecacheCount, pszModelname);
 	}
 
 #ifdef DEV_BUILD
@@ -704,8 +691,10 @@ void CSVGlobals::LogScript(const char* ScriptName, CBaseEntity *pOwner, int incl
 	ScriptList[idx].add(Item);
 #endif
 }
+
 void CSVGlobals::WriteScriptLog()
 {
+	// TODO: use valve's filesystem instead.
 #ifdef DEV_BUILD
 	if (!ms_devlog.value)
 		return;

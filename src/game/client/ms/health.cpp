@@ -23,7 +23,6 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "clglobal.h"
-#include "logger.h"
 #include "mscharacter.h"
 #include "script.h"
 
@@ -117,9 +116,6 @@ int CHudHealth::VidInit(void)
 
 int CHudHealth::MsgFunc_HP(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT(), iIsMaxHP = READ_BYTE();
 
@@ -134,14 +130,10 @@ int CHudHealth::MsgFunc_HP(const char *pszName, int iSize, void *pbuf)
 	else
 		player.m_MaxHP = x;
 
-	enddbg;
 	return 1;
 }
 int CHudHealth::MsgFunc_MP(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 	int x = READ_SHORT(), iIsMaxMP = READ_BYTE();
 
@@ -156,15 +148,11 @@ int CHudHealth::MsgFunc_MP(const char *pszName, int iSize, void *pbuf)
 	else
 		player.m_MaxMP = x;
 
-	enddbg;
 	return 1;
 }
 
 int CHudHealth::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 
 	int armor = READ_BYTE();	   // armor
@@ -182,7 +170,6 @@ int CHudHealth::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 	if (damageTaken > 0 || armor > 0)
 		CalcDamageDirection(vecFrom);
 
-	enddbg;
 	return 1;
 }
 

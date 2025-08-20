@@ -64,7 +64,6 @@ void DLLEXPORT Demo_ReadBuffer(int size, unsigned char *buffer)
 {
 	int type;
 	int i = 0;
-	DBG_INPUT;
 
 	type = *(int *)buffer;
 	i += sizeof(int);

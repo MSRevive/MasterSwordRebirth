@@ -55,8 +55,8 @@
 #include "global.h"
 #include "mscharacter.h"
 #include "magic.h"
-#include "logger.h"
 #include "fn/FNSharedDefs.h"
+#include "mslogger.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
@@ -1488,17 +1488,11 @@ void SetKeys(CBasePlayer *pPlayer);
 
 void CBasePlayer::PreThink(void)
 {
-	startdbg;
-
-	dbg("Begin");
-
 	//Send char info, if character is still unloaded
 	Think_SendCharData();
 
-	dbg("Call MSChar_Interface::AutoSave");
 	MSChar_Interface::AutoSave(this); //Autosave character
 
-	dbg("Call MSChar_Interface::Think_SendChar");
 	MSChar_Interface::Think_SendChar(this); //Send client-side char down to client
 
 	int buttonsChanged = (m_afButtonLast ^ pev->button); // These buttons have changed this frame
@@ -1508,44 +1502,36 @@ void CBasePlayer::PreThink(void)
 	m_afButtonPressed = buttonsChanged & pev->button;	  // The changed ones still down are "pressed"
 	m_afButtonReleased = buttonsChanged & (~pev->button); // The ones not down are "released"
 
-	dbg("Call SetKeys");
 	SetKeys();
 
-	dbg("Call g_pGameRules->PlayerThink");
 	if (g_pGameRules)
 		g_pGameRules->PlayerThink(this);
 
 	if (g_fGameOver)
 		return; // intermission or finale
 
-	dbg("Call Trade");
 	Trade(); //Trade - Do this early on
 
-	dbg("Call ItemPreFrame");
 	ItemPreFrame();
 	WaterMove();
 
 	RunScriptEvents(); //RunScriptEvents
 
-	dbg("Call UpdateClientData");
 	UpdateClientData(); //UpdateClientData
 
 	if (SpawnCheckTime > 0 && gpGlobals->time > SpawnCheckTime)
 	{
 		SpawnCheckTime = 0;
-		dbg("Call Spawn");
 		Spawn();
 	}
 
 	if (FBitSet(pev->flags, FL_SPECTATOR))
 		return;
 
-	dbg("Call CheckTimeBasedDamage");
 	CheckTimeBasedDamage();
 
 	if (pev->deadflag >= DEAD_DYING)
 	{
-		dbg("Call PlayerDeathThink");
 		PlayerDeathThink();
 		return;
 	}
@@ -1674,8 +1660,6 @@ void CBasePlayer::PreThink(void)
 	pev->vuser3.x = MaxHP();
 	pev->vuser3.y = (IsAlive() ? pev->health : 0);
 	pev->vuser3.z = 0.0f;
-
-	enddbg;
 }
 
 /* Time based Damage works as follows:
@@ -2059,20 +2043,15 @@ void CBasePlayer ::UpdatePlayerSound(void)
 	//ALERT ( at_console, "%d/%d\n", iVolume, m_iTargetVolume );
 	m_iTargetVolume = 0;
 }
-#define postthinkdbg(a) dbg(msstring("[") + DisplayName() + "] " + a)
 
 void CBasePlayer::PostThink()
 {
-	startdbg;
-	postthinkdbg("Begin");
-
 	if (g_fGameOver)
 		goto pt_end; // intermission or finale
 
 	if (!IsAlive() || FBitSet(pev->flags, FL_SPECTATOR))
 		goto pt_end;
 
-	postthinkdbg("Handle Tank controlling");
 	// Handle Tank controlling
 	if (m_pTank != NULL)
 	{ // if they've moved too far from the gun,  or selected a weapon, unuse the gun
@@ -2087,7 +2066,6 @@ void CBasePlayer::PostThink()
 		}
 	}
 
-	postthinkdbg("Call ItemPostFrame( )");
 	// do weapon stuff
 	ItemPostFrame();
 
@@ -2097,7 +2075,6 @@ void CBasePlayer::PostThink()
 	// of maximum safe distance will make no sound. Falling farther than max safe distance will play a
 	// fallpain sound, and damage will be inflicted based on how far the player fell
 
-	postthinkdbg("Check player fall");
 	if ((FBitSet(pev->flags, FL_ONGROUND)) && (pev->health > 0) && m_flFallVelocity >= PLAYER_FALL_PUNCH_THRESHHOLD)
 	{
 		// ALERT ( at_console, "%f\n", m_flFallVelocity );
@@ -2170,20 +2147,15 @@ void CBasePlayer::PostThink()
 		}
 	}
 
-	postthinkdbg("Call game_animate");
 	CallScriptEvent("game_animate");
 
-	postthinkdbg("Call SetAnimation");
 	if (IsAlive())
 		SetAnimation(MONSTER_ANIM_WALK);
 
-	postthinkdbg("Call StudioFrameAdvance");
 	StudioFrameAdvance();
 
-	postthinkdbg("Call UpdatePlayerSound");
 	UpdatePlayerSound();
 
-	postthinkdbg("Call SetSpeed");
 	SetSpeed();
 
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
@@ -2191,20 +2163,15 @@ void CBasePlayer::PostThink()
 
 pt_end:
 
-	postthinkdbg("Call UpdateMiscPositions");
 	UpdateMiscPositions();
 
-	postthinkdbg("Call Body->Think");
 	if (Body)
 		Body->Think(this);
 
-	postthinkdbg("Call Script Event game_think");
 	CallScriptEvent("game_think");
 
-	postthinkdbg("End PostThink");
 	
 	//Deactivate no-collide if not near any players.
-	postthinkdbg("Check for nearby spawns and players, deactivate nocolloide");
 	//do not check for dead or spectating/noclipping players
 	if (pev->solid == SOLID_TRIGGER && pev->deadflag == DEAD_NO && pev->movetype != MOVETYPE_NOCLIP) {
 
@@ -2269,8 +2236,6 @@ pt_end:
 			pev->solid = SOLID_SLIDEBOX;
 		}
 	}
-
-	enddbg("CBasePlayer::PostThink()");
 }
 
 // checks if the spot is clear of players
@@ -2445,7 +2410,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << Logger::LOG_INFO << "Looking for valid spawn spots for " << DisplayName() << " (" << JoinTypeText << ")...\n";
+	MS_INFO("Looking for valid spawn spots for %s (%s)", DisplayName(), JoinTypeText);
 
 	//Find all valid spots
 	CBaseEntity *pSpot = NULL;
@@ -2463,7 +2428,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	}
 	else
 	{
-		logfile << Logger::LOG_INFO << "m_JoinType: " << m_JoinType << "\n";
+		MS_INFO("m_JoinType: %s", m_JoinType);
 		switch (m_JoinType)
 		{
 		case JN_VISITED:
@@ -2493,14 +2458,14 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 
 	if (Status > SS_NOSPOT)
 	{
-		logfile << Logger::LOG_INFO << "Found useable spawn spots, testing...\n";
+		MS_INFO("Found useable spawn spots, testing...");
 
 		if (Status == SS_ALLFULL)
 		{
 			//All spots filled, wait.
 			SpawnCheckTime = gpGlobals->time + 2.0;
 			SendEventMsg(HUDEVENT_UNABLE, "Waiting to spawn...\n");
-			logfile << Logger::LOG_INFO << "All spawn spots filled!\n";
+			MS_INFO("All spawn spots filled!");
 			return NULL;
 		}
 
@@ -2511,7 +2476,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		//No valid spots, kick player with message
 
 		msstring TransitionText = m_SpawnTransition ? m_SpawnTransition : "<unknown>";
-		logfile << Logger::LOG_WARN << "NO valid spawn spots for " << JoinTypeText << " (Trans: " << TransitionText.c_str() << ")!!!\n";
+		MS_WARN("NO valid spawn spots for %s (Transition: %s)", JoinTypeText, TransitionText.c_str());
 		bool fKickPlayer = true;
 
 		if (m_CharacterState == CHARSTATE_LOADED)
@@ -2542,7 +2507,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		}
 	}
 
-	logfile << Logger::LOG_INFO << "Found VALID SPOT\n";
+	MS_INFO("Found VALID SPOT");
 
 	return pSpot;
 }
@@ -2563,9 +2528,6 @@ LINK_ENTITY_TO_CLASS(ms_player_begin, CSpawnPointBegin);
 
 void CBasePlayer::Spawn(void)
 {
-	startdbg;
-
-	dbg("Call Precache");
 	//Master Sword spawn code
 	//Note: The player will sometimes have items/packs when this is called
 	Precache();
@@ -2599,16 +2561,13 @@ void CBasePlayer::Spawn(void)
 	}
 
 	//Initialize if not done already
-	dbg("Call InitialSpawn");
 	InitialSpawn();
 
 	pev->model = IdealModel();
 	SetModel(pev->model); //Set the default model
 
-	dbg("Call game_spawn");
 	CallScriptEvent("game_spawn");
 
-	dbg("Init player");
 	m_PrefHand = RIGHT_HAND; // Right handed (unsettable for now)
 	m_Framerate = 1.0f;
 	CheckAreaTime = gpGlobals->time + 0.5;
@@ -2704,7 +2663,6 @@ void CBasePlayer::Spawn(void)
 	else {
 	}*/
 
-	dbg("Create spawn portal");
 	if (m_MapStatus == FIRST_MAP && !fRespawnPlayer)
 	{
 		//***!!!*** Setup some kind of cool portal***!!!***
@@ -2713,7 +2671,6 @@ void CBasePlayer::Spawn(void)
 		pPortal->Spawn2();
 	}
 
-	dbg("Call Setsize");
 	SetSize(pev->flags);
 
 	pev->view_ofs = VEC_VIEW;
@@ -2733,7 +2690,6 @@ void CBasePlayer::Spawn(void)
 	if (!SpawnPlayer)
 	{
 		//If it hasn't loaded your character yet, don't spawn
-		dbg("Spawn in observer mode");
 		pev->solid = SOLID_NOT;
 		pev->movetype = MOVETYPE_NOCLIP;
 
@@ -2748,7 +2704,6 @@ void CBasePlayer::Spawn(void)
 		m_iHideHUD = HIDEHUD_ALL;
 		EnableControl(FALSE); //So you can't move
 
-		dbg("Call PreLoadChars");
 
 		//Load the list of characters either from file or from the Central Server
 		if (!m_LoadedInitialChars)
@@ -2759,7 +2714,6 @@ void CBasePlayer::Spawn(void)
 	}
 	else
 	{
-		dbg("Spawn in regular mode");
 		CallScriptEvent("game_player_putinworld"); //Thothie MAR2008a
 
 		//See if music is playing for all players, then play for newly connected character
@@ -2806,7 +2760,6 @@ void CBasePlayer::Spawn(void)
 			m_MapStatus = OLD_MAP;
 
 		//Display greeting
-		dbg("Display server greeting");
 		clientaddr_t &ClientInfo = g_NewClients[entindex() - 1];
 		if (!ClientInfo.fDisplayedGreeting)
 		{
@@ -2849,24 +2802,19 @@ void CBasePlayer::Spawn(void)
 	pev->sequence = LookupSequence("stand"); //LookupActivity( ACT_IDLE )
 	BlockButton(IN_ATTACK);					 //Make it inconsequential if the player is still holding down the button
 
-	dbg("Initialize Body");
 	if (Body)
 		Body->Set(BPS_RDRNORM, 0);
 
 	//Give player hands
-	dbg("Give player hands SpawnPlayer PlayerHands");
 	if (SpawnPlayer && !PlayerHands)
 	{
-		dbg("Give player hands CGenericItem *pPlayerHands");
 		CGenericItem *pPlayerHands = NewGenericItem("fist_bare");
 		if (pPlayerHands)
 		{
-			dbg("Give player hands pPlayerHands GiveTo");
 			pPlayerHands->GiveTo(this, false, false);
 		}
 		else
 		{
-			dbg("Give player hands MSErrorConsoleText");
 			MSErrorConsoleText("CBasePlayer::Spawn()", "Couldn't find item \"fist_bare\"!");
 		}
 	}
@@ -2881,7 +2829,6 @@ void CBasePlayer::Spawn(void)
 	m_NetName = DisplayName();
 	pev->netname = MAKE_STRING(m_NetName.c_str());
 
-	dbg("Shurik3n: Send Skills on spawn");
 	//Shurik3n AUG2007a - attempts to fix 100% bug
 	for (int i = 0; i < SKILL_MAX_STATS; i++)
 	{
@@ -2900,29 +2847,21 @@ void CBasePlayer::Spawn(void)
 		}
 	}
 
-	dbg("Call SwitchToBestHand");
 	SwitchToBestHand();
 
-	dbg("Call g_pGameRules->PlayerSpawn");
 	g_pGameRules->PlayerSpawn(this);
 
-	dbg("Call MSGlobals::GameScript game_playerspawn");
 	if (MSGlobals::GameScript)
 	{
 		msstringlist Parameters;
 		Parameters.add(EntToString(this));
 		MSGlobals::GameScript->CallScriptEvent("game_playerspawn", &Parameters);
 	}
-
-	enddbg("CBasePlayer::Spawn()");
 }
 
 bool CBasePlayer::MoveToSpawnSpot()
 {
 	CBaseEntity *pSpawnSpot = NULL;
-	startdbg;
-
-	dbg("Call FindSpawnSpot");
 
 	if (pSpawnSpot = FindSpawnSpot())
 	{
@@ -2937,7 +2876,6 @@ bool CBasePlayer::MoveToSpawnSpot()
 	}
 
 	//Thothie - need a loop around here, causing every wearable item the character has to execute it's "game_wear" function
-	enddbg;
 	return pSpawnSpot ? true : false;
 }
 
@@ -6218,7 +6156,8 @@ void CBasePlayer::KickPlayer(const char *pszMessage)
 			SERVER_COMMAND("disconnect\n");
 		else
 			SERVER_COMMAND(UTIL_VarArgs("kick #%i\n", GETPLAYERUSERID(edict())));
-		logfile << Logger::LOG_INFO << "Kicked " << DisplayName() << " Reason: " << pszMessage << "\n";
+
+		MS_INFO("Kicked %s Reason: %s", DisplayName(), pszMessage);
 	}
 }
 void CBasePlayer::Attacked(CBaseEntity *pAttacker, float flDamage, int bitsDamageType)
@@ -6310,10 +6249,7 @@ void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 
 bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 {
-	startdbg;
-	dbg("Begin");
-
-	logfile << Logger::LOG_INFO << "Load Character: " << DisplayName() << "\n";
+	MS_INFO("Load Character: %s", DisplayName());
 
 	//Thothie JAN2010_10 - flag to tell "char" function character is loaded, so no clickie
 	m_CharacterState = CHARSTATE_LOADING;
@@ -6374,7 +6310,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	CLIENT_COMMAND(edict(), "name %s\n", Data.Name);
 	//g_engfuncs.pfnSetClientKeyValue( entindex(), g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "name", (char *)Data.Name );
 
-	dbg("Read Stats");
 	m_OldGold = m_Gold = Data.Gold;
 
 	//MiB JAN2010_15 Gold Change on Spawn.rtf
@@ -6437,7 +6372,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	mslist<CGenericItem *> Items; //Keep track of ALL items, for quickslot assignment later
 
 	//Read Items
-	dbg("Read Items");
 	for (int i = 0; i < Data.m_Items.size(); i++)
 	{
 		CGenericItem *pItem = Data.m_Items[i].operator CGenericItem *();
@@ -6460,7 +6394,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	Storage_Send(); //Send all the items in storage
 
 	//Read Companions
-	dbg("Read Companions");
 
 	m_Companions = Data.m_Companions;
 	//Thothie JUN2008a - just read in companions, save the summoning until the script command "summonpets"
@@ -6533,10 +6466,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	//Send music data 
 
-	dbg("Call CBasePlayer::Spawn()");
 	Spawn();
-
-	enddbg;
 
 	return true;
 }

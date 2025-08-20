@@ -13,7 +13,7 @@
 #include "mscharacter.h"
 #include "script.h"
 #include "modeldefs.h"
-#include "logger.h"
+#include "mslogger.h"
 
 #ifndef VALVE_DLL
 void ContainerWindowUpdate();
@@ -243,8 +243,6 @@ void CBasePlayer::DeleteStats()
 //Called once on startup on both client & server
 void CBasePlayer::InitialSpawn(void)
 {
-	startdbg;
-
 	if (m_Initialized)
 		return;
 
@@ -259,10 +257,8 @@ void CBasePlayer::InitialSpawn(void)
 	for (int i = 0; i < MAX_CHARSLOTS; i++)
 		m_CharInfo[i].Index = i;
 
-	dbg("Call CreateStats");
 	CreateStats();
 
-	dbg("Call Script Spawn");
 
 	//Load the script file and precache all models/sounds it uses
 #ifdef VALVE_DLL
@@ -272,7 +268,6 @@ void CBasePlayer::InitialSpawn(void)
 		MSErrorConsoleText("CBasePlayer::InitialSpawn()", msstring("Missing ") + PLAYER_SCRIPT);
 
 	//Add all the player-initiated effects.  Such as sit, lay down, emotes, etc.
-	dbg("Add default effects to player");
 
 	/*
 		//Thothie MAR2012 debuggary
@@ -302,14 +297,12 @@ void CBasePlayer::InitialSpawn(void)
 
 	CallScriptEvent("game_reset_wear_positions"); //Initialize the wearable positions, in case the player makes a new char
 	m_Initialized = true;
-
-	enddbg;
 }
+
 /*
   PlaySound - Save yourself a couple parameters by using this instead of EMIT_SOUND.
   (c)(c)(c)(c)(c)(c)(c)(c)(c)   It also allows translation to the female versions of the sound
 */
-
 void CBasePlayer::PlaySound(int channel, const char* sample, float volume, bool fGenderSpecific, float attenuation)
 {
 	char SoundName[128];
@@ -725,8 +718,6 @@ bool CBasePlayer::PutInAnyPack(CGenericItem* pItem, bool bVerbose)
 
 bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 {
-	startdbg;
-
 	//bVerbose == true print all failure messages
 	int iUseHand = 0;
 
@@ -745,7 +736,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		iUseHand = m_PrefHand;
 	}
 
-	/*dbg( "Remove weapon from sheath" );
+	/*
 	if( DrawWeapon )
 	{
 		//Try to find a weapon to pull out from a sheath
@@ -783,7 +774,6 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 	CGenericItem* pUse = Hand(iUseHand);
 
-	dbg("Call UseItem");
 	if (pUse && !pUse->UseItem(bVerbose))
 	{
 		//if( bVerbose ) SendInfoMsg( "You cannot use %s\n", SPEECH_GetItemName( Hand[iUseHand] ) );
@@ -792,8 +782,6 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 	if (pUse && pUse->SpellData)
 		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pUse) + " spell is canceled");
-
-	enddbg;
 
 	return true;
 }

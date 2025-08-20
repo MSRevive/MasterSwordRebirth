@@ -98,8 +98,6 @@ VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenW
 
 void VGUI_MenuBase::Init()
 {
-	startdbg;
-
 	SetBits(m_Flags, MENUFLAG_TRAPNUMINPUT);
 
 	m_pMainPanel = new CTransparentPanel(128, MAINWIN_X, MAINWIN_Y, MAINWIN_SIZE_X, MAINWIN_SIZE_Y);
@@ -128,8 +126,6 @@ void VGUI_MenuBase::Init()
 	pSpacer->setBorder( m_Spacer = new LineBorder( 2, Color(0, 128, 0, 128) ) );
 	pSpacer->setParent( m_pMainPanel );
 	*/
-
-	enddbg;
 }
 
 MSButton *VGUI_MenuBase::AddButton(const char* Name, int Width, msvariant ID)

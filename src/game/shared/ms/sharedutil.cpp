@@ -1,6 +1,5 @@
 #include "msdllheaders.h"
 #include "global.h"
-#include "logger.h"
 #include "mslogger.h"
 #include "time.h"
 
@@ -15,80 +14,6 @@ extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
-Logger logfile;
-#ifdef VALVE_DLL
-Logger chatlog;
-#endif
-Logger NullFile;
-bool g_log_initialized = false;
-void MSErrorConsoleText(const char* pszLabel, const char* Progress)
-{
-	//Print("%s, %s\n", pszLabel, Progress);
-#ifndef TURN_OFF_ALERT
-	if (g_log_initialized)
-	{
-		msstring Output = "Error ";
-#ifdef VALVE_DLL
-		Output += "(SERVER): ";
-#else
-		Output += "(CLIENT): ";
-#endif
-		Output += pszLabel;
-		Output += " --> ";
-		Output += Progress;
-		Output += "\r\n";
-		if (logfile.is_open())
-		{
-			logfile << Output;
-		}
-		Print("%s", Output);
-	}
-	else
-	{
-		//This is prety fatal - We got an error before the logs were initialized
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, msstring(pszLabel) + msstring(" (Logs not yet initialized)"), Progress, NULL);
-	}
-#endif
-}
-
-void OpenLogFiles()
-{
-	// Initialize MSLogger first
-#ifdef VALVE_DLL
-	MSLogger::Initialize(MSGlobals::AbsGamePath.c_str(), true);
-#else
-	MSLogger::Initialize(MSGlobals::AbsGamePath.c_str(), false);
-#endif
-	
-	// Keep old logger for backward compatibility during transition
-	char cLogfile[MAX_PATH];
-	
-#ifdef VALVE_DLL
-	char cChatfile[MAX_PATH];
-	
-	time_t curTime;
-	time(&curTime);
-	struct tm* TheTime = localtime(&curTime);
-	int month = TheTime->tm_mon + 1;
-	int year = TheTime->tm_year + 1900;
-	char pChatname[20];
-	_snprintf(pChatname, sizeof(pChatname), "msr_chatlog_%02d_%i", month, year);
-	_snprintf(cChatfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), pChatname);
-	
-	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_msdll");
-	
-	logfile.open(cLogfile);
-	chatlog.open(cChatfile, 1);
-#else
-	_snprintf(cLogfile, MAX_PATH, "%s/%s.log", MSGlobals::AbsGamePath.c_str(), "log_cldll");
-	logfile.open(cLogfile);
-#endif
-	g_log_initialized = true;
-	
-	// Log initialization message
-	MS_INFO("Master Sword Rebirth logging system initialized");
-	MS_INFO("Game path: %s", MSGlobals::AbsGamePath.c_str());
-}
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
 msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a string of format "PentP(idx,addr)"
@@ -101,6 +26,7 @@ msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a stri
 
 	return RetString;
 }
+
 CBaseEntity *StringToEnt(const char* EntString) // Converts an string of format "PentP(idx,addr)" to an entity
 {
 	int Idx = -1;
@@ -125,6 +51,7 @@ const char* VecToString(const Vector& Vec, bool bAs2D)
 		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
 	return RetString;
 }
+
 Vector StringToVec(const char* String)
 {
 	Vector Vec;
@@ -135,6 +62,7 @@ Vector StringToVec(const char* String)
 			return g_vecZero;
 	return Vec;
 }
+
 Color4F StringToColor(const char* String) //Converts a string of the format "(r,g,b,a)" Color class
 {
 	Color4F Color(0, 0, 0, 0);
@@ -156,6 +84,7 @@ Vector GetRelativePos(Vector &Ang, Vector &Dir)
 
 	return vPosition;
 }
+
 //Adds models/ or sprites/ to a model or sprite filename
 char *GetFullResourceName(const char* pszPartialName)
 {
@@ -189,6 +118,7 @@ CBaseEntity *MSInstance(entvars_t *pev)
 #endif
 	return pEnt;
 }
+
 CBaseEntity *MSInstance(edict_t *pent)
 {
 	if (!pent)
@@ -203,7 +133,6 @@ CBaseEntity *MSInstance(edict_t *pent)
 }
 
 int iBeam;
-
 void BeamEffect(float SRCx, float SRCy, float SRCz, float DESTx,
 				float DESTy, float DESTz, int sprite, int startframe,
 				int framerate, int life, int width, int noise,
@@ -230,6 +159,7 @@ void BeamEffect(float SRCx, float SRCy, float SRCz, float DESTx,
 	WRITE_BYTE(ispeed);		// speed
 	MESSAGE_END();
 }
+
 void BeamEffect(Vector vStart, Vector vEnd, int sprite, int startframe,
 				int framerate, int life, int width, int noise,
 				int r, int g, int b, int brightness, int ispeed)
@@ -282,7 +212,7 @@ void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
     msstring vsAsOne = vsTitle + ": " + msstring(string) + "\n";
     if (vFlags & ERRORPRINT_LOG)
     {
-        logfile << vsAsOne << "\n";
+		MS_ERROR(vsAsOne);
     }
     if (vFlags & ERRORPRINT_CONSOLE)
     {

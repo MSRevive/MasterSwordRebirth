@@ -18,7 +18,6 @@
 #include "inc_weapondefs.h"
 #include "global.h"
 #include "stats/statdefs.h"
-#include "logger.h"
 
 #ifdef VALVE_DLL
 #include "shield.h"
@@ -202,9 +201,6 @@ bool CGenericItem::Attack_CanAttack()
 //Can be called with a parameter to force an attack
 bool CGenericItem::StartAttack(int ForceAttackNum)
 {
-	startdbg;
-	dbg("Begin");
-
 #ifdef VALVE_DLL
 
 	//Check if I have a command queued from the client
@@ -245,7 +241,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	}
 #endif
 
-	dbg("Check Restrictions");
 	//MiB JUN2010_19 - Letting both hands attack at the same time. Commented out IsActing as we don't care if another
 	//				   weapon is attacking, only if this one is already attacking. We do, however care if the player
 	//				   is using a shield. Would be exploitable to allow attacking from behind a shield
@@ -257,7 +252,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 
 	if (ForceAttackNum >= 0)
 	{
-		dbg("Force Attack");
 		if (ForceAttackNum >= (signed)m_Attacks.size())
 			return true;
 
@@ -267,7 +261,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 #ifndef VALVE_DLL
 	else if (!CurrentAttack)
 	{
-		dbg("Choose attack");
 		//bool thoth_unskill_base = false;
 		for (int a = 0; a < m_Attacks.size(); a++)
 		{
@@ -339,7 +332,6 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	if (CurrentAttack && ((iNewAttack >= 0) || (iNewAttack == -2)))
 	{
 		//Start attack
-		dbg("Initiate attack");
 		SetBits(m_pOwner->m_StatusFlags, PLAYER_MOVE_ATTACKING);
 		CallScriptEvent(CurrentAttack->CallbackName + "_start");
 		if (!CurrentAttack) return true; //Was canceled at the start
@@ -394,20 +386,15 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		m_LastChargedAmt = 0; //Clear after I've checked for valid attack.  This way if I let go of charge early, it still waits for the attack to finish
 	}
 
-	enddbg;
 	return true;
 }
 
 //Attack - Called every frame to continue an attack
 void CGenericItem::Attack()
 {
-	startdbg;
-	dbg("Begin");
-
 	if (!m_pOwner || !CurrentAttack)
 		return;
 
-	dbg("Projectile checks");
 
 	//Special stuff for projectiles... move to subroutine?
 	bool fCanLandAttack = true;
@@ -438,7 +425,6 @@ void CGenericItem::Attack()
 		return;
 	}
 
-	dbg("Duration checks");
 	//Quit if the attack is done (it's duration has expired)
 	if (CurrentAttack->tStart + CurrentAttack->tDuration <= gpGlobals->time &&
 		CurrentAttack->tDuration >= 0 && CurrentAttack->fCanCancel)
@@ -463,7 +449,6 @@ void CGenericItem::Attack()
 	//Attack has successfully been landed
 	CurrentAttack->fAttackLanded = true;
 
-	dbg("Call strike function");
 	//Don't refer to CurrentAttack after calling StrikeLand, StrikeHold, etc.
 	//because CancelAttack might get called, which nulls CurrentAttack.
 	int Type = CurrentAttack->Type;
@@ -473,8 +458,6 @@ void CGenericItem::Attack()
 		StrikeHold();
 	else if (Type == ATT_CHARGE_THROW_PROJ)
 		ChargeThrowProj();
-
-	enddbg;
 }
 void CGenericItem::RegisterAttack()
 {
@@ -663,19 +646,14 @@ void CGenericItem::CancelAttack()
 }
 void CGenericItem::ItemPostFrame()
 {
-	startdbg;
-
-	dbg("Begin");
-
 	if (!m_pPlayer)
 		return;
 
-	/*dbg( "AttackButtonDown" );
+	/*
 	if( FBitSet(m_pPlayer->pbs.ButtonsDown,IN_ATTACK) )
 		AttackButtonDown( );
 	else AttackButtonUp( );*/
 
-	dbg("Attack2ButtonDown");
 	if (m_pPlayer && FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK2))
 		Attack2ButtonDown(); // +attack2
 	else
@@ -694,11 +672,9 @@ void CGenericItem::ItemPostFrame()
 			ActivateButtonUp(); //Button is currently up
 	}
 
-	dbg("AllButtonsReleased");
 	if (!m_pPlayer || !FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK | IN_ATTACK2))
 		AllButtonsReleased(); // no fire buttons down
 
-	dbg("Idle");
 	if (ShouldIdle())
 		Idle();
 
@@ -723,20 +699,16 @@ void CGenericItem::ItemPostFrame()
 	DrinkThink(); //Run on client & server
 
 #ifdef VALVE_DLL
-	dbg("Think");
 	if (MSProperties() & ITEM_GENERIC)
 		Think();
 #endif
-	dbg("End");
-
-	enddbg;
 }
+
 // Attack variations
 void CGenericItem::StrikeLand()
 {
 #ifdef VALVE_DLL
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Begin");
 	//m_pOwner->WorldVolume = LOUD_GUN_VOLUME;
 
 	UTIL_MakeVectors(m_pOwner->pev->v_angle);
@@ -793,7 +765,6 @@ void CGenericItem::StrikeLand()
 		flDamage *= m_LastChargedAmt;
 	}
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
 		bitsDamage |= DMG_SIMPLEBBOX;
@@ -842,7 +813,6 @@ void CGenericItem::StrikeLand()
 	if (!CurrentAttack)
 		return;
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Set script variables");
 
 	//Reset hit/miss variables
 	//SetScriptVar( "game_lastattack.hitwall", 0 );
@@ -855,7 +825,6 @@ void CGenericItem::StrikeLand()
 	//else SetScriptVar( "game_lastattack.hitwall", 1 );
 	//SetScriptVar( "game_lastattack.endpos", VecToString(Damage.outTraceResult.vecEndPos) );
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Script callback: land event");
 	msstringlist Parameters;
 	Parameters.add(pHit ? (pHit->IsMSMonster() ? "npc" : "world") : "none");
 	Parameters.add(VecToString(Damage.outTraceResult.vecEndPos));
@@ -863,7 +832,6 @@ void CGenericItem::StrikeLand()
 	Parameters.add(Damage.AttackHit ? "1" : "0");
 	CallScriptEvent(CurrentAttack->CallbackName + "_strike", &Parameters);
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Reset script variables");
 #endif
 }
 void CGenericItem::StrikeHold()
@@ -874,8 +842,6 @@ void CGenericItem::StrikeHold()
 //Uses ammo.  Projectiles or MP
 bool CGenericItem::UseAmmo(int iAmt)
 {
-	startdbg;
-	dbg("Begin");
 	if (!m_pOwner || !CurrentAttack)
 		return false;
 
@@ -1037,7 +1003,6 @@ bool CGenericItem::UseAmmo(int iAmt)
 	if (CurrentAttack->flMPDrain)
 		m_pOwner->Give(GIVE_MP, -CurrentAttack->flMPDrain);
 
-	enddbg;
 	return true;
 }
 
@@ -1185,8 +1150,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 /*CBaseEntity *DoDamage( damage_t &Damage )
 {
-	startdbg;
-	dbg( "Begin" );
+	try {
 
 	//Old DoDamage parameters
 	entvars_t *pInflictor = Damage.pevInflictor;
@@ -1237,12 +1201,10 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 	//BeamEffect( vecSrc, vecEnd, iBeam, 0, 0, 100, 10, 0, 255, 255, 255, 255, 20 );
 
-	//SetDebugProgress( ItemThinkProgress, "DoDamage - Check special power damage (rogue backstab)" );
 	//bActualHit: Did the combination of luck&skill produce a hit?
 	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
 	//	fReportHit = FALSE, fDodged = FALSE;
 
-	SetDebugProgress( ItemThinkProgress, "DoDamage - Check hit" );
 	bool fReportHit = false;
 	Damage.AttackHit = false;
 
@@ -1256,7 +1218,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 		pEntity = CBaseEntity::Instance(Damage.outTraceResult.pHit);
 
-		SetDebugProgress( ItemThinkProgress, "DoDamage - Entity hit" );
 		int iAccuracyRoll = 0;
 		if( pEntity )
 		{
@@ -1345,7 +1306,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 			}
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Check if damage is dealt" );
 			bool fDodged = false;
 			if( Damage.AttackHit )
 			{
@@ -1386,7 +1346,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 					else
 						flDamage = ((CMSMonster *)pEntity)->TraceAttack( Damage );
 
-					SetDebugProgress( ItemThinkProgress, "DoDamage - Apply damage" );
 					if( flDamage > 0 )  // flDamage < 0 means monster dodged it
 						ApplyMultiDamage( pInflictor, pAttacker );
 					else if( !flDamage && !CBaseEntity::Instance(pAttacker)->IsPlayer() )
@@ -1405,7 +1364,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 
 			if( pVictim ) pVictim->Attacked( CBaseEntity::Instance( pAttacker ), Damage );
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Report damage" );
 			if( fReportHit )
 			{
 				char szStats[32], szDamage[32], szHitMiss[32];
@@ -1428,7 +1386,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 				}
 			}
 
-			SetDebugProgress( ItemThinkProgress, "DoDamage - Countereffect" );
 			pEntity->CounterEffect( pEntityInflictor, 0, (void *)&flDamage );
 			//if( fHitWorld )
 			//{
@@ -1450,7 +1407,6 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 EndDamage:
 
 	//Set some script variables
-	dbg( "Set post damage variables" );
 	if( pAttMonster )
 	{
 		Vector &EndPos = Damage.AttackHit ? Damage.outTraceResult.vecEndPos : Damage.vecEnd;
@@ -1467,7 +1423,6 @@ EndDamage:
 
 	//Ranged attack... Find all valid targets and call non-ranged DoDamage on them
 	CBaseEntity *pClosestHit = pEntity;
-	dbg( "Do radius damages" );
 	if( Damage.flAOERange )
 	{
 		CBaseEntity *pTarget = NULL;
@@ -1485,7 +1440,6 @@ EndDamage:
 				continue;	//Only hit the owner if damage is reflective
 
 			TraceResult	tr;
-			dbg( "Do radius Traceline" );
 			UTIL_TraceLine ( Damage.vecSrc, pTarget->Center(), ignore_monsters, ENT(Damage.pevInflictor), &tr );
 
 			if( tr.flFraction < 1.0f )
@@ -1509,18 +1463,16 @@ EndDamage:
 	}
 
 	return pClosestHit;
-	enddbg( "DoDamage()" );
+	}
 	return NULL;
 }*/
 CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget);
 
 void DoDamage(damage_t &Damage, hitent_list &Hits)
 {
-	startdbg;
 	//Find all valid targets
 	//If AOE, hit all targets in area
 	//If non-AOE, just hit the closest one in front of me
-	dbg("Find Targets");
 	//mslist<hitent_t> Hits;
 	Hits.clearitems();
 
@@ -1544,7 +1496,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 				continue; //Only hit the owner if damage is reflective
 
 			TraceResult tr;
-			dbg("Do radius Traceline");
 			UTIL_TraceLine(Damage.vecSrc, pTarget->Center(), ignore_monsters, Damage.pInflictor->edict(), &tr);
 
 			if (tr.flFraction < 1.0f)
@@ -1584,7 +1535,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		}
 	}
 
-	dbg("Damage Targets");
 	if (!Damage.flAOERange)
 	{
 		if (Hits.size())
@@ -1593,7 +1543,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 			{
 				//Thothie FEB2009 - critical crash fix - make sure attacker is alive when passing damage
 				//- if he damages multiple targets while dead, it causes crash
-				dbg("Damage Targets->DoDamage");
 				CBaseEntity *pDmgEnt = Damage.pAttacker;
 				//if ( pDmgEnt->IsAlive() ) DoDamage( Damage, Hits[h].pEntity );
 				if (pDmgEnt)
@@ -1612,7 +1561,6 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		}
 		else
 		{
-			dbg("Damage Targets->Tracelin");
 			//Didn't hit any NPCs with a normal attack.  Do a traceline to hit worldmodels, breakables, etc.
 			int trflags = MSTRACE_SOLIDSHIELDS;
 
@@ -1634,427 +1582,415 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 			//BeamEffect( vecSrc, vecEnd, iBeam, 0, 0, 100, 10, 0, 255, 255, 255, 255, 20 );
 		}
 	}
-
-	enddbg;
 }
 
 //MIB MAR2008a - massive changes
-CBaseEntity *DoDamage(damage_t &Damage, CBaseEntity *pTarget)
+CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 {
-	startdbg;
-	dbg("Hit Target");
+	try {
+		if (FBitSet(Damage.iDamageType, DMG_NONE))
+			return pTarget; //Don't do any damage, but target the ent
 
-	if (FBitSet(Damage.iDamageType, DMG_NONE))
-		return pTarget; //Don't do any damage, but target the ent
+		CBaseEntity *pEntityAttacker = Damage.pAttacker;
+		CBaseEntity *pEntityInflictor = Damage.pInflictor;
 
-	CBaseEntity *pEntityAttacker = Damage.pAttacker;
-	CBaseEntity *pEntityInflictor = Damage.pInflictor;
+		char sz[256] = "";
 
-	char sz[256] = "";
+		if (!pEntityAttacker)
+			return NULL; //This happens with arrows sometimes... for some reason....
 
-	if (!pEntityAttacker)
-		return NULL; //This happens with arrows sometimes... for some reason....
+		CMSMonster *pAttMonster = pEntityAttacker->IsMSMonster() ? (CMSMonster *)pEntityAttacker : NULL;	//Attacking Monster	(Can be NULL)
+		CBasePlayer *pPlayerAttacker = pEntityAttacker->IsPlayer() ? (CBasePlayer *)pEntityAttacker : NULL; //Attacking Player	(Can be NULL)
+		CGenericItem *pItemInflictor = pEntityInflictor ? (pEntityInflictor->IsMSItem() ? (CGenericItem *)pEntityInflictor : NULL) : NULL;
 
-	CMSMonster *pAttMonster = pEntityAttacker->IsMSMonster() ? (CMSMonster *)pEntityAttacker : NULL;	//Attacking Monster	(Can be NULL)
-	CBasePlayer *pPlayerAttacker = pEntityAttacker->IsPlayer() ? (CBasePlayer *)pEntityAttacker : NULL; //Attacking Player	(Can be NULL)
-	CGenericItem *pItemInflictor = pEntityInflictor ? (pEntityInflictor->IsMSItem() ? (CGenericItem *)pEntityInflictor : NULL) : NULL;
+		//This might be a summon, or other effect that is doing damage for the player...
+		if (pAttMonster && !pPlayerAttacker)
+		{ //if so, assign the player pointer correctly
+			CBaseEntity *pExpOwner = pAttMonster->RetrieveEntity(ENT_EXPOWNER);
+			if (pExpOwner && pExpOwner->IsPlayer())
+				pPlayerAttacker = (CBasePlayer *)pExpOwner;
+		}
 
-	//This might be a summon, or other effect that is doing damage for the player...
-	if (pAttMonster && !pPlayerAttacker)
-	{ //if so, assign the player pointer correctly
-		CBaseEntity *pExpOwner = pAttMonster->RetrieveEntity(ENT_EXPOWNER);
-		if (pExpOwner && pExpOwner->IsPlayer())
-			pPlayerAttacker = (CBasePlayer *)pExpOwner;
-	}
+		//bActualHit: Did the combination of luck&skill produce a hit?
+		//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
+		//	fReportHit = FALSE, fDodged = FALSE;
 
-	//bActualHit: Did the combination of luck&skill produce a hit?
-	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
-	//	fReportHit = FALSE, fDodged = FALSE;
+		bool fReportHit = false;
+		Damage.AttackHit = true;
+		Damage.AttackCrit = false;
 
-	SetDebugProgress(ItemThinkProgress, "DoDamage - Check hit");
-	bool fReportHit = false;
-	Damage.AttackHit = true;
-	Damage.AttackCrit = false;
+		CMSMonster *pVictim = NULL;
 
-	CMSMonster *pVictim = NULL;
-
-	int iAccuracyRoll = 0;
-	if (pTarget)
-	{
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Entity hit");
-		//Hit an entity
-		//Check if I can damage it
-		Damage.AttackHit = pEntityAttacker->CanDamage(pTarget);
-		fReportHit = false;
-
-		if (pAttMonster && Damage.AttackHit)
+		int iAccuracyRoll = 0;
+		if (pTarget)
 		{
-			//Hit a monster...
-			fReportHit = true;
+			//Hit an entity
+			//Check if I can damage it
+			Damage.AttackHit = pEntityAttacker->CanDamage(pTarget);
+			fReportHit = false;
 
-			pVictim = pTarget->IsMSMonster() ? (CMSMonster *)pTarget : NULL;
-
-			if (pVictim && pVictim->IsAlive())
+			if (pAttMonster && Damage.AttackHit)
 			{
-				//If player is attacking himself, don't report
-				if (pPlayerAttacker == pVictim)
-					fReportHit = false;
+				//Hit a monster...
+				fReportHit = true;
 
-				//Check if your horrid skill or bad luck made you miss:
-				iAccuracyRoll = RANDOM_LONG(0, 99);
-				if (iAccuracyRoll < (100 - Damage.flHitPercentage))
+				pVictim = pTarget->IsMSMonster() ? (CMSMonster *)pTarget : NULL;
+
+				if (pVictim && pVictim->IsAlive())
 				{
-					//used to be here twice? removed one iteration.
+					//If player is attacking himself, don't report
+					if (pPlayerAttacker == pVictim)
+						fReportHit = false;
+
+					//Check if your horrid skill or bad luck made you miss:
+					iAccuracyRoll = RANDOM_LONG(0, 99);
+					if (iAccuracyRoll < (100 - Damage.flHitPercentage))
+					{
+						//used to be here twice? removed one iteration.
+						Damage.AttackHit = false;
+					}
+
+					//Check for critical hits and multiply damage accordingly
+					if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
+						Damage.flDamage *= Damage.flCritMutli;
+						Damage.AttackCrit = true;
+						pItemInflictor->CallScriptEvent("weapon_crit_success"); //call script event for item
+					}
+				}
+				else
+				{
+					// Always hit world entities or dead bodies
+
+					Damage.AttackHit = true;
+					fReportHit = false;
+				}
+			}
+
+			bool fDodged = false;
+			if (Damage.AttackHit) //check again, because it might have been canceled in game_damaged_other
+			{
+				//Hit sounds are now played from TraceAttack
+				ClearMultiDamage();
+				Damage.AccuracyRoll = (Damage.flHitPercentage - iAccuracyRoll);
+
+				if (pEntityInflictor)
+					pEntityInflictor->StoreEntity(pTarget, ENT_LASTSTRUCKBYME);
+				if (pAttMonster)
+				{
+					pAttMonster->StoreEntity(pTarget, ENT_LASTSTRUCKBYME);
+					static msstringlist Params;
+					Params.clearitems();
+
+					Params.add(EntToString(pTarget));
+					Params.add(UTIL_VarArgs("%f", Damage.flDamage));
+					Params.add(Damage.sDamageType.c_str());
+					Params.add(Damage.dodamage_event.len() > 0 ? Damage.dodamage_event.c_str() : "(none)"); //Thothie DEC2017_01 - see below
+					pAttMonster->CallScriptEvent("game_damaged_other", &Params);
+
+					if (pItemInflictor)
+					{
+						msstring CallbackName = "game_damaged_other";
+						if (Damage.ItemCallBackPrefix)
+							CallbackName = *Damage.ItemCallBackPrefix + "_damaged_other";
+						pItemInflictor->m_CurrentDamage = &Damage; //m_CurrentDamage used by script commands to change damage
+						pItemInflictor->CallScriptEvent(CallbackName, &Params);
+						if(Damage.ItemCallBackPrefix)
+							pItemInflictor->CallScriptEvent("weapon_damaged_other", &Params); //Thothie OCT2016_05 adding generic callback for weapon mods
+						pItemInflictor->m_CurrentDamage = NULL;
+					}
+
+					//Script decided to change or cancel damage from within game_damaged_other
+					if (pAttMonster->m_ReturnData.len())
+					{
+						//Each script either sets a ratio of damage to be dealt or cancels the damage
+						msstringlist DamageRatios;
+						TokenizeString(pAttMonster->m_ReturnData, DamageRatios);
+						for (int i = 0; i < DamageRatios.size(); i++)
+						{
+							if (DamageRatios[i] == "canceldamage")
+							{
+								Damage.AttackHit = false;
+								fReportHit = false;
+								pTarget = NULL;
+								goto EndDamage; //Script canceled, skip the rest
+							}
+
+							Damage.flDamage *= atof(DamageRatios[i]);
+						}
+					}
+				}
+
+				//Deal Damage
+				//===========
+				entvars_t *pevInflictor = Damage.pInflictor ? Damage.pInflictor->pev : NULL;
+				entvars_t *pevAttacker = Damage.pAttacker ? Damage.pAttacker->pev : NULL;
+				float flDamage = Damage.flDamage;
+				//Non-ranged attack
+				if (!pTarget->IsMSMonster())
+					flDamage = pTarget->TraceAttack(pevInflictor, pevAttacker, Damage.flDamage, gpGlobals->v_forward, &Damage.outTraceResult, Damage.iDamageType, Damage.AccuracyRoll);
+				else
+					flDamage = ((CMSMonster *)pTarget)->TraceAttack(Damage);
+
+				if (flDamage > 0) // flDamage < 0 means monster dodged it
+				{
+					//MiB Mar2008a - Relocated exp assigning here so that armor and other
+					//damage recalculations could be done (stops exp from parry and things
+					//of that sort)
+					if (pPlayerAttacker &&				 //Only if player is attacking...
+						pVictim && !pVictim->IsPlayer()) //Only when attacking monsters...
+					{
+						//Advance your skill based on monster difficulty and num of swings
+						//Find the stat that increases from this attack
+						if(Damage.ExpUseProps)
+						{
+							pVictim->MarkDamage(pPlayerAttacker, Damage.ExpStat, Damage.ExpProp, flDamage);
+						}
+						else
+						{
+							pVictim->MarkDamage(pPlayerAttacker, pPlayerAttacker->ActiveItem(), flDamage);
+						}
+					}
+
+					//ALERT( at_console,"ApplyMultiDamage: %s \n",pPlayerAttacker->DisplayName());
+					if (pevAttacker)
+						ApplyMultiDamage(pevInflictor, pevAttacker); //Thothie FEB2009 - experimenting
+				}
+				else if (!flDamage && !Damage.pAttacker->IsPlayer())
+				{
+					//If monsters do 0 damage, just consider it not hitting
+					//This also prevents orc archers arrows from sticking into
+					//other orcs
+					goto EndDamage;
+				}
+				else if (flDamage == -1)
+				{
+					ClearMultiDamage();
+					fDodged = true;
 					Damage.AttackHit = false;
 				}
-
-				//Check for critical hits and multiply damage accordingly
-				if (iAccuracyRoll > Damage.flCritThreshold && Damage.flCritThreshold > 0) {
-					Damage.flDamage *= Damage.flCritMutli;
-					Damage.AttackCrit = true;
-					pItemInflictor->CallScriptEvent("weapon_crit_success"); //call script event for item
-				}
 			}
-			else
+			if (pVictim)
+				pVictim->Attacked(pEntityAttacker, Damage);
+
+			//Report Damage
+			//=============
+
+			if (fReportHit)
 			{
-				// Always hit world entities or dead bodies
+				if (Damage.flDamage > 0)
+				{	
+					//szStats is no longer used since removing accuracy.
+					//char szStats[32], szDamage[32], szHitMiss[32];
+					char szDamage[32], szHitMiss[32];
 
-				Damage.AttackHit = true;
-				fReportHit = false;
-			}
-		}
+					//Thothie JAN2013b_25 - elemental codes
+					msstring dtype_code = Damage.sDamageType.c_str();
+					char element_code[11] = "";
+					if (dtype_code.starts_with("fire"))
+						strncpy(element_code,  " fire", sizeof(element_code) );
+					else if (dtype_code.starts_with("cold"))
+						strncpy(element_code,  " cold", sizeof(element_code) );
+					else if (dtype_code.starts_with("lightning"))
+						strncpy(element_code,  " lightning", sizeof(element_code) );
+					else if (dtype_code.starts_with("poison"))
+						strncpy(element_code,  " poison", sizeof(element_code) );
+					else if (dtype_code.starts_with("acid"))
+						strncpy(element_code,  " acid", sizeof(element_code) );
+					else if (dtype_code.starts_with("slash"))
+						strncpy(element_code,  " slash", sizeof(element_code) );
+					else if (dtype_code.starts_with("blunt"))
+						strncpy(element_code,  " blunt", sizeof(element_code) );
+					else if (dtype_code.starts_with("pierce"))
+						strncpy(element_code,  " pierce", sizeof(element_code) );
+					else if (dtype_code.starts_with("magic"))
+						strncpy(element_code,  " magic", sizeof(element_code) );
+					else if (dtype_code.starts_with("holy"))
+						strncpy(element_code,  " holy", sizeof(element_code) );
+					else if (dtype_code.starts_with("dark"))
+						strncpy(element_code,  " dark", sizeof(element_code) );
+					else if (dtype_code.starts_with("apostle"))
+						strncpy(element_code,  " apostle", sizeof(element_code) );
+					else if (dtype_code.starts_with("earth"))
+						strncpy(element_code,  " earth", sizeof(element_code) );
 
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Check if damage is dealt");
-		bool fDodged = false;
-		if (Damage.AttackHit) //check again, because it might have been canceled in game_damaged_other
-		{
-			//Hit sounds are now played from TraceAttack
-			ClearMultiDamage();
-			Damage.AccuracyRoll = (Damage.flHitPercentage - iAccuracyRoll);
-
-			if (pEntityInflictor)
-				pEntityInflictor->StoreEntity(pTarget, ENT_LASTSTRUCKBYME);
-			if (pAttMonster)
-			{
-				pAttMonster->StoreEntity(pTarget, ENT_LASTSTRUCKBYME);
-				static msstringlist Params;
-				Params.clearitems();
-
-				Params.add(EntToString(pTarget));
-				Params.add(UTIL_VarArgs("%f", Damage.flDamage));
-				Params.add(Damage.sDamageType.c_str());
-				Params.add(Damage.dodamage_event.len() > 0 ? Damage.dodamage_event.c_str() : "(none)"); //Thothie DEC2017_01 - see below
-				pAttMonster->CallScriptEvent("game_damaged_other", &Params);
-
-				if (pItemInflictor)
-				{
-					msstring CallbackName = "game_damaged_other";
-					if (Damage.ItemCallBackPrefix)
-						CallbackName = *Damage.ItemCallBackPrefix + "_damaged_other";
-					pItemInflictor->m_CurrentDamage = &Damage; //m_CurrentDamage used by script commands to change damage
-					pItemInflictor->CallScriptEvent(CallbackName, &Params);
-					if(Damage.ItemCallBackPrefix)
-						pItemInflictor->CallScriptEvent("weapon_damaged_other", &Params); //Thothie OCT2016_05 adding generic callback for weapon mods
-					pItemInflictor->m_CurrentDamage = NULL;
-				}
-
-				//Script decided to change or cancel damage from within game_damaged_other
-				if (pAttMonster->m_ReturnData.len())
-				{
-					//Each script either sets a ratio of damage to be dealt or cancels the damage
-					msstringlist DamageRatios;
-					TokenizeString(pAttMonster->m_ReturnData, DamageRatios);
-					for (int i = 0; i < DamageRatios.size(); i++)
+					strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
+					strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss));
+					//our hits can not be inverted or they will seem weird with no accuracy
+					// this is no longer needed with missing being only possible during lightning debuffs. Enabling this would mean missing with high numbers during lightning so obfuscating.
+					//_snprintf(szStats, sizeof(szStats), "(%i)",  (iAccuracyRoll) );
+					
+					//Thothie SEP2019_22 - report resistance BEGIN
+					bool tdm_found_entry = false;
+					float tdm_modifier;
+					if (pVictim)
 					{
-						if (DamageRatios[i] == "canceldamage")
+						for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
 						{
-							Damage.AttackHit = false;
-							fReportHit = false;
-							pTarget = NULL;
-							goto EndDamage; //Script canceled, skip the rest
-						}
-
-						Damage.flDamage *= atof(DamageRatios[i]);
-					}
-				}
-			}
-
-			//Deal Damage
-			//===========
-			dbg("Deal Damage->entvars_t");
-			entvars_t *pevInflictor = Damage.pInflictor ? Damage.pInflictor->pev : NULL;
-			entvars_t *pevAttacker = Damage.pAttacker ? Damage.pAttacker->pev : NULL;
-			float flDamage = Damage.flDamage;
-			//Non-ranged attack
-			dbg("Deal Damage->pTarget");
-			if (!pTarget->IsMSMonster())
-				flDamage = pTarget->TraceAttack(pevInflictor, pevAttacker, Damage.flDamage, gpGlobals->v_forward, &Damage.outTraceResult, Damage.iDamageType, Damage.AccuracyRoll);
-			else
-				flDamage = ((CMSMonster *)pTarget)->TraceAttack(Damage);
-
-			SetDebugProgress(ItemThinkProgress, "DoDamage - Apply damage");
-			if (flDamage > 0) // flDamage < 0 means monster dodged it
-			{
-				//MiB Mar2008a - Relocated exp assigning here so that armor and other
-				//damage recalculations could be done (stops exp from parry and things
-				//of that sort)
-				dbg("Store XP for Attack");
-				if (pPlayerAttacker &&				 //Only if player is attacking...
-					pVictim && !pVictim->IsPlayer()) //Only when attacking monsters...
-				{
-					//Advance your skill based on monster difficulty and num of swings
-					//Find the stat that increases from this attack
-					if(Damage.ExpUseProps)
-					{
-						pVictim->MarkDamage(pPlayerAttacker, Damage.ExpStat, Damage.ExpProp, flDamage);
-					}
-					else
-					{
-						pVictim->MarkDamage(pPlayerAttacker, pPlayerAttacker->ActiveItem(), flDamage);
-					}
-				}
-
-				dbg("ApplyMultiDamage");
-				//ALERT( at_console,"ApplyMultiDamage: %s \n",pPlayerAttacker->DisplayName());
-				if (pevAttacker)
-					ApplyMultiDamage(pevInflictor, pevAttacker); //Thothie FEB2009 - experimenting
-			}
-			else if (!flDamage && !Damage.pAttacker->IsPlayer())
-			{
-				//If monsters do 0 damage, just consider it not hitting
-				//This also prevents orc archers arrows from sticking into
-				//other orcs
-				dbg("EndDamage");
-				goto EndDamage;
-			}
-			else if (flDamage == -1)
-			{
-				dbg("NoDamage");
-				ClearMultiDamage();
-				fDodged = true;
-				Damage.AttackHit = false;
-			}
-		}
-		if (pVictim)
-			pVictim->Attacked(pEntityAttacker, Damage);
-
-		//Report Damage
-		//=============
-
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Report damage");
-		if (fReportHit)
-		{
-			if (Damage.flDamage > 0)
-			{	
-				//szStats is no longer used since removing accuracy.
-				//char szStats[32], szDamage[32], szHitMiss[32];
-				char szDamage[32], szHitMiss[32];
-
-				//Thothie JAN2013b_25 - elemental codes
-				msstring dtype_code = Damage.sDamageType.c_str();
-				char element_code[11] = "";
-				if (dtype_code.starts_with("fire"))
-					 strncpy(element_code,  " fire", sizeof(element_code) );
-				else if (dtype_code.starts_with("cold"))
-					 strncpy(element_code,  " cold", sizeof(element_code) );
-				else if (dtype_code.starts_with("lightning"))
-					 strncpy(element_code,  " lightning", sizeof(element_code) );
-				else if (dtype_code.starts_with("poison"))
-					 strncpy(element_code,  " poison", sizeof(element_code) );
-				else if (dtype_code.starts_with("acid"))
-					 strncpy(element_code,  " acid", sizeof(element_code) );
-				else if (dtype_code.starts_with("slash"))
-					 strncpy(element_code,  " slash", sizeof(element_code) );
-				else if (dtype_code.starts_with("blunt"))
-					 strncpy(element_code,  " blunt", sizeof(element_code) );
-				else if (dtype_code.starts_with("pierce"))
-					 strncpy(element_code,  " pierce", sizeof(element_code) );
-				else if (dtype_code.starts_with("magic"))
-					 strncpy(element_code,  " magic", sizeof(element_code) );
-				else if (dtype_code.starts_with("holy"))
-					 strncpy(element_code,  " holy", sizeof(element_code) );
-				else if (dtype_code.starts_with("dark"))
-					 strncpy(element_code,  " dark", sizeof(element_code) );
-				else if (dtype_code.starts_with("apostle"))
-					 strncpy(element_code,  " apostle", sizeof(element_code) );
-				else if (dtype_code.starts_with("earth"))
-					 strncpy(element_code,  " earth", sizeof(element_code) );
-
-				 strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
-				 strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss));
-				 //our hits can not be inverted or they will seem weird with no accuracy
-				 // this is no longer needed with missing being only possible during lightning debuffs. Enabling this would mean missing with high numbers during lightning so obfuscating.
-				 //_snprintf(szStats, sizeof(szStats), "(%i)",  (iAccuracyRoll) );
-				
-				//Thothie SEP2019_22 - report resistance BEGIN
-				bool tdm_found_entry = false;
-				float tdm_modifier;
-				if (pVictim)
-				{
-					for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
-					{
-						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
-						msstring tdm_damage_type = TDM.DamageType;
-						if (dtype_code.contains(tdm_damage_type))
-						{
-							tdm_modifier = TDM.modifier;
-							tdm_found_entry = true;
-							break;
+							CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
+							msstring tdm_damage_type = TDM.DamageType;
+							if (dtype_code.contains(tdm_damage_type))
+							{
+								tdm_modifier = TDM.modifier;
+								tdm_found_entry = true;
+								break;
+							}
 						}
 					}
-				}
-				
-				msstring tdm_engrish = " ";
-				if ( tdm_found_entry )
-				{
-					if ( tdm_modifier < 1 )
+					
+					msstring tdm_engrish = " ";
+					if ( tdm_found_entry )
 					{
-						tdm_engrish = UTIL_VarArgs("[%i%% resistant]", int((1 - tdm_modifier)*100.0));
-					}
-					else if ( tdm_modifier > 1 )
-					{
-						tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]", int((tdm_modifier-1)*100.0));
-					}
-				}
-				//Thothie SEP2019_22 - report resistance END	
-				
-				//Thothie SEP2019_22 - changing report syntax to be shorter
-				if (pPlayerAttacker)
-				{
-					// Old format
-					//_snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
-					//	pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
-					//	pTarget->DisplayName(),
-					//	szStats, szHitMiss, szDamage);
-
-					if (Damage.AttackHit)
-					{
-						//Hit <prefix> <name> for <dmg>(acc/req) [resist] <crit?>
-						// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
-						//_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats, Damage.AttackCrit ? "CRIT!" : "");
-
-						if (Damage.AttackCrit)
-							_snprintf(sz, sizeof(sz), "Hit %s: %s %s CRIT! (%i/%i)", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), iAccuracyRoll, (int)Damage.flCritThreshold);
-						else
-							_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
-						
-					}
-					else
-					{
-						if (!fDodged)
+						if ( tdm_modifier < 1 )
 						{
-							// Missed <prefix> <name> (acc/req)
-							// New implementation always hits unless affected by lightning or other forms of accuracy reduction.
-							// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
-							// _snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
-							_snprintf(sz, sizeof(sz), "Missed %s.", pTarget->DisplayName());
+							tdm_engrish = UTIL_VarArgs("[%i%% resistant]", int((1 - tdm_modifier)*100.0));
 						}
-						else
+						else if ( tdm_modifier > 1 )
 						{
-							//<prefix> <name> parries the attack!
-							_snprintf(sz, sizeof(sz), "%s parries the attack!", pTarget->DisplayName());
+							tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]", int((tdm_modifier-1)*100.0));
 						}
 					}
-
-					pPlayerAttacker->SendEventMsg(HUDEVENT_ATTACK, sz);
-				}
-
-				if (pVictim && pVictim->IsPlayer() && pEntityAttacker && pVictim != pEntityAttacker)
-				{
-					CMSMonster* pMonster = (CMSMonster*)pEntityAttacker;
-					CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
-
-					// Old format
-				 //_snprintf(sz, sizeof(sz), "%s attacks you. %s %s %s %s", 
-				 //		SPEECH::NPCName(pMonster, true),
-					//	szStats, 
-					//	szHitMiss, 
-					//	szDamage,
-					//	tdm_engrish.c_str()
-					//);
-
+					//Thothie SEP2019_22 - report resistance END	
+					
 					//Thothie SEP2019_22 - changing report syntax to be shorter
-					//<name> hits you for <damage/element> [resist]
-					if (Damage.AttackHit) {
-						_snprintf(sz, sizeof(sz), "%s hits you: %s %s", SPEECH::NPCName(pMonster, true), szDamage, tdm_engrish.c_str());
-					}
-					else { 
-						//enemy hits need to be inverted or they will seem weird
-						//enemies still need certain rolls to hit, for now also obfuscating for consistency.
-						//_snprintf(szStats, sizeof(szStats), "(%i)", (100 - iAccuracyRoll));
-						_snprintf(sz, sizeof(sz), "%s misses you.", SPEECH::NPCName(pMonster, true));
+					if (pPlayerAttacker)
+					{
+						// Old format
+						//_snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
+						//	pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
+						//	pTarget->DisplayName(),
+						//	szStats, szHitMiss, szDamage);
+
+						if (Damage.AttackHit)
+						{
+							//Hit <prefix> <name> for <dmg>(acc/req) [resist] <crit?>
+							// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
+							//_snprintf(sz, sizeof(sz), "Hit %s: %s %s %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), szStats, Damage.AttackCrit ? "CRIT!" : "");
+
+							if (Damage.AttackCrit)
+								_snprintf(sz, sizeof(sz), "Hit %s: %s %s CRIT! (%i/%i)", pTarget->DisplayName(), szDamage, tdm_engrish.c_str(), iAccuracyRoll, (int)Damage.flCritThreshold);
+							else
+								_snprintf(sz, sizeof(sz), "Hit %s: %s %s", pTarget->DisplayName(), szDamage, tdm_engrish.c_str());
+							
+						}
+						else
+						{
+							if (!fDodged)
+							{
+								// Missed <prefix> <name> (acc/req)
+								// New implementation always hits unless affected by lightning or other forms of accuracy reduction.
+								// (acc/req) no longer part of attack calculation, hiding to obfuscate otherwise weird high-roll misses due to new calculation when affected by lightning.
+								// _snprintf(sz, sizeof(sz), "Missed %s: %s", pTarget->DisplayName(), szStats);
+								_snprintf(sz, sizeof(sz), "Missed %s.", pTarget->DisplayName());
+							}
+							else
+							{
+								//<prefix> <name> parries the attack!
+								_snprintf(sz, sizeof(sz), "%s parries the attack!", pTarget->DisplayName());
+							}
+						}
+
+						pPlayerAttacker->SendEventMsg(HUDEVENT_ATTACK, sz);
 					}
 
-					pPlayer->SendEventMsg(HUDEVENT_ATTACKED, sz);
+					if (pVictim && pVictim->IsPlayer() && pEntityAttacker && pVictim != pEntityAttacker)
+					{
+						CMSMonster* pMonster = (CMSMonster*)pEntityAttacker;
+						CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
+
+						// Old format
+					//_snprintf(sz, sizeof(sz), "%s attacks you. %s %s %s %s", 
+					//		SPEECH::NPCName(pMonster, true),
+						//	szStats, 
+						//	szHitMiss, 
+						//	szDamage,
+						//	tdm_engrish.c_str()
+						//);
+
+						//Thothie SEP2019_22 - changing report syntax to be shorter
+						//<name> hits you for <damage/element> [resist]
+						if (Damage.AttackHit) {
+							_snprintf(sz, sizeof(sz), "%s hits you: %s %s", SPEECH::NPCName(pMonster, true), szDamage, tdm_engrish.c_str());
+						}
+						else { 
+							//enemy hits need to be inverted or they will seem weird
+							//enemies still need certain rolls to hit, for now also obfuscating for consistency.
+							//_snprintf(szStats, sizeof(szStats), "(%i)", (100 - iAccuracyRoll));
+							_snprintf(sz, sizeof(sz), "%s misses you.", SPEECH::NPCName(pMonster, true));
+						}
+
+						pPlayer->SendEventMsg(HUDEVENT_ATTACKED, sz);
+					}
+				} //endif Damage.flDamage > 0
+			}
+
+			pTarget->CounterEffect(pEntityInflictor, 0, (void *)&Damage.flDamage);
+			//if( fHitWorld )
+			//{
+			//	if( pTarget->MSProperties()&ITEM_SHIELD )
+			//		pTarget->CounterEffect( MSInstance(ENT(pInflictor)), ITEM_SHIELD, (void *)&flDamage );
+			//}
+
+			// Make a decal
+			if (!Damage.nodecal)
+				DecalGunshot(&Damage.outTraceResult, BULLET_PLAYER_CROWBAR);
+
+			if (pEntityAttacker)
+			{
+				float Range = 128 + Damage.flDamage * 90; //Min 128 units, and add 90 units for each dmg pt
+				CSoundEnt::InsertSound(pEntityAttacker, "combat", Damage.outTraceResult.vecEndPos, Range, 0.3f, 0);
+			}
+		}
+
+	EndDamage:
+
+		//Set some script variables
+		if (pAttMonster)
+		{
+			Vector &EndPos = Damage.AttackHit ? Damage.outTraceResult.vecEndPos : Damage.vecEnd;
+
+			static msstringlist Parameters;
+			Parameters.clearitems();
+			Parameters.add(Damage.AttackHit ? "1" : "0");
+			Parameters.add(pTarget ? msstring(EntToString(pTarget)) : msstring("none"));
+			Parameters.add(VecToString(Damage.vecSrc));
+			Parameters.add(VecToString(EndPos));
+			Parameters.add(Damage.sDamageType.c_str());
+			char szDamage[32];
+			strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs(" %.1f damage.",  Damage.flDamage) : "0", sizeof(szDamage) );
+			Parameters.add(szDamage);
+			pAttMonster->CallScriptEvent("game_dodamage", &Parameters);
+			if (Damage.dodamage_event.len() > 0)
+			{
+				msstring dmgevent = Damage.dodamage_event;
+				dmgevent += "_dodamage";
+				if (dmgevent.starts_with("*"))
+				{
+					dmgevent = dmgevent.substr(1);
+					if (pItemInflictor) pItemInflictor->CallScriptEvent(dmgevent.c_str(), &Parameters);
+					else if (pEntityInflictor) pEntityInflictor->GetScripted()->CallScriptEvent(dmgevent.c_str(), &Parameters); //Allows dmgevent for non-item scripts
 				}
-			} //endif Damage.flDamage > 0
+				else
+				{
+					pAttMonster->CallScriptEvent(dmgevent.c_str(), &Parameters);
+				}
+			}
+
+			if (pItemInflictor)
+			{
+				msstring CallbackName = "game_dodamage";
+				if (Damage.ItemCallBackPrefix)
+					CallbackName = *Damage.ItemCallBackPrefix + "_dodamage";
+				pItemInflictor->CallScriptEvent("game_dodamage", &Parameters);
+			}
 		}
 
-		SetDebugProgress(ItemThinkProgress, "DoDamage - Countereffect");
-		pTarget->CounterEffect(pEntityInflictor, 0, (void *)&Damage.flDamage);
-		//if( fHitWorld )
-		//{
-		//	if( pTarget->MSProperties()&ITEM_SHIELD )
-		//		pTarget->CounterEffect( MSInstance(ENT(pInflictor)), ITEM_SHIELD, (void *)&flDamage );
-		//}
-
-		// Make a decal
-		if (!Damage.nodecal)
-			DecalGunshot(&Damage.outTraceResult, BULLET_PLAYER_CROWBAR);
-
-		if (pEntityAttacker)
-		{
-			float Range = 128 + Damage.flDamage * 90; //Min 128 units, and add 90 units for each dmg pt
-			CSoundEnt::InsertSound(pEntityAttacker, "combat", Damage.outTraceResult.vecEndPos, Range, 0.3f, 0);
-		}
+		return pTarget;
 	}
-
-EndDamage:
-
-	//Set some script variables
-	dbg("Set post damage variables");
-	if (pAttMonster)
+	catch(...)
 	{
-		Vector &EndPos = Damage.AttackHit ? Damage.outTraceResult.vecEndPos : Damage.vecEnd;
-
-		static msstringlist Parameters;
-		Parameters.clearitems();
-		Parameters.add(Damage.AttackHit ? "1" : "0");
-		Parameters.add(pTarget ? msstring(EntToString(pTarget)) : msstring("none"));
-		Parameters.add(VecToString(Damage.vecSrc));
-		Parameters.add(VecToString(EndPos));
-		Parameters.add(Damage.sDamageType.c_str());
-		char szDamage[32];
-		strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs(" %.1f damage.",  Damage.flDamage) : "0", sizeof(szDamage) );
-		Parameters.add(szDamage);
-		pAttMonster->CallScriptEvent("game_dodamage", &Parameters);
-		if (Damage.dodamage_event.len() > 0)
-		{
-			msstring dmgevent = Damage.dodamage_event;
-			dmgevent += "_dodamage";
-			if (dmgevent.starts_with("*"))
-			{
-				dmgevent = dmgevent.substr(1);
-				if (pItemInflictor) pItemInflictor->CallScriptEvent(dmgevent.c_str(), &Parameters);
-				else if (pEntityInflictor) pEntityInflictor->GetScripted()->CallScriptEvent(dmgevent.c_str(), &Parameters); //Allows dmgevent for non-item scripts
-			}
-			else
-			{
-				pAttMonster->CallScriptEvent(dmgevent.c_str(), &Parameters);
-			}
-		}
-
-		if (pItemInflictor)
-		{
-			msstring CallbackName = "game_dodamage";
-			if (Damage.ItemCallBackPrefix)
-				CallbackName = *Damage.ItemCallBackPrefix + "_dodamage";
-			pItemInflictor->CallScriptEvent("game_dodamage", &Parameters);
-		}
+		return nullptr;
 	}
 
-	return pTarget;
-	enddbg;
-	return NULL;
+	return nullptr;
 }
 #endif

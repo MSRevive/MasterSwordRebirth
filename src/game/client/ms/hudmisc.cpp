@@ -31,7 +31,6 @@
 #include "hudmisc.h"
 #include "hudid.h"
 #include "menu.h"
-#include "logger.h"
 
 void VectorAngles(const float *forward, float *angles);
 void CHudMisc_SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
@@ -184,9 +183,6 @@ void CHudMisc ::UserCmd_ChangeSayType(void)
 
 void CHudMisc ::UserCmd_RemovePack(void)
 {
-	startdbg;
-	dbg("Begin");
-
 	//Menu is already on, turn it off
 	if (gHUD.m_Menu->HideMyMenu(MENU_REMOVEPACK))
 		return;
@@ -230,8 +226,6 @@ void CHudMisc ::UserCmd_RemovePack(void)
 		gHUD.m_Menu->ShowMenu(iBitsValid, MenuText, CHudMisc_SelectMenuItem, MENU_REMOVEPACK);
 	else
 		player.SendEventMsg(HUDEVENT_UNABLE, "You are not wearing anything\n");
-
-	enddbg;
 }
 
 void CHudMisc::SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
@@ -290,9 +284,6 @@ void CHudMisc::SelectMenuItem(int idx, TCallbackMenu *pcbMenu)
 
 void CHudMisc ::UserCmd_Offer(void)
 {
-	startdbg;
-	dbg("Begin");
-
 	//Menu is already on, turn it off
 	if (gHUD.m_Menu->HideMyMenu(MENU_OFFER))
 		return;
@@ -344,14 +335,10 @@ void CHudMisc ::UserCmd_Offer(void)
 
 	strncat(MenuText, "\n(Press 'offer' again to cancel)\n", 35);
 	gHUD.m_Menu->ShowMenu(iBitsValid, MenuText, CHudMisc_SelectMenuItem, MENU_OFFER);
-	enddbg;
 }
 
 void CHudMisc ::UserCmd_Accept(void)
 {
-	startdbg;
-	dbg("Begin");
-
 	//Override 'accept' for when entering gold amounts
 	char sz[128];
 	if (m_OfferInfo.GoldScreen)
@@ -371,7 +358,6 @@ void CHudMisc ::UserCmd_Accept(void)
 	}
 
 	ServerCmd("accept\n");
-	enddbg;
 }
 /*void CHudMisc :: UserCmd_ListSkills( void )
 {

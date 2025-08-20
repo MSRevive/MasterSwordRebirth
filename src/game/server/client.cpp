@@ -38,7 +38,6 @@
 #include "netadr.h"
 #include "com_model.h"
 
-#include "logger.h"
 #include "svglobals.h"
 #include "mscharacter.h"
 #include "global.h"
@@ -46,6 +45,7 @@
 #include "ms/angelscript/ASEngineEventManager.h"
 #include "ms/angelscript/CAngelScriptManager.h"
 #include "ms/angelscript/ASModuleSystem.h"
+#include "mslogger.h"
 
 extern void PlayerPrecache();
 
@@ -68,7 +68,6 @@ void LinkUserMessages(void);
  */
 void set_suicide_frame(entvars_t *pev)
 {
-	startdbg;
 	ALERT(at_console, "SUICIDE FRAME\n");
 	if (!pev->model)
 		return; // allready gibbed
@@ -78,7 +77,6 @@ void set_suicide_frame(entvars_t *pev)
 	pev->movetype = MOVETYPE_TOSS;
 	pev->deadflag = DEAD_DEAD;
 	pev->nextthink = -1;
-	enddbg;
 }
 
 clientaddr_t g_NewClients[32];
@@ -92,11 +90,9 @@ called when a player connects to a server
 */
 BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[128])
 {
-	DBG_INPUT;
 	bool fSuccess = false;
-	startdbg;
 
-	logfile << Logger::LOG_INFO << "[ClientConnect]  ";
+	MS_INFO("[ClientConnect]	");
 	if (g_pGameRules)
 		fSuccess = g_pGameRules->ClientConnected(pEntity, pszName, pszAddress, szRejectReason) ? true : false;
 
@@ -110,7 +106,7 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 		strncpy(ClientInfo.Addr, pszAddress, sizeof(ClientInfo.Addr) );
 		ClientInfo.fDisplayedGreeting = false;
 		pEntity->free = false;
-		logfile << "Client Queue: [" << iPlayerOfs << "] " << pszAddress << "\n";
+		MS_INFO("Client Queue: [%i] %s", iPlayerOfs, pszAddress);
 		
 		// Fire AngelScript engine event for player connection
 		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -134,21 +130,20 @@ BOOL ClientConnect(edict_t *pEntity, const char *pszName, const char *pszAddress
 			
 			// Log handler count before firing event
 			int handlerCount = pEventManager->GetHandlerCount(EngineEventType::PLAYER_CONNECT);
-			logfile << Logger::LOG_INFO << "[DEBUG] Firing PlayerConnect event - handlers registered: " << handlerCount << "\n";
+			MS_DEBUG("[DEBUG] Firing PlayerConnect event - handlers registered: %i", handlerCount);
 			
 			pEventManager->FirePlayerConnectEvent(pszName ? pszName : "Unknown", steamID.c_str());
 		}
 		else
 		{
-			logfile << Logger::LOG_ERROR << "[DEBUG] ASEngineEventManager instance is null during player connect!\n";
+			MS_ERROR("[DEBUG] ASEngineEventManager instance is null during player connect!");
 		}
 	}
 	else
-		logfile << "Client rejected: " << szRejectReason << "\n";
+		MS_INFO("Client Rejected: %s", szRejectReason);
 
-	logfile << Logger::LOG_INFO << "[ClientConnect: Complete]\n";
+	MS_INFO("[ClientConnect: Complete]");
 
-	enddbg;
 	return fSuccess ? 1 : 0;
 }
 
@@ -165,14 +160,8 @@ GLOBALS ASSUMED SET:  g_fGameOver
 
 void ClientDisconnect(edict_t *pEntity)
 {
-	DBG_INPUT;
-	startdbg;
-
-	dbg("Begin");
 	if (g_fGameOver)
 		return;
-
-	dbg("Call pSound->Reset");
 
 	/*CSound *pSound;
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( pEntity ) );
@@ -180,7 +169,6 @@ void ClientDisconnect(edict_t *pEntity)
 	if ( pSound )
 		pSound->Reset();*/
 
-	dbg("Call g_pGameRules->ClientDisconnected");
 
 	// Fire AngelScript engine event for player disconnection (before cleanup)
 	ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
@@ -222,8 +210,6 @@ void ClientDisconnect(edict_t *pEntity)
 	//When the server is shutdown, this ClientDisconnect is called after gamerules has been deleted
 	if (g_pGameRules)
 		g_pGameRules->ClientDisconnected(pEntity);
-
-	enddbg;
 }
 
 // called by ClientKill and DeadThink
@@ -244,8 +230,6 @@ GLOBALS ASSUMED SET:  g_ulModelIndexPlayer
 */
 void ClientKill(edict_t *pEntity)
 {
-	startdbg;
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 
 	CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance(pev);
@@ -257,7 +241,6 @@ void ClientKill(edict_t *pEntity)
 		pPlayer->SendInfoMsg("You will die in 5 seconds...\n");
 	pPlayer->m_TimeTillSuicide = gpGlobals->time + (pPlayer->IsElite() ? 0.1f : 5.0f);
 	pPlayer->m_fNextSuicideTime = pPlayer->m_TimeTillSuicide + 5;
-	enddbg;
 }
 
 /*
@@ -269,10 +252,7 @@ called each time a player is spawned
 */
 void ClientPutInServer(edict_t *pEntity)
 {
-	startdbg;
-	DBG_INPUT;
-
-	logfile << Logger::LOG_INFO << "[ClientPutInServer]\n";
+	MS_INFO("[ClientPutInServer]");
 	CBasePlayer *pPlayer;
 
 	entvars_t *pev = &pEntity->v;
@@ -283,7 +263,7 @@ void ClientPutInServer(edict_t *pEntity)
 	if (!pPlayer->m_ClientAddress[0]) //Just joined the server, get address
 	{
 		int iPlayerOfs = ENTINDEX(pEntity) - 1;
-		logfile << Logger::LOG_INFO << "Client Address " << g_NewClients[iPlayerOfs].Addr << "... Slot [" << iPlayerOfs << "]\n";
+		MS_INFO("Client Address %s... Slot %i", g_NewClients[iPlayerOfs].Addr, iPlayerOfs);
 
 		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
 	}else{
@@ -293,7 +273,7 @@ void ClientPutInServer(edict_t *pEntity)
 	char msg[256];
 	_snprintf(msg, sizeof(msg), "Connecting %s (%s)\n", pPlayer->DisplayName(), pPlayer->m_ClientAddress);
 	g_engfuncs.pfnServerPrint(msg);
-	logfile << Logger::LOG_INFO << msg;
+	MS_INFO(msg);
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = UTIL_ComputeSteamID64(GETPLAYERAUTHID(pEntity));
@@ -303,7 +283,6 @@ void ClientPutInServer(edict_t *pEntity)
 
 	// Reset interpolation during first frame
 	pPlayer->pev->effects |= EF_NOINTERP;
-	enddbg;
 }
 
 #include "voice_gamemgr.h"
@@ -1855,11 +1834,9 @@ DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
 
 void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 {
-	DBG_INPUT;
-	startdbg;
 	int i;
 	CBaseEntity *pClass;
-	logfile << Logger::LOG_INFO << "World Activate..." << std::flush;
+	MS_INFO("World Activate...");
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
@@ -1885,7 +1862,6 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			Dbgstr += STRING(pClass->pev->targetname);
 			Dbgstr += ")";
 
-			dbg(Dbgstr);
 			try
 			{
 				pClass->Activate();
@@ -1908,7 +1884,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	if (!pGameMasterEnt)
 	{
-		logfile << Logger::LOG_INFO << "Spawning game master\n";
+		MS_INFO("Spawning game master");
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
 		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
 		if (NewMonster)
@@ -1923,8 +1899,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 	CSVGlobals::WriteScriptLog();
 
-	logfile << Logger::LOG_INFO << "World Activate END\n";
-	enddbg;
+	MS_INFO("World Activate END");
 }
 
 /*
@@ -2090,11 +2065,10 @@ Engine is going to shut down, allows setting a breakpoint in game .dll to catch 
 */
 void Sys_Error(const char *error_string)
 {
-	DBG_INPUT;
 	// Default case, do nothing.  MOD AUTHORS:  Add code ( e.g., _asm { int 3 }; here to cause a breakpoint for debugging your game .dlls
 	msstring Error = msstring("SYS_ERROR: ") + (error_string ? error_string : "[NO STRING]");
 	//logfile << "SYS_ERROR: " << (error_string ? error_string : "[NO STRING]") << endl;
-	LogCurrentLine(Error.c_str());
+	MS_ERROR(Error);
 }
 
 /*
@@ -2129,8 +2103,6 @@ animation right now.
 */
 void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 {
-	DBG_INPUT;
-	startdbg;
 	entvars_t *pev = &pEntity->v;
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
@@ -2160,7 +2132,6 @@ void PlayerCustomization(edict_t *pEntity, customization_t *pCust)
 		ALERT(at_console, "PlayerCustomization:  Unknown customization type!\n");
 		break;
 	}
-	enddbg;
 }
 
 /*
@@ -2172,7 +2143,6 @@ A spectator has joined the game
 */
 void SpectatorConnect(edict_t *pEntity)
 {
-	DBG_INPUT;
 	entvars_t *pev = &pEntity->v;
 	CBaseSpectator *pPlayer = (CBaseSpectator *)GET_PRIVATE(pEntity);
 
@@ -2524,9 +2494,6 @@ Creates baselines used for network encoding, especially for player data since pl
 */
 void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
 {
-	DBG_INPUT;
-	startdbg;
-	dbg("CreateBaseline - Begin");
 	baseline->origin = entity->v.origin;
 	baseline->angles = entity->v.angles;
 	baseline->frame = entity->v.frame;
@@ -2572,8 +2539,6 @@ void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, str
 		baseline->framerate = entity->v.framerate;
 		baseline->gravity = entity->v.gravity;
 	}
-
-	enddbg;
 }
 
 typedef struct
@@ -2873,7 +2838,6 @@ Allows game .dll to override network encoding of certain types of entities and t
 */
 void RegisterEncoders(void)
 {
-	DBG_INPUT;
 	DELTA_ADDENCODER("Entity_Encode", Entity_Encode);
 	DELTA_ADDENCODER("Custom_Encode", Custom_Encode);
 	DELTA_ADDENCODER("Player_Encode", Player_Encode);
@@ -2881,7 +2845,6 @@ void RegisterEncoders(void)
 
 int GetWeaponData(struct edict_s *player, struct weapon_data_s *info)
 {
-	DBG_INPUT;
 	memset(info, 0, 32 * sizeof(weapon_data_t));
 	return 1; //1
 }
@@ -2896,9 +2859,6 @@ engine sets cd to 0 before calling.
 */
 void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientdata_s *cd)
 {
-	DBG_INPUT;
-	startdbg;
-
 	cd->flags = ent->v.flags;
 	cd->health = ent->v.health;
 
@@ -2935,8 +2895,6 @@ void UpdateClientData(const struct edict_s *ent, int sendweapons, struct clientd
 	else
 		cd->iuser3 = 0;
 	//---------------
-
-	enddbg;
 }
 
 /*
@@ -2949,8 +2907,6 @@ This is the time to examine the usercmd for anything extra.  This call happens e
 */
 void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed)
 {
-	DBG_INPUT;
-	startdbg;
 	CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance((entvars_t *)&player->v);
 
 	if (!pPlayer)
@@ -2962,8 +2918,6 @@ void CmdStart(const edict_t *player, const struct usercmd_s *cmd, unsigned int r
 	}
 
 	pPlayer->random_seed = random_seed;
-
-	enddbg;
 }
 
 /*
@@ -2975,8 +2929,6 @@ Each cmdstart is exactly matched with a cmd end, clean up any group trace flags,
 */
 void CmdEnd(const edict_t *player)
 {
-	DBG_INPUT;
-	startdbg;
 	entvars_t *pev = (entvars_t *)&player->v;
 	CBasePlayer *pl = (CBasePlayer *)CBasePlayer::Instance(pev);
 
@@ -2986,8 +2938,6 @@ void CmdEnd(const edict_t *player)
 	{
 		UTIL_UnsetGroupTrace();
 	}
-
-	enddbg;
 }
 
 /*
@@ -3000,7 +2950,6 @@ ConnectionlessPacket
 */
 int ConnectionlessPacket(const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size)
 {
-	DBG_INPUT;
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
 
@@ -3035,7 +2984,6 @@ to be created during play ( e.g., grenades, ammo packs, projectiles, corpses, et
 */
 void CreateInstancedBaselines(void)
 {
-	DBG_INPUT;
 	//int iret = 0;
 	//entity_state_t state;
 
@@ -3058,7 +3006,6 @@ One of the ENGINE_FORCE_UNMODIFIED files failed the consistency check for the sp
 */
 int InconsistentFile(const edict_t *player, const char *filename, char *disconnect_message)
 {
-	DBG_INPUT;
 	// Server doesn't care?
 	//if ( CVAR_GET_FLOAT( "mp_consistency" ) != 1 )
 	//	return 0;
@@ -3086,6 +3033,5 @@ AllowLagCompensation
 */
 int AllowLagCompensation(void)
 {
-	DBG_INPUT;
 	return 0;
 }

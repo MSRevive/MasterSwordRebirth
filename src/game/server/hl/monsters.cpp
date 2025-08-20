@@ -34,8 +34,6 @@
 #include "soundent.h"
 #include "gamerules.h"
 
-#include "logger.h" //MAR2008b debug - TEMPORARY
-
 #define MONSTER_CUT_CORNER_DIST 8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
 Vector VecBModelOrigin(entvars_t *pevBModel);
@@ -305,9 +303,6 @@ BOOL CBaseMonster ::FValidateHintType(short sHint)
 //=========================================================
 void CBaseMonster ::Look(int iDistance)
 {
-
-	//startdbg;
-
 	int iSighted = 0;
 
 	// DON'T let visibility information from last frame sit around!
@@ -406,10 +401,7 @@ void CBaseMonster ::Look(int iDistance)
 		}
 	}
 
-	//dbg("SetConditions");
 	SetConditions(iSighted);
-
-	//enddbg;
 }
 
 //=========================================================

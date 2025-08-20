@@ -113,6 +113,7 @@ private:
 #define MS_INFO(fmt, ...) MSLogger::Info(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
 #define MS_DEBUG(fmt, ...) MSLogger::Debug(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
 #define MS_TRACE(fmt, ...) MSLogger::Trace(MSLogger::GENERAL, fmt, ##__VA_ARGS__)
+#define MS_CHAT(fmt, ...) MSLogger::Chat(fmt, ##__VA_ARGS__)
 
 // Category-specific macros
 #define MS_SCRIPT_ERROR(fmt, ...) MSLogger::Error(MSLogger::SCRIPT, fmt, ##__VA_ARGS__)
@@ -121,6 +122,9 @@ private:
 #define MS_ANGEL_INFO(fmt, ...) MSLogger::Info(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
 #define MS_ANGEL_ERROR(fmt, ...) MSLogger::Error(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
 #define MS_ANGEL_DEBUG(fmt, ...) MSLogger::Debug(MSLogger::ANGELSCRIPT, fmt, ##__VA_ARGS__)
+#define MS_RENDER_INFO(fmt, ...) MSLogger::Info(MSLogger::RENDER, fmt, ##__VA_ARGS__)
+#define MS_RENDER_WARN(fmt, ...) MSLogger::Warn(MSLogger::RENDER, fmt, ##__VA_ARGS__)
+#define MS_RENDER_ERROR(fmt, ...) MSLogger::Error(MSLogger::RENDER, fmt, ##__VA_ARGS__)
 
 // Compatibility macro for gradual ALERT migration
 // Note: Engine headers should not be included here to avoid circular dependencies
@@ -133,5 +137,6 @@ private:
 // Legacy compatibility functions
 void MSLoggerPrint(const char* fmt, ...);
 void MSLoggerLog(const char* fmt, ...);
+void MSErrorConsoleText(const char* pszLabel, const char* Progress);
 
 #endif // MS_LOGGER_H

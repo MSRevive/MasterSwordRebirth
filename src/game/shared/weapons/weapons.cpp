@@ -32,7 +32,6 @@
 #endif
 #include "msitemdefs.h"
 #include "syntax/syntax.h"
-#include "logger.h"
 
 #ifndef VALVE_DLL
 #include "usercmd.h"
@@ -532,10 +531,6 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 }
 void CBasePlayerItem::ItemPostFrame(void)
 {
-	startdbg;
-
-	dbg("Begin");
-
 	if (!m_pPlayer)
 		return;
 
@@ -544,28 +539,21 @@ void CBasePlayerItem::ItemPostFrame(void)
 	//	AttackButtonDown( );
 	//else AttackButtonUp( );
 
-	dbg("Attack2ButtonDown");
 	if (FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK2))
 		Attack2ButtonDown(); // +attack2
 	else
 		Attack2ButtonUp();
 
-	dbg("AllButtonsReleased");
 	if (!FBitSet(m_pPlayer->pbs.ButtonsDown, IN_ATTACK | IN_ATTACK2))
 		AllButtonsReleased(); // no fire buttons down
 
-	dbg("Idle");
 	if (ShouldIdle())
 		Idle();
 
-	dbg("Think");
 #ifdef VALVE_DLL
 	if (MSProperties() & ITEM_GENERIC)
 		Think();
 #endif
-	dbg("End");
-
-	enddbg("CBasePlayerItem::ItemPostFrame()");
 }
 
 bool CBasePlayerWeapon::ShouldIdle(void)
@@ -576,6 +564,7 @@ bool CBasePlayerWeapon::ShouldIdle(void)
 	else
 		return FALSE;
 }
+
 /*void CBasePlayerItem::DestroyItem( void )
 {
 	// if attached to a player, remove. 

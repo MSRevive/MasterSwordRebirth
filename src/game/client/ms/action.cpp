@@ -21,7 +21,6 @@
 #include "msdllheaders.h"
 #include "scriptedeffects.h"
 #include "action.h"
-#include "logger.h"
 
 void CHudAction_SelectMenuItem(int idx, TCallbackMenu *pcbMenu);
 
@@ -40,9 +39,6 @@ int CHudAction::Init(void)
 
 int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	byte AddOrRemove = READ_BYTE();
 	msstring ID = READ_STRING();
 
@@ -71,8 +67,7 @@ int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 				break;
 			}
 	}
-
-	enddbg;
+	
 	return 1;
 }
 void CHudAction::UserCmd_Action(void)

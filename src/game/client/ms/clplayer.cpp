@@ -34,13 +34,13 @@
 #include "script.h"
 #include "menu.h"
 #include "stats/stats.h"
-#include "logger.h"
 #include "mscharacter.h"
 #include "vgui_scorepanel.h"
 #include "action.h"
 #include "vgui_teamfortressviewport.h"
 #include "ms/vgui_hud.h"
 #include "ms/vgui_containerlist.h"
+#include "mslogger.h"
 
 void ShowVGUIMenu(int iMenu);
 extern int g_SwitchToHand;
@@ -742,9 +742,6 @@ void __CmdFunc_PlayerDesc(void)
 //Handles all inventory messages
 int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 	byte Operation = READ_BYTE();
 	bool bDoInvUpdate = false;
@@ -754,8 +751,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//New item
 	case 0:
 	{
-		dbg("Add item");
-		CGenericItem* pItem = ReadGenericItem(true);
+			CGenericItem* pItem = ReadGenericItem(true);
 		if (pItem)
 		{
 			//Add the item, without any checks (free hand, weight, etc.)
@@ -787,7 +783,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Update existing item
 	case 1:
 	{
-		dbg("Update item");
 		ulong lID = READ_LONG();
 		READ_REWIND_LONG(); //I read the ID, put the offset back so that ReadGenericItem() can read it
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
@@ -815,7 +810,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Remove item
 	case 2:
 	{
-		dbg("Remove item");
 		ulong ItemID = READ_LONG();
 		CGenericItem* pItem = MSUtil_GetItemByID(ItemID, &player);
 		if (pItem)
@@ -838,17 +832,13 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Add to container
 	case 3:
 	{
-		dbg("Add item to container");
 		ulong ContainerID = READ_LONG();
 
-		dbg("Read Long");
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 
-		dbg("get pContainer");
 		if (!pContainer)
 			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't find container") + (int)ContainerID);
 
-		dbg("get pItem");
 		CGenericItem* pItem = ReadGenericItem(true);
 		if (!pItem)
 			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add to container' msg but client couldn't find item");
@@ -863,7 +853,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Remove from container
 	case 4:
 	{
-		dbg("Remove item from container");
 		ulong ContainerID = READ_LONG();
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 		if (!pContainer)
@@ -887,7 +876,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	//Show storage
 	case 5:
 	{
-		dbg("Show storage window");
 		msstring DisplayName = READ_STRING();
 		msstring StorageName = READ_STRING();
 		float flFeeRatio = READ_FLOAT();
@@ -900,7 +888,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	{
 		//MiB DEC2007a - Redundant skool of redundancy
 		// Params: ID, Attacknum, prop, value
-		dbg("AttackProps");
 		ulong lID = READ_LONG();
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
@@ -986,7 +973,6 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//Shuriken FEB2008a - setviewmodelprop
 		//setviewmodelprop edits APR2008a MIB
 	{
-		dbg("setviewmodelprop");
 		msstring Mode = READ_STRING();
 		int iHand = READ_SHORT();
 		int iParam1;
@@ -1066,11 +1052,9 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 
 	if (bDoInvUpdate)
 	{
-		dbg("UpdateActiveMenus()");
 		UpdateActiveMenus();
 	}
 
-	enddbg;
 	return 1;
 }
 
@@ -1282,13 +1266,9 @@ bool ShowChat() { return ShowHUD(); } //Always show chat
 
 int __MsgFunc_Hands(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 	player.SwitchHands(READ_BYTE());
 
-	enddbg;
 	return 1;
 }
 
@@ -1301,32 +1281,31 @@ extern float g_fMenuLastClosed;
 
 int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 
 	byte Cmd = READ_BYTE();
 
-	dbg(msstring("Cmd: ") + (int)Cmd);
 	switch (Cmd)
 	{
 	case 0: //Spawned
-		logfile << Logger::LOG_INFO << "Received SPAWN message...\n";
+		MS_INFO("Received SPAWN message...");
 		player.m_CharacterState = CHARSTATE_LOADED;
 
 		player.Spawn();
-		logfile << Logger::LOG_INFO << "Player Successfully Spawned\n";
+		MS_INFO("Player Successfully Spawned");
 		g_fMenuLastClosed = 0.0f;
 		break;
+
 	case 1: //Killed
 		if (player.m_CharacterState == CHARSTATE_UNLOADED)
 			break;
 		player.Killed(NULL, NULL);
 		break;
+
 	case 2: //[OPEN]
 		//MSChar_Interface::SaveChar( &player );
 		break;
+
 	case 3: //Client  can now change levels (standing in a transition area)
 	{
 		int iMode = READ_BYTE();
@@ -1350,16 +1329,19 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		//MSChar_Interface::SaveChar( &player );
 	}
 	break;
+
 	case 4: //Character Name
 	{
 		player.m_DisplayName = READ_STRING();
 	}
 	break;
+
 	case 5: //Drain stamina
 	{
 		Player_UseStamina(READ_LONG());
 	}
 	break;
+
 	case 6: // This server connected to a Central Server
 	{
 		int Type = READ_BYTE();
@@ -1367,22 +1349,26 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		ChooseChar_Interface::UpdateCharScreen();
 	}
 	break;
+
 	case 7: //I am a god (dev)
 	{
 		player.m_fIsElite = READ_BYTE() ? true : false;
 		//MSChar_Interface::SaveChar( &player );
 	}
 	break;
+
 	case 8: //Recv number of people I've killed
 	{
 		player.m_PlayersKilled = READ_SHORT();
 	}
 	break;
+
 	case 9: //Recv time I've been waiting to forget a kill
 	{
 		player.m_TimeWaitedToForgetKill = READ_COORD();
 	}
 	break;
+
 	case 10: //Auto-use weapon (like auto-block with shield)
 	{
 		int iHand = READ_BYTE(), iAttackNum = READ_BYTE();
@@ -1406,11 +1392,13 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			pItem->CurrentAttack->tProjMinHold = 0.50;
 	}
 	break;
+
 	case 11: //Recieve char data
 	{
 		MSChar_Interface::HL_CLReadCharData();
 	}
 	break;
+
 	case 12: //Item gain/lose quality
 	{
 		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
@@ -1418,11 +1406,14 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			break;
 		pItem->Quality = READ_SHORT();
 	}
+	break;
+
 	case 13: //Recv time I've been waiting to lose thief status
 	{
 		player.m_TimeWaitedToForgetSteal = READ_COORD();
 	}
 	break;
+
 	case 14: //Cancel shield and change quality at the same time
 	{
 		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
@@ -1434,20 +1425,24 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			player.BlockButton(IN_ATTACK);
 	}
 	break;
+
 	case 15: //Open
 	{
 	}
 	break;
+
 	case 16: //Add/Remove a player action
 	{
 		gHUD.m_Action->MsgFunc_Action(pszName, iSize, pbuf);
 	}
 	break;
+
 	case 17: //Client-side script
 	{
 		gHUD.m_HUDScript->MsgFunc_ClientScript(pszName, iSize, pbuf);
 	}
 	break;
+
 	case 18: //Start receiving char from server
 	{
 		int CharIdx = READ_BYTE();
@@ -1455,6 +1450,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		MSChar_Interface::HL_CLNewIncomingChar(CharIdx, Size);
 	}
 	break;
+
 	case 20: //New quickslot was assigned
 	{
 		int Flags = READ_BYTE();
@@ -1500,6 +1496,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		}
 	}
 	break;
+
 	case 21: //Retrieve all quickslots (Sent at spawn)
 	{
 		for (int i = 0; i < MAX_QUICKSLOTS; i++)
@@ -1522,11 +1519,13 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		VGUI_ShowMenuInteract();
 	}
 	break;
+
 	case 26: //A Menu option for the currently selected NPC
 	{
 		VGUI_AddMenuOption();
 	}
 	break;
+
 	//MIB MAR2010_12 Armor Fix FINAL
 	case 27:
 	{
@@ -1541,7 +1540,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	break;
 	}
 
-	enddbg;
 	return 1;
 }
 

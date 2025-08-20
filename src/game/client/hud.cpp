@@ -32,7 +32,6 @@
 #include "demo_api.h"
 
 //Master Sword
-#include "logger.h"
 #include "ms/health.h"
 #include "ms/fatigue.h"
 #include "stats/stats.h"
@@ -47,6 +46,8 @@
 #include "ms/vgui_localizedpanel.h" // MiB MAR2015_01 [LOCAL_PANEL] - Include for new panel
 #include "voice_status.h"
 #include "fmod/soundengine.h"
+#include "mslogger.h"
+
 //-----------------
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
@@ -63,7 +64,7 @@ int __MsgFunc_StatusIcons(const char *pszName, int iSize, void *pbuf); //Drigien
 
 int __MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
-	logfile << Logger::LOG_INFO << "[__MsgFunc_InitHUD]\n";
+	MS_INFO("[__MsgFunc_InitHUD]");
 	gHUD.MsgFunc_InitHUD(pszName, iSize, pbuf);
 
 	return 1;
@@ -748,9 +749,6 @@ float HUD_GetFOV(void)
 float ClFOV = 0; //FOV, in radians
 int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 {
-	startdbg;
-	dbg("Begin");
-
 	BEGIN_READ(pbuf, iSize);
 
 	int newfov = READ_BYTE();
@@ -782,7 +780,6 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 		// set a new sensitivity that is proportional to the change from the FOV default
 		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
-	enddbg;
 
 	return 1;
 }

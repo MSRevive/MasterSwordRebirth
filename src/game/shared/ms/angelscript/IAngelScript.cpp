@@ -2,7 +2,6 @@
 #include "CAngelScript.h"
 #include "CAngelScriptManager.h"
 #include "angelscript.h"
-#include "msbasic.h"
 #include "stackstring.h"
 #include "global.h"
 #include <ctime>

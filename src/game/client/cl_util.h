@@ -15,10 +15,8 @@
 //
 // cl_util.h
 //
-#include "msbasic.h"
 #include "sharedutil.h"
 #include "msdebug.h"
-#include "logger.h"
 
 #include "cvardef.h"
 
@@ -33,11 +31,8 @@
 #define DECLARE_MESSAGE(y, x)                                     \
 	int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 	{                                                             \
-		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		startdbg;                                                 \
 		ret = gHUD.y.MsgFunc_##x(pszName, iSize, pbuf);           \
-		enddbg;                                                   \
 		return ret;                                               \
 	}
 
@@ -45,30 +40,21 @@
 #define DECLARE_COMMAND(y, x)   \
 	void __CmdFunc_##x(void)    \
 	{                           \
-		DBG_INPUT;              \
-		startdbg;               \
 		gHUD.y.UserCmd_##x();   \
-		enddbg;                 \
 	}
 
 //------------ Master Sword ----------------
 #define MS_DECLARE_MESSAGE(y, x)                                  \
 	int __MsgFunc_##x(const char *pszName, int iSize, void *pbuf) \
 	{                                                             \
-		DBG_INPUT;                                                \
 		int ret = 0;                                              \
-		startdbg;                                                 \
 		ret = gHUD.y->MsgFunc_##x(pszName, iSize, pbuf);          \
-		enddbg;                                                   \
 		return ret;                                               \
 	}
 #define MS_DECLARE_COMMAND(y, x) \
 	void __CmdFunc_##x(void)     \
 	{                            \
-		DBG_INPUT;               \
-		startdbg;                \
 		gHUD.y->UserCmd_##x();   \
-		enddbg;                  \
 	}
 //------------------------------------------
 

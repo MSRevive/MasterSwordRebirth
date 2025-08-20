@@ -5,7 +5,8 @@
 	*included by both dlls*
 
 */
-
+#include <set>
+#include <cmath>
 #include "msdllheaders.h"
 #include "hl/monsters.h"
 #include "animation.h"
@@ -19,12 +20,10 @@
 #include "magic.h"
 #include "weapons/genericitem.h"
 #include "syntax/syntax.h"
-#include "logger.h"
 #include "corpse.h"
 #include "saytext.h"
+#include "mslogger.h"
 #include "ms/angelscript/ASEngineEventManager.h"
-#include <set>
-#include <cmath>
 
 #ifdef VALVE_DLL
 
@@ -134,11 +133,9 @@ void CMSMonster::Spawn()
 {
 	m_OldGold = 0;
 
-	//startdbg;
 	//SUB_Remove( ); return;
 	//DelayedRemove( );
 
-	//dbg( "Precache" );
 
 	//NOV2014_20 - Thothie msmonster_random [begin]
 	if (m_nRndMobs > 0)
@@ -147,7 +144,7 @@ void CMSMonster::Spawn()
 		msstring orig_scriptName = m_ScriptName;
 		for (int i = 0; i < m_nRndMobs; i++)
 		{
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random precache #%i / %i as %s\n", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
+			MS_DEBUG("DEBUG: msmonster_random precache #%i / %i as %s", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
 			TempScript.Spawn(random_monsterdata[i].m_ScriptName, this, this->GetScripted(), true);
 			//TempScript.RunScriptEventByName( "game_precache" ); //skipping this, and hoping it behaves, as I'm not sure if it'll remove when done or how to do so
@@ -162,8 +159,6 @@ void CMSMonster::Spawn()
 	//NOV2014_20 - Thothie msmonster_random [end]
 
 	Precache();
-
-	//dbg( "Setup flags" );
 
 	if (!m_Brush)
 	{
@@ -208,7 +203,6 @@ void CMSMonster::Spawn()
 		m_SpawnChance = 0.0;
 	SetUse(&CMSMonster::Used);
 
-	//dbg( "Create Script" );
 	//This loads the script file and precaches all models/sounds it uses
 	bool fScriptSpawned = Script_Add(m_ScriptName, this) ? true : false;
 
@@ -218,7 +212,6 @@ void CMSMonster::Spawn()
 		return;
 	}
 
-	//dbg( "Delete After Precache" );
 	if (g_fInPrecache)
 	{
 		//This monster was only created to precache its resources
@@ -232,13 +225,9 @@ void CMSMonster::Spawn()
 		return; //wait until Activate(), when everything is spawned
 	}
 
-	//dbg( "Create Stats" );
 	CreateStats();
-
-	//dbg( "Call Script Event: \"Spawn\"" );
 	CScriptedEnt::Spawn();
 
-	//dbg( "Setup BBox" );
 	if (!m_Brush)
 		if (pev->model)
 		{
@@ -282,7 +271,6 @@ void CMSMonster::Spawn()
 
 	//ALERT( at_console, "Postspawn Adj Reads: dmg%f hp%f \n", m_DMGMulti, m_HPMulti);
 
-	//dbg( "Set Custom Params" );
 	msstringlist Parameters;
 	Parameters.add(m_title);
 	Parameters.add(FloatToString(m_DMGMulti));
@@ -290,8 +278,8 @@ void CMSMonster::Spawn()
 	Parameters.add(m_addparams);
 
 	CallScriptEvent("game_postspawn", &Parameters);
-	//enddbg;
 }
+
 void CMSMonster::Precache()
 {
 	CBaseMonster::Precache();
@@ -373,7 +361,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			if (m_HPReq_max < m_HPReq_min)
 			{
 				m_HPReq_max = 0;
-				logfile << "MAP_ERROR: " << m_Scripts[0]->m.ScriptFile.c_str() << " - max reqhp set higher than min.\n";
+				MS_ERROR("MAP_ERROR: %s - max reqhp set higher than min.", m_Scripts[0]->m.ScriptFile.c_str());
 			}
 			//else if ( m_HPReq_min == 0 ) m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 		}
@@ -438,12 +426,15 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			{
 				random_monsterdata.add_blank();
 			};
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i\n", idx, (int)random_monsterdata.size());
+			MS_DEBUG("DEBUG: msmonster_random spaces for new mob idx %i - array size after %i", idx, (int)random_monsterdata.size());
 		}
+
 		if (rndproperty == "title")
 			random_monsterdata[idx].m_title = pkvd->szValue;
+
 		if (rndproperty == "params")
 			random_monsterdata[idx].m_addparams = pkvd->szValue;
+
 		if (rndproperty == "scriptfile")
 		{
 			//is required, and only one of each, so add count here
@@ -452,15 +443,18 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				m_nRndMobs = 1;
 			else
 				++m_nRndMobs;
-			logfile << UTIL_VarArgs("DEBUG: msmonster_random added new mob #%i = %s \n", idx, random_monsterdata[idx].m_ScriptName.c_str());
+			MS_DEBUG("DEBUG: msmonster_random added new mob #%i = %s", idx, random_monsterdata[idx].m_ScriptName.c_str());
 		}
+
 		if (rndproperty == "hpmulti")
 			random_monsterdata[idx].m_HPMulti = atof(pkvd->szValue);
 		if (rndproperty == "dmgmulti")
 			random_monsterdata[idx].m_DMGMulti = atof(pkvd->szValue);
+
 		//if ( rndproperty == "lives" ) random_monsterdata[idx].m_Lives = atoi(pkvd->szValue);
 		if (rndproperty == "nplayers")
 			random_monsterdata[idx].m_ReqPlayers = atoi(pkvd->szValue);
+
 		//sticky bit
 		if (rndproperty == "reqhp")
 		{
@@ -477,7 +471,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 				if (mrand_m_HPReq_max < mrand_m_HPReq_min)
 				{
 					mrand_m_HPReq_max = 0;
-					logfile << Logger::LOG_WARN << "MAP_ERROR: " << STRING(random_monsterdata[idx].m_ScriptName) << " - max reqhp set higher than min.\n";
+					MS_WARN("MAP_ERROR: %s - max reqhp set higher than min.", STRING(random_monsterdata[idx].m_ScriptName));
 				}
 				//else if ( mrand_m_HPReq_min == 0 ) mrand_m_HPReq_min = 1; //NOV2014_20 - this may fux with things if all players are flagged AFK - fixed in msarea_monsterspawn
 			}
@@ -490,7 +484,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 			random_monsterdata[idx].m_HPReq_useavg = rand_m_HPReq_useavg;
 		}
 		//Gotta use the logfile here, dernitall
-		logfile << UTIL_VarArgs("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s\n", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
+		MS_DEBUG("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
@@ -507,7 +501,6 @@ void CMSMonster::Think()
 	pev->vuser3.y = (IsAlive() ? pev->health : 0);
 	pev->vuser3.z = 0.0f;
 
-	//dbg( "Start" );
 	pev->ltime = gpGlobals->time;
 	pev->nextthink = gpGlobals->time + 0.1;
 
@@ -518,27 +511,19 @@ void CMSMonster::Think()
 	if (IsAlive())
 		flInterval = StudioFrameAdvance();
 
-	startdbg; //MAR2008b - Skipping StudioFrameAdvance errors for now
-
-	dbg("m_pfnThink");
-
 	if (m_pfnThink)
 	{
 		CBaseEntity::Think();
 		return;
 	}
 
-	dbg("!IsAlive()");
-
 	if (!IsAlive())
 		return;
 
-	dbg("pev->button");
 
 	pev->button = 0;
 
 	//Ignore normal script events when possessed by an NPC script ent
-	dbg("Run script events");
 	if (!HasConditions(MONSTER_NOAI))
 		RunScriptEvents();
 	//Only run timed named events when this flag is set
@@ -552,26 +537,17 @@ void CMSMonster::Think()
 
 	Act();
 
-	dbg("Look");
 	if (!HasConditions(MONSTER_BLIND))
 		Look();
 
 	if (!HasConditions(MONSTER_NOAI))
 	{
-		dbg("ListenForSound");
 		ListenForSound();
 	}
 
-	dbg("Trade");
 	Trade();
-
-	dbg("SetSpeed");
 	SetSpeed();
-
-	dbg("SetMoveDest");
 	SetMoveDest();
-
-	dbg("SetWanderDest");
 	SetWanderDest();
 
 	//Clear out single-frame events
@@ -580,10 +556,8 @@ void CMSMonster::Think()
 	case 600:
 		LastEvent.event = 0;
 	}
-	dbg("DispatchAnimEvents");
 	DispatchAnimEvents();
 
-	dbg("Play Movement Anim");
 
 	//NPCScripts override the monster animation
 	if (m_MonsterState != MONSTERSTATE_SCRIPT)
@@ -603,7 +577,6 @@ void CMSMonster::Think()
 		m_OldActivity = m_Activity;
 	}
 
-	dbg("Move");
 	Move(flInterval);
 
 	//Need to check if I'm alive again, because the above MoveExecute will
@@ -619,15 +592,13 @@ void CMSMonster::Think()
 
 	Float(); //Special velocity for floating monsters
 
-	dbg("Talk");
 	Talk();
 	int TempConditions = FrameConditions;
 	FrameConditions = 0;
 	if (TempConditions & FC_AVOID)
 		FrameConditions |= FC_AVOID;
-
-	enddbgprt((const char*)m_ScriptName.c_str());
 }
+
 /*int CMSMonster :: MoveExecute ( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist, bool fTestMove )
 {
 	Vector	vecStartPos,// Record monster's position before trying the move
@@ -910,8 +881,6 @@ void CMSMonster::Look()
 }
 void CMSMonster::ListenForSound()
 {
-	startdbg;
-
 	if (gpGlobals->time < m_ListenTime)
 		return;
 
@@ -988,8 +957,6 @@ void CMSMonster::ListenForSound()
 	}
 
 	m_ListenTime = gpGlobals->time + 1.0;
-
-	enddbg;
 }
 void CMSMonster::SetMoveDest()
 {
@@ -1053,7 +1020,6 @@ void CMSMonster::SetMoveDest()
 }
 void CMSMonster::SetWanderDest()
 {
-	startdbg;
 	//No enemy, walk around randomly (here m_vecEnemyLKP is the random place to walk)
 	if (!HasConditions(MONSTER_ROAM))
 		return;
@@ -1063,12 +1029,10 @@ void CMSMonster::SetWanderDest()
 	Vector m_vecTarget, VecDest;
 	TraceResult tr;
 
-	dbg("Check m_NodeCancelTime");
 	//Canel a movedest if we've been trying for too long
 	if (!m_NextNodeTime && gpGlobals->time >= m_NodeCancelTime)
 		m_NextNodeTime = gpGlobals->time + m_RoamDelay;
 
-	dbg("Check m_NextNodeTime");
 	if (m_NextNodeTime && gpGlobals->time >= m_NextNodeTime)
 	{
 		//Find another random spot to walk to
@@ -1078,7 +1042,6 @@ void CMSMonster::SetWanderDest()
 		float NewYaw;
 		m_hEnemy = NULL;
 		Vector vForward;
-		dbg("Check 15 random move dirs");
 		while (count < 15)
 		{
 			NewYaw = UTIL_AngleMod(pev->angles.y + RANDOM_FLOAT(-130, 130));
@@ -1106,7 +1069,6 @@ void CMSMonster::SetWanderDest()
 		}
 		if (!FoundPath)
 		{
-			dbg("Check 360 sequential move dirs");
 			//Couldn't randomly find an angle, so brute force one
 			for (count = 0; count < 360; count++)
 			{
@@ -1138,11 +1100,9 @@ void CMSMonster::SetWanderDest()
 				m_NextNodeTime = gpGlobals->time + 10.0; //big delay
 			}
 		}
-		dbg("Check if path found");
 		if (FoundPath)
 		{
 			//pev->angles.x = 0; pev->angles.z = 0;
-			dbg("Setup wander variables");
 			m_MoveDest.Origin = EyePosition() + vForward * RANDOM_FLOAT(300, 6000);
 			m_MoveDest.Proximity = GetDefaultMoveProximity();
 			m_Wandering = true;
@@ -1150,17 +1110,14 @@ void CMSMonster::SetWanderDest()
 			SetConditions(MONSTER_HASMOVEDEST);
 			m_NextNodeTime = 0;
 			m_Activity = ACT_WALK;
-			dbg("CallEvent game_wander");
 			CallScriptEvent("game_wander");
 		}
 	}
-	enddbg;
 }
 
 Vector StartAng;
 void CMSMonster::Move(float flInterval)
 {
-	startdbg;
 	int Side[2] = { 1, -1 };
 
 	if (pev->movetype == MOVETYPE_FOLLOW || pev->movetype == MOVETYPE_NONE)
@@ -1187,7 +1144,6 @@ void CMSMonster::Move(float flInterval)
 		|| m_LastOrigin != pev->origin)
 		FaceForward();
 
-	dbg("Set Movement velocity");
 	if (m_flGroundSpeed)
 	{
 		if (CanSetVelocity())
@@ -1238,7 +1194,6 @@ void CMSMonster::Move(float flInterval)
 	}
 
 	//Gravity has to be done manually...
-	dbg("Gravity");
 	if (!IsFlying() && !FBitSet(FrameConditions, FC_STEP))
 	{
 		bool fAddGravity = true;
@@ -1275,8 +1230,6 @@ void CMSMonster::Move(float flInterval)
 
 	m_LastYaw = pev->angles.y;
 	m_LastOrigin = pev->origin;
-
-	enddbg;
 }
 void CMSMonster::AvoidFrontObject(float MoveAmt)
 {
@@ -2004,8 +1957,6 @@ float CMSMonster::Give(givetype_e Type, float Amt)
 // Set the activity based on an event or current state
 void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
-	startdbg;
-
 	if (m_Brush)
 		return;
 
@@ -2016,7 +1967,6 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 
 	m_pAnimHandler->m_pOwner = this;
 	pszCurrentAnimName = pszAnimName;
-	dbg("Check for new animation");
 	//Thothie - JUN2007b
 	//- The code is causing monsters to break anims at weird moments
 	//- if you 'dance' around an affected monster, he can never attack, as his swing anims break
@@ -2043,7 +1993,6 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 		//[/thothie]
 		*/
 
-		dbg("New Animation");
 
 		/*if( AnimType == MONSTER_ANIM_BREAK ) //Special case: PLAYER_BREAK
 		{
@@ -2071,24 +2020,18 @@ void CMSMonster::SetAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, vo
 	{
 		m_pAnimHandler->m_pOwner = this;
 
-		dbg("Animate");
 		m_pAnimHandler->Animate();
 
-		dbg("PostAnimate");
 		m_pAnimHandler->PostAnimate();
 
 		pev->framerate = m_Framerate;
 		if (m_Framerate_Modifier)
 			pev->framerate *= m_Framerate_Modifier;
 	}
-
-	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
 }
 void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, void* vData)
 {
 	//Thothie - Attempting to stop msdll from breaking anims
-
-	startdbg;
 
 	if (m_Brush)
 		return;
@@ -2098,9 +2041,7 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 
 	m_pAnimHandler->m_pOwner = this;
 	pszCurrentAnimName = pszAnimName;
-	dbg("Check for new animation");
 
-	dbg("Break Animation");
 
 	if (AnimType == MONSTER_ANIM_BREAK) //Special case: PLAYER_BREAK
 	{
@@ -2129,19 +2070,16 @@ void CMSMonster::BreakAnimation(MONSTER_ANIM AnimType, const char* pszAnimName, 
 	{
 		m_pAnimHandler->m_pOwner = this;
 
-		dbg("Animate");
 		m_pAnimHandler->Animate();
 
-		dbg("PostAnimate");
 		m_pAnimHandler->PostAnimate();
 
 		pev->framerate = m_Framerate;
 		if (m_Framerate_Modifier)
 			pev->framerate *= m_Framerate_Modifier;
 	}
-
-	enddbgprt((IsPlayer() ? "(Monster)" : "(PLAYER)"));
 }
+
 void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 {
 	//Thothie FEB2011_22 - not used by any script, save the call
@@ -2157,193 +2095,193 @@ void CMSMonster::Attacked(CBaseEntity* pAttacker, damage_t& Damage)
 //MiB MAR2008a multiple changes
 float CMSMonster::TraceAttack(damage_t& Damage)
 {
-	startdbg;
+	// if it fails then we want to return 0
+	try {
+		//CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 
-	//CBaseMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
+		// Handle parrying
+		// Attacker - Rolls from [AccuracyRoll - 130       ]
+		// Defender - Rolls from [0            - ParryValue]
+		// Attacker gets that extra 30 so attacks will get through more often
 
-	// Handle parrying
-	// Attacker - Rolls from [AccuracyRoll - 130       ]
-	// Defender - Rolls from [0            - ParryValue]
-	// Attacker gets that extra 30 so attacks will get through more often
-	dbg("Begin");
+		//This is a last-chance check, to make sure that somebody doesn't find an obscure way to hurt another player
+		//The relationship status is first checked in DoDamage()
+		//---UNDONE: This check should be done before hand.  If TraceAttack is called, we have to accept the damage regardless of who caused it
+		//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
+		//	return 0;
 
-	//This is a last-chance check, to make sure that somebody doesn't find an obscure way to hurt another player
-	//The relationship status is first checked in DoDamage()
-	//---UNDONE: This check should be done before hand.  If TraceAttack is called, we have to accept the damage regardless of who caused it
-	//if( Damage.pevAttacker && CBaseEntity::Instance(Damage.pevAttacker)->CanDamage( this ) )
-	//	return 0;
+		bool bAttackWasParried = false;
 
-	bool bAttackWasParried = false;
-
-	CBaseEntity* pAttacker = Damage.pAttacker;
-	if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
-	{
-		CMSMonster* pMonster = (CMSMonster*)pAttacker;
-
-		//PROBLEM: Players get INSANE XP bonus when monsters parry,
-		//- maybe internalize Parry for monsters?
-		//- Thothie note of FEB2008a
-
-		int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
-
-		if (ParryValue > 60)
-			ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
-
-		int AccRoll = RANDOM_LONG(Damage.AccuracyRoll, 100), ParryRoll = RANDOM_LONG(0, ParryValue);
-
-		//Using a weapon that can parry (shield, some swords) gives a parry bonus
-		int iAttackNum = 0, iHand = 0;
-		;
-		CGenericItem* pHandItem = FindParryWeapon(this, iHand, iAttackNum);
-		//NOV2014_09 - this is handled by setting the parry skill now, oh dear
-		/*
-		if( pHandItem )
+		CBaseEntity* pAttacker = Damage.pAttacker;
+		if (IsAlive() && pAttacker && pAttacker->IsMSMonster())
 		{
-			attackdata_t *pAttack = &pHandItem->m_Attacks[iAttackNum];
-			ParryRoll *= 1 + (pAttack->flAccuracyDefault / 100.f);		//If 100% bonus, the roll gets multiplied by 2
-		}
-		*/
+			CMSMonster* pMonster = (CMSMonster*)pAttacker;
 
-		//Thothie comments: Problems with this system
-		//Awareness + (0-Parry Skill) is basically your parry roll
-		//Total caps at 80
-		//mob just rolls 1d100 - (accuracy<100)
+			//PROBLEM: Players get INSANE XP bonus when monsters parry,
+			//- maybe internalize Parry for monsters?
+			//- Thothie note of FEB2008a
 
-		//Awareness gives a small parry bonus
-		ParryRoll += GetNatStat(NATURAL_AWR);
+			int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
 
-		//Thothie - do not parry certain damage types
-		msstring msDamageTypeName = Damage.sDamageType;
-		if (msDamageTypeName.starts_with("target"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("fire"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("poison"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("lightning"))
-			ParryRoll = 0;
-		if (msDamageTypeName.starts_with("cold"))
-			ParryRoll = 0;
-		if (msDamageTypeName.contains("effect"))
-			ParryRoll = 0; //do not parry DOT attacks
-		if (msDamageTypeName.starts_with("magic"))
-			ParryRoll = 0;
-		if (Damage.flDamage == 0)
-			ParryRoll = 0; //do not parry 0 damage atks
-		if (ParryRoll > 80)
-			ParryRoll = 80; //always allow at least 20% chance to be hit
+			if (ParryValue > 60)
+				ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
 
-		if (ParryRoll > AccRoll)
-		{
-			//thothie attempting to pass parry vars
-			msstringlist ParametersB;
-			ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-			ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
-			ParametersB.add(Damage.sDamageType);
-			ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
-			ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
-			ParametersB.add(UTIL_VarArgs("%i", ParryValue));
-			CallScriptEvent("game_parry", &ParametersB);
-			if (pHandItem)
-				pHandItem->CallScriptEvent("game_parry", &ParametersB);
-			Damage.flDamage = -1; // -1 means the monster dodged the attack
-			ClearMultiDamage();
-			bAttackWasParried = true;
-			/* MiB JUL2010_02 - Remove Parry as a levellable stat
-			//Learn parry skill from  a successful parry
-			if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
-				if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
-					LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
-			//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
+			int AccRoll = RANDOM_LONG(Damage.AccuracyRoll, 100), ParryRoll = RANDOM_LONG(0, ParryValue);
 
-				/*if (pMonster->m_SkillLevel * 2 > 0)
-					LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
-				else
-					LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
-				//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
-		}
-	}
-
-	//this was moved to where experience is calculated in GIAttack
-	//Damage Modifiers ( takedmg xxx )
-	dbg("Damage Modifiers");
-	Damage.flDamage *= m.GenericTDM;
-	if (Damage.sDamageType)
-		for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
-		{
-			takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
-			//msstring thoth_my_dmgtype = TDM.DamageType;
-			msstring msIncomingDamageType = Damage.sDamageType.c_str();
-			if (msIncomingDamageType.starts_with(TDM.DamageType))
+			//Using a weapon that can parry (shield, some swords) gives a parry bonus
+			int iAttackNum = 0, iHand = 0;
+			;
+			CGenericItem* pHandItem = FindParryWeapon(this, iHand, iAttackNum);
+			//NOV2014_09 - this is handled by setting the parry skill now, oh dear
+			/*
+			if( pHandItem )
 			{
-				//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
-				Damage.flDamage *= TDM.modifier;
+				attackdata_t *pAttack = &pHandItem->m_Attacks[iAttackNum];
+				ParryRoll *= 1 + (pAttack->flAccuracyDefault / 100.f);		//If 100% bonus, the roll gets multiplied by 2
+			}
+			*/
+
+			//Thothie comments: Problems with this system
+			//Awareness + (0-Parry Skill) is basically your parry roll
+			//Total caps at 80
+			//mob just rolls 1d100 - (accuracy<100)
+
+			//Awareness gives a small parry bonus
+			ParryRoll += GetNatStat(NATURAL_AWR);
+
+			//Thothie - do not parry certain damage types
+			msstring msDamageTypeName = Damage.sDamageType;
+			if (msDamageTypeName.starts_with("target"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("fire"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("poison"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("lightning"))
+				ParryRoll = 0;
+			if (msDamageTypeName.starts_with("cold"))
+				ParryRoll = 0;
+			if (msDamageTypeName.contains("effect"))
+				ParryRoll = 0; //do not parry DOT attacks
+			if (msDamageTypeName.starts_with("magic"))
+				ParryRoll = 0;
+			if (Damage.flDamage == 0)
+				ParryRoll = 0; //do not parry 0 damage atks
+			if (ParryRoll > 80)
+				ParryRoll = 80; //always allow at least 20% chance to be hit
+
+			if (ParryRoll > AccRoll)
+			{
+				//thothie attempting to pass parry vars
+				msstringlist ParametersB;
+				ParametersB.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+				ParametersB.add(UTIL_VarArgs("%f", Damage.flDamage));
+				ParametersB.add(Damage.sDamageType);
+				ParametersB.add(UTIL_VarArgs("%i", ParryRoll));
+				ParametersB.add(UTIL_VarArgs("%i", std::abs(AccRoll)));
+				ParametersB.add(UTIL_VarArgs("%i", ParryValue));
+				CallScriptEvent("game_parry", &ParametersB);
+				if (pHandItem)
+					pHandItem->CallScriptEvent("game_parry", &ParametersB);
+				Damage.flDamage = -1; // -1 means the monster dodged the attack
+				ClearMultiDamage();
+				bAttackWasParried = true;
+				/* MiB JUL2010_02 - Remove Parry as a levellable stat
+				//Learn parry skill from  a successful parry
+				if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
+					if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
+						LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
+				//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
+
+					/*if (pMonster->m_SkillLevel * 2 > 0)
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
+					else
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
+					//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
 			}
 		}
 
-	//Allow scripts to affect the damage
-	msstringlist Parameters;
-	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
-	Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
-	Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
-	Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
+		//this was moved to where experience is calculated in GIAttack
+		//Damage Modifiers ( takedmg xxx )
+		Damage.flDamage *= m.GenericTDM;
+		if (Damage.sDamageType)
+			for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
+			{
+				takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
+				//msstring thoth_my_dmgtype = TDM.DamageType;
+				msstring msIncomingDamageType = Damage.sDamageType.c_str();
+				if (msIncomingDamageType.starts_with(TDM.DamageType))
+				{
+					//ALERT( at_console, "Damage modified!");// %.2f --> %.2f ( %s )\n", Damage.flDamage, Damage.flDamage * TDM.modifier, Damage.sDamageType );
+					Damage.flDamage *= TDM.modifier;
+				}
+			}
 
-	//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
-	CStat* pStat = FindStat(Damage.ExpStat);
-	if (pStat)
-	{
-		msstring out_skill = pStat->m_Name;
-		if (out_skill.contains("spell"))
+		//Allow scripts to affect the damage
+		msstringlist Parameters;
+		Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+		Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
+		Parameters.add(Damage.sDamageType); //Thothie attempting to add damage type to game_damaged
+		Parameters.add(UTIL_VarArgs("%i", Damage.AccuracyRoll));
+		Parameters.add(Damage.pInflictor ? EntToString(Damage.pInflictor).c_str() : "none");
+
+		//[begin] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
+		CStat* pStat = FindStat(Damage.ExpStat);
+		if (pStat)
 		{
-			out_skill.append(".");
-			char toconv[256];
-			strncpy(toconv, SpellTypeList[Damage.ExpProp], sizeof(toconv));
-			out_skill.append(msstring(_strlwr(toconv)));
+			msstring out_skill = pStat->m_Name;
+			if (out_skill.contains("spell"))
+			{
+				out_skill.append(".");
+				char toconv[256];
+				strncpy(toconv, SpellTypeList[Damage.ExpProp], sizeof(toconv));
+				out_skill.append(msstring(_strlwr(toconv)));
+			}
+			Parameters.add(out_skill);
 		}
-		Parameters.add(out_skill);
-	}
-	else
-	{
-		Parameters.add("none"); //Thothie OCT2019_11 - MiB Sanity Check
-	}
-	//[end] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
-
-	CallScriptEvent("game_damaged", &Parameters);
-
-	if (m_ReturnData.len())
-	{
-		//Each script sets a ratio of damage you should take.  Factor each one into the damage
-		msstringlist DamageRatios;
-		TokenizeString(m_ReturnData, DamageRatios);
-		for (int i = 0; i < DamageRatios.size(); i++)
-			Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
-	}
-
-	Parameters.clearitems();
-	Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
-	Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
-	CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
-
-	dbg("StruckSound/Bleed");
-	if (Damage.flDamage > 0)
-	{
-		//if( IsAlive() ) StruckSound( CBaseEntity::Instance(Damage.pevInflictor), CBaseEntity::Instance(Damage.pevAttacker), Damage.flDamage, &Damage.outTraceResult, Damage.iDamageType );
-
-		if (pev->health > 0 && pev->takedamage && !FBitSet(pev->flags, FL_GODMODE))
+		else
 		{
-			SpawnBlood(Damage.outTraceResult.vecEndPos, BloodColor(), Damage.flDamage); // a little surface blood.
-			TraceBleed(Damage.flDamage, (Damage.vecEnd - Damage.vecSrc).Normalize(), &Damage.outTraceResult, Damage.iDamageType);
+			Parameters.add("none"); //Thothie OCT2019_11 - MiB Sanity Check
 		}
+		//[end] Thothie DEC2014_13 - return skill used (WEAPON_SKILL not being reliable)
+
+		CallScriptEvent("game_damaged", &Parameters);
+
+		if (m_ReturnData.len())
+		{
+			//Each script sets a ratio of damage you should take.  Factor each one into the damage
+			msstringlist DamageRatios;
+			TokenizeString(m_ReturnData, DamageRatios);
+			for (int i = 0; i < DamageRatios.size(); i++)
+				Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
+		}
+
+		Parameters.clearitems();
+		Parameters.add(pAttacker ? EntToString(pAttacker).c_str() : "none");
+		Parameters.add(UTIL_VarArgs("%f", Damage.flDamage));
+		CallScriptEvent("game_damaged_end", &Parameters); //Allow post-parsing of damage, after all the scripts have messed with it
+
+		if (Damage.flDamage > 0)
+		{
+			//if( IsAlive() ) StruckSound( CBaseEntity::Instance(Damage.pevInflictor), CBaseEntity::Instance(Damage.pevAttacker), Damage.flDamage, &Damage.outTraceResult, Damage.iDamageType );
+
+			if (pev->health > 0 && pev->takedamage && !FBitSet(pev->flags, FL_GODMODE))
+			{
+				SpawnBlood(Damage.outTraceResult.vecEndPos, BloodColor(), Damage.flDamage); // a little surface blood.
+				TraceBleed(Damage.flDamage, (Damage.vecEnd - Damage.vecSrc).Normalize(), &Damage.outTraceResult, Damage.iDamageType);
+			}
+		}
+
+		if (!bAttackWasParried)
+			AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
+
+		return Damage.flDamage;
+
 	}
-
-	dbg("AddMultiDamage");
-	if (!bAttackWasParried)
-		AddMultiDamage(Damage.pAttacker ? Damage.pAttacker->pev : NULL, this, Damage.flDamage, Damage.iDamageType);
-
-	return Damage.flDamage;
-
-	enddbg;
+	catch(...)
+	{
+		return 0;
+	}
 
 	return 0;
 }
@@ -2354,8 +2292,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	//		m_hEnemy.Set( pevAttacker->pContainingEntity );
 
 	//if( pevAttacker == pev ) return fTookDamage;
-	//startdbg;
-	//dbg( "Begin" );
 	CBaseEntity* pInflictor = NULL, * pAttacker = NULL;
 	if (!FNullEnt(pevInflictor))
 		pInflictor = CBaseEntity::Instance(pevInflictor);
@@ -2366,7 +2302,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	//if( pAttacker && IRelationship(pAttacker) >= RELATIONSHIP_NO )
 	//	return 0;
 
-	//dbg( "TakeDamageEffect" );
 	TakeDamageEffect(pInflictor, pAttacker, flDamage, bitsDamageType);
 
 	if (pevInflictor)
@@ -2377,7 +2312,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if (IsAlive())
 	{
 		//Attacked, store the attacker and run the struck event
-		//dbg( "StoreEntity" );
 		StoreEntity(pAttacker, ENT_LASTSTRUCK);
 
 		//dbg( "CallScriptEvent->game_struck" );
@@ -2391,25 +2325,21 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 			pAttacker->TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 		*/
 
-		//dbg( "GiveHP" );
 		GiveHP(-flDamage);
 		if (pev->health <= 0)
 		{
 			if (FBitSet(bitsDamageType, DMG_NOKILL))
 			{
-				//dbg( "Zero_Health^1" );
 				pev->health = m_HP = 1;
 			}
 			else
 			{
-				//dbg( "Killed" );
 				Killed(pevAttacker, GIB_NEVER);
 			}
 		}
 	}
 	else
 	{
-		//dbg( "AttackCorpse" );
 		//Attack a dead body
 		//Skinning disabled
 		/*if( Skin && pAttacker && pAttacker->MyMonsterPointer() &&
@@ -2432,8 +2362,6 @@ int CMSMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 			pev->health = 0;
 	}
 
-	//enddbg;
-
 	return flDamage;
 }
 void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtraData)
@@ -2448,8 +2376,6 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	startdbg;
-	dbg("Begin");
 	BOOL DeleteMe = TRUE;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
@@ -2485,7 +2411,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		}
 
 		//Award players with exp proportional to the damage they did
-		dbg("AwardXP");
 		for (int i = 1; i <= MAXPLAYERS; i++)
 		{
 			CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i); // MiB MAR2019_22 [SLOT_EXP] - Need this to be a CBasePlayer, not sure why it wasn't
@@ -2514,7 +2439,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 						xpsend += xp; //Thothie added if ( xpsend < m_SkillLevel ) condition - don't give more than the monsters worth just cuz you hit it a lot!
 						//if( xpsend > 0 ) ALERT( at_console, "Gained XP: %f", xpsend );  //Thothie returns XP
 						//if( xpsend > 0 ) ClientPrint( pPlayer->pev, at_console, "Gained XP: %f", xpsend );
-						dbg("pPlayer->LearnSkill");
 						if (!xp_custom)
 							pPlayer->LearnSkill(n, r, xp); //NOV2014_21 Thothie - script side XP management option
 
@@ -2537,7 +2461,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 					}
 				}
 			}
-			dbg("SendXP");
 			if (xpsend > 0 && !xp_custom)
 			{
 				msstringlist Parameters;
@@ -2656,7 +2579,6 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			DropAllItems(); //Be sure to drop items
 		GibMonster();
 	}
-	enddbg;
 }
 void CMSMonster::SUB_Remove()
 {
@@ -2901,10 +2823,7 @@ void CMSMonster::SetSpeed()
 //Opens interact menu from server
 void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 {
-	startdbg;
 	m_MenuCurrentOptions = NULL;
-
-	dbg("PrepClient");
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
 	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
@@ -2919,8 +2838,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	WRITE_STRING_LIMIT(DisplayName(), WRITE_STRING_MAX);
 	MESSAGE_END();
 
-	dbg("Read:game_menu_getoptions");
-
 	static msstringlist Params;
 	Params.clearitems();
 	Params.add(EntToString(pPlayer));
@@ -2933,8 +2850,6 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	pPlayer->CallScriptEvent("ext_remove_afk"); //NOV2014_15 - flag player as non-afk when first uses a menu
 
 	m_MenuCurrentOptions = NULL;
-
-	dbg("SendMenu");
 
 	for (int i = 0; i < Menuoptions.size(); i++)
 	{
@@ -2950,8 +2865,8 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 		WRITE_STRING_LIMIT(MenuOption.Data, 92);
 		MESSAGE_END();
 	}
+	
 	pPlayer->InMenu = true;
-	enddbg;
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {

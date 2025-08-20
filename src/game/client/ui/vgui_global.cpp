@@ -9,7 +9,6 @@
 #include "sharedutil.h"
 #include "vgui_menudefsshared.h"
 #include "menu.h"
-#include "logger.h"
 
 extern int g_iVisibleMouse;
 

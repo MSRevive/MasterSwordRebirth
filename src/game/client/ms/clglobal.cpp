@@ -10,7 +10,7 @@
 #include "hudmisc.h"
 #include "hudscript.h"
 #include "ms/vgui_hud.h"
-#include "logger.h"
+#include "mslogger.h"
 //#include "SteamClientHelper.h"
 //#include "richpresence.h"
 
@@ -61,9 +61,6 @@ void MSCLGlobals::RemoveEnt(CBaseEntity *pEntity, bool fDelete)
 //Global one-time Initialization - called from CHud :: Init()
 void MSCLGlobals::Initialize()
 {
-	startdbg;
-
-	dbg("Begin");
 	//Set up g_engfuncs re-directs
 	gpGlobals = &Globals;
 	SetupGlobalEngFuncRedirects();
@@ -137,13 +134,9 @@ void MSCLGlobals::Initialize()
 		gEngfuncs.pfnClientCmd( msstring("ms_id ") + ID + "\n" );
 	}*/
 
-	dbg("Call InitializePlayer");
 	InitializePlayer();
 
-	dbg("Call MSGlobalItemInit");
 	MSGlobalItemInit();
-
-	enddbg;
 }
 
 //Player initialization that happens every map
@@ -206,6 +199,7 @@ void MSCLGlobals::PrintAllEntites()
 	for (int e = 0; e < m_ClEntites.size(); e++)
 		Print("Item %i: %s", items++, m_ClEntites[e]->DisplayName());
 }
+
 void MSCLGlobals::RemoveAllEntities()
 {
 	//Delete all entites
@@ -237,7 +231,7 @@ void MSCLGlobals::RemoveAllEntities()
 		if (pEntity->pev)
 			SetBits(pEntity->pev->flags, FL_KILLME);
 	}
-	//logfile << "Global Cleanup: " << killed << " unreferenced entites.\r\n";
+	MS_DEBUG("Global Cleanup: %i unreferenced entities", killed);
 	MSCLGlobals::Think();
 
 	m_ClModels.clear(); //Cleanup client-side models/sprites
@@ -353,50 +347,36 @@ void ShowVGUIMenu(int iMenu);
 
 void MSCLGlobals::SpawnIntoServer()
 {
-	startdbg;
-
-	logfile << Logger::LOG_INFO << "SpawnIntoServer...";
+	MS_INFO("SpawnIntoServer...");
 
 	Cleanup(); //Clean up stuff from the previous map
 
-	dbg("Call player.InitialSpawn");
 	player.InitialSpawn();
 	player.BeginRender();
 
-	dbg("Call CreateStoreMenus");
 	CreateStoreMenus();
 
-	dbg("Call MSChar_Interface::CLInit");
 	MSChar_Interface::CLInit();
 
-	dbg("ShowVGUIMenu( MENU_NEWCHARACTER )");
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
-	logfile << "DONE\n";
-
-	enddbg;
+	MS_INFO("DONE");
 }
 
 //Cleans up stuff from the previous map
 void MSCLGlobals::Cleanup()
 {
-	startdbg;
-
 	//Remove spell list
 	player.m_SpellList.clear();
 
 	//Kill the client-side entity list
-	dbg("Call CBasePlayeR::RenderCleanup");
 	player.RenderCleanup();
 
 	// Delete all client-side entities
-	dbg("Call MSCLGlobals::RemoveAllEntities( )");
 	RemoveAllEntities();
 
 	//Remove Environment Special Effects
 	CRender::Cleanup();
-
-	enddbg;
 }
 
 void DLLAttach(HINSTANCE hinstDLL)
@@ -406,9 +386,6 @@ void DLLAttach(HINSTANCE hinstDLL)
 
 void DLLDetach()
 {
-	//if( logfile.is_open() ) logfile << __FILE__ << ":" << ((int)__LINE__) << " client.dll being unloaded" << endl;
-	if (logfile.is_open())
-		(((logfile << Logger::LOG_INFO << __FILE__) << " client.dll being unloaded\n"));
 	//RichPresenceShutdown();
 	MSGlobals::EndMap();
 	MSCLGlobals::DLLDetach();

@@ -15,7 +15,6 @@
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
 #include "stats/statdefs.h"
-#include "logger.h"
 
 #define TypeCheck        \
 	if (!ProjectileData) \
@@ -119,8 +118,6 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 {
 	//if ( ProjectileData->IgnoreNPC ) return;
 
-	startdbg;
-
 	TypeCheck;
 
 	if (pev->owner == pOther->edict() || pOther->MSMoveType == MOVETYPE_ARROW || !FBitSet(MSProperties(), ITEM_PROJECTILE))
@@ -202,16 +199,11 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 			return;
 		}
 
-		dbg("Params List");
 		static msstringlist Params;
-		dbg("Clear List");
 		Params.clearitems();
-		dbg("PDamageEnt");
 		Params.add(EntToString(pDamageEnt));
-		dbg("SendEvent");
 		pev->origin = old_location; //Thothie AUG2011_15 - move back to location so sound plays from right spot
 		CallScriptEvent("game_projectile_hitnpc", &Params);
-		dbg("IgnoreNPC");
 		if (ProjectileData->IgnoreNPC)
 		{
 			return;
@@ -246,9 +238,8 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 	//pev->velocity = g_vecZero;
 	SetTouch(NULL);
 	//Think( );
-
-	enddbg;
 }
+
 void CGenericItem::Projectile_Move()
 {
 	TypeCheck;
