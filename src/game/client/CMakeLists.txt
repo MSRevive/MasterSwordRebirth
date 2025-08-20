@@ -270,7 +270,6 @@ set(Shared
 	"../shared/ms/global.cpp"
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
-	"../shared/ms/logger.h"
 	"../shared/ms/mslogger.cpp"
 	"../shared/ms/mslogger.h"
 	"../shared/ms/mscharacter.cpp"

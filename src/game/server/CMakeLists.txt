@@ -256,7 +256,6 @@ set(Shared
 	"../shared/ms/globalmem.cpp"
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/iscript.h"
-	"../shared/ms/logger.h"
 	"../shared/ms/mslogger.cpp"
 	"../shared/ms/mslogger.h"
 	"../shared/ms/magic.h"
