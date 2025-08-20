@@ -5,14 +5,15 @@
 // or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
+// TODO: move this inside the main project since we modified it and have to use main project headers.
+
 #include "stream_safe.h"
 #include <string.h>
 
 #include "texturestruct.h"
 #include "tgaloader.h"
 #include "textureloader.h"
-
-void DbgLog(const char *szFmt, ...);
+#include "mslogger.h"
 
 namespace Tartan
 {
@@ -25,13 +26,13 @@ namespace Tartan
 	{
 		if (strlen(sFilePath) <= 4)
 		{
-			DbgLog("LoadTextureFile: %s has an invalid filename extension", sFilePath);
+			MS_DEBUG("LoadTextureFile: %s has an invalid filename extension", sFilePath);
 			//cout << "Tartan::LoadTextureFile() Error: File " << sFilePath << " has an invalid filename extension" << endl;
 		}
 
 		const char *filetypestring = sFilePath + strlen(sFilePath) - 4;
 
-		DbgLog("LoadTextureFile - Filetype: %s", filetypestring);
+		MS_DEBUG("LoadTextureFile - Filetype: %s", filetypestring);
 
 #ifdef _WIN32
 		if (stricmp(filetypestring, ".tga") == 0)
@@ -63,13 +64,13 @@ namespace Tartan
 		Texture Texture;
 
 		//	DEBUG(  "Loading TGA file " << FilePath.GetFullPath().mb_str() << " ... " ); // DEBUG
-		DbgLog("Enter LoadTextureTGA");
+		MS_DEBUG("Enter LoadTextureTGA");
 
 		int LoadTGAResult = LoadTGA(&Texture, sFilepath);
 		//DEBUG(  "Check result of TGA loading..." ); // DEBUG
 		if (!LoadTGAResult)
 		{
-			DbgLog("LoadTextureTGA - Couldn't find or load file: %s", sFilepath);
+			MS_DEBUG("LoadTextureTGA - Couldn't find or load file: %s", sFilepath);
 			return false;
 		}
 		//DEBUG(  "File found, loading..." ); // DEBUG
@@ -77,7 +78,7 @@ namespace Tartan
 		LoadTex.Width = Texture.width;
 		LoadTex.Height = Texture.height;
 
-		DbgLog("Call GetCompatibleTextureSize");
+		MS_DEBUG("Call GetCompatibleTextureSize");
 		GetCompatibleTextureSize(Texture.width, Texture.height, LoadTex.GLWidth, LoadTex.GLHeight, LoadTex.CoordU, LoadTex.CoordV);
 
 		// Typical Texture Generation Using Data From The TGA ( CHANGE )
@@ -87,27 +88,27 @@ namespace Tartan
 		GLint format;
 		int BytesPerPixel = Texture.bpp / 8;
 		//DEBUG(" *** DESIRED format : " << (Texture.bpp / 8) << " width: " << Texture.width << " height : " << Texture.height);
-		DbgLog("Call glTexImage2D (first time)");
+		MS_DEBUG("Call glTexImage2D (first time)");
 		glTexImage2D(GL_PROXY_TEXTURE_2D, 0, BytesPerPixel, LoadTex.GLWidth, LoadTex.GLHeight, 0, Texture.type, GL_UNSIGNED_BYTE, NULL);
 
-		DbgLog("Call glGetTexLevelParameteriv (first time)");
+		MS_DEBUG("Call glGetTexLevelParameteriv (first time)");
 		glGetTexLevelParameteriv(GL_PROXY_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &format);
 		//DEBUG(" ***** Load texture: " << format);
 
 		GLubyte *DataPixels = Texture.imageData;
 		bool AdjustedTexture = false;
 
-		DbgLog("Change Texture Size");
+		MS_DEBUG("Change Texture Size");
 		//If the texture size was changed to be 2^x, then create a new buffer for the larger texture
 		if (LoadTex.GLWidth != LoadTex.Width || LoadTex.GLHeight != LoadTex.Height)
 		{
-			DbgLog("LoadTex.Width: %u LoadTex.Height: %u", LoadTex.Width, LoadTex.Height);
-			DbgLog("LoadTex.GLWidth: %u LoadTex.GLHeight: %u", LoadTex.GLWidth, LoadTex.GLHeight);
+			MS_DEBUG("LoadTex.Width: %u LoadTex.Height: %u", LoadTex.Width, LoadTex.Height);
+			MS_DEBUG("LoadTex.GLWidth: %u LoadTex.GLHeight: %u", LoadTex.GLWidth, LoadTex.GLHeight);
 
 			AdjustedTexture = true;
 			int OldSize = BytesPerPixel * LoadTex.Width * LoadTex.Height;
 			int NewSize = BytesPerPixel * LoadTex.GLWidth * LoadTex.GLHeight;
-			DbgLog("OldSize: %i NewSize: %i", OldSize, NewSize);
+			MS_DEBUG("OldSize: %i NewSize: %i", OldSize, NewSize);
 
 			DataPixels = new GLubyte[NewSize];
 			int OldOfs = 0, NewOfs = 0;
@@ -122,10 +123,10 @@ namespace Tartan
 			memset(&DataPixels[OldSize], 0, NewSize - OldSize);
 		}
 
-		DbgLog("Call glTexImage2D (2nd time)");
+		MS_DEBUG("Call glTexImage2D (2nd time)");
 		glTexImage2D(GL_TEXTURE_2D, 0, BytesPerPixel, LoadTex.GLWidth, LoadTex.GLHeight, 0, Texture.type, GL_UNSIGNED_BYTE, DataPixels);
 
-		DbgLog("Call glTexParameteri (4 times)");
+		MS_DEBUG("Call glTexParameteri (4 times)");
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -134,23 +135,23 @@ namespace Tartan
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
-			DbgLog("glGetError() returned error code: %i", err);
+			MS_DEBUG("glGetError() returned error code: %i", err);
 
 		if (AdjustedTexture)
 		{
-			DbgLog("delete DataPixels");
+			MS_DEBUG("delete DataPixels");
 			delete[] DataPixels;
 		}
 
 		if (Texture.imageData) // If Texture Image Exists ( CHANGE )
 		{
-			DbgLog("free(Texture.imageData)");
+			MS_DEBUG("free(Texture.imageData)");
 			free(Texture.imageData); // Free The Texture Image Memory ( CHANGE )
 		}
 
 		LoadTex.GLTexureID = Texture.texID;
 
-		DbgLog("Exit LoadTextureTGA");
+		MS_DEBUG("Exit LoadTextureTGA");
 		return true;
 	}
 
