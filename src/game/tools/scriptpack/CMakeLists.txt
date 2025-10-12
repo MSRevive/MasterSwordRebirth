@@ -27,7 +27,7 @@ target_include_directories(scriptpack PRIVATE
 ################################################################################
 # Source groups
 ################################################################################
-set(Source_Files
+set(SRC_Files
 	"cbase.h"
 	"compat.h"
 	"dirent.h"
@@ -46,10 +46,10 @@ set(Source_Files
 	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
 	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.h"
 )
-source_group("Source Files" FILES ${Source_Files})
+source_group("Source Files" FILES ${SRC_Files})
 
 set(ALL_FILES
-	${Source_Files}
+	${SRC_Files}
 )
 
 target_sources(scriptpack PRIVATE ${ALL_FILES})
