@@ -441,9 +441,10 @@ private:
 
 			// Create the last directory on the path (the recursive calls will have taken
 			// care of the parent directories by now)
-			bool result = CreateDirectory(path.c_str(), NULL);
-			if(!result)
+			int result = CreateDirectory(path.c_str(), NULL); // windows API use BOOL which is a int.
+			if(result == 0)
 			{
+				std::cout << path.c_str() << std::endl;
 				std::cout << "ERROR: Could not create directory!" << std::endl;
 				exit(-1);
 			}
