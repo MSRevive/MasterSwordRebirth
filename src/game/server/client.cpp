@@ -1898,7 +1898,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	}
 
 	CSVGlobals::WriteScriptLog();
-
+    ASScriptContextManager::Instance()->LogContextInfo();
 	MS_INFO("World Activate END");
 }
 

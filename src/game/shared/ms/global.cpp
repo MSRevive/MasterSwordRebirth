@@ -113,7 +113,7 @@ void MSGlobalItemInit()
 //Called on client & server when a new map is loaded
 void MSGlobals::NewMap()
 {
-	MS_INFO("[NewMap]: %s");
+	MS_INFO("[NewMap]: Allocating new map objects.");
 	if (MSGlobals::GameScript)
 	{
 		//GameScript should have been deleted by EndMap() before NewMap() is called

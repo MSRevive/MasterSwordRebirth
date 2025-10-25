@@ -239,6 +239,44 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
     info.name = name;
     ParseModuleMetadata(content, info);
     
+    // Determine script context from content and name
+    ASScriptContextManager* pContextMgr = ASScriptContextManager::Instance();
+    ScriptContext contextFromContent = pContextMgr->DetermineContextFromContent(content);
+    ScriptContext contextFromPath = pContextMgr->DetermineContextFromPath(name);
+    
+    // Content pragma takes precedence over path-based detection
+    if (contextFromContent != ScriptContext::UNKNOWN)
+    {
+        info.context = contextFromContent;
+    }
+    else if (contextFromPath != ScriptContext::UNKNOWN)
+    {
+        info.context = contextFromPath;
+    }
+    else
+    {
+        // Default to SHARED if no context specified
+        info.context = ScriptContext::SHARED;
+        printf("ASModuleSystem: WARNING - No context specified for module '%s', defaulting to SHARED\n", name.c_str());
+    }
+    
+    // Check if module is compatible with current build
+    if (!ASScriptContextUtil::CanRunInCurrentContext(info.context))
+    {
+        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Module '%s' context (%s) is not compatible with current build (%s)\n",
+            name.c_str(),
+            ASScriptContextUtil::ContextToString(info.context),
+            ASScriptContextUtil::ContextToString(ASScriptContextUtil::GetCurrentBuildContext()));
+        return false;
+    }
+    
+    printf("ASModuleSystem: Loading module '%s' with context: %s\n", 
+        name.c_str(), 
+        ASScriptContextUtil::ContextToString(info.context));
+    
+    // Register the script context
+    pContextMgr->SetScriptContext(name, info.context);
+    
     // Resolve dependencies if requested
     if (options.resolveDependencies)
     {
@@ -1545,6 +1583,30 @@ namespace ASModuleSystemBindings
         
         return true;
     }
+}
+
+//==========================================================================
+// Context Management
+//==========================================================================
+ScriptContext ASModuleSystem::GetModuleContext(const std::string& name) const
+{
+    auto it = m_Modules.find(name);
+    if (it != m_Modules.end())
+    {
+        return it->second.context;
+    }
+    return ScriptContext::UNKNOWN;
+}
+
+bool ASModuleSystem::IsModuleCompatibleWithCurrentBuild(const std::string& name) const
+{
+    ScriptContext context = GetModuleContext(name);
+    if (context == ScriptContext::UNKNOWN)
+    {
+        return false;
+    }
+    
+    return ASScriptContextUtil::CanRunInCurrentContext(context);
 }
 
 //==========================================================================
