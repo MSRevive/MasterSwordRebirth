@@ -13,6 +13,7 @@
 #include <map>
 #include <vector>
 #include <set>
+#include "ASScriptContext.h"
 
 // Forward declarations
 class CGameGroupFile;
@@ -45,8 +46,10 @@ struct ASModuleInfo
     asIScriptModule* pModule;
     int refCount;
     bool isBuiltin;    // True for system modules that can't be unloaded
+    ScriptContext context;  // Script execution context (client/server/shared)
+    std::string filePath;   // Original file path for context determination
     
-    ASModuleInfo() : pModule(nullptr), refCount(0), isBuiltin(false) {}
+    ASModuleInfo() : pModule(nullptr), refCount(0), isBuiltin(false), context(ScriptContext::UNKNOWN) {}
 };
 
 //==========================================================================
@@ -123,6 +126,10 @@ public:
     const ASModuleInfo* GetModuleInfo(const std::string& name) const;
     std::vector<std::string> GetLoadedModules() const;
     std::vector<std::string> GetModuleDependents(const std::string& name) const;
+    
+    // Context management
+    ScriptContext GetModuleContext(const std::string& name) const;
+    bool IsModuleCompatibleWithCurrentBuild(const std::string& name) const;
     
     // Dependency management
     bool ResolveDependencies(const std::string& moduleName);

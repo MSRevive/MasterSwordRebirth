@@ -7,6 +7,8 @@
 
 #include "ASBuiltinFunctions.h"
 #include "ASEngineInterface.h"
+#include "ASScriptContext.h"
+#include "ASBindExtensions.h"
 #include <asbind20/asbind.hpp>
 #include <angelscript.h>  // For asGetActiveContext
 #include <angelscript/addons/scriptarray/scriptarray.h>
@@ -76,6 +78,22 @@ static CBasePlayer* GetPlayerByIndexHelper(int index)
     
     return static_cast<CBasePlayer*>(pEntity);
 #endif
+}
+
+//==========================================================================
+// Helper function to register function contexts after asbind20 registration
+//==========================================================================
+static void RegisterFunctionContext(asIScriptEngine* pEngine, const char* funcDecl, ScriptContext context)
+{
+    ASScriptContextManager* pContextMgr = ASScriptContextManager::Instance();
+    if (!pContextMgr) return;
+    
+    // Find the function
+    asIScriptFunction* func = pEngine->GetGlobalFunctionByDecl(funcDecl);
+    if (func)
+    {
+        pContextMgr->RegisterFunctionContext(func->GetName(), context);
+    }
 }
 
 //==========================================================================
@@ -163,14 +181,15 @@ namespace ASBuiltinFunctions
         
         printf("ASBuiltinFunctions: Registering additional math functions...\n");
         
-        // Register math functions with asbind20
+        // Register math functions with context-aware asbind20 extension
         // Note: Basic float functions (sin, cos, sqrt, abs, ceil, min, max) are registered in ASCoreTypes.cpp
         // We add integer versions and additional utility functions
-        asbind20::global(pEngine)
-            // Integer math functions to complement float versions from ASCoreTypes
-            .function("int abs(int)", &AS_AbsInt)
-            .function("int min(int, int)", &AS_MinInt)
-            .function("int max(int, int)", &AS_MaxInt);
+        using namespace asbind20::ctx;
+        asbind20::global_ctx(pEngine)
+            // Integer math functions to complement float versions from ASCoreTypes - all SHARED
+            .function("int abs(int)", &AS_AbsInt, shared)
+            .function("int min(int, int)", &AS_MinInt, shared)
+            .function("int max(int, int)", &AS_MaxInt, shared);
         
         printf("ASBuiltinFunctions: Additional math functions registered\n");
     }
@@ -226,14 +245,15 @@ namespace ASBuiltinFunctions
         
         printf("ASBuiltinFunctions: Registering vector utility functions...\n");
         
-        // Register vector creation and manipulation functions with asbind20
-        asbind20::global(pEngine)
-            .function("Vector3 CreateVector(float, float, float)", &AS_CreateVector)
-            .function("float GetVectorX(const Vector3 &in)", &AS_GetVectorX)
-            .function("float GetVectorY(const Vector3 &in)", &AS_GetVectorY)
-            .function("float GetVectorZ(const Vector3 &in)", &AS_GetVectorZ)
-            .function("float Distance(const Vector3 &in, const Vector3 &in)", &AS_Distance)
-            .function("float DotProduct(const Vector3 &in, const Vector3 &in)", &AS_DotProduct);
+        // Register vector creation and manipulation functions with context-aware asbind20
+        using namespace asbind20::ctx;
+        asbind20::global_ctx(pEngine)
+            .function("Vector3 CreateVector(float, float, float)", &AS_CreateVector, shared)
+            .function("float GetVectorX(const Vector3 &in)", &AS_GetVectorX, shared)
+            .function("float GetVectorY(const Vector3 &in)", &AS_GetVectorY, shared)
+            .function("float GetVectorZ(const Vector3 &in)", &AS_GetVectorZ, shared)
+            .function("float Distance(const Vector3 &in, const Vector3 &in)", &AS_Distance, shared)
+            .function("float DotProduct(const Vector3 &in, const Vector3 &in)", &AS_DotProduct, shared);
         // Note: CrossProduct is registered in ASCoreTypes, not here
         
         printf("ASBuiltinFunctions: Vector utility functions registered\n");
@@ -568,28 +588,31 @@ namespace ASBuiltinFunctions
         // Note: GetCvar and GetGameTime are now registered in ASEntityBindings.cpp
         // to avoid duplicate registrations and ensure proper engine integration
         
-        // Register game functions with asbind20 - comprehensive implementation
+        // Register game functions with context-aware asbind20
         // Note: GetTimestamp, GetPlayerCount, GetAllPlayers are registered in ASEntityBindings.cpp
         // Note: formatInt is provided by scriptstdstring addon with enhanced functionality
-        asbind20::global(pEngine)
-            // String utility functions
-            .function("string formatFloat(float, const string &in, int, int)", &AS_FormatFloat)
-            // Random functions
-            .function("float Random(float, float)", &AS_Random)
-            .function("int RandomInt(int, int)", &AS_RandomInt)
-            // Logging functions
-            .function("void LogMessage(const string &in)", &AS_LogMessage)
-            .function("void DeveloperMessage(int, const string &in)", &AS_DeveloperMessage)
-            // Angle manipulation functions
-            .function("Vector3 CreateAngles(float, float, float)", &AS_CreateAngles)
-            .function("float GetAnglePitch(const Vector3 &in)", &AS_GetAnglePitch)
-            .function("float GetAngleYaw(const Vector3 &in)", &AS_GetAngleYaw)
-            .function("float GetAngleRoll(const Vector3 &in)", &AS_GetAngleRoll);
+        using namespace asbind20::ctx;
+        asbind20::global_ctx(pEngine)
+            // String utility functions - SHARED
+            .function("string formatFloat(float, const string &in, int, int)", &AS_FormatFloat, shared)
+            // Random functions - SHARED
+            .function("float Random(float, float)", &AS_Random, shared)
+            .function("int RandomInt(int, int)", &AS_RandomInt, shared)
+            // Logging functions - SHARED
+            .function("void LogMessage(const string &in)", &AS_LogMessage, shared)
+            .function("void DeveloperMessage(int, const string &in)", &AS_DeveloperMessage, shared)
+            // Angle manipulation functions - SHARED
+            .function("Vector3 CreateAngles(float, float, float)", &AS_CreateAngles, shared)
+            .function("float GetAnglePitch(const Vector3 &in)", &AS_GetAnglePitch, shared)
+            .function("float GetAngleYaw(const Vector3 &in)", &AS_GetAngleYaw, shared)
+            .function("float GetAngleRoll(const Vector3 &in)", &AS_GetAngleRoll, shared);
         
         // Note: GetAllPlayers is registered in ASEntityBindings.cpp to avoid duplication
         
+        // Register split function with old API + context tracking
         pEngine->RegisterGlobalFunction("array<string>@ split(const string &in, const string &in)", 
             asFUNCTION(AS_SplitWrapper), asCALL_CDECL);
+        RegisterFunctionContext(pEngine, "array<string>@ split(const string &in, const string &in)", ScriptContext::SHARED);
         
         printf("ASBuiltinFunctions: Game system functions registered\n");
     }
@@ -1274,60 +1297,47 @@ namespace ASBuiltinFunctions
         
         MS_ANGEL_INFO("RegisterGameMasterFunctions: Registering GameMaster communication and event functions...");
         
-        // Register communication functions
-        pEngine->RegisterGlobalFunction("void SendPlayerMessage(const string &in, const string &in)", 
-            asFUNCTION(AS_SendPlayerMessage), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void SendConsoleMessage(const string &in, const string &in)", 
-            asFUNCTION(AS_SendConsoleMessage), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void SendInfoMessageToAll(const string &in, const string &in)", 
-            asFUNCTION(AS_SendInfoMessageToAll), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void SendMessageToAllPlayers(const string &in, const string &in)", 
-            asFUNCTION(AS_SendMessageToAllPlayers), asCALL_CDECL);
+        // All GameMaster functions are SERVER_ONLY
+        using namespace asbind20::ctx;
+        ASScriptContextManager* pContextMgr = ASScriptContextManager::Instance();
         
-        // Register external system integration functions
-        pEngine->RegisterGlobalFunction("void CallPlayerExternal(const string &in, const string &in, const array<string>@ &in)", 
-            asFUNCTION(AS_CallPlayerExternal), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void CallGameMasterExternal(const string &in, const array<string>@ &in)", 
-            asFUNCTION(AS_CallGameMasterExternal), asCALL_CDECL);
+        // Helper lambda to register with context
+        auto regFunc = [&](const char* decl, auto func) {
+            pEngine->RegisterGlobalFunction(decl, asFUNCTION(func), asCALL_CDECL);
+            if (pContextMgr) {
+                asIScriptFunction* asFunc = pEngine->GetGlobalFunctionByDecl(decl);
+                if (asFunc) pContextMgr->RegisterFunctionContext(asFunc->GetName(), ScriptContext::SERVER_ONLY);
+            }
+        };
         
-        // Register event system functions
-        // TODO: Fix function pointer issues
-        // pEngine->RegisterGlobalFunction("void RegisterEngineEvent(const string &in, funcdef@ callback)", 
-        //     asFUNCTION(AS_RegisterEngineEvent), asCALL_CDECL);
-        // Note: LogEngineEventHandlers is registered by ASEngineEventManager.cpp
+        // Register communication functions - all SERVER_ONLY
+        regFunc("void SendPlayerMessage(const string &in, const string &in)", AS_SendPlayerMessage);
+        regFunc("void SendConsoleMessage(const string &in, const string &in)", AS_SendConsoleMessage);
+        regFunc("void SendInfoMessageToAll(const string &in, const string &in)", AS_SendInfoMessageToAll);
+        regFunc("void SendMessageToAllPlayers(const string &in, const string &in)", AS_SendMessageToAllPlayers);
         
-        // Register advanced system functions
-        pEngine->RegisterGlobalFunction("void InitializeAdvancedTriggerSystem()", 
-            asFUNCTION(AS_InitializeAdvancedTriggerSystem), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void InitializeHPSequenceTrigger()", 
-            asFUNCTION(AS_InitializeHPSequenceTrigger), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void InitializeEntitySpawner()", 
-            asFUNCTION(AS_InitializeEntitySpawner), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void InitializeEntityCommunications()", 
-            asFUNCTION(AS_InitializeEntityCommunications), asCALL_CDECL);
+        // Register external system integration functions - SERVER_ONLY
+        regFunc("void CallPlayerExternal(const string &in, const string &in, const array<string>@ &in)", AS_CallPlayerExternal);
+        regFunc("void CallGameMasterExternal(const string &in, const array<string>@ &in)", AS_CallGameMasterExternal);
         
-        pEngine->RegisterGlobalFunction("void ShutdownAdvancedTriggerSystem()", 
-            asFUNCTION(AS_ShutdownAdvancedTriggerSystem), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void ShutdownHPSequenceTrigger()", 
-            asFUNCTION(AS_ShutdownHPSequenceTrigger), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void ShutdownEntitySpawner()", 
-            asFUNCTION(AS_ShutdownEntitySpawner), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("void ShutdownEntityCommunications()", 
-            asFUNCTION(AS_ShutdownEntityCommunications), asCALL_CDECL);
+        // Register advanced system functions - SERVER_ONLY
+        regFunc("void InitializeAdvancedTriggerSystem()", AS_InitializeAdvancedTriggerSystem);
+        regFunc("void InitializeHPSequenceTrigger()", AS_InitializeHPSequenceTrigger);
+        regFunc("void InitializeEntitySpawner()", AS_InitializeEntitySpawner);
+        regFunc("void InitializeEntityCommunications()", AS_InitializeEntityCommunications);
         
-        // Register advanced system status functions
-        pEngine->RegisterGlobalFunction("bool IsAdvancedTriggerSystemActive()", 
-            asFUNCTION(AS_IsAdvancedTriggerSystemActive), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("bool IsHPSequenceSystemActive()", 
-            asFUNCTION(AS_IsHPSequenceSystemActive), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("bool IsEntitySpawnerActive()", 
-            asFUNCTION(AS_IsEntitySpawnerActive), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("bool IsEntityCommSystemActive()", 
-            asFUNCTION(AS_IsEntityCommSystemActive), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("int GetActiveTriggersCount()", 
-            asFUNCTION(AS_GetActiveTriggersCount), asCALL_CDECL);
-        pEngine->RegisterGlobalFunction("int GetActiveSequencesCount()", 
-            asFUNCTION(AS_GetActiveSequencesCount), asCALL_CDECL);
+        regFunc("void ShutdownAdvancedTriggerSystem()", AS_ShutdownAdvancedTriggerSystem);
+        regFunc("void ShutdownHPSequenceTrigger()", AS_ShutdownHPSequenceTrigger);
+        regFunc("void ShutdownEntitySpawner()", AS_ShutdownEntitySpawner);
+        regFunc("void ShutdownEntityCommunications()", AS_ShutdownEntityCommunications);
+        
+        // Register advanced system status functions - SERVER_ONLY
+        regFunc("bool IsAdvancedTriggerSystemActive()", AS_IsAdvancedTriggerSystemActive);
+        regFunc("bool IsHPSequenceSystemActive()", AS_IsHPSequenceSystemActive);
+        regFunc("bool IsEntitySpawnerActive()", AS_IsEntitySpawnerActive);
+        regFunc("bool IsEntityCommSystemActive()", AS_IsEntityCommSystemActive);
+        regFunc("int GetActiveTriggersCount()", AS_GetActiveTriggersCount);
+        regFunc("int GetActiveSequencesCount()", AS_GetActiveSequencesCount);
         
         MS_ANGEL_INFO("RegisterGameMasterFunctions: GameMaster functions registered successfully");
     }

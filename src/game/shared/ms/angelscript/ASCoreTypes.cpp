@@ -6,6 +6,8 @@
 //==========================================================================
 
 #include "ASCoreTypes.h"
+#include "ASScriptContext.h"
+#include "ASBindExtensions.h"
 #include <asbind20/asbind.hpp>
 #include <cstdio>
 #include <cmath>
@@ -268,14 +270,15 @@ namespace ASCoreTypes
         
         MS_ANGEL_INFO("ASCoreTypes: Registering math functions...");
         
-        // Register basic math functions with asbind20
-        asbind20::global(pEngine)
-            .function("float sin(float)", &AS_Sin)
-            .function("float cos(float)", &AS_Cos)
-            .function("float sqrt(float)", &AS_Sqrt)
-            .function("float abs(float)", &AS_Abs)
-            .function("float min(float, float)", &AS_Min)
-            .function("float max(float, float)", &AS_Max);
+        // Register basic math functions with context-aware asbind20
+        using namespace asbind20::ctx;
+        asbind20::global_ctx(pEngine)
+            .function("float sin(float)", &AS_Sin, shared)
+            .function("float cos(float)", &AS_Cos, shared)
+            .function("float sqrt(float)", &AS_Sqrt, shared)
+            .function("float abs(float)", &AS_Abs, shared)
+            .function("float min(float, float)", &AS_Min, shared)
+            .function("float max(float, float)", &AS_Max, shared);
         
         // Register math constants
         pEngine->RegisterGlobalProperty("const float PI", (void*)&AS_PI);

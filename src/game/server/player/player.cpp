@@ -2428,7 +2428,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	}
 	else
 	{
-		MS_INFO("m_JoinType: %s", m_JoinType);
+		MS_INFO("m_JoinType: %d", m_JoinType);
 		switch (m_JoinType)
 		{
 		case JN_VISITED:

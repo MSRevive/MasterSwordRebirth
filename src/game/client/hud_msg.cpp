@@ -77,7 +77,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 
 	MSCLGlobals::AuthID = READ_STRING();
 	int VotesAllowed = READ_BYTE();
-	MS_INFO("[MsgFunc_InitHUD: AuthID] %s", MSCLGlobals::AuthID);
+	MS_INFO("[MsgFunc_InitHUD: AuthID] %s", MSCLGlobals::AuthID.c_str());
 
 	ChooseChar_Interface::ServerCharNum = READ_BYTE(); //Number of characters the server allows you to have
 	MS_INFO("[MsgFunc_InitHUD: Charnum] %d", ChooseChar_Interface::ServerCharNum);
