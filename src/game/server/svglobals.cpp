@@ -28,6 +28,9 @@ bool gFNInitialized = false;
 bool CSVGlobals::LogScripts = true;
 mslist<CSVGlobals::scriptlistitem_t> CSVGlobals::ScriptList[SCRIPT_TYPES];
 
+// Global game_master entity handle
+CBaseEntity* g_pGameMasterEntity = nullptr;
+
 //Thothie MAR2012_27 - duplicate precache trackers
 int gModelPrecacheCount = 0;
 int gSoundPrecacheCount = 0;
@@ -286,6 +289,27 @@ void MSWorldSpawn()
 	}
 
 	WriteCrashCfg();
+
+	// Re-initialize AngelScript system if it was destroyed by previous map end
+	if (as_enabled.value > 0)
+	{
+		if (!CAngelScriptManager::Instance()->IsInitialized())
+		{
+			g_engfuncs.pfnServerPrint("Re-initializing AngelScript Manager after map change...\n");
+			MS_INFO("Re-initializing AngelScript Manager after map change...");
+			
+			if (!CAngelScriptManager::Instance()->Initialize())
+			{
+				g_engfuncs.pfnServerPrint("ERROR: Failed to re-initialize AngelScript Manager!\n");
+				MS_ERROR("Failed to re-initialize AngelScript Manager!");
+			}
+			else
+			{
+				g_engfuncs.pfnServerPrint("AngelScript Manager re-initialized successfully\n");
+				MS_INFO("AngelScript Manager re-initialized successfully");
+			}
+		}
+	}
 
 	// Initialize AngelScript Module System
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())

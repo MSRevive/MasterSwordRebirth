@@ -9,6 +9,12 @@ void MSGameThink();
 void MSGameEnd();
 void SendHUDMsgAll(const char* Title, const char* Text);
 
+// Forward declarations
+class CBaseEntity;
+
+// Global game_master entity handle
+extern CBaseEntity* g_pGameMasterEntity;
+
 #define SCRIPT_TYPES 4
 
 class CSVGlobals

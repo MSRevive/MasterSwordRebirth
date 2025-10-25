@@ -33,11 +33,16 @@ typedef float vec_t;
     #include "hud.h"
     #include "cl_util.h"
 #else
-    // Server-side includes
+    // Server-side includes (VALVE_DLL is defined for server builds)
     #include "extdll.h"
     #include "util.h"
     #include "hl/cbase.h"
     #include "player/player.h"
+    #include "svglobals.h"  // For g_pGameMasterEntity
+#endif
+
+#ifdef VALVE_DLL
+    #include "enginecallback.h"  // For WRITE_STRING_MAX and network message functions
 #endif
 
 // Include AngelScript headers after engine headers
@@ -420,6 +425,130 @@ namespace ASEntityBindings
             MS_ANGEL_ERROR("CreateEntity: Failed to create entity '%s'", scriptName.c_str());
             return EntityHandle(0);
         }
+    }
+    
+    // Vote menu opening function - opens a menu with custom options using the game master entity
+    void AS_OpenVoteMenu(CBasePlayer* pPlayer, const std::string& title, const CScriptArray* options)
+    {
+#ifdef VALVE_DLL
+        MS_ANGEL_INFO("OpenVoteMenu called for player %s with title '%s'", 
+                     pPlayer ? pPlayer->DisplayName() : "NULL", title.c_str());
+        
+        if (!pPlayer || !pPlayer->pev || !options)
+        {
+            MS_ANGEL_ERROR("OpenVoteMenu: Invalid parameters (player=%p, pev=%p, options=%p)", 
+                          pPlayer, pPlayer ? pPlayer->pev : NULL, options);
+            return;
+        }
+        
+        // Check inventory full
+        if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+        {
+            pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
+            MS_ANGEL_DEBUG("OpenVoteMenu: Player inventory full");
+            return;
+        }
+        
+        // Get the game master entity from global handle (required for menu system)
+        MS_ANGEL_DEBUG("OpenVoteMenu: Using global game_master entity handle");
+        CBaseEntity* pGameMaster = g_pGameMasterEntity;
+        
+        if (!pGameMaster)
+        {
+            MS_ANGEL_ERROR("OpenVoteMenu: Global game_master entity handle is NULL!");
+            MS_ANGEL_ERROR("  This likely means ServerActivate hasn't run yet or game_master creation failed.");
+            
+            // Try to find it by searching as fallback
+            MS_ANGEL_DEBUG("  Attempting fallback search for game_master by netname...");
+            pGameMaster = UTIL_FindEntityByString(NULL, "netname", "-game_master");
+            
+            if (!pGameMaster)
+            {
+                MS_ANGEL_ERROR("  Fallback search also failed - game_master entity doesn't exist!");
+                
+                // Debug: list all ms_npc entities
+                CBaseEntity* pTest = NULL;
+                int npcCount = 0;
+                while ((pTest = UTIL_FindEntityByClassname(pTest, "ms_npc")) != NULL)
+                {
+                    npcCount++;
+                    if (pTest->pev && pTest->pev->netname)
+                    {
+                        MS_ANGEL_DEBUG("    Found ms_npc #%d with netname: '%s'", npcCount, STRING(pTest->pev->netname));
+                    }
+                }
+                MS_ANGEL_DEBUG("  Total ms_npc entities found: %d", npcCount);
+                
+                pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Vote system error: game master not found.");
+                return;
+            }
+            else
+            {
+                MS_ANGEL_INFO("  Fallback search succeeded! Found game_master at index %d", pGameMaster->entindex());
+            }
+        }
+        
+        MS_ANGEL_INFO("OpenVoteMenu: Found game_master entity at index %d", pGameMaster->entindex());
+        
+        CMSMonster* pGM = pGameMaster->IsMSMonster() ? (CMSMonster*)pGameMaster : NULL;
+        if (!pGM)
+        {
+            MS_ANGEL_ERROR("OpenVoteMenu: game_master is not a CMSMonster!");
+            return;
+        }
+        
+        MS_ANGEL_DEBUG("Opening vote menu for %s with title '%s' via game_master entity %d", 
+                      pPlayer->DisplayName(), title.c_str(), pGM->entindex());
+        
+        // Clear and set up menu options for this player
+        mslist<menuoption_t>& menuOptions = pGM->m_MenuOptions[pPlayer->entindex()];
+        menuOptions.clearitems();
+        
+        // Add each vote option to the game master's menu
+        asUINT optionCount = options->GetSize();
+        for (asUINT i = 0; i < optionCount; i++)
+        {
+            const std::string* optionStr = static_cast<const std::string*>(options->At(i));
+            if (optionStr)
+            {
+                menuoption_t menuOption;
+                clrmem(menuOption);
+                menuOption.Access = MOA_ALL;
+                menuOption.Title = optionStr->c_str();
+                menuOption.Type = MOT_CALLBACK;
+                menuOption.Data = optionStr->c_str();
+                menuOptions.add(menuOption);
+                MS_ANGEL_DEBUG("  Option %d: %s", i, optionStr->c_str());
+            }
+        }
+        
+        // Send menu initialization message (message type 25)
+        MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
+        WRITE_BYTE(25);  // Menu init
+        WRITE_LONG(pGM->entindex());  // Game master entity index
+        WRITE_STRING_LIMIT(title.c_str(), WRITE_STRING_MAX);
+        MESSAGE_END();
+        
+        // Send each menu option (message type 26)
+        for (asUINT i = 0; i < optionCount; i++)
+        {
+            const std::string* optionStr = static_cast<const std::string*>(options->At(i));
+            if (optionStr)
+            {
+                MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
+                WRITE_BYTE(26);  // Menu option
+                WRITE_BYTE(MOA_ALL);   // Access level
+                WRITE_STRING_LIMIT(optionStr->c_str(), 92);  // Option title
+                WRITE_BYTE(MOT_CALLBACK);   // Type
+                WRITE_STRING_LIMIT(optionStr->c_str(), 92);  // Option data
+                MESSAGE_END();
+            }
+        }
+        
+        pPlayer->InMenu = true;
+        MS_ANGEL_INFO("Opened vote menu for %s with %d options via game_master", 
+                     pPlayer->DisplayName(), optionCount);
+#endif
     }
     
     // Entity property functions using EntityHandle
@@ -837,7 +966,9 @@ namespace ASEntityBindings
             // Logging functions for scripts
             .function("void MS_ANGEL_INFO(const string &in)", [](const std::string& message) { AS_LogAngelInfo(message); })
             .function("void MS_ANGEL_DEBUG(const string &in)", [](const std::string& message) { AS_LogAngelDebug(message); })
-            .function("void MS_ANGEL_ERROR(const string &in)", [](const std::string& message) { AS_LogAngelError(message); });
+            .function("void MS_ANGEL_ERROR(const string &in)", [](const std::string& message) { AS_LogAngelError(message); })
+            // Vote menu opening function
+            .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu);
         
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
     }

@@ -1823,6 +1823,10 @@ void ServerDeactivate(void)
 
 	// Peform any shutdown operations here...
 	//
+	
+	// Clear the global game_master entity handle
+	g_pGameMasterEntity = nullptr;
+	MS_INFO("Global game_master entity handle cleared");
 
 	if (g_pGameRules)
 		g_pGameRules->EndMultiplayerGame();
@@ -1881,20 +1885,77 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	LinkUserMessages();
 
 	//If the game master hasn't been created yet, create it now - Solokiller
+	MS_INFO("Checking for existing game_master entity...");
 	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 	if (!pGameMasterEnt)
 	{
+		MS_INFO("Game master not found, creating new one...");
 		MS_INFO("Spawning game master");
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
 		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
 		if (NewMonster)
 		{
 			NewMonster->pev->origin = Vector(20000, -10000, -20000);
+			
+			// Set game master properties BEFORE Spawn to prevent script from overriding
+			NewMonster->pev->health = 1;
+			NewMonster->pev->max_health = 1;
+			NewMonster->pev->rendermode = kRenderTransTexture;
+			NewMonster->pev->renderamt = 0; // invisible
+			NewMonster->pev->flags |= FL_GODMODE;
+			NewMonster->pev->takedamage = DAMAGE_NO;
+			
+			// Set netname BEFORE Spawn (required for entity lookups)
+			NewMonster->m_NetName = "-game_master";
+			NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
+			
+			MS_INFO("Game master entity pre-configured with netname: %s at index %d", 
+			        NewMonster->m_NetName.c_str(), NewMonster->entindex());
+			
+			// Spawn with the game_master script (currently disabled, using AngelScript instead)
 			NewMonster->Spawn("game_master");
+			
+			// Verify netname is still set after Spawn
+			if (NewMonster->pev->netname && STRING(NewMonster->pev->netname)[0])
+			{
+				MS_INFO("Game master netname verified after Spawn: '%s'", STRING(NewMonster->pev->netname));
+			}
+			else
+			{
+				MS_ERROR("Game master netname was cleared by Spawn! Restoring...");
+				NewMonster->m_NetName = "-game_master";
+				NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
+			}
 
-			msstringlist params;
-			NewMonster->CallScriptEvent("game_dynamically_created", &params);
-		}
+		msstringlist params;
+		NewMonster->CallScriptEvent("game_dynamically_created", &params);
+		
+		// Update the pointer so we can set the global handle below
+		pGameMasterEnt = NewMonster;
+		
+		MS_INFO("Game master entity fully initialized");
+	}
+	else
+	{
+		MS_ERROR("Failed to create game master entity!");
+	}
+	}
+	else
+	{
+		MS_INFO("Game master entity already exists at index %d with netname '%s'", 
+		        pGameMasterEnt->entindex(), 
+		        pGameMasterEnt->pev->netname ? STRING(pGameMasterEnt->pev->netname) : "(null)");
+	}
+	
+	// Store the game_master entity in global handle for easy access
+	g_pGameMasterEntity = pGameMasterEnt;
+	if (g_pGameMasterEntity)
+	{
+		MS_INFO("Global game_master entity handle set (index %d)", g_pGameMasterEntity->entindex());
+	}
+	else
+	{
+		MS_ERROR("Failed to set global game_master entity handle!");
 	}
 
 	CSVGlobals::WriteScriptLog();

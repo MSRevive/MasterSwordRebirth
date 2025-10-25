@@ -203,6 +203,9 @@ string GetClientAddress(CBasePlayer@)
 
 // Player communication
 void SendPlayerMessage(const string &in playerName, const string &in title, const string &in message)
+
+// Menu system
+void OpenVoteMenu(CBasePlayer@ player, const string &in title, const array<string> &in options)
 ```
 
 ### Entity Management Functions
