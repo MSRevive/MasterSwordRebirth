@@ -517,6 +517,7 @@ namespace ASEntityBindings
                 menuOption.Title = optionStr->c_str();
                 menuOption.Type = MOT_CALLBACK;
                 menuOption.Data = optionStr->c_str();
+                menuOption.CB_Name = "game_vote_menu_callback";  // Set callback event name
                 menuOptions.add(menuOption);
                 MS_ANGEL_DEBUG("  Option %d: %s", i, optionStr->c_str());
             }

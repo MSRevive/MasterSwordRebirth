@@ -2870,22 +2870,34 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
+	MS_ANGEL_INFO("UseMenuOption called for player %s, option %d", 
+	             pPlayer ? pPlayer->DisplayName() : "NULL", Option);
+	
 	pPlayer->InMenu = false;
 	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
+
+	MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
 
 	//Thothie JAN2008a - need a way of dealing with canceled menus
 	if (Option == -1)
 	{
+		MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
 		static msstringlist Params;
 		Params.clearitems();
 		Params.add(EntToString(pPlayer));
 		CallScriptEvent("game_menu_cancel", &Params);
+		return;
 	}
 
 	if (Option < 0 || Option >= (signed)Menuoptions.size())
+	{
+		MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
 		return;
+	}
 
 	menuoption_t& MenuOption = Menuoptions[Option];
+	MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
+	             MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
 
 	bool PlayerCanPay = true;
 
@@ -2973,23 +2985,44 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 	}
 
 	//Handle callback
+	// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
+	msstring CallbackEvent = MenuOption.CB_Name;
+	msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
+	msstring OptionData = MenuOption.Data;
+	menuoptiontype_e OptionType = MenuOption.Type;
+	
+	MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
+	
 	static msstringlist Params;
 	Params.clearitems();
 	Params.add(EntToString(pPlayer));
-	Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+	Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
 
-	msstring CallbackEvent = MenuOption.CB_Name;
+	MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
+	             EntToString(pPlayer).c_str(), OptionData.c_str());
 
-	if (MenuOption.Type == MOT_PAYMENT)
+	if (OptionType == MOT_PAYMENT)
 	{
 		if (!PlayerCanPay)
-			CallbackEvent = MenuOption.CB_Failed_Name;
+		{
+			MS_ANGEL_INFO("  Player can't pay, using failed callback");
+			CallbackEvent = CallbackFailedEvent;
+		}
 	}
 
 	if (CallbackEvent.len())
 	{
+		MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
+		             CallbackEvent.c_str(), (int)Params.size());
 		CallScriptEvent(CallbackEvent, &Params);
+		MS_ANGEL_INFO("  Script event completed");
 	}
+	else
+	{
+		MS_ANGEL_WARN("  No callback event name specified for this menu option");
+	}
+	
+	MS_ANGEL_INFO("  Clearing menu options");
 	Menuoptions.clearitems();
 }
 

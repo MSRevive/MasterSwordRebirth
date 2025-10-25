@@ -833,20 +833,41 @@ void ClientCommand2(edict_t *pEntity)
 	}
 	else if (FStrEq(pcmd, "menuoption"))
 	{
+		MS_ANGEL_INFO("menuoption command received from player %s", pPlayer ? pPlayer->DisplayName() : "NULL");
+		MS_ANGEL_INFO("  Arguments: %d", CMD_ARGC());
+		
 		if (CMD_ARGC() <= 2)
+		{
+			MS_ANGEL_ERROR("menuoption: Not enough arguments (need at least 3)");
 			return;
+		}
 
 		int EntIdx = atoi(CMD_ARGV(1));
+		MS_ANGEL_INFO("  Entity Index: %d", EntIdx);
+		MS_ANGEL_INFO("  Option Index: %s", CMD_ARGV(2));
+		
 		CBaseEntity *pEntity = MSInstance(INDEXENT(EntIdx));
-		if (!pEntity || !pEntity->IsMSMonster())
+		if (!pEntity)
+		{
+			MS_ANGEL_ERROR("menuoption: Entity at index %d is NULL", EntIdx);
 			return;
+		}
+		
+		if (!pEntity->IsMSMonster())
+		{
+			MS_ANGEL_ERROR("menuoption: Entity at index %d is not an MSMonster (classname: %s)", 
+			              EntIdx, STRING(pEntity->pev->classname));
+			return;
+		}
 
 		CMSMonster *pMonster = (CMSMonster *)pEntity;
 		int Option = atoi(CMD_ARGV(2));
 
+		MS_ANGEL_INFO("menuoption: Calling UseMenuOption on entity %d with option %d", EntIdx, Option);
 		pPlayer->InMenu = false;
 
 		pMonster->UseMenuOption(pPlayer, Option);
+		MS_ANGEL_INFO("menuoption: UseMenuOption completed");
 	}
 	else if (FStrEq(pcmd, "offer"))
 	{

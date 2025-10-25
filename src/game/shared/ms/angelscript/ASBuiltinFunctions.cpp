@@ -1064,7 +1064,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side initialization
             g_AdvancedSystems.triggerSystemActive = true;
             g_AdvancedSystems.activeTriggers.clear();
@@ -1088,7 +1088,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side initialization
             g_AdvancedSystems.hpSequenceSystemActive = true;
             g_AdvancedSystems.activeSequences.clear();
@@ -1123,7 +1123,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side initialization
             g_AdvancedSystems.entitySpawnerActive = true;
             
@@ -1147,7 +1147,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side initialization
             g_AdvancedSystems.entityCommSystemActive = true;
             
@@ -1171,7 +1171,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side shutdown
             TriggerCustomEngineEvent("TRIGGER_SYSTEM_SHUTDOWN", nullptr);
             
@@ -1195,7 +1195,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side shutdown
             TriggerCustomEngineEvent("HP_SEQUENCE_SYSTEM_SHUTDOWN", nullptr);
             
@@ -1216,7 +1216,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side shutdown
             TriggerCustomEngineEvent("ENTITY_SPAWNER_SHUTDOWN", nullptr);
             
@@ -1238,7 +1238,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side shutdown
             TriggerCustomEngineEvent("ENTITY_COMM_SYSTEM_SHUTDOWN", nullptr);
             

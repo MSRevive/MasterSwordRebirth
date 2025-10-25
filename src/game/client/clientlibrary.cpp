@@ -8,6 +8,7 @@
 #include "richpresence.h"
 #include "fmod/soundengine.h"
 #include "mslogger.h"
+#include "ms/angelscript/CAngelScriptManager.h"
 
 CSoundEngine gSoundEngine;
 CRichPresence gRichPresence;
@@ -95,6 +96,16 @@ void CClientLibrary::VideoInit()
 void CClientLibrary::Shutdown()
 {
 	MS_INFO("[INIT: Shutdown]");
+	
+	// Shutdown AngelScript on client
+	if (CAngelScriptManager::Instance()->IsInitialized())
+	{
+		MS_INFO("Shutting down client-side AngelScript...");
+		CAngelScriptManager::Instance()->Destroy();
+		CAngelScriptManager::Shutdown();
+		MS_INFO("Client-side AngelScript shutdown complete");
+	}
+	
 	gHUD.Shutdown();
 	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
