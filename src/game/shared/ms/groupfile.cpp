@@ -129,6 +129,9 @@ bool CGameGroupFile::Open(const char* pszFilename)
 			return false;
 		}
 
+		// Ensure filename is null-terminated (critical for string safety)
+		Entry.cFilename[sizeof(Entry.cFilename) - 1] = '\0';
+
 		m_EntryList.push_back(Entry);
 	}
 
@@ -198,8 +201,23 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 	for (int i = 0; i < m_EntryList.size(); i++)
 	{
 		pakDirectory_t Entry = m_EntryList[i];
-		if (strcmp(Entry.cFilename, EntryName) != 0)
-			continue;
+		
+		// Try case-sensitive match first (faster)
+		if (strcmp(Entry.cFilename, EntryName) == 0)
+		{
+			// Exact match found, continue to read
+		}
+		// Try case-insensitive match as fallback (for Windows compatibility)
+		else
+		{
+#ifdef _WIN32
+			if (_stricmp(Entry.cFilename, EntryName) != 0)
+				continue;
+#else
+			if (strcasecmp(Entry.cFilename, EntryName) != 0)
+				continue;
+#endif
+		}
 
 		DataSize = Entry.FileSize;
 		if (pBuffer)

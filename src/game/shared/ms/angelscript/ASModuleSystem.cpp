@@ -78,6 +78,63 @@ int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder
 }
 
 //==========================================================================
+// Pragma Callback for CScriptBuilder
+//==========================================================================
+int PragmaCallback(const std::string &pragmaText, CScriptBuilder &builder, void *userParam)
+{
+    // Trim leading/trailing whitespace from pragma text
+    std::string text = pragmaText;
+    size_t start = text.find_first_not_of(" \t\r\n");
+    size_t end = text.find_last_not_of(" \t\r\n");
+    
+    if (start == std::string::npos)
+    {
+        // Empty pragma
+        return -1;
+    }
+    
+    text = text.substr(start, end - start + 1);
+    
+    // Parse the pragma directive
+    // Expected format: "context server|client|shared"
+    if (text.find("context") == 0)
+    {
+        // Extract the context type
+        size_t contextStart = text.find_first_not_of(" \t", 7); // Skip "context"
+        if (contextStart == std::string::npos)
+        {
+            printf("PragmaCallback: ERROR - Missing context type in #pragma context\n");
+            return -1;
+        }
+        
+        std::string contextType = text.substr(contextStart);
+        // Trim any trailing whitespace from context type
+        size_t contextEnd = contextType.find_first_of(" \t\r\n");
+        if (contextEnd != std::string::npos)
+        {
+            contextType = contextType.substr(0, contextEnd);
+        }
+        
+        // Validate context type
+        if (contextType != "server" && contextType != "client" && contextType != "shared")
+        {
+            printf("PragmaCallback: ERROR - Invalid context type '%s'. Must be 'server', 'client', or 'shared'\n", contextType.c_str());
+            return -1;
+        }
+        
+        printf("PragmaCallback: Recognized #pragma context %s (pragma will be stripped from code)\n", contextType.c_str());
+        
+        // Return 0 to indicate success
+        // The script builder will automatically overwrite the pragma with spaces
+        return 0;
+    }
+    
+    // Unknown pragma directive
+    printf("PragmaCallback: WARNING - Unknown pragma directive: %s\n", text.c_str());
+    return -1;
+}
+
+//==========================================================================
 // Constructor/Destructor
 //==========================================================================
 ASModuleSystem::ASModuleSystem()
@@ -306,6 +363,10 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
     {
         printf("ASModuleSystem: No pak file provided - #include directives will not be supported\n");
     }
+    
+    // Set up pragma callback to handle #pragma context directives
+    builder.SetPragmaCallback(PragmaCallback, nullptr);
+    printf("ASModuleSystem: Pragma callback configured for module '%s'\n", name.c_str());
     
     int r = builder.StartNewModule(m_pEngine, name.c_str());
     if (r < 0)

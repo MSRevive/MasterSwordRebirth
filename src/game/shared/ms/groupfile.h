@@ -5,6 +5,8 @@
 #include "stackstring.h"
 typedef unsigned long ulong;
 
+#pragma pack(push, 1)  // Ensure tight packing with no padding
+
 struct pakHeader_t
 {
 	int MagicNumber;
@@ -12,12 +14,15 @@ struct pakHeader_t
 	unsigned int DirectoryCount;
 };
 
+// Raw on-disk format - increased from 56 to 256 bytes (requires re-packing scripts.pak)
 struct pakDirectory_t
 {
-	char cFilename[56];
+	char cFilename[256];  // Increased from 56 to 256 bytes to support longer paths
 	unsigned int FileOffset;
 	unsigned int FileSize;
 };
+
+#pragma pack(pop)  // Restore default packing
 
 #ifndef NOT_HLDLL
 #include "filesystem_shared.h"
