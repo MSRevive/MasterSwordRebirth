@@ -133,6 +133,12 @@ void CMSMonster::Spawn()
 {
 	m_OldGold = 0;
 
+	// Initialize menu protection flags to false for all players
+	for (int i = 0; i < MAXPLAYERS; i++)
+	{
+		m_MenuOptionsProtected[i] = false;
+	}
+
 	//SUB_Remove( ); return;
 	//DelayedRemove( );
 
@@ -2842,7 +2848,17 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	Params.clearitems();
 	Params.add(EntToString(pPlayer));
 
-	m_MenuCurrentOptions = &m_MenuOptions[pPlayer->entindex()];
+	int playerIndex = pPlayer->entindex();
+	
+	// Check if this player's menu is protected (vote menu)
+	if (m_MenuOptionsProtected[playerIndex])
+	{
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: BLOCKED OpenMenu() from clearing player %d menu (entity: %d) ***", 
+		             playerIndex, entindex());
+		return;
+	}
+
+	m_MenuCurrentOptions = &m_MenuOptions[playerIndex];
 	mslist<menuoption_t>& Menuoptions = *m_MenuCurrentOptions;
 	Menuoptions.clearitems();
 
@@ -2870,11 +2886,14 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
-	MS_ANGEL_INFO("UseMenuOption called for player %s, option %d", 
-	             pPlayer ? pPlayer->DisplayName() : "NULL", Option);
+	int playerIndex = pPlayer->entindex();
+	MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
+	             pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
+	MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
+	             m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
 	
 	pPlayer->InMenu = false;
-	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
 
 	MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
 
@@ -2886,6 +2905,11 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 		Params.clearitems();
 		Params.add(EntToString(pPlayer));
 		CallScriptEvent("game_menu_cancel", &Params);
+		
+		// Clear protection flag when menu is cancelled
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
+		
 		return;
 	}
 
@@ -2915,6 +2939,10 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
 			CallScriptEvent("game_vote_menu_callback", &Params);
 		}
+		
+		// Clear protection flag when option is out of range (vote may have expired)
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
 		
 		return;
 	}
@@ -3057,6 +3085,10 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 	
 	MS_ANGEL_INFO("  Clearing menu options");
 	Menuoptions.clearitems();
+	
+	// Clear protection flag (used for vote menus)
+	m_MenuOptionsProtected[playerIndex] = false;
+	MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
 }
 
 void AlignToNormal(/*In*/ Vector& vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector& vAngles)

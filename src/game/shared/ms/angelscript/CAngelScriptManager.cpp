@@ -399,16 +399,35 @@ asIScriptContext* CAngelScriptManager::AcquireContext()
         pContext = m_ContextPool.back();
         m_ContextPool.pop_back();
         
-        // Make sure the context is in a clean state
-        pContext->Unprepare();
+        // CRITICAL: Validate that the pooled context belongs to the current engine
+        // If engines were switched (e.g. during level change), old contexts must be discarded
+        if (pContext && pContext->GetEngine() != m_pEngine)
+        {
+            MS_ANGEL_WARN("AcquireContext: Pooled context belongs to wrong engine! (context: %p, expected: %p)", 
+                         pContext->GetEngine(), m_pEngine);
+            MS_ANGEL_WARN("  Discarding stale context and creating new one");
+            pContext->Release();
+            pContext = nullptr;
+        }
+        
+        if (pContext)
+        {
+            // Make sure the context is in a clean state
+            pContext->Unprepare();
+        }
     }
-    else
+    
+    // Create a new context if pool is empty or stale context was discarded
+    if (!pContext)
     {
-        // Create a new context if pool is empty
         pContext = m_pEngine->CreateContext();
         if (!pContext)
         {
             LogMessage("Failed to create script context", 1);
+        }
+        else
+        {
+            MS_ANGEL_INFO("AcquireContext: Created new context from engine %p", m_pEngine);
         }
     }
     

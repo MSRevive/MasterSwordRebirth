@@ -323,6 +323,7 @@ public:
 	CBaseBody *Body;								//If this monster uses body parts
 	CItemList Gear;									//This monster's gear
 	mslist<menuoption_t> m_MenuOptions[MAXPLAYERS]; //The current menu options for each player
+	bool m_MenuOptionsProtected[MAXPLAYERS];		//Protection flag for vote menus (prevents old system from clearing)
 	mslist<menuoption_t> *m_MenuCurrentOptions;		//Only set during OpenMenu - Used in script operations
 
 	CStore *OpenStore;					   //Current store I'm offering to someone

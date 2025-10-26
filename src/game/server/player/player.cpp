@@ -2168,8 +2168,15 @@ pt_end:
 	if (Body)
 		Body->Think(this);
 
+	// Create a safe handle to ourselves before calling script
+	// If the script deletes this entity, the handle will become invalid
+	CBasePlayer* hSelf = this;
+	
 	CallScriptEvent("game_think");
 
+	// Safety check: entity might have been deleted during script execution
+	if (!hSelf || hSelf->pev == nullptr)
+		return;
 	
 	//Deactivate no-collide if not near any players.
 	//do not check for dead or spectating/noclipping players

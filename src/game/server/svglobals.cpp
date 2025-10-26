@@ -607,42 +607,6 @@ void MSGameEnd()
 	// Shutdown AngelScript GameMaster
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
 	{
-		// Call game_master_shutdown if available - now looks for GameMaster module
-		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
-		if (pModuleSystem)
-		{
-			asIScriptModule* pModule = pModuleSystem->GetModule("GameMaster");
-			if (pModule)
-			{
-				asIScriptFunction* pFunc = pModule->GetFunctionByName("game_master_shutdown");
-				if (pFunc)
-				{
-					asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
-					if (!pEngine)
-					{
-						g_engfuncs.pfnServerPrint("AngelScript engine not available for GameMaster shutdown\n");
-						return;
-					}
-					
-					asIScriptContext* pContext = pEngine->CreateContext();
-					
-					if (pContext)
-					{
-						pContext->Prepare(pFunc);
-						int r = pContext->Execute();
-						
-						if (r == asEXECUTION_FINISHED)
-						{
-							g_engfuncs.pfnServerPrint("AngelScript GameMaster shut down successfully\n");
-							MS_INFO("AngelScript GameMaster shut down successfully");
-						}
-						
-						pContext->Release();
-					}
-				}
-			}
-		}
-		
 		// General AngelScript cleanup
 		CAngelScriptManager::Instance()->Destroy();
 	}

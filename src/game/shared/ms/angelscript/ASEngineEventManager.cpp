@@ -67,8 +67,12 @@ void ASEngineEventManager::Shutdown()
 //==========================================================================
 bool ASEngineEventManager::Initialize(asIScriptEngine* pEngine)
 {
-    if (m_bInitialized)
+    // Allow reinitialization if the engine pointer has changed (level change scenario)
+    if (m_bInitialized && m_pEngine == pEngine)
+    {
+        MS_ANGEL_INFO("ASEngineEventManager::Initialize: Already initialized with this engine (%p)", pEngine);
         return true;
+    }
         
     if (!pEngine)
     {
@@ -76,10 +80,26 @@ bool ASEngineEventManager::Initialize(asIScriptEngine* pEngine)
         return false;
     }
     
+    // CRITICAL: If we're reinitializing with a new engine OR we have stale handlers, clear everything
+    if (m_bInitialized && m_pEngine != pEngine)
+    {
+        MS_ANGEL_INFO("ASEngineEventManager::Initialize: ENGINE CHANGE DETECTED!");
+        MS_ANGEL_INFO("  Old engine: %p, New engine: %p", m_pEngine, pEngine);
+        MS_ANGEL_INFO("  Performing aggressive cleanup of old handlers...");
+        Destroy();
+    }
+    else if (!m_bInitialized && !m_EventHandlers.empty())
+    {
+        // Safety check: If not initialized but handlers exist, something went wrong
+        MS_ANGEL_ERROR("ASEngineEventManager::Initialize: INCONSISTENT STATE - handlers exist but not initialized!");
+        MS_ANGEL_ERROR("  This indicates improper shutdown. Forcing cleanup...");
+        Destroy();
+    }
+    
     m_pEngine = pEngine;
     m_bInitialized = true;
     
-    MS_ANGEL_INFO("ASEngineEventManager initialized successfully");
+    MS_ANGEL_INFO("ASEngineEventManager initialized successfully with engine %p (handlers: %zu)", pEngine, m_EventHandlers.size());
     return true;
 }
 
@@ -88,43 +108,60 @@ bool ASEngineEventManager::Initialize(asIScriptEngine* pEngine)
 //==========================================================================
 void ASEngineEventManager::Destroy()
 {
-    if (!m_bInitialized)
-        return;
-    
-    MS_ANGEL_INFO("ASEngineEventManager: Starting destruction process...");
+    size_t handlerCount = m_EventHandlers.size();
+    MS_ANGEL_INFO("ASEngineEventManager: Starting destruction process (initialized=%d, handlers=%zu)...", 
+                  m_bInitialized, handlerCount);
         
-    // Enhanced cleanup to prevent memory corruption
-    // First, mark as not initialized to prevent new operations
-    m_bInitialized = false;
+    // CRITICAL: Store the old engine pointer before clearing
+    asIScriptEngine* pOldEngine = m_pEngine;
+    
+    // Always clear handlers even if not marked as initialized
+    // This handles cases where Destroy is called multiple times
     
     // Release all function references safely
-    MS_ANGEL_INFO("ASEngineEventManager: Releasing %zu event handlers", m_EventHandlers.size());
-    for (auto& handler : m_EventHandlers)
+    if (!m_EventHandlers.empty())
     {
-        if (handler.pFunction)
+        MS_ANGEL_INFO("ASEngineEventManager: Releasing %zu event handlers", handlerCount);
+        for (auto& handler : m_EventHandlers)
         {
-            MS_ANGEL_INFO("ASEngineEventManager: Releasing function %s from module %s", 
-                         handler.pFunction->GetName(), handler.moduleName.c_str());
-            try
+            if (handler.pFunction)
             {
-                handler.pFunction->Release();
+                MS_ANGEL_INFO("ASEngineEventManager: Releasing function %s from module %s (engine: %p)", 
+                             handler.pFunction->GetName(), handler.moduleName.c_str(), pOldEngine);
+                try
+                {
+                    // Verify the function's engine matches before releasing
+                    asIScriptModule* pFuncModule = handler.pFunction->GetModule();
+                    asIScriptEngine* pFuncEngine = pFuncModule ? pFuncModule->GetEngine() : nullptr;
+                    
+                    if (pFuncEngine != pOldEngine && pOldEngine != nullptr)
+                    {
+                        MS_ANGEL_WARN("ASEngineEventManager: Handler function engine mismatch during cleanup! (handler: %p, expected: %p)", 
+                                     pFuncEngine, pOldEngine);
+                    }
+                    
+                    handler.pFunction->Release();
+                }
+                catch (...)
+                {
+                    MS_ANGEL_ERROR("ASEngineEventManager: Exception while releasing function %s", 
+                                  handler.pFunction->GetName());
+                }
+                handler.pFunction = nullptr; // Ensure pointer is nulled
             }
-            catch (...)
-            {
-                MS_ANGEL_ERROR("ASEngineEventManager: Exception while releasing function %s", 
-                              handler.pFunction->GetName());
-            }
-            handler.pFunction = nullptr; // Ensure pointer is nulled
         }
     }
     
     // Clear the handlers list completely
     m_EventHandlers.clear();
     
+    // Mark as not initialized
+    m_bInitialized = false;
+    
     // Null the engine pointer to prevent further access
     m_pEngine = nullptr;
     
-    MS_ANGEL_INFO("ASEngineEventManager destroyed");
+    MS_ANGEL_INFO("ASEngineEventManager destroyed (%zu handlers cleared, engine %p unbound)", handlerCount, pOldEngine);
 }
 
 //==========================================================================
@@ -134,9 +171,45 @@ bool ASEngineEventManager::RegisterEventHandler(EngineEventType eventType, asISc
 {
     if (!m_bInitialized || !pFunction || !szModuleName)
     {
-        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: Invalid parameters");
+        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: Invalid parameters (initialized=%d, function=%p, module=%s)", 
+                       m_bInitialized, pFunction, szModuleName ? szModuleName : "NULL");
         return false;
     }
+    
+    if (!m_pEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: Event manager has no engine pointer!");
+        return false;
+    }
+    
+    // CRITICAL: Validate that the function belongs to the current engine
+    asIScriptModule* pFuncModule = pFunction->GetModule();
+    if (!pFuncModule)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: Function '%s' has no module - cannot register", 
+                      pFunction->GetName());
+        return false;
+    }
+    
+    asIScriptEngine* pFuncEngine = pFuncModule->GetEngine();
+    if (!pFuncEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: Function module has no engine - cannot register");
+        return false;
+    }
+    
+    if (pFuncEngine != m_pEngine)
+    {
+        MS_ANGEL_ERROR("ASEngineEventManager::RegisterEventHandler: CRITICAL ENGINE MISMATCH!");
+        MS_ANGEL_ERROR("  Function '%s' from module '%s' belongs to engine %p", pFunction->GetName(), szModuleName, pFuncEngine);
+        MS_ANGEL_ERROR("  But EventManager is using engine %p", m_pEngine);
+        MS_ANGEL_ERROR("  This indicates a stale function pointer from an old engine!");
+        MS_ANGEL_ERROR("  REGISTRATION REJECTED - Handler will NOT be registered");
+        return false;
+    }
+    
+    MS_ANGEL_INFO("ASEngineEventManager::RegisterEventHandler: Validated engine match for '%s' (engine: %p)", 
+                 pFunction->GetName(), pFuncEngine);
     
     // Check if handler already exists for this module and event type
     for (const auto& handler : m_EventHandlers)
@@ -515,10 +588,12 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
     
     int handlerCount = 0;
     int executedCount = 0;
+    std::vector<size_t> staleHandlerIndices;  // Track indices of stale handlers to remove
     
     // Find all handlers for this event type
-    for (const auto& handler : m_EventHandlers)
+    for (size_t handlerIdx = 0; handlerIdx < m_EventHandlers.size(); handlerIdx++)
     {
+        const auto& handler = m_EventHandlers[handlerIdx];
         MS_ANGEL_INFO("ASEngineEventManager: Checking handler %s (type=%d) against event %s (type=%d)",
                      handler.pFunction ? handler.pFunction->GetName() : "NULL",
                      static_cast<int>(handler.eventType),
@@ -542,6 +617,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         if (!handler.pFunction)
         {
             MS_ANGEL_ERROR("ASEngineEventManager: Function pointer is NULL for %s", GetEventTypeName(eventType));
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -552,6 +628,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             MS_ANGEL_ERROR("ASEngineEventManager: Function module is NULL for %s::%s - STALE FUNCTION POINTER DETECTED", 
                           handler.moduleName.c_str(), handler.pFunction->GetName());
             MS_ANGEL_ERROR("  This indicates the module was unloaded but event handlers weren't unregistered");
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -562,6 +639,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             MS_ANGEL_ERROR("ASEngineEventManager: Module '%s' is not registered with engine - STALE FUNCTION POINTER", 
                           handler.moduleName.c_str());
             MS_ANGEL_ERROR("  Expected module: %p, Found module: %p", pModule, pEngineModule);
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -572,6 +650,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             MS_ANGEL_ERROR("ASEngineEventManager: Module name mismatch for %s (expected: %s, actual: %s) - STALE REFERENCE", 
                           handler.pFunction->GetName(), handler.moduleName.c_str(), 
                           actualModuleName ? actualModuleName : "NULL");
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -582,6 +661,7 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
             MS_ANGEL_ERROR("ASEngineEventManager: Function '%s' not found in module '%s' - STALE FUNCTION POINTER", 
                           handler.pFunction->GetName(), handler.moduleName.c_str());
             MS_ANGEL_ERROR("  Expected function: %p, Found function: %p", handler.pFunction, pVerifyFunc);
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -593,6 +673,22 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         if (!pContext)
         {
             MS_ANGEL_ERROR("ASEngineEventManager: Failed to acquire script context for %s", GetEventTypeName(eventType));
+            continue;
+        }
+        
+        // FINAL VALIDATION: Verify the function belongs to the same engine as the context
+        asIScriptEngine* pContextEngine = pContext->GetEngine();
+        asIScriptEngine* pFunctionEngine = handler.pFunction->GetModule() ? handler.pFunction->GetModule()->GetEngine() : nullptr;
+        
+        if (!pFunctionEngine || pContextEngine != pFunctionEngine)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: CRITICAL - Function/Context engine mismatch!");
+            MS_ANGEL_ERROR("  Context engine: %p", pContextEngine);
+            MS_ANGEL_ERROR("  Function engine: %p", pFunctionEngine);
+            MS_ANGEL_ERROR("  Function: %s from module %s", handler.pFunction->GetName(), handler.moduleName.c_str());
+            MS_ANGEL_ERROR("  This handler must be removed - it's from an old engine!");
+            ReleaseContext(pContext);
+            staleHandlerIndices.push_back(handlerIdx);
             continue;
         }
         
@@ -808,6 +904,38 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         ReleaseContext(pContext);
     }
     
+    // Clean up any stale handlers detected during execution
+    if (!staleHandlerIndices.empty())
+    {
+        MS_ANGEL_WARN("ASEngineEventManager: Removing %zu stale handlers detected during event dispatch", staleHandlerIndices.size());
+        
+        // Sort indices in descending order to remove from back to front (avoids index shifting issues)
+        std::sort(staleHandlerIndices.begin(), staleHandlerIndices.end(), std::greater<size_t>());
+        
+        for (size_t idx : staleHandlerIndices)
+        {
+            if (idx < m_EventHandlers.size())
+            {
+                auto& handler = m_EventHandlers[idx];
+                MS_ANGEL_INFO("  Removing stale handler: %s from module %s", 
+                             handler.pFunction ? handler.pFunction->GetName() : "NULL",
+                             handler.moduleName.c_str());
+                
+                // Release the function pointer if it exists
+                if (handler.pFunction)
+                {
+                    handler.pFunction->Release();
+                    handler.pFunction = nullptr;
+                }
+                
+                // Remove from vector
+                m_EventHandlers.erase(m_EventHandlers.begin() + idx);
+            }
+        }
+        
+        MS_ANGEL_INFO("ASEngineEventManager: Stale handlers removed. Remaining handlers: %zu", m_EventHandlers.size());
+    }
+    
     if (handlerCount > 0)
     {
         MS_ANGEL_INFO("ASEngineEventManager: Dispatched %s event to %d handlers (%d executed successfully)", 
@@ -957,23 +1085,35 @@ namespace ASEngineEvents
     void RegisterEngineEvent_Generic(asIScriptGeneric* gen)
     {
         if (!gen)
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: NULL generic interface!");
             return;
+        }
             
         // Get the string parameter
         std::string* eventName = static_cast<std::string*>(gen->GetArgObject(0));
         if (!eventName)
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: NULL event name!");
             return;
+        }
             
         // Get the function reference parameter
         asIScriptFunction** pFuncPtr = static_cast<asIScriptFunction**>(gen->GetArgAddress(1));
         if (!pFuncPtr || !*pFuncPtr)
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: NULL function pointer for event '%s'!", eventName->c_str());
             return;
+        }
             
         asIScriptFunction* pFunction = *pFuncPtr;
         
         ASEngineEventManager* pManager = ASEngineEventManager::Instance();
         if (!pManager)
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: Event manager instance not available!");
             return;
+        }
             
         EngineEventType eventType = StringToEventType(*eventName);
         
@@ -988,10 +1128,22 @@ namespace ASEngineEvents
         asIScriptModule* pModule = pFunction->GetModule();
         const char* szModuleName = pModule ? pModule->GetName() : "Unknown";
         
-        MS_ANGEL_INFO("RegisterEngineEvent_Generic: Registering '%s' -> %s (%s)", 
+        MS_ANGEL_INFO("RegisterEngineEvent_Generic: Attempting to register '%s' -> %s (module: %s)", 
                      eventName->c_str(), pManager->GetEventTypeName(eventType), szModuleName);
         
-        pManager->RegisterEventHandler(eventType, pFunction, szModuleName);
+        bool result = pManager->RegisterEventHandler(eventType, pFunction, szModuleName);
+        
+        if (result)
+        {
+            MS_ANGEL_INFO("RegisterEngineEvent_Generic: SUCCESS - Handler '%s' registered for event '%s'", 
+                         pFunction->GetName(), eventName->c_str());
+        }
+        else
+        {
+            MS_ANGEL_ERROR("RegisterEngineEvent_Generic: FAILED - Handler '%s' could not be registered for event '%s'!", 
+                          pFunction->GetName(), eventName->c_str());
+            MS_ANGEL_ERROR("  Module: %s, Event Type: %s", szModuleName, pManager->GetEventTypeName(eventType));
+        }
     }
 
     // Unregister engine event (called from AngelScript)

@@ -453,9 +453,11 @@ namespace ASEntityBindings
         MS_ANGEL_DEBUG("OpenVoteMenu: Using global game_master entity handle");
         CBaseEntity* pGameMaster = g_pGameMasterEntity;
         
-        if (pGameMaster && ((uintptr_t)pGameMaster->pev == 0xdddddddd) || FNullEnt(pGameMaster->edict()))
+        // Check if game_master entity is invalid (NULL, freed memory, or null edict)
+        if (!pGameMaster || !pGameMaster->pev || ((uintptr_t)pGameMaster->pev == 0xdddddddd) || FNullEnt(pGameMaster->edict()))
         {
-            MS_ANGEL_ERROR("OpenVoteMenu: Global game_master entity handle is NULL!");
+            MS_ANGEL_ERROR("OpenVoteMenu: Global game_master entity handle is invalid!");
+            MS_ANGEL_ERROR("  pGameMaster=%p, pev=%p", pGameMaster, pGameMaster ? pGameMaster->pev : NULL);
             MS_ANGEL_ERROR("  This likely means ServerActivate hasn't run yet or game_master creation failed.");
             
             // Try to find it by searching as fallback
@@ -473,9 +475,10 @@ namespace ASEntityBindings
             {
                 MS_ANGEL_ERROR("  Fallback search also failed - game_master entity doesn't exist!");
                 
-                // Debug: list all ms_npc entities
+                // Debug: list all ms_npc entities to see what's available
                 CBaseEntity* pTest = NULL;
                 int npcCount = 0;
+                MS_ANGEL_DEBUG("  Searching for ms_npc entities...");
                 while ((pTest = UTIL_FindEntityByClassname(pTest, "ms_npc")) != NULL)
                 {
                     npcCount++;
@@ -483,10 +486,23 @@ namespace ASEntityBindings
                     {
                         MS_ANGEL_DEBUG("    Found ms_npc #%d with netname: '%s'", npcCount, STRING(pTest->pev->netname));
                     }
+                    else
+                    {
+                        MS_ANGEL_DEBUG("    Found ms_npc #%d with no netname", npcCount);
+                    }
                 }
                 MS_ANGEL_DEBUG("  Total ms_npc entities found: %d", npcCount);
                 
-                pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Vote system error: game master not found.");
+                if (npcCount == 0)
+                {
+                    pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Vote system initializing - please try again in a moment.");
+                    MS_ANGEL_ERROR("  No NPCs found at all - server may still be starting up");
+                }
+                else
+                {
+                    pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Vote system error: game master not ready.");
+                    MS_ANGEL_ERROR("  Found %d NPCs but none with netname '-game_master'", npcCount);
+                }
                 return;
             }
         }
@@ -510,6 +526,11 @@ namespace ASEntityBindings
         // Clear and set up menu options for this player
         mslist<menuoption_t>& menuOptions = pGM->m_MenuOptions[playerIndex];
         menuOptions.clearitems();
+        
+        // Set protection flag to prevent old menu system from clearing these options
+        pGM->m_MenuOptionsProtected[playerIndex] = true;
+        MS_ANGEL_INFO("*** VOTE MENU PROTECTION: SET for player %d (entity: %d, options: %d) ***", 
+                     playerIndex, pGM->entindex(), menuOptions.size());
         
         MS_ANGEL_INFO("Storing menu options at index %d (player: %s)", playerIndex, pPlayer->DisplayName());
         
