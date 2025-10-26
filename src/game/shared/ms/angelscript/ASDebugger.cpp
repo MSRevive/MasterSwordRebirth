@@ -5,6 +5,7 @@
 #include <chrono>
 #include <algorithm>
 #include <iomanip>
+#include <cstdint>
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -202,7 +203,8 @@ std::vector<ASVariableInfo> ASDebugger::GetLocalVariables(asIScriptContext* pCon
     }
     
     asIScriptFunction* pFunc = pContext->GetFunction();
-    if (!pFunc)
+    // Validate pointer is in a reasonable range (not an error code)
+    if (!pFunc || reinterpret_cast<uintptr_t>(pFunc) <= 0x10000)
     {
         return variables;
     }
@@ -382,7 +384,8 @@ std::vector<ASCallFrame> ASDebugger::GetCallStack(asIScriptContext* pContext)
         ASCallFrame frame;
         
         asIScriptFunction* pFunc = pContext->GetFunction(i);
-        if (pFunc)
+        // Validate pointer is in a reasonable range (not an error code)
+        if (pFunc && reinterpret_cast<uintptr_t>(pFunc) > 0x10000)
         {
             frame.functionName = pFunc->GetName();
             
@@ -397,6 +400,12 @@ std::vector<ASCallFrame> ASDebugger::GetCallStack(asIScriptContext* pContext)
             
             // Get line number
             frame.lineNumber = pContext->GetLineNumber(i, &frame.columnNumber);
+        }
+        else
+        {
+            frame.functionName = "<invalid>";
+            frame.scriptName = "<invalid>";
+            frame.lineNumber = -1;
         }
         
         callStack.push_back(frame);
@@ -454,7 +463,8 @@ void ASDebugger::LineCallback(asIScriptContext* pContext, void* pUserData)
         return;
     
     asIScriptFunction* pFunc = pContext->GetFunction();
-    if (!pFunc)
+    // Validate pointer is in a reasonable range (not an error code like 0x5)
+    if (!pFunc || reinterpret_cast<uintptr_t>(pFunc) <= 0x10000)
         return;
     
     const char* sectionName = nullptr;
@@ -489,18 +499,34 @@ void ASDebugger::ExceptionCallback(asIScriptContext* pContext, void* pUserData)
     if (!pDebugger || !pContext)
         return;
     
-    asIScriptFunction* pFunc = pContext->GetFunction();
+    // Check context state before trying to get function
+    asEContextState state = pContext->GetState();
+    if (state == asEXECUTION_ABORTED || state == asEXECUTION_UNINITIALIZED)
+        return;
+    
     const char* sectionName = "unknown";
-    if (pFunc) {
-        int row, col;
-        pFunc->GetDeclaredAt(&sectionName, &row, &col);
-        if (!sectionName) sectionName = "unknown";
+    int lineNumber = -1;
+    
+    // Safely get line number
+    lineNumber = pContext->GetLineNumber();
+    
+    // Only try to get function info if we're in a valid execution state
+    if (state == asEXECUTION_EXCEPTION)
+    {
+        asIScriptFunction* pFunc = pContext->GetFunction();
+        // Validate pointer is in a reasonable range (not an error code)
+        if (pFunc && reinterpret_cast<uintptr_t>(pFunc) > 0x10000) {
+            int row, col;
+            const char* section = nullptr;
+            pFunc->GetDeclaredAt(&section, &row, &col);
+            if (section) sectionName = section;
+        }
     }
-    int lineNumber = pContext->GetLineNumber();
     
     std::string errorMsg = "Script exception at ";
-    errorMsg += sectionName ? sectionName : "unknown";
-    errorMsg += ":" + std::to_string(lineNumber);
+    errorMsg += sectionName;
+    errorMsg += ":";
+    errorMsg += (lineNumber >= 0) ? std::to_string(lineNumber) : "unknown";
     
     pDebugger->LogError(errorMsg);
     pDebugger->m_bExecutionPaused = true;
@@ -525,14 +551,17 @@ bool ASDebugger::CheckBreakpoint(const std::string& scriptName, int lineNumber)
 
 void ASDebugger::HandleBreakpoint(asIScriptContext* pContext)
 {
-    asIScriptFunction* pFunc = pContext->GetFunction();
     const char* sectionName = "unknown";
-    if (pFunc) {
-        int row, col;
-        pFunc->GetDeclaredAt(&sectionName, &row, &col);
-        if (!sectionName) sectionName = "unknown";
-    }
     int lineNumber = pContext->GetLineNumber();
+    
+    asIScriptFunction* pFunc = pContext->GetFunction();
+    // Validate pointer is in a reasonable range (not an error code like 0x5)
+    if (pFunc && reinterpret_cast<uintptr_t>(pFunc) > 0x10000) {
+        int row, col;
+        const char* section = nullptr;
+        pFunc->GetDeclaredAt(&section, &row, &col);
+        if (section) sectionName = section;
+    }
     
     LogMessage("Breakpoint hit at " + std::string(sectionName) + ":" + std::to_string(lineNumber));
     m_bExecutionPaused = true;
@@ -833,7 +862,8 @@ void ASProfiler::FunctionStartCallback(asIScriptContext* pContext, void* pUserDa
         return;
     
     asIScriptFunction* pFunc = pContext->GetFunction();
-    if (pFunc)
+    // Validate pointer is in a reasonable range (not an error code)
+    if (pFunc && reinterpret_cast<uintptr_t>(pFunc) > 0x10000)
     {
         const char* funcName = pFunc->GetName();
         const char* sectionName = nullptr;
@@ -854,7 +884,8 @@ void ASProfiler::FunctionEndCallback(asIScriptContext* pContext, void* pUserData
         return;
     
     asIScriptFunction* pFunc = pContext->GetFunction();
-    if (pFunc)
+    // Validate pointer is in a reasonable range (not an error code)
+    if (pFunc && reinterpret_cast<uintptr_t>(pFunc) > 0x10000)
     {
         const char* funcName = pFunc->GetName();
         const char* sectionName = nullptr;

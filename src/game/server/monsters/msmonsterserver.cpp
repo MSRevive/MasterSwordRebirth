@@ -2892,6 +2892,30 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 	if (Option < 0 || Option >= (signed)Menuoptions.size())
 	{
 		MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
+		
+		// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
+		// This allows AngelScript to handle expired votes gracefully
+		if (Menuoptions.size() == 0)
+		{
+			MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
+			
+			// Try to call the vote callback even with no options
+			// The AngelScript side will handle the expired vote appropriately
+			static msstringlist Params;
+			Params.clearitems();
+			
+			// Format player entity as "ent:index" for AngelScript compatibility
+			char entFormat[32];
+			_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", pPlayer->entindex());
+			entFormat[sizeof(entFormat) - 1] = '\0';
+			
+			Params.add(entFormat);
+			Params.add(""); // Empty option data since menu is gone
+			
+			MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
+			CallScriptEvent("game_vote_menu_callback", &Params);
+		}
+		
 		return;
 	}
 
@@ -2995,11 +3019,20 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 	
 	static msstringlist Params;
 	Params.clearitems();
-	Params.add(EntToString(pPlayer));
+	
+	// Format player entity as "ent:index" for AngelScript compatibility
+	char entFormat[32];
+	_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", pPlayer->entindex());
+	entFormat[sizeof(entFormat) - 1] = '\0';
+	
+	msstring PlayerEntStr = entFormat;
+	MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), pPlayer->entindex());
+	
+	Params.add(PlayerEntStr);
 	Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
 
 	MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
-	             EntToString(pPlayer).c_str(), OptionData.c_str());
+	             Params[0].c_str(), OptionData.c_str());
 
 	if (OptionType == MOT_PAYMENT)
 	{

@@ -9,6 +9,7 @@
 #include "ASEngineInterface.h"
 #include "ASScriptContext.h"
 #include "ASBindExtensions.h"
+#include "CAngelScriptManager.h"
 #include <asbind20/asbind.hpp>
 #include <angelscript.h>  // For asGetActiveContext
 #include <angelscript/addons/scriptarray/scriptarray.h>
@@ -1037,6 +1038,219 @@ namespace ASBuiltinFunctions
         // Always check for custom handlers
         TriggerCustomEngineEvent(eventName, args);
     }
+}
+
+//==========================================================================
+// Bridge function for legacy script system to call AngelScript handlers
+//==========================================================================
+void CallAngelScriptEventHandler(const char* eventName, msstringlist* params)
+{
+    using namespace ASBuiltinFunctions;
+    
+    if (!eventName || !eventName[0]) {
+        return;
+    }
+    
+    // CRITICAL: Check if AngelScript engine is still initialized
+    // During map transitions or engine shutdown, the AngelScript manager may be destroyed
+    // Attempting to call event handlers in this state causes crashes at as_context.cpp:4978
+    CAngelScriptManager* pManager = CAngelScriptManager::Instance();
+    if (!pManager || !pManager->IsInitialized()) {
+        // Engine is not initialized or is shutting down - silently return
+        return;
+    }
+    
+    // Cache to track events we've already searched for and found nothing
+    static std::map<std::string, bool> s_eventCache;
+    
+    // Check cache first to avoid repeated searches for non-existent events
+    auto cacheIt = s_eventCache.find(eventName);
+    if (cacheIt != s_eventCache.end() && !cacheIt->second) {
+        // We've already searched for this event and found nothing
+        return;
+    }
+    
+    // First try registered event handlers
+    auto it = g_CustomEventHandlers.find(eventName);
+    if (it != g_CustomEventHandlers.end() && !it->second.empty()) {
+        // Cache that this event has handlers
+        s_eventCache[eventName] = true;
+        
+        MS_ANGEL_DEBUG("CallAngelScriptEventHandler: Found %d registered handlers for event '%s'", 
+                      (int)it->second.size(), eventName);
+    
+    // Call all registered handlers
+    for (asIScriptFunction* handler : it->second) {
+        if (!handler) continue;
+        
+        // CRITICAL: Always create a new context for event handlers
+        // Never reuse asGetActiveContext() as it may already be executing
+        // and will fail with asCONTEXT_ACTIVE when calling Prepare()
+        asIScriptEngine* engine = handler->GetEngine();
+        if (!engine) {
+            MS_ANGEL_ERROR("CallAngelScriptEventHandler: Handler has no engine for event '%s'", eventName);
+            continue;
+        }
+        
+        asIScriptContext* ctx = pManager->AcquireContext();
+        if (!ctx) {
+            MS_ANGEL_ERROR("CallAngelScriptEventHandler: Failed to acquire context for event '%s'", eventName);
+            continue;
+        }
+        
+        // Prepare the context
+        int result = ctx->Prepare(handler);
+        if (result < 0) {
+            MS_ANGEL_ERROR("CallAngelScriptEventHandler: Failed to prepare context for event '%s' (code: %d)", eventName, result);
+            pManager->ReleaseContext(ctx);
+            continue;
+        }
+        
+        // Set parameters - convert msstringlist to std::string vector
+        std::vector<std::string> stringParams;
+        if (params && params->size() > 0) {
+            for (size_t i = 0; i < params->size(); i++) {
+                msstring& msStr = (*params)[i];
+                const char* cstr = msStr.c_str();
+                MS_ANGEL_DEBUG("CallAngelScriptEventHandler: Handler Param[%d] = '%s' (len=%d)", 
+                              (int)i, cstr ? cstr : "(null)", cstr ? (int)strlen(cstr) : 0);
+                stringParams.push_back(cstr ? cstr : "");
+            }
+        }
+        
+        int paramCount = handler->GetParamCount();
+        for (int i = 0; i < paramCount && i < (int)stringParams.size(); i++) {
+            // Check if parameter is by reference
+            int typeId;
+            asDWORD flags;
+            handler->GetParam(i, &typeId, &flags);
+            
+            // Pass the string appropriately
+            if (flags & asTM_INREF || flags & asTM_INOUTREF) {
+                ctx->SetArgAddress(i, &stringParams[i]);
+            } else {
+                ctx->SetArgObject(i, &stringParams[i]);
+            }
+        }
+        
+        // Execute the handler
+        result = ctx->Execute();
+        if (result != asEXECUTION_FINISHED) {
+            if (result == asEXECUTION_EXCEPTION) {
+                MS_ANGEL_ERROR("CallAngelScriptEventHandler: Exception in handler for event '%s': %s", 
+                             eventName, ctx->GetExceptionString());
+            } else {
+                MS_ANGEL_ERROR("CallAngelScriptEventHandler: Handler execution failed for event '%s' (result: %d)", 
+                             eventName, result);
+            }
+        } else {
+            //MS_ANGEL_DEBUG("CallAngelScriptEventHandler: Handler executed successfully for event '%s'", eventName);
+        }
+        
+        // Return context to pool
+        pManager->ReleaseContext(ctx);
+    }
+        return; // Found and called registered handlers
+    }
+    
+    // If no registered handlers, try to find global function by name in all modules
+    // Only log if we haven't checked this event before
+    if (cacheIt == s_eventCache.end()) {
+        MS_ANGEL_DEBUG("CallAngelScriptEventHandler: No registered handlers for '%s', searching for global function...", 
+                      eventName);
+    }
+    
+    // Note: pManager was already checked at the beginning of this function,
+    // but we check again here for defensive programming
+    asIScriptEngine* pEngine = pManager->GetEngine();
+    if (!pEngine) {
+        return;
+    }
+    
+    // Search all modules for a global function with this name
+    for (asUINT i = 0; i < pEngine->GetModuleCount(); i++) {
+        asIScriptModule* pModule = pEngine->GetModuleByIndex(i);
+        if (!pModule) continue;
+        
+        asIScriptFunction* pFunction = pModule->GetFunctionByName(eventName);
+        if (!pFunction) continue;
+        
+        // Cache that we found this function
+        s_eventCache[eventName] = true;
+        
+        //MS_ANGEL_INFO("CallAngelScriptEventHandler: Found global function '%s' in module '%s'", eventName, pModule->GetName());
+        
+        // CRITICAL: Always create a new context for event handlers
+        // Never reuse asGetActiveContext() as it may already be executing
+        asIScriptContext* ctx = pManager->AcquireContext();
+        if (!ctx) {
+            MS_ANGEL_ERROR("CallAngelScriptEventHandler: Failed to acquire context for function '%s'", eventName);
+            continue;
+        }
+        
+        // Prepare the context
+        int result = ctx->Prepare(pFunction);
+        if (result < 0) {
+            MS_ANGEL_ERROR("CallAngelScriptEventHandler: Failed to prepare context for function '%s' (code: %d)", eventName, result);
+            pManager->ReleaseContext(ctx);
+            continue;
+        }
+        
+        // Set parameters - convert msstringlist to std::string vector
+        std::vector<std::string> stringParams;
+        if (params && params->size() > 0) {
+            for (size_t j = 0; j < params->size(); j++) {
+                msstring& msStr = (*params)[j];
+                const char* cstr = msStr.c_str();
+                MS_ANGEL_DEBUG("CallAngelScriptEventHandler: Param[%d] = '%s' (len=%d)", 
+                              (int)j, cstr ? cstr : "(null)", cstr ? (int)strlen(cstr) : 0);
+                stringParams.push_back(cstr ? cstr : "");
+            }
+        }
+        
+        int paramCount = pFunction->GetParamCount();
+        for (int j = 0; j < paramCount && j < (int)stringParams.size(); j++) {
+            int typeId;
+            asDWORD flags;
+            pFunction->GetParam(j, &typeId, &flags);
+            
+            if (flags & asTM_INREF || flags & asTM_INOUTREF) {
+                ctx->SetArgAddress(j, &stringParams[j]);
+            } else {
+                ctx->SetArgObject(j, &stringParams[j]);
+            }
+        }
+        
+        // Execute
+        result = ctx->Execute();
+        if (result != asEXECUTION_FINISHED) {
+            if (result == asEXECUTION_EXCEPTION) {
+                MS_ANGEL_ERROR("CallAngelScriptEventHandler: Exception in function '%s': %s", 
+                             eventName, ctx->GetExceptionString());
+            } else {
+                MS_ANGEL_ERROR("CallAngelScriptEventHandler: Function execution failed for '%s' (result: %d)", 
+                             eventName, result);
+            }
+        }
+        
+        // Return context to pool
+        pManager->ReleaseContext(ctx);
+        
+        // Only call the first matching function found
+        return;
+    }
+    
+    // Cache that we didn't find this event/function (false = not found)
+    s_eventCache[eventName] = false;
+    
+    // Only log the first time we search and don't find it
+    if (cacheIt == s_eventCache.end()) {
+        MS_ANGEL_DEBUG("CallAngelScriptEventHandler: No global function named '%s' found in any module", eventName);
+    }
+}
+
+namespace ASBuiltinFunctions
+{
     
     //==========================================================================
     // Advanced System Stubs
@@ -1285,6 +1499,68 @@ namespace ASBuiltinFunctions
     }
     
     //==========================================================================
+    // Server Command Execution
+    //==========================================================================
+    
+    /**
+     * Execute a server command from AngelScript
+     * This is a critical function for game management
+     */
+    void AS_ExecuteServerCommand(const std::string& command)
+    {
+        #ifdef CLIENT_DLL
+            MS_ANGEL_ERROR("ExecuteServerCommand: Cannot execute server commands from client");
+            return;
+        #else
+            if (command.empty()) {
+                MS_ANGEL_DEBUG("ExecuteServerCommand: Empty command");
+                return;
+            }
+            
+            // Security: Basic validation to prevent dangerous commands
+            // Block commands that could crash or compromise the server
+            if (command.find("quit") != std::string::npos || 
+                command.find("exit") != std::string::npos ||
+                command.find("rcon_password") != std::string::npos) {
+                MS_ANGEL_ERROR("ExecuteServerCommand: Blocked dangerous command '%s'", command.c_str());
+                return;
+            }
+            
+            MS_ANGEL_INFO("ExecuteServerCommand: Executing '%s'", command.c_str());
+            
+            // Execute the command using the Half-Life engine
+            SERVER_COMMAND(const_cast<char*>(command.c_str()));
+            SERVER_EXECUTE();
+        #endif
+    }
+    
+    //==========================================================================
+    // Map Validation
+    //==========================================================================
+    
+    /**
+     * Check if a map exists on the server
+     * Uses the engine's file system to validate map existence
+     */
+    bool AS_EngineMapExists(const std::string& mapName)
+    {
+        #ifdef CLIENT_DLL
+            MS_ANGEL_DEBUG("EngineMapExists: Client cannot check map existence");
+            return false;
+        #else
+            if (mapName.empty()) {
+                MS_ANGEL_DEBUG("EngineMapExists: Empty map name");
+                return false;
+            }
+            
+            // Use ASEngineProvider to check map existence
+            bool exists = ASEngineProvider::EngineMapExists(mapName);
+            MS_ANGEL_DEBUG("EngineMapExists: Map '%s' %s", mapName.c_str(), exists ? "exists" : "does not exist");
+            return exists;
+        #endif
+    }
+    
+    //==========================================================================
     // GameMaster Functions Registration
     //==========================================================================
     
@@ -1309,6 +1585,12 @@ namespace ASBuiltinFunctions
                 if (asFunc) pContextMgr->RegisterFunctionContext(asFunc->GetName(), ScriptContext::SERVER_ONLY);
             }
         };
+        
+        // Register server command execution - SERVER_ONLY
+        regFunc("void ExecuteServerCommand(const string &in)", AS_ExecuteServerCommand);
+        
+        // Register map validation - SERVER_ONLY
+        regFunc("bool EngineMapExists(const string &in)", AS_EngineMapExists);
         
         // Register communication functions - all SERVER_ONLY
         regFunc("void SendPlayerMessage(const string &in, const string &in)", AS_SendPlayerMessage);

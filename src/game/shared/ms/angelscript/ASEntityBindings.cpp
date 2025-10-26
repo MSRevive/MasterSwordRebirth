@@ -453,7 +453,7 @@ namespace ASEntityBindings
         MS_ANGEL_DEBUG("OpenVoteMenu: Using global game_master entity handle");
         CBaseEntity* pGameMaster = g_pGameMasterEntity;
         
-        if (!pGameMaster)
+        if (pGameMaster && ((uintptr_t)pGameMaster->pev == 0xdddddddd) || FNullEnt(pGameMaster->edict()))
         {
             MS_ANGEL_ERROR("OpenVoteMenu: Global game_master entity handle is NULL!");
             MS_ANGEL_ERROR("  This likely means ServerActivate hasn't run yet or game_master creation failed.");
@@ -462,7 +462,14 @@ namespace ASEntityBindings
             MS_ANGEL_DEBUG("  Attempting fallback search for game_master by netname...");
             pGameMaster = UTIL_FindEntityByString(NULL, "netname", "-game_master");
             
-            if (!pGameMaster)
+            if (pGameMaster)
+            {
+                // Update the global so we don't need to search again
+                g_pGameMasterEntity = pGameMaster;
+                MS_ANGEL_INFO("  Fallback search succeeded! Updated global game_master entity handle (index %d)", 
+                             pGameMaster->entindex());
+            }
+            else
             {
                 MS_ANGEL_ERROR("  Fallback search also failed - game_master entity doesn't exist!");
                 
@@ -482,27 +489,29 @@ namespace ASEntityBindings
                 pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Vote system error: game master not found.");
                 return;
             }
-            else
-            {
-                MS_ANGEL_INFO("  Fallback search succeeded! Found game_master at index %d", pGameMaster->entindex());
-            }
         }
-        
-        MS_ANGEL_INFO("OpenVoteMenu: Found game_master entity at index %d", pGameMaster->entindex());
-        
+
         CMSMonster* pGM = pGameMaster->IsMSMonster() ? (CMSMonster*)pGameMaster : NULL;
-        if (!pGM)
+
+        if (!pGM || !pGM->entindex())
         {
-            MS_ANGEL_ERROR("OpenVoteMenu: game_master is not a CMSMonster!");
+            MS_ANGEL_ERROR("OpenVoteMenu: game_master is not a CMSMonster or has no entity index!");
             return;
         }
+
+        MS_ANGEL_INFO("OpenVoteMenu: Found game_master entity at index %d", pGameMaster->entindex());
         
-        MS_ANGEL_DEBUG("Opening vote menu for %s with title '%s' via game_master entity %d", 
-                      pPlayer->DisplayName(), title.c_str(), pGM->entindex());
+
+        
+        int playerIndex = pPlayer->entindex();
+        MS_ANGEL_INFO("Opening vote menu for %s (index %d) with title '%s' via game_master entity %d", 
+                      pPlayer->DisplayName(), playerIndex, title.c_str(), pGM->entindex());
         
         // Clear and set up menu options for this player
-        mslist<menuoption_t>& menuOptions = pGM->m_MenuOptions[pPlayer->entindex()];
+        mslist<menuoption_t>& menuOptions = pGM->m_MenuOptions[playerIndex];
         menuOptions.clearitems();
+        
+        MS_ANGEL_INFO("Storing menu options at index %d (player: %s)", playerIndex, pPlayer->DisplayName());
         
         // Add each vote option to the game master's menu
         asUINT optionCount = options->GetSize();
@@ -519,9 +528,11 @@ namespace ASEntityBindings
                 menuOption.Data = optionStr->c_str();
                 menuOption.CB_Name = "game_vote_menu_callback";  // Set callback event name
                 menuOptions.add(menuOption);
-                MS_ANGEL_DEBUG("  Option %d: %s", i, optionStr->c_str());
+                MS_ANGEL_INFO("  Added option %d: '%s' (CB: %s)", i, optionStr->c_str(), menuOption.CB_Name.c_str());
             }
         }
+        
+        MS_ANGEL_INFO("Total options stored for player %d: %d", playerIndex, menuOptions.size());
         
         // Send menu initialization message (message type 25)
         MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);

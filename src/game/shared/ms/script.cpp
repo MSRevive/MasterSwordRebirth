@@ -6677,6 +6677,13 @@ void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 	m_ReturnData = "";
 	for (int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->RunScriptEventByName(EventName, Parameters);
+	
+	// Also try calling registered AngelScript global function handlers
+	// This allows modules to register event handlers using RegisterEngineEvent()
+	#ifdef VALVE_DLL // Server-side only
+	extern void CallAngelScriptEventHandler(const char* eventName, msstringlist* params);
+	CallAngelScriptEventHandler(EventName, Parameters);
+	#endif
 }
 
 void IScripted::Script_InitHUD(CBasePlayer* pPlayer)

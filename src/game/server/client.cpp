@@ -1829,7 +1829,9 @@ void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer)
 		g_pGameRules->ClientUserInfoChanged(GetClassPtr((CBasePlayer *)&pEntity->v), infobuffer);
 }
 
-static int g_serveractive = 0;
+// Global server active flag - used to prevent script execution during level changes
+// NOT static so it can be accessed from other translation units
+int g_serveractive = 0;
 
 void ServerDeactivate(void)
 {
@@ -1845,14 +1847,40 @@ void ServerDeactivate(void)
 	// Peform any shutdown operations here...
 	//
 	
-	// Clear the global game_master entity handle
+	MS_INFO("=== ServerDeactivate: Starting map transition cleanup ===");
+	
+	// CRITICAL: COMPLETE AngelScript engine teardown and rebuild
+	// All entity indices are reused, so ALL entity references become invalid
+	// We must destroy and recreate the entire AngelScript engine to ensure clean state
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
+	{
+		MS_INFO("ServerDeactivate: DESTROYING AND REBUILDING ENTIRE ANGELSCRIPT ENGINE...");
+		
+		// This will:
+		// 1. Clear all pooled contexts
+		// 2. Discard all script modules  
+		// 3. Shutdown debugger
+		// 4. Run extensive garbage collection
+		// 5. RELEASE AND DESTROY the AngelScript engine
+		// 6. CREATE A NEW AngelScript engine from scratch
+		// 7. Re-register all bindings and systems
+		pASManager->ReinitializeForLevelChange();
+		
+		MS_INFO("ServerDeactivate: AngelScript engine completely rebuilt - ready for new map");
+	}
+	
+	// IMPORTANT: Clear the game_master entity handle since all entities are destroyed during level change
+	// ServerActivate will create a new game_master entity in the new map
 	g_pGameMasterEntity = nullptr;
-	MS_INFO("Global game_master entity handle cleared");
+	MS_INFO("Game_master entity handle cleared (will be recreated in ServerActivate)");
 
 	if (g_pGameRules)
 		g_pGameRules->EndMultiplayerGame();
 
 	MSGameEnd();
+	
+	MS_INFO("=== ServerDeactivate: Cleanup complete ===");
 }
 
 DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
@@ -1907,7 +1935,32 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 
 	//If the game master hasn't been created yet, create it now - Solokiller
 	MS_INFO("Checking for existing game_master entity...");
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+	
+	// First check the global handle (might be set from previous level)
+	CBaseEntity* pGameMasterEnt = g_pGameMasterEntity;
+	
+	// Verify the global handle is still valid (entity might have been destroyed)
+	if (pGameMasterEnt && (FNullEnt(pGameMasterEnt->edict()) || (uintptr_t)pGameMasterEnt->pev == 0xdddddddd))
+	{
+		MS_INFO("Global game_master entity handle is stale (entity was destroyed), clearing...");
+		pGameMasterEnt = nullptr;
+		g_pGameMasterEntity = nullptr;
+	}
+	
+	// If not found via global, search by netname
+	if (!pGameMasterEnt)
+	{
+		pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+		if (pGameMasterEnt)
+		{
+			MS_INFO("Game master found via search at index %d", pGameMasterEnt->entindex());
+		}
+	}
+	else
+	{
+		MS_INFO("Game master found via global handle at index %d", pGameMasterEnt->entindex());
+	}
+	
 	if (!pGameMasterEnt)
 	{
 		MS_INFO("Game master not found, creating new one...");

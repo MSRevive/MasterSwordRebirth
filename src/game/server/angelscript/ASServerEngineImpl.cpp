@@ -30,7 +30,7 @@ ASServerEngine& ASServerEngine::GetInstance()
 
 float ASServerEngine::GetGameTimeImpl() const
 {
-    MS_ANGEL_DEBUG("ServerGetEngineGameTime: Returning gpGlobals->time");
+    //MS_ANGEL_DEBUG("ServerGetEngineGameTime: Returning gpGlobals->time");
     return gpGlobals->time;
 }
 

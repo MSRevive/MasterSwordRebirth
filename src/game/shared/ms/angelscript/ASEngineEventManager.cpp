@@ -549,8 +549,19 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         asIScriptModule* pModule = handler.pFunction->GetModule();
         if (!pModule)
         {
-            MS_ANGEL_ERROR("ASEngineEventManager: Function module is NULL for %s::%s", 
+            MS_ANGEL_ERROR("ASEngineEventManager: Function module is NULL for %s::%s - STALE FUNCTION POINTER DETECTED", 
                           handler.moduleName.c_str(), handler.pFunction->GetName());
+            MS_ANGEL_ERROR("  This indicates the module was unloaded but event handlers weren't unregistered");
+            continue;
+        }
+        
+        // Verify the module is still registered with the engine
+        asIScriptModule* pEngineModule = m_pEngine->GetModule(handler.moduleName.c_str());
+        if (!pEngineModule || pEngineModule != pModule)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: Module '%s' is not registered with engine - STALE FUNCTION POINTER", 
+                          handler.moduleName.c_str());
+            MS_ANGEL_ERROR("  Expected module: %p, Found module: %p", pModule, pEngineModule);
             continue;
         }
         
@@ -558,9 +569,19 @@ void ASEngineEventManager::DispatchEvent(EngineEventType eventType, const std::v
         const char* actualModuleName = pModule->GetName();
         if (!actualModuleName || handler.moduleName != actualModuleName)
         {
-            MS_ANGEL_ERROR("ASEngineEventManager: Module name mismatch for %s (expected: %s, actual: %s)", 
+            MS_ANGEL_ERROR("ASEngineEventManager: Module name mismatch for %s (expected: %s, actual: %s) - STALE REFERENCE", 
                           handler.pFunction->GetName(), handler.moduleName.c_str(), 
                           actualModuleName ? actualModuleName : "NULL");
+            continue;
+        }
+        
+        // Verify the function is still valid within its module
+        asIScriptFunction* pVerifyFunc = pModule->GetFunctionByName(handler.pFunction->GetName());
+        if (!pVerifyFunc || pVerifyFunc != handler.pFunction)
+        {
+            MS_ANGEL_ERROR("ASEngineEventManager: Function '%s' not found in module '%s' - STALE FUNCTION POINTER", 
+                          handler.pFunction->GetName(), handler.moduleName.c_str());
+            MS_ANGEL_ERROR("  Expected function: %p, Found function: %p", handler.pFunction, pVerifyFunc);
             continue;
         }
         

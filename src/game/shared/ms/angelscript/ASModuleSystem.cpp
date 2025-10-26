@@ -5,6 +5,7 @@
 //==========================================================================
 
 #include "ASModuleSystem.h"
+#include "ASEngineEventManager.h"  // For unregistering event handlers during reload
 #include "addons/scriptbuilder/scriptbuilder.h"
 #include "addons/scriptmodule/scriptmodule.h"
 #include "groupfile.h"
@@ -1353,6 +1354,24 @@ bool ASModuleSystem::ReloadAllModules()
     // Get list of currently loaded modules to preserve order
     std::vector<std::string> loadedModules = GetLoadedModules();
     printf("ASModuleSystem: Found %d loaded modules to reload\n", (int)loadedModules.size());
+    
+    // CRITICAL: Unregister all event handlers BEFORE unloading modules
+    // This prevents stale function pointers from being executed after module unload
+    printf("ASModuleSystem::ReloadAllModules: Unregistering event handlers from all modules...\n");
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        for (const std::string& moduleName : loadedModules)
+        {
+            printf("ASModuleSystem: Unregistering event handlers for module '%s'\n", moduleName.c_str());
+            pEventManager->UnregisterAllHandlers(moduleName.c_str());
+        }
+        printf("ASModuleSystem::ReloadAllModules: Event handlers unregistered successfully\n");
+    }
+    else
+    {
+        printf("ASModuleSystem::ReloadAllModules: WARNING - Event manager not available\n");
+    }
     
     // Store module info before unloading for restoration if needed
     std::map<std::string, ASModuleInfo> moduleBackup;

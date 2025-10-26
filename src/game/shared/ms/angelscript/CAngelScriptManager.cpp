@@ -228,17 +228,62 @@ void CAngelScriptManager::Destroy()
 {
     if (!m_bInitialized)
         return;
+    
+    MS_ANGEL_INFO("=== CAngelScriptManager::Destroy - Starting cleanup ===");
         
     // Destroy the event manager first to clear all event handlers
     // This prevents dangling function references when the engine is destroyed
     ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
     if (pEventManager)
     {
+        MS_ANGEL_INFO("Destroying AngelScript Event Manager...");
         pEventManager->Destroy();
-        LogMessage("AngelScript Event Manager destroyed");
+        MS_ANGEL_INFO("AngelScript Event Manager destroyed");
     }
     
-    // Release all contexts in the pool
+    // CRITICAL: Force garbage collection before releasing contexts and engine
+    // This helps clean up circular references and global objects
+    if (m_pEngine)
+    {
+        MS_ANGEL_INFO("Running full garbage collection cycle...");
+        
+        // Get GC statistics before cleanup
+        asUINT currentSize, totalDestroyed, totalDetected;
+        m_pEngine->GetGCStatistics(&currentSize, &totalDestroyed, &totalDetected);
+        MS_ANGEL_INFO("GC Statistics before cleanup: CurrentSize=%u, TotalDestroyed=%u, TotalDetected=%u", 
+                      currentSize, totalDestroyed, totalDetected);
+        
+        // Run multiple GC cycles to handle circular references
+        // Each cycle may detect new objects that can be destroyed
+        const int maxGCCycles = 5;
+        for (int cycle = 0; cycle < maxGCCycles; cycle++)
+        {
+            // Start incremental GC
+            int r = m_pEngine->GarbageCollect(asGC_FULL_CYCLE | asGC_DESTROY_GARBAGE);
+            
+            // Get statistics after this cycle
+            m_pEngine->GetGCStatistics(&currentSize, &totalDestroyed, &totalDetected);
+            MS_ANGEL_INFO("GC Cycle %d/%d: CurrentSize=%u, TotalDestroyed=%u, TotalDetected=%u", 
+                          cycle + 1, maxGCCycles, currentSize, totalDestroyed, totalDetected);
+            
+            // If no objects remain, we're done
+            if (currentSize == 0)
+            {
+                MS_ANGEL_INFO("All GC objects cleaned up after %d cycles", cycle + 1);
+                break;
+            }
+            
+            // If this is the last cycle and objects still remain, log a warning
+            if (cycle == maxGCCycles - 1 && currentSize > 0)
+            {
+                MS_ANGEL_ERROR("WARNING: %u objects still in GC after %d cycles", currentSize, maxGCCycles);
+                MS_ANGEL_ERROR("This may indicate circular references or leaked objects");
+            }
+        }
+    }
+    
+    // Release all contexts in the pool AFTER garbage collection
+    MS_ANGEL_INFO("Releasing %zu context(s) from pool...", m_ContextPool.size());
     for (size_t i = 0; i < m_ContextPool.size(); i++)
     {
         if (m_ContextPool[i])
@@ -247,31 +292,38 @@ void CAngelScriptManager::Destroy()
         }
     }
     m_ContextPool.clear();
+    MS_ANGEL_INFO("Context pool cleared");
     
     // Shutdown debugger
     if (m_pDebugger)
     {
+        MS_ANGEL_INFO("Shutting down debugger...");
         m_pDebugger->Shutdown();
         delete m_pDebugger;
         m_pDebugger = nullptr;
+        MS_ANGEL_INFO("Debugger shut down");
     }
     
     // Shutdown optimization systems
+    MS_ANGEL_INFO("Shutting down optimization systems...");
     ShutdownOptimizationSystems();
     
     // Shutdown coroutine manager
+    MS_ANGEL_INFO("Shutting down coroutine manager...");
     ASCoroutineManager::Shutdown();
     
-    // Clean up the engine
+    // Clean up the engine - this will trigger final GC
     if (m_pEngine)
     {
+        MS_ANGEL_INFO("Shutting down and releasing AngelScript engine...");
         m_pEngine->ShutDownAndRelease();
         m_pEngine = nullptr;
+        MS_ANGEL_INFO("AngelScript engine released");
     }
     
     m_bInitialized = false;
     
-    LogMessage("AngelScript Manager destroyed");
+    MS_ANGEL_INFO("=== AngelScript Manager destroyed successfully ===");
 }
 
 //==========================================================================
@@ -361,13 +413,190 @@ asIScriptContext* CAngelScriptManager::AcquireContext()
     }
     
     // Set line callback for debugging if debugger is enabled
+    // TEMPORARILY DISABLED: These callbacks can cause crashes when the context is in invalid states
+    // TODO: Re-enable when debugger is fully implemented and tested
+    /*
     if (pContext && m_pDebugger && IsDebugModeEnabled())
     {
         pContext->SetLineCallback(asFUNCTION(ASDebugger::LineCallback), m_pDebugger, asCALL_CDECL_OBJLAST);
         pContext->SetExceptionCallback(asFUNCTION(ASDebugger::ExceptionCallback), m_pDebugger, asCALL_CDECL_OBJLAST);
     }
+    */
     
     return pContext;
+}
+
+//==========================================================================
+// Clear context pool
+//==========================================================================
+void CAngelScriptManager::ClearContextPool()
+{
+    MS_ANGEL_INFO("ClearContextPool: Clearing %zu pooled contexts...", m_ContextPool.size());
+    
+    // Release all contexts in the pool
+    for (size_t i = 0; i < m_ContextPool.size(); i++)
+    {
+        if (m_ContextPool[i])
+        {
+            // Unprepare to clear any stale function references
+            m_ContextPool[i]->Unprepare();
+            m_ContextPool[i]->Release();
+        }
+    }
+    m_ContextPool.clear();
+    
+    MS_ANGEL_INFO("ClearContextPool: Context pool cleared");
+}
+
+//==========================================================================
+// Clear all script modules
+//==========================================================================
+void CAngelScriptManager::ClearAllModules()
+{
+    if (!m_pEngine)
+        return;
+        
+    asUINT moduleCount = m_pEngine->GetModuleCount();
+    MS_ANGEL_INFO("ClearAllModules: Discarding %u script modules...", moduleCount);
+    
+    // Discard all modules (must do in reverse to avoid index shifting issues)
+    for (int i = (int)moduleCount - 1; i >= 0; i--)
+    {
+        asIScriptModule* pModule = m_pEngine->GetModuleByIndex(i);
+        if (pModule)
+        {
+            const char* moduleName = pModule->GetName();
+            MS_ANGEL_DEBUG("  Discarding module: %s", moduleName ? moduleName : "<unnamed>");
+            m_pEngine->DiscardModule(moduleName);
+        }
+    }
+    
+    MS_ANGEL_INFO("ClearAllModules: All modules cleared (remaining: %u)", m_pEngine->GetModuleCount());
+}
+
+//==========================================================================
+// Prepare for level change - comprehensive cleanup
+//==========================================================================
+void CAngelScriptManager::PrepareForLevelChange()
+{
+    if (!m_bInitialized || !m_pEngine)
+        return;
+        
+    MS_ANGEL_INFO("=== PrepareForLevelChange: Starting comprehensive AngelScript cleanup ===");
+    
+    // Step 1: Clear all pooled contexts
+    // This prevents any stale bytecode pointers from being reused
+    MS_ANGEL_INFO("Step 1: Clearing context pool...");
+    ClearContextPool();
+    
+    // Step 2: Clear all script modules
+    // This removes all compiled scripts and their entity references
+    MS_ANGEL_INFO("Step 2: Clearing all script modules...");
+    ClearAllModules();
+    
+    // Step 3: Run garbage collection to clean up any remaining script objects
+    MS_ANGEL_INFO("Step 3: Running full garbage collection...");
+    asUINT currentSize, totalDestroyed, totalDetected;
+    m_pEngine->GetGCStatistics(&currentSize, &totalDestroyed, &totalDetected);
+    MS_ANGEL_INFO("  GC before cleanup - Objects: %u, Destroyed: %u, Detected: %u", 
+                  currentSize, totalDestroyed, totalDetected);
+    
+    // Force multiple full GC cycles to ensure everything is cleaned up
+    for (int i = 0; i < 3; i++)
+    {
+        m_pEngine->GarbageCollect(asGC_FULL_CYCLE | asGC_DESTROY_GARBAGE);
+    }
+    
+    m_pEngine->GetGCStatistics(&currentSize, &totalDestroyed, &totalDetected);
+    MS_ANGEL_INFO("  GC after cleanup - Objects: %u, Destroyed: %u, Detected: %u", 
+                  currentSize, totalDestroyed, totalDetected);
+    
+    if (currentSize > 0)
+    {
+        MS_ANGEL_WARN("  Warning: %u objects still in GC after cleanup (may be persistent global objects)", 
+                        currentSize);
+    }
+    
+    MS_ANGEL_INFO("=== PrepareForLevelChange: AngelScript cleanup complete ===");
+    MS_ANGEL_INFO("  All entity references, bytecode, and script state cleared");
+    MS_ANGEL_INFO("  Scripts will be reloaded when new map loads");
+}
+
+//==========================================================================
+// Complete AngelScript engine reinitialization for level change
+//==========================================================================
+void CAngelScriptManager::ReinitializeForLevelChange()
+{
+    MS_ANGEL_INFO("=== ReinitializeForLevelChange: COMPLETE ENGINE TEARDOWN AND REBUILD ===");
+    
+    if (!m_bInitialized)
+    {
+        MS_ANGEL_ERROR("ReinitializeForLevelChange: Engine not initialized, cannot reinit");
+        return;
+    }
+    
+    // Step 1: Complete teardown
+    MS_ANGEL_INFO("Step 1: Performing complete engine shutdown...");
+    
+    // Clear all contexts first
+    ClearContextPool();
+    
+    // Clear all modules
+    ClearAllModules();
+    
+    // Shutdown event manager to clear all event handlers before engine destruction
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        MS_ANGEL_INFO("  Destroying event manager...");
+        pEventManager->Destroy();
+    }
+    
+    // Shutdown debugger if it exists
+    if (m_pDebugger)
+    {
+        MS_ANGEL_INFO("  Shutting down debugger...");
+        m_pDebugger->Shutdown();
+        delete m_pDebugger;
+        m_pDebugger = nullptr;
+    }
+    
+    // Run final garbage collection before destroying engine
+    MS_ANGEL_INFO("  Running final garbage collection...");
+    for (int i = 0; i < 5; i++)  // Extra cycles to be thorough
+    {
+        m_pEngine->GarbageCollect(asGC_FULL_CYCLE | asGC_DESTROY_GARBAGE | asGC_DETECT_GARBAGE);
+    }
+    
+    // Get final GC stats
+    asUINT currentSize, totalDestroyed, totalDetected;
+    m_pEngine->GetGCStatistics(&currentSize, &totalDestroyed, &totalDetected);
+    MS_ANGEL_INFO("  Final GC stats - Objects: %u, Destroyed: %u, Detected: %u", 
+                  currentSize, totalDestroyed, totalDetected);
+    
+    // Release the engine completely
+    MS_ANGEL_INFO("  Releasing AngelScript engine...");
+    int refCount = m_pEngine->Release();
+    MS_ANGEL_INFO("  Engine released (remaining refcount: %d)", refCount);
+    m_pEngine = nullptr;
+    m_bInitialized = false;
+    m_nMemoryUsed = 0;
+    
+    MS_ANGEL_INFO("Step 2: Complete teardown finished - all AngelScript state destroyed");
+    
+    // Step 2: Complete reinitialization
+    MS_ANGEL_INFO("Step 3: Rebuilding AngelScript engine from scratch...");
+    
+    if (!Initialize())
+    {
+        MS_ANGEL_ERROR("ReinitializeForLevelChange: CRITICAL - Failed to reinitialize AngelScript engine!");
+        return;
+    }
+    
+    MS_ANGEL_INFO("=== ReinitializeForLevelChange: ENGINE REBUILD COMPLETE ===");
+    MS_ANGEL_INFO("  AngelScript engine recreated with clean state");
+    MS_ANGEL_INFO("  All registrations, bindings, and systems reinitialized");
+    MS_ANGEL_INFO("  Ready for script loading");
 }
 
 //==========================================================================
@@ -548,9 +777,42 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
 bool CAngelScriptManager::ExecuteFunction(asIScriptFunction* pFunction, const char* szFunctionName)
 {
     if (!pFunction)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: NULL function pointer");
         return false;
+    }
     
-    MS_ANGEL_INFO("ExecuteFunction: About to execute '%s'", szFunctionName);
+    // Validate the function before execution
+    asIScriptModule* pModule = pFunction->GetModule();
+    if (!pModule)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Function '%s' has NULL module - STALE FUNCTION POINTER", 
+                      szFunctionName);
+        MS_ANGEL_ERROR("  This function was likely from a module that has been unloaded");
+        return false;
+    }
+    
+    // Verify the module is still registered with the engine
+    const char* moduleName = pModule->GetName();
+    if (!moduleName)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Module has NULL name for function '%s'", 
+                      szFunctionName);
+        return false;
+    }
+    
+    asIScriptModule* pEngineModule = m_pEngine->GetModule(moduleName);
+    if (!pEngineModule || pEngineModule != pModule)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Module '%s' not registered with engine - STALE FUNCTION POINTER", 
+                      moduleName);
+        MS_ANGEL_ERROR("  Function: '%s', Expected module: %p, Found module: %p", 
+                      szFunctionName, pModule, pEngineModule);
+        return false;
+    }
+    
+    MS_ANGEL_INFO("ExecuteFunction: About to execute '%s' from module '%s' (validated)", 
+                  szFunctionName, moduleName);
         
     // Acquire context from pool
     asIScriptContext* pContext = this->AcquireContext();
@@ -566,6 +828,7 @@ bool CAngelScriptManager::ExecuteFunction(asIScriptFunction* pFunction, const ch
     {
         MS_ANGEL_ERROR("CAngelScriptManager::ExecuteFunction: Failed to prepare function '%s' (error: %d)", 
                       szFunctionName, r);
+        MS_ANGEL_ERROR("  This could indicate corrupted bytecode or invalid function state");
         this->ReleaseContext(pContext);
         return false;
     }

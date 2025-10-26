@@ -208,6 +208,87 @@ void SendPlayerMessage(const string &in playerName, const string &in title, cons
 void OpenVoteMenu(CBasePlayer@ player, const string &in title, const array<string> &in options)
 ```
 
+### Server Management Functions
+**Scope**: Server
+
+```angelscript
+// Execute server console commands
+void ExecuteServerCommand(const string &in command)
+```
+
+**ExecuteServerCommand** allows scripts to execute server console commands such as:
+- `changelevel <mapname>` - Change to a different map
+- `kick #<userid>` - Kick a player by user ID
+- `banid <minutes> <steamid> kick` - Ban a player by Steam ID
+- `sv_password <password>` - Set server password
+- `ms_pklevel <level>` - Set PvP level (0=disabled, 1+=enabled)
+
+**Security Notes:**
+- Commands like `quit`, `exit`, and `rcon_password` are blocked for security
+- Only use trusted input when building command strings
+- This function is SERVER_ONLY and cannot be called from client scripts
+
+**Implementation Details:**
+- Exposed via `AS_ExecuteServerCommand` in `ASBuiltinFunctions.cpp`
+- Uses `SERVER_COMMAND()` and `SERVER_EXECUTE()` internally
+- Security validation performed before execution
+
+### GameMaster Communication Functions
+**Scope**: Server
+
+```angelscript
+// External function calls
+void CallPlayerExternal(const string &in playerID, const string &in function, const array<string>@ &in args)
+void CallGameMasterExternal(const string &in function, const array<string>@ &in args)
+
+// Player messaging
+void SendMessageToAllPlayers(const string &in color, const string &in message)
+void SendInfoMessageToAll(const string &in title, const string &in message)
+void SendPlayerMessage(const string &in playerName, const string &in title, const string &in message)
+void SendConsoleMessage(const string &in playerID, const string &in message)
+```
+
+**CallPlayerExternal** calls external functions on player scripts:
+- `playerID`: Player's Steam ID
+- `function`: Name of the function to call (e.g., "ext_set_map", "ext_setspawn", "ext_changelevel_prep")
+- `args`: Array of string arguments to pass to the function
+
+**CallGameMasterExternal** calls external functions on GameMaster scripts:
+- `function`: Name of the GameMaster function to call (e.g., "gm_create_vote", "gm_set_global_var")
+- `args`: Array of string arguments to pass to the function
+
+**SendMessageToAllPlayers** sends colored chat messages to all players:
+- `color`: Color name (red, green, blue, yellow, etc.)
+- `message`: Message text to display
+
+**SendInfoMessageToAll** sends info box messages to all players:
+- `title`: Title text for the info box
+- `message`: Body text for the info box
+
+### Map Validation Functions
+**Scope**: Server
+
+```angelscript
+// Check if a map exists on the server
+bool EngineMapExists(const string &in mapName)
+```
+
+**EngineMapExists** checks if a map file exists on the server:
+- `mapName`: Map name without .bsp extension (e.g., "crossroads", "thornlands")
+- Returns `true` if the map file exists in the maps/ directory
+- Returns `false` if the map doesn't exist or the name is invalid
+- Uses engine file system to validate actual map file presence
+- Server-only function for map transition validation
+
+**Example Usage**:
+```angelscript
+if (EngineMapExists("crossroads")) {
+    ExecuteServerCommand("changelevel crossroads");
+} else {
+    SendMessageToAllPlayers("red", "Map 'crossroads' not found on server");
+}
+```
+
 ### Entity Management Functions
 **Scope**: Server
 

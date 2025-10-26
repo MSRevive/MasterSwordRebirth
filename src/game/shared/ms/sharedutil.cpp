@@ -16,18 +16,20 @@ extern CBasePlayer player;
 CBaseEntity *MSInstance(edict_t *pent);
 
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
-msstring EntToString(class CBaseEntity *pEntity) // Converts an entity to a string of format "PentP(idx,addr)"
+msstring EntToString(class CBaseEntity *pEntity)
 {
 	if (!pEntity)
 		return "";
 
 	static char RetString[32];
-	_snprintf(RetString, sizeof(RetString), ENT_FORMAT, pEntity->entindex(), (int)pEntity);
+	memset(RetString, 0, sizeof(RetString)); // Clear buffer to avoid garbage
+	int written = _snprintf(RetString, sizeof(RetString) - 1, ENT_FORMAT, pEntity->entindex(), (int)pEntity);
+	RetString[sizeof(RetString) - 1] = '\0'; // Ensure null termination
 
 	return RetString;
 }
 
-CBaseEntity *StringToEnt(const char* EntString) // Converts an string of format "PentP(idx,addr)" to an entity
+CBaseEntity *StringToEnt(const char* EntString)
 {
 	int Idx = -1;
 	unsigned int Addr = ~0;

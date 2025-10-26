@@ -208,7 +208,11 @@ void CDebugger::LineCallback(asIScriptContext *ctx)
 	stringstream s;
 	const char *file = 0;
 	int lineNbr = ctx->GetLineNumber(0, 0, &file);
-	s << (file ? file : "{unnamed}") << ":" << lineNbr << "; " << ctx->GetFunction()->GetDeclaration() << endl;
+	asIScriptFunction *func = ctx->GetFunction();
+	if( func && reinterpret_cast<uintptr_t>(func) > 0x10000 )
+		s << (file ? file : "{unnamed}") << ":" << lineNbr << "; " << func->GetDeclaration() << endl;
+	else
+		s << (file ? file : "{unnamed}") << ":" << lineNbr << "; <invalid function>" << endl;
 	Output(s.str());
 
 	TakeCommands(ctx);
@@ -234,6 +238,9 @@ bool CDebugger::CheckBreakPoint(asIScriptContext *ctx)
 
 	// Did we move into a new function?
 	asIScriptFunction *func = ctx->GetFunction();
+	// Validate pointer is in a reasonable range (not an error code)
+	if( !func || reinterpret_cast<uintptr_t>(func) <= 0x10000 )
+		return false;
 	if( m_lastFunction != func )
 	{
 		// Check if any breakpoints need adjusting
@@ -540,7 +547,8 @@ void CDebugger::PrintValue(const std::string &expr, asIScriptContext *ctx)
 		int typeId = 0;
 
 		asIScriptFunction *func = ctx->GetFunction();
-		if( !func ) return;
+		// Validate pointer is in a reasonable range (not an error code)
+		if( !func || reinterpret_cast<uintptr_t>(func) <= 0x10000 ) return;
 
 		// skip local variables if a scope was informed
 		if( scope == "" )
