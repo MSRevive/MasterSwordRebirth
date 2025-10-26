@@ -28,6 +28,9 @@ bool gFNInitialized = false;
 bool CSVGlobals::LogScripts = true;
 mslist<CSVGlobals::scriptlistitem_t> CSVGlobals::ScriptList[SCRIPT_TYPES];
 
+// Global game_master entity handle
+CBaseEntity* g_pGameMasterEntity = nullptr;
+
 //Thothie MAR2012_27 - duplicate precache trackers
 int gModelPrecacheCount = 0;
 int gSoundPrecacheCount = 0;
@@ -188,10 +191,71 @@ void WriteCrashCfg()
 //Called from CWorld::Spawn() each map change
 void MSWorldSpawn()
 {
+	MS_INFO("=== MSWorldSpawn: Starting map initialization ===");
+	
 	//Setup global variables that can't be changed during a game
 	MSGlobals::PKAllowed = ms_pklevel.value > 0 ? true : false;
 	//Thothie attemptitng to remove FN upload sploit (Thanx to MiB)
 	MSGlobals::CentralEnabled = CVAR_GET_FLOAT("ms_central_enabled") > 0.0f ? true : false;
+	
+	// CRITICAL: Reload AngelScript modules after level change
+	// All modules were cleared in ServerDeactivate via PrepareForLevelChange()
+	// We need to reload them now for the new map
+	if (as_enabled.value > 0)
+	{
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			MS_INFO("MSWorldSpawn: Reloading AngelScript modules for new map...");
+			
+			// Open the scripts.pak file for reading AngelScript modules
+			CGameGroupFile groupFile;
+			if (!groupFile.Open("scripts.pak"))
+			{
+				MS_ERROR("MSWorldSpawn: Failed to open scripts.pak for module reloading");
+			}
+			else
+			{
+				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+				if (pModuleSystem)
+				{
+					// Check if auto-discovery is enabled
+					if (as_auto_discovery.value > 0)
+					{
+						MS_INFO("MSWorldSpawn: Using automatic module discovery...");
+						
+						// Discover modules with 'module ModuleName {' syntax
+						if (pModuleSystem->DiscoverModulesInPak(&groupFile))
+						{
+							// Load all discovered modules
+							if (pModuleSystem->LoadDiscoveredModules(&groupFile))
+							{
+								MS_INFO("MSWorldSpawn: AngelScript modules reloaded successfully!");
+							}
+							else
+							{
+								MS_ERROR("MSWorldSpawn: Some AngelScript modules failed to reload");
+							}
+						}
+						else
+						{
+							MS_ERROR("MSWorldSpawn: No modules discovered during reload");
+						}
+					}
+					else
+					{
+						MS_INFO("MSWorldSpawn: Module auto-discovery disabled, skipping reload");
+					}
+				}
+				else
+				{
+					MS_ERROR("MSWorldSpawn: ASModuleSystem not available for reload");
+				}
+			}
+		}
+	}
+	
+	MS_INFO("=== MSWorldSpawn: Map initialization complete ===");
 	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0 && !MSGlobals::CentralEnabled ? true : false;
 	//return MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar;
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
@@ -286,6 +350,27 @@ void MSWorldSpawn()
 	}
 
 	WriteCrashCfg();
+
+	// Re-initialize AngelScript system if it was destroyed by previous map end
+	if (as_enabled.value > 0)
+	{
+		if (!CAngelScriptManager::Instance()->IsInitialized())
+		{
+			g_engfuncs.pfnServerPrint("Re-initializing AngelScript Manager after map change...\n");
+			MS_INFO("Re-initializing AngelScript Manager after map change...");
+			
+			if (!CAngelScriptManager::Instance()->Initialize())
+			{
+				g_engfuncs.pfnServerPrint("ERROR: Failed to re-initialize AngelScript Manager!\n");
+				MS_ERROR("Failed to re-initialize AngelScript Manager!");
+			}
+			else
+			{
+				g_engfuncs.pfnServerPrint("AngelScript Manager re-initialized successfully\n");
+				MS_INFO("AngelScript Manager re-initialized successfully");
+			}
+		}
+	}
 
 	// Initialize AngelScript Module System
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
@@ -416,11 +501,15 @@ void MSWorldSpawn()
 //Called every frame
 void MSGameThink()
 {
+	// CRITICAL: Don't run any script-related code during level transitions
+	// g_serveractive is 0 during ServerDeactivate/ServerActivate
+	
 	//g_SteamServerHelper->Think();
 	g_FNRequestManager.Think();
 
-	// AngelScript maintenance
-	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	// AngelScript maintenance - only run when server is fully active
+	// This prevents script execution during level changes when entity references are invalid
+	if (g_serveractive && as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
 	{
 		CAngelScriptManager::Instance()->Think();
 	}
@@ -518,36 +607,6 @@ void MSGameEnd()
 	// Shutdown AngelScript GameMaster
 	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
 	{
-		// Call game_master_shutdown if available - now looks for GameMaster module
-		ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
-		if (pModuleSystem)
-		{
-			asIScriptModule* pModule = pModuleSystem->GetModule("GameMaster");
-			if (pModule)
-			{
-				asIScriptFunction* pFunc = pModule->GetFunctionByName("game_master_shutdown");
-				if (pFunc)
-				{
-					asIScriptEngine* pEngine = CAngelScriptManager::Instance()->GetEngine();
-					asIScriptContext* pContext = pEngine->CreateContext();
-					
-					if (pContext)
-					{
-						pContext->Prepare(pFunc);
-						int r = pContext->Execute();
-						
-						if (r == asEXECUTION_FINISHED)
-						{
-							g_engfuncs.pfnServerPrint("AngelScript GameMaster shut down successfully\n");
-							MS_INFO("AngelScript GameMaster shut down successfully");
-						}
-						
-						pContext->Release();
-					}
-				}
-			}
-		}
-		
 		// General AngelScript cleanup
 		CAngelScriptManager::Instance()->Destroy();
 	}

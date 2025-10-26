@@ -68,6 +68,12 @@ public:
     // Context pool
     asIScriptContext* AcquireContext();
     void ReleaseContext(asIScriptContext* pContext);
+    void ClearContextPool(); // Clear all pooled contexts (call during level changes)
+    
+    // Level change handling
+    void PrepareForLevelChange(); // Comprehensive cleanup for level transitions
+    void ReinitializeForLevelChange(); // Complete teardown and reinit of AngelScript engine
+    void ClearAllModules(); // Remove all script modules
     
     // Global function execution
     bool CallGlobalFunction(const char* szFunctionName, const char* szModuleName = nullptr);

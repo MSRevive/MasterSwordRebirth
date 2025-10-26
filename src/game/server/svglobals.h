@@ -9,6 +9,15 @@ void MSGameThink();
 void MSGameEnd();
 void SendHUDMsgAll(const char* Title, const char* Text);
 
+// Server state flag - 0 during level changes, 1 when server is fully active
+extern int g_serveractive;
+
+// Forward declarations
+class CBaseEntity;
+
+// Global game_master entity handle
+extern CBaseEntity* g_pGameMasterEntity;
+
 #define SCRIPT_TYPES 4
 
 class CSVGlobals

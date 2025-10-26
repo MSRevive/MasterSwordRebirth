@@ -1604,101 +1604,6 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 
 	FREE_FILE( aFileList );
 }
-	
-//Master Sword ----------------------------------------------------
-//=========================================================
-// Universal AngelScript Command Dispatcher
-// Simple dispatcher that routes commands to AngelScript first
-//=========================================================
-class ASCommandDispatcher
-{
-public:
-	static ASCommandDispatcher* Instance()
-	{
-		static ASCommandDispatcher instance;
-		return &instance;
-	}
-	
-	bool IsInitialized()
-	{
-		// Check if AngelScript manager is available and initialized
-		CAngelScriptManager* pManager = CAngelScriptManager::Instance();
-		return pManager && pManager->IsInitialized();
-	}
-	
-	bool DispatchCommand(CBasePlayer* pPlayer, const char* pcmd, const char* args)
-	{
-		if (!pPlayer || !pcmd)
-			return false;
-		
-		// Get AngelScript manager to access the command system
-		CAngelScriptManager* pManager = CAngelScriptManager::Instance();
-		if (!pManager || !pManager->IsInitialized())
-			return false;
-		
-		// Get the script engine
-		asIScriptEngine* pEngine = pManager->GetEngine();
-		if (!pEngine)
-			return false;
-		
-		// Find the ProcessCommand function in AngelScript
-		asIScriptFunction* pProcessCommandFunc = pEngine->GetGlobalFunctionByDecl("bool ProcessCommand(CBasePlayer@, const string &in, const string &in)");
-		if (!pProcessCommandFunc)
-		{
-			// Function not found, log for debugging but don't spam
-			static bool logged = false;
-			if (!logged)
-			{
-				ALERT(at_console, "ASCommandDispatcher: ProcessCommand function not found in AngelScript\n");
-				logged = true;
-			}
-			return false;
-		}
-		
-		try
-		{
-			// Use asbind20 for cleaner script invocation
-			asbind20::request_context ctx(pEngine);
-			
-			// Create string arguments
-			std::string commandStr(pcmd);
-			std::string argsStr(args ? args : "");
-			
-			// Call ProcessCommand function using asbind20
-			auto result = asbind20::script_invoke<bool>(
-				ctx, pProcessCommandFunc, 
-				pPlayer, commandStr, argsStr
-			);
-			
-			if (result.has_value())
-			{
-				bool commandHandled = result.value();
-				
-				if (commandHandled)
-				{
-					ALERT(at_console, "ASCommandDispatcher: Command '%s' handled by AngelScript\n", pcmd);
-				}
-				
-				return commandHandled;
-			}
-			else
-			{
-				ALERT(at_console, "ASCommandDispatcher: ProcessCommand returned no value for '%s'\n", pcmd);
-				return false;
-			}
-		}
-		catch (const std::exception& e)
-		{
-			ALERT(at_console, "ASCommandDispatcher: Exception calling ProcessCommand for '%s': %s\n", pcmd, e.what());
-			return false;
-		}
-		catch (...)
-		{
-			ALERT(at_console, "ASCommandDispatcher: Unknown exception calling ProcessCommand for '%s'\n", pcmd);
-			return false;
-		}
-	}
-};
 
 //=========================================================
 // ClientCommand
@@ -1709,19 +1614,6 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 {
 	if(g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
 		return TRUE;
-
-	// Universal AngelScript Command Dispatcher
-	// Route ALL commands through AngelScript first with fallback to legacy handling
-	ASCommandDispatcher* dispatcher = ASCommandDispatcher::Instance();
-	if( dispatcher && dispatcher->IsInitialized() )
-	{
-		bool handled = dispatcher->DispatchCommand(pPlayer, pcmd, CMD_ARGS());
-		if( handled )
-		{
-			return TRUE; // Command processed by AngelScript
-		}
-		// If not handled by AngelScript, continue to legacy C++ handling
-	}
 
 	int OldMenu;
 	if( FStrEq( pcmd, "menuselect" ) )

@@ -13,7 +13,7 @@
     // Server-side implementation
     #include "../../server/angelscript/ASServerEngineImpl.h"
     #define ENGINE_IMPL ASServerEngine::GetInstance()
-#elif defined(CLIENT_DLL)
+#elif defined(ISCLIENT)
     // Client-side implementation
     #include "../../client/angelscript/ASClientEngineImpl.h"
     #define ENGINE_IMPL ASClientEngine::GetInstance()

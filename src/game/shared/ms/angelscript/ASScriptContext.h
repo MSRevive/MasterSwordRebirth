@@ -27,13 +27,13 @@ enum class ScriptContext
 //==========================================================================
 enum class BuildContext
 {
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
     CLIENT,
 #else
     SERVER,
 #endif
     CURRENT = 
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
         CLIENT
 #else
         SERVER
@@ -74,7 +74,7 @@ public:
     // Check if a script can run in the current build context
     static bool CanRunInCurrentContext(ScriptContext scriptContext)
     {
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
         // Client build can run CLIENT and SHARED scripts
         return scriptContext == ScriptContext::CLIENT_ONLY || 
                scriptContext == ScriptContext::SHARED;
@@ -88,7 +88,7 @@ public:
     // Get current build context as script context
     static ScriptContext GetCurrentBuildContext()
     {
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
         return ScriptContext::CLIENT_ONLY;
 #else
         return ScriptContext::SERVER_ONLY;
@@ -98,7 +98,7 @@ public:
     // Check if we're currently building client or server
     static bool IsClientBuild()
     {
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
         return true;
 #else
         return false;
@@ -107,7 +107,7 @@ public:
     
     static bool IsServerBuild()
     {
-#if defined(CLIENT_DLL)
+#if defined(ISCLIENT)
         return false;
 #else
         return true;

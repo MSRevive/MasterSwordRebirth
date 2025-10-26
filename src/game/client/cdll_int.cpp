@@ -36,6 +36,11 @@
 #include "ms/clglobal.h"
 #include "mslogger.h"
 
+// AngelScript includes
+#include "ms/angelscript/CAngelScriptManager.h"
+#include "ms/angelscript/ASModuleSystem.h"
+#include "groupfile.h"  // For CGameGroupFile (scripts.pak access)
+
 #define DLLEXPORT EXPORT
 
 cl_enginefunc_t gEngfuncs;
@@ -50,6 +55,10 @@ void IN_Commands(void);
 
 static cvar_s *g_pVarBorderless = nullptr;
 static int g_iBorderlessMode = 0;
+
+// AngelScript cvars (client-side)
+static cvar_s *cl_as_enabled = nullptr;
+static cvar_s *cl_as_debug_mode = nullptr;
 
 enum BORDERLESS_WINDOW_TYPES
 {
@@ -232,9 +241,44 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 
 	EV_HookEvents();
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
+	
+	// Register AngelScript cvars for client
+	cl_as_enabled = CVAR_CREATE("cl_as_enabled", "1", FCVAR_ARCHIVE);
+	cl_as_debug_mode = CVAR_CREATE("cl_as_debug_mode", "0", FCVAR_ARCHIVE);
 
 	if(!gClient.Initialize())
 		return 0;
+
+	// Initialize AngelScript on client if enabled
+	if (cl_as_enabled && cl_as_enabled->value > 0)
+	{
+		MS_INFO("Initializing client-side AngelScript...");
+		if (!CAngelScriptManager::Instance()->Initialize())
+		{
+			MS_ERROR("Client-side AngelScript initialization FAILED!");
+			// Don't fail the entire client initialization, just disable AngelScript
+			if (cl_as_enabled)
+				cl_as_enabled->value = 0;
+		}
+		else
+		{
+			MS_INFO("Client-side AngelScript initialized successfully");
+			
+			// Load client-side AngelScript modules
+			if (CAngelScriptManager::Instance()->IsInitialized())
+			{
+				MS_INFO("Loading client-side AngelScript modules...");
+				
+				// Initialize the module system for client
+				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+				if (pModuleSystem)
+				{
+					// Client modules will be loaded from scripts.pak with #pragma context client
+					MS_INFO("Client-side AngelScript module system ready");
+				}
+			}
+		}
+	}
 
 	MS_INFO("[DLLEXPORT Initialize: Complete]");
 
@@ -283,6 +327,64 @@ void DLLEXPORT HUD_Init(void)
 
 	MS_INFO("[HUD_Init: Scheme_Init]");
 	Scheme_Init();
+	
+	// Load client-side AngelScript modules when connecting to server
+	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	{
+		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING ===");
+		MS_INFO("Build Context: CLIENT");
+		MS_INFO("Loading client-side AngelScript modules from scripts.pak...");
+		
+		// Open scripts.pak file
+		CGameGroupFile groupFile;
+		if (!groupFile.Open("scripts.pak"))
+		{
+			MS_ERROR("Failed to open scripts.pak for client-side modules");
+		}
+		else
+		{
+			ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+			if (pModuleSystem)
+			{
+				// Initialize the module system with the engine
+				if (!pModuleSystem->Initialize(CAngelScriptManager::Instance()->GetEngine()))
+				{
+					MS_ERROR("Failed to initialize ASModuleSystem on client");
+				}
+				else
+				{
+					MS_INFO("Client-side module system initialized, discovering modules...");
+					MS_INFO("Note: Only modules with #pragma context client or shared will be loaded");
+					
+					// Discover and load client-side modules
+					if (pModuleSystem->DiscoverModulesInPak(&groupFile))
+					{
+						MS_INFO("Client-side modules discovered, filtering and loading...");
+						if (pModuleSystem->LoadDiscoveredModules(&groupFile))
+						{
+							MS_INFO("Client-side AngelScript modules loaded successfully!");
+						}
+						else
+						{
+							MS_ERROR("Some client-side AngelScript modules failed to load");
+						}
+					}
+					else
+					{
+						MS_INFO("No client-side modules discovered in scripts.pak (this is normal if no client modules exist)");
+					}
+				}
+			}
+			else
+			{
+				MS_ERROR("ASModuleSystem not available on client");
+			}
+			
+			groupFile.Close();
+		}
+		
+		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING COMPLETE ===");
+	}
 
 	MS_INFO("[HUD_Init: Complete]");
 }
@@ -299,6 +401,12 @@ redraw the HUD.
 int DLLEXPORT HUD_Redraw(float time, int intermission)
 {
 	gHUD.Redraw(time, 0 != intermission);
+	
+	// Update AngelScript on client if enabled
+	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+	{
+		CAngelScriptManager::Instance()->Think();
+	}
 
 	return 1;
 }

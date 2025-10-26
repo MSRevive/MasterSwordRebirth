@@ -446,7 +446,8 @@ bool IAngelScript::SetEventParameters(asIScriptContext* pCtx, ASEventParams* pPa
         
     // Set parameters based on function signature
     asIScriptFunction* pFunc = pCtx->GetFunction();
-    if (!pFunc)
+    // Validate pointer is in a reasonable range (not an error code)
+    if (!pFunc || reinterpret_cast<uintptr_t>(pFunc) <= 0x10000)
         return false;
         
     int paramCount = pFunc->GetParamCount();

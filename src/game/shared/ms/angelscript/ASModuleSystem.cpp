@@ -5,6 +5,7 @@
 //==========================================================================
 
 #include "ASModuleSystem.h"
+#include "ASEngineEventManager.h"  // For unregistering event handlers during reload
 #include "addons/scriptbuilder/scriptbuilder.h"
 #include "addons/scriptmodule/scriptmodule.h"
 #include "groupfile.h"
@@ -1154,7 +1155,65 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
     // Load each discovered module
     for (const ModuleInfo& moduleInfo : discoveredModules)
     {
-        printf("ASModuleSystem: Loading module '%s' from %s\n", moduleInfo.name.c_str(), moduleInfo.filePath.c_str());
+        // First, determine the module's context from its ORIGINAL content (not processed)
+        // The #pragma context directive must be checked before module->class transformation
+        ASScriptContextManager* pContextMgr = ASScriptContextManager::Instance();
+        
+        // Debug: Check if source is available
+        if (moduleInfo.source.empty())
+        {
+            printf("ASModuleSystem: WARNING - Module '%s' has empty source! Using file path for context detection\n", 
+                   moduleInfo.name.c_str());
+        }
+        else
+        {
+            // Debug: Show first 100 chars of source to verify pragma is present
+            size_t previewLen = (std::min)(moduleInfo.source.length(), static_cast<size_t>(100));
+            std::string preview = moduleInfo.source.substr(0, previewLen);
+            printf("ASModuleSystem: Module '%s' source preview: %s...\n", moduleInfo.name.c_str(), preview.c_str());
+        }
+        
+        ScriptContext moduleContext = pContextMgr->DetermineContextFromContent(moduleInfo.source);
+        
+        printf("ASModuleSystem: Module '%s' context from content: %s\n", 
+               moduleInfo.name.c_str(), 
+               ASScriptContextUtil::ContextToString(moduleContext));
+        
+        // If no context pragma found, try to determine from file path
+        if (moduleContext == ScriptContext::UNKNOWN)
+        {
+            moduleContext = pContextMgr->DetermineContextFromPath(moduleInfo.filePath);
+            printf("ASModuleSystem: Module '%s' context from path: %s\n", 
+                   moduleInfo.name.c_str(), 
+                   ASScriptContextUtil::ContextToString(moduleContext));
+        }
+        
+        // Default to SHARED if still unknown
+        if (moduleContext == ScriptContext::UNKNOWN)
+        {
+            printf("ASModuleSystem: Module '%s' defaulting to SHARED context\n", moduleInfo.name.c_str());
+            moduleContext = ScriptContext::SHARED;
+        }
+        
+        printf("ASModuleSystem: Module '%s' final context: %s, current build: %s\n",
+               moduleInfo.name.c_str(),
+               ASScriptContextUtil::ContextToString(moduleContext),
+               ASScriptContextUtil::IsClientBuild() ? "CLIENT" : "SERVER");
+        
+        // Check if this module can run in the current build context
+        if (!ASScriptContextUtil::CanRunInCurrentContext(moduleContext))
+        {
+            printf("ASModuleSystem: SKIPPING module '%s' - context %s not compatible with %s build\n", 
+                   moduleInfo.name.c_str(),
+                   ASScriptContextUtil::ContextToString(moduleContext),
+                   ASScriptContextUtil::IsClientBuild() ? "CLIENT" : "SERVER");
+            continue;  // Skip this module
+        }
+        
+        printf("ASModuleSystem: Loading module '%s' from %s (context: %s)\n", 
+               moduleInfo.name.c_str(), 
+               moduleInfo.filePath.c_str(),
+               ASScriptContextUtil::ContextToString(moduleContext));
         
         // Use the processed source (module -> class transformation)
         ASModuleLoadOptions options;
@@ -1295,6 +1354,24 @@ bool ASModuleSystem::ReloadAllModules()
     // Get list of currently loaded modules to preserve order
     std::vector<std::string> loadedModules = GetLoadedModules();
     printf("ASModuleSystem: Found %d loaded modules to reload\n", (int)loadedModules.size());
+    
+    // CRITICAL: Unregister all event handlers BEFORE unloading modules
+    // This prevents stale function pointers from being executed after module unload
+    printf("ASModuleSystem::ReloadAllModules: Unregistering event handlers from all modules...\n");
+    ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
+    if (pEventManager)
+    {
+        for (const std::string& moduleName : loadedModules)
+        {
+            printf("ASModuleSystem: Unregistering event handlers for module '%s'\n", moduleName.c_str());
+            pEventManager->UnregisterAllHandlers(moduleName.c_str());
+        }
+        printf("ASModuleSystem::ReloadAllModules: Event handlers unregistered successfully\n");
+    }
+    else
+    {
+        printf("ASModuleSystem::ReloadAllModules: WARNING - Event manager not available\n");
+    }
     
     // Store module info before unloading for restoration if needed
     std::map<std::string, ASModuleInfo> moduleBackup;

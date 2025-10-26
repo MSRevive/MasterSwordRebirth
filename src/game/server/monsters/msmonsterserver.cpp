@@ -133,6 +133,12 @@ void CMSMonster::Spawn()
 {
 	m_OldGold = 0;
 
+	// Initialize menu protection flags to false for all players
+	for (int i = 0; i < MAXPLAYERS; i++)
+	{
+		m_MenuOptionsProtected[i] = false;
+	}
+
 	//SUB_Remove( ); return;
 	//DelayedRemove( );
 
@@ -2842,7 +2848,17 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	Params.clearitems();
 	Params.add(EntToString(pPlayer));
 
-	m_MenuCurrentOptions = &m_MenuOptions[pPlayer->entindex()];
+	int playerIndex = pPlayer->entindex();
+	
+	// Check if this player's menu is protected (vote menu)
+	if (m_MenuOptionsProtected[playerIndex])
+	{
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: BLOCKED OpenMenu() from clearing player %d menu (entity: %d) ***", 
+		             playerIndex, entindex());
+		return;
+	}
+
+	m_MenuCurrentOptions = &m_MenuOptions[playerIndex];
 	mslist<menuoption_t>& Menuoptions = *m_MenuCurrentOptions;
 	Menuoptions.clearitems();
 
@@ -2870,22 +2886,70 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
+	int playerIndex = pPlayer->entindex();
+	MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
+	             pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
+	MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
+	             m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
+	
 	pPlayer->InMenu = false;
-	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
+
+	MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
 
 	//Thothie JAN2008a - need a way of dealing with canceled menus
 	if (Option == -1)
 	{
+		MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
 		static msstringlist Params;
 		Params.clearitems();
 		Params.add(EntToString(pPlayer));
 		CallScriptEvent("game_menu_cancel", &Params);
+		
+		// Clear protection flag when menu is cancelled
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
+		
+		return;
 	}
 
 	if (Option < 0 || Option >= (signed)Menuoptions.size())
+	{
+		MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
+		
+		// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
+		// This allows AngelScript to handle expired votes gracefully
+		if (Menuoptions.size() == 0)
+		{
+			MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
+			
+			// Try to call the vote callback even with no options
+			// The AngelScript side will handle the expired vote appropriately
+			static msstringlist Params;
+			Params.clearitems();
+			
+			// Format player entity as "ent:index" for AngelScript compatibility
+			char entFormat[32];
+			_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", pPlayer->entindex());
+			entFormat[sizeof(entFormat) - 1] = '\0';
+			
+			Params.add(entFormat);
+			Params.add(""); // Empty option data since menu is gone
+			
+			MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
+			CallScriptEvent("game_vote_menu_callback", &Params);
+		}
+		
+		// Clear protection flag when option is out of range (vote may have expired)
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
+		
 		return;
+	}
 
 	menuoption_t& MenuOption = Menuoptions[Option];
+	MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
+	             MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
 
 	bool PlayerCanPay = true;
 
@@ -2973,24 +3037,58 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 	}
 
 	//Handle callback
+	// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
+	msstring CallbackEvent = MenuOption.CB_Name;
+	msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
+	msstring OptionData = MenuOption.Data;
+	menuoptiontype_e OptionType = MenuOption.Type;
+	
+	MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
+	
 	static msstringlist Params;
 	Params.clearitems();
-	Params.add(EntToString(pPlayer));
-	Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+	
+	// Format player entity as "ent:index" for AngelScript compatibility
+	char entFormat[32];
+	_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", pPlayer->entindex());
+	entFormat[sizeof(entFormat) - 1] = '\0';
+	
+	msstring PlayerEntStr = entFormat;
+	MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), pPlayer->entindex());
+	
+	Params.add(PlayerEntStr);
+	Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
 
-	msstring CallbackEvent = MenuOption.CB_Name;
+	MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
+	             Params[0].c_str(), OptionData.c_str());
 
-	if (MenuOption.Type == MOT_PAYMENT)
+	if (OptionType == MOT_PAYMENT)
 	{
 		if (!PlayerCanPay)
-			CallbackEvent = MenuOption.CB_Failed_Name;
+		{
+			MS_ANGEL_INFO("  Player can't pay, using failed callback");
+			CallbackEvent = CallbackFailedEvent;
+		}
 	}
 
 	if (CallbackEvent.len())
 	{
+		MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
+		             CallbackEvent.c_str(), (int)Params.size());
 		CallScriptEvent(CallbackEvent, &Params);
+		MS_ANGEL_INFO("  Script event completed");
 	}
+	else
+	{
+		MS_ANGEL_WARN("  No callback event name specified for this menu option");
+	}
+	
+	MS_ANGEL_INFO("  Clearing menu options");
 	Menuoptions.clearitems();
+	
+	// Clear protection flag (used for vote menus)
+	m_MenuOptionsProtected[playerIndex] = false;
+	MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
 }
 
 void AlignToNormal(/*In*/ Vector& vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector& vAngles)

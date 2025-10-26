@@ -833,20 +833,41 @@ void ClientCommand2(edict_t *pEntity)
 	}
 	else if (FStrEq(pcmd, "menuoption"))
 	{
+		MS_ANGEL_INFO("menuoption command received from player %s", pPlayer ? pPlayer->DisplayName() : "NULL");
+		MS_ANGEL_INFO("  Arguments: %d", CMD_ARGC());
+		
 		if (CMD_ARGC() <= 2)
+		{
+			MS_ANGEL_ERROR("menuoption: Not enough arguments (need at least 3)");
 			return;
+		}
 
 		int EntIdx = atoi(CMD_ARGV(1));
+		MS_ANGEL_INFO("  Entity Index: %d", EntIdx);
+		MS_ANGEL_INFO("  Option Index: %s", CMD_ARGV(2));
+		
 		CBaseEntity *pEntity = MSInstance(INDEXENT(EntIdx));
-		if (!pEntity || !pEntity->IsMSMonster())
+		if (!pEntity)
+		{
+			MS_ANGEL_ERROR("menuoption: Entity at index %d is NULL", EntIdx);
 			return;
+		}
+		
+		if (!pEntity->IsMSMonster())
+		{
+			MS_ANGEL_ERROR("menuoption: Entity at index %d is not an MSMonster (classname: %s)", 
+			              EntIdx, STRING(pEntity->pev->classname));
+			return;
+		}
 
 		CMSMonster *pMonster = (CMSMonster *)pEntity;
 		int Option = atoi(CMD_ARGV(2));
 
+		MS_ANGEL_INFO("menuoption: Calling UseMenuOption on entity %d with option %d", EntIdx, Option);
 		pPlayer->InMenu = false;
 
 		pMonster->UseMenuOption(pPlayer, Option);
+		MS_ANGEL_INFO("menuoption: UseMenuOption completed");
 	}
 	else if (FStrEq(pcmd, "offer"))
 	{
@@ -1808,7 +1829,9 @@ void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer)
 		g_pGameRules->ClientUserInfoChanged(GetClassPtr((CBasePlayer *)&pEntity->v), infobuffer);
 }
 
-static int g_serveractive = 0;
+// Global server active flag - used to prevent script execution during level changes
+// NOT static so it can be accessed from other translation units
+int g_serveractive = 0;
 
 void ServerDeactivate(void)
 {
@@ -1823,11 +1846,41 @@ void ServerDeactivate(void)
 
 	// Peform any shutdown operations here...
 	//
+	
+	MS_INFO("=== ServerDeactivate: Starting map transition cleanup ===");
+	
+	// CRITICAL: COMPLETE AngelScript engine teardown and rebuild
+	// All entity indices are reused, so ALL entity references become invalid
+	// We must destroy and recreate the entire AngelScript engine to ensure clean state
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
+	{
+		MS_INFO("ServerDeactivate: DESTROYING AND REBUILDING ENTIRE ANGELSCRIPT ENGINE...");
+		
+		// This will:
+		// 1. Clear all pooled contexts
+		// 2. Discard all script modules  
+		// 3. Shutdown debugger
+		// 4. Run extensive garbage collection
+		// 5. RELEASE AND DESTROY the AngelScript engine
+		// 6. CREATE A NEW AngelScript engine from scratch
+		// 7. Re-register all bindings and systems
+		pASManager->ReinitializeForLevelChange();
+		
+		MS_INFO("ServerDeactivate: AngelScript engine completely rebuilt - ready for new map");
+	}
+	
+	// IMPORTANT: Clear the game_master entity handle since all entities are destroyed during level change
+	// ServerActivate will create a new game_master entity in the new map
+	g_pGameMasterEntity = nullptr;
+	MS_INFO("Game_master entity handle cleared (will be recreated in ServerActivate)");
 
 	if (g_pGameRules)
 		g_pGameRules->EndMultiplayerGame();
 
 	MSGameEnd();
+	
+	MS_INFO("=== ServerDeactivate: Cleanup complete ===");
 }
 
 DLL_GLOBAL extern bool g_fInPrecache; //Code called from is in CWorld::Precache
@@ -1881,20 +1934,102 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	LinkUserMessages();
 
 	//If the game master hasn't been created yet, create it now - Solokiller
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+	MS_INFO("Checking for existing game_master entity...");
+	
+	// First check the global handle (might be set from previous level)
+	CBaseEntity* pGameMasterEnt = g_pGameMasterEntity;
+	
+	// Verify the global handle is still valid (entity might have been destroyed)
+	if (pGameMasterEnt && (FNullEnt(pGameMasterEnt->edict()) || (uintptr_t)pGameMasterEnt->pev == 0xdddddddd))
+	{
+		MS_INFO("Global game_master entity handle is stale (entity was destroyed), clearing...");
+		pGameMasterEnt = nullptr;
+		g_pGameMasterEntity = nullptr;
+	}
+	
+	// If not found via global, search by netname
 	if (!pGameMasterEnt)
 	{
+		pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+		if (pGameMasterEnt)
+		{
+			MS_INFO("Game master found via search at index %d", pGameMasterEnt->entindex());
+		}
+	}
+	else
+	{
+		MS_INFO("Game master found via global handle at index %d", pGameMasterEnt->entindex());
+	}
+	
+	if (!pGameMasterEnt)
+	{
+		MS_INFO("Game master not found, creating new one...");
 		MS_INFO("Spawning game master");
 		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
 		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
 		if (NewMonster)
 		{
 			NewMonster->pev->origin = Vector(20000, -10000, -20000);
+			
+			// Set game master properties BEFORE Spawn to prevent script from overriding
+			NewMonster->pev->health = 1;
+			NewMonster->pev->max_health = 1;
+			NewMonster->pev->rendermode = kRenderTransTexture;
+			NewMonster->pev->renderamt = 0; // invisible
+			NewMonster->pev->flags |= FL_GODMODE;
+			NewMonster->pev->takedamage = DAMAGE_NO;
+			
+			// Set netname BEFORE Spawn (required for entity lookups)
+			NewMonster->m_NetName = "-game_master";
+			NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
+			
+			MS_INFO("Game master entity pre-configured with netname: %s at index %d", 
+			        NewMonster->m_NetName.c_str(), NewMonster->entindex());
+			
+			// Spawn with the game_master script (currently disabled, using AngelScript instead)
 			NewMonster->Spawn("game_master");
+			
+			// Verify netname is still set after Spawn
+			if (NewMonster->pev->netname && STRING(NewMonster->pev->netname)[0])
+			{
+				MS_INFO("Game master netname verified after Spawn: '%s'", STRING(NewMonster->pev->netname));
+			}
+			else
+			{
+				MS_ERROR("Game master netname was cleared by Spawn! Restoring...");
+				NewMonster->m_NetName = "-game_master";
+				NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
+			}
 
-			msstringlist params;
-			NewMonster->CallScriptEvent("game_dynamically_created", &params);
-		}
+		msstringlist params;
+		NewMonster->CallScriptEvent("game_dynamically_created", &params);
+		
+		// Update the pointer so we can set the global handle below
+		pGameMasterEnt = NewMonster;
+		
+		MS_INFO("Game master entity fully initialized");
+	}
+	else
+	{
+		MS_ERROR("Failed to create game master entity!");
+	}
+	}
+	else
+	{
+		MS_INFO("Game master entity already exists at index %d with netname '%s'", 
+		        pGameMasterEnt->entindex(), 
+		        pGameMasterEnt->pev->netname ? STRING(pGameMasterEnt->pev->netname) : "(null)");
+	}
+	
+	// Store the game_master entity in global handle for easy access
+	g_pGameMasterEntity = pGameMasterEnt;
+	if (g_pGameMasterEntity)
+	{
+		MS_INFO("Global game_master entity handle set (index %d)", g_pGameMasterEntity->entindex());
+	}
+	else
+	{
+		MS_ERROR("Failed to set global game_master entity handle!");
 	}
 
 	CSVGlobals::WriteScriptLog();
