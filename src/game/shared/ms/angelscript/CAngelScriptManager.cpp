@@ -791,6 +791,177 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
 }
 
 //==========================================================================
+// CallGlobalFunctionWithParams - Execute a global AngelScript function with string parameters
+//==========================================================================
+bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionName, const std::vector<std::string>& params, const char* szModuleName)
+{
+    if (!m_bInitialized || !m_pEngine || !szFunctionName)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Invalid state or parameters");
+        return false;
+    }
+
+    MS_ANGEL_INFO("=== CallGlobalFunctionWithParams: Looking for '%s' in module '%s' with %d params ===", 
+                  szFunctionName, szModuleName ? szModuleName : "ALL", (int)params.size());
+
+    // If module name is specified, search only in that module
+    if (szModuleName)
+    {
+        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName);
+        if (!pModule)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Module '%s' not found", szModuleName);
+            return false;
+        }
+
+        asIScriptFunction* pFunction = pModule->GetFunctionByName(szFunctionName);
+        if (!pFunction)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Function '%s' not found in module '%s'", 
+                          szFunctionName, szModuleName);
+            return false;
+        }
+
+        // Get context
+        asIScriptContext* pContext = AcquireContext();
+        if (!pContext)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to acquire context");
+            return false;
+        }
+
+        // Prepare function
+        int r = pContext->Prepare(pFunction);
+        if (r < 0)
+        {
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to prepare function");
+            ReleaseContext(pContext);
+            return false;
+        }
+
+        // Set string arguments
+        for (size_t i = 0; i < params.size() && i < (size_t)pFunction->GetParamCount(); i++)
+        {
+            r = pContext->SetArgObject(i, (void*)&params[i]);
+            if (r < 0)
+            {
+                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)i);
+                ReleaseContext(pContext);
+                return false;
+            }
+        }
+
+        // Execute
+        r = pContext->Execute();
+        ReleaseContext(pContext);
+
+        if (r != asEXECUTION_FINISHED)
+        {
+            if (r == asEXECUTION_EXCEPTION)
+            {
+                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Exception in function '%s': %s", 
+                              szFunctionName, pContext->GetExceptionString());
+            }
+            else
+            {
+                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to execute function '%s' (result: %d)", 
+                              szFunctionName, r);
+            }
+            return false;
+        }
+
+        MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
+        return true;
+    }
+    
+    // Search all modules for the function
+    bool functionFound = false;
+    bool anySuccess = false;
+    
+    for (asUINT i = 0; i < m_pEngine->GetModuleCount(); i++)
+    {
+        asIScriptModule* pModule = m_pEngine->GetModuleByIndex(i);
+        if (!pModule) continue;
+        
+        asIScriptFunction* pFunction = pModule->GetFunctionByName(szFunctionName);
+        if (pFunction)
+        {
+            functionFound = true;
+            MS_ANGEL_INFO("CAngelScriptManager::CallGlobalFunctionWithParams: Calling '%s' in module '%s'", 
+                         szFunctionName, pModule->GetName());
+            
+            // Get context
+            asIScriptContext* pContext = AcquireContext();
+            if (!pContext)
+            {
+                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to acquire context");
+                continue;
+            }
+
+            // Prepare function
+            int r = pContext->Prepare(pFunction);
+            if (r < 0)
+            {
+                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to prepare function");
+                ReleaseContext(pContext);
+                continue;
+            }
+
+            // Set string arguments
+            bool argsOk = true;
+            for (size_t j = 0; j < params.size() && j < (size_t)pFunction->GetParamCount(); j++)
+            {
+                r = pContext->SetArgObject(j, (void*)&params[j]);
+                if (r < 0)
+                {
+                    MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)j);
+                    argsOk = false;
+                    break;
+                }
+            }
+
+            if (!argsOk)
+            {
+                ReleaseContext(pContext);
+                continue;
+            }
+
+            // Execute
+            r = pContext->Execute();
+            ReleaseContext(pContext);
+
+            if (r == asEXECUTION_FINISHED)
+            {
+                anySuccess = true;
+                MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
+            }
+            else
+            {
+                if (r == asEXECUTION_EXCEPTION)
+                {
+                    MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Exception in function '%s': %s", 
+                                  szFunctionName, pContext->GetExceptionString());
+                }
+                else
+                {
+                    MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to execute function '%s' (result: %d)", 
+                                  szFunctionName, r);
+                }
+            }
+        }
+    }
+    
+    if (!functionFound)
+    {
+        MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Function '%s' not found in any module", 
+                      szFunctionName);
+        return false;
+    }
+    
+    return anySuccess;
+}
+
+//==========================================================================
 // ExecuteFunction - Helper to execute a function with proper context handling
 //==========================================================================
 bool CAngelScriptManager::ExecuteFunction(asIScriptFunction* pFunction, const char* szFunctionName)

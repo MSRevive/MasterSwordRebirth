@@ -3,6 +3,7 @@
 
 #include <cstddef>  // for size_t
 #include <vector>
+#include <string>
 
 // Forward declarations
 class asIScriptEngine;
@@ -77,6 +78,7 @@ public:
     
     // Global function execution
     bool CallGlobalFunction(const char* szFunctionName, const char* szModuleName = nullptr);
+    bool CallGlobalFunctionWithParams(const char* szFunctionName, const std::vector<std::string>& params, const char* szModuleName = nullptr);
     
     // Debugger access
     ASDebugger* GetDebugger() const { return m_pDebugger; }

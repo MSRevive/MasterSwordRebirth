@@ -662,6 +662,9 @@ CScriptArray::~CScriptArray()
 
 asUINT CScriptArray::GetSize() const
 {
+	if (!buffer)
+		return (asUINT)0;
+
 	return buffer->numElements;
 }
 

@@ -421,6 +421,12 @@ void CWorld ::Spawn(void)
 void CWorld ::Think(void)
 {
 	CScriptedEnt::Think();
+
+	//error occured skip think until next cycle
+	//I pray for smart pointers every second working with this
+	if (!pev || (uintptr_t)pev == 0xDDDDDDDD) 
+		return;
+
 	pev->nextthink = pev->ltime + 0.1;
 }
 void CWorld ::Activate(void)

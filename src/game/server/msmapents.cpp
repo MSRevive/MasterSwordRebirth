@@ -5,6 +5,7 @@
 #include "mscharacter.h"
 #include "filesystem_shared.h"
 #include "mslogger.h"
+#include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
 class CCycler : public CBaseMonster
 {
@@ -1788,15 +1789,22 @@ public:
 
 		if (!bDidVote)
 		{
-			if (pGMScript)
+			// Updated to use AngelScript instead of MSScript for map transitions
+			#ifndef CLIENT_DLL
+			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+			if (pASManager && pASManager->IsInitialized())
 			{
-				msstringlist Parameters;
-				Parameters.add(STRING(sDestName));
-				Parameters.add(STRING(sDestMap));
-				Parameters.add(STRING(sName));
-				Parameters.add(STRING(sDestTrans));
-				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
+				std::vector<std::string> params;
+				params.push_back(STRING(sDestName));    // Map title
+				params.push_back(STRING(sDestMap));     // Destination BSP
+				params.push_back(STRING(sName));        // Local spawn point
+				params.push_back(STRING(sDestTrans));   // Destination spawn point
+				
+				// Call AngelScript GameMaster function
+				// This will be handled by MS::GameTransitionTriggered in GameMasterMapTransitions.as
+				pASManager->CallGlobalFunctionWithParams("GameTransitionTriggered", params);
 			}
+			#endif
 			bDidVote = true;
 		}
 

@@ -25,6 +25,7 @@
 #include "saverestore.h"
 #include "trains.h" // trigger_camera has train functionality
 #include "gamerules.h"
+#include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
 #define SF_TRIGGER_PUSH_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
 #define SF_TRIGGER_HURT_TARGETONCE 1	   // Only fire hurt target once
@@ -1814,15 +1815,24 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	MESSAGE_END();
 	*/
 	//NOV2014_12 Thothie - wanted to axe this ent entirely, but just making MSC friendly instead.
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-	if (pGMScript)
+	// Updated to use AngelScript instead of MSScript for map transitions
+	#ifndef CLIENT_DLL
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
 	{
-		msstringlist Parameters;
-		Parameters.add(STRING(m_szMapName));
-		Parameters.add(STRING(m_szLandmarkName));
-		pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+		std::vector<std::string> params;
+		params.push_back(STRING(m_szMapName));
+		params.push_back(STRING(m_szLandmarkName));
+		
+		// Call AngelScript GameMaster function
+		// This will be handled by MS::ExecuteManualMapChange in GameMasterMapTransitions.as
+		pASManager->CallGlobalFunctionWithParams("ExecuteManualMapChange", params);
 	}
+	else
+	{
+		ALERT(at_console, "Unable to execute changelevel - AngelScript not initialized!\n");
+	}
+	#endif
 }
 
 FILE_GLOBAL char st_szNextMap[cchMapNameMost];
