@@ -2046,6 +2046,9 @@ Called every frame before physics are run
 */
 void PlayerPreThink(edict_t *pEntity)
 {
+	if (pEntity->pvPrivateData == 0x0)
+		return;
+
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
 	if (pPlayer)
@@ -2062,9 +2065,12 @@ Called every frame after physics are run
 
 void PlayerPostThink(edict_t *pEntity)
 {
+	if (pEntity->pvPrivateData == 0x0)
+		return;
+
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
-	if (pPlayer)
+	if (pPlayer && pPlayer->pev)
 		pPlayer->PostThink();
 }
 

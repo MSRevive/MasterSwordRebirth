@@ -100,7 +100,7 @@ bool IsPlayer()
 // Methods
 string DisplayName() const
 string GetName() const              // Alias for DisplayName
-string GETPLAYERAUTHID() const      // Returns Steam ID
+string GetSteamID() const           // Returns Steam ID
 int GetEntIndex() const             // Entity index
 bool IsConnected() const
 bool IsAlive() const
@@ -123,7 +123,58 @@ bool IsPlayer() const
 void PlaySound(const string &in)
 void SendInfoMsg(const string &in)
 void SendEventMsg(const string &in)
+
+// Map transition methods
+void SetTransitionFields(const string &in localSpawn, const string &in destMap, const string &in destSpawn)
+string GetOldTransition() const
+string GetNextMap() const
+string GetNextTransition() const
+int GetJoinType() const
+void SetJoinType(int joinType)
+
+// Spawn management methods
+bool MoveToSpawnSpot()
+void SetSpawnTransition(const string &in transName)
+string GetSpawnTransition() const
+
+// Comparison
 bool opEquals(const CBasePlayer@+ other) const
+```
+
+**SetTransitionFields** sets the player's C++ transition fields which control where they spawn after map changes:
+- `localSpawn`: Current spawn point name on the current map (sets `m_OldTransition` and `m_SpawnTransition`)
+- `destMap`: Destination map name (sets `m_NextMap`)
+- `destSpawn`: Spawn point name on the destination map (sets `m_NextTransition`)
+- Automatically calls `SaveChar()` to persist the changes
+
+**GetOldTransition**, **GetNextMap**, **GetNextTransition**: Retrieve the current transition state
+
+**GetJoinType** / **SetJoinType**: Get or set how the player joined the server
+- JoinType constants: `JN_NOTALLOWED` (0), `JN_TRAVEL` (1), `JN_STARTMAP` (2), `JN_VISITED` (3), `JN_ELITE` (4)
+- Changing JoinType affects spawn point selection logic
+- Useful for ensuring transitions take priority over start map status
+
+**MoveToSpawnSpot** moves the player to their designated spawn point:
+- Returns `true` if successful, `false` otherwise
+- Uses the player's current spawn transition to find the appropriate spawn point
+- Automatically sets player position and angles to match the spawn point
+
+**SetSpawnTransition** / **GetSpawnTransition**: Set or retrieve the player's current spawn transition name:
+- The spawn transition determines which `ms_player_spawn` entity the player will spawn at
+- Maximum length: 32 characters
+- Used by map transition system and respawn logic
+
+**Example**:
+```angelscript
+CBasePlayer@ player = PlayerBySteamID("STEAM_0:1:12345");
+if (player !is null) {
+    player.SetTransitionFields("start", "thornlands", "entrance");
+    
+    // Adjust JoinType to ensure transition spawn is used
+    if (player.GetJoinType() == 2) {  // JN_STARTMAP
+        player.SetJoinType(1);  // JN_TRAVEL
+    }
+}
 ```
 
 ---
@@ -191,6 +242,7 @@ void MS_ANGEL_ERROR(const string &in)   // Shared
 array<CBasePlayer@>@ GetAllPlayers()
 int GetPlayerCount()
 CBasePlayer@ PlayerByIndex(int index)
+CBasePlayer@ PlayerBySteamID(const string &in steamID)
 int GetCurrentPlayerID()
 
 // Player information
@@ -206,6 +258,28 @@ void SendPlayerMessage(const string &in playerName, const string &in title, cons
 
 // Menu system
 void OpenVoteMenu(CBasePlayer@ player, const string &in title, const array<string> &in options)
+
+// Spawn management
+bool MovePlayerToRandomSpawn(CBasePlayer@ player, float maxDistance)
+```
+
+**MovePlayerToRandomSpawn** moves a player to a random spawn point within a specified distance:
+- `player`: The player to move
+- `maxDistance`: Maximum distance in units to search for spawn points (e.g., 256.0)
+- Returns `true` if a spawn point was found and the player was moved
+- Returns `false` if no spawn points were found within the distance
+- Searches for `ms_player_spawn` entities near the player's current position
+- Useful for `/stuck` commands or respawn systems
+- Converted from legacy `torandomspawn` script command
+
+**Example**:
+```angelscript
+// Move player to a random nearby spawn (within 256 units)
+if (MovePlayerToRandomSpawn(pPlayer, 256.0f)) {
+    pPlayer.SendInfoMsg("Teleported to nearby spawn point");
+} else {
+    pPlayer.SendInfoMsg("No spawn points found nearby");
+}
 ```
 
 ### Server Management Functions
@@ -303,6 +377,32 @@ bool IsEntityDead(const EntityHandle &in)
 // Type casting
 CBaseEntity@ ToEntity(CBasePlayer@)
 CBasePlayer@ ToPlayer(CBaseEntity@)
+
+// Entity string conversion
+CBaseEntity@ StringToEntity(const string &in)
+CBasePlayer@ StringToPlayer(const string &in)
+```
+
+**StringToEntity** converts an entity string to a CBaseEntity pointer:
+- Entity strings are in the format `"PentP(index,address)"` (e.g., `"PentP(1,12345678)"`)
+- Returns `null` if the string is invalid or the entity no longer exists
+- Validates both the entity index and memory address for safety
+- Used when C++ passes entity references as strings to scripts
+
+**StringToPlayer** converts an entity string to a CBasePlayer pointer:
+- Uses `StringToEntity` internally and casts to player
+- Returns `null` if the entity is not a valid player
+- Convenient for converting player entity strings from C++ events
+
+**Example**:
+```angelscript
+// Event handler receiving entity string from C++
+void GamePlayerPutInWorld(const string &in entityString) {
+    CBasePlayer@ pPlayer = StringToPlayer(entityString);
+    if (pPlayer !is null) {
+        LogMessage("Player spawned: " + pPlayer.GetName());
+    }
+}
 ```
 
 ### Quest Data Functions
@@ -424,7 +524,67 @@ The module system searches for modules in configured paths, typically:
 ## Engine Event System
 **Scope**: Shared
 
-The engine event system allows scripts to respond to game events. Specific event registration functions depend on implementation.
+The engine event system allows scripts to respond to game events by implementing global functions with specific names. The C++ engine will call these functions at appropriate times.
+
+### Player Lifecycle Events
+**Scope**: Server
+
+```angelscript
+// Called when player spawns in world (after character selection)
+void GamePlayerPutInWorld()
+void GamePlayerPutInWorld(CBasePlayer@ pPlayer)
+void GamePlayerPutInWorld(const string &in playerIdentifier)
+
+// Called when player respawns after death
+void GameRespawn(CBasePlayer@ pPlayer)
+```
+
+**GamePlayerPutInWorld** is called when a player enters the world after character selection (not during respawn):
+- Called from C++ `player.cpp:2730` via `CallScriptEvent`
+- The entity string version receives `"PentP(index,address)"` format from `EntToString(this)`
+- The version with `CBasePlayer@` can be called directly with a player object  
+- The version with string identifier can look up players by Steam ID or index
+- Implement this function globally in your AngelScript module to handle player spawn events
+- See `PlayerEvents.as` for the reference implementation
+
+**GameRespawn** is called when a player respawns after death:
+- Implement this function globally to handle post-death respawn logic
+- Different from `GamePlayerPutInWorld` which is for initial world entry
+
+**Reference Implementation** (`PlayerEvents.as`):
+The official implementation handles:
+- **Christmas Mode**: Seasonal events on specific maps (edana, deralia, helena)
+- **Random Spawn**: Moves player to random nearby spawn point for anti-stuck
+- **Transition Data**: Restores spawn points from quest data (key: "d")
+- **Home Position**: Saves player's home coordinates to quest data
+- **First Join**: Initializes new players (sets `PLR_IN_WORLD` quest flag)
+- **Dark Level**: Restores dark level from quest data (key: "dl")
+- **Meta Perks**: Donator/dev halos and trollcano checks
+
+**Example**:
+```angelscript
+void GamePlayerPutInWorld(const string &in entityString) {
+    // Convert entity string to player
+    CBasePlayer@ pPlayer = StringToPlayer(entityString);
+    if (pPlayer is null) return;
+    
+    string steamID = pPlayer.GetSteamID();
+    
+    // Handle player spawn logic
+    LogMessage("Player " + pPlayer.GetName() + " entered the world");
+    
+    // Set transition data from quest data
+    string trans = GetPlayerQuestData(steamID, "d");
+    if (trans.length() > 0) {
+        pPlayer.SetTransitionFields(trans, GetMapName(), trans);
+    }
+    
+    // Set home position
+    Vector3 pos = pPlayer.GetOrigin();
+    string posStr = pos.x + "," + pos.y + "," + pos.z;
+    SetPlayerQuestData(steamID, "MY_HOME", posStr);
+}
+```
 
 ---
 

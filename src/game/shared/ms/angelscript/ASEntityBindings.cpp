@@ -267,6 +267,38 @@ namespace ASEntityBindings
 #endif
     }
     
+    CBasePlayer* AS_PlayerBySteamID(const std::string& steamID)
+    {
+#ifndef CLIENT_DLL
+        if (steamID.empty())
+        {
+            MS_ANGEL_ERROR("PlayerBySteamID: Empty Steam ID");
+            return nullptr;
+        }
+        
+        for (int i = 1; i <= gpGlobals->maxClients; i++)
+        {
+            CBasePlayer* pPlayer = AS_PlayerByIndex(i);
+            if (pPlayer)
+            {
+                std::string playerSteamID = pPlayer->AuthID().c_str();
+                if (playerSteamID == steamID)
+                {
+                    MS_ANGEL_DEBUG("PlayerBySteamID: Found player with Steam ID %s", steamID.c_str());
+                    return pPlayer;
+                }
+            }
+        }
+        
+        MS_ANGEL_DEBUG("PlayerBySteamID: No player found with Steam ID %s", steamID.c_str());
+        return nullptr;
+#else
+        // Client-side: Can't access other players
+        MS_ANGEL_DEBUG("PlayerBySteamID: Client-side, returning nullptr");
+        return nullptr;
+#endif
+    }
+    
     bool AS_IsConnected(CBasePlayer* pPlayer)
     {
         if (!pPlayer || !pPlayer->pev)
@@ -695,6 +727,50 @@ namespace ASEntityBindings
         return static_cast<CBasePlayer*>(pEntity);
     }
     
+    //==========================================================================
+    // Entity String Conversion Functions
+    //==========================================================================
+    
+    /**
+     * Convert entity string to CBaseEntity
+     * Entity strings are in format "PentP(index,address)"
+     */
+    CBaseEntity* StringToEntity(const std::string& entityString)
+    {
+        if (entityString.empty())
+        {
+            MS_ANGEL_DEBUG("StringToEntity: Empty entity string");
+            return nullptr;
+        }
+        
+        // Use the shared utility function from sharedutil.h/cpp
+        CBaseEntity* pEntity = StringToEnt(entityString.c_str());
+        
+        if (!pEntity)
+        {
+            MS_ANGEL_DEBUG("StringToEntity: Failed to convert '%s' to entity", entityString.c_str());
+            return nullptr;
+        }
+        
+        MS_ANGEL_DEBUG("StringToEntity: Successfully converted '%s' to entity", entityString.c_str());
+        return pEntity;
+    }
+    
+    /**
+     * Convert entity string to CBasePlayer
+     * Entity strings are in format "PentP(index,address)"
+     */
+    CBasePlayer* StringToPlayer(const std::string& entityString)
+    {
+        CBaseEntity* pEntity = StringToEntity(entityString);
+        if (!pEntity)
+        {
+            return nullptr;
+        }
+        
+        return EntityToPlayer_Cast(pEntity);
+    }
+    
     // Template casting function for AngelScript cast<T>() support
     template<class T>
     T* Template_Cast(void* pEntity)
@@ -846,9 +922,6 @@ namespace ASEntityBindings
             // Essential identification methods with automatic calling convention detection
             .method("string DisplayName() const", &CBasePlayer::DisplayName)
             .method("string GetName() const", &CBasePlayer::DisplayName)  // Alias for GameMaster script compatibility
-            .method("string GETPLAYERAUTHID() const", [](CBasePlayer* player) { 
-                return player ? player->AuthID().c_str() : std::string("STEAM_ID_INVALID"); 
-            })
             .method("int GetEntIndex() const", [](CBasePlayer* player) { 
                 return player ? player->entindex() : 0; 
             })
@@ -929,14 +1002,104 @@ namespace ASEntityBindings
                 if (player) player->SendEventMsg(msg.c_str());
             })
             
+            // Map transition methods
+            .method("void SetTransitionFields(const string &in, const string &in, const string &in)", 
+                [](CBasePlayer* player, const std::string& localSpawn, const std::string& destMap, const std::string& destSpawn) {
+                #ifdef VALVE_DLL
+                    if (!player) {
+                        MS_ANGEL_DEBUG("SetTransitionFields: NULL player pointer");
+                        return;
+                    }
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: BEFORE - OldTrans='%s', NextMap='%s', NextTrans='%s'",
+                                   player->m_OldTransition, player->m_NextMap, player->m_NextTransition);
+                    
+                    // Set transition fields - this is what msarea_transition does
+                    strncpy(player->m_OldTransition, localSpawn.c_str(), sizeof(player->m_OldTransition) - 1);
+                    player->m_OldTransition[sizeof(player->m_OldTransition) - 1] = '\0';
+                    
+                    strncpy(player->m_NextMap, destMap.c_str(), sizeof(player->m_NextMap) - 1);
+                    player->m_NextMap[sizeof(player->m_NextMap) - 1] = '\0';
+                    
+                    strncpy(player->m_NextTransition, destSpawn.c_str(), sizeof(player->m_NextTransition) - 1);
+                    player->m_NextTransition[sizeof(player->m_NextTransition) - 1] = '\0';
+                    
+                    // Set spawn transition to current spawn
+                    player->m_SpawnTransition = player->m_OldTransition;
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: AFTER - OldTrans='%s', NextMap='%s', NextTrans='%s', SpawnTrans='%s'",
+                                   player->m_OldTransition, player->m_NextMap, player->m_NextTransition, player->m_SpawnTransition);
+                    
+                    // Save the character with updated transition data
+                    player->SaveChar();
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: Character saved for player %s", player->AuthID().c_str());
+                #endif
+            })
+            .method("string GetOldTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_OldTransition;
+            })
+            .method("string GetNextMap() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_NextMap;
+            })
+            .method("string GetNextTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_NextTransition;
+            })
+            .method("int GetJoinType() const", [](CBasePlayer* player) -> int {
+                if (!player) return 0;
+                return player->m_JoinType;
+            })
+            .method("void SetJoinType(int)", [](CBasePlayer* player, int joinType) {
+                #ifdef VALVE_DLL
+                    if (!player) {
+                        MS_ANGEL_DEBUG("SetJoinType: NULL player pointer");
+                        return;
+                    }
+                    player->m_JoinType = joinType;
+                    MS_ANGEL_INFO("SetJoinType: Player %s JoinType set to %d", player->AuthID().c_str(), joinType);
+                #endif
+            })
+#ifdef VALVE_DLL
+            .method("bool MoveToSpawnSpot()", [](CBasePlayer* player) -> bool {
+                if (!player) {
+                    MS_ANGEL_DEBUG("MoveToSpawnSpot: NULL player pointer");
+                    return false;
+                }
+                bool result = player->MoveToSpawnSpot();
+                MS_ANGEL_INFO("MoveToSpawnSpot: Player %s moved to spawn: %s",
+                    player->AuthID().c_str(), result ? "true" : "false");
+                return result;
+               })
+            .method("void SetSpawnTransition(const string &in)", [](CBasePlayer* player, const std::string& transName) {
+                if (!player) {
+                    MS_ANGEL_DEBUG("SetSpawnTransition: NULL player pointer");
+                    return;
+                }
+                if (player->m_SpawnTransition != NULL) {
+                    strncpy((char*)player->m_SpawnTransition, transName.c_str(), 32);
+                    ((char*)player->m_SpawnTransition)[31] = '\0';
+                    MS_ANGEL_INFO("SetSpawnTransition: Player %s spawn transition set to '%s'",
+                        player->AuthID().c_str(), transName.c_str());
+                }
+            })
+            .method("string GetSpawnTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player || !player->m_SpawnTransition) return "";
+                return std::string(player->m_SpawnTransition);
+            })
+#endif
+       
             // Custom equality comparison using pointer comparison (most appropriate for commands)
             .method("bool opEquals(const CBasePlayer@+ other) const", [](CBasePlayer* player, CBasePlayer* other) {
                 return player == other;  // Simple pointer comparison
-            })
-            ;
+            });
         
         MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
+
+
 
     void RegisterEntityTypes(asIScriptEngine* pEngine)
     {
@@ -956,7 +1119,10 @@ namespace ASEntityBindings
         // Register casting functions with asbind20
         asbind20::global(pEngine)
             .function("CBaseEntity@ ToEntity(CBasePlayer@)", PlayerToEntity_Cast)
-            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", EntityToPlayer_Cast);
+            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", EntityToPlayer_Cast)
+            // Entity string conversion functions
+            .function("CBaseEntity@ StringToEntity(const string &in)", StringToEntity)
+            .function("CBasePlayer@ StringToPlayer(const string &in)", StringToPlayer);
         
         MS_ANGEL_INFO("[ASEntityBindings] Entity types registration complete");
     }
@@ -983,6 +1149,7 @@ namespace ASEntityBindings
             .function("array<CBasePlayer@>@ GetAllPlayers()", AS_GetAllPlayersWrapper)
             .function("int GetPlayerCount()", AS_GetPlayerCount)
             .function("CBasePlayer@ PlayerByIndex(int)", AS_PlayerByIndex)
+            .function("CBasePlayer@ PlayerBySteamID(const string &in)", AS_PlayerBySteamID)
             .function("bool IsConnected(CBasePlayer@)", AS_IsConnected)
             .function("string GetDisplayName(CBasePlayer@)", AS_GetDisplayName)
             .function("string GetSteamID(CBasePlayer@)", AS_GetSteamID)

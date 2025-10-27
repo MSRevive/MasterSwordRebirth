@@ -535,6 +535,9 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		strncpy(Data.OldTrans, pPlayer->m_OldTransition, 32);
 		strncpy(Data.NextMap, pPlayer->m_NextMap, 32);
 		strncpy(Data.NewTrans, pPlayer->m_NextTransition, 32);
+		
+		MS_INFO("SaveChar: Saving transitions - MapName='%s', OldTrans='%s', NextMap='%s', NewTrans='%s'",
+		        Data.MapName, Data.OldTrans, Data.NextMap, Data.NewTrans);
 
 		Data.IsElite = pPlayer->m_fIsElite;
 		Data.Gold = pPlayer->m_Gold;

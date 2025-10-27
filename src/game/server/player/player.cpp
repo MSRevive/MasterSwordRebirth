@@ -28,6 +28,7 @@
 #include "soundent.h"
 #include "monsters.h"
 #include "../engine/shake.h"
+#include "ms/angelscript/CAngelScriptManager.h"
 #include "decals.h"
 #include "gamerules/gamerules.h"
 #include "decals.h"
@@ -2175,7 +2176,7 @@ pt_end:
 	CallScriptEvent("game_think");
 
 	// Safety check: entity might have been deleted during script execution
-	if (!hSelf || hSelf->pev == nullptr)
+	if (!hSelf || hSelf->pev == nullptr || hSelf->m_CharInfo[1].m_CachedStatus == CDS_UNLOADED)
 		return;
 	
 	//Deactivate no-collide if not near any players.
@@ -2721,7 +2722,19 @@ void CBasePlayer::Spawn(void)
 	}
 	else
 	{
-		CallScriptEvent("game_player_putinworld"); //Thothie MAR2008a
+		// Call AngelScript event handler directly via ASManager
+		// Pass the player entity string as parameter
+		#ifndef CLIENT_DLL
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+
+
+			std::vector<std::string> params;
+			params.push_back(EntToStdString(this)); // Entity string format: "PentP(index,address)"
+			pASManager->CallGlobalFunctionWithParams("GamePlayerPutInWorld", params);
+		}
+		#endif
 
 		//See if music is playing for all players, then play for newly connected character
 		if (MSGlobals::AllMusic.length() > 0) //If playing music for all players
@@ -6289,20 +6302,27 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	strncpy(m_NextMap, cCurrentMap, 32);
 
 	//Determine whether a transition took place and set the spawn transition accordingly
+	MS_INFO("LoadCharacter: Data.MapName='%s', Data.NextMap='%s', cCurrentMap='%s'", Data.MapName, Data.NextMap, cCurrentMap);
+	MS_INFO("LoadCharacter: Data.OldTrans='%s', Data.NewTrans='%s'", Data.OldTrans, Data.NewTrans);
+	
 	if (FStrEq(Data.MapName, cCurrentMap))
 	{
 		m_MapStatus = OLD_MAP;
 		strncpy(m_OldTransition, Data.OldTrans, 32); //Copy transition names to savable memory
+		MS_INFO("LoadCharacter: OLD_MAP - Using OldTrans='%s' as spawn", m_OldTransition);
 	}
 	else if (FStrEq(Data.NextMap, cCurrentMap))
 	{
 		m_MapStatus = NEW_MAP;
 		strncpy(m_OldTransition, Data.NewTrans, 32); //The new transition becomes the old transition
+		MS_INFO("LoadCharacter: NEW_MAP - Using NewTrans='%s' as spawn", m_OldTransition);
 	}
 
 	m_SpawnTransition = m_OldTransition;
 	m_NextTransition[0] = 0;
 	m_NextMap[0] = 0;
+	
+	MS_INFO("LoadCharacter: Final m_SpawnTransition='%s'", m_SpawnTransition);
 
 	//Copy the data
 
@@ -6356,6 +6376,18 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	MESSAGE_END();
 
 	m_JoinType = MSChar_Interface::CanJoinThisMap(Data, m_Maps);
+	
+	// Call AngelScript to adjust JoinType based on transition data
+	// This ensures transitions take priority over start map status
+	#ifndef CLIENT_DLL
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
+	{
+		std::vector<std::string> params;
+		params.push_back(this->AuthID().c_str());
+		pASManager->CallGlobalFunctionWithParams("OnPlayerCharacterLoaded", params);
+	}
+	#endif
 
 	//Create our Human body -- Must be done here
 	if (Body)
