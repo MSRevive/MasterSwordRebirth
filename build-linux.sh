@@ -21,8 +21,8 @@ done
 echo "cmake --version"
 cmake --version
 
-echo "gcc-11 -v"
-gcc-11 -v
+echo "gcc -v"
+gcc -v
 
 ./createall.sh -p $path -t $type
 
