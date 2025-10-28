@@ -43,13 +43,6 @@
 #include "sharedutil.h"
 #include "ASEngineEventManager.h"
 
-// Forward declare EntityHandle struct (defined in ASCoreTypes.cpp)
-struct EntityHandle
-{
-    int value;
-    EntityHandle() : value(0) {}
-    EntityHandle(int v) : value(v) {}
-};
 
 // Helper function to get player by index - implemented differently on server vs client
 static CBasePlayer* GetPlayerByIndexHelper(int index)
@@ -458,12 +451,12 @@ namespace ASBuiltinFunctions
     }
     
     // Find entity by targetname
-    EntityHandle AS_FindEntityByName(const std::string& name)
+    CBaseEntity* AS_FindEntityByName(const std::string& name)
     {
         MS_ANGEL_DEBUG("FindEntityByName: Searching for '%s'", name.c_str());
         // TODO: Implement proper entity finding
-        // For now, return an invalid handle
-        return EntityHandle(0);
+        // For now, return nullptr
+        return nullptr;
     }
     
     // Get player by index (1-based)
@@ -551,11 +544,17 @@ namespace ASBuiltinFunctions
     }
 
     // Check if entity reference is valid
-    bool AS_IsValidEntity(EntityHandle handle)
+    bool AS_IsValidEntity(CBaseEntity* entity)
     {
-        MS_ANGEL_DEBUG("IsValidEntity: Checking handle %d", handle.value);
-        // TODO: Implement proper entity validation
-        return handle.value != 0;
+        MS_ANGEL_DEBUG("IsValidEntity: Checking entity %p", entity);
+        // Check if entity pointer is valid and not freed
+        if (!entity)
+            return false;
+#ifdef VALVE_DLL
+        return !FNullEnt(entity);
+#else
+        return true;  // Client-side: assume valid if not null
+#endif
     }
     
     // Create angle vector
@@ -741,9 +740,8 @@ namespace ASBuiltinFunctions
             for (int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free && (pPlayer->edict()->v.flags & FL_CLIENT)) {
-                    // Send using engine provider
-                    std::string fullMessage = title + ": " + message;
-                    ASEngineProvider::SendInfoMsg((void*)pPlayer, fullMessage);
+                    //ASEngineProvider::SendInfoMsg((void*)pPlayer, fullMessage);
+                    pPlayer->SendHelpMsg("game_transition", title.c_str(), message.c_str());
                 }
             }
             

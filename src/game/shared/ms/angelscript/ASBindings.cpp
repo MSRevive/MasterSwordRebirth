@@ -109,10 +109,6 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     {
         ASEntityBindings::RegisterAll(pEngine);
         MS_ANGEL_INFO("   OK Entity types registered successfully");
-        
-        // Now register EntityHandle methods that depend on entity types
-        ASCoreTypes::RegisterEntityHandleMethods(pEngine);
-        MS_ANGEL_INFO("   OK EntityHandle dependent methods registered successfully");
     }
     catch (...)
     {
@@ -435,14 +431,6 @@ bool ASBindings::ValidateRegistrations(asIScriptEngine* pEngine)
             warnings++;
     }
     MS_ANGEL_INFO("     OK Game functions: %d/%d registered", gameFuncCount, 5);
-    
-    // Check for EntityHandle type (used by game functions)
-    asITypeInfo* pEntityHandle = pEngine->GetTypeInfoByName("EntityHandle");
-    if (!pEntityHandle)
-    {
-        MS_ANGEL_INFO("     WARNING: EntityHandle type not registered (entity functions may not work)");
-        warnings++;
-    }
     
     // Summary
     MS_ANGEL_INFO("   Validation complete: ");

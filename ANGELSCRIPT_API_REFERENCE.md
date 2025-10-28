@@ -54,20 +54,26 @@ int b
 int a
 ```
 
-### EntityHandle
+---
+
+## Engine Constants
 **Scope**: Shared
 
+### Render Mode Constants
 ```angelscript
-// Constructor
-EntityHandle(int value = 0)
+const int kRenderNormal = 0          // Normal rendering
+const int kRenderTransColor = 1      // Transparent color
+const int kRenderTransTexture = 2    // Transparent texture
+const int kRenderGlow = 3            // Glow effect
+const int kRenderTransAlpha = 4      // Transparent alpha
+const int kRenderTransAdd = 5        // Additive transparency
+```
 
-// Properties
-int value
-
-// Methods
-bool IsValid() const
-CBaseEntity@ GetEntity() const
-void SetEntity(CBaseEntity@)
+### Damage Type Constants
+```angelscript
+const int DAMAGE_NO = 0   // Entity takes no damage
+const int DAMAGE_YES = 1  // Entity takes normal damage
+const int DAMAGE_AIM = 2  // Entity takes aim-based damage
 ```
 
 ---
@@ -90,6 +96,14 @@ Vector3 Center()
 float Volume()
 float Weight()
 bool IsPlayer()
+
+// Entity configuration methods
+void SetNetName(const string &in)
+string GetNetName()
+void SetRenderMode(int)
+void SetRenderAmount(int)
+void SetTakeDamage(int)
+void SetGodMode(bool)
 ```
 
 ### CBasePlayer
@@ -368,11 +382,11 @@ if (EngineMapExists("crossroads")) {
 
 ```angelscript
 // Entity creation and manipulation
-EntityHandle CreateEntity(const string &in scriptName)
-void SetEntityName(const EntityHandle &in, const string &in)
-void SetEntityTargetName(const EntityHandle &in, const string &in)
-void SetEntityHealth(const EntityHandle &in, float)
-bool IsEntityDead(const EntityHandle &in)
+CBaseEntity@ CreateEntity(const string &in scriptName)
+void SetEntityName(CBaseEntity@, const string &in)
+void SetEntityTargetName(CBaseEntity@, const string &in)
+void SetEntityHealth(CBaseEntity@, float)
+bool IsEntityDead(CBaseEntity@)
 
 // Type casting
 CBaseEntity@ ToEntity(CBasePlayer@)
@@ -381,6 +395,36 @@ CBasePlayer@ ToPlayer(CBaseEntity@)
 // Entity string conversion
 CBaseEntity@ StringToEntity(const string &in)
 CBasePlayer@ StringToPlayer(const string &in)
+
+// Entity spawning functions
+CBaseEntity@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CBaseEntity@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+```
+
+**SpawnNPC** creates an NPC entity at the specified position:
+- `scriptName`: Script name of the NPC to spawn (e.g., "game_master", "skeleton")
+- `position`: 3D coordinates where the NPC should spawn
+- `params`: Optional array of additional parameters (reserved for future use)
+- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Server-only function
+
+**SpawnItem** creates an item entity at the specified position:
+- `scriptName`: Script name of the item to spawn (e.g., "potion_health", "sword_short")
+- `position`: 3D coordinates where the item should spawn
+- `params`: Optional array of additional parameters (reserved for future use)
+- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Server-only function
+
+**Example**:
+```angelscript
+// Spawn a skeleton at coordinates (100, 200, 0)
+CBaseEntity@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
+if (pSkeleton !is null) {
+    LogMessage("Skeleton spawned at index " + pSkeleton.GetEntIndex());
+}
+
+// Spawn a health potion
+CBaseEntity@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
 ```
 
 **StringToEntity** converts an entity string to a CBaseEntity pointer:
@@ -537,6 +581,40 @@ void GamePlayerPutInWorld(const string &in playerIdentifier)
 
 // Called when player respawns after death
 void GameRespawn(CBasePlayer@ pPlayer)
+
+// Called when the server activates (map load complete)
+void ServerActivate()
+```
+
+**ServerActivate** is called after all map entities have been spawned and activated:
+- Called once per map load, after entity activation completes
+- Ideal for initializing game systems, spawning dynamic entities
+- GameMaster scripts should implement this to spawn the game_master NPC
+- Called from C++ `client.cpp:ServerActivate()` via `CallGlobalFunctionWithParams`
+- Replaces the legacy C++ game_master spawning code
+
+**Example - GameMaster Implementation**:
+```angelscript
+void ServerActivate() {
+    LogMessage("Server activated, spawning game_master...");
+    
+    // Spawn game_master NPC at far coordinates
+    CBaseEntity@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000));
+    
+    if (pGameMaster !is null) {
+        // Configure game_master properties
+        pGameMaster.SetNetName("-game_master");  // Required for C++ lookup
+        pGameMaster.SetHealth(1.0f);
+        pGameMaster.SetRenderMode(kRenderTransTexture);
+        pGameMaster.SetRenderAmount(0);  // Invisible
+        pGameMaster.SetGodMode(true);
+        pGameMaster.SetTakeDamage(DAMAGE_NO);
+        
+        LogMessage("Game master spawned and configured successfully");
+    } else {
+        LogMessage("ERROR: Failed to spawn game_master");
+    }
+}
 ```
 
 **GamePlayerPutInWorld** is called when a player enters the world after character selection (not during respawn):

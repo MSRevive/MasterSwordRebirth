@@ -39,6 +39,8 @@ typedef float vec_t;
     #include "hl/cbase.h"
     #include "player/player.h"
     #include "svglobals.h"  // For g_pGameMasterEntity
+    #include "monsters/msmonster.h"
+    #include "weapons/genericitem.h"
 #endif
 
 #ifdef VALVE_DLL
@@ -96,35 +98,35 @@ namespace ASEntityBindings
     // Helper functions for CBaseEntity methods that need extra logic
     Vector GetEntityOrigin(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return Vector(0, 0, 0);
         return pEntity->pev->origin;
     }
     
     std::string GetEntityClassName(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return "null_entity";
         return STRING(pEntity->pev->classname);
     }
     
     void SetEntityOrigin(CBaseEntity* pEntity, const Vector& origin)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return;
         UTIL_SetOrigin(pEntity->pev, origin);
     }
     
     float GetEntityHealth(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return 0.0f;
         return pEntity->pev->health;
     }
     
     void SetEntityHealth(CBaseEntity* pEntity, float health)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return;
         pEntity->pev->health = health;
     }
@@ -132,35 +134,35 @@ namespace ASEntityBindings
     // Helper functions for CBasePlayer methods
     std::string GetPlayerDisplayName(CBasePlayer* pPlayer)
     {
-        if (!pPlayer || !pPlayer->pev)
+        if (!pPlayer || FNullEnt(pPlayer))
             return "Unknown Player";
         return STRING(pPlayer->pev->netname);
     }
     
     std::string GetPlayerAuthID(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return "STEAM_ID_INVALID";
         return pPlayer->AuthID().c_str();
     }
     
     std::string GetPlayerTitle(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return "Unknown";
         return pPlayer->GetTitle();
     }
     
     float GetPlayerMaxHP(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return 0.0f;
         return pPlayer->MaxHP();
     }
     
     float GetPlayerMaxMP(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return 0.0f;
         return pPlayer->MaxMP();
     }
@@ -189,7 +191,7 @@ namespace ASEntityBindings
         // Create a new array
         CScriptArray* array = CScriptArray::Create(arrayType);
         
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         // Server-side: Populate with actual connected players using real engine functions
         
         for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -229,7 +231,7 @@ namespace ASEntityBindings
     
     CBasePlayer* AS_PlayerByIndex(int index)
     {
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         
         if (index < 1 || index > gpGlobals->maxClients)
         {
@@ -269,7 +271,7 @@ namespace ASEntityBindings
     
     CBasePlayer* AS_PlayerBySteamID(const std::string& steamID)
     {
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         if (steamID.empty())
         {
             MS_ANGEL_ERROR("PlayerBySteamID: Empty Steam ID");
@@ -437,26 +439,78 @@ namespace ASEntityBindings
         return result;
     }
     
-    // Create entity by script name (returns EntityHandle)
-    EntityHandle AS_CreateEntity(const std::string& scriptName)
+    // SpawnNPC - Creates an NPC at a specific position (WITHOUT spawning the script)
+    // Returns CBaseEntity@ pointer to the created monster
+    // Note: Caller must set properties and then call SpawnEntity() to run the spawn script
+    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params)
     {
+#ifdef VALVE_DLL
         if (scriptName.empty())
         {
-            MS_ANGEL_ERROR("CreateEntity: Empty script name");
-            return EntityHandle(0);
+            MS_ANGEL_ERROR("SpawnNPC: Empty script name");
+            return nullptr;
         }
         
-        void* entity = ASEngineProvider::CreateEntity(scriptName);
-        if (entity)
+        MS_ANGEL_INFO("SpawnNPC: Creating NPC '%s' at (%.1f, %.1f, %.1f)", 
+                      scriptName.c_str(), position.x, position.y, position.z);
+        
+        // Create the monster entity using engine function
+        CMSMonster* pMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
+        if (!pMonster || FNullEnt(pMonster))
         {
-            MS_ANGEL_INFO("CreateEntity: Successfully created '%s'", scriptName.c_str());
-            return EntityHandle(reinterpret_cast<int>(entity));
+            MS_ANGEL_ERROR("SpawnNPC: Failed to create ms_npc entity");
+            return nullptr;
         }
-        else
+        
+        // Set origin before spawning
+        pMonster->pev->origin = position;
+        
+        // Spawn the monster with the script
+        pMonster->Spawn(scriptName.c_str());
+        
+        MS_ANGEL_INFO("SpawnNPC: Successfully spawned '%s' at index %d", 
+                      scriptName.c_str(), pMonster->entindex());
+        
+        return pMonster;
+#else
+        MS_ANGEL_ERROR("SpawnNPC: Client cannot spawn NPCs");
+        return nullptr;
+#endif
+    }
+    
+    // SpawnItem - Creates an item at a specific position
+    // Returns CBaseEntity@ pointer to the created item
+    CBaseEntity* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
+    {
+#ifdef VALVE_DLL
+        if (scriptName.empty())
         {
-            MS_ANGEL_ERROR("CreateEntity: Failed to create entity '%s'", scriptName.c_str());
-            return EntityHandle(0);
+            MS_ANGEL_ERROR("SpawnItem: Empty script name");
+            return nullptr;
         }
+        
+        MS_ANGEL_INFO("SpawnItem: Creating item '%s' at (%.1f, %.1f, %.1f)", 
+                      scriptName.c_str(), position.x, position.y, position.z);
+        
+        // Create the item using the item manager
+        CGenericItem* pItem = NewGenericItem(scriptName.c_str());
+        if (!pItem)
+        {
+            MS_ANGEL_ERROR("SpawnItem: Failed to create item '%s'", scriptName.c_str());
+            return nullptr;
+        }
+        
+        // Set origin
+        pItem->pev->origin = position;
+        
+        MS_ANGEL_INFO("SpawnItem: Successfully spawned '%s' at index %d", 
+                      scriptName.c_str(), pItem->entindex());
+        
+        return pItem;
+#else
+        MS_ANGEL_ERROR("SpawnItem: Client cannot spawn items");
+        return nullptr;
+#endif
     }
     
     // Vote menu opening function - opens a menu with custom options using the game master entity
@@ -616,58 +670,54 @@ namespace ASEntityBindings
 #endif
     }
     
-    // Entity property functions using EntityHandle
-    void AS_SetEntityName(const EntityHandle& handle, const std::string& name)
+    // Entity property functions using CBaseEntity@
+    void AS_SetEntityName(CBaseEntity* entity, const std::string& name)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityName(entity, name);
+        ASEngineProvider::SetEntityName((void*)entity, name);
         MS_ANGEL_DEBUG("SetEntityName: Set name to '%s'", name.c_str());
     }
     
-    void AS_SetEntityTargetName(const EntityHandle& handle, const std::string& targetName)
+    void AS_SetEntityTargetName(CBaseEntity* entity, const std::string& targetName)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityTargetName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityTargetName(entity, targetName);
+        ASEngineProvider::SetEntityTargetName((void*)entity, targetName);
         MS_ANGEL_DEBUG("SetEntityTargetName: Set targetname to '%s'", targetName.c_str());
     }
     
-    void AS_SetEntityHealth(const EntityHandle& handle, float health)
+    void AS_SetEntityHealth(CBaseEntity* entity, float health)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityHealth: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityHealth(entity, health);
+        ASEngineProvider::SetEntityHealth((void*)entity, health);
         MS_ANGEL_DEBUG("SetEntityHealth: Set health to %f", health);
     }
     
     // Check if entity is dead (more comprehensive than IsAlive)
-    bool AS_IsEntityDead(const EntityHandle& handle)
+    bool AS_IsEntityDead(CBaseEntity* entity)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_DEBUG("IsEntityDead: NULL entity pointer - considered dead");
             return true;
         }
         
-        float health = ASEngineProvider::GetEntityHealth(entity);
-        int deadFlag = ASEngineProvider::GetEntityDeadFlag(entity);
+        float health = ASEngineProvider::GetEntityHealth((void*)entity);
+        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)entity);
         
         // Check if entity is dead by health or deadflag (DEAD_NO = 0)
         bool isDead = (deadFlag != 0) || (health <= 0);
@@ -902,7 +952,62 @@ namespace ASEntityBindings
             .method("Vector3 Center()", &CBaseEntity::Center)
             .method("float Volume()", &CBaseEntity::Volume)
             .method("float Weight()", &CBaseEntity::Weight)
-            .method("bool IsPlayer()", &CBaseEntity::IsPlayer);
+            .method("bool IsPlayer()", &CBaseEntity::IsPlayer)
+            // Additional entity configuration methods
+            .method("void SetNetName(const string &in)", [](CBaseEntity* entity, const std::string& netname) {
+#ifdef VALVE_DLL
+                if (FNullEnt(entity))
+                    return;
+
+                if (entity && entity->IsMSMonster()) {
+                    CMSMonster* pMonster = static_cast<CMSMonster*>(entity);
+                    pMonster->m_NetName = netname.c_str();
+                    pMonster->pev->netname = MAKE_STRING(pMonster->m_NetName.c_str());
+                }
+#endif
+            })
+            .method("string GetNetName()", [](CBaseEntity* entity) -> std::string {
+#ifdef VALVE_DLL
+                if (FNullEnt(entity))
+                    return "";
+
+                if (entity && entity->pev->netname) {
+                    return STRING(entity->pev->netname);
+                }
+#endif
+                return "";
+            })
+            .method("void SetRenderMode(int)", [](CBaseEntity* entity, int renderMode) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->rendermode = renderMode;
+                }
+#endif
+            })
+            .method("void SetRenderAmount(int)", [](CBaseEntity* entity, int renderAmount) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->renderamt = renderAmount;
+                }
+#endif
+            })
+            .method("void SetTakeDamage(int)", [](CBaseEntity* entity, int takeDamage) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->takedamage = takeDamage;
+                }
+#endif
+            })
+            .method("void SetGodMode(bool)", [](CBaseEntity* entity, bool godMode) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    if (godMode)
+                        entity->pev->flags |= FL_GODMODE;
+                    else
+                        entity->pev->flags &= ~FL_GODMODE;
+                }
+#endif
+            });
         
         MS_ANGEL_INFO("CBaseEntity registration complete");
     }
@@ -1124,7 +1229,30 @@ namespace ASEntityBindings
             .function("CBaseEntity@ StringToEntity(const string &in)", StringToEntity)
             .function("CBasePlayer@ StringToPlayer(const string &in)", StringToPlayer);
         
-        MS_ANGEL_INFO("[ASEntityBindings] Entity types registration complete");
+        // Register engine constants for entity configuration
+        // Using static variables for AngelScript global properties
+        static const int const_kRenderNormal = 0;
+        static const int const_kRenderTransColor = 1;
+        static const int const_kRenderTransTexture = 2;
+        static const int const_kRenderGlow = 3;
+        static const int const_kRenderTransAlpha = 4;
+        static const int const_kRenderTransAdd = 5;
+        static const int const_DAMAGE_NO = 0;
+        static const int const_DAMAGE_YES = 1;
+        static const int const_DAMAGE_AIM = 2;
+        
+        pEngine->RegisterGlobalProperty("const int kRenderNormal", (void*)&const_kRenderNormal);
+        pEngine->RegisterGlobalProperty("const int kRenderTransColor", (void*)&const_kRenderTransColor);
+        pEngine->RegisterGlobalProperty("const int kRenderTransTexture", (void*)&const_kRenderTransTexture);
+        pEngine->RegisterGlobalProperty("const int kRenderGlow", (void*)&const_kRenderGlow);
+        pEngine->RegisterGlobalProperty("const int kRenderTransAlpha", (void*)&const_kRenderTransAlpha);
+        pEngine->RegisterGlobalProperty("const int kRenderTransAdd", (void*)&const_kRenderTransAdd);
+        
+        pEngine->RegisterGlobalProperty("const int DAMAGE_NO", (void*)&const_DAMAGE_NO);
+        pEngine->RegisterGlobalProperty("const int DAMAGE_YES", (void*)&const_DAMAGE_YES);
+        pEngine->RegisterGlobalProperty("const int DAMAGE_AIM", (void*)&const_DAMAGE_AIM);
+        
+        MS_ANGEL_INFO("[ASEntityBindings] Entity types and constants registration complete");
     }
     
     void RegisterGlobalFunctions(asIScriptEngine* pEngine)
@@ -1168,7 +1296,16 @@ namespace ASEntityBindings
             .function("void MS_ANGEL_DEBUG(const string &in)", [](const std::string& message) { AS_LogAngelDebug(message); })
             .function("void MS_ANGEL_ERROR(const string &in)", [](const std::string& message) { AS_LogAngelError(message); })
             // Vote menu opening function
-            .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu);
+            .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu)
+            // Spawn functions
+            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
+                    return AS_SpawnNPC(scriptName, position, params);
+                })
+            .function("CBaseEntity@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
+                    return AS_SpawnItem(scriptName, position, params);
+                });
         
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
     }
@@ -1217,7 +1354,7 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Starting entity bindings registration...");
         
-        // Note: Core types (Vector3, EntityHandle, etc.) are registered by ASBindings.cpp
+        // Note: Core types (Vector3, Color, etc.) are registered by ASBindings.cpp
         // We only register entity-specific bindings here
         
         // Register the new template-based engine bindings

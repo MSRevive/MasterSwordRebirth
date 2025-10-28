@@ -2168,16 +2168,6 @@ pt_end:
 
 	if (Body)
 		Body->Think(this);
-
-	// Create a safe handle to ourselves before calling script
-	// If the script deletes this entity, the handle will become invalid
-	CBasePlayer* hSelf = this;
-	
-	CallScriptEvent("game_think");
-
-	// Safety check: entity might have been deleted during script execution
-	if (!hSelf || hSelf->pev == nullptr || hSelf->m_CharInfo[1].m_CachedStatus == CDS_UNLOADED)
-		return;
 	
 	//Deactivate no-collide if not near any players.
 	//do not check for dead or spectating/noclipping players
@@ -2244,6 +2234,8 @@ pt_end:
 			pev->solid = SOLID_SLIDEBOX;
 		}
 	}
+
+	CallScriptEvent("game_think");
 }
 
 // checks if the spot is clear of players

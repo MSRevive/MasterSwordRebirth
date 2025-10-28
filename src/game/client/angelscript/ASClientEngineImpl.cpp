@@ -136,6 +136,8 @@ void ASClientEngine::SendInfoMsgImpl(void* player, const std::string& message)
 {
     // Display message in client HUD
     gHUD.m_TextMessage.BufferedLocaliseTextString(message.c_str());
+
+    
 }
 
 void ASClientEngine::EmitSoundImpl(void* entity, int channel, const std::string& sound, float volume, float attn, int flags, int pitch)

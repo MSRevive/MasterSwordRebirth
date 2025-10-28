@@ -1963,56 +1963,31 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	
 	if (!pGameMasterEnt)
 	{
-		MS_INFO("Game master not found, creating new one...");
-		MS_INFO("Spawning game master");
-		//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
-		CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
-		if (NewMonster)
+		MS_INFO("Game master not found, firing AngelScript ServerActivate event to create it...");
+		
+		// Fire AngelScript ServerActivate event to allow scripts to initialize and spawn game_master
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
 		{
-			NewMonster->pev->origin = Vector(20000, -10000, -20000);
+			std::vector<std::string> params;
+			pASManager->CallGlobalFunctionWithParams("ServerActivate", params);
+			MS_INFO("ServerActivate event fired successfully");
 			
-			// Set game master properties BEFORE Spawn to prevent script from overriding
-			NewMonster->pev->health = 1;
-			NewMonster->pev->max_health = 1;
-			NewMonster->pev->rendermode = kRenderTransTexture;
-			NewMonster->pev->renderamt = 0; // invisible
-			NewMonster->pev->flags |= FL_GODMODE;
-			NewMonster->pev->takedamage = DAMAGE_NO;
-			
-			// Set netname BEFORE Spawn (required for entity lookups)
-			NewMonster->m_NetName = "-game_master";
-			NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
-			
-			MS_INFO("Game master entity pre-configured with netname: %s at index %d", 
-			        NewMonster->m_NetName.c_str(), NewMonster->entindex());
-			
-			// Spawn with the game_master script (currently disabled, using AngelScript instead)
-			NewMonster->Spawn("game_master");
-			
-			// Verify netname is still set after Spawn
-			if (NewMonster->pev->netname && STRING(NewMonster->pev->netname)[0])
+			// After ServerActivate, try to find the game_master again
+			pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+			if (pGameMasterEnt)
 			{
-				MS_INFO("Game master netname verified after Spawn: '%s'", STRING(NewMonster->pev->netname));
+				MS_INFO("Game master created by AngelScript at index %d", pGameMasterEnt->entindex());
 			}
 			else
 			{
-				MS_ERROR("Game master netname was cleared by Spawn! Restoring...");
-				NewMonster->m_NetName = "-game_master";
-				NewMonster->pev->netname = MAKE_STRING(NewMonster->m_NetName.c_str());
+				MS_ERROR("AngelScript ServerActivate did not create game_master entity!");
 			}
-
-		msstringlist params;
-		NewMonster->CallScriptEvent("game_dynamically_created", &params);
-		
-		// Update the pointer so we can set the global handle below
-		pGameMasterEnt = NewMonster;
-		
-		MS_INFO("Game master entity fully initialized");
-	}
-	else
-	{
-		MS_ERROR("Failed to create game master entity!");
-	}
+		}
+		else
+		{
+			MS_ERROR("AngelScript manager not available for ServerActivate event - game_master not created!");
+		}
 	}
 	else
 	{
@@ -2065,12 +2040,9 @@ Called every frame after physics are run
 
 void PlayerPostThink(edict_t *pEntity)
 {
-	if (pEntity->pvPrivateData == 0x0)
-		return;
-
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
 
-	if (pPlayer && pPlayer->pev)
+	if (pPlayer && !FNullEnt(pPlayer))
 		pPlayer->PostThink();
 }
 
