@@ -1190,6 +1190,8 @@ int asCCompiler::CallDefaultConstructor(const asCDataType &type, int offset, boo
 				}
 				ctx.bc.Instr(asBC_PopPtr);
 				ReleaseTemporaryVariable(ctx.type.stackOffset, &ctx.bc);
+
+				ProcessDeferredParams(&ctx);
 			}
 
 			bc->AddCode(&ctx.bc);
@@ -1256,13 +1258,12 @@ int asCCompiler::CallDefaultConstructor(const asCDataType &type, int offset, boo
 					if( func )
 					{
 						// Call the constructor as a normal function
-						bc->InstrSHORT(asBC_PSF, (short)offset);
+						ctx.bc.InstrSHORT(asBC_PSF, (short)offset);
 						if( derefDest )
-							bc->Instr(asBC_RDSPtr);
+							ctx.bc.Instr(asBC_RDSPtr);
 
-						asCExprContext ctxCall(engine);
-						PerformFunctionCall(func, &ctxCall, false, 0, CastToObjectType(type.GetTypeInfo()));
-						bc->AddCode(&ctxCall.bc);
+						PerformFunctionCall(func, &ctx, false, &args, CastToObjectType(type.GetTypeInfo()));
+						bc->AddCode(&ctx.bc);
 					}
 
 					// TODO: value on stack: This probably needs to be done in PerformFunctionCall
@@ -1277,19 +1278,21 @@ int asCCompiler::CallDefaultConstructor(const asCDataType &type, int offset, boo
 					if( func )
 					{
 						// Call the constructor as a normal function
-						bc->InstrSHORT(asBC_PSF, 0);
-						bc->Instr(asBC_RDSPtr);
-						bc->InstrSHORT_DW(asBC_ADDSi, (short)offset, engine->GetTypeIdFromDataType(asCDataType::CreateType(outFunc->objectType, false)));
+						ctx.bc.InstrSHORT(asBC_PSF, 0);
+						ctx.bc.Instr(asBC_RDSPtr);
+						ctx.bc.InstrSHORT_DW(asBC_ADDSi, (short)offset, engine->GetTypeIdFromDataType(asCDataType::CreateType(outFunc->objectType, false)));
 
-						asCExprContext ctxCall(engine);
-						PerformFunctionCall(func, &ctxCall, false, 0, CastToObjectType(type.GetTypeInfo()));
-						bc->AddCode(&ctxCall.bc);
+						PerformFunctionCall(func, &ctx, false, &args, CastToObjectType(type.GetTypeInfo()));
+						bc->AddCode(&ctx.bc);
 					}
 				}
 				else
 				{
 					asASSERT( false );
 				}
+
+				ProcessDeferredParams(&ctx);
+				bc->AddCode(&ctx.bc);
 			}
 			else
 			{
@@ -1449,6 +1452,13 @@ void asCCompiler::CompileStatementBlock(asCScriptNode *block, bool ownVariableSc
 		{
 			asCScriptNode* n = node->firstChild;
 			asCString name(&script->code[n->tokenPos], n->tokenLength);
+
+			while( n->next && n->next->nodeType == snIdentifier )
+			{
+				n = n->next;
+				name += "::";
+				name += asCString(&script->code[n->tokenPos], n->tokenLength);
+			}
 
 			auto visibleNamespace = engine->FindNameSpace(name.AddressOf());
 
@@ -2282,7 +2292,7 @@ int asCCompiler::PrepareArgument(asCDataType *paramType, asCExprContext *ctx, as
 				sVariable* var = ctx->type.isVariable ? variables->GetVariableByOffset(ctx->type.stackOffset) : 0;
 				if( !(!isFunction && isMakingCopy && ctx->type.dataType.IsObjectHandle() && ctx->type.isVariable) || 
 					(var && var->type.IsReference() && var->type.IsObjectHandle()) )
-					PrepareTemporaryVariable(node, ctx, true);
+					PrepareTemporaryVariable(node, ctx, true, true);
 			}
 		}
 	}
@@ -2551,7 +2561,9 @@ int asCCompiler::CompileArgumentList(asCScriptNode *node, asCArray<asCExprContex
 			{
 				if( namedArgs[a].name == namedArg.name )
 				{
-					Error(TXT_DUPLICATE_NAMED_ARG, asgNode);
+					asCString msg;
+					msg.Format(TXT_DUPLICATE_NAMED_ARGUMENT_s, namedArg.name.AddressOf());
+					Error(msg, asgNode);
 					anyErrors = true;
 					break;
 				}
@@ -2717,6 +2729,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 	asCArray<int> origFuncs = funcs; // Keep the original list for error message
 	asUINT cost = 0;
 	asUINT n;
+	asCArray<asSFailedMatch> failedMatches;
 
 	if( funcs.GetLength() > 0 )
 	{
@@ -2737,7 +2750,10 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 				// TODO: variadic: Handle default args
 
 				if (totalArgs <= argsWithoutLast)
+				{
+					failedMatches.PushLast(asSFailedMatch(desc->id, asEFM_NOT_ENOUGH_ARGS));
 					noMatch = true;
+				}
 			}
 			else if( desc->parameterTypes.GetLength() != totalArgs )
 			{
@@ -2756,6 +2772,9 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 
 					if( totalArgs >= desc->parameterTypes.GetLength() - defaultArgs )
 						noMatch = false;
+
+					if (noMatch)
+						failedMatches.PushLast(asSFailedMatch(desc->id, totalArgs > desc->parameterTypes.GetLength() ? asEFM_TOO_MANY_ARGS : asEFM_NOT_ENOUGH_ARGS));
 				}
 			}
 
@@ -2803,6 +2822,8 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 				// Was the function a match?
 				if( c == tempFuncs.GetLength() )
 				{
+					failedMatches.PushLast(asSFailedMatch(matchingFuncs[f].funcId, asEFM_POSITIONAL_MISMATCH, n));
+
 					// No, remove it from the list
 					if( f == matchingFuncs.GetLength()-1 )
 						matchingFuncs.PopLast();
@@ -2848,6 +2869,22 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 						{
 							// No argument was found for this, and there is no
 							// default, so it doesn't work.
+
+							// namedArgs isn't in any order, so we need to
+							// do a second scan to find the failed matches.
+							for (n = 0; n < namedArgs->GetLength(); ++n)
+							{
+								asSNamedArgument & namedArg = (*namedArgs)[n];
+								asUINT a = 0;
+								
+								for (; a < desc->parameterTypes.GetLength(); ++a)
+									if (desc->parameterNames[a] == namedArg.name)
+										break;
+								
+								if (a == desc->parameterTypes.GetLength())
+									failedMatches.PushLast(asSFailedMatch(desc->id, asEFM_NAMED_MISSING, namedArg.name.AddressOf()));
+							}
+
 							matchedAll = false;
 							break;
 						}
@@ -2857,6 +2894,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 						if( match != asUINT(-1) )
 						{
 							// Can't name an argument that was already passed
+							failedMatches.PushLast(asSFailedMatch(desc->id, asEFM_NAMED_DUPLICATE, j));
 							matchedAll = false;
 							break;
 						}
@@ -2872,6 +2910,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 
 						if( named.match == asUINT(-1) )
 						{
+							failedMatches.PushLast(asSFailedMatch(desc->id, asEFM_NAMED_MISSING, named.name.AddressOf()));
 							matchedAll = false;
 							break;
 						}
@@ -2880,6 +2919,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 						cost = MatchArgument(desc, named.ctx, named.match, allowObjectConstruct);
 						if( cost == asUINT(-1) )
 						{
+							failedMatches.PushLast(asSFailedMatch(desc->id, asEFM_NAMED_MISMATCH, named.name.AddressOf()));
 							matchedAll = false;
 							break;
 						}
@@ -2995,7 +3035,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 					asASSERT( node );
 					if( node ) script->ConvertPosToRowCol(node->tokenPos, &r, &c);
 					builder->WriteInfo(script->name.AddressOf(), TXT_CANDIDATES_ARE, r, c, false);
-					PrintMatchingFuncs(origFuncs, node, objectType);
+					PrintMatchingFuncs(origFuncs, node, objectType, &failedMatches);
 				}
 			}
 		}
@@ -3006,7 +3046,7 @@ asUINT asCCompiler::MatchFunctions(asCArray<int> &funcs, asCArray<asCExprContext
 			str.Format(TXT_MULTIPLE_MATCHING_SIGNATURES_TO_s, str.AddressOf());
 			Error(str, node);
 
-			PrintMatchingFuncs(funcs, node, objectType);
+			PrintMatchingFuncs(funcs, node, objectType, &failedMatches);
 		}
 	}
 
@@ -3337,6 +3377,7 @@ bool asCCompiler::CompileInitialization(asCScriptNode *node, asCByteCode *bc, co
 								ctx.bc.ObjInfo(offset, asOBJ_INIT);
 							}
 						}
+
 						ProcessDeferredParams(&ctx);
 						bc->AddCode(&ctx.bc);
 					}
@@ -4574,11 +4615,13 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *hasReturn, 
 	{
 		// We can join numbers that are less than 5 numbers
 		// apart since the output code will still be smaller
-		if( caseValues[n] > caseValues[n-1] + 5 )
+		// Do this comparison using int64 so we don't get errors with large 32bit numbers
+		if( asINT64(caseValues[n]) > asINT64(caseValues[n-1]) + 5 )
 			ranges.PushLast(n);
 	}
 
 	// If the value is larger than the largest case value, jump to default
+	// TODO: optimize: If the largest value is already the max value of int32, i.e. 2147483647, then there is no need to do this check
 	int tmpOffset = AllocateVariable(asCDataType::CreatePrimitive(ttInt, false), true);
 	expr.bc.InstrSHORT_DW(asBC_SetV4, (short)tmpOffset, caseValues[caseValues.GetLength()-1]);
 	expr.bc.InstrW_W(asBC_CMPi, offset, tmpOffset);
@@ -4594,8 +4637,8 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *hasReturn, 
 	{
 		// Find the largest value in this range
 		int maxRange = caseValues[ranges[range]];
-		int index = ranges[range];
-		for( ; (index < (int)caseValues.GetLength()) && (caseValues[index] <= maxRange + 5); index++ )
+		int index = ranges[range]+1;
+		for( ; (index < (int)caseValues.GetLength()) && (asINT64(caseValues[index]) <= asINT64(maxRange) + 5); index++ )
 			maxRange = caseValues[index];
 
 		// If there are only 2 numbers then it is better to compare them directly
@@ -4629,12 +4672,13 @@ void asCCompiler::CompileSwitchStatement(asCScriptNode *snode, bool *hasReturn, 
 
 			// Add the list of jumps to the correct labels (any holes, jump to default)
 			index = ranges[range];
-			for( int i = caseValues[index]; i <= maxRange; i++ )
+			for( int i = caseValues[index]; ; i++ )
 			{
 				if( caseValues[index] == i )
 					expr.bc.InstrINT(asBC_JMP, caseLabels[index++]);
 				else
 					expr.bc.InstrINT(asBC_JMP, defaultLabel);
+				if (i == maxRange) break;
 			}
 
 			expr.bc.Label((short)nextRangeLabel);
@@ -5373,9 +5417,8 @@ void asCCompiler::CompileForEachStatement(asCScriptNode* node, asCByteCode* bc)
 					int retTid = engine->scriptFunctions[opForValueIdN]->GetReturnTypeId(&retFlags);
 
 					bool isConst = itemDataTypes[i].IsReadOnly() || (retFlags & asTM_CONST);
-					bool isHandle = itemDataTypes[i].IsObjectHandle() ;
 					asCDataType dt = asCDataType::CreateById(engine, retTid, isConst);
-					dt.MakeHandle(isHandle);
+					dt.MakeHandle(true); // Always use handle for auto if possible
 					itemDataTypes[i] = dt;
 				}
 			}
@@ -5459,7 +5502,6 @@ void asCCompiler::CompileForEachStatement(asCScriptNode* node, asCByteCode* bc)
 	CompileInitializationWithAssignment(
 		&initBC, iterDt, node->firstChild, iterOffset, NULL, asVGM_VARIABLE, rangeNode, &opForBeginExpr
 	);
-	ReleaseTemporaryVariable(opForBeginExpr.type, &initBC);
 	initBC.OptimizeLocally(tempVariableOffsets);
 
 	//-----------------------------------
@@ -5558,6 +5600,7 @@ void asCCompiler::CompileForEachStatement(asCScriptNode* node, asCByteCode* bc)
 			ttAssignment,
 			node
 		);
+		ProcessDeferredParams(&next);
 		ReleaseTemporaryVariable(next.type, &next.bc);
 
 		// Pop the value from the stack
@@ -5671,7 +5714,9 @@ void asCCompiler::CompileForEachStatement(asCScriptNode* node, asCByteCode* bc)
 		sVariable* v = variables->variables[n];
 
 		// Call variable destructors here, for variables not yet destroyed
-		CallDestructor(v->type, v->stackOffset, v->onHeap, bc);
+		// The items (values) were already destroyed as part of the loop statement, so don't destroy them again outside the loop
+		if( !itemOffsets.Exists(v->stackOffset) )
+			CallDestructor(v->type, v->stackOffset, v->onHeap, bc);
 		DeallocateVariable(v->stackOffset);
 	}
 
@@ -5922,7 +5967,7 @@ void asCCompiler::CompileExpressionStatement(asCScriptNode *enode, asCByteCode *
 	}
 }
 
-void asCCompiler::PrepareTemporaryVariable(asCScriptNode *node, asCExprContext *ctx, bool forceOnHeap)
+void asCCompiler::PrepareTemporaryVariable(asCScriptNode *node, asCExprContext *ctx, bool forceOnHeap, bool forceValueCopy)
 {
 	// The input can be either an object or funcdef, either as handle or reference
 	asASSERT(ctx->type.dataType.IsObject() || ctx->type.dataType.IsFuncdef());
@@ -5947,13 +5992,23 @@ void asCCompiler::PrepareTemporaryVariable(asCScriptNode *node, asCExprContext *
 
 	// Allocate temporary variable
 	asCDataType dt = ctx->type.dataType;
+	bool isHandle = dt.IsObjectHandle();
+	bool isReadOnly = dt.IsReadOnly();
+
+	// If the type supports handles, then we will always use a handle
+	if (!forceValueCopy)
+	{
+		if (!dt.IsObjectHandle() && dt.SupportHandles())
+			dt.MakeHandle(true);
+	}
+	
 	dt.MakeReference(false);
 	dt.MakeReadOnly(false);
 
 	int offset = AllocateVariable(dt, true, forceOnHeap);
 
 	// Objects stored on the stack are not considered references
-	dt.MakeReference(IsVariableOnHeap(offset));
+	dt.MakeReference(IsVariableOnHeap(offset) || dt.IsObjectHandle());
 
 	asCExprValue lvalue;
 	lvalue.Set(dt);
@@ -5979,7 +6034,16 @@ void asCCompiler::PrepareTemporaryVariable(asCScriptNode *node, asCExprContext *
 	ctx->type.stackOffset = (short)offset;
 	ctx->type.isVariable = true;
 	ctx->type.isExplicitHandle = isExplicitHandle;
-	ctx->type.dataType.MakeReference(IsVariableOnHeap(offset));
+	ctx->type.dataType.MakeReference(IsVariableOnHeap(offset) || dt.IsObjectHandle());
+
+	if (!forceValueCopy)
+	{
+		// If the original was not a handle, then the temporary variable should also not be a handle
+		// In this case we don't need to check for null handle, since we original was already known not to be a null handle
+		if (!isHandle)
+			ctx->type.dataType.MakeHandle(false);
+		ctx->type.dataType.MakeReadOnly(isReadOnly);
+	}
 }
 
 void asCCompiler::CompileReturnStatement(asCScriptNode *rnode, asCByteCode *bc)
@@ -6310,7 +6374,7 @@ void asCCompiler::Information(const asCString &msg, asCScriptNode *node)
 	builder->WriteInfo(script->name, msg, r, c, false);
 }
 
-void asCCompiler::PrintMatchingFuncs(asCArray<int> &funcs, asCScriptNode *node, asCObjectType *inType)
+void asCCompiler::PrintMatchingFuncs(asCArray<int> &funcs, asCScriptNode *node, asCObjectType *inType, asCArray<asSFailedMatch>* failedReasons)
 {
 	int r = 0, c = 0;
 	asASSERT( node );
@@ -6337,6 +6401,47 @@ void asCCompiler::PrintMatchingFuncs(asCArray<int> &funcs, asCScriptNode *node, 
 					asCString msg;
 					msg.Format(TXT_WHERE_s_IS_s, ti->GetName(), ti->GetFuncdefSignature()->GetDeclaration());
 					builder->WriteInfo(script->name, msg.AddressOf(), r, c, false);
+				}
+			}
+		}
+
+		// check if a reason exists for this func
+		if (failedReasons)
+		{
+			for (unsigned int f = 0; f < failedReasons->GetLength(); f++)
+			{
+				if ((*failedReasons)[f].func == funcs[n])
+				{
+					asCString msg;
+					switch ((*failedReasons)[f].reason)
+					{
+					case asEFM_NOT_ENOUGH_ARGS:
+						msg.Format(TXT_NOT_ENOUGH_ARGUMENTS);
+						break;
+					case asEFM_TOO_MANY_ARGS:
+						msg.Format(TXT_TOO_MANY_ARGUMENTS);
+						break;
+					case asEFM_POSITIONAL_MISMATCH:
+						if (func->parameterNames[(*failedReasons)[f].arg].GetLength() == 0)
+							msg.Format(TXT_ARGUMENT_TYPE_ERROR_i, (*failedReasons)[f].arg + 1); // use one-indexed parameters, like other compilers (msvc, clang)
+						else
+							msg.Format(TXT_ARGUMENT_TYPE_ERROR_s, func->parameterNames[(*failedReasons)[f].arg].AddressOf());
+						break;
+					case asEFM_NAMED_DUPLICATE:
+						msg.Format(TXT_DUPLICATE_NAMED_ARGUMENT_s, func->parameterNames[(*failedReasons)[f].arg].AddressOf());
+						break;
+					case asEFM_NAMED_MISMATCH:
+						if ((*failedReasons)[f].argName)
+							msg.Format(TXT_ARGUMENT_TYPE_ERROR_s, (*failedReasons)[f].argName);
+						else
+							msg.Format(TXT_ARGUMENT_TYPE_ERROR_s, func->parameterNames[(*failedReasons)[f].arg].AddressOf());
+						break;
+					case asEFM_NAMED_MISSING:
+						msg.Format(TXT_MISSING_ARGUMENT_s, (*failedReasons)[f].argName);
+						break;
+					}
+					builder->WriteInfo(script->name, msg.AddressOf(), r, c, false);
+					break;
 				}
 			}
 		}
@@ -6893,7 +6998,7 @@ bool asCCompiler::CompileRefCast(asCExprContext *ctx, const asCDataType &to, boo
 			//                         functions with 1 parameter, even though they should still be
 			//                         registered with RegisterObjectBehaviour()
 
-			if( (ctx->type.dataType.GetTypeInfo()->flags & asOBJ_REF) && !(ctx->type.dataType.GetTypeInfo()->flags & asOBJ_NOHANDLE))
+			if ((ctx->type.dataType.GetTypeInfo()->flags & asOBJ_REF) && !(ctx->type.dataType.GetTypeInfo()->flags & asOBJ_NOHANDLE))
 			{
 				// Add code to avoid calling the cast behaviour if the handle is already null,
 				// because that will raise a null pointer exception due to the cast behaviour
@@ -6923,7 +7028,17 @@ bool asCCompiler::CompileRefCast(asCExprContext *ctx, const asCDataType &to, boo
 				ctx->bc.Instr(asBC_RDSPtr);
 				ctx->type.dataType.MakeReference(false);
 
-				asCArray<asCExprContext *> args;
+				asCArray<asCExprContext*> args;
+
+				// Verify that the opImplCast isn't returning a type by value
+				asCScriptFunction* func = engine->scriptFunctions[ops[0]];
+				if (!func->returnType.IsReference() && !func->returnType.IsObjectHandle())
+				{
+					asCString msg;
+					msg.Format(TXT_ILLEGAL_RETURN_BY_VALUE_FOR_s, func->GetDeclarationStr().AddressOf());
+					Error(msg, node);
+				}
+
 				MakeFunctionCall(ctx, ops[0], CastToObjectType(ctx->type.dataType.GetTypeInfo()), args, node);
 				ctx->bc.Instr(asBC_PopPtr);
 
@@ -7041,6 +7156,7 @@ bool asCCompiler::CompileRefCast(asCExprContext *ctx, const asCDataType &to, boo
 
 					// Place the object pointer on the stack
 					ctx->bc.InstrSHORT(asBC_PSF, (short)tmp.type.stackOffset);
+					ctx->type.dataType.MakeReference(true);
 				}
 
 				// Allocate a temporary variable of the requested handle type
@@ -7173,10 +7289,17 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 		{
 			// Attempt to resolve an ambiguous enum value
 			asCDataType out;
-			asDWORD value;
+			asINT64 value;
 			if( builder->GetEnumValueFromType(CastToEnumType(to.GetTypeInfo()), ctx->enumValue.AddressOf(), out, value) )
 			{
-				ctx->type.SetConstantDW(out, value);
+				if (out.GetSizeInMemoryBytes() == 1)
+					ctx->type.SetConstantB(out, asBYTE(value));
+				else if (out.GetSizeInMemoryBytes() == 2)
+					ctx->type.SetConstantW(out, asWORD(value));
+				else if (out.GetSizeInMemoryBytes() == 4)
+					ctx->type.SetConstantDW(out, asDWORD(value));
+				else
+					ctx->type.SetConstantQW(out, value);
 				ctx->type.dataType.MakeReadOnly(to.IsReadOnly());
 
 				// Reset the enum value since we no longer need it
@@ -7201,9 +7324,9 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 		cost = asCC_FLOAT_TO_INT_CONV;
 	else if ((to.IsFloatType() || to.IsDoubleType()) && (ctx->type.dataType.IsIntegerType() || ctx->type.dataType.IsUnsignedType()))
 		cost = asCC_INT_TO_FLOAT_CONV;
-	else if (ctx->type.dataType.IsEnumType() && to.IsIntegerType() && to.GetSizeInMemoryBytes() == ctx->type.dataType.GetSizeInMemoryBytes() )
+	else if (ctx->type.dataType.IsEnumType() && ((ctx->type.dataType.IsIntegerType() && to.IsIntegerType()) || (ctx->type.dataType.IsUnsignedType() && to.IsUnsignedType())) && to.GetSizeInMemoryBytes() == ctx->type.dataType.GetSizeInMemoryBytes())
 		cost = asCC_ENUM_SAME_SIZE_CONV;
-	else if (ctx->type.dataType.IsEnumType() && to.IsIntegerType() && to.GetSizeInMemoryBytes() != ctx->type.dataType.GetSizeInMemoryBytes())
+	else if (ctx->type.dataType.IsEnumType() && ((ctx->type.dataType.IsIntegerType() && to.IsIntegerType()) || (ctx->type.dataType.IsUnsignedType() && to.IsUnsignedType())) && to.GetSizeInMemoryBytes() != ctx->type.dataType.GetSizeInMemoryBytes())
 		cost = asCC_ENUM_DIFF_SIZE_CONV;
 	else if( to.IsUnsignedType() && ctx->type.dataType.IsIntegerType() )
 		cost = asCC_SIGNED_TO_UNSIGNED_CONV;
@@ -7250,8 +7373,48 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 			}
 		}
 
-		if( (to.IsIntegerType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType()) ||
-			(to.IsEnumType() && convType == asIC_EXPLICIT_VAL_CAST) )
+		if (to.IsEnumType() && convType == asIC_EXPLICIT_VAL_CAST)
+		{
+			if (ctx->type.dataType.IsIntegerType() ||
+				ctx->type.dataType.IsUnsignedType())
+			{
+				ctx->type.dataType.SetTokenType(to.GetTokenType());
+				ctx->type.dataType.SetTypeInfo(to.GetTypeInfo());
+			}
+			else if (ctx->type.dataType.IsFloatType())
+			{
+				ConvertToTempVariable(ctx);
+				ctx->bc.InstrSHORT(to.GetSizeInMemoryDWords() == 2 ? asBC_fTOi64 : asBC_fTOi, (short)ctx->type.stackOffset);
+				ctx->type.dataType.SetTokenType(to.GetTokenType());
+				ctx->type.dataType.SetTypeInfo(to.GetTypeInfo());
+				
+				if (convType != asIC_EXPLICIT_VAL_CAST)
+					Warning(TXT_FLOAT_CONV_TO_INT_CAUSE_TRUNC, node);
+			}
+			else if (ctx->type.dataType.IsDoubleType())
+			{
+				ConvertToTempVariable(ctx);
+				ReleaseTemporaryVariable(ctx->type, &ctx->bc);
+				int offset = AllocateVariable(to, true);
+				ctx->bc.InstrW_W(to.GetSizeInMemoryDWords() == 2 ? asBC_dTOi64 : asBC_dTOi, offset, ctx->type.stackOffset);
+				ctx->type.SetVariable(to, offset, true);
+				
+				if (convType != asIC_EXPLICIT_VAL_CAST)
+					Warning(TXT_FLOAT_CONV_TO_INT_CAUSE_TRUNC, node);
+			}
+			
+			// Convert to smaller integer if necessary
+			s = to.GetSizeInMemoryBytes();
+			if (s < 4)
+			{
+			ConvertToTempVariable(ctx);
+			if (s == 1)
+				ctx->bc.InstrSHORT(asBC_iTOb, (short)ctx->type.stackOffset);
+			else if (s == 2)
+				ctx->bc.InstrSHORT(asBC_iTOw, (short)ctx->type.stackOffset);
+			}
+		}
+		else if ((to.IsIntegerType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType()))
 		{
 			if( ctx->type.dataType.IsIntegerType() ||
 				ctx->type.dataType.IsUnsignedType() )
@@ -7303,7 +7466,7 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 					ctx->bc.InstrSHORT(asBC_iTOw, (short)ctx->type.stackOffset);
 			}
 		}
-		else if( to.IsIntegerType() && to.GetSizeInMemoryDWords() == 2 )
+		else if (to.IsIntegerType() && to.GetSizeInMemoryDWords() == 2 && !to.IsEnumType())
 		{
 			if( ctx->type.dataType.IsIntegerType() ||
 				ctx->type.dataType.IsUnsignedType() )
@@ -7347,7 +7510,7 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 					Warning(TXT_FLOAT_CONV_TO_INT_CAUSE_TRUNC, node);
 			}
 		}
-		else if( to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 1  )
+		else if (to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType())
 		{
 			if( ctx->type.dataType.IsIntegerType() ||
 				ctx->type.dataType.IsUnsignedType() )
@@ -7399,7 +7562,7 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 					ctx->bc.InstrSHORT(asBC_iTOw, (short)ctx->type.stackOffset);
 			}
 		}
-		else if( to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 2 )
+		else if (to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 2 && !to.IsEnumType())
 		{
 			if( ctx->type.dataType.IsIntegerType() ||
 				ctx->type.dataType.IsUnsignedType() )
@@ -7528,7 +7691,7 @@ asUINT asCCompiler::ImplicitConvPrimitiveToPrimitive(asCExprContext *ctx, const 
 	}
 	else
 	{
-		if( ((to.IsIntegerType() && !to.IsEnumType()) || to.IsUnsignedType() ||
+		if ((((to.IsIntegerType() || to.IsUnsignedType()) && !to.IsEnumType()) ||
 			 to.IsFloatType()   || to.IsDoubleType() ||
 			 (to.IsEnumType() && convType == asIC_EXPLICIT_VAL_CAST)) &&
 			(ctx->type.dataType.IsIntegerType() || ctx->type.dataType.IsUnsignedType() ||
@@ -8436,7 +8599,7 @@ asUINT asCCompiler::ImplicitConvObjectToObject(asCExprContext *ctx, const asCDat
 			if (ctx->type.isConstant && ctx->type.dataType.IsEqualExceptRefAndConst(engine->stringType))
 			{
 				if (generateCode)
-					PrepareTemporaryVariable(node, ctx);
+					PrepareTemporaryVariable(node, ctx, false, true);
 				else
 				{
 					ctx->type.dataType.MakeReadOnly(false);
@@ -8631,7 +8794,7 @@ asUINT asCCompiler::ImplicitConvObjectToObject(asCExprContext *ctx, const asCDat
 				// correct, so nothing should be done other than remove the mark as reference.
 				// For types allocated on the heap, it is necessary to dereference the pointer
 				// that is currently on the stack
-				if( IsVariableOnHeap(ctx->type.stackOffset) )
+				if( !(ctx->type.isVariable || ctx->type.isTemporary) || IsVariableOnHeap(ctx->type.stackOffset) )
 					Dereference(ctx, generateCode);
 				else
 					ctx->type.dataType.MakeReference(false);
@@ -8946,46 +9109,155 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 	// References cannot be constants
 	if( from->type.dataType.IsReference() ) return;
 
-	if( (to.IsIntegerType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType()) ||
-		(to.IsEnumType() && convType == asIC_EXPLICIT_VAL_CAST) )
+	if((to.IsEnumType() && convType == asIC_EXPLICIT_VAL_CAST))
 	{
 		if( from->type.dataType.IsFloatType() ||
 			from->type.dataType.IsDoubleType() ||
 			from->type.dataType.IsUnsignedType() ||
 			from->type.dataType.IsIntegerType() )
 		{
-			asCDataType targetDt;
-			if (to.IsEnumType())
-				targetDt = to;
-			else
-				targetDt = asCDataType::CreatePrimitive(ttInt, true);
+			// Transform the value
+			// Float constants can be implicitly converted to int
+			if (from->type.dataType.IsFloatType())
+			{
+				float fc = from->type.GetConstantF();
+				asINT64 ic = asINT64(fc);
+				
+				if (asINT64(ic) != fc)
+				{
+					if (convType != asIC_EXPLICIT_VAL_CAST && node) 
+						Warning(TXT_NOT_EXACT, node);
+				}
+				
+				if (to.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(to, asBYTE(ic));
+				else if (to.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(to, asWORD(ic));
+				else if (to.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(to, asDWORD(ic));
+				else
+					from->type.SetConstantQW(to, ic);
+			}
+			// Double constants can be implicitly converted to int
+			else if (from->type.dataType.IsDoubleType())
+			{
+				double fc = from->type.GetConstantD();
+				asINT64 ic = asINT64(fc);
+				
+				if (asINT64(ic) != fc)
+				{
+					if (convType != asIC_EXPLICIT_VAL_CAST && node) 
+						Warning(TXT_NOT_EXACT, node);
+				}
+				
+				if (to.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(to, asBYTE(ic));
+				else if (to.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(to, asWORD(ic));
+				else if (to.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(to, asDWORD(ic));
+				else
+					from->type.SetConstantQW(to, ic);
+			}
+			else if (from->type.dataType.IsUnsignedType())
+			{
+				asQWORD qw;
+				
+				if (from->type.dataType.GetSizeInMemoryBytes() == 1)
+					qw = from->type.GetConstantB();
+				else if (from->type.dataType.GetSizeInMemoryBytes() == 2)
+					qw = from->type.GetConstantW();
+				else if (from->type.dataType.GetSizeInMemoryBytes() == 4)
+					qw = from->type.GetConstantDW();
+				else
+					qw = from->type.GetConstantQW();
+				
+				// Convert to `to`
+				if (to.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(to, (asBYTE)qw);
+				else if (to.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(to, (asWORD)qw);
+				else if (to.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(to, (asDWORD)qw);
+				else
+					from->type.SetConstantQW(to, (asQWORD)qw);
+			}
+			else if (from->type.dataType.IsIntegerType())
+			{
+				asINT64 qw;
+				
+				if (from->type.dataType.GetSizeInMemoryBytes() == 1)
+					qw = from->type.GetConstantB();
+				else if (from->type.dataType.GetSizeInMemoryBytes() == 2)
+					qw = from->type.GetConstantW();
+				else if (from->type.dataType.GetSizeInMemoryBytes() == 4)
+					qw = from->type.GetConstantDW();
+				else
+					qw = from->type.GetConstantQW();
+			
+				// Convert to `to`
+				if (to.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(to, (asINT8)qw);
+				else if (to.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(to, (asINT16)qw);
+				else if (to.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(to, (asINT32)qw);
+				else
+					from->type.SetConstantQW(to, (asINT64)qw);
+			}
+		}
+	}
+	else if ((to.IsIntegerType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType()))
+	{
+		if (from->type.dataType.IsFloatType() ||
+			from->type.dataType.IsDoubleType() ||
+			from->type.dataType.IsUnsignedType() ||
+			from->type.dataType.IsIntegerType())
+		{
+			asCDataType targetDt = asCDataType::CreatePrimitive(ttInt, true);
 
 			// Transform the value
 			// Float constants can be implicitly converted to int
 			if( from->type.dataType.IsFloatType() )
 			{
 				float fc = from->type.GetConstantF();
-				int ic = int(fc);
+				asINT64 ic = int(fc);
 
 				if( float(ic) != fc )
 				{
-					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_NOT_EXACT, node);
+					if( convType != asIC_EXPLICIT_VAL_CAST && node ) 
+						Warning(TXT_NOT_EXACT, node);
 				}
 
-				from->type.SetConstantDW(targetDt, ic);
+				if (targetDt.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(targetDt, asBYTE(ic));
+				else if (targetDt.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(targetDt, asWORD(ic));
+				else if (targetDt.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(targetDt, asDWORD(ic));
+				else
+					from->type.SetConstantQW(targetDt, ic);
 			}
 			// Double constants can be implicitly converted to int
 			else if( from->type.dataType.IsDoubleType() )
 			{
 				double fc = from->type.GetConstantD();
-				int ic = int(fc);
+				asINT64 ic = int(fc);
 
 				if( double(ic) != fc )
 				{
-					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_NOT_EXACT, node);
+					if( convType != asIC_EXPLICIT_VAL_CAST && node ) 
+						Warning(TXT_NOT_EXACT, node);
 				}
 
-				from->type.SetConstantDW(targetDt, ic);
+				if (targetDt.GetSizeInMemoryBytes() == 1)
+					from->type.SetConstantB(targetDt, asBYTE(ic));
+				else if (targetDt.GetSizeInMemoryBytes() == 2)
+					from->type.SetConstantW(targetDt, asWORD(ic));
+				else if (targetDt.GetSizeInMemoryBytes() == 4)
+					from->type.SetConstantDW(targetDt, asDWORD(ic));
+				else
+					from->type.SetConstantQW(targetDt, ic);
 			}
 			else if( from->type.dataType.IsUnsignedType() && from->type.dataType.GetSizeInMemoryDWords() == 1 )
 			{
@@ -8997,9 +9269,9 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 					Warning(TXT_CHANGE_SIGN, node);
 
 				// Convert to 32bit
-				if( from->type.dataType.GetSizeInMemoryBytes() == 1 )
+				if(targetDt.GetSizeInMemoryBytes() == 1)
 					from->type.SetConstantDW(targetDt, from->type.GetConstantB());
-				else if (from->type.dataType.GetSizeInMemoryBytes() == 2)
+				else if (targetDt.GetSizeInMemoryBytes() == 2)
 					from->type.SetConstantDW(targetDt, from->type.GetConstantW());
 				else
 					from->type.dataType = targetDt;
@@ -9052,18 +9324,18 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 				if( asINT8(from->type.GetConstantDW()) != int(from->type.GetConstantDW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantB(asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT8(from->type.GetConstantDW()));
+				from->type.SetConstantB(to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT8(from->type.GetConstantDW()));
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
 				if( asINT16(from->type.GetConstantDW()) != int(from->type.GetConstantDW()) )
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantW(asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT16(from->type.GetConstantDW()));
+				from->type.SetConstantW(to.IsEnumType() ? to : asCDataType::CreatePrimitive(to.GetTokenType(), true), asINT16(from->type.GetConstantDW()));
 			}
 		}
 	}
-	else if( to.IsIntegerType() && to.GetSizeInMemoryDWords() == 2 )
+	else if (to.IsIntegerType() && to.GetSizeInMemoryDWords() == 2 && !to.IsEnumType())
 	{
 		// Float constants can be implicitly converted to int
 		if( from->type.dataType.IsFloatType() )
@@ -9120,8 +9392,9 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 				from->type.SetConstantQW(asCDataType::CreatePrimitive(ttInt64, true), (int)from->type.GetConstantDW());
 		}
 	}
-	else if( to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 1 )
+	else if (to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 1 && !to.IsEnumType())
 	{
+		asCDataType targetDt = asCDataType::CreatePrimitive(ttUInt, true);
 		if( from->type.dataType.IsFloatType() )
 		{
 			float fc = from->type.GetConstantF();
@@ -9210,11 +9483,11 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
 				if( from->type.dataType.GetSizeInMemoryBytes() == 2 )
-					from->type.SetConstantB(asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantW()));
+					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 4)
-					from->type.SetConstantB(asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantDW()));
+					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantDW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 8)
-					from->type.SetConstantB(asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantQW()));
+					from->type.SetConstantB(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asBYTE(from->type.GetConstantQW()));
 			}
 			else if( to.GetSizeInMemoryBytes() == 2 )
 			{
@@ -9223,20 +9496,30 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 					if( convType != asIC_EXPLICIT_VAL_CAST && node ) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
 				if (from->type.dataType.GetSizeInMemoryBytes() == 4)
-					from->type.SetConstantW(asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantDW()));
+					from->type.SetConstantW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantDW()));
 				else if (from->type.dataType.GetSizeInMemoryBytes() == 8)
-					from->type.SetConstantW(asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantQW()));
+					from->type.SetConstantW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asWORD(from->type.GetConstantQW()));
 			}
 			else if (to.GetSizeInMemoryBytes() == 4)
 			{
 				if( asDWORD(from->type.GetConstantQW()) != from->type.GetConstantQW())
 					if (convType != asIC_EXPLICIT_VAL_CAST && node) Warning(TXT_VALUE_TOO_LARGE_FOR_TYPE, node);
 
-				from->type.SetConstantDW(asCDataType::CreatePrimitive(to.GetTokenType(), true), asDWORD(from->type.GetConstantQW()));
+				from->type.SetConstantDW(to.IsEnumType() ? CastToEnumType(to.GetTypeInfo())->enumType : asCDataType::CreatePrimitive(to.GetTokenType(), true), asDWORD(from->type.GetConstantQW()));
 			}
 		}
+		else
+		{
+			// Only uint32 and enums should come here and as these are 32bit
+			// already nothing needs to be done except set the target type
+			asASSERT((from->type.dataType.GetTokenType() == ttUInt ||
+					  from->type.dataType.IsEnumType()) &&
+					 from->type.dataType.GetSizeInMemoryBytes() == 4);
+			
+			from->type.dataType = targetDt;
+		}
 	}
-	else if( to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 2 )
+	else if (to.IsUnsignedType() && to.GetSizeInMemoryDWords() == 2 && !to.IsEnumType())
 	{
 		if( from->type.dataType.IsFloatType() )
 		{
@@ -9307,6 +9590,8 @@ void asCCompiler::ImplicitConversionConstant(asCExprContext *from, const asCData
 				from->type.SetConstantQW(asCDataType::CreatePrimitive(ttUInt64, true), from->type.GetConstantW());
 			else if( from->type.dataType.GetSizeInMemoryBytes() == 4 )
 				from->type.SetConstantQW(asCDataType::CreatePrimitive(ttUInt64, true), from->type.GetConstantDW());
+			else if (from->type.dataType.GetSizeInMemoryBytes() == 8)
+				from->type.SetConstantQW(asCDataType::CreatePrimitive(ttUInt64, true), from->type.GetConstantQW());
 		}
 	}
 	else if( to.IsFloatType() )
@@ -10787,7 +11072,7 @@ asCCompiler::SYMBOLTYPE asCCompiler::SymbolLookup(const asCString &name, const a
 					// Is it an enum type?
 					if (CastToEnumType(scopeType))
 					{
-						asDWORD value = 0;
+						asINT64 value = 0;
 						asCDataType dt;
 						if (builder->GetEnumValueFromType(CastToEnumType(scopeType), name.AddressOf(), dt, value))
 						{
@@ -10795,7 +11080,14 @@ asCCompiler::SYMBOLTYPE asCCompiler::SymbolLookup(const asCString &name, const a
 								return SL_ERROR;
 
 							// an enum value was resolved
-							outResult->type.SetConstantDW(dt, value);
+							if (dt.GetSizeInMemoryBytes() == 1)
+								outResult->type.SetConstantB(dt, asBYTE(value));
+							else if (dt.GetSizeInMemoryBytes() == 2)
+								outResult->type.SetConstantW(dt, asWORD(value));
+							else if (dt.GetSizeInMemoryBytes() == 4)
+								outResult->type.SetConstantDW(dt, asDWORD(value));
+							else
+								outResult->type.SetConstantQW(dt, value);
 							outResult->symbolNamespace = ns;
 
 							if (!checkAmbiguousSymbols)
@@ -10943,7 +11235,7 @@ asCCompiler::SYMBOLTYPE asCCompiler::SymbolLookup(const asCString &name, const a
 			if (ns && !engine->ep.requireEnumScope && resultSymbolType == SL_NOMATCH)
 			{
 				// Look for the enum value without explicitly informing the enum type
-				asDWORD value = 0;
+				asINT64 value = 0;
 				asCDataType dt;
 				int e = builder->GetEnumValue(name.AddressOf(), dt, value, ns);
 				if (e)
@@ -10966,7 +11258,14 @@ asCCompiler::SYMBOLTYPE asCCompiler::SymbolLookup(const asCString &name, const a
 					else
 					{
 						// an enum value was resolved
-						outResult->type.SetConstantDW(dt, value);
+						if (dt.GetSizeInMemoryBytes() == 1)
+							outResult->type.SetConstantB(dt, asBYTE(value));
+						else if (dt.GetSizeInMemoryBytes() == 2)
+							outResult->type.SetConstantW(dt, asWORD(value));
+						else if (dt.GetSizeInMemoryBytes() == 4)
+							outResult->type.SetConstantDW(dt, asDWORD(value));
+						else
+							outResult->type.SetConstantQW(dt, value);
 						outResult->symbolNamespace = ns;
 					}
 
@@ -11486,14 +11785,21 @@ int asCCompiler::CompileVariableAccess(const asCString &name, const asCString &s
 				return 0;
 			}
 
-			asDWORD value = 0;
+			asINT64 value = 0;
 			builder->GetEnumValueFromType(CastToEnumType(lookupResult.type.dataType.GetTypeInfo()), name.AddressOf(), dt, value);
 
 			// Even if the enum type is not shared, and we're compiling a shared object,
 			// the use of the values are still allowed, since they are treated as constants.
 
 			// an enum value was resolved
-			ctx->type.SetConstantDW(dt, value);
+			if (dt.GetSizeInMemoryBytes() == 1)
+				ctx->type.SetConstantB(dt, asBYTE(value));
+			else if (dt.GetSizeInMemoryBytes() == 2)
+				ctx->type.SetConstantW(dt, asWORD(value));
+			else if (dt.GetSizeInMemoryBytes() == 4)
+				ctx->type.SetConstantDW(dt, asDWORD(value));
+			else
+				ctx->type.SetConstantQW(dt, value);
 			return 0;
 		}
 	}
@@ -16569,22 +16875,28 @@ void asCCompiler::CompileComparisonOperator(asCScriptNode *node, asCExprContext 
 			signMismatch = true;
 			if( opCtx->type.isConstant )
 			{
-				if( opCtx->type.dataType.GetTokenType() == ttUInt64 || opCtx->type.dataType.GetTokenType() == ttInt64 )
+				eTokenType tokenType;
+				if (opCtx->type.dataType.IsEnumType())
+					tokenType = CastToEnumType(opCtx->type.dataType.GetTypeInfo())->enumType.GetTokenType();
+				else
+					tokenType = opCtx->type.dataType.GetTokenType();
+				
+				if (tokenType == ttUInt64 || tokenType == ttInt64)
 				{
 					if( !(opCtx->type.GetConstantQW() & (asQWORD(1)<<63)) )
 						signMismatch = false;
 				}
-				else if(opCtx->type.dataType.GetTokenType() == ttUInt || opCtx->type.dataType.GetTokenType() == ttInt || opCtx->type.dataType.IsEnumType() )
+				else if (tokenType == ttUInt || tokenType == ttInt)
 				{
 					if( !(opCtx->type.GetConstantDW() & (1<<31)) )
 						signMismatch = false;
 				}
-				else if (opCtx->type.dataType.GetTokenType() == ttUInt16 || opCtx->type.dataType.GetTokenType() == ttInt16)
+				else if (tokenType == ttUInt16 || tokenType == ttInt16)
 				{
 					if (!(opCtx->type.GetConstantW() & (1 << 15)))
 						signMismatch = false;
 				}
-				else if (opCtx->type.dataType.GetTokenType() == ttUInt8 || opCtx->type.dataType.GetTokenType() == ttInt8)
+				else if (tokenType == ttUInt8 || tokenType == ttInt8)
 				{
 					if (!(opCtx->type.GetConstantB() & (1 << 7)))
 						signMismatch = false;

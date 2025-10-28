@@ -907,8 +907,8 @@ void asCBuilder::RegisterNamespaceVisibility(asCScriptNode* node, asCScriptCode*
 		node = next;
 	}
 }
+#endif
 
-// TODO: using: review
 void asCBuilder::AddVisibleNamespaces(asSNameSpace *ns, const asCArray<asSNameSpace*>& visited, asCArray<asSNameSpace*>& pending)
 {
 	asSMapNode<asSNameSpace*, asCArray<asSNameSpace*>>* cursor = 0;
@@ -929,7 +929,6 @@ void asCBuilder::AddVisibleNamespaces(asSNameSpace *ns, const asCArray<asSNameSp
 	}
 }
 
-// TODO: using: review
 asSNameSpace *asCBuilder::FindNextVisibleNamespace(const asCArray<asSNameSpace*>& visited, asCArray<asSNameSpace*>& pending, asSNameSpace *parentNs, bool* checkAmbiguous)
 {
 	// First iterate through all pending namespaces that have been included with 'using namespace'
@@ -954,6 +953,7 @@ asSNameSpace *asCBuilder::FindNextVisibleNamespace(const asCArray<asSNameSpace*>
 	return nextNs;
 }
 
+#ifndef AS_NO_COMPILER
 void asCBuilder::RegisterNonTypesFromScript(asCScriptNode *node, asCScriptCode *script, asSNameSpace *ns)
 {
 	node = node->firstChild;
@@ -2262,8 +2262,8 @@ int asCBuilder::RegisterUsingNamespace(asCScriptNode *node, asCScriptCode *file,
 
 	while (n->next)
 	{
-	    n = n->next;
-	    name += "::" + asCString(&file->code[n->tokenPos], n->tokenLength);
+		n = n->next;
+		name += "::" + asCString(&file->code[n->tokenPos], n->tokenLength);
 	}
 
 	asSNameSpace* visibleNamespace = engine->AddNameSpace(name.AddressOf());
@@ -2296,7 +2296,7 @@ int asCBuilder::RegisterMixinClass(asCScriptNode *node, asCScriptCode *file, asS
 	// Skip potential decorator tokens
 	while( n->tokenType == ttIdentifier &&
 		   (file->TokenEquals(n->tokenPos, n->tokenLength, FINAL_TOKEN) ||
-		    file->TokenEquals(n->tokenPos, n->tokenLength, SHARED_TOKEN) ||
+			file->TokenEquals(n->tokenPos, n->tokenLength, SHARED_TOKEN) ||
 			file->TokenEquals(n->tokenPos, n->tokenLength, ABSTRACT_TOKEN) ||
 			file->TokenEquals(n->tokenPos, n->tokenLength, EXTERNAL_TOKEN)) )
 	{
@@ -2776,10 +2776,11 @@ void asCBuilder::CompileGlobalVariables()
 					// Set the namespace that should be used during the compilation
 					func.nameSpace = gvar->datatype.GetTypeInfo()->nameSpace;
 
-					// Temporarily switch the type of the variable to int so it can be compiled properly
+					// Temporarily switch the type of the variable to the enums' underlying type so it can be compiled properly
+					asCEnumType *enumType = CastToEnumType(gvar->datatype.GetTypeInfo());
 					asCDataType saveType;
 					saveType = gvar->datatype;
-					gvar->datatype = asCDataType::CreatePrimitive(ttInt, true);
+					gvar->datatype = enumType->enumType;
 					r = comp.CompileGlobalVariable(this, gvar->script, gvar->initializationNode, gvar, &func);
 					gvar->datatype = saveType;
 
@@ -2791,7 +2792,7 @@ void asCBuilder::CompileGlobalVariables()
 					r = 0;
 
 					// When there is no assignment the value is the last + 1
-					int enumVal = 0;
+					asINT64 enumVal = 0;
 					asCSymbolTable<sGlobalVariableDescription>::iterator prev_it = it;
 					prev_it--;
 					if( prev_it )
@@ -2799,7 +2800,7 @@ void asCBuilder::CompileGlobalVariables()
 						sGlobalVariableDescription *gvar2 = *prev_it;
 						if(gvar2->datatype == gvar->datatype )
 						{
-							enumVal = int(gvar2->constantValue) + 1;
+							enumVal = asINT64(gvar2->constantValue) + 1;
 
 							if( !gvar2->isCompiled )
 							{
@@ -2917,7 +2918,7 @@ void asCBuilder::CompileGlobalVariables()
 					}
 
 					e->name = gvar->name;
-					e->value = int(gvar->constantValue);
+					e->value = asINT64(gvar->constantValue);
 
 					enumType->enumValues.PushLast(e);
 				}
@@ -4693,6 +4694,17 @@ int asCBuilder::RegisterEnum(asCScriptNode *node, asCScriptCode *file, asSNameSp
 	asASSERT(snIdentifier == tmp->firstChild->nodeType);
 	name.Assign(&file->code[tmp->firstChild->tokenPos], tmp->firstChild->tokenLength);
 
+	// Grab the type of the enumeration
+	asCDataType type = asCDataType::CreatePrimitive(ttInt, true);
+	asCScriptNode * dataNode = tmp->firstChild->next;
+	if (dataNode)
+	{
+		asASSERT(snDataType == dataNode->nodeType);
+		asASSERT((dataNode->tokenType >= ttInt && dataNode->tokenType <= ttInt64) ||
+				 (dataNode->tokenType >= ttUInt && dataNode->tokenType <= ttUInt64));
+		type = asCDataType::CreatePrimitive(dataNode->tokenType, true);
+	}
+
 	if( isShared )
 	{
 		// Look for a pre-existing shared enum with the same signature
@@ -4703,7 +4715,8 @@ int asCBuilder::RegisterEnum(asCScriptNode *node, asCScriptCode *file, asSNameSp
 				o->IsShared() &&
 				(o->flags & asOBJ_ENUM) &&
 				o->name == name &&
-				o->nameSpace == ns )
+				o->nameSpace == ns &&
+				CastToEnumType(o)->enumType == type)
 			{
 				existingSharedType = CastToEnumType(o);
 				break;
@@ -4743,10 +4756,11 @@ int asCBuilder::RegisterEnum(asCScriptNode *node, asCScriptCode *file, asSNameSp
 			st->flags     = asOBJ_ENUM;
 			if( isShared )
 				st->flags |= asOBJ_SHARED;
-			st->size      = 4;
+			st->size      = type.GetSizeInMemoryBytes();
 			st->name      = name;
 			st->nameSpace = ns;
 			st->module    = module;
+			st->enumType  = type;
 		}
 		module->AddEnumType(st);
 
@@ -4766,7 +4780,7 @@ int asCBuilder::RegisterEnum(asCScriptNode *node, asCScriptCode *file, asSNameSp
 		decl->typeInfo         = st;
 		namedTypeDeclarations.PushLast(decl);
 
-		asCDataType type = CreateDataTypeFromNode(tmp, file, ns);
+		type = CreateDataTypeFromNode(tmp, file, ns);
 		asASSERT(!type.IsReference());
 
 		// External shared enums must not redeclare the enum values
@@ -4894,7 +4908,7 @@ int asCBuilder::RegisterTypedef(asCScriptNode *node, asCScriptCode *file, asSNam
 	name.Assign(&file->code[tmp->tokenPos], tmp->tokenLength);
 
 	// If the name is not already in use add it
- 	int r = CheckNameConflict(name.AddressOf(), tmp, file, ns, true, false, false);
+	int r = CheckNameConflict(name.AddressOf(), tmp, file, ns, true, false, false);
 
 	asCTypedefType *st = 0;
 	if( asSUCCESS == r )
@@ -5236,7 +5250,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 			{
 				asCScriptFunction *func = engine->scriptFunctions[objType->methods[n]];
 				if( func->name == name &&
-					func->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST)) )
+					func->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST), funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 				{
 					// Add the shared function in this module too
 					module->AddScriptFunction(func);
@@ -5415,7 +5429,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 					f->name == name &&
 					f->nameSpace == ns &&
 					f->objectType == objType &&
-					f->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, 0, false) )
+					f->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, 0, false, funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 				{
 					funcId = func->funcId = f->id;
 					isExistingShared = func->isExistingShared = true;
@@ -5492,7 +5506,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 		for( asUINT n = 0; n < funcs.GetLength(); ++n )
 		{
 			asCScriptFunction *func = GetFunctionDescription(funcs[n]);
-			if( func->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST)) )
+			if( func->IsSignatureExceptNameEqual(returnType, parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST), funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 			{
 				// TODO: clean up: Reuse the same error handling for both opConv and normal methods
 				if( isMixin )
@@ -5521,7 +5535,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 		for( asUINT n = 0; n < funcs.GetLength(); ++n )
 		{
 			asCScriptFunction *func = GetFunctionDescription(funcs[n]);
-			if( func->IsSignatureExceptNameAndReturnTypeEqual(parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST)) )
+			if( func->IsSignatureExceptNameAndReturnTypeEqual(parameterTypes, inOutFlags, objType, funcTraits.GetTrait(asTRAIT_CONST), funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 			{
 				if( isMixin )
 				{
@@ -5598,7 +5612,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 			{
 				// The copy constructor needs to be marked for easy finding
 				if( parameterTypes.GetLength() == 1 && 
-				    parameterTypes[0].GetTypeInfo() == objType && 
+					parameterTypes[0].GetTypeInfo() == objType && 
 					(parameterTypes[0].IsReference() || parameterTypes[0].IsObjectHandle()) )
 				{
 					// Verify that there are not multiple options matching the copy constructor
@@ -5626,7 +5640,7 @@ int asCBuilder::RegisterScriptFunction(asCScriptNode *node, asCScriptCode *file,
 					defaultArgs[n] = asNEW(asCString)(*defaultArgs[n]);
 
 			asCDataType dt = asCDataType::CreateObjectHandle(objType, false);
-			module->AddScriptFunction(file->idx, engine->scriptFunctions[funcId]->scriptData->declaredAt, factoryId, name, dt, parameterTypes, parameterNames, inOutFlags, defaultArgs, false, 0, false, funcTraits);
+			module->AddScriptFunction(file->idx, engine->scriptFunctions[funcId]->scriptData->declaredAt, factoryId, name, dt, parameterTypes, parameterNames, inOutFlags, defaultArgs, false, 0, false, funcTraits, objType->nameSpace);
 
 			// If the object is shared, then the factory must also be marked as shared
 			if( objType->flags & asOBJ_SHARED )
@@ -5792,6 +5806,19 @@ int asCBuilder::RegisterVirtualProperty(asCScriptNode *node, asCScriptCode *file
 				paramTypes.PushLast(emulatedType);
 				defaultArgs.PushLast(0);
 				name = "set_" + emulatedName;
+
+				if (emulatedType.IsReference())
+				{
+					paramModifiers[0] = asTM_INOUTREF;
+
+					if (!engine->ep.allowUnsafeReferences )
+					{
+						// Verify that the base type support &inout parameter types
+						if (!emulatedType.IsObject() || emulatedType.IsObjectHandle() ||
+							!((emulatedType.GetTypeInfo()->flags & asOBJ_NOCOUNT) || (CastToObjectType(emulatedType.GetTypeInfo())->beh.addref && CastToObjectType(emulatedType.GetTypeInfo())->beh.release)))
+							WriteError(TXT_ONLY_OBJECTS_MAY_USE_REF_INOUT, file, node->firstChild);
+					}
+				}
 			}
 		}
 
@@ -5810,7 +5837,7 @@ int asCBuilder::RegisterVirtualProperty(asCScriptNode *node, asCScriptCode *file
 				{
 					asCScriptFunction *func = engine->scriptFunctions[objType->methods[n]];
 					if( func->name == name &&
-						func->IsSignatureExceptNameEqual(returnType, paramTypes, paramModifiers, objType, funcTraits.GetTrait(asTRAIT_CONST)) )
+						func->IsSignatureExceptNameEqual(returnType, paramTypes, paramModifiers, objType, funcTraits.GetTrait(asTRAIT_CONST), funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 					{
 						found = true;
 						break;
@@ -5856,7 +5883,7 @@ int asCBuilder::RegisterImportedFunction(int importID, asCScriptNode *node, asCS
 	for( asUINT n = 0; n < funcs.GetLength(); ++n )
 	{
 		asCScriptFunction *func = GetFunctionDescription(funcs[n]);
-		if( func->IsSignatureExceptNameAndReturnTypeEqual(parameterTypes, inOutFlags, 0, false) )
+		if( func->IsSignatureExceptNameAndReturnTypeEqual(parameterTypes, inOutFlags, 0, false, funcTraits.GetTrait(asTRAIT_VARIADIC)) )
 		{
 			WriteError(TXT_FUNCTION_ALREADY_EXIST, file, node);
 			break;
@@ -6123,8 +6150,10 @@ bool asCBuilder::FindObjectTypeOrMixinInNsHierarchy(const asCString& name, asSNa
 			if (!checkAmbiguousSymbols)
 			{
 				objType = GetObjectType(name.AddressOf(), ns);
+#ifndef AS_NO_COMPILER
 				if (objType == 0 && outMixin)
 					mixin = GetMixinClass(name.AddressOf(), ns);
+#endif
 
 				if (objType || mixin)
 					break;
@@ -6133,8 +6162,10 @@ bool asCBuilder::FindObjectTypeOrMixinInNsHierarchy(const asCString& name, asSNa
 			{
 				asCObjectType* ot = GetObjectType(name.AddressOf(), ns);
 				sMixinClass* m = 0;
+#ifndef AS_NO_COMPILER
 				if (ot == 0 && outMixin)
 					m = GetMixinClass(name.AddressOf(), ns);
+#endif
 				if (ot || m)
 				{
 					if (objType || mixin)
@@ -6477,7 +6508,7 @@ asCDataType asCBuilder::CreateDataTypeFromNode(asCScriptNode *node, asCScriptCod
 									return asCDataType::CreatePrimitive(ttInt, false);
 								}
 							}
-							else if (n && n->next && n->next->nodeType == snDataType)
+							else if (n && n->next && n->next->nodeType == snDataType && !(node->parent && node->parent->nodeType == snEnum))
 							{
 								if (reportError)
 								{
@@ -7022,7 +7053,7 @@ asCFuncdefType *asCBuilder::GetFuncDef(const char *type, asSNameSpace *ns, asCOb
 
 #ifndef AS_NO_COMPILER
 
-int asCBuilder::GetEnumValueFromType(asCEnumType *type, const char *name, asCDataType &outDt, asDWORD &outValue)
+int asCBuilder::GetEnumValueFromType(asCEnumType *type, const char *name, asCDataType &outDt, asINT64 &outValue)
 {
 	if( !type || !(type->flags & asOBJ_ENUM) )
 		return 0;
@@ -7040,7 +7071,7 @@ int asCBuilder::GetEnumValueFromType(asCEnumType *type, const char *name, asCDat
 	return 0;
 }
 
-int asCBuilder::GetEnumValue(const char *name, asCDataType &outDt, asDWORD &outValue, asSNameSpace *ns)
+int asCBuilder::GetEnumValue(const char *name, asCDataType &outDt, asINT64 &outValue, asSNameSpace *ns)
 {
 	bool found = false;
 

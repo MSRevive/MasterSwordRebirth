@@ -1,6 +1,9 @@
 #include "scriptbuilder.h"
 #include <vector>
 #include <assert.h>
+#ifdef _WIN32
+#include <windows.h> // MultiByteToWideChar()
+#endif
 using namespace std;
 
 #include <stdio.h>
@@ -114,34 +117,13 @@ int CScriptBuilder::AddSectionFromFile(const char *filename)
 // Returns <0 if there was an error
 int CScriptBuilder::AddSectionFromMemory(const char *sectionName, const char *scriptCode, unsigned int scriptLength, int lineOffset)
 {
-	printf("[CScriptBuilder] AddSectionFromMemory called for section '%s' (length: %u)\n", sectionName, scriptLength);
-	
-	// Log first 200 chars of script content for debugging
-	if (scriptCode && scriptLength > 0)
-	{
-		unsigned int previewLen = scriptLength < 200 ? scriptLength : 200;
-		printf("[CScriptBuilder] Script preview: %.*s%s\n", previewLen, scriptCode, 
-		       scriptLength > 200 ? "..." : "");
-	}
-	
 	if( IncludeIfNotAlreadyIncluded(sectionName) )
 	{
-		printf("[CScriptBuilder] Processing script section '%s'\n", sectionName);
 		int r = ProcessScriptSection(scriptCode, scriptLength, sectionName, lineOffset);
 		if( r < 0 )
-		{
-			printf("[CScriptBuilder] ProcessScriptSection failed with error: %d\n", r);
 			return r;
-		}
 		else
-		{
-			printf("[CScriptBuilder] ProcessScriptSection succeeded for '%s'\n", sectionName);
 			return 1;
-		}
-	}
-	else
-	{
-		printf("[CScriptBuilder] Section '%s' already included, skipping\n", sectionName);
 	}
 
 	return 0;
@@ -149,48 +131,7 @@ int CScriptBuilder::AddSectionFromMemory(const char *sectionName, const char *sc
 
 int CScriptBuilder::BuildModule()
 {
-	printf("[CScriptBuilder] BuildModule called for module '%s'\n", module ? module->GetName() : "NULL");
-	
-	// Log module state before build
-	if (module)
-	{
-		printf("[CScriptBuilder] Module '%s' state before build:\n", module->GetName());
-		printf("  - Function count: %d\n", module->GetFunctionCount());
-		printf("  - Global var count: %d\n", module->GetGlobalVarCount());
-		printf("  - Type count: %d\n", module->GetObjectTypeCount());
-	}
-	
-	int result = Build();
-	
-	// Log module state after build
-	if (module && result >= 0)
-	{
-		printf("[CScriptBuilder] Module '%s' built successfully:\n", module->GetName());
-		printf("  - Function count: %d\n", module->GetFunctionCount());
-		printf("  - Global var count: %d\n", module->GetGlobalVarCount());
-		printf("  - Type count: %d\n", module->GetObjectTypeCount());
-		
-		// Log first few functions for debugging
-		printf("[CScriptBuilder] Functions in module:\n");
-		for (asUINT i = 0; i < module->GetFunctionCount() && i < 10; i++)
-		{
-			asIScriptFunction* func = module->GetFunctionByIndex(i);
-			if (func)
-			{
-				printf("    - %s\n", func->GetName());
-			}
-		}
-		if (module->GetFunctionCount() > 10)
-		{
-			printf("    ... and %d more functions\n", module->GetFunctionCount() - 10);
-		}
-	}
-	else if (result < 0)
-	{
-		printf("[CScriptBuilder] Module build failed with error: %d\n", result);
-	}
-	
-	return result;
+	return Build();
 }
 
 void CScriptBuilder::DefineWord(const char *word)
@@ -211,9 +152,11 @@ void CScriptBuilder::ClearAll()
 	currentNamespace = "";
 
 	foundDeclarations.clear();
+
 	typeMetadataMap.clear();
 	funcMetadataMap.clear();
 	varMetadataMap.clear();
+	classMetadataMap.clear();
 #endif
 }
 
@@ -232,13 +175,24 @@ bool CScriptBuilder::IncludeIfNotAlreadyIncluded(const char *filename)
 	return true;
 }
 
-int CScriptBuilder::LoadScriptSection(const char *filename)
+int CScriptBuilder::LoadScriptSection(const char* filename)
 {
 	// Open the script file
 	string scriptFile = filename;
 #if _MSC_VER >= 1500 && !defined(__S3E__)
+  #ifdef _WIN32
+	// Convert the filename from UTF8 to UTF16
+	wchar_t bufUTF16_name[10000] = {0};
+	wchar_t bufUTF16_mode[10] = {0};
+	MultiByteToWideChar(CP_UTF8, 0, filename, -1, bufUTF16_name, 10000);
+	MultiByteToWideChar(CP_UTF8, 0, "rb", -1, bufUTF16_mode, 10);
+
 	FILE *f = 0;
+	_wfopen_s(&f, bufUTF16_name, bufUTF16_mode);
+  #else
+	FILE* f = 0;
 	fopen_s(&f, scriptFile.c_str(), "rb");
+  #endif
 #else
 	FILE *f = fopen(scriptFile.c_str(), "rb");
 #endif
@@ -443,16 +397,26 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 		// Check if namespace so the metadata for members can be gathered
 		if( token == "namespace" )
 		{
-			// Get the identifier after "namespace"
+			// Get the scope after "namespace". It can be composed of multiple nested namespaces, e.g. A::B::C
+			// Keep track of the number of nested namespace scopes are declared for each block
+			int nestedNamespaces = 0;
 			do
 			{
-				pos += len;
-				t = engine->ParseToken(&modifiedScript[pos], modifiedScript.size() - pos, &len);
-			} while(t == asTC_COMMENT || t == asTC_WHITESPACE);
+				do
+				{
+					pos += len;
+					t = engine->ParseToken(&modifiedScript[pos], modifiedScript.size() - pos, &len);
+				} while (t == asTC_COMMENT || t == asTC_WHITESPACE);
 
-			if( currentNamespace != "" )
-				currentNamespace += "::";
-			currentNamespace += modifiedScript.substr(pos,len);
+				if (t == asTC_IDENTIFIER)
+				{
+					if (currentNamespace != "")
+						currentNamespace += "::";
+					currentNamespace += modifiedScript.substr(pos, len);
+					nestedNamespaces++;
+				}
+			} while (t == asTC_IDENTIFIER || (t == asTC_KEYWORD && modifiedScript.substr(pos, len) == "::"));
+			currentNamespaceStack.push_back(nestedNamespaces);
 
 			// Search until first { is encountered
 			while( pos < modifiedScript.length() )
@@ -476,14 +440,20 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 		// Check if end of namespace
 		if( currentNamespace != "" && token == "}" )
 		{
-			size_t found = currentNamespace.rfind( "::" );
-			if( found != string::npos )
+			assert(currentNamespaceStack.size() > 0);
+			int nestedNamespaces = currentNamespaceStack[currentNamespaceStack.size()-1];
+			currentNamespaceStack.pop_back();
+			while (nestedNamespaces-- > 0)
 			{
-				currentNamespace.erase( found );
-			}
-			else
-			{
-				currentNamespace = "";
+				size_t found = currentNamespace.rfind("::");
+				if (found != string::npos)
+				{
+					currentNamespace.erase(found);
+				}
+				else
+				{
+					currentNamespace = "";
+				}
 			}
 			pos += len;
 			continue;
@@ -534,11 +504,22 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 						includefile.assign(&modifiedScript[pos + 1], len - 2);
 						pos += len;
 
-						// Store it for later processing
-						includes.push_back(includefile);
+						// Make sure the includeFile doesn't contain any line breaks
+						size_t p = includefile.find('\n');
+						if (p != string::npos)
+						{
+							// TODO: Show the correct line number for the error
+							string str = "Invalid file name for #include; it contains a line-break: '" + includefile.substr(0, p) + "'";
+							engine->WriteMessage(sectionname, 0, 0, asMSGTYPE_ERROR, str.c_str());
+						}
+						else
+						{
+							// Store it for later processing
+							includes.push_back(includefile);
 
-						// Overwrite the include directive with space characters to avoid compiler error
-						OverwriteCode(start, pos - start);
+							// Overwrite the include directive with space characters to avoid compiler error
+							OverwriteCode(start, pos - start);
+						}
 					}
 				}
 				else if (token == "pragma")
@@ -584,21 +565,7 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 
 	// Build the actual script
 	engine->SetEngineProperty(asEP_COPY_SCRIPT_SECTIONS, true);
-	
-	printf("[CScriptBuilder] Adding script section '%s' to module (size: %zu)\n", 
-	       sectionname, modifiedScript.size());
-	
-	// Log the processed script content preview
-	if (modifiedScript.size() > 0)
-	{
-		size_t previewLen = modifiedScript.size() < 300 ? modifiedScript.size() : 300;
-		printf("[CScriptBuilder] Processed script preview:\n%.*s%s\n", 
-		       (int)previewLen, modifiedScript.c_str(), 
-		       modifiedScript.size() > 300 ? "\n..." : "");
-	}
-	
-	int addResult = module->AddScriptSection(sectionname, modifiedScript.c_str(), modifiedScript.size(), lineOffset);
-	printf("[CScriptBuilder] AddScriptSection returned: %d\n", addResult);
+	module->AddScriptSection(sectionname, modifiedScript.c_str(), modifiedScript.size(), lineOffset);
 
 	if( includes.size() > 0 )
 	{
@@ -647,17 +614,9 @@ int CScriptBuilder::ProcessScriptSection(const char *script, unsigned int length
 
 int CScriptBuilder::Build()
 {
-	printf("[CScriptBuilder::Build] Starting build for module '%s'\n", module ? module->GetName() : "NULL");
-	
 	int r = module->Build();
-	
-	printf("[CScriptBuilder::Build] module->Build() returned: %d\n", r);
-	
 	if( r < 0 )
-	{
-		printf("[CScriptBuilder::Build] Build failed with error code: %d\n", r);
 		return r;
-	}
 
 #if AS_PROCESS_METADATA == 1
 	// After the script has been built, the metadata strings should be
@@ -833,7 +792,6 @@ int CScriptBuilder::Build()
 					// Look for the matching method instead
 					asITypeInfo *type = engine->GetTypeInfoById(typeId);
 					asIScriptFunction *func = type->GetMethodByDecl(decl->declaration.c_str());
-					assert(func);
 					if (func)
 						it->second.funcMetadataMap.insert(map<int, vector<string> >::value_type(func->GetId(), decl->metadata));
 				}
@@ -1103,11 +1061,13 @@ int CScriptBuilder::ExtractDeclaration(int pos, string &name, string &declaratio
 				}
 				else if( t == asTC_IDENTIFIER )
 				{
-					name = token;
+					// If a parenthesis is already found then the name is already known so it must not be overwritten
+					if( !hasParenthesis )
+						name = token;
 				}
 
 				// Skip trailing decorators
-				if( !hasParenthesis || nestedParenthesis > 0 || t != asTC_IDENTIFIER || (token != "final" && token != "override") )
+				if( !hasParenthesis || nestedParenthesis > 0 || t != asTC_IDENTIFIER || (token != "final" && token != "override" && token != "delete" && token != "property"))
 					declaration += token;
 
 				pos += len;
