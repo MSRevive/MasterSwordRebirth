@@ -823,8 +823,15 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
     }
 
     const int paramCount = params.has_value() ? (int)params->size() : 0;
-    MS_ANGEL_INFO("=== CallGlobalFunctionWithParams: Looking for '%s' in module '%s' with %d params ===", 
-                  szFunctionName, szModuleName.has_value() ? szModuleName->c_str() : "ALL", paramCount);
+    
+    // Skip verbose logging for frequently called functions to reduce spam
+    bool isFrequentFunction = (strcmp(szFunctionName, "GameThink") == 0);
+    
+    if (!isFrequentFunction)
+    {
+        MS_ANGEL_INFO("=== CallGlobalFunctionWithParams: Looking for '%s' in module '%s' with %d params ===", 
+                      szFunctionName, szModuleName.has_value() ? szModuleName->c_str() : "ALL", paramCount);
+    }
 
     // If module name is specified, search only in that module
     if (szModuleName.has_value())
@@ -899,7 +906,11 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
             return false;
         }
 
-        MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
+        // Only log success for non-frequent functions
+        if (!isFrequentFunction)
+        {
+            MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
+        }
         return true;
     }
     
@@ -916,8 +927,13 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
         if (pFunction)
         {
             functionFound = true;
-            MS_ANGEL_INFO("CAngelScriptManager::CallGlobalFunctionWithParams: Calling '%s' in module '%s'", 
-                         szFunctionName, pModule->GetName());
+            
+            // Only log for non-frequent functions to reduce spam
+            if (!isFrequentFunction)
+            {
+                MS_ANGEL_INFO("CAngelScriptManager::CallGlobalFunctionWithParams: Calling '%s' in module '%s'", 
+                             szFunctionName, pModule->GetName());
+            }
             
             // Get context
             asIScriptContext* pContext = AcquireContext();
@@ -969,7 +985,7 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
             if (r == asEXECUTION_FINISHED)
             {
                 anySuccess = true;
-                MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
+                //MS_ANGEL_INFO("Successfully called function '%s' with parameters", szFunctionName);
             }
             else
             {

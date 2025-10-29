@@ -2240,7 +2240,7 @@ pt_end:
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
-		pASManager->CallGlobalFunctionWithParams("Callbacks::Engine::Think");
+		pASManager->CallGlobalFunctionWithParams("GameThink");
 	}
 }
 
