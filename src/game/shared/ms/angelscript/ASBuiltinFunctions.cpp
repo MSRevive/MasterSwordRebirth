@@ -1646,8 +1646,8 @@ namespace ASBuiltinFunctions
         regFunc("void SendMessageToAllPlayers(const string &in, const string &in)", AS_SendMessageToAllPlayers);
         
         // Register external system integration functions
-        regFunc("void CallPlayerExternal(const string &in, const string &in, const array<string>@ &in)", AS_CallPlayerExternal);
-        regFunc("void CallGameMasterExternal(const string &in, const array<string>@ &in)", AS_CallGameMasterExternal);
+        regFunc("void CallPlayerExternal(const string &in, const string &in, array<string>@)", AS_CallPlayerExternal);
+        regFunc("void CallGameMasterExternal(const string &in, array<string>@)", AS_CallGameMasterExternal);
         regFunc("bool MovePlayerToRandomSpawn(CBasePlayer@, float)", AS_MovePlayerToRandomSpawn);
         
         // Register advanced system functions

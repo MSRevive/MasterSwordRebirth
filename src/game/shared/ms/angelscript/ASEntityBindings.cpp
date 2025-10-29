@@ -141,9 +141,10 @@ namespace ASEntityBindings
     
     std::string GetPlayerAuthID(CBasePlayer* pPlayer)
     {
-        if (!pPlayer || FNullEnt(pPlayer))
+        if (!pPlayer || FNullEnt(pPlayer->edict()))
             return "STEAM_ID_INVALID";
-        return pPlayer->AuthID().c_str();
+            
+        return GETPLAYERAUTHID(pPlayer->edict());
     }
     
     std::string GetPlayerTitle(CBasePlayer* pPlayer)
@@ -336,7 +337,8 @@ namespace ASEntityBindings
             return "STEAM_ID_INVALID";
         }
         
-        std::string steamID = GetPlayerAuthID(pPlayer);
+        std::string steamID = GETPLAYERAUTHID(pPlayer->edict());
+        //std::string steamID = GetPlayerAuthID(pPlayer);
         MS_ANGEL_DEBUG("GetSteamID: '%s'", steamID.c_str());
         return steamID;
     }
@@ -1357,11 +1359,13 @@ namespace ASEntityBindings
         // Note: Core types (Vector3, Color, etc.) are registered by ASBindings.cpp
         // We only register entity-specific bindings here
         
-        // Register the new template-based engine bindings
+        // Register entity types first (CBaseEntity, CBasePlayer)
+        RegisterEntityTypes(pEngine);
+        
+        // Now register engine bindings that depend on entity types
         ASEngineBindings::RegisterAll(pEngine);
         
-        // Register entity types and legacy functions
-        RegisterEntityTypes(pEngine);
+        // Register global functions
         RegisterGlobalFunctions(pEngine);
         
         // Test the entity bindings to ensure they work
