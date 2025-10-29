@@ -1,0 +1,52 @@
+name: PR Compile Check
+
+on:
+  pull_request:
+    branches:
+      - "dev"
+    types: [review_requested, ready_for_review, synchronize]
+
+env:
+  BUILD_TYPE: release
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.28.3
+      
+      - name: Get Linux Packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update
+          sudo apt install -y libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config gcc-multilib g++-multilib
+
+      - name: Build on Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
+
+      - name: Setup MSVC CLI for Windows
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Build on Windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -A Win32
+          msbuild ${{github.workspace}}/build/msr.sln /p:Configuration=Release /p:Platform=win32
