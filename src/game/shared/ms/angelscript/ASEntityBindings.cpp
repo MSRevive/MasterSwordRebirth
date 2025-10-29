@@ -441,10 +441,18 @@ namespace ASEntityBindings
         return result;
     }
     
-    // SpawnNPC - Creates an NPC at a specific position (WITHOUT spawning the script)
+    // Enum for NPC spawn modes
+    enum class ScriptMode
+    {
+        Legacy = 0,      // Load and execute MSCScript file (legacy behavior)
+        Angel = 1,    // Skip MSCScript loading (for AngelScript-managed entities)
+        Both = 2    // Load and execute both MSCScript and AngelScript
+    };
+    
+    // SpawnNPC - Creates an NPC at a specific position
     // Returns CBaseEntity@ pointer to the created monster
-    // Note: Caller must set properties and then call SpawnEntity() to run the spawn script
-    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params)
+    // spawnMode: Legacy (default) loads legacy MSCScript, Angel skips it
+    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
     {
 #ifdef VALVE_DLL
         if (scriptName.empty())
@@ -453,8 +461,10 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        MS_ANGEL_INFO("SpawnNPC: Creating NPC '%s' at (%.1f, %.1f, %.1f)", 
-                      scriptName.c_str(), position.x, position.y, position.z);
+        const char* modeStr = spawnMode == ScriptMode::Legacy ? "Legacy" : 
+                              (spawnMode == ScriptMode::Angel ? "Angel" : "Both");
+        MS_ANGEL_INFO("SpawnNPC: Creating NPC '%s' at (%.1f, %.1f, %.1f) [Mode: %s]", 
+                      scriptName.c_str(), position.x, position.y, position.z, modeStr);
         
         // Create the monster entity using engine function
         CMSMonster* pMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
@@ -467,8 +477,93 @@ namespace ASEntityBindings
         // Set origin before spawning
         pMonster->pev->origin = position;
         
-        // Spawn the monster with the script
-        pMonster->Spawn(scriptName.c_str());
+        if (spawnMode == ScriptMode::Legacy)
+        {
+            // Legacy mode: Spawn the monster with the MSCScript
+            pMonster->Spawn(scriptName.c_str());
+        }
+        else if (spawnMode == ScriptMode::Angel)
+        {
+            // Angel mode: Manually initialize without loading MSCScript
+            // This prevents SUB_Remove() from being called when no script file exists
+            pMonster->m_ScriptName = ""; // No script - AngelScript manages this entity
+            pMonster->m_DisplayName = scriptName.c_str();
+            pMonster->pev->classname = MAKE_STRING("ms_npc");
+            
+            // Set basic properties for a minimal entity
+            pMonster->pev->health = 1;
+            pMonster->m_HP = 1;
+            pMonster->pev->max_health = 1;
+            pMonster->m_MaxHP = 1;
+            pMonster->pev->takedamage = DAMAGE_NO;
+            pMonster->pev->solid = SOLID_NOT;
+            pMonster->pev->movetype = MOVETYPE_NONE;
+            pMonster->pev->flags |= FL_MONSTER;
+            pMonster->pev->deadflag = DEAD_NO;
+            pMonster->pev->gravity = 0;
+            
+            // Make invisible
+            pMonster->pev->effects |= EF_NODRAW;
+            pMonster->pev->rendermode = kRenderTransTexture;
+            pMonster->pev->renderamt = 0;
+            
+            // Set size (minimal)
+            UTIL_SetSize(pMonster->pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+            
+            // Call Precache to set up basic properties
+            pMonster->Precache();
+        }
+        else // ScriptMode::Both
+        {
+            // Both mode: Initialize manually first (to ensure entity persists),
+            // then attempt to load MSCScript if it exists
+            MS_ANGEL_INFO("SpawnNPC: Both mode - initializing entity manually first");
+            
+            pMonster->m_ScriptName = scriptName.c_str();
+            pMonster->m_DisplayName = scriptName.c_str();
+            pMonster->pev->classname = MAKE_STRING("ms_npc");
+            
+            // Set basic properties for a minimal entity
+            pMonster->pev->health = 1;
+            pMonster->m_HP = 1;
+            pMonster->pev->max_health = 1;
+            pMonster->m_MaxHP = 1;
+            pMonster->pev->takedamage = DAMAGE_NO;
+            pMonster->pev->solid = SOLID_NOT;
+            pMonster->pev->movetype = MOVETYPE_NONE;
+            pMonster->pev->flags |= FL_MONSTER;
+            pMonster->pev->deadflag = DEAD_NO;
+            pMonster->pev->gravity = 0;
+            
+            // Make invisible by default
+            pMonster->pev->effects |= EF_NODRAW;
+            pMonster->pev->rendermode = kRenderTransTexture;
+            pMonster->pev->renderamt = 0;
+            
+            // Set size (minimal)
+            UTIL_SetSize(pMonster->pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+            
+            // Call Precache to set up basic properties
+            pMonster->Precache();
+            
+            // Now try to load the MSCScript if it exists
+            // Script_Add returns nullptr if script doesn't exist or fails to load
+            IScripted* pScripted = pMonster->GetScripted();
+            if (pScripted)
+            {
+                CScript* pScript = pScripted->Script_Add(scriptName.c_str(), pMonster);
+                if (pScript)
+                {
+                    MS_ANGEL_INFO("SpawnNPC: Both mode - MSCScript '%s' loaded successfully", scriptName.c_str());
+                    // Run script events to initialize script-side properties
+                    pScripted->RunScriptEvents();
+                }
+                else
+                {
+                    MS_ANGEL_INFO("SpawnNPC: Both mode - MSCScript '%s' not found or failed to load (continuing with AngelScript only)", scriptName.c_str());
+                }
+            }
+        }
         
         MS_ANGEL_INFO("SpawnNPC: Successfully spawned '%s' at index %d", 
                       scriptName.c_str(), pMonster->entindex());
@@ -1254,6 +1349,12 @@ namespace ASEntityBindings
         pEngine->RegisterGlobalProperty("const int DAMAGE_YES", (void*)&const_DAMAGE_YES);
         pEngine->RegisterGlobalProperty("const int DAMAGE_AIM", (void*)&const_DAMAGE_AIM);
         
+        // Register ScriptMode enum for controlling script loading behavior
+        pEngine->RegisterEnum("ScriptMode");
+        pEngine->RegisterEnumValue("ScriptMode", "Legacy", static_cast<int>(ScriptMode::Legacy));
+        pEngine->RegisterEnumValue("ScriptMode", "Angel", static_cast<int>(ScriptMode::Angel));
+        pEngine->RegisterEnumValue("ScriptMode", "Both", static_cast<int>(ScriptMode::Both));
+        
         MS_ANGEL_INFO("[ASEntityBindings] Entity types and constants registration complete");
     }
     
@@ -1300,9 +1401,9 @@ namespace ASEntityBindings
             // Vote menu opening function
             .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu)
             // Spawn functions
-            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null)", 
-                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
-                    return AS_SpawnNPC(scriptName, position, params);
+            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CBaseEntity* {
+                    return AS_SpawnNPC(scriptName, position, params, spawnMode);
                 })
             .function("CBaseEntity@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
                 +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
