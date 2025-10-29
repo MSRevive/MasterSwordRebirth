@@ -685,7 +685,7 @@ void CAngelScriptManager::LogMessage(const char* szMessage, int nLevel)
 //==========================================================================
 // CallGlobalFunction - Execute a global AngelScript function
 //==========================================================================
-bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const char* szModuleName)
+bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, std::optional<std::string> szModuleName)
 {
     if (!m_bInitialized || !m_pEngine || !szFunctionName)
     {
@@ -694,15 +694,15 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
     }
 
     MS_ANGEL_INFO("=== CallGlobalFunction: Looking for '%s' in module '%s' ===", 
-                  szFunctionName, szModuleName ? szModuleName : "ALL");
+                  szFunctionName, szModuleName.has_value() ? szModuleName->c_str() : "ALL");
 
     // If module name is specified, search only in that module
-    if (szModuleName)
+    if (szModuleName.has_value())
     {
-        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName);
+        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName->c_str());
         if (!pModule)
         {
-            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Module '%s' not found", szModuleName);
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Module '%s' not found", szModuleName->c_str());
             return false;
         }
 
@@ -710,10 +710,10 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
         if (!pFunction)
         {
             MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunction: Function '%s' not found in module '%s'", 
-                          szFunctionName, szModuleName);
+                          szFunctionName, szModuleName->c_str());
             
             // List all functions in the module for debugging
-            MS_ANGEL_INFO("Functions in module '%s':", szModuleName);
+            MS_ANGEL_INFO("Functions in module '%s':", szModuleName->c_str());
             for (asUINT j = 0; j < pModule->GetFunctionCount(); j++)
             {
                 asIScriptFunction* pFunc = pModule->GetFunctionByIndex(j);
@@ -726,7 +726,7 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
             return false;
         }
 
-        MS_ANGEL_INFO("Found function '%s' in module '%s', executing...", szFunctionName, szModuleName);
+        MS_ANGEL_INFO("Found function '%s' in module '%s', executing...", szFunctionName, szModuleName->c_str());
         return this->ExecuteFunction(pFunction, szFunctionName);
     }
     
@@ -795,7 +795,7 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
 //==========================================================================
 bool CAngelScriptManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
 {
-    if (!pFunction || paramIndex >= pFunction->GetParamCount())
+    if (!pFunction || paramIndex < 0 || static_cast<asUINT>(paramIndex) >= pFunction->GetParamCount())
         return false;
         
     int typeId;
@@ -814,7 +814,7 @@ bool CAngelScriptManager::IsParameterByReference(asIScriptFunction* pFunction, i
 //==========================================================================
 // CallGlobalFunctionWithParams - Execute a global AngelScript function with string parameters
 //==========================================================================
-bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionName, const std::vector<std::string>& params, const char* szModuleName)
+bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionName, const std::optional<std::vector<std::string>>& params, std::optional<std::string> szModuleName)
 {
     if (!m_bInitialized || !m_pEngine || !szFunctionName)
     {
@@ -822,16 +822,17 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
         return false;
     }
 
+    const int paramCount = params.has_value() ? (int)params->size() : 0;
     MS_ANGEL_INFO("=== CallGlobalFunctionWithParams: Looking for '%s' in module '%s' with %d params ===", 
-                  szFunctionName, szModuleName ? szModuleName : "ALL", (int)params.size());
+                  szFunctionName, szModuleName.has_value() ? szModuleName->c_str() : "ALL", paramCount);
 
     // If module name is specified, search only in that module
-    if (szModuleName)
+    if (szModuleName.has_value())
     {
-        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName);
+        asIScriptModule* pModule = m_pEngine->GetModule(szModuleName->c_str());
         if (!pModule)
         {
-            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Module '%s' not found", szModuleName);
+            MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Module '%s' not found", szModuleName->c_str());
             return false;
         }
 
@@ -839,7 +840,7 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
         if (!pFunction)
         {
             MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Function '%s' not found in module '%s'", 
-                          szFunctionName, szModuleName);
+                          szFunctionName, szModuleName->c_str());
             return false;
         }
 
@@ -861,18 +862,21 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
         }
 
         // Set string arguments - check if parameter is passed by reference
-        for (size_t i = 0; i < params.size() && i < (size_t)pFunction->GetParamCount(); i++)
+        if (params.has_value())
         {
-            if (IsParameterByReference(pFunction, i))
-                r = pContext->SetArgAddress(i, const_cast<std::string*>(&params[i]));
-            else
-                r = pContext->SetArgObject(i, const_cast<std::string*>(&params[i]));
-                
-            if (r < 0)
+            for (size_t i = 0; i < params->size() && i < (size_t)pFunction->GetParamCount(); i++)
             {
-                MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)i);
-                ReleaseContext(pContext);
-                return false;
+                if (IsParameterByReference(pFunction, i))
+                    r = pContext->SetArgAddress(i, const_cast<std::string*>(&(*params)[i]));
+                else
+                    r = pContext->SetArgObject(i, const_cast<std::string*>(&(*params)[i]));
+                    
+                if (r < 0)
+                {
+                    MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)i);
+                    ReleaseContext(pContext);
+                    return false;
+                }
             }
         }
 
@@ -934,18 +938,21 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
 
             // Set string arguments - check if parameter is passed by reference
             bool argsOk = true;
-            for (size_t j = 0; j < params.size() && j < (size_t)pFunction->GetParamCount(); j++)
+            if (params.has_value())
             {
-                if (IsParameterByReference(pFunction, j))
-                    r = pContext->SetArgAddress(j, const_cast<std::string*>(&params[j]));
-                else
-                    r = pContext->SetArgObject(j, const_cast<std::string*>(&params[j]));
-                    
-                if (r < 0)
+                for (size_t j = 0; j < params->size() && j < (size_t)pFunction->GetParamCount(); j++)
                 {
-                    MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)j);
-                    argsOk = false;
-                    break;
+                    if (IsParameterByReference(pFunction, j))
+                        r = pContext->SetArgAddress(j, const_cast<std::string*>(&(*params)[j]));
+                    else
+                        r = pContext->SetArgObject(j, const_cast<std::string*>(&(*params)[j]));
+                        
+                    if (r < 0)
+                    {
+                        MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)j);
+                        argsOk = false;
+                        break;
+                    }
                 }
             }
 

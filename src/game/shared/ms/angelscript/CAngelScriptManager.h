@@ -4,6 +4,7 @@
 #include <cstddef>  // for size_t
 #include <vector>
 #include <string>
+#include <optional>
 
 // Forward declarations
 class asIScriptEngine;
@@ -77,8 +78,8 @@ public:
     void ClearAllModules(); // Remove all script modules
     
     // Global function execution
-    bool CallGlobalFunction(const char* szFunctionName, const char* szModuleName = nullptr);
-    bool CallGlobalFunctionWithParams(const char* szFunctionName, const std::vector<std::string>& params, const char* szModuleName = nullptr);
+    bool CallGlobalFunction(const char* szFunctionName, std::optional<std::string> szModuleName = std::nullopt);
+    bool CallGlobalFunctionWithParams(const char* szFunctionName, const std::optional<std::vector<std::string>>& params = std::nullopt, std::optional<std::string> szModuleName = std::nullopt);
     
     // Debugger access
     ASDebugger* GetDebugger() const { return m_pDebugger; }

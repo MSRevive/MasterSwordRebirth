@@ -2236,6 +2236,12 @@ pt_end:
 	}
 
 	CallScriptEvent("game_think");
+
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
+	{
+		pASManager->CallGlobalFunctionWithParams("Callbacks::Engine::Think");
+	}
 }
 
 // checks if the spot is clear of players

@@ -1969,8 +1969,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
-			std::vector<std::string> params;
-			pASManager->CallGlobalFunctionWithParams("ServerActivate", params);
+			pASManager->CallGlobalFunctionWithParams("ServerActivate");
 			MS_INFO("ServerActivate event fired successfully");
 			
 			// After ServerActivate, try to find the game_master again
