@@ -1720,11 +1720,12 @@ public:
 		if (pASManager && pASManager->IsInitialized())
 		{
 			std::vector<std::string> params;
-			params.push_back(STRING(sDestName));
-			params.push_back(STRING(sDestMap));
-			params.push_back(STRING(sName));
-			params.push_back(STRING(sDestTrans));
-			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Add player Steam ID
+			params.push_back(pPlayer->DisplayName());     // Player name
+			params.push_back(STRING(sDestName));          // Destination name
+			params.push_back(STRING(sDestMap));           // Destination map
+			params.push_back(STRING(sName));              // Local spawn point
+			params.push_back(STRING(sDestTrans));         // Destination spawn point
+			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Steam ID
 			
 			// Call global AngelScript function
 			pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionEntered", params);

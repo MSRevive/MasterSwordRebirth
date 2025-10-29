@@ -87,6 +87,9 @@ private:
     // Helper function for function execution
     bool ExecuteFunction(asIScriptFunction* pFunction, const char* szFunctionName);
     
+    // Helper function to determine if parameter should be passed by reference
+    bool IsParameterByReference(asIScriptFunction* pFunction, int paramIndex);
+    
 public:
     // Update and maintenance
     void Think(); // Called from MSGameThink() for garbage collection

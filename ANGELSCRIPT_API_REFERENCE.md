@@ -138,6 +138,10 @@ void PlaySound(const string &in)
 void SendInfoMsg(const string &in)
 void SendEventMsg(const string &in)
 
+// Enhanced messaging methods with color support
+void SendColoredMessage(MessageColor color, const string &in message)
+void SendHUDInfoMessage(const string &in title, const string &in message)
+
 // Map transition methods
 void SetTransitionFields(const string &in localSpawn, const string &in destMap, const string &in destSpawn)
 string GetOldTransition() const
@@ -190,6 +194,56 @@ if (player !is null) {
     }
 }
 ```
+
+**SendColoredMessage** sends a colored text message to the player's HUD event console:
+- `color`: MessageColor enum value determining the message color
+- `message`: Message text to display (max 140 characters, auto-truncated with `*` suffix)
+- Automatically adds newline if not present
+- Replaces legacy script commands: `playermessage`, `rplayermessage`, `gplayermessage`, `bplayermessage`, `yplayermessage`, `dplayermessage`
+
+**SendHUDInfoMessage** sends an info box message to the player's top-left HUD:
+- `title`: Title text for the info box (max 120 characters, auto-truncated with `*\n` suffix)
+- `message`: Body text for the info box (max 120 characters, auto-truncated with `*\n` suffix)
+- Replaces legacy script command: `infomsg <player> <title> <message>`
+
+**Example - Messaging**:
+```angelscript
+CBasePlayer@ player = PlayerByIndex(1);
+if (player !is null) {
+    // Send colored messages
+    player.SendColoredMessage(MessageColor::Green, "You found a rare item!");
+    player.SendColoredMessage(MessageColor::Red, "You took damage!");
+    player.SendColoredMessage(MessageColor::Yellow, "Attack dealt 50 damage");
+    player.SendColoredMessage(MessageColor::Blue, "Mana restored");
+    player.SendColoredMessage(MessageColor::Gray, "Cannot equip this item");
+    player.SendColoredMessage(MessageColor::White, "Normal information message");
+    
+    // Send HUD info box
+    player.SendHUDInfoMessage("Quest Complete", "You completed the tutorial quest!");
+}
+```
+
+### MessageColor Enum
+**Scope**: Server
+
+```angelscript
+enum MessageColor {
+    White = 0,   // Normal color (off-white) - HUDEVENT_NORMAL
+    Gray = 1,    // Dark gray - unable/disabled actions - HUDEVENT_UNABLE
+    Yellow = 2,  // Yellowish - attack results - HUDEVENT_ATTACK
+    Red = 3,     // Red - damage received - HUDEVENT_ATTACKED
+    Green = 4,   // Green - positive events - HUDEVENT_GREEN
+    Blue = 5     // Blue - info/mana events - HUDEVENT_BLUE
+}
+```
+
+The MessageColor enum is used with `SendColoredMessage()` to specify HUD message colors:
+- **White**: Standard informational messages, general notifications
+- **Gray**: Disabled actions (can't pickup, can't equip, etc.)
+- **Yellow**: Combat feedback (your attack damage)
+- **Red**: Taking damage, negative combat events
+- **Green**: Positive events (item pickup, quest complete, healing)
+- **Blue**: Special information, mana-related events
 
 ---
 

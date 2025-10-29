@@ -95,6 +95,127 @@ namespace ASEntityBindings
         MS_ANGEL_DEBUG("Release_CBasePlayer called for player %p", player);
     }
     
+    // ========================================================================
+    // Message Color Enum for AngelScript
+    // Maps to hudevent_e from player.h for colored HUD messages
+    // ========================================================================
+    enum class MessageColor : int
+    {
+        White = 0,      // HUDEVENT_NORMAL - Normal color (off white)
+        Gray = 1,       // HUDEVENT_UNABLE - Unable to do something (dark gray)
+        Yellow = 2,     // HUDEVENT_ATTACK - Your attack results (yellowish)
+        Red = 3,        // HUDEVENT_ATTACKED - You were attacked (red)
+        Green = 4,      // HUDEVENT_GREEN - Something good (green)
+        Blue = 5        // HUDEVENT_BLUE - Something blue (blue)
+    };
+    
+    // ========================================================================
+    // Player Messaging Wrapper Functions
+    // Replacements for CScript::ScriptCmd_Message and ScriptCmd_InfoMessage
+    // ========================================================================
+    
+    /**
+     * SendColoredMessage - Send a colored event message to player's HUD
+     * Replacement for: playermessage, rplayermessage, gplayermessage, etc.
+     * 
+     * @param player The player to send the message to
+     * @param color The color/type of message (MessageColor enum)
+     * @param message The message text to display
+     */
+    void SendColoredMessage(CBasePlayer* player, MessageColor color, const std::string& message)
+    {
+        #ifdef VALVE_DLL
+            if (!player || message.empty()) return;
+            
+            // Apply message length limit (140 chars as per original implementation)
+            std::string finalMsg = message;
+            if (finalMsg.length() > 140) {
+                finalMsg = finalMsg.substr(0, 140) + "*";
+            }
+            
+            // Add newline if not already present
+            if (!finalMsg.empty() && finalMsg[finalMsg.length() - 1] != '\n') {
+                finalMsg += "\n";
+            }
+            
+            // Send message based on color using hudevent_e values
+            switch (color) {
+                case MessageColor::White:
+                    // Use SendInfoMsg for white/normal messages (matches "playermessage")
+                    player->SendInfoMsg("%s", finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Gray:
+                    player->SendEventMsg(HUDEVENT_UNABLE, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Yellow:
+                    player->SendEventMsg(HUDEVENT_ATTACK, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Red:
+                    player->SendEventMsg(HUDEVENT_ATTACKED, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Green:
+                    player->SendEventMsg(HUDEVENT_GREEN, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Blue:
+                    player->SendEventMsg(HUDEVENT_BLUE, finalMsg.c_str());
+                    break;
+                    
+                default:
+                    // Default to normal white message
+                    player->SendInfoMsg("%s", finalMsg.c_str());
+                    break;
+            }
+            
+            MS_ANGEL_DEBUG("SendColoredMessage: Sent %s message to %s: %s", 
+                static_cast<int>(color) == 0 ? "white" :
+                static_cast<int>(color) == 1 ? "gray" :
+                static_cast<int>(color) == 2 ? "yellow" :
+                static_cast<int>(color) == 3 ? "red" :
+                static_cast<int>(color) == 4 ? "green" : "blue",
+                player->DisplayName(),
+                finalMsg.c_str());
+        #endif
+    }
+    
+    /**
+     * SendHUDInfoMessage - Send an info box message to player's HUD
+     * Replacement for: infomsg <player> <title> <message>
+     * 
+     * @param player The player to send the message to
+     * @param title The title text for the info box (max 120 chars)
+     * @param message The body text for the info box (max 120 chars)
+     */
+    void SendHUDInfoMessage(CBasePlayer* player, const std::string& title, const std::string& message)
+    {
+        #ifdef VALVE_DLL
+            if (!player) return;
+            
+            // Apply length limits (120 chars as per original implementation)
+            std::string finalTitle = title;
+            if (finalTitle.length() > 120) {
+                finalTitle = finalTitle.substr(0, 120) + "*\n";
+            }
+            
+            std::string finalMsg = message;
+            if (finalMsg.length() > 120) {
+                finalMsg = finalMsg.substr(0, 120) + "*\n";
+            }
+            
+            // Send HUD info message
+            player->SendHUDMsg(finalTitle.c_str(), finalMsg.c_str());
+            
+            MS_ANGEL_DEBUG("SendHUDInfoMessage: Sent to %s - Title: %s, Message: %s", 
+                player->DisplayName(),
+                finalTitle.c_str(),
+                finalMsg.c_str());
+        #endif
+    }
+    
     // Helper functions for CBaseEntity methods that need extra logic
     Vector GetEntityOrigin(CBaseEntity* pEntity)
     {
@@ -1204,6 +1325,10 @@ namespace ASEntityBindings
                 if (player) player->SendEventMsg(msg.c_str());
             })
             
+            // Enhanced messaging methods with color support
+            .method("void SendColoredMessage(MessageColor, const string &in)", SendColoredMessage)
+            .method("void SendHUDInfoMessage(const string &in, const string &in)", SendHUDInfoMessage)
+            
             // Map transition methods
             .method("void SetTransitionFields(const string &in, const string &in, const string &in)", 
                 [](CBasePlayer* player, const std::string& localSpawn, const std::string& destMap, const std::string& destSpawn) {
@@ -1312,6 +1437,15 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Registering real entity types...");
         
+        // Register MessageColor enum FIRST (before CBasePlayer that uses it)
+        pEngine->RegisterEnum("MessageColor");
+        pEngine->RegisterEnumValue("MessageColor", "White", static_cast<int>(MessageColor::White));
+        pEngine->RegisterEnumValue("MessageColor", "Gray", static_cast<int>(MessageColor::Gray));
+        pEngine->RegisterEnumValue("MessageColor", "Yellow", static_cast<int>(MessageColor::Yellow));
+        pEngine->RegisterEnumValue("MessageColor", "Red", static_cast<int>(MessageColor::Red));
+        pEngine->RegisterEnumValue("MessageColor", "Green", static_cast<int>(MessageColor::Green));
+        pEngine->RegisterEnumValue("MessageColor", "Blue", static_cast<int>(MessageColor::Blue));
+        
         // Register CBaseEntity with direct AngelScript API
         RegisterCBaseEntity(pEngine);
         
@@ -1354,6 +1488,8 @@ namespace ASEntityBindings
         pEngine->RegisterEnumValue("ScriptMode", "Legacy", static_cast<int>(ScriptMode::Legacy));
         pEngine->RegisterEnumValue("ScriptMode", "Angel", static_cast<int>(ScriptMode::Angel));
         pEngine->RegisterEnumValue("ScriptMode", "Both", static_cast<int>(ScriptMode::Both));
+        
+        // Note: MessageColor enum is registered earlier (before CBasePlayer registration)
         
         MS_ANGEL_INFO("[ASEntityBindings] Entity types and constants registration complete");
     }

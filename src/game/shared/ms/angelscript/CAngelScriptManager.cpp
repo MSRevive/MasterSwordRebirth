@@ -791,6 +791,27 @@ bool CAngelScriptManager::CallGlobalFunction(const char* szFunctionName, const c
 }
 
 //==========================================================================
+// IsParameterByReference - Helper function to determine if parameter should be passed by reference
+//==========================================================================
+bool CAngelScriptManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
+{
+    if (!pFunction || paramIndex >= pFunction->GetParamCount())
+        return false;
+        
+    int typeId;
+    asDWORD flags;
+    const char* name;
+    const char* defaultArg;
+    
+    int r = pFunction->GetParam(paramIndex, &typeId, &flags, &name, &defaultArg);
+    if (r < 0)
+        return false;
+    
+    // Check if parameter has reference flag
+    return (flags & asTM_INREF) != 0;
+}
+
+//==========================================================================
 // CallGlobalFunctionWithParams - Execute a global AngelScript function with string parameters
 //==========================================================================
 bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionName, const std::vector<std::string>& params, const char* szModuleName)
@@ -839,10 +860,14 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
             return false;
         }
 
-        // Set string arguments
+        // Set string arguments - check if parameter is passed by reference
         for (size_t i = 0; i < params.size() && i < (size_t)pFunction->GetParamCount(); i++)
         {
-            r = pContext->SetArgObject(i, (void*)&params[i]);
+            if (IsParameterByReference(pFunction, i))
+                r = pContext->SetArgAddress(i, const_cast<std::string*>(&params[i]));
+            else
+                r = pContext->SetArgObject(i, const_cast<std::string*>(&params[i]));
+                
             if (r < 0)
             {
                 MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)i);
@@ -907,11 +932,15 @@ bool CAngelScriptManager::CallGlobalFunctionWithParams(const char* szFunctionNam
                 continue;
             }
 
-            // Set string arguments
+            // Set string arguments - check if parameter is passed by reference
             bool argsOk = true;
             for (size_t j = 0; j < params.size() && j < (size_t)pFunction->GetParamCount(); j++)
             {
-                r = pContext->SetArgObject(j, (void*)&params[j]);
+                if (IsParameterByReference(pFunction, j))
+                    r = pContext->SetArgAddress(j, const_cast<std::string*>(&params[j]));
+                else
+                    r = pContext->SetArgObject(j, const_cast<std::string*>(&params[j]));
+                    
                 if (r < 0)
                 {
                     MS_ANGEL_ERROR("CAngelScriptManager::CallGlobalFunctionWithParams: Failed to set argument %d", (int)j);
