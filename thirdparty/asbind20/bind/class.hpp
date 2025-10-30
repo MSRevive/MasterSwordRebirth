@@ -1118,14 +1118,14 @@ namespace detail
     };
     
     /** 
-    // Metadata Tracking for Automatic Inheritance
+     * Metadata Tracking for Automatic Inheritance
     */ 
     
     // Metadata for a registered method
     struct MethodMetadata
     {
         std::string declaration;                               // e.g., "void SetNetName(const string &in)"
-        void* functionPtr;                                     // The actual function pointer (as void*)
+        AS_NAMESPACE_QUALIFIER asSFuncPtr functionPtr;         // The actual function pointer
         AS_NAMESPACE_QUALIFIER asECallConvTypes callConv;      // Calling convention
         void* auxiliary;                                       // Auxiliary data (if any)
         int compositeOffset;                                   // Composite offset (if any)
@@ -1186,16 +1186,39 @@ inline void clear_inheritance_metadata()
     detail::get_property_registry().clear();
 }
 
-// Helper function for reference casting between types in inheritance hierarchy
+/**
+ * @brief Helper function for reference casting between types in inheritance hierarchy
+ * 
+ * This function enables implicit upcasting in AngelScript when using .base<>() inheritance.
+ * It uses dynamic_cast for safe runtime type conversion.
+ * 
+ * @tparam From Source type (derived class)
+ * @tparam To Target type (base class)
+ * @param from Pointer to source object
+ * @return Pointer to target type, or nullptr if cast fails
+ * 
+ * @warning CRITICAL REQUIREMENTS:
+ * 1. RTTI (Run-Time Type Information) MUST be enabled in compiler settings
+ *    - MSVC: /GR (enabled by default)
+ *    - GCC/Clang: -frtti (enabled by default)
+ * 
+ * 2. C++ classes in the inheritance hierarchy MUST be polymorphic
+ *    - At least ONE virtual function is required (typically a virtual destructor)
+ *    - Example: virtual ~CBaseEntity() = default;
+ * 
+ * @note Without RTTI or virtual functions, dynamic_cast will fail to compile
+ *       or produce incorrect results, breaking the inheritance system.
+ * 
+ * @note The handle reference will be managed by AngelScript - no manual addref needed.
+ */
 template<typename From, typename To>
 To* asbind20_refCast(From* from)
 {
     if (!from) return nullptr;
     
-    // Try to cast using dynamic_cast
+    // Use dynamic_cast for safe runtime type conversion
+    // This requires RTTI and polymorphic classes (see warning above)
     To* to = dynamic_cast<To*>(from);
-    // If cast succeeds, the handle reference will be managed by AngelScript
-    // No need to manually call addref here as AngelScript handles it
     return to;
 }
 
@@ -1285,7 +1308,7 @@ protected:
         // Store metadata for automatic inheritance
         detail::MethodMetadata metadata;
         metadata.declaration = std::string(decl);
-        metadata.functionPtr = reinterpret_cast<void*>(funcPtr.ptr.f.func);
+        metadata.functionPtr = funcPtr;  // Store the entire asSFuncPtr struct
         metadata.callConv = CallConv;
         metadata.auxiliary = aux;
         metadata.compositeOffset = 0;
@@ -5583,16 +5606,13 @@ public:
                 if (alreadyInherited)
                     continue;  // Skip, already inherited from another base
                 
-                // Reconstruct asSFuncPtr from stored data
-                AS_NAMESPACE_QUALIFIER asSFuncPtr funcPtr;
-                funcPtr.ptr.f.func = reinterpret_cast<AS_NAMESPACE_QUALIFIER asFUNCTION_t>(method.functionPtr);
-                
+                // Use the stored asSFuncPtr directly (no reconstruction needed)
                 // Re-register for derived class
                 // Note: We silently ignore asALREADY_REGISTERED errors (method overriding)
                 int r = m_engine->RegisterObjectMethod(
                     m_name.c_str(),
                     method.declaration.c_str(),
-                    funcPtr,
+                    method.functionPtr,
                     method.callConv,
                     method.auxiliary
                 );
