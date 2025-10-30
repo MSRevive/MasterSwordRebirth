@@ -1175,16 +1175,16 @@ namespace detail
             return it->second;
         return "";
     }
-    
-    // Clear all inheritance metadata registries
-    // Call this when reinitializing AngelScript to ensure clean state
-    inline void clear_inheritance_metadata()
-    {
-        get_type_name_registry().clear();
-        get_method_registry().clear();
-        get_property_registry().clear();
-    }
 } // namespace detail
+
+// Clear all inheritance metadata registries
+// Call this when reinitializing AngelScript to ensure clean state
+inline void clear_inheritance_metadata()
+{
+    detail::get_type_name_registry().clear();
+    detail::get_method_registry().clear();
+    detail::get_property_registry().clear();
+}
 
 // Helper function for reference casting between types in inheritance hierarchy
 template<typename From, typename To>
