@@ -755,7 +755,11 @@ namespace ASMonsterBindings
             .method("bool IsMoving()", &CBaseMonster::IsMoving)
             
             // Stop method
-            .method("void Stop()", &CBaseMonster::Stop);
+            .method("void Stop()", &CBaseMonster::Stop)
+            
+            // Inherit from CBaseEntity (called AFTER registering CBaseMonster's own methods
+            // so that overrides like IsAlive() are registered first)
+            .base<CBaseEntity>();
         
         MS_ANGEL_INFO("[ASMonsterBindings] CBaseMonster registration complete");
     }
@@ -789,9 +793,9 @@ namespace ASMonsterBindings
             .property("float m_DMGMulti", &CMSMonster::m_DMGMulti)
             .property("float m_HearingSensitivity", &CMSMonster::m_HearingSensitivity)
             // Complex properties that need wrapper functions (msstring types)
-            .method("string get_Title() const", AS_CMSMonster_get_Title)
+            .method("string get_Title()", AS_CMSMonster_get_Title)
             .method("void set_Title(const string &in)", AS_CMSMonster_set_Title)
-            .method("string get_ScriptName() const", AS_CMSMonster_get_ScriptName)
+            .method("string get_ScriptName()", AS_CMSMonster_get_ScriptName)
             .method("void set_ScriptName(const string &in)", AS_CMSMonster_set_ScriptName)
             
             // Lifecycle Methods
@@ -823,7 +827,12 @@ namespace ASMonsterBindings
             
             // Misc Methods
             .method("float Weight()", AS_CMSMonster_Weight)
-            .method("void SetSpeed()", AS_CMSMonster_SetSpeed);
+            .method("void SetSpeed()", AS_CMSMonster_SetSpeed)
+            
+            // Inherit from CBaseMonster (called AFTER registering CMSMonster's own methods
+            // so that overrides like IsAlive() are registered first)
+            // NOTE: This automatically inherits all CBaseMonster AND CBaseEntity methods!
+            .base<CBaseMonster>();
         
         MS_ANGEL_INFO("[ASMonsterBindings] CMSMonster registration complete");
     }

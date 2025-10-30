@@ -684,34 +684,43 @@ CBaseEntity@ StringToEntity(const string &in)
 CBasePlayer@ StringToPlayer(const string &in)
 
 // Entity spawning functions
-CBaseEntity@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
-CBaseEntity@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CMSMonster@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CBasePlayerItem@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
 ```
 
 **SpawnNPC** creates an NPC entity at the specified position:
 - `scriptName`: Script name of the NPC to spawn (e.g., "game_master", "skeleton")
 - `position`: 3D coordinates where the NPC should spawn
 - `params`: Optional array of additional parameters (reserved for future use)
-- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Returns: Pointer to the spawned CMSMonster, or null if creation failed
 - Server-only function
 
 **SpawnItem** creates an item entity at the specified position:
 - `scriptName`: Script name of the item to spawn (e.g., "potion_health", "sword_short")
 - `position`: 3D coordinates where the item should spawn
 - `params`: Optional array of additional parameters (reserved for future use)
-- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Returns: Pointer to the spawned CBasePlayerItem, or null if creation failed
 - Server-only function
 
 **Example**:
 ```angelscript
 // Spawn a skeleton at coordinates (100, 200, 0)
-CBaseEntity@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
+CMSMonster@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
 if (pSkeleton !is null) {
-    LogMessage("Skeleton spawned at index " + pSkeleton.GetEntIndex());
+    LogMessage("Skeleton spawned at index " + pSkeleton.entindex());
+    // Now you have direct access to CMSMonster properties
+    pSkeleton.m_HP = 100.0f;
+    pSkeleton.Title = "Elite Skeleton";
 }
 
-// Spawn a health potion
-CBaseEntity@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
+// Spawn a health potion (returns CBasePlayerItem)
+CBasePlayerItem@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
+if (pPotion !is null) {
+    LogMessage("Item spawned: " + pPotion.GetItemName());
+    // Access item-specific properties
+    uint value = pPotion.GetValue();
+    LogMessage("Item value: " + value + " gold");
+}
 ```
 
 **StringToEntity** converts an entity string to a CBaseEntity pointer:
@@ -885,8 +894,8 @@ void ServerActivate()
 void ServerActivate() {
     LogMessage("Server activated, spawning game_master...");
     
-    // Spawn game_master NPC at far coordinates
-    CBaseEntity@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000));
+    // Spawn game_master NPC at far coordinates (returns CMSMonster@)
+    CMSMonster@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000), null, Angel);
     
     if (pGameMaster !is null) {
         // Configure game_master properties
@@ -896,6 +905,10 @@ void ServerActivate() {
         pGameMaster.SetRenderAmount(0);  // Invisible
         pGameMaster.SetGodMode(true);
         pGameMaster.SetTakeDamage(DAMAGE_NO);
+        
+        // Set MS-specific properties
+        pGameMaster.Title = "Game Master";
+        pGameMaster.m_Menu_Autoopen = false;
         
         LogMessage("Game master spawned and configured successfully");
     } else {
@@ -961,6 +974,10 @@ Memory optimization functions are available but typically managed automatically 
 ---
 
 ## Monster Classes
+
+**Inheritance Chain**: `CBaseEntity` → `CBaseMonster` → `CMSMonster` → `CBasePlayer`
+
+All monster classes inherit methods and properties from their parent classes. For example, `CMSMonster` has access to all `CBaseEntity` methods like `SetNetName()`, `SetHealth()`, `GetClassName()`, etc.
 
 ### CBaseMonster
 **Scope**: Server
@@ -1072,7 +1089,9 @@ void ControlMonsterAI() {
 
 ### CMSMonster
 **Scope**: Server
-*Master Sword monster class (inherits from CBaseMonster)*
+*Master Sword monster class (inherits from CBaseMonster, which inherits from CBaseEntity)*
+
+**Note**: CMSMonster has full access to all `CBaseEntity` methods (e.g., `SetNetName()`, `GetClassName()`, `SetHealth()`, `SetRenderMode()`) and all `CBaseMonster` methods (e.g., `Look()`, `SetState()`, `BestVisibleEnemy()`).
 
 ```angelscript
 // Properties (direct member access)

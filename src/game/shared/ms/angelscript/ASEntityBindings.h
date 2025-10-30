@@ -12,6 +12,8 @@ class asIScriptEngine;
 namespace ASEntityBindings
 {
     void RegisterAll(asIScriptEngine* pEngine);
+    void RegisterCBaseEntity(asIScriptEngine* pEngine);
+    void RegisterCBasePlayer(asIScriptEngine* pEngine);
     void RegisterEntityTypes(asIScriptEngine* pEngine);
     void RegisterGlobalFunctions(asIScriptEngine* pEngine);
     

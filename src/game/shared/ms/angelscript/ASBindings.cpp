@@ -104,9 +104,23 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Core types registered successfully");
     }
     
-    // Step 3: Register item/weapon types (CBaseAnimating, CBasePlayerItem, CBasePlayerWeapon)
-    // Note: Must be registered BEFORE entity types since CBasePlayer methods reference these types
-    MS_ANGEL_INFO("[3/11] Registering Item/Weapon Types...");
+    // Step 3: Register base entity type (CBaseEntity) FIRST
+    // This must come before any derived types that use .base<CBaseEntity>()
+    MS_ANGEL_INFO("[3/11] Registering Base Entity Type...");
+    try
+    {
+        ASEntityBindings::RegisterCBaseEntity(pEngine);
+        MS_ANGEL_INFO("   OK CBaseEntity registered successfully");
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("   ERROR: CBaseEntity registration failed!");
+        success = false;
+    }
+    
+    // Step 4: Register item/weapon types (CBaseAnimating, CBasePlayerItem, CBasePlayerWeapon)
+    // Note: Must be registered BEFORE CBasePlayer since CBasePlayer methods reference these types
+    MS_ANGEL_INFO("[4/11] Registering Item/Weapon Types...");
     try
     {
         ASItemBindings::RegisterAll(pEngine);
@@ -118,8 +132,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         success = false;
     }
     
-    // Step 4: Register entity types (CBaseEntity, CBasePlayer)
-    MS_ANGEL_INFO("[4/11] Registering Entity Types...");
+    // Step 5: Register remaining entity types (CBasePlayer, monsters, etc.)
+    MS_ANGEL_INFO("[5/11] Registering Remaining Entity Types...");
     try
     {
         ASEntityBindings::RegisterAll(pEngine);
@@ -131,9 +145,9 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         success = false;
     }
     
-    // Step 4.5: Register cross-references between item/weapon and entity types
+    // Step 6: Register cross-references between item/weapon and entity types
     // This adds methods that have circular dependencies (e.g., CBasePlayerItem::GetOwnerPlayer())
-    MS_ANGEL_INFO("[4.5/11] Registering Cross-References...");
+    MS_ANGEL_INFO("[6/11] Registering Cross-References...");
     try
     {
         ASItemBindings::RegisterCrossReferences(pEngine);
@@ -145,8 +159,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         success = false;
     }
     
-    // Step 5: Register builtin functions (strings, utilities, game functions)
-    MS_ANGEL_INFO("[5/11] Registering Builtin Functions...");
+    // Step 7: Register builtin functions (strings, utilities, game functions)
+    MS_ANGEL_INFO("[7/11] Registering Builtin Functions...");
     if (!RegisterBuiltinFunctions(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Builtin function registration failed!");
@@ -157,8 +171,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Builtin functions registered successfully");
     }
     
-    // Step 6: Register script classes (CGameScript and derivatives)
-    MS_ANGEL_INFO("[6/11] Registering Script Classes...");
+    // Step 8: Register script classes (CGameScript and derivatives)
+    MS_ANGEL_INFO("[8/13] Registering Script Classes...");
     if (!RegisterScriptClasses(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Script class registration failed!");
@@ -169,8 +183,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Script classes registered successfully");
     }
     
-    // Step 7: Register coroutines system
-    MS_ANGEL_INFO("[7/11] Registering Coroutines System...");
+    // Step 9: Register coroutines system
+    MS_ANGEL_INFO("[9/13] Registering Coroutines System...");
     if (!RegisterCoroutineFunctions(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Coroutines system registration failed!");
@@ -181,8 +195,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Coroutines system registered successfully");
     }
     
-    // Step 8: Register memory optimization systems
-    MS_ANGEL_INFO("[8/11] Registering Memory Optimization...");
+    // Step 10: Register memory optimization systems
+    MS_ANGEL_INFO("[10/13] Registering Memory Optimization...");
     if (!RegisterMemoryOptimization(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Memory optimization registration failed!");
@@ -193,8 +207,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Memory optimization registered successfully");
     }
     
-    // Step 9: Register module system
-    MS_ANGEL_INFO("[9/11] Registering Module System...");
+    // Step 11: Register module system
+    MS_ANGEL_INFO("[11/13] Registering Module System...");
     if (!RegisterModuleSystem(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Module system registration failed!");
@@ -205,8 +219,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK Module system registered successfully");
     }
     
-    // Step 9.5: Register engine event system
-    MS_ANGEL_INFO("[9.5/11] Registering Engine Event System...");
+    // Step 12: Register engine event system
+    MS_ANGEL_INFO("[12/13] Registering Engine Event System...");
     if (!ASEngineEvents::RegisterEngineEventFunctions(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Engine event system registration failed!");
@@ -229,8 +243,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         }
     }
     
-    // Step 10: Validate all registrations
-    MS_ANGEL_INFO("[10/11] Validating Registrations...");
+    // Step 13: Validate all registrations
+    MS_ANGEL_INFO("[13/13] Validating Registrations...");
     if (!ValidateRegistrations(pEngine))
     {
         MS_ANGEL_ERROR("   ERROR: Registration validation failed!");
@@ -241,8 +255,8 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   OK All registrations validated successfully");
     }
     
-    // Step 11: Log registration summary
-    MS_ANGEL_INFO("[11/11] Registration Summary:");
+    // Final step: Log registration summary
+    MS_ANGEL_INFO("Registration Summary:");
     LogRegistrationInfo(pEngine);
 
     return success;

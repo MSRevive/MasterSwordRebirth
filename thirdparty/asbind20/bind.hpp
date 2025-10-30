@@ -18,6 +18,8 @@
 #include <algorithm>
 #include <functional>
 #include <span>
+#include <unordered_map>
+#include <typeindex>
 #include "detail/include_as.hpp"
 #include "utility.hpp"
 #include "generic.hpp"
@@ -2686,6 +2688,43 @@ namespace detail
             std::string_view(name_begin.base(), funcdef.end())
         );
     }
+    
+    // ========================================================================
+    // Metadata Tracking for Automatic Inheritance
+    // ========================================================================
+    
+    // Metadata for a registered method
+    struct MethodMetadata
+    {
+        std::string declaration;                               // e.g., "void SetNetName(const string &in)"
+        void* functionPtr;                                     // The actual function pointer (as void*)
+        AS_NAMESPACE_QUALIFIER asECallConvTypes callConv;      // Calling convention
+        void* auxiliary;                                       // Auxiliary data (if any)
+        int compositeOffset;                                   // Composite offset (if any)
+        bool isCompositeIndirect;                              // Composite indirect flag
+    };
+    
+    // Metadata for a registered property
+    struct PropertyMetadata
+    {
+        std::string declaration;      // e.g., "float m_HP"
+        int offset;                   // Property offset
+        int compositeOffset;          // Composite offset (if any)
+        bool isCompositeIndirect;     // Composite indirect flag
+    };
+    
+    // Global registry mapping type names to their metadata
+    inline auto& get_method_registry()
+    {
+        static std::unordered_map<std::string, std::vector<MethodMetadata>> registry;
+        return registry;
+    }
+    
+    inline auto& get_property_registry()
+    {
+        static std::unordered_map<std::string, std::vector<PropertyMetadata>> registry;
+        return registry;
+    }
 } // namespace detail
 
 template <bool ForceGeneric>
@@ -2752,14 +2791,17 @@ protected:
         std::string_view decl, Fn&& fn, call_conv_t<CallConv>, void* aux = nullptr
     ) requires(!ForceGeneric)
     {
+        // Convert function to asSFuncPtr
+        auto funcPtr = to_asSFuncPtr(fn);
+        
         [[maybe_unused]]
         int r = with_cstr(
-            [this, &fn, &aux](const char* decl)
+            [this, &funcPtr, &aux](const char* decl)
             {
                 return m_engine->RegisterObjectMethod(
                     m_name.c_str(),
                     decl,
-                    to_asSFuncPtr(fn),
+                    funcPtr,
                     CallConv,
                     aux
                 );
@@ -2767,6 +2809,17 @@ protected:
             decl
         );
         assert(r >= 0);
+        
+        // Store metadata for automatic inheritance
+        detail::MethodMetadata metadata;
+        metadata.declaration = std::string(decl);
+        metadata.functionPtr = reinterpret_cast<void*>(funcPtr.ptr.f.func);
+        metadata.callConv = CallConv;
+        metadata.auxiliary = aux;
+        metadata.compositeOffset = 0;
+        metadata.isCompositeIndirect = false;
+        
+        detail::get_method_registry()[m_name].push_back(metadata);
     }
 
     // Implementation Note: DO NOT DELETE this specialization!
@@ -2890,6 +2943,15 @@ protected:
             decl
         );
         assert(r >= 0);
+        
+        // Store metadata for automatic inheritance
+        detail::PropertyMetadata metadata;
+        metadata.declaration = std::string(decl);
+        metadata.offset = static_cast<int>(off);
+        metadata.compositeOffset = 0;
+        metadata.isCompositeIndirect = false;
+        
+        detail::get_property_registry()[m_name].push_back(metadata);
     }
 
     template <typename MemberPointer>
@@ -5334,6 +5396,45 @@ using value_class = basic_value_class<Class, false, ForceGeneric>;
 template <typename Class, bool ForceGeneric = false>
 using template_value_class = basic_value_class<Class, true, ForceGeneric>;
 
+// Type registry for mapping C++ types to their AngelScript registered names
+namespace detail
+{
+    inline auto& get_type_name_registry()
+    {
+        static std::unordered_map<std::type_index, std::string> registry;
+        return registry;
+    }
+    
+    template<typename T>
+    inline void register_type_name(const std::string& name)
+    {
+        get_type_name_registry()[std::type_index(typeid(T))] = name;
+    }
+    
+    template<typename T>
+    inline std::string get_registered_type_name()
+    {
+        auto& registry = get_type_name_registry();
+        auto it = registry.find(std::type_index(typeid(T)));
+        if (it != registry.end())
+            return it->second;
+        return "";
+    }
+}
+
+// Helper function for reference casting between types in inheritance hierarchy
+template<typename From, typename To>
+To* asbind20_refCast(From* from)
+{
+    if (!from) return nullptr;
+    
+    // Try to cast using dynamic_cast
+    To* to = dynamic_cast<To*>(from);
+    // If cast succeeds, the handle reference will be managed by AngelScript
+    // No need to manually call addref here as AngelScript handles it
+    return to;
+}
+
 template <typename Class, bool Template = false, bool ForceGeneric = false>
 class basic_ref_class : public class_register_helper_base<ForceGeneric>
 {
@@ -5367,6 +5468,9 @@ public:
         // Size is unnecessary for reference type.
         // Use 0 as size to support registering an incomplete type.
         this->template register_object_type<Class>(flags, 0);
+        
+        // Register type name in the global registry for inheritance support
+        detail::register_type_name<Class>(m_name);
     }
 
     template <std::convertible_to<std::string_view> StringView>
@@ -6821,6 +6925,162 @@ public:
     {
         this->member_funcdef_impl(decl);
 
+        return *this;
+    }
+
+    template <typename Base>
+    basic_ref_class& base()
+    {
+        using Derived = Class;
+        
+        // Get the registered name of the base type from the registry
+        std::string base_name = detail::get_registered_type_name<Base>();
+        assert(!base_name.empty() && "Base type must be registered before calling .base<Base>()");
+        
+        if (base_name.empty())
+        {
+            // Base type not registered - this is a user error
+            return *this;
+        }
+        
+        // Register opImplCast for implicit upcasting (Derived -> Base)
+        // This allows derived handles to be passed where base handles are expected
+        std::string implCastDecl = base_name + "@ opImplCast()";
+        this->method_impl(
+            implCastDecl.c_str(),
+            &asbind20_refCast<Derived, Base>,
+            call_conv<AS_NAMESPACE_QUALIFIER asCALL_CDECL_OBJLAST>
+        );
+        
+        // Also register const version
+        std::string constImplCastDecl = "const " + base_name + "@ opImplCast() const";
+        this->method_impl(
+            constImplCastDecl.c_str(),
+            &asbind20_refCast<const Derived, const Base>,
+            call_conv<AS_NAMESPACE_QUALIFIER asCALL_CDECL_OBJLAST>
+        );
+        
+        // ========================================================================
+        // AUTOMATIC INHERITANCE: Re-register all base class methods and properties
+        // ========================================================================
+        
+        // Save the current message callback to temporarily suppress duplicate registration messages
+        AS_NAMESPACE_QUALIFIER asSFuncPtr oldCallback;
+        void* oldCallbackObj;
+        AS_NAMESPACE_QUALIFIER asDWORD oldCallConv;
+        m_engine->GetMessageCallback(&oldCallback, &oldCallbackObj, &oldCallConv);
+        m_engine->ClearMessageCallback();
+        
+        // Inherit all methods from base class
+        auto& methodRegistry = detail::get_method_registry();
+        auto methodIt = methodRegistry.find(base_name);
+        if (methodIt != methodRegistry.end())
+        {
+            // Get the derived class's existing methods to check for duplicates
+            auto& derivedMethods = methodRegistry[m_name];
+            
+            for (const auto& method : methodIt->second)
+            {
+                // Skip the opImplCast methods we just registered to avoid duplicates
+                if (method.declaration.find("opImplCast") != std::string::npos)
+                    continue;
+                
+                // Check if this method was already registered for the derived class
+                // (either directly or by a previous .base() call)
+                bool alreadyInherited = false;
+                for (const auto& derivedMethod : derivedMethods)
+                {
+                    if (derivedMethod.declaration == method.declaration)
+                    {
+                        alreadyInherited = true;
+                        break;
+                    }
+                }
+                
+                if (alreadyInherited)
+                    continue;  // Skip, already inherited from another base
+                
+                // Reconstruct asSFuncPtr from stored data
+                AS_NAMESPACE_QUALIFIER asSFuncPtr funcPtr;
+                funcPtr.ptr.f.func = reinterpret_cast<AS_NAMESPACE_QUALIFIER asFUNCTION_t>(method.functionPtr);
+                
+                // Re-register for derived class
+                // Note: We silently ignore asALREADY_REGISTERED errors (method overriding)
+                int r = m_engine->RegisterObjectMethod(
+                    m_name.c_str(),
+                    method.declaration.c_str(),
+                    funcPtr,
+                    method.callConv,
+                    method.auxiliary
+                );
+                
+                // Only assert on actual errors (not duplicate registrations)
+                if (r < 0 && r != AS_NAMESPACE_QUALIFIER asALREADY_REGISTERED)
+                {
+                    assert(false && "Failed to inherit method from base class");
+                }
+                else if (r >= 0)
+                {
+                    // Successfully inherited - add to derived class's metadata
+                    derivedMethods.push_back(method);
+                }
+            }
+        }
+        
+        // Inherit all properties from base class
+        auto& propertyRegistry = detail::get_property_registry();
+        auto propIt = propertyRegistry.find(base_name);
+        if (propIt != propertyRegistry.end())
+        {
+            // Get the derived class's existing properties to check for duplicates
+            auto& derivedProps = propertyRegistry[m_name];
+            
+            for (const auto& prop : propIt->second)
+            {
+                // Check if this property was already registered for the derived class
+                // (either directly or by a previous .base() call)
+                bool alreadyInherited = false;
+                for (const auto& derivedProp : derivedProps)
+                {
+                    if (derivedProp.declaration == prop.declaration)
+                    {
+                        alreadyInherited = true;
+                        break;
+                    }
+                }
+                
+                if (alreadyInherited)
+                    continue;  // Skip, already inherited from another base
+                
+                // Re-register for derived class
+                // Note: We silently ignore asALREADY_REGISTERED errors
+                int r = m_engine->RegisterObjectProperty(
+                    m_name.c_str(),
+                    prop.declaration.c_str(),
+                    prop.offset,
+                    prop.compositeOffset,
+                    prop.isCompositeIndirect
+                );
+                
+                // Only assert on actual errors (not duplicate registrations)
+                if (r < 0 && r != AS_NAMESPACE_QUALIFIER asALREADY_REGISTERED)
+                {
+                    assert(false && "Failed to inherit property from base class");
+                }
+                else if (r >= 0)
+                {
+                    // Successfully inherited - add to derived class's metadata
+                    derivedProps.push_back(prop);
+                }
+            }
+        }
+        
+        // Restore the original message callback
+        if (oldCallback.flag != 0)
+        {
+            m_engine->SetMessageCallback(oldCallback, oldCallbackObj, oldCallConv);
+        }
+        
         return *this;
     }
 

@@ -571,7 +571,10 @@ namespace ASItemBindings
             // Properties (read-only from script)
             .method("float GetFrameRate() const", AS_CBaseAnimating_GetFrameRate)
             .method("bool IsSequenceFinished() const", AS_CBaseAnimating_IsSequenceFinished)
-            .method("bool IsSequenceLooping() const", AS_CBaseAnimating_IsSequenceLooping);
+            .method("bool IsSequenceLooping() const", AS_CBaseAnimating_IsSequenceLooping)
+            
+            // Inherit from CBaseEntity (called AFTER registering CBaseAnimating's own methods)
+            .base<CBaseEntity>();
         
         MS_ANGEL_INFO("CBaseAnimating registration complete");
     }
@@ -606,7 +609,9 @@ namespace ASItemBindings
             .method("void Holster()", &CBasePlayerItem::Holster)
             .method("void Materialize()", &CBasePlayerItem::Materialize)
             #endif
-            ;
+            
+            // Inherit from CBaseAnimating (called AFTER registering CBasePlayerItem's own methods)
+            .base<CBaseAnimating>();
         
         MS_ANGEL_INFO("CBasePlayerItem registration complete");
     }
@@ -645,7 +650,10 @@ namespace ASItemBindings
             .method("int PrimaryAmmoIndex()", &CBasePlayerWeapon::PrimaryAmmoIndex)
             .method("int SecondaryAmmoIndex()", &CBasePlayerWeapon::SecondaryAmmoIndex)
             .method("string pszAmmo1()", AS_CBasePlayerWeapon_pszAmmo1)
-            .method("string pszAmmo2()", AS_CBasePlayerWeapon_pszAmmo2);
+            .method("string pszAmmo2()", AS_CBasePlayerWeapon_pszAmmo2)
+            
+            // Inherit from CBasePlayerItem (called AFTER registering CBasePlayerWeapon's own methods)
+            .base<CBasePlayerItem>();
         
         MS_ANGEL_INFO("CBasePlayerWeapon registration complete");
     }

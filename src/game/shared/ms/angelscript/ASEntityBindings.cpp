@@ -573,9 +573,9 @@ namespace ASEntityBindings
     };
     
     // SpawnNPC - Creates an NPC at a specific position
-    // Returns CBaseEntity@ pointer to the created monster
+    // Returns CMSMonster@ pointer to the created monster
     // spawnMode: Legacy (default) loads legacy MSCScript, Angel skips it
-    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
+    CMSMonster* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
     {
 #ifdef VALVE_DLL
         if (scriptName.empty())
@@ -699,8 +699,8 @@ namespace ASEntityBindings
     }
     
     // SpawnItem - Creates an item at a specific position
-    // Returns CBaseEntity@ pointer to the created item
-    CBaseEntity* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
+    // Returns CBasePlayerItem@ pointer to the created item
+    CBasePlayerItem* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
     {
 #ifdef VALVE_DLL
         if (scriptName.empty())
@@ -1503,7 +1503,11 @@ namespace ASEntityBindings
             // Custom equality comparison using pointer comparison (most appropriate for commands)
             .method("bool opEquals(const CBasePlayer@+ other) const", [](CBasePlayer* player, CBasePlayer* other) {
                 return player == other;  // Simple pointer comparison
-            });
+            })
+            
+            // Inherit from CBaseEntity (called AFTER registering CBasePlayer's own methods
+            // so that overrides like IsAlive() are registered first)
+            .base<CBaseEntity>();
         
         MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
@@ -1528,8 +1532,8 @@ namespace ASEntityBindings
         pEngine->RegisterEnumValue("MessageColor", "Green", static_cast<int>(MessageColor::Green));
         pEngine->RegisterEnumValue("MessageColor", "Blue", static_cast<int>(MessageColor::Blue));
         
-        // Register CBaseEntity with direct AngelScript API
-        RegisterCBaseEntity(pEngine);
+        // Note: CBaseEntity is now registered earlier in ASBindings.cpp (Step 3)
+        // This ensures it's available before any derived types use .base<CBaseEntity>()
         
         // Register monster types in inheritance order (CBaseEntity → CBaseMonster → CMSMonster → CBasePlayer)
         ASMonsterBindings::RegisterAll(pEngine);
@@ -1624,12 +1628,12 @@ namespace ASEntityBindings
             // Vote menu opening function
             .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu)
             // Spawn functions
-            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
-                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CBaseEntity* {
+            .function("CMSMonster@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CMSMonster* {
                     return AS_SpawnNPC(scriptName, position, params, spawnMode);
                 })
-            .function("CBaseEntity@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
-                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
+            .function("CBasePlayerItem@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBasePlayerItem* {
                     return AS_SpawnItem(scriptName, position, params);
                 });
         
