@@ -53,6 +53,7 @@ typedef float vec_t;
 #include "ASEngineInterface.h"
 #include "ASEngineBindings.h"
 #include "ASCoreTypes.h"
+#include "ASMonsterBindings.h"
 
 // Note: All external C function declarations have been removed.
 // All engine integration now uses ASEngineProvider directly.
@@ -1530,7 +1531,10 @@ namespace ASEntityBindings
         // Register CBaseEntity with direct AngelScript API
         RegisterCBaseEntity(pEngine);
         
-        // Register CBasePlayer with inheritance support
+        // Register monster types in inheritance order (CBaseEntity → CBaseMonster → CMSMonster → CBasePlayer)
+        ASMonsterBindings::RegisterAll(pEngine);
+        
+        // Register CBasePlayer with inheritance support (inherits from CMSMonster)
         RegisterCBasePlayer(pEngine);
         
         // Register casting functions with asbind20
@@ -1540,6 +1544,8 @@ namespace ASEntityBindings
             // Entity string conversion functions
             .function("CBaseEntity@ StringToEntity(const string &in)", StringToEntity)
             .function("CBasePlayer@ StringToPlayer(const string &in)", StringToPlayer);
+        
+        // Note: Monster casting functions are registered by ASMonsterBindings::RegisterAll()
         
         // Register engine constants for entity configuration
         // Using static variables for AngelScript global properties

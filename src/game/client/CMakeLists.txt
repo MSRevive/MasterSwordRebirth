@@ -331,6 +331,8 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASEntityBindings.h"
 	"../shared/ms/angelscript/ASItemBindings.cpp"
 	"../shared/ms/angelscript/ASItemBindings.h"
+	"../shared/ms/angelscript/ASMonsterBindings.cpp"
+	"../shared/ms/angelscript/ASMonsterBindings.h"
 	"../shared/ms/angelscript/ASCoroutines.cpp"
 	"../shared/ms/angelscript/ASCoroutines.h"
 	"../shared/ms/angelscript/ASDebugger.cpp"

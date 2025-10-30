@@ -960,9 +960,255 @@ Memory optimization functions are available but typically managed automatically 
 
 ---
 
+## Monster Classes
+
+### CBaseMonster
+**Scope**: Server
+*Base class for all monsters (inherits from CBaseEntity)*
+
+```angelscript
+// Properties (direct member access)
+float m_flFieldOfView        // Monster's view cone width (dot product, e.g. 0.5)
+float m_flWaitFinished       // Time when current wait expires
+float m_flMoveWaitFinished   // Time when movement wait expires
+int m_LastHitGroup           // Last body region that took damage
+float m_flNextAttack         // Time when can attack again
+int m_bloodColor             // Blood particle color value
+float m_flDistTooFar         // Enemy too far distance threshold
+float m_flDistLook           // Monster sight distance (default 2048)
+int m_iMaxHealth             // Maximum health value
+int m_afCapability           // Capability flags (bits_CAP_*)
+CBaseEntity@ Enemy           // Current enemy entity (virtual property)
+CBaseEntity@ TargetEnt       // Current target entity (virtual property)
+Vector3 EnemyLKP             // Enemy last known position (virtual property)
+
+// Core AI Methods
+int BloodColor()                        // Get blood color value
+void Look(int distance)                 // Look for targets within distance
+void RunAI()                            // Execute AI tick
+bool IsAlive()                          // Check if monster is alive
+void MonsterThink()                     // AI think function
+int IRelationship(CBaseEntity@ target) // Get relationship to target
+void MonsterInit()                      // Initialize monster
+void StartMonster()                     // Activate monster
+CBaseEntity@ BestVisibleEnemy()        // Find best visible enemy
+bool FInViewCone(CBaseEntity@ entity)  // Check if entity in view cone
+bool FInViewCone(const Vector3 &in)    // Check if position in view cone
+void SetState(int state)                // Set monster state
+void ReportAIState()                    // Debug AI state to console
+int CheckEnemy(CBaseEntity@ enemy)     // Validate enemy
+void PushEnemy(CBaseEntity@ enemy, const Vector3 &in lastPos) // Save enemy
+bool PopEnemy()                         // Restore previous enemy
+void ClearSchedule()                    // Clear current schedule
+float ChangeYaw(int speed)              // Rotate yaw toward target
+bool FacingIdeal()                      // Check if facing ideal direction
+Vector3 BodyTarget(const Vector3 &in)   // Get aim point on body
+
+// Condition Management
+void SetConditions(int conditions)      // Set condition flags
+void ClearConditions(int conditions)    // Clear condition flags
+bool HasConditions(int conditions)      // Check condition flags
+bool HasAllConditions(int conditions)   // Check all condition flags
+
+// Memory Management
+void Remember(int memory)               // Set memory flag
+void Forget(int memory)                 // Clear memory flag
+bool HasMemory(int memory)              // Check memory flag
+bool HasAllMemories(int memory)         // Check all memory flags
+
+// Task Management
+void TaskComplete()                     // Mark current task complete
+void TaskFail()                         // Mark current task failed
+void TaskBegin()                        // Begin current task
+
+// Movement
+bool IsMoving()                         // Check if monster is moving
+void Stop()                             // Stop movement
+```
+
+**MonsterState Enum Values**:
+- `MONSTERSTATE_NONE` (0) - No state
+- `MONSTERSTATE_IDLE` (1) - Idle/passive
+- `MONSTERSTATE_COMBAT` (2) - In combat
+- `MONSTERSTATE_ALERT` (3) - Alert/investigating
+- `MONSTERSTATE_HUNT` (4) - Hunting enemy
+- `MONSTERSTATE_PRONE` (5) - Prone/knocked down
+- `MONSTERSTATE_SCRIPT` (6) - Scripted sequence
+- `MONSTERSTATE_PLAYDEAD` (7) - Playing dead
+- `MONSTERSTATE_DEAD` (8) - Dead
+
+**Example - Basic Monster AI Control**:
+```angelscript
+void ControlMonsterAI() {
+    // Get a monster entity (example assumes you have one)
+    CBaseEntity@ entity = /* get monster entity */;
+    CBaseMonster@ monster = ToMonster(entity);
+    
+    if (monster !is null) {
+        // Configure monster AI
+        monster.m_flFieldOfView = 0.7f;  // Narrower view cone
+        monster.m_flDistLook = 1024.0f;  // Shorter sight range
+        
+        // Set monster to combat state
+        monster.SetState(MONSTERSTATE_COMBAT);
+        
+        // Find and engage enemy
+        CBaseEntity@ enemy = monster.BestVisibleEnemy();
+        if (enemy !is null) {
+            monster.Enemy = enemy;
+            MS_ANGEL_INFO("Monster engaged enemy");
+        }
+        
+        // Check conditions
+        if (monster.HasConditions(bits_COND_SEE_ENEMY)) {
+            MS_ANGEL_INFO("Monster sees enemy");
+        }
+        
+        // Remember something
+        monster.Remember(bits_MEMORY_PROVOKED);
+    }
+}
+```
+
+### CMSMonster
+**Scope**: Server
+*Master Sword monster class (inherits from CBaseMonster)*
+
+```angelscript
+// Properties (direct member access)
+float m_HP                   // Current health points
+float m_MP                   // Current mana points
+int m_Gold                   // Gold amount carried
+float m_StepSize             // Maximum step height
+float m_SpeedMultiplier      // Speed modifier (1.0 = normal)
+float m_TurnRate             // Turn speed ratio (0.0-1.0)
+float m_Width                // Monster width for collision
+float m_Height               // Monster height for collision
+uint8 m_Gender               // Monster gender (Gender enum as uint8)
+string Title                 // Display title/name (virtual property, msstring wrapper)
+string ScriptName            // Script file name (virtual property, msstring wrapper)
+int m_Lives                  // Remaining lives (respawns)
+float m_SkillLevel           // Experience worth
+bool m_Menu_Autoopen         // Auto-open menu on +use
+float m_HITMulti             // Hit chance multiplier
+float m_HPMulti              // HP multiplier
+float m_DMGMulti             // Damage output multiplier
+float m_HearingSensitivity   // Sound hearing sensitivity
+
+// Lifecycle Methods
+bool IsMSMonster()           // Check if this is an MSMonster
+float MaxHP()                // Get effective maximum HP
+float MaxMP()                // Get effective maximum MP
+bool IsAlive()               // Check if alive
+
+// Economy Methods
+int GiveGold(int amount)                 // Give/take gold (returns new amount)
+int GiveGold(int amount, bool verbose)   // With verbose messages
+float GiveHP(float amount)               // Give/take HP (returns new HP)
+float GiveMP(float amount)               // Give/take MP (returns new MP)
+
+// Stats System
+int GetNatStat(int stat)                 // Get natural stat value
+int GetSkillStat(int stat)               // Get skill stat value
+int GetSkillStatCount()                  // Get number of skill stats
+
+// Movement
+float WalkSpeed()                        // Get walk speed
+float RunSpeed()                         // Get run speed
+bool IsFlying()                          // Check if flying/swimming
+
+// Combat
+bool IsActing()                          // Check if attacking/acting
+bool IsShielding()                       // Check if blocking with shield
+void CancelAttack()                      // Cancel current attack
+
+// Miscellaneous
+float Weight()                           // Get total weight (gear + items)
+void SetSpeed()                          // Recalculate speed
+```
+
+**Gender Enum Values**:
+- `GENDER_MALE` (0) - Male
+- `GENDER_FEMALE` (1) - Female
+- `GENDER_UNKNOWN` (2) - Unknown/neutral
+
+**SpeechType Enum Values**:
+- `SPEECH_GLOBAL` (0) - Global chat
+- `SPEECH_LOCAL` (1) - Local range (300 units)
+- `SPEECH_PARTY` (2) - Party only
+
+**Example - Monster Management**:
+```angelscript
+void ManageMSMonster() {
+    // Get an MS monster entity
+    CBaseEntity@ entity = /* get monster entity */;
+    CMSMonster@ monster = ToMSMonster(entity);
+    
+    if (monster !is null) {
+        // Set properties
+        monster.Title = "Elite Guardian";
+        monster.m_SpeedMultiplier = 1.5f;
+        monster.m_HPMulti = 2.0f;
+        monster.m_DMGMulti = 1.3f;
+        
+        // Give rewards
+        monster.GiveHP(50.0f);   // Heal 50 HP
+        monster.GiveMP(25.0f);   // Restore 25 MP
+        monster.GiveGold(100);   // Add 100 gold
+        
+        // Check stats
+        float currentHP = monster.m_HP;
+        float maxHP = monster.MaxHP();
+        float hpPercent = (currentHP / maxHP) * 100.0f;
+        
+        MS_ANGEL_INFO("Monster HP: " + currentHP + "/" + maxHP + " (" + hpPercent + "%)");
+        MS_ANGEL_INFO("Gold: " + monster.m_Gold);
+        
+        // Check combat state
+        if (monster.IsActing()) {
+            MS_ANGEL_INFO("Monster is attacking");
+        }
+        
+        if (monster.IsShielding()) {
+            MS_ANGEL_INFO("Monster is blocking");
+        }
+        
+        // Get stats
+        int strength = monster.GetNatStat(STAT_STRENGTH);
+        MS_ANGEL_INFO("Strength: " + strength);
+    }
+}
+```
+
+**Example - Monster Casting**:
+```angelscript
+void CastMonsterTypes() {
+    CBaseEntity@ entity = /* get entity */;
+    
+    // Cast to CBaseMonster
+    CBaseMonster@ monster = ToMonster(entity);
+    if (monster !is null) {
+        MS_ANGEL_INFO("Entity is a monster");
+        monster.Look(1024);
+    }
+    
+    // Cast to CMSMonster
+    CMSMonster@ msMonster = ToMSMonster(entity);
+    if (msMonster !is null) {
+        MS_ANGEL_INFO("Entity is an MS monster");
+        MS_ANGEL_INFO("HP: " + msMonster.m_HP + "/" + msMonster.MaxHP());
+    }
+    
+    // Cast monster to entity
+    CBaseEntity@ backToEntity = ToEntity(monster);
+}
+```
+
+---
+
 ## Notes
 
-1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@) are managed by the game engine. Scripts should not attempt to delete entities directly.
+1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@, CBaseMonster@, CMSMonster@) are managed by the game engine. Scripts should not attempt to delete entities directly.
 
 2. **Array Types**: The `array<T>` template type is available for creating dynamic arrays of any registered type.
 
@@ -987,3 +1233,4 @@ Memory optimization functions are available but typically managed automatically 
 ## Version History
 - **1.0**: Initial documentation based on ASBindings.cpp and ASEntityBindings.cpp analysis
 - **1.1**: Added comprehensive module system documentation from ASModuleSystem.h and scriptmodule.h
+- **1.2**: Added comprehensive CBaseMonster and CMSMonster bindings with full property access and AI control methods
