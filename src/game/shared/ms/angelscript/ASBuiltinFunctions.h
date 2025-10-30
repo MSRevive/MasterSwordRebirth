@@ -17,6 +17,7 @@ class asIScriptEngine;
 class asIScriptFunction;
 class CScriptArray;
 class Vector; // Master Sword's Vector class
+class CBasePlayer;
 
 //==========================================================================
 // Built-in Functions Registration - Comprehensive Implementation
@@ -79,6 +80,9 @@ namespace ASBuiltinFunctions
     // External System Integration
     void AS_CallPlayerExternal(const std::string& playerID, const std::string& function, CScriptArray* args);
     void AS_CallGameMasterExternal(const std::string& function, CScriptArray* args);
+    #ifdef VALVE_DLL
+    bool AS_MovePlayerToRandomSpawn(CBasePlayer* pPlayer, float maxDistance);
+    #endif
     
     // Event System Functions
     void AS_RegisterEngineEvent(const std::string& eventName, asIScriptFunction* callback);

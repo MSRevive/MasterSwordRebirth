@@ -124,7 +124,7 @@ void IAngelScript::RunScriptEvents(bool fOnlyRunNamedEvents)
         if (!fOnlyRunNamedEvents)
         {
             // Execute think event if present
-            pScript->ExecuteEvent("game_think");
+            pScript->ExecuteEvent("GameThink");
         }
     }
 }

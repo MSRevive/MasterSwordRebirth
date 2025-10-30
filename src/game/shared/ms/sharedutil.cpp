@@ -29,6 +29,17 @@ msstring EntToString(class CBaseEntity *pEntity)
 	return RetString;
 }
 
+std::string EntToStdString(class CBaseEntity *pEntity)
+{
+	if (!pEntity)
+		return "";
+	static char RetString[32];
+	memset(RetString, 0, sizeof(RetString)); // Clear buffer to avoid garbage
+	int written = _snprintf(RetString, sizeof(RetString) - 1, ENT_FORMAT, pEntity->entindex(), (int)pEntity);
+	RetString[sizeof(RetString) - 1] = '\0'; // Ensure null termination
+	return std::string(RetString);
+}
+
 CBaseEntity *StringToEnt(const char* EntString)
 {
 	int Idx = -1;

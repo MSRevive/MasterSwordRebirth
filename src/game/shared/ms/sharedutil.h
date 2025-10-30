@@ -65,6 +65,7 @@ void Print(const char *szFmt, ...);
 
 #define ENT_PREFIX "PentP"
 msstring EntToString( class CBaseEntity *pEntity );			//Converts an entity to a string of format "PentP(idx,addr)"
+std::string EntToStdString(class CBaseEntity* pEntity);	//Converts an entity to a string of format "PentP(idx,addr)"
 CBaseEntity *StringToEnt(const char* EntString);			//Converts an string of format "PentP(idx,addr)" to an entity
 
 void WRITE_FLOAT( float Float );

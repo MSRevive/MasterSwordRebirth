@@ -31,6 +31,7 @@
     #include "util.h"
     #include "cbase.h"
     #include "player/player.h"
+    #include "svglobals.h"
     extern globalvars_t *gpGlobals;
     extern enginefuncs_t g_engfuncs;
     // Note: gmsgSayText is handled via ASEngineProvider pattern
@@ -39,15 +40,9 @@
 #include <map>
 #include "hl/vector.h"
 #include "mslogger.h"
+#include "sharedutil.h"
 #include "ASEngineEventManager.h"
 
-// Forward declare EntityHandle struct (defined in ASCoreTypes.cpp)
-struct EntityHandle
-{
-    int value;
-    EntityHandle() : value(0) {}
-    EntityHandle(int v) : value(v) {}
-};
 
 // Helper function to get player by index - implemented differently on server vs client
 static CBasePlayer* GetPlayerByIndexHelper(int index)
@@ -456,12 +451,12 @@ namespace ASBuiltinFunctions
     }
     
     // Find entity by targetname
-    EntityHandle AS_FindEntityByName(const std::string& name)
+    CBaseEntity* AS_FindEntityByName(const std::string& name)
     {
         MS_ANGEL_DEBUG("FindEntityByName: Searching for '%s'", name.c_str());
         // TODO: Implement proper entity finding
-        // For now, return an invalid handle
-        return EntityHandle(0);
+        // For now, return nullptr
+        return nullptr;
     }
     
     // Get player by index (1-based)
@@ -549,11 +544,17 @@ namespace ASBuiltinFunctions
     }
 
     // Check if entity reference is valid
-    bool AS_IsValidEntity(EntityHandle handle)
+    bool AS_IsValidEntity(CBaseEntity* entity)
     {
-        MS_ANGEL_DEBUG("IsValidEntity: Checking handle %d", handle.value);
-        // TODO: Implement proper entity validation
-        return handle.value != 0;
+        MS_ANGEL_DEBUG("IsValidEntity: Checking entity %p", entity);
+        // Check if entity pointer is valid and not freed
+        if (!entity)
+            return false;
+#ifdef VALVE_DLL
+        return !FNullEnt(entity);
+#else
+        return true;  // Client-side: assume valid if not null
+#endif
     }
     
     // Create angle vector
@@ -739,9 +740,8 @@ namespace ASBuiltinFunctions
             for (int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free && (pPlayer->edict()->v.flags & FL_CLIENT)) {
-                    // Send using engine provider
-                    std::string fullMessage = title + ": " + message;
-                    ASEngineProvider::SendInfoMsg((void*)pPlayer, fullMessage);
+                    //ASEngineProvider::SendInfoMsg((void*)pPlayer, fullMessage);
+                    pPlayer->SendHelpMsg("game_transition", title.c_str(), message.c_str());
                 }
             }
             
@@ -856,6 +856,55 @@ namespace ASBuiltinFunctions
             
             MS_ANGEL_INFO("CallGameMasterExternal: Executed GameMaster script call: %s", function.c_str());
         #endif
+    }
+
+    //==========================================================================
+    // MovePlayerToRandomSpawn - Move player to a random spawn point within range
+    // Converted from torandomspawn script command (scriptcmds.cpp:7034)
+    // SERVER ONLY
+    //==========================================================================
+
+    bool AS_MovePlayerToRandomSpawn(CBasePlayer* pPlayer, float maxDistance)
+    {
+#ifdef VALVE_DLL
+        if (!pPlayer) {
+            MS_ANGEL_ERROR("MovePlayerToRandomSpawn: NULL player pointer");
+            return false;
+        }
+        
+        // Find all spawn points within maxDistance
+        mslist<CBaseEntity*> spawnpoints;
+        CBaseEntity* pSpot = NULL;
+        
+        // Find all ms_player_spawn entities (SPAWN_GENERIC constant from svglobals.h)
+        while ((pSpot = UTIL_FindEntityByClassname(pSpot, SPAWN_GENERIC)) != NULL)
+        {
+            float distance = (pSpot->pev->origin - pPlayer->pev->origin).Length();
+            if (distance <= maxDistance)
+            {
+                spawnpoints.add(pSpot);
+            }
+        }
+        
+        if (spawnpoints.size() > 0)
+        {
+            // Pick a random spawn point
+            int loc = RANDOM_LONG(0, spawnpoints.size() - 1);
+            pPlayer->pev->origin = spawnpoints[loc]->pev->origin;
+            
+            MS_ANGEL_INFO("MovePlayerToRandomSpawn: Moved player %s to random spawn (found %d nearby spawns)", 
+                           pPlayer->AuthID().c_str(), (int)spawnpoints.size());
+            return true;
+        }
+        else
+        {
+            MS_ANGEL_DEBUG("MovePlayerToRandomSpawn: No spawn points found within %.1f units for player %s", 
+                           maxDistance, pPlayer->AuthID().c_str());
+            return false;
+        }
+#else
+        return false; // Not supported on client
+#endif
     }
     
     //==========================================================================
@@ -1586,23 +1635,22 @@ namespace ASBuiltinFunctions
             }
         };
         
-        // Register server command execution - SERVER_ONLY
+        // Register server command execution
         regFunc("void ExecuteServerCommand(const string &in)", AS_ExecuteServerCommand);
-        
-        // Register map validation - SERVER_ONLY
         regFunc("bool EngineMapExists(const string &in)", AS_EngineMapExists);
         
-        // Register communication functions - all SERVER_ONLY
+        // Register communication functions
         regFunc("void SendPlayerMessage(const string &in, const string &in)", AS_SendPlayerMessage);
         regFunc("void SendConsoleMessage(const string &in, const string &in)", AS_SendConsoleMessage);
         regFunc("void SendInfoMessageToAll(const string &in, const string &in)", AS_SendInfoMessageToAll);
         regFunc("void SendMessageToAllPlayers(const string &in, const string &in)", AS_SendMessageToAllPlayers);
         
-        // Register external system integration functions - SERVER_ONLY
-        regFunc("void CallPlayerExternal(const string &in, const string &in, const array<string>@ &in)", AS_CallPlayerExternal);
-        regFunc("void CallGameMasterExternal(const string &in, const array<string>@ &in)", AS_CallGameMasterExternal);
+        // Register external system integration functions
+        regFunc("void CallPlayerExternal(const string &in, const string &in, array<string>@)", AS_CallPlayerExternal);
+        regFunc("void CallGameMasterExternal(const string &in, array<string>@)", AS_CallGameMasterExternal);
+        regFunc("bool MovePlayerToRandomSpawn(CBasePlayer@, float)", AS_MovePlayerToRandomSpawn);
         
-        // Register advanced system functions - SERVER_ONLY
+        // Register advanced system functions
         regFunc("void InitializeAdvancedTriggerSystem()", AS_InitializeAdvancedTriggerSystem);
         regFunc("void InitializeHPSequenceTrigger()", AS_InitializeHPSequenceTrigger);
         regFunc("void InitializeEntitySpawner()", AS_InitializeEntitySpawner);
@@ -1613,7 +1661,7 @@ namespace ASBuiltinFunctions
         regFunc("void ShutdownEntitySpawner()", AS_ShutdownEntitySpawner);
         regFunc("void ShutdownEntityCommunications()", AS_ShutdownEntityCommunications);
         
-        // Register advanced system status functions - SERVER_ONLY
+        // Register advanced system status functions
         regFunc("bool IsAdvancedTriggerSystemActive()", AS_IsAdvancedTriggerSystemActive);
         regFunc("bool IsHPSequenceSystemActive()", AS_IsHPSequenceSystemActive);
         regFunc("bool IsEntitySpawnerActive()", AS_IsEntitySpawnerActive);

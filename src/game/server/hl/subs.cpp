@@ -24,6 +24,7 @@
 #include "saverestore.h"
 #include "nodes.h"
 #include "doors.h"
+#include "ms/angelscript/CAngelScriptManager.h" // For AngelScript game triggers
 
 extern CGraph WorldGraph;
 
@@ -209,15 +210,19 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 	ALERT(at_aiconsole, "Firing: (%s)\n", targetName);
 
 	//NOV2015_05 let GM capture triggers
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-	if (pGMScript)
+	// Updated to use AngelScript instead of MSScript for game triggers
+	#ifndef CLIENT_DLL
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
 	{
-		static msstringlist Params;
-		Params.clearitems();
-		Params.add(targetName);
-		pGMScript->CallScriptEvent("game_triggered", &Params);
+		std::vector<std::string> params;
+		params.push_back(targetName);
+		
+		// Call AngelScript GameMaster function
+		// This will be handled by MS::GameTriggered in GameMasterMapTransitions.as
+		pASManager->CallGlobalFunctionWithParams("GameTriggered", params);
 	}
+	#endif
 
 	edict_t* pentTarget = NULL;
 	for (;;)

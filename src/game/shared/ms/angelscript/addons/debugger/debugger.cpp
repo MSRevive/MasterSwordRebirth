@@ -3,6 +3,7 @@
 #include <sstream>   // stringstream
 #include <stdlib.h>  // atoi
 #include <assert.h>  // assert
+#include <cstring>   // strlen
 
 using namespace std;
 
@@ -73,9 +74,9 @@ string CDebugger::ToString(void *value, asUINT typeId, int expandMembers, asIScr
 			asITypeInfo *t = engine->GetTypeInfoById(typeId);
 			for( int n = t->GetEnumValueCount(); n-- > 0; )
 			{
-				int enumVal;
+				asINT64 enumVal;
 				const char *enumName = t->GetEnumValueByIndex(n, &enumVal);
-				if( enumVal == *(int*)value )
+				if( enumVal == *(asINT64*)value )
 				{
 					s << ", " << enumName;
 					break;
@@ -208,11 +209,7 @@ void CDebugger::LineCallback(asIScriptContext *ctx)
 	stringstream s;
 	const char *file = 0;
 	int lineNbr = ctx->GetLineNumber(0, 0, &file);
-	asIScriptFunction *func = ctx->GetFunction();
-	if( func && reinterpret_cast<uintptr_t>(func) > 0x10000 )
-		s << (file ? file : "{unnamed}") << ":" << lineNbr << "; " << func->GetDeclaration() << endl;
-	else
-		s << (file ? file : "{unnamed}") << ":" << lineNbr << "; <invalid function>" << endl;
+	s << (file ? file : "{unnamed}") << ":" << lineNbr << "; " << ctx->GetFunction()->GetDeclaration() << endl;
 	Output(s.str());
 
 	TakeCommands(ctx);
@@ -238,9 +235,6 @@ bool CDebugger::CheckBreakPoint(asIScriptContext *ctx)
 
 	// Did we move into a new function?
 	asIScriptFunction *func = ctx->GetFunction();
-	// Validate pointer is in a reasonable range (not an error code)
-	if( !func || reinterpret_cast<uintptr_t>(func) <= 0x10000 )
-		return false;
 	if( m_lastFunction != func )
 	{
 		// Check if any breakpoints need adjusting
@@ -547,8 +541,7 @@ void CDebugger::PrintValue(const std::string &expr, asIScriptContext *ctx)
 		int typeId = 0;
 
 		asIScriptFunction *func = ctx->GetFunction();
-		// Validate pointer is in a reasonable range (not an error code)
-		if( !func || reinterpret_cast<uintptr_t>(func) <= 0x10000 ) return;
+		if( !func ) return;
 
 		// skip local variables if a scope was informed
 		if( scope == "" )
@@ -556,10 +549,11 @@ void CDebugger::PrintValue(const std::string &expr, asIScriptContext *ctx)
 			// We start from the end, in case the same name is reused in different scopes
 			for( asUINT n = func->GetVarCount(); n-- > 0; )
 			{
-				if( ctx->IsVarInScope(n) && name == ctx->GetVarName(n) )
+				const char* varName = 0;
+				ctx->GetVar(n, 0, &varName, &typeId);
+				if( ctx->IsVarInScope(n) && varName != 0 && name == varName )
 				{
 					ptr = ctx->GetAddressOfVar(n);
-					typeId = ctx->GetVarTypeId(n);
 					break;
 				}
 			}
@@ -701,11 +695,20 @@ void CDebugger::ListLocalVariables(asIScriptContext *ctx)
 	stringstream s;
 	for( asUINT n = 0; n < func->GetVarCount(); n++ )
 	{
+		// Skip temporary variables
+		// TODO: Should there be an option to view temporary variables too?
+		const char* name;
+		func->GetVar(n, &name);
+		if (name == 0 || strlen(name) == 0)
+			continue;
+
 		if( ctx->IsVarInScope(n) )
 		{
 			// TODO: Allow user to set if members should be expanded or not
 			// Expand members by default to 3 recursive levels only
-			s << func->GetVarDecl(n) << " = " << ToString(ctx->GetAddressOfVar(n), ctx->GetVarTypeId(n), 3, ctx->GetEngine()) << endl;
+			int typeId;
+			ctx->GetVar(n, 0, 0, &typeId);
+			s << func->GetVarDecl(n) << " = " << ToString(ctx->GetAddressOfVar(n), typeId, 3, ctx->GetEngine()) << endl;
 		}
 	}
 	Output(s.str());

@@ -54,20 +54,26 @@ int b
 int a
 ```
 
-### EntityHandle
+---
+
+## Engine Constants
 **Scope**: Shared
 
+### Render Mode Constants
 ```angelscript
-// Constructor
-EntityHandle(int value = 0)
+const int kRenderNormal = 0          // Normal rendering
+const int kRenderTransColor = 1      // Transparent color
+const int kRenderTransTexture = 2    // Transparent texture
+const int kRenderGlow = 3            // Glow effect
+const int kRenderTransAlpha = 4      // Transparent alpha
+const int kRenderTransAdd = 5        // Additive transparency
+```
 
-// Properties
-int value
-
-// Methods
-bool IsValid() const
-CBaseEntity@ GetEntity() const
-void SetEntity(CBaseEntity@)
+### Damage Type Constants
+```angelscript
+const int DAMAGE_NO = 0   // Entity takes no damage
+const int DAMAGE_YES = 1  // Entity takes normal damage
+const int DAMAGE_AIM = 2  // Entity takes aim-based damage
 ```
 
 ---
@@ -90,6 +96,14 @@ Vector3 Center()
 float Volume()
 float Weight()
 bool IsPlayer()
+
+// Entity configuration methods
+void SetNetName(const string &in)
+string GetNetName()
+void SetRenderMode(int)
+void SetRenderAmount(int)
+void SetTakeDamage(int)
+void SetGodMode(bool)
 ```
 
 ### CBasePlayer
@@ -100,7 +114,7 @@ bool IsPlayer()
 // Methods
 string DisplayName() const
 string GetName() const              // Alias for DisplayName
-string GETPLAYERAUTHID() const      // Returns Steam ID
+string GetSteamID() const           // Returns Steam ID
 int GetEntIndex() const             // Entity index
 bool IsConnected() const
 bool IsAlive() const
@@ -123,8 +137,113 @@ bool IsPlayer() const
 void PlaySound(const string &in)
 void SendInfoMsg(const string &in)
 void SendEventMsg(const string &in)
+
+// Enhanced messaging methods with color support
+void SendColoredMessage(MessageColor color, const string &in message)
+void SendHUDInfoMessage(const string &in title, const string &in message)
+
+// Map transition methods
+void SetTransitionFields(const string &in localSpawn, const string &in destMap, const string &in destSpawn)
+string GetOldTransition() const
+string GetNextMap() const
+string GetNextTransition() const
+int GetJoinType() const
+void SetJoinType(int joinType)
+
+// Spawn management methods
+bool MoveToSpawnSpot()
+void SetSpawnTransition(const string &in transName)
+string GetSpawnTransition() const
+
+// Comparison
 bool opEquals(const CBasePlayer@+ other) const
 ```
+
+**SetTransitionFields** sets the player's C++ transition fields which control where they spawn after map changes:
+- `localSpawn`: Current spawn point name on the current map (sets `m_OldTransition` and `m_SpawnTransition`)
+- `destMap`: Destination map name (sets `m_NextMap`)
+- `destSpawn`: Spawn point name on the destination map (sets `m_NextTransition`)
+- Automatically calls `SaveChar()` to persist the changes
+
+**GetOldTransition**, **GetNextMap**, **GetNextTransition**: Retrieve the current transition state
+
+**GetJoinType** / **SetJoinType**: Get or set how the player joined the server
+- JoinType constants: `JN_NOTALLOWED` (0), `JN_TRAVEL` (1), `JN_STARTMAP` (2), `JN_VISITED` (3), `JN_ELITE` (4)
+- Changing JoinType affects spawn point selection logic
+- Useful for ensuring transitions take priority over start map status
+
+**MoveToSpawnSpot** moves the player to their designated spawn point:
+- Returns `true` if successful, `false` otherwise
+- Uses the player's current spawn transition to find the appropriate spawn point
+- Automatically sets player position and angles to match the spawn point
+
+**SetSpawnTransition** / **GetSpawnTransition**: Set or retrieve the player's current spawn transition name:
+- The spawn transition determines which `ms_player_spawn` entity the player will spawn at
+- Maximum length: 32 characters
+- Used by map transition system and respawn logic
+
+**Example**:
+```angelscript
+CBasePlayer@ player = PlayerBySteamID("STEAM_0:1:12345");
+if (player !is null) {
+    player.SetTransitionFields("start", "thornlands", "entrance");
+    
+    // Adjust JoinType to ensure transition spawn is used
+    if (player.GetJoinType() == 2) {  // JN_STARTMAP
+        player.SetJoinType(1);  // JN_TRAVEL
+    }
+}
+```
+
+**SendColoredMessage** sends a colored text message to the player's HUD event console:
+- `color`: MessageColor enum value determining the message color
+- `message`: Message text to display (max 140 characters, auto-truncated with `*` suffix)
+- Automatically adds newline if not present
+- Replaces legacy script commands: `playermessage`, `rplayermessage`, `gplayermessage`, `bplayermessage`, `yplayermessage`, `dplayermessage`
+
+**SendHUDInfoMessage** sends an info box message to the player's top-left HUD:
+- `title`: Title text for the info box (max 120 characters, auto-truncated with `*\n` suffix)
+- `message`: Body text for the info box (max 120 characters, auto-truncated with `*\n` suffix)
+- Replaces legacy script command: `infomsg <player> <title> <message>`
+
+**Example - Messaging**:
+```angelscript
+CBasePlayer@ player = PlayerByIndex(1);
+if (player !is null) {
+    // Send colored messages
+    player.SendColoredMessage(MessageColor::Green, "You found a rare item!");
+    player.SendColoredMessage(MessageColor::Red, "You took damage!");
+    player.SendColoredMessage(MessageColor::Yellow, "Attack dealt 50 damage");
+    player.SendColoredMessage(MessageColor::Blue, "Mana restored");
+    player.SendColoredMessage(MessageColor::Gray, "Cannot equip this item");
+    player.SendColoredMessage(MessageColor::White, "Normal information message");
+    
+    // Send HUD info box
+    player.SendHUDInfoMessage("Quest Complete", "You completed the tutorial quest!");
+}
+```
+
+### MessageColor Enum
+**Scope**: Server
+
+```angelscript
+enum MessageColor {
+    White = 0,   // Normal color (off-white) - HUDEVENT_NORMAL
+    Gray = 1,    // Dark gray - unable/disabled actions - HUDEVENT_UNABLE
+    Yellow = 2,  // Yellowish - attack results - HUDEVENT_ATTACK
+    Red = 3,     // Red - damage received - HUDEVENT_ATTACKED
+    Green = 4,   // Green - positive events - HUDEVENT_GREEN
+    Blue = 5     // Blue - info/mana events - HUDEVENT_BLUE
+}
+```
+
+The MessageColor enum is used with `SendColoredMessage()` to specify HUD message colors:
+- **White**: Standard informational messages, general notifications
+- **Gray**: Disabled actions (can't pickup, can't equip, etc.)
+- **Yellow**: Combat feedback (your attack damage)
+- **Red**: Taking damage, negative combat events
+- **Green**: Positive events (item pickup, quest complete, healing)
+- **Blue**: Special information, mana-related events
 
 ---
 
@@ -191,6 +310,7 @@ void MS_ANGEL_ERROR(const string &in)   // Shared
 array<CBasePlayer@>@ GetAllPlayers()
 int GetPlayerCount()
 CBasePlayer@ PlayerByIndex(int index)
+CBasePlayer@ PlayerBySteamID(const string &in steamID)
 int GetCurrentPlayerID()
 
 // Player information
@@ -206,6 +326,28 @@ void SendPlayerMessage(const string &in playerName, const string &in title, cons
 
 // Menu system
 void OpenVoteMenu(CBasePlayer@ player, const string &in title, const array<string> &in options)
+
+// Spawn management
+bool MovePlayerToRandomSpawn(CBasePlayer@ player, float maxDistance)
+```
+
+**MovePlayerToRandomSpawn** moves a player to a random spawn point within a specified distance:
+- `player`: The player to move
+- `maxDistance`: Maximum distance in units to search for spawn points (e.g., 256.0)
+- Returns `true` if a spawn point was found and the player was moved
+- Returns `false` if no spawn points were found within the distance
+- Searches for `ms_player_spawn` entities near the player's current position
+- Useful for `/stuck` commands or respawn systems
+- Converted from legacy `torandomspawn` script command
+
+**Example**:
+```angelscript
+// Move player to a random nearby spawn (within 256 units)
+if (MovePlayerToRandomSpawn(pPlayer, 256.0f)) {
+    pPlayer.SendInfoMsg("Teleported to nearby spawn point");
+} else {
+    pPlayer.SendInfoMsg("No spawn points found nearby");
+}
 ```
 
 ### Server Management Functions
@@ -294,15 +436,71 @@ if (EngineMapExists("crossroads")) {
 
 ```angelscript
 // Entity creation and manipulation
-EntityHandle CreateEntity(const string &in scriptName)
-void SetEntityName(const EntityHandle &in, const string &in)
-void SetEntityTargetName(const EntityHandle &in, const string &in)
-void SetEntityHealth(const EntityHandle &in, float)
-bool IsEntityDead(const EntityHandle &in)
+CBaseEntity@ CreateEntity(const string &in scriptName)
+void SetEntityName(CBaseEntity@, const string &in)
+void SetEntityTargetName(CBaseEntity@, const string &in)
+void SetEntityHealth(CBaseEntity@, float)
+bool IsEntityDead(CBaseEntity@)
 
 // Type casting
 CBaseEntity@ ToEntity(CBasePlayer@)
 CBasePlayer@ ToPlayer(CBaseEntity@)
+
+// Entity string conversion
+CBaseEntity@ StringToEntity(const string &in)
+CBasePlayer@ StringToPlayer(const string &in)
+
+// Entity spawning functions
+CBaseEntity@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CBaseEntity@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+```
+
+**SpawnNPC** creates an NPC entity at the specified position:
+- `scriptName`: Script name of the NPC to spawn (e.g., "game_master", "skeleton")
+- `position`: 3D coordinates where the NPC should spawn
+- `params`: Optional array of additional parameters (reserved for future use)
+- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Server-only function
+
+**SpawnItem** creates an item entity at the specified position:
+- `scriptName`: Script name of the item to spawn (e.g., "potion_health", "sword_short")
+- `position`: 3D coordinates where the item should spawn
+- `params`: Optional array of additional parameters (reserved for future use)
+- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Server-only function
+
+**Example**:
+```angelscript
+// Spawn a skeleton at coordinates (100, 200, 0)
+CBaseEntity@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
+if (pSkeleton !is null) {
+    LogMessage("Skeleton spawned at index " + pSkeleton.GetEntIndex());
+}
+
+// Spawn a health potion
+CBaseEntity@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
+```
+
+**StringToEntity** converts an entity string to a CBaseEntity pointer:
+- Entity strings are in the format `"PentP(index,address)"` (e.g., `"PentP(1,12345678)"`)
+- Returns `null` if the string is invalid or the entity no longer exists
+- Validates both the entity index and memory address for safety
+- Used when C++ passes entity references as strings to scripts
+
+**StringToPlayer** converts an entity string to a CBasePlayer pointer:
+- Uses `StringToEntity` internally and casts to player
+- Returns `null` if the entity is not a valid player
+- Convenient for converting player entity strings from C++ events
+
+**Example**:
+```angelscript
+// Event handler receiving entity string from C++
+void GamePlayerPutInWorld(const string &in entityString) {
+    CBasePlayer@ pPlayer = StringToPlayer(entityString);
+    if (pPlayer !is null) {
+        LogMessage("Player spawned: " + pPlayer.GetName());
+    }
+}
 ```
 
 ### Quest Data Functions
@@ -424,7 +622,101 @@ The module system searches for modules in configured paths, typically:
 ## Engine Event System
 **Scope**: Shared
 
-The engine event system allows scripts to respond to game events. Specific event registration functions depend on implementation.
+The engine event system allows scripts to respond to game events by implementing global functions with specific names. The C++ engine will call these functions at appropriate times.
+
+### Player Lifecycle Events
+**Scope**: Server
+
+```angelscript
+// Called when player spawns in world (after character selection)
+void GamePlayerPutInWorld()
+void GamePlayerPutInWorld(CBasePlayer@ pPlayer)
+void GamePlayerPutInWorld(const string &in playerIdentifier)
+
+// Called when player respawns after death
+void GameRespawn(CBasePlayer@ pPlayer)
+
+// Called when the server activates (map load complete)
+void ServerActivate()
+```
+
+**ServerActivate** is called after all map entities have been spawned and activated:
+- Called once per map load, after entity activation completes
+- Ideal for initializing game systems, spawning dynamic entities
+- GameMaster scripts should implement this to spawn the game_master NPC
+- Called from C++ `client.cpp:ServerActivate()` via `CallGlobalFunctionWithParams`
+- Replaces the legacy C++ game_master spawning code
+
+**Example - GameMaster Implementation**:
+```angelscript
+void ServerActivate() {
+    LogMessage("Server activated, spawning game_master...");
+    
+    // Spawn game_master NPC at far coordinates
+    CBaseEntity@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000));
+    
+    if (pGameMaster !is null) {
+        // Configure game_master properties
+        pGameMaster.SetNetName("-game_master");  // Required for C++ lookup
+        pGameMaster.SetHealth(1.0f);
+        pGameMaster.SetRenderMode(kRenderTransTexture);
+        pGameMaster.SetRenderAmount(0);  // Invisible
+        pGameMaster.SetGodMode(true);
+        pGameMaster.SetTakeDamage(DAMAGE_NO);
+        
+        LogMessage("Game master spawned and configured successfully");
+    } else {
+        LogMessage("ERROR: Failed to spawn game_master");
+    }
+}
+```
+
+**GamePlayerPutInWorld** is called when a player enters the world after character selection (not during respawn):
+- Called from C++ `player.cpp:2730` via `CallScriptEvent`
+- The entity string version receives `"PentP(index,address)"` format from `EntToString(this)`
+- The version with `CBasePlayer@` can be called directly with a player object  
+- The version with string identifier can look up players by Steam ID or index
+- Implement this function globally in your AngelScript module to handle player spawn events
+- See `PlayerEvents.as` for the reference implementation
+
+**GameRespawn** is called when a player respawns after death:
+- Implement this function globally to handle post-death respawn logic
+- Different from `GamePlayerPutInWorld` which is for initial world entry
+
+**Reference Implementation** (`PlayerEvents.as`):
+The official implementation handles:
+- **Christmas Mode**: Seasonal events on specific maps (edana, deralia, helena)
+- **Random Spawn**: Moves player to random nearby spawn point for anti-stuck
+- **Transition Data**: Restores spawn points from quest data (key: "d")
+- **Home Position**: Saves player's home coordinates to quest data
+- **First Join**: Initializes new players (sets `PLR_IN_WORLD` quest flag)
+- **Dark Level**: Restores dark level from quest data (key: "dl")
+- **Meta Perks**: Donator/dev halos and trollcano checks
+
+**Example**:
+```angelscript
+void GamePlayerPutInWorld(const string &in entityString) {
+    // Convert entity string to player
+    CBasePlayer@ pPlayer = StringToPlayer(entityString);
+    if (pPlayer is null) return;
+    
+    string steamID = pPlayer.GetSteamID();
+    
+    // Handle player spawn logic
+    LogMessage("Player " + pPlayer.GetName() + " entered the world");
+    
+    // Set transition data from quest data
+    string trans = GetPlayerQuestData(steamID, "d");
+    if (trans.length() > 0) {
+        pPlayer.SetTransitionFields(trans, GetMapName(), trans);
+    }
+    
+    // Set home position
+    Vector3 pos = pPlayer.GetOrigin();
+    string posStr = pos.x + "," + pos.y + "," + pos.z;
+    SetPlayerQuestData(steamID, "MY_HOME", posStr);
+}
+```
 
 ---
 

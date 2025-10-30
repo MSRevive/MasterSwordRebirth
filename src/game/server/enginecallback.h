@@ -176,7 +176,7 @@ extern char g_pTempStringLimit[WRITE_STRING_MAX];
 #define ALLOC_PRIVATE (*g_engfuncs.pfnPvAllocEntPrivateData)
 inline void *GET_PRIVATE(edict_t *pent)
 {
-	if (pent)
+	if (pent && pent->pvPrivateData)
 		return pent->pvPrivateData;
 	return nullptr;
 }

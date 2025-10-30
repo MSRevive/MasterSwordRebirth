@@ -2,6 +2,7 @@
 #include "script.h"
 #include "mseffects.h"
 #include "shake.h"
+#include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 //#include "monsters/bodyparts/bodyparts.h"
 
 void UTIL_ScreenFadeBuild(ScreenFade &fade, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags);
@@ -420,17 +421,24 @@ class CMSChangeLevel : public CBaseEntity
 	{
 		//MAR2008a - Thothie - Let game master handle mstrig_changelevel level changes
 		//- original: CHANGE_LEVEL( (char *)STRING(sDestMap), NULL );
-		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-		if (pGMScript)
+		// Updated to use AngelScript instead of MSScript for map transitions
+		#ifndef CLIENT_DLL
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
 		{
-			msstringlist Parameters;
-			Parameters.add(STRING(sDestMap));
-			Parameters.add(STRING(sDestTrans));
-			pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+			std::vector<std::string> params;
+			params.push_back(STRING(sDestMap));
+			params.push_back(STRING(sDestTrans));
+			
+			// Call AngelScript GameMaster function
+			// This will be handled by MS::ExecuteManualMapChange in GameMasterMapTransitions.as
+			pASManager->CallGlobalFunctionWithParams("ExecuteManualMapChange", params);
 		}
 		else
-			ALERT(at_console, "Unable to find game_master for level change!\n");
+		{
+			ALERT(at_console, "Unable to execute changelevel - AngelScript not initialized!\n");
+		}
+		#endif
 	}
 	void KeyValue(KeyValueData *pkvd)
 	{

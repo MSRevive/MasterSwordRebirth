@@ -7080,7 +7080,6 @@ bool CScript::ScriptCmd_ToSpawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		if( pPlayer )
 		{
 			if ( Params.size() >= 2 ) strncpy((char*)pPlayer->m_SpawnTransition, Params[1], 32);
-			pPlayer->m_JoinType = 2;
 			CBaseEntity *pSpawnSpot = pPlayer->FindSpawnSpot();
 			UTIL_SetOrigin( pPlayer->pev, pSpawnSpot->pev->origin );
 			pPlayer->pev->angles = pSpawnSpot->pev->angles;

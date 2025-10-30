@@ -39,6 +39,8 @@ typedef float vec_t;
     #include "hl/cbase.h"
     #include "player/player.h"
     #include "svglobals.h"  // For g_pGameMasterEntity
+    #include "monsters/msmonster.h"
+    #include "weapons/genericitem.h"
 #endif
 
 #ifdef VALVE_DLL
@@ -93,38 +95,159 @@ namespace ASEntityBindings
         MS_ANGEL_DEBUG("Release_CBasePlayer called for player %p", player);
     }
     
+    // ========================================================================
+    // Message Color Enum for AngelScript
+    // Maps to hudevent_e from player.h for colored HUD messages
+    // ========================================================================
+    enum class MessageColor : int
+    {
+        White = 0,      // HUDEVENT_NORMAL - Normal color (off white)
+        Gray = 1,       // HUDEVENT_UNABLE - Unable to do something (dark gray)
+        Yellow = 2,     // HUDEVENT_ATTACK - Your attack results (yellowish)
+        Red = 3,        // HUDEVENT_ATTACKED - You were attacked (red)
+        Green = 4,      // HUDEVENT_GREEN - Something good (green)
+        Blue = 5        // HUDEVENT_BLUE - Something blue (blue)
+    };
+    
+    // ========================================================================
+    // Player Messaging Wrapper Functions
+    // Replacements for CScript::ScriptCmd_Message and ScriptCmd_InfoMessage
+    // ========================================================================
+    
+    /**
+     * SendColoredMessage - Send a colored event message to player's HUD
+     * Replacement for: playermessage, rplayermessage, gplayermessage, etc.
+     * 
+     * @param player The player to send the message to
+     * @param color The color/type of message (MessageColor enum)
+     * @param message The message text to display
+     */
+    void SendColoredMessage(CBasePlayer* player, MessageColor color, const std::string& message)
+    {
+        #ifdef VALVE_DLL
+            if (!player || message.empty()) return;
+            
+            // Apply message length limit (140 chars as per original implementation)
+            std::string finalMsg = message;
+            if (finalMsg.length() > 140) {
+                finalMsg = finalMsg.substr(0, 140) + "*";
+            }
+            
+            // Add newline if not already present
+            if (!finalMsg.empty() && finalMsg[finalMsg.length() - 1] != '\n') {
+                finalMsg += "\n";
+            }
+            
+            // Send message based on color using hudevent_e values
+            switch (color) {
+                case MessageColor::White:
+                    // Use SendInfoMsg for white/normal messages (matches "playermessage")
+                    player->SendInfoMsg("%s", finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Gray:
+                    player->SendEventMsg(HUDEVENT_UNABLE, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Yellow:
+                    player->SendEventMsg(HUDEVENT_ATTACK, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Red:
+                    player->SendEventMsg(HUDEVENT_ATTACKED, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Green:
+                    player->SendEventMsg(HUDEVENT_GREEN, finalMsg.c_str());
+                    break;
+                    
+                case MessageColor::Blue:
+                    player->SendEventMsg(HUDEVENT_BLUE, finalMsg.c_str());
+                    break;
+                    
+                default:
+                    // Default to normal white message
+                    player->SendInfoMsg("%s", finalMsg.c_str());
+                    break;
+            }
+            
+            MS_ANGEL_DEBUG("SendColoredMessage: Sent %s message to %s: %s", 
+                static_cast<int>(color) == 0 ? "white" :
+                static_cast<int>(color) == 1 ? "gray" :
+                static_cast<int>(color) == 2 ? "yellow" :
+                static_cast<int>(color) == 3 ? "red" :
+                static_cast<int>(color) == 4 ? "green" : "blue",
+                player->DisplayName(),
+                finalMsg.c_str());
+        #endif
+    }
+    
+    /**
+     * SendHUDInfoMessage - Send an info box message to player's HUD
+     * Replacement for: infomsg <player> <title> <message>
+     * 
+     * @param player The player to send the message to
+     * @param title The title text for the info box (max 120 chars)
+     * @param message The body text for the info box (max 120 chars)
+     */
+    void SendHUDInfoMessage(CBasePlayer* player, const std::string& title, const std::string& message)
+    {
+        #ifdef VALVE_DLL
+            if (!player) return;
+            
+            // Apply length limits (120 chars as per original implementation)
+            std::string finalTitle = title;
+            if (finalTitle.length() > 120) {
+                finalTitle = finalTitle.substr(0, 120) + "*\n";
+            }
+            
+            std::string finalMsg = message;
+            if (finalMsg.length() > 120) {
+                finalMsg = finalMsg.substr(0, 120) + "*\n";
+            }
+            
+            // Send HUD info message
+            player->SendHUDMsg(finalTitle.c_str(), finalMsg.c_str());
+            
+            MS_ANGEL_DEBUG("SendHUDInfoMessage: Sent to %s - Title: %s, Message: %s", 
+                player->DisplayName(),
+                finalTitle.c_str(),
+                finalMsg.c_str());
+        #endif
+    }
+    
     // Helper functions for CBaseEntity methods that need extra logic
     Vector GetEntityOrigin(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return Vector(0, 0, 0);
         return pEntity->pev->origin;
     }
     
     std::string GetEntityClassName(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return "null_entity";
         return STRING(pEntity->pev->classname);
     }
     
     void SetEntityOrigin(CBaseEntity* pEntity, const Vector& origin)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return;
         UTIL_SetOrigin(pEntity->pev, origin);
     }
     
     float GetEntityHealth(CBaseEntity* pEntity)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return 0.0f;
         return pEntity->pev->health;
     }
     
     void SetEntityHealth(CBaseEntity* pEntity, float health)
     {
-        if (!pEntity || !pEntity->pev)
+        if (!pEntity || FNullEnt(pEntity))
             return;
         pEntity->pev->health = health;
     }
@@ -132,35 +255,36 @@ namespace ASEntityBindings
     // Helper functions for CBasePlayer methods
     std::string GetPlayerDisplayName(CBasePlayer* pPlayer)
     {
-        if (!pPlayer || !pPlayer->pev)
+        if (!pPlayer || FNullEnt(pPlayer))
             return "Unknown Player";
         return STRING(pPlayer->pev->netname);
     }
     
     std::string GetPlayerAuthID(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer->edict()))
             return "STEAM_ID_INVALID";
-        return pPlayer->AuthID().c_str();
+            
+        return GETPLAYERAUTHID(pPlayer->edict());
     }
     
     std::string GetPlayerTitle(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return "Unknown";
         return pPlayer->GetTitle();
     }
     
     float GetPlayerMaxHP(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return 0.0f;
         return pPlayer->MaxHP();
     }
     
     float GetPlayerMaxMP(CBasePlayer* pPlayer)
     {
-        if (!pPlayer)
+        if (!pPlayer || FNullEnt(pPlayer))
             return 0.0f;
         return pPlayer->MaxMP();
     }
@@ -189,7 +313,7 @@ namespace ASEntityBindings
         // Create a new array
         CScriptArray* array = CScriptArray::Create(arrayType);
         
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         // Server-side: Populate with actual connected players using real engine functions
         
         for (int i = 1; i <= gpGlobals->maxClients; i++)
@@ -229,7 +353,7 @@ namespace ASEntityBindings
     
     CBasePlayer* AS_PlayerByIndex(int index)
     {
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         
         if (index < 1 || index > gpGlobals->maxClients)
         {
@@ -263,6 +387,38 @@ namespace ASEntityBindings
 #else
         // Client-side: Can't access other players
         MS_ANGEL_DEBUG("PlayerByIndex: Client-side, returning nullptr");
+        return nullptr;
+#endif
+    }
+    
+    CBasePlayer* AS_PlayerBySteamID(const std::string& steamID)
+    {
+#ifdef VALVE_DLL
+        if (steamID.empty())
+        {
+            MS_ANGEL_ERROR("PlayerBySteamID: Empty Steam ID");
+            return nullptr;
+        }
+        
+        for (int i = 1; i <= gpGlobals->maxClients; i++)
+        {
+            CBasePlayer* pPlayer = AS_PlayerByIndex(i);
+            if (pPlayer)
+            {
+                std::string playerSteamID = pPlayer->AuthID().c_str();
+                if (playerSteamID == steamID)
+                {
+                    MS_ANGEL_DEBUG("PlayerBySteamID: Found player with Steam ID %s", steamID.c_str());
+                    return pPlayer;
+                }
+            }
+        }
+        
+        MS_ANGEL_DEBUG("PlayerBySteamID: No player found with Steam ID %s", steamID.c_str());
+        return nullptr;
+#else
+        // Client-side: Can't access other players
+        MS_ANGEL_DEBUG("PlayerBySteamID: Client-side, returning nullptr");
         return nullptr;
 #endif
     }
@@ -302,7 +458,8 @@ namespace ASEntityBindings
             return "STEAM_ID_INVALID";
         }
         
-        std::string steamID = GetPlayerAuthID(pPlayer);
+        std::string steamID = GETPLAYERAUTHID(pPlayer->edict());
+        //std::string steamID = GetPlayerAuthID(pPlayer);
         MS_ANGEL_DEBUG("GetSteamID: '%s'", steamID.c_str());
         return steamID;
     }
@@ -405,26 +562,173 @@ namespace ASEntityBindings
         return result;
     }
     
-    // Create entity by script name (returns EntityHandle)
-    EntityHandle AS_CreateEntity(const std::string& scriptName)
+    // Enum for NPC spawn modes
+    enum class ScriptMode
     {
+        Legacy = 0,      // Load and execute MSCScript file (legacy behavior)
+        Angel = 1,    // Skip MSCScript loading (for AngelScript-managed entities)
+        Both = 2    // Load and execute both MSCScript and AngelScript
+    };
+    
+    // SpawnNPC - Creates an NPC at a specific position
+    // Returns CBaseEntity@ pointer to the created monster
+    // spawnMode: Legacy (default) loads legacy MSCScript, Angel skips it
+    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
+    {
+#ifdef VALVE_DLL
         if (scriptName.empty())
         {
-            MS_ANGEL_ERROR("CreateEntity: Empty script name");
-            return EntityHandle(0);
+            MS_ANGEL_ERROR("SpawnNPC: Empty script name");
+            return nullptr;
         }
         
-        void* entity = ASEngineProvider::CreateEntity(scriptName);
-        if (entity)
+        const char* modeStr = spawnMode == ScriptMode::Legacy ? "Legacy" : 
+                              (spawnMode == ScriptMode::Angel ? "Angel" : "Both");
+        MS_ANGEL_INFO("SpawnNPC: Creating NPC '%s' at (%.1f, %.1f, %.1f) [Mode: %s]", 
+                      scriptName.c_str(), position.x, position.y, position.z, modeStr);
+        
+        // Create the monster entity using engine function
+        CMSMonster* pMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
+        if (!pMonster || FNullEnt(pMonster))
         {
-            MS_ANGEL_INFO("CreateEntity: Successfully created '%s'", scriptName.c_str());
-            return EntityHandle(reinterpret_cast<int>(entity));
+            MS_ANGEL_ERROR("SpawnNPC: Failed to create ms_npc entity");
+            return nullptr;
         }
-        else
+        
+        // Set origin before spawning
+        pMonster->pev->origin = position;
+        
+        if (spawnMode == ScriptMode::Legacy)
         {
-            MS_ANGEL_ERROR("CreateEntity: Failed to create entity '%s'", scriptName.c_str());
-            return EntityHandle(0);
+            // Legacy mode: Spawn the monster with the MSCScript
+            pMonster->Spawn(scriptName.c_str());
         }
+        else if (spawnMode == ScriptMode::Angel)
+        {
+            // Angel mode: Manually initialize without loading MSCScript
+            // This prevents SUB_Remove() from being called when no script file exists
+            pMonster->m_ScriptName = ""; // No script - AngelScript manages this entity
+            pMonster->m_DisplayName = scriptName.c_str();
+            pMonster->pev->classname = MAKE_STRING("ms_npc");
+            
+            // Set basic properties for a minimal entity
+            pMonster->pev->health = 1;
+            pMonster->m_HP = 1;
+            pMonster->pev->max_health = 1;
+            pMonster->m_MaxHP = 1;
+            pMonster->pev->takedamage = DAMAGE_NO;
+            pMonster->pev->solid = SOLID_NOT;
+            pMonster->pev->movetype = MOVETYPE_NONE;
+            pMonster->pev->flags |= FL_MONSTER;
+            pMonster->pev->deadflag = DEAD_NO;
+            pMonster->pev->gravity = 0;
+            
+            // Make invisible
+            pMonster->pev->effects |= EF_NODRAW;
+            pMonster->pev->rendermode = kRenderTransTexture;
+            pMonster->pev->renderamt = 0;
+            
+            // Set size (minimal)
+            UTIL_SetSize(pMonster->pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+            
+            // Call Precache to set up basic properties
+            pMonster->Precache();
+        }
+        else // ScriptMode::Both
+        {
+            // Both mode: Initialize manually first (to ensure entity persists),
+            // then attempt to load MSCScript if it exists
+            MS_ANGEL_INFO("SpawnNPC: Both mode - initializing entity manually first");
+            
+            pMonster->m_ScriptName = scriptName.c_str();
+            pMonster->m_DisplayName = scriptName.c_str();
+            pMonster->pev->classname = MAKE_STRING("ms_npc");
+            
+            // Set basic properties for a minimal entity
+            pMonster->pev->health = 1;
+            pMonster->m_HP = 1;
+            pMonster->pev->max_health = 1;
+            pMonster->m_MaxHP = 1;
+            pMonster->pev->takedamage = DAMAGE_NO;
+            pMonster->pev->solid = SOLID_NOT;
+            pMonster->pev->movetype = MOVETYPE_NONE;
+            pMonster->pev->flags |= FL_MONSTER;
+            pMonster->pev->deadflag = DEAD_NO;
+            pMonster->pev->gravity = 0;
+            
+            // Make invisible by default
+            pMonster->pev->effects |= EF_NODRAW;
+            pMonster->pev->rendermode = kRenderTransTexture;
+            pMonster->pev->renderamt = 0;
+            
+            // Set size (minimal)
+            UTIL_SetSize(pMonster->pev, Vector(-16, -16, 0), Vector(16, 16, 32));
+            
+            // Call Precache to set up basic properties
+            pMonster->Precache();
+            
+            // Now try to load the MSCScript if it exists
+            // Script_Add returns nullptr if script doesn't exist or fails to load
+            IScripted* pScripted = pMonster->GetScripted();
+            if (pScripted)
+            {
+                CScript* pScript = pScripted->Script_Add(scriptName.c_str(), pMonster);
+                if (pScript)
+                {
+                    MS_ANGEL_INFO("SpawnNPC: Both mode - MSCScript '%s' loaded successfully", scriptName.c_str());
+                    // Run script events to initialize script-side properties
+                    pScripted->RunScriptEvents();
+                }
+                else
+                {
+                    MS_ANGEL_INFO("SpawnNPC: Both mode - MSCScript '%s' not found or failed to load (continuing with AngelScript only)", scriptName.c_str());
+                }
+            }
+        }
+        
+        MS_ANGEL_INFO("SpawnNPC: Successfully spawned '%s' at index %d", 
+                      scriptName.c_str(), pMonster->entindex());
+        
+        return pMonster;
+#else
+        MS_ANGEL_ERROR("SpawnNPC: Client cannot spawn NPCs");
+        return nullptr;
+#endif
+    }
+    
+    // SpawnItem - Creates an item at a specific position
+    // Returns CBaseEntity@ pointer to the created item
+    CBaseEntity* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
+    {
+#ifdef VALVE_DLL
+        if (scriptName.empty())
+        {
+            MS_ANGEL_ERROR("SpawnItem: Empty script name");
+            return nullptr;
+        }
+        
+        MS_ANGEL_INFO("SpawnItem: Creating item '%s' at (%.1f, %.1f, %.1f)", 
+                      scriptName.c_str(), position.x, position.y, position.z);
+        
+        // Create the item using the item manager
+        CGenericItem* pItem = NewGenericItem(scriptName.c_str());
+        if (!pItem)
+        {
+            MS_ANGEL_ERROR("SpawnItem: Failed to create item '%s'", scriptName.c_str());
+            return nullptr;
+        }
+        
+        // Set origin
+        pItem->pev->origin = position;
+        
+        MS_ANGEL_INFO("SpawnItem: Successfully spawned '%s' at index %d", 
+                      scriptName.c_str(), pItem->entindex());
+        
+        return pItem;
+#else
+        MS_ANGEL_ERROR("SpawnItem: Client cannot spawn items");
+        return nullptr;
+#endif
     }
     
     // Vote menu opening function - opens a menu with custom options using the game master entity
@@ -584,58 +888,54 @@ namespace ASEntityBindings
 #endif
     }
     
-    // Entity property functions using EntityHandle
-    void AS_SetEntityName(const EntityHandle& handle, const std::string& name)
+    // Entity property functions using CBaseEntity@
+    void AS_SetEntityName(CBaseEntity* entity, const std::string& name)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityName(entity, name);
+        ASEngineProvider::SetEntityName((void*)entity, name);
         MS_ANGEL_DEBUG("SetEntityName: Set name to '%s'", name.c_str());
     }
     
-    void AS_SetEntityTargetName(const EntityHandle& handle, const std::string& targetName)
+    void AS_SetEntityTargetName(CBaseEntity* entity, const std::string& targetName)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityTargetName: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityTargetName(entity, targetName);
+        ASEngineProvider::SetEntityTargetName((void*)entity, targetName);
         MS_ANGEL_DEBUG("SetEntityTargetName: Set targetname to '%s'", targetName.c_str());
     }
     
-    void AS_SetEntityHealth(const EntityHandle& handle, float health)
+    void AS_SetEntityHealth(CBaseEntity* entity, float health)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_ERROR("SetEntityHealth: NULL entity pointer");
             return;
         }
         
-        ASEngineProvider::SetEntityHealth(entity, health);
+        ASEngineProvider::SetEntityHealth((void*)entity, health);
         MS_ANGEL_DEBUG("SetEntityHealth: Set health to %f", health);
     }
     
     // Check if entity is dead (more comprehensive than IsAlive)
-    bool AS_IsEntityDead(const EntityHandle& handle)
+    bool AS_IsEntityDead(CBaseEntity* entity)
     {
-        void* entity = reinterpret_cast<void*>(handle.value);
         if (!entity)
         {
             MS_ANGEL_DEBUG("IsEntityDead: NULL entity pointer - considered dead");
             return true;
         }
         
-        float health = ASEngineProvider::GetEntityHealth(entity);
-        int deadFlag = ASEngineProvider::GetEntityDeadFlag(entity);
+        float health = ASEngineProvider::GetEntityHealth((void*)entity);
+        int deadFlag = ASEngineProvider::GetEntityDeadFlag((void*)entity);
         
         // Check if entity is dead by health or deadflag (DEAD_NO = 0)
         bool isDead = (deadFlag != 0) || (health <= 0);
@@ -693,6 +993,50 @@ namespace ASEntityBindings
         
         MS_ANGEL_DEBUG("EntityToPlayer_Cast: Successfully cast entity to player");
         return static_cast<CBasePlayer*>(pEntity);
+    }
+    
+    //==========================================================================
+    // Entity String Conversion Functions
+    //==========================================================================
+    
+    /**
+     * Convert entity string to CBaseEntity
+     * Entity strings are in format "PentP(index,address)"
+     */
+    CBaseEntity* StringToEntity(const std::string& entityString)
+    {
+        if (entityString.empty())
+        {
+            MS_ANGEL_DEBUG("StringToEntity: Empty entity string");
+            return nullptr;
+        }
+        
+        // Use the shared utility function from sharedutil.h/cpp
+        CBaseEntity* pEntity = StringToEnt(entityString.c_str());
+        
+        if (!pEntity)
+        {
+            MS_ANGEL_DEBUG("StringToEntity: Failed to convert '%s' to entity", entityString.c_str());
+            return nullptr;
+        }
+        
+        MS_ANGEL_DEBUG("StringToEntity: Successfully converted '%s' to entity", entityString.c_str());
+        return pEntity;
+    }
+    
+    /**
+     * Convert entity string to CBasePlayer
+     * Entity strings are in format "PentP(index,address)"
+     */
+    CBasePlayer* StringToPlayer(const std::string& entityString)
+    {
+        CBaseEntity* pEntity = StringToEntity(entityString);
+        if (!pEntity)
+        {
+            return nullptr;
+        }
+        
+        return EntityToPlayer_Cast(pEntity);
     }
     
     // Template casting function for AngelScript cast<T>() support
@@ -826,7 +1170,62 @@ namespace ASEntityBindings
             .method("Vector3 Center()", &CBaseEntity::Center)
             .method("float Volume()", &CBaseEntity::Volume)
             .method("float Weight()", &CBaseEntity::Weight)
-            .method("bool IsPlayer()", &CBaseEntity::IsPlayer);
+            .method("bool IsPlayer()", &CBaseEntity::IsPlayer)
+            // Additional entity configuration methods
+            .method("void SetNetName(const string &in)", [](CBaseEntity* entity, const std::string& netname) {
+#ifdef VALVE_DLL
+                if (FNullEnt(entity))
+                    return;
+
+                if (entity && entity->IsMSMonster()) {
+                    CMSMonster* pMonster = static_cast<CMSMonster*>(entity);
+                    pMonster->m_NetName = netname.c_str();
+                    pMonster->pev->netname = MAKE_STRING(pMonster->m_NetName.c_str());
+                }
+#endif
+            })
+            .method("string GetNetName()", [](CBaseEntity* entity) -> std::string {
+#ifdef VALVE_DLL
+                if (FNullEnt(entity))
+                    return "";
+
+                if (entity && entity->pev->netname) {
+                    return STRING(entity->pev->netname);
+                }
+#endif
+                return "";
+            })
+            .method("void SetRenderMode(int)", [](CBaseEntity* entity, int renderMode) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->rendermode = renderMode;
+                }
+#endif
+            })
+            .method("void SetRenderAmount(int)", [](CBaseEntity* entity, int renderAmount) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->renderamt = renderAmount;
+                }
+#endif
+            })
+            .method("void SetTakeDamage(int)", [](CBaseEntity* entity, int takeDamage) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    entity->pev->takedamage = takeDamage;
+                }
+#endif
+            })
+            .method("void SetGodMode(bool)", [](CBaseEntity* entity, bool godMode) {
+#ifdef VALVE_DLL
+                if (entity && !FNullEnt(entity)) {
+                    if (godMode)
+                        entity->pev->flags |= FL_GODMODE;
+                    else
+                        entity->pev->flags &= ~FL_GODMODE;
+                }
+#endif
+            });
         
         MS_ANGEL_INFO("CBaseEntity registration complete");
     }
@@ -846,9 +1245,6 @@ namespace ASEntityBindings
             // Essential identification methods with automatic calling convention detection
             .method("string DisplayName() const", &CBasePlayer::DisplayName)
             .method("string GetName() const", &CBasePlayer::DisplayName)  // Alias for GameMaster script compatibility
-            .method("string GETPLAYERAUTHID() const", [](CBasePlayer* player) { 
-                return player ? player->AuthID().c_str() : std::string("STEAM_ID_INVALID"); 
-            })
             .method("int GetEntIndex() const", [](CBasePlayer* player) { 
                 return player ? player->entindex() : 0; 
             })
@@ -929,14 +1325,108 @@ namespace ASEntityBindings
                 if (player) player->SendEventMsg(msg.c_str());
             })
             
+            // Enhanced messaging methods with color support
+            .method("void SendColoredMessage(MessageColor, const string &in)", SendColoredMessage)
+            .method("void SendHUDInfoMessage(const string &in, const string &in)", SendHUDInfoMessage)
+            
+            // Map transition methods
+            .method("void SetTransitionFields(const string &in, const string &in, const string &in)", 
+                [](CBasePlayer* player, const std::string& localSpawn, const std::string& destMap, const std::string& destSpawn) {
+                #ifdef VALVE_DLL
+                    if (!player) {
+                        MS_ANGEL_DEBUG("SetTransitionFields: NULL player pointer");
+                        return;
+                    }
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: BEFORE - OldTrans='%s', NextMap='%s', NextTrans='%s'",
+                                   player->m_OldTransition, player->m_NextMap, player->m_NextTransition);
+                    
+                    // Set transition fields - this is what msarea_transition does
+                    strncpy(player->m_OldTransition, localSpawn.c_str(), sizeof(player->m_OldTransition) - 1);
+                    player->m_OldTransition[sizeof(player->m_OldTransition) - 1] = '\0';
+                    
+                    strncpy(player->m_NextMap, destMap.c_str(), sizeof(player->m_NextMap) - 1);
+                    player->m_NextMap[sizeof(player->m_NextMap) - 1] = '\0';
+                    
+                    strncpy(player->m_NextTransition, destSpawn.c_str(), sizeof(player->m_NextTransition) - 1);
+                    player->m_NextTransition[sizeof(player->m_NextTransition) - 1] = '\0';
+                    
+                    // Set spawn transition to current spawn
+                    player->m_SpawnTransition = player->m_OldTransition;
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: AFTER - OldTrans='%s', NextMap='%s', NextTrans='%s', SpawnTrans='%s'",
+                                   player->m_OldTransition, player->m_NextMap, player->m_NextTransition, player->m_SpawnTransition);
+                    
+                    // Save the character with updated transition data
+                    player->SaveChar();
+                    
+                    MS_ANGEL_INFO("SetTransitionFields: Character saved for player %s", player->AuthID().c_str());
+                #endif
+            })
+            .method("string GetOldTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_OldTransition;
+            })
+            .method("string GetNextMap() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_NextMap;
+            })
+            .method("string GetNextTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player) return "";
+                return player->m_NextTransition;
+            })
+            .method("int GetJoinType() const", [](CBasePlayer* player) -> int {
+                if (!player) return 0;
+                return player->m_JoinType;
+            })
+            .method("void SetJoinType(int)", [](CBasePlayer* player, int joinType) {
+                #ifdef VALVE_DLL
+                    if (!player) {
+                        MS_ANGEL_DEBUG("SetJoinType: NULL player pointer");
+                        return;
+                    }
+                    player->m_JoinType = joinType;
+                    MS_ANGEL_INFO("SetJoinType: Player %s JoinType set to %d", player->AuthID().c_str(), joinType);
+                #endif
+            })
+#ifdef VALVE_DLL
+            .method("bool MoveToSpawnSpot()", [](CBasePlayer* player) -> bool {
+                if (!player) {
+                    MS_ANGEL_DEBUG("MoveToSpawnSpot: NULL player pointer");
+                    return false;
+                }
+                bool result = player->MoveToSpawnSpot();
+                MS_ANGEL_INFO("MoveToSpawnSpot: Player %s moved to spawn: %s",
+                    player->AuthID().c_str(), result ? "true" : "false");
+                return result;
+               })
+            .method("void SetSpawnTransition(const string &in)", [](CBasePlayer* player, const std::string& transName) {
+                if (!player) {
+                    MS_ANGEL_DEBUG("SetSpawnTransition: NULL player pointer");
+                    return;
+                }
+                if (player->m_SpawnTransition != NULL) {
+                    strncpy((char*)player->m_SpawnTransition, transName.c_str(), 32);
+                    ((char*)player->m_SpawnTransition)[31] = '\0';
+                    MS_ANGEL_INFO("SetSpawnTransition: Player %s spawn transition set to '%s'",
+                        player->AuthID().c_str(), transName.c_str());
+                }
+            })
+            .method("string GetSpawnTransition() const", [](CBasePlayer* player) -> std::string {
+                if (!player || !player->m_SpawnTransition) return "";
+                return std::string(player->m_SpawnTransition);
+            })
+#endif
+       
             // Custom equality comparison using pointer comparison (most appropriate for commands)
             .method("bool opEquals(const CBasePlayer@+ other) const", [](CBasePlayer* player, CBasePlayer* other) {
                 return player == other;  // Simple pointer comparison
-            })
-            ;
+            });
         
         MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
+
+
 
     void RegisterEntityTypes(asIScriptEngine* pEngine)
     {
@@ -947,6 +1437,15 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Registering real entity types...");
         
+        // Register MessageColor enum FIRST (before CBasePlayer that uses it)
+        pEngine->RegisterEnum("MessageColor");
+        pEngine->RegisterEnumValue("MessageColor", "White", static_cast<int>(MessageColor::White));
+        pEngine->RegisterEnumValue("MessageColor", "Gray", static_cast<int>(MessageColor::Gray));
+        pEngine->RegisterEnumValue("MessageColor", "Yellow", static_cast<int>(MessageColor::Yellow));
+        pEngine->RegisterEnumValue("MessageColor", "Red", static_cast<int>(MessageColor::Red));
+        pEngine->RegisterEnumValue("MessageColor", "Green", static_cast<int>(MessageColor::Green));
+        pEngine->RegisterEnumValue("MessageColor", "Blue", static_cast<int>(MessageColor::Blue));
+        
         // Register CBaseEntity with direct AngelScript API
         RegisterCBaseEntity(pEngine);
         
@@ -956,9 +1455,43 @@ namespace ASEntityBindings
         // Register casting functions with asbind20
         asbind20::global(pEngine)
             .function("CBaseEntity@ ToEntity(CBasePlayer@)", PlayerToEntity_Cast)
-            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", EntityToPlayer_Cast);
+            .function("CBasePlayer@ ToPlayer(CBaseEntity@)", EntityToPlayer_Cast)
+            // Entity string conversion functions
+            .function("CBaseEntity@ StringToEntity(const string &in)", StringToEntity)
+            .function("CBasePlayer@ StringToPlayer(const string &in)", StringToPlayer);
         
-        MS_ANGEL_INFO("[ASEntityBindings] Entity types registration complete");
+        // Register engine constants for entity configuration
+        // Using static variables for AngelScript global properties
+        static const int const_kRenderNormal = 0;
+        static const int const_kRenderTransColor = 1;
+        static const int const_kRenderTransTexture = 2;
+        static const int const_kRenderGlow = 3;
+        static const int const_kRenderTransAlpha = 4;
+        static const int const_kRenderTransAdd = 5;
+        static const int const_DAMAGE_NO = 0;
+        static const int const_DAMAGE_YES = 1;
+        static const int const_DAMAGE_AIM = 2;
+        
+        pEngine->RegisterGlobalProperty("const int kRenderNormal", (void*)&const_kRenderNormal);
+        pEngine->RegisterGlobalProperty("const int kRenderTransColor", (void*)&const_kRenderTransColor);
+        pEngine->RegisterGlobalProperty("const int kRenderTransTexture", (void*)&const_kRenderTransTexture);
+        pEngine->RegisterGlobalProperty("const int kRenderGlow", (void*)&const_kRenderGlow);
+        pEngine->RegisterGlobalProperty("const int kRenderTransAlpha", (void*)&const_kRenderTransAlpha);
+        pEngine->RegisterGlobalProperty("const int kRenderTransAdd", (void*)&const_kRenderTransAdd);
+        
+        pEngine->RegisterGlobalProperty("const int DAMAGE_NO", (void*)&const_DAMAGE_NO);
+        pEngine->RegisterGlobalProperty("const int DAMAGE_YES", (void*)&const_DAMAGE_YES);
+        pEngine->RegisterGlobalProperty("const int DAMAGE_AIM", (void*)&const_DAMAGE_AIM);
+        
+        // Register ScriptMode enum for controlling script loading behavior
+        pEngine->RegisterEnum("ScriptMode");
+        pEngine->RegisterEnumValue("ScriptMode", "Legacy", static_cast<int>(ScriptMode::Legacy));
+        pEngine->RegisterEnumValue("ScriptMode", "Angel", static_cast<int>(ScriptMode::Angel));
+        pEngine->RegisterEnumValue("ScriptMode", "Both", static_cast<int>(ScriptMode::Both));
+        
+        // Note: MessageColor enum is registered earlier (before CBasePlayer registration)
+        
+        MS_ANGEL_INFO("[ASEntityBindings] Entity types and constants registration complete");
     }
     
     void RegisterGlobalFunctions(asIScriptEngine* pEngine)
@@ -983,6 +1516,7 @@ namespace ASEntityBindings
             .function("array<CBasePlayer@>@ GetAllPlayers()", AS_GetAllPlayersWrapper)
             .function("int GetPlayerCount()", AS_GetPlayerCount)
             .function("CBasePlayer@ PlayerByIndex(int)", AS_PlayerByIndex)
+            .function("CBasePlayer@ PlayerBySteamID(const string &in)", AS_PlayerBySteamID)
             .function("bool IsConnected(CBasePlayer@)", AS_IsConnected)
             .function("string GetDisplayName(CBasePlayer@)", AS_GetDisplayName)
             .function("string GetSteamID(CBasePlayer@)", AS_GetSteamID)
@@ -1001,7 +1535,16 @@ namespace ASEntityBindings
             .function("void MS_ANGEL_DEBUG(const string &in)", [](const std::string& message) { AS_LogAngelDebug(message); })
             .function("void MS_ANGEL_ERROR(const string &in)", [](const std::string& message) { AS_LogAngelError(message); })
             // Vote menu opening function
-            .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu);
+            .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu)
+            // Spawn functions
+            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CBaseEntity* {
+                    return AS_SpawnNPC(scriptName, position, params, spawnMode);
+                })
+            .function("CBaseEntity@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
+                    return AS_SpawnItem(scriptName, position, params);
+                });
         
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
     }
@@ -1050,14 +1593,16 @@ namespace ASEntityBindings
         
         MS_ANGEL_INFO("[ASEntityBindings] Starting entity bindings registration...");
         
-        // Note: Core types (Vector3, EntityHandle, etc.) are registered by ASBindings.cpp
+        // Note: Core types (Vector3, Color, etc.) are registered by ASBindings.cpp
         // We only register entity-specific bindings here
         
-        // Register the new template-based engine bindings
+        // Register entity types first (CBaseEntity, CBasePlayer)
+        RegisterEntityTypes(pEngine);
+        
+        // Now register engine bindings that depend on entity types
         ASEngineBindings::RegisterAll(pEngine);
         
-        // Register entity types and legacy functions
-        RegisterEntityTypes(pEngine);
+        // Register global functions
         RegisterGlobalFunctions(pEngine);
         
         // Test the entity bindings to ensure they work

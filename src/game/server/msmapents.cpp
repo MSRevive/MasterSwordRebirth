@@ -5,6 +5,7 @@
 #include "mscharacter.h"
 #include "filesystem_shared.h"
 #include "mslogger.h"
+#include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
 class CCycler : public CBaseMonster
 {
@@ -1713,12 +1714,23 @@ public:
 		//Thothie JUN2007 - tired of this not displaying, letting scripts handle it
 		//msstring Text = msstring("It appears that you wish to travel to ") + STRING(sDestName) + ".\nPress enter (accept), to continue.";
 		//pOtherPlayer->SendHUDMsg( "Travel", Text );
-		msstringlist Parameters;
-		Parameters.add(STRING(sDestName));
-		Parameters.add(STRING(sDestMap));
-		Parameters.add(STRING(sName));
-		Parameters.add(STRING(sDestTrans));
-		pPlayer->CallScriptEvent("game_transition_entered", &Parameters);
+		// Call AngelScript player function for transition entered
+		#ifdef VALVE_DLL
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			std::vector<std::string> params;
+			params.push_back(pPlayer->DisplayName());     // Player name
+			params.push_back(STRING(sDestName));          // Destination name
+			params.push_back(STRING(sDestMap));           // Destination map
+			params.push_back(STRING(sName));              // Local spawn point
+			params.push_back(STRING(sDestTrans));         // Destination spawn point
+			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Steam ID
+			
+			// Call global AngelScript function
+			pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionEntered", params);
+		}
+		#endif
 
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 		WRITE_BYTE(3);
@@ -1769,11 +1781,22 @@ public:
 		pPlayer->CurrentTransArea = NULL;
 
 		bDidVote = false;
-		msstringlist Parameters;
-		Parameters.add(STRING(sDestName));
-		Parameters.add(STRING(sDestMap));
-		Parameters.add(STRING(sName));
-		pPlayer->CallScriptEvent("game_transition_exited", &Parameters);
+		
+		// Call AngelScript player function for transition exited
+		#ifndef CLIENT_DLL
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
+		{
+			std::vector<std::string> params;
+			params.push_back(STRING(sDestName));
+			params.push_back(STRING(sDestMap));
+			params.push_back(STRING(sName));
+			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Add player Steam ID
+			
+			// Call global AngelScript function
+			pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionExited", params);
+		}
+		#endif
 	}
 
 	// MSQuery - Called by CHalfLifeMultiplay::ClientCommand to let me know who voted
@@ -1788,15 +1811,22 @@ public:
 
 		if (!bDidVote)
 		{
-			if (pGMScript)
+			// Updated to use AngelScript instead of MSScript for map transitions
+			#ifndef CLIENT_DLL
+			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+			if (pASManager && pASManager->IsInitialized())
 			{
-				msstringlist Parameters;
-				Parameters.add(STRING(sDestName));
-				Parameters.add(STRING(sDestMap));
-				Parameters.add(STRING(sName));
-				Parameters.add(STRING(sDestTrans));
-				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
+				std::vector<std::string> params;
+				params.push_back(STRING(sDestName));    // Map title
+				params.push_back(STRING(sDestMap));     // Destination BSP
+				params.push_back(STRING(sName));        // Local spawn point
+				params.push_back(STRING(sDestTrans));   // Destination spawn point
+				
+				// Call AngelScript GameMaster function
+				// This will be handled by MS::GameTransitionTriggered in GameMasterMapTransitions.as
+				pASManager->CallGlobalFunctionWithParams("GameTransitionTriggered", params);
 			}
+			#endif
 			bDidVote = true;
 		}
 
@@ -1842,9 +1872,19 @@ public:
 				if (IS_MAP_VALID(dest_map.c_str()))
 					pOtherPlayer->EnableControl(FALSE);
 
-				msstringlist Parameters;
-				Parameters.add(STRING(sDestMap));
-				pOtherPlayer->CallScriptEvent("game_map_change", &Parameters);
+				// Call AngelScript player function for map change
+				#ifdef VALVE_DLL
+				CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+				if (pASManager && pASManager->IsInitialized())
+				{
+					std::vector<std::string> params;
+					params.push_back(STRING(sDestMap));
+					params.push_back(GETPLAYERAUTHID(pOtherPlayer->edict())); // Add player Steam ID
+					
+					// Call global AngelScript function
+					pASManager->CallGlobalFunctionWithParams("OnPlayerMapChange", params);
+				}
+				#endif
 
 				//Thothie JUN2007 make sure all trans stats are set right
 				/*

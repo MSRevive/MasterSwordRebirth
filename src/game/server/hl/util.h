@@ -107,7 +107,7 @@ typedef int BOOL;
 #ifdef DEBUG
 extern edict_t *DBG_EntOfVars(const entvars_t *pev);
 inline edict_t* ENT(const entvars_t* pev) {
-	if ((uintptr_t)pev == 0xddddddd || pev == nullptr)
+	if ((uintptr_t)pev == 0xdddddddd || pev == nullptr)
 	{
 		return nullptr;
 	};

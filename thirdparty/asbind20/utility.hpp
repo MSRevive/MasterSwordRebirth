@@ -23,6 +23,16 @@
 
 namespace asbind20
 {
+#if defined(_WIN32) && !defined(_WIN64)
+#    define ASBIND20_HAS_STANDALONE_STDCALL
+#    define ASBIND20_CDECL   __cdecl
+#    define ASBIND20_STDCALL __stdcall
+#else
+// placeholder
+#    define ASBIND20_CDECL
+#    define ASBIND20_STDCALL
+#endif
+
 struct this_type_t
 {};
 
@@ -201,6 +211,36 @@ constexpr bool is_objhandle(int type_id) noexcept
 }
 
 /**
+ * @brief Get the script string type ID
+ *
+ * @param engine Script engine
+ */
+[[nodiscard]]
+inline int get_script_string_type(
+    const AS_NAMESPACE_QUALIFIER asIScriptEngine* engine
+)
+{
+#if ANGELSCRIPT_VERSION >= 23800
+    int string_t_id = engine->GetStringFactory();
+#else
+    int string_t_id = engine->GetStringFactoryReturnTypeId();
+#endif
+
+    return string_t_id;
+}
+
+/**
+ * @brief Check if a type id refers to the script string
+ */
+[[nodiscard]]
+inline bool is_script_string(
+    const AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id
+)
+{
+    return get_script_string_type(engine) == type_id;
+}
+
+/**
  * @brief Check if a type requires GC
  *
  * This can be used for template callback.
@@ -209,7 +249,7 @@ constexpr bool is_objhandle(int type_id) noexcept
  *           so it's safe to call this function by `type_requires_gc(ti->GetSubType())`.
  */
 [[nodiscard]]
-inline bool type_requires_gc(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
+inline bool type_requires_gc(const AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
 {
     if(!ti) [[unlikely]]
         return false;
@@ -239,7 +279,7 @@ inline bool type_requires_gc(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
  * @param type_id AngelScript type id
  */
 inline auto sizeof_script_type(
-    AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id
+    const AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id
 )
     -> AS_NAMESPACE_QUALIFIER asUINT
 {
@@ -277,7 +317,7 @@ inline auto sizeof_script_type(
         }
     }
 
-    AS_NAMESPACE_QUALIFIER asITypeInfo* ti = engine->GetTypeInfoById(type_id);
+    auto* ti = engine->GetTypeInfoById(type_id);
     if(!ti)
         return 0;
 
@@ -1002,7 +1042,7 @@ std::size_t member_offset(T Class::* mp) noexcept
 }
 
 [[nodiscard]]
-inline auto get_default_factory(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
+inline auto get_default_factory(const AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
     -> AS_NAMESPACE_QUALIFIER asIScriptFunction*
 {
     if(!ti) [[unlikely]]
@@ -1020,7 +1060,7 @@ inline auto get_default_factory(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
 }
 
 [[nodiscard]]
-inline auto get_default_constructor(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
+inline auto get_default_constructor(const AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
     -> AS_NAMESPACE_QUALIFIER asIScriptFunction*
 {
     if(!ti) [[unlikely]]
@@ -1042,7 +1082,7 @@ inline auto get_default_constructor(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
 }
 
 [[nodiscard]]
-inline auto get_weakref_flag(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
+inline auto get_weakref_flag(const AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
     -> AS_NAMESPACE_QUALIFIER asIScriptFunction*
 {
     if(!ti) [[unlikely]]
@@ -1181,335 +1221,39 @@ inline void set_script_exception(const std::string& info)
     set_script_exception(info.c_str());
 }
 
-namespace container
+inline void set_script_exception(std::string_view info)
+{
+    with_cstr(
+        [](const char* info)
+        { set_script_exception(info); },
+        info
+    );
+}
+
+/**
+ * @brief Tools for debugging
+ */
+namespace debugging
 {
     /**
-     * @brief Helper for storing a single script object
-     *
-     * @note This helper needs an external type ID for correctly handle the stored data,
-     *       so it is recommended to use this helper as a member of container class, together with a member for storing type ID.
+     * @brief Get script section name of function
      */
-    class single
+    [[nodiscard]]
+    inline const char* get_function_section_name(
+        const AS_NAMESPACE_QUALIFIER asIScriptFunction* func
+    )
     {
-    public:
-        single() noexcept
-        {
-            m_data.ptr = nullptr;
-        };
+#if ANGELSCRIPT_VERSION >= 23800
 
-        single(const single&) = delete;
+        const char* result;
+        func->GetDeclaredAt(&result, nullptr, nullptr);
+        return result;
 
-        single(single&& other) noexcept
-        {
-            *this = std::move(other);
-        }
-
-        /**
-         * @warning Due to limitations of the AngelScript interface, it won't properly release the stored object.
-         *          Remember to manually clear the stored object before destroying the helper!
-         */
-        ~single()
-        {
-            assert(m_data.ptr == nullptr && "reference not released");
-        }
-
-        single& operator=(const single&) = delete;
-
-        single& operator=(single&& other) noexcept
-        {
-            if(this == &other) [[unlikely]]
-                return *this;
-
-            std::memcpy(&m_data, &other.m_data, sizeof(m_data));
-            other.m_data.ptr = nullptr;
-
-            return *this;
-        }
-
-        /**
-         * @name Get the address of the data
-         *
-         * This can be used to implemented a function that return reference of data to script
-         */
-        /// @{
-
-        void* data_address(int type_id)
-        {
-            assert(!is_void_type(type_id));
-
-            if(is_primitive_type(type_id))
-                return m_data.primitive;
-            else if(is_objhandle(type_id))
-                return &m_data.handle;
-            else
-                return m_data.ptr;
-        }
-
-        const void* data_address(int type_id) const
-        {
-            assert(!is_void_type(type_id));
-
-            if(is_primitive_type(type_id))
-                return m_data.primitive;
-            else if(is_objhandle(type_id))
-                return &m_data.handle;
-            else
-                return m_data.ptr;
-        }
-
-        /// @}
-
-        /**
-         * @brief Get the referenced object
-         *
-         * This allows direct interaction with the stored object, whether it's an object handle or not
-         *
-         * @note Only valid if the type of stored data is @b NOT a primitive value
-         */
-        [[nodiscard]]
-        void* object_ref() const noexcept
-        {
-            return m_data.ptr;
-        }
-
-        // TODO: API receiving asITypeInfo*
-
-        /**
-         * @brief Construct the stored value using its default constructor
-         *
-         * @param engine Script engine
-         * @param type_id Type ID. Must @b NOT be void (`asTYPEID_VOID`)
-         *
-         * @return True if successful
-         */
-        bool construct(AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id)
-        {
-            assert(!is_void_type(type_id));
-
-            if(is_primitive_type(type_id))
-            {
-                std::memset(m_data.primitive, 0, 8);
-            }
-            else if(is_objhandle(type_id))
-            {
-                m_data.handle = nullptr;
-            }
-            else
-            {
-                void* ptr = engine->CreateScriptObject(
-                    engine->GetTypeInfoById(type_id)
-                );
-                if(!ptr) [[unlikely]]
-                    return false;
-                m_data.ptr = ptr;
-            }
-
-            return true;
-        }
-
-        /**
-         * @brief Copy construct the stored value from another value
-         *
-         * @param engine Script engine
-         * @param type_id Type ID. Must @b NOT be void (`asTYPEID_VOID`)
-         * @param ref Address of the value. Must @b NOT be `nullptr`
-         *
-         * @return True if successful
-         *
-         * @note Make sure this helper doesn't contain a constructed object previously!
-         */
-        bool copy_construct(AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id, const void* ref)
-        {
-            assert(!is_void_type(type_id));
-
-            if(is_primitive_type(type_id))
-            {
-                copy_primitive_value(m_data.primitive, ref, type_id);
-            }
-            else if(is_objhandle(type_id))
-            {
-                void* handle = *static_cast<void* const*>(ref);
-                m_data.handle = handle;
-                if(handle)
-                {
-                    engine->AddRefScriptObject(
-                        handle,
-                        engine->GetTypeInfoById(type_id)
-                    );
-                }
-            }
-            else
-            {
-                void* ptr = engine->CreateScriptObjectCopy(
-                    const_cast<void*>(ref),
-                    engine->GetTypeInfoById(type_id)
-                );
-                if(!ptr) [[unlikely]]
-                    return false;
-                m_data.ptr = ptr;
-            }
-
-            return true;
-        }
-
-        /**
-         * @brief Copy assign the stored value from another value
-         *
-         * @param engine Script engine
-         * @param type_id Type ID. Must @b NOT be void (`asTYPEID_VOID`)
-         * @param ref Address of the value. Must @b NOT be `nullptr`
-         *
-         * @return True if successful
-         *
-         * @note Make sure the stored value is valid!
-         */
-        bool copy_assign_from(AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id, const void* ref)
-        {
-            assert(!is_void_type(type_id));
-
-            if(is_primitive_type(type_id))
-            {
-                copy_primitive_value(m_data.primitive, ref, type_id);
-            }
-            else if(is_objhandle(type_id))
-            {
-                AS_NAMESPACE_QUALIFIER asITypeInfo* ti = engine->GetTypeInfoById(type_id);
-                if(m_data.handle)
-                    engine->ReleaseScriptObject(m_data.handle, ti);
-                void* handle = *static_cast<void* const*>(ref);
-                m_data.handle = handle;
-                if(handle)
-                {
-                    engine->AddRefScriptObject(
-                        handle, ti
-                    );
-                }
-            }
-            else
-            {
-                int r = engine->AssignScriptObject(
-                    m_data.ptr,
-                    const_cast<void*>(ref),
-                    engine->GetTypeInfoById(type_id)
-                );
-                return r >= 0;
-            }
-
-            return true;
-        }
-
-        /**
-         * @brief Copy assign the stored value to destination
-         *
-         * @param engine Script engine
-         * @param type_id Type ID. Must @b NOT be void (`asTYPEID_VOID`)
-         * @param out Address of the destination. Must @b NOT be `nullptr`
-         *
-         * @return True if successful
-         *
-         * @note Make sure the stored value is valid!
-         */
-        bool copy_assign_to(AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id, void* out) const
-        {
-            assert(!is_void_type(type_id));
-            assert(out != nullptr);
-
-            if(is_primitive_type(type_id))
-            {
-                copy_primitive_value(out, m_data.primitive, type_id);
-            }
-            else if(is_objhandle(type_id))
-            {
-                void** out_handle = static_cast<void**>(out);
-
-                AS_NAMESPACE_QUALIFIER asITypeInfo* ti = engine->GetTypeInfoById(type_id);
-                if(*out_handle)
-                    engine->ReleaseScriptObject(*out_handle, ti);
-                *out_handle = m_data.handle;
-                if(m_data.handle)
-                {
-                    engine->AddRefScriptObject(
-                        m_data.handle, ti
-                    );
-                }
-            }
-            else
-            {
-                int r = engine->AssignScriptObject(
-                    out,
-                    m_data.ptr,
-                    engine->GetTypeInfoById(type_id)
-                );
-
-                return r >= 0;
-            }
-
-            return true;
-        }
-
-        /**
-         * @brief Destroy the stored object
-         *
-         * @param engine Script engine
-         * @param type_id Type ID. Must @b NOT be void (`asTYPEID_VOID`)
-         */
-        void destroy(AS_NAMESPACE_QUALIFIER asIScriptEngine* engine, int type_id)
-        {
-            if(is_primitive_type(type_id))
-            {
-                // Suppressing assertion in destructor
-                assert((m_data.ptr = nullptr, true));
-                return;
-            }
-
-            if(!m_data.ptr)
-                return;
-            engine->ReleaseScriptObject(
-                m_data.ptr,
-                engine->GetTypeInfoById(type_id)
-            );
-            m_data.ptr = nullptr;
-        }
-
-        /**
-         * @brief Enumerate references of stored object for GC
-         *
-         * @details This function has no effect for non-garbage collected types
-         *
-         * @param ti Type information
-         */
-        void enum_refs(AS_NAMESPACE_QUALIFIER asITypeInfo* ti)
-        {
-            if(!ti) [[unlikely]]
-                return;
-
-            auto flags = ti->GetFlags();
-            if(!(flags & AS_NAMESPACE_QUALIFIER asOBJ_GC)) [[unlikely]]
-                return;
-
-            if(flags & AS_NAMESPACE_QUALIFIER asOBJ_REF)
-            {
-                ti->GetEngine()->GCEnumCallback(object_ref());
-            }
-            else if(flags & AS_NAMESPACE_QUALIFIER asOBJ_VALUE)
-            {
-                ti->GetEngine()->ForwardGCEnumReferences(
-                    object_ref(), ti
-                );
-            }
-        }
-
-    private:
-        union internal_t
-        {
-            std::byte primitive[8]; // primitive value
-            void* handle; // script handle
-            void* ptr; // script object
-        };
-
-        internal_t m_data;
-    };
-} // namespace container
+#else // 2.37
+        return func->GetScriptSectionName();
+#endif
+    }
+} // namespace debugging
 } // namespace asbind20
 
 #endif
