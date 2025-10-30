@@ -41,6 +41,7 @@ typedef float vec_t;
     #include "svglobals.h"  // For g_pGameMasterEntity
     #include "monsters/msmonster.h"
     #include "weapons/genericitem.h"
+    #include "weapons/weapons.h"  // For CBasePlayerItem and CBasePlayerWeapon
 #endif
 
 #ifdef VALVE_DLL
@@ -52,6 +53,7 @@ typedef float vec_t;
 #include "ASEngineInterface.h"
 #include "ASEngineBindings.h"
 #include "ASCoreTypes.h"
+#include "ASMonsterBindings.h"
 
 // Note: All external C function declarations have been removed.
 // All engine integration now uses ASEngineProvider directly.
@@ -571,9 +573,9 @@ namespace ASEntityBindings
     };
     
     // SpawnNPC - Creates an NPC at a specific position
-    // Returns CBaseEntity@ pointer to the created monster
+    // Returns CMSMonster@ pointer to the created monster
     // spawnMode: Legacy (default) loads legacy MSCScript, Angel skips it
-    CBaseEntity* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
+    CMSMonster* AS_SpawnNPC(const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode = ScriptMode::Legacy)
     {
 #ifdef VALVE_DLL
         if (scriptName.empty())
@@ -697,8 +699,8 @@ namespace ASEntityBindings
     }
     
     // SpawnItem - Creates an item at a specific position
-    // Returns CBaseEntity@ pointer to the created item
-    CBaseEntity* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
+    // Returns CBasePlayerItem@ pointer to the created item
+    CBasePlayerItem* AS_SpawnItem(const std::string& scriptName, const Vector& position, CScriptArray* params)
     {
 #ifdef VALVE_DLL
         if (scriptName.empty())
@@ -1417,11 +1419,95 @@ namespace ASEntityBindings
                 return std::string(player->m_SpawnTransition);
             })
 #endif
+            // Inventory/Item management methods
+            #ifdef VALVE_DLL
+            .method("CBasePlayerItem@ GetItemBySlot(int) const", [](CBasePlayer* player, int slot) -> CBasePlayerItem* {
+                if (!player || !player->pev) {
+                    MS_ANGEL_ERROR("GetItemBySlot: NULL player pointer");
+                    return nullptr;
+                }
+                if (slot < 0 || slot >= MAX_ITEM_TYPES) {
+                    MS_ANGEL_ERROR("GetItemBySlot: Invalid slot %d", slot);
+                    return nullptr;
+                }
+                CBasePlayerItem* pItem = player->m_rgpPlayerItems[slot];
+                MS_ANGEL_DEBUG("GetItemBySlot: Player %s, slot %d = %p", player->DisplayName(), slot, pItem);
+                return pItem;
+            })
+            .method("CBasePlayerWeapon@ GetActiveWeapon() const", [](CBasePlayer* player) -> CBasePlayerWeapon* {
+                if (!player || !player->pev) {
+                    MS_ANGEL_ERROR("GetActiveWeapon: NULL player pointer");
+                    return nullptr;
+                }
+                CBasePlayerItem* pItem = player->m_pActiveItem;
+                if (!pItem) {
+                    MS_ANGEL_DEBUG("GetActiveWeapon: Player %s has no active item", player->DisplayName());
+                    return nullptr;
+                }
+                // Check if the active item is a weapon
+                CBasePlayerWeapon* pWeapon = pItem->GetWeaponPtr() ? (CBasePlayerWeapon*)pItem : nullptr;
+                MS_ANGEL_DEBUG("GetActiveWeapon: Player %s active weapon = %p", player->DisplayName(), pWeapon);
+                return pWeapon;
+            })
+            .method("array<CBasePlayerItem@>@ GetInventory()", [](CBasePlayer* player) -> CScriptArray* {
+                if (!g_pStaticEngine) {
+                    MS_ANGEL_ERROR("GetInventory: Engine not initialized");
+                    return nullptr;
+                }
+                // Get the array type for CBasePlayerItem@
+                asITypeInfo* arrayType = g_pStaticEngine->GetTypeInfoByDecl("array<CBasePlayerItem@>");
+                if (!arrayType) {
+                    MS_ANGEL_ERROR("GetInventory: Failed to get array<CBasePlayerItem@> type");
+                    return nullptr;
+                }
+                // Create a new array
+                CScriptArray* array = CScriptArray::Create(arrayType);
+                if (!player || !player->pev) {
+                    MS_ANGEL_ERROR("GetInventory: NULL player pointer");
+                    return array;  // Return empty array
+                }
+                // Iterate through all item slots
+                for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+                    CBasePlayerItem* pItem = player->m_rgpPlayerItems[i];
+                    // Walk the linked list of items in this slot
+                    while (pItem != nullptr) {
+                        array->InsertLast(&pItem);
+                        pItem = pItem->m_pNext;
+                    }
+                }
+                MS_ANGEL_DEBUG("GetInventory: Player %s has %d items", player->DisplayName(), array->GetSize());
+                return array;
+            })
+            .method("bool HasItem(const string &in) const", [](CBasePlayer* player, const std::string& itemName) -> bool {
+                if (!player || !player->pev || itemName.empty()) {
+                    MS_ANGEL_ERROR("HasItem: Invalid parameters");
+                    return false;
+                }
+                // Search through all item slots
+                for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+                    CBasePlayerItem* pItem = player->m_rgpPlayerItems[i];
+                    // Walk the linked list of items in this slot
+                    while (pItem != nullptr) {
+                        if (pItem->ItemName == itemName.c_str()) {
+                            MS_ANGEL_DEBUG("HasItem: Player %s has item '%s'", player->DisplayName(), itemName.c_str());
+                            return true;
+                        }
+                        pItem = pItem->m_pNext;
+                    }
+                }
+                MS_ANGEL_DEBUG("HasItem: Player %s does not have item '%s'", player->DisplayName(), itemName.c_str());
+                return false;
+            })
+            #endif
        
             // Custom equality comparison using pointer comparison (most appropriate for commands)
             .method("bool opEquals(const CBasePlayer@+ other) const", [](CBasePlayer* player, CBasePlayer* other) {
                 return player == other;  // Simple pointer comparison
-            });
+            })
+            
+            // Inherit from CBaseEntity (called AFTER registering CBasePlayer's own methods
+            // so that overrides like IsAlive() are registered first)
+            .base<CBaseEntity>();
         
         MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
@@ -1446,10 +1532,13 @@ namespace ASEntityBindings
         pEngine->RegisterEnumValue("MessageColor", "Green", static_cast<int>(MessageColor::Green));
         pEngine->RegisterEnumValue("MessageColor", "Blue", static_cast<int>(MessageColor::Blue));
         
-        // Register CBaseEntity with direct AngelScript API
-        RegisterCBaseEntity(pEngine);
+        // Note: CBaseEntity is now registered earlier in ASBindings.cpp (Step 3)
+        // This ensures it's available before any derived types use .base<CBaseEntity>()
         
-        // Register CBasePlayer with inheritance support
+        // Register monster types in inheritance order (CBaseEntity → CBaseMonster → CMSMonster → CBasePlayer)
+        ASMonsterBindings::RegisterAll(pEngine);
+        
+        // Register CBasePlayer with inheritance support (inherits from CMSMonster)
         RegisterCBasePlayer(pEngine);
         
         // Register casting functions with asbind20
@@ -1459,6 +1548,8 @@ namespace ASEntityBindings
             // Entity string conversion functions
             .function("CBaseEntity@ StringToEntity(const string &in)", StringToEntity)
             .function("CBasePlayer@ StringToPlayer(const string &in)", StringToPlayer);
+        
+        // Note: Monster casting functions are registered by ASMonsterBindings::RegisterAll()
         
         // Register engine constants for entity configuration
         // Using static variables for AngelScript global properties
@@ -1537,12 +1628,12 @@ namespace ASEntityBindings
             // Vote menu opening function
             .function("void OpenVoteMenu(CBasePlayer@, const string &in, const array<string> &in)", AS_OpenVoteMenu)
             // Spawn functions
-            .function("CBaseEntity@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
-                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CBaseEntity* {
+            .function("CMSMonster@ SpawnNPC(const string &in, const Vector3 &in, const array<string>@ = null, ScriptMode = Legacy)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params, ScriptMode spawnMode) -> CMSMonster* {
                     return AS_SpawnNPC(scriptName, position, params, spawnMode);
                 })
-            .function("CBaseEntity@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
-                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBaseEntity* {
+            .function("CBasePlayerItem@ SpawnItem(const string &in, const Vector3 &in, const array<string>@ = null)", 
+                +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBasePlayerItem* {
                     return AS_SpawnItem(scriptName, position, params);
                 });
         

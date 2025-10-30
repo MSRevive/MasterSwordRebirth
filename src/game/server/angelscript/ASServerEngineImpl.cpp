@@ -766,7 +766,7 @@ void ASServerEngine::SendConsoleMessageImpl(const std::string& playerID, const s
 void ASServerEngine::SendMessageToAllPlayersImpl(const std::string& color, const std::string& message)
 {
     MS_ANGEL_DEBUG("SendMessageToAllPlayersImpl: Sending colored message to all: [%s] %s", color.c_str(), message.c_str());
-    // TODO: Implement actual broadcast messaging
+    
 }
 
 void ASServerEngine::SendInfoMessageToAllImpl(const std::string& title, const std::string& message)

@@ -9,23 +9,100 @@
 
 #pragma once
 
+#include <version>
 #include <tuple>
 #include <functional>
+#include <optional>
 #include "detail/include_as.hpp"
 #include "utility.hpp"
 #include "type_traits.hpp"
+#ifdef __cpp_lib_expected
+#    define ASBIND20_HAS_EXPECTED __cpp_lib_expected
+#    include <expected>
+#endif
 
 namespace asbind20
 {
-struct bad_result_t
-{};
+namespace detail
+{
+    template <typename T>
+    concept is_script_obj =
+        std::same_as<T, AS_NAMESPACE_QUALIFIER asIScriptObject*> ||
+        std::same_as<T, AS_NAMESPACE_QUALIFIER asIScriptObject const*>;
+} // namespace detail
 
-constexpr inline bad_result_t bad_result;
+template <typename T>
+requires(!std::is_const_v<T>)
+decltype(auto) get_script_return(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx)
+{
+    assert(ctx->GetState() == (AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED));
+
+    constexpr bool is_customized = requires() {
+        { type_traits<T>::get_return(ctx) } -> std::convertible_to<T>;
+    };
+
+    if constexpr(is_customized)
+    {
+        return type_traits<T>::get_return(ctx);
+    }
+    else if constexpr(detail::is_script_obj<std::remove_cvref_t<T>>)
+    {
+        AS_NAMESPACE_QUALIFIER asIScriptObject* ptr =
+            *(AS_NAMESPACE_QUALIFIER asIScriptObject**)ctx->GetAddressOfReturnValue();
+        return T(ptr);
+    }
+    else if constexpr(std::is_reference_v<T>)
+    {
+        using ptr_t = std::add_pointer_t<std::remove_reference_t<T>>;
+        return *reinterpret_cast<ptr_t>(ctx->GetReturnAddress());
+    }
+    else if constexpr(std::is_pointer_v<T>)
+    {
+        return (T)ctx->GetReturnAddress();
+    }
+    else if constexpr(std::is_class_v<T>)
+    {
+        using ptr_t = std::add_pointer_t<std::remove_reference_t<T>>;
+        return *reinterpret_cast<ptr_t>(ctx->GetReturnObject());
+    }
+    else
+    {
+        using primitive_t = typename std::conditional_t<
+            std::is_enum_v<std::remove_cvref_t<T>>,
+            int,
+            std::remove_cvref_t<T>>;
+        if constexpr(std::integral<primitive_t>)
+        {
+            if constexpr(sizeof(primitive_t) == 1)
+                return static_cast<T>(ctx->GetReturnByte());
+            else if constexpr(sizeof(primitive_t) == 2)
+                return static_cast<T>(ctx->GetReturnWord());
+            else if constexpr(sizeof(primitive_t) == 4)
+                return static_cast<T>(ctx->GetReturnDWord());
+            else if constexpr(sizeof(primitive_t) == 8)
+                return static_cast<T>(ctx->GetReturnQWord());
+            else // Compiler extensions like __int128
+                return *(T*)ctx->GetAddressOfReturnValue();
+        }
+        else if constexpr(std::same_as<primitive_t, float>)
+        {
+            return ctx->GetReturnFloat();
+        }
+        else if constexpr(std::same_as<primitive_t, double>)
+        {
+            return ctx->GetReturnDouble();
+        }
+        else
+            static_assert(!sizeof(T), "Invalid type");
+    }
+}
 
 class bad_script_invoke_result_access : public std::exception
 {
 public:
-    bad_script_invoke_result_access(int r) noexcept
+    using error_code_type = AS_NAMESPACE_QUALIFIER asEContextState;
+
+    bad_script_invoke_result_access(error_code_type r) noexcept
         : m_r(r) {}
 
     const char* what() const noexcept override
@@ -33,203 +110,90 @@ public:
         return "bad script invoke result access";
     }
 
-    int error() const noexcept
+    [[nodiscard]]
+    error_code_type error() const noexcept
     {
         return m_r;
     }
 
 private:
-    int m_r;
+    error_code_type m_r;
 };
 
-/**
- * @brief Script invocation result
- *
- * @tparam R Result type
- */
+namespace detail
+{
+    template <typename T>
+    struct invoke_result_traits
+    {
+        using pointer_type = T*;
+        static constexpr bool to_pointer_support = false;
+    };
+
+    template <typename T>
+    struct invoke_result_traits<T*>
+    {
+        using pointer_type = T*;
+        static constexpr bool to_pointer_support = true;
+    };
+
+    template <typename T>
+    struct invoke_result_traits<T[]>
+    {
+        using pointer_type = T*;
+        static constexpr bool to_pointer_support = true;
+    };
+
+    template <typename T, std::size_t Size>
+    struct invoke_result_traits<T[Size]>
+    {
+        using pointer_type = T*;
+        static constexpr bool to_pointer_support = true;
+    };
+
+    template <typename T>
+    struct invoke_result_traits<T&>
+    {
+        using pointer_type = T*;
+        static constexpr bool to_pointer_support = true;
+    };
+} // namespace detail
+
 template <typename R>
-class script_invoke_result
+auto get_context_result(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx);
+
+/**
+ * @brief Base class of script results
+ */
+class script_invoke_result_base
 {
 public:
-    using value_type = R;
+    using error_type = AS_NAMESPACE_QUALIFIER asEContextState;
 
-    script_invoke_result(const script_invoke_result& other) noexcept(std::is_nothrow_copy_constructible_v<R>)
-        : m_r(other.m_r)
+    script_invoke_result_base() = delete;
+    script_invoke_result_base(const script_invoke_result_base&) noexcept = default;
+
+    script_invoke_result_base& operator=(
+        const script_invoke_result_base& other
+    ) noexcept = default;
+
+    ~script_invoke_result_base() = default;
+
+    [[nodiscard]]
+    auto get_context() const noexcept
+        -> AS_NAMESPACE_QUALIFIER asIScriptContext*
     {
-        if(m_r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-        {
-            construct_impl(*other);
-        }
-    }
-
-    script_invoke_result(script_invoke_result&& other) noexcept(std::is_nothrow_move_constructible_v<R>)
-        : m_r(other.m_r)
-    {
-        if(m_r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-        {
-            construct_impl(std::move(*other));
-        }
-    }
-
-    explicit script_invoke_result(const R& result)
-        : m_r(AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-    {
-        construct_impl(result);
-    }
-
-    explicit script_invoke_result(R&& result) noexcept
-        : m_r(AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-    {
-        construct_impl(std::move(result));
-    }
-
-    script_invoke_result(bad_result_t, int r) noexcept
-        : m_r(r)
-    {
-        if(r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED) [[unlikely]]
-            m_r = AS_NAMESPACE_QUALIFIER asEXECUTION_ERROR;
-    }
-
-    script_invoke_result& operator=(script_invoke_result&& other)
-    {
-        if(this == &other) [[unlikely]]
-            return *this;
-
-        if(!other.has_value())
-        {
-            destroy_impl();
-            m_r = other.m_r;
-            return *this;
-        }
-
-        if(has_value())
-        {
-            **this = std::move(*other);
-        }
-        else
-        {
-            construct_impl(std::move(*other));
-            m_r = AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED;
-        }
-
-        return *this;
-    }
-
-    script_invoke_result& operator=(const script_invoke_result& other)
-    {
-        if(this == &other) [[unlikely]]
-            return *this;
-
-        if(!other.has_value())
-        {
-            destroy_impl();
-            m_r = other.m_r;
-            return *this;
-        }
-
-        if(has_value())
-        {
-            **this = *other;
-        }
-        else
-        {
-            construct_impl(*other);
-            m_r = AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED;
-        }
-
-        return *this;
-    }
-
-    ~script_invoke_result()
-    {
-        destroy_impl();
+        return m_ctx;
     }
 
     /**
-     * @name Unchecked Accessors
-     *
-     * @note Please check the status of object before directly accessing the value!
+     * @brief Returns the AngelScript error code of context state
      */
-    /// @{
-
-    R* operator->() noexcept
-    {
-        assert(has_value());
-        return ptr();
-    }
-
-    const R* operator->() const noexcept
-    {
-        assert(has_value());
-        return ptr();
-    }
-
-    R& operator*() & noexcept
-    {
-        assert(has_value());
-        return *ptr();
-    }
-
-    R&& operator*() && noexcept
-    {
-        assert(has_value());
-        return std::move(*ptr());
-    }
-
-    const R& operator*() const& noexcept
-    {
-        assert(has_value());
-        return *ptr();
-    }
-
-    const R&& operator*() const&& noexcept
-    {
-        assert(has_value());
-        return std::move(*ptr());
-    }
-
-    /// @}
-
-    /**
-     * @name Checked Accessors
-     *
-     * @brief Throws an exception when the object does not contain a returned value
-     */
-    /// @{
-
     [[nodiscard]]
-    R& value() &
+    auto error() const
+        -> AS_NAMESPACE_QUALIFIER asEContextState
     {
-        if(!has_value())
-            throw_bad_access();
-        return **this;
+        return m_ctx->GetState();
     }
-
-    [[nodiscard]]
-    R&& value() &&
-    {
-        if(!has_value())
-            throw_bad_access();
-        return std::move(**this);
-    }
-
-    [[nodiscard]]
-    const R& value() const&
-    {
-        if(!has_value())
-            throw_bad_access();
-        return **this;
-    }
-
-    [[nodiscard]]
-    const R&& value() const&&
-    {
-        if(!has_value())
-            throw_bad_access();
-        return std::move(**this);
-    }
-
-    /// @}
 
     /**
      * @name Value Status
@@ -250,43 +214,13 @@ public:
 
     /// @}
 
-    /**
-     * @brief Returns the error code
-     *
-     * @return The AngelScript error code.
-     *         If the object contains a returned value, it will be `asEXECUTION_FINISHED`
-     */
-    [[nodiscard]]
-    int error() const noexcept
+protected:
+    script_invoke_result_base(
+        AS_NAMESPACE_QUALIFIER asIScriptContext* ctx
+    ) noexcept
+        : m_ctx(ctx)
     {
-        return m_r;
-    }
-
-private:
-    alignas(alignof(R)) std::byte m_data[sizeof(R)];
-    int m_r;
-
-    R* ptr() noexcept
-    {
-        return reinterpret_cast<R*>(m_data);
-    }
-
-    const R* ptr() const noexcept
-    {
-        return reinterpret_cast<const R*>(m_data);
-    }
-
-    template <typename... Args>
-    void construct_impl(Args&&... args) noexcept(std::is_nothrow_constructible_v<R, Args...>)
-    {
-        new(m_data) R(std::forward<Args>(args)...);
-    }
-
-    void destroy_impl() noexcept
-    {
-        if(!has_value()) [[unlikely]]
-            return;
-        ptr()->~R();
+        assert(m_ctx != nullptr);
     }
 
     [[noreturn]]
@@ -294,136 +228,182 @@ private:
     {
         throw bad_script_invoke_result_access(error());
     }
+
+private:
+    AS_NAMESPACE_QUALIFIER asIScriptContext* m_ctx;
+};
+
+/**
+ * @brief Script invocation result
+ *
+ * @tparam T Result type
+ */
+template <typename T>
+class script_invoke_result : public script_invoke_result_base
+{
+    template <typename R>
+    friend auto get_context_result(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx);
+
+    script_invoke_result(
+        AS_NAMESPACE_QUALIFIER asIScriptContext* ctx
+    ) noexcept
+        : script_invoke_result_base(ctx) {}
+
+public:
+    using value_type = T;
+    using return_type =
+        decltype(get_script_return<T>(std::declval<AS_NAMESPACE_QUALIFIER asIScriptContext*>()));
+    using pointer_type =
+        typename detail::invoke_result_traits<return_type>::pointer_type;
+
+    script_invoke_result(
+        const script_invoke_result&
+    ) noexcept = default;
+
+    script_invoke_result& operator=(
+        const script_invoke_result& other
+    ) noexcept = default;
+
+    ~script_invoke_result() = default;
+
+    /**
+     * @name Unchecked Accessors
+     *
+     * @note Please check the status of object before directly accessing the value!
+     */
+    /// @{
+
+    return_type operator*() const
+    {
+        assert(has_value());
+        return get_script_return<T>(get_context());
+    }
+
+    /** @note This function is only available if return type is reference or convertible to pointer */
+    pointer_type operator->() const requires(
+        detail::invoke_result_traits<return_type>::to_pointer_support
+    )
+    {
+        assert(has_value());
+        if constexpr(!std::is_reference_v<return_type>)
+            return static_cast<pointer_type>(**this);
+        else
+            return std::addressof(**this);
+    }
+
+    /// @}
+
+    /**
+     * @name Checked Accessors
+     *
+     * @brief Throws an exception when the object does not contain a returned value
+     */
+    /// @{
+
+    [[nodiscard]]
+    return_type value() const
+    {
+        if(!has_value())
+            throw_bad_access();
+        return **this;
+    }
+
+    template <typename U = std::remove_cv_t<T>>
+    value_type value_or(U&& default_val) const
+    {
+        if(has_value())
+            return **this;
+        else
+            return static_cast<T>(std::forward<U>(default_val));
+    }
+
+    /// @}
+
+    [[nodiscard]]
+    std::optional<T> to_optional() const
+    {
+        if(!has_value())
+            return std::nullopt;
+        else
+            return std::optional<T>(**this);
+    }
+
+    explicit operator std::optional<T>() const
+    {
+        return to_optional();
+    }
+
+#ifdef ASBIND20_HAS_EXPECTED
+
+    [[nodiscard]]
+    std::expected<T, error_type> to_expected() const
+    {
+        if(has_value())
+            return std::expected<T, error_type>(**this);
+        else
+            return std::unexpected<error_type>(error());
+    }
+
+    operator std::expected<T, error_type>() const
+    {
+        return to_expected();
+    }
+
+#endif
 };
 
 /**
  * @brief Script invocation result for references
  */
-template <typename R>
-class script_invoke_result<R&>
+template <typename T>
+class script_invoke_result<T&> : public script_invoke_result_base
 {
+    template <typename R>
+    friend auto get_context_result(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx);
+
+    script_invoke_result(
+        AS_NAMESPACE_QUALIFIER asIScriptContext* ctx
+    ) noexcept
+        : script_invoke_result_base(ctx) {}
+
 public:
-    using value_type = R&;
-
-    script_invoke_result(const script_invoke_result& other) noexcept
-        : m_r(other.m_r), m_ptr(other.m_ptr) {}
-
-    explicit script_invoke_result(R& result) noexcept
-        : m_ptr(std::addressof(result)),
-          m_r(AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-    {}
-
-    script_invoke_result(bad_result_t, int r) noexcept
-        : m_r(r)
-    {
-        if(r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED) [[unlikely]]
-            m_r = AS_NAMESPACE_QUALIFIER asEXECUTION_ERROR;
-    }
+    using value_type = T&;
+    using return_type = T&;
+    using pointer_type = T*;
 
     ~script_invoke_result() = default;
 
-    script_invoke_result& operator=(const script_invoke_result& other) noexcept
-    {
-        m_r = other.m_r;
-        m_ptr = other.m_ptr;
+    script_invoke_result& operator=(
+        const script_invoke_result& other
+    ) noexcept = default;
 
-        return *this;
-    }
-
-    R* operator->() noexcept
+    return_type operator*() const noexcept
     {
         assert(has_value());
-        return m_ptr;
+        return get_script_return<T&>(get_context());
     }
 
-    const R* operator->() const noexcept
+    pointer_type operator->() const noexcept
     {
         assert(has_value());
-        return m_ptr;
-    }
-
-    R& operator*() & noexcept
-    {
-        assert(has_value());
-        return *m_ptr;
-    }
-
-    R&& operator*() && noexcept
-    {
-        assert(has_value());
-        return std::move(*m_ptr);
-    }
-
-    R&& operator*() const& noexcept
-    {
-        assert(has_value());
-        return *m_ptr;
-    }
-
-    R&& operator*() const&& noexcept
-    {
-        assert(has_value());
-        return std::move(*m_ptr);
+        return std::addressof(**this);
     }
 
     [[nodiscard]]
-    R& value() &
+    return_type value() const
     {
         if(!has_value())
             throw_bad_access();
         return **this;
     }
 
-    [[nodiscard]]
-    R&& value() &&
+    template <typename U = std::remove_cv_t<T>>
+    T& value_or(U&& default_val) const
     {
-        if(!has_value())
-            throw_bad_access();
-        return std::move(**this);
-    }
-
-    [[nodiscard]]
-    const R& value() const&
-    {
-        if(!has_value())
-            throw_bad_access();
-        return **this;
-    }
-
-    [[nodiscard]]
-    const R&& value() const&&
-    {
-        if(!has_value())
-            throw_bad_access();
-        return std::move(**this);
-    }
-
-    [[nodiscard]]
-    bool has_value() const noexcept
-    {
-        return error() == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED;
-    }
-
-    [[nodiscard]]
-    explicit operator bool() const noexcept
-    {
-        return has_value();
-    }
-
-    [[nodiscard]]
-    int error() const noexcept
-    {
-        return m_r;
-    }
-
-private:
-    R* m_ptr;
-    int m_r;
-
-    [[noreturn]]
-    void throw_bad_access()
-    {
-        throw bad_script_invoke_result_access(m_r);
+        if(has_value())
+            return **this;
+        else
+            return std::forward<U>(default_val);
     }
 };
 
@@ -431,73 +411,39 @@ private:
  * @brief Script invocation result for void type
  */
 template <>
-class script_invoke_result<void>
+class script_invoke_result<void> : public script_invoke_result_base
 {
+    template <typename R>
+    friend auto get_context_result(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx);
+
+    script_invoke_result(
+        AS_NAMESPACE_QUALIFIER asIScriptContext* ctx
+    ) noexcept
+        : script_invoke_result_base(ctx) {}
+
 public:
     using value_type = void;
+    using return_type = void;
 
-    script_invoke_result() noexcept
-        : m_r(AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED) {}
-
-    script_invoke_result(const script_invoke_result& other) noexcept
-        : m_r(other.m_r) {}
-
-    script_invoke_result(bad_result_t, int r)
-        : m_r(r)
-    {
-        if(r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED) [[unlikely]]
-            m_r = AS_NAMESPACE_QUALIFIER asEXECUTION_ERROR;
-    }
+    script_invoke_result(
+        const script_invoke_result& other
+    ) noexcept = default;
 
     ~script_invoke_result() = default;
 
-    script_invoke_result& operator=(const script_invoke_result& other) noexcept
+    script_invoke_result& operator=(
+        const script_invoke_result& other
+    ) noexcept = default;
+
+    void operator*() const noexcept
     {
-        m_r = other.m_r;
-
-        return *this;
-    }
-
-    void operator*() noexcept {}
-
-    void operator*() const noexcept {}
-
-    [[nodiscard]]
-    bool has_value() const noexcept
-    {
-        return m_r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED;
-    }
-
-    explicit operator bool() const noexcept
-    {
-        return has_value();
-    }
-
-    void value()
-    {
-        if(!has_value())
-            throw_bad_access();
+        assert(has_value());
     }
 
     void value() const
     {
         if(!has_value())
             throw_bad_access();
-    }
-
-    [[nodiscard]]
-    int error() const noexcept
-    {
-        return m_r;
-    }
-
-private:
-    int m_r;
-
-    [[noreturn]]
-    void throw_bad_access() const
-    {
-        throw bad_script_invoke_result_access(m_r);
     }
 };
 
@@ -633,107 +579,35 @@ int set_script_arg(
     }
 }
 
-namespace detail
+/**
+ * @brief Apply a tuple to script context as arguments
+ *
+ * @param ctx Script context. The script function must be prepared.
+ * @param tp Tuple of arguments
+ */
+template <typename Tuple>
+void apply_script_args(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx, Tuple&& tp)
 {
-    template <typename Tuple>
-    void set_args(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx, Tuple&& tp)
+    [&]<AS_NAMESPACE_QUALIFIER asUINT... Idx>(std::integer_sequence<AS_NAMESPACE_QUALIFIER asUINT, Idx...>)
     {
-        [&]<AS_NAMESPACE_QUALIFIER asUINT... Idx>(std::integer_sequence<AS_NAMESPACE_QUALIFIER asUINT, Idx...>)
-        {
-            (set_script_arg(ctx, Idx, std::get<Idx>(tp)), ...);
-        }(std::make_integer_sequence<AS_NAMESPACE_QUALIFIER asUINT, std::tuple_size_v<Tuple>>());
-    }
-
-    template <typename T>
-    concept is_script_obj =
-        std::same_as<T, AS_NAMESPACE_QUALIFIER asIScriptObject*> ||
-        std::same_as<T, AS_NAMESPACE_QUALIFIER asIScriptObject const*>;
-} // namespace detail
-
-template <typename T>
-requires(!std::is_const_v<T>)
-T get_script_return(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx)
-{
-    assert(ctx->GetState() == (AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED));
-
-    constexpr bool is_customized = requires() {
-        { type_traits<T>::get_return(ctx) } -> std::convertible_to<T>;
-    };
-
-    if constexpr(is_customized)
-    {
-        return type_traits<T>::get_return(ctx);
-    }
-    else if constexpr(detail::is_script_obj<std::remove_cvref_t<T>>)
-    {
-        AS_NAMESPACE_QUALIFIER asIScriptObject* ptr =
-            *(AS_NAMESPACE_QUALIFIER asIScriptObject**)ctx->GetAddressOfReturnValue();
-        return T(ptr);
-    }
-    else if constexpr(std::is_reference_v<T>)
-    {
-        using ptr_t = std::add_pointer_t<std::remove_reference_t<T>>;
-        return *reinterpret_cast<ptr_t>(ctx->GetReturnAddress());
-    }
-    else if constexpr(std::is_pointer_v<T>)
-    {
-        return (T)ctx->GetReturnAddress();
-    }
-    else if constexpr(std::is_class_v<T>)
-    {
-        using ptr_t = std::add_pointer_t<std::remove_reference_t<T>>;
-        return *reinterpret_cast<ptr_t>(ctx->GetReturnObject());
-    }
-    else
-    {
-        using primitive_t = typename std::conditional_t<
-            std::is_enum_v<std::remove_cvref_t<T>>,
-            int,
-            std::remove_cvref_t<T>>;
-        if constexpr(std::integral<primitive_t>)
-        {
-            if constexpr(sizeof(primitive_t) == 1)
-                return static_cast<T>(ctx->GetReturnByte());
-            else if constexpr(sizeof(primitive_t) == 2)
-                return static_cast<T>(ctx->GetReturnWord());
-            else if constexpr(sizeof(primitive_t) == 4)
-                return static_cast<T>(ctx->GetReturnDWord());
-            else if constexpr(sizeof(primitive_t) == 8)
-                return static_cast<T>(ctx->GetReturnQWord());
-            else // Compiler extensions like __int128
-                return *(T*)ctx->GetAddressOfReturnValue();
-        }
-        else if constexpr(std::same_as<primitive_t, float>)
-        {
-            return ctx->GetReturnFloat();
-        }
-        else if constexpr(std::same_as<primitive_t, double>)
-        {
-            return ctx->GetReturnDouble();
-        }
-        else
-            static_assert(!sizeof(T), "Invalid type");
-    }
+        (set_script_arg(ctx, Idx, std::get<Idx>(tp)), ...);
+    }(std::make_integer_sequence<AS_NAMESPACE_QUALIFIER asUINT, std::tuple_size_v<Tuple>>());
 }
 
-namespace detail
+/**
+ * @brief Get the result of context
+ *
+ * @tparam R Return type. It can be safely ignored by `void` if you only want the error code
+ *
+ * @param ctx Script context. Cannot be `nullptr`.
+ *
+ * @return Result of the execution
+ */
+template <typename R>
+auto get_context_result(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx)
 {
-    template <typename R>
-    auto execute_context(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx)
-    {
-        int r = ctx->Execute();
-
-        if(r == AS_NAMESPACE_QUALIFIER asEXECUTION_FINISHED)
-        {
-            if constexpr(std::is_void_v<R>)
-                return script_invoke_result<void>();
-            else
-                return script_invoke_result<R>(get_script_return<R>(ctx));
-        }
-        else
-            return script_invoke_result<R>(bad_result, r);
-    }
-} // namespace detail
+    return script_invoke_result<R>(ctx);
+}
 
 /**
  * @brief Call a script function
@@ -753,9 +627,10 @@ script_invoke_result<R> script_invoke(
     r = ctx->Prepare(func);
     assert(r >= 0);
 
-    detail::set_args(ctx, std::forward_as_tuple(args...));
+    apply_script_args(ctx, std::forward_as_tuple(args...));
 
-    return detail::execute_context<R>(ctx);
+    ctx->Execute();
+    return get_context_result<R>(ctx);
 }
 
 template <typename T>
@@ -769,9 +644,9 @@ concept script_object_handle =
 template <script_object_handle Object>
 int set_script_object(AS_NAMESPACE_QUALIFIER asIScriptContext* ctx, Object&& obj)
 {
-    return ctx->SetObject(const_cast<AS_NAMESPACE_QUALIFIER asIScriptObject*>(
-        (AS_NAMESPACE_QUALIFIER asIScriptObject const*)obj
-    ));
+    return ctx->SetObject(
+        const_cast<AS_NAMESPACE_QUALIFIER asIScriptObject*>((AS_NAMESPACE_QUALIFIER asIScriptObject const*)obj)
+    );
 }
 
 /**
@@ -795,9 +670,10 @@ script_invoke_result<R> script_invoke(
     r = set_script_object(ctx, std::forward<Object>(obj));
     assert(r >= 0);
 
-    detail::set_args(ctx, std::forward_as_tuple(std::forward<Args>(args)...));
+    apply_script_args(ctx, std::forward_as_tuple(std::forward<Args>(args)...));
 
-    return detail::execute_context<R>(ctx);
+    ctx->Execute();
+    return get_context_result<R>(ctx);
 }
 
 namespace detail
@@ -1127,7 +1003,7 @@ inline script_object instantiate_class(
         return script_object();
 
     auto result = script_invoke<script_object>(ctx, factory);
-    return result.has_value() ? std::move(*result) : script_object();
+    return result.has_value() ? *result : script_object();
 }
 } // namespace asbind20
 

@@ -19,7 +19,6 @@ Class Hierachy
 CBaseEntity
 	CBaseDelay
 		CBaseToggle
-			CBaseItem
 			CBaseMonster
 				CBaseCycler
 				CBasePlayer

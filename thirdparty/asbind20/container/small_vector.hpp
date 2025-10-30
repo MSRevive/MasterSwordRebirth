@@ -1,5 +1,5 @@
 /**
- * @file small_vector.hpp
+ * @file container/small_vector.hpp
  * @author HenryAWE
  * @brief Vector with small size optimization (SSO) for AngelScript object
  */
@@ -609,7 +609,7 @@ private:
         using value_type = void*;
         using pointer = void**;
         using const_pointer = void* const*;
-        using allocator_type = my_base::allocator_type;
+        using allocator_type = typename my_base::allocator_type;
 
         using my_base::my_base;
 

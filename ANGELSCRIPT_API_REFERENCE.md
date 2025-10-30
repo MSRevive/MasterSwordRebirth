@@ -155,6 +155,12 @@ bool MoveToSpawnSpot()
 void SetSpawnTransition(const string &in transName)
 string GetSpawnTransition() const
 
+// Inventory/Item management methods
+CBasePlayerItem@ GetItemBySlot(int slot) const
+CBasePlayerWeapon@ GetActiveWeapon() const
+array<CBasePlayerItem@>@ GetInventory()
+bool HasItem(const string &in itemName) const
+
 // Comparison
 bool opEquals(const CBasePlayer@+ other) const
 ```
@@ -181,6 +187,10 @@ bool opEquals(const CBasePlayer@+ other) const
 - The spawn transition determines which `ms_player_spawn` entity the player will spawn at
 - Maximum length: 32 characters
 - Used by map transition system and respawn logic
+
+**GetItemBySlot** / **GetActiveWeapon** / **GetInventory** / **HasItem**: Inventory management methods:
+- See the "Item/Weapon Management Methods" section below for detailed documentation
+- These methods provide access to player's items, weapons, and inventory state
 
 **Example**:
 ```angelscript
@@ -244,6 +254,229 @@ The MessageColor enum is used with `SendColoredMessage()` to specify HUD message
 - **Red**: Taking damage, negative combat events
 - **Green**: Positive events (item pickup, quest complete, healing)
 - **Blue**: Special information, mana-related events
+
+---
+
+## Item and Weapon Classes
+
+### CBaseAnimating
+**Scope**: Server
+*Base class for animated entities*
+
+```angelscript
+// Animation methods
+int LookupSequence(const string &in label)
+void ResetSequenceInfo()
+void SetBodygroup(int group, int value)
+int GetBodygroup(int group)
+
+// Properties (read-only from script)
+float GetFrameRate() const
+bool IsSequenceFinished() const
+bool IsSequenceLooping() const
+```
+
+**LookupSequence** finds a sequence by name:
+- Returns sequence index or -1 if not found
+- Used for setting specific animations on models
+
+**ResetSequenceInfo** resets the current sequence information:
+- Call when switching sequences or models
+- Resets timing and frame information
+
+**SetBodygroup** / **GetBodygroup** manage model body groups:
+- Body groups allow switching between model variations
+- Common for armor, weapons, or character customization
+
+### CBasePlayerItem
+**Scope**: Server
+*Base class for inventory items*
+
+```angelscript
+// Properties
+string GetItemName() const
+string GetWorldModel() const
+string GetHandSpriteName() const
+string GetTradeSpriteName() const
+CBasePlayer@ GetOwnerPlayer() const
+int GetItemID() const
+uint GetValue() const
+bool IsWielded() const
+bool IsUseable() const
+
+// Methods
+bool IsMSItem() const
+bool CanDrop() const
+bool Deploy()
+void Holster()
+void Materialize()
+```
+
+**GetItemName** returns the internal item name (e.g., "dagger", "broadsword"):
+- This is the script name used to identify the item type
+
+**GetWorldModel** returns the world model path:
+- Used when the item is dropped or placed in the world
+
+**GetOwnerPlayer** returns the player who owns this item:
+- Returns `null` if not owned by a player
+- Use to check item ownership
+
+**GetValue** returns the item's gold value:
+- Used for trading, selling, and economy systems
+
+**IsWielded** checks if the item is currently being held/used:
+- Returns `true` if the item is actively equipped
+
+**Deploy** / **Holster** control item equipping:
+- `Deploy()` equips the item (makes it active)
+- `Holster()` puts the item away
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    CBasePlayerItem@ pItem = pPlayer.GetItemBySlot(0);
+    if (pItem !is null) {
+        MS_ANGEL_INFO("Item: " + pItem.GetItemName());
+        MS_ANGEL_INFO("Value: " + pItem.GetValue() + " gold");
+        MS_ANGEL_INFO("Wielded: " + (pItem.IsWielded() ? "Yes" : "No"));
+    }
+}
+```
+
+### CBasePlayerWeapon
+**Scope**: Server
+*Weapons (extends CBasePlayerItem)*
+
+```angelscript
+// Ammo properties
+int GetClip() const
+void SetClip(int amount)
+int GetPrimaryAmmoType() const
+int GetSecondaryAmmoType() const
+
+// Attack timing
+float GetNextPrimaryAttack() const
+void SetNextPrimaryAttack(float time)
+float GetNextSecondaryAttack() const
+void SetNextSecondaryAttack(float time)
+float GetTimeWeaponIdle() const
+
+// State properties
+bool IsInReload() const
+
+// Methods
+bool CanDeploy()
+bool IsUseable()
+void SendWeaponAnim(int anim, int skiplocal)
+int PrimaryAmmoIndex()
+int SecondaryAmmoIndex()
+string pszAmmo1()
+string pszAmmo2()
+```
+
+**GetClip** / **SetClip** manage weapon ammunition:
+- `GetClip()` returns current ammunition in the weapon's clip
+- `SetClip(amount)` sets the clip ammunition count
+- Use for reloading or ammo manipulation
+
+**GetNextPrimaryAttack** / **SetNextPrimaryAttack** control attack timing:
+- Time value when the weapon can fire again
+- Based on `gpGlobals->time` for server timing
+
+**IsInReload** checks if the weapon is currently reloading:
+- Returns `true` during reload animation
+- Use to prevent actions during reload
+
+**SendWeaponAnim** plays a weapon animation:
+- `anim` is the animation sequence index
+- `skiplocal` skips animation for local player (client prediction)
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    CBasePlayerWeapon@ pWeapon = pPlayer.GetActiveWeapon();
+    if (pWeapon !is null) {
+        MS_ANGEL_INFO("Clip: " + pWeapon.GetClip());
+        MS_ANGEL_INFO("In Reload: " + (pWeapon.IsInReload() ? "Yes" : "No"));
+        
+        // Refill clip
+        pWeapon.SetClip(30);
+    }
+}
+```
+
+---
+
+## Item/Weapon Management Methods (CBasePlayer)
+**Scope**: Server
+
+The following inventory management methods are available on `CBasePlayer`:
+
+```angelscript
+// Get item from specific inventory slot
+CBasePlayerItem@ GetItemBySlot(int slot) const
+
+// Get player's currently active weapon
+CBasePlayerWeapon@ GetActiveWeapon() const
+
+// Get all items in player's inventory
+array<CBasePlayerItem@>@ GetInventory()
+
+// Check if player has specific item by name
+bool HasItem(const string &in itemName) const
+```
+
+**GetItemBySlot** retrieves an item from a specific inventory slot:
+- `slot`: Inventory slot index (0 to MAX_ITEM_TYPES-1)
+- Returns `null` if slot is empty
+- Use to access specific inventory positions
+
+**GetActiveWeapon** gets the player's currently equipped weapon:
+- Returns `null` if no weapon is active or item is not a weapon
+- Casts to CBasePlayerWeapon for weapon-specific access
+
+**GetInventory** returns all items the player owns:
+- Returns an array of all CBasePlayerItem@ references
+- Includes items from all inventory slots
+- Empty slots are not included in the array
+
+**HasItem** checks if player owns a specific item by name:
+- `itemName`: The item's script name (e.g., "dagger")
+- Returns `true` if found in any inventory slot
+- Case-sensitive comparison
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    // Check if player has a specific item
+    if (pPlayer.HasItem("health_potion")) {
+        pPlayer.SendInfoMsg("You have a health potion!");
+    }
+    
+    // Iterate through all player items
+    array<CBasePlayerItem@>@ items = pPlayer.GetInventory();
+    for (uint i = 0; i < items.length(); i++) {
+        CBasePlayerItem@ pItem = items[i];
+        MS_ANGEL_INFO("Item " + i + ": " + pItem.GetItemName());
+    }
+    
+    // Get active weapon and check ammo
+    CBasePlayerWeapon@ pWeapon = pPlayer.GetActiveWeapon();
+    if (pWeapon !is null && pWeapon.GetClip() < 5) {
+        pPlayer.SendColoredMessage(MessageColor::Red, "Low ammo!");
+    }
+    
+    // Get item from specific slot
+    CBasePlayerItem@ pSlotItem = pPlayer.GetItemBySlot(0);
+    if (pSlotItem !is null) {
+        MS_ANGEL_INFO("Slot 0 item: " + pSlotItem.GetItemName());
+    }
+}
+```
 
 ---
 
@@ -451,34 +684,43 @@ CBaseEntity@ StringToEntity(const string &in)
 CBasePlayer@ StringToPlayer(const string &in)
 
 // Entity spawning functions
-CBaseEntity@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
-CBaseEntity@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CMSMonster@ SpawnNPC(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
+CBasePlayerItem@ SpawnItem(const string &in scriptName, const Vector3 &in position, const array<string>@ params = null)
 ```
 
 **SpawnNPC** creates an NPC entity at the specified position:
 - `scriptName`: Script name of the NPC to spawn (e.g., "game_master", "skeleton")
 - `position`: 3D coordinates where the NPC should spawn
 - `params`: Optional array of additional parameters (reserved for future use)
-- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Returns: Pointer to the spawned CMSMonster, or null if creation failed
 - Server-only function
 
 **SpawnItem** creates an item entity at the specified position:
 - `scriptName`: Script name of the item to spawn (e.g., "potion_health", "sword_short")
 - `position`: 3D coordinates where the item should spawn
 - `params`: Optional array of additional parameters (reserved for future use)
-- Returns: Pointer to the spawned CBaseEntity, or null if creation failed
+- Returns: Pointer to the spawned CBasePlayerItem, or null if creation failed
 - Server-only function
 
 **Example**:
 ```angelscript
 // Spawn a skeleton at coordinates (100, 200, 0)
-CBaseEntity@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
+CMSMonster@ pSkeleton = SpawnNPC("skeleton", Vector3(100, 200, 0));
 if (pSkeleton !is null) {
-    LogMessage("Skeleton spawned at index " + pSkeleton.GetEntIndex());
+    LogMessage("Skeleton spawned at index " + pSkeleton.entindex());
+    // Now you have direct access to CMSMonster properties
+    pSkeleton.m_HP = 100.0f;
+    pSkeleton.Title = "Elite Skeleton";
 }
 
-// Spawn a health potion
-CBaseEntity@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
+// Spawn a health potion (returns CBasePlayerItem)
+CBasePlayerItem@ pPotion = SpawnItem("potion_health", Vector3(150, 250, 10));
+if (pPotion !is null) {
+    LogMessage("Item spawned: " + pPotion.GetItemName());
+    // Access item-specific properties
+    uint value = pPotion.GetValue();
+    LogMessage("Item value: " + value + " gold");
+}
 ```
 
 **StringToEntity** converts an entity string to a CBaseEntity pointer:
@@ -652,8 +894,8 @@ void ServerActivate()
 void ServerActivate() {
     LogMessage("Server activated, spawning game_master...");
     
-    // Spawn game_master NPC at far coordinates
-    CBaseEntity@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000));
+    // Spawn game_master NPC at far coordinates (returns CMSMonster@)
+    CMSMonster@ pGameMaster = SpawnNPC("game_master", Vector3(20000, -10000, -20000), null, Angel);
     
     if (pGameMaster !is null) {
         // Configure game_master properties
@@ -663,6 +905,10 @@ void ServerActivate() {
         pGameMaster.SetRenderAmount(0);  // Invisible
         pGameMaster.SetGodMode(true);
         pGameMaster.SetTakeDamage(DAMAGE_NO);
+        
+        // Set MS-specific properties
+        pGameMaster.Title = "Game Master";
+        pGameMaster.m_Menu_Autoopen = false;
         
         LogMessage("Game master spawned and configured successfully");
     } else {
@@ -727,9 +973,261 @@ Memory optimization functions are available but typically managed automatically 
 
 ---
 
+## Monster Classes
+
+**Inheritance Chain**: `CBaseEntity` → `CBaseMonster` → `CMSMonster` → `CBasePlayer`
+
+All monster classes inherit methods and properties from their parent classes. For example, `CMSMonster` has access to all `CBaseEntity` methods like `SetNetName()`, `SetHealth()`, `GetClassName()`, etc.
+
+### CBaseMonster
+**Scope**: Server
+*Base class for all monsters (inherits from CBaseEntity)*
+
+```angelscript
+// Properties (direct member access)
+float m_flFieldOfView        // Monster's view cone width (dot product, e.g. 0.5)
+float m_flWaitFinished       // Time when current wait expires
+float m_flMoveWaitFinished   // Time when movement wait expires
+int m_LastHitGroup           // Last body region that took damage
+float m_flNextAttack         // Time when can attack again
+int m_bloodColor             // Blood particle color value
+float m_flDistTooFar         // Enemy too far distance threshold
+float m_flDistLook           // Monster sight distance (default 2048)
+int m_iMaxHealth             // Maximum health value
+int m_afCapability           // Capability flags (bits_CAP_*)
+CBaseEntity@ Enemy           // Current enemy entity (virtual property)
+CBaseEntity@ TargetEnt       // Current target entity (virtual property)
+Vector3 EnemyLKP             // Enemy last known position (virtual property)
+
+// Core AI Methods
+int BloodColor()                        // Get blood color value
+void Look(int distance)                 // Look for targets within distance
+void RunAI()                            // Execute AI tick
+bool IsAlive()                          // Check if monster is alive
+void MonsterThink()                     // AI think function
+int IRelationship(CBaseEntity@ target) // Get relationship to target
+void MonsterInit()                      // Initialize monster
+void StartMonster()                     // Activate monster
+CBaseEntity@ BestVisibleEnemy()        // Find best visible enemy
+bool FInViewCone(CBaseEntity@ entity)  // Check if entity in view cone
+bool FInViewCone(const Vector3 &in)    // Check if position in view cone
+void SetState(int state)                // Set monster state
+void ReportAIState()                    // Debug AI state to console
+int CheckEnemy(CBaseEntity@ enemy)     // Validate enemy
+void PushEnemy(CBaseEntity@ enemy, const Vector3 &in lastPos) // Save enemy
+bool PopEnemy()                         // Restore previous enemy
+void ClearSchedule()                    // Clear current schedule
+float ChangeYaw(int speed)              // Rotate yaw toward target
+bool FacingIdeal()                      // Check if facing ideal direction
+Vector3 BodyTarget(const Vector3 &in)   // Get aim point on body
+
+// Condition Management
+void SetConditions(int conditions)      // Set condition flags
+void ClearConditions(int conditions)    // Clear condition flags
+bool HasConditions(int conditions)      // Check condition flags
+bool HasAllConditions(int conditions)   // Check all condition flags
+
+// Memory Management
+void Remember(int memory)               // Set memory flag
+void Forget(int memory)                 // Clear memory flag
+bool HasMemory(int memory)              // Check memory flag
+bool HasAllMemories(int memory)         // Check all memory flags
+
+// Task Management
+void TaskComplete()                     // Mark current task complete
+void TaskFail()                         // Mark current task failed
+void TaskBegin()                        // Begin current task
+
+// Movement
+bool IsMoving()                         // Check if monster is moving
+void Stop()                             // Stop movement
+```
+
+**MonsterState Enum Values**:
+- `MONSTERSTATE_NONE` (0) - No state
+- `MONSTERSTATE_IDLE` (1) - Idle/passive
+- `MONSTERSTATE_COMBAT` (2) - In combat
+- `MONSTERSTATE_ALERT` (3) - Alert/investigating
+- `MONSTERSTATE_HUNT` (4) - Hunting enemy
+- `MONSTERSTATE_PRONE` (5) - Prone/knocked down
+- `MONSTERSTATE_SCRIPT` (6) - Scripted sequence
+- `MONSTERSTATE_PLAYDEAD` (7) - Playing dead
+- `MONSTERSTATE_DEAD` (8) - Dead
+
+**Example - Basic Monster AI Control**:
+```angelscript
+void ControlMonsterAI() {
+    // Get a monster entity (example assumes you have one)
+    CBaseEntity@ entity = /* get monster entity */;
+    CBaseMonster@ monster = ToMonster(entity);
+    
+    if (monster !is null) {
+        // Configure monster AI
+        monster.m_flFieldOfView = 0.7f;  // Narrower view cone
+        monster.m_flDistLook = 1024.0f;  // Shorter sight range
+        
+        // Set monster to combat state
+        monster.SetState(MONSTERSTATE_COMBAT);
+        
+        // Find and engage enemy
+        CBaseEntity@ enemy = monster.BestVisibleEnemy();
+        if (enemy !is null) {
+            monster.Enemy = enemy;
+            MS_ANGEL_INFO("Monster engaged enemy");
+        }
+        
+        // Check conditions
+        if (monster.HasConditions(bits_COND_SEE_ENEMY)) {
+            MS_ANGEL_INFO("Monster sees enemy");
+        }
+        
+        // Remember something
+        monster.Remember(bits_MEMORY_PROVOKED);
+    }
+}
+```
+
+### CMSMonster
+**Scope**: Server
+*Master Sword monster class (inherits from CBaseMonster, which inherits from CBaseEntity)*
+
+**Note**: CMSMonster has full access to all `CBaseEntity` methods (e.g., `SetNetName()`, `GetClassName()`, `SetHealth()`, `SetRenderMode()`) and all `CBaseMonster` methods (e.g., `Look()`, `SetState()`, `BestVisibleEnemy()`).
+
+```angelscript
+// Properties (direct member access)
+float m_HP                   // Current health points
+float m_MP                   // Current mana points
+int m_Gold                   // Gold amount carried
+float m_StepSize             // Maximum step height
+float m_SpeedMultiplier      // Speed modifier (1.0 = normal)
+float m_TurnRate             // Turn speed ratio (0.0-1.0)
+float m_Width                // Monster width for collision
+float m_Height               // Monster height for collision
+uint8 m_Gender               // Monster gender (Gender enum as uint8)
+string Title                 // Display title/name (virtual property, msstring wrapper)
+string ScriptName            // Script file name (virtual property, msstring wrapper)
+int m_Lives                  // Remaining lives (respawns)
+float m_SkillLevel           // Experience worth
+bool m_Menu_Autoopen         // Auto-open menu on +use
+float m_HITMulti             // Hit chance multiplier
+float m_HPMulti              // HP multiplier
+float m_DMGMulti             // Damage output multiplier
+float m_HearingSensitivity   // Sound hearing sensitivity
+
+// Lifecycle Methods
+bool IsMSMonster()           // Check if this is an MSMonster
+float MaxHP()                // Get effective maximum HP
+float MaxMP()                // Get effective maximum MP
+bool IsAlive()               // Check if alive
+
+// Economy Methods
+int GiveGold(int amount)                 // Give/take gold (returns new amount)
+int GiveGold(int amount, bool verbose)   // With verbose messages
+float GiveHP(float amount)               // Give/take HP (returns new HP)
+float GiveMP(float amount)               // Give/take MP (returns new MP)
+
+// Stats System
+int GetNatStat(int stat)                 // Get natural stat value
+int GetSkillStat(int stat)               // Get skill stat value
+int GetSkillStatCount()                  // Get number of skill stats
+
+// Movement
+float WalkSpeed()                        // Get walk speed
+float RunSpeed()                         // Get run speed
+bool IsFlying()                          // Check if flying/swimming
+
+// Combat
+bool IsActing()                          // Check if attacking/acting
+bool IsShielding()                       // Check if blocking with shield
+void CancelAttack()                      // Cancel current attack
+
+// Miscellaneous
+float Weight()                           // Get total weight (gear + items)
+void SetSpeed()                          // Recalculate speed
+```
+
+**Gender Enum Values**:
+- `GENDER_MALE` (0) - Male
+- `GENDER_FEMALE` (1) - Female
+- `GENDER_UNKNOWN` (2) - Unknown/neutral
+
+**SpeechType Enum Values**:
+- `SPEECH_GLOBAL` (0) - Global chat
+- `SPEECH_LOCAL` (1) - Local range (300 units)
+- `SPEECH_PARTY` (2) - Party only
+
+**Example - Monster Management**:
+```angelscript
+void ManageMSMonster() {
+    // Get an MS monster entity
+    CBaseEntity@ entity = /* get monster entity */;
+    CMSMonster@ monster = ToMSMonster(entity);
+    
+    if (monster !is null) {
+        // Set properties
+        monster.Title = "Elite Guardian";
+        monster.m_SpeedMultiplier = 1.5f;
+        monster.m_HPMulti = 2.0f;
+        monster.m_DMGMulti = 1.3f;
+        
+        // Give rewards
+        monster.GiveHP(50.0f);   // Heal 50 HP
+        monster.GiveMP(25.0f);   // Restore 25 MP
+        monster.GiveGold(100);   // Add 100 gold
+        
+        // Check stats
+        float currentHP = monster.m_HP;
+        float maxHP = monster.MaxHP();
+        float hpPercent = (currentHP / maxHP) * 100.0f;
+        
+        MS_ANGEL_INFO("Monster HP: " + currentHP + "/" + maxHP + " (" + hpPercent + "%)");
+        MS_ANGEL_INFO("Gold: " + monster.m_Gold);
+        
+        // Check combat state
+        if (monster.IsActing()) {
+            MS_ANGEL_INFO("Monster is attacking");
+        }
+        
+        if (monster.IsShielding()) {
+            MS_ANGEL_INFO("Monster is blocking");
+        }
+        
+        // Get stats
+        int strength = monster.GetNatStat(STAT_STRENGTH);
+        MS_ANGEL_INFO("Strength: " + strength);
+    }
+}
+```
+
+**Example - Monster Casting**:
+```angelscript
+void CastMonsterTypes() {
+    CBaseEntity@ entity = /* get entity */;
+    
+    // Cast to CBaseMonster
+    CBaseMonster@ monster = ToMonster(entity);
+    if (monster !is null) {
+        MS_ANGEL_INFO("Entity is a monster");
+        monster.Look(1024);
+    }
+    
+    // Cast to CMSMonster
+    CMSMonster@ msMonster = ToMSMonster(entity);
+    if (msMonster !is null) {
+        MS_ANGEL_INFO("Entity is an MS monster");
+        MS_ANGEL_INFO("HP: " + msMonster.m_HP + "/" + msMonster.MaxHP());
+    }
+    
+    // Cast monster to entity
+    CBaseEntity@ backToEntity = ToEntity(monster);
+}
+```
+
+---
+
 ## Notes
 
-1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@) are managed by the game engine. Scripts should not attempt to delete entities directly.
+1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@, CBaseMonster@, CMSMonster@) are managed by the game engine. Scripts should not attempt to delete entities directly.
 
 2. **Array Types**: The `array<T>` template type is available for creating dynamic arrays of any registered type.
 
@@ -754,3 +1252,4 @@ Memory optimization functions are available but typically managed automatically 
 ## Version History
 - **1.0**: Initial documentation based on ASBindings.cpp and ASEntityBindings.cpp analysis
 - **1.1**: Added comprehensive module system documentation from ASModuleSystem.h and scriptmodule.h
+- **1.2**: Added comprehensive CBaseMonster and CMSMonster bindings with full property access and AI control methods
