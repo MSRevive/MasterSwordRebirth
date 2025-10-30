@@ -40,6 +40,11 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
         return false;
     }
     
+    // Clear asbind20 inheritance metadata registries to ensure clean state
+    // This is critical for proper operation across map changes and reloads
+    asbind20::clear_inheritance_metadata();
+    MS_ANGEL_INFO("Cleared asbind20 inheritance metadata registries");
+    
     bool success = true;
     
     // Step 0: Register string type (MUST be first!)

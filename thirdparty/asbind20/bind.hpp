@@ -5420,6 +5420,15 @@ namespace detail
             return it->second;
         return "";
     }
+    
+    // Clear all inheritance metadata registries
+    // Call this when reinitializing AngelScript to ensure clean state
+    inline void clear_inheritance_metadata()
+    {
+        get_type_name_registry().clear();
+        get_method_registry().clear();
+        get_property_registry().clear();
+    }
 }
 
 // Helper function for reference casting between types in inheritance hierarchy
@@ -7283,6 +7292,22 @@ private:
     AS_NAMESPACE_QUALIFIER asIScriptEngine* m_engine;
     std::string m_name;
 };
+
+// ============================================================================
+// Public utility functions for managing inheritance metadata
+// ============================================================================
+
+/// Clear all inheritance metadata registries
+/// Call this when reinitializing AngelScript engine to ensure clean state
+/// This clears:
+/// - Type name registry (C++ type -> AngelScript name mapping)
+/// - Method metadata registry (inherited method tracking)
+/// - Property metadata registry (inherited property tracking)
+inline void clear_inheritance_metadata()
+{
+    detail::clear_inheritance_metadata();
+}
+
 } // namespace asbind20
 
 #endif
