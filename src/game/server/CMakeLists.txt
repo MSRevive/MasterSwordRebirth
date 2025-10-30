@@ -327,6 +327,8 @@ set(Shared_AngelScript
 	"../shared/ms/angelscript/ASCoreTypes.h"
 	"../shared/ms/angelscript/ASEntityBindings.cpp"
 	"../shared/ms/angelscript/ASEntityBindings.h"
+	"../shared/ms/angelscript/ASItemBindings.cpp"
+	"../shared/ms/angelscript/ASItemBindings.h"
 	"../shared/ms/angelscript/ASEngineProvider.cpp"
 	"../shared/ms/angelscript/ASEngineInterface.h"
 	"../shared/ms/angelscript/ASEngineBindings.h"

@@ -155,6 +155,12 @@ bool MoveToSpawnSpot()
 void SetSpawnTransition(const string &in transName)
 string GetSpawnTransition() const
 
+// Inventory/Item management methods
+CBasePlayerItem@ GetItemBySlot(int slot) const
+CBasePlayerWeapon@ GetActiveWeapon() const
+array<CBasePlayerItem@>@ GetInventory()
+bool HasItem(const string &in itemName) const
+
 // Comparison
 bool opEquals(const CBasePlayer@+ other) const
 ```
@@ -181,6 +187,10 @@ bool opEquals(const CBasePlayer@+ other) const
 - The spawn transition determines which `ms_player_spawn` entity the player will spawn at
 - Maximum length: 32 characters
 - Used by map transition system and respawn logic
+
+**GetItemBySlot** / **GetActiveWeapon** / **GetInventory** / **HasItem**: Inventory management methods:
+- See the "Item/Weapon Management Methods" section below for detailed documentation
+- These methods provide access to player's items, weapons, and inventory state
 
 **Example**:
 ```angelscript
@@ -244,6 +254,229 @@ The MessageColor enum is used with `SendColoredMessage()` to specify HUD message
 - **Red**: Taking damage, negative combat events
 - **Green**: Positive events (item pickup, quest complete, healing)
 - **Blue**: Special information, mana-related events
+
+---
+
+## Item and Weapon Classes
+
+### CBaseAnimating
+**Scope**: Server
+*Base class for animated entities*
+
+```angelscript
+// Animation methods
+int LookupSequence(const string &in label)
+void ResetSequenceInfo()
+void SetBodygroup(int group, int value)
+int GetBodygroup(int group)
+
+// Properties (read-only from script)
+float GetFrameRate() const
+bool IsSequenceFinished() const
+bool IsSequenceLooping() const
+```
+
+**LookupSequence** finds a sequence by name:
+- Returns sequence index or -1 if not found
+- Used for setting specific animations on models
+
+**ResetSequenceInfo** resets the current sequence information:
+- Call when switching sequences or models
+- Resets timing and frame information
+
+**SetBodygroup** / **GetBodygroup** manage model body groups:
+- Body groups allow switching between model variations
+- Common for armor, weapons, or character customization
+
+### CBasePlayerItem
+**Scope**: Server
+*Base class for inventory items*
+
+```angelscript
+// Properties
+string GetItemName() const
+string GetWorldModel() const
+string GetHandSpriteName() const
+string GetTradeSpriteName() const
+CBasePlayer@ GetOwnerPlayer() const
+int GetItemID() const
+uint GetValue() const
+bool IsWielded() const
+bool IsUseable() const
+
+// Methods
+bool IsMSItem() const
+bool CanDrop() const
+bool Deploy()
+void Holster()
+void Materialize()
+```
+
+**GetItemName** returns the internal item name (e.g., "dagger", "broadsword"):
+- This is the script name used to identify the item type
+
+**GetWorldModel** returns the world model path:
+- Used when the item is dropped or placed in the world
+
+**GetOwnerPlayer** returns the player who owns this item:
+- Returns `null` if not owned by a player
+- Use to check item ownership
+
+**GetValue** returns the item's gold value:
+- Used for trading, selling, and economy systems
+
+**IsWielded** checks if the item is currently being held/used:
+- Returns `true` if the item is actively equipped
+
+**Deploy** / **Holster** control item equipping:
+- `Deploy()` equips the item (makes it active)
+- `Holster()` puts the item away
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    CBasePlayerItem@ pItem = pPlayer.GetItemBySlot(0);
+    if (pItem !is null) {
+        MS_ANGEL_INFO("Item: " + pItem.GetItemName());
+        MS_ANGEL_INFO("Value: " + pItem.GetValue() + " gold");
+        MS_ANGEL_INFO("Wielded: " + (pItem.IsWielded() ? "Yes" : "No"));
+    }
+}
+```
+
+### CBasePlayerWeapon
+**Scope**: Server
+*Weapons (extends CBasePlayerItem)*
+
+```angelscript
+// Ammo properties
+int GetClip() const
+void SetClip(int amount)
+int GetPrimaryAmmoType() const
+int GetSecondaryAmmoType() const
+
+// Attack timing
+float GetNextPrimaryAttack() const
+void SetNextPrimaryAttack(float time)
+float GetNextSecondaryAttack() const
+void SetNextSecondaryAttack(float time)
+float GetTimeWeaponIdle() const
+
+// State properties
+bool IsInReload() const
+
+// Methods
+bool CanDeploy()
+bool IsUseable()
+void SendWeaponAnim(int anim, int skiplocal)
+int PrimaryAmmoIndex()
+int SecondaryAmmoIndex()
+string pszAmmo1()
+string pszAmmo2()
+```
+
+**GetClip** / **SetClip** manage weapon ammunition:
+- `GetClip()` returns current ammunition in the weapon's clip
+- `SetClip(amount)` sets the clip ammunition count
+- Use for reloading or ammo manipulation
+
+**GetNextPrimaryAttack** / **SetNextPrimaryAttack** control attack timing:
+- Time value when the weapon can fire again
+- Based on `gpGlobals->time` for server timing
+
+**IsInReload** checks if the weapon is currently reloading:
+- Returns `true` during reload animation
+- Use to prevent actions during reload
+
+**SendWeaponAnim** plays a weapon animation:
+- `anim` is the animation sequence index
+- `skiplocal` skips animation for local player (client prediction)
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    CBasePlayerWeapon@ pWeapon = pPlayer.GetActiveWeapon();
+    if (pWeapon !is null) {
+        MS_ANGEL_INFO("Clip: " + pWeapon.GetClip());
+        MS_ANGEL_INFO("In Reload: " + (pWeapon.IsInReload() ? "Yes" : "No"));
+        
+        // Refill clip
+        pWeapon.SetClip(30);
+    }
+}
+```
+
+---
+
+## Item/Weapon Management Methods (CBasePlayer)
+**Scope**: Server
+
+The following inventory management methods are available on `CBasePlayer`:
+
+```angelscript
+// Get item from specific inventory slot
+CBasePlayerItem@ GetItemBySlot(int slot) const
+
+// Get player's currently active weapon
+CBasePlayerWeapon@ GetActiveWeapon() const
+
+// Get all items in player's inventory
+array<CBasePlayerItem@>@ GetInventory()
+
+// Check if player has specific item by name
+bool HasItem(const string &in itemName) const
+```
+
+**GetItemBySlot** retrieves an item from a specific inventory slot:
+- `slot`: Inventory slot index (0 to MAX_ITEM_TYPES-1)
+- Returns `null` if slot is empty
+- Use to access specific inventory positions
+
+**GetActiveWeapon** gets the player's currently equipped weapon:
+- Returns `null` if no weapon is active or item is not a weapon
+- Casts to CBasePlayerWeapon for weapon-specific access
+
+**GetInventory** returns all items the player owns:
+- Returns an array of all CBasePlayerItem@ references
+- Includes items from all inventory slots
+- Empty slots are not included in the array
+
+**HasItem** checks if player owns a specific item by name:
+- `itemName`: The item's script name (e.g., "dagger")
+- Returns `true` if found in any inventory slot
+- Case-sensitive comparison
+
+**Example**:
+```angelscript
+CBasePlayer@ pPlayer = PlayerByIndex(1);
+if (pPlayer !is null) {
+    // Check if player has a specific item
+    if (pPlayer.HasItem("health_potion")) {
+        pPlayer.SendInfoMsg("You have a health potion!");
+    }
+    
+    // Iterate through all player items
+    array<CBasePlayerItem@>@ items = pPlayer.GetInventory();
+    for (uint i = 0; i < items.length(); i++) {
+        CBasePlayerItem@ pItem = items[i];
+        MS_ANGEL_INFO("Item " + i + ": " + pItem.GetItemName());
+    }
+    
+    // Get active weapon and check ammo
+    CBasePlayerWeapon@ pWeapon = pPlayer.GetActiveWeapon();
+    if (pWeapon !is null && pWeapon.GetClip() < 5) {
+        pPlayer.SendColoredMessage(MessageColor::Red, "Low ammo!");
+    }
+    
+    // Get item from specific slot
+    CBasePlayerItem@ pSlotItem = pPlayer.GetItemBySlot(0);
+    if (pSlotItem !is null) {
+        MS_ANGEL_INFO("Slot 0 item: " + pSlotItem.GetItemName());
+    }
+}
+```
 
 ---
 
