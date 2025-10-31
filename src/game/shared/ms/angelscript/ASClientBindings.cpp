@@ -36,36 +36,35 @@ extern playermove_t *pmove;
 
 //==========================================================================
 // CLocalPlayer - Wrapper for local player client-side access
+// Inherits from CClientEntity since the local player is a client entity
 //==========================================================================
 
-class CLocalPlayer
+class CLocalPlayer : public CClientEntity
 {
 public:
+    CLocalPlayer() : CClientEntity(0) 
+    {
+        // Update index to local player's index
+        cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
+        if (pLocal) m_index = pLocal->index;
+    }
+    
+    // Override GetIndex to always return local player's current index
     int GetIndex() const
     {
         cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
         return pLocal ? pLocal->index : 0;
     }
     
-    Vector3 GetOrigin() const
-    {
-        cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
-        if (!pLocal) return Vector3(0, 0, 0);
-        return Vector3(pLocal->origin.x, pLocal->origin.y, pLocal->origin.z);
-    }
+    // Note: GetOrigin, GetAngles, etc. are inherited from CClientEntity
+    // and will work automatically since m_index is set to local player
     
+    // Local player specific methods (not available on regular CClientEntity)
     Vector3 GetViewAngles() const
     {
         float viewAngles[3];
         gEngfuncs.GetViewAngles(viewAngles);
         return Vector3(viewAngles[0], viewAngles[1], viewAngles[2]);
-    }
-    
-    Vector3 GetAngles() const
-    {
-        cl_entity_t* pLocal = gEngfuncs.GetLocalPlayer();
-        if (!pLocal) return Vector3(0, 0, 0);
-        return Vector3(pLocal->angles.x, pLocal->angles.y, pLocal->angles.z);
     }
     
     bool IsThirdPerson() const
@@ -143,8 +142,8 @@ static CLocalPlayer* AS_GetLocalPlayer()
 
 class CClientEntity
 {
-private:
-    int m_index;
+protected:
+    int m_index;  // Protected so CLocalPlayer can access it
     
     cl_entity_t* GetEntity() const
     {
@@ -323,17 +322,16 @@ enum class CollisionMode
     AllAndDie
 };
 
-class CTempEntity
+class CTempEntity : public CClientEffect
 {
 private:
     TEMPENTITY* m_pTempEnt;
-    bool m_bIsValid;
     
 public:
-    CTempEntity() : m_pTempEnt(nullptr), m_bIsValid(false) {}
-    CTempEntity(TEMPENTITY* pTempEnt) : m_pTempEnt(pTempEnt), m_bIsValid(pTempEnt != nullptr) {}
+    CTempEntity() : CClientEffect(false), m_pTempEnt(nullptr) {}
+    CTempEntity(TEMPENTITY* pTempEnt) : CClientEffect(pTempEnt != nullptr), m_pTempEnt(pTempEnt) {}
     
-    bool IsValid() const
+    bool IsValid() const override
     {
         return m_bIsValid && m_pTempEnt != nullptr;
     }
@@ -693,21 +691,37 @@ static CTempEntity* AS_CreateFrameModel(const std::string& modelName, const Vect
 }
 
 //==========================================================================
+// CClientEffect - Base class for client-side effects
+//==========================================================================
+
+class CClientEffect
+{
+protected:
+    bool m_bIsValid;
+    
+public:
+    CClientEffect() : m_bIsValid(false) {}
+    CClientEffect(bool valid) : m_bIsValid(valid) {}
+    virtual ~CClientEffect() {}
+    
+    virtual bool IsValid() const { return m_bIsValid; }
+};
+
+//==========================================================================
 // CDynamicLight - Client-side dynamic light system
 //==========================================================================
 
-class CDynamicLight
+class CDynamicLight : public CClientEffect
 {
 private:
     dlight_t* m_pLight;
     int m_lightKey;
-    bool m_bIsValid;
     
 public:
-    CDynamicLight() : m_pLight(nullptr), m_lightKey(0), m_bIsValid(false) {}
-    CDynamicLight(dlight_t* pLight, int key) : m_pLight(pLight), m_lightKey(key), m_bIsValid(pLight != nullptr) {}
+    CDynamicLight() : CClientEffect(false), m_pLight(nullptr), m_lightKey(0) {}
+    CDynamicLight(dlight_t* pLight, int key) : CClientEffect(pLight != nullptr), m_pLight(pLight), m_lightKey(key) {}
     
-    bool IsValid() const { return m_bIsValid && m_pLight != nullptr; }
+    bool IsValid() const override { return m_bIsValid && m_pLight != nullptr; }
     
     void SetOrigin(const Vector3& origin)
     {
@@ -784,17 +798,16 @@ static CDynamicLight* AS_CreateDynamicLight(const Vector3& origin, float radius,
 // CBeam - Client-side beam system
 //==========================================================================
 
-class CBeam
+class CBeam : public CClientEffect
 {
 private:
     BEAM* m_pBeam;
-    bool m_bIsValid;
     
 public:
-    CBeam() : m_pBeam(nullptr), m_bIsValid(false) {}
-    CBeam(BEAM* pBeam) : m_pBeam(pBeam), m_bIsValid(pBeam != nullptr) {}
+    CBeam() : CClientEffect(false), m_pBeam(nullptr) {}
+    CBeam(BEAM* pBeam) : CClientEffect(pBeam != nullptr), m_pBeam(pBeam) {}
     
-    bool IsValid() const { return m_bIsValid && m_pBeam != nullptr; }
+    bool IsValid() const override { return m_bIsValid && m_pBeam != nullptr; }
     
     void SetStartPos(const Vector3& pos)
     {
@@ -1087,12 +1100,13 @@ void ASClientBindings::RegisterLocalPlayer(asIScriptEngine* pEngine)
     MS_ANGEL_INFO("[ASClientBindings] Registering CLocalPlayer class...");
     
     auto bind = asbind20::class_<CLocalPlayer>(pEngine, "CLocalPlayer");
+    bind.base<CClientEntity>();  // Inherit from CClientEntity
     
-    // Methods
+    // Override methods
     bind.method("int GetIndex() const", &CLocalPlayer::GetIndex);
-    bind.method("Vector3 GetOrigin() const", &CLocalPlayer::GetOrigin);
+    
+    // Local player specific methods (entity methods inherited from CClientEntity)
     bind.method("Vector3 GetViewAngles() const", &CLocalPlayer::GetViewAngles);
-    bind.method("Vector3 GetAngles() const", &CLocalPlayer::GetAngles);
     bind.method("bool IsThirdPerson() const", &CLocalPlayer::IsThirdPerson);
     bind.method("bool IsUnderwater() const", &CLocalPlayer::IsUnderwater);
     bind.method("Vector3 GetWaterOrigin() const", &CLocalPlayer::GetWaterOrigin);
@@ -1160,8 +1174,9 @@ void ASClientBindings::RegisterTempEntity(asIScriptEngine* pEngine)
     pEngine->RegisterEnumValue("CollisionMode", "All", (int)CollisionMode::All);
     pEngine->RegisterEnumValue("CollisionMode", "AllAndDie", (int)CollisionMode::AllAndDie);
     
-    // Register CTempEntity class
+    // Register CTempEntity class with inheritance
     auto bind = asbind20::class_<CTempEntity>(pEngine, "CTempEntity");
+    bind.base<CClientEffect>();
     bind.refcounted();
     
     // Validation
@@ -1241,6 +1256,7 @@ void ASClientBindings::RegisterDynamicLight(asIScriptEngine* pEngine)
     MS_ANGEL_INFO("[ASClientBindings] Registering CDynamicLight class...");
     
     auto bind = asbind20::class_<CDynamicLight>(pEngine, "CDynamicLight");
+    bind.base<CClientEffect>();
     bind.refcounted();
     
     bind.method("bool IsValid() const", &CDynamicLight::IsValid);
@@ -1264,6 +1280,7 @@ void ASClientBindings::RegisterBeam(asIScriptEngine* pEngine)
     MS_ANGEL_INFO("[ASClientBindings] Registering CBeam class...");
     
     auto bind = asbind20::class_<CBeam>(pEngine, "CBeam");
+    bind.base<CClientEffect>();
     bind.refcounted();
     
     bind.method("bool IsValid() const", &CBeam::IsValid);
@@ -1390,9 +1407,20 @@ void ASClientBindings::RegisterAll(asIScriptEngine* pEngine)
     
     MS_ANGEL_INFO("[ASClientBindings] Starting client-side binding registration...");
     
-    // Register all client-side systems
-    RegisterLocalPlayer(pEngine);
+    // Register base classes first (order matters for inheritance)
+    
+    // 1. Register CClientEffect base class for effects
+    MS_ANGEL_INFO("[ASClientBindings] Registering CClientEffect base class...");
+    auto baseEffect = asbind20::class_<CClientEffect>(pEngine, "CClientEffect");
+    baseEffect.refcounted();
+    baseEffect.method("bool IsValid() const", &CClientEffect::IsValid);
+    MS_ANGEL_INFO("[ASClientBindings] CClientEffect base class registered successfully");
+    
+    // 2. Register CClientEntity before CLocalPlayer (since CLocalPlayer inherits from it)
     RegisterClientEntity(pEngine);
+    
+    // 3. Register CLocalPlayer (inherits from CClientEntity)
+    RegisterLocalPlayer(pEngine);
     RegisterTempEntity(pEngine);
     RegisterDynamicLight(pEngine);
     RegisterBeam(pEngine);

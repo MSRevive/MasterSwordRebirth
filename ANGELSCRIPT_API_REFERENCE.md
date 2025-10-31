@@ -1229,49 +1229,44 @@ void CastMonsterTypes() {
 
 **NOTE**: All classes and functions in this section are available ONLY in client-side scripts (marked with `#scope client` in legacy scripts or loaded as client modules in AngelScript).
 
-### CLocalPlayer
+### Class Hierarchy
+
+Client classes follow two inheritance hierarchies:
+
+**Entity Hierarchy:**
+```
+CClientEntity (base)
+  └── CLocalPlayer
+```
+
+**Effect Hierarchy:**
+```
+CClientEffect (base)
+  ├── CTempEntity
+  ├── CDynamicLight
+  └── CBeam
+```
+
+- **CLocalPlayer** inherits all entity query methods from **CClientEntity** (GetOrigin, GetAngles, GetVelocity, etc.)
+- All effect classes inherit the `IsValid()` method from **CClientEffect**
+
+### CClientEffect (Base Class)
 **Scope**: Client
 
-The local player represents the player running the client.
+Base class for all client-side visual effects.
 
 ```angelscript
-class CLocalPlayer {
-    int GetIndex() const;                  // Get player's entity index
-    Vector3 GetOrigin() const;             // Get player position
-    Vector3 GetViewAngles() const;         // Get view angles (camera)
-    Vector3 GetAngles() const;             // Get player angles
-    bool IsThirdPerson() const;            // Check if in third-person mode
-    bool IsUnderwater() const;             // Check if underwater
-    Vector3 GetWaterOrigin() const;        // Get water surface position
-    bool CanAttack() const;                // Check if can attack
-    bool CanJump() const;                  // Check if can jump
-    bool CanDuck() const;                  // Check if can duck
-    bool CanRun() const;                   // Check if can run
-    bool CanMove() const;                  // Check if can move
-    int GetWaterLevel() const;             // Get water level (0-3)
-}
-
-// Global accessor
-CLocalPlayer@ GetLocalPlayer()
-```
-
-**Example**:
-```angelscript
-void CheckLocalPlayer() {
-    CLocalPlayer@ player = GetLocalPlayer();
-    Vector3 pos = player.GetOrigin();
-    MS_ANGEL_INFO("Player at: " + pos.x + "," + pos.y + "," + pos.z);
-    
-    if (player.IsUnderwater()) {
-        MS_ANGEL_INFO("Player is underwater!");
-    }
+class CClientEffect {
+    bool IsValid() const;  // Check if effect is valid
 }
 ```
+
+This class is inherited by `CTempEntity`, `CDynamicLight`, and `CBeam`.
 
 ### CClientEntity
 **Scope**: Client
 
-Read-only wrapper for client-side entity queries.
+Read-only wrapper for client-side entity queries. This is the base class for `CLocalPlayer`.
 
 ```angelscript
 class CClientEntity {
@@ -1312,15 +1307,70 @@ void QueryEntity(int index) {
 }
 ```
 
+### CLocalPlayer
+**Scope**: Client
+
+The local player represents the player running the client. Inherits from `CClientEntity`.
+
+```angelscript
+class CLocalPlayer : CClientEntity {
+    // Inherited from CClientEntity:
+    // int GetIndex() const;
+    // Vector3 GetOrigin() const;
+    // Vector3 GetAngles() const;
+    // Vector3 GetVelocity() const;
+    // string GetModelName() const;
+    // ... and all other CClientEntity methods
+    
+    // Local player specific methods:
+    Vector3 GetViewAngles() const;         // Get view angles (camera)
+    bool IsThirdPerson() const;            // Check if in third-person mode
+    bool IsUnderwater() const;             // Check if underwater
+    Vector3 GetWaterOrigin() const;        // Get water surface position
+    bool CanAttack() const;                // Check if can attack
+    bool CanJump() const;                  // Check if can jump
+    bool CanDuck() const;                  // Check if can duck
+    bool CanRun() const;                   // Check if can run
+    bool CanMove() const;                  // Check if can move
+    int GetWaterLevel() const;             // Get water level (0-3)
+}
+
+// Global accessor
+CLocalPlayer@ GetLocalPlayer()
+```
+
+**Example**:
+```angelscript
+void CheckLocalPlayer() {
+    CLocalPlayer@ player = GetLocalPlayer();
+    
+    // Can use inherited CClientEntity methods
+    Vector3 pos = player.GetOrigin();
+    Vector3 angles = player.GetAngles();
+    string model = player.GetModelName();
+    
+    MS_ANGEL_INFO("Player at: " + pos.x + "," + pos.y + "," + pos.z);
+    MS_ANGEL_INFO("Player model: " + model);
+    
+    // Can use local player specific methods
+    if (player.IsUnderwater()) {
+        MS_ANGEL_INFO("Player is underwater!");
+    }
+    
+    Vector3 viewAngles = player.GetViewAngles();
+    MS_ANGEL_INFO("Looking at: " + viewAngles.y + " degrees");
+}
+```
+
 ### CTempEntity
 **Scope**: Client
 
-Temporary entity for client-side visual effects.
+Temporary entity for client-side visual effects. Inherits from `CClientEffect`.
 
 ```angelscript
-class CTempEntity {
-    // Validation
-    bool IsValid() const;
+class CTempEntity : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
     
     // Transform
     void SetOrigin(const Vector3 &in);
@@ -1410,11 +1460,12 @@ void CreateExplosionEffect() {
 ### CDynamicLight
 **Scope**: Client
 
-Client-side dynamic lighting.
+Client-side dynamic lighting. Inherits from `CClientEffect`.
 
 ```angelscript
-class CDynamicLight {
-    bool IsValid() const;
+class CDynamicLight : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
     void SetOrigin(const Vector3 &in);
     Vector3 GetOrigin() const;
     void SetRadius(float);
@@ -1447,11 +1498,12 @@ void CreateTorchLight() {
 ### CBeam
 **Scope**: Client
 
-Client-side beam effects.
+Client-side beam effects. Inherits from `CClientEffect`.
 
 ```angelscript
-class CBeam {
-    bool IsValid() const;
+class CBeam : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
     void SetStartPos(const Vector3 &in);
     void SetEndPos(const Vector3 &in);
     void SetStartEntity(int entityIndex, int attachment);
@@ -1638,3 +1690,6 @@ void CheckGround() {
 - **1.1**: Added comprehensive module system documentation from ASModuleSystem.h and scriptmodule.h
 - **1.2**: Added comprehensive CBaseMonster and CMSMonster bindings with full property access and AI control methods
 - **1.3**: Added complete client-side AngelScript API documentation including CLocalPlayer, CClientEntity, CTempEntity, CDynamicLight, CBeam, CClientEnvironment, CClientSound, and client utility functions
+- **1.4**: Refactored client-side classes to use inheritance hierarchies using asbind20's `.base<>()` feature:
+  - CClientEffect base class for effects (CTempEntity, CDynamicLight, CBeam)
+  - CLocalPlayer now inherits from CClientEntity, gaining all entity query methods
