@@ -13,7 +13,12 @@
 #include "ASScriptClasses.h"   
 #include "ASCoroutines.h"        
 #include "ASObjectPool.h"
-#include "ASEngineEventManager.h"      
+#include "ASEngineEventManager.h"
+
+// Client-side bindings (only compiled for client DLL)
+#ifdef CLIENT_DLL
+#include "ASClientBindings.h"
+#endif      
 
 // Include asbind20
 #include <asbind20/asbind.hpp>
@@ -247,6 +252,21 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
             MS_ANGEL_INFO("   OK Engine event manager initialized successfully");
         }
     }
+    
+    // Step 12.5: Register client-side bindings (CLIENT_DLL only)
+#ifdef CLIENT_DLL
+    MS_ANGEL_INFO("[12.5/13] Registering Client-Side Bindings...");
+    try
+    {
+        ASClientBindings::RegisterAll(pEngine);
+        MS_ANGEL_INFO("   OK Client-side bindings registered successfully");
+    }
+    catch (...)
+    {
+        MS_ANGEL_ERROR("   ERROR: Client-side bindings registration failed!");
+        success = false;
+    }
+#endif
     
     // Step 13: Validate all registrations
     MS_ANGEL_INFO("[13/13] Validating Registrations...");

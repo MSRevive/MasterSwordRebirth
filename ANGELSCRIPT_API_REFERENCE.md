@@ -1225,6 +1225,390 @@ void CastMonsterTypes() {
 
 ---
 
+## Client-Side Classes
+
+**NOTE**: All classes and functions in this section are available ONLY in client-side scripts (marked with `#scope client` in legacy scripts or loaded as client modules in AngelScript).
+
+### CLocalPlayer
+**Scope**: Client
+
+The local player represents the player running the client.
+
+```angelscript
+class CLocalPlayer {
+    int GetIndex() const;                  // Get player's entity index
+    Vector3 GetOrigin() const;             // Get player position
+    Vector3 GetViewAngles() const;         // Get view angles (camera)
+    Vector3 GetAngles() const;             // Get player angles
+    bool IsThirdPerson() const;            // Check if in third-person mode
+    bool IsUnderwater() const;             // Check if underwater
+    Vector3 GetWaterOrigin() const;        // Get water surface position
+    bool CanAttack() const;                // Check if can attack
+    bool CanJump() const;                  // Check if can jump
+    bool CanDuck() const;                  // Check if can duck
+    bool CanRun() const;                   // Check if can run
+    bool CanMove() const;                  // Check if can move
+    int GetWaterLevel() const;             // Get water level (0-3)
+}
+
+// Global accessor
+CLocalPlayer@ GetLocalPlayer()
+```
+
+**Example**:
+```angelscript
+void CheckLocalPlayer() {
+    CLocalPlayer@ player = GetLocalPlayer();
+    Vector3 pos = player.GetOrigin();
+    MS_ANGEL_INFO("Player at: " + pos.x + "," + pos.y + "," + pos.z);
+    
+    if (player.IsUnderwater()) {
+        MS_ANGEL_INFO("Player is underwater!");
+    }
+}
+```
+
+### CClientEntity
+**Scope**: Client
+
+Read-only wrapper for client-side entity queries.
+
+```angelscript
+class CClientEntity {
+    bool Exists() const;                   // Check if entity exists
+    int GetIndex() const;                  // Get entity index
+    Vector3 GetOrigin() const;             // Get position
+    Vector3 GetAngles() const;             // Get angles
+    Vector3 GetVelocity() const;           // Get velocity
+    string GetModelName() const;           // Get model path
+    int GetModelIndex() const;             // Get model index
+    int GetRenderMode() const;             // Get render mode
+    int GetRenderAmount() const;           // Get render amount
+    Color GetRenderColor() const;          // Get render color
+    bool IsPlayer() const;                 // Check if player entity
+    bool IsVisible() const;                // Check if visible
+    Vector3 GetBonePosition(int) const;    // Get bone position
+    int GetBoneCount() const;              // Get bone count
+    Vector3 GetAttachment(int) const;      // Get attachment position
+    int GetSequence() const;               // Get animation sequence
+    float GetFrame() const;                // Get animation frame
+    int GetBody() const;                   // Get body group
+    int GetSkin() const;                   // Get skin
+}
+
+// Global accessor
+CClientEntity@ GetClientEntity(int index)
+```
+
+**Example**:
+```angelscript
+void QueryEntity(int index) {
+    CClientEntity@ ent = GetClientEntity(index);
+    if (ent.Exists()) {
+        MS_ANGEL_INFO("Entity: " + ent.GetModelName());
+        MS_ANGEL_INFO("Position: " + ent.GetOrigin().x);
+        MS_ANGEL_INFO("Is Player: " + ent.IsPlayer());
+    }
+}
+```
+
+### CTempEntity
+**Scope**: Client
+
+Temporary entity for client-side visual effects.
+
+```angelscript
+class CTempEntity {
+    // Validation
+    bool IsValid() const;
+    
+    // Transform
+    void SetOrigin(const Vector3 &in);
+    Vector3 GetOrigin() const;
+    void SetAngles(const Vector3 &in);
+    Vector3 GetAngles() const;
+    void SetVelocity(const Vector3 &in);
+    Vector3 GetVelocity() const;
+    
+    // Appearance
+    void SetModel(const string &in);
+    void SetSprite(const string &in);
+    void SetScale(float);
+    float GetScale() const;
+    void SetFrame(int);
+    int GetFrame() const;
+    void SetFrameRate(float);
+    void SetBody(int);
+    void SetSkin(int);
+    
+    // Rendering
+    void SetRenderMode(int);
+    void SetRenderAmount(int);
+    void SetRenderColor(const Color &in);
+    void SetRenderFx(int);
+    
+    // Physics
+    void SetGravity(float);
+    void SetCollisionMode(CollisionMode);
+    void SetBounceFactor(float);
+    void SetMins(const Vector3 &in);
+    void SetMaxs(const Vector3 &in);
+    
+    // Lifetime
+    void SetDeathDelay(float);
+    void SetFadeout(bool, float);
+    void Kill();
+    
+    // Following
+    void FollowEntity(int entityIndex, int attachment = -1);
+    void StopFollowing();
+    
+    // Custom data
+    void SetUserInt(int slot, int value);
+    int GetUserInt(int slot) const;
+    void SetUserFloat(int slot, float value);
+    float GetUserFloat(int slot) const;
+    
+    // Callbacks (TODO)
+    void SetUpdateCallback(const string &in);
+    void SetCollisionCallback(const string &in);
+    void SetWaterCallback(const string &in);
+    void SetTimerCallback(float, const string &in);
+}
+
+enum CollisionMode {
+    None,
+    World,
+    All,
+    AllAndDie
+}
+
+// Factory functions
+CTempEntity@ CreateTempSprite(const string &in spriteName, const Vector3 &in origin);
+CTempEntity@ CreateTempModel(const string &in modelName, const Vector3 &in origin);
+CTempEntity@ CreateFrameSprite(const string &in spriteName, const Vector3 &in origin);
+CTempEntity@ CreateFrameModel(const string &in modelName, const Vector3 &in origin);
+```
+
+**Example**:
+```angelscript
+void CreateExplosionEffect() {
+    Vector3 pos = Vector3(100, 200, 50);
+    CTempEntity@ sprite = CreateTempSprite("sprites/fire.spr", pos);
+    
+    if (sprite.IsValid()) {
+        sprite.SetScale(2.0);
+        sprite.SetFrameRate(15.0);
+        sprite.SetRenderMode(kRenderTransAdd);
+        sprite.SetRenderAmount(200);
+        sprite.SetDeathDelay(1.0);
+        sprite.SetFadeout(true, 0.5);
+    }
+}
+```
+
+### CDynamicLight
+**Scope**: Client
+
+Client-side dynamic lighting.
+
+```angelscript
+class CDynamicLight {
+    bool IsValid() const;
+    void SetOrigin(const Vector3 &in);
+    Vector3 GetOrigin() const;
+    void SetRadius(float);
+    void SetColor(const Color &in);
+    void SetDuration(float);
+    void SetDark(bool);              // Dark light (removes light)
+    void FollowEntity(int entityIndex);
+    void Kill();
+}
+
+// Factory function
+CDynamicLight@ CreateDynamicLight(const Vector3 &in origin, float radius, 
+                                   const Color &in color, float duration = 0.0f);
+```
+
+**Example**:
+```angelscript
+void CreateTorchLight() {
+    Vector3 pos = Vector3(100, 200, 50);
+    Color orange = Color(255, 128, 0, 255);
+    CDynamicLight@ light = CreateDynamicLight(pos, 256.0, orange, 5.0);
+    
+    if (light.IsValid()) {
+        // Light will last 5 seconds
+        light.SetRadius(300.0);  // Make it brighter
+    }
+}
+```
+
+### CBeam
+**Scope**: Client
+
+Client-side beam effects.
+
+```angelscript
+class CBeam {
+    bool IsValid() const;
+    void SetStartPos(const Vector3 &in);
+    void SetEndPos(const Vector3 &in);
+    void SetStartEntity(int entityIndex, int attachment);
+    void SetEndEntity(int entityIndex, int attachment);
+    void SetSprite(const string &in);
+    void SetWidth(float);
+    void SetAmplitude(float);
+    void SetBrightness(float);
+    void SetSpeed(float);
+    void SetFrameRate(float);
+    void SetColor(const Color &in);
+    void SetLife(float);
+    void Kill();
+}
+
+// Factory functions
+CBeam@ CreateBeamPoints(const Vector3 &in start, const Vector3 &in end, const string &in sprite);
+CBeam@ CreateBeamEntities(int startIdx, int startAttach, int endIdx, int endAttach, const string &in sprite);
+CBeam@ CreateBeamEntPoint(int startIdx, int attachment, const Vector3 &in endPos, const string &in sprite);
+
+// Effect utilities
+void CreateSpark(const Vector3 &in origin);
+void CreateSparkOnModel(int entityIndex, int attachment = 0);
+void CreateDecal(int decalIndex, const Vector3 &in traceStart, const Vector3 &in traceEnd);
+```
+
+**Example**:
+```angelscript
+void CreateLightningBeam() {
+    Vector3 start = Vector3(0, 0, 100);
+    Vector3 end = Vector3(100, 100, 0);
+    CBeam@ beam = CreateBeamPoints(start, end, "sprites/laserbeam.spr");
+    
+    if (beam.IsValid()) {
+        beam.SetWidth(20.0);
+        beam.SetColor(Color(100, 100, 255, 255));
+        beam.SetBrightness(200.0);
+        beam.SetLife(2.0);
+    }
+}
+```
+
+### CClientEnvironment
+**Scope**: Client
+
+Client-side environment control (fog, screen tint, sky).
+
+```angelscript
+class CClientEnvironment {
+    // Fog control
+    void SetFogEnabled(bool);
+    bool GetFogEnabled() const;
+    void SetFogColor(const Color &in);
+    Color GetFogColor() const;
+    void SetFogDensity(float);
+    void SetFogStart(float);
+    void SetFogEnd(float);
+    void SetFogType(int);
+    
+    // Screen effects
+    void SetScreenTint(const Color &in);
+    Color GetScreenTint() const;
+    void ClearScreenTint();
+    
+    // Sky
+    void SetSkyTexture(const string &in);
+    string GetSkyName() const;
+    void SetLightGamma(float);
+    void SetMaxViewDistance(float);
+}
+
+// Global accessor
+CClientEnvironment@ GetEnvironment()
+```
+
+**Example**:
+```angelscript
+void SetDarkAtmosphere() {
+    CClientEnvironment@ env = GetEnvironment();
+    
+    // Dark red screen tint
+    env.SetScreenTint(Color(50, 0, 0, 100));
+    
+    // Enable fog
+    env.SetFogEnabled(true);
+    env.SetFogColor(Color(20, 0, 0, 255));
+    env.SetFogDensity(0.002);
+}
+```
+
+### CClientSound
+**Scope**: Client
+
+Client-side audio playback.
+
+```angelscript
+class CClientSound {
+    void PlaySound(int channel, const string &in soundPath, float volume = 1.0f);
+    void SetVolume(int channel, const string &in soundPath, float volume);
+    void StopSound(int channel, const string &in soundPath);
+    void PlaySoundAtPosition(const Vector3 &in pos, const string &in soundPath, float volume = 1.0f);
+}
+
+// Global accessor
+CClientSound@ GetClientSound()
+
+// Sound channel constants
+const int SOUND_CHANNEL_WEAPON = 0;
+const int SOUND_CHANNEL_VOICE = 1;
+const int SOUND_CHANNEL_STREAM = 5;
+```
+
+**Example**:
+```angelscript
+void PlayAmbientSound() {
+    CClientSound@ sound = GetClientSound();
+    sound.PlaySound(SOUND_CHANNEL_STREAM, "ambient/wind.wav", 0.5);
+}
+```
+
+### Client Utility Functions
+**Scope**: Client
+
+```angelscript
+// Trace/query functions
+Vector3 GetGroundHeight(const Vector3 &in origin);
+Vector3 GetSkyHeight(const Vector3 &in origin);
+bool IsUnderSky(const Vector3 &in origin);
+Vector3 TraceLine(const Vector3 &in start, const Vector3 &in end, bool worldOnly = false);
+int TraceLineEntity(const Vector3 &in start, const Vector3 &in end);
+int GetContents(const Vector3 &in origin);
+
+// Client-specific accessors
+float GetClientTime();
+string GetCurrentMap();
+bool IsClientSide();  // Always returns true on client
+array<int>@ GetNearbyEntities(const Vector3 &in origin, float radius, bool playersOnly = false);
+```
+
+**Example**:
+```angelscript
+void CheckGround() {
+    CLocalPlayer@ player = GetLocalPlayer();
+    Vector3 playerPos = player.GetOrigin();
+    Vector3 ground = GetGroundHeight(playerPos);
+    
+    float distToGround = playerPos.z - ground.z;
+    MS_ANGEL_INFO("Distance to ground: " + distToGround);
+    
+    if (IsUnderSky(playerPos)) {
+        MS_ANGEL_INFO("Player is under open sky");
+    }
+}
+```
+
+---
+
 ## Notes
 
 1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@, CBaseMonster@, CMSMonster@) are managed by the game engine. Scripts should not attempt to delete entities directly.
@@ -1253,3 +1637,4 @@ void CastMonsterTypes() {
 - **1.0**: Initial documentation based on ASBindings.cpp and ASEntityBindings.cpp analysis
 - **1.1**: Added comprehensive module system documentation from ASModuleSystem.h and scriptmodule.h
 - **1.2**: Added comprehensive CBaseMonster and CMSMonster bindings with full property access and AI control methods
+- **1.3**: Added complete client-side AngelScript API documentation including CLocalPlayer, CClientEntity, CTempEntity, CDynamicLight, CBeam, CClientEnvironment, CClientSound, and client utility functions
