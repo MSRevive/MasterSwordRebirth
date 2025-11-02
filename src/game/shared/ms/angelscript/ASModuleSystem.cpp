@@ -10,6 +10,7 @@
 #include "addons/scriptmodule/scriptmodule.h"
 #include "groupfile.h"
 #include "scriptmgr.h"
+#include "mslogger.h"  // For MS_INFO and MS_ERROR macros
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -358,41 +359,49 @@ bool ASModuleSystem::LoadModuleFromMemory(const std::string& name, const std::st
     if (pakFile)
     {
         builder.SetIncludeCallback(PakFileIncludeCallback, pakFile);
-        printf("ASModuleSystem: Pak file include callback configured for module '%s'\n", name.c_str());
+        MS_INFO("ASModuleSystem: Pak file include callback configured for module '%s'", name.c_str());
     }
     else
     {
-        printf("ASModuleSystem: No pak file provided - #include directives will not be supported\n");
+        MS_INFO("ASModuleSystem: No pak file provided - #include directives will not be supported");
     }
-    
+
     // Set up pragma callback to handle #pragma context directives
     builder.SetPragmaCallback(PragmaCallback, nullptr);
-    printf("ASModuleSystem: Pragma callback configured for module '%s'\n", name.c_str());
+    MS_INFO("ASModuleSystem: Pragma callback configured for module '%s'", name.c_str());
     
+    MS_INFO("ASModuleSystem: Starting new module '%s'...", name.c_str());
     int r = builder.StartNewModule(m_pEngine, name.c_str());
     if (r < 0)
     {
-        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to start new module: %s\n", name.c_str());
+        MS_ERROR("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to start new module: %s (error code: %d)", name.c_str(), r);
         return false;
     }
-    
+    MS_INFO("ASModuleSystem: Successfully started module '%s'", name.c_str());
+
     // Add the script content to the builder
+    MS_INFO("ASModuleSystem: Adding script section for module '%s' (%d bytes)...", name.c_str(), (int)content.length());
     r = builder.AddSectionFromMemory(name.c_str(), content.c_str(), content.length());
     if (r < 0)
     {
-        printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to add script section for module: %s\n", name.c_str());
+        MS_ERROR("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to add script section for module: %s (error code: %d)", name.c_str(), r);
         return false;
     }
-    
+    MS_INFO("ASModuleSystem: Successfully added script section for module '%s'", name.c_str());
+
     // Build the module if not compile-only (CScriptBuilder handles this)
     if (!options.compileOnly)
     {
+        MS_INFO("ASModuleSystem: Building module '%s'...", name.c_str());
         r = builder.BuildModule();
         if (r < 0)
         {
-            printf("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to build module: %s\n", name.c_str());
+            MS_ERROR("ASModuleSystem::LoadModuleFromMemory: ERROR - Failed to build module: %s (error code: %d)", name.c_str(), r);
+            MS_ERROR("ASModuleSystem: Check for [COMPILATION ERROR] messages above for details");
             return false;
         }
+        MS_INFO("ASModuleSystem: Successfully built module '%s'", name.c_str());
+
         
         // Get the module from the builder
         info.pModule = builder.GetModule();
@@ -1130,13 +1139,13 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
 {
     if (!m_pScriptModule)
     {
-        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - Script module system not initialized\n");
+        MS_ERROR("ASModuleSystem::LoadDiscoveredModules: ERROR - Script module system not initialized");
         return false;
     }
-    
+
     if (!pakFile)
     {
-        printf("ASModuleSystem::LoadDiscoveredModules: ERROR - NULL pak file\n");
+        MS_ERROR("ASModuleSystem::LoadDiscoveredModules: ERROR - NULL pak file");
         return false;
     }
     
@@ -1144,14 +1153,15 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
     
     if (discoveredModules.empty())
     {
-        printf("ASModuleSystem::LoadDiscoveredModules: No modules discovered. Run DiscoverModulesInPak first.\n");
+        MS_INFO("ASModuleSystem::LoadDiscoveredModules: No modules discovered. Run DiscoverModulesInPak first.");
         return false;
     }
-    
-    printf("ASModuleSystem: Loading %d discovered modules...\n", (int)discoveredModules.size());
-    
+
+    MS_INFO("ASModuleSystem: Loading %d discovered modules...", (int)discoveredModules.size());
+
     bool allSuccess = true;
-    
+    std::vector<std::string> failedModules;  // Track which modules failed
+
     // Load each discovered module
     for (const ModuleInfo& moduleInfo : discoveredModules)
     {
@@ -1162,7 +1172,7 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
         // Debug: Check if source is available
         if (moduleInfo.source.empty())
         {
-            printf("ASModuleSystem: WARNING - Module '%s' has empty source! Using file path for context detection\n", 
+            MS_INFO("ASModuleSystem: WARNING - Module '%s' has empty source! Using file path for context detection",
                    moduleInfo.name.c_str());
         }
         else
@@ -1170,32 +1180,32 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
             // Debug: Show first 100 chars of source to verify pragma is present
             size_t previewLen = (std::min)(moduleInfo.source.length(), static_cast<size_t>(100));
             std::string preview = moduleInfo.source.substr(0, previewLen);
-            printf("ASModuleSystem: Module '%s' source preview: %s...\n", moduleInfo.name.c_str(), preview.c_str());
+            MS_INFO("ASModuleSystem: Module '%s' source preview: %s...", moduleInfo.name.c_str(), preview.c_str());
         }
         
         ScriptContext moduleContext = pContextMgr->DetermineContextFromContent(moduleInfo.source);
-        
-        printf("ASModuleSystem: Module '%s' context from content: %s\n", 
-               moduleInfo.name.c_str(), 
+
+        MS_INFO("ASModuleSystem: Module '%s' context from content: %s",
+               moduleInfo.name.c_str(),
                ASScriptContextUtil::ContextToString(moduleContext));
-        
+
         // If no context pragma found, try to determine from file path
         if (moduleContext == ScriptContext::UNKNOWN)
         {
             moduleContext = pContextMgr->DetermineContextFromPath(moduleInfo.filePath);
-            printf("ASModuleSystem: Module '%s' context from path: %s\n", 
-                   moduleInfo.name.c_str(), 
+            MS_INFO("ASModuleSystem: Module '%s' context from path: %s",
+                   moduleInfo.name.c_str(),
                    ASScriptContextUtil::ContextToString(moduleContext));
         }
-        
+
         // Default to SHARED if still unknown
         if (moduleContext == ScriptContext::UNKNOWN)
         {
-            printf("ASModuleSystem: Module '%s' defaulting to SHARED context\n", moduleInfo.name.c_str());
+            MS_INFO("ASModuleSystem: Module '%s' defaulting to SHARED context", moduleInfo.name.c_str());
             moduleContext = ScriptContext::SHARED;
         }
-        
-        printf("ASModuleSystem: Module '%s' final context: %s, current build: %s\n",
+
+        MS_INFO("ASModuleSystem: Module '%s' final context: %s, current build: %s",
                moduleInfo.name.c_str(),
                ASScriptContextUtil::ContextToString(moduleContext),
                ASScriptContextUtil::IsClientBuild() ? "CLIENT" : "SERVER");
@@ -1203,15 +1213,15 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
         // Check if this module can run in the current build context
         if (!ASScriptContextUtil::CanRunInCurrentContext(moduleContext))
         {
-            printf("ASModuleSystem: SKIPPING module '%s' - context %s not compatible with %s build\n", 
+            MS_INFO("ASModuleSystem: SKIPPING module '%s' - context %s not compatible with %s build",
                    moduleInfo.name.c_str(),
                    ASScriptContextUtil::ContextToString(moduleContext),
                    ASScriptContextUtil::IsClientBuild() ? "CLIENT" : "SERVER");
             continue;  // Skip this module
         }
-        
-        printf("ASModuleSystem: Loading module '%s' from %s (context: %s)\n", 
-               moduleInfo.name.c_str(), 
+
+        MS_INFO("ASModuleSystem: Loading module '%s' from %s (context: %s)",
+               moduleInfo.name.c_str(),
                moduleInfo.filePath.c_str(),
                ASScriptContextUtil::ContextToString(moduleContext));
         
@@ -1222,8 +1232,8 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
         
         if (LoadModuleFromMemory(moduleInfo.name, moduleInfo.processed, pakFile, options))
         {
-            printf("ASModuleSystem: Successfully loaded module '%s'\n", moduleInfo.name.c_str());
-            
+            MS_INFO("ASModuleSystem: Successfully loaded module '%s'", moduleInfo.name.c_str());
+
             // Call the module's initialization function
             if (moduleInfo.hasMainClass)
             {
@@ -1232,53 +1242,53 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
                 {
                     // Call the auto-generated initialization function
                     std::string initFuncName = moduleInfo.name + "_Initialize";
-                    printf("ASModuleSystem: Looking for initialization function '%s'\n", initFuncName.c_str());
+                    MS_INFO("ASModuleSystem: Looking for initialization function '%s'", initFuncName.c_str());
                     
                     asIScriptFunction* pInitFunc = pModule->GetFunctionByName(initFuncName.c_str());
                     if (pInitFunc)
                     {
-                        printf("ASModuleSystem: Found initialization function, creating context...\n");
+                        MS_INFO("ASModuleSystem: Found initialization function, creating context...");
                         asIScriptContext* pContext = m_pEngine->CreateContext();
                         if (pContext)
                         {
-                            printf("ASModuleSystem: Preparing to execute '%s'...\n", initFuncName.c_str());
+                            MS_INFO("ASModuleSystem: Preparing to execute '%s'...", initFuncName.c_str());
                             pContext->Prepare(pInitFunc);
                             int r = pContext->Execute();
-                            
+
                             if (r == asEXECUTION_FINISHED)
                             {
-                                printf("ASModuleSystem: Module '%s' initialized successfully\n", moduleInfo.name.c_str());
+                                MS_INFO("ASModuleSystem: Module '%s' initialized successfully", moduleInfo.name.c_str());
                             }
                             else if (r == asEXECUTION_EXCEPTION)
                             {
-                                printf("ASModuleSystem: WARNING - Module '%s' initialization threw exception: %s\n", 
+                                MS_ERROR("ASModuleSystem: WARNING - Module '%s' initialization threw exception: %s",
                                        moduleInfo.name.c_str(), pContext->GetExceptionString());
                             }
                             else
                             {
-                                printf("ASModuleSystem: WARNING - Module '%s' initialization failed: %d\n", moduleInfo.name.c_str(), r);
+                                MS_ERROR("ASModuleSystem: WARNING - Module '%s' initialization failed: %d", moduleInfo.name.c_str(), r);
                             }
-                            
+
                             pContext->Release();
                         }
                         else
                         {
-                            printf("ASModuleSystem: ERROR - Failed to create context for initialization\n");
+                            MS_ERROR("ASModuleSystem: ERROR - Failed to create context for initialization");
                         }
                     }
                     else
                     {
-                        printf("ASModuleSystem: WARNING - Module '%s' has no initialization function '%s'\n", 
+                        MS_INFO("ASModuleSystem: WARNING - Module '%s' has no initialization function '%s'",
                                moduleInfo.name.c_str(), initFuncName.c_str());
-                        
+
                         // List all functions in the module for debugging
-                        printf("ASModuleSystem: Functions in module '%s':\n", moduleInfo.name.c_str());
+                        MS_INFO("ASModuleSystem: Functions in module '%s':", moduleInfo.name.c_str());
                         for (asUINT i = 0; i < pModule->GetFunctionCount(); i++)
                         {
                             asIScriptFunction* pFunc = pModule->GetFunctionByIndex(i);
                             if (pFunc)
                             {
-                                printf("  - %s\n", pFunc->GetName());
+                                MS_INFO("  - %s", pFunc->GetName());
                             }
                         }
                     }
@@ -1287,18 +1297,24 @@ bool ASModuleSystem::LoadDiscoveredModules(CGameGroupFile* pakFile)
         }
         else
         {
-            printf("ASModuleSystem: ERROR - Failed to load module '%s'\n", moduleInfo.name.c_str());
+            MS_ERROR("ASModuleSystem: ERROR - Failed to load module '%s' from %s",
+                   moduleInfo.name.c_str(), moduleInfo.filePath.c_str());
+            failedModules.push_back(moduleInfo.name + " (" + moduleInfo.filePath + ")");
             allSuccess = false;
         }
     }
-    
+
     if (allSuccess)
     {
-        printf("ASModuleSystem: All discovered modules loaded successfully\n");
+        MS_INFO("ASModuleSystem: All discovered modules loaded successfully");
     }
     else
     {
-        printf("ASModuleSystem: Some modules failed to load\n");
+        MS_ERROR("ASModuleSystem: FAILED TO LOAD %d MODULE(S):", (int)failedModules.size());
+        for (const std::string& failed : failedModules)
+        {
+            MS_ERROR("  - %s", failed.c_str());
+        }
     }
     
     return allSuccess;

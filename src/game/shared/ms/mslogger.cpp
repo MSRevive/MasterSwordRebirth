@@ -6,6 +6,17 @@
 #include <SDL2/SDL_messagebox.h>
 #endif
 
+// Include engine ALERT support
+#ifdef VALVE_DLL
+    #include "hl/extdll.h"       // Must include before enginecallback.h (defines edict_t, enginefuncs_t, etc.)
+    #include "enginecallback.h"  // For server-side ALERT macro
+#else
+    // Forward declare client-side AlertMessage function
+    typedef enum { at_notice, at_console, at_aiconsole, at_warning, at_error, at_logged } ALERT_TYPE;
+    extern void AlertMessage(ALERT_TYPE atype, const char *szFmt, ...);
+    #define ALERT AlertMessage
+#endif
+
 #ifdef _WIN32
     #include <windows.h>
     #include <direct.h>
@@ -208,12 +219,12 @@ std::string MSLogger::FormatString(const char* fmt, va_list args) {
 
 void MSLogger::Error(Category cat, const char* fmt, ...) {
     if (!s_initialized) return;
-    
+
     va_list args;
     va_start(args, fmt);
     std::string msg = FormatString(fmt, args);
     va_end(args);
-    
+
     auto logger = GetLogger(cat);
     if (logger) {
 #if SPDLOG_AVAILABLE
@@ -222,7 +233,12 @@ void MSLogger::Error(Category cat, const char* fmt, ...) {
         logger->error(msg);
 #endif
     }
-    
+
+#ifndef VALVE_DLL
+    // Also send to engine console
+    ALERT(at_error, "[%s] %s\n", GetCategoryName(cat), msg.c_str());
+#endif
+
     // Also log to error file
     if (s_errorLogger) {
 #if SPDLOG_AVAILABLE
@@ -235,12 +251,12 @@ void MSLogger::Error(Category cat, const char* fmt, ...) {
 
 void MSLogger::Warn(Category cat, const char* fmt, ...) {
     if (!s_initialized) return;
-    
+
     va_list args;
     va_start(args, fmt);
     std::string msg = FormatString(fmt, args);
     va_end(args);
-    
+
     auto logger = GetLogger(cat);
     if (logger) {
 #if SPDLOG_AVAILABLE
@@ -249,6 +265,9 @@ void MSLogger::Warn(Category cat, const char* fmt, ...) {
         logger->warn(msg);
 #endif
     }
+
+    // Also send to engine console
+    ALERT(at_warning, "[%s] %s\n", GetCategoryName(cat), msg.c_str());
 }
 
 void MSLogger::Info(Category cat, const char* fmt, ...) {
@@ -267,6 +286,11 @@ void MSLogger::Info(Category cat, const char* fmt, ...) {
         logger->info(msg);
 #endif
     }
+
+#ifndef VALVE_DLL
+    // Also send to engine console
+    ALERT(at_warning, "[%s] %s\n", GetCategoryName(cat), msg.c_str());
+#endif
 }
 
 void MSLogger::Debug(Category cat, const char* fmt, ...) {
@@ -279,6 +303,7 @@ void MSLogger::Debug(Category cat, const char* fmt, ...) {
     
     auto logger = GetLogger(cat);
     if (logger) {
+
 #if SPDLOG_AVAILABLE
         logger->debug(msg);
 #else
@@ -469,6 +494,9 @@ void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 
 		MS_ERROR(Output.c_str());
 		MSLoggerPrint(Output.c_str());
+
+		// Also send to engine console
+		ALERT(at_error, "%s --> %s\n", pszLabel, Progress);
 	}
 	else
 	{
@@ -478,6 +506,9 @@ void MSErrorConsoleText(const char* pszLabel, const char* Progress)
         std::string errorMsg = pszLabel;
         errorMsg += " (Logs not yet initialized)";
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorMsg.c_str(), Progress, NULL);
+
+		// Try to send to engine console even if logger not initialized
+		ALERT(at_error, "%s --> %s (Logs not yet initialized)\n", pszLabel, Progress);
 #endif
 	}
 #endif

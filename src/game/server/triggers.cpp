@@ -1816,7 +1816,7 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	*/
 	//NOV2014_12 Thothie - wanted to axe this ent entirely, but just making MSC friendly instead.
 	// Updated to use AngelScript instead of MSScript for map transitions
-	#ifndef CLIENT_DLL
+	#ifdef VALVE_DLL
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{

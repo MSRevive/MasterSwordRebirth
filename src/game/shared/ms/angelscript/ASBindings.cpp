@@ -16,8 +16,8 @@
 #include "ASEngineEventManager.h"
 
 // Client-side bindings (only compiled for client DLL)
-#ifdef CLIENT_DLL
-#include "ASClientBindings.h"
+#ifndef VALVE_DLL
+#include "angelscript/ASClientBindings.h"
 #endif      
 
 // Include asbind20
@@ -254,7 +254,7 @@ bool ASBindings::RegisterAll(asIScriptEngine* pEngine)
     }
     
     // Step 12.5: Register client-side bindings (CLIENT_DLL only)
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     MS_ANGEL_INFO("[12.5/13] Registering Client-Side Bindings...");
     try
     {

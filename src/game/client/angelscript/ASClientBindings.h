@@ -9,16 +9,16 @@
 #define ASCLIENTBINDINGS_H
 #pragma once
 
-#ifdef CLIENT_DLL
-
 #include <angelscript.h>
 
 namespace ASClientBindings
 {
     // Main registration function - called from ASBindings::RegisterAll()
     void RegisterAll(asIScriptEngine* pEngine);
-    
+
+#ifndef VALVE_DLL  // Client-only functions
     // Individual registration functions
+    void RegisterClientEffect(asIScriptEngine* pEngine);  // Base class for client effects
     void RegisterLocalPlayer(asIScriptEngine* pEngine);
     void RegisterClientEntity(asIScriptEngine* pEngine);
     void RegisterTempEntity(asIScriptEngine* pEngine);
@@ -28,9 +28,9 @@ namespace ASClientBindings
     void RegisterScreenFade(asIScriptEngine* pEngine);
     void RegisterClientSound(asIScriptEngine* pEngine);
     void RegisterUtilityFunctions(asIScriptEngine* pEngine);
+    void RegisterVGUI(asIScriptEngine* pEngine);
+#endif // !VALVE_DLL
 }
-
-#endif // CLIENT_DLL
 
 #endif // ASCLIENTBINDINGS_H
 

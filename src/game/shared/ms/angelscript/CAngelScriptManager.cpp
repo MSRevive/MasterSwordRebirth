@@ -86,23 +86,33 @@ void CAngelScriptManager::Shutdown()
 void ASMessageCallback(const asSMessageInfo* msg, void* param)
 {
     // Use MSLogger for proper categorized logging
-    if (msg->type == asMSGTYPE_ERROR) 
+    if (msg->type == asMSGTYPE_ERROR)
     {
-        MS_ANGEL_ERROR("%s (%d, %d): %s", 
-                       msg->section ? msg->section : "Unknown", 
+        // Log to both ANGELSCRIPT and GENERAL logs for visibility
+        MS_ANGEL_ERROR("%s (%d, %d): %s",
+                       msg->section ? msg->section : "Unknown",
                        msg->row, msg->col, msg->message);
+        MS_ERROR("[COMPILATION ERROR] %s (%d, %d): %s",
+                 msg->section ? msg->section : "Unknown",
+                 msg->row, msg->col, msg->message);
     }
-    else if (msg->type == asMSGTYPE_WARNING) 
+    else if (msg->type == asMSGTYPE_WARNING)
     {
-        MS_ANGEL_INFO("WARNING: %s (%d, %d): %s", 
-                      msg->section ? msg->section : "Unknown", 
+        MS_ANGEL_INFO("WARNING: %s (%d, %d): %s",
+                      msg->section ? msg->section : "Unknown",
                       msg->row, msg->col, msg->message);
+        MS_INFO("[COMPILATION WARNING] %s (%d, %d): %s",
+                msg->section ? msg->section : "Unknown",
+                msg->row, msg->col, msg->message);
     }
     else
     {
-        MS_ANGEL_INFO("%s (%d, %d): %s", 
-                      msg->section ? msg->section : "Unknown", 
+        MS_ANGEL_INFO("%s (%d, %d): %s",
+                      msg->section ? msg->section : "Unknown",
                       msg->row, msg->col, msg->message);
+        MS_INFO("[COMPILATION INFO] %s (%d, %d): %s",
+                msg->section ? msg->section : "Unknown",
+                msg->row, msg->col, msg->message);
     }
 }
 

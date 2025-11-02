@@ -28,7 +28,7 @@ typedef float vec_t;
 #include "mslogger.h"
 
 // Include real Master Sword entity classes first
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     // Client-side includes
     #include "hud.h"
     #include "cl_util.h"
@@ -59,7 +59,7 @@ typedef float vec_t;
 // All engine integration now uses ASEngineProvider directly.
 
 // Engine globals - declared globally to avoid namespace issues
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
 extern globalvars_t *gpGlobals;
 extern enginefuncs_t g_engfuncs;
 #endif
@@ -67,8 +67,10 @@ extern enginefuncs_t g_engfuncs;
 namespace ASEntityBindings
 {
     // Forward declarations for casting functions
+#ifdef VALVE_DLL
     CBaseEntity* PlayerToEntity_Cast(CBasePlayer* pPlayer);
     CBasePlayer* EntityToPlayer_Cast(CBaseEntity* pEntity);
+#endif
     template<class T> T* Template_Cast(void* pEntity);
     
     // Reference counting functions for AngelScript reference types
@@ -79,12 +81,13 @@ namespace ASEntityBindings
         MS_ANGEL_DEBUG("AddRef_CBaseEntity called for entity %p", entity);
     }
     
-    void Release_CBaseEntity(CBaseEntity* entity) 
+    void Release_CBaseEntity(CBaseEntity* entity)
     {
         // No-op: Engine manages entity lifetime
         MS_ANGEL_DEBUG("Release_CBaseEntity called for entity %p", entity);
     }
-    
+
+#ifdef VALVE_DLL  // CBasePlayer bindings are server-only
     void AddRef_CBasePlayer(CBasePlayer* player)
     {
         // No-op: Engine manages player lifetime
@@ -1134,11 +1137,13 @@ namespace ASEntityBindings
         
         MS_ANGEL_ERROR("SendPlayerMessage: Player '%s' not found", playerName.c_str());
     }
-    
-    
+#endif  // VALVE_DLL (end of CBasePlayer bindings from line 90)
+
+
+#ifdef VALVE_DLL  // Player-specific helpers - server only
     // Global engine pointer for wrapper functions
     static asIScriptEngine* g_pStaticEngine = nullptr;
-    
+
     // Wrapper function that doesn't need asIContext
     CScriptArray* AS_GetAllPlayersWrapper()
     {
@@ -1148,11 +1153,13 @@ namespace ASEntityBindings
         }
         return AS_GetAllPlayers(g_pStaticEngine);
     }
-    
+#endif  // VALVE_DLL (end of player-specific helpers from line 1143)
+
     void RegisterCBaseEntity(asIScriptEngine* pEngine)
     {
+#ifdef VALVE_DLL  // CBaseEntity registration requires full definition - server only
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Registering CBaseEntity type with asbind20...");
         
         // Register CBaseEntity type with asbind20
@@ -1228,14 +1235,18 @@ namespace ASEntityBindings
                 }
 #endif
             });
-        
+
         MS_ANGEL_INFO("CBaseEntity registration complete");
+#else  // Client stub
+        // CBaseEntity registration is skipped on client
+#endif  // VALVE_DLL
     }
 
+#ifdef VALVE_DLL  // CBasePlayer registration - server only
     void RegisterCBasePlayer(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Registering comprehensive CBasePlayer type with asbind20...");
         
         // Comprehensive CBasePlayer registration using enhanced asbind20 patterns
@@ -1508,16 +1519,18 @@ namespace ASEntityBindings
             // Inherit from CBaseEntity (called AFTER registering CBasePlayer's own methods
             // so that overrides like IsAlive() are registered first)
             .base<CBaseEntity>();
-        
+
         MS_ANGEL_INFO("Comprehensive CBasePlayer registration complete with enhanced asbind20 patterns");
     }
+#endif  // VALVE_DLL
 
 
 
     void RegisterEntityTypes(asIScriptEngine* pEngine)
     {
+#ifdef VALVE_DLL  // Entity type registration is server-only
         if (!pEngine) return;
-        
+
         // Store engine for wrapper functions
         g_pStaticEngine = pEngine;
         
@@ -1581,14 +1594,17 @@ namespace ASEntityBindings
         pEngine->RegisterEnumValue("ScriptMode", "Both", static_cast<int>(ScriptMode::Both));
         
         // Note: MessageColor enum is registered earlier (before CBasePlayer registration)
-        
+
+
         MS_ANGEL_INFO("[ASEntityBindings] Entity types and constants registration complete");
+#endif  // VALVE_DLL
     }
-    
+
     void RegisterGlobalFunctions(asIScriptEngine* pEngine)
     {
+#ifdef VALVE_DLL  // Global functions are server-only
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Registering global entity functions with asbind20...");
         
         // Register all global functions with asbind20
@@ -1636,16 +1652,17 @@ namespace ASEntityBindings
                 +[](const std::string& scriptName, const Vector& position, CScriptArray* params) -> CBasePlayerItem* {
                     return AS_SpawnItem(scriptName, position, params);
                 });
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Global entity functions registered successfully");
+#endif  // VALVE_DLL
     }
-    
+
     // Test function to validate entity bindings are working
     void AS_TestEntityBindings()
     {
         MS_ANGEL_INFO("[ASEntityBindings] Testing entity bindings...");
         
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
         // Test player access
         CBasePlayer* pTestPlayer = AS_PlayerByIndex(1);
         if (pTestPlayer)
@@ -1680,8 +1697,9 @@ namespace ASEntityBindings
     
     void RegisterAll(asIScriptEngine* pEngine)
     {
+#ifdef VALVE_DLL  // Entity bindings registration is server-only
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Starting entity bindings registration...");
         
         // Note: Core types (Vector3, Color, etc.) are registered by ASBindings.cpp
@@ -1698,7 +1716,8 @@ namespace ASEntityBindings
         
         // Test the entity bindings to ensure they work
         AS_TestEntityBindings();
-        
+
         MS_ANGEL_INFO("[ASEntityBindings] Entity bindings registration complete");
+#endif  // VALVE_DLL
     }
 }

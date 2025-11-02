@@ -139,38 +139,41 @@ bool CScriptModule::ProcessModuleFile(const std::string& filePath, const std::st
     
     std::string moduleName;
     std::string processedSource;
-    
+    std::string namespaceName;
+
     // Try to preprocess the source to extract module information
-    if (PreprocessModuleSource(source, processedSource, moduleName))
+    if (PreprocessModuleSource(source, processedSource, moduleName, namespaceName))
     {
-        printf("CScriptModule: Successfully preprocessed module '%s' from file: %s\n", 
+        printf("CScriptModule: Successfully preprocessed module '%s' from file: %s\n",
                moduleName.c_str(), filePath.c_str());
-        
+
         // Check for duplicate module names
         if (HasModule(moduleName))
         {
-            printf("CScriptModule: ERROR - Duplicate module name '%s' found in file: %s\n", 
+            printf("CScriptModule: ERROR - Duplicate module name '%s' found in file: %s\n",
                    moduleName.c_str(), filePath.c_str());
             printf("CScriptModule: Previous module with same name already exists\n");
             return false;
         }
-        
+
         // Validate module name follows proper conventions
         if (moduleName.length() > 64)
         {
-            printf("CScriptModule: ERROR - Module name too long (%zu chars): '%s'\n", 
+            printf("CScriptModule: ERROR - Module name too long (%zu chars): '%s'\n",
                    moduleName.length(), moduleName.c_str());
             return false;
         }
-        
+
         // Create module info with comprehensive validation
         ModuleInfo moduleInfo(moduleName, filePath);
         moduleInfo.source = source;
         moduleInfo.processed = processedSource;
-        
+        moduleInfo.namespaceName = namespaceName;  // Save the namespace
+
         // Validate that the module has an Init() function
         size_t moduleStart;
-        if (ParseModuleDeclaration(source, moduleName, moduleStart))
+        std::string dummyNamespace;
+        if (ParseModuleDeclaration(source, moduleName, moduleStart, dummyNamespace))
         {
             // Perform detailed structure validation
             if (!ValidateModuleStructure(source, moduleStart, moduleInfo.hasMainClass))
@@ -229,7 +232,7 @@ bool CScriptModule::ProcessModuleFile(const std::string& filePath, const std::st
     }
 }
 
-bool CScriptModule::PreprocessModuleSource(const std::string& source, std::string& output, std::string& moduleName)
+bool CScriptModule::PreprocessModuleSource(const std::string& source, std::string& output, std::string& moduleName, std::string& namespaceName)
 {
 #ifdef SCRIPTPACK_TOOL
     printf("CScriptModule: Starting preprocessing of source (%zu bytes)\n", source.length());
@@ -243,21 +246,26 @@ bool CScriptModule::PreprocessModuleSource(const std::string& source, std::strin
 #endif
         return false;
     }
-    
+
     size_t moduleStart;
-    
+
     // Look for 'module ModuleName {' declaration using enhanced parsing
-    if (!ParseModuleDeclaration(source, moduleName, moduleStart))
+    if (!ParseModuleDeclaration(source, moduleName, moduleStart, namespaceName))
     {
 #ifdef SCRIPTPACK_TOOL
         printf("CScriptModule: No valid module declaration found during preprocessing\n");
 #endif
         return false; // No module declaration found
     }
-    
+
 #ifndef SCRIPTPACK_TOOL
-    printf("CScriptModule: Found module '%s' at position %zu, starting transformation\n", 
+    printf("CScriptModule: Found module '%s' at position %zu",
            moduleName.c_str(), moduleStart);
+    if (!namespaceName.empty())
+    {
+        printf(" in namespace '%s'", namespaceName.c_str());
+    }
+    printf(", starting transformation\n");
 #endif
     
     // Validate module name one more time
@@ -300,13 +308,13 @@ bool CScriptModule::PreprocessModuleSource(const std::string& source, std::strin
     // Add module wrapper code
     try
     {
-        std::string wrapper = GenerateModuleWrapper(moduleName);
+        std::string wrapper = GenerateModuleWrapper(moduleName, namespaceName);
         if (wrapper.empty())
         {
             printf("CScriptModule: ERROR - Failed to generate module wrapper\n");
             return false;
         }
-        
+
         output += "\n" + wrapper;
         printf("CScriptModule: Added module wrapper code (%zu bytes total)\n", output.length());
     }
@@ -328,13 +336,16 @@ bool CScriptModule::PreprocessModuleSource(const std::string& source, std::strin
 //==============================================================================
 // Module Parsing
 //==============================================================================
-bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::string& moduleName, size_t& moduleStart)
+bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::string& moduleName, size_t& moduleStart, std::string& namespaceName)
 {
     // Enhanced AngelScript-style parsing for 'module ModuleName {' pattern
     const char* sourceData = source.c_str();
     size_t sourceLength = source.length();
     size_t pos = 0;
-    
+
+    // Track namespace nesting
+    std::vector<std::string> namespaceStack;
+
     while (pos < sourceLength)
     {
         // Skip whitespace and comments using AngelScript-style approach
@@ -348,27 +359,64 @@ bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::strin
             pos = newPos;
             continue;
         }
-        
-        // Check for 'module' keyword using enhanced token recognition
+
+        // Check for 'namespace' keyword to track nesting
         size_t tokenLength;
+        if (IsKeywordAt(sourceData, sourceLength, pos, "namespace", tokenLength))
+        {
+            pos += tokenLength;
+            pos = SkipWhitespaceAndComments(sourceData, sourceLength, pos);
+
+            // Parse namespace name
+            size_t identifierLength;
+            if (pos < sourceLength && IsIdentifierAt(sourceData, sourceLength, pos, identifierLength))
+            {
+                std::string nsName = source.substr(pos, identifierLength);
+                pos += identifierLength;
+                pos = SkipWhitespaceAndComments(sourceData, sourceLength, pos);
+
+                // Look for opening brace
+                if (pos < sourceLength && sourceData[pos] == '{')
+                {
+                    namespaceStack.push_back(nsName);
+                    printf("CScriptModule: Entering namespace '%s'\n", nsName.c_str());
+                    pos++;
+                    continue;
+                }
+            }
+        }
+
+        // Check for closing braces (namespace end)
+        if (sourceData[pos] == '}' && !namespaceStack.empty())
+        {
+            // This could be a namespace closing brace
+            // For simplicity, we pop from the namespace stack
+            // (More robust parsing would track brace pairs)
+            printf("CScriptModule: Exiting namespace '%s'\n", namespaceStack.back().c_str());
+            namespaceStack.pop_back();
+            pos++;
+            continue;
+        }
+
+        // Check for 'module' keyword using enhanced token recognition
         if (IsKeywordAt(sourceData, sourceLength, pos, "module", tokenLength))
         {
             // Debug: found module keyword (disabled for scriptpack)
-            
+
             // Save the start position (beginning of 'module' keyword)
             size_t moduleKeywordStart = pos;
             pos += tokenLength;
-            
+
             // Skip whitespace after 'module' keyword
             pos = SkipWhitespaceAndComments(sourceData, sourceLength, pos);
-            
+
             // Parse module name using AngelScript-style identifier parsing
             size_t identifierLength;
             if (pos < sourceLength && IsIdentifierAt(sourceData, sourceLength, pos, identifierLength))
             {
                 moduleName = source.substr(pos, identifierLength);
                 printf("CScriptModule: Extracted module name: '%s'\n", moduleName.c_str());
-                
+
                 // Validate that it's a proper identifier
                 if (!IsValidIdentifier(moduleName))
                 {
@@ -376,25 +424,41 @@ bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::strin
                     pos++;
                     continue;
                 }
-                
+
                 pos += identifierLength;
-                
+
                 // Skip whitespace after module name
                 pos = SkipWhitespaceAndComments(sourceData, sourceLength, pos);
-                
+
                 // Look for opening brace
                 if (pos < sourceLength && sourceData[pos] == '{')
                 {
                     moduleStart = moduleKeywordStart;
-                    printf("CScriptModule: Successfully parsed module declaration: '%s' at position %zu\n", 
+
+                    // Build the full namespace path
+                    if (!namespaceStack.empty())
+                    {
+                        for (size_t i = 0; i < namespaceStack.size(); i++)
+                        {
+                            if (i > 0) namespaceName += "::";
+                            namespaceName += namespaceStack[i];
+                        }
+                    }
+
+                    printf("CScriptModule: Successfully parsed module declaration: '%s' at position %zu",
                            moduleName.c_str(), moduleStart);
+                    if (!namespaceName.empty())
+                    {
+                        printf(" in namespace '%s'", namespaceName.c_str());
+                    }
+                    printf("\n");
                     return true;
                 }
                 else
                 {
                     printf("CScriptModule: ERROR - Expected '{' after module name '%s', found '%c' at position %zu\n",
-                           moduleName.c_str(), 
-                           pos < sourceLength ? sourceData[pos] : '?', 
+                           moduleName.c_str(),
+                           pos < sourceLength ? sourceData[pos] : '?',
                            pos);
                 }
             }
@@ -403,11 +467,11 @@ bool CScriptModule::ParseModuleDeclaration(const std::string& source, std::strin
                 printf("CScriptModule: ERROR - Expected identifier after 'module' keyword at position %zu\n", pos);
             }
         }
-        
+
         // Move to next character if no valid module declaration found
         pos++;
     }
-    
+
 #ifdef SCRIPTPACK_TOOL
     printf("CScriptModule: No module declaration found in source\n");
 #endif
@@ -516,12 +580,25 @@ std::string CScriptModule::TransformModuleToClass(const std::string& source, con
     return result;
 }
 
-std::string CScriptModule::GenerateModuleWrapper(const std::string& moduleName)
+std::string CScriptModule::GenerateModuleWrapper(const std::string& moduleName, const std::string& namespaceName)
 {
     std::ostringstream wrapper;
-    
-    wrapper << "\n// Auto-generated module wrapper for " << moduleName << "\n";
-    wrapper << moduleName << "@ g_" << moduleName << " = null;\n";
+
+    // Build the full qualified class name
+    std::string qualifiedName = moduleName;
+    if (!namespaceName.empty())
+    {
+        qualifiedName = namespaceName + "::" + moduleName;
+    }
+
+    wrapper << "\n// Auto-generated module wrapper for " << moduleName;
+    if (!namespaceName.empty())
+    {
+        wrapper << " (in namespace " << namespaceName << ")";
+    }
+    wrapper << "\n";
+
+    wrapper << qualifiedName << "@ g_" << moduleName << " = null;\n";
     wrapper << "\n";
     wrapper << "void " << moduleName << "_Initialize()\n";
     wrapper << "{\n";
@@ -529,7 +606,7 @@ std::string CScriptModule::GenerateModuleWrapper(const std::string& moduleName)
     wrapper << "    if (g_" << moduleName << " is null)\n";
     wrapper << "    {\n";
     wrapper << "        LogMessage(\"[MODULE] Creating " << moduleName << " instance...\");\n";
-    wrapper << "        @g_" << moduleName << " = " << moduleName << "();\n";
+    wrapper << "        @g_" << moduleName << " = " << qualifiedName << "();\n";
     wrapper << "        LogMessage(\"[MODULE] " << moduleName << " instance created successfully\");\n";
     wrapper << "        if (g_" << moduleName << " !is null)\n";
     wrapper << "        {\n";
@@ -551,7 +628,7 @@ std::string CScriptModule::GenerateModuleWrapper(const std::string& moduleName)
     wrapper << "    LogMessage(\"[MODULE] " << moduleName << "_Shutdown() called\");\n";
     wrapper << "    @g_" << moduleName << " = null;\n";
     wrapper << "}\n";
-    
+
     return wrapper.str();
 }
 

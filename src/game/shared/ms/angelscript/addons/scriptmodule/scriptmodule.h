@@ -39,9 +39,10 @@ struct ModuleInfo
     std::string source;         // Original source code
     std::string processed;      // Processed source code (module -> class)
     bool hasMainClass;         // Whether the module has a main class matching module name
-    
+    std::string namespaceName;  // Namespace containing the module (empty if global)
+
     ModuleInfo() : hasMainClass(false) {}
-    ModuleInfo(const std::string& moduleName, const std::string& path) 
+    ModuleInfo(const std::string& moduleName, const std::string& path)
         : name(moduleName), filePath(path), hasMainClass(false) {}
 };
 
@@ -62,7 +63,7 @@ public:
     bool HasModule(const std::string& moduleName) const;
     
     // Module preprocessing
-    bool PreprocessModuleSource(const std::string& source, std::string& output, std::string& moduleName);
+    bool PreprocessModuleSource(const std::string& source, std::string& output, std::string& moduleName, std::string& namespaceName);
     bool ProcessModuleFile(const std::string& filePath, const std::string& source);
     
     // Clear discovered modules
@@ -74,10 +75,10 @@ public:
     
 private:
     // Internal helpers
-    bool ParseModuleDeclaration(const std::string& source, std::string& moduleName, size_t& moduleStart);
+    bool ParseModuleDeclaration(const std::string& source, std::string& moduleName, size_t& moduleStart, std::string& namespaceName);
     bool ValidateModuleStructure(const std::string& source, size_t moduleStart, bool& hasMainClass);
     std::string TransformModuleToClass(const std::string& source, const std::string& moduleName, size_t moduleStart);
-    std::string GenerateModuleWrapper(const std::string& moduleName);
+    std::string GenerateModuleWrapper(const std::string& moduleName, const std::string& namespaceName);
     
     // Utility functions
     std::string TrimWhitespace(const std::string& str) const;

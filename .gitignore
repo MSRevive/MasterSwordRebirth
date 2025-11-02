@@ -208,3 +208,5 @@ bins/release/*
 /.serena
 /.claude
 /memory
+MSCScripts
+nul

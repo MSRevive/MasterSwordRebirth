@@ -27,10 +27,11 @@ typedef float vec_t;
 #include "mslogger.h"
 
 // Include Master Sword entity classes
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     // Client-side includes
     #include "hud.h"
     #include "cl_util.h"
+    #include "cl_entity.h"
 #else
     // Server-side includes (VALVE_DLL is defined for server builds)
     #include "extdll.h"
@@ -48,18 +49,19 @@ typedef float vec_t;
 #include "ASMonsterBindings.h"
 
 // Engine globals
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
 extern globalvars_t *gpGlobals;
 extern enginefuncs_t g_engfuncs;
 #endif
 
 namespace ASMonsterBindings
 {
+#ifdef VALVE_DLL  // All monster bindings are server-only
     // ========================================================================
     // Reference Counting Functions for AngelScript Reference Types
     // Note: These are no-ops since entities are managed by the game engine
     // ========================================================================
-    
+
     void AddRef_CBaseMonster(CBaseMonster* monster)
     {
         // No-op: Engine manages entity lifetime
@@ -688,14 +690,14 @@ namespace ASMonsterBindings
     void RegisterCBaseMonster(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASMonsterBindings] Registering CBaseMonster type with asbind20...");
-        
+
         asbind20::ref_class<CBaseMonster>(pEngine, "CBaseMonster")
             // Reference counting behaviors
             .addref(&AddRef_CBaseMonster)
             .release(&Release_CBaseMonster)
-            
+
             // Properties (using asbind20 .property() for direct member access)
             .property("float m_flFieldOfView", &CBaseMonster::m_flFieldOfView)
             .property("float m_flWaitFinished", &CBaseMonster::m_flWaitFinished)
@@ -715,7 +717,7 @@ namespace ASMonsterBindings
             .method("void set_TargetEnt(CBaseEntity@)", AS_CBaseMonster_set_TargetEnt)
             .method("Vector3 get_EnemyLKP() const", AS_CBaseMonster_get_EnemyLKP)
             .method("void set_EnemyLKP(const Vector3 &in)", AS_CBaseMonster_set_EnemyLKP)
-            
+
             // Core Methods
             .method("int BloodColor()", &CBaseMonster::BloodColor)
             .method("void Look(int)", AS_CBaseMonster_Look)
@@ -737,7 +739,7 @@ namespace ASMonsterBindings
             .method("float ChangeYaw(int)", AS_CBaseMonster_ChangeYaw)
             .method("bool FacingIdeal()", AS_CBaseMonster_FacingIdeal)
             .method("Vector3 BodyTarget(const Vector3 &in)", AS_CBaseMonster_BodyTarget)
-            
+
             // Condition and Memory Methods (inlined, so call directly)
             .method("void SetConditions(int)", &CBaseMonster::SetConditions)
             .method("void ClearConditions(int)", &CBaseMonster::ClearConditions)
@@ -747,34 +749,34 @@ namespace ASMonsterBindings
             .method("void Forget(int)", &CBaseMonster::Forget)
             .method("bool HasMemory(int)", &CBaseMonster::HasMemory)
             .method("bool HasAllMemories(int)", &CBaseMonster::HasAllMemories)
-            
+
             // Task Methods (inlined, so call directly)
             .method("void TaskComplete()", &CBaseMonster::TaskComplete)
             .method("void TaskFail()", &CBaseMonster::TaskFail)
             .method("void TaskBegin()", &CBaseMonster::TaskBegin)
             .method("bool IsMoving()", &CBaseMonster::IsMoving)
-            
+
             // Stop method
             .method("void Stop()", &CBaseMonster::Stop)
-            
+
             // Inherit from CBaseEntity (called AFTER registering CBaseMonster's own methods
             // so that overrides like IsAlive() are registered first)
             .base<CBaseEntity>();
-        
+
         MS_ANGEL_INFO("[ASMonsterBindings] CBaseMonster registration complete");
     }
     
     void RegisterCMSMonster(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASMonsterBindings] Registering CMSMonster type with asbind20...");
-        
+
         asbind20::ref_class<CMSMonster>(pEngine, "CMSMonster")
             // Reference counting behaviors
             .addref(&AddRef_CMSMonster)
             .release(&Release_CMSMonster)
-            
+
             // Properties (using asbind20 .property() for direct member access)
             .property("float m_HP", &CMSMonster::m_HP)
             .property("float m_MP", &CMSMonster::m_MP)
@@ -797,43 +799,43 @@ namespace ASMonsterBindings
             .method("void set_Title(const string &in)", AS_CMSMonster_set_Title)
             .method("string get_ScriptName()", AS_CMSMonster_get_ScriptName)
             .method("void set_ScriptName(const string &in)", AS_CMSMonster_set_ScriptName)
-            
+
             // Lifecycle Methods
             .method("bool IsMSMonster()", &CMSMonster::IsMSMonster)
             .method("float MaxHP()", &CMSMonster::MaxHP)
             .method("float MaxMP()", &CMSMonster::MaxMP)
             .method("bool IsAlive()", &CMSMonster::IsAlive)
-            
+
             // Economy Methods
             .method("int GiveGold(int, bool)", AS_CMSMonster_GiveGold)
             .method("int GiveGold(int)", +[](CMSMonster* m, int amt) { return AS_CMSMonster_GiveGold(m, amt, true); })
             .method("float GiveHP(float)", AS_CMSMonster_GiveHP)
             .method("float GiveMP(float)", AS_CMSMonster_GiveMP)
-            
+
             // Stats Methods
             .method("int GetNatStat(int)", AS_CMSMonster_GetNatStat)
             .method("int GetSkillStat(int)", AS_CMSMonster_GetSkillStat)
             .method("int GetSkillStatCount()", AS_CMSMonster_GetSkillStatCount)
-            
+
             // Movement Methods
             .method("float WalkSpeed()", AS_CMSMonster_WalkSpeed)
             .method("float RunSpeed()", AS_CMSMonster_RunSpeed)
             .method("bool IsFlying()", &CMSMonster::IsFlying)
-            
+
             // Combat Methods
             .method("bool IsActing()", AS_CMSMonster_IsActing)
             .method("bool IsShielding()", AS_CMSMonster_IsShielding)
             .method("void CancelAttack()", AS_CMSMonster_CancelAttack)
-            
+
             // Misc Methods
             .method("float Weight()", AS_CMSMonster_Weight)
             .method("void SetSpeed()", AS_CMSMonster_SetSpeed)
-            
+
             // Inherit from CBaseMonster (called AFTER registering CMSMonster's own methods
             // so that overrides like IsAlive() are registered first)
             // NOTE: This automatically inherits all CBaseMonster AND CBaseEntity methods!
             .base<CBaseMonster>();
-        
+
         MS_ANGEL_INFO("[ASMonsterBindings] CMSMonster registration complete");
     }
     
@@ -855,5 +857,8 @@ namespace ASMonsterBindings
         
         MS_ANGEL_INFO("[ASMonsterBindings] Monster bindings registration complete");
     }
+#else  // Client stubs
+    void RegisterAll(asIScriptEngine* pEngine) { /* No-op on client */ }
+#endif  // VALVE_DLL
 }
 

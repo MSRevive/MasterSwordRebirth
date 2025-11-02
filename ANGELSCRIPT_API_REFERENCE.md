@@ -1231,7 +1231,7 @@ void CastMonsterTypes() {
 
 ### Class Hierarchy
 
-Client classes follow two inheritance hierarchies:
+Client classes follow three main categories:
 
 **Entity Hierarchy:**
 ```
@@ -1247,8 +1247,14 @@ CClientEffect (base)
   └── CBeam
 ```
 
+**Item Classes:**
+```
+CGenericItem (standalone, read-only item data)
+```
+
 - **CLocalPlayer** inherits all entity query methods from **CClientEntity** (GetOrigin, GetAngles, GetVelocity, etc.)
 - All effect classes inherit the `IsValid()` method from **CClientEffect**
+- **CGenericItem** provides read-only access to item data for UI/display purposes
 
 ### CClientEffect (Base Class)
 **Scope**: Client
@@ -1661,6 +1667,493 @@ void CheckGround() {
 
 ---
 
+### CGenericItem
+**Scope**: Client
+
+Read-only access to item properties for client-side UI, display, and visualization. This class provides safe access to item data without exposing game logic.
+
+**Note**: CGenericItem provides read-only methods only. All game logic (use, drop, equip, etc.) must be handled server-side.
+
+```angelscript
+class CGenericItem {
+    // Basic Properties
+    string GetItemName() const;        // Internal item name (e.g., "dagger")
+    int GetItemID() const;             // Unique item instance ID
+    int GetQuality() const;            // Current item quality/durability
+    int GetMaxQuality() const;         // Maximum quality value
+    int GetQuantity() const;           // Stack quantity (for groupable items)
+    int GetMaxQuantity() const;        // Maximum stack size
+    float GetWeight() const;           // Item weight
+    uint GetValue() const;             // Gold value
+    int GetLocation() const;           // Item location (ITEMPOS_* constants)
+    int GetHand() const;               // Which hand (LEFT_HAND/RIGHT_HAND)
+
+    // Visual/Rendering Properties
+    string GetViewModel() const;       // View model path (1st person)
+    string GetPlayerHoldModel() const; // Player hold model (3rd person)
+    string GetAnimExtension() const;   // Animation extension
+    string GetAnimExtensionLegs() const; // Leg animation extension
+    int GetRenderMode() const;         // Render mode (kRender*)
+    int GetRenderAmount() const;       // Render amount (0-255)
+    int GetRenderFx() const;           // Render effects
+    int GetSkin() const;               // Model skin index
+    int GetViewModelAnim() const;      // Current view model animation
+    float GetViewModelAnimSpeed() const; // View model animation speed
+
+    // Item Type Checks
+    bool IsWorn() const;               // Is currently worn/equipped
+    bool IsArmor() const;              // Is armor piece
+    bool IsWearable() const;           // Can be worn
+    bool IsShield() const;             // Is a shield
+    bool IsGroupable() const;          // Can stack with others
+    bool IsContainer() const;          // Can hold other items
+    bool IsProjectile() const;         // Is a projectile/ammo
+    bool IsDrinkable() const;          // Can be consumed as drink
+    bool IsPerishable() const;         // Has expiration/decay
+    bool IsSpell() const;              // Is a spell scroll/tome
+
+    // Container Methods (for container items)
+    int Container_ItemCount() const;   // Number of items in container
+    float Container_Weight() const;    // Total weight of contents
+    bool Container_IsOpen() const;     // Is container open
+    float Volume() const;              // Item volume
+
+    // Attack Information
+    int GetAttackCount() const;        // Number of attack modes
+}
+```
+
+**Location Constants**:
+```angelscript
+const int ITEMPOS_NONE = 0;
+const int ITEMPOS_HANDS = 1;
+const int ITEMPOS_BODY = 2;
+```
+
+**Hand Constants**:
+```angelscript
+const int LEFT_HAND = 0;
+const int RIGHT_HAND = 1;
+```
+
+**Example - Displaying Item Info in UI**:
+```angelscript
+void DisplayItemTooltip(CGenericItem@ pItem) {
+    if (pItem is null) return;
+
+    string tooltip = "=== " + pItem.GetItemName() + " ===\n";
+    tooltip += "Value: " + pItem.GetValue() + " gold\n";
+    tooltip += "Weight: " + pItem.GetWeight() + " kg\n";
+    tooltip += "Quality: " + pItem.GetQuality() + "/" + pItem.GetMaxQuality() + "\n";
+
+    // Check item type
+    if (pItem.IsWearable()) {
+        tooltip += "Type: Wearable\n";
+        tooltip += "Equipped: " + (pItem.IsWorn() ? "Yes" : "No") + "\n";
+    }
+    if (pItem.IsContainer()) {
+        tooltip += "Container: " + pItem.Container_ItemCount() + " items\n";
+        tooltip += "Total Weight: " + pItem.Container_Weight() + " kg\n";
+    }
+    if (pItem.IsGroupable()) {
+        tooltip += "Quantity: " + pItem.GetQuantity() + "/" + pItem.GetMaxQuantity() + "\n";
+    }
+
+    MS_ANGEL_INFO(tooltip);
+}
+```
+
+**Example - Filtering Items by Type**:
+```angelscript
+void ShowWeapons(array<CGenericItem@>@ items) {
+    for (uint i = 0; i < items.length(); i++) {
+        CGenericItem@ pItem = items[i];
+
+        // Check if item has attack capability
+        if (pItem.GetAttackCount() > 0) {
+            MS_ANGEL_INFO("Weapon: " + pItem.GetItemName());
+            MS_ANGEL_INFO("  Attacks: " + pItem.GetAttackCount());
+            MS_ANGEL_INFO("  Hand: " + (pItem.GetHand() == LEFT_HAND ? "Left" : "Right"));
+        }
+    }
+}
+```
+
+**Example - Rendering Information**:
+```angelscript
+void CheckItemVisuals(CGenericItem@ pItem) {
+    if (pItem is null) return;
+
+    MS_ANGEL_INFO("View Model: " + pItem.GetViewModel());
+    MS_ANGEL_INFO("World Model: " + pItem.GetPlayerHoldModel());
+    MS_ANGEL_INFO("Render Mode: " + pItem.GetRenderMode());
+    MS_ANGEL_INFO("Skin: " + pItem.GetSkin());
+
+    // Check transparency
+    if (pItem.GetRenderMode() == kRenderTransAlpha) {
+        int alpha = pItem.GetRenderAmount();
+        MS_ANGEL_INFO("Item is " + (alpha < 128 ? "mostly transparent" : "mostly opaque"));
+    }
+}
+```
+
+---
+
+## VGUI System (Client UI)
+**Scope**: Client
+
+The VGUI (Valve GUI) system allows client-side scripts to create custom user interfaces with interactive elements like buttons, labels, text fields, and frames.
+
+### Class Hierarchy
+
+```
+VGUIPanel (base class)
+  ├── VGUIFrame (windowed panels with title bars)
+  ├── VGUIButton (clickable buttons)
+  ├── VGUILabel (text display)
+  ├── VGUITextEntry (text input fields)
+  └── VGUIImagePanel (image display)
+```
+
+### VGUIPanel (Base Class)
+**Scope**: Client
+
+Base class for all VGUI panels. Provides core functionality for positioning, sizing, visibility, and hierarchy.
+
+```angelscript
+class VGUIPanel {
+    // Validity
+    bool IsValid();
+
+    // Position and sizing
+    void SetPos(int x, int y);
+    void SetSize(int wide, int tall);
+    void SetBounds(int x, int y, int wide, int tall);
+
+    // Visibility
+    void SetVisible(bool state);
+    bool IsVisible();
+
+    // Hierarchy
+    void SetParent(VGUIPanel@ parent);
+    void AddChild(VGUIPanel@ child);
+    void RemoveChild(VGUIPanel@ child);
+
+    // Appearance
+    void SetFgColor(int r, int g, int b, int a);
+    void SetBgColor(int r, int g, int b, int a);
+
+    // Rendering
+    void Repaint();
+    void SetPaintEnabled(bool enabled);
+
+    // Input
+    bool IsMouseOver();
+
+    // Cleanup
+    void Remove();  // Remove from parent
+}
+```
+
+**SetPos** / **SetSize** / **SetBounds**: Position and size the panel
+- Coordinates are in screen space (pixels)
+- Position (0,0) is top-left corner of screen
+
+**SetVisible**: Show or hide the panel and all its children
+
+**SetParent** / **AddChild** / **RemoveChild**: Manage panel hierarchy
+- Child panels move with their parent
+- Child visibility is affected by parent visibility
+
+**SetFgColor** / **SetBgColor**: Set foreground and background colors
+- Parameters: red (0-255), green (0-255), blue (0-255), alpha (0-255)
+- Alpha 0 = fully transparent, 255 = fully opaque
+
+**IsMouseOver**: Check if mouse cursor is over this panel
+
+**Remove**: Remove panel from its parent (panel remains valid until released)
+
+### VGUIFrame
+**Scope**: Client
+
+Windowed panels with title bars, dragging support, and optional close/minimize buttons.
+
+```angelscript
+class VGUIFrame : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetTitle(const string& in);
+    void SetMoveable(bool);
+    void SetSizeable(bool);
+    void SetCloseButton(bool);
+    void SetMinimizeButton(bool);
+    void Center();  // Center on screen
+}
+```
+
+**SetTitle**: Set the title bar text
+
+**SetMoveable**: Allow/disallow dragging the frame by its title bar
+
+**SetSizeable**: Allow/disallow resizing the frame by dragging edges
+
+**SetCloseButton** / **SetMinimizeButton**: Show/hide window control buttons
+
+**Center**: Position the frame at the center of the screen
+
+**Example**:
+```angelscript
+VGUIFrame@ frame = CreateFrame(100, 100, 400, 300, "My Window");
+frame.SetMoveable(true);
+frame.SetSizeable(false);
+frame.SetCloseButton(true);
+frame.Center();
+frame.SetVisible(true);
+```
+
+### VGUIButton
+**Scope**: Client
+
+Clickable buttons with callback support.
+
+```angelscript
+class VGUIButton : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    void SetCallback(const string& in);  // Function name to call when clicked
+    void SetEnabled(bool);
+    void SetArmedColor(int r, int g, int b, int a);  // Color when mouse over
+    void SetDepressedColor(int r, int g, int b, int a);  // Color when clicked
+}
+```
+
+**SetText**: Set the button's label text
+
+**SetCallback**: Set the AngelScript function to call when button is clicked
+- Function must exist in the global scope
+- Function takes no parameters and returns void
+
+**SetEnabled**: Enable/disable the button (disabled buttons can't be clicked)
+
+**SetArmedColor**: Color when mouse hovers over button
+
+**SetDepressedColor**: Color when button is being clicked
+
+**Example**:
+```angelscript
+void OnMyButtonClick() {
+    MS_ANGEL_INFO("Button was clicked!");
+}
+
+VGUIButton@ btn = CreateButton("Click Me", 50, 50, 120, 30);
+btn.SetCallback("OnMyButtonClick");
+btn.SetArmedColor(255, 200, 100, 255);  // Orange when hovering
+btn.SetVisible(true);
+```
+
+### VGUILabel
+**Scope**: Client
+
+Static text display with formatting options.
+
+```angelscript
+class VGUILabel : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    void SetTextColor(int r, int g, int b, int a);
+    void SetContentAlignment(int alignment);  // 0=left, 1=center, 2=right
+}
+```
+
+**SetText**: Set the label text
+
+**SetTextColor**: Set the color of the text
+
+**SetContentAlignment**: Align text within the label
+- 0 = left-aligned
+- 1 = center-aligned
+- 2 = right-aligned
+
+**Example**:
+```angelscript
+VGUILabel@ label = CreateLabel("Player Health: 100", 10, 10, 200, 30);
+label.SetTextColor(0, 255, 0, 255);  // Green text
+label.SetContentAlignment(0);  // Left-aligned
+label.SetVisible(true);
+```
+
+### VGUITextEntry
+**Scope**: Client
+
+Text input fields for user text entry.
+
+```angelscript
+class VGUITextEntry : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    string GetText();
+    void SetEditable(bool);
+    void SetMaxLength(int);    // Note: Not fully supported in base VGUI
+    void SetMultiline(bool);   // Note: Use TextPanel for multiline
+}
+```
+
+**SetText** / **GetText**: Set or retrieve the current text
+
+**SetEditable**: Allow/disallow editing
+
+**Example**:
+```angelscript
+VGUITextEntry@ entry = CreateTextEntry(10, 50, 200, 30);
+entry.SetText("Enter your name");
+entry.SetEditable(true);
+entry.SetVisible(true);
+
+// Later, retrieve the text:
+string playerName = entry.GetText();
+```
+
+### VGUIImagePanel
+**Scope**: Client
+
+Display images (sprites or textures).
+
+```angelscript
+class VGUIImagePanel : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetImage(const string& in);  // Set image path
+    void SetScaleImage(bool);         // Scale image to fit panel size
+}
+```
+
+**SetImage**: Set the image to display
+- Path relative to game directory
+- Supports TGA format
+
+**SetScaleImage**: Whether to scale the image to fit the panel bounds
+
+**Example**:
+```angelscript
+VGUIImagePanel@ img = CreateImagePanel("gfx/vgui/logo.tga", 100, 100, 256, 256);
+img.SetScaleImage(true);
+img.SetVisible(true);
+```
+
+---
+
+## VGUI Factory Functions
+**Scope**: Client
+
+Factory functions for creating VGUI panels.
+
+```angelscript
+// Create windowed frame
+VGUIFrame@ CreateFrame(int x, int y, int wide, int tall, const string& in title);
+
+// Create button
+VGUIButton@ CreateButton(const string& in text, int x, int y, int wide, int tall);
+
+// Create label
+VGUILabel@ CreateLabel(const string& in text, int x, int y, int wide, int tall);
+
+// Create text entry field
+VGUITextEntry@ CreateTextEntry(int x, int y, int wide, int tall);
+
+// Create image panel
+VGUIImagePanel@ CreateImagePanel(const string& in imagePath, int x, int y, int wide, int tall);
+
+// Create generic panel (container)
+VGUIPanel@ CreatePanel(int x, int y, int wide, int tall);
+```
+
+---
+
+## VGUI Utility Functions
+**Scope**: Client
+
+```angelscript
+// Get screen dimensions
+void GetScreenSize(int& out wide, int& out tall);
+
+// Check if panel is valid
+bool IsPanelValid(VGUIPanel@ panel);
+```
+
+**GetScreenSize**: Retrieve the current screen resolution
+- Use for positioning panels relative to screen size
+
+**IsPanelValid**: Check if a panel pointer is valid and not null
+
+---
+
+## VGUI Complete Example
+**Scope**: Client
+
+Here's a complete example showing how to create a custom dialog:
+
+```angelscript
+// Global variables to keep panels alive
+VGUIFrame@ g_CustomDialog;
+VGUILabel@ g_MessageLabel;
+VGUIButton@ g_OkButton;
+VGUIButton@ g_CancelButton;
+
+void ShowCustomDialog(const string& in message) {
+    // Create frame
+    g_CustomDialog = CreateFrame(0, 0, 400, 200, "Notification");
+    g_CustomDialog.Center();
+    g_CustomDialog.SetMoveable(true);
+    g_CustomDialog.SetCloseButton(true);
+
+    // Create message label
+    g_MessageLabel = CreateLabel(message, 20, 50, 360, 60);
+    g_MessageLabel.SetTextColor(255, 255, 255, 255);
+    g_MessageLabel.SetContentAlignment(1);  // Center
+    g_CustomDialog.AddChild(g_MessageLabel);
+
+    // Create OK button
+    g_OkButton = CreateButton("OK", 100, 140, 80, 30);
+    g_OkButton.SetCallback("OnDialogOK");
+    g_OkButton.SetArmedColor(100, 200, 100, 255);
+    g_CustomDialog.AddChild(g_OkButton);
+
+    // Create Cancel button
+    g_CancelButton = CreateButton("Cancel", 220, 140, 80, 30);
+    g_CancelButton.SetCallback("OnDialogCancel");
+    g_CancelButton.SetArmedColor(200, 100, 100, 255);
+    g_CustomDialog.AddChild(g_CancelButton);
+
+    // Show dialog
+    g_CustomDialog.SetVisible(true);
+}
+
+void OnDialogOK() {
+    MS_ANGEL_INFO("User clicked OK");
+    HideCustomDialog();
+}
+
+void OnDialogCancel() {
+    MS_ANGEL_INFO("User clicked Cancel");
+    HideCustomDialog();
+}
+
+void HideCustomDialog() {
+    if (g_CustomDialog !is null && g_CustomDialog.IsValid()) {
+        g_CustomDialog.SetVisible(false);
+        @g_CustomDialog = null;  // Release references
+        @g_MessageLabel = null;
+        @g_OkButton = null;
+        @g_CancelButton = null;
+    }
+}
+```
+
+---
+
 ## Notes
 
 1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@, CBaseMonster@, CMSMonster@) are managed by the game engine. Scripts should not attempt to delete entities directly.
@@ -1693,3 +2186,11 @@ void CheckGround() {
 - **1.4**: Refactored client-side classes to use inheritance hierarchies using asbind20's `.base<>()` feature:
   - CClientEffect base class for effects (CTempEntity, CDynamicLight, CBeam)
   - CLocalPlayer now inherits from CClientEntity, gaining all entity query methods
+- **1.5**: Added comprehensive VGUI (Valve GUI) system for client-side custom UI creation:
+  - VGUIPanel base class for all UI elements
+  - VGUIFrame for windowed interfaces
+  - VGUIButton with callback support
+  - VGUILabel for text display
+  - VGUITextEntry for user input
+  - VGUIImagePanel for image display
+  - Factory functions and complete usage examples

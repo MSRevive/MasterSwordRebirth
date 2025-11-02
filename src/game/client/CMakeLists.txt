@@ -357,6 +357,12 @@ source_group("Shared\\AngelScript" FILES ${Shared_AngelScript})
 set(Client_AngelScript
 	"angelscript/ASClientEngineImpl.cpp"
 	"angelscript/ASClientEngineImpl.h"
+	"angelscript/ASClientBindings.cpp"
+	"angelscript/ASClientBindings.h"
+	"angelscript/ASVGUIBindings.cpp"
+	"angelscript/ASVGUIBindings.h"
+	"angelscript/ASClientItemBindings.cpp"
+	"angelscript/ASClientItemBindings.h"
 )
 source_group("Client\\AngelScript" FILES ${Client_AngelScript})
 

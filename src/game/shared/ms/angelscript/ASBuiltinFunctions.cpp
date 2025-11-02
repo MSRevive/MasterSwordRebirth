@@ -21,7 +21,7 @@
 #include <ctime>    // For time functions
 
 // Master Sword specific includes
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     #include "hud.h"
     #include "cl_util.h"
     #include "cl_dll.h"
@@ -47,7 +47,7 @@
 // Helper function to get player by index - implemented differently on server vs client
 static CBasePlayer* GetPlayerByIndexHelper(int index)
 {
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     return nullptr; // Client doesn't have access to other players
 #else
     // Server-side implementation
@@ -115,9 +115,11 @@ namespace ASBuiltinFunctions
             // Register game system functions
             RegisterGameFunctions(pEngine);
             
+#ifdef VALVE_DLL
             // Register GameMaster communication and event functions
             RegisterGameMasterFunctions(pEngine);
-            
+#endif
+
             printf("ASBuiltinFunctions: Registration complete\n");
         }
     
@@ -399,7 +401,7 @@ namespace ASBuiltinFunctions
     // Random float between min and max
     float AS_Random(float min, float max)
     {
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
         // Client-side random
         return min + (max - min) * ((float)rand() / RAND_MAX);
 #else
@@ -411,7 +413,7 @@ namespace ASBuiltinFunctions
     // Random integer between min and max (inclusive)
     int AS_RandomInt(int min, int max)
     {
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
         // Client-side random
         return min + (rand() % (max - min + 1));
 #else
@@ -423,7 +425,7 @@ namespace ASBuiltinFunctions
     // Write message to game log/console
     void AS_LogMessage(const std::string& msg)
     {
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
         gEngfuncs.Con_Printf("%s\n", msg.c_str());
 #else
         // Use multiple output methods to ensure visibility
@@ -437,7 +439,7 @@ namespace ASBuiltinFunctions
     // Write developer console message
     void AS_DeveloperMessage(int level, const std::string& msg)
     {
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
         float devValue = gEngfuncs.pfnGetCvarFloat("developer");
         if (devValue >= level) {
             gEngfuncs.Con_DPrintf("%s\n", msg.c_str());
@@ -462,7 +464,7 @@ namespace ASBuiltinFunctions
     // Get player by index (1-based)
     CBasePlayer* AS_GetPlayerByIndex(int index)
     {
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             // Client-side: Limited player access
             MS_ANGEL_DEBUG("GetPlayerByIndex called on client (index: %d)", index);
             return nullptr;
@@ -487,7 +489,7 @@ namespace ASBuiltinFunctions
     // Get number of connected players
     int AS_GetPlayerCount()
     {
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             // Client-side: Return 1 (self)
             return 1;
         #else
@@ -521,7 +523,7 @@ namespace ASBuiltinFunctions
         // Create new array
         CScriptArray* playerArray = CScriptArray::Create(arrayType, (asUINT)0);
         
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             // Server-side: Populate with real players
             for (int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
@@ -626,7 +628,7 @@ namespace ASBuiltinFunctions
     // Find player by Steam ID helper
     CBasePlayer* FindPlayerBySteamID(const std::string& steamID)
     {
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             return nullptr; // Client doesn't have access to other players
         #else
             if (steamID.empty()) {
@@ -693,7 +695,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_DEBUG("SendConsoleMessage: Client attempted console message to %s: %s", 
                           playerID.c_str(), message.c_str());
         #else
@@ -732,7 +734,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_DEBUG("SendInfoMessageToAll: Client attempted to send info message: %s - %s", 
                           title.c_str(), message.c_str());
         #else
@@ -775,7 +777,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_DEBUG("CallPlayerExternal: Client attempted to call %s on player %s", 
                           function.c_str(), playerID.c_str());
         #else
@@ -825,7 +827,7 @@ namespace ASBuiltinFunctions
             return;
         }
         
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_DEBUG("CallGameMasterExternal: Client attempted to call %s", function.c_str());
         #else
             // Convert args array to vector of strings
@@ -947,7 +949,7 @@ namespace ASBuiltinFunctions
         
         // Check if this is a built-in engine event that should use ASEngineEventManager
         if (IsBuiltinEngineEvent(eventName)) {
-            #ifndef CLIENT_DLL
+            #ifdef VALVE_DLL
                 ASEngineEventManager* eventMgr = ASEngineEventManager::Instance();
                 if (eventMgr) {
                     EngineEventType eventType = StringToEngineEventType(eventName);
@@ -985,7 +987,7 @@ namespace ASBuiltinFunctions
         MS_ANGEL_INFO("=== Registered Engine Event Handlers ===");
         
         // Log built-in engine event handlers via ASEngineEventManager
-        #ifndef CLIENT_DLL
+        #ifdef VALVE_DLL
             ASEngineEventManager* eventMgr = ASEngineEventManager::Instance();
             if (eventMgr) {
                 MS_ANGEL_INFO("Built-in Engine Events:");
@@ -1557,7 +1559,7 @@ namespace ASBuiltinFunctions
      */
     void AS_ExecuteServerCommand(const std::string& command)
     {
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_ERROR("ExecuteServerCommand: Cannot execute server commands from client");
             return;
         #else
@@ -1593,7 +1595,7 @@ namespace ASBuiltinFunctions
      */
     bool AS_EngineMapExists(const std::string& mapName)
     {
-        #ifdef CLIENT_DLL
+        #ifndef VALVE_DLL
             MS_ANGEL_DEBUG("EngineMapExists: Client cannot check map existence");
             return false;
         #else

@@ -84,9 +84,10 @@ namespace ASEngineBindings
                         return ASEngineProvider::GetEntityDeadFlag((void*)entity) == 0 && 
                                ASEngineProvider::GetEntityHealth((void*)entity) > 0;
                     })
-                
-                // Player-specific functions  
-                .function("string GetPlayerAuthId(CBasePlayer@)", 
+
+#ifdef VALVE_DLL  // Player-specific functions require CBasePlayer definition (server-only)
+                // Player-specific functions
+                .function("string GetPlayerAuthId(CBasePlayer@)",
                     +[](CBasePlayer* player) -> std::string {
                         return ASEngineProvider::GetPlayerAuthId((void*)player);
                     })
@@ -106,11 +107,12 @@ namespace ASEngineBindings
                     +[](CBasePlayer* player) -> bool {
                         return ASEngineProvider::IsValidPlayer((void*)player);
                     })
-                .function("void SendPlayerMessage(CBasePlayer@, const string &in)", 
+                .function("void SendPlayerMessage(CBasePlayer@, const string &in)",
                     +[](CBasePlayer* player, const std::string& message) {
                         ASEngineProvider::SendInfoMsg((void*)player, message);
                     })
-                
+#endif  // VALVE_DLL
+
                 // Sound functions
                 .function("void EmitSound(CBaseEntity@, int, const string &in, float, float, int, int)", 
                     +[](CBaseEntity* entity, int channel, const std::string& sound, 
@@ -188,17 +190,20 @@ namespace ASEngineBindings
                         if (!entity) return;
                         ASEngineProvider::SetEntityHealth((void*)entity, 0.0f);
                     })
-                .function("Vector3 GetPlayerPosition(CBasePlayer@)", 
+#ifdef VALVE_DLL  // Player position functions require CBasePlayer definition (server-only)
+                .function("Vector3 GetPlayerPosition(CBasePlayer@)",
                     +[](CBasePlayer* player) -> Vector {
                         return ASEngineProvider::GetEntityOrigin((void*)player);
                     })
-                .function("bool TeleportPlayer(CBasePlayer@, const Vector3 &in)", 
+                .function("bool TeleportPlayer(CBasePlayer@, const Vector3 &in)",
                     +[](CBasePlayer* player, const Vector& origin) -> bool {
                         if (!ASEngineProvider::IsValidPlayer((void*)player)) return false;
                         ASEngineProvider::SetEntityOrigin((void*)player, origin);
                         return true;
-                    });
-            
+                    })
+#endif  // VALVE_DLL
+                ;
+
             MS_ANGEL_INFO("[ASEngineBindings] Convenience functions registered successfully");
             
         } catch (const std::exception& e) {

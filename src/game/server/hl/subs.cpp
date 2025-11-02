@@ -211,7 +211,7 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 
 	//NOV2015_05 let GM capture triggers
 	// Updated to use AngelScript instead of MSScript for game triggers
-	#ifndef CLIENT_DLL
+	#ifdef VALVE_DLL
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
