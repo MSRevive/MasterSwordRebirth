@@ -42,7 +42,8 @@
 
 // UNDONE: Do we need these?
 #define FL_IMMUNE_WATER (1 << 17)
-#define FL_IMMUNE_SLIME (1 << 18)
+//#define FL_IMMUNE_SLIME (1 << 18)
+#define FL_CLIENTONLY (1 << 18)		// Strip edicts
 #define FL_IMMUNE_LAVA (1 << 19)
 
 #define FL_PROXY (1 << 20)		  // This is a spectator proxy

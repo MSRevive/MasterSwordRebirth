@@ -320,6 +320,14 @@ public:
 		pev->controller[1] = 255 / 2;
 		pev->controller[2] = 255 / 2;
 		pev->controller[3] = 255 / 2;
+
+		// Strip Edicts with no targetname
+		if (FStringNull(this->pev->targetname))
+		{
+			this->pev->flags |= FL_CLIENTONLY;
+			SET_MODEL(ENT(this->pev), iStringNull);
+			UTIL_Remove(this);
+		}
 	}
 };
 LINK_ENTITY_TO_CLASS(env_model, CStaticModel);

@@ -399,7 +399,10 @@ public:
 	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = FALSE; }
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
-	virtual int ObjectCaps(void) { return FCAP_ACROSS_TRANSITION; }
+
+	// Strip edicts safety check - prevent saving FL_CLIENTONLY entities
+	virtual int ObjectCaps(void) { return (this->pev->flags & FL_CLIENTONLY) ? FCAP_DONT_SAVE : FCAP_ACROSS_TRANSITION; }
+	
 	virtual void Activate(void) {}
 
 	// Setup the object->object collision box (pev->mins / pev->maxs is the object->world collision box)
