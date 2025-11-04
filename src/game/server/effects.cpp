@@ -1139,6 +1139,17 @@ void CSprite::Spawn(void)
 	SET_MODEL(ENT(pev), STRING(pev->model));
 
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
+
+	// Strip edicts with no targetname or parent
+	if (FStringNull(pev->targetname) && FNullEnt(pev->aiment))
+	{
+		pev->flags |= FL_CLIENTONLY;
+
+		SET_MODEL(ENT(pev), iStringNull);
+		UTIL_Remove(this);
+		return;
+	}
+
 	if (pev->targetname && !(pev->spawnflags & SF_SPRITE_STARTON))
 		TurnOff();
 	else
