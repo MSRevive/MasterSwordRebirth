@@ -1,5 +1,4 @@
-#ifndef PACKER_H
-#define PACKER_H
+#pragma once
 
 #include "sharedutil.h"
 #include "msfileio.h"
@@ -25,5 +24,3 @@ private:
 	
 	void doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly);
 };
-
-#endif
