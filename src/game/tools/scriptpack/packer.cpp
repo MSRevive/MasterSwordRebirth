@@ -42,9 +42,9 @@ void Packer::readDirectory(char *pszName, bool cooked)
 	struct dirent *ent;
 	while ((ent = readdir(dir)) != NULL)
 	{
-		strcpy(cFullPath, pszName);
-		strcat(cFullPath, "/");
-		strcat(cFullPath, ent->d_name);
+		strncpy(cFullPath, pszName, MAX_PATH);
+		strncat(cFullPath, "/", MAX_PATH);
+		strncat(cFullPath, ent->d_name, MAX_PATH);
 
 		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
 		{
@@ -171,7 +171,7 @@ void Packer::packScripts()
 	Header.DirectoryCount = files.size();
 
 	pakDirectory_t dummy;
-	strcpy(dummy.cFilename, "");
+	strncpy(dummy.cFilename, "", MAX_PATH);
 	dummy.FileSize = 0;
 	dummy.FileOffset = 0;
 
@@ -258,7 +258,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 
 	//we want to use snprintf instead of strncpy or memcpy because it applies a null terminator.
 	char *ffile = new char[bufSize]();
-	snprintf(ffile, bufSize, "%s", buffer);
+	_snprintf(ffile, bufSize, "%s", buffer);
 
 	if (!stricmp(name, "items.txt") && !errOnly)
 	{
