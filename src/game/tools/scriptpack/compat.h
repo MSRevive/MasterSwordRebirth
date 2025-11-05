@@ -9,6 +9,10 @@
 #include <direct.h>   // _mkdir
 #endif
 
+#if !defined(MAX_PATH)
+#define MAX_PATH PATH_MAX
+#endif
+
 namespace Compat 
 {
 	bool isDirExist(const std::string& path)
