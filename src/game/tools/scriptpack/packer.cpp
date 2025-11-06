@@ -251,7 +251,7 @@ void Packer::packScripts()
 	fclose(fp);
 }
 
-void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
+void Packer::doParser(byte *buffer, size_t bufferSize, const char *name, const char *create, bool errOnly)
 {
 	//need buffersize + 1 to make room for the null terminator
 	size_t bufSize = bufferSize+1;

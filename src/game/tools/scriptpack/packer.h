@@ -22,5 +22,5 @@ private:
 	msstringlist m_StoredFiles;
 	msstringlist m_CookedFiles;
 	
-	void doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly);
+	void doParser(byte *buffer, size_t bufferSize, const char *name, const char *create, bool errOnly);
 };

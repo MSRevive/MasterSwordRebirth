@@ -8,7 +8,7 @@
 class Parser
 {
 public:
-	Parser(char* data, char* file);
+	Parser(const char* data, const char* file);
 	void stripComments();
 	void stripWhiteSpace();
 	void stripDebug();
@@ -22,7 +22,7 @@ public:
 	std::vector<std::string> getErrorlist();
 	void printErrors();
 	void saveErrors();
-	void saveResult(char* create);
+	void saveResult(const char* create);
 
 private:
 	enum class State : char
@@ -43,11 +43,10 @@ private:
 
 	//create directory recursively for scripts
 	//modified from this https://gist.github.com/danzek/d7192d250c951804dec05125f5223a30
-	void createDirectoryRecursively(std::string& path);
-	const char* getBaseDir(char* path);
+	//void createDirectoryRecursively(std::string& path);
 
 	std::string m_Result{};
 	std::string m_Data;
-	char* m_FileName;
+	const char* m_FileName;
 	std::vector<std::string> m_ErrorList{};
 };

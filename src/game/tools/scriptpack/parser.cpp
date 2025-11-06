@@ -10,8 +10,8 @@
 
 #include "cbase.h"
 
-Parser::Parser(char *data, char *file) : m_Data(data) {
-    m_FileName = file;
+Parser::Parser(const char *data, const char *file) : m_Data(data) {
+	m_FileName = file;
 	m_Result = m_Data;
 }
 
@@ -27,7 +27,7 @@ void Parser::stripComments()
 		std::string nLine = "";
 		size_t lineLen = line.length();
 
-		for (int i = 0; i < lineLen; i++)
+		for (size_t i = 0; i < lineLen; i++)
 		{
 			const char ch = line[i];
 			const char nextch = line[i+1]; //get next ch.
@@ -231,7 +231,7 @@ void Parser::checkBrackets() {
 	while (getline(ss, line))
 	{
 		size_t lineLen = line.length();
-		for(int pos = 0; pos < lineLen; pos++)
+		for(size_t pos = 0; pos < lineLen; pos++)
 		{
 			switch(line[pos])
 			{
@@ -291,24 +291,15 @@ void Parser::saveErrors()
 	o.close();
 }
 
-void Parser::saveResult(char *create)
+void Parser::saveResult(const char *create)
 {
-	char dir[MAX_PATH];
-	int ret = _snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
-	std::string sdir(dir);
-	std::filesystem::path fsPath = sdir;
+	std::filesystem::path fsFile = create;
+	std::filesystem::path fsPath = fsFile.parent_path();
 
-	//terrible method, but only way to make sure it wrote to char array properly?
-	if (ret >= 5)
-	{
-		std::error_code ec;
-		if (!std::filesystem::create_directories(fsPath, ec)) {
-        	std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
-    	}
-	} 
-	else 
-	{
-		std::cout << "ERROR: MAX PATH limit exceeded" << std::endl;
+	std::error_code ec;
+	std::filesystem::create_directories(fsPath, ec);
+	if (ec) {
+		std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
 	}
 
 	std::ofstream o;
@@ -388,6 +379,7 @@ void Parser::quoteError(size_t line, size_t pos)
 
 //create directory recursively for scripts
 //modified from this https://gist.github.com/danzek/d7192d250c951804dec05125f5223a30
+/*
 void Parser::createDirectoryRecursively(std::string &path)
 {
 	static const std::string separators("\\/");
@@ -413,11 +405,4 @@ void Parser::createDirectoryRecursively(std::string &path)
 			exit(-1);
 		}
 	}
-}
-
-const char* Parser::getBaseDir(char *path)
-{
-	std::string str(path);
-	std::string result = str.substr(0, str.find_last_of("/\\"));
-	return result.c_str();
-}
+}*/
