@@ -7,7 +7,6 @@
 #include "packer.h"
 #include "../stream_safe.h"
 #include "parser.h"
-#include "compat.h"
 #include "dirent.h"
 
 extern bool g_Verbose;
@@ -24,9 +23,11 @@ Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
 
 	if (g_Release)
 	{
-		if (!Compat::makePath(std::string(m_CookedDir)))
-		{
-			printf("Failed to create %s\n", m_CookedDir);
+		std::filesystem::path fsPath = m_CookedDir;
+		std::error_code ec;
+		std::filesystem::create_directories(fsPath, ec);
+		if (ec) {
+			std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
 			exit(-1);
 		}
 	}
