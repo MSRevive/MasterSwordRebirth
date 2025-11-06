@@ -276,7 +276,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, const char *name, const c
 
 		//we check for errors here because comments were already replaced.
 		parser.checkQuotes(); //check for quote errors
-		parser.checkBrackets(); //check for closing errors
+		//parser.checkBrackets(); //check for closing errors
 
 		//only run this stuff if we're doing full parser.
 		if (!errOnly)
