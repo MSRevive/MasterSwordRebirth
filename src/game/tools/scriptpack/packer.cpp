@@ -43,8 +43,8 @@ void Packer::readDirectory(char *pszName, bool cooked)
 	while ((ent = readdir(dir)) != NULL)
 	{
 		strncpy(cFullPath, pszName, MAX_PATH);
-		strncat(cFullPath, "/", MAX_PATH);
-		strncat(cFullPath, ent->d_name, MAX_PATH);
+		strncat(cFullPath, "/", 1);
+		strncat(cFullPath, ent->d_name, sizeof(ent->d_name));
 
 		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
 		{
@@ -281,7 +281,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create,
 		//only run this stuff if we're doing full parser.
 		if (!errOnly)
 		{
-			parser.stripWhitespace();
+			parser.stripWhiteSpace();
 			parser.stripDebug();
 		}
 
