@@ -1,6 +1,5 @@
 #include "parser.h"
 
-#include <iterator>
 #include <sstream>
 #include <regex>
 #include <ctype.h>
@@ -297,12 +296,20 @@ void Parser::saveResult(char *create)
 	char dir[MAX_PATH];
 	int ret = _snprintf(dir, MAX_PATH, "%s", getBaseDir(create));
 	std::string sdir(dir);
+	std::filesystem::path fsPath = sdir;
 
 	//terrible method, but only way to make sure it wrote to char array properly?
 	if (ret >= 5)
-		createDirectoryRecursively(sdir);
-	else
+	{
+		std::error_code ec;
+		if (!std::filesystem::create_directories(fsPath, ec)) {
+        	std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
+    	}
+	} 
+	else 
+	{
 		std::cout << "ERROR: MAX PATH limit exceeded" << std::endl;
+	}
 
 	std::ofstream o;
 	o.open(create, std::ios_base::trunc);
@@ -369,7 +376,7 @@ bool Parser::isSpace(const char &ch)
 void Parser::addError(const char *fmt, size_t lineNum, size_t pos)
 {
 	char eBuffer[256];
-	snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
+	_snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
 	std::string s(eBuffer);
 	m_ErrorList.push_back(s);
 }
