@@ -5,7 +5,6 @@
 
 #include "cbase.h"
 #include "packer.h"
-#include "../stream_safe.h"
 #include "parser.h"
 
 extern bool g_Verbose;
