@@ -50,31 +50,31 @@ int main(int argc, char** argv)
 		g_ErrFile = errFileSwitch.getValue();
 		g_FailOnErr = failErrSwitch.getValue();
 		
-		struct stat info;
-		if(stat(workDir, &info) != 0)
+		if(!std::filesystem::exists(workDir))
 		{
 			printf("Error: work directory %s not found!\n", workDir);
 			exit(-1);
 		}
 
-	  	if(stat("./errors.txt", &info) == 0)
+		if(std::filesystem::exists("./errors.txt"))
 			std::remove("./errors.txt");
-		
-		if(stat(outDir, &info) != 0)
+
+		if(!std::filesystem::exists(outDir))
 		{
 			printf("Error: output directory %s not found!\n", outDir);
 		}
 		
 		Packer packer(workDir, rootDir, outDir);
 		packer.readDirectory(workDir);
-		packer.processScripts();
+		packer.catalogScripts();
 		if(!packSwitch.getValue())
 		{
-			packer.packScripts();
+			//packer.packScripts();
 			printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
 		}
 		std::cout << "Finished..." << std::endl;
-	} catch (TCLAP::ArgException &err)
+	} 
+	catch (TCLAP::ArgException &err)
 	{
 		std::cout << "Error: " << err.error() << "for arg " << err.argId() << std::endl;
 		exit(-1);

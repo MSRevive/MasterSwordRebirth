@@ -10,7 +10,7 @@
 
 #include "cbase.h"
 
-Parser::Parser(const char *data, const char *file) : m_Data(data) {
+Parser::Parser(const char *data, std::string file) : m_Data(data) {
 	m_FileName = file;
 	m_Result = m_Data;
 }
@@ -291,9 +291,9 @@ void Parser::saveErrors()
 	o.close();
 }
 
-void Parser::saveResult(const char *create)
+void Parser::saveResult(std::string file)
 {
-	std::filesystem::path fsFile = create;
+	std::filesystem::path fsFile = file;
 	std::filesystem::path fsPath = fsFile.parent_path();
 
 	std::error_code ec;
@@ -303,7 +303,7 @@ void Parser::saveResult(const char *create)
 	}
 
 	std::ofstream o;
-	o.open(create, std::ios_base::trunc);
+	o.open(file, std::ios_base::binary | std::ios_base::trunc);
 	o << m_Result;
 	o.close();
 }
@@ -364,12 +364,14 @@ bool Parser::isSpace(const char &ch)
 	}
 }
 
-void Parser::addError(const char *fmt, size_t lineNum, size_t pos)
+void Parser::addError(std::string_view fmt, size_t lineNum, size_t pos)
 {
-	char eBuffer[256];
-	_snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
-	std::string s(eBuffer);
-	m_ErrorList.push_back(s);
+	// char eBuffer[256];
+	// _snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
+	// std::string s(eBuffer);
+	std::string_view fmtt(fmt);
+	std::string str = std::vformat(fmtt, std::make_format_args(m_FileName, lineNum, pos));
+	m_ErrorList.push_back(str);
 }
 
 void Parser::quoteError(size_t line, size_t pos)

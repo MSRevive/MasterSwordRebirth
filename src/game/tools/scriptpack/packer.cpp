@@ -19,7 +19,10 @@ Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
 	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
 	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
 	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
-	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked\\", rDir);
+	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked", rDir);
+
+	std::cout << "Work directory set to: " << m_WorkDir << std::endl;
+	std::cout << "Cooked directory set to: " << m_CookedDir << std::endl;
 
 	if (g_Release)
 	{
@@ -33,118 +36,88 @@ Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
 	}
 }
 
-void Packer::readDirectory(char *pszName, bool cooked)
+void Packer::readDirectory(const char *pszName, bool cooked)
 {
-	char cFullPath[MAX_PATH];
-	DIR *dir = opendir(pszName);
-	if(!dir)
-		exit(-1);
+	std::filesystem::path fsPath = pszName;
 
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL)
+	for(const auto &entry : std::filesystem::recursive_directory_iterator(fsPath))
 	{
-		strncpy(cFullPath, pszName, MAX_PATH);
-		strncat(cFullPath, "/", 1);
-		strncat(cFullPath, ent->d_name, sizeof(ent->d_name));
+		if (g_Release && entry.path().parent_path().filename() == "developer")
+			continue;
 
-		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
+		if (g_Verbose && entry.is_directory())
 		{
-			switch (ent->d_type)
-			{
-			case DT_REG:
-				//ignore non script files.
-				if(strstr(ent->d_name, ".script") || strstr(ent->d_name, ".as") || !stricmp(ent->d_name, "items.txt"))
-				{
-					if(cooked)
-						m_CookedFiles.add(cFullPath);
-					else
-						m_StoredFiles.add(cFullPath);
-				}
-				break;
-			case DT_DIR:
-				if (g_Verbose)
-					printf("Reading Directory: %s\n", ent->d_name);
-				
-				if (g_Release && !stricmp(ent->d_name, "developer"))
-					continue;
+			std::cout << "Reading Directory: " << entry.path().string() << std::endl;
+		}
 
-				readDirectory(cFullPath, cooked);
-				break;
-			default:
-				break;
+		if( entry.is_regular_file() )
+		{
+			auto file = entry.path();
+			if(file.extension() == ".script" || file.extension() == ".as" || file.filename() == "items.txt")
+			{
+				if( g_Verbose )
+					std::cout << file.string() << std::endl;
+
+				if(cooked)
+					m_CookedFiles.push_back(file.string());
+				else
+					m_StoredFiles.push_back(file.string());
 			}
 		}
 	}
-
-	closedir(dir);
 }
 
 //checks the scripts for errors and cleans them for release.
-void Packer::processScripts() 
+void Packer::catalogScripts() 
 {
 	CMemFile InFile;
-	size_t listSize = m_StoredFiles.size();
-	printf("size: %d\n", listSize);
+	printf("size: %d\n", m_StoredFiles.size());
 
-	if(g_Release && listSize > 0)
+	if(m_StoredFiles.size() > 0)
 	{
-		for(size_t i = 0; i < listSize; i++)
+		for(std::string &file : m_StoredFiles)
 		{
-			msstring &FullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(FullPath))
+			if(InFile.ReadFromFile(file.c_str()))
 			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
-				
-				char createFile[MAX_PATH];
-				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
-				
+				std::cout << file << std::endl;
+				std::string relativePath = file.substr(strlen(m_WorkDir) + 1, file.length());
+				std::cout << relativePath << std::endl;
+
 				if (g_Verbose)
-					printf("Cleaning script: %s\n", cRelativePath);
+					std::cout << "Cataloging script: " << relativePath << std::endl;
 				
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
-				parserThread.join();
-					
-				if (g_Verbose)
-					printf("End script cleaning: %s\n\n", cRelativePath);
+				if (g_Release)
+				{
+					std::string cookedFile = m_CookedDir;
+					cookedFile += "/";
+					cookedFile += relativePath;
+
+					std::thread parserThread(&Packer::processScript, this, InFile.m_Buffer, InFile.m_BufferSize, relativePath, cookedFile, false);
+					parserThread.join();
+				}
+				else
+				{
+					std::thread parserThread(&Packer::processScript, this, InFile.m_Buffer, InFile.m_BufferSize, relativePath, file, false);
+					parserThread.join();
+				}
 			}
 		}
-		
-		//read the cooked dir once scripts are cooked.
-		readDirectory(m_CookedDir, true);
-	}
-	else if (!g_Release && listSize > 0)
-	{
-		for(size_t i = 0; i < listSize; i++)
+
+		if (g_Release)
 		{
-			msstring &FullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(FullPath))
-			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
-
-				if (g_Verbose)
-					printf("Error checking script: %s\n", cRelativePath);
-
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
-				parserThread.join();
-
-				if (g_Verbose)
-					printf("End script processing: %s\n\n", cRelativePath);
-			}
+			readDirectory(m_CookedDir, true);
 		}
 	}
 }
 
-//packs the scripts.
+// packs the scripts.
+// we have to use c strings here because MSR does.
 void Packer::packScripts()
 {
-	//we want to make scripts.pak in via root dir.
 	char cWriteFile[MAX_PATH];
 	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir);
-	
-	struct stat info;
-	if(stat(cWriteFile, &info) == 0)
+
+	if(std::filesystem::exists(cWriteFile))
 		std::remove(cWriteFile);
 
 	FILE* fp = fopen(cWriteFile, "wb+");
@@ -155,16 +128,22 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	msstringlist files;
+	std::vector<std::string> files;
 
+	size_t baseDirLen = 0;
 	if (g_Release)
 	{
 		files = m_CookedFiles;
-	}
+		baseDirLen = strlen(m_CookedDir)-1;
+		std::cout << "RELEASE " << baseDirLen << std::endl;
+	}	
 	else
 	{
 		files = m_StoredFiles;
+		baseDirLen = strlen(m_WorkDir)-1;
+		std::cout << "NO-RELEASE " << baseDirLen << std::endl;
 	}
+		
 
 	pakHeader_t Header;
 	Header.MagicNumber = 1262698832;
@@ -172,7 +151,7 @@ void Packer::packScripts()
 	Header.DirectoryCount = files.size();
 
 	pakDirectory_t dummy;
-	strncpy(dummy.cFilename, "", MAX_PATH);
+	strncpy(dummy.cFilename, "", 0);
 	dummy.FileSize = 0;
 	dummy.FileOffset = 0;
 
@@ -191,15 +170,18 @@ void Packer::packScripts()
 	// jump back to just after the header
 	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
 
-	if (listSize > 0)
+	if (files.size() > 0 && baseDirLen > 0)
 	{
-		for (size_t i = 0; i < listSize; i++)
+		for(std::string &file : files)
 		{
-			msstring &FullPath = files[i];
-			if (InFile.ReadFromFile(FullPath))
+			if (InFile.ReadFromFile(file.c_str()))
 			{
+				std::cout << file << std::endl;
+				std::string relativePath = file.substr(baseDirLen, file.length());
+				std::cout << relativePath << std::endl;
+
 				pakDirectory_t File;
-				strncpy(File.cFilename, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), sizeof(File.cFilename));
+				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename)); // was strlen(m_WorkDir)+1 but that's not the correct index anymore?
 				File.FileOffset = 0;
 				File.FileSize = InFile.m_BufferSize;
 
@@ -243,16 +225,15 @@ void Packer::packScripts()
 	}
 	else
 	{
-		std::cout << "ERROR: No files found!" << std::endl;
+		std::cout << "ERROR: No files in list!" << std::endl;
 		exit(-1);
 	}
-	
-	// close and flush
+
 	fflush(fp);
 	fclose(fp);
 }
 
-void Packer::doParser(byte *buffer, size_t bufferSize, const char *name, const char *create, bool errOnly)
+void Packer::processScript(byte *buffer, size_t bufferSize, std::string relativeFile, std::string createFile, bool errOnly)
 {
 	//need buffersize + 1 to make room for the null terminator
 	size_t bufSize = bufferSize+1;
@@ -261,15 +242,15 @@ void Packer::doParser(byte *buffer, size_t bufferSize, const char *name, const c
 	char *ffile = new char[bufSize]();
 	_snprintf(ffile, bufSize, "%s", buffer);
 
-	if (!stricmp(name, "items.txt") && !errOnly)
+	if (relativeFile == "items.txt" && !errOnly)
 	{
-		Parser parser(ffile, name);
-		parser.saveResult(create);
+		Parser parser(ffile, relativeFile);
+		parser.saveResult(createFile);
 	}
 	else
 	{
 		//we create parser object.
-		Parser parser(ffile, name);
+		Parser parser(ffile, relativeFile);
 		parser.stripComments();
 
 		// Preprocess module syntax before error checking
@@ -292,7 +273,7 @@ void Packer::doParser(byte *buffer, size_t bufferSize, const char *name, const c
 			parser.saveErrors();
 
 		if (!errOnly)
-			parser.saveResult(create);
+			parser.saveResult(createFile);
 
 		if (g_FailOnErr && parser.errorCheck())
 		{

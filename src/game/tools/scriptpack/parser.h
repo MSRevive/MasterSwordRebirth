@@ -8,7 +8,7 @@
 class Parser
 {
 public:
-	Parser(const char* data, const char* file);
+	Parser(const char* data, std::string file);
 	void stripComments();
 	void stripWhiteSpace();
 	void stripDebug();
@@ -21,8 +21,9 @@ public:
 	std::string getResult();
 	std::vector<std::string> getErrorlist();
 	void printErrors();
+
 	void saveErrors();
-	void saveResult(const char* create);
+	void saveResult(std::string file);
 
 private:
 	enum class State : char
@@ -38,7 +39,7 @@ private:
 	std::istream& getline(std::istream& is, std::string &t);
 	bool onlySpace(const std::string& str);
 	static bool isSpace(const char& ch);
-	void addError(const char* fmt, size_t lineNum, size_t pos);
+	void addError(std::string_view fmt, size_t lineNum, size_t pos);
 	void quoteError(size_t line, size_t pos);
 
 	//create directory recursively for scripts
@@ -47,6 +48,6 @@ private:
 
 	std::string m_Result{};
 	std::string m_Data;
-	const char* m_FileName;
+	std::string m_FileName;
 	std::vector<std::string> m_ErrorList{};
 };

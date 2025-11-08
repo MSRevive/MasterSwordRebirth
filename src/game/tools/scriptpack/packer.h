@@ -10,8 +10,8 @@ class Packer
 {
 public:
 	Packer(const char *wDir, const char* rDir, const char* oDir);
-	void readDirectory(char *pszName, bool cooked = false);
-	void processScripts();
+	void readDirectory(const char *pszName, bool cooked = false);
+	void catalogScripts();
 	void packScripts();
   
 private:
@@ -19,8 +19,8 @@ private:
 	char m_RootDir[MAX_PATH];
 	char m_CookedDir[MAX_PATH];
 	char m_OutDir[MAX_PATH];
-	msstringlist m_StoredFiles;
-	msstringlist m_CookedFiles;
+	std::vector<std::string> m_StoredFiles;
+	std::vector<std::string> m_CookedFiles;
 	
-	void doParser(byte *buffer, size_t bufferSize, const char *name, const char *create, bool errOnly);
+	void processScript(byte *buffer, size_t bufferSize, std::string relativeFile, std::string createFile, bool errOnly);
 };
