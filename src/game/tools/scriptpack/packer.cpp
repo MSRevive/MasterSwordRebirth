@@ -7,7 +7,6 @@
 #include "packer.h"
 #include "../stream_safe.h"
 #include "parser.h"
-#include "dirent.h"
 
 extern bool g_Verbose;
 extern bool g_Release;

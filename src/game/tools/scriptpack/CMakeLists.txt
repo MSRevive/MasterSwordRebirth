@@ -29,7 +29,6 @@ target_include_directories(scriptpack PRIVATE
 ################################################################################
 set(SRC_Files
 	"cbase.h"
-	"dirent.h"
 	"packer.cpp"
 	"packer.h"
 	"parser.cpp"
