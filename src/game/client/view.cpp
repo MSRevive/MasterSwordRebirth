@@ -1689,7 +1689,7 @@ void V_CalcMirrorRefdef(struct ref_params_s *pparams)
 }
 
 extern CRenderPlayerInset g_Inset;
-void RenderFog();
+void RenderFog( bool bRender );
 void ModifyLevel(ref_params_s &Params);
 
 void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
@@ -1751,7 +1751,7 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	pparams->movevars->skyvec_y = 0;
 	pparams->movevars->skyvec_z = -1;*/
 
-	RenderFog();
+	RenderFog( true );
 
 	v_ViewDist = pparams->movevars->zmax;
 	ViewMgr.LastAngles = ViewMgr.Angles;
