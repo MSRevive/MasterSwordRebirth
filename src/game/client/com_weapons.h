@@ -13,7 +13,7 @@ extern "C"
 	void _DLLEXPORT HUD_PostRunCmd(struct local_state_s *from, struct local_state_s *to, struct usercmd_s *cmd, int runfuncs, double time, unsigned int random_seed);
 }
 
-void COM_Log(char *pszFile, char *fmt, ...);
+void COM_Log(const char *pszFile, const char *fmt, ...);
 int CL_IsDead(void);
 
 float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
