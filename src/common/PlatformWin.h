@@ -18,14 +18,14 @@
 
 //Fix problems with ARRAYSIZE and HSPRITE SDK definitions conflicting with Windows header definitions
 //TODO: ARRAYSIZE should be replaced with std::size, which is a superior replacement
-#pragma push_macro("ARRAYSIZE")
-#ifdef ARRAYSIZE
-#undef ARRAYSIZE
-#endif
+// #pragma push_macro("ARRAYSIZE")
+// #ifdef ARRAYSIZE
+// #undef ARRAYSIZE
+// #endif
 
 #include <Windows.h>
 
-#pragma pop_macro("ARRAYSIZE")
+//#pragma pop_macro("ARRAYSIZE")
 
 // Undefine problematic Windows macros that conflict with AngelScript/asbind20
 #ifdef GetObject

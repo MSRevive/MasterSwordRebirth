@@ -37,10 +37,10 @@ using func_t = int;
 using vec_t = float;
 using word = unsigned short;
 
-#ifdef ARRAYSIZE
-#undef ARRAYSIZE
-#endif
-#define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
+// #ifdef ARRAYSIZE
+// #undef ARRAYSIZE
+// #endif
+// #define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
 #define V_min(a, b) (((a) < (b)) ? (a) : (b))
 #define V_max(a, b) (((a) > (b)) ? (a) : (b))
 
