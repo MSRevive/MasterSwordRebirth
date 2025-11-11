@@ -68,14 +68,16 @@ void Packer::readDirectory(const char *pszName, bool cooked)
 //checks the scripts for errors and cleans them for release.
 void Packer::catalogScripts() 
 {
-	CMemFile InFile;
+	//CMemFile InFile = NULL;
 	printf("size: %d\n", m_StoredFiles.size());
 
 	if(m_StoredFiles.size() > 0)
 	{
 		for(std::string &file : m_StoredFiles)
 		{
-			if(InFile.ReadFromFile(file.c_str()))
+			auto contents = getFileContents(file);
+
+			if(contents.size() > 0)
 			{
 				std::cout << file << std::endl;
 				std::string relativePath = file.substr(strlen(m_WorkDir) + 1, file.length());
@@ -90,12 +92,17 @@ void Packer::catalogScripts()
 					cookedFile += "/";
 					cookedFile += relativePath;
 
-					std::thread parserThread(&Packer::processScript, this, InFile.m_Buffer, InFile.m_BufferSize, relativePath, cookedFile, false);
+					// std::ofstream o;
+					// o.open(cookedFile, std::ios::out | std::ios::binary);
+					// o.write(reinterpret_cast<const char*>(contents.data()), contents.size());
+					// o.close();
+
+					std::thread parserThread(&Packer::processScript, this, reinterpret_cast<const char*>(contents.data()), contents.size(), relativePath, cookedFile, false);
 					parserThread.join();
 				}
 				else
 				{
-					std::thread parserThread(&Packer::processScript, this, InFile.m_Buffer, InFile.m_BufferSize, relativePath, file, false);
+					std::thread parserThread(&Packer::processScript, this, reinterpret_cast<const char*>(contents.data()), contents.size(), relativePath, file, false);
 					parserThread.join();
 				}
 			}
@@ -126,22 +133,7 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	std::vector<std::string> files;
-
-	size_t baseDirLen = 0;
-	if (g_Release)
-	{
-		files = m_CookedFiles;
-		baseDirLen = strlen(m_CookedDir)-1;
-		std::cout << "RELEASE " << baseDirLen << std::endl;
-	}	
-	else
-	{
-		files = m_StoredFiles;
-		baseDirLen = strlen(m_WorkDir)-1;
-		std::cout << "NO-RELEASE " << baseDirLen << std::endl;
-	}
-		
+	size_t baseDirLen = strlen(m_WorkDir)-1;
 
 	pakHeader_t Header;
 	Header.MagicNumber = 1262698832;
@@ -149,14 +141,14 @@ void Packer::packScripts()
 	Header.DirectoryCount = files.size();
 
 	pakDirectory_t dummy;
-	strncpy(dummy.cFilename, "", 0);
+	strcpy(dummy.cFilename, "");
 	dummy.FileSize = 0;
 	dummy.FileOffset = 0;
 
 	// write the file header
 	fwrite(&Header, sizeof(pakHeader_t), 1, fp);
 
-	CMemFile InFile;
+	//CMemFile InFile;
 	size_t listSize = files.size();
 
 	// write out dummy data to occupy the file metadata position
@@ -167,12 +159,14 @@ void Packer::packScripts()
 
 	// jump back to just after the header
 	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
-
+	
 	if (files.size() > 0 && baseDirLen > 0)
 	{
 		for(std::string &file : files)
 		{
-			if (InFile.ReadFromFile(file.c_str()))
+			auto contents = getFileContents(file);
+
+			if (contents.size() > 0)
 			{
 				std::cout << file << std::endl;
 				std::string relativePath = file.substr(baseDirLen, file.length());
@@ -181,7 +175,7 @@ void Packer::packScripts()
 				pakDirectory_t File;
 				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename)); // was strlen(m_WorkDir)+1 but that's not the correct index anymore?
 				File.FileOffset = 0;
-				File.FileSize = InFile.m_BufferSize;
+				File.FileSize = contents.size();
 
 				if (g_Verbose == true)
 					printf("Packing file: %s\n", File.cFilename);
@@ -202,7 +196,7 @@ void Packer::packScripts()
 				File.FileOffset = ftell(fp);
 
 				// write the file data
-				ObjectsWritten = fwrite(InFile.m_Buffer, InFile.m_BufferSize, 1, fp);
+				ObjectsWritten = fwrite(reinterpret_cast<const char*>(contents.data()), contents.size(), 1, fp);
 
 				if (ObjectsWritten != 1)
 					printf("Failed to write file: %s\n", File.cFilename);
@@ -231,55 +225,59 @@ void Packer::packScripts()
 	fclose(fp);
 }
 
-void Packer::processScript(byte *buffer, size_t bufferSize, std::string relativeFile, std::string createFile, bool errOnly)
+void Packer::processScript(const char *buffer, size_t bufferSize, std::string relativeFile, std::string createFile, bool errOnly)
 {
-	//need buffersize + 1 to make room for the null terminator
-	size_t bufSize = bufferSize+1;
-
-	//we want to use snprintf instead of strncpy or memcpy because it applies a null terminator.
-	char *ffile = new char[bufSize]();
-	_snprintf(ffile, bufSize, "%s", buffer);
-
-	if (relativeFile == "items.txt" && !errOnly)
+	Parser *pParser = new Parser(buffer, relativeFile);
+	if (relativeFile != "items.txt" && !errOnly)
 	{
-		Parser parser(ffile, relativeFile);
-		parser.saveResult(createFile);
-	}
-	else
-	{
-		//we create parser object.
-		Parser parser(ffile, relativeFile);
-		parser.stripComments();
-
-		// Preprocess module syntax before error checking
-		parser.preprocessModules();
-
-		//we check for errors here because comments were already replaced.
-		parser.checkQuotes(); //check for quote errors
-		//parser.checkBrackets(); //check for closing errors
-
-		//only run this stuff if we're doing full parser.
-		if (!errOnly)
-		{
-			parser.stripWhiteSpace();
-			parser.stripDebug();
-		}
-
-		//do error print at the end
-		parser.printErrors();
-		if (g_ErrFile)
-			parser.saveErrors();
-
-		if (!errOnly)
-			parser.saveResult(createFile);
-
-		if (g_FailOnErr && parser.errorCheck())
-		{
-			delete[] ffile;
-			exit(-1);
-		}
+		//parser.saveResult(createFile);
 	}
 
-	//deallocate memory for object when done.
-	delete[] ffile;
+	// if (relativeFile == "items.txt" && !errOnly)
+	// {
+	// 	Parser parser(buffer, relativeFile);
+	// 	parser.saveResult(createFile);
+	// }
+	// else
+	// {
+	// 	//we create parser object.
+	// 	Parser parser(buffer, relativeFile);
+	// 	parser.saveResult(createFile);
+	// 	//parser.stripComments();
+
+	// 	// // Preprocess module syntax before error checking
+	// 	// parser.preprocessModules();
+
+	// 	// //we check for errors here because comments were already replaced.
+	// 	// parser.checkQuotes(); //check for quote errors
+	// 	// //parser.checkBrackets(); //check for closing errors
+
+	// 	// //only run this stuff if we're doing full parser.
+	// 	// if (!errOnly)
+	// 	// {
+	// 	// 	parser.stripWhiteSpace();
+	// 	// 	parser.stripDebug();
+	// 	// }
+
+	// 	// //do error print at the end
+	// 	// parser.printErrors();
+	// 	// if (g_ErrFile)
+	// 	// 	parser.saveErrors();
+
+	// 	// if (!errOnly)
+	// 	// 	parser.saveResult(createFile);
+
+	// 	// if (g_FailOnErr && parser.errorCheck())
+	// 	// {
+	// 	// 	//delete[] ffile;
+	// 	// 	exit(-1);
+	// 	// }
+	// }
+
+	std::ofstream o;
+	o.open(createFile, std::ios::out | std::ios::binary);
+	o.write(buffer, bufferSize);
+	o.close();
+
+	delete pParser;
 }

@@ -23,7 +23,6 @@ public:
 	void printErrors();
 
 	void saveErrors();
-	void saveResult(std::string file);
 
 private:
 	enum class State : char
@@ -47,7 +46,7 @@ private:
 	//void createDirectoryRecursively(std::string& path);
 
 	std::string m_Result{};
-	std::string m_Data;
+	const char *m_Data;
 	std::string m_FileName;
 	std::vector<std::string> m_ErrorList{};
 };

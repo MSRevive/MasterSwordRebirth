@@ -10,9 +10,9 @@
 
 #include "cbase.h"
 
-Parser::Parser(const char *data, std::string file) : m_Data(data) {
+Parser::Parser(const char *data, std::string file) {
 	m_FileName = file;
-	m_Result = m_Data;
+	//m_Result = m_Data;
 }
 
 void Parser::stripComments()
@@ -366,9 +366,6 @@ bool Parser::isSpace(const char &ch)
 
 void Parser::addError(std::string_view fmt, size_t lineNum, size_t pos)
 {
-	// char eBuffer[256];
-	// _snprintf(eBuffer, 256, fmt, m_FileName, lineNum, pos);
-	// std::string s(eBuffer);
 	std::string_view fmtt(fmt);
 	std::string str = std::vformat(fmtt, std::make_format_args(m_FileName, lineNum, pos));
 	m_ErrorList.push_back(str);
