@@ -2693,7 +2693,7 @@ static entity_field_alias_t entity_field_alias[] =
 
 void Entity_FieldInit(struct delta_s *pFields)
 {
-	int EntityFields = ARRAYSIZE(entity_field_alias);
+	int EntityFields = std::size(entity_field_alias);
 	for (int i = 0; i < EntityFields; i++)
 		entity_field_alias[i].field = DELTA_FINDFIELD(pFields, entity_field_alias[i].name);
 }

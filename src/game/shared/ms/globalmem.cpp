@@ -68,9 +68,9 @@ void* operator new(size_t size)
 			MemAlloc.Index = allocid++;
 			if (MemAlloc.Index > allochighest)
 				allochighest = MemAlloc.Index;
-			if (allocid >= ARRAYSIZE(Allocations))
+			if (allocid >= std::size(Allocations))
 			{
-				MS_ERROR("Error: Alloc New Memory: Allocations exceed max debug size %i", ARRAYSIZE(Allocations));
+				MS_ERROR("Error: Alloc New Memory: Allocations exceed max debug size %i", std::size(Allocations));
 				//int stop = 0;
 				exit(1);
 				return NULL;

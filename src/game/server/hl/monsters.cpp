@@ -112,14 +112,14 @@ int CBaseMonster::Save(CSave &save)
 {
 	if (!CBaseToggle::Save(save))
 		return 0;
-	return save.WriteFields("CBaseMonster", this, m_SaveData, ARRAYSIZE(m_SaveData));
+	return save.WriteFields("CBaseMonster", this, m_SaveData, std::size(m_SaveData));
 }
 
 int CBaseMonster::Restore(CRestore &restore)
 {
 	if (!CBaseToggle::Restore(restore))
 		return 0;
-	int status = restore.ReadFields("CBaseMonster", this, m_SaveData, ARRAYSIZE(m_SaveData));
+	int status = restore.ReadFields("CBaseMonster", this, m_SaveData, std::size(m_SaveData));
 
 	// We don't save/restore routes yet
 	RouteClear();
