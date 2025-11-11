@@ -664,6 +664,26 @@ int PRECACHE_SOUND(const char *pszSound)
 	return (*g_engfuncs.pfnPrecacheSound)((char *)pszSound);
 }
 
+// An updated version, so we can see what the fuck is going on.
+void SET_MODEL( edict_t* e, const char* szModel )
+{
+	if ( !szModel )
+	{
+		CBaseEntity *pEnt = CBaseEntity::Instance( e );
+		if ( pEnt )
+			MS_ERROR( "Tried to set an invalid model for entity %s (%i)", STRING( pEnt->pev->classname ), pEnt->entindex() );
+		else
+		{
+			if ( e )
+				MS_ERROR( "Tried to set an invalid model for entity %s", STRING( e->v.classname ) );
+			else
+				MS_ERROR( "Tried to set an invalid model for an invalid entity!!" );
+		}
+		return;
+	}
+	g_engfuncs.pfnSetModel( e, szModel );
+}
+
 int PRECACHE_MODEL(const char *pszModelname)
 {
 	//Thothie tracking model precaches, avoiding duplicates
@@ -702,12 +722,12 @@ int PRECACHE_MODEL(const char *pszModelname)
 	{
 		if (TotalModelPrecaches == 1)
 		{
-			modelout << "Brush entities: " << LastModel << endl;
-			modelout << "Num\tIndex in Engine" << endl;
+			modelout << "Brush entities: " << LastModel << std::endl;
+			modelout << "Num\tIndex in Engine" << std::endl;
 		}
 		char NumStr[512];
 		_snprintf(NumStr, sizeof(NumStr), "%.3i\t#%.3i - %s", TotalModelPrecaches, LastModel, pszModelname);
-		modelout << NumStr << endl;
+		modelout << NumStr << std::endl;
 		HighestPrecache = LastModel;
 		TotalModelPrecaches++;
 	}
@@ -760,20 +780,20 @@ void CSVGlobals::WriteScriptLog()
 
 	LogScripts = false; //Stop logging scripts
 
-	ofstream scriptout;
+	std::ofstream scriptout;
 
 	scriptout.open(msstring(EngineFunc::GetGameDir()) + "/log_scripts.txt");
-	scriptout << "Scripts loaded for " << STRING(gpGlobals->mapname) << endl;
+	scriptout << "Scripts loaded for " << STRING(gpGlobals->mapname) << std::endl;
 
 	int Total = 0;
 	for (int i = 0; i < SCRIPT_TYPES; i++)
 		Total += ScriptList[i].size();
 
-	scriptout << "Total: " << Total << endl;
+	scriptout << "Total: " << Total << std::endl;
 
 	for (int i = 0; i < SCRIPT_TYPES; i++)
 	{
-		scriptout << endl;
+		scriptout << std::endl;
 
 		const char* Name = "Global:";
 		if (i == 1)
@@ -783,9 +803,9 @@ void CSVGlobals::WriteScriptLog()
 		else if (i == 3)
 			Name = "Precache only:";
 
-		scriptout << Name << endl;
-		scriptout << "------------" << endl;
-		scriptout << "Total: " << ScriptList[i].size() << endl;
+		scriptout << Name << std::endl;
+		scriptout << "------------" << std::endl;
+		scriptout << "Total: " << ScriptList[i].size() << std::endl;
 
 		for (int s = 0; s < ScriptList[i].size(); s++)
 		{
@@ -796,7 +816,7 @@ void CSVGlobals::WriteScriptLog()
 				else
 					continue; // Admin chose not to log #included scripts
 
-			scriptout << ScriptListItem.FileName.c_str() << endl;
+			scriptout << ScriptListItem.FileName.c_str() << std::endl;
 		}
 
 		ScriptList[i].clear(); //save ourselves some memory
