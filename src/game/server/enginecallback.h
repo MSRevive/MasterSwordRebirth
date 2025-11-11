@@ -32,10 +32,11 @@ extern int g_iUserMessageType;
 //#define PRECACHE_MODEL	(*g_engfuncs.pfnPrecacheModel)
 int PRECACHE_MODEL(const char *pszModel); //Master Sword - Keep track of all model precaching
 int PRECACHE_SOUND(const char *pszSound); //Thothie MAR2012_26 - Ditto for sounds
+void SET_MODEL( edict_t *e, const char *szModel );
 //define PRECACHE_SOUND(sFile) logfile << "Precache_Sound(" << MSGlobals->gSoundPrecacheCount++ << "):" << sFile << "\n"; (*g_engfuncs.pfnPrecacheSound)(sFile) //Thothie Track/Manage Sound Precaches MAR2012_26
 #define	WRITE_BOOL( b )	WRITE_BYTE( b ? 1 : 0 )			// MIB FEB2019_23 [LOCAL_PANEL_IMAGE]
 #define PRECACHE_GENERIC (*g_engfuncs.pfnPrecacheGeneric)
-#define SET_MODEL (*g_engfuncs.pfnSetModel)
+//#define SET_MODEL(*g_engfuncs.pfnSetModel)
 #define MODEL_INDEX (*g_engfuncs.pfnModelIndex)
 #define MODEL_FRAMES (*g_engfuncs.pfnModelFrames)
 #define SET_SIZE (*g_engfuncs.pfnSetSize)

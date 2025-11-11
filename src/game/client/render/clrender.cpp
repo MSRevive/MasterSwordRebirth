@@ -375,7 +375,7 @@ Non-transparent triangles-- add them here
 */
 
 void ModifyLevel();
-void RenderFog();
+void RenderFog( bool bRender );
 bool FindSkyHeight(Vector Origin, float &SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
 int OldVisFrame = -1;
@@ -463,6 +463,7 @@ void CRender::PopHLStates()
 
 void DLLEXPORT HUD_DrawNormalTriangles(void)
 {
+	RenderFog( true );
 	/*if( CMirrorMgr::m_CurrentMirror.Enabled 
 		&& OldVisFrame > -1 )
 	{
@@ -501,7 +502,7 @@ void DLLEXPORT HUD_DrawTransparentTriangles(void)
 {
 	CRender::PushHLStates();
 
-	RenderFog();
+	RenderFog( false );
 	CMirrorMgr::HUD_DrawTransparentTriangles();
 	CEnvMgr::Think_DrawTransparentTriangles();
 	gHUD.m_HUDScript->Effects_DrawTransPararentTriangles();
@@ -523,21 +524,25 @@ void CRender::Cleanup()
 	CMirrorMgr::Cleanup();
 }
 
-void RenderFog()
+void RenderFog( bool bRender )
 {
-	if (CEnvMgr::m_Fog.Enabled)
+	if ( CEnvMgr::m_Fog.Enabled )
 	{
-		glEnable(GL_FOG);
-		glFogfv(GL_FOG_COLOR, CEnvMgr::m_Fog.Color);
-		glFogi(GL_FOG_MODE, CEnvMgr::m_Fog.Type); //GL_EXP, GL_LINEAR
-		glFogf(GL_FOG_DENSITY, CEnvMgr::m_Fog.Density);
-		glFogf(GL_FOG_START, CEnvMgr::m_Fog.Start);
-		glFogf(GL_FOG_END, CEnvMgr::m_Fog.End);
+		glEnable( GL_FOG );
+		if ( bRender )
+			glFogfv( GL_FOG_COLOR, CEnvMgr::m_Fog.Color );
+		else
+			glFogfv( GL_FOG_COLOR, Vector( 0, 0, 0 ) );
+		glFogi( GL_FOG_MODE, CEnvMgr::m_Fog.Type ); //GL_EXP, GL_LINEAR
+		glFogf( GL_FOG_DENSITY, CEnvMgr::m_Fog.Density );
+		glFogf( GL_FOG_START, CEnvMgr::m_Fog.Start );
+		glFogf( GL_FOG_END, CEnvMgr::m_Fog.End );
 	}
 	else
-	{
-		glDisable(GL_FOG);
-	}
+		glDisable( GL_FOG );
+
+	// Required for transparent crap, else they refuse to apply fog. Thank you engine.
+	gEngfuncs.pTriAPI->Fog( bRender ? CEnvMgr::m_Fog.Color : Vector( 0, 0, 0 ), CEnvMgr::m_Fog.Start, CEnvMgr::m_Fog.End, CEnvMgr::m_Fog.Enabled );
 }
 
 //VGUI_Image3D - 3D HUD Sprite
