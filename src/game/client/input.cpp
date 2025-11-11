@@ -314,7 +314,7 @@ KeyDown
 void KeyDown(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = gEngfuncs.Cmd_Argv(1);
 	if (c[0])
@@ -348,7 +348,7 @@ KeyUp
 void KeyUp(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = gEngfuncs.Cmd_Argv(1);
 	if (c[0])

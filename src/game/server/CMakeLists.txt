@@ -88,6 +88,7 @@ set(Common
 	"../../common/cstringpool.h"
 	"../../common/Platform.h"
 	"../../common/PlatformWin.h"
+	"../../common/enums.h"
 )
 source_group("Common" FILES ${Common})
 

@@ -15,13 +15,13 @@
 //
 // status_icons.cpp
 //
+#include <string.h>
+#include <stdio.h>
 #include "hud.h"
 #include "cl_util.h"
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
-#include <string.h>
-#include <stdio.h>
 #include "parsemsg.h"
 #include "event_api.h"
 
@@ -40,7 +40,6 @@ int CHudStatusIcons::Init(void)
 
 int CHudStatusIcons::VidInit(void)
 {
-
 	return 1;
 }
 

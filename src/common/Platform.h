@@ -17,6 +17,9 @@
 #pragma warning(disable : 26451) // Arithmetic overflow
 #pragma warning(disable : 26812) // The enum type is unscoped
 
+#include "steam/steamtypes.h"
+#include "common_types.h"
+
 // Misc C-runtime library headers
 #include <cctype>
 #include <climits>

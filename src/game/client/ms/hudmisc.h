@@ -26,7 +26,7 @@ private:
 	// easiest place to set the crosshair lol
 	HLSPRITE m_hCrosshairList[9];
 	HLSPRITE m_hCrosshair;
-	wrect_t m_rcCrosshair;
+	Rect m_rcCrosshair;
 
 	HLSPRITE GetCrosshairSprite(int type);
 #define MAX_GOLD_OFFER 1000000
