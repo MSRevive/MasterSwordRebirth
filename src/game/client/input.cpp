@@ -263,7 +263,7 @@ void KB_Add(const char *name, kbutton_t *pkb)
 	p = (kblist_t *)malloc(sizeof(kblist_t));
 	memset(p, 0, sizeof(*p));
 
-	 strncpy(p->name,  name, sizeof(p->name) );
+	strncpy(p->name, name, sizeof(p->name));
 	p->pkey = pkb;
 
 	p->next = g_kbkeys;
