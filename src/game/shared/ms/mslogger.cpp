@@ -96,6 +96,9 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
         // Initialize category loggers
         for (int i = 0; i < CATEGORY_COUNT; i++) {
             Category cat = static_cast<Category>(i);
+            if (cat == Category::CHAT)
+                break;
+
             std::string logPath = logDir + "/" + (isServer ? "server_" : "client_") + 
                                   std::string(GetCategoryName(cat)) + ".log";
             
@@ -126,10 +129,10 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
         s_errorLogger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] %v");
         spdlog::register_logger(s_errorLogger);
         
-        // Chat logger with monthly rotation
+        //Chat logger with monthly rotation
         if (isServer) {
             auto chat_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
-                logDir + "/chat", 0, 0, false, 30); // Keep 30 days
+                logDir + "/chat.log", 0, 0, false, 30); // Keep 30 days
             s_chatLogger = std::make_shared<spdlog::logger>("CHAT", chat_sink);
             s_chatLogger->set_pattern("[%Y-%m-%d %H:%M:%S] %v");
             spdlog::register_logger(s_chatLogger);
