@@ -720,7 +720,7 @@ msstring CScript::ScriptGetter_CapFirst(msstring& FullName, msstring& ParserName
 	{
 		msstring sen = Params[0];
 		msstring f = sen;
-		f = strupr(f);
+		f = _strupr(f);
 		sen.str()[0] = f.str()[0];
 		return sen;
 	}
@@ -1305,12 +1305,12 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 					bool                    bCaseInsensitive = Params.size() > vParam ? atoi(Params[vParam++]) == 1 : false;
 
 					vStrtIndx = V_max(vStrtIndx, 0);
-					if (bCaseInsensitive) vsSrch = strlwr(vsSrch);
+					if (bCaseInsensitive) vsSrch = _strlwr(vsSrch);
 					for (size_t i = vStrtIndx; i < pArray->size(); ++i)
 					{
 						bool                bFnd = false;
 						msstring            vsCur = (*pArray)[i];
-						if (bCaseInsensitive) vsCur = strlwr(vsCur);
+						if (bCaseInsensitive) vsCur = _strlwr(vsCur);
 
 						switch (vSrchType)
 						{

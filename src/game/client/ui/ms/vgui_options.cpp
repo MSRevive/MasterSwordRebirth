@@ -271,7 +271,7 @@ public:
 		m_VoteType = VoteType;
 
 		msstring VoteTypeCaps = m_VoteType;
-		strupr(VoteTypeCaps);
+		_strupr(VoteTypeCaps);
 
 		msstring TitleText = msstring("#VOTE_") + VoteTypeCaps + "_TITLE",
 				 DescText = msstring("#VOTE_") + VoteTypeCaps + "_DESC",
