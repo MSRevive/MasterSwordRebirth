@@ -26,16 +26,19 @@
 // Default Log Levels
 //==========================================================================
 
-// Default log level for each category in debug builds
-#ifdef DEBUG
-    #define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_DEBUG
-    #define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_TRACE
-    #define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_DEBUG
-#else
-    #define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_INFO
-    #define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_INFO
-    #define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_INFO
-#endif
+// Default log level for each category in debug builds.
+#define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_DEBUG
+#define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_TRACE
+#define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_DEBUG
+// #ifdef DEBUG
+//     #define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_DEBUG
+//     #define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_TRACE
+//     #define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_DEBUG
+// #else
+//     #define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_INFO
+//     #define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_INFO
+//     #define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_INFO
+// #endif
 
 //==========================================================================
 // File Configuration

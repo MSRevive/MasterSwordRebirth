@@ -546,20 +546,15 @@ bool CScript::ScriptCmd_DebugEntities(
 }
 
 #define ERROR_MISSING_PARMS_HACK MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s - not enough parameters!\n", vsCmdName.c_str()) )
-bool DoDebugEntities(
-	CBasePlayer *                         pCallerPlayer
-	, msstring                              vsCmdName
-	, msstringlist                          vFilteredParams
-	, const char *                          pszPrepend
-	)
+bool DoDebugEntities(CBasePlayer *pCallerPlayer, msstring vsCmdName, msstringlist vFilteredParams, const char *pszPrepend)
 {
-	bool                                bResult = true;
+	bool bResult = true;
 #ifdef VALVE_DLL
-	SDebugInfo                          vDebugInfo;
-	bool                                bIsSub          = (pszPrepend != NULL);
-	msstring                            vsMsgTemplate   = "";
-	size_t                              vParamIndex     = 0;
-	static const char *                 ksPrintEvent    = "ext_debug_que";
+	SDebugInfo vDebugInfo;
+	bool bIsSub = (pszPrepend != NULL);
+	msstring vsMsgTemplate = "";
+	size_t vParamIndex = 0;
+	static const char *ksPrintEvent    = "ext_debug_que";
 
 	if      ( vsCmdName == "dbg_all"            ) vDebugInfo.mTargetType = DBGALL           ;
 	else if ( vsCmdName == "dbg_npcs"           ) vDebugInfo.mTargetType = DBGNPCS          ;
@@ -2890,7 +2885,6 @@ bool CScript::ScriptCmd_DarkenBloom(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 //- developer builds only.
 bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-#if !TURN_OFF_ALERT
 	msstring sTemp;
 	for(int i = 0; i < Params.size(); i++)
 		sTemp += (i ? msstring(" ") : msstring("")) + Params[i];
@@ -2907,8 +2901,8 @@ bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 #ifndef VALVE_DLL
 	LocationString = "Client";
 #endif
-	Print("* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
-#endif
+	//Print("* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
+	MS_DEBUG("* Script Debug (%s): %s - %s", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
 
 	return true;
 }
