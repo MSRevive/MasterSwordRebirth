@@ -267,7 +267,7 @@ void ClientPutInServer(edict_t *pEntity)
 
 		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
 	}else{
-		MSErrorConsoleText("ClientPutInServer", "Player already has Address");
+		MS_ERROR("ClientPutInServer Player already has Address");
 	}
 	
 	char msg[256];
@@ -1113,7 +1113,7 @@ void ClientCommand2(edict_t *pEntity)
 			if (pItem)
 				pPlayer->DropItem(pItem, false, true);
 			else
-				MSErrorConsoleText("ClientCommand()", msstring("'drop' cmd couldn't find item to drop"));
+				MS_ERROR("ClientCommand() 'drop' cmd couldn't find item to drop");
 		}
 		else
 		{
@@ -1440,10 +1440,10 @@ void ClientCommand2(edict_t *pEntity)
 					//pPlayer->m_fClientInitiated = false;
 				}
 				else
-					MSErrorConsoleText("ClientCommand - inv get item", msstring("Item ") + atoi(CMD_ARGV(3)) + " does not exist on player!");
+					MS_ERROR("ClientCommand - inv get item %i does not exist on player!", atoi(CMD_ARGV(3)));
 			}
 			else
-				MSErrorConsoleText("ClientCommand - inv get item", msstring("Pack ") + atoi(CMD_ARGV(2)) + " does not exist on player!");
+				MS_ERROR("ClientCommand - inv get item Pack %i does not exist on player!", atoi(CMD_ARGV(2)));
 		}
 		else if (FStrEq(CMD_ARGV(1), "open"))
 		{
@@ -1921,7 +1921,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			}
 			catch (...)
 			{
-				MSErrorConsoleText("ServerActivate", Dbgstr);
+				MS_ERROR("ServerActivate %s", Dbgstr);
 			}
 		}
 		//else

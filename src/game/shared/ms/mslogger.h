@@ -138,6 +138,5 @@ private:
 // Legacy compatibility functions
 void MSLoggerPrint(const char* fmt, ...);
 void MSLoggerLog(const char* fmt, ...);
-void MSErrorConsoleText(const char* pszLabel, const char* Progress);
 
 #endif // MS_LOGGER_H

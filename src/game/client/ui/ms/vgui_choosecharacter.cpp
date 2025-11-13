@@ -1387,7 +1387,7 @@ CRenderChar::~CRenderChar( )
 	if( !m_Done )
 	{
 		//This is bad - the char gets deallocated before it gets unregistered
-		MSErrorConsoleText( "~CRenderChar()", "Deallocated improperly" );
+		MS_ERROR("~CRenderChar() Deallocated improperly");
 	}
 }
 
@@ -1427,7 +1427,7 @@ CRenderSpawnbox::~CRenderSpawnbox( )
 	if( !m_Done )
 	{
 		//This is bad - the ent gets deallocated before it gets unregistered
-		MSErrorConsoleText( "~CRenderChar()", "Deallocated improperly" );
+		MS_ERROR("~CRenderChar() Deallocated improperly");
 	}
 }
 

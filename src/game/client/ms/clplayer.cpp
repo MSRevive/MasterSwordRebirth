@@ -772,11 +772,11 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 			else
 			{
 				pItem->SUB_Remove();
-				MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add item' msg but client didn't accept item ") + pItem->DisplayName());
+				MS_ERROR("__MsgFunc_Item(): Got 'add item' msg but client didn't accept item %s", pItem->DisplayName());
 			}
 		}
 		else
-			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add item' msg but client couldn't create item");
+			MS_ERROR("__MsgFunc_Item(): Got 'add item' msg but client couldn't create item");
 	}
 	break;
 
@@ -803,7 +803,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 			}
 		}
 		else
-			MSErrorConsoleText("__MsgFunc_Item()", "Got 'update item' msg but client couldn't find item");
+			MS_ERROR("__MsgFunc_Item() Got 'update item' msg but client couldn't find item");
 	}
 	break;
 
@@ -825,7 +825,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 			bDoInvUpdate = true;
 		}
 		else
-			MSErrorConsoleText("__MsgFunc_Item()", msstring("Non-Fatal: Got 'remove item' msg but item ") + int(ItemID) + " not found.");
+			MS_ERROR("__MsgFunc_Item(): Non-Fatal: Got 'remove item' msg but item %i not found.", int(ItemID));
 	}
 	break;
 
@@ -837,14 +837,14 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 
 		if (!pContainer)
-			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't find container") + (int)ContainerID);
+			MS_ERROR("__MsgFunc_Item(): Got 'add to container' msg but client couldn't find container %i", (int)ContainerID);
 
 		CGenericItem* pItem = ReadGenericItem(true);
 		if (!pItem)
-			MSErrorConsoleText("__MsgFunc_Item()", "Got 'add to container' msg but client couldn't find item");
+			MS_ERROR("__MsgFunc_Item() Got 'add to container' msg but client couldn't find item");
 
 		if (pContainer && pItem && !pItem->PutInPack(pContainer))
-			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'add to container' msg but client couldn't put ") + pItem->DisplayName() + " in " + pContainer->DisplayName());
+			MS_ERROR("__MsgFunc_Item(): Got 'add to container' msg but client couldn't put %s in %s", pItem->DisplayName(), pContainer->DisplayName());
 
 		bDoInvUpdate = true;
 	}
@@ -856,15 +856,15 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		ulong ContainerID = READ_LONG();
 		CGenericItem* pContainer = MSUtil_GetItemByID(ContainerID, &player);
 		if (!pContainer)
-			MSErrorConsoleText("__MsgFunc_Item()", msstring("Got 'remove from container' msg but client couldn't find container") + (int)ContainerID);
+			MS_ERROR("__MsgFunc_Item(): Got 'remove from container' msg but client couldn't find container %i", (int)ContainerID);
 
 		ulong ItemID = READ_LONG();
 		CGenericItem* pItem = MSUtil_GetItemByID(ItemID);
 		if (!pItem)
-			MSErrorConsoleText("__MsgFunc_Item()", "Got 'remove from container' msg but client couldn't find item");
+			MS_ERROR("__MsgFunc_Item()", "Got 'remove from container' msg but client couldn't find item");
 
 		if (pContainer && pItem && !pContainer->Container_RemoveItem(pItem))
-			MSErrorConsoleText("__MsgFunc_Item()", "Non-Fatal: Got 'remove from container' msg but item was not found in container");
+			MS_ERROR("__MsgFunc_Item() Non-Fatal: Got 'remove from container' msg but item was not found in container");
 
 		if (pItem)
 			pItem->SUB_Remove();

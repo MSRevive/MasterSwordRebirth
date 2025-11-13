@@ -248,7 +248,7 @@ void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 	}
 	catch (...)
 	{
-		MSErrorConsoleText("DispatchTouch", DispatchTouchPrg);
+		MS_ERROR("DispatchTouch %s", DispatchTouchPrg);
 	}
 }
 
