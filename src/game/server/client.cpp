@@ -2390,7 +2390,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	
 		// Ignore if not the host and not touching a PVS/PAS leaf
 		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-		if (ent != host && !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
+		if (ent != host || !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 		{
 			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s *)ent, pSet))
 			{
@@ -2489,13 +2489,9 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 
 	// This replaces the above code.
 	if ((ent->v.flags & FL_FLY) != 0)
-	{
 		state->eflags |= EFLAG_SLERP;
-	}
 	else
-	{
 		state->eflags &= ~EFLAG_SLERP;
-	}
 
 	state->eflags |= entity->m_EFlags;
 
@@ -2547,7 +2543,8 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			state->owner = owner;
 	}
 
-	if (FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE)) //For Master Sword's special follow
+	//For Master Sword's special follow
+	if (FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 	{
 		state->origin = ent->v.vuser1;
 		if (ent->v.owner)
