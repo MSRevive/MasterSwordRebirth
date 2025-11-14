@@ -192,7 +192,7 @@ typedef struct enginefuncs_s
 	void        (*pfnCRC32_ProcessBuffer)   (CRC32_t *pulCRC, void *p, int len);
 	void		(*pfnCRC32_ProcessByte)     (CRC32_t *pulCRC, unsigned char ch);
 	CRC32_t		(*pfnCRC32_Final)			(CRC32_t pulCRC);
-	long		(*pfnRandomLong)			(long  lLow,  long  lHigh);
+	int32		(*pfnRandomLong)			(int32 lLow,  int32  lHigh);
 	float		(*pfnRandomFloat)			(float flLow, float flHigh);
 	void		(*pfnSetView)				(const edict_t *pClient, const edict_t *pViewent );
 	float		(*pfnTime)					( void );

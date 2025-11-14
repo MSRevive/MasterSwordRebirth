@@ -175,7 +175,7 @@ void CImageDelayed::paintBackground()
 	}
 
 
-	wrect_t DisplaySize = { ClipBeg[0], ClipEnd[0], ClipBeg[1], ClipEnd[1] };
+	Rect DisplaySize = { ClipBeg[0], ClipEnd[0], ClipBeg[1], ClipEnd[1] };
 
 	Color fgColor;
 	getFgColor( fgColor );

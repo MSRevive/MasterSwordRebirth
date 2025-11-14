@@ -307,7 +307,7 @@ public:
 			return;
 		}
 		PRECACHE_MODEL(pszModel);
-		SET_MODEL(edict(), pszModel);
+		SET_MODEL(ENT(pev), pszModel);
 		//Set solidity
 		if (pev->dmg)
 		{
@@ -322,12 +322,12 @@ public:
 		pev->controller[3] = 255 / 2;
 
 		// Strip Edicts with no targetname
-		if (FStringNull(this->pev->targetname))
+		/*if (FStringNull(this->pev->targetname))
 		{
 			this->pev->flags |= FL_CLIENTONLY;
 			SET_MODEL(ENT(this->pev), iStringNull);
 			UTIL_Remove(this);
-		}
+		}*/
 	}
 };
 LINK_ENTITY_TO_CLASS(env_model, CStaticModel);
@@ -379,9 +379,9 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 	//Thothie AUG2007a - removing music/ dependancy, so you can play MP3's in valve/media/ folder
 	msstring th_test_string = STRING(pev->message);
 	if (th_test_string.contains("/"))
-		 _snprintf(command, sizeof(command),  "mp3 %s %s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
+		_snprintf(command, sizeof(command),  "mp3 %s %s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
 	else
-		 _snprintf(command, sizeof(command),  "mp3 %s music/%s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
+		_snprintf(command, sizeof(command),  "mp3 %s music/%s\n",  FBitSet(pev->spawnflags,  SF_LOOP) ? "loop" : "play",  STRING(pev->message) );
 
 	CLIENT_COMMAND(pActivator->edict(), command); //thothie - not sure how this works, might be useful to know
 

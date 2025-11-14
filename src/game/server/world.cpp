@@ -301,13 +301,13 @@ int CGlobalState::Save(CSave &save)
 	int i;
 	globalentity_t *pEntity;
 
-	if (!save.WriteFields("GLOBAL", this, m_SaveData, ARRAYSIZE(m_SaveData)))
+	if (!save.WriteFields("GLOBAL", this, m_SaveData, std::size(m_SaveData)))
 		return 0;
 
 	pEntity = m_pList;
 	for (i = 0; i < m_listCount && pEntity; i++)
 	{
-		if (!save.WriteFields("GENT", pEntity, gGlobalEntitySaveData, ARRAYSIZE(gGlobalEntitySaveData)))
+		if (!save.WriteFields("GENT", pEntity, gGlobalEntitySaveData, std::size(gGlobalEntitySaveData)))
 			return 0;
 
 		pEntity = pEntity->pNext;
@@ -322,7 +322,7 @@ int CGlobalState::Restore(CRestore &restore)
 	globalentity_t tmpEntity;
 
 	ClearStates();
-	if (!restore.ReadFields("GLOBAL", this, m_SaveData, ARRAYSIZE(m_SaveData)))
+	if (!restore.ReadFields("GLOBAL", this, m_SaveData, std::size(m_SaveData)))
 		return 0;
 
 	listCount = m_listCount; // Get new list count
@@ -330,7 +330,7 @@ int CGlobalState::Restore(CRestore &restore)
 
 	for (i = 0; i < listCount; i++)
 	{
-		if (!restore.ReadFields("GENT", &tmpEntity, gGlobalEntitySaveData, ARRAYSIZE(gGlobalEntitySaveData)))
+		if (!restore.ReadFields("GENT", &tmpEntity, gGlobalEntitySaveData, std::size(gGlobalEntitySaveData)))
 			return 0;
 		EntityAdd(MAKE_STRING(tmpEntity.name), MAKE_STRING(tmpEntity.levelName), tmpEntity.state);
 	}
@@ -552,7 +552,7 @@ void CWorld ::Precache(void)
 	// 63 testing
 	LIGHT_STYLE(63, "a");
 
-	for (int i = 0; i < ARRAYSIZE(gDecals); i++)
+	for (int i = 0; i < std::size(gDecals); i++)
 		gDecals[i].index = DECAL_INDEX(gDecals[i].name);
 
 	// init the WorldGraph.

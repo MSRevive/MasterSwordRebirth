@@ -96,6 +96,9 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
         // Initialize category loggers
         for (int i = 0; i < CATEGORY_COUNT; i++) {
             Category cat = static_cast<Category>(i);
+            if (cat == Category::CHAT)
+                break;
+
             std::string logPath = logDir + "/" + (isServer ? "server_" : "client_") + 
                                   std::string(GetCategoryName(cat)) + ".log";
             
@@ -126,10 +129,10 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
         s_errorLogger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] %v");
         spdlog::register_logger(s_errorLogger);
         
-        // Chat logger with monthly rotation
+        //Chat logger with monthly rotation
         if (isServer) {
             auto chat_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
-                logDir + "/chat", 0, 0, false, 30); // Keep 30 days
+                logDir + "/chat.log", 0, 0, false, 30); // Keep 30 days
             s_chatLogger = std::make_shared<spdlog::logger>("CHAT", chat_sink);
             s_chatLogger->set_pattern("[%Y-%m-%d %H:%M:%S] %v");
             spdlog::register_logger(s_chatLogger);
@@ -435,50 +438,29 @@ const char* MSLogger::GetCategoryName(Category cat) {
     return g_categoryNames[cat];
 }
 
-// Legacy compatibility functions
-void MSLoggerPrint(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    char buffer[4096];
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    va_end(args);
-    
-    MSLogger::Console("%s", buffer);
-}
+// void MSErrorConsoleText(const char* pszLabel, const char* Progress)
+// {
+//     	//Print("%s, %s\n", pszLabel, Progress);
+// #ifndef TURN_OFF_ALERT
+// 	if (MSLogger::IsInitialized() == true)
+// 	{
+// 		std::string Output = "Error: ";
+// 		Output += pszLabel;
+// 		Output += " --> ";
+// 		Output += Progress;
 
-void MSLoggerLog(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    char buffer[4096];
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    va_end(args);
-    
-    MSLogger::Debug(MSLogger::GENERAL, "%s", buffer);
-}
-
-void MSErrorConsoleText(const char* pszLabel, const char* Progress)
-{
-    	//Print("%s, %s\n", pszLabel, Progress);
-#ifndef TURN_OFF_ALERT
-	if (MSLogger::IsInitialized() == true)
-	{
-		std::string Output = "Error: ";
-		Output += pszLabel;
-		Output += " --> ";
-		Output += Progress;
-
-		MS_ERROR(Output.c_str());
-		MSLoggerPrint(Output.c_str());
-	}
-	else
-	{
-        //this should only be called client side.
-#ifndef VALVE_DLL
-        //This is prety fatal - We got an error before the logs were initialized
-        std::string errorMsg = pszLabel;
-        errorMsg += " (Logs not yet initialized)";
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorMsg.c_str(), Progress, NULL);
-#endif
-	}
-#endif
-}
+// 		MS_ERROR(Output.c_str());
+// 		MSLoggerPrint(Output.c_str());
+// 	}
+// 	else
+// 	{
+//         //this should only be called client side.
+// #ifndef VALVE_DLL
+//         //This is prety fatal - We got an error before the logs were initialized
+//         std::string errorMsg = pszLabel;
+//         errorMsg += " (Logs not yet initialized)";
+// 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorMsg.c_str(), Progress, NULL);
+// #endif
+// 	}
+// #endif
+// }

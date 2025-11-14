@@ -230,28 +230,28 @@ const char **CBreakable::MaterialSoundList(Materials precacheMaterial, int &soun
 	{
 	case matWood:
 		pSoundList = pSoundsWood;
-		soundCount = ARRAYSIZE(pSoundsWood);
+		soundCount = std::size(pSoundsWood);
 		break;
 	case matFlesh:
 		pSoundList = pSoundsFlesh;
-		soundCount = ARRAYSIZE(pSoundsFlesh);
+		soundCount = std::size(pSoundsFlesh);
 		break;
 	case matComputer:
 	case matUnbreakableGlass:
 	case matGlass:
 		pSoundList = pSoundsGlass;
-		soundCount = ARRAYSIZE(pSoundsGlass);
+		soundCount = std::size(pSoundsGlass);
 		break;
 
 	case matMetal:
 		pSoundList = pSoundsMetal;
-		soundCount = ARRAYSIZE(pSoundsMetal);
+		soundCount = std::size(pSoundsMetal);
 		break;
 
 	case matCinderBlock:
 	case matRocks:
 		pSoundList = pSoundsConcrete;
-		soundCount = ARRAYSIZE(pSoundsConcrete);
+		soundCount = std::size(pSoundsConcrete);
 		break;
 
 	case matCeilingTile:

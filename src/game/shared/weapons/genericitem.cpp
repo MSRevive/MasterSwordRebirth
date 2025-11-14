@@ -395,12 +395,10 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #else
 			//Fatal error in public build... couldn't find items.txt
 			MS_ERROR("FATAL ERROR: items.txt inside scripts.pak NOT FOUND!");
-
-#ifdef RELEASE_LOCKDOWN
-			exit(0);
-#else
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "SC Error", "Missing items.txt!", NULL);
+#ifdef ISCLIENT
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Error", "Missing items.txt!", NULL);
 #endif
+			exit(0);
 #endif
 			goto end;
 		}
@@ -1579,7 +1577,7 @@ bool CGenericItem::IsInAttackStance()
 //*********************************************************************************
 //*********************************************************************************
 
-#define ERROR_MISSING_PARMS MSErrorConsoleText("CGenericItem::ExecuteScriptCmd", UTIL_VarArgs("%s: %s - not enough parameters!\n", Script->m.ScriptFile.c_str(), Cmd.Name().c_str()))
+#define ERROR_MISSING_PARMS MS_ERROR("CGenericItem::ExecuteScriptCmd: %s: %s - not enough parameters!", Script->m.ScriptFile.c_str(), Cmd.Name().c_str())
 
 //Register my script commands
 void CGenericItem::Script_Setup()
@@ -1978,7 +1976,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 			if (pev->sequence < 0)
 			{
 				pev->sequence = 0;
-				MSErrorConsoleText("CGenercItem::Script_ExecuteCmd()", UTIL_VarArgs("Script: %s:\n  %s - Sequence %s NOT FOUND!\n", Script->m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[0].c_str()));
+				MS_ERROR("CGenercItem::Script_ExecuteCmd(): Script: %s:\n  %s - Sequence %s NOT FOUND!", Script->m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[0].c_str());
 			}
 
 			pev->frame = 0;
@@ -2360,7 +2358,7 @@ CGenericItem* ReadGenericItem(bool fAllowCreateNew)
 		pItem = CGenericItemMgr::NewGenericItem(idx); //ItemScript ); // MiB - See above
 	if (!pItem)
 	{
-		MSErrorConsoleText("ReadGenericItem", msstring("Item doesn't exist and couldn't be created  ID: ") + (int)lID + " Script: " + (const char*)CGenericItemMgr::Item(idx)->Name.c_str());
+		MS_ERROR("ReadGenericItem: Item doesn't exist and couldn't be created  ID: %i Script: %s", (int)lID, (const char*)CGenericItemMgr::Item(idx)->Name.c_str());
 		return NULL;
 	}
 

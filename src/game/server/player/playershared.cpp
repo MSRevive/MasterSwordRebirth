@@ -265,7 +265,7 @@ void CBasePlayer::InitialSpawn(void)
 	bool fScriptSpawned = Script_Add(PLAYER_SCRIPT, this) ? true : false;
 
 	if (!fScriptSpawned)
-		MSErrorConsoleText("CBasePlayer::InitialSpawn()", msstring("Missing ") + PLAYER_SCRIPT);
+		MS_ERROR("CBasePlayer::InitialSpawn(): Missing %s", PLAYER_SCRIPT);
 
 	//Add all the player-initiated effects.  Such as sit, lay down, emotes, etc.
 
@@ -961,7 +961,7 @@ bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose
 	else
 	{
 		//Should never get here
-		MSErrorConsoleText("CBasePlayer::DropItem()", "Called Dropitem on client without ForceDrop!");
+		MS_ERROR("CBasePlayer::DropItem() Called Dropitem on client without ForceDrop!");
 		RemoveItem(pDropItem);
 		pDropItem->SUB_Remove();
 	}

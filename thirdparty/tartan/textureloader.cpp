@@ -32,7 +32,7 @@ namespace Tartan
 		//MS_DEBUG("LoadTextureFile - Filetype: %s", filetypestring);
 
 #ifdef _WIN32
-		if (stricmp(filetypestring, ".tga") == 0)
+		if (_stricmp(filetypestring, ".tga") == 0)
 #else
 		if (strcasecmp(filetypestring, ".tga") == 0)
 #endif

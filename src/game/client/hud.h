@@ -105,7 +105,7 @@ typedef struct
 {
 	char szSpriteName[MAX_SPRITE_NAME_LENGTH];
 	HLSPRITE spr;
-	wrect_t rc;
+	Rect rc;
 	unsigned char r, g, b;
 	int id, index, frame;
 	bool Display;
@@ -361,7 +361,7 @@ private:
 		char Name[MAX_SPRITE_NAME_LENGTH];
 		char SpriteName[64];
 		HLSPRITE Handle = 0;
-		wrect_t Rectangle{0, 0, 0, 0};
+		Rect Rectangle{0, 0, 0, 0};
 	};
 
 	std::vector<HudSprite> m_Sprites;
@@ -406,11 +406,11 @@ public:
 		return (index < 0) ? 0 : m_Sprites[index].Handle;
 	}
 
-	wrect_t& GetSpriteRect(int index)
+	Rect& GetSpriteRect(int index)
 	{
 		//wrect_t rect = wrect_t.Rectangle{0,0,0,0};
 		//return (index < 0) ? wrect_t{} : m_Sprites[index].Rectangle;
-		wrect_t rect = {0,0,0,0};
+		Rect rect = {0,0,0,0};
 		return (index < 0) ? rect : m_Sprites[index].Rectangle;
 	}
 

@@ -263,7 +263,7 @@ void KB_Add(const char *name, kbutton_t *pkb)
 	p = (kblist_t *)malloc(sizeof(kblist_t));
 	memset(p, 0, sizeof(*p));
 
-	 strncpy(p->name,  name, sizeof(p->name) );
+	strncpy(p->name, name, sizeof(p->name));
 	p->pkey = pkb;
 
 	p->next = g_kbkeys;
@@ -314,7 +314,7 @@ KeyDown
 void KeyDown(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = gEngfuncs.Cmd_Argv(1);
 	if (c[0])
@@ -348,7 +348,7 @@ KeyUp
 void KeyUp(kbutton_t *b)
 {
 	int k;
-	char *c;
+	const char *c;
 
 	c = gEngfuncs.Cmd_Argv(1);
 	if (c[0])

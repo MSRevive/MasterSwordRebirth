@@ -1141,6 +1141,7 @@ void CSprite::Spawn(void)
 	m_maxFrame = (float)MODEL_FRAMES(pev->modelindex) - 1;
 
 	// Strip edicts with no targetname or parent
+	/*
 	if (FStringNull(pev->targetname) && FNullEnt(pev->aiment))
 	{
 		pev->flags |= FL_CLIENTONLY;
@@ -1148,7 +1149,7 @@ void CSprite::Spawn(void)
 		SET_MODEL(ENT(pev), iStringNull);
 		UTIL_Remove(this);
 		return;
-	}
+	}*/
 
 	if (pev->targetname && !(pev->spawnflags & SF_SPRITE_STARTON))
 		TurnOff();
@@ -1320,14 +1321,14 @@ public:
 };
 
 TYPEDESCRIPTION CGibShooter::m_SaveData[] =
-	{
-		DEFINE_FIELD(CGibShooter, m_iGibs, FIELD_INTEGER),
-		DEFINE_FIELD(CGibShooter, m_iGibCapacity, FIELD_INTEGER),
-		DEFINE_FIELD(CGibShooter, m_iGibMaterial, FIELD_INTEGER),
-		DEFINE_FIELD(CGibShooter, m_iGibModelIndex, FIELD_INTEGER),
-		DEFINE_FIELD(CGibShooter, m_flGibVelocity, FIELD_FLOAT),
-		DEFINE_FIELD(CGibShooter, m_flVariance, FIELD_FLOAT),
-		DEFINE_FIELD(CGibShooter, m_flGibLife, FIELD_FLOAT),
+{
+	DEFINE_FIELD(CGibShooter, m_iGibs, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_iGibCapacity, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_iGibMaterial, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_iGibModelIndex, FIELD_INTEGER),
+	DEFINE_FIELD(CGibShooter, m_flGibVelocity, FIELD_FLOAT),
+	DEFINE_FIELD(CGibShooter, m_flVariance, FIELD_FLOAT),
+	DEFINE_FIELD(CGibShooter, m_flGibLife, FIELD_FLOAT),
 };
 
 IMPLEMENT_SAVERESTORE(CGibShooter, CBaseDelay);

@@ -17,6 +17,9 @@
 #pragma warning(disable : 26451) // Arithmetic overflow
 #pragma warning(disable : 26812) // The enum type is unscoped
 
+#include "steam/steamtypes.h"
+#include "common_types.h"
+
 // Misc C-runtime library headers
 #include <cctype>
 #include <climits>
@@ -34,7 +37,10 @@ using func_t = int;
 using vec_t = float;
 using word = unsigned short;
 
-#define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
+// #ifdef ARRAYSIZE
+// #undef ARRAYSIZE
+// #endif
+// #define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
 #define V_min(a, b) (((a) < (b)) ? (a) : (b))
 #define V_max(a, b) (((a) > (b)) ? (a) : (b))
 

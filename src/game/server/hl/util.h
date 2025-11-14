@@ -80,7 +80,9 @@ typedef int EOFFSET;
 typedef int BOOL;
 
 // In case this ever changes
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void UTIL_DLLEXPORT MethodName( void )
@@ -596,14 +598,14 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
 #define PRECACHE_SOUND_ARRAY(a)                \
 	{                                          \
-		for (int i = 0; i < ARRAYSIZE(a); i++) \
+		for (int i = 0; i < std::size(a); i++) \
 			PRECACHE_SOUND((char *)a[i]);      \
 	}
 
 #define EMIT_SOUND_ARRAY_DYN(chan, array) \
-	EMIT_SOUND_DYN(ENT(pev), chan, array[RANDOM_LONG(0, ARRAYSIZE(array) - 1)], 1.0, ATTN_NORM, 0, RANDOM_LONG(95, 105));
+	EMIT_SOUND_DYN(ENT(pev), chan, array[RANDOM_LONG(0, std::size(array) - 1)], 1.0, ATTN_NORM, 0, RANDOM_LONG(95, 105));
 
-#define RANDOM_SOUND_ARRAY(array) (array)[RANDOM_LONG(0, ARRAYSIZE((array)) - 1)]
+#define RANDOM_SOUND_ARRAY(array) (array)[RANDOM_LONG(0, std::size((array)) - 1)]
 
 #define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 #define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
