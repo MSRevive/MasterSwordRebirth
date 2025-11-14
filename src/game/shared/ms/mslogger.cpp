@@ -438,27 +438,6 @@ const char* MSLogger::GetCategoryName(Category cat) {
     return g_categoryNames[cat];
 }
 
-// Legacy compatibility functions
-void MSLoggerPrint(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    char buffer[4096];
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    va_end(args);
-    
-    MSLogger::Console("%s", buffer);
-}
-
-void MSLoggerLog(const char* fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    char buffer[4096];
-    vsnprintf(buffer, sizeof(buffer), fmt, args);
-    va_end(args);
-    
-    MSLogger::Debug(MSLogger::GENERAL, "%s", buffer);
-}
-
 // void MSErrorConsoleText(const char* pszLabel, const char* Progress)
 // {
 //     	//Print("%s, %s\n", pszLabel, Progress);

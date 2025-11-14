@@ -6957,38 +6957,10 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 
 	if (cc_found)
 	{
-		msstring out_error;
 		if (linenum == 0)
-			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str());
+			MS_ERROR("MSSCRIPT: CONFLICT ERROR [%s:%s]:(%s) %s %s", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str());
 		else
-			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s at %d\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
-
-		MS_WARN("MSSCRIPT: CONFLICT ERROR %s", out_error.c_str());
-		//be nice to be able to return the top script here, but buggers up if I try to pull the ent to do so
-		Print("%s", out_error.c_str());
-		MS_ERROR(out_error.c_str());
-		/*
-		if ( m.pScriptedEnt )
-		{
-			CBaseEntity *pEntity = m.pScriptedEnt;
-			IScripted *pScripted = (pEntity) ? pEntity->GetScripted() : NULL;
-			if ( pScripted )
-			{
-				cc_error_text.append( UTIL_VarArgs( "[%s]", pScripted->m_Scripts[0]->m.ScriptFile.c_str() ) );
-			}
-			else
-			{
-				cc_error_text.append( UTIL_VarArgs( "[*%s]", m.ScriptFile.c_str() ) );
-			}
-		}
-		else
-		{
-			cc_error_text.append( UTIL_VarArgs( "[*%s]", m.ScriptFile.c_str() ) );
-		}
-		logfile << "Conflict_error*: " << cc_error_text.c_str() << " : " << VarName.c_str() << "\n";
-		//Print("Conflict_error: %s with %s in %s:\n",cc_error_text.c_str(),VarName.c_str(), m.ScriptFile.c_str() );
-		//MSErrorConsoleText( "", UTIL_VarArgs("Conflict_error: %s with %s in %s:\n",cc_error_text.c_str(),VarName.c_str(), m.ScriptFile.c_str()) );
-		*/
+			MS_ERROR("MSSCRIPT: CONFLICT ERROR [%s:%s]:(%s) %s %s at %d", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
 	}
 }
 #endif

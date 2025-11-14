@@ -27,6 +27,7 @@
 //==========================================================================
 
 // Default log level for each category in debug builds.
+// We enable debug by default for right now because we're not released and still use MSScript
 #define MS_LOGGER_DEFAULT_LEVEL MSLogger::LEVEL_DEBUG
 #define MS_LOGGER_DEFAULT_AI_LEVEL MSLogger::LEVEL_TRACE
 #define MS_LOGGER_DEFAULT_SCRIPT_LEVEL MSLogger::LEVEL_DEBUG
