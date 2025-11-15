@@ -8,7 +8,7 @@
 class Parser
 {
 public:
-	Parser(const char* data, std::string file);
+	Parser(std::vector<std::byte> data, std::string file);
 	void stripComments();
 	void stripWhiteSpace();
 	void stripDebug();
@@ -21,6 +21,7 @@ public:
 	std::string getResult();
 	std::vector<std::string> getErrorlist();
 	void printErrors();
+	void saveResult(std::string file);
 
 	void saveErrors();
 

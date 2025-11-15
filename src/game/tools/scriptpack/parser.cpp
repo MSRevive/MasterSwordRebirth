@@ -10,87 +10,10 @@
 
 #include "cbase.h"
 
-Parser::Parser(const char *data, std::string file) {
+Parser::Parser(std::vector<std::byte> data, std::string file) {
 	m_FileName = file;
 	//m_Result = m_Data;
 }
-
-void Parser::stripComments()
-{
-	std::istringstream ss(m_Result);
-	std::string line;
-	std::string newRes;
-
-	//we have to build a new result.
-	while(getline(ss, line))
-	{
-		std::string nLine = "";
-		size_t lineLen = line.length();
-
-		for (size_t i = 0; i < lineLen; i++)
-		{
-			const char ch = line[i];
-			const char nextch = line[i+1]; //get next ch.
-
-			//remove comments.
-			if (ch == '/' && nextch == '/')
-				break;
-
-			//just remove return carriages here instead of doing erase.
-			if (ch == '\r')
-				break;
-
-			nLine += ch;
-		}
-
-		newRes += nLine;
-		newRes += "\n";
-	}
-
-	m_Result = newRes;
-}
-
-/*
-//credits to https://codereview.stackexchange.com/a/215913
-void Parser::stripComments()
-{
-	State cState = State::NotAComment;
-	std::string res;
-
-	for (size_t i = 0; i < m_Result.length(); i++)
-	{
-		const char ch = m_Result[i];
-		switch (cState)
-		{
-		case State::SlashOC:
-			if (ch == '/')
-			cState = State::SingleLineComment;
-			else
-			{
-			// ?????
-			cState = State::NotAComment;
-			res += ch;
-			}
-			break;
-		case State::SingleLineComment:
-			if (ch == '\n')
-			{
-			cState = State::NotAComment;
-			res += '\n';
-			}
-			break;
-		case State::NotAComment:
-			if (ch == '/')
-			cState = State::SlashOC;
-			else
-			res += ch;
-
-			break;
-		}
-	}
-
-	m_Result = res;
-}*/
 
 
 void Parser::stripWhiteSpace() {
@@ -113,23 +36,6 @@ void Parser::stripWhiteSpace() {
 				return isSpace(a) && isSpace(b);
 			}), std::end(line));
 
-			newRes += line;
-			newRes += "\n";
-		}
-	}
-
-	m_Result = newRes;
-}
-
-void Parser::stripDebug() {
-	std::istringstream ss(m_Result);
-	std::string line;
-	std::string newRes;
-
-	while(getline(ss, line))
-	{
-		if (line.substr(0, 3) != "dbg")
-		{
 			newRes += line;
 			newRes += "\n";
 		}
@@ -308,42 +214,6 @@ void Parser::saveResult(std::string file)
 	o.close();
 }
 
-//we have to use our own getline because of the mixed line endings.
-//credits to https://gist.github.com/josephwb/df09e3a71679461fc104
-std::istream& Parser::getline(std::istream &is, std::string &t) { 
-	t.clear();
-
-	// The characters in the stream are read one-by-one using a std::streambuf.
-	// That is faster than reading them one-by-one using the std::istream.
-	// Code that uses streambuf this way must be guarded by a sentry object.
-	// The sentry object performs various tasks,
-	// such as thread synchronization and updating the stream state.
-
-	std::istream::sentry se(is, true);
-	std::streambuf* sb = is.rdbuf();
-
-	for (;;) {
-		int c = sb->sbumpc();
-		switch (c) {
-			case '\n':
-				return is;
-			case '\r':
-				if (sb->sgetc() == '\n') {
-					sb->sbumpc();
-				}
-				return is;
-			case EOF:
-				// Also handle the case when the last line has no line ending
-				if (t.empty()) {
-					is.setstate(std::ios::eofbit);
-				}
-				return is;
-			default:
-				t += (char)c;
-		}
-	}
-}
-
 bool Parser::onlySpace(const std::string &str)
 {
 	return std::all_of(str.begin(), str.end(), isspace);
@@ -375,33 +245,3 @@ void Parser::quoteError(size_t line, size_t pos)
 {
 	addError("%s:%u.%u: unclosed quotation", line, pos);
 }
-
-//create directory recursively for scripts
-//modified from this https://gist.github.com/danzek/d7192d250c951804dec05125f5223a30
-/*
-void Parser::createDirectoryRecursively(std::string &path)
-{
-	static const std::string separators("\\/");
-
-	struct stat info;
-	if(stat(path.c_str(), &info) != 0)
-	{
-		// Recursively do it all again for the parent directory, if any
-		size_t slashIndex = path.find_last_of(separators);
-		if(slashIndex != std::string::npos) 
-		{
-			std::string parentPath = path.substr(0, slashIndex);
-			createDirectoryRecursively(parentPath);
-		}
-
-		// Create the last directory on the path (the recursive calls will have taken
-		// care of the parent directories by now)
-		int result = CreateDirectory(path.c_str(), NULL); // windows API use BOOL which is a int.
-		if(result == 0)
-		{
-			std::cout << path.c_str() << std::endl;
-			std::cout << "ERROR: Could not create directory!" << std::endl;
-			exit(-1);
-		}
-	}
-}*/

@@ -31,8 +31,6 @@ set(SRC_Files
 	"cbase.h"
 	"packer.cpp"
 	"packer.h"
-	"parser.cpp"
-	"parser.h"
 	"scriptpack.cpp"
 	"${BASEDIR}/src/game/shared/ms/crc/checksum_crc.cpp"
 	"${BASEDIR}/src/game/shared/ms/crc/checksum_crc.h"

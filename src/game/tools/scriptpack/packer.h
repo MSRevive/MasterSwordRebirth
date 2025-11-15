@@ -13,6 +13,9 @@ public:
 	void readDirectory(const char *pszName, bool cooked = false);
 	void catalogScripts();
 	void packScripts();
+	void stripComments(std::vector<std::byte>& data);
+	void stripWhiteSpace(std::vector<std::byte>& data);
+	void stripEmptyLines(std::vector<std::byte>& data);
   
 private:
 	char m_WorkDir[MAX_PATH];
@@ -21,8 +24,9 @@ private:
 	char m_OutDir[MAX_PATH];
 	std::vector<std::string> m_StoredFiles;
 	std::vector<std::string> m_CookedFiles;
+	std::vector<std::string> m_Errors;
 	
-	void processScript(const char *buffer, size_t bufferSize, std::string relativeFile, std::string createFile, bool errOnly);
+	void processScript(std::vector<std::byte> buffer, std::string relativeFile, std::string createFile, bool errOnly);
 
 	std::vector<std::byte> getFileContents(const std::string &path)
 	{
@@ -36,5 +40,24 @@ private:
 		file.read(reinterpret_cast<char*>(buffer.data()), fsize);
 
 		return buffer;
+	}
+
+	std::string trim(const std::string& str) {
+		// Standard whitespace characters
+		const std::string whitespace = " \t\n\r\f\v";
+
+		// Find the first character that is not whitespace
+		size_t start = str.find_first_not_of(whitespace);
+
+		// If only whitespace or empty, return an empty string
+		if (std::string::npos == start) {
+			return "";
+		}
+
+		// Find the last character that is not whitespace
+		size_t end = str.find_last_not_of(whitespace);
+
+		// Return the substring between start and end (inclusive)
+		return str.substr(start, (end - start) + 1);
 	}
 };
