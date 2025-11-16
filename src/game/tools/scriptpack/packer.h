@@ -4,14 +4,11 @@
 #include "msfileio.h"
 #include "groupfile.h"
 
-typedef unsigned char byte;
-
 class Packer 
 {
 public:
 	Packer(const char *wDir, const char* rDir, const char* oDir);
 	void readDirectory(const char *pszName, bool cooked = false);
-	void catalogScripts();
 	void packScripts();
 	void stripComments(std::vector<std::byte>& data);
 	void stripWhiteSpace(std::vector<std::byte>& data);
@@ -20,13 +17,11 @@ public:
 private:
 	char m_WorkDir[MAX_PATH];
 	char m_RootDir[MAX_PATH];
-	char m_CookedDir[MAX_PATH];
 	char m_OutDir[MAX_PATH];
 	std::vector<std::string> m_StoredFiles;
-	std::vector<std::string> m_CookedFiles;
 	std::vector<std::string> m_Errors;
 	
-	void processScript(std::vector<std::byte> buffer, std::string relativeFile, std::string createFile, bool errOnly);
+	void processScript(std::vector<std::byte> &buffer, std::string relativeFile);
 
 	std::vector<std::byte> getFileContents(const std::string &path)
 	{

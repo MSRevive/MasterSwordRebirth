@@ -66,10 +66,10 @@ int main(int argc, char** argv)
 		
 		Packer packer(workDir, rootDir, outDir);
 		packer.readDirectory(workDir);
-		packer.catalogScripts();
+
 		if(!packSwitch.getValue())
 		{
-			//packer.packScripts();
+			packer.packScripts();
 			printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
 		}
 		std::cout << "Finished..." << std::endl;

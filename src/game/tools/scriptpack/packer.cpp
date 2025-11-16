@@ -20,21 +20,8 @@ Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
 	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
 	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
 	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
-	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked", rDir);
 
 	std::cout << "Work directory set to: " << m_WorkDir << std::endl;
-	std::cout << "Cooked directory set to: " << m_CookedDir << std::endl;
-
-	if (g_Release)
-	{
-		std::filesystem::path fsPath = m_CookedDir;
-		std::error_code ec;
-		std::filesystem::create_directories(fsPath, ec);
-		if (ec) {
-			std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
-			exit(-1);
-		}
-	}
 }
 
 void Packer::readDirectory(const char *pszName, bool cooked)
@@ -59,62 +46,8 @@ void Packer::readDirectory(const char *pszName, bool cooked)
 				if( g_Verbose )
 					std::cout << file.string() << std::endl;
 
-				if(cooked)
-					m_CookedFiles.push_back(file.string());
-				else
-					m_StoredFiles.push_back(file.string());
+				m_StoredFiles.push_back(file.string());
 			}
-		}
-	}
-}
-
-//checks the scripts for errors and cleans them for release.
-void Packer::catalogScripts() 
-{
-	printf("size: %d\n", m_StoredFiles.size());
-
-	if(m_StoredFiles.size() > 0)
-	{
-		for(std::string &file : m_StoredFiles)
-		{
-			auto contents = getFileContents(file);
-
-			if(contents.size() > 0)
-			{
-				std::cout << file << std::endl;
-				std::string relativePath = file.substr(strlen(m_WorkDir) + 1, file.length());
-				std::cout << relativePath << std::endl;
-
-				if (g_Verbose)
-					std::cout << "Cataloging script: " << relativePath << std::endl;
-				
-				if (g_Release)
-				{
-					std::string cookedFile = m_CookedDir;
-					cookedFile += "/";
-					cookedFile += relativePath;
-
-					// std::ofstream o;
-					// o.open(cookedFile, std::ios::out | std::ios::binary);
-					// o.write(reinterpret_cast<const char*>(contents.data()), contents.size());
-					// o.close();
-
-					//reinterpret_cast<const char*>(contents.data())
-
-					std::thread parserThread(&Packer::processScript, this, contents, relativePath, cookedFile, false);
-					parserThread.join();
-				}
-				else
-				{
-					std::thread parserThread(&Packer::processScript, this, contents, relativePath, file, false);
-					parserThread.join();
-				}
-			}
-		}
-
-		if (g_Release)
-		{
-			readDirectory(m_CookedDir, true);
 		}
 	}
 }
@@ -129,6 +62,8 @@ void Packer::packScripts()
 	if(std::filesystem::exists(cWriteFile))
 		std::remove(cWriteFile);
 
+	std::cout << "DKJHFKGHJF: " << cWriteFile << std::endl;
+
 	FILE* fp = fopen(cWriteFile, "wb+");
 
 	if (fp == NULL)
@@ -137,19 +72,8 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	std::vector<std::string> files;
-
-	if (g_Release)
-	{
-		files = m_CookedFiles;
-	}
-	else
-	{
-		files = m_StoredFiles;
-	}
-
-	size_t baseDirLen = strlen(m_WorkDir)-1;
-	size_t listSize = files.size();
+	size_t baseDirLen = strlen(m_WorkDir) + 1;
+	size_t listSize = m_StoredFiles.size();
 
 	pakHeader_t Header;
 	Header.MagicNumber = 1262698832;
@@ -173,9 +97,9 @@ void Packer::packScripts()
 	// jump back to just after the header
 	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
 	
-	if (files.size() > 0 && baseDirLen > 0)
+	if (listSize > 0 && baseDirLen > 0)
 	{
-		for(std::string &file : files)
+		for(std::string &file : m_StoredFiles)
 		{
 			auto contents = getFileContents(file);
 
@@ -185,8 +109,12 @@ void Packer::packScripts()
 				std::string relativePath = file.substr(baseDirLen, file.length());
 				std::cout << relativePath << std::endl;
 
+				if (g_Verbose == true)
+					std::cout << "Processing " << relativePath << "..." << std::endl;
+				processScript(contents, relativePath);
+
 				pakDirectory_t File;
-				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename)); // was strlen(m_WorkDir)+1 but that's not the correct index anymore?
+				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename));
 				File.FileOffset = 0;
 				File.FileSize = contents.size();
 
@@ -238,18 +166,13 @@ void Packer::packScripts()
 	fclose(fp);
 }
 
-void Packer::processScript(std::vector<std::byte> buffer, std::string relativeFile, std::string createFile, bool errOnly)
+void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeFile)
 {
 	if (relativeFile == "items.txt")
 	{
-		std::ofstream o;
-		o.open(createFile, std::ios::out | std::ios::binary | std::ios::trunc);
-		o.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-		o.close();
 		return;
 	}
-
-	if (relativeFile.find(".as")) 
+	else if (relativeFile.find(".as") != std::string::npos)
 	{
 #ifdef _MSR_UTILS
 		// Check if this file contains module syntax
@@ -271,72 +194,16 @@ void Packer::processScript(std::vector<std::byte> buffer, std::string relativeFi
 				std::cout << "Note: File contains 'module' keyword but is not a valid module: " << relativeFile << std::endl;
 			}
 		}
+		return;
 #endif
 	}
-	else 
+	
+	if (g_Release)
 	{
 		stripComments(buffer);
-		stripWhiteSpace(buffer);
 		stripEmptyLines(buffer);
+		stripWhiteSpace(buffer);
 	}
-
-	
-
-
-	// if (relativeFile == "items.txt" && !errOnly)
-	// {
-	// 	Parser parser(buffer, relativeFile);
-	// 	parser.saveResult(createFile);
-	// }
-	// else
-	// {
-	// 	//we create parser object.
-	// 	Parser parser(buffer, relativeFile);
-	// 	parser.saveResult(createFile);
-	// 	//parser.stripComments();
-
-	// 	// // Preprocess module syntax before error checking
-	// 	// parser.preprocessModules();
-
-	// 	// //we check for errors here because comments were already replaced.
-	// 	// parser.checkQuotes(); //check for quote errors
-	// 	// //parser.checkBrackets(); //check for closing errors
-
-	// 	// //only run this stuff if we're doing full parser.
-	// 	// if (!errOnly)
-	// 	// {
-	// 	// 	parser.stripWhiteSpace();
-	// 	// 	parser.stripDebug();
-	// 	// }
-
-	// 	// //do error print at the end
-	// 	// parser.printErrors();
-	// 	// if (g_ErrFile)
-	// 	// 	parser.saveErrors();
-
-	// 	// if (!errOnly)
-	// 	// 	parser.saveResult(createFile);
-
-	// 	// if (g_FailOnErr && parser.errorCheck())
-	// 	// {
-	// 	// 	//delete[] ffile;
-	// 	// 	exit(-1);
-	// 	// }
-	// }
-
-	std::filesystem::path fsFile = createFile;
-	std::filesystem::path fsPath = fsFile.parent_path();
-
-	std::error_code ec;
-	std::filesystem::create_directories(fsPath, ec);
-	if (ec) {
-		std::cout << "ERROR: creating directories for " << fsPath << ": " << ec.message() << std::endl;
-	}
-
-	std::ofstream o;
-	o.open(createFile, std::ios::out | std::ios::binary | std::ios::trunc);
-	o.write(reinterpret_cast<const char*>(buffer.data()), buffer.size());
-	o.close();
 }
 
 void Packer::stripComments(std::vector<std::byte>& data)
@@ -448,6 +315,10 @@ void Packer::stripWhiteSpace(std::vector<std::byte>& data) {
 		} else {
 			break;
 		}
+	}
+
+	if (write_idx > 0 && static_cast<char>(data[write_idx - 1]) != '\n') {
+		data[write_idx++] = static_cast<std::byte>('\n');
 	}
 
 	data.resize(write_idx);
