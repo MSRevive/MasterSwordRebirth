@@ -62,8 +62,6 @@ void Packer::packScripts()
 	if(std::filesystem::exists(cWriteFile))
 		std::remove(cWriteFile);
 
-	std::cout << "DKJHFKGHJF: " << cWriteFile << std::endl;
-
 	FILE* fp = fopen(cWriteFile, "wb+");
 
 	if (fp == NULL)

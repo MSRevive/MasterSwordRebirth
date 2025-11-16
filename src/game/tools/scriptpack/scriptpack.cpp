@@ -1,7 +1,6 @@
 // 
 // Scriptpack.cpp : Defines the entry point for the console application.
 //
-#include <direct.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -27,7 +26,7 @@ int main(int argc, char** argv)
 		
 		//String arguements
 		char rootDir[MAX_PATH];
-		_getcwd(rootDir, MAX_PATH);
+		_snprintf(rootDir, MAX_PATH, "%s", std::filesystem::current_path().string().c_str());
 		_snprintf(workDir, MAX_PATH, "%s\\scripts", rootDir);
 		_snprintf(_outDir, MAX_PATH, "%s", rootDir);
 		
