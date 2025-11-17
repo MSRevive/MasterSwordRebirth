@@ -7,77 +7,62 @@
 #include "cbase.h"
 #include "packer.h"
 #include "crc/crchash.h"
-#include "tclap/CmdLine.h"
+#include "cxxopts.hpp"
 
-bool g_Verbose;
-bool g_Release;
+bool g_Verbose; //--verbose
+bool g_Release; //--release
 bool g_ErrFile;
-bool g_FailOnErr;
-bool g_NoPack;
+bool g_FailOnErr; //--fail
 
 int main(int argc, char** argv)
 {
-	try {
-		//Program description
-		TCLAP::CmdLine cmd("Packs via scripts for use with MSR", ' ', "0.9");
-		
-		char workDir[MAX_PATH];
-		char _outDir[MAX_PATH];
-		
-		//String arguements
-		char rootDir[MAX_PATH];
-		_snprintf(rootDir, MAX_PATH, "%s", std::filesystem::current_path().string().c_str());
-		_snprintf(workDir, MAX_PATH, "%s\\scripts", rootDir);
-		_snprintf(_outDir, MAX_PATH, "%s", rootDir);
-		
-		TCLAP::ValueArg<const char*> oDirArg("o", "output", "Output Directory", false, _outDir, "The output directory for packed scripts");
-		cmd.add(oDirArg);
-		
-		TCLAP::SwitchArg relSwitch("r", "release", "Release build, this will clean the scipts then pack them.", cmd, false);
-		TCLAP::SwitchArg verboseSwitch("v", "verbose", "Verbose printing.", cmd, false);
-		TCLAP::SwitchArg errFileSwitch("e", "errfile", "Print errors to text file.", cmd, false);
-		TCLAP::SwitchArg failErrSwitch("f", "fail", "Exit on script error.", cmd, false);
-		TCLAP::SwitchArg packSwitch("p", "pack", "Turn off script packing.", cmd, false);
-		
-		//Parse command line arguements
-		cmd.parse(argc, argv);
-		
-		const char *outDir = oDirArg.getValue();
-		//set global vars
-		g_Release = relSwitch.getValue();
-		g_Verbose = verboseSwitch.getValue();
-		g_ErrFile = errFileSwitch.getValue();
-		g_FailOnErr = failErrSwitch.getValue();
-		
-		if(!std::filesystem::exists(workDir))
-		{
-			printf("Error: work directory %s not found!\n", workDir);
-			exit(-1);
-		}
+	//Program description
+	cxxopts::Options options("ScriptPacker", "Packs the scripts used for MSR into single a Pak file.");
+	
+	std::string workDir = std::filesystem::current_path().string() + "\\scripts";
 
-		if(std::filesystem::exists("./errors.txt"))
-			std::remove("./errors.txt");
+	options.add_options()
+	("o,output", "The output directory for packed scripts", cxxopts::value<std::string>()->default_value(std::filesystem::current_path().string()))
+	("r,release", "Release build, this will clean the scripts then pack them.", cxxopts::value<bool>()->default_value("false"))
+	("v,verbose", "Verbose printing.", cxxopts::value<bool>()->default_value("false"))
+	("f,fail", "Exit on script error.", cxxopts::value<bool>()->default_value("false"))
+	("p,pack", "Turn off script packing.", cxxopts::value<bool>()->default_value("false"))
+	("h,help", "Print usage");
+	
+	//Parse command line arguements
+	auto result = options.parse(argc, argv);
 
-		if(!std::filesystem::exists(outDir))
-		{
-			printf("Error: output directory %s not found!\n", outDir);
-		}
-		
-		Packer packer(workDir, rootDir, outDir);
-		packer.readDirectory(workDir);
-
-		if(!packSwitch.getValue())
-		{
-			packer.packScripts();
-			printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
-		}
-		std::cout << "Finished..." << std::endl;
-	} 
-	catch (TCLAP::ArgException &err)
+	if (result.count("help"))
 	{
-		std::cout << "Error: " << err.error() << "for arg " << err.argId() << std::endl;
+		std::cout << options.help() << std::endl;
+		exit(0);
+	}
+	
+	std::string outDir = result["output"].as<std::string>();
+	g_Release = result["release"].as<bool>();
+	g_Verbose = result["verbose"].as<bool>();
+	g_FailOnErr = result["fail"].as<bool>();
+	
+	if(!std::filesystem::exists(workDir))
+	{
+		std::cout << "Error: work directory " << workDir << " not found!" << std::endl;
 		exit(-1);
 	}
+
+	if(!std::filesystem::exists(outDir))
+	{
+		std::cout << "Error: output directory " << outDir << " not found!" << std::endl;
+	}
+	
+	Packer packer(workDir, std::filesystem::current_path().string(), outDir);
+	packer.readDirectory(workDir);
+
+	if(result["pack"].as<bool>() == false)
+	{
+		packer.packScripts();
+		printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
+	}
+	std::cout << "Finished..." << std::endl;
 
 	return 0;
 }
