@@ -5,145 +5,61 @@
 
 #include "cbase.h"
 #include "packer.h"
-#include "../stream_safe.h"
-#include "parser.h"
-#include "compat.h"
-#include "dirent.h"
+//#include "parser.h"
+#ifdef _MSR_UTILS
+#include "scriptmodule/scriptmodule.h"
+#endif
 
 extern bool g_Verbose;
 extern bool g_Release;
 extern bool g_ErrFile;
 extern bool g_FailOnErr;
 
-Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
+Packer::Packer(std::string wDir, std::string rDir, std::string oDir)
 {
-	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
-	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
-	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
-	_snprintf(m_CookedDir, MAX_PATH, "%s\\cooked\\", rDir);
+	m_WorkDir = wDir;
+	m_RootDir = rDir;
+	m_OutDir = oDir;
 
-	if (g_Release)
-	{
-		if (!Compat::makePath(std::string(m_CookedDir)))
-		{
-			printf("Failed to create %s\n", m_CookedDir);
-			exit(-1);
-		}
-	}
+	std::cout << "Work directory set to: " << m_WorkDir << std::endl;
 }
 
-void Packer::readDirectory(char *pszName, bool cooked)
+void Packer::readDirectory(std::string pszName)
 {
-	char cFullPath[MAX_PATH];
-	DIR *dir = opendir(pszName);
-	if(!dir)
-		exit(-1);
+	std::filesystem::path fsPath = pszName;
 
-	struct dirent *ent;
-	while ((ent = readdir(dir)) != NULL)
+	for(const auto &entry : std::filesystem::recursive_directory_iterator(fsPath))
 	{
-		strcpy(cFullPath, pszName);
-		strcat(cFullPath, "/");
-		strcat(cFullPath, ent->d_name);
+		if (g_Release && entry.path().parent_path().filename() == "developer")
+			continue;
 
-		if (strcmp(ent->d_name, ".") != 0 && strcmp(ent->d_name, "..") != 0)
+		if (g_Verbose && entry.is_directory())
 		{
-			switch (ent->d_type)
-			{
-			case DT_REG:
-				//ignore non script files.
-				if(strstr(ent->d_name, ".script") || strstr(ent->d_name, ".as") || !stricmp(ent->d_name, "items.txt"))
-				{
-					if(cooked)
-						m_CookedFiles.add(cFullPath);
-					else
-						m_StoredFiles.add(cFullPath);
-				}
-				break;
-			case DT_DIR:
-				if (g_Verbose)
-					printf("Reading Directory: %s\n", ent->d_name);
-				
-				if (g_Release && !stricmp(ent->d_name, "developer"))
-					continue;
-
-				readDirectory(cFullPath, cooked);
-				break;
-			default:
-				break;
-			}
+			std::cout << "Reading Directory: " << entry.path().string() << std::endl;
 		}
-	}
 
-	closedir(dir);
-}
-
-//checks the scripts for errors and cleans them for release.
-void Packer::processScripts() 
-{
-	CMemFile InFile;
-	size_t listSize = m_StoredFiles.size();
-	printf("size: %d\n", listSize);
-
-	if(g_Release && listSize > 0)
-	{
-		for(size_t i = 0; i < listSize; i++)
+		if( entry.is_regular_file() )
 		{
-			msstring &FullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(FullPath))
+			auto file = entry.path();
+			if(file.extension() == ".script" || file.extension() == ".as" || file.filename() == "items.txt")
 			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
-				
-				char createFile[MAX_PATH];
-				_snprintf(createFile, MAX_PATH, "%s%s", m_CookedDir, cRelativePath);
-				
-				if (g_Verbose)
-					printf("Cleaning script: %s\n", cRelativePath);
-				
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, createFile, false);
-				parserThread.join();
-					
-				if (g_Verbose)
-					printf("End script cleaning: %s\n\n", cRelativePath);
-			}
-		}
-		
-		//read the cooked dir once scripts are cooked.
-		readDirectory(m_CookedDir, true);
-	}
-	else if (!g_Release && listSize > 0)
-	{
-		for(size_t i = 0; i < listSize; i++)
-		{
-			msstring &FullPath = m_StoredFiles[i];
-			if(InFile.ReadFromFile(FullPath))
-			{
-				char cRelativePath[MAX_PATH];
-				strncpy(cRelativePath, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), MAX_PATH);
+				if( g_Verbose )
+					std::cout << file.string() << std::endl;
 
-				if (g_Verbose)
-					printf("Error checking script: %s\n", cRelativePath);
-
-				std::thread parserThread(&Packer::doParser, this, InFile.m_Buffer, InFile.m_BufferSize, cRelativePath, FullPath, true);
-				parserThread.join();
-
-				if (g_Verbose)
-					printf("End script processing: %s\n\n", cRelativePath);
+				m_StoredFiles.push_back(file.string());
 			}
 		}
 	}
 }
 
-//packs the scripts.
+// packs the scripts.
+// we have to use c strings here because MSR does.
 void Packer::packScripts()
 {
-	//we want to make scripts.pak in via root dir.
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir);
-	
-	struct stat info;
-	if(stat(cWriteFile, &info) == 0)
+	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir.c_str());
+
+	if(std::filesystem::exists(cWriteFile))
 		std::remove(cWriteFile);
 
 	FILE* fp = fopen(cWriteFile, "wb+");
@@ -154,21 +70,13 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	msstringlist files;
-
-	if (g_Release)
-	{
-		files = m_CookedFiles;
-	}
-	else
-	{
-		files = m_StoredFiles;
-	}
+	size_t baseDirLen = m_WorkDir.size() + 1;
+	size_t listSize = m_StoredFiles.size();
 
 	pakHeader_t Header;
 	Header.MagicNumber = 1262698832;
 	Header.DirectoryOffset = sizeof(pakHeader_t);
-	Header.DirectoryCount = files.size();
+	Header.DirectoryCount = listSize;
 
 	pakDirectory_t dummy;
 	strcpy(dummy.cFilename, "");
@@ -177,9 +85,6 @@ void Packer::packScripts()
 
 	// write the file header
 	fwrite(&Header, sizeof(pakHeader_t), 1, fp);
-
-	CMemFile InFile;
-	size_t listSize = files.size();
 
 	// write out dummy data to occupy the file metadata position
 	for (int i = 0; i < listSize; i++)
@@ -190,17 +95,31 @@ void Packer::packScripts()
 	// jump back to just after the header
 	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
 
-	if (listSize > 0)
+	size_t count = 0;
+	
+	if (listSize > 0 && baseDirLen > 0)
 	{
-		for (size_t i = 0; i < listSize; i++)
+		std::cout << listSize << std::endl;
+		for(std::string &file : m_StoredFiles)
 		{
-			msstring &FullPath = files[i];
-			if (InFile.ReadFromFile(FullPath))
+			std::cout << "Script #" << count << std::endl;
+			count++;
+			auto contents = getFileContents(file);
+
+			if (contents.size() > 0)
 			{
+				std::cout << file << std::endl;
+				std::string relativePath = file.substr(baseDirLen, file.length());
+				std::cout << relativePath << std::endl;
+
+				if (g_Verbose == true)
+					std::cout << "Processing " << relativePath << "..." << std::endl;
+				processScript(contents, relativePath);
+
 				pakDirectory_t File;
-				strncpy(File.cFilename, &(FullPath.c_str()[strlen(m_WorkDir) + 1]), sizeof(File.cFilename));
+				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename));
 				File.FileOffset = 0;
-				File.FileSize = InFile.m_BufferSize;
+				File.FileSize = contents.size();
 
 				if (g_Verbose == true)
 					printf("Packing file: %s\n", File.cFilename);
@@ -221,7 +140,7 @@ void Packer::packScripts()
 				File.FileOffset = ftell(fp);
 
 				// write the file data
-				ObjectsWritten = fwrite(InFile.m_Buffer, InFile.m_BufferSize, 1, fp);
+				ObjectsWritten = fwrite(reinterpret_cast<const char*>(contents.data()), contents.size(), 1, fp);
 
 				if (ObjectsWritten != 1)
 					printf("Failed to write file: %s\n", File.cFilename);
@@ -237,69 +156,240 @@ void Packer::packScripts()
 		
 				if (ObjectsWritten != 1)
 					printf("Failed to write entry: %s\n", File.cFilename);
+
+				std::cout << std::endl;
+			}
+			else
+			{
+				std::cout << "ERROR: file: " << file << " is empty!" << std::endl;
 			}
 		}
 	}
 	else
 	{
-		std::cout << "ERROR: No files found!" << std::endl;
+		std::cout << "ERROR: No files in list!" << std::endl;
 		exit(-1);
 	}
-	
-	// close and flush
+
+	std::cout << "Finished packing..." << std::endl;
+
+
 	fflush(fp);
 	fclose(fp);
+} 
+
+void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeFile)
+{
+	if (relativeFile == "items.txt")
+	{
+		return;
+	}
+	else if (relativeFile.find(".as") != std::string::npos)
+	{
+#ifdef _MSR_UTILS
+		// Check if this file contains module syntax
+		std::string norm_str(reinterpret_cast<const char*>(buffer.data()));
+		if (norm_str.find("module ") != std::string::npos)
+		{
+			// Use the scriptmodule addon to preprocess the file
+			CScriptModule moduleProcessor;
+			std::string moduleName;
+			std::string processedSource;
+
+			if (moduleProcessor.PreprocessModuleSource(norm_str, processedSource, moduleName))
+			{
+				norm_str = processedSource;
+				std::cout << "Preprocessed module: " << moduleName << " in " << relativeFile << std::endl;
+			}
+			else
+			{
+				std::cout << "Note: File contains 'module' keyword but is not a valid module: " << relativeFile << std::endl;
+			}
+		}
+		return;
+#endif
+	}
+	
+	if (g_Release)
+	{
+		stripComments(buffer);
+		stripEmptyLines(buffer);
+		stripWhiteSpace(buffer);
+	}
 }
 
-void Packer::doParser(byte *buffer, size_t bufferSize, char *name, char *create, bool errOnly)
+void Packer::stripComments(std::vector<std::byte>& data)
 {
-	//need buffersize + 1 to make room for the null terminator
-	size_t bufSize = bufferSize+1;
-
-	//we want to use snprintf instead of strncpy or memcpy because it applies a null terminator.
-	char *ffile = new char[bufSize]();
-	snprintf(ffile, bufSize, "%s", buffer);
-
-	if (!stricmp(name, "items.txt") && !errOnly)
-	{
-		Parser parser(ffile, name);
-		parser.saveResult(create);
+	if (data.empty()) {
+		return;
 	}
-	else
-	{
-		//we create parser object.
-		Parser parser(ffile, name);
-		parser.stripComments();
 
-		// Preprocess module syntax before error checking
-		parser.preprocessModules();
+	size_t write_idx = 0;
+	bool in_comment = false; // Are we inside a comment?
+	bool in_string = false; // Are we inside a string?
 
-		//we check for errors here because comments were already replaced.
-		parser.checkQuotes(); //check for quote errors
-		parser.checkBrackets(); //check for closing errors
-
-		//only run this stuff if we're doing full parser.
-		if (!errOnly)
-		{
-			parser.stripWhitespace();
-			parser.stripDebug();
+	for (size_t read_idx = 0; read_idx < data.size(); ++read_idx) {
+		
+		const char c = static_cast<char>(data[read_idx]);
+		
+		char next_c = '\0'; // Look-ahead character
+		if (read_idx + 1 < data.size()) {
+			next_c = static_cast<char>(data[read_idx + 1]);
 		}
 
-		//do error print at the end
-		parser.printErrors();
-		if (g_ErrFile)
-			parser.saveErrors();
+		if (in_string) {
+			if (c == '"' && (write_idx == 0 || static_cast<char>(data[write_idx - 1]) != '\\')) {
+				in_string = false;
+			}
 
-		if (!errOnly)
-			parser.saveResult(create);
-
-		if (g_FailOnErr && parser.errorCheck())
-		{
-			delete[] ffile;
-			exit(-1);
+			data[write_idx++] = data[read_idx];
+		} else if (in_comment) {
+			if (c == '\n') {
+				in_comment = false;
+				data[write_idx++] = data[read_idx];
+			}
+		} else {
+			if (c == '"') {
+				in_string = true;
+				data[write_idx++] = data[read_idx];
+			
+			} else if (c == '/' && next_c == '/') {
+				in_comment = true;
+				read_idx++; 
+			} else {
+				data[write_idx++] = data[read_idx];
+			}
 		}
 	}
 
-	//deallocate memory for object when done.
-	delete[] ffile;
+	data.resize(write_idx);
+}
+
+void Packer::stripWhiteSpace(std::vector<std::byte>& data) {
+	if (data.empty()) {
+		return;
+	}
+
+	size_t write_idx = 0;
+	bool in_string = false; // Are we inside a string?
+	bool at_start_of_line = true; // Are we at the start of a (potential) line?
+	bool last_char_was_space = false; // Was the last *written* char a space?
+
+	for (size_t read_idx = 0; read_idx < data.size(); ++read_idx) {
+		const char c = static_cast<char>(data[read_idx]);
+
+		if (in_string) {
+			data[write_idx++] = data[read_idx];
+
+			if (c == '"' && (write_idx <= 1 || static_cast<char>(data[write_idx - 2]) != '\\')) {
+				in_string = false;
+			}
+
+			at_start_of_line = false;
+			last_char_was_space = false;
+		} else {
+			if (c == '"') {
+				in_string = true;
+				data[write_idx++] = data[read_idx];
+				at_start_of_line = false;
+				last_char_was_space = false;
+
+			} else if (c == '\n') {
+				if (!at_start_of_line) {
+					data[write_idx++] = data[read_idx];
+				}
+
+				at_start_of_line = true; 
+				last_char_was_space = true;
+
+			} else if (c == ' ' || c == '\t') {
+				if (at_start_of_line) {
+					continue; // Skip
+				}
+
+				if (!last_char_was_space) {
+					data[write_idx++] = static_cast<std::byte>(' '); 
+					last_char_was_space = true;
+				}
+
+			} else {
+				data[write_idx++] = data[read_idx];
+				at_start_of_line = false;
+				last_char_was_space = false;
+			}
+		}
+	}
+
+	while (write_idx > 0) {
+		char c = static_cast<char>(data[write_idx - 1]);
+		if (std::isspace(static_cast<unsigned char>(c))) {
+			write_idx--;
+		} else {
+			break;
+		}
+	}
+
+	data.resize(write_idx);
+
+	if (!data.empty() && static_cast<char>(data[write_idx - 1]) != '\n') {
+		data.push_back(static_cast<std::byte>('\n'));
+	}
+}
+
+void Packer::stripEmptyLines(std::vector<std::byte>& data) {
+	if (data.empty()) {
+		return;
+	}
+
+	const std::byte* begin = data.data();
+	const std::byte* end = data.data() + data.size();
+	const std::byte* current = begin;
+
+	std::vector<std::byte> temp_result_bytes;
+
+	bool input_ends_with_newline = !data.empty() && 
+									(static_cast<char>(data.back()) == '\n' || 
+									static_cast<char>(data.back()) == '\r');
+
+	bool first_line = true;
+
+	while (current < end) {
+		const std::byte* line_end = current;
+		while (line_end < end && static_cast<char>(*line_end) != '\n') {
+			line_end++;
+		}
+		
+		const std::byte* line_content_end = line_end;
+		if (line_content_end > current && static_cast<char>(*(line_content_end - 1)) == '\r') {
+			line_content_end--;
+		}
+
+		size_t line_length = line_content_end - current;
+		
+		std::string current_line(
+			reinterpret_cast<const char*>(current), 
+			line_length
+		);
+
+		if (!trim(current_line).empty()) {
+			if (!first_line) {
+				temp_result_bytes.push_back(static_cast<std::byte>('\n'));
+			}
+
+			temp_result_bytes.insert(temp_result_bytes.end(), current, line_content_end);
+			first_line = false;
+		}
+
+		if (line_end < end) {
+			current = line_end + 1;
+		} else {
+			current = end;
+		}
+	}
+
+	if (!temp_result_bytes.empty() && input_ends_with_newline && static_cast<char>(temp_result_bytes.back()) != '\n') {
+		temp_result_bytes.push_back(static_cast<std::byte>('\n'));
+	}
+
+	data.swap(temp_result_bytes);
 }

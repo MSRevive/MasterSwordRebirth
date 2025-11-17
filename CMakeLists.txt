@@ -137,10 +137,7 @@ add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 # Add Projects
 add_subdirectory(src/game/client)
 add_subdirectory(src/game/server)
-# TODO: make scriptpack tool Linux compatible.
-if (WIN32)
-	add_subdirectory(src/game/tools/scriptpack)
-endif()
+add_subdirectory(src/game/tools/scriptpack)
 
 # Set Visual Studio starting project
 if (MSVC)
@@ -154,5 +151,9 @@ if(MSVC)
 endif()
 
 set_target_properties(server PROPERTIES 
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release)
+
+set_target_properties(scriptpack PROPERTIES 
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release)
