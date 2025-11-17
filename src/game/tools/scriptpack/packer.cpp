@@ -15,16 +15,16 @@ extern bool g_Release;
 extern bool g_ErrFile;
 extern bool g_FailOnErr;
 
-Packer::Packer(const char* wDir, const char* rDir, const char* oDir)
+Packer::Packer(std::string wDir, std::string rDir, std::string oDir)
 {
-	_snprintf(m_WorkDir, MAX_PATH, "%s", wDir);
-	_snprintf(m_RootDir, MAX_PATH, "%s", rDir);
-	_snprintf(m_OutDir, MAX_PATH, "%s", oDir);
+	m_WorkDir = wDir;
+	m_RootDir = rDir;
+	m_OutDir = oDir;
 
 	std::cout << "Work directory set to: " << m_WorkDir << std::endl;
 }
 
-void Packer::readDirectory(const char *pszName, bool cooked)
+void Packer::readDirectory(std::string pszName)
 {
 	std::filesystem::path fsPath = pszName;
 
@@ -57,7 +57,7 @@ void Packer::readDirectory(const char *pszName, bool cooked)
 void Packer::packScripts()
 {
 	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir);
+	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir.c_str());
 
 	if(std::filesystem::exists(cWriteFile))
 		std::remove(cWriteFile);
@@ -70,7 +70,7 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
-	size_t baseDirLen = strlen(m_WorkDir) + 1;
+	size_t baseDirLen = m_WorkDir.size() + 1;
 	size_t listSize = m_StoredFiles.size();
 
 	pakHeader_t Header;
@@ -94,11 +94,16 @@ void Packer::packScripts()
 
 	// jump back to just after the header
 	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
+
+	size_t count = 0;
 	
 	if (listSize > 0 && baseDirLen > 0)
 	{
+		std::cout << listSize << std::endl;
 		for(std::string &file : m_StoredFiles)
 		{
+			std::cout << "Script #" << count << std::endl;
+			count++;
 			auto contents = getFileContents(file);
 
 			if (contents.size() > 0)
@@ -151,6 +156,12 @@ void Packer::packScripts()
 		
 				if (ObjectsWritten != 1)
 					printf("Failed to write entry: %s\n", File.cFilename);
+
+				std::cout << std::endl;
+			}
+			else
+			{
+				std::cout << "ERROR: file: " << file << " is empty!" << std::endl;
 			}
 		}
 	}
@@ -160,9 +171,12 @@ void Packer::packScripts()
 		exit(-1);
 	}
 
+	std::cout << "Finished packing..." << std::endl;
+
+
 	fflush(fp);
 	fclose(fp);
-}
+} 
 
 void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeFile)
 {
@@ -315,11 +329,11 @@ void Packer::stripWhiteSpace(std::vector<std::byte>& data) {
 		}
 	}
 
-	if (write_idx > 0 && static_cast<char>(data[write_idx - 1]) != '\n') {
-		data[write_idx++] = static_cast<std::byte>('\n');
-	}
-
 	data.resize(write_idx);
+
+	if (!data.empty() && static_cast<char>(data[write_idx - 1]) != '\n') {
+		data.push_back(static_cast<std::byte>('\n'));
+	}
 }
 
 void Packer::stripEmptyLines(std::vector<std::byte>& data) {

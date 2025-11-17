@@ -7,17 +7,17 @@
 class Packer 
 {
 public:
-	Packer(const char *wDir, const char* rDir, const char* oDir);
-	void readDirectory(const char *pszName, bool cooked = false);
+	Packer(std::string wDir, std::string rDir, std::string oDir);
+	void readDirectory(std::string pszName);
 	void packScripts();
 	void stripComments(std::vector<std::byte>& data);
 	void stripWhiteSpace(std::vector<std::byte>& data);
 	void stripEmptyLines(std::vector<std::byte>& data);
   
 private:
-	char m_WorkDir[MAX_PATH];
-	char m_RootDir[MAX_PATH];
-	char m_OutDir[MAX_PATH];
+	std::string m_WorkDir;
+	std::string m_RootDir;
+	std::string m_OutDir;
 	std::vector<std::string> m_StoredFiles;
 	std::vector<std::string> m_Errors;
 	
