@@ -22,18 +22,15 @@ target_include_directories(scriptpack PRIVATE
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
 	${CMAKE_CURRENT_SOURCE_DIR}
-	tclap)
+	cxxopts)
 
 ################################################################################
 # Source groups
 ################################################################################
 set(SRC_Files
 	"cbase.h"
-	"compat.h"
-	"dirent.h"
 	"packer.cpp"
 	"packer.h"
-	"parser.h"
 	"scriptpack.cpp"
 	"${BASEDIR}/src/game/shared/ms/crc/checksum_crc.cpp"
 	"${BASEDIR}/src/game/shared/ms/crc/checksum_crc.h"
@@ -45,6 +42,7 @@ set(SRC_Files
 	"${BASEDIR}/src/game/shared/ms/stackstring.cpp"
 	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.cpp"
 	"${BASEDIR}/src/game/shared/ms/angelscript/addons/scriptmodule/scriptmodule.h"
+	"cxxopts/cxxopts.hpp"
 )
 source_group("Source Files" FILES ${SRC_Files})
 
