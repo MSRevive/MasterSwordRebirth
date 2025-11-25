@@ -241,8 +241,9 @@ public:
 			CScriptModule moduleProcessor;
 			std::string moduleName;
 			std::string processedSource;
+            std::string namespaceName = "GameMaster";
 			
-			if (moduleProcessor.PreprocessModuleSource(m_Result, processedSource, moduleName))
+			if (moduleProcessor.PreprocessModuleSource(m_Result, processedSource, moduleName, namespaceName))
 			{
 				m_Result = processedSource;
 				std::cout << "Preprocessed module: " << moduleName << " in " << m_FileName << std::endl;
