@@ -25,7 +25,7 @@ CScript *CGlobalScriptedEffects::ApplyEffect(const char* ScriptName, IScripted *
 	CScript *Script = pScriptTarget->Script_Add(ScriptName, pTarget);
 	if (!Script)
 	{
-		MSErrorConsoleText("CGlobalScriptedEffects::ApplyEffect()", msstring("Scripted Effect '") + ScriptName + "' does not exist!'");
+		MS_ERROR("CGlobalScriptedEffects::ApplyEffect(): Scripted Effect '%s' does not exist!", ScriptName);
 		return NULL;
 	}
 

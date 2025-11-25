@@ -267,7 +267,7 @@ void ClientPutInServer(edict_t *pEntity)
 
 		strncpy(pPlayer->m_ClientAddress, g_NewClients[iPlayerOfs].Addr, sizeof(pPlayer->m_ClientAddress));
 	}else{
-		MSErrorConsoleText("ClientPutInServer", "Player already has Address");
+		MS_ERROR("ClientPutInServer Player already has Address");
 	}
 	
 	char msg[256];
@@ -1113,7 +1113,7 @@ void ClientCommand2(edict_t *pEntity)
 			if (pItem)
 				pPlayer->DropItem(pItem, false, true);
 			else
-				MSErrorConsoleText("ClientCommand()", msstring("'drop' cmd couldn't find item to drop"));
+				MS_ERROR("ClientCommand() 'drop' cmd couldn't find item to drop");
 		}
 		else
 		{
@@ -1440,10 +1440,10 @@ void ClientCommand2(edict_t *pEntity)
 					//pPlayer->m_fClientInitiated = false;
 				}
 				else
-					MSErrorConsoleText("ClientCommand - inv get item", msstring("Item ") + atoi(CMD_ARGV(3)) + " does not exist on player!");
+					MS_ERROR("ClientCommand - inv get item %i does not exist on player!", atoi(CMD_ARGV(3)));
 			}
 			else
-				MSErrorConsoleText("ClientCommand - inv get item", msstring("Pack ") + atoi(CMD_ARGV(2)) + " does not exist on player!");
+				MS_ERROR("ClientCommand - inv get item Pack %i does not exist on player!", atoi(CMD_ARGV(2)));
 		}
 		else if (FStrEq(CMD_ARGV(1), "open"))
 		{
@@ -1921,7 +1921,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			}
 			catch (...)
 			{
-				MSErrorConsoleText("ServerActivate", Dbgstr);
+				MS_ERROR("ServerActivate %s", Dbgstr);
 			}
 		}
 		//else
@@ -2390,7 +2390,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	
 		// Ignore if not the host and not touching a PVS/PAS leaf
 		// If pSet is NULL, then the test will always succeed and the entity will be added to the update
-		if (ent != host && !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
+		if (ent != host || !FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 		{
 			if (!ENGINE_CHECK_VISIBILITY((const struct edict_s *)ent, pSet))
 			{
@@ -2489,13 +2489,9 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 
 	// This replaces the above code.
 	if ((ent->v.flags & FL_FLY) != 0)
-	{
 		state->eflags |= EFLAG_SLERP;
-	}
 	else
-	{
 		state->eflags &= ~EFLAG_SLERP;
-	}
 
 	state->eflags |= entity->m_EFlags;
 
@@ -2547,7 +2543,8 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 			state->owner = owner;
 	}
 
-	if (FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE)) //For Master Sword's special follow
+	//For Master Sword's special follow
+	if (FBitSet(ent->v.playerclass, ENT_EFFECT_FOLLOW_ROTATE))
 	{
 		state->origin = ent->v.vuser1;
 		if (ent->v.owner)
@@ -2693,7 +2690,7 @@ static entity_field_alias_t entity_field_alias[] =
 
 void Entity_FieldInit(struct delta_s *pFields)
 {
-	int EntityFields = ARRAYSIZE(entity_field_alias);
+	int EntityFields = std::size(entity_field_alias);
 	for (int i = 0; i < EntityFields; i++)
 		entity_field_alias[i].field = DELTA_FINDFIELD(pFields, entity_field_alias[i].name);
 }

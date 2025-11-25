@@ -343,7 +343,7 @@ const char* CScript::GetConst(const char* Text)
 			return ReturnString;
 		}
 		else
-			MSErrorConsoleText(__FUNCTION__, UTIL_VarArgs("Script: %s, \"%s\" - Mismatched Parenthesis!\n", m.ScriptFile.c_str(), Text));
+			MS_ERROR("%s: Script: %s, \"%s\" - Mismatched Parenthesis!", m.ScriptFile.c_str(), Text);
 	}
 	else
 		for (int i = 0; i < m_Constants.size(); i++)
@@ -720,7 +720,7 @@ msstring CScript::ScriptGetter_CapFirst(msstring& FullName, msstring& ParserName
 	{
 		msstring sen = Params[0];
 		msstring f = sen;
-		f = strupr(f);
+		f = _strupr(f);
 		sen.str()[0] = f.str()[0];
 		return sen;
 	}
@@ -1305,12 +1305,12 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 					bool                    bCaseInsensitive = Params.size() > vParam ? atoi(Params[vParam++]) == 1 : false;
 
 					vStrtIndx = V_max(vStrtIndx, 0);
-					if (bCaseInsensitive) vsSrch = strlwr(vsSrch);
+					if (bCaseInsensitive) vsSrch = _strlwr(vsSrch);
 					for (size_t i = vStrtIndx; i < pArray->size(); ++i)
 					{
 						bool                bFnd = false;
 						msstring            vsCur = (*pArray)[i];
-						if (bCaseInsensitive) vsCur = strlwr(vsCur);
+						if (bCaseInsensitive) vsCur = _strlwr(vsCur);
 
 						switch (vSrchType)
 						{
@@ -1364,7 +1364,7 @@ msstring CScript::ScriptGetter_GetAttackProp(msstring& FullName, msstring& Parse
 		//Thothie OCT2016_22 sanity check
 		if (!pItem)
 		{
-			MSErrorConsoleText("$get_attackprop", UTIL_VarArgs(" used on non-item! %s\n", m.ScriptFile.c_str()));
+			MS_ERROR("$get_attackprop used on non-item! %s", m.ScriptFile.c_str());
 			return "0";
 		}
 
@@ -2490,7 +2490,7 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 	}
 	else
 	{
-		MSErrorConsoleText("scriptflags", UTIL_VarArgs("$get_scriptflags target entity not found in %s\n", m.ScriptFile.c_str()));
+		MS_ERROR("scriptflags $get_scriptflags target entity not found in %s", m.ScriptFile.c_str());
 	}
 #endif
 
@@ -3295,7 +3295,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 				RETURN_FLOAT(sin(atof(Params[1])));
 			}
 		}
-		MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", m.ScriptFile.c_str(), ParserName.c_str()));
+		MS_ERROR("ExecuteScriptCmd Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), ParserName.c_str());
 		return "0";
 	}
 
@@ -3394,13 +3394,13 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 		else
 		{
 			end_result = 0;
-			MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters for $math capvar!\n", m.ScriptFile.c_str(), ParserName.c_str()));
+			MS_ERROR("ExecuteScriptCmd Script: %s, %s - not enough parameters for $math capvar!", m.ScriptFile.c_str(), ParserName.c_str());
 		}
 	}
 
 	if (!legit_command)
 	{
-		MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - %s is an invalid operation!\n", m.ScriptFile.c_str(), ParserName.c_str(), op_type.c_str()));
+		MS_ERROR("ExecuteScriptCmd Script: %s, %s - %s is an invalid operation!", m.ScriptFile.c_str(), ParserName.c_str(), op_type.c_str());
 		return "0";
 	}
 
@@ -5880,7 +5880,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/,
 		{
 			if (!ParentCmds.size())
 			{
-				MSErrorConsoleText(__FUNCTION__, UTIL_VarArgs("Script: %s, Line: %i - %s \"{\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer));
+				MS_ERROR("%s: Script: %s, Line: %i - %s \"{\" following non conditional command!", __FUNCTION__, m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer);
 				return 0;
 			}
 
@@ -6030,7 +6030,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/,
 				}
 			}
 			else
-				MSErrorConsoleText("SCript::ParseLine()", msstring("Script: ") + (const char*)m.ScriptFile.c_str() + " Line: " + LineNum + " - if() statement missing ')'!\n");
+				MS_ERROR("Script::ParseLine() Script: %s Line: %i - if() statement missing ')'!", (const char*)m.ScriptFile.c_str(), LineNum);
 		}
 	}
 	else if (!_stricmp(TestCommand, "else"))
@@ -6054,7 +6054,8 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/,
 			else
 				return 2; //Return 2 so any parent command knows I'm not done yet
 		}
-		else MSErrorConsoleText("CSript::ParseLine", UTIL_VarArgs("Script: %s, Line: %i - %s \"else\" following non conditional command!\n", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer));
+		else 
+			MS_ERROR("CSript::ParseLine Script: %s, Line: %i - %s \"else\" following non conditional command!", m.ScriptFile.c_str(), LineNum, TestCommand, cBuffer);
 	}
 	else if (!_stricmp(TestCommand, "eventname"))
 	{
@@ -6389,7 +6390,7 @@ int CScript::ParseLine(const char* pszCommandLine /*in*/,
 					LineOfs++;					//Skip the closing quote
 				}
 				else	//Error: No closing quotes
-					MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, cBuffer));
+					MS_ERROR("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!", m.ScriptFile.c_str(), LineNum, cBuffer);
 			}
 
 			ScriptCmd.m_Params.add(GetConst(cBuffer));	//Resolve constants, but not variables
@@ -6411,7 +6412,8 @@ DontKeepCommand:
 			*pCurrentCmds = ParentCmds[ParentCmds.size() - 1];
 			ParentCmds.erase(ParentCmds.size() - 1);
 		}
-		else MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!\n", m.ScriptFile.c_str(), LineNum, cBuffer));
+		else 
+			MS_ERROR("Script: %s, Line: %i - Conditional command returned to parent cmd list but the parent list wasn't found!", m.ScriptFile.c_str(), LineNum, cBuffer);
 	}
 
 	return 1;
@@ -6955,38 +6957,10 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 
 	if (cc_found)
 	{
-		msstring out_error;
 		if (linenum == 0)
-			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str());
+			MS_ERROR("MSSCRIPT: CONFLICT ERROR [%s:%s]:(%s) %s %s", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str());
 		else
-			out_error = UTIL_VarArgs("CONFLICT_ERROR! [%s:%s]:(%s) %s %s at %d\n", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
-
-		MS_WARN("MSSCRIPT: CONFLICT ERROR %s", out_error.c_str());
-		//be nice to be able to return the top script here, but buggers up if I try to pull the ent to do so
-		Print("%s", out_error.c_str());
-		MSErrorConsoleText("", out_error.c_str());
-		/*
-		if ( m.pScriptedEnt )
-		{
-			CBaseEntity *pEntity = m.pScriptedEnt;
-			IScripted *pScripted = (pEntity) ? pEntity->GetScripted() : NULL;
-			if ( pScripted )
-			{
-				cc_error_text.append( UTIL_VarArgs( "[%s]", pScripted->m_Scripts[0]->m.ScriptFile.c_str() ) );
-			}
-			else
-			{
-				cc_error_text.append( UTIL_VarArgs( "[*%s]", m.ScriptFile.c_str() ) );
-			}
-		}
-		else
-		{
-			cc_error_text.append( UTIL_VarArgs( "[*%s]", m.ScriptFile.c_str() ) );
-		}
-		logfile << "Conflict_error*: " << cc_error_text.c_str() << " : " << VarName.c_str() << "\n";
-		//Print("Conflict_error: %s with %s in %s:\n",cc_error_text.c_str(),VarName.c_str(), m.ScriptFile.c_str() );
-		//MSErrorConsoleText( "", UTIL_VarArgs("Conflict_error: %s with %s in %s:\n",cc_error_text.c_str(),VarName.c_str(), m.ScriptFile.c_str()) );
-		*/
+			MS_ERROR("MSSCRIPT: CONFLICT ERROR [%s:%s]:(%s) %s %s at %d", testvar_scope.c_str(), m.ScriptFile.c_str(), cc_conflict_rep.c_str(), testvar_type.c_str(), testvar.c_str(), linenum);
 	}
 }
 #endif

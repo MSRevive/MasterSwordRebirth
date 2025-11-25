@@ -128,7 +128,7 @@ static int g_NumReses = sizeof(g_ResArray);
 static std::vector<byte> LoadFileByResolution(const char *filePrefix, int xRes, const char *filePostfix)
 {
 	// find our resolution in the res array
-	int resNum = ARRAYSIZE(g_ResArray) - 1;
+	int resNum = std::size(g_ResArray) - 1;
 	while (g_ResArray[resNum] > xRes)
 	{
 		resNum--;

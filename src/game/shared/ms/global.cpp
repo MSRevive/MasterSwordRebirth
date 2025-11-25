@@ -117,7 +117,7 @@ void MSGlobals::NewMap()
 	if (MSGlobals::GameScript)
 	{
 		//GameScript should have been deleted by EndMap() before NewMap() is called
-		MSErrorConsoleText("MSGlobals::NewMap", "MSGlobals::GameScript already allocated!");
+		MS_ERROR("MSGlobals::NewMap MSGlobals::GameScript already allocated!");
 	}
 	
 #if SPAWN_GLOBAL_ITEMS

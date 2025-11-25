@@ -452,7 +452,7 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 			bool Success = ReadItem1(DataID, Data, PackItem);
 			if (!Success)
 			{
-				MSErrorConsoleText("ReadItem()", "Bad item in container, skipping...");
+				MS_ERROR("ReadItem() Bad item in container, skipping...");
 				continue;
 			}
 			outItem.ContainerItems.add(PackItem);

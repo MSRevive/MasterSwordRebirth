@@ -323,7 +323,7 @@ public:
 	msstring m_ImageName;
 	HLSPRITE m_SpriteHandle;
 	int m_imgw, m_imgh;
-	wrect_t m_Size;
+	Rect m_Size;
 	int m_Frame;		//Current frame
 	bool m_TGAorSprite; //True = TGA, False = Sprite
 	bool m_ImageLoaded; //For delayed images... is it loaded yet?

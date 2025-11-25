@@ -2569,9 +2569,6 @@ void CBasePlayer::Spawn(void)
 	//Initialize if not done already
 	InitialSpawn();
 
-	pev->model = IdealModel();
-	SetModel(pev->model); //Set the default model
-
 	CallScriptEvent("game_spawn");
 
 	m_PrefHand = RIGHT_HAND; // Right handed (unsettable for now)
@@ -2643,6 +2640,10 @@ void CBasePlayer::Spawn(void)
 
 	// dont let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
+
+	//Set the model later down the line.
+	pev->model = IdealModel();
+	SET_MODEL(ENT(pev), MODEL_HUMAN_REF);
 
 	//Find a spot for the player and create a portal
 
@@ -2833,7 +2834,7 @@ void CBasePlayer::Spawn(void)
 		}
 		else
 		{
-			MSErrorConsoleText("CBasePlayer::Spawn()", "Couldn't find item \"fist_bare\"!");
+			MS_ERROR("CBasePlayer::Spawn() Couldn't find item \"fist_bare\"!");
 		}
 	}
 

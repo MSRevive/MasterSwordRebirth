@@ -135,9 +135,4 @@ private:
     #define ALERT(type, ...) MSLogger::Alert((MSLogger::AlertType)type, __VA_ARGS__)
 #endif
 
-// Legacy compatibility functions
-void MSLoggerPrint(const char* fmt, ...);
-void MSLoggerLog(const char* fmt, ...);
-void MSErrorConsoleText(const char* pszLabel, const char* Progress);
-
 #endif // MS_LOGGER_H

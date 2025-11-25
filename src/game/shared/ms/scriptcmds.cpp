@@ -33,8 +33,7 @@
 
 #undef SCRIPTVAR
 #define SCRIPTVAR GetVar								//A script-wide or global variable
-#define ERROR_MISSING_PARMS MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - not enough parameters!\n", m.ScriptFile.c_str(), Cmd.Name().c_str()))
-
+#define ERROR_MISSING_PARMS MS_ERROR("ExecuteScriptCmd: Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), Cmd.Name().c_str())
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )
 void Player_UseStamina(float flAddAmt);
 extern "C" playermove_t *pmove;
@@ -545,21 +544,16 @@ bool CScript::ScriptCmd_DebugEntities(
 	return DoDebugEntities(pCallerPlayer, Cmd.Name(), vFilteredParams, NULL);
 }
 
-#define ERROR_MISSING_PARMS_HACK MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s - not enough parameters!\n", vsCmdName.c_str()) )
-bool DoDebugEntities(
-	CBasePlayer *                         pCallerPlayer
-	, msstring                              vsCmdName
-	, msstringlist                          vFilteredParams
-	, const char *                          pszPrepend
-	)
+#define ERROR_MISSING_PARMS_HACK MS_ERROR("ExecuteScriptCmd: Script: %s - not enough parameters!", vsCmdName.c_str())
+bool DoDebugEntities(CBasePlayer *pCallerPlayer, msstring vsCmdName, msstringlist vFilteredParams, const char *pszPrepend)
 {
-	bool                                bResult = true;
+	bool bResult = true;
 #ifdef VALVE_DLL
-	SDebugInfo                          vDebugInfo;
-	bool                                bIsSub          = (pszPrepend != NULL);
-	msstring                            vsMsgTemplate   = "";
-	size_t                              vParamIndex     = 0;
-	static const char *                 ksPrintEvent    = "ext_debug_que";
+	SDebugInfo vDebugInfo;
+	bool bIsSub = (pszPrepend != NULL);
+	msstring vsMsgTemplate = "";
+	size_t vParamIndex = 0;
+	static const char *ksPrintEvent    = "ext_debug_que";
 
 	if      ( vsCmdName == "dbg_all"            ) vDebugInfo.mTargetType = DBGALL           ;
 	else if ( vsCmdName == "dbg_npcs"           ) vDebugInfo.mTargetType = DBGNPCS          ;
@@ -2282,7 +2276,8 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			{
 				SCRIPT_EVENT *seEvent = EventByName(EventName);
 				if (seEvent) CallEventTimed(EventName, Delay);
-				else MSErrorConsoleText("ExecuteScriptCmd", UTIL_VarArgs("Script: %s, callevent (timed) - event %s NOT FOUND!\n", m.ScriptFile.c_str(), EventName));
+				else
+					MS_ERROR("ExecuteScriptCmd Script: %s, callevent (timed) - event %s NOT FOUND!", m.ScriptFile.c_str(), EventName);
 			}
 		}
 		else
@@ -2747,12 +2742,13 @@ bool CScript::ScriptCmd_ConflictCheck(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 					{
 						cc_found = true;
 						Print("Conflictcheck: conflict with var %s in %s:\n", pScripted->m_Scripts[s]->m_Constants[c].Name.c_str(), pScripted->m_Scripts[0]->m.ScriptFile.c_str());
-						MSErrorConsoleText("", UTIL_VarArgs("Script: %s, %s const/setvard confict!\n", m.ScriptFile.c_str(), pScripted->m_Scripts[s]->m_Variables[i].Name.c_str()));
+						MS_ERROR("Script: %s, %s const/setvard confict!", m.ScriptFile.c_str(), pScripted->m_Scripts[s]->m_Variables[i].Name.c_str());
 					}
 				} //consts
 			} //vars
 		} //scripts
-		if (!cc_found) Print("Conflictcheck: No conflicts found in %s\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
+		if (!cc_found) 
+			Print("Conflictcheck: No conflicts found in %s\n", pScripted->m_Scripts[0]->m.ScriptFile.c_str());
 	}
 #endif
 
@@ -2890,7 +2886,6 @@ bool CScript::ScriptCmd_DarkenBloom(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 //- developer builds only.
 bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-#if !TURN_OFF_ALERT
 	msstring sTemp;
 	for(int i = 0; i < Params.size(); i++)
 		sTemp += (i ? msstring(" ") : msstring("")) + Params[i];
@@ -2907,8 +2902,8 @@ bool CScript::ScriptCmd_Debug(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlis
 #ifndef VALVE_DLL
 	LocationString = "Client";
 #endif
-	Print("* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
-#endif
+	//Print("* Script Debug (%s): %s - %s\n", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
+	MS_DEBUG("* Script Debug (%s): %s - %s", LocationString, m.pScriptedEnt ? m.pScriptedEnt->DisplayName() : "(No Entity)", sTemp.c_str());
 
 	return true;
 }
@@ -5380,12 +5375,13 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 				else
 				{
 					//couldn't find it
-					MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - scriptflags edit - couldn't find name %s.\n", m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[2].c_str() ) );
+					MS_ERROR("ExecuteScriptCmd Script: %s, %s - scriptflags edit - couldn't find name %s.", m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[2].c_str());
 				}
 			}
 			else
 			{
-				if ( Params[1] == "edit" ) MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - scriptflags edit - not enough parameters.\n", m.ScriptFile.c_str(), Cmd.Name().c_str() ) );
+				if ( Params[1] == "edit" ) 
+					MS_ERROR("ExecuteScriptCmd Script: %s, %s - scriptflags edit - not enough parameters.", m.ScriptFile.c_str(), Cmd.Name().c_str());
 			}
 
 			if ( Params[1] == "remove" )
@@ -5488,7 +5484,7 @@ bool CScript::ScriptCmd_ScriptFlags(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		}
 		else
 		{
-			MSErrorConsoleText( "scriptflags", UTIL_VarArgs("target entity not found in %s\n",m.ScriptFile.c_str()) );
+			MS_ERROR("scriptflags target entity not found in %s", m.ScriptFile.c_str());
 		}
 	}
 	else ERROR_MISSING_PARMS;
@@ -6336,7 +6332,8 @@ bool CScript::ScriptCmd_SetQuality(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			pItem->Quality = atof(Params[1]);
 			if ( Params.size() >= 3 ) pItem->MaxQuality = atof(Params[2]);
 		}
-		else MSErrorConsoleText( "ScriptCmd_SetQuality", UTIL_VarArgs("Script: %s, %s - Warning: attempted to use setquality on non-item.\n", m.ScriptFile.c_str(), Cmd.Name().c_str()));
+		else
+			MS_ERROR("ScriptCmd_SetQuality: Script: %s, %s - Warning: attempted to use setquality on non-item.", m.ScriptFile.c_str(), Cmd.Name().c_str());
 	}
 	else ERROR_MISSING_PARMS;
 #endif
@@ -6361,7 +6358,8 @@ bool CScript::ScriptCmd_setquantity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstr
 		{
 			pItem->iQuantity = atof(Params[1]);
 		}
-		else MSErrorConsoleText( "ScriptCmd_setquantity", UTIL_VarArgs("Script: %s, %s - Warning: attempted to use setquantity on non-item.\n", m.ScriptFile.c_str(), Cmd.Name().c_str()));
+		else
+			MS_ERROR("ScriptCmd_setquantity: Script: %s, %s - Warning: attempted to use setquantity on non-item.", m.ScriptFile.c_str(), Cmd.Name().c_str());
 	}
 	else ERROR_MISSING_PARMS;
 #endif
@@ -6579,7 +6577,7 @@ bool CScript::ScriptCmd_SetTrans(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 		}
 		else
 		{
-			MSErrorConsoleText( "ExecuteScriptCmd", UTIL_VarArgs("Script: %s, %s - settrans tried to affect non-player!\n", m.ScriptFile.c_str(), Cmd.Name().c_str() ) );
+			MS_ERROR("ExecuteScriptCmd: Script: %s, %s - settrans tried to affect non-player!", m.ScriptFile.c_str(), Cmd.Name().c_str());
 		}
 	}
 	else ERROR_MISSING_PARMS;
@@ -7178,7 +7176,7 @@ bool CScript::ScriptCmd_VectorSet(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 		if (Params[1] == "x")		Prop = &ModifyVec.x;
 		else if (Params[1] == "y") Prop = &ModifyVec.y;
 		else if (Params[1] == "z") Prop = &ModifyVec.z;
-		else MSErrorConsoleText("CScript::ScriptCmd_VectorSet", UTIL_VarArgs("Script: %s, %s - '%s' not a valid vector coordinate!\n", m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[1].c_str()));
+		else MS_ERROR("CScript::ScriptCmd_VectorSet: Script: %s, %s - '%s' not a valid vector coordinate!", m.ScriptFile.c_str(), Cmd.Name().c_str(), Params[1].c_str());
 
 		if (Prop) *Prop = atof(Params[2]);
 

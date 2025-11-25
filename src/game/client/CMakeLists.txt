@@ -109,6 +109,9 @@ set(Common
 	"../../common/Platform.h"
 	"../../common/PlatformWin.h"
 	"../../common/const.h"
+	"../../common/Sequence.h"
+	"../../common/common_types.h"
+	"../../common/enums.h"
 )
 source_group("Common" FILES ${Common})
 

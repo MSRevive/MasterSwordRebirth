@@ -736,20 +736,20 @@ void CNewCharacterPanel::Update()
 				Choose_MainBtn[i]->setText( "" );
 				Choose_CharLabel[i][0]->setText( CharSlot.Name );
 				char cMapInfo[128];
-				msstring mapName = CharSlot.MapName;
-				msstring nextMap = CharSlot.NextMap;
+				std::string mapName = CharSlot.MapName.c_str();
+				std::string nextMap = CharSlot.NextMap.c_str();
 				
 				// Safely capitalize first character if string is not empty
-				if (mapName.len() > 0)
+				if (mapName.length() > 0)
 				{
-					mapName = toupper(mapName);
+					mapName[0] = toupper(mapName[0]);
 				}
-				if (nextMap.len() > 0)
+				if (nextMap.length() > 0)
 				{
-					nextMap = toupper(nextMap);
+					nextMap[0] = toupper(nextMap[0]);
 				}
 				
-				if (nextMap.len() > 0)
+				if (nextMap.length() > 0)
 					_snprintf(cMapInfo, sizeof(cMapInfo), "%s -> %s", mapName.c_str(), nextMap.c_str());
 				else
 					_snprintf(cMapInfo, sizeof(cMapInfo), "At %s", mapName.c_str());
@@ -1387,7 +1387,7 @@ CRenderChar::~CRenderChar( )
 	if( !m_Done )
 	{
 		//This is bad - the char gets deallocated before it gets unregistered
-		MSErrorConsoleText( "~CRenderChar()", "Deallocated improperly" );
+		MS_ERROR("~CRenderChar() Deallocated improperly");
 	}
 }
 
@@ -1427,7 +1427,7 @@ CRenderSpawnbox::~CRenderSpawnbox( )
 	if( !m_Done )
 	{
 		//This is bad - the ent gets deallocated before it gets unregistered
-		MSErrorConsoleText( "~CRenderChar()", "Deallocated improperly" );
+		MS_ERROR("~CRenderChar() Deallocated improperly");
 	}
 }
 

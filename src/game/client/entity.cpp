@@ -633,11 +633,11 @@ const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)
 			return (Return = VecToString(vTemp));             \
 		}                                                     \
 		else if (Prop == name ".r")                           \
-			RETURN_FLOAT(color.r)                             \
+			RETURN_INT(color.r)                             \
 		else if (Prop == name ".g")                           \
-			RETURN_FLOAT(color.g)                             \
+			RETURN_INT(color.g)                             \
 		else if (Prop == name ".b")                           \
-			RETURN_FLOAT(color.b)                             \
+			RETURN_INT(color.b)                             \
 	}
 
 //[begin] DEC2014_09 Thothie - beam_update
@@ -777,9 +777,9 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	else if (Prop == "maxs")
 		RETURN_VECTOR(ent.curstate.maxs)
 	else if (Prop == "frame")
-		RETURN_INT(ent.curstate.frame)
+		RETURN_FLOAT(ent.curstate.frame)
 	else if (Prop == "framerate")
-		RETURN_INT(ent.curstate.framerate)
+		RETURN_FLOAT(ent.curstate.framerate)
 	else if (Prop == "exists")
 		return pclEntity->Exists() ? "1" : "0";
 	else if (Prop == "gravity")
@@ -796,7 +796,7 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	else if (Prop == "rendermode")
 		RETURN_INT(ent.curstate.rendermode)
 	else if (Prop == "renderamt")
-		RETURN_FLOAT(ent.curstate.renderamt)
+		RETURN_INT(ent.curstate.renderamt)
 	else if (Prop.starts_with("rendercolor"))
 		RETURN_COLOR("rendercolor", ent.curstate.rendercolor)
 	else if (Prop == "visible")

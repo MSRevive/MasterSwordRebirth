@@ -127,7 +127,7 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 
 		//set debug cvar to avoid spamming console but be able to get debug info
 		char sDebugInfo[64];
-		_snprintf(sDebugInfo, 64, "Stat: %i , Equalcount : %i , Highest EXP needed: %llf", iBestSubstatId, iEqualCount, ldHighestExpRemaining);
+		_snprintf(sDebugInfo, 64, "Stat: %i , Equalcount : %i , Highest EXP needed: %lf", iBestSubstatId, iEqualCount, ldHighestExpRemaining);
 		g_engfuncs.pfnCVarSetString("DEBUG_bestxpstat", sDebugInfo);
 
 		//run learnskill

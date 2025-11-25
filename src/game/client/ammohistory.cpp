@@ -39,7 +39,7 @@ struct ITEM_INFO
 {
 	char szName[MAX_ITEM_NAME];
 	HLSPRITE spr;
-	wrect_t rect;
+	Rect rect;
 };
 
 void HistoryResource ::AddToHistory(int iType, int iId, int iCount)

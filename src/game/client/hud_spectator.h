@@ -115,7 +115,7 @@ private:
 	HLSPRITE m_hsprBeam;
 	HLSPRITE m_hCrosshair;
 
-	wrect_t m_crosshairRect;
+	Rect m_crosshairRect;
 
 	struct model_s *m_MapSprite; // each layer image is saved in one sprite, where each tile is a sprite frame
 	float m_flNextObserverInput;

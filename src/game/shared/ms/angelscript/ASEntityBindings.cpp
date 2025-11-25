@@ -555,8 +555,7 @@ namespace ASEntityBindings
     
     void AS_ChatLog(const std::string& message)
     {
-        // TODO: Connect to actual chat logging
-        MS_ANGEL_DEBUG("ChatLog: %s", message.c_str());
+        MS_CHAT("%s", message.c_str());
     }
     
     // Get current map name
