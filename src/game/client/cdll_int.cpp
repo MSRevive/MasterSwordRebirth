@@ -366,7 +366,8 @@ void DLLEXPORT HUD_Init(void)
 						}
 						else
 						{
-							MS_ERROR("Some client-side AngelScript modules failed to load");
+							MS_ERROR("Some client-side AngelScript modules failed to load - check console for details");
+							MS_ERROR("Look for 'ASModuleSystem: FAILED TO LOAD' and 'ASModuleSystem: ERROR' messages above");
 						}
 					}
 					else

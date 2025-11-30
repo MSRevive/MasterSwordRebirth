@@ -27,6 +27,8 @@
 #include "vgui_choosecharacter.h"
 #include "monsters/msmonster.h"
 #include "mslogger.h"
+#include "ms/angelscript/CAngelScriptManager.h"
+#include <angelscript.h>
 
 int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 {
@@ -110,6 +112,82 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	CEnvMgr::InitNewLevel();
 
 	MS_INFO("[MsgFunc_InitHUD: Complete]");
+
+	// Call client-side VGUI test script
+	MS_INFO("[MsgFunc_InitHUD: Calling CreateTestControlPanel]");
+
+	asIScriptEngine* engine = CAngelScriptManager::Instance()->GetEngine();
+	if (engine)
+	{
+		asUINT moduleCount = engine->GetModuleCount();
+		MS_INFO("[MsgFunc_InitHUD: Found %u loaded modules]", moduleCount);
+
+		// Search all modules for the CreateTestControlPanel function
+		asIScriptFunction* func = nullptr;
+		asIScriptModule* foundModule = nullptr;
+
+		for (asUINT i = 0; i < moduleCount; i++)
+		{
+			asIScriptModule* module = engine->GetModuleByIndex(i);
+			if (!module)
+				continue;
+
+			const char* moduleName = module->GetName();
+			MS_INFO("[MsgFunc_InitHUD: Checking module '%s']", moduleName);
+
+			func = module->GetFunctionByName("CreateTestControlPanel");
+			if (func)
+			{
+				foundModule = module;
+				MS_INFO("[MsgFunc_InitHUD: Found CreateTestControlPanel in module '%s']", moduleName);
+				break;
+			}
+		}
+
+		if (func && foundModule)
+		{
+			// Create and execute the function
+			asIScriptContext* ctx = engine->CreateContext();
+			if (ctx)
+			{
+				int r = ctx->Prepare(func);
+				if (r >= 0)
+				{
+					r = ctx->Execute();
+					if (r == asEXECUTION_FINISHED)
+					{
+						MS_INFO("[MsgFunc_InitHUD: CreateTestControlPanel executed successfully]");
+					}
+					else if (r == asEXECUTION_EXCEPTION)
+					{
+						MS_ERROR("[MsgFunc_InitHUD: Exception in CreateTestControlPanel: %s]",
+								 ctx->GetExceptionString());
+					}
+					else
+					{
+						MS_ERROR("[MsgFunc_InitHUD: CreateTestControlPanel execution failed: %d]", r);
+					}
+				}
+				else
+				{
+					MS_ERROR("[MsgFunc_InitHUD: Failed to prepare CreateTestControlPanel function]");
+				}
+				ctx->Release();
+			}
+			else
+			{
+				MS_ERROR("[MsgFunc_InitHUD: Failed to create AngelScript context]");
+			}
+		}
+		else
+		{
+			MS_INFO("[MsgFunc_InitHUD: CreateTestControlPanel function not found in any module]");
+		}
+	}
+	else
+	{
+		MS_ERROR("[MsgFunc_InitHUD: AngelScript engine not available]");
+	}
 }
 
 int CHud ::MsgFunc_GameMode(const char *pszName, int iSize, void *pbuf)

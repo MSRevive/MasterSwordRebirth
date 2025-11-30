@@ -1791,7 +1791,7 @@ public:
 		bDidVote = false;
 		
 		// Call AngelScript player function for transition exited
-		#ifndef CLIENT_DLL
+		#ifdef VALVE_DLL
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
@@ -1820,7 +1820,7 @@ public:
 		if (!bDidVote)
 		{
 			// Updated to use AngelScript instead of MSScript for map transitions
-			#ifndef CLIENT_DLL
+			#ifdef VALVE_DLL
 			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 			if (pASManager && pASManager->IsInitialized())
 			{

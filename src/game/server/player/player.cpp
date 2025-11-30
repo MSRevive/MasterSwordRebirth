@@ -2723,7 +2723,7 @@ void CBasePlayer::Spawn(void)
 	{
 		// Call AngelScript event handler directly via ASManager
 		// Pass the player entity string as parameter
-		#ifndef CLIENT_DLL
+		#ifdef VALVE_DLL
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
@@ -6378,7 +6378,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	
 	// Call AngelScript to adjust JoinType based on transition data
 	// This ensures transitions take priority over start map status
-	#ifndef CLIENT_DLL
+	#ifdef VALVE_DLL
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{

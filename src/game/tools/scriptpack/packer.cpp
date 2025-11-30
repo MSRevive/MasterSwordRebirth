@@ -195,8 +195,9 @@ void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeF
 			CScriptModule moduleProcessor;
 			std::string moduleName;
 			std::string processedSource;
+			std::string namespaceName = "GameMaster";
 
-			if (moduleProcessor.PreprocessModuleSource(norm_str, processedSource, moduleName))
+			if (moduleProcessor.PreprocessModuleSource(norm_str, processedSource, moduleName, namespaceName))
 			{
 				norm_str = processedSource;
 				std::cout << "Preprocessed module: " << moduleName << " in " << relativeFile << std::endl;

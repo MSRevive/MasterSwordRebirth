@@ -27,7 +27,7 @@ typedef float vec_t;
 #include "mslogger.h"
 
 // Include Master Sword entity classes
-#ifdef CLIENT_DLL
+#ifndef VALVE_DLL
     // Client-side includes
     #include "hud.h"
     #include "cl_util.h"
@@ -47,18 +47,19 @@ typedef float vec_t;
 #include "ASEntityBindings.h"
 
 // Engine globals - declared globally to avoid namespace issues
-#ifndef CLIENT_DLL
+#ifdef VALVE_DLL
 extern globalvars_t *gpGlobals;
 extern enginefuncs_t g_engfuncs;
 #endif
 
 namespace ASItemBindings
 {
+#ifdef VALVE_DLL  // All item/weapon bindings are server-only
     // ========================================================================
     // Reference Counting Functions for AngelScript Reference Types
     // Note: These are no-ops since entities are managed by the game engine
     // ========================================================================
-    
+
     void AddRef_CBaseAnimating(CBaseAnimating* entity)
     {
         // No-op: Engine manages entity lifetime
@@ -555,9 +556,9 @@ namespace ASItemBindings
     void RegisterCBaseAnimating(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASItemBindings] Registering CBaseAnimating type with asbind20...");
-        
+
         // Register CBaseAnimating type with asbind20
         asbind20::ref_class<CBaseAnimating>(pEngine, "CBaseAnimating")
             // Reference counting behaviors (required for reference types)
@@ -572,19 +573,19 @@ namespace ASItemBindings
             .method("float GetFrameRate() const", AS_CBaseAnimating_GetFrameRate)
             .method("bool IsSequenceFinished() const", AS_CBaseAnimating_IsSequenceFinished)
             .method("bool IsSequenceLooping() const", AS_CBaseAnimating_IsSequenceLooping)
-            
+
             // Inherit from CBaseEntity (called AFTER registering CBaseAnimating's own methods)
             .base<CBaseEntity>();
-        
+
         MS_ANGEL_INFO("CBaseAnimating registration complete");
     }
     
     void RegisterCBasePlayerItem(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASItemBindings] Registering CBasePlayerItem type with asbind20...");
-        
+
         // Register CBasePlayerItem type with asbind20
         // Note: GetOwnerPlayer() is registered later in RegisterCrossReferences() to avoid circular dependency
         asbind20::ref_class<CBasePlayerItem>(pEngine, "CBasePlayerItem")
@@ -604,24 +605,22 @@ namespace ASItemBindings
             // Item methods
             .method("bool IsMSItem()", &CBasePlayerItem::IsMSItem)
             .method("bool CanDrop()", &CBasePlayerItem::CanDrop)
-            #ifdef VALVE_DLL
             .method("bool Deploy()", &CBasePlayerItem::Deploy)
             .method("void Holster()", &CBasePlayerItem::Holster)
             .method("void Materialize()", &CBasePlayerItem::Materialize)
-            #endif
-            
+
             // Inherit from CBaseAnimating (called AFTER registering CBasePlayerItem's own methods)
             .base<CBaseAnimating>();
-        
+
         MS_ANGEL_INFO("CBasePlayerItem registration complete");
     }
     
     void RegisterCBasePlayerWeapon(asIScriptEngine* pEngine)
     {
         if (!pEngine) return;
-        
+
         MS_ANGEL_INFO("[ASItemBindings] Registering CBasePlayerWeapon type with asbind20...");
-        
+
         // Register CBasePlayerWeapon type with asbind20
         asbind20::ref_class<CBasePlayerWeapon>(pEngine, "CBasePlayerWeapon")
             // Reference counting behaviors (required for reference types)
@@ -641,20 +640,18 @@ namespace ASItemBindings
             // State properties
             .method("bool IsInReload() const", AS_CBasePlayerWeapon_IsInReload)
             // Weapon methods
-            #ifdef VALVE_DLL
             .method("bool CanDeploy()", &CBasePlayerWeapon::CanDeploy)
             .method("bool IsUseable()", &CBasePlayerWeapon::IsUseable)
             .method("void SendWeaponAnim(int, int)", &CBasePlayerWeapon::SendWeaponAnim)
-            #endif
             // Ammo info methods
             .method("int PrimaryAmmoIndex()", &CBasePlayerWeapon::PrimaryAmmoIndex)
             .method("int SecondaryAmmoIndex()", &CBasePlayerWeapon::SecondaryAmmoIndex)
             .method("string pszAmmo1()", AS_CBasePlayerWeapon_pszAmmo1)
             .method("string pszAmmo2()", AS_CBasePlayerWeapon_pszAmmo2)
-            
+
             // Inherit from CBasePlayerItem (called AFTER registering CBasePlayerWeapon's own methods)
             .base<CBasePlayerItem>();
-        
+
         MS_ANGEL_INFO("CBasePlayerWeapon registration complete");
     }
     
@@ -694,5 +691,9 @@ namespace ASItemBindings
         
         MS_ANGEL_INFO("[ASItemBindings] Item/weapon bindings registration complete");
     }
+#else  // Client stubs
+    void RegisterAll(asIScriptEngine* pEngine) { /* No-op on client */ }
+    void RegisterCrossReferences(asIScriptEngine* pEngine) { /* No-op on client */ }
+#endif  // VALVE_DLL
 }
 

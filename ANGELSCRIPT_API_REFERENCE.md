@@ -1225,6 +1225,935 @@ void CastMonsterTypes() {
 
 ---
 
+## Client-Side Classes
+
+**NOTE**: All classes and functions in this section are available ONLY in client-side scripts (marked with `#scope client` in legacy scripts or loaded as client modules in AngelScript).
+
+### Class Hierarchy
+
+Client classes follow three main categories:
+
+**Entity Hierarchy:**
+```
+CClientEntity (base)
+  └── CLocalPlayer
+```
+
+**Effect Hierarchy:**
+```
+CClientEffect (base)
+  ├── CTempEntity
+  ├── CDynamicLight
+  └── CBeam
+```
+
+**Item Classes:**
+```
+CGenericItem (standalone, read-only item data)
+```
+
+- **CLocalPlayer** inherits all entity query methods from **CClientEntity** (GetOrigin, GetAngles, GetVelocity, etc.)
+- All effect classes inherit the `IsValid()` method from **CClientEffect**
+- **CGenericItem** provides read-only access to item data for UI/display purposes
+
+### CClientEffect (Base Class)
+**Scope**: Client
+
+Base class for all client-side visual effects.
+
+```angelscript
+class CClientEffect {
+    bool IsValid() const;  // Check if effect is valid
+}
+```
+
+This class is inherited by `CTempEntity`, `CDynamicLight`, and `CBeam`.
+
+### CClientEntity
+**Scope**: Client
+
+Read-only wrapper for client-side entity queries. This is the base class for `CLocalPlayer`.
+
+```angelscript
+class CClientEntity {
+    bool Exists() const;                   // Check if entity exists
+    int GetIndex() const;                  // Get entity index
+    Vector3 GetOrigin() const;             // Get position
+    Vector3 GetAngles() const;             // Get angles
+    Vector3 GetVelocity() const;           // Get velocity
+    string GetModelName() const;           // Get model path
+    int GetModelIndex() const;             // Get model index
+    int GetRenderMode() const;             // Get render mode
+    int GetRenderAmount() const;           // Get render amount
+    Color GetRenderColor() const;          // Get render color
+    bool IsPlayer() const;                 // Check if player entity
+    bool IsVisible() const;                // Check if visible
+    Vector3 GetBonePosition(int) const;    // Get bone position
+    int GetBoneCount() const;              // Get bone count
+    Vector3 GetAttachment(int) const;      // Get attachment position
+    int GetSequence() const;               // Get animation sequence
+    float GetFrame() const;                // Get animation frame
+    int GetBody() const;                   // Get body group
+    int GetSkin() const;                   // Get skin
+}
+
+// Global accessor
+CClientEntity@ GetClientEntity(int index)
+```
+
+**Example**:
+```angelscript
+void QueryEntity(int index) {
+    CClientEntity@ ent = GetClientEntity(index);
+    if (ent.Exists()) {
+        MS_ANGEL_INFO("Entity: " + ent.GetModelName());
+        MS_ANGEL_INFO("Position: " + ent.GetOrigin().x);
+        MS_ANGEL_INFO("Is Player: " + ent.IsPlayer());
+    }
+}
+```
+
+### CLocalPlayer
+**Scope**: Client
+
+The local player represents the player running the client. Inherits from `CClientEntity`.
+
+```angelscript
+class CLocalPlayer : CClientEntity {
+    // Inherited from CClientEntity:
+    // int GetIndex() const;
+    // Vector3 GetOrigin() const;
+    // Vector3 GetAngles() const;
+    // Vector3 GetVelocity() const;
+    // string GetModelName() const;
+    // ... and all other CClientEntity methods
+    
+    // Local player specific methods:
+    Vector3 GetViewAngles() const;         // Get view angles (camera)
+    bool IsThirdPerson() const;            // Check if in third-person mode
+    bool IsUnderwater() const;             // Check if underwater
+    Vector3 GetWaterOrigin() const;        // Get water surface position
+    bool CanAttack() const;                // Check if can attack
+    bool CanJump() const;                  // Check if can jump
+    bool CanDuck() const;                  // Check if can duck
+    bool CanRun() const;                   // Check if can run
+    bool CanMove() const;                  // Check if can move
+    int GetWaterLevel() const;             // Get water level (0-3)
+}
+
+// Global accessor
+CLocalPlayer@ GetLocalPlayer()
+```
+
+**Example**:
+```angelscript
+void CheckLocalPlayer() {
+    CLocalPlayer@ player = GetLocalPlayer();
+    
+    // Can use inherited CClientEntity methods
+    Vector3 pos = player.GetOrigin();
+    Vector3 angles = player.GetAngles();
+    string model = player.GetModelName();
+    
+    MS_ANGEL_INFO("Player at: " + pos.x + "," + pos.y + "," + pos.z);
+    MS_ANGEL_INFO("Player model: " + model);
+    
+    // Can use local player specific methods
+    if (player.IsUnderwater()) {
+        MS_ANGEL_INFO("Player is underwater!");
+    }
+    
+    Vector3 viewAngles = player.GetViewAngles();
+    MS_ANGEL_INFO("Looking at: " + viewAngles.y + " degrees");
+}
+```
+
+### CTempEntity
+**Scope**: Client
+
+Temporary entity for client-side visual effects. Inherits from `CClientEffect`.
+
+```angelscript
+class CTempEntity : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
+    
+    // Transform
+    void SetOrigin(const Vector3 &in);
+    Vector3 GetOrigin() const;
+    void SetAngles(const Vector3 &in);
+    Vector3 GetAngles() const;
+    void SetVelocity(const Vector3 &in);
+    Vector3 GetVelocity() const;
+    
+    // Appearance
+    void SetModel(const string &in);
+    void SetSprite(const string &in);
+    void SetScale(float);
+    float GetScale() const;
+    void SetFrame(int);
+    int GetFrame() const;
+    void SetFrameRate(float);
+    void SetBody(int);
+    void SetSkin(int);
+    
+    // Rendering
+    void SetRenderMode(int);
+    void SetRenderAmount(int);
+    void SetRenderColor(const Color &in);
+    void SetRenderFx(int);
+    
+    // Physics
+    void SetGravity(float);
+    void SetCollisionMode(CollisionMode);
+    void SetBounceFactor(float);
+    void SetMins(const Vector3 &in);
+    void SetMaxs(const Vector3 &in);
+    
+    // Lifetime
+    void SetDeathDelay(float);
+    void SetFadeout(bool, float);
+    void Kill();
+    
+    // Following
+    void FollowEntity(int entityIndex, int attachment = -1);
+    void StopFollowing();
+    
+    // Custom data
+    void SetUserInt(int slot, int value);
+    int GetUserInt(int slot) const;
+    void SetUserFloat(int slot, float value);
+    float GetUserFloat(int slot) const;
+    
+    // Callbacks (TODO)
+    void SetUpdateCallback(const string &in);
+    void SetCollisionCallback(const string &in);
+    void SetWaterCallback(const string &in);
+    void SetTimerCallback(float, const string &in);
+}
+
+enum CollisionMode {
+    None,
+    World,
+    All,
+    AllAndDie
+}
+
+// Factory functions
+CTempEntity@ CreateTempSprite(const string &in spriteName, const Vector3 &in origin);
+CTempEntity@ CreateTempModel(const string &in modelName, const Vector3 &in origin);
+CTempEntity@ CreateFrameSprite(const string &in spriteName, const Vector3 &in origin);
+CTempEntity@ CreateFrameModel(const string &in modelName, const Vector3 &in origin);
+```
+
+**Example**:
+```angelscript
+void CreateExplosionEffect() {
+    Vector3 pos = Vector3(100, 200, 50);
+    CTempEntity@ sprite = CreateTempSprite("sprites/fire.spr", pos);
+    
+    if (sprite.IsValid()) {
+        sprite.SetScale(2.0);
+        sprite.SetFrameRate(15.0);
+        sprite.SetRenderMode(kRenderTransAdd);
+        sprite.SetRenderAmount(200);
+        sprite.SetDeathDelay(1.0);
+        sprite.SetFadeout(true, 0.5);
+    }
+}
+```
+
+### CDynamicLight
+**Scope**: Client
+
+Client-side dynamic lighting. Inherits from `CClientEffect`.
+
+```angelscript
+class CDynamicLight : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
+    void SetOrigin(const Vector3 &in);
+    Vector3 GetOrigin() const;
+    void SetRadius(float);
+    void SetColor(const Color &in);
+    void SetDuration(float);
+    void SetDark(bool);              // Dark light (removes light)
+    void FollowEntity(int entityIndex);
+    void Kill();
+}
+
+// Factory function
+CDynamicLight@ CreateDynamicLight(const Vector3 &in origin, float radius, 
+                                   const Color &in color, float duration = 0.0f);
+```
+
+**Example**:
+```angelscript
+void CreateTorchLight() {
+    Vector3 pos = Vector3(100, 200, 50);
+    Color orange = Color(255, 128, 0, 255);
+    CDynamicLight@ light = CreateDynamicLight(pos, 256.0, orange, 5.0);
+    
+    if (light.IsValid()) {
+        // Light will last 5 seconds
+        light.SetRadius(300.0);  // Make it brighter
+    }
+}
+```
+
+### CBeam
+**Scope**: Client
+
+Client-side beam effects. Inherits from `CClientEffect`.
+
+```angelscript
+class CBeam : CClientEffect {
+    // Inherited from CClientEffect:
+    // bool IsValid() const;
+    void SetStartPos(const Vector3 &in);
+    void SetEndPos(const Vector3 &in);
+    void SetStartEntity(int entityIndex, int attachment);
+    void SetEndEntity(int entityIndex, int attachment);
+    void SetSprite(const string &in);
+    void SetWidth(float);
+    void SetAmplitude(float);
+    void SetBrightness(float);
+    void SetSpeed(float);
+    void SetFrameRate(float);
+    void SetColor(const Color &in);
+    void SetLife(float);
+    void Kill();
+}
+
+// Factory functions
+CBeam@ CreateBeamPoints(const Vector3 &in start, const Vector3 &in end, const string &in sprite);
+CBeam@ CreateBeamEntities(int startIdx, int startAttach, int endIdx, int endAttach, const string &in sprite);
+CBeam@ CreateBeamEntPoint(int startIdx, int attachment, const Vector3 &in endPos, const string &in sprite);
+
+// Effect utilities
+void CreateSpark(const Vector3 &in origin);
+void CreateSparkOnModel(int entityIndex, int attachment = 0);
+void CreateDecal(int decalIndex, const Vector3 &in traceStart, const Vector3 &in traceEnd);
+```
+
+**Example**:
+```angelscript
+void CreateLightningBeam() {
+    Vector3 start = Vector3(0, 0, 100);
+    Vector3 end = Vector3(100, 100, 0);
+    CBeam@ beam = CreateBeamPoints(start, end, "sprites/laserbeam.spr");
+    
+    if (beam.IsValid()) {
+        beam.SetWidth(20.0);
+        beam.SetColor(Color(100, 100, 255, 255));
+        beam.SetBrightness(200.0);
+        beam.SetLife(2.0);
+    }
+}
+```
+
+### CClientEnvironment
+**Scope**: Client
+
+Client-side environment control (fog, screen tint, sky).
+
+```angelscript
+class CClientEnvironment {
+    // Fog control
+    void SetFogEnabled(bool);
+    bool GetFogEnabled() const;
+    void SetFogColor(const Color &in);
+    Color GetFogColor() const;
+    void SetFogDensity(float);
+    void SetFogStart(float);
+    void SetFogEnd(float);
+    void SetFogType(int);
+    
+    // Screen effects
+    void SetScreenTint(const Color &in);
+    Color GetScreenTint() const;
+    void ClearScreenTint();
+    
+    // Sky
+    void SetSkyTexture(const string &in);
+    string GetSkyName() const;
+    void SetLightGamma(float);
+    void SetMaxViewDistance(float);
+}
+
+// Global accessor
+CClientEnvironment@ GetEnvironment()
+```
+
+**Example**:
+```angelscript
+void SetDarkAtmosphere() {
+    CClientEnvironment@ env = GetEnvironment();
+    
+    // Dark red screen tint
+    env.SetScreenTint(Color(50, 0, 0, 100));
+    
+    // Enable fog
+    env.SetFogEnabled(true);
+    env.SetFogColor(Color(20, 0, 0, 255));
+    env.SetFogDensity(0.002);
+}
+```
+
+### CClientSound
+**Scope**: Client
+
+Client-side audio playback.
+
+```angelscript
+class CClientSound {
+    void PlaySound(int channel, const string &in soundPath, float volume = 1.0f);
+    void SetVolume(int channel, const string &in soundPath, float volume);
+    void StopSound(int channel, const string &in soundPath);
+    void PlaySoundAtPosition(const Vector3 &in pos, const string &in soundPath, float volume = 1.0f);
+}
+
+// Global accessor
+CClientSound@ GetClientSound()
+
+// Sound channel constants
+const int SOUND_CHANNEL_WEAPON = 0;
+const int SOUND_CHANNEL_VOICE = 1;
+const int SOUND_CHANNEL_STREAM = 5;
+```
+
+**Example**:
+```angelscript
+void PlayAmbientSound() {
+    CClientSound@ sound = GetClientSound();
+    sound.PlaySound(SOUND_CHANNEL_STREAM, "ambient/wind.wav", 0.5);
+}
+```
+
+### Client Utility Functions
+**Scope**: Client
+
+```angelscript
+// Trace/query functions
+Vector3 GetGroundHeight(const Vector3 &in origin);
+Vector3 GetSkyHeight(const Vector3 &in origin);
+bool IsUnderSky(const Vector3 &in origin);
+Vector3 TraceLine(const Vector3 &in start, const Vector3 &in end, bool worldOnly = false);
+int TraceLineEntity(const Vector3 &in start, const Vector3 &in end);
+int GetContents(const Vector3 &in origin);
+
+// Client-specific accessors
+float GetClientTime();
+string GetCurrentMap();
+bool IsClientSide();  // Always returns true on client
+array<int>@ GetNearbyEntities(const Vector3 &in origin, float radius, bool playersOnly = false);
+```
+
+**Example**:
+```angelscript
+void CheckGround() {
+    CLocalPlayer@ player = GetLocalPlayer();
+    Vector3 playerPos = player.GetOrigin();
+    Vector3 ground = GetGroundHeight(playerPos);
+    
+    float distToGround = playerPos.z - ground.z;
+    MS_ANGEL_INFO("Distance to ground: " + distToGround);
+    
+    if (IsUnderSky(playerPos)) {
+        MS_ANGEL_INFO("Player is under open sky");
+    }
+}
+```
+
+---
+
+### CGenericItem
+**Scope**: Client
+
+Read-only access to item properties for client-side UI, display, and visualization. This class provides safe access to item data without exposing game logic.
+
+**Note**: CGenericItem provides read-only methods only. All game logic (use, drop, equip, etc.) must be handled server-side.
+
+```angelscript
+class CGenericItem {
+    // Basic Properties
+    string GetItemName() const;        // Internal item name (e.g., "dagger")
+    int GetItemID() const;             // Unique item instance ID
+    int GetQuality() const;            // Current item quality/durability
+    int GetMaxQuality() const;         // Maximum quality value
+    int GetQuantity() const;           // Stack quantity (for groupable items)
+    int GetMaxQuantity() const;        // Maximum stack size
+    float GetWeight() const;           // Item weight
+    uint GetValue() const;             // Gold value
+    int GetLocation() const;           // Item location (ITEMPOS_* constants)
+    int GetHand() const;               // Which hand (LEFT_HAND/RIGHT_HAND)
+
+    // Visual/Rendering Properties
+    string GetViewModel() const;       // View model path (1st person)
+    string GetPlayerHoldModel() const; // Player hold model (3rd person)
+    string GetAnimExtension() const;   // Animation extension
+    string GetAnimExtensionLegs() const; // Leg animation extension
+    int GetRenderMode() const;         // Render mode (kRender*)
+    int GetRenderAmount() const;       // Render amount (0-255)
+    int GetRenderFx() const;           // Render effects
+    int GetSkin() const;               // Model skin index
+    int GetViewModelAnim() const;      // Current view model animation
+    float GetViewModelAnimSpeed() const; // View model animation speed
+
+    // Item Type Checks
+    bool IsWorn() const;               // Is currently worn/equipped
+    bool IsArmor() const;              // Is armor piece
+    bool IsWearable() const;           // Can be worn
+    bool IsShield() const;             // Is a shield
+    bool IsGroupable() const;          // Can stack with others
+    bool IsContainer() const;          // Can hold other items
+    bool IsProjectile() const;         // Is a projectile/ammo
+    bool IsDrinkable() const;          // Can be consumed as drink
+    bool IsPerishable() const;         // Has expiration/decay
+    bool IsSpell() const;              // Is a spell scroll/tome
+
+    // Container Methods (for container items)
+    int Container_ItemCount() const;   // Number of items in container
+    float Container_Weight() const;    // Total weight of contents
+    bool Container_IsOpen() const;     // Is container open
+    float Volume() const;              // Item volume
+
+    // Attack Information
+    int GetAttackCount() const;        // Number of attack modes
+}
+```
+
+**Location Constants**:
+```angelscript
+const int ITEMPOS_NONE = 0;
+const int ITEMPOS_HANDS = 1;
+const int ITEMPOS_BODY = 2;
+```
+
+**Hand Constants**:
+```angelscript
+const int LEFT_HAND = 0;
+const int RIGHT_HAND = 1;
+```
+
+**Example - Displaying Item Info in UI**:
+```angelscript
+void DisplayItemTooltip(CGenericItem@ pItem) {
+    if (pItem is null) return;
+
+    string tooltip = "=== " + pItem.GetItemName() + " ===\n";
+    tooltip += "Value: " + pItem.GetValue() + " gold\n";
+    tooltip += "Weight: " + pItem.GetWeight() + " kg\n";
+    tooltip += "Quality: " + pItem.GetQuality() + "/" + pItem.GetMaxQuality() + "\n";
+
+    // Check item type
+    if (pItem.IsWearable()) {
+        tooltip += "Type: Wearable\n";
+        tooltip += "Equipped: " + (pItem.IsWorn() ? "Yes" : "No") + "\n";
+    }
+    if (pItem.IsContainer()) {
+        tooltip += "Container: " + pItem.Container_ItemCount() + " items\n";
+        tooltip += "Total Weight: " + pItem.Container_Weight() + " kg\n";
+    }
+    if (pItem.IsGroupable()) {
+        tooltip += "Quantity: " + pItem.GetQuantity() + "/" + pItem.GetMaxQuantity() + "\n";
+    }
+
+    MS_ANGEL_INFO(tooltip);
+}
+```
+
+**Example - Filtering Items by Type**:
+```angelscript
+void ShowWeapons(array<CGenericItem@>@ items) {
+    for (uint i = 0; i < items.length(); i++) {
+        CGenericItem@ pItem = items[i];
+
+        // Check if item has attack capability
+        if (pItem.GetAttackCount() > 0) {
+            MS_ANGEL_INFO("Weapon: " + pItem.GetItemName());
+            MS_ANGEL_INFO("  Attacks: " + pItem.GetAttackCount());
+            MS_ANGEL_INFO("  Hand: " + (pItem.GetHand() == LEFT_HAND ? "Left" : "Right"));
+        }
+    }
+}
+```
+
+**Example - Rendering Information**:
+```angelscript
+void CheckItemVisuals(CGenericItem@ pItem) {
+    if (pItem is null) return;
+
+    MS_ANGEL_INFO("View Model: " + pItem.GetViewModel());
+    MS_ANGEL_INFO("World Model: " + pItem.GetPlayerHoldModel());
+    MS_ANGEL_INFO("Render Mode: " + pItem.GetRenderMode());
+    MS_ANGEL_INFO("Skin: " + pItem.GetSkin());
+
+    // Check transparency
+    if (pItem.GetRenderMode() == kRenderTransAlpha) {
+        int alpha = pItem.GetRenderAmount();
+        MS_ANGEL_INFO("Item is " + (alpha < 128 ? "mostly transparent" : "mostly opaque"));
+    }
+}
+```
+
+---
+
+## VGUI System (Client UI)
+**Scope**: Client
+
+The VGUI (Valve GUI) system allows client-side scripts to create custom user interfaces with interactive elements like buttons, labels, text fields, and frames.
+
+### Class Hierarchy
+
+```
+VGUIPanel (base class)
+  ├── VGUIFrame (windowed panels with title bars)
+  ├── VGUIButton (clickable buttons)
+  ├── VGUILabel (text display)
+  ├── VGUITextEntry (text input fields)
+  └── VGUIImagePanel (image display)
+```
+
+### VGUIPanel (Base Class)
+**Scope**: Client
+
+Base class for all VGUI panels. Provides core functionality for positioning, sizing, visibility, and hierarchy.
+
+```angelscript
+class VGUIPanel {
+    // Validity
+    bool IsValid();
+
+    // Position and sizing
+    void SetPos(int x, int y);
+    void SetSize(int wide, int tall);
+    void SetBounds(int x, int y, int wide, int tall);
+
+    // Visibility
+    void SetVisible(bool state);
+    bool IsVisible();
+
+    // Hierarchy
+    void SetParent(VGUIPanel@ parent);
+    void AddChild(VGUIPanel@ child);
+    void RemoveChild(VGUIPanel@ child);
+
+    // Appearance
+    void SetFgColor(int r, int g, int b, int a);
+    void SetBgColor(int r, int g, int b, int a);
+
+    // Rendering
+    void Repaint();
+    void SetPaintEnabled(bool enabled);
+
+    // Input
+    bool IsMouseOver();
+
+    // Cleanup
+    void Remove();  // Remove from parent
+}
+```
+
+**SetPos** / **SetSize** / **SetBounds**: Position and size the panel
+- Coordinates are in screen space (pixels)
+- Position (0,0) is top-left corner of screen
+
+**SetVisible**: Show or hide the panel and all its children
+
+**SetParent** / **AddChild** / **RemoveChild**: Manage panel hierarchy
+- Child panels move with their parent
+- Child visibility is affected by parent visibility
+
+**SetFgColor** / **SetBgColor**: Set foreground and background colors
+- Parameters: red (0-255), green (0-255), blue (0-255), alpha (0-255)
+- Alpha 0 = fully transparent, 255 = fully opaque
+
+**IsMouseOver**: Check if mouse cursor is over this panel
+
+**Remove**: Remove panel from its parent (panel remains valid until released)
+
+### VGUIFrame
+**Scope**: Client
+
+Windowed panels with title bars, dragging support, and optional close/minimize buttons.
+
+```angelscript
+class VGUIFrame : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetTitle(const string& in);
+    void SetMoveable(bool);
+    void SetSizeable(bool);
+    void SetCloseButton(bool);
+    void SetMinimizeButton(bool);
+    void Center();  // Center on screen
+}
+```
+
+**SetTitle**: Set the title bar text
+
+**SetMoveable**: Allow/disallow dragging the frame by its title bar
+
+**SetSizeable**: Allow/disallow resizing the frame by dragging edges
+
+**SetCloseButton** / **SetMinimizeButton**: Show/hide window control buttons
+
+**Center**: Position the frame at the center of the screen
+
+**Example**:
+```angelscript
+VGUIFrame@ frame = CreateFrame(100, 100, 400, 300, "My Window");
+frame.SetMoveable(true);
+frame.SetSizeable(false);
+frame.SetCloseButton(true);
+frame.Center();
+frame.SetVisible(true);
+```
+
+### VGUIButton
+**Scope**: Client
+
+Clickable buttons with callback support.
+
+```angelscript
+class VGUIButton : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    void SetCallback(const string& in);  // Function name to call when clicked
+    void SetEnabled(bool);
+    void SetArmedColor(int r, int g, int b, int a);  // Color when mouse over
+    void SetDepressedColor(int r, int g, int b, int a);  // Color when clicked
+}
+```
+
+**SetText**: Set the button's label text
+
+**SetCallback**: Set the AngelScript function to call when button is clicked
+- Function must exist in the global scope
+- Function takes no parameters and returns void
+
+**SetEnabled**: Enable/disable the button (disabled buttons can't be clicked)
+
+**SetArmedColor**: Color when mouse hovers over button
+
+**SetDepressedColor**: Color when button is being clicked
+
+**Example**:
+```angelscript
+void OnMyButtonClick() {
+    MS_ANGEL_INFO("Button was clicked!");
+}
+
+VGUIButton@ btn = CreateButton("Click Me", 50, 50, 120, 30);
+btn.SetCallback("OnMyButtonClick");
+btn.SetArmedColor(255, 200, 100, 255);  // Orange when hovering
+btn.SetVisible(true);
+```
+
+### VGUILabel
+**Scope**: Client
+
+Static text display with formatting options.
+
+```angelscript
+class VGUILabel : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    void SetTextColor(int r, int g, int b, int a);
+    void SetContentAlignment(int alignment);  // 0=left, 1=center, 2=right
+}
+```
+
+**SetText**: Set the label text
+
+**SetTextColor**: Set the color of the text
+
+**SetContentAlignment**: Align text within the label
+- 0 = left-aligned
+- 1 = center-aligned
+- 2 = right-aligned
+
+**Example**:
+```angelscript
+VGUILabel@ label = CreateLabel("Player Health: 100", 10, 10, 200, 30);
+label.SetTextColor(0, 255, 0, 255);  // Green text
+label.SetContentAlignment(0);  // Left-aligned
+label.SetVisible(true);
+```
+
+### VGUITextEntry
+**Scope**: Client
+
+Text input fields for user text entry.
+
+```angelscript
+class VGUITextEntry : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetText(const string& in);
+    string GetText();
+    void SetEditable(bool);
+    void SetMaxLength(int);    // Note: Not fully supported in base VGUI
+    void SetMultiline(bool);   // Note: Use TextPanel for multiline
+}
+```
+
+**SetText** / **GetText**: Set or retrieve the current text
+
+**SetEditable**: Allow/disallow editing
+
+**Example**:
+```angelscript
+VGUITextEntry@ entry = CreateTextEntry(10, 50, 200, 30);
+entry.SetText("Enter your name");
+entry.SetEditable(true);
+entry.SetVisible(true);
+
+// Later, retrieve the text:
+string playerName = entry.GetText();
+```
+
+### VGUIImagePanel
+**Scope**: Client
+
+Display images (sprites or textures).
+
+```angelscript
+class VGUIImagePanel : VGUIPanel {
+    // All VGUIPanel methods, plus:
+
+    void SetImage(const string& in);  // Set image path
+    void SetScaleImage(bool);         // Scale image to fit panel size
+}
+```
+
+**SetImage**: Set the image to display
+- Path relative to game directory
+- Supports TGA format
+
+**SetScaleImage**: Whether to scale the image to fit the panel bounds
+
+**Example**:
+```angelscript
+VGUIImagePanel@ img = CreateImagePanel("gfx/vgui/logo.tga", 100, 100, 256, 256);
+img.SetScaleImage(true);
+img.SetVisible(true);
+```
+
+---
+
+## VGUI Factory Functions
+**Scope**: Client
+
+Factory functions for creating VGUI panels.
+
+```angelscript
+// Create windowed frame
+VGUIFrame@ CreateFrame(int x, int y, int wide, int tall, const string& in title);
+
+// Create button
+VGUIButton@ CreateButton(const string& in text, int x, int y, int wide, int tall);
+
+// Create label
+VGUILabel@ CreateLabel(const string& in text, int x, int y, int wide, int tall);
+
+// Create text entry field
+VGUITextEntry@ CreateTextEntry(int x, int y, int wide, int tall);
+
+// Create image panel
+VGUIImagePanel@ CreateImagePanel(const string& in imagePath, int x, int y, int wide, int tall);
+
+// Create generic panel (container)
+VGUIPanel@ CreatePanel(int x, int y, int wide, int tall);
+```
+
+---
+
+## VGUI Utility Functions
+**Scope**: Client
+
+```angelscript
+// Get screen dimensions
+void GetScreenSize(int& out wide, int& out tall);
+
+// Check if panel is valid
+bool IsPanelValid(VGUIPanel@ panel);
+```
+
+**GetScreenSize**: Retrieve the current screen resolution
+- Use for positioning panels relative to screen size
+
+**IsPanelValid**: Check if a panel pointer is valid and not null
+
+---
+
+## VGUI Complete Example
+**Scope**: Client
+
+Here's a complete example showing how to create a custom dialog:
+
+```angelscript
+// Global variables to keep panels alive
+VGUIFrame@ g_CustomDialog;
+VGUILabel@ g_MessageLabel;
+VGUIButton@ g_OkButton;
+VGUIButton@ g_CancelButton;
+
+void ShowCustomDialog(const string& in message) {
+    // Create frame
+    g_CustomDialog = CreateFrame(0, 0, 400, 200, "Notification");
+    g_CustomDialog.Center();
+    g_CustomDialog.SetMoveable(true);
+    g_CustomDialog.SetCloseButton(true);
+
+    // Create message label
+    g_MessageLabel = CreateLabel(message, 20, 50, 360, 60);
+    g_MessageLabel.SetTextColor(255, 255, 255, 255);
+    g_MessageLabel.SetContentAlignment(1);  // Center
+    g_CustomDialog.AddChild(g_MessageLabel);
+
+    // Create OK button
+    g_OkButton = CreateButton("OK", 100, 140, 80, 30);
+    g_OkButton.SetCallback("OnDialogOK");
+    g_OkButton.SetArmedColor(100, 200, 100, 255);
+    g_CustomDialog.AddChild(g_OkButton);
+
+    // Create Cancel button
+    g_CancelButton = CreateButton("Cancel", 220, 140, 80, 30);
+    g_CancelButton.SetCallback("OnDialogCancel");
+    g_CancelButton.SetArmedColor(200, 100, 100, 255);
+    g_CustomDialog.AddChild(g_CancelButton);
+
+    // Show dialog
+    g_CustomDialog.SetVisible(true);
+}
+
+void OnDialogOK() {
+    MS_ANGEL_INFO("User clicked OK");
+    HideCustomDialog();
+}
+
+void OnDialogCancel() {
+    MS_ANGEL_INFO("User clicked Cancel");
+    HideCustomDialog();
+}
+
+void HideCustomDialog() {
+    if (g_CustomDialog !is null && g_CustomDialog.IsValid()) {
+        g_CustomDialog.SetVisible(false);
+        @g_CustomDialog = null;  // Release references
+        @g_MessageLabel = null;
+        @g_OkButton = null;
+        @g_CancelButton = null;
+    }
+}
+```
+
+---
+
 ## Notes
 
 1. **Entity Lifetime**: Entity references (CBaseEntity@, CBasePlayer@, CBaseMonster@, CMSMonster@) are managed by the game engine. Scripts should not attempt to delete entities directly.
@@ -1253,3 +2182,15 @@ void CastMonsterTypes() {
 - **1.0**: Initial documentation based on ASBindings.cpp and ASEntityBindings.cpp analysis
 - **1.1**: Added comprehensive module system documentation from ASModuleSystem.h and scriptmodule.h
 - **1.2**: Added comprehensive CBaseMonster and CMSMonster bindings with full property access and AI control methods
+- **1.3**: Added complete client-side AngelScript API documentation including CLocalPlayer, CClientEntity, CTempEntity, CDynamicLight, CBeam, CClientEnvironment, CClientSound, and client utility functions
+- **1.4**: Refactored client-side classes to use inheritance hierarchies using asbind20's `.base<>()` feature:
+  - CClientEffect base class for effects (CTempEntity, CDynamicLight, CBeam)
+  - CLocalPlayer now inherits from CClientEntity, gaining all entity query methods
+- **1.5**: Added comprehensive VGUI (Valve GUI) system for client-side custom UI creation:
+  - VGUIPanel base class for all UI elements
+  - VGUIFrame for windowed interfaces
+  - VGUIButton with callback support
+  - VGUILabel for text display
+  - VGUITextEntry for user input
+  - VGUIImagePanel for image display
+  - Factory functions and complete usage examples
