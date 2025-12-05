@@ -1210,13 +1210,10 @@ void CBasePlayer::PlayerUse(void)
 
 void CBasePlayer::Jump()
 {
-	//if( FBitSet(m_StatusFlags, PLAYER_MOVE_NOJUMP) ) return;
-
 	Vector vecWallCheckDir; // direction we're tracing a line to find a wall when walljumping
 	Vector vecAdjustedVelocity;
 	Vector vecSpot;
 	TraceResult tr;
-	//BOOL bCanJump = TRUE;
 
 	if (FBitSet(pev->flags, FL_WATERJUMP))
 		return;
@@ -1232,7 +1229,7 @@ void CBasePlayer::Jump()
 	if (!FBitSet(m_afButtonPressed, IN_JUMP))
 		return; // don't pogo stick
 
-	if (!(pev->flags & FL_ONGROUND) || !pev->groundentity)
+	if ((pev->flags & FL_ONGROUND) == 0 || !pev->groundentity)
 		return;
 
 	SetBits(m_StatusFlags, PLAYER_MOVE_JUMPING);
@@ -1252,6 +1249,15 @@ void CBasePlayer::Jump()
 	{
 		pev->velocity = pev->velocity + pev->basevelocity;
 	}
+
+	// JoshA: CS behaviour does this for tracktrain + train as well,
+	// but let's just do this for func_vehicle to avoid breaking existing content.
+	//
+	// If you're standing on a moving train... then add the velocity of the train to yours.
+	if (pevGround && (/*(!strcmp( "func_tracktrain", STRING(pevGround->classname))) ||
+			(!strcmp( "func_train", STRING(pevGround->classname))) ) ||*/
+			(!strcmp("func_vehicle", STRING(pevGround->classname)))))
+		pev->velocity = pev->velocity + pevGround->velocity;
 }
 
 // This is a glorious hack to find free space when you've crouched into some solid space
