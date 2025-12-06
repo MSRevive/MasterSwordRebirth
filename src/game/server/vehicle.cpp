@@ -33,24 +33,6 @@ static void FixupAngles2(Vector& v)
 #define VEHICLE_MAXPITCH 200
 #define VEHICLE_MAXSPEED 1500 // approx max speed for sound pitch calculation
 
-
-TYPEDESCRIPTION CFuncVehicle::m_SaveData[] =
-	{
-		DEFINE_FIELD(CFuncVehicle, m_ppath, FIELD_CLASSPTR),
-		DEFINE_FIELD(CFuncVehicle, m_length, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_height, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_speed, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_dir, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_startSpeed, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_controlMins, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncVehicle, m_controlMaxs, FIELD_VECTOR),
-		DEFINE_FIELD(CFuncVehicle, m_sounds, FIELD_INTEGER),
-		DEFINE_FIELD(CFuncVehicle, m_flVolume, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_flBank, FIELD_FLOAT),
-		DEFINE_FIELD(CFuncVehicle, m_oldSpeed, FIELD_FLOAT),
-};
-
-IMPLEMENT_SAVERESTORE(CFuncVehicle, CBaseEntity);
 LINK_ENTITY_TO_CLASS(func_vehicle, CFuncVehicle);
 
 bool CFuncVehicle::KeyValue(KeyValueData* pkvd)
