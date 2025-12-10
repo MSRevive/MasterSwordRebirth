@@ -23,7 +23,7 @@ private:
 	
 	void processScript(std::vector<std::byte> &buffer, std::string relativeFile);
 
-	std::vector<std::byte> getFileContents(const std::string &path)
+	static std::vector<std::byte> getFileContents(const std::string &path)
 	{
 		std::ifstream file(path, std::ios::binary);
 		if (!file.is_open()) {
@@ -33,11 +33,12 @@ private:
 		size_t fsize = std::filesystem::file_size(path);
 		std::vector<std::byte> buffer(fsize);
 		file.read(reinterpret_cast<char*>(buffer.data()), fsize);
+		buffer.push_back(static_cast<std::byte>('\n'));
 
 		return buffer;
 	}
 
-	std::string trim(const std::string& str) {
+	static std::string trim(const std::string& str) {
 		// Standard whitespace characters
 		const std::string whitespace = " \t\n\r\f\v";
 
@@ -54,5 +55,22 @@ private:
 
 		// Return the substring between start and end (inclusive)
 		return str.substr(start, (end - start) + 1);
+	}
+
+	static std::string buildString(std::vector<std::byte>& data) {
+		if (data.empty()) {
+			return "";
+		}
+
+		size_t write_idx = 0;
+		std::string newStr;
+
+		for (size_t read_idx = 0; read_idx < data.size(); ++read_idx) {
+			const char c = static_cast<char>(data[read_idx]);
+
+			newStr += c;
+		}
+
+		return newStr;
 	}
 };

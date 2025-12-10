@@ -52,26 +52,26 @@ void Packer::readDirectory(std::string pszName)
 	}
 }
 
-// packs the scripts.
-// we have to use c strings here because MSR does.
 void Packer::packScripts()
 {
-	char cWriteFile[MAX_PATH];
-	_snprintf(cWriteFile, MAX_PATH, "%s\\scripts.pak", m_OutDir.c_str());
+	namespace fs = std::filesystem;
+	fs::path writePath = fs::path(m_OutDir) / "scripts.pak";
+	std::fstream stream(writePath, std::ios::binary | std::ios::out | std::ios::in | std::ios::trunc);
 
-	if(std::filesystem::exists(cWriteFile))
-		std::remove(cWriteFile);
-
-	FILE* fp = fopen(cWriteFile, "wb+");
-
-	if (fp == NULL)
+	if (!stream.is_open())
 	{
-		printf("Failed to create %s\n", cWriteFile);
+		std::cerr << "Failed to create " << writePath << std::endl;
 		exit(-1);
 	}
 
 	size_t baseDirLen = m_WorkDir.size() + 1;
 	size_t listSize = m_StoredFiles.size();
+
+	if (listSize == 0)
+	{
+		std::cerr << "ERROR: No files in list!" << std::endl;
+		exit(-1);
+	}
 
 	pakHeader_t Header;
 	Header.MagicNumber = 1262698832;
@@ -79,104 +79,95 @@ void Packer::packScripts()
 	Header.DirectoryCount = listSize;
 
 	pakDirectory_t dummy;
-	strcpy(dummy.cFilename, "");
-	dummy.FileSize = 0;
-	dummy.FileOffset = 0;
+	std::memset(&dummy, 0, sizeof(pakDirectory_t)); 
 
-	// write the file header
-	fwrite(&Header, sizeof(pakHeader_t), 1, fp);
+	// write file header
+	stream.write(reinterpret_cast<const char*>(&Header), sizeof(pakHeader_t));
 
 	// write out dummy data to occupy the file metadata position
-	for (int i = 0; i < listSize; i++)
-		fwrite(&dummy, sizeof(pakDirectory_t), 1, fp);
+	for (size_t i = 0; i < listSize; i++)
+	{
+		stream.write(reinterpret_cast<const char*>(&dummy), sizeof(pakDirectory_t));
+	}
 
-	size_t currentFileBytesWritten = ftell(fp);
+	// end of the directory block
+	std::streampos currentFileBytesWritten = stream.tellp();
 
-	// jump back to just after the header
-	fseek(fp, sizeof(pakHeader_t), SEEK_SET);
+	// jump back to just after the header to start writing real directory entries
+	stream.seekp(sizeof(pakHeader_t));
 
 	size_t count = 0;
-	
-	if (listSize > 0 && baseDirLen > 0)
+
+	std::cout << listSize << std::endl;
+
+	for (std::string& file : m_StoredFiles)
 	{
-		std::cout << listSize << std::endl;
-		for(std::string &file : m_StoredFiles)
+		std::cout << "Script #" << count++ << std::endl;
+
+		auto contents = getFileContents(file);
+		if (contents.empty())
 		{
-			std::cout << "Script #" << count << std::endl;
-			count++;
-			auto contents = getFileContents(file);
-
-			if (contents.size() > 0)
-			{
-				std::cout << file << std::endl;
-				std::string relativePath = file.substr(baseDirLen, file.length());
-				std::cout << relativePath << std::endl;
-
-				if (g_Verbose == true)
-					std::cout << "Processing " << relativePath << "..." << std::endl;
-				processScript(contents, relativePath);
-
-				pakDirectory_t File;
-				strncpy(File.cFilename, &(file.c_str()[baseDirLen]), sizeof(File.cFilename));
-				File.FileOffset = 0;
-				File.FileSize = contents.size();
-
-				if (g_Verbose == true)
-					printf("Packing file: %s\n", File.cFilename);
-
-				// remember where this entry is
-				size_t currentPosition = ftell(fp);
-
-				// write this entry
-				size_t ObjectsWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
-
-				if (ObjectsWritten != 1)
-					printf("Failed to write entry: %s\n", File.cFilename);
-
-				// jump to where the file data should be
-				fseek(fp, currentFileBytesWritten, SEEK_SET);
-
-				// remember the current position as where this file starts
-				File.FileOffset = ftell(fp);
-
-				// write the file data
-				ObjectsWritten = fwrite(reinterpret_cast<const char*>(contents.data()), contents.size(), 1, fp);
-
-				if (ObjectsWritten != 1)
-					printf("Failed to write file: %s\n", File.cFilename);
-
-				// remember the current position as where to pick up from when writing the next file
-				currentFileBytesWritten = ftell(fp);
-
-				// jump back to the entry
-				fseek(fp, currentPosition, SEEK_SET);
-
-				// write the entry with the correct FileOffset
-				ObjectsWritten = fwrite(&File, sizeof(pakDirectory_t), 1, fp);
-		
-				if (ObjectsWritten != 1)
-					printf("Failed to write entry: %s\n", File.cFilename);
-
-				std::cout << std::endl;
-			}
-			else
-			{
-				std::cout << "ERROR: file: " << file << " is empty!" << std::endl;
-			}
+			std::cerr << "ERROR: file: " << file << " is empty!" << std::endl;
+			continue;
 		}
-	}
-	else
-	{
-		std::cout << "ERROR: No files in list!" << std::endl;
-		exit(-1);
+
+		std::cout << file << std::endl;
+		std::string relativePath = (file.length() > baseDirLen) ? file.substr(baseDirLen) : file;
+		std::cout << relativePath << std::endl;
+
+		if (g_Verbose)
+			std::cout << "Processing " << relativePath << "..." << std::endl;
+
+		processScript(contents, relativePath);
+
+		std::string safeStr = buildString(contents);
+		size_t strSize = safeStr.size();
+
+		pakDirectory_t FileEntry;
+		std::memset(&FileEntry, 0, sizeof(pakDirectory_t));
+		
+		strncpy(FileEntry.cFilename, relativePath.c_str(), sizeof(FileEntry.cFilename) - 1);
+		FileEntry.FileOffset = 0; // placeholder
+		FileEntry.FileSize = strSize;
+
+		if (g_Verbose)
+			std::cout << "Packing file: " << FileEntry.cFilename << std::endl;
+
+		// remember where we are in the directory block
+		std::streampos entryPosition = stream.tellp();
+
+		// write the Directory entry (with incorrect offset for now)
+		stream.write(reinterpret_cast<const char*>(&FileEntry), sizeof(pakDirectory_t));
+
+		if (stream.fail()) 
+			std::cerr << "Failed to write directory entry: " << FileEntry.cFilename << std::endl;
+
+		// jump to the end of the file (where data lives)
+		stream.seekp(currentFileBytesWritten);
+
+		// update the FileOffset to the current position
+		FileEntry.FileOffset = (unsigned int)stream.tellp();
+
+		// write the actual file data
+		stream.write(safeStr.c_str(), strSize);
+
+		if (stream.fail())
+			std::cerr << "Failed to write file data: " << FileEntry.cFilename << std::endl;
+
+		// update our tracker for the end of the file
+		currentFileBytesWritten = stream.tellp();
+
+		// jump back to the directory entry position
+		stream.seekp(entryPosition);
+
+		// rewrite the directory entry with the correct FileOffset
+		stream.write(reinterpret_cast<const char*>(&FileEntry), sizeof(pakDirectory_t));
+
+		std::cout << std::endl;
 	}
 
 	std::cout << "Finished packing..." << std::endl;
-
-
-	fflush(fp);
-	fclose(fp);
-} 
+}
 
 void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeFile)
 {
@@ -332,7 +323,7 @@ void Packer::stripWhiteSpace(std::vector<std::byte>& data) {
 
 	data.resize(write_idx);
 
-	if (!data.empty() && static_cast<char>(data[write_idx - 1]) != '\n') {
+	if (static_cast<char>(data[write_idx - 1]) != '\n') {
 		data.push_back(static_cast<std::byte>('\n'));
 	}
 }
