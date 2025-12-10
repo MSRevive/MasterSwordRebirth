@@ -141,6 +141,7 @@ typedef void (CBaseEntity::*USEPTR)(CBaseEntity *pActivator, CBaseEntity *pCalle
 #define CLASS_ALIEN_BIOWEAPON 15  // hornets and snarks.launched by the alien menace
 #define CLASS_BARNACLE 99		  // special because no one pays attention to it, and it eats a wide cross-section of creatures.
 #define CHAR_LEVEL_CAP 45		  // MiB JAN2010_15 Global Level Cap
+#define CLASS_VEHICLE 16 // we use 16 because of MS class defines.
 
 class CBaseEntity;
 class CBaseMonster;

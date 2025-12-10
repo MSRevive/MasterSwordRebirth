@@ -31,6 +31,7 @@
 #include	"ms/angelscript/CAngelScriptManager.h"
 #include	"ms/angelscript/ASModuleSystem.h"
 #include	"ms/scriptmgr.h"
+#include	"trains.h" // for CFuncVehicle
 #include	<asbind20/asbind.hpp>
 
 #include <climits>
@@ -593,22 +594,33 @@ void CHalfLifeMultiplay::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller,
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 	CBasePlayer *peKiller = NULL;
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
-	if ( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
+	if (ktmp && (ktmp->Classify() == CLASS_PLAYER))
 		peKiller = (CBasePlayer*)ktmp;
 
-	if ( pVictim->pev == pKiller )  
+	if (pVictim->pev == pKiller)  
 	{  // killed self
 		pKiller->frags -= 1;
 	}
-	else if ( ktmp && ktmp->IsPlayer() )
+	else if (ktmp && ktmp->IsPlayer())
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
-		pKiller->frags += IPointsForKill( peKiller, pVictim );
+		pKiller->frags += IPointsForKill(peKiller, pVictim);
 		
-		FireTargets( "game_playerkill", ktmp, ktmp, USE_TOGGLE, 0 );
+		FireTargets("game_playerkill", ktmp, ktmp, USE_TOGGLE, 0);
 	}
-	else if ( ktmp && FBitSet( ktmp->pev->flags, FL_MONSTER ) )
+	else if (ktmp && FBitSet(ktmp->pev->flags, FL_MONSTER))
 	{
+	}
+	else if (ktmp && (ktmp->Classify() == CLASS_VEHICLE))
+	{
+		CBasePlayer* pDriver = ((CFuncVehicle*)ktmp)->m_pDriver;
+
+		if (pDriver != NULL)
+		{
+			peKiller = pDriver;
+			ktmp = pDriver;
+			pKiller = pDriver->pev;
+		}
 	}
 	else
 	{  // killed by the world

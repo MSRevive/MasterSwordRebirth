@@ -1126,6 +1126,9 @@ void CBasePlayer::PlayerUse(void)
 			{
 				m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
+				CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
+				if (pTrain && (pTrain->Classify() == CLASS_VEHICLE))
+					((CFuncVehicle*)pTrain)->m_pDriver = NULL;
 				return;
 			}
 			else
@@ -1210,13 +1213,10 @@ void CBasePlayer::PlayerUse(void)
 
 void CBasePlayer::Jump()
 {
-	//if( FBitSet(m_StatusFlags, PLAYER_MOVE_NOJUMP) ) return;
-
 	Vector vecWallCheckDir; // direction we're tracing a line to find a wall when walljumping
 	Vector vecAdjustedVelocity;
 	Vector vecSpot;
 	TraceResult tr;
-	//BOOL bCanJump = TRUE;
 
 	if (FBitSet(pev->flags, FL_WATERJUMP))
 		return;
@@ -1232,7 +1232,7 @@ void CBasePlayer::Jump()
 	if (!FBitSet(m_afButtonPressed, IN_JUMP))
 		return; // don't pogo stick
 
-	if (!(pev->flags & FL_ONGROUND) || !pev->groundentity)
+	if ((pev->flags & FL_ONGROUND) == 0 || !pev->groundentity)
 		return;
 
 	SetBits(m_StatusFlags, PLAYER_MOVE_JUMPING);
@@ -1252,6 +1252,15 @@ void CBasePlayer::Jump()
 	{
 		pev->velocity = pev->velocity + pev->basevelocity;
 	}
+
+	// JoshA: CS behaviour does this for tracktrain + train as well,
+	// but let's just do this for func_vehicle to avoid breaking existing content.
+	//
+	// If you're standing on a moving train... then add the velocity of the train to yours.
+	if (pevGround && (/*(!strcmp( "func_tracktrain", STRING(pevGround->classname))) ||
+			(!strcmp( "func_train", STRING(pevGround->classname))) ) ||*/
+			(!strcmp("func_vehicle", STRING(pevGround->classname)))))
+		pev->velocity = pev->velocity + pevGround->velocity;
 }
 
 // This is a glorious hack to find free space when you've crouched into some solid space
@@ -1565,12 +1574,15 @@ void CBasePlayer::PreThink(void)
 				//ALERT( at_error, "In train mode with no train!\n" );
 				m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
+				if (pTrain->Classify() == CLASS_VEHICLE)
+					((CFuncVehicle*)pTrain)->m_pDriver = NULL;
 				return;
 			}
 		}
-		else if (!FBitSet(pev->flags, FL_ONGROUND) || FBitSet(pTrain->pev->spawnflags, SF_TRACKTRAIN_NOCONTROL) || (pev->button & (IN_MOVELEFT | IN_MOVERIGHT)))
+		else if (!FBitSet(pev->flags, FL_ONGROUND) || FBitSet(pTrain->pev->spawnflags, SF_TRACKTRAIN_NOCONTROL) || ((pev->button & (IN_MOVELEFT | IN_MOVERIGHT)) != 0 && pTrain->Classify() != CLASS_VEHICLE))
 		{
 			// Turn off the train if you jump, strafe, or the train controls go dead
+			// and it isn't a func_vehicle
 			m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
 			m_iTrain = TRAIN_NEW | TRAIN_OFF;
 			return;
@@ -1578,15 +1590,41 @@ void CBasePlayer::PreThink(void)
 
 		pev->velocity = g_vecZero;
 		vel = 0;
-		if (m_afButtonPressed & IN_FORWARD)
+		if (pTrain->Classify() == CLASS_VEHICLE)
 		{
-			vel = 1;
-			pTrain->Use(this, this, USE_SET, (float)vel);
+			if (pev->button & IN_FORWARD)
+			{
+				vel = 1;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
+			if (pev->button & IN_BACK)
+			{
+				vel = -1;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
+			if (pev->button & IN_MOVELEFT)
+			{
+				vel = 20;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
+			if (pev->button & IN_MOVERIGHT)
+			{
+				vel = 30;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
 		}
-		else if (m_afButtonPressed & IN_BACK)
+		else
 		{
-			vel = -1;
-			pTrain->Use(this, this, USE_SET, (float)vel);
+			if ((m_afButtonPressed & IN_FORWARD) != 0)
+			{
+				vel = 1;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
+			else if ((m_afButtonPressed & IN_BACK) != 0)
+			{
+				vel = -1;
+				pTrain->Use(this, this, USE_SET, (float)vel);
+			}
 		}
 
 		if (vel)
