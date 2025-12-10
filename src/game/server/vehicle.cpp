@@ -35,43 +35,43 @@ static void FixupAngles2(Vector& v)
 
 LINK_ENTITY_TO_CLASS(func_vehicle, CFuncVehicle);
 
-bool CFuncVehicle::KeyValue(KeyValueData* pkvd)
+void CFuncVehicle::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "length"))
 	{
 		m_length = atof(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	if (FStrEq(pkvd->szKeyName, "width"))
 	{
 		m_width = atof(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "height"))
 	{
 		m_height = atof(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "startspeed"))
 	{
 		m_startSpeed = atof(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "volume"))
 	{
 		m_flVolume = (float)(atoi(pkvd->szValue));
 		m_flVolume *= 0.1;
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "bank"))
 	{
 		m_flBank = atof(pkvd->szValue);
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "acceleration"))
 	{
@@ -80,7 +80,7 @@ bool CFuncVehicle::KeyValue(KeyValueData* pkvd)
 			m_acceleration = 1;
 		else if (m_acceleration > 10)
 			m_acceleration = 10;
-		return true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		return CBaseEntity::KeyValue(pkvd);
@@ -791,12 +791,12 @@ void CFuncVehicle ::SetControls(entvars_t* pevControls)
 }
 
 
-bool CFuncVehicle ::OnControls(entvars_t* pevTest)
+BOOL CFuncVehicle ::OnControls(entvars_t* pevTest)
 {
 	Vector offset = pevTest->origin - pev->origin;
 
 	if (pev->spawnflags & SF_TRACKTRAIN_NOCONTROL)
-		return false;
+		return FALSE;
 
 	// Transform offset into local coordinates
 	UTIL_MakeVectors(pev->angles);
@@ -807,9 +807,9 @@ bool CFuncVehicle ::OnControls(entvars_t* pevTest)
 
 	if (local.x >= m_controlMins.x && local.y >= m_controlMins.y && local.z >= m_controlMins.z &&
 		local.x <= m_controlMaxs.x && local.y <= m_controlMaxs.y && local.z <= m_controlMaxs.z)
-		return true;
+		return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 

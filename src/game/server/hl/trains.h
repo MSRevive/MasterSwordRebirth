@@ -132,7 +132,7 @@ public:
 
 	void Blocked(CBaseEntity* pOther);
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	bool KeyValue(KeyValueData* pkvd);
+	void KeyValue(KeyValueData* pkvd);
 
 	void EXPORT Next(void);
 	void EXPORT Find(void);
@@ -147,15 +147,12 @@ public:
 
 	void SetTrack(CPathTrack* track) { m_ppath = track->Nearest(pev->origin); }
 	void SetControls(entvars_t* pevControls);
-	bool OnControls(entvars_t* pev);
+	BOOL OnControls(entvars_t* pev);
 
 	void StopSound(void);
 	void UpdateSound(void);
 
 	static CFuncVehicle* Instance(edict_t* pent);
-
-	bool Save(CSave& save);
-	bool Restore(CRestore& restore);
 
 	static TYPEDESCRIPTION m_SaveData[];
 	int ObjectCaps() { return (CBaseEntity ::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DIRECTIONAL_USE; }

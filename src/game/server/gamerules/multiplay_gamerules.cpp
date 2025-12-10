@@ -31,6 +31,7 @@
 #include	"ms/angelscript/CAngelScriptManager.h"
 #include	"ms/angelscript/ASModuleSystem.h"
 #include	"ms/scriptmgr.h"
+#include	"trains.h" // for CFuncVehicle
 #include	<asbind20/asbind.hpp>
 
 #include <climits>
