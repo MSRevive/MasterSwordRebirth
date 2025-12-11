@@ -1009,42 +1009,43 @@ void CFuncVehicle ::Precache()
 	if (m_flVolume == 0.0)
 		m_flVolume = 1.0;
 
-	switch (m_sounds)
-	{
-	case 1:
-		PRECACHE_SOUND("plats/vehicle1.wav");
-		pev->noise = MAKE_STRING("plats/vehicle1.wav");
-		break;
-	case 2:
-		PRECACHE_SOUND("plats/vehicle2.wav");
-		pev->noise = MAKE_STRING("plats/vehicle2.wav");
-		break;
-	case 3:
-		PRECACHE_SOUND("plats/vehicle3.wav");
-		pev->noise = MAKE_STRING("plats/vehicle3.wav");
-		break;
-	case 4:
-		PRECACHE_SOUND("plats/vehicle4.wav");
-		pev->noise = MAKE_STRING("plats/vehicle4.wav");
-		break;
-	case 5:
-		PRECACHE_SOUND("plats/vehicle6.wav");
-		pev->noise = MAKE_STRING("plats/vehicle6.wav");
-		break;
-	case 6:
-		PRECACHE_SOUND("plats/vehicle7.wav");
-		pev->noise = MAKE_STRING("plats/vehicle7.wav");
-		break;
-	default:
-		PRECACHE_SOUND("plats/vehicle7.wav");
-		pev->noise = MAKE_STRING("plats/vehicle7.wav");
-		break;
-	}
+	// we don't really want to use these sounds since they're not fantasy sounds thus wouldn't match our game.
+	// switch (m_sounds)
+	// {
+	// case 1:
+	// 	PRECACHE_SOUND("plats/vehicle1.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle1.wav");
+	// 	break;
+	// case 2:
+	// 	PRECACHE_SOUND("plats/vehicle2.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle2.wav");
+	// 	break;
+	// case 3:
+	// 	PRECACHE_SOUND("plats/vehicle3.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle3.wav");
+	// 	break;
+	// case 4:
+	// 	PRECACHE_SOUND("plats/vehicle4.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle4.wav");
+	// 	break;
+	// case 5:
+	// 	PRECACHE_SOUND("plats/vehicle6.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle6.wav");
+	// 	break;
+	// case 6:
+	// 	PRECACHE_SOUND("plats/vehicle7.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle7.wav");
+	// 	break;
+	// default:
+	// 	PRECACHE_SOUND("plats/vehicle7.wav");
+	// 	pev->noise = MAKE_STRING("plats/vehicle7.wav");
+	// 	break;
+	// }
 
-	PRECACHE_SOUND("plats/vehicle_brake1.wav");
-	PRECACHE_SOUND("plats/vehicle_start1.wav");
+	// PRECACHE_SOUND("plats/vehicle_brake1.wav");
+	// PRECACHE_SOUND("plats/vehicle_start1.wav");
 
-	m_usAdjustPitch = PRECACHE_EVENT(1, "events/vehicle.sc");
+	// m_usAdjustPitch = PRECACHE_EVENT(1, "events/vehicle.sc");
 }
 
 
