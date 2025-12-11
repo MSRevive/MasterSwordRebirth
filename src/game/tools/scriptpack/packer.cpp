@@ -326,10 +326,6 @@ void Packer::stripWhiteSpace(std::vector<std::byte>& data) {
 	}
 
 	data.resize(write_idx);
-
-	if (static_cast<char>(data[write_idx - 1]) != '\n') {
-		data.push_back(static_cast<std::byte>('\n'));
-	}
 }
 
 void Packer::stripEmptyLines(std::vector<std::byte>& data) {
