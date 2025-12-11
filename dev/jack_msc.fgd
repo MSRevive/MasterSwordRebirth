@@ -1932,6 +1932,48 @@
 	deceleration(string) : "Stop Deceleration units/sec^2" : "500"
 ]
 
+@SolidClass base(Targetname, Angles, RenderFields, ZHLT) = func_vehicle : "Drivable Vehicles" 
+[
+	spawnflags(flags) =
+	[
+		1 : "No Pitch (X-rot)" : 0
+		2 : "No User Control" : 0
+		8 : "Passable" : 0
+	]
+	target(target_destination) : "First stop target"
+	sounds(choices) : "Sound" : "" =
+	[
+		"": "None"
+		1: "Vehicle 1"
+		2: "Vehicle 2"
+		3: "Vehicle 3"
+		4: "Vehicle 4"
+		5: "Vehicle 6"
+		6: "Vehicle 7"
+	]
+	length(integer) : "Length of the vehicle" : 256
+	width(integer) : "Width of the vehicle" : 128
+	height(integer) : "Height above track" : 4
+//*
+//*note: max speed is 2000 or things go wrong
+//*
+	startspeed(integer) : "Initial speed" : 0
+	speed(integer) : "Speed (units per second)" : 64
+	dmg(integer) : "Damage on crush" : 0	
+	volume(integer) : "Volume (10 = loudest)" : 10
+	bank(string) : "Bank angle on turns" : "0"
+	_minlight(string) : "Minimum light level" : "0"
+]
+
+@SolidClass = func_vehiclecontrols : "Vehicle Controls"
+[
+	target(target_destination) : "Vehicle Name"
+	zhlt_invisible(choices) : "Invisible" : 1 =
+	[
+		1: "yes"
+	]
+]
+
 //
 // T E S T
 //
