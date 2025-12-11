@@ -9,6 +9,7 @@
 #ifdef _MSR_UTILS
 #include "scriptmodule/scriptmodule.h"
 #endif
+#include "logger.h"
 
 extern bool g_Verbose;
 extern bool g_Release;
@@ -21,7 +22,7 @@ Packer::Packer(std::string wDir, std::string rDir, std::string oDir)
 	m_RootDir = rDir;
 	m_OutDir = oDir;
 
-	std::cout << "Work directory set to: " << m_WorkDir << std::endl;
+	Logger::GetInstance().Log("Work directory set to: {}", m_WorkDir);
 }
 
 void Packer::readDirectory(std::string pszName)
@@ -30,6 +31,8 @@ void Packer::readDirectory(std::string pszName)
 
 	for(const auto &entry : std::filesystem::recursive_directory_iterator(fsPath))
 	{
+		std::cout << "Reading: " << entry.path().string() << std::endl;
+
 		if (g_Release && entry.path().parent_path().filename() == "developer")
 			continue;
 
@@ -38,10 +41,16 @@ void Packer::readDirectory(std::string pszName)
 			std::cout << "Reading Directory: " << entry.path().string() << std::endl;
 		}
 
-		if( entry.is_regular_file() )
+		if (entry.is_regular_file() && entry.file_size() > 0)
 		{
 			auto file = entry.path();
-			if(file.extension() == ".script" || file.extension() == ".as" || file.filename() == "items.txt")
+			if (entry.file_size() <= 0)
+			{
+				std::cout << file.string() << " is empty! Skipping..." << std::endl;
+				continue;
+			}
+
+			if (file.extension() == ".script" || file.extension() == ".as" || file.filename() == "items.txt")
 			{
 				if( g_Verbose )
 					std::cout << file.string() << std::endl;
@@ -54,8 +63,7 @@ void Packer::readDirectory(std::string pszName)
 
 void Packer::packScripts()
 {
-	namespace fs = std::filesystem;
-	fs::path writePath = fs::path(m_OutDir) / "scripts.pak";
+	std::filesystem::path writePath = std::filesystem::path(m_OutDir) / "scripts.pak";
 	std::fstream stream(writePath, std::ios::binary | std::ios::out | std::ios::in | std::ios::trunc);
 
 	if (!stream.is_open())
@@ -111,12 +119,13 @@ void Packer::packScripts()
 			continue;
 		}
 
-		std::cout << file << std::endl;
 		std::string relativePath = (file.length() > baseDirLen) ? file.substr(baseDirLen) : file;
-		std::cout << relativePath << std::endl;
-
 		if (g_Verbose)
+		{
+			std::cout << file << std::endl;
+			std::cout << relativePath << std::endl;
 			std::cout << "Processing " << relativePath << "..." << std::endl;
+		}	
 
 		processScript(contents, relativePath);
 

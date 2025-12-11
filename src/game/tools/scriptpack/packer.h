@@ -13,6 +13,7 @@ public:
 	void stripComments(std::vector<std::byte>& data);
 	void stripWhiteSpace(std::vector<std::byte>& data);
 	void stripEmptyLines(std::vector<std::byte>& data);
+	void Logger(std::string msg);
   
 private:
 	std::string m_WorkDir;
@@ -33,7 +34,6 @@ private:
 		size_t fsize = std::filesystem::file_size(path);
 		std::vector<std::byte> buffer(fsize);
 		file.read(reinterpret_cast<char*>(buffer.data()), fsize);
-		buffer.push_back(static_cast<std::byte>('\n'));
 
 		return buffer;
 	}
