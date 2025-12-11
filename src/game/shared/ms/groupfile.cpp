@@ -226,9 +226,11 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 			byte* _pBuffer = msnew byte[Entry.FileSize];
 			bool bSuccess = false;
 
-			if (Entry.FileSize == cFile.Read(_pBuffer, Entry.FileSize))
+			unsigned long BytesRead = cFile.Read(_pBuffer, Entry.FileSize);
+			if (BytesRead == Entry.FileSize)
 			{
-				memcpy(pBuffer, _pBuffer, DataSize);
+				memcpy(pBuffer, _pBuffer, BytesRead);
+				DataSize = BytesRead;
 				bSuccess = true;
 			}
 

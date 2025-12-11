@@ -8,6 +8,7 @@
 #include "packer.h"
 #include "crc/crchash.h"
 #include "cxxopts.hpp"
+#include "logger.h"
 
 bool g_Verbose; //--verbose
 bool g_Release; //--release
@@ -27,16 +28,18 @@ int main(int argc, char** argv)
 	("v,verbose", "Verbose printing.", cxxopts::value<bool>()->default_value("false"))
 	("f,fail", "Exit on script error.", cxxopts::value<bool>()->default_value("false"))
 	("p,pack", "Turn off script packing.", cxxopts::value<bool>()->default_value("false"))
+	("l,log", "Enable logging to a text file.", cxxopts::value<bool>()->default_value("true"))
 	("h,help", "Print usage");
 	
 	//Parse command line arguements
 	auto result = options.parse(argc, argv);
-
 	if (result.count("help"))
 	{
 		std::cout << options.help() << std::endl;
 		exit(0);
 	}
+
+	Logger::GetInstance().EnableFileLogging(result["log"].as<bool>());
 	
 	std::string outDir = result["output"].as<std::string>();
 	g_Release = result["release"].as<bool>();
@@ -52,6 +55,7 @@ int main(int argc, char** argv)
 	if(!std::filesystem::exists(outDir))
 	{
 		std::cout << "Error: output directory " << outDir << " not found!" << std::endl;
+		exit(-1);
 	}
 	
 	Packer packer(workDir, std::filesystem::current_path().string(), outDir);
@@ -60,9 +64,8 @@ int main(int argc, char** argv)
 	if(result["pack"].as<bool>() == false)
 	{
 		packer.packScripts();
-		printf("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
+		Logger::GetInstance().Log("Wrote changes to the script pak. Hash {}\n\n", GetFileCheckSum("./scripts.pak"));
 	}
-	std::cout << "Finished..." << std::endl;
 
 	return 0;
 }
