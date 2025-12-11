@@ -64,9 +64,8 @@ int main(int argc, char** argv)
 	if(result["pack"].as<bool>() == false)
 	{
 		packer.packScripts();
-		Logger::GetInstance().Log("Wrote changes to the script pak. Hash %u\n\n", GetFileCheckSum("./scripts.pak"));
+		Logger::GetInstance().Log("Wrote changes to the script pak. Hash {}\n\n", GetFileCheckSum("./scripts.pak"));
 	}
-	Logger::GetInstance().Log("Finished...");
 
 	return 0;
 }

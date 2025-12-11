@@ -15,6 +15,8 @@ public:
     // New method to control logging dynamically
     void EnableFileLogging(bool enable); 
 
+	void RawLog(const std::string& message);
+
     // *** 3. Main Logging Method ***
     void Log(const std::string& message);
 

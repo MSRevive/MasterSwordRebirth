@@ -40,6 +40,14 @@ Logger& Logger::GetInstance() {
 	return instance;
 }
 
+void Logger::RawLog(const std::string& message) {
+	if (isFileLoggingEnabled && logFileStream.is_open()) {
+		logFileStream << message << std::endl;
+	}
+
+	std::cout << message << std::endl;
+}
+
 void Logger::Log(const std::string& message) {
 	std::string timestamp = getCurrentTimestamp();
 	std::string fullMessage = "[" + timestamp + "] " + message;
