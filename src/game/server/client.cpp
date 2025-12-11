@@ -179,7 +179,7 @@ void ClientDisconnect(edict_t *pEntity)
 		std::string steamID = "Unknown";
 		
 		// Try to get player name from entity
-		if (pEntity->v.netname && STRING(pEntity->v.netname)[0])
+		if (pEntity->v.netname && STRING(pEntity->v.netname))
 		{
 			pszPlayerName = STRING(pEntity->v.netname);
 		}
