@@ -53,7 +53,7 @@ void Packer::readDirectory(std::string pszName)
 			if (file.extension() == ".script" || file.extension() == ".as" || file.filename() == "items.txt")
 			{
 				if(g_Verbose)
-					Logger::GetInstance().Log("Adding file to list: {}", file.string());
+					Logger::GetInstance().Log("Adding file to list: {} File Size: {}", file.string(), entry.file_size());
 
 				m_StoredFiles.push_back(file.string());
 			}
@@ -115,6 +115,7 @@ void Packer::packScripts()
 		auto contents = getFileContents(file);
 
 		std::string relativePath = (file.length() > baseDirLen) ? file.substr(baseDirLen) : file;
+		std::replace(relativePath.begin(), relativePath.end(), '\\', '/'); // why just why, 2 days wasted because of this........
 		if (g_Verbose)
 		{
 			Logger::GetInstance().Log("{}", file);
@@ -124,6 +125,7 @@ void Packer::packScripts()
 
 		processScript(contents, relativePath);
 
+		//std::string(contents.data()) causes compile error, so just build string manually from vector.
 		std::string safeStr = buildString(contents);
 		size_t strSize = safeStr.size();
 
@@ -135,7 +137,7 @@ void Packer::packScripts()
 		FileEntry.FileSize = strSize;
 
 		if (g_Verbose)
-			Logger::GetInstance().Log("Packing file: {}", FileEntry.cFilename);
+			Logger::GetInstance().Log("Packing file: {}, Bytes Written: {}", FileEntry.cFilename, strSize);
 
 		// remember where we are in the directory block
 		std::streampos entryPosition = stream.tellp();
