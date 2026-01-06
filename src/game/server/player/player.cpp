@@ -2493,6 +2493,8 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 				Status = GetRandomSpawnSpot(SPAWN_BEGIN, NULL, this, &pSpot);
 			if (Status == SS_NOSPOT && m_JoinType == JN_ELITE)
 				Status = GetRandomSpawnSpot(SPAWN_GENERIC, NULL, this, &pSpot);
+			if (Status == SS_NOSPOT && m_JoinType == JN_TRAVEL)
+				Status = GetRandomSpawnSpot(SPAWN_GENERIC, NULL, this, &pSpot);
 			break;
 		default:
 
