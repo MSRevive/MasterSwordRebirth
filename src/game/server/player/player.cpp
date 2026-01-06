@@ -2761,6 +2761,9 @@ void CBasePlayer::Spawn(void)
 	}
 	else
 	{
+		// this needs to be called until AS is finished.
+		CallScriptEvent("game_player_putinworld"); //Thothie MAR2008a
+
 		// Call AngelScript event handler directly via ASManager
 		// Pass the player entity string as parameter
 		#ifdef VALVE_DLL
