@@ -8,15 +8,6 @@
 #include "weapons/genericitem.h"
 #include "modeldefs.h"
 
-int CBasePlayer::IdealModel()
-{
-	return MAKE_STRING(MODEL_HUMAN_REF);
-	/*if( m_Gender == GENDER_MALE )
-		return MAKE_STRING(MODEL_HUMAN_REF);
-	else return MAKE_STRING(MODEL_HUMAN_REF);*/
-	//return MAKE_STRING(Race->MaleModel);
-	//return MAKE_STRING(Race->FemaleModel);
-}
 Vector CBasePlayer::Size(int flags)
 {
 	return Vector(m_Width, m_Width, (!(flags & FL_DUCKING)) ? m_Height : m_Height / 2);
