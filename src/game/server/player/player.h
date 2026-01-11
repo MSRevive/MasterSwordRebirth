@@ -17,6 +17,7 @@
 
 #include "monsters/msmonster.h"
 #include "sharedutil.h"
+#include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
 #include "iscript.h"
