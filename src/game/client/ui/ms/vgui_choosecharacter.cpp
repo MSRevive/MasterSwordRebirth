@@ -1165,6 +1165,7 @@ void CRenderChar::Init( int Idx )
 { 
 	Init( Idx, MODEL_HUMAN_REF ); 
 } // MIB FEB2015_21 [RACE_MENU] - Changed this to pass-through, allows model as optional parm
+
 void CRenderChar::Init( int Idx, msstring model )
 {
 	clrmem( m_Ent );

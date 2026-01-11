@@ -31,22 +31,6 @@ void ShowWeaponDesc(CGenericItem* pItem);
 #include "game.h"
 //END NOTE
 
-const char* ModelListHumanMale[HUMAN_BODYPARTS] =
-{
-	MODEL_HUMAN_LEGS,
-	MODEL_HUMAN_HEAD,
-	MODEL_HUMAN_CHEST,
-	MODEL_HUMAN_ARMS,
-};
-
-const char* ModelListHumanFemale[HUMAN_BODYPARTS] =
-{
-	MODEL_HUMAN_FEM_LEGS,
-	MODEL_HUMAN_FEM_HEAD,
-	MODEL_HUMAN_FEM_CHEST,
-	MODEL_HUMAN_FEM_ARMS,
-};
-
 keysnapshot KeyHistory[MAX_KEYHISTORY];
 
 const char* GetPlayerTitle(int Title)
