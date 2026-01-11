@@ -2163,29 +2163,29 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 //=========================================================
 
 //#define PLAYERMODEL_HUMAN_MALE1 "../../human/male1/male1"
-#define PLAYERMODEL_HUMAN_MALE1 ""
+//#define PLAYERMODEL_HUMAN_MALE1 ""
 
 void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, const char *infobuffer )
 {
 	// prevent skin/color/model changes
-	const char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
+	// const char *mdls = g_engfuncs.pfnInfoKeyValue( infobuffer, "model" );
 
-	if ( _stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
-	{
-		g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "model", PLAYERMODEL_HUMAN_MALE1 );
-		//_snprintf( text, sizeof(text), "* Unkwnown forces prevent you from shapeshifting...\n" );
-		//UTIL_SayText( text, pPlayer );
-		return;
-	}
+	// if ( _stricmp( mdls, PLAYERMODEL_HUMAN_MALE1 ) )
+	// {
+	// 	g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "model", PLAYERMODEL_HUMAN_MALE1 );
+	// 	//_snprintf( text, sizeof(text), "* Unkwnown forces prevent you from shapeshifting...\n" );
+	// 	//UTIL_SayText( text, pPlayer );
+	// 	return;
+	// }
 
-	//Only allow a name change the first time a client joins
-	if( pPlayer->m_DisplayName.len() )	//Name already set.  Keep that name
-	{
-		g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "name", (char *)pPlayer->m_DisplayName );
-		//pPlayer->pev->netname = ALLOC_STRING(pPlayer->DisplayName());
-		pPlayer->m_NetName = pPlayer->DisplayName(); 
-		pPlayer->pev->netname = MAKE_STRING(pPlayer->m_NetName.c_str());
-	}
+	// //Only allow a name change the first time a client joins
+	// if( pPlayer->m_DisplayName.len() )	//Name already set.  Keep that name
+	// {
+	// 	g_engfuncs.pfnSetClientKeyValue( pPlayer->entindex(), g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "name", (char *)pPlayer->m_DisplayName );
+	// 	//pPlayer->pev->netname = ALLOC_STRING(pPlayer->DisplayName());
+	// 	pPlayer->m_NetName = pPlayer->DisplayName(); 
+	// 	pPlayer->pev->netname = MAKE_STRING(pPlayer->m_NetName.c_str());
+	// }
 /*
 	if( !FStrEq( pPlayer->DisplayName(), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" )) )
 		//if Tried to change name
