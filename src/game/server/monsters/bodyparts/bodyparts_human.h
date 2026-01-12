@@ -10,9 +10,6 @@ enum
 	HUMAN_BODYPARTS
 };
 
-extern const char* ModelListHumanMale[HUMAN_BODYPARTS];
-extern const char* ModelListHumanFemale[HUMAN_BODYPARTS];
-
 class CHumanBodypart : public CBodypart
 {
 public:

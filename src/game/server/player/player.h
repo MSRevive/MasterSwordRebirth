@@ -649,7 +649,6 @@ public:
 	bool CreateStats();
 	void DeleteStats();
 
-	int IdealModel();
 	Vector Size(int flags = 0);
 	void SetSize(int flags = 0);
 	float Volume();

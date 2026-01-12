@@ -2682,7 +2682,7 @@ void CBasePlayer::Spawn(void)
 	m_flFallVelocity = 0;
 
 	//Set the model later down the line.
-	pev->model = IdealModel();
+	pev->model = MAKE_STRING(MODEL_HUMAN_REF);
 	SET_MODEL(ENT(pev), MODEL_HUMAN_REF);
 
 	//Find a spot for the player and create a portal
