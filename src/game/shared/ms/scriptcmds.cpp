@@ -1514,8 +1514,11 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 				{
 					RETURN_INT(pPlayer->m_CurrentHand); //0=Left Hand Active, 1=Right Hand Active (active hand=left click, off hand=right click)
 				}
-				else if (Prop == "glowcolor") RETURN_VECTOR(pPlayer->mGlowColor) // MiB APR2019_10 [GLOW_COLOR] - Glow color
-				else if (Prop == "gender")	return (pPlayer->m_Gender == GENDER_MALE) ? "male" : "female";
+				else if (Prop == "glowcolor") RETURN_VECTOR(pPlayer->m_GlowColor) // MiB APR2019_10 [GLOW_COLOR] - Glow color
+				else if (Prop == "gender")
+				{
+					return (pPlayer->m_Gender == GENDER_MALE) ? "male" : "female";
+				}
 				else if (Prop == "ip") //MiB Dec2007a Returns the ip address of the player NOTE: This COULD be loopback.
 				{
 #ifdef VALVE_DLL
@@ -2233,6 +2236,14 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			else if (Params[0] == "players") //Thothie JUN2007a
 			{
 				Type = CE_EXTERNAL_PLAYERS;
+			}
+			else if (Params[0] == "gamemaster")
+			{
+#if VALVE_DLL
+				CBaseEntity *pEntity = UTIL_FindEntityByString(nullptr, "netname", "game_master");
+				if (pEntity) pScripted = pEntity->GetScripted();
+#endif
+				Type = CE_EXTERNAL;
 			}
 			else
 			{

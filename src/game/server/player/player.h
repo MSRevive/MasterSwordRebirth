@@ -449,7 +449,7 @@ public:
 	float m_GaitFramerateGauge;				  //If I'm moving at this speed, play my gait at normal (100%) fps. Otherwide adjust fps using a ratio
 	quickslot_t m_QuickSlots[MAX_QUICKSLOTS]; //Quickslots for spells, items
 	float m_AnimSpeedAdj;
-	Vector mGlowColor;
+	Vector m_GlowColor;
 #ifndef VALVE_DLL
 	char mLastGlowColor[14];
 #endif

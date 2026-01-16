@@ -6402,10 +6402,10 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	else
 		pev->deadflag = DEAD_DEAD;
 
-	strncpy(m_cEnterMap,  Data.MapName, sizeof(m_cEnterMap) );
+	strncpy(m_cEnterMap, Data.MapName, sizeof(m_cEnterMap) );
 
 	SetTeam(CTeam::CreateTeam(Data.Party, Data.PartyID));
-	m_Gender = Data.Gender;
+	m_Gender = static_cast<gender_e>(Data.Gender);
 	m_fIsElite = Data.IsElite ? true : false;
 	m_PlayersKilled = Data.PlayerKills;
 	m_TimeWaitedToForgetKill = Data.TimeWaitedToForgetKill;

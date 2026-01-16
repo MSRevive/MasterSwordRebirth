@@ -521,7 +521,8 @@ int __MsgFunc_SetStat(const char *pszName, int iSize, void *pbuf)
 	}
 	else if (iStatType == 10) //Gender msg
 	{
-		player.m_Gender = READ_BYTE();
+
+		player.m_Gender = static_cast<gender_e>(READ_BYTE());
 	}
 
 	UpdateVGUIStats();
