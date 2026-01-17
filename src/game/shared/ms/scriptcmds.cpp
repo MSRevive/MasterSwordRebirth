@@ -2240,7 +2240,7 @@ bool CScript::ScriptCmd_CallEvent(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 			else if (Params[0] == "gamemaster")
 			{
 #if VALVE_DLL
-				CBaseEntity *pEntity = UTIL_FindEntityByString(nullptr, "netname", "game_master");
+				CBaseEntity *pEntity = UTIL_FindEntityByString(nullptr, "netname", msstring("-") + "game_master");
 				if (pEntity) pScripted = pEntity->GetScripted();
 #endif
 				Type = CE_EXTERNAL;
