@@ -273,7 +273,7 @@ void ClientPutInServer(edict_t *pEntity)
 	char msg[256];
 	_snprintf(msg, sizeof(msg), "Connecting %s (%s)\n", pPlayer->DisplayName(), pPlayer->m_ClientAddress);
 	g_engfuncs.pfnServerPrint(msg);
-	MS_INFO(msg);
+	MS_INFO("Connecting %s (%s)", pPlayer->DisplayName(), pPlayer->m_ClientAddress);
 
 	// Read Profile from FN, if possible.
 	pPlayer->steamID64 = UTIL_ComputeSteamID64(GETPLAYERAUTHID(pEntity));
