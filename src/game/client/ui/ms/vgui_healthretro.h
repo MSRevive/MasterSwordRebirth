@@ -84,7 +84,7 @@ namespace RetroHUD
 
 			m_Image.SetFrame(frame);
 
-			m_Label->setText(UTIL_VarArgs("%i/%i ", (int)m_CurrentAmt, (int)MaxAmt)); //the space is intentional
+			m_Label->setText( UTIL_VarArgs("%i/%i ", static_cast<int>(m_CurrentAmt), static_cast<int>(MaxAmt)) ); //the space is intentional
 			if (m_CurrentAmt > MaxAmt / 4.0f)
 				m_Label->SetFGColorRGB(COLOR(255, 255, 255, 10));
 			else
@@ -118,7 +118,7 @@ namespace RetroHUD
 
 		float vChargeLevelAmt = 0;
 		float vCurChargeAmt = 0;
-		float vDisplayChargeLevel = 0;
+		int vDisplayChargeLevel = 0;
 		int mCurChargeLevel = 1;
 		int vCurChargeLevel = 0;
 
@@ -305,8 +305,8 @@ namespace RetroHUD
 						vChargeLevel++;
 					}
 					
-					vCurChargeLevel = (int)((vChargeLevel - 1) + vCurChargeAmt);
-					vDisplayChargeLevel = vCurChargeLevel - 1;
+					vCurChargeLevel = static_cast<int>(((vChargeLevel - 1) + vCurChargeAmt));
+					vDisplayChargeLevel = static_cast<int>(vCurChargeLevel - 1);
 
 					if(vCurChargeLevel > mCurChargeLevel)
 						PlayHUDSound(gEngfuncs.pfnGetCvarString("ms_chargebar_sound"), gEngfuncs.pfnGetCvarFloat("ms_chargebar_volume"));
