@@ -406,15 +406,6 @@ void SET_MODEL( edict_t* e, const char* szModel )
 	if ( !szModel )
 	{
 		CBaseEntity *pEnt = CBaseEntity::Instance( e );
-		if ( pEnt )
-			MS_ERROR( "Tried to set an invalid model for entity %s (%i)", STRING( pEnt->pev->classname ), pEnt->entindex() );
-		else
-		{
-			if ( e )
-				MS_ERROR( "Tried to set an invalid model for entity %s", STRING( e->v.classname ) );
-			else
-				MS_ERROR( "Tried to set an invalid model for an invalid entity!!" );
-		}
 		return;
 	}
 	g_engfuncs.pfnSetModel( e, szModel );
