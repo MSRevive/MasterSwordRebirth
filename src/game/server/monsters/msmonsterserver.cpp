@@ -2865,11 +2865,11 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 	dbg("PrepClient");
 
 	//Thothie SEP2011_07 - prevent menus to players with full inv
-	if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
-	{
-		pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
-		return;
-	}
+	// if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+	// {
+	// 	pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
+	// 	return;
+	// }
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 	WRITE_BYTE(25);
