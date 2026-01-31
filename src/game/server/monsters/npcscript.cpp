@@ -1022,10 +1022,10 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				{
 					OpenMenu(pPlayer);
 				}
-				else
-				{
-					pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
-				}
+				// else
+				// {
+				// 	pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
+				// }
 			}
 		}
 		else
