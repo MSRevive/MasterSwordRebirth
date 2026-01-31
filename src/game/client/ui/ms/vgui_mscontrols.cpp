@@ -295,15 +295,35 @@ class CHandler_ItemButton : public InputSignal
 {
 private:
 	VGUI_ItemButton *m_pItemButton;
+	VGUI_DoubleClickDetector *mpDoubleClickDetector;
+
 public:
 	CHandler_ItemButton( VGUI_ItemButton *pItemButton )
 	{
 		m_pItemButton = pItemButton;
+		mpDoubleClickDetector = pDoubleClickDetector;
 	}
 		
-	void cursorEntered( Panel *panel )					{ m_pItemButton->Highlight( true ); }
-	void cursorExited( Panel* panel )					{ m_pItemButton->Highlight( false ); };
-	void mousePressed( MouseCode code,Panel* panel )	{ m_pItemButton->Clicked( ); };
+	void cursorEntered( Panel *panel ) { m_pItemButton->Highlight( true ); }
+	void cursorExited( Panel* panel ) { m_pItemButton->Highlight( false ); };
+	void mousePressed( MouseCode code,Panel* panel ) 
+	{ 
+		if (code == MOUSE_LEFT)
+		{
+			if ( mpDoubleClickDetector->Click(this, code) && m_pItemButton->m_Selected)
+			{
+				mouseDoublePressed(code, panel);
+			}
+			else
+			{
+				m_pItemButton->Clicked();
+			}
+		}
+		else if (code == MOUSE_RIGHT)
+		{
+			m_pItemButton->RightClicked();
+		}
+	};
 	void cursorMoved(int x,int y,Panel* panel) {};
 	void mouseReleased(MouseCode code,Panel* panel) {};
 	void mouseDoublePressed( MouseCode code, Panel* panel ) { m_pItemButton->Doubleclicked( ); };

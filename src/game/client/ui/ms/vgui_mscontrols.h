@@ -357,8 +357,47 @@ public:
 	void paintBackground( );
 };
 
+// MiB APR2019_17 - Fix for double click being broken
+// Call Click at the beginning of mousePressed
+//  If it returns true, call mouseDoublePressed and return
+//  Otherwise, continue
+class VGUI_DoubleClickDetector
+{
+private:
+	float mLastClick;
+	void *mpLastClicked;
+	MouseCode mLastMouseCode;
+
+public:
+	VGUI_DoubleClickDetector()
+	{
+		mLastClick = 0;
+		mpLastClicked = NULL;
+		mLastMouseCode = MOUSE_LAST;
+	}
+
+	// Returns true if double-clicked
+	bool Click(void *pClicked, MouseCode vMouseCode)
+	{
+		float vCurTime = gEngfuncs.GetClientTime();
+		if (pClicked == mpLastClicked && mLastMouseCode == vMouseCode)
+		{
+			float vThreshhold = gEngfuncs.pfnGetCvarFloat("ms_doubleclicktime") + mLastClick;
+			if (vCurTime < vThreshhold)
+			{
+				mLastClick = vCurTime;
+				return true;
+			}
+		}
+		mLastClick = vCurTime;
+		mpLastClicked = pClicked;
+		mLastMouseCode = vMouseCode;
+		return false;
+	}
+};
+
 //Callback for when items get selected, etc.
-class VGUI_ItemCallbackPanel
+class VGUI_ItemCallbackPanel : public VGUI_DoubleClickDetector
 {
 public:
 	virtual void ItemSelectChanged( ulong ID, bool fSelected ) { }
@@ -369,11 +408,13 @@ public:
 	virtual void GearItemSelected( ulong ID ) { }
 	virtual bool GearItemClicked( ulong ID ) { return false; }			//Return true to override the default behavior
 	virtual bool GearItemDoubleClicked( ulong ID ) { return false; }	//Return true to override the default behavior
+	virtual void InvTypeChanged( int vInvType ) {}
+	virtual void AlphabeticChanged( bool bAlphabetic ) {}
 };
 
 //An item in a pack or player hands
 #define ITEMBTN_LABELS_MAX 1
-#define INVENTORY_TRANSPARENCY		90
+#define INVENTORY_TRANSPARENCY 90
 
 class VGUI_ItemButton : public CTransparentPanel
 {
@@ -545,5 +586,202 @@ public:
 	void KeyInput( int down, int keynum, const char *pszCurrentBinding );
 };
 
+// MiB APR2019_24 - Adding a bunch of simple input signal handlers so we don't have to override every single signal every time
+class CCursorMovementHandler
+{
+public:
+	virtual void cursorMoved(int x, int y, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void cursorEntered(Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void cursorExited(Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+};
+
+class CMouseInputHandler
+{
+protected:
+	VGUI_DoubleClickDetector *mpDoubleClickDetector;
+	void *mpDoubleClickTarget;
+public:
+	CMouseInputHandler(VGUI_DoubleClickDetector *pDoubleClickDetector = nullptr, void *pDoubleClickTarget = nullptr)
+	{
+		mpDoubleClickDetector = pDoubleClickDetector;
+	}
+
+	virtual void mouseWheeled(int vDelta, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void mousePressed(MouseCode vCode, Panel *pPanel)
+	{
+		// Bit awkward here. Want to automatically enable double-click detection,
+		// but don't get overridden if single press needs to do something
+		// So, in this case, you should override mouseSinglePress instead
+
+		if (mpDoubleClickDetector)
+		{
+			void *pDoubleClickTarget = mpDoubleClickTarget ? mpDoubleClickTarget : pPanel;
+			if (mpDoubleClickDetector->Click(pDoubleClickTarget, vCode))
+			{
+				mouseDoublePressed(vCode, pPanel);
+				return;
+			}
+		}
+		mouseSinglePress(vCode, pPanel);
+	}
+
+	virtual void mouseSinglePress(MouseCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void mouseReleased(MouseCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void mouseDoublePressed(MouseCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+};
+
+class CKeyHandler
+{
+public:
+	virtual void keyPressed(KeyCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void keyTyped(KeyCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void keyReleased(KeyCode vCode, Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+
+	virtual void keyFocusTicked(Panel *pPanel)
+	{
+		// Do nothing by default
+	}
+};
+
+// Base overrides all
+class CSimpleInputSignal : public InputSignal
+{
+protected:
+    CCursorMovementHandler *mpCursorMovementHandler;
+    CMouseInputHandler *mpMouseInputHandler;
+    CKeyHandler *mpKeyHandler;
+
+    // Whether or not to handle deletes. Likely false, but just in case
+    bool mbDeleteCursorMovementHandler;
+    bool mbDeleteMouseInputHandler;
+    bool mbDeleteKeyHandler;
+public:
+    CSimpleInputSignal(CCursorMovementHandler *pCursorMovementHandler, CMouseInputHandler *pMouseInputHandler, CKeyHandler *pKeyHandler)
+    {
+        mpCursorMovementHandler = pCursorMovementHandler;
+        mpMouseInputHandler = pMouseInputHandler;
+        mpKeyHandler = pKeyHandler;
+        mbDeleteCursorMovementHandler = false;
+        mbDeleteMouseInputHandler = false;
+        mbDeleteKeyHandler = false;
+    }
+    void SetDeleteCursorMovementHandler(bool bDeleteCursorMovementHandler) { mbDeleteCursorMovementHandler = bDeleteCursorMovementHandler; }
+    void SetDeleteMouseInputHandler(bool bDeleteMouseInputHandler) { mbDeleteMouseInputHandler = bDeleteMouseInputHandler; }
+    void SetDeleteKeyHandler(bool bDeleteKeyHandler) { mbDeleteKeyHandler = bDeleteKeyHandler; }
+
+    ~CSimpleInputSignal()
+    {
+        if (mbDeleteCursorMovementHandler && mpCursorMovementHandler) 
+			delete mpCursorMovementHandler;
+        if (mbDeleteMouseInputHandler && mpMouseInputHandler) 
+			delete mpMouseInputHandler;
+        if (mbDeleteKeyHandler && mpKeyHandler) 
+			delete mpKeyHandler;
+    }
+
+    virtual void cursorMoved(int x, int y, Panel *pPanel)
+    {
+        if (mpCursorMovementHandler) 
+			mpCursorMovementHandler->cursorMoved(x, y, pPanel);
+    }
+
+    virtual void cursorEntered(Panel *pPanel)
+    {
+        if (mpCursorMovementHandler) 
+			mpCursorMovementHandler->cursorEntered(pPanel);
+    }
+
+    virtual void cursorExited(Panel *pPanel)
+    {
+        if (mpCursorMovementHandler) 
+			mpCursorMovementHandler->cursorExited(pPanel);
+    }
+
+    virtual void mouseWheeled(int vDelta, Panel *pPanel)
+    {
+        if (mpMouseInputHandler) 
+			mpMouseInputHandler->mouseWheeled(vDelta, pPanel);
+    }
+
+    virtual void mousePressed(MouseCode vCode, Panel *pPanel)
+    {
+        if (mpMouseInputHandler) 
+			mpMouseInputHandler->mousePressed(vCode, pPanel);
+    }
+
+    virtual void mouseReleased(MouseCode vCode, Panel *pPanel)
+    {
+        if (mpMouseInputHandler) 
+			mpMouseInputHandler->mouseReleased(vCode, pPanel);
+    }
+
+    virtual void mouseDoublePressed(MouseCode vCode, Panel *pPanel)
+    {
+        // Broken, but hey, I have to override it anyway...
+        if (mpMouseInputHandler) 
+			mpMouseInputHandler->mouseDoublePressed(vCode, pPanel);
+    }
+
+    virtual void keyPressed(MouseCode vCode, Panel *pPanel)
+    {
+        if (mpKeyHandler) 
+			mpKeyHandler->keyPressed(vCode, pPanel);
+    }
+
+    virtual void keyTyped(MouseCode vCode, Panel *pPanel)
+    {
+        if (mpKeyHandler) 
+			mpKeyHandler->keyTyped(vCode, pPanel);
+    }
+
+    virtual void keyReleased(MouseCode vCode, Panel *pPanel)
+    {
+        if (mpKeyHandler) 
+			mpKeyHandler->keyReleased(vCode, pPanel);
+    }
+
+    virtual void keyFocusTicked(Panel *pPanel)
+    {
+        if (mpKeyHandler) 
+			mpKeyHandler->keyFocusTicked(pPanel);
+    }
+};
 
 #endif
