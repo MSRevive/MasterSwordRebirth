@@ -93,10 +93,38 @@ public:
 // Creation
 CContainerPanel::CContainerPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall) : VGUI_ContainerPanel()
 {
+	addChild(mpMoveItemPanel = new VGUI_MoveItemPanel(this))
 	m_pCancelButton->setText(Localized("#CLOSE"));
 	m_ActButton->addActionSignal(new CAction_RemoveGear(this));
-	//m_ActButton->setVisible( false );
+	m_ActButton->addActionSignal(new CContainer_ActionButtonSignal(this));
+    m_ActButton->setVisible(true);
 }
+
+void CContainerPanel::ActionPerformed()
+{
+	mpMoveItemPanel->setVisible(false);
+	if (HasSelectedItems())
+	{
+		DropAllSelected();
+	}
+	else
+	{
+		RemoveGear();
+	}
+}
+
+void CContainerPanel::InvTypeChanged(int vInvType)
+{
+	VGUI_ItemCallbackPanel::InvTypeChanged(vInvType);
+	mpMoveItemPanel->setVisible(false);
+}
+
+void CContainerPanel::AlphabeticChanged(bool bAlphabetic)
+{
+	VGUI_ItemCallbackPanel::AlphabeticChanged(bAlphabetic);
+	mpMoveItemPanel->setVisible(false);
+}
+
 void CContainerPanel::UpdateSubtitle()
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
@@ -125,16 +153,19 @@ void CContainerPanel::UpdateSubtitle()
 
 	GearButton.m_ItemContainer->setVisible(GearButton.m_GearItem.IsContainer);
 }
+
 void CContainerPanel::RemoveGear()
 {
 	msstring Cmd = msstring("remove ") + m_GearPanel->GearItemButtons[m_GearPanel->m_Selected]->m_GearItemID + "\n";
 	ServerCmd(Cmd);
 	gViewPort->HideTopMenu();
 }
+
 void CContainerPanel::ItemSelectChanged(ulong ID, bool fSelected)
 {
 	UpdateSubtitle();
 }
+
 void CContainerPanel::ItemDoubleclicked(ulong ID)
 {
 	if (m_GearPanel->m_Selected == 0)
@@ -158,6 +189,7 @@ void CContainerPanel::ItemDoubleclicked(ulong ID)
 	gViewPort->HideTopMenu();
 	//	}
 }
+
 void CContainerPanel::GearItemSelected(ulong ID)
 {
 	//Unselect all items
@@ -178,6 +210,7 @@ void CContainerPanel::GearItemSelected(ulong ID)
 	m_pTitle->setText(Title);
 	UpdateSubtitle();
 }
+
 bool CContainerPanel::GearItemClicked(ulong ID)
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
@@ -218,6 +251,7 @@ bool CContainerPanel::GearItemClicked(ulong ID)
 
 	return true;
 }
+
 bool CContainerPanel::GearItemDoubleClicked(ulong ID)
 {
 	CGenericItem *pWornItem = player.GetGearItem(ID);
@@ -231,6 +265,7 @@ bool CContainerPanel::GearItemDoubleClicked(ulong ID)
 
 	return true;
 }
+
 // Update
 void CContainerPanel::Close(void)
 {
@@ -291,6 +326,7 @@ void ContainerWindowOpen(ulong ContainerID)
 	gViewPort->m_pContainerMenu->m_OpenContainerID = ContainerID;
 	ShowVGUIMenu(MENU_CONTAINER);
 }
+
 void ContainerWindowUpdate()
 {
 	if (!gViewPort || !gViewPort->m_pContainerMenu)
@@ -299,6 +335,7 @@ void ContainerWindowUpdate()
 	gViewPort->m_pContainerMenu->m_AllowUpdate = true;
 	gViewPort->m_pContainerMenu->Update();
 }
+
 void ContainerWindowClose()
 {
 	gViewPort->HideTopMenu();

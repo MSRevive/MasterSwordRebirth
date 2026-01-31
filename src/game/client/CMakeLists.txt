@@ -479,6 +479,8 @@ set(VGUI_MS
 	"ui/ms/vgui_storesell.cpp"
 	"ui/ms/vgui_storesell.h"
 	"ui/ms/vgui_vote.h"
+	"ui/ms/vgui_moveitempanel.cpp"
+	"ui/ms/vgui_moveitempanel.h"
 )
 source_group("VGUI\\ms" FILES ${VGUI_MS})
 
