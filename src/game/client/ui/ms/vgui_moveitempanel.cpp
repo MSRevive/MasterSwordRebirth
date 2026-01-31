@@ -1,9 +1,9 @@
 #include "../hud.h"
 #include "../cl_util.h"
-#include "../vgui_TeamFortressViewport.h"
-#include "../../MSShared/sharedutil.h"
-#include "VGUI_MoveItemPanel.h"
-#include "vgui_ContainerList.h"
+#include "vgui_teamfortressviewport.h"
+#include "sharedutil.h"
+#include "vgui_moveitempanel.h"
+#include "vgui_containerlist.h"
 
 VGUI_MoveItemPanel::VGUI_MoveItemPanel(CContainerPanel *pParent) : CTransparentPanel(80, 0, 0, 0, 0)
 {
@@ -39,7 +39,7 @@ VGUI_MoveItemPanel::VGUI_MoveItemPanel(CContainerPanel *pParent) : CTransparentP
 		pButton->setVisible(true);
 
 		y += vButtonH;
-		w = max(w, vButtonW);
+		w = V_max(w, vButtonW);
 	}
 
 	setSize(w + XRES(10), y + YRES(10));

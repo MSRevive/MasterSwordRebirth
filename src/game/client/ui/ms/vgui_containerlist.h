@@ -1,4 +1,5 @@
 #include "vgui_storemainwin.h"
+#include "vgui_moveitempanel.h"
 
 class ContainerButton;
 #define CONTAINER_INFO_LABELS 1

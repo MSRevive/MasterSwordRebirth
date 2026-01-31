@@ -298,15 +298,15 @@ private:
 	VGUI_DoubleClickDetector *mpDoubleClickDetector;
 
 public:
-	CHandler_ItemButton( VGUI_ItemButton *pItemButton )
+	CHandler_ItemButton(VGUI_ItemButton *pItemButton, VGUI_DoubleClickDetector* pDoubleClickDetector)
 	{
 		m_pItemButton = pItemButton;
 		mpDoubleClickDetector = pDoubleClickDetector;
 	}
 		
-	void cursorEntered( Panel *panel ) { m_pItemButton->Highlight( true ); }
-	void cursorExited( Panel* panel ) { m_pItemButton->Highlight( false ); };
-	void mousePressed( MouseCode code,Panel* panel ) 
+	void cursorEntered(Panel *panel) { m_pItemButton->Highlight(true); }
+	void cursorExited(Panel* panel) { m_pItemButton->Highlight(false); };
+	void mousePressed(MouseCode code,Panel* panel) 
 	{ 
 		if (code == MOUSE_LEFT)
 		{
@@ -373,8 +373,9 @@ VGUI_ItemButton::VGUI_ItemButton( int x, int y, VGUI_ItemCallbackPanel *pCallbac
 	m_Button = new CTransparentPanel( 0, 0, 0, getWide(), getTall() );
 	m_Button->setParent( this );
 
-	m_Button->addInputSignal( m_Signal = new CHandler_ItemButton( this ) );
+	m_Button->addInputSignal( m_Signal = new CHandler_ItemButton( this, pCallbackPanel ) );
 }
+
 /*VGUI_ItemButton::~VGUI_ItemButton( )
 {
 	removeChild( Image );
@@ -387,6 +388,7 @@ VGUI_ItemButton::VGUI_ItemButton( int x, int y, VGUI_ItemCallbackPanel *pCallbac
 		delete Labels[i];
 	}
 }*/
+
 void VGUI_ItemButton::SetItem( containeritem_t &Item )
 {
 	m_Data = Item;
@@ -488,38 +490,44 @@ void VGUI_ItemButton::Update( )
 	setVisible( true );
 	m_Button->setEnabled( !m_Data.Disabled );
 }
+
 void VGUI_ItemButton::Reset( )
 {
 	setVisible( false );
 	m_Selected = false;
 	m_Highlighted = false;
 }
+
 void VGUI_ItemButton::Clicked( )
 {
-	if( m_Selected )
-	{
-		Doubleclicked(); //MAY2013_15 Thothie Fake Double Click
-	}
-	else
-	{
-		if( !m_CallbackPanel || !m_CallbackPanel->ItemClicked( this ) )
-			Select( !m_Selected );
-	}
+	if( !m_CallbackPanel || !m_CallbackPanel->ItemClicked( this ) )
+		Select( !m_Selected );
 }
+
+void VGUI_ItemButton::RightClicked()
+{
+    if ( m_CallbackPanel ) 
+		m_CallbackPanel->ItemRightClicked(this);
+}
+
 void VGUI_ItemButton::Doubleclicked( )
 {
-	if( m_CallbackPanel ) m_CallbackPanel->ItemDoubleclicked( m_Data.ID );
+	if( m_CallbackPanel ) 
+		m_CallbackPanel->ItemDoubleclicked( m_Data.ID );
 }
+
 void VGUI_ItemButton::Select( bool fSelect )
 {
 	m_Selected = fSelect;
-	if( m_CallbackPanel ) m_CallbackPanel->ItemSelectChanged( m_Data.ID, m_Selected );
+	if( m_CallbackPanel ) 
+		m_CallbackPanel->ItemSelectChanged( m_Data.ID, m_Selected );
 }
 
 void VGUI_ItemButton::Highlight( bool fSelect )
 {
 	m_Highlighted = fSelect;
-	if( m_CallbackPanel ) m_CallbackPanel->ItemHighlighted( this );
+	if( m_CallbackPanel ) 
+		m_CallbackPanel->ItemHighlighted( this );
 	//if( !m_Highlighted )
 }
 
@@ -597,17 +605,6 @@ public:
 	void keyFocusTicked(Panel* panel) { }
 };
 
-// MIB FEB2015_21 [INV_SCROLL] - Do the actual moving of the scroll bar
-void VGUI_Container::StepInput( bool bDirUp )
-{
-	int h, v, ScrollAmount = 20; // MIB FEB2015_21 [INV_SCROLL] - Change this if you want to alter the scroll sensitivity
-	if ( m_pScrollPanel )
-	{
-		m_pScrollPanel->getScrollValue( h, v );
-		m_pScrollPanel->setScrollValue( h, v - (bDirUp ? ScrollAmount : -ScrollAmount) );
-	}
-}
-
 // Container Creation
 VGUI_Container::VGUI_Container( int x, int y, int w, int h, VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent ) : 
 	CTransparentPanel( INVENTORY_TRANSPARENCY, x, y, w, h )
@@ -647,25 +644,83 @@ VGUI_ItemButton *VGUI_Container::AddItem( containeritem_t &Item )
 	{
 		//Initialize the item button
 		m_ItemButtons.add( new VGUI_ItemButton( 0, 0, m_CallbackPanel, m_pScrollPanel ) ); // // MiB FEB2015_07 - Set position in UpdatePosition
+		m_AlphabetizedItemButtons.add( m_ItemButtons[m_ItemButtonTotal] );
 		m_InitializedItemButtons++;
 	}
 
 	VGUI_ItemButton &NewItemButton = *m_ItemButtons[m_ItemButtonTotal];
 	NewItemButton.SetItem( Item );
-	UpdatePosition( m_ItemButtonTotal );
-	m_ItemButtonTotal++;
 
-	m_NoItems->setVisible( false );
-	m_pScrollPanel->validate( );
+	// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+	int	iAlphaLoc = 0;
+	if (!m_ItemButtonTotal)
+	{
+		m_AlphabetizedItemButtons[0] = &NewItemButton;
+	}
+	else
+	{
+		// Find the location of this item
+		msstring sNewItemName = Item.getFullName();
+
+		// Walk the list backwards
+		for (int i = m_ItemButtonTotal - 1; i >= 0; --i)
+		{
+			msstring sCurItemName = m_AlphabetizedItemButtons[i]->m_Data.getFullName();
+
+			// If i-button's name < new name, add at i+1 and break
+			if (stricmp(sCurItemName,sNewItemName) <= 0)
+			{
+				iAlphaLoc = i+1;
+				m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
+				break;
+			}
+			// Else move i-button to i+1 and continue
+			else
+			{
+				m_AlphabetizedItemButtons[i+1] = m_AlphabetizedItemButtons[i];
+				// That was the last one, set to the beginning
+				if ( i == 0 )
+				{
+					m_AlphabetizedItemButtons[0] = &NewItemButton;
+					break;
+				}
+			}
+		}
+	}
+
+	m_NoItems->setVisible(false);
+	m_ItemButtonTotal++;
+	if (IsAlphabetical())
+	{
+		// Need to update everything at the new location and after
+		for(int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
+		{
+			UpdatePosition(i);
+		}
+	}
+	else
+	{
+		UpdatePosition(m_ItemButtonTotal-1);
+	}
+	m_pScrollPanel->validate();
 
 	return &NewItemButton;
 }
 
 void VGUI_Container::Update( )
 {
-	 for (int i = 0; i < m_ItemButtonTotal; i++) 
+	bool bIsAlpha = IsAlphabetical();
+	for (int i = 0; i < m_ItemButtonTotal; i++) 
 	{
-		m_ItemButtons[i]->Update( );
+		// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+		if ( bIsAlpha )
+		{
+			m_AlphabetizedItemButtons[i]->Update();
+		}
+		else
+		{
+			m_ItemButtons[i]->Update( );
+		}
 		UpdatePosition( i );
 	}
 	m_pScrollPanel->validate();
@@ -678,8 +733,17 @@ void VGUI_Container::UpdatePosition( int idx )
 	//Find the spot for this item
 	if( idx )
 	{
-		VGUI_ItemButton &LastItemButton = *m_ItemButtons[idx-1];
-		LastItemButton.getPos( x, y );
+		// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+		VGUI_ItemButton *LastItemButton = nullptr;
+		if ( IsAlphabetical() )
+		{
+			LastItemButton = m_AlphabetizedItemButtons[idx-1];
+		}
+		else
+		{
+			LastItemButton = m_ItemButtons[idx-1];
+		}
+		LastItemButton->getPos( x, y );
 		switch( atoi(gEngfuncs.pfnGetCvarString("ms_invtype")) )
 		{
 			case INVTYPE_ORIGINAL: // Original
@@ -688,11 +752,11 @@ void VGUI_Container::UpdatePosition( int idx )
 					[  icon 1  ] [  icon 2  ]
 					[Item Name1] [Item Name2]
 				*/
-				x += LastItemButton.getWide( );
-				if( x + LastItemButton.getWide( ) >= (m_pScrollPanel->getWide() - m_pScrollPanel->getVerticalScrollBar()->getWide()) )
+				x += LastItemButton->getWide();
+				if(x + LastItemButton->getWide() >= (m_pScrollPanel->getWide() - m_pScrollPanel->getVerticalScrollBar()->getWide()))
 				{
 					x = 0;
-					y += LastItemButton.getTall( );
+					y += LastItemButton->getTall();
 				}
 			}
 			break;
@@ -714,12 +778,19 @@ void VGUI_Container::UpdatePosition( int idx )
 				*/
 				// Both require the same thing here: All the way to the left and on a new line
 				x = 0;
-				y += LastItemButton.getTall( );
+				y += LastItemButton->getTall( );
 			}
 			break;
 		}
 	}
-	m_ItemButtons[idx]->setPos( x , y );
+	if ( IsAlphabetical() )
+	{
+		m_AlphabetizedItemButtons[idx]->setPos( x , y );
+	}
+	else
+	{
+		m_ItemButtons[idx]->setPos( x , y );
+	}
 }
 
 void VGUI_Container::PurgeButtons( )
@@ -782,4 +853,63 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	char Temp[2] = { Char & 0xFF, '\0' };
 	AddLetter( Temp );
 #endif
+}
+
+// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+VGUI_CheckBox::VGUI_CheckBox(const char *pszText, int x, int y, int w, int h, bool bStartChecked)
+	: Panel( x, y, w, h )
+{
+	int vTmp;
+	mpHandler = nullptr;
+	SetChecked(bStartChecked);
+	SetArmed(false);
+	mpTextLabel = new Label(pszText);
+	mpTextLabel->getTextSize(vTmp,mCheckSquareSize);
+	mCheckSquareSize = V_min(mCheckSquareSize, h / 2);
+	mpTextLabel->setPos(CHECKBOX_LABELPOS_X, 0);
+	mpTextLabel->setSize(w - CHECKBOX_LABELPOS_X, h);
+	mpTextLabel->setBgColor(0, 0, 0, 255);
+	mpTextLabel->setParent(this);
+	mpTextLabel->setContentAlignment(Label::Alignment::a_west);
+
+	// MiB Note: Make sure this is always last so the layering makes this on top
+	// Make the hitbox button cover the whole thing
+	mpOverlayButton = new CTransparentPanel(0, 0, 0, getWide(), getTall());
+	mpOverlayButton->setParent(this);
+	mpOverlayButton->addInputSignal(new CheckHandler(this));
+}
+
+VGUI_CheckBox::~VGUI_CheckBox()
+{
+	if ( mpHandler ) 
+		delete mpHandler;
+}
+
+void VGUI_CheckBox::paint()
+{
+	Scheme::SchemeColor vSchemeColor = IsArmed() ? Scheme::sc_secondary2 : Scheme::sc_primary1;
+
+	setFgColor(vSchemeColor);
+	mpTextLabel->setFgColor(vSchemeColor);
+
+	drawSetColor(vSchemeColor);
+	drawOutlinedRect(CHECKBOX_CHECKSPACER, CHECKBOX_CHECKPOS_Y, CHECKBOX_CHECKSPACER + mCheckSquareSize, CHECKBOX_CHECKPOS_Y + mCheckSquareSize);
+	if (IsChecked())
+	{
+		drawFilledRect( CHECKBOX_CHECKSPACER + CHECKBOX_INNERSPACER, CHECKBOX_CHECKPOS_Y + CHECKBOX_INNERSPACER, CHECKBOX_CHECKSPACER + mCheckSquareSize - CHECKBOX_INNERSPACER, CHECKBOX_CHECKPOS_Y + mCheckSquareSize - CHECKBOX_INNERSPACER);
+	}
+
+	Panel::paint();
+}
+
+void VGUI_CheckBox::paintBackground()
+{
+	if (IsArmed())
+	{
+		drawSetColor(Scheme::sc_primary2);
+		drawFilledRect(0,0,_size[0],_size[1]);
+	}
+
+	drawSetColor(Scheme::sc_secondary1);
+	drawOutlinedRect(0,0,_size[0],_size[1]);
 }

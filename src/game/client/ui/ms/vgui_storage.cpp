@@ -304,7 +304,6 @@ void Storage_Update()
 {
 	if (gViewPort && gViewPort->m_pStoreStorageMenu)
 	{
-		gViewPort->m_pStoreStorageMenu->m_AllowUpdate = true;
 		gViewPort->m_pStoreStorageMenu->Update();
 	}
 }

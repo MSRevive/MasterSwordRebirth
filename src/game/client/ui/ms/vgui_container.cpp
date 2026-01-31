@@ -46,7 +46,7 @@ public:
 	VGUI_ItemCallbackPanel *m_Callback;
 	VGUI_DoubleClickDetector *mpDoubleClickDetector;
 	int m_Idx;
-	VGUI_Inv_GearItem *mpHighlightCallback
+	VGUI_Inv_GearItem* mpHighlightCallback;
 
 	CHandler_GearButton(VGUI_ItemCallbackPanel *pParent, VGUI_DoubleClickDetector *pDoubleClickDetector, VGUI_Inv_GearItem *pHighlightCallback, int idx)
 	{
@@ -55,6 +55,7 @@ public:
 		mpHighlightCallback = pHighlightCallback;
 		m_Idx = idx;
 	}
+
 	void mousePressed(MouseCode code, Panel *panel)
 	{
 		if ( code == MOUSE_LEFT )
@@ -69,6 +70,7 @@ public:
 			}
 		}
 	}
+
 	void cursorEntered(Panel *panel) { mpHighlightCallback->mbMouseOver = true; }
 	void cursorMoved(int x, int y, Panel *panel) {};
 	void mouseReleased(MouseCode code, Panel *panel) {};
@@ -91,7 +93,7 @@ VGUI_Inv_GearItem::VGUI_Inv_GearItem(Panel *pContainerParent, VGUI_ItemCallbackP
 	m_ContainerParent = pContainerParent;
 
 	m_Name = new MSLabel(this, "", 0, 0, getWide(), getTall(), MSLabel::a_center);
-	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, m_Idx));
+	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, m_Idx));
 	m_ItemContainer = new VGUI_Container(ITEM_CONTAINER_X, ITEM_CONTAINER_Y, ITEM_CONTAINER_SIZE_X, ITEM_CONTAINER_SIZE_Y, pItemCallbackPanel, pContainerParent);
 	mbMouseOver = false;
 }
@@ -335,7 +337,9 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	COLOR Color_TitleText = COLOR(255, 100, 100, 0),
 		  Color_SubtitleText = COLOR(160, 160, 160, 0),
 		  Color_GoldText = COLOR(255, 255, 0, 0),
-		  Color_TransparentTextBG = COLOR(0, 0, 0, 255);
+		  Color_TransparentTextBG = COLOR(0, 0, 0, 255),
+		  Color_Red = COLOR(255, 0, 0, 0),
+		  Color_White = COLOR(255, 255, 255, 0);
 
 	// Create the title
 	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0);
@@ -355,8 +359,8 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_ActButton = new MSButton(this, Localized("#REMOVE"), ACTBTN_X, ACTBTN_Y, ACTBTN_SIZE_X, ACTBTN_SIZE_Y);
 	m_ActButton->setFont(g_FontTitle);
 	m_ActButton->setContentAlignment(vgui::Label::a_east);
-	m_ActButton->SetArmedColor(COLOR(255, 0, 0, 0));
-	m_ActButton->SetUnArmedColor(COLOR( 255, 255, 255, 0 ));
+	m_ActButton->SetArmedColor(Color_Red);
+	m_ActButton->SetUnArmedColor(Color_White);
 
 	#define BUTTON_CANCEL_SIZE_X XRES(40)
 	#define BUTTON_CANCEL_SIZE_Y YRES(13)
@@ -370,7 +374,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X,BUTTON_CANCEL_SIZE_Y);
 	m_pCancelButton->setFont(g_FontID);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
-	m_pCancelButton->SetArmedColor(COLOR(255, 0, 0, 0));
+	m_pCancelButton->SetArmedColor(Color_Red);
 	m_pCancelButton->SetUnArmedColor(Color_TextNormal);
 
 	m_AllowUpdate = false;
@@ -389,8 +393,8 @@ void VGUI_ContainerPanel::Update()
 	removeChild(m_pCancelButton);
 	m_pCancelButton->setParent(this);
 
-	char[255] sGold;
-	_snprintf(sGold, 255, Localized("#PLAYER_GOLD"), player.m_Gold);
+	char sGold[255];
+	snprintf(sGold, 255, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
 
 	m_AllowUpdate = false;
@@ -501,7 +505,7 @@ public:
 
 // MIB FEB2019_25 [ALPHABETICAL_INVENTORY]
 #define INVTYPE_PANEL_X	ITEM_CONTAINER_X
-#define INVTYPE_PANEL_Y	SELLLABEL_Y + SELLLABEL_H
+#define INVTYPE_PANEL_Y	(ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y) + YRES(30)
 #define INVTYPE_PANEL_SIZE_X ITEM_CONTAINER_SIZE_X - ACTBTN_SIZE_X
 #define INVTYPE_PANEL_SIZE_Y YRES(64)
 #define INVTYPE_BUTTON_SIZE_X XRES(80)

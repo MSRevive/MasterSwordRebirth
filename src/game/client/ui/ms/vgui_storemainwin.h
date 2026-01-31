@@ -3,6 +3,14 @@
 
 #include "vgui_container.h"
 
+#define TITLE_X	ITEM_CONTAINER_X
+#define TITLE_Y	0
+
+#define SELLLABEL_X	ITEM_CONTAINER_X 
+#define SELLLABEL_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y
+#define SELLLABEL_W ITEM_CONTAINER_SIZE_X - ACTBTN_SIZE_X
+#define SELLLABEL_H YRES(30)
+
 class CStorePanel : public VGUI_ContainerPanel
 {
 protected:

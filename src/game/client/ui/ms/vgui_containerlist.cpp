@@ -71,14 +71,13 @@ public:
 	virtual void keyFocusTicked(Panel *panel){};
 };
 
-class CAction_RemoveGear : public ActionSignal
+class CContainer_ActionButtonSignal : public ActionSignal
 {
 protected:
 	CContainerPanel *m_Panel;
-
 public:
-	CAction_RemoveGear(CContainerPanel *pPanel) { m_Panel = pPanel; }
-	virtual void actionPerformed(Panel *panel) { m_Panel->RemoveGear(); }
+	CContainer_ActionButtonSignal( CContainerPanel *pPanel ) { m_Panel = pPanel; }
+	virtual void actionPerformed(Panel* panel) { m_Panel->ActionPerformed(); }
 };
 
 //------------
@@ -93,9 +92,8 @@ public:
 // Creation
 CContainerPanel::CContainerPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall) : VGUI_ContainerPanel()
 {
-	addChild(mpMoveItemPanel = new VGUI_MoveItemPanel(this))
+	addChild(mpMoveItemPanel = new VGUI_MoveItemPanel(this));
 	m_pCancelButton->setText(Localized("#CLOSE"));
-	m_ActButton->addActionSignal(new CAction_RemoveGear(this));
 	m_ActButton->addActionSignal(new CContainer_ActionButtonSignal(this));
     m_ActButton->setVisible(true);
 }
@@ -274,13 +272,6 @@ void CContainerPanel::Close(void)
 	VGUI_ContainerPanel::Close();
 }
 
-// MIB FEB2015_21 [INV_SCROLL] - Pass to the gear panel
-void CContainerPanel::StepInput(bool bDirUp)
-{
-	if (m_GearPanel)
-		m_GearPanel->StepInput(bDirUp);
-}
-
 //======================================
 // Update the Class menu before opening it
 void CContainerPanel::Open(void)
@@ -332,7 +323,6 @@ void ContainerWindowUpdate()
 	if (!gViewPort || !gViewPort->m_pContainerMenu)
 		return;
 
-	gViewPort->m_pContainerMenu->m_AllowUpdate = true;
 	gViewPort->m_pContainerMenu->Update();
 }
 

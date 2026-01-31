@@ -52,18 +52,22 @@ public:
 	{
 		m_ArmedColor = Color;
 	}
+
 	inline void SetUnArmedColor( COLOR &Color )
 	{
 		m_UnArmedColor = Color;
 	}
+
 	inline void SetDisabledColor( COLOR &Color )
 	{
 		m_DisabledColor = Color;
 	}
+
 	inline void SetBgColor( COLOR &Color )
 	{
 		setBgColor( Color.r, Color.g, Color.b, Color.a );
 	}
+
 	void paint( )
 	{
 		if( isEnabled() )
@@ -84,6 +88,7 @@ public:
 
 		Button::paint( );
 	}
+
 	void paintBackground( )
 	{
 		//Button::paintBackground( );
@@ -95,6 +100,7 @@ public:
 		CommandButton::setText( Text );
 		if( m_AutoFitText ) FitText( );;
 	}
+
 	void FitText( )
 	{
 		int w, h;
@@ -105,6 +111,7 @@ public:
 	COLOR m_ArmedColor, m_UnArmedColor, m_DisabledColor;
 	bool m_AutoFitText;
 };
+
 class MSLabel : public Label
 {
 public:
@@ -265,7 +272,7 @@ class CheckButton : public CommandButton
 public:
 	CheckButton( char *CVARName, int x, int y, int wide, int tall ) : CommandButton( "", x, y, wide, tall, true )
 	{
-		 strncpy(m_CVARName,  CVARName, sizeof(m_CVARName) );
+		strncpy(m_CVARName,  CVARName, sizeof(m_CVARName) );
 		m_CVARName[255] = 0;
 		addActionSignal( new Action_ClickCheck( this ) );
 	}
@@ -402,14 +409,15 @@ class VGUI_ItemCallbackPanel : public VGUI_DoubleClickDetector
 public:
 	virtual void ItemSelectChanged( ulong ID, bool fSelected ) { }
 	virtual bool ItemClicked( void *pData  ) { return false; }		//Return true to override the default behavior
+	virtual void ItemRightClicked( void *pData ) { }
 	virtual void ItemCreated( void *pData ) { }
 	virtual void ItemHighlighted( void *pData ) { }
 	virtual void ItemDoubleclicked( ulong ID ) { };
 	virtual void GearItemSelected( ulong ID ) { }
 	virtual bool GearItemClicked( ulong ID ) { return false; }			//Return true to override the default behavior
 	virtual bool GearItemDoubleClicked( ulong ID ) { return false; }	//Return true to override the default behavior
-	virtual void InvTypeChanged( int vInvType ) {}
-	virtual void AlphabeticChanged( bool bAlphabetic ) {}
+	virtual void InvTypeChanged( int vInvType ) { }
+	virtual void AlphabeticChanged( bool bAlphabetic ) { }
 };
 
 //An item in a pack or player hands
@@ -436,6 +444,7 @@ public:
 
 	void Reset( );
 	void Clicked( );
+	void RightClicked( );
 	void Doubleclicked( );
 	void Select( bool fSelect );
 	void Highlight( bool fSelect );
@@ -447,39 +456,115 @@ public:
 class VGUI_Container : public CTransparentPanel
 {
 public:
-	mslist<VGUI_ItemButton *>		m_ItemButtons;
-	int								m_ItemButtonTotal;
-	int								m_InitializedItemButtons;
-	CTFScrollPanel					*m_pScrollPanel;
-	VGUI_ItemCallbackPanel			*m_CallbackPanel;
-	MSLabel							*m_NoItems;
+	mslist<VGUI_ItemButton *> m_ItemButtons;
+	mslist<VGUI_ItemButton *> m_AlphabetizedItemButtons; // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+	int m_ItemButtonTotal;
+	int m_InitializedItemButtons;
+	CTFScrollPanel *m_pScrollPanel;
+	VGUI_ItemCallbackPanel *m_CallbackPanel;
+	MSLabel	*m_NoItems;
 
-	class VGUI_InvTypePanel			*m_pInvTypePanel;
+	class VGUI_InvTypePanel	*m_pInvTypePanel;
 
-	void							Update();
-	void							UpdatePosition( int idx );
+	void Update();
+	void UpdatePosition(int idx);
 
-	void							StepInput( bool bDirUp ); // MIB FEB2015_21 [INV_SCROLL]
+	virtual CTFScrollPanel *GetScrollForStepInput() { return m_pScrollPanel; }
+
+	// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+	bool IsAlphabetical() { return gEngfuncs.pfnGetCvarFloat("ms_alpha_inventory") == 1; }
 	
-	#define INVTYPE_ORIGINAL		0
-	#define INVTYPE_SMALL			1
-	#define INVTYPE_DESC			2
+	#define INVTYPE_ORIGINAL 0
+	#define INVTYPE_SMALL 1
+	#define INVTYPE_DESC 2
 
 	//pGearItem == NULL means uses held items instead of pack items
-	VGUI_Container( int x, int y, int w, int h, class VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent );
-	~VGUI_Container( );
+	VGUI_Container(int x, int y, int w, int h, class VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent);
+	~VGUI_Container();
 
-	VGUI_ItemButton *AddItem( containeritem_t &Item );
-	void PurgeButtons( );
+	VGUI_ItemButton *AddItem(containeritem_t &Item);
+	void PurgeButtons();
+};
+
+class VGUI_CheckBox;
+class VGUI_CheckBoxHandler
+{
+public:
+	virtual void CheckChange( VGUI_CheckBox * ) = 0;
+};
+
+#define CHECKBOX_CHECKSPACER ( mCheckSquareSize / 2 )
+#define CHECKBOX_INNERSPACER ( mCheckSquareSize / 4 )
+#define CHECKBOX_CHECKPOS_Y ( (getTall() - mCheckSquareSize) / 2 )
+#define CHECKBOX_LABELPOS_X ( mCheckSquareSize * 2 )
+class VGUI_CheckBox : public Panel
+{
+protected:
+	bool mbChecked;
+	VGUI_CheckBoxHandler *mpHandler;
+	Label *mpTextLabel;
+	CTransparentPanel *mpOverlayButton;
+	bool mbArmed;
+	int mCheckSquareSize;
+
+public:
+	VGUI_CheckBox(const char *pszText, int x, int y, int h, int w, bool bStartChecked = false);
+	~VGUI_CheckBox();
+
+	bool IsChecked() { return mbChecked; }
+	void SetChecked(bool bChecked) { mbChecked = bChecked; }
+	bool IsArmed() { return mbArmed; }
+	void SetArmed(bool bArmed) { mbArmed = bArmed; }
+	void SetHandler(VGUI_CheckBoxHandler *pHandler) { mpHandler = pHandler; }
+	virtual void setText(const char *pszText) { mpTextLabel->setText(pszText); }
+
+	virtual void paint();
+	virtual void paintBackground();
+
+	class CheckHandler : public InputSignal
+	{
+	private:
+		VGUI_CheckBox *mpCheckBox;
+	public:
+		CheckHandler(VGUI_CheckBox *pCheckBox) { mpCheckBox = pCheckBox; }
+
+		virtual void cursorMoved(int x,int y,Panel* panel) {};
+		virtual void cursorEntered(Panel* panel)
+		{
+			if (mpCheckBox->isEnabled())
+			{
+				//PlaySound("ui/buttonrollover.wav", 0.8f);
+				mpCheckBox->SetArmed( true );
+			}
+		}
+		virtual void cursorExited(Panel* panel) {mpCheckBox->SetArmed(false);}
+		virtual void mouseDoublePressed(MouseCode code,Panel* panel) {};
+		virtual void mouseWheeled(int delta,Panel* panel) {};
+		virtual void keyPressed(KeyCode code,Panel* panel) {};
+		virtual void keyTyped(KeyCode code,Panel* panel) {};
+		virtual void keyReleased(KeyCode code,Panel* panel) {};
+		virtual void keyFocusTicked(Panel* panel) {};
+		virtual void mouseReleased(MouseCode code,Panel* panel) {};
+		virtual void mousePressed(MouseCode code,Panel* panel)
+		{
+			mpCheckBox->SetChecked(!mpCheckBox->IsChecked());
+			if (mpCheckBox->mpHandler) 
+			{
+				mpCheckBox->mpHandler->CheckChange(mpCheckBox);
+			}
+		}
+	};
 };
 
 class VGUI_InvTypePanel : public CTransparentPanel
 {
 public:
 	#define INVTYPE_BUTTONS_TOTAL 3
+	VGUI_CheckBox							*pAlphaCheckBox;
 	mslist<ClassButton *>					InvTypeButtons;
 
 	VGUI_InvTypePanel( Panel *pParent, VGUI_Container *pCallback );
+	~VGUI_InvTypePanel();
 };
 
 // One-line Text box - Can be typed in by user
@@ -550,7 +635,7 @@ public:
 		m_VisibleMsg = m_Message;
 		m_MessageLabel->setText( m_Message );
 		int sz =  m_FadeLabels.size();
-		 for (int i = 0; i < sz; i++) 
+		for (int i = 0; i < sz; i++) 
 		{
 			m_FadeLabels[0]->setParent( NULL );
 			delete m_FadeLabels[0];
@@ -567,7 +652,7 @@ public:
 
 	void Update( )
 	{
-		 for (int i = 0; i < m_FadeLabels.size(); i++) 
+		for (int i = 0; i < m_FadeLabels.size(); i++) 
 		{
 			VGUI_FadeText *pFadeText = m_FadeLabels[i];
 			pFadeText->Update( );
@@ -759,19 +844,19 @@ public:
 			mpMouseInputHandler->mouseDoublePressed(vCode, pPanel);
     }
 
-    virtual void keyPressed(MouseCode vCode, Panel *pPanel)
+    virtual void keyPressed(KeyCode vCode, Panel *pPanel)
     {
         if (mpKeyHandler) 
 			mpKeyHandler->keyPressed(vCode, pPanel);
     }
 
-    virtual void keyTyped(MouseCode vCode, Panel *pPanel)
+    virtual void keyTyped(KeyCode vCode, Panel *pPanel)
     {
         if (mpKeyHandler) 
 			mpKeyHandler->keyTyped(vCode, pPanel);
     }
 
-    virtual void keyReleased(MouseCode vCode, Panel *pPanel)
+    virtual void keyReleased(KeyCode vCode, Panel *pPanel)
     {
         if (mpKeyHandler) 
 			mpKeyHandler->keyReleased(vCode, pPanel);
