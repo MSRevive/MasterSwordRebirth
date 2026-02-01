@@ -2159,15 +2159,22 @@ void __CmdFunc_HUDScroll()
 	else
 		return; //Invalid command
 
-	if (gViewPort->m_pCurrentMenu && gViewPort->m_pCurrentMenu->m_Flags & MENUFLAG_TRAPSTEPINPUT)
+	CTFScrollPanel *pScrollPanel;
+
+	if (gViewPort->m_pCurrentMenu && ScrollCmd != HUDSCROLL_SELECT && (pScrollPanel = gViewPort->m_pCurrentMenu->GetScrollForStepInput()))
+    {
+		// PGup and PGdn affect some menus
+        // MiB APR2019_17 - Trapping this separately so I can standardize use a cvar
+        int h, v;
+        int vAmt = static_cast<int>(CVAR_GET_FLOAT("ms_scrollamount"));
+        if ( ScrollCmd == HUDSCROLL_UP ) vAmt *= -1;
+        pScrollPanel->getScrollValue( h, v );
+        pScrollPanel->setScrollValue( h, v + vAmt );
+    }
+	else if (gViewPort->m_pCurrentMenu && gViewPort->m_pCurrentMenu->m_Flags & MENUFLAG_TRAPSTEPINPUT)
 	{
 		// PGup and PGdn affect some menus
 		gViewPort->m_pCurrentMenu->StepInput(ScrollCmd);
-	}
-	else if (gViewPort->m_pContainerMenu && gViewPort->m_pContainerMenu->isVisible())
-	{
-		// MIB FEB2015_21 [INV_SCROLL] - Pass to the container menu
-		gViewPort->m_pContainerMenu->StepInput(ScrollCmd == HUDSCROLL_UP);
 	}
 	else if (!gViewPort->m_pCurrentMenu)
 	{
