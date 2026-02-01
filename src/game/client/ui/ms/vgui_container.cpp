@@ -497,9 +497,9 @@ public:
 
 	virtual void CheckChange(VGUI_CheckBox *pButton)
 	{
-		gEngfuncs.Cvar_SetValue( "ms_alpha_inventory", pButton->IsChecked() ? 1 : 0 );
+		gEngfuncs.Cvar_SetValue("ms_alpha_inventory", pButton->IsChecked() ? 1 : 0);
 		m_pCallbackPanel->Update();
-		m_pCallbackPanel->m_CallbackPanel->AlphabeticChanged( pButton->IsChecked() );
+		m_pCallbackPanel->m_CallbackPanel->AlphabeticChanged(pButton->IsChecked());
 	}
 };
 
