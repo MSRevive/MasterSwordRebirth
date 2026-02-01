@@ -2404,7 +2404,7 @@ int __MsgFunc_Anim(const char* pszName, int iSize, void* pbuf)
 		player.pev->weaponanim = iAnim;
 
 	CGenericItem* pItem = player.Hand(iHand);
-	pItem->m_ViewModelAnim = iAnim;
+	if (pItem) pItem->m_ViewModelAnim = iAnim;
 
 	return 1;
 }
