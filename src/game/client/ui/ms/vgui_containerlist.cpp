@@ -129,24 +129,30 @@ void CContainerPanel::UpdateSubtitle()
 	GetSelectedItems(SelectedItems);
 
 	VGUI_Inv_GearItem &GearButton = *m_GearPanel->GearItemButtons[m_GearPanel->m_Selected];
-	m_ActButton->setText(Localized("#REMOVE"));
 	if (!m_GearPanel->m_Selected || SelectedItems.size() > 0)
 	{
 		m_pSubtitle->setText("Click container to move selected item, or click again to equip");
-		m_ActButton->setEnabled(false);
-		//if( SelectedItems.size() == 1 )
-		//	m_ActButton->setText( Localized("#USE") );
+		if (!m_GearPanel->m_Selected)
+		{
+			m_ActButton->setVisible(false);
+		}
+		else
+		{
+			m_ActButton->setText("Drop Selected");
+			m_ActButton->setVisible(true);
+		}
 	}
 	else
 	{
 		m_pSubtitle->setText(m_Text_DoubleClick);
 		CGenericItem *pGearItem = player.GetGearItem(GearButton.m_GearItemID);
-		if (pGearItem)
+		if(pGearItem)
 		{
-			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
+			if(!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
 				m_pSubtitle->setText("Remove wearable item");
 		}
-		m_ActButton->setEnabled(true);
+		m_ActButton->setText(Localized("#REMOVE"));
+		m_ActButton->setVisible(true);
 	}
 
 	GearButton.m_ItemContainer->setVisible(GearButton.m_GearItem.IsContainer);
@@ -159,9 +165,26 @@ void CContainerPanel::RemoveGear()
 	gViewPort->HideTopMenu();
 }
 
+void CContainerPanel::DropAllSelected()
+{
+	mslist<VGUI_ItemButton *> vSelectedItems;
+	GetSelectedItems( vSelectedItems );
+	for(int i = 0; i < vSelectedItems.size(); i++)
+	{
+		ServerCmd( msstring("drop ") + (int)vSelectedItems[i]->m_Data.ID + "\n" );
+	}
+	gViewPort->HideTopMenu();
+}
+
 void CContainerPanel::ItemSelectChanged(ulong ID, bool fSelected)
 {
 	UpdateSubtitle();
+}
+
+bool CContainerPanel::ItemClicked(void *pData)
+{
+	mpMoveItemPanel->setVisible( false );
+	return false; // Let the button finish handling
 }
 
 void CContainerPanel::ItemDoubleclicked(ulong ID)
@@ -186,6 +209,50 @@ void CContainerPanel::ItemDoubleclicked(ulong ID)
 
 	gViewPort->HideTopMenu();
 	//	}
+}
+
+void CContainerPanel::ItemRightClicked(void *pData)
+{
+	mslist<VGUI_ItemButton*> vSelectedItems;
+	VGUI_ItemButton *pButton = static_cast<VGUI_ItemButton*>(pData);
+	containeritem_t vItem = pButton->m_Data;
+
+	// Don't do it if any other items are selected,
+	// because... Okay, I don't have a good reason,
+	// just seems wrong.
+	GetSelectedItems(vSelectedItems);
+	if (vSelectedItems.size() > 1 || (  vSelectedItems.size() == 1 && vSelectedItems[0] != pButton))
+	{
+		return;
+	}
+
+	// Must be stackable
+	if (!FBitSet(vItem.Properties,ITEM_GROUPABLE)) 
+		return;
+
+	// Must have enough for at least the minimum
+	if (vItem.Quantity < gMoveNumbers[0]) 
+		return;
+
+	// Not when already in the hands
+	if (!m_GearPanel->m_Selected) 
+		return;
+
+	// Remove then add so it's on top
+	removeChild(mpMoveItemPanel);
+	addChild(mpMoveItemPanel);
+
+	mpMoveItemPanel->ShowForButton(pButton);
+}
+
+void CContainerPanel::MoveItem(VGUI_ItemButton *pButton, int vNumMove)
+{
+	if ( !vNumMove ) 
+		return; // Sanity
+
+	char pszCommand[128];
+	snprintf(pszCommand, sizeof(pszCommand), "inv split %i %i\n", pButton->m_Data.ID, vNumMove);
+	ServerCmd(pszCommand);
 }
 
 void CContainerPanel::GearItemSelected(ulong ID)
@@ -259,7 +326,7 @@ bool CContainerPanel::GearItemDoubleClicked(ulong ID)
 	if (!pWornItem->IsWorn())
 		return false;
 
-	m_ActButton->doClick(); //Remove the item
+	RemoveGear();
 
 	return true;
 }

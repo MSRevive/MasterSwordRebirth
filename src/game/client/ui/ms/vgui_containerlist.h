@@ -15,7 +15,6 @@ public:
 	ulong m_OpenContainerID;
 
 	CContainerPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall);
-	void ActionPerformed();
 	void UpdateSubtitle();
 	void RemoveGear();
 	void DropAllSelected();
@@ -30,11 +29,13 @@ public:
 	bool GearItemDoubleClicked(ulong ID);
 	void ItemDoubleclicked(ulong ID);
 
-	virtual void ItemRightClicked(void *pData );
+	virtual void ItemRightClicked(void *pData);
 	virtual void MoveItem(VGUI_ItemButton *pButton, int vNumMove);
 	virtual bool ItemClicked(void *pData);
 	virtual void InvTypeChanged(int vInvType);
 	virtual void AlphabeticChanged(bool bAlphabetic);
+
+	void ActionPerformed();
 
 	void StepInput(bool bDirUp); // MIB FEB2015_21 [INV_SCROLL]
 };
