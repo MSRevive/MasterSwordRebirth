@@ -48,7 +48,7 @@ class VGUI_EventConsole : public Panel
 public:
 
 	#define EVENTCON_LINE_SIZE_Y EventConsoleText::LineHeight//YRES(10)
-	#define EVENTCON_MAXLINES 256
+	#define EVENTCON_MAXLINES 128
 
 	#define EVENTCON_PREF_VISIBLELINES					m_VisLines->value
 	#define EVENTCON_PREF_MAXLINES						m_MaxLines->value
@@ -92,7 +92,7 @@ public:
 		int ScrollClientWidth = m_ScrollPanel->getWide() - m_ScrollBarWidth;
 
 		//Create the Text lines
-		 for (int i = 0; i < EVENTCON_MAXLINES; i++) 
+		for (int i = 0; i < EVENTCON_PREF_MAXLINES; i++) 
 		{
 			m_Line[i] = new EventConsoleText( 0, 0, ScrollClientWidth, EVENTCON_LINE_SIZE_Y, NULL );
 			if( TextFont ) 
@@ -102,6 +102,7 @@ public:
 		Resize( );
 
 	}
+
 	void Print( Color color, const char* Text )
 	{
 		Print( color, Text, false );
@@ -112,7 +113,7 @@ public:
 		if (!Text || !Text[0])
 			return;
 
-		int MaxLines = V_min( EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES ); // Max amount of text lines to keep in the history
+		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES); // Max amount of text lines to keep in the history
 		int iNewLine = V_min(m_TotalLines,MaxLines-1);
 
 		//If the active line was the last line, then make this new line the active line
@@ -132,9 +133,11 @@ public:
 		EventConsoleText &NewLine = *m_Line[iNewLine];
 
 		//Make the window grow... up to the maximum visible lines
-		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES ) m_VisibleLines++;
+		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES ) 
+			m_VisibleLines++;
 		else
 			m_Line[m_ActiveLine - m_VisibleLines]->Archive( );		//Window is at full size, start archiving text above what's visible
+
 		m_TotalLines = V_min( m_TotalLines+1, MaxLines );				//Increment the total number of lines... up to the maximum kept in history
 		m_ShrinkTime = 0;											//Reset shrinktime
 		NewLine.m_SpansFromPrevLine = WrappedFromLastLine;
@@ -271,7 +274,8 @@ public:
 
 		if(!ShowHUD())
 			setVisible( false );
-		else if( m_VisibleLines ) setVisible( true );
+		else if( m_VisibleLines ) 
+			setVisible( true );
 	}
 
 	void StepInput( bool fDown )
