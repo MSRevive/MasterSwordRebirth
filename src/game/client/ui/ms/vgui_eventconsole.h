@@ -12,19 +12,23 @@ public:
 		setFont( g_FontSml );
 		LineHeight = g_FontSml->getTall();
 	}
+
 	void setText( Color color, const char *Text )
 	{
 		m_Text = Text;
 		m_Color = color;
 		TextPanel::setText( m_Text.c_str() );
 		setFgColor( m_Color[0], m_Color[1], m_Color[2], m_Color[3] );
+		ConsolePrint(m_Text + "\n");
 	}
+
 	void CopyLine( EventConsoleText *pNewTextLine )
 	{
 		setText( pNewTextLine->m_Color, pNewTextLine->m_Text );
 		m_TextWidth = pNewTextLine->m_TextWidth;
 		m_SpansFromPrevLine = pNewTextLine->m_SpansFromPrevLine;
 	}
+
 	void Archive( )
 	{
 		if( m_Archived )
@@ -114,7 +118,7 @@ public:
 			return;
 
 		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES); // Max amount of text lines to keep in the history
-		int iNewLine = V_min(m_TotalLines,MaxLines-1);
+		int iNewLine = V_min(m_TotalLines, MaxLines-1);
 
 		//If the active line was the last line, then make this new line the active line
 		if( m_ActiveLine >= (iNewLine-1) )
@@ -133,12 +137,10 @@ public:
 		EventConsoleText &NewLine = *m_Line[iNewLine];
 
 		//Make the window grow... up to the maximum visible lines
-		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES ) 
+		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES )
 			m_VisibleLines++;
-		else
-			m_Line[m_ActiveLine - m_VisibleLines]->Archive( );		//Window is at full size, start archiving text above what's visible
 
-		m_TotalLines = V_min( m_TotalLines+1, MaxLines );				//Increment the total number of lines... up to the maximum kept in history
+		m_TotalLines = V_min( m_TotalLines+1, MaxLines );			//Increment the total number of lines... up to the maximum kept in history
 		m_ShrinkTime = 0;											//Reset shrinktime
 		NewLine.m_SpansFromPrevLine = WrappedFromLastLine;
 		
@@ -158,22 +160,34 @@ public:
 			int WrapPos = -1;
 			int WrapLength = -1;
 			bool SkipChar = false;
-			 for (int c = 0; c < strlen(Text); c++) 
+			for (int c = 0; c < strlen(Text); c++) 
 			{
-				strncpy( ctemp, Text, c+1 );
+				strncpy(ctemp, Text, c+1);
 				ctemp[c+1] = 0;
 				int testw, testh;
 				NewLine.getTextImage()->getFont()->getTextSize( ctemp, testw, testh );
 				if( testw > MaxWidth || testh > MaxHeight )
 				{
-					if( Text[c] == '\n' ) { WrapPos = c; SkipChar = true; } //Skip over the carriage return, so I don't try to print it to the next line
-					else if( WrapPos < 0 ) WrapPos = c;						//Wrapped by line too long, but no spaces were found.  Use the last char
-					else w = WrapLength;									//Wrapped by line too long and a space was found.  My width only goes up to the space
+					if( Text[c] == '\n' ) 
+					{
+						WrapPos = c; 
+						SkipChar = true; 
+					} //Skip over the carriage return, so I don't try to print it to the next line
+					else if( WrapPos < 0 ) 
+						WrapPos = c;						//Wrapped by line too long, but no spaces were found.  Use the last char
+					else 
+						w = WrapLength;									//Wrapped by line too long and a space was found.  My width only goes up to the space
 					break;
 				}
 
-				if( Text[c] == ' ' ) { WrapPos = c; SkipChar = true; WrapLength = w; } //Use this space as the breaking point, but skip over the space
-				else w = testw;
+				if( Text[c] == ' ' ) 
+				{
+					WrapPos = c; 
+					SkipChar = true; 
+					WrapLength = w; 
+				} //Use this space as the breaking point, but skip over the space
+				else 
+					w = testw;
 			}
 
 			if( WrapPos > 0 )
@@ -193,6 +207,7 @@ public:
 
 		Resize( );
 	}
+
 	void Resize( )
 	{
 		if( !m_VisibleLines || !ShowHUD())
@@ -210,7 +225,7 @@ public:
 		if( m_DynamicWidth )
 		{
 			w = 0;
- 			 for (int i = 0; i < m_VisibleLines; i++) 
+ 			for (int i = 0; i < m_VisibleLines; i++) 
 			{
 				int idx = m_ActiveLine - i;
 				int linewidth = V_min( m_Line[idx]->m_TextWidth, m_Line[idx]->getWide() );
@@ -248,6 +263,7 @@ public:
 
 		m_ScrollPanel->validate( );
 	}
+
 	void Update( )
 	{
 		if( !m_ShrinkTime )
@@ -258,7 +274,6 @@ public:
 		else if( gpGlobals->time > m_ShrinkTime )
 		{
 			//Shrink down one line
-			m_Line[m_ActiveLine - (m_VisibleLines-1)]->Archive( );
 
 			m_VisibleLines--;
 			Resize( );
@@ -284,9 +299,9 @@ public:
 		m_ShrinkTime = 0;																//Reset shrinktime
 
 		if( fDown )
-			m_ActiveLine = V_min(m_ActiveLine+1,m_TotalLines-1);
+			m_ActiveLine = V_min(m_ActiveLine+1, m_TotalLines-1);
 		else
-			m_ActiveLine = V_max(m_ActiveLine-1,m_VisibleLines-1);
+			m_ActiveLine = V_max(m_ActiveLine-1, m_VisibleLines-1);
 
 		Resize( );
 	}
