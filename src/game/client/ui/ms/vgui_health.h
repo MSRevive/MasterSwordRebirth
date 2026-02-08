@@ -157,7 +157,7 @@ namespace PrimaryHUD
 			float coords[2];
 
 			coords[0] = 10; //x
-			coords[1] = (ScreenHeight - (2 * BAR_H) - 10); //y, from the bottom of the screen, as high as the sprites are
+			coords[1] = (ScreenHeight - (2 * BAR_H) - YRES(10)); //y, from the bottom of the screen, as high as the sprites are
 
 			//	Status Bars
 			
