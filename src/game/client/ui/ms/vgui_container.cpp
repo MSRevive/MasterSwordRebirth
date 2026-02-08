@@ -35,7 +35,7 @@
 const char *VGUI_ContainerPanel::m_Text_DoubleClick = "Double click to use item or click Remove to unequip container";
 
 COLOR Color_GearSelected = COLOR(255, 0, 0, 0),
-	  Color_GearNormal = COLOR(200, 200, 200, 0),
+	  Color_GearNormal = COLOR(255, 255, 255, 0),
 	  Color_GearNonContainer = COLOR(160, 160, 160, 0),
 	  Color_TextHighlighted = COLOR(255, 255, 255, 0),
 	  Color_TextNormal = COLOR(100, 100, 100, 0);

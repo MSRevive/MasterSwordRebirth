@@ -204,7 +204,7 @@ void CContainerPanel::ItemDoubleclicked(ulong ID)
 	//if( pItem->GiveTo( &player, false, false ) )
 	//	{
 	char sz[32];
-	 _snprintf(sz, sizeof(sz),  "inv transfer %u 0",  pItem->m_iId );
+	_snprintf(sz, sizeof(sz), "inv transfer %u 0", pItem->m_iId);
 	gEngfuncs.pfnClientCmd(sz);
 
 	gViewPort->HideTopMenu();
