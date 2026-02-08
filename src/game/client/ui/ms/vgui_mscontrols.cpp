@@ -668,7 +668,7 @@ VGUI_ItemButton *VGUI_Container::AddItem( containeritem_t &Item )
 			msstring sCurItemName = m_AlphabetizedItemButtons[i]->m_Data.getFullName();
 
 			// If i-button's name < new name, add at i+1 and break
-			if (stricmp(sCurItemName,sNewItemName) <= 0)
+			if (_stricmp(sCurItemName, sNewItemName) <= 0)
 			{
 				iAlphaLoc = i+1;
 				m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
