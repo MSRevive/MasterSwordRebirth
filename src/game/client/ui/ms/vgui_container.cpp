@@ -29,67 +29,76 @@
 #include "logger.h"
 
 // Menu Dimensions
-#define GEARPNL_PACK_SPACER_Y YRES(10)
+#define GEARPNL_PACK_SPACER_Y YRES(2)
 
 #define LINESPACER_Y YRES(10)
 
 const char *VGUI_ContainerPanel::m_Text_DoubleClick = "Double click to use item or click Remove to unequip container";
 
 COLOR Color_GearSelected = COLOR(255, 0, 0, 0),
-	  Color_GearNormal = COLOR(200, 200, 200, 0),
+	  Color_GearNormal = COLOR(255, 255, 255, 0),
 	  Color_GearNonContainer = COLOR(160, 160, 160, 0),
 	  Color_TextHighlighted = COLOR(255, 255, 255, 0),
 	  Color_TextNormal = COLOR(100, 100, 100, 0);
-
-int last_clicked = 0; //AUG2013_15 Thothie - fix double click functionality for gear items
 
 class CHandler_GearButton : public InputSignal
 {
 public:
 	VGUI_ItemCallbackPanel *m_Callback;
+	VGUI_DoubleClickDetector *mpDoubleClickDetector;
 	int m_Idx;
-	CHandler_GearButton(VGUI_ItemCallbackPanel *pParent, int idx)
+	VGUI_Inv_GearItem* mpHighlightCallback;
+
+	CHandler_GearButton(VGUI_ItemCallbackPanel *pParent, VGUI_DoubleClickDetector *pDoubleClickDetector, VGUI_Inv_GearItem *pHighlightCallback, int idx)
 	{
 		m_Callback = pParent;
+		mpDoubleClickDetector = pDoubleClickDetector;
+		mpHighlightCallback = pHighlightCallback;
 		m_Idx = idx;
 	}
+
 	void mousePressed(MouseCode code, Panel *panel)
 	{
-		//AUG2013_15 Thothie - fix double click functionality for gear items
-		if (last_clicked == m_Idx && m_Idx != 0)
+		if ( code == MOUSE_LEFT )
 		{
-			m_Callback->GearItemDoubleClicked(m_Idx);
-		}
-		else
-		{
-			last_clicked = m_Idx;
-			m_Callback->GearItemClicked(m_Idx);
+			if ( mpDoubleClickDetector->Click( this, code ) )
+			{
+				mouseDoublePressed( code, panel );
+			}
+			else
+			{
+				m_Callback->GearItemClicked( m_Idx );
+			}
 		}
 	}
-	void cursorEntered(Panel *panel) {}
-	void cursorMoved(int x, int y, Panel *panel){};
-	void mouseReleased(MouseCode code, Panel *panel){};
+
+	void cursorEntered(Panel *panel) { mpHighlightCallback->mbMouseOver = true; }
+	void cursorMoved(int x, int y, Panel *panel) {};
+	void mouseReleased(MouseCode code, Panel *panel) {};
 	void mouseDoublePressed(MouseCode code, Panel *panel)
 	{
 		m_Callback->GearItemDoubleClicked(m_Idx);
 	};
-	void cursorExited(Panel *panel){};
-	void mouseWheeled(int delta, Panel *panel){};
-	void keyPressed(KeyCode code, Panel *panel){};
-	void keyTyped(KeyCode code, Panel *panel){};
-	void keyReleased(KeyCode code, Panel *panel){};
-	void keyFocusTicked(Panel *panel){};
+	void cursorExited(Panel *panel) { mpHighlightCallback->mbMouseOver = false; };
+	void mouseWheeled(int delta, Panel *panel) {};
+	void keyPressed(KeyCode code, Panel *panel) {};
+	void keyTyped(KeyCode code, Panel *panel) {};
+	void keyReleased(KeyCode code, Panel *panel) {};
+	void keyFocusTicked(Panel *panel) {};
 };
 
-VGUI_Inv_GearItem::VGUI_Inv_GearItem(Panel *pContainerParent, VGUI_ItemCallbackPanel *pItemCallbackPanel, VGUI_ItemCallbackPanel *pGearCallback, Panel *pParent) : CTransparentPanel(255, 0, 0, GEARPNL_SIZE_X, YRES(13))
+VGUI_Inv_GearItem::VGUI_Inv_GearItem(Panel *pContainerParent, VGUI_ItemCallbackPanel *pItemCallbackPanel, VGUI_ItemCallbackPanel *pGearCallback, Panel *pParent) : 
+	CTransparentPanel(255, 0, 0, GEARPNL_SIZE_X, YRES(13))
 {
 	setParent(pParent);
 	m_ContainerParent = pContainerParent;
 
 	m_Name = new MSLabel(this, "", 0, 0, getWide(), getTall(), MSLabel::a_center);
-	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, m_Idx));
+	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, m_Idx));
 	m_ItemContainer = new VGUI_Container(ITEM_CONTAINER_X, ITEM_CONTAINER_Y, ITEM_CONTAINER_SIZE_X, ITEM_CONTAINER_SIZE_Y, pItemCallbackPanel, pContainerParent);
+	mbMouseOver = false;
 }
+
 VGUI_Inv_GearItem::~VGUI_Inv_GearItem()
 {
 	/*m_ContainerParent->removeChild( m_ItemContainer );
@@ -99,15 +108,14 @@ VGUI_Inv_GearItem::~VGUI_Inv_GearItem()
 	removeChild( m_Name );
 	delete m_Name;*/
 }
+
 void VGUI_Inv_GearItem::Update(gearitem_t &GearItem, int idx)
 {
-	last_clicked = 0; //Thothie AUG2013_19 - seems double click fix jams sometimes
-
 	m_Idx = idx;
 	m_pSignal->m_Idx = m_Idx;
 	m_GearItemID = GearItem.ID;
 	m_GearItem = GearItem;
-	setPos(0, YRES(10) + (getTall() + GEARPNL_PACK_SPACER_Y) * idx);
+	setPos(0, GEARPNL_PACK_SPACER_Y + (getTall() + GEARPNL_PACK_SPACER_Y) * idx);
 	setVisible(true);
 
 	m_Name->setText(GearItem.Name);
@@ -116,14 +124,17 @@ void VGUI_Inv_GearItem::Update(gearitem_t &GearItem, int idx)
 	//Delete all items in the container
 	m_ItemContainer->PurgeButtons();
 }
+
 void VGUI_Inv_GearItem::Reset()
 {
 	//Delete all items in the container
 	m_ItemContainer->PurgeButtons();
 
 	setVisible(false);
+	mbMouseOver = false;
 	DeSelect();
 }
+
 void VGUI_Inv_GearItem::Select()
 {
 	m_Name->SetFGColorRGB(Color_GearSelected);
@@ -135,6 +146,7 @@ void VGUI_Inv_GearItem::Select()
 		m_ItemContainer->Update();
 	}
 }
+
 void VGUI_Inv_GearItem::DeSelect()
 {
 	if (m_GearItem.IsContainer)
@@ -146,8 +158,9 @@ void VGUI_Inv_GearItem::DeSelect()
 	m_ItemContainer->m_pInvTypePanel->setVisible(false);
 }
 
-VGUI_InventoryPanel::VGUI_InventoryPanel(VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent) : CTransparentPanel(INVENTORY_TRANSPARENCY, GEARPNL_X, GEARPNL_Y, GEARPNL_SIZE_X, GEARPNL_SIZE_Y),
-																								   VGUI_ItemCallbackPanel()
+VGUI_InventoryPanel::VGUI_InventoryPanel(VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent) : 
+	CTransparentPanel(INVENTORY_TRANSPARENCY, GEARPNL_X, GEARPNL_Y, GEARPNL_SIZE_X, GEARPNL_SIZE_Y),
+	VGUI_ItemCallbackPanel()
 {
 	setParent(pParent);
 	m_pCallbackPanel = pCallbackPanel;
@@ -159,7 +172,11 @@ VGUI_InventoryPanel::VGUI_InventoryPanel(VGUI_ItemCallbackPanel *pCallbackPanel,
 	m_Scroll->setScrollBarAutoVisible(false, true);
 	m_Scroll->setScrollBarVisible(false, false);
 	m_Scroll->validate();
+
+	mbScrollHighlighted = false;
+    m_Scroll->addInputSignal( new CSimpleInputSignal( this, NULL, NULL ) );
 }
+
 VGUI_Inv_GearItem *VGUI_InventoryPanel::AddGearItem(gearitem_t &GearItem)
 {
 	if (GearItemButtonTotal >= MAX_CONTAINERS)
@@ -197,6 +214,7 @@ void VGUI_InventoryPanel::Reset()
 		GearItemButtons[i]->Reset();
 	GearItemButtonTotal = 0;
 }
+
 void VGUI_InventoryPanel::Select(int Idx)
 {
 	if (Idx < 0 || Idx >= GearItemButtonTotal)
@@ -212,6 +230,7 @@ void VGUI_InventoryPanel::Select(int Idx)
 	if (m_pCallbackPanel)
 		m_pCallbackPanel->GearItemSelected(GearItemButton.m_GearItemID);
 }
+
 bool VGUI_InventoryPanel::GearItemClicked(ulong ID)
 {
 	if (ID < 0 || ID >= (unsigned)GearItemButtonTotal)
@@ -226,11 +245,21 @@ bool VGUI_InventoryPanel::GearItemClicked(ulong ID)
 	return false;
 }
 
-// MIB FEB2015_21 [INV_SCROLL] - Pass it along to the container that's open (if any)
-void VGUI_InventoryPanel::StepInput(bool bDirUp)
+CTFScrollPanel* VGUI_InventoryPanel::GetScrollForStepInput()
 {
-	if ((int)GearItemButtons.size() > m_Selected && GearItemButtons[m_Selected]->m_ItemContainer)
-		GearItemButtons[m_Selected]->m_ItemContainer->StepInput(bDirUp);
+	if ( mbScrollHighlighted ) return m_Scroll;
+
+	for (int i = 0; i < GearItemButtons.size(); i++)
+	{
+		if (GearItemButtons[i]->IsMouseOver())
+		{
+			return m_Scroll;
+		}
+	}
+
+	if (static_cast<int>(GearItemButtons.size()) > m_Selected && GearItemButtons[ m_Selected ]->m_ItemContainer)
+		return GearItemButtons[m_Selected]->m_ItemContainer->GetScrollForStepInput();
+	return nullptr;
 }
 
 bool VGUI_InventoryPanel::GearItemDoubleClicked(ulong ID)
@@ -245,10 +274,17 @@ bool VGUI_InventoryPanel::GearItemDoubleClicked(ulong ID)
 	return false;
 }
 
-#define INFOPANEL_X GEARPNL_X
-#define INFOPANEL_Y GEARPNL_Y + YRES(180)
+// wtf is with the overuse of macros here.......
+#define GOLDLABEL_SPACER_Y YRES(5)
+#define GOLDLABEL_X GEARPNL_X
+#define GOLDLABEL_Y (GEARPNL_Y + GEARPNL_SIZE_Y + GOLDLABEL_SPACER_Y)
+#define GOLDLABEL_SIZE_X GEARPNL_SIZE_X
+#define GOLDLABEL_SIZE_Y YRES(12)
+
+#define INFOPANEL_X	GEARPNL_X
+#define INFOPANEL_Y	(GOLDLABEL_Y + GOLDLABEL_SIZE_Y + GOLDLABEL_SPACER_Y)
 #define INFOPANEL_SIZE_X GEARPNL_SIZE_X
-#define INFOPANEL_SIZE_Y YRES(80)
+#define INFOPANEL_SIZE_Y ((ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y) - INFOPANEL_Y)
 
 //Info panel
 VGUI_ItemInfoPanel::VGUI_ItemInfoPanel(Panel *pParent) : CTransparentPanel(INVENTORY_TRANSPARENCY, INFOPANEL_X, INFOPANEL_Y, INFOPANEL_SIZE_X, INFOPANEL_SIZE_Y)
@@ -285,6 +321,7 @@ VGUI_ItemInfoPanel::VGUI_ItemInfoPanel(Panel *pParent) : CTransparentPanel(INVEN
 	m_Scroll->setScrollBarVisible(false, false);
 	m_Scroll->validate();
 }
+
 void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 {
 	m_Name->setText(Item.getFullName());
@@ -298,21 +335,20 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 // Creation
 VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, ScreenWidth, ScreenHeight), VGUI_ItemCallbackPanel()
 {
-#define TITLE_X ITEM_CONTAINER_X
-#define TITLE_Y YRES(48)
-
 	COLOR Color_TitleText = COLOR(255, 100, 100, 0),
 		  Color_SubtitleText = COLOR(160, 160, 160, 0),
 		  Color_GoldText = COLOR(255, 255, 0, 0),
-		  Color_TransparentTextBG = COLOR(0, 0, 0, 255);
+		  Color_TransparentTextBG = COLOR(0, 0, 0, 255),
+		  Color_Red = COLOR(255, 0, 0, 0),
+		  Color_White = COLOR(255, 255, 255, 0);
 
 	// Create the title
-	m_pTitle = new MSLabel(this, "Inventory", TITLE_X, TITLE_Y);
+	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0);
 	m_pTitle->setFont(g_FontTitle);
 	m_pTitle->SetFGColorRGB(Color_TitleText);
 
 	// Create the Label
-	m_pSubtitle = new MSLabel(this, m_Text_DoubleClick, TITLE_X, TITLE_Y + m_pTitle->getTall() + YRES(4));
+	m_pSubtitle = new MSLabel(this, m_Text_DoubleClick, ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(4));
 	m_pSubtitle->SetFGColorRGB(Color_SubtitleText);
 
 	//Create the panel showing all the gear I'm wearing
@@ -321,54 +357,34 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	//Create the Info panel
 	m_InfoPanel = new VGUI_ItemInfoPanel(this);
 
-	//Line separation
-	COLOR colTemp1 = COLOR(90, 90, 90, 128);
-	COLOR colTemp2 = COLOR(255, 0, 0, 0);
-	COLOR colTemp3 = COLOR(255, 255, 255, 0);
-
-	new VGUI_Line((GEARPNL_X + GEARPNL_SIZE_X) + (GEARPNL_SPACER_X / 2.0f), GEARPNL_Y + LINESPACER_Y, ITEM_CONTAINER_SIZE_Y - (LINESPACER_Y * 2), false, colTemp1, this);
-
-	//Line separation
-	new VGUI_Line(LINESPACER_Y, GEARPNL_Y + YRES(170), m_InfoPanel->getWide() - (LINESPACER_Y * 2), true, colTemp1, this);
-
-#define ACTBTN_SIZE_X XRES(100)
-#define ACTBTN_SIZE_Y YRES(30)
-#define ACTBTN_X (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - ACTBTN_SIZE_X
-#define ACTBTN_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y
-
 	m_ActButton = new MSButton(this, Localized("#REMOVE"), ACTBTN_X, ACTBTN_Y, ACTBTN_SIZE_X, ACTBTN_SIZE_Y);
 	m_ActButton->setFont(g_FontTitle);
 	m_ActButton->setContentAlignment(vgui::Label::a_east);
-	m_ActButton->SetArmedColor(colTemp2);
-	m_ActButton->SetUnArmedColor(colTemp3);
+	m_ActButton->SetArmedColor(Color_Red);
+	m_ActButton->SetUnArmedColor(Color_White);
 
-#define BUTTON_CANCEL_SIZE_X XRES(40)
-#define BUTTON_CANCEL_SIZE_Y YRES(13)
+	#define BUTTON_CANCEL_SIZE_X XRES(40)
+	#define BUTTON_CANCEL_SIZE_Y YRES(13)
 
-//Create the Gold display labal
-#define GOLDLABEL_X GEARPNL_X
-#define GOLDLABEL_Y GEARPNL_Y + YRES(150)
-#define GOLDLABEL_SIZE_X GEARPNL_SIZE_X
-#define GOLDLABEL_SIZE_Y YRES(12)
-
+	//Create the Gold display labal
 	m_GoldLabel = new MSLabel(this, "", GOLDLABEL_X, GOLDLABEL_Y, GOLDLABEL_SIZE_X, GOLDLABEL_SIZE_Y, MSLabel::a_center);
 	m_GoldLabel->setFont(g_FontTitle);
 	m_GoldLabel->SetFGColorRGB(Color_GoldText);
 
 	// Create the Cancel button
-	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X, BUTTON_CANCEL_SIZE_Y);
+	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X,BUTTON_CANCEL_SIZE_Y);
 	m_pCancelButton->setFont(g_FontID);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
-	m_pCancelButton->SetArmedColor(colTemp2);
+	m_pCancelButton->SetArmedColor(Color_Red);
 	m_pCancelButton->SetUnArmedColor(Color_TextNormal);
 
-	m_AllowUpdate = m_bIsOpened = false;
+	m_AllowUpdate = false;
 }
 
 // Update
 void VGUI_ContainerPanel::Update()
 {
-	if (!m_AllowUpdate || !m_bIsOpened)
+	if (!m_AllowUpdate)
 		return;
 
 	m_GearPanel->Reset();
@@ -378,12 +394,13 @@ void VGUI_ContainerPanel::Update()
 	removeChild(m_pCancelButton);
 	m_pCancelButton->setParent(this);
 
-	msstring sGold;
-	_snprintf(sGold, MSSTRING_SIZE, Localized("#PLAYER_GOLD"), player.m_Gold);
+	char sGold[255];
+	snprintf(sGold, 255, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
 
 	m_AllowUpdate = false;
 }
+
 void VGUI_ContainerPanel::AddInventoryItems()
 {
 	startdbg;
@@ -471,17 +488,38 @@ public:
 		gEngfuncs.Cvar_SetValue("ms_invtype", m_iInvType);
 		m_pCallbackPanel->Update();
 		m_pCallbackPanel->m_pScrollPanel->setScrollValue(0, 0); // Reset scroll bar
+		m_pCallbackPanel->m_CallbackPanel->InvTypeChanged( m_iInvType );
 	}
 };
 
-#define INVTYPE_PANEL_X ITEM_CONTAINER_X
-#define INVTYPE_PANEL_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y
+// MIB FEB2019_25 [ALPHABETICAL_INVENTORY]
+class AlphabetizeCheckBoxHandler : public VGUI_CheckBoxHandler
+{
+private:
+	class VGUI_Container *m_pCallbackPanel;
+public:
+	AlphabetizeCheckBoxHandler( VGUI_Container *pCallbackPanel )
+	{
+		m_pCallbackPanel = pCallbackPanel;
+	}
+
+	virtual void CheckChange(VGUI_CheckBox *pButton)
+	{
+		gEngfuncs.Cvar_SetValue("ms_alpha_inventory", pButton->IsChecked() ? 1 : 0);
+		m_pCallbackPanel->Update();
+		m_pCallbackPanel->m_CallbackPanel->AlphabeticChanged(pButton->IsChecked());
+	}
+};
+
+// MIB FEB2019_25 [ALPHABETICAL_INVENTORY]
+#define INVTYPE_PANEL_X	ITEM_CONTAINER_X
+#define INVTYPE_PANEL_Y	(ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y) + YRES(30)
 #define INVTYPE_PANEL_SIZE_X ITEM_CONTAINER_SIZE_X - ACTBTN_SIZE_X
-#define INVTYPE_PANEL_SIZE_Y YRES(30)
+#define INVTYPE_PANEL_SIZE_Y YRES(64)
 #define INVTYPE_BUTTON_SIZE_X XRES(80)
 #define INVTYPE_BUTTON_SIZE_Y YRES(15)
-#define INVTYPE_BUTTON_Y (INVTYPE_PANEL_SIZE_Y / 2.0) - (INVTYPE_BUTTON_SIZE_Y / 2.0)
-#define INVTYPE_BUTTON_X_SPACER XRES(12)
+#define INVTYPE_BUTTON_X_SPACER	XRES(12)
+#define INVTYPE_BUTTON_Y_SPACER	YRES(12)
 
 // MiB FEB2015_07 - Inventory type buttons
 VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) : CTransparentPanel(0, INVTYPE_PANEL_X, INVTYPE_PANEL_Y, INVTYPE_PANEL_SIZE_X, INVTYPE_PANEL_SIZE_Y)
@@ -489,18 +527,23 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 	setParent(pParent);
 	const char ButtonText[INVTYPE_BUTTONS_TOTAL][16] = {"Tiled", "Small", "Descriptions"};
 
+	pAlphaCheckBox = new VGUI_CheckBox("Alphabetic", INVTYPE_BUTTON_X_SPACER, INVTYPE_BUTTON_SIZE_Y + INVTYPE_BUTTON_Y_SPACER, INVTYPE_BUTTON_SIZE_X, INVTYPE_BUTTON_SIZE_Y, pCallback->IsAlphabetical());
+	pAlphaCheckBox->setVisible(true);
+	pAlphaCheckBox->SetHandler(new AlphabetizeCheckBoxHandler(pCallback));
+	addChild(pAlphaCheckBox);
+
 	for (int i = 0; i < INVTYPE_BUTTONS_TOTAL; i++)
 	{
 		int x = 0, y;
 
 		if (i)
 		{
-			ClassButton *pLast = InvTypeButtons[i - 1];
+			ClassButton *pLast = InvTypeButtons[i-1];
 			pLast->getPos(x, y);
 			x += pLast->getWide();
 		}
 
-		ClassButton *pCur = new ClassButton(0, ButtonText[i], x + INVTYPE_BUTTON_X_SPACER, INVTYPE_BUTTON_Y, INVTYPE_BUTTON_SIZE_X, INVTYPE_BUTTON_SIZE_Y, false);
+		ClassButton *pCur = new ClassButton(0, ButtonText[i], x + INVTYPE_BUTTON_X_SPACER, 0, INVTYPE_BUTTON_SIZE_X, INVTYPE_BUTTON_SIZE_Y, false);
 		pCur->setContentAlignment(vgui::Label::Alignment::a_center);
 		pCur->setVisible(true);
 		pCur->addActionSignal(new InvTypeButtonSignal(i, pCallback));
@@ -514,17 +557,18 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 void VGUI_ContainerPanel::Open(void)
 {
 	// Update before opening
-	m_AllowUpdate = m_bIsOpened = true;
+	m_AllowUpdate = true;
 	Update();
 	CMenuPanel::Open();
 }
+
 void VGUI_ContainerPanel::Close(void)
 {
 	player.BlockButton(IN_ATTACK);
 	m_pCancelButton->setArmed(false); //If the user presses cancel, the cancel button doesn't automaticaly get unarmed... so manually do it
 	m_ActButton->setArmed(false);
 	CMenuPanel::Close();
-	m_AllowUpdate = m_bIsOpened = false;
+	m_AllowUpdate = false;
 }
 bool VGUI_ContainerPanel::SlotInput(int iSlot)
 {
@@ -554,6 +598,22 @@ void VGUI_ContainerPanel::ItemHighlighted(void *pData)
 		return;
 
 	m_InfoPanel->Update(ItemButton.m_Data);
+}
+
+bool VGUI_ContainerPanel::HasSelectedItems()
+{
+	for(int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
+	{
+		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[i];
+		for(int g = 0; g < GearItem.m_ItemContainer->m_ItemButtonTotal; g++)
+		{
+			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[g];
+			if(ItemButton.m_Selected) 
+				return true;
+		}
+	}
+
+    return false;
 }
 
 void VGUI_ContainerPanel::GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems)

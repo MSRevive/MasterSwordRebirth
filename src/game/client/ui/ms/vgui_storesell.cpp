@@ -174,7 +174,6 @@ void SellWindow_Update()
 {
 	if (gViewPort && gViewPort->m_pStoreSellMenu)
 	{
-		gViewPort->m_pStoreSellMenu->m_AllowUpdate = true;
 		gViewPort->m_pStoreSellMenu->Update();
 	}
 }
