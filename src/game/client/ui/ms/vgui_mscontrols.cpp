@@ -564,7 +564,7 @@ void VGUI_ItemButton::paint( )
 	}
 
 	m_Image.SetFGColorRGB( ImageColor );
-	 for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
+	for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		m_Labels[i]->SetFGColorRGB( LabelColor );
 	m_Description->SetFGColorRGB( LabelColor );
 }
