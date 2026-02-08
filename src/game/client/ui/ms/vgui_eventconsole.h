@@ -29,20 +29,10 @@ public:
 		m_SpansFromPrevLine = pNewTextLine->m_SpansFromPrevLine;
 	}
 
-	void Archive( )
-	{
-		if( m_Archived )
-			return;
-
-		ConsolePrint( m_Text + "\n" );
-		m_Archived = true;
-	}
-
 	msstring m_Text;
 	Color m_Color;
 	int m_TextWidth;
-	bool m_SpansFromPrevLine,		//The text has a carriage return or is just so long it goes to the next line
-		 m_Archived;				//The text has been logged to console
+	bool m_SpansFromPrevLine;		//The text has a carriage return or is just so long it goes to the next line
 	static int LineHeight;
 };
 int EventConsoleText::LineHeight = 0;
