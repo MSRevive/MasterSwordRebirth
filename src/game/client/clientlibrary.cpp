@@ -54,7 +54,6 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_quickslot_timeout", "2.5", FCVAR_ARCHIVE);		// Timeout for the quickslots
 	CVAR_CREATE("ms_autocharge", "1", FCVAR_ARCHIVE);					// MiB MAR2012_05 - Let's you auto-charge your attack
 	CVAR_CREATE("ms_doubletapdodge", "0", FCVAR_ARCHIVE);				// MiB MAR2012_05 -Enable/Disable double tapping to dodge
-	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
 	CVAR_CREATE("ms_showotherglow", "1", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_chargebar_sound", "magic/chargebar_alt1.wav", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_glowcolor", "(255,255,255)", FCVAR_ARCHIVE); // This is called in player think and was breaking the entire think cycle.
@@ -79,6 +78,10 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_txthud_width", "640", FCVAR_ARCHIVE);				// Width of console
 	CVAR_CREATE("ms_hidehud", "0", FCVAR_ARCHIVE);						// Hides the HUD and viewmodel completely
 	CVAR_CREATE("ms_lildude", "1", FCVAR_ARCHIVE);						// Thothie MAR2007a - Hides the 3d Guy if set 0
+	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
+	CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
+	CVAR_CREATE("ms_doubleclicktime", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_scrollamount", "30", FCVAR_ARCHIVE);
 
 	//debug outputs ; remove later - always add where they are set! This way let's us get data after something goes wrong out of a string
 	CVAR_CREATE("DEBUG_bestxpstat", "0", FCVAR_CLIENTDLL); // Called @ playerstats.cpp line 123

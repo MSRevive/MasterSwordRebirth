@@ -50,13 +50,6 @@ static COLOR Color_TitleText = COLOR(255, 0, 0, 0), //255, 100, 100
 // Creation
 CStorePanel::CStorePanel() : VGUI_ContainerPanel()
 {
-#define TITLE_X ITEM_CONTAINER_X
-#define TITLE_Y YRES(48)
-
-//Create the sell calculation
-#define SELLLABEL_X ITEM_CONTAINER_X + XRES(2)
-#define SELLLABEL_Y ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y + YRES(20)
-
 	m_SaleLabel = new MSLabel(this, "", SELLLABEL_X, SELLLABEL_Y);
 	m_SaleLabel->setFont(g_FontTitle);
 	m_SaleLabel->SetFGColorRGB(Color_SubtitleText);

@@ -1491,6 +1491,40 @@ void ClientCommand2(edict_t *pEntity)
 				}
 			}
 		}
+		else if (FStrEq(CMD_ARGV(1), "split"))
+		{
+			CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
+			int vNewStackAmount = atoi(CMD_ARGV(3));
+			if(pItem && vNewStackAmount && pItem->m_pParentContainer)
+			{
+				CGenericItem *pAddToHand = nullptr;
+
+				if(pItem->iQuantity == vNewStackAmount)
+				{
+					// Not sure why player "split" the whole stack, but don't
+					// bother creating a new item and deleting the current one,
+					// just move the current one
+					pAddToHand = pItem;
+				}
+				else
+				{
+					pAddToHand = NewGenericItem(pItem->m_Name);
+					if(pAddToHand)
+					{
+						pAddToHand->iQuantity = vNewStackAmount;
+						pItem->iQuantity -= vNewStackAmount;
+
+						MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
+							WRITE_BYTE(1);
+							SendGenericItem(pPlayer, pItem, false);
+						MESSAGE_END();
+					}
+				}
+
+				if(pAddToHand)
+					pAddToHand->GiveTo(pPlayer, true, false, true);
+			}
+		}
 	}
 	else if (FStrEq(pcmd, "inv") && !bCanUseInventory)
 	{

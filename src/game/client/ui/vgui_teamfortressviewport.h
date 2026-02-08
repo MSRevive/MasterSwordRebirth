@@ -1091,6 +1091,7 @@ enum hudscroll_e
 	HUDSCROLL_SELECT,
 };
 
+class CTFScrollPanel;
 class CMenuPanel : public VGUI_MainPanel
 {
 private:
@@ -1175,6 +1176,7 @@ public:
 	//Master Sword
 	int m_Flags;
 	virtual void StepInput(hudscroll_e HUDScroll) {}
+	virtual CTFScrollPanel *GetScrollForStepInput() { return nullptr; }
 };
 
 //================================================================

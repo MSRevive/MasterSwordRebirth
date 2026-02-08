@@ -71,14 +71,13 @@ public:
 	virtual void keyFocusTicked(Panel *panel){};
 };
 
-class CAction_RemoveGear : public ActionSignal
+class CContainer_ActionButtonSignal : public ActionSignal
 {
 protected:
 	CContainerPanel *m_Panel;
-
 public:
-	CAction_RemoveGear(CContainerPanel *pPanel) { m_Panel = pPanel; }
-	virtual void actionPerformed(Panel *panel) { m_Panel->RemoveGear(); }
+	CContainer_ActionButtonSignal( CContainerPanel *pPanel ) { m_Panel = pPanel; }
+	virtual void actionPerformed(Panel* panel) { m_Panel->ActionPerformed(); }
 };
 
 //------------
@@ -93,48 +92,101 @@ public:
 // Creation
 CContainerPanel::CContainerPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall) : VGUI_ContainerPanel()
 {
+	addChild(mpMoveItemPanel = new VGUI_MoveItemPanel(this));
 	m_pCancelButton->setText(Localized("#CLOSE"));
-	m_ActButton->addActionSignal(new CAction_RemoveGear(this));
-	//m_ActButton->setVisible( false );
+	m_ActButton->addActionSignal(new CContainer_ActionButtonSignal(this));
+    m_ActButton->setVisible(true);
 }
+
+void CContainerPanel::ActionPerformed()
+{
+	mpMoveItemPanel->setVisible(false);
+	if (HasSelectedItems())
+	{
+		DropAllSelected();
+	}
+	else
+	{
+		RemoveGear();
+	}
+}
+
+void CContainerPanel::InvTypeChanged(int vInvType)
+{
+	VGUI_ItemCallbackPanel::InvTypeChanged(vInvType);
+	mpMoveItemPanel->setVisible(false);
+}
+
+void CContainerPanel::AlphabeticChanged(bool bAlphabetic)
+{
+	VGUI_ItemCallbackPanel::AlphabeticChanged(bAlphabetic);
+	mpMoveItemPanel->setVisible(false);
+}
+
 void CContainerPanel::UpdateSubtitle()
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
 	GetSelectedItems(SelectedItems);
 
 	VGUI_Inv_GearItem &GearButton = *m_GearPanel->GearItemButtons[m_GearPanel->m_Selected];
-	m_ActButton->setText(Localized("#REMOVE"));
 	if (!m_GearPanel->m_Selected || SelectedItems.size() > 0)
 	{
 		m_pSubtitle->setText("Click container to move selected item, or click again to equip");
-		m_ActButton->setEnabled(false);
-		//if( SelectedItems.size() == 1 )
-		//	m_ActButton->setText( Localized("#USE") );
+		if (!m_GearPanel->m_Selected)
+		{
+			m_ActButton->setVisible(false);
+		}
+		else
+		{
+			m_ActButton->setText("Drop Selected");
+			m_ActButton->setVisible(true);
+		}
 	}
 	else
 	{
 		m_pSubtitle->setText(m_Text_DoubleClick);
 		CGenericItem *pGearItem = player.GetGearItem(GearButton.m_GearItemID);
-		if (pGearItem)
+		if(pGearItem)
 		{
-			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
+			if(!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
 				m_pSubtitle->setText("Remove wearable item");
 		}
-		m_ActButton->setEnabled(true);
+		m_ActButton->setText(Localized("#REMOVE"));
+		m_ActButton->setVisible(true);
 	}
 
 	GearButton.m_ItemContainer->setVisible(GearButton.m_GearItem.IsContainer);
 }
+
 void CContainerPanel::RemoveGear()
 {
 	msstring Cmd = msstring("remove ") + m_GearPanel->GearItemButtons[m_GearPanel->m_Selected]->m_GearItemID + "\n";
 	ServerCmd(Cmd);
 	gViewPort->HideTopMenu();
 }
+
+void CContainerPanel::DropAllSelected()
+{
+	mslist<VGUI_ItemButton *> vSelectedItems;
+	GetSelectedItems( vSelectedItems );
+	for(int i = 0; i < vSelectedItems.size(); i++)
+	{
+		ServerCmd( msstring("drop ") + (int)vSelectedItems[i]->m_Data.ID + "\n" );
+	}
+	gViewPort->HideTopMenu();
+}
+
 void CContainerPanel::ItemSelectChanged(ulong ID, bool fSelected)
 {
 	UpdateSubtitle();
 }
+
+bool CContainerPanel::ItemClicked(void *pData)
+{
+	mpMoveItemPanel->setVisible( false );
+	return false; // Let the button finish handling
+}
+
 void CContainerPanel::ItemDoubleclicked(ulong ID)
 {
 	if (m_GearPanel->m_Selected == 0)
@@ -152,12 +204,57 @@ void CContainerPanel::ItemDoubleclicked(ulong ID)
 	//if( pItem->GiveTo( &player, false, false ) )
 	//	{
 	char sz[32];
-	 _snprintf(sz, sizeof(sz),  "inv transfer %u 0",  pItem->m_iId );
+	_snprintf(sz, sizeof(sz), "inv transfer %u 0", pItem->m_iId);
 	gEngfuncs.pfnClientCmd(sz);
 
 	gViewPort->HideTopMenu();
 	//	}
 }
+
+void CContainerPanel::ItemRightClicked(void *pData)
+{
+	mslist<VGUI_ItemButton*> vSelectedItems;
+	VGUI_ItemButton *pButton = static_cast<VGUI_ItemButton*>(pData);
+	containeritem_t vItem = pButton->m_Data;
+
+	// Don't do it if any other items are selected,
+	// because... Okay, I don't have a good reason,
+	// just seems wrong.
+	GetSelectedItems(vSelectedItems);
+	if (vSelectedItems.size() > 1 || (  vSelectedItems.size() == 1 && vSelectedItems[0] != pButton))
+	{
+		return;
+	}
+
+	// Must be stackable
+	if (!FBitSet(vItem.Properties,ITEM_GROUPABLE)) 
+		return;
+
+	// Must have enough for at least the minimum
+	if (vItem.Quantity < gMoveNumbers[0]) 
+		return;
+
+	// Not when already in the hands
+	if (!m_GearPanel->m_Selected) 
+		return;
+
+	// Remove then add so it's on top
+	removeChild(mpMoveItemPanel);
+	addChild(mpMoveItemPanel);
+
+	mpMoveItemPanel->ShowForButton(pButton);
+}
+
+void CContainerPanel::MoveItem(VGUI_ItemButton *pButton, int vNumMove)
+{
+	if ( !vNumMove ) 
+		return; // Sanity
+
+	char pszCommand[128];
+	snprintf(pszCommand, sizeof(pszCommand), "inv split %i %i\n", pButton->m_Data.ID, vNumMove);
+	ServerCmd(pszCommand);
+}
+
 void CContainerPanel::GearItemSelected(ulong ID)
 {
 	//Unselect all items
@@ -178,6 +275,7 @@ void CContainerPanel::GearItemSelected(ulong ID)
 	m_pTitle->setText(Title);
 	UpdateSubtitle();
 }
+
 bool CContainerPanel::GearItemClicked(ulong ID)
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
@@ -218,6 +316,7 @@ bool CContainerPanel::GearItemClicked(ulong ID)
 
 	return true;
 }
+
 bool CContainerPanel::GearItemDoubleClicked(ulong ID)
 {
 	CGenericItem *pWornItem = player.GetGearItem(ID);
@@ -227,23 +326,17 @@ bool CContainerPanel::GearItemDoubleClicked(ulong ID)
 	if (!pWornItem->IsWorn())
 		return false;
 
-	m_ActButton->doClick(); //Remove the item
+	RemoveGear();
 
 	return true;
 }
+
 // Update
 void CContainerPanel::Close(void)
 {
 	player.ClearConditions(MONSTER_OPENCONTAINER);
 	ClientCmd("inv stop");
 	VGUI_ContainerPanel::Close();
-}
-
-// MIB FEB2015_21 [INV_SCROLL] - Pass to the gear panel
-void CContainerPanel::StepInput(bool bDirUp)
-{
-	if (m_GearPanel)
-		m_GearPanel->StepInput(bDirUp);
 }
 
 //======================================
@@ -291,14 +384,15 @@ void ContainerWindowOpen(ulong ContainerID)
 	gViewPort->m_pContainerMenu->m_OpenContainerID = ContainerID;
 	ShowVGUIMenu(MENU_CONTAINER);
 }
+
 void ContainerWindowUpdate()
 {
 	if (!gViewPort || !gViewPort->m_pContainerMenu)
 		return;
 
-	gViewPort->m_pContainerMenu->m_AllowUpdate = true;
 	gViewPort->m_pContainerMenu->Update();
 }
+
 void ContainerWindowClose()
 {
 	gViewPort->HideTopMenu();
