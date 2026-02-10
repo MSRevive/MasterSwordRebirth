@@ -397,8 +397,6 @@ void VGUI_ContainerPanel::Update()
 	char sGold[255];
 	snprintf(sGold, 255, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
-
-	m_AllowUpdate = false;
 }
 
 void VGUI_ContainerPanel::AddInventoryItems()
@@ -570,6 +568,7 @@ void VGUI_ContainerPanel::Close(void)
 	CMenuPanel::Close();
 	m_AllowUpdate = false;
 }
+
 bool VGUI_ContainerPanel::SlotInput(int iSlot)
 {
 	iSlot--;
