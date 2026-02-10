@@ -13,6 +13,7 @@ public:
 	void stripComments(std::vector<std::byte>& data);
 	void stripWhiteSpace(std::vector<std::byte>& data);
 	void stripEmptyLines(std::vector<std::byte>& data);
+	void stripDebugLines(std::vector<std::byte>& data);
 	void Logger(std::string msg);
   
 private:

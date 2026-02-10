@@ -211,6 +211,7 @@ void Packer::processScript(std::vector<std::byte> &buffer, std::string relativeF
 	if (g_Release)
 	{
 		stripComments(buffer);
+		stripDebugLines(buffer);
 		stripEmptyLines(buffer);
 		stripWhiteSpace(buffer);
 	}
@@ -383,6 +384,34 @@ void Packer::stripEmptyLines(std::vector<std::byte>& data) {
 
 	if (!temp_result_bytes.empty() && input_ends_with_newline && static_cast<char>(temp_result_bytes.back()) != '\n') {
 		temp_result_bytes.push_back(static_cast<std::byte>('\n'));
+	}
+
+	data.swap(temp_result_bytes);
+}
+
+void Packer::stripDebugLines(std::vector<std::byte>& data) {
+	if (data.empty()) {
+		return;
+	}
+
+	std::vector<std::byte> temp_result_bytes;
+
+	const std::byte pattern[] = { std::byte{'d'}, std::byte{'b'}, std::byte{'g'} };
+	const std::byte newline = std::byte{'\n'};
+
+	auto current = data.begin();
+	const auto end = data.end();
+
+	while (current != end) {
+		auto line_end = std::find(current, end, newline);
+		auto next_line_start = (line_end == end) ? end : line_end + 1;
+		auto found = std::search(current, line_end, std::begin(pattern), std::end(pattern));
+
+		if (found == line_end) {
+			temp_result_bytes.insert(temp_result_bytes.end(), current, next_line_start);
+		}
+
+		current = next_line_start;
 	}
 
 	data.swap(temp_result_bytes);

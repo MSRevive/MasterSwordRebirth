@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <stdexcept>
 
-std::string Logger::logFilename = "./output.txt";
+std::string Logger::logFilename = "./output.log";
 
 void Logger::SetLogFile(const std::string& filename) {
 	Logger::logFilename = filename;
