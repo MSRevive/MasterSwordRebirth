@@ -108,8 +108,6 @@ protected:
 	bool m_AllowUpdate;
 
 public:
-	static const char *m_Text_DoubleClick;
-
 	VGUI_ContainerPanel();
 	virtual bool HasSelectedItems();
 	virtual void GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems); //in, out

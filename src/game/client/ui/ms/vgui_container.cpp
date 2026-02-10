@@ -33,8 +33,6 @@
 
 #define LINESPACER_Y YRES(10)
 
-const char *VGUI_ContainerPanel::m_Text_DoubleClick = "Double click to use item or click Remove to unequip container";
-
 COLOR Color_GearSelected = COLOR(255, 0, 0, 0),
 	  Color_GearNormal = COLOR(255, 255, 255, 0),
 	  Color_GearNonContainer = COLOR(160, 160, 160, 0),
@@ -343,12 +341,12 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 		  Color_White = COLOR(255, 255, 255, 0);
 
 	// Create the title
-	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0);
+	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0 + YRES(15));
 	m_pTitle->setFont(g_FontTitle);
 	m_pTitle->SetFGColorRGB(Color_TitleText);
 
 	// Create the Label
-	m_pSubtitle = new MSLabel(this, m_Text_DoubleClick, ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(4));
+	m_pSubtitle = new MSLabel(this, "Double click to use item or click Remove to unequip container. Right click to split a stack.", ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(15));
 	m_pSubtitle->SetFGColorRGB(Color_SubtitleText);
 
 	//Create the panel showing all the gear I'm wearing
@@ -364,7 +362,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_ActButton->SetUnArmedColor(Color_White);
 
 	#define BUTTON_CANCEL_SIZE_X XRES(40)
-	#define BUTTON_CANCEL_SIZE_Y YRES(13)
+	#define BUTTON_CANCEL_SIZE_Y YRES(15)
 
 	//Create the Gold display labal
 	m_GoldLabel = new MSLabel(this, "", GOLDLABEL_X, GOLDLABEL_Y, GOLDLABEL_SIZE_X, GOLDLABEL_SIZE_Y, MSLabel::a_center);
@@ -373,10 +371,10 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 
 	// Create the Cancel button
 	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X,BUTTON_CANCEL_SIZE_Y);
-	m_pCancelButton->setFont(g_FontID);
+	m_pCancelButton->setFont(g_FontTitle);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
 	m_pCancelButton->SetArmedColor(Color_Red);
-	m_pCancelButton->SetUnArmedColor(Color_TextNormal);
+	m_pCancelButton->SetUnArmedColor(Color_White);
 
 	m_AllowUpdate = false;
 }
