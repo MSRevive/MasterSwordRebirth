@@ -522,7 +522,7 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 
 	int TotalItems = NumItems(); //Gear.size() - 1;
 	int MaxItems = NUM_MAX_ITEMS;
-	int WarnItems = NUM_MAX_ITEMS - 15;
+	int WarnItems = NUM_MAX_ITEMS - 5;
 	/*
 	 for (int i = 0; i < Gear.size(); i++)
 	{
@@ -538,13 +538,14 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 	ClientPrint(this->pev, at_console, UTIL_VarArgs("Item_Count: %i/%i Weight: %ilbs/%i\n", TotalItems, MaxItems, outWeight, outMaxWeight));
 	if (TotalItems < MaxItems)
 	{
-		if (TotalItems > WarnItems)
-			SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Warning: you are carrying too many items! (%i/%i)\nToo many items can result in character corruption!", TotalItems, MaxItems));
+		if (TotalItems >= WarnItems)
+			SendEventMsg(HUDEVENT_UNABLE, UTIL_VarArgs("Warning: you are carrying too many items! (%i/%i)", TotalItems, MaxItems));
 	}
+
 	if (TotalItems >= MaxItems)
 	{
 		if (bVerbose)
-			strncpy(cErrorString, "You are carrying too many items.", sizeof(cErrorString));
+			_snprintf(cErrorString, sizeof(cErrorString), "You are carrying too many items! (%i/%i)", TotalItems, MaxItems);
 		pItem->pev->origin = pev->origin;
 		Success = false;
 	}
@@ -556,7 +557,7 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 		if( bVerbose ) sprintf( cErrorString, "The %s is too big for you to carry.", pItem->DisplayName() );
 		Success = false;
 	}*/
-	if (pItem->Weight() + Weight() > Volume())
+	if (pItem->Weight() + outWeight > outMaxWeight)
 	{
 		if (bVerbose)
 			_snprintf(cErrorString, sizeof(cErrorString), "The %s would make your equipment too heavy!", pItem->DisplayName());
