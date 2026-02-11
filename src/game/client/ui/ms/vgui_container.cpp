@@ -299,18 +299,27 @@ VGUI_ItemInfoPanel::VGUI_ItemInfoPanel(Panel *pParent) : CTransparentPanel(INVEN
 	m_Scroll = new CTFScrollPanel(0, 0, getWide(), getTall());
 	m_Scroll->setParent(this);
 
+	// NAME
 	iy = INFOPANEL_LABEL_SPACER1_Y;
 	m_Name = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Name->SetFGColorRGB(Color_TextHighlighted);
 
+	//WEIGHT
 	iy += m_Name->getTall() + INFOPANEL_LABEL_SPACER2_Y;
+	m_Weight = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
+	m_Weight->SetFGColorRGB(Color_TextNormal);
+
+	// QUANTITY
+	iy += m_Weight->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_Quantity = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Quantity->SetFGColorRGB(Color_TextNormal);
 
+	//QUALITY
 	iy += m_Quantity->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_Quality = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Quality->SetFGColorRGB(Color_TextNormal);
 
+	// SALES
 	iy += m_Quality->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_SaleText = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_SaleText->SetFGColorRGB(Color_TextNormal);
@@ -327,6 +336,7 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 	m_Quantity->setText(Localized("#ITEMINFO_QUANTITY"), Item.Quantity);
 	m_Quality->setText(Localized("#ITEMINFO_QUALITY"), Item.Quality);
 	m_Quality->setVisible(false);
+	m_Weight->setText(Localized("Weight: "), Item.Weight);
 	m_Scroll->validate();
 }
 
@@ -346,7 +356,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_pTitle->SetFGColorRGB(Color_TitleText);
 
 	// Create the Label
-	m_pSubtitle = new MSLabel(this, "Double click to use item or click Remove to unequip container. Right click to split a stack.", ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(15));
+	m_pSubtitle = new MSLabel(this, "", ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(15));
 	m_pSubtitle->SetFGColorRGB(Color_SubtitleText);
 
 	//Create the panel showing all the gear I'm wearing
