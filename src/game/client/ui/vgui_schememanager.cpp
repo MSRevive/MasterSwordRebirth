@@ -109,18 +109,8 @@ CSchemeManager::CScheme::~CScheme()
 static int g_ResArray[] =
 {
 	640,
-	800,
-	720,
-	1024,
-	1152,
-	1176,
-	1280,
-	1360,
-	1366,
+	960,
 	1440,
-	1600,
-	1680,
-	1768,
 	1920
 };
 static int g_NumReses = sizeof(g_ResArray);
@@ -141,7 +131,7 @@ static std::vector<byte> LoadFileByResolution(const char *filePrefix, int xRes, 
 	{
 		// try load
 		char fname[256];
-		sprintf(fname, "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix);
+		_snprintf(fname, sizeof(fname), "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix);
 		auto fileContents = FileSystem_LoadFileIntoBuffer(fname, FileContentFormat::Text);
 
 		if (!fileContents.empty())
@@ -154,11 +144,21 @@ static std::vector<byte> LoadFileByResolution(const char *filePrefix, int xRes, 
 static void ParseRGBAFromString(byte colorArray[4], const char *colorVector)
 {
 	int r, g, b, a;
-	sscanf(colorVector, "%d %d %d %d", &r, &g, &b, &a);
-	colorArray[0] = r;
-	colorArray[1] = g;
-	colorArray[2] = b;
-	colorArray[3] = a;
+	if (4 == sscanf(colorVector, "%d %d %d %d", &r, &g, &b, &a))
+	{
+		colorArray[0] = r;
+		colorArray[1] = g;
+		colorArray[2] = b;
+		colorArray[3] = a;
+	}
+	else
+	{
+		//Pure white for easier debugging
+		colorArray[0] = 255;
+		colorArray[1] = 255;
+		colorArray[2] = 255;
+		colorArray[3] = 255;
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -170,7 +170,7 @@ static void ParseRGBAFromString(byte colorArray[4], const char *colorVector)
 CSchemeManager::CSchemeManager(int xRes, int yRes)
 {
 	// basic setup
-	m_pSchemeList = NULL;
+	m_pSchemeList = nullptr;
 	m_iNumSchemes = 0;
 
 	// find the closest matching scheme file to our resolution
@@ -276,7 +276,7 @@ CSchemeManager::CSchemeManager(int xRes, int yRes)
 				}
 				if (!pScheme->fontName[0])
 				{
-					strncpy(pScheme->fontName,  "Courier", sizeof(pScheme->fontName) );
+					strncpy(pScheme->fontName, "Courier", sizeof(pScheme->fontName) );
 				}
 			}
 
@@ -414,22 +414,23 @@ buildDefaultFont:
 				//custom because msc has weird font sizes
 				int fontRes = 640;
 				if (m_xRes >= 1600)
-					fontRes = 1440;
+					fontRes = 1600;
 				else if (m_xRes >= 1280)
 					fontRes = 1400;
 				else if (m_xRes >= 800)
 					fontRes = 960;
 
-				// if (m_xRes >= 1600)
-				// 	fontRes = 1600;
-				// else if (m_xRes >= 1280)
-				// 	fontRes = 1280;
-				// else if (m_xRes >= 1152)
-				// 	fontRes = 1152;
-				// else if (m_xRes >= 1024)
-				// 	fontRes = 1024;
-				// else if (m_xRes >= 800)
-				// 	fontRes = 800;
+				//int fontRes = 640;
+				//if (m_xRes >= 1600)
+				//	fontRes = 1600;
+				//else if (m_xRes >= 1280)
+				//	fontRes = 1280;
+				//else if (m_xRes >= 1152)
+				//	fontRes = 1152;
+				//else if (m_xRes >= 1024)
+				//	fontRes = 1024;
+				//else if (m_xRes >= 800)
+				//	fontRes = 800;
 
 				_snprintf(fontFilename, sizeof(fontFilename), "gfx\\vgui\\fonts\\%d_%s.tga", fontRes, m_pSchemeList[i].schemeName);
 				fontFileContents = FileSystem_LoadFileIntoBuffer(fontFilename, FileContentFormat::Binary);

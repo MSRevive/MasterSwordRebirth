@@ -368,7 +368,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_InfoPanel = new VGUI_ItemInfoPanel(this);
 
 	m_ActButton = new MSButton(this, Localized("#REMOVE"), ACTBTN_X, ACTBTN_Y, ACTBTN_SIZE_X, ACTBTN_SIZE_Y);
-	m_ActButton->setFont(g_FontTitle);
+	m_ActButton->setFont(g_FontID);
 	m_ActButton->setContentAlignment(vgui::Label::a_east);
 	m_ActButton->SetArmedColor(Color_Red);
 	m_ActButton->SetUnArmedColor(Color_White);
@@ -383,7 +383,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 
 	// Create the Cancel button
 	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X, BUTTON_CANCEL_SIZE_Y);
-	m_pCancelButton->setFont(g_FontTitle);
+	m_pCancelButton->setFont(g_FontID);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
 	m_pCancelButton->SetArmedColor(Color_Red);
 	m_pCancelButton->SetUnArmedColor(Color_White);
