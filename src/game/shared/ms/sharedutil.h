@@ -85,6 +85,7 @@ void dbgtxt(const char* Text );
 		ulong Properties;
 		unsigned short Quantity;
 		unsigned short Quality, MaxQuality;
+		float Weight;
 	};
 #pragma pack( pop )
 #endif

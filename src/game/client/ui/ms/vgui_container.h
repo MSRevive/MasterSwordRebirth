@@ -7,7 +7,7 @@
 #define CLASSMENU_BUTTON_SPACER_X XRES(6)
 #define CLASSMENU_BUTTON_SPACER_Y ((LABEL_ITEMNAME_SIZE_Y + LABEL_ITEM_SPACER_Y) * STORE_INFO_LABELS + YRES(6))
 
-#define CONTAINERMENU_SPACER_X XRES(15)
+#define CONTAINERMENU_SPACER_X XRES(5)
 
 #define GEARPNL_X CONTAINERMENU_SPACER_X
 #define GEARPNL_Y YRES(50)
@@ -88,7 +88,7 @@ class VGUI_ItemInfoPanel : public CTransparentPanel
 {
 public:
 	CImageDelayed *m_Image;
-	MSLabel *m_Name, *m_Quantity, *m_Quality, *m_SaleText;
+	MSLabel *m_Name, *m_Quantity, *m_Quality, *m_SaleText, *m_Weight;
 	CTFScrollPanel *m_Scroll;
 
 	VGUI_ItemInfoPanel(Panel *pParent);
@@ -108,8 +108,6 @@ protected:
 	bool m_AllowUpdate;
 
 public:
-	static const char *m_Text_DoubleClick;
-
 	VGUI_ContainerPanel();
 	virtual bool HasSelectedItems();
 	virtual void GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems); //in, out
