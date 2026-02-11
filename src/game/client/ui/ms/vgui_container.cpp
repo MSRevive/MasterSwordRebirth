@@ -336,7 +336,10 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 	m_Quantity->setText(Localized("#ITEMINFO_QUANTITY"), Item.Quantity);
 	m_Quality->setText(Localized("#ITEMINFO_QUALITY"), Item.Quality);
 	m_Quality->setVisible(false);
-	m_Weight->setText(Localized("Weight: "), Item.Weight);
+
+	char weight[50];
+	_snprintf(weight, sizeof(weight), "Weight: %.2f", Item.Weight);
+	m_Weight->setText(weight);
 	m_Scroll->validate();
 }
 

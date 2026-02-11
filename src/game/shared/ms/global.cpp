@@ -258,7 +258,6 @@ genericitem_t::genericitem_t(class CGenericItem *pItem)
 	Quantity = pItem->iQuantity;
 	Quality = pItem->Quality;
 	MaxQuality = pItem->MaxQuality;
-	Weight = pItem->flItemWeight;
 }
 genericitem_t::operator class CGenericItem *()
 {
@@ -272,7 +271,6 @@ genericitem_t::operator class CGenericItem *()
 	pItem->Quality = Quality;
 	pItem->MaxQuality = MaxQuality;
 	pItem->m_OldID = ID;
-	pItem->flItemWeight = 0.0;
 
 	return pItem;
 }

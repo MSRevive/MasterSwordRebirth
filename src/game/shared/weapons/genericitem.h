@@ -244,7 +244,7 @@ public:
 	//Perishables
 	short Quality, MaxQuality;
 
-	float flItemWeight; // This is for storing a item's weight on the actual item instead of the entity.
+	float flItemWeight; // TODO: This is for storing a item's weight on the actual item instead of the entity.
 
 	//Groupables
 	int iQuantity, iMaxGroupable, m_MaxGroupable; //MiB FEB2010_13 - Stackable Stacks added m_MaxGroupable

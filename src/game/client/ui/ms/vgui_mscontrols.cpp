@@ -262,6 +262,7 @@ containeritem_t::containeritem_t( genericitem_t &Item )
 	Properties = Item.Properties;
 	Quantity = Item.Quantity;
 	Quality = Item.Quality;
+	Weight = 0.0;
 }
 
 containeritem_t::containeritem_t( CGenericItem *pItem )
@@ -283,6 +284,7 @@ void containeritem_t::init( CGenericItem *pItem )
 	Value = pItem->m_Value;
 	Desc = pItem->DisplayDesc;
 	pOrig = pItem;
+	Weight = pItem->Weight();
 }
 
 msstring containeritem_t::getFullName( )
