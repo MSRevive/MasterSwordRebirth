@@ -261,7 +261,7 @@ public:
 			if( m_VisibleLines )
 				m_ShrinkTime = gpGlobals->time + EVENTCON_PREF_DECAYTIME;
 		}
-		else if( gpGlobals->time > m_ShrinkTime )
+		else if ((gpGlobals->time > m_ShrinkTime) && (m_VisibleLines > 0))
 		{
 			//Shrink down one line
 
@@ -273,8 +273,12 @@ public:
 
 			int TopLine = m_ActiveLine - (m_VisibleLines-1);
 			TopLine = V_max( TopLine, 0 );
-			if( !m_Line[TopLine]->m_SpansFromPrevLine )
-				m_ShrinkTime = 0;
+
+			if (m_Line[TopLine] != nullptr)
+			{
+				if (!m_Line[TopLine]->m_SpansFromPrevLine)
+					m_ShrinkTime = 0;
+			}
 		}
 
 		if(!ShowHUD())

@@ -153,7 +153,7 @@ void CContainerPanel::UpdateSubtitle()
 	}
 	else
 	{
-		m_pSubtitle->setText(m_Text_DoubleClick);
+		m_pSubtitle->setText("Double click to use item or click Remove to unequip container. Right click to split a stack.");
 		CGenericItem *pGearItem = player.GetGearItem(GearButton.m_GearItemID);
 		if(pGearItem)
 		{

@@ -33,8 +33,6 @@
 
 #define LINESPACER_Y YRES(10)
 
-const char *VGUI_ContainerPanel::m_Text_DoubleClick = "Double click to use item or click Remove to unequip container";
-
 COLOR Color_GearSelected = COLOR(255, 0, 0, 0),
 	  Color_GearNormal = COLOR(255, 255, 255, 0),
 	  Color_GearNonContainer = COLOR(160, 160, 160, 0),
@@ -301,18 +299,27 @@ VGUI_ItemInfoPanel::VGUI_ItemInfoPanel(Panel *pParent) : CTransparentPanel(INVEN
 	m_Scroll = new CTFScrollPanel(0, 0, getWide(), getTall());
 	m_Scroll->setParent(this);
 
+	// NAME
 	iy = INFOPANEL_LABEL_SPACER1_Y;
 	m_Name = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Name->SetFGColorRGB(Color_TextHighlighted);
 
+	//WEIGHT
 	iy += m_Name->getTall() + INFOPANEL_LABEL_SPACER2_Y;
+	m_Weight = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
+	m_Weight->SetFGColorRGB(Color_TextNormal);
+
+	// QUANTITY
+	iy += m_Weight->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_Quantity = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Quantity->SetFGColorRGB(Color_TextNormal);
 
+	//QUALITY
 	iy += m_Quantity->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_Quality = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_Quality->SetFGColorRGB(Color_TextNormal);
 
+	// SALES
 	iy += m_Quality->getTall() + INFOPANEL_LABEL_SPACER2_Y;
 	m_SaleText = new MSLabel(m_Scroll->getClient(), "", INFOPANEL_LABEL_X, iy, INFOPANEL_LABEL_SIZE_X, INFOPANEL_LABEL_SIZE_Y, MSLabel::a_center);
 	m_SaleText->SetFGColorRGB(Color_TextNormal);
@@ -329,6 +336,10 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 	m_Quantity->setText(Localized("#ITEMINFO_QUANTITY"), Item.Quantity);
 	m_Quality->setText(Localized("#ITEMINFO_QUALITY"), Item.Quality);
 	m_Quality->setVisible(false);
+
+	char weight[50];
+	_snprintf(weight, sizeof(weight), "Weight: %.2f", Item.Weight);
+	m_Weight->setText(weight);
 	m_Scroll->validate();
 }
 
@@ -343,12 +354,12 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 		  Color_White = COLOR(255, 255, 255, 0);
 
 	// Create the title
-	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0);
+	m_pTitle = new MSLabel(this, "Inventory", ITEM_CONTAINER_X, 0 + YRES(15));
 	m_pTitle->setFont(g_FontTitle);
 	m_pTitle->SetFGColorRGB(Color_TitleText);
 
 	// Create the Label
-	m_pSubtitle = new MSLabel(this, m_Text_DoubleClick, ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(4));
+	m_pSubtitle = new MSLabel(this, "", ITEM_CONTAINER_X, 0 + m_pTitle->getTall() + YRES(15));
 	m_pSubtitle->SetFGColorRGB(Color_SubtitleText);
 
 	//Create the panel showing all the gear I'm wearing
@@ -364,7 +375,7 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_ActButton->SetUnArmedColor(Color_White);
 
 	#define BUTTON_CANCEL_SIZE_X XRES(40)
-	#define BUTTON_CANCEL_SIZE_Y YRES(13)
+	#define BUTTON_CANCEL_SIZE_Y YRES(15)
 
 	//Create the Gold display labal
 	m_GoldLabel = new MSLabel(this, "", GOLDLABEL_X, GOLDLABEL_Y, GOLDLABEL_SIZE_X, GOLDLABEL_SIZE_Y, MSLabel::a_center);
@@ -372,11 +383,11 @@ VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, Screen
 	m_GoldLabel->SetFGColorRGB(Color_GoldText);
 
 	// Create the Cancel button
-	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X,BUTTON_CANCEL_SIZE_Y);
-	m_pCancelButton->setFont(g_FontID);
+	m_pCancelButton = new MSButton(this, Localized("#CANCEL"), (ITEM_CONTAINER_X + ITEM_CONTAINER_SIZE_X) - BUTTON_CANCEL_SIZE_X, ITEM_CONTAINER_Y - BUTTON_CANCEL_SIZE_Y, BUTTON_CANCEL_SIZE_X, BUTTON_CANCEL_SIZE_Y);
+	m_pCancelButton->setFont(g_FontTitle);
 	m_pCancelButton->addActionSignal(new CMenuHandler_TextWindow(HIDE_TEXTWINDOW));
 	m_pCancelButton->SetArmedColor(Color_Red);
-	m_pCancelButton->SetUnArmedColor(Color_TextNormal);
+	m_pCancelButton->SetUnArmedColor(Color_White);
 
 	m_AllowUpdate = false;
 }
@@ -397,8 +408,6 @@ void VGUI_ContainerPanel::Update()
 	char sGold[255];
 	snprintf(sGold, 255, Localized("#PLAYER_GOLD"), player.m_Gold);
 	m_GoldLabel->setText(sGold);
-
-	m_AllowUpdate = false;
 }
 
 void VGUI_ContainerPanel::AddInventoryItems()
@@ -513,7 +522,7 @@ public:
 
 // MIB FEB2019_25 [ALPHABETICAL_INVENTORY]
 #define INVTYPE_PANEL_X	ITEM_CONTAINER_X
-#define INVTYPE_PANEL_Y	(ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y) + YRES(30)
+#define INVTYPE_PANEL_Y	(ITEM_CONTAINER_Y + ITEM_CONTAINER_SIZE_Y) + YRES(10)
 #define INVTYPE_PANEL_SIZE_X ITEM_CONTAINER_SIZE_X - ACTBTN_SIZE_X
 #define INVTYPE_PANEL_SIZE_Y YRES(64)
 #define INVTYPE_BUTTON_SIZE_X XRES(80)
@@ -570,6 +579,7 @@ void VGUI_ContainerPanel::Close(void)
 	CMenuPanel::Close();
 	m_AllowUpdate = false;
 }
+
 bool VGUI_ContainerPanel::SlotInput(int iSlot)
 {
 	iSlot--;

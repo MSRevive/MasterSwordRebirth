@@ -262,6 +262,7 @@ containeritem_t::containeritem_t( genericitem_t &Item )
 	Properties = Item.Properties;
 	Quantity = Item.Quantity;
 	Quality = Item.Quality;
+	Weight = 0.0;
 }
 
 containeritem_t::containeritem_t( CGenericItem *pItem )
@@ -283,6 +284,7 @@ void containeritem_t::init( CGenericItem *pItem )
 	Value = pItem->m_Value;
 	Desc = pItem->DisplayDesc;
 	pOrig = pItem;
+	Weight = pItem->Weight();
 }
 
 msstring containeritem_t::getFullName( )
@@ -870,13 +872,14 @@ VGUI_CheckBox::VGUI_CheckBox(const char *pszText, int x, int y, int w, int h, bo
 	SetChecked(bStartChecked);
 	SetArmed(false);
 	mpTextLabel = new Label(pszText);
-	mpTextLabel->getTextSize(vTmp,mCheckSquareSize);
 	mCheckSquareSize = V_min(mCheckSquareSize, h / 2);
+	mpTextLabel->getTextSize(vTmp, mCheckSquareSize);
 	mpTextLabel->setPos(CHECKBOX_LABELPOS_X, 0);
-	mpTextLabel->setSize(w - CHECKBOX_LABELPOS_X, h);
+	//mpTextLabel->setSize(w - CHECKBOX_LABELPOS_X, h);
+	mpTextLabel->setSize(w, h);
 	mpTextLabel->setBgColor(0, 0, 0, 255);
 	mpTextLabel->setParent(this);
-	mpTextLabel->setContentAlignment(Label::Alignment::a_west);
+	mpTextLabel->setContentAlignment(Label::Alignment::a_center);
 
 	// MiB Note: Make sure this is always last so the layering makes this on top
 	// Make the hitbox button cover the whole thing
