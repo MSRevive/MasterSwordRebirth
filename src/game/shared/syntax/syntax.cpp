@@ -1,30 +1,39 @@
 #include "inc_weapondefs.h"
 
-#define MAX_SIZE 4096
-char ReturnString[MAX_SIZE];
-
 const char *SPEECH::ItemName(CGenericItem *pItem, bool fCapital)
 {
-	bool bNotUnique = (pItem->iQuantity > 1);
-	char pchQuantity[32]; pchQuantity[0] = 0;
+	char returnStr[255];
 	const char *pchDisplayOther = pItem->DisplayPrefix.c_str();
+
 	if (pItem->iQuantity > 1)
-		_snprintf(pchQuantity, sizeof(pchQuantity), "%i", pItem->iQuantity);
+	{
+		_snprintf(returnStr, sizeof(returnStr), "%i %s%s", pItem->iQuantity, pItem->DisplayName(), "s");
+		return std::string(returnStr).c_str(); // we do this to avoid manual free of heap allocation.
+	}
 	else if (pchDisplayOther && pchDisplayOther[0])
-		_snprintf(pchQuantity, sizeof(pchQuantity), "%s", pchDisplayOther);
-	_snprintf(ReturnString, MAX_SIZE, "%s %s%s", pchQuantity, pItem->DisplayName(), (bNotUnique ? "s" : ""));
-	if (fCapital)
-		ReturnString[0] = toupper(ReturnString[0]);
-	return &ReturnString[0];
+	{
+		_snprintf(returnStr, sizeof(returnStr), "%s %s", pchDisplayOther, pItem->DisplayName());
+		return std::string(returnStr).c_str(); // we do this to avoid manual free of heap allocation.
+	}
+	else
+	{
+		return pItem->DisplayName();
+	}
+
+	return "NullItem";
 }
 
 const char *SPEECH::NPCName(CMSMonster *pMonster, bool fCapital)
 {
+	char returnStr[255];
+
 	msstring Prefix = pMonster->DisplayPrefix.len() ? (pMonster->DisplayPrefix + " ") : ("");
-	_snprintf(ReturnString, MAX_SIZE, "%s%s", Prefix.c_str(), pMonster->DisplayName());
+	_snprintf(returnStr, sizeof(returnStr), "%s%s", Prefix.c_str(), pMonster->DisplayName());
+
 	if (fCapital)
-		ReturnString[0] = toupper(ReturnString[0]);
-	return &ReturnString[0];
+		returnStr[0] = toupper(returnStr[0]);
+
+	return std::string(returnStr).c_str(); // we do this to avoid manual free of heap allocation.
 }
 
 const char *SPEECH::HandName(int iHand, bool fCapital)
