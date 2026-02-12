@@ -258,6 +258,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 		CurrentAttack = &m_Attacks[ForceAttackNum];
 		iNewAttack = ForceAttackNum;
 	}
+	
 #ifndef VALVE_DLL
 	else if (!CurrentAttack)
 	{
@@ -753,7 +754,8 @@ void CGenericItem::StrikeLand()
 
 	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
-	float flDamage = CurrentAttack->flDamage + RANDOM_LONG(-CurrentAttack->flDamageRange, CurrentAttack->flDamageRange);
+	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
+	float flDamage = CurrentAttack->flDamage + randomMulti;
 	flDamage *= flDmgFraction;
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
@@ -1813,52 +1815,52 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 					else if (dtype_code.starts_with("earth"))
 						strncpy(element_code,  " earth", sizeof(element_code) );
 
-					strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
-					strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss));
-					//our hits can not be inverted or they will seem weird with no accuracy
-					// this is no longer needed with missing being only possible during lightning debuffs. Enabling this would mean missing with high numbers during lightning so obfuscating.
-					//_snprintf(szStats, sizeof(szStats), "(%i)",  (iAccuracyRoll) );
-					
-					//Thothie SEP2019_22 - report resistance BEGIN
-					bool tdm_found_entry = false;
-					float tdm_modifier;
-					if (pVictim)
+				strncpy(szDamage, Damage.AttackHit ? UTIL_VarArgs("%.1f%s damage.", Damage.flDamage, element_code) : "", sizeof(szDamage) );
+				strncpy(szHitMiss, Damage.AttackHit ? "HIT!" : (fDodged ? "PARRIED!" : "MISS!"), sizeof(szHitMiss));
+				//our hits can not be inverted or they will seem weird with no accuracy
+				// this is no longer needed with missing being only possible during lightning debuffs. Enabling this would mean missing with high numbers during lightning so obfuscating.
+				//_snprintf(szStats, sizeof(szStats), "(%i)",  (iAccuracyRoll) );
+				
+				//Thothie SEP2019_22 - report resistance BEGIN
+				bool tdm_found_entry = false;
+				float tdm_modifier;
+				if (pVictim)
+				{
+					for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
 					{
-						for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
+						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
+						msstring tdm_damage_type = TDM.DamageType;
+						if (dtype_code.contains(tdm_damage_type))
 						{
-							CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
-							msstring tdm_damage_type = TDM.DamageType;
-							if (dtype_code.contains(tdm_damage_type))
-							{
-								tdm_modifier = TDM.modifier;
-								tdm_found_entry = true;
-								break;
-							}
+							tdm_modifier = TDM.modifier;
+							tdm_found_entry = true;
+							break;
 						}
 					}
-					
-					msstring tdm_engrish = " ";
-					if ( tdm_found_entry )
+				}
+				
+				msstring tdm_engrish = " ";
+				if ( tdm_found_entry )
+				{
+					if ( tdm_modifier < 1 )
 					{
-						if ( tdm_modifier < 1 )
-						{
-							tdm_engrish = UTIL_VarArgs("[%i%% resistant]", int((1 - tdm_modifier)*100.0));
-						}
-						else if ( tdm_modifier > 1 )
-						{
-							tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]", int((tdm_modifier-1)*100.0));
-						}
+						tdm_engrish = UTIL_VarArgs("[%i%% resistant]", int((1 - tdm_modifier)*100.0));
 					}
-					//Thothie SEP2019_22 - report resistance END	
-					
-					//Thothie SEP2019_22 - changing report syntax to be shorter
-					if (pPlayerAttacker)
+					else if ( tdm_modifier > 1 )
 					{
-						// Old format
-						//_snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
-						//	pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
-						//	pTarget->DisplayName(),
-						//	szStats, szHitMiss, szDamage);
+						tdm_engrish = UTIL_VarArgs("[%i%% vulnerable]", int((tdm_modifier-1)*100.0));
+					}
+				}
+				//Thothie SEP2019_22 - report resistance END	
+				
+				//Thothie SEP2019_22 - changing report syntax to be shorter
+				if (pPlayerAttacker)
+				{
+					// Old format
+					//_snprintf(sz, sizeof(sz), "You attack %s %s. %s %s %s",
+					//	pTarget->DisplayPrefix.c_str(), //Thothie AUG2007b - display name prefix when attacking - thought it already did?
+					//	pTarget->DisplayName(),
+					//	szStats, szHitMiss, szDamage);
 
 						if (Damage.AttackHit)
 						{
