@@ -99,7 +99,7 @@ struct quickslot_t //Quickslots for items, spells
 	quickslottype_e Type;
 	uint ID;
 };
-#define MAX_QUICKSLOTS 24 //MiB MAR2012 - Increase quickslots
+#define MAX_QUICKSLOTS 36 //MiB MAR2012 - Increase quickslots
 
 #include "sharedmenu.h"
 
