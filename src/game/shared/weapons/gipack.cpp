@@ -498,27 +498,22 @@ void CGenericItem::Container_StackItems()
 						if (!FBitSet(pCur->Properties, ITEM_GROUPABLE)) //If it's groupable (Paranoia)
 							continue;
 
-						//if (pCur->iQuantity == 0)
-						//{
-						//	//PackData->ItemList.RemoveItem( pCur );
-						//	Container_RemoveItem(pCur);
-						//	pCur->RemoveFromOwner();
-						//	continue;
-						//}
-
-						pItem->iQuantity += pCur->iQuantity;
-						if (pItem->iQuantity > NUM_MAX_STACK)
+						if (pItem->iQuantity != NUM_MAX_STACK)
 						{
-							int remainder = pItem->iQuantity - NUM_MAX_STACK;
-							pCur->iQuantity = remainder;
-							pItem->iQuantity = NUM_MAX_STACK;
-						}
-						else
-						{
-							pCur->iQuantity = 0;
-							Container_RemoveItem(pCur);
-							pCur->RemoveFromOwner();
-							pCur->DelayedRemove();
+							pItem->iQuantity += pCur->iQuantity;
+							if (pItem->iQuantity > NUM_MAX_STACK)
+							{
+								int remainder = pItem->iQuantity - NUM_MAX_STACK;
+								pCur->iQuantity = remainder;
+								pItem->iQuantity = NUM_MAX_STACK;
+							}
+							else
+							{
+								pCur->iQuantity = 0;
+								Container_RemoveItem(pCur);
+								pCur->RemoveFromOwner();
+								pCur->DelayedRemove();
+							}
 						}
 
 						Container_SendItem(pItem, true);
