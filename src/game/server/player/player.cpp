@@ -2839,7 +2839,7 @@ void CBasePlayer::Spawn(void)
 			if (MSGlobals::GameType != GAMETYPE_ADVENTURE)
 				SaveString = "Challenge mode: Your character will not be saved!";
 
-			if (MSGlobals::ServerSideChar != GAMETYPE_ADVENTURE)
+			if (MSGlobals::ServerSideChar != false)
 				CharString = "Characters are stored on the server";
 
 			InfoString = PKString;
