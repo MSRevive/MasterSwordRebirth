@@ -536,11 +536,12 @@ void MSGameEnd()
 	for(int i = 1; i <= gpGlobals->maxClients; ++i)
 	{
 		CBasePlayer *pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
-		//TODO: make sure player is actually connected and in valid state (i.e. not missing inventory) - Solokiller
-		if(pPlayer)
+
+		if((pPlayer) && (pPlayer->m_CharacterState == CHARSTATE_LOADED))
 		{
 			pPlayer->SaveChar();
-			if(!MSGlobals::ServerSideChar) pPlayer->m_TimeCharLastSent = 0;
+			if(!MSGlobals::ServerSideChar) 
+				pPlayer->m_TimeCharLastSent = 0;
 		}
 	}
 	
