@@ -3,7 +3,11 @@
 	Script.h - Script file implementation
 
 */
+
 #include <ctime>
+
+extern bool bShouldDumpMSScriptFunctions;
+
 class CEventList : public mslist<LegacyScriptEvent *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:

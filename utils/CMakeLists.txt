@@ -4,7 +4,7 @@ if (MSVC)
 	set(CMAKE_SYSTEM_VERSION 10.0)
 endif()
 
-project(msr LANGUAGES C CXX)
+project(utils LANGUAGES C CXX)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 

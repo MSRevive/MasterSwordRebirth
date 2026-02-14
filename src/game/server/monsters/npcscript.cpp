@@ -20,6 +20,8 @@ void CMSMonster::Script_Setup()
 {
 	if (!m_ScriptCommands.size())
 	{
+		ALERT(at_console, "CMSMonster::Script_Setup\n");
+
 		//NPC Commands
 		m_ScriptCommands.add(scriptcmdname_t("blind"));		//Thothie MAR2008b
 		m_ScriptCommands.add(scriptcmdname_t("invisible")); //Thothie MAR2008b

@@ -31,18 +31,19 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #include "crc/crchash.h" //Wishbone MAR2016 - Our CRC function.
 #include "findentities.h"
 #include <iterator>
-//#include <unordered_map>
 
 #undef SCRIPTVAR
 #define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
 #define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
-//int CountPlayers( void );
+
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
 const char* PM_GetValue(msstringlist& Params);
 bool GetModelBounds(void* pModel, Vector Bounds[2]);
+
+bool bShouldDumpMSScriptFunctions = false;
 
 CScript::msfunchash_t CScript::m_GlobalCmdHash;	// MiB 30NOV_14  Hashed Commands for ScriptCmds.cpp
 CScript::msgetterhash_t CScript::m_GlobalGetterHash;
@@ -56,6 +57,8 @@ ulong CScript::m_gLastLightID;							//ID of last dynamic light
 
 void CScript::ScriptGetterHash_Setup()
 {
+	ALERT(at_console, "CScript::ScriptGetterHash_Setup\n");
+
 	if (m_GlobalGetterHash.empty())
 	{
 		m_GlobalGetterHash["$len"] = scriptcpp_cmdfunc_t(&CScript::ScriptGetter_Len);
