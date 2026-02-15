@@ -3604,14 +3604,17 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	//Thothie JAN2011_04 - modded to allow sending of helptip to all players
 	if( Params.size() >= 4 )
 	{
-		MSGlobals::Buffer[0] = 0;
+		std::string buffer = "";
+
 		for(int i = 0; i < Params.size() - 3; i++)
-			strncat(MSGlobals::Buffer, Params[i + 3], Params[i + 3].len());
+			buffer += Params[i+3];
+
 		if ( Params[0] != "all" )
 		{
 			CBaseEntity *pEntity = m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[0]) : NULL;
 			CBasePlayer *pPlayer = (CBasePlayer *)pEntity;
-			if ( pPlayer ) pPlayer->SendHelpMsg(Params[1], Params[2], MSGlobals::Buffer);
+			if ( pPlayer ) 
+				pPlayer->SendHelpMsg(Params[1], Params[2], buffer.c_str());
 		}
 		else
 		{
@@ -3619,7 +3622,8 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			{
 				CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 				CBasePlayer *pPlayer = (CBasePlayer *)pEntity;;
-				if ( pPlayer ) pPlayer->SendHelpMsg(Params[1], Params[2], MSGlobals::Buffer);
+				if ( pPlayer ) 
+					pPlayer->SendHelpMsg(Params[1], Params[2], buffer.c_str());
 			}
 		}
 	}

@@ -434,11 +434,11 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 		//Print to help window
 		msstring sTitle = READ_STRING();
 
-		MSGlobals::Buffer[0] = 0;
+		std::string buffer = "";
 		for (int i = 0; i < HelpParts.size(); i++)
-			strncat(MSGlobals::Buffer, HelpParts[i], HelpParts[i].len());
+			buffer += HelpParts[i];
 
-		HUD_ShowHelpWin(sTitle, MSGlobals::Buffer);
+		HUD_ShowHelpWin(sTitle, buffer.c_str());
 	}
 	else if (Type == 4)
 	{
