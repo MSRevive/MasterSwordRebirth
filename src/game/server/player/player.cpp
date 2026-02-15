@@ -6456,6 +6456,10 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	for (int i = 0; i < Data.m_Items.size(); i++)
 	{
 		CGenericItem *pItem = Data.m_Items[i].operator CGenericItem *();
+		
+		// we ignore broken items.
+		if (pItem == nullptr)
+			continue;
 
 		if (pItem->m_Location == ITEMPOS_HANDS)
 			AddItem(pItem, true, false, pItem->m_Hand);
