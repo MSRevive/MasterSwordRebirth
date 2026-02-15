@@ -67,7 +67,6 @@ int MSGlobals::DefaultGold = 10;		  //Starting gold
 msstring MSGlobals::DefaultSpawnBoxModel;
 
 IScripted *MSGlobals::GameScript = nullptr;
-char MSGlobals::Buffer[32768]; //A huge buffer for text or anything else
 int MSGlobals::ClEntities[CLPERMENT_TOTAL] = {500, 501, 502};
 int MSGlobals::gSoundPrecacheCount = 0;
 
