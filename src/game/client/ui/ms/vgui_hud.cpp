@@ -118,8 +118,9 @@ public:
 
 	void AddInfoWin(const char* Title, const char* Text);
 	void AddHelpWin(const char* Title, const char* Text);
-	void UpdateInfoWindows(mslist<CInfoWindow*>& Windows);
-	void RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx);
+	void Cleanup();
+	void UpdateInfoWindows(std::vector<CInfoWindow*>& Windows);
+	void RemoveInfoWindow(std::vector<CInfoWindow*>& Windows, int idx);
 	void PrintEvent(Color color, const char* Text);
 	void PrintSayText(Color color, const char* Text);
 	void StepInput(hudscroll_e ScrollCmd);
@@ -128,8 +129,8 @@ public:
 private:
 	std::vector<IHUD*> m_HUDElements;
 	std::vector<VGUI_EventConsole*> m_Consoles;
-	mslist<CInfoWindow*> m_InfoWindows;
-	mslist<CInfoWindow*> m_HelpWindows;
+	std::vector<CInfoWindow*> m_InfoWindows;
+	std::vector<CInfoWindow*> m_HelpWindows;
 
 	VGUI_VoteInfo* m_VoteInfo;
 	RetroHUD::VGUI_Health* m_RetroHealth;
@@ -153,7 +154,7 @@ VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); 
 CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
 {
 	setParent(pParent);
-	
+
 	m_HUDElements.push_back(m_RetroHealth = new RetroHUD::VGUI_Health(this));
 	m_HUDElements.push_back(m_Health = new PrimaryHUD::VGUI_Health(this));
 
@@ -232,6 +233,35 @@ CHUDPanel::~CHUDPanel()
 
 	m_InfoWindows.clear();
 	m_HelpWindows.clear();
+}
+
+void CHUDPanel::Cleanup()
+{
+	delete m_ID;
+	delete m_StartSayText;
+	delete m_DebugText;
+
+	for(int i = 0; i < m_HUDElements.size(); i++)
+	{
+		delete m_HUDElements[i];
+	}
+
+	for(int i = 0; i < m_Consoles.size(); i++)
+	{
+		delete m_Consoles[i];
+	}
+
+	//Remove all info windows
+	while (m_InfoWindows.size() != 0)
+		RemoveInfoWindow(m_InfoWindows, 0);
+
+	while (m_HelpWindows.size() != 0)
+		RemoveInfoWindow(m_HelpWindows, 0);
+		
+	std::vector<IHUD*>().swap(m_HUDElements);
+	std::vector<VGUI_EventConsole*>().swap(m_Consoles);
+	std::vector<CInfoWindow*>().swap(m_InfoWindows);
+	std::vector<CInfoWindow*>().swap(m_HelpWindows);
 }
 
 // Create new Info window
@@ -328,7 +358,7 @@ void CHUDPanel::Think()
 	m_StartSayText->Update();
 }
 
-void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
+void CHUDPanel::UpdateInfoWindows(std::vector<CInfoWindow*>& Windows)
 {
 	//Count backwards because the objects might delete themselves
 	for (int i = Windows.size() - 1; i >= 0; i--)
@@ -343,10 +373,10 @@ void CHUDPanel::UpdateInfoWindows(mslist<CInfoWindow*>& Windows)
 	}
 }
 
-void CHUDPanel::RemoveInfoWindow(mslist<CInfoWindow*>& Windows, int idx)
+void CHUDPanel::RemoveInfoWindow(std::vector<CInfoWindow*>& Windows, int idx)
 {
 	CInfoWindow* pInfoWin = Windows[idx];
-	Windows.erase(idx);
+	Windows.erase(Windows.begin() + idx);
 	removeChild(pInfoWin);
 	pInfoWin->Remove();
 }
@@ -362,7 +392,7 @@ void CHUDPanel::Initialize(void)
 	while (m_InfoWindows.size() != 0)
 		RemoveInfoWindow(m_InfoWindows, 0);
 
-	while (m_InfoWindows.size() != 0)
+	while (m_HelpWindows.size() != 0)
 		RemoveInfoWindow(m_HelpWindows, 0);
 
 	m_ID->NewLevel();
