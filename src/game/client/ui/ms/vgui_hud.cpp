@@ -437,7 +437,6 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 		std::string buffer = "";
 		for (int i = 0; i < HelpParts.size(); i++)
 			buffer += HelpParts[i];
-			//strncat(MSGlobals::Buffer, HelpParts[i], HelpParts[i].len());
 
 		HUD_ShowHelpWin(sTitle, buffer.c_str());
 	}

@@ -3608,7 +3608,6 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 		for(int i = 0; i < Params.size() - 3; i++)
 			buffer += Params[i+3];
-			//strncat(buffer, Params[i + 3], Params[i + 3].len());
 
 		if ( Params[0] != "all" )
 		{
