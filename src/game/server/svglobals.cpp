@@ -51,7 +51,7 @@ cvar_t msallowtimevote = {"ms_allowtimevote", "1", FCVAR_SERVER};
 cvar_t ms_reset_time = {"ms_reset_time", "10", FCVAR_SERVER};
 cvar_t ms_reset_map = {"ms_reset_map", "edana", FCVAR_SERVER};
 cvar_t ms_version = {"ms_version", __DATE__, FCVAR_EXTDLL};
-cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER};
+cvar_t ms_pklevel = {"ms_pklevel", "0", FCVAR_SERVER}; // 1 == in town only
 //cvar_t	ms_trans_req	= {"ms_trans_req","0", FCVAR_SERVER }; //Thothie JUN2007 - max players required to activate a transition (0 = all on server) - nvm, changed method - nvm, changed method
 cvar_t ms_fxlimit = {"ms_fxlimit", "0", FCVAR_SERVER};
 //cvar_t	ms_currentfx	= {"ms_currentfx","0", 0 }; //Thothie - want to make FX control total ms.dll, but can't figure how
@@ -194,10 +194,9 @@ void MSWorldSpawn()
 	MS_INFO("=== MSWorldSpawn: Starting map initialization ===");
 	
 	//Setup global variables that can't be changed during a game
-	MSGlobals::PKAllowed = ms_pklevel.value > 0 ? true : false;
+	MSGlobals::PKAllowed = ms_pklevel.value > 0.0f ? true : false;
 	//Thothie attemptitng to remove FN upload sploit (Thanx to MiB)
 	MSGlobals::CentralEnabled = CVAR_GET_FLOAT("ms_central_enabled") > 0.0f ? true : false;
-	
 	// CRITICAL: Reload AngelScript modules after level change
 	// All modules were cleared in ServerDeactivate via PrepareForLevelChange()
 	// We need to reload them now for the new map
@@ -261,8 +260,14 @@ void MSWorldSpawn()
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
 	MSGlobals::PKAllowedinTown = ms_pklevel.value > 1 ? true : false;
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") ? true : false;
+	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0.0f && !MSGlobals::CentralEnabled ? true : false;
+	MSGlobals::PKAllowedinTown = ms_pklevel.value > 1.0f ? true : false;
+
+	// sv_lan seems to be set to 1 after disconnecting from a listen server and creating a new one.
+	// engine bug maybe?
+	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") > 0.0f ? true : false;
 	MSGlobals::CanCreateCharOnMap = false;
-	MSGlobals::ServerSideChar = ms_serverchar.value ? true : false;
+	MSGlobals::ServerSideChar = ms_serverchar.value > 0.0f ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
 	
 	//Force the client to use the same client lib as the server. - Solokiller

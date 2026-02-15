@@ -1419,8 +1419,9 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	{
 		charinfo_t& Char = m_CharInfo[i];
 		CPlayer_DataBuffer gFile;
-		if (gFile.ReadFromFile(GetSaveFileName(i, this), "rb", true))
-			Char.AssignChar(i, Location, (char*)gFile.m_Buffer, gFile.GetFileSize(), this);
+		const char* saveFileName = GetSaveFileName(i, this);
+		if (gFile.ReadFromFile(saveFileName, "rb", true))
+			Char.AssignChar(i, Location, reinterpret_cast<char*>(gFile.m_Buffer), gFile.GetFileSize(), this);
 		else
 			Char.Status = CDS_NOTFOUND;
 	}
