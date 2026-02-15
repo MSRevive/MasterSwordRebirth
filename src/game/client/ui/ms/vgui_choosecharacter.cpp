@@ -690,7 +690,7 @@ void CNewCharacterPanel::Update()
 	if( MSGlobals::ServerSideChar )
 	{
 		cTemp2[0] = 0;
-		if (MSGlobals::IsLanGame) 
+		if ((MSGlobals::IsLanGame) && (MSGlobals::ServerSideChar == false)) 
 			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
 
 		if(ChooseChar_Interface::CentralServer)

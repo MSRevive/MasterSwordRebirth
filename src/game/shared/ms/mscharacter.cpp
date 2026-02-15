@@ -43,8 +43,8 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 	//Server
 	msstring FileID;
 	//if( MSGlobals::IsLanGame ) pszFileID = LanID = msstring("LAN_") + STRING(pPlayer->DisplayName) + g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "ms_id" );
-	if (MSGlobals::IsLanGame)
-		FileID = msstring("LAN_") + (const char*)g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name");
+	if ((MSGlobals::IsLanGame) && (MSGlobals::ServerSideChar == false))
+		FileID = msstring("LAN_") + reinterpret_cast<const char*>(g_engfuncs.pfnInfoKeyValue(g_engfuncs.pfnGetInfoKeyBuffer(pPlayer->edict()), "name"));
 	else
 		FileID = GETPLAYERAUTHID(pPlayer->edict());
 	msstring Prefix = FNShared::IsEnabled() ? "central_" : "";
@@ -53,7 +53,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
 	//iCharacter = pPlayer->m_CharacterNum;
 	//Print("CHAR_SAVE_DEBUG [MSCharacter]: %i vs %i\n",iCharacter+1,pPlayer->m_CharacterNum);
 
-	_snprintf(cFileName, MAX_PATH,  "%s/save/%s%s_%i.char",  EngineFunc::GetGameDir(),  Prefix.c_str(),  FileID.c_str(),  iCharacter + 1 );
+	_snprintf(cFileName, MAX_PATH,  "%s/save/%s%s_%i.char", EngineFunc::GetGameDir(), Prefix.c_str(), FileID.c_str(), iCharacter + 1);
 	ReplaceChar(cFileName, ':', '-');
 #else
 	//Client
