@@ -28,7 +28,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Modern VS versions default to C++14 anyway, so make it consistent
 # But in the future we may want so support C++20
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
@@ -93,6 +93,7 @@ add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 # TODO: charimport is quite broken
 # add_subdirectory(charimport)
 add_subdirectory(maphash)
+add_subdirectory(chardecoder)
 
 # Set Visual Studio starting project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT maphash)
