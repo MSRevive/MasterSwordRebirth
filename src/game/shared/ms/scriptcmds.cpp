@@ -3661,9 +3661,8 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 	if( Params.size() >= 4 )
 	{
 		std::string buffer = "";
-
 		for(int i = 0; i < Params.size() - 3; i++)
-			buffer += Params[i+3];
+			buffer += static_cast<const char*>(Params[i+3]);
 
 		if ( Params[0] != "all" )
 		{
