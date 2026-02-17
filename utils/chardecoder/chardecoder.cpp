@@ -8,7 +8,7 @@
 // --- Game Polyfills ---
 typedef uint8_t byte;
 typedef unsigned long ulong;
-const int MSSTRING_SIZE = 128;
+const int MSSTRING_SIZE = 255;
 
 struct Vector {
     float x, y, z;
