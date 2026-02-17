@@ -26,7 +26,7 @@
 #define NUM_MAX_ITEMS 100 //Thothie APR2011_28
 
 // was 1500, but there shouldn't be any issues with increasing.
-#define NUM_MAX_STACK 9999 //stack is stored as either a unsigned short, so that's the actual max it can be.
+#define NUM_MAX_STACK 1500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 
 enum sbar_data
 {
