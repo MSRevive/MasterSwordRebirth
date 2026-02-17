@@ -92,6 +92,46 @@ public:
     }
 };
 
+static const char* GetStatName(int stat) {
+    switch(stat)
+    {
+    // Stats
+    case 0:
+        return "Strength";
+    case 1:
+        return "Agility";
+    case 2:
+        return "Concentration";
+    case 3:
+        return "Awareness";
+    case 4:
+        return "Fitness";
+    case 5:
+        return "Wisdom";
+    // Skills
+    case 6:
+        return "Swordsmanship";
+    case 7:
+        return "Martial Arts";
+    case 8:
+        return "Small Arms";
+    case 9:
+        return "Axe Handling";
+    case 10:
+        return "Blunt Arms";
+    case 11:
+        return "Archery";
+    case 12:
+        return "Spell Casting";
+    case 13:
+        return "Parry";
+    case 14:
+        return "Pole Arms";
+    default:
+        return "UNKNOWN";
+    }
+}
+
 // Forward declaration for recursive item reading
 void PrintItem(CPlayer_DataReader& file, byte DataID, std::ofstream& out, std::string indent = "\t");
 
@@ -154,7 +194,7 @@ int main(int argc, char* argv[]) {
                 for (int i = 0; i < stats; i++) {
                     byte subStats = 0;
                     file.ReadByte(subStats);
-                    out << "\tStat " << i << " (" << (int)subStats << " SubStats):\n";
+                    out << "\tStat " << i << ": " << GetStatName(i) << " (" << (int)subStats << " SubStats):\n";
                     for (int r = 0; r < subStats; r++) {
                         short val = 0;
                         int exp = 0;
