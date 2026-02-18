@@ -647,70 +647,74 @@ VGUI_Container::~VGUI_Container( )
 	delete m_pScrollPanel;*/
 }
 
-VGUI_ItemButton *VGUI_Container::AddItem( containeritem_t &Item )
+VGUI_ItemButton* VGUI_Container::AddItem(containeritem_t& Item)
 {
-	if( m_ItemButtonTotal >= m_InitializedItemButtons )
+	if (m_ItemButtonTotal >= m_InitializedItemButtons)
 	{
-		//Initialize the item button
-		m_ItemButtons.add( new VGUI_ItemButton( 0, 0, m_CallbackPanel, m_pScrollPanel ) ); // // MiB FEB2015_07 - Set position in UpdatePosition
-		m_AlphabetizedItemButtons.add( m_ItemButtons[m_ItemButtonTotal] );
+		m_ItemButtons.add(new VGUI_ItemButton(0, 0, m_CallbackPanel, m_pScrollPanel));
+		m_AlphabetizedItemButtons.add(m_ItemButtons[m_ItemButtonTotal]);
 		m_InitializedItemButtons++;
 	}
 
-	VGUI_ItemButton &NewItemButton = *m_ItemButtons[m_ItemButtonTotal];
-	NewItemButton.SetItem( Item );
+	VGUI_ItemButton& NewItemButton = *m_ItemButtons[m_ItemButtonTotal];
+	NewItemButton.SetItem(Item);
 
-	// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	int	iAlphaLoc = 0;
-	if (!m_ItemButtonTotal)
-	{
-		m_AlphabetizedItemButtons[0] = &NewItemButton;
-	}
-	else
-	{
-		// Find the location of this item
-		msstring sNewItemName = Item.getFullName();
+	int iAlphaLoc = m_ItemButtonTotal;
 
-		// Walk the list backwards
-		for (int i = m_ItemButtonTotal - 1; i >= 0; --i)
+	if (IsAlphabetical())
+	{
+		if (!m_ItemButtonTotal)
 		{
-			msstring sCurItemName = m_AlphabetizedItemButtons[i]->m_Data.getFullName();
+			m_AlphabetizedItemButtons[0] = &NewItemButton;
+			iAlphaLoc = 0;
+		}
+		else
+		{
+			msstring sNewItemName = Item.getFullName();
 
-			// If i-button's name < new name, add at i+1 and break
-			if (_stricmp(sCurItemName, sNewItemName) <= 0)
+			for (int i = m_ItemButtonTotal - 1; i >= 0; --i)
 			{
-				iAlphaLoc = i+1;
-				m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
-				break;
-			}
-			// Else move i-button to i+1 and continue
-			else
-			{
-				m_AlphabetizedItemButtons[i+1] = m_AlphabetizedItemButtons[i];
-				// That was the last one, set to the beginning
-				if ( i == 0 )
+				msstring sCurItemName = m_AlphabetizedItemButtons[i]->m_Data.getFullName();
+
+				if (_stricmp(sCurItemName, sNewItemName) <= 0)
 				{
-					m_AlphabetizedItemButtons[0] = &NewItemButton;
+					iAlphaLoc = i + 1;
+					m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
 					break;
+				}
+				else
+				{
+					m_AlphabetizedItemButtons[i + 1] = m_AlphabetizedItemButtons[i];
+					if (i == 0)
+					{
+						iAlphaLoc = 0;
+						m_AlphabetizedItemButtons[0] = &NewItemButton;
+						break;
+					}
 				}
 			}
 		}
 	}
+	else
+	{
+		m_AlphabetizedItemButtons[m_ItemButtonTotal] = &NewItemButton;
+	}
 
 	m_NoItems->setVisible(false);
 	m_ItemButtonTotal++;
+
 	if (IsAlphabetical())
 	{
-		// Need to update everything at the new location and after
-		for(int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
+		for (int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
 		{
 			UpdatePosition(i);
 		}
 	}
 	else
 	{
-		UpdatePosition(m_ItemButtonTotal-1);
+		UpdatePosition(m_ItemButtonTotal - 1);
 	}
+
 	m_pScrollPanel->validate();
 
 	return &NewItemButton;
