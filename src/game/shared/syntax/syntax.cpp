@@ -1,30 +1,40 @@
 #include "inc_weapondefs.h"
 
-#define MAX_SIZE 4096
-char ReturnString[MAX_SIZE];
+static thread_local char ReturnString[255];
 
-const char *SPEECH::ItemName(CGenericItem *pItem, bool fCapital)
+// TODO: switch to std::strings and std::format on dev branch with c++20
+const char* SPEECH::ItemName(CGenericItem* pItem, bool fCapital)
 {
-	bool bNotUnique = (pItem->iQuantity > 1);
-	char pchQuantity[32]; pchQuantity[0] = 0;
-	const char *pchDisplayOther = pItem->DisplayPrefix.c_str();
+	const char* pchDisplayOther = pItem->DisplayPrefix.c_str();
+
 	if (pItem->iQuantity > 1)
-		_snprintf(pchQuantity, sizeof(pchQuantity), "%i", pItem->iQuantity);
+	{
+		_snprintf(ReturnString, sizeof(ReturnString), "%i %s%s", pItem->iQuantity, pItem->DisplayName(), "s");
+	}
 	else if (pchDisplayOther && pchDisplayOther[0])
-		_snprintf(pchQuantity, sizeof(pchQuantity), "%s", pchDisplayOther);
-	_snprintf(ReturnString, MAX_SIZE, "%s %s%s", pchQuantity, pItem->DisplayName(), (bNotUnique ? "s" : ""));
+	{
+		_snprintf(ReturnString, sizeof(ReturnString), "%s %s", pchDisplayOther, pItem->DisplayName());
+	}
+	else
+	{
+		return pItem->DisplayName();
+	}
+
 	if (fCapital)
 		ReturnString[0] = toupper(ReturnString[0]);
-	return &ReturnString[0];
+
+	return ReturnString;
 }
 
+// TODO: switch to std::strings and std::format on dev branch with c++20
 const char *SPEECH::NPCName(CMSMonster *pMonster, bool fCapital)
 {
-	msstring Prefix = pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix + " ") : msstring("");
-	_snprintf(ReturnString, MAX_SIZE, "%s%s", Prefix.c_str(), pMonster->DisplayName());
+	msstring Prefix = pMonster->DisplayPrefix.len() ? (pMonster->DisplayPrefix + " ") : ("");
+	_snprintf(ReturnString, sizeof(ReturnString), "%s%s", Prefix.c_str(), pMonster->DisplayName());
 	if (fCapital)
 		ReturnString[0] = toupper(ReturnString[0]);
-	return &ReturnString[0];
+
+	return ReturnString;
 }
 
 const char *SPEECH::HandName(int iHand, bool fCapital)
