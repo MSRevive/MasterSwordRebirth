@@ -178,7 +178,7 @@ VGUI_InventoryPanel::VGUI_InventoryPanel(VGUI_ItemCallbackPanel *pCallbackPanel,
 VGUI_Inv_GearItem *VGUI_InventoryPanel::AddGearItem(gearitem_t &GearItem)
 {
 	if (GearItemButtonTotal >= MAX_CONTAINERS)
-		return NULL;
+		return nullptr;
 
 	//Add a new gear item
 
@@ -255,7 +255,7 @@ CTFScrollPanel* VGUI_InventoryPanel::GetScrollForStepInput()
 		}
 	}
 
-	if (static_cast<int>(GearItemButtons.size()) > m_Selected && GearItemButtons[ m_Selected ]->m_ItemContainer)
+	if (static_cast<int>(GearItemButtons.size()) > m_Selected && GearItemButtons[m_Selected]->m_ItemContainer)
 		return GearItemButtons[m_Selected]->m_ItemContainer->GetScrollForStepInput();
 	return nullptr;
 }
