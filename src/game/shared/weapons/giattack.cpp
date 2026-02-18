@@ -789,10 +789,10 @@ void CGenericItem::StrikeLand()
 		flDamage *= 0.5; //this might be working
 
 	//Print( "In damage: %f\nLast charged: %f\n", flDamage, m_LastChargedAmt );
-	if (m_LastChargedAmt > 0 && m_LastChargedAmt < 1)
+	if (m_LastChargedAmt < 1)
 	{
-		Print("Out damage: %f\n", flDamage *= m_LastChargedAmt);
-		flDamage *= m_LastChargedAmt;
+		flDamage *= (m_LastChargedAmt + 1);
+		//Print("Out damage: %f\nCharge Multiplier: %f\n", flDamage, (m_LastChargedAmt+1));
 	}
 
 	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
