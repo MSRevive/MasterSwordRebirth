@@ -432,8 +432,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	for (int g = 0; g < gearSize; g++)
 	{
 		CGenericItem *pGearItem = player.Gear[g];
-		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) &&
-			pGearItem->m_Location <= ITEMPOS_HANDS)
+		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && pGearItem->m_Location <= ITEMPOS_HANDS)
 			continue;
 
 		if (FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
@@ -443,8 +442,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	for (int g = 0; g < gearSize; g++)
 	{
 		CGenericItem *pGearItem = player.Gear[g];
-		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) &&
-			pGearItem->m_Location <= ITEMPOS_HANDS)
+		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && pGearItem->m_Location <= ITEMPOS_HANDS)
 			continue;
 
 		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
