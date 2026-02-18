@@ -629,6 +629,7 @@ VGUI_Container::VGUI_Container( int x, int y, int w, int h, VGUI_ItemCallbackPan
 
 	m_pScrollPanel->validate( );
 }
+
 VGUI_Container::~VGUI_Container( )
 {
 	/*PurgeButtons( );
@@ -639,10 +640,9 @@ VGUI_Container::~VGUI_Container( )
 	removeChild( m_pScrollPanel );
 	delete m_pScrollPanel;*/
 }
+
 VGUI_ItemButton *VGUI_Container::AddItem( containeritem_t &Item )
 {
-//	if( m_ItemButtonTotal >= MAX_CONTAINER_ITEMS )
-//		return NULL;
 	if( m_ItemButtonTotal >= m_InitializedItemButtons )
 	{
 		//Initialize the item button

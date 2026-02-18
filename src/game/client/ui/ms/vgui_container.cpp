@@ -412,59 +412,60 @@ void VGUI_ContainerPanel::Update()
 void VGUI_ContainerPanel::AddInventoryItems()
 {
 	gearitem_t GearItem;
-	mslist<CGenericItem *> Containers;	  //Sort my inventory into Containers and non-containers
-	mslist<CGenericItem *> NonContainers; //The containers get listed first, then non-containers
-	for (int g = 0; g < player.Gear.size() + 1; g++)
-	{
-		if (g > 0)
-		{
-			//Add container
-			//Update:  Now display all items, so the player can remove them from here too
-			CGenericItem *pGearItem = player.Gear[g - 1];
-			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && //Display everything except non-packs that are held
-				pGearItem->m_Location <= ITEMPOS_HANDS)
-				continue;
 
-			if (FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
-				Containers.add(pGearItem);
-			else
-				NonContainers.add(pGearItem);
-		}
-		else
+	GearItem.Name = Localized("#PLAYER_HANDS");
+	GearItem.ID = 0;
+	GearItem.IsContainer = true;
+	VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
+	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+	{
+		if (player.Hand(i))
 		{
-			GearItem.Name = Localized("#PLAYER_HANDS");
-			GearItem.ID = 0;
-			GearItem.IsContainer = true;
-			VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
-			for (int i = 0; i < MAX_PLAYER_HANDS; i++)
-			{
-				if (player.Hand(i))
-				{
-					containeritem_t vNewItem = containeritem_t(player.Hand(i));
-					pGearItemButton->m_ItemContainer->AddItem(vNewItem);
-				}
-			}
+			pGearItemButton->m_ItemContainer->AddItem(containeritem_t(player.Hand(i)));
 		}
 	}
 
-	for (int i = 0; i < NonContainers.size(); i++) //Add all the non-containers (armor, bows, etc.) to the end of
-		Containers.add(NonContainers[i]);		   //the container list
+	const int gearSize = player.Gear.size();
+	std::vector<CGenericItem *> sorted;
+	sorted.reserve(gearSize);
 
-	for (int i = 0; i < Containers.size(); i++)
+	for (int g = 0; g < gearSize; g++)
 	{
-		CGenericItem *pGearItem = Containers[i];
+		CGenericItem *pGearItem = player.Gear[g];
+		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) &&
+			pGearItem->m_Location <= ITEMPOS_HANDS)
+			continue;
+
+		if (FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
+			sorted.push_back(pGearItem);
+	}
+
+	for (int g = 0; g < gearSize; g++)
+	{
+		CGenericItem *pGearItem = player.Gear[g];
+		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) &&
+			pGearItem->m_Location <= ITEMPOS_HANDS)
+			continue;
+
+		if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))
+			sorted.push_back(pGearItem);
+	}
+
+	for (int i = 0; i < sorted.size(); i++)
+	{
+		CGenericItem *pGearItem = sorted[i];
+		const auto props = pGearItem->MSProperties(); // cache property lookup
 		GearItem.Name = pGearItem->DisplayName();
 		GearItem.ID = pGearItem->m_iId;
-		GearItem.IsContainer = FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) ? true : false;
-		VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
+		GearItem.IsContainer = FBitSet(props, ITEM_CONTAINER) ? true : false;
+		pGearItemButton = m_GearPanel->AddGearItem(GearItem);
 
-		//Add items from container
 		if (GearItem.IsContainer)
 		{
-			for (int i = 0; i < pGearItem->Container_ItemCount(); i++)
+			const int itemCount = pGearItem->Container_ItemCount();
+			for (int j = 0; j < itemCount; j++)
 			{
-				containeritem_t vNewItem = containeritem_t(pGearItem->Container_GetItem(i));
-				pGearItemButton->m_ItemContainer->AddItem(vNewItem);
+				pGearItemButton->m_ItemContainer->AddItem(containeritem_t(pGearItem->Container_GetItem(j)));
 			}
 		}
 	}
