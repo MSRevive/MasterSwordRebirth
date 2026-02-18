@@ -78,7 +78,7 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_lildude", "1", FCVAR_ARCHIVE);						// Thothie MAR2007a - Hides the 3d Guy if set 0
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)
 	CVAR_CREATE("ms_alpha_inventory", "0", FCVAR_ARCHIVE); // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	CVAR_CREATE("ms_doubleclicktime", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE("ms_doubleclicktime", "0.5", FCVAR_ARCHIVE);
 	CVAR_CREATE("ms_scrollamount", "30", FCVAR_ARCHIVE);
 
 	//debug outputs ; remove later - always add where they are set! This way let's us get data after something goes wrong out of a string

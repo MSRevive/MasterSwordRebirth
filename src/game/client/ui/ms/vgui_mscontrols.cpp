@@ -283,6 +283,7 @@ void containeritem_t::init( CGenericItem *pItem )
 	Quality = pItem->Quality;
 	Value = pItem->m_Value;
 	Desc = pItem->DisplayDesc;
+	bForceFull = false;
 	pOrig = pItem;
 	Weight = pItem->Weight();
 }
