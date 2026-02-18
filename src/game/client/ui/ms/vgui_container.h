@@ -110,12 +110,12 @@ protected:
 	VGUI_OrderItemPanel *mpOrderItemPanel;
 
 public:
-
 	VGUI_ContainerPanel();
 	virtual bool HasSelectedItems();
 	virtual void GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems); //in, out
 	virtual void UnSelectAllItems();
 	virtual void AddInventoryItems();
+	virtual void ItemRightClicked(void *pData);
 
 	virtual void Open(void);
 	virtual void Close(void);

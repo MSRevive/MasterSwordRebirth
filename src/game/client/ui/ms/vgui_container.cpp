@@ -481,6 +481,22 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	enddbg;
 }
 
+void VGUI_ContainerPanel::ItemRightClicked(void *pData) 
+{
+	VGUI_ItemButton *pButton = static_cast<VGUI_ItemButton*>(pData);
+	containeritem_t vItem = pButton->m_Data;
+
+	if (FBitSet(vItem.Properties, ITEM_CONTAINER))
+	{
+		// Remove then add so it's on top
+		removeChild(mpOrderItemPanel);
+		addChild(mpOrderItemPanel);
+
+		mpOrderItemPanel->ShowForButton(pButton);
+		return;
+	}
+}
+
 // MiB FEB2015_07 - Inventory type buttons
 class InvTypeButtonSignal : public ActionSignal
 {
