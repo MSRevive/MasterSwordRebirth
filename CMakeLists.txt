@@ -50,9 +50,10 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
 	set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
 endif()
 
+option(INSTALL_DIR "Directory to copy built binaries to" "")
 if(MSVC)
-	set(VS_DEBUG_WORK_DIR "" CACHE PATH "Set working directory for VS Debug. This should be the directory where your MSRebirth test server is.")
-	set(VS_DEBUG_CMD_ARGS "" CACHE STRING "The arguements to start the program with.")
+	option(VS_DEBUG_WORK_DIR "Set working directory for VS Debug. This should be the directory where your MSRebirth test server is." "")
+	option(VS_DEBUG_CMD_ARGS "The arguements to start the program with." "")
 endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
