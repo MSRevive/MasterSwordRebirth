@@ -346,6 +346,8 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 // Creation
 VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, ScreenWidth, ScreenHeight), VGUI_ItemCallbackPanel()
 {
+	addChild(mpOrderItemPanel = new VGUI_OrderItemPanel(this));
+
 	COLOR Color_TitleText = COLOR(255, 100, 100, 0),
 		  Color_SubtitleText = COLOR(160, 160, 160, 0),
 		  Color_GoldText = COLOR(255, 255, 0, 0),
@@ -426,8 +428,9 @@ void VGUI_ContainerPanel::AddInventoryItems()
 			//Update:  Now display all items, so the player can remove them from here too
 			dbg("Add container");
 			CGenericItem *pGearItem = player.Gear[g - 1];
-			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && //Display everything except non-packs that are held
-				pGearItem->m_Location <= ITEMPOS_HANDS)
+
+			//Display everything except non-packs that are held
+			if (!FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER) && pGearItem->m_Location <= ITEMPOS_HANDS)
 				continue;
 
 			if (FBitSet(pGearItem->MSProperties(), ITEM_CONTAINER))

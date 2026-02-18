@@ -3,6 +3,7 @@
 
 #include "sharedutil.h"
 #include "vgui_mscontrols.h"
+#include "vgui_orderitempanel.h"
 
 #define CLASSMENU_BUTTON_SPACER_X XRES(6)
 #define CLASSMENU_BUTTON_SPACER_Y ((LABEL_ITEMNAME_SIZE_Y + LABEL_ITEM_SPACER_Y) * STORE_INFO_LABELS + YRES(6))
@@ -106,8 +107,10 @@ protected:
 	VGUI_ItemInfoPanel *m_InfoPanel;
 	MSButton *m_ActButton;
 	bool m_AllowUpdate;
+	VGUI_OrderItemPanel *mpOrderItemPanel;
 
 public:
+
 	VGUI_ContainerPanel();
 	virtual bool HasSelectedItems();
 	virtual void GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems); //in, out

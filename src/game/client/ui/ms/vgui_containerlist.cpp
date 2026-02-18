@@ -230,10 +230,20 @@ void CContainerPanel::ItemRightClicked(void *pData)
 	// because... Okay, I don't have a good reason,
 	// just seems wrong.
 	GetSelectedItems(vSelectedItems);
-	if (vSelectedItems.size() > 1 || (  vSelectedItems.size() == 1 && vSelectedItems[0] != pButton))
+	if (vSelectedItems.size() > 1 || (vSelectedItems.size() == 1 && vSelectedItems[0] != pButton))
 	{
 		return;
 	}
+
+	// if (FBitSet(vItem.Properties, ITEM_CONTAINER))
+	// {
+	// 	// Remove then add so it's on top
+	// 	removeChild(mpMoveItemPanel);
+	// 	addChild(mpMoveItemPanel);
+
+	// 	mpMoveItemPanel->ShowForButton(pButton);
+	// 	return;
+	// }
 
 	// Must be stackable
 	if (!FBitSet(vItem.Properties,ITEM_GROUPABLE)) 
