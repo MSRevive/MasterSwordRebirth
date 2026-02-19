@@ -39,7 +39,7 @@ void CRequestManager::Init()
 	}
 }
 
-void CRequestManager::Think(bool skipCallback)
+void CRequestManager::Think(bool onShutdown)
 {
 	if (!m_bLoaded || !m_pMultiHandle)
 		return;
@@ -61,6 +61,21 @@ void CRequestManager::Think(bool skipCallback)
 				m_vRequests.erase(m_vRequests.begin() + i);
 			}
 		}
+
+		// If onShutdown is set and the request has been executed, just discard it.
+		// this is to finish processing all requests 
+		if (onShutdown && (req->m_iRequestState == HTTPRequest::RequestState::EXECUTED))
+		{
+			// Need to remove from multi handle before deleting — but OnMultiComplete
+			// may not have fired yet. Force-remove it.
+			// Note: PrepareForMulti stores the CURL* inside the HTTPRequest, and
+			// OnMultiComplete cleans it up. If we're discarding early we must do it here.
+			// We can't easily get the easy handle back without adding an accessor,
+			// so we just delete the request (destructor cleans up the easy handle)
+			// and rely on curl_multi_remove_handle being tolerant of already-removed handles.
+			delete req;
+			m_vRequests.erase(m_vRequests.begin() + i);
+		}
 	}
 
 	curl_multi_perform(m_pMultiHandle, &m_iRunningTransfers);
@@ -76,20 +91,6 @@ void CRequestManager::Think(bool skipCallback)
 			delete req;
 			m_vRequests.erase(m_vRequests.begin() + i);
 			continue;
-		}
-
-		// If skipCallback is set and the request has been executed, just discard it.
-		if ((req->m_bNoCallback || skipCallback) && (req->m_iRequestState == HTTPRequest::RequestState::EXECUTED))
-		{
-			// Need to remove from multi handle before deleting — but OnMultiComplete
-			// may not have fired yet. Force-remove it.
-			// Note: PrepareForMulti stores the CURL* inside the HTTPRequest, and
-			// OnMultiComplete cleans it up. If we're discarding early we must do it here.
-			// We can't easily get the easy handle back without adding an accessor,
-			// so we just delete the request (destructor cleans up the easy handle)
-			// and rely on curl_multi_remove_handle being tolerant of already-removed handles.
-			delete req;
-			m_vRequests.erase(m_vRequests.begin() + i);
 		}
 	}
 }
