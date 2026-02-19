@@ -7,6 +7,7 @@
 #include "titles.h"
 #include "scriptedeffects.h"
 #include "mslogger.h"
+#include "groupfile.h"
 #ifndef VALVE_DLL
 #include "hud.h"
 #include "cl_util.h"
@@ -75,6 +76,8 @@ int MSGlobals::AllMusicMode = 0;
 
 msstringlist vote_t::VotesTypes;		//All The vote types
 msstringlist vote_t::VotesTypesAllowed; //All The vote types allowed
+
+CGameGroupFile g_ScriptPack;
 
 //The client calls this once, on DLL load
 //The server calls this every map change, at CWorld::Precache

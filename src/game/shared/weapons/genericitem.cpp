@@ -376,13 +376,15 @@ void CGenericItemMgr::GenericItemPrecache(void)
 #endif
 
 		//If Public build or /scripts/items.txt failed in the dev build, try /scripts.pak
-		CGameGroupFile GroupFile;
-		GroupFile.Open("scripts.pak");
+		if (!g_ScriptPack.IsOpen())
+		{
+			g_ScriptPack.Open("scripts.pak");
+		}
 		ulong FileSize;
-		if (GroupFile.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
+		if (g_ScriptPack.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
 		{
 			pStringPtr = msnew(byte[FileSize + 1]);
-			GroupFile.ReadEntry(FILE_ITEMLIST, (byte*)pStringPtr, FileSize);
+			g_ScriptPack.ReadEntry(FILE_ITEMLIST, (byte*)pStringPtr, FileSize);
 			pStringPtr[FileSize] = 0;
 			//Set global variable: scripts loaded from library
 			g_MSScriptInfo = &g_MSScriptTypes[MS_SCRIPT_LIBRARY];
