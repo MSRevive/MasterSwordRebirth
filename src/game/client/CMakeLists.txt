@@ -403,7 +403,7 @@ if(INSTALL_DIR)
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:client> "${INSTALL_DIR}/cl_dlls/"
 		COMMENT "Copying client to ${INSTALL_DIR}/cl_dlls")
 
-	if(MSVC)
+	if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
 		add_custom_command(TARGET client POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:client> "${INSTALL_DIR}/cl_dlls/")
 	endif()
