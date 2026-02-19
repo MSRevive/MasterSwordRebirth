@@ -1,6 +1,6 @@
-//
-//  This should only be included by vgui_HUD.cpp
-//
+// doesn't matter if it SHOULD be only included by vgui_hud.cpp, 
+// should still have header guard.
+#pragma once
 
 class EventConsoleText : public TextPanel
 {
@@ -22,27 +22,10 @@ public:
 		ConsolePrint(m_Text + "\n");
 	}
 
-	void CopyLine( EventConsoleText *pNewTextLine )
-	{
-		setText( pNewTextLine->m_Color, pNewTextLine->m_Text );
-		m_TextWidth = pNewTextLine->m_TextWidth;
-		m_SpansFromPrevLine = pNewTextLine->m_SpansFromPrevLine;
-	}
-
-	void Archive( )
-	{
-		if( m_Archived )
-			return;
-
-		ConsolePrint( m_Text + "\n" );
-		m_Archived = true;
-	}
-
 	msstring m_Text;
 	Color m_Color;
 	int m_TextWidth;
-	bool m_SpansFromPrevLine,		//The text has a carriage return or is just so long it goes to the next line
-		 m_Archived;				//The text has been logged to console
+	bool m_SpansFromPrevLine;
 	static int LineHeight;
 };
 int EventConsoleText::LineHeight = 0;
@@ -51,7 +34,7 @@ class VGUI_EventConsole : public Panel
 {
 public:
 
-	#define EVENTCON_LINE_SIZE_Y EventConsoleText::LineHeight//YRES(10)
+	#define EVENTCON_LINE_SIZE_Y EventConsoleText::LineHeight
 	#define EVENTCON_MAXLINES 128
 
 	#define EVENTCON_PREF_VISIBLELINES					m_VisLines->value
@@ -66,7 +49,18 @@ public:
 		const char* BGTrans;
 		const char* Width;
 	};
-	
+
+	int LogicalToPhysical( int logical ) const
+	{
+		int MaxLines = V_min((int)EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
+		return (m_Head + logical) % MaxLines;
+	}
+
+	EventConsoleText* GetLine( int logical ) const
+	{
+		return m_Line[ LogicalToPhysical(logical) ];
+	}
+
 	VGUI_EventConsole( Panel *pParent, int x, int y, int w, int h, prefs_t &Prefs, bool DynamicWidth = false, Font *TextFont = NULL ) : Panel( x, y, w, h )
 	{
 		setParent( pParent );
@@ -75,6 +69,7 @@ public:
 		m_ActiveLine = 0;
 		m_ShrinkTime = 0;
 		m_VisibleLines = 0;
+		m_Head = 0;
 		m_StartY = y;
 		m_VisLines = gEngfuncs.pfnGetCvarPointer( Prefs.VisLines );
 		m_MaxLines = gEngfuncs.pfnGetCvarPointer( Prefs.MaxLines );
@@ -85,7 +80,6 @@ public:
 
 		setSize( GetWidth(), EVENTCON_LINE_SIZE_Y * m_VisibleLines );
 
-		// Create the Scroll panel
 		m_ScrollPanel = new CTFScrollPanel( 0, 0, getWide(), EVENTCON_MAXLINES * EVENTCON_LINE_SIZE_Y );
 		m_ScrollPanel->setParent( this );
 		m_ScrollPanel->setScrollBarAutoVisible(false, true);
@@ -95,7 +89,6 @@ public:
 		m_ScrollBarWidth = m_ScrollPanel->getVerticalScrollBar()->getWide();
 		int ScrollClientWidth = m_ScrollPanel->getWide() - m_ScrollBarWidth;
 
-		//Create the Text lines
 		for (int i = 0; i < EVENTCON_PREF_MAXLINES; i++) 
 		{
 			m_Line[i] = new EventConsoleText( 0, 0, ScrollClientWidth, EVENTCON_LINE_SIZE_Y, NULL );
@@ -104,7 +97,6 @@ public:
 		}
 
 		Resize( );
-
 	}
 
 	void Print( Color color, const char* Text )
@@ -117,31 +109,40 @@ public:
 		if (!Text || !Text[0])
 			return;
 
-		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES); // Max amount of text lines to keep in the history
-		int iNewLine = V_min(m_TotalLines, MaxLines-1);
+		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
 
-		//If the active line was the last line, then make this new line the active line
-		if( m_ActiveLine >= (iNewLine-1) )
+		if( m_TotalLines >= MaxLines )
+		{
+			m_Head = (m_Head + 1) % MaxLines;
+		}
+		else
+		{
+			m_TotalLines++;
+		}
+
+		// The newest line is always at logical index (m_TotalLines - 1)
+		int iNewLine = m_TotalLines - 1;
+
+		// If the active line was tracking the bottom, keep it there
+		if( m_ActiveLine >= (iNewLine - 1) )
 			m_ActiveLine = iNewLine;
 
-		for( int i = 0; i <= iNewLine; i++ )
+		// Reposition all active lines in the scroll panel
+		// (VGUI needs the panels laid out top-to-bottom by logical order)
+		for( int i = 0; i < m_TotalLines; i++ )
 		{
-			if( (m_TotalLines >= MaxLines) && i < iNewLine )		//We've run out of lines.  Move each line up to the previous line
-				m_Line[i]->CopyLine( m_Line[i+1] );
-
-			m_Line[i]->setParent( m_ScrollPanel->getClient() );
-			m_Line[i]->setPos( 0, EVENTCON_LINE_SIZE_Y * i );
-			m_Line[i]->setSize( m_Line[i]->getWide(), EVENTCON_LINE_SIZE_Y );
+			EventConsoleText *line = GetLine(i);
+			line->setParent( m_ScrollPanel->getClient() );
+			line->setPos( 0, EVENTCON_LINE_SIZE_Y * i );
+			line->setSize( line->getWide(), EVENTCON_LINE_SIZE_Y );
 		}
-		
-		EventConsoleText &NewLine = *m_Line[iNewLine];
 
-		//Make the window grow... up to the maximum visible lines
+		EventConsoleText &NewLine = *GetLine(iNewLine);
+
 		if( m_VisibleLines < EVENTCON_PREF_VISIBLELINES )
 			m_VisibleLines++;
 
-		m_TotalLines = V_min( m_TotalLines+1, MaxLines );			//Increment the total number of lines... up to the maximum kept in history
-		m_ShrinkTime = 0;											//Reset shrinktime
+		m_ShrinkTime = 0;
 		NewLine.m_SpansFromPrevLine = WrappedFromLastLine;
 		
 		const char* ThisLineText = Text;
@@ -151,49 +152,81 @@ public:
 		int w, h;
 		int MaxWidth = NewLine.getWide();
 		int MaxHeight = EVENTCON_LINE_SIZE_Y;
-		NewLine.getTextImage()->getFont()->getTextSize( ThisLineText, w, h ); //Test the text to see if it exceeds the boundaries
+		NewLine.getTextImage()->getFont()->getTextSize( ThisLineText, w, h );
+
 		if( w > MaxWidth || h > MaxHeight )
 		{
-			//Line is too long.  
-			//Wrap it at the last space before it gets too long,
-			//or if no spaces, wrap it at the last character before it gets too long
+			int TextLen = (int)strlen(Text);
 			int WrapPos = -1;
 			int WrapLength = -1;
 			bool SkipChar = false;
-			for (int c = 0; c < strlen(Text); c++) 
+
+			// Binary search for approximate overflow point
+			int lo = 0, hi = TextLen;
+			while( lo < hi )
 			{
-				strncpy(ctemp, Text, c+1);
-				ctemp[c+1] = 0;
+				int mid = (lo + hi) / 2;
+				strncpy(ctemp, Text, mid + 1);
+				ctemp[mid + 1] = 0;
 				int testw, testh;
 				NewLine.getTextImage()->getFont()->getTextSize( ctemp, testw, testh );
 				if( testw > MaxWidth || testh > MaxHeight )
+					hi = mid;
+				else
+					lo = mid + 1;
+			}
+
+			int lastSpacePos = -1;
+			int widthAtLastSpace = 0;
+			int lastGoodWidth = 0;
+			int scanEnd = V_min(lo, TextLen - 1);
+
+			for( int c = 0; c <= scanEnd; c++ )
+			{
+				if( Text[c] == '\n' )
 				{
-					if( Text[c] == '\n' ) 
+					WrapPos = c;
+					SkipChar = true;
+					w = lastGoodWidth;
+					break;
+				}
+				if( Text[c] == ' ' )
+				{
+					lastSpacePos = c;
+					strncpy(ctemp, Text, c + 1);
+					ctemp[c + 1] = 0;
+					int sw, sh;
+					NewLine.getTextImage()->getFont()->getTextSize( ctemp, sw, sh );
+					widthAtLastSpace = sw;
+				}
+
+				if( c == lo )
+				{
+					if( lastSpacePos >= 0 )
 					{
-						WrapPos = c; 
-						SkipChar = true; 
-					} //Skip over the carriage return, so I don't try to print it to the next line
-					else if( WrapPos < 0 ) 
-						WrapPos = c;						//Wrapped by line too long, but no spaces were found.  Use the last char
-					else 
-						w = WrapLength;									//Wrapped by line too long and a space was found.  My width only goes up to the space
+						WrapPos = lastSpacePos;
+						SkipChar = true;
+						w = widthAtLastSpace;
+					}
+					else
+					{
+						WrapPos = c;
+						SkipChar = false;
+					}
 					break;
 				}
 
-				if( Text[c] == ' ' ) 
-				{
-					WrapPos = c; 
-					SkipChar = true; 
-					WrapLength = w; 
-				} //Use this space as the breaking point, but skip over the space
-				else 
-					w = testw;
+				strncpy(ctemp, Text, c + 1);
+				ctemp[c + 1] = 0;
+				int tw, th;
+				NewLine.getTextImage()->getFont()->getTextSize( ctemp, tw, th );
+				lastGoodWidth = tw;
 			}
 
 			if( WrapPos > 0 )
 			{
-				int WrapEnd   = WrapPos,						//WrapEnd doesn't count the last character.  That's the char that put us over the limit
-					WrapStart = WrapPos + (SkipChar ? 1 : 0);	//Skip the breaking character if Skipchar == true (carriage return or space)
+				int WrapEnd   = WrapPos;
+				int WrapStart = WrapPos + (SkipChar ? 1 : 0);
 				strncpy( ctemp, Text, WrapEnd ); ctemp[WrapEnd] = 0;
 				ThisLineText = ctemp;
 				NextLineText = &(((char *)Text)[WrapStart]);
@@ -227,40 +260,34 @@ public:
 			w = 0;
  			for (int i = 0; i < m_VisibleLines; i++) 
 			{
-				int idx = m_ActiveLine - i;
-				int linewidth = V_min( m_Line[idx]->m_TextWidth, m_Line[idx]->getWide() );
+				int logIdx = m_ActiveLine - i;
+				EventConsoleText *line = GetLine(logIdx);
+				int linewidth = V_min( line->m_TextWidth, line->getWide() );
  				if( linewidth > w ) w = linewidth;
 			}
 		}
 
 		setSize( w + m_ScrollBarWidth, EVENTCON_LINE_SIZE_Y * m_VisibleLines );
-
 		m_ScrollPanel->setSize( getWide( ), getTall() );
 
 		Color color;
 		getBgColor( color );
-		setBgColor( color[0], color[1], color[2], 128 + V_max(V_min(m_BGTrans->value,1),-1) * 127 );
+		int bgAlpha = 128 + V_max(V_min(m_BGTrans->value, 1), -1) * 127;
+		setBgColor( color[0], color[1], color[2], bgAlpha );
 
-		Button &TopScrollBtn = *m_ScrollPanel->getVerticalScrollBar()->getButton(0);
-		if( (m_ActiveLine+1) - m_VisibleLines > 0 )
-			TopScrollBtn.setVisible( !m_DynamicWidth );		//Using m_DynamicWidth to determine if this is 
-															//the saytext box or the event console
-		else
-			TopScrollBtn.setVisible( false );
+		bool canScrollUp = ((m_ActiveLine + 1) - m_VisibleLines) > 0;
+		bool canScrollDown = m_ActiveLine < (m_TotalLines - 1);
 
-		Button &BtmScrollBtn = *m_ScrollPanel->getVerticalScrollBar()->getButton(1);
-		if( m_ActiveLine < (m_TotalLines-1) )
-			BtmScrollBtn.setVisible( true );
-		else
-			BtmScrollBtn.setVisible( false );
+		Button *TopScrollBtn = m_ScrollPanel->getVerticalScrollBar()->getButton(0);
+		Button *BtmScrollBtn = m_ScrollPanel->getVerticalScrollBar()->getButton(1);
 
-		if( m_VisibleLines <= 1 )	
-			//When only one line is shwon, give priority to the down arrow so the user knows this isn't the last line in the console
-			if( m_ScrollPanel->getVerticalScrollBar()->getButton(1)->isVisible() )
-				m_ScrollPanel->getVerticalScrollBar()->getButton(0)->setVisible( false );
+		TopScrollBtn->setVisible( canScrollUp && !m_DynamicWidth );
+		BtmScrollBtn->setVisible( canScrollDown );
 
-		m_ScrollPanel->setScrollValue( 0, EVENTCON_LINE_SIZE_Y * ((m_ActiveLine+1) - m_VisibleLines) ); //Scroll down to the active line
+		if( m_VisibleLines <= 1 && canScrollDown )
+			TopScrollBtn->setVisible( false );
 
+		m_ScrollPanel->setScrollValue( 0, EVENTCON_LINE_SIZE_Y * ((m_ActiveLine+1) - m_VisibleLines) );
 		m_ScrollPanel->validate( );
 	}
 
@@ -273,22 +300,14 @@ public:
 		}
 		else if ((gpGlobals->time > m_ShrinkTime) && (m_VisibleLines > 0))
 		{
-			//Shrink down one line
-
 			m_VisibleLines--;
 			Resize( );
 
-			//If the top visible line is a wrapped line, then shrink again... 
-			//And keep shrinking until the top visible line is a normal line
+			int TopLine = V_max( m_ActiveLine - (m_VisibleLines - 1), 0 );
+			EventConsoleText *topLine = GetLine(TopLine);
 
-			int TopLine = m_ActiveLine - (m_VisibleLines-1);
-			TopLine = V_max( TopLine, 0 );
-
-			if (m_Line[TopLine] != nullptr)
-			{
-				if (!m_Line[TopLine]->m_SpansFromPrevLine)
-					m_ShrinkTime = 0;
-			}
+			if (topLine != nullptr && !topLine->m_SpansFromPrevLine)
+				m_ShrinkTime = 0;
 		}
 
 		if(!ShowHUD())
@@ -299,8 +318,8 @@ public:
 
 	void StepInput( bool fDown )
 	{
-		m_VisibleLines = V_min(EVENTCON_PREF_VISIBLELINES, m_TotalLines);	//Grow to max visible lines
-		m_ShrinkTime = 0;																//Reset shrinktime
+		m_VisibleLines = V_min(EVENTCON_PREF_VISIBLELINES, m_TotalLines);
+		m_ShrinkTime = 0;
 
 		if( fDown )
 			m_ActiveLine = V_min(m_ActiveLine+1, m_TotalLines-1);
@@ -315,16 +334,16 @@ public:
 		return m_Width ? XRES(m_Width->value) : getWide();
 	}
 
-
 	CTFScrollPanel *m_ScrollPanel;
 	EventConsoleText *m_Line[EVENTCON_MAXLINES];
-	int m_VisibleLines,						//Current number of visible lines
-		m_TotalLines,						//Current number of lines in the console
-		m_ActiveLine,						//Bottom line that must be shown in the viewable area (changes with pgup/pgdn)
-	    m_StartY,							//Initial Y position
-		m_ScrollBarWidth;					//Width of vertical scrollbar
-	float m_ShrinkTime;						//Shrink time
-	cvar_t *m_VisLines, *m_MaxLines,			//CVARs controlling size and delays
+	int m_Head;	// index of the oldest (logical 0) line
+	int m_VisibleLines,
+		m_TotalLines,
+		m_ActiveLine,
+	    m_StartY,
+		m_ScrollBarWidth;
+	float m_ShrinkTime;
+	cvar_t *m_VisLines, *m_MaxLines,
 		   *m_DecayTime, *m_BGTrans,
 		   *m_Width;
 	bool m_DynamicWidth;
