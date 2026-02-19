@@ -29,7 +29,7 @@ const char* SPEECH::ItemName(CGenericItem* pItem, bool fCapital)
 // TODO: switch to std::strings and std::format on dev branch with c++20
 const char *SPEECH::NPCName(CMSMonster *pMonster, bool fCapital)
 {
-	msstring Prefix = pMonster->DisplayPrefix.len() ? (pMonster->DisplayPrefix + " ") : ("");
+	msstring Prefix = pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix + " ") : msstring("");
 	_snprintf(ReturnString, sizeof(ReturnString), "%s%s", Prefix.c_str(), pMonster->DisplayName());
 	if (fCapital)
 		ReturnString[0] = toupper(ReturnString[0]);

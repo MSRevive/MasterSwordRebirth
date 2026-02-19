@@ -5136,9 +5136,6 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 
 int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** pCurrentEvent, scriptcmd_list** pCurrentCmds, std::vector<scriptcmd_list*>& ParentCmds)
 {
-	startdbg;
-	dbg("Begin");
-
 	SCRIPT_EVENT* CurrentEvent = *pCurrentEvent;
 	scriptcmd_list& CurrentCmds = **pCurrentCmds;
 
@@ -5642,7 +5639,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 					LineOfs++;
 				}
 				else
-					MSErrorConsoleText("", UTIL_VarArgs("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!\n", m.ScriptFile.c_str(), LineNum, cBuffer));
+					MS_ERROR("Script: %s, Line: %i - \"%s\" Closing quotations NOT FOUND!", m.ScriptFile.c_str(), LineNum, cBuffer);
 			}
 
 			ScriptCmd.m_Params.add(GetConst(cBuffer));
