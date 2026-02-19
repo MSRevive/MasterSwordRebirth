@@ -4909,10 +4909,10 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 			FREE_FILE(pMemFile);
 		}
 	}
-	else if (ScriptMgr::m_GroupFile.ReadEntry(ScriptName, NULL, ScriptSize))
+	else if (g_ScriptPack.ReadEntry(ScriptName, NULL, ScriptSize))
 	{
 		ScriptData = msnew(char[ScriptSize + 1]);
-		ScriptMgr::m_GroupFile.ReadEntry(ScriptName, (byte*)ScriptData, ScriptSize);
+		g_ScriptPack.ReadEntry(ScriptName, (byte*)ScriptData, ScriptSize);
 		ScriptData[ScriptSize] = 0;
 	}
 	else
