@@ -422,7 +422,8 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	{
 		if (player.Hand(i))
 		{
-			pGearItemButton->m_ItemContainer->AddItem(containeritem_t(player.Hand(i)));
+			containeritem_t item(player.Hand(i));
+			pGearItemButton->m_ItemContainer->AddItem(item);
 		}
 	}
 
@@ -464,7 +465,8 @@ void VGUI_ContainerPanel::AddInventoryItems()
 			const int itemCount = pGearItem->Container_ItemCount();
 			for (int j = 0; j < itemCount; j++)
 			{
-				pGearItemButton->m_ItemContainer->AddItem(containeritem_t(pGearItem->Container_GetItem(j)));
+				containeritem_t item(pGearItem->Container_GetItem(j));
+				pGearItemButton->m_ItemContainer->AddItem(item);
 			}
 		}
 	}
