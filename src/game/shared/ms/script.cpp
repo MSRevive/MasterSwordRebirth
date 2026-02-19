@@ -4829,7 +4829,8 @@ CScript::~CScript()
 
 bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pScriptedInterface, bool PrecacheOnly, bool Casual)
 {
-	std::clock_t clock_start = std::clock();
+	// UNCOMMENT FOR TIMING
+	//std::clock_t clock_start = std::clock();
 
 	//Keep track of all #included files... don't allow #including the same file twice
 	//Update: A script can specify when it wants to allow duplicate includes
@@ -4957,7 +4958,8 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 
 	RunScriptEventByName("game_precache");	//Run precache event
 
-	CallLogged(ScriptName, clock_start);
+	// UNCOMMENT FOR TIMING
+	//CallLogged(ScriptName, clock_start);
 	return fReturn;
 }
 
