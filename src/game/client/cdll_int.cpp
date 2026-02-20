@@ -243,7 +243,7 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
 	
 	// Register AngelScript cvars for client
-	cl_as_enabled = CVAR_CREATE("cl_as_enabled", "1", FCVAR_ARCHIVE);
+	cl_as_enabled = CVAR_CREATE("cl_as_enabled", "0", FCVAR_ARCHIVE);
 	cl_as_debug_mode = CVAR_CREATE("cl_as_debug_mode", "0", FCVAR_ARCHIVE);
 
 	if(!gClient.Initialize())

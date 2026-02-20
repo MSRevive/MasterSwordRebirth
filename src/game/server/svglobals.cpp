@@ -77,7 +77,7 @@ cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
 
 //AngelScript CVARs
-cvar_t as_enabled = {const_cast<char*>("as_enabled"), "1", FCVAR_SERVER};
+cvar_t as_enabled = {const_cast<char*>("as_enabled"), "0", FCVAR_SERVER};
 cvar_t as_memory_limit = {const_cast<char*>("as_memory_limit"), "1073741824", FCVAR_SERVER}; // 1GB
 cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "0", FCVAR_SERVER};
 cvar_t as_gc_interval = {const_cast<char*>("as_gc_interval"), "60", FCVAR_SERVER};
