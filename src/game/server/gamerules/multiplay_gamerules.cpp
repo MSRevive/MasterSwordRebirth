@@ -1884,9 +1884,9 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		ALERT(at_console, "=== PAK File Diagnostic Information ===\n");
 		
 		// Check if PAK file is open
-		bool pakOpen = ScriptMgr::m_GroupFile.IsOpen();
-		size_t entryCount = ScriptMgr::m_GroupFile.GetEntryCount();
-		std::string filename = ScriptMgr::m_GroupFile.GetFilename();
+		bool pakOpen = g_ScriptPack.IsOpen();
+		size_t entryCount = g_ScriptPack.GetEntryCount();
+		std::string filename = g_ScriptPack.GetFilename();
 		
 		pPlayer->SendInfoMsg("PAK File Status: %s", pakOpen ? "OPEN" : "CLOSED");
 		pPlayer->SendInfoMsg("Entry Count: %zu", entryCount);
@@ -1898,7 +1898,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		
 		// Try to enumerate AngelScript files
 		std::vector<std::string> asFiles;
-		int asCount = ScriptMgr::m_GroupFile.EnumerateAngelScriptFiles(asFiles);
+		int asCount = g_ScriptPack.EnumerateAngelScriptFiles(asFiles);
 		
 		pPlayer->SendInfoMsg("AngelScript Files: %d", asCount);
 		ALERT(at_console, "AngelScript Files Found: %d\n", asCount);

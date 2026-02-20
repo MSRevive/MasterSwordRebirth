@@ -1433,7 +1433,7 @@ bool ASModuleSystem::ReloadAllModules()
     
     // Re-discover modules in the refreshed PAK
     printf("ASModuleSystem::ReloadAllModules: Discovering modules in refreshed PAK...\n");
-    if (!DiscoverModulesInPak(&ScriptMgr::m_GroupFile))
+    if (!DiscoverModulesInPak(&g_ScriptPack))
     {
         printf("ASModuleSystem::ReloadAllModules: ERROR - Failed to discover modules after PAK refresh\n");
         printf("ASModuleSystem::ReloadAllModules: This could indicate PAK corruption or missing module files\n");
@@ -1454,7 +1454,7 @@ bool ASModuleSystem::ReloadAllModules()
     
     // Load all discovered modules with error recovery
     printf("ASModuleSystem::ReloadAllModules: Loading discovered modules...\n");
-    bool loadSuccess = LoadDiscoveredModules(&ScriptMgr::m_GroupFile);
+    bool loadSuccess = LoadDiscoveredModules(&g_ScriptPack);
     
     if (!loadSuccess)
     {
@@ -1527,8 +1527,8 @@ bool ASModuleSystem::RefreshFromPak()
     printf("ASModuleSystem::RefreshFromPak: Starting PAK file refresh process...\n");
     
     // Get current status information
-    bool wasOpen = ScriptMgr::m_GroupFile.IsOpen();
-    size_t currentEntries = ScriptMgr::m_GroupFile.GetEntryCount();
+    bool wasOpen = g_ScriptPack.IsOpen();
+    size_t currentEntries = g_ScriptPack.GetEntryCount();
     
     printf("ASModuleSystem::RefreshFromPak: Current PAK status - %s, %zu entries\n",
            wasOpen ? "OPEN" : "CLOSED", currentEntries);
@@ -1552,7 +1552,7 @@ bool ASModuleSystem::RefreshFromPak()
             printf("ASModuleSystem::RefreshFromPak: Trying location: %s\n", pakLocations[i]);
             
             // Use the enhanced file existence check from CGameGroupFile
-            if (ScriptMgr::m_GroupFile.Open(pakLocations[i]))
+            if (g_ScriptPack.Open(pakLocations[i]))
             {
                 printf("ASModuleSystem::RefreshFromPak: Successfully opened PAK file at: %s\n", pakLocations[i]);
                 found = true;
@@ -1577,9 +1577,9 @@ bool ASModuleSystem::RefreshFromPak()
         
         // Get the current filename before refresh
         std::string currentFilename;
-        if (ScriptMgr::m_GroupFile.GetFilename().length() > 0)
+        if (g_ScriptPack.GetFilename().length() > 0)
         {
-            currentFilename = ScriptMgr::m_GroupFile.GetFilename();
+            currentFilename = g_ScriptPack.GetFilename();
             printf("ASModuleSystem::RefreshFromPak: Current PAK filename: %s\n", currentFilename.c_str());
         }
         else
@@ -1593,7 +1593,7 @@ bool ASModuleSystem::RefreshFromPak()
         if (!currentFilename.empty())
         {
             printf("ASModuleSystem::RefreshFromPak: Attempting refresh with stored filename...\n");
-            refreshSuccess = ScriptMgr::m_GroupFile.Refresh();
+            refreshSuccess = g_ScriptPack.Refresh();
         }
         
         // If refresh failed and we don't have a filename, try common locations
@@ -1605,7 +1605,7 @@ bool ASModuleSystem::RefreshFromPak()
             {
                 printf("ASModuleSystem::RefreshFromPak: Fallback attempt with: %s\n", pakLocations[i]);
                 
-                if (ScriptMgr::m_GroupFile.Refresh(pakLocations[i]))
+                if (g_ScriptPack.Refresh(pakLocations[i]))
                 {
                     printf("ASModuleSystem::RefreshFromPak: Refresh successful with fallback location: %s\n", pakLocations[i]);
                     refreshSuccess = true;
@@ -1627,7 +1627,7 @@ bool ASModuleSystem::RefreshFromPak()
     }
     
     // Verify the refresh was successful
-    size_t newEntries = ScriptMgr::m_GroupFile.GetEntryCount();
+    size_t newEntries = g_ScriptPack.GetEntryCount();
     printf("ASModuleSystem::RefreshFromPak: PAK file refreshed successfully\n");
     printf("ASModuleSystem::RefreshFromPak: Entry count: %zu (was %zu)\n", newEntries, currentEntries);
     
