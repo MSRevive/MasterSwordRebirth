@@ -55,6 +55,7 @@
 // Static member initialization
 bool MSLogger::s_initialized = false;
 bool MSLogger::s_isServer = false;
+std::string MSLogger::s_gameDir;
 std::shared_ptr<spdlog::logger> MSLogger::s_loggers[MSLogger::CATEGORY_COUNT];
 std::shared_ptr<spdlog::logger> MSLogger::s_errorLogger;
 std::shared_ptr<spdlog::logger> MSLogger::s_chatLogger;
@@ -73,10 +74,50 @@ static const char* g_categoryNames[] = {
     "SOUND"
 };
 
+void MSLogger::EnsureLogger(Category cat) {
+    if (s_loggers[cat]) return;  // Already exists
+    
+    // Need a game dir to create files - store it during Initialize
+    if (s_gameDir.empty()) return;
+    
+    std::string logDir = s_gameDir + "/logs";
+    MKDIR(logDir.c_str());
+    
+#if SPDLOG_AVAILABLE
+    try {
+        std::string logPath = logDir + "/" + (s_isServer ? "server_" : "client_") + 
+                              std::string(GetCategoryName(cat)) + ".log";
+        
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+        console_sink->set_level(spdlog::level::debug);
+        
+        auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
+            logPath, 0, 0, false, 7); //every 7 days
+        file_sink->set_level(spdlog::level::trace);
+        
+        std::vector<spdlog::sink_ptr> sinks = {console_sink, file_sink};
+        
+        auto logger = std::make_shared<spdlog::logger>(
+            GetCategoryName(cat), sinks.begin(), sinks.end());
+        logger->set_level(spdlog::level::trace);
+        logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%^%l%$] %v");
+        
+        spdlog::register_logger(logger);
+        s_loggers[cat] = logger;
+    } catch (const std::exception& ex) {
+        printf("MSLogger: Failed to create logger for %s: %s\n", GetCategoryName(cat), ex.what());
+    }
+#else
+    s_loggers[cat] = std::make_shared<spdlog::logger>();
+#endif
+}
+
 void MSLogger::Initialize(const char* gameDir, bool isServer) {
     if (s_initialized) {
         return;
     }
+
+    s_gameDir = gameDir;
     
     // Clean up any existing spdlog loggers to prevent "already exists" errors
 #if SPDLOG_AVAILABLE
@@ -100,39 +141,6 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
     
 #if SPDLOG_AVAILABLE
     try {
-        // Create console sink with color
-        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
-        console_sink->set_level(spdlog::level::debug);
-        
-        // Initialize category loggers
-        for (int i = 0; i < CATEGORY_COUNT; i++) {
-            Category cat = static_cast<Category>(i);
-            if (cat == Category::CHAT)
-                break;
-
-            std::string logPath = logDir + "/" + (isServer ? "server_" : "client_") + 
-                                  std::string(GetCategoryName(cat)) + ".log";
-            
-            // Create sinks
-            std::vector<spdlog::sink_ptr> sinks;
-            sinks.push_back(console_sink);
-            
-            // File sink with daily rotation
-            auto file_sink = std::make_shared<spdlog::sinks::daily_file_sink_mt>(
-                logPath, 0, 0, false, 7); // Keep 7 days of logs
-            file_sink->set_level(spdlog::level::trace);
-            sinks.push_back(file_sink);
-            
-            // Create logger
-            auto logger = std::make_shared<spdlog::logger>(
-                GetCategoryName(cat), sinks.begin(), sinks.end());
-            logger->set_level(spdlog::level::trace);
-            logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%^%l%$] %v");
-            
-            spdlog::register_logger(logger);
-            s_loggers[i] = logger;
-        }
-        
         // Special error logger (logs all errors to one file)
         auto error_file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(
             logDir + "/" + (isServer ? "server_errors.log" : "client_errors.log"), true);
@@ -164,10 +172,6 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
     // Fallback implementation
     printf("MSLogger: spdlog not available, using fallback implementation\n");
     
-    // Create dummy loggers
-    for (int i = 0; i < CATEGORY_COUNT; i++) {
-        s_loggers[i] = std::make_shared<spdlog::logger>();
-    }
     s_errorLogger = std::make_shared<spdlog::logger>();
     if (isServer) {
         s_chatLogger = std::make_shared<spdlog::logger>();
@@ -193,8 +197,15 @@ void MSLogger::Shutdown() {
 }
 
 std::shared_ptr<spdlog::logger> MSLogger::GetLogger(Category cat) {
-    if (!s_initialized || cat < 0 || cat >= CATEGORY_COUNT) {
+    if (!s_initialized) {
         return nullptr;
+    }
+
+    if (cat < 0 || cat >= CATEGORY_COUNT) {
+        return nullptr;
+    }
+    if (!s_loggers[cat]) {
+        EnsureLogger(cat);
     }
     return s_loggers[cat];
 }
@@ -221,7 +232,7 @@ std::string MSLogger::FormatString(const char* fmt, va_list args) {
 }
 
 void MSLogger::Error(Category cat, const char* fmt, ...) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
 
     va_list args;
     va_start(args, fmt);
@@ -253,7 +264,7 @@ void MSLogger::Error(Category cat, const char* fmt, ...) {
 }
 
 void MSLogger::Warn(Category cat, const char* fmt, ...) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
 
     va_list args;
     va_start(args, fmt);
@@ -274,7 +285,7 @@ void MSLogger::Warn(Category cat, const char* fmt, ...) {
 }
 
 void MSLogger::Info(Category cat, const char* fmt, ...) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
     
     va_list args;
     va_start(args, fmt);
@@ -297,7 +308,7 @@ void MSLogger::Info(Category cat, const char* fmt, ...) {
 }
 
 void MSLogger::Debug(Category cat, const char* fmt, ...) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
     
     va_list args;
     va_start(args, fmt);
@@ -316,7 +327,7 @@ void MSLogger::Debug(Category cat, const char* fmt, ...) {
 }
 
 void MSLogger::Trace(Category cat, const char* fmt, ...) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
     
     va_list args;
     va_start(args, fmt);
@@ -334,7 +345,7 @@ void MSLogger::Trace(Category cat, const char* fmt, ...) {
 }
 
 void MSLogger::LogString(Category cat, Level level, const std::string& msg) {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
     
     auto logger = GetLogger(cat);
     if (!logger) return;
@@ -376,7 +387,7 @@ MSLogger::Level MSLogger::AlertTypeToLevel(AlertType type) {
 }
 
 void MSLogger::Alert(AlertType type, const char* fmt, ...) {
-    if (!s_initialized) {
+    if (!s_initialized && s_gameDir.empty()) {
         // Fallback to printf if not initialized
         va_list args;
         va_start(args, fmt);
@@ -420,7 +431,7 @@ void MSLogger::Console(const char* fmt, ...) {
 }
 
 void MSLogger::Chat(const char* fmt, ...) {
-    if (!s_initialized || !s_chatLogger) return;
+    if ((!s_initialized || !s_chatLogger) && s_gameDir.empty()) return;
     
     va_list args;
     va_start(args, fmt);
@@ -446,7 +457,7 @@ void MSLogger::LogToFile(const char* filename, const char* fmt, ...) {
 }
 
 void MSLogger::Flush() {
-    if (!s_initialized) return;
+    if (!s_initialized && s_gameDir.empty()) return;
     
 #if SPDLOG_AVAILABLE
     spdlog::apply_all([](std::shared_ptr<spdlog::logger> l) { l->flush(); });
@@ -462,30 +473,3 @@ const char* MSLogger::GetCategoryName(Category cat) {
     }
     return g_categoryNames[cat];
 }
-
-// void MSErrorConsoleText(const char* pszLabel, const char* Progress)
-// {
-//     	//Print("%s, %s\n", pszLabel, Progress);
-// #ifndef TURN_OFF_ALERT
-// 	if (MSLogger::IsInitialized() == true)
-// 	{
-// 		std::string Output = "Error: ";
-// 		Output += pszLabel;
-// 		Output += " --> ";
-// 		Output += Progress;
-
-// 		MS_ERROR(Output.c_str());
-// 		MSLoggerPrint(Output.c_str());
-// 	}
-// 	else
-// 	{
-//         //this should only be called client side.
-// #ifndef VALVE_DLL
-//         //This is prety fatal - We got an error before the logs were initialized
-//         std::string errorMsg = pszLabel;
-//         errorMsg += " (Logs not yet initialized)";
-// 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, errorMsg.c_str(), Progress, NULL);
-// #endif
-// 	}
-// #endif
-// }

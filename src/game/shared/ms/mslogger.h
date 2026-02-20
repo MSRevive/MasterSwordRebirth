@@ -49,6 +49,7 @@ public:
     };
     
     // Initialize the logging system
+    static void EnsureLogger(Category cat);
     static void Initialize(const char* gameDir, bool isServer);
     
     // Shutdown and flush all loggers
@@ -93,6 +94,7 @@ public:
 private:
     static bool s_initialized;
     static bool s_isServer;
+    static std::string s_gameDir;
     static std::shared_ptr<spdlog::logger> s_loggers[CATEGORY_COUNT];
     static std::shared_ptr<spdlog::logger> s_errorLogger;
     static std::shared_ptr<spdlog::logger> s_chatLogger;
