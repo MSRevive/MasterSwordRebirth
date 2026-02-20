@@ -1995,6 +1995,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		MS_INFO("Game master found via global handle at index %d", pGameMasterEnt->entindex());
 	}
 	
+	CBaseEntity* pInitGameMaster = nullptr;
 	if (as_enabled.value > 0)
 	{
 		if (!pGameMasterEnt)
@@ -2036,22 +2037,28 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		if (!pGameMasterEnt)
 		{
-			MS_INFO("Legacy creating game master");
+			MS_INFO("Creating legacy game master");
 			//TODO: this code was lifted from CScript::ScriptCmd_Create, considering refactoring - Solokiller
-			CMSMonster* NewMonster = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
-			if (NewMonster)
+			CMSMonster* NewMob = (CMSMonster*)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING("ms_npc")));
+			if (NewMob)
 			{
-				NewMonster->pev->origin = Vector(20000, -10000, -20000);
-				NewMonster->Spawn("game_master");
+				NewMob->pev->origin = Vector(20000, -10000, -20000);
+				NewMob->Spawn("game_master");
 
 				msstringlist params;
-				NewMonster->CallScriptEvent("game_dynamically_created", &params);
+				NewMob->CallScriptEvent("game_dynamically_created", &params);
+				MS_INFO("Created legacy game master");
+				pInitGameMaster = NewMob;
 			}
 		}
 	}
-	
+
 	// Store the game_master entity in global handle for easy access
-	g_pGameMasterEntity = pGameMasterEnt;
+	if (pGameMasterEnt)
+		g_pGameMasterEntity = pGameMasterEnt;
+	else
+		g_pGameMasterEntity = pInitGameMaster;
+
 	if (g_pGameMasterEntity)
 	{
 		MS_INFO("Global game_master entity handle set (index %d)", g_pGameMasterEntity->entindex());
