@@ -37,7 +37,7 @@ int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder
         return -1;
     }
     
-    CGameGroupFile* groupFile = static_cast<CGameGroupFile*>(userParam);
+    //CGameGroupFile* groupFile = static_cast<CGameGroupFile*>(userParam);
     
     // Build the full path for the include file within the angelscript directory
     std::string includePath = "angelscript/";
@@ -47,7 +47,7 @@ int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder
     
     // First check if the file exists and get its size
     unsigned long fileSize;
-    if (!groupFile->ReadEntry(includePath.c_str(), nullptr, fileSize))
+    if (!g_ScriptPack.ReadEntry(includePath.c_str(), nullptr, fileSize))
     {
         printf("PakFileIncludeCallback: ERROR - Include file not found in pak: %s\n", includePath.c_str());
         return -1;
@@ -55,7 +55,7 @@ int PakFileIncludeCallback(const char *include, const char *from, CScriptBuilder
     
     // Allocate buffer and read the file content
     char* scriptContent = new char[fileSize + 1];
-    if (!groupFile->ReadEntry(includePath.c_str(), (unsigned char*)scriptContent, fileSize))
+    if (!g_ScriptPack.ReadEntry(includePath.c_str(), (unsigned char*)scriptContent, fileSize))
     {
         printf("PakFileIncludeCallback: ERROR - Failed to read include file from pak: %s\n", includePath.c_str());
         delete[] scriptContent;

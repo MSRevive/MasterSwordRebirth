@@ -208,8 +208,7 @@ void MSWorldSpawn()
 			MS_INFO("MSWorldSpawn: Reloading AngelScript modules for new map...");
 			
 			// Open the scripts.pak file for reading AngelScript modules
-			CGameGroupFile groupFile;
-			if (!groupFile.Open("scripts.pak"))
+			if (!g_ScriptPack.Open("scripts.pak"))
 			{
 				MS_ERROR("MSWorldSpawn: Failed to open scripts.pak for module reloading");
 			}
@@ -224,10 +223,10 @@ void MSWorldSpawn()
 						MS_INFO("MSWorldSpawn: Using automatic module discovery...");
 						
 						// Discover modules with 'module ModuleName {' syntax
-						if (pModuleSystem->DiscoverModulesInPak(&groupFile))
+						if (pModuleSystem->DiscoverModulesInPak(&g_ScriptPack))
 						{
 							// Load all discovered modules
-							if (pModuleSystem->LoadDiscoveredModules(&groupFile))
+							if (pModuleSystem->LoadDiscoveredModules(&g_ScriptPack))
 							{
 								MS_INFO("MSWorldSpawn: AngelScript modules reloaded successfully!");
 							}
@@ -384,8 +383,7 @@ void MSWorldSpawn()
 		MS_INFO("Initializing AngelScript Module System...");
 		
 		// Open the scripts.pak file for reading AngelScript modules
-		CGameGroupFile groupFile;
-		if (!groupFile.Open("scripts.pak"))
+		if (!g_ScriptPack.Open("scripts.pak"))
 		{
 			g_engfuncs.pfnServerPrint("ERROR: Failed to open scripts.pak for modules\n");
 			MS_INFO("Failed to open scripts.pak for modules");
@@ -402,10 +400,10 @@ void MSWorldSpawn()
 					MS_INFO("Using automatic module discovery...");
 					
 					// Discover modules with 'module ModuleName {' syntax
-					if (pModuleSystem->DiscoverModulesInPak(&groupFile))
+					if (pModuleSystem->DiscoverModulesInPak(&g_ScriptPack))
 					{
 						// Load all discovered modules
-						if (pModuleSystem->LoadDiscoveredModules(&groupFile))
+						if (pModuleSystem->LoadDiscoveredModules(&g_ScriptPack))
 						{
 							g_engfuncs.pfnServerPrint("AngelScript modules loaded successfully!\n");
 							MS_INFO("AngelScript modules loaded successfully!");
@@ -444,7 +442,7 @@ void MSWorldSpawn()
 					for (int i = 0; i < 7; i++)
 					{
 						unsigned long fileSize;
-						if (!groupFile.ReadEntry(legacyModules[i], NULL, fileSize))
+						if (!g_ScriptPack.ReadEntry(legacyModules[i], NULL, fileSize))
 						{
 							char errorMsg[256];
 							snprintf(errorMsg, sizeof(errorMsg), "Legacy module not found: %s\n", legacyModules[i]);
@@ -455,7 +453,7 @@ void MSWorldSpawn()
 						}
 						
 						char* scriptContent = new char[fileSize + 1];
-						if (!groupFile.ReadEntry(legacyModules[i], (byte*)scriptContent, fileSize))
+						if (!g_ScriptPack.ReadEntry(legacyModules[i], (byte*)scriptContent, fileSize))
 						{
 							delete[] scriptContent;
 							bSuccess = false;
@@ -476,7 +474,7 @@ void MSWorldSpawn()
 						options.allowOverwrite = true;
 						options.resolveDependencies = true;
 						
-						if (!pModuleSystem->LoadModuleFromMemory(modName, scriptContent, &groupFile, options))
+						if (!pModuleSystem->LoadModuleFromMemory(modName, scriptContent, &g_ScriptPack, options))
 						{
 							bSuccess = false;
 						}

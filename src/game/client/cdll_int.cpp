@@ -336,8 +336,7 @@ void DLLEXPORT HUD_Init(void)
 		MS_INFO("Loading client-side AngelScript modules from scripts.pak...");
 		
 		// Open scripts.pak file
-		CGameGroupFile groupFile;
-		if (!groupFile.Open("scripts.pak"))
+		if (!g_ScriptPack.Open("scripts.pak"))
 		{
 			MS_ERROR("Failed to open scripts.pak for client-side modules");
 		}
@@ -357,10 +356,10 @@ void DLLEXPORT HUD_Init(void)
 					MS_INFO("Note: Only modules with #pragma context client or shared will be loaded");
 					
 					// Discover and load client-side modules
-					if (pModuleSystem->DiscoverModulesInPak(&groupFile))
+					if (pModuleSystem->DiscoverModulesInPak(&g_ScriptPack))
 					{
 						MS_INFO("Client-side modules discovered, filtering and loading...");
-						if (pModuleSystem->LoadDiscoveredModules(&groupFile))
+						if (pModuleSystem->LoadDiscoveredModules(&g_ScriptPack))
 						{
 							MS_INFO("Client-side AngelScript modules loaded successfully!");
 						}
@@ -381,7 +380,7 @@ void DLLEXPORT HUD_Init(void)
 				MS_ERROR("ASModuleSystem not available on client");
 			}
 			
-			groupFile.Close();
+			g_ScriptPack.Close();
 		}
 		
 		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING COMPLETE ===");
