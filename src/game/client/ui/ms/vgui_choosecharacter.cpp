@@ -1222,7 +1222,7 @@ void CRenderChar::Render( )
 	if( m_Stage != STG_CHOOSEGENDER )
 	{
 		m_GearItems.clearitems( );
-		m_Gear.clearitems( );
+		m_Gear.clear();
 		uint BodyParts[HUMAN_BODYPARTS] = { 0 };
 		
 		for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
@@ -1270,7 +1270,7 @@ void CRenderChar::Render( )
 
 		}
 		for (int i = 0; i < m_GearItems.size(); i++) 
-			m_Gear.add( &m_GearItems[i] );
+			m_Gear.push_back( &m_GearItems[i] );
 	}
 
 	if( m_Active )

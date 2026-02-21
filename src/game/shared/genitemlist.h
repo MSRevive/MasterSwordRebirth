@@ -1,9 +1,11 @@
 #ifndef ITEMLIST_H
 #define ITEMLIST_H
 
+#include <vector>
+
 class CGenericItem;
 
-class CItemList : public mslist<CGenericItem *>
+class CItemList : public std::vector<CGenericItem *>
 {
 public:
 	bool CanAddItem(CGenericItem *NewItem);

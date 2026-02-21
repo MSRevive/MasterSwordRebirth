@@ -1,77 +1,67 @@
 #include "inc_weapondefs.h"
+#include <algorithm>
 
-bool CItemList ::CanAddItem(CGenericItem *NewItem)
+bool CItemList::CanAddItem(CGenericItem *NewItem)
 {
 	if (!NewItem)
 		return false;
 
-	//This item is already in your pack
 	if (ItemExists(NewItem))
-		return FALSE;
+		return false;
 
-	return TRUE;
+	return true;
 }
-bool CItemList ::AddItem(CGenericItem *NewItem)
+
+bool CItemList::AddItem(CGenericItem *NewItem)
 {
 	if (!CanAddItem(NewItem))
 		return false;
 
-	add(NewItem);
-
+	push_back(NewItem);
 	return true;
 }
 
-bool CItemList ::ItemExists(CGenericItem *pItem)
+bool CItemList::ItemExists(CGenericItem *pItem)
 {
 	if (!pItem)
 		return false;
 
-	for (int i = 0; i < size(); i++)
-		if (operator[](i) == pItem)
-			return true;
-
-	return false;
-}
-CGenericItem *CItemList ::GetItem(const char *pszName)
-{
-	for (int i = 0; i < size(); i++)
-		if (strstr(operator[](i)->ItemName.c_str(), pszName))
-			return operator[](i);
-
-	return NULL;
-}
-CGenericItem *CItemList ::GetItem(ulong lID)
-{
-	for (int i = 0; i < size(); i++)
-		if (operator[](i)->m_iId == lID)
-			return operator[](i);
-
-	return NULL;
+	return std::find(begin(), end(), pItem) != end();
 }
 
-bool CItemList ::RemoveItem(CGenericItem *pDelItem)
+CGenericItem *CItemList::GetItem(const char *pszName)
 {
-	int Delidx = -1;
-	for (int i = 0; i < size(); i++)
-		if (operator[](i) == pDelItem)
-		{
-			Delidx = i;
-			break;
-		}
+	for (CGenericItem *pItem : *this)
+		if (strstr(pItem->ItemName.c_str(), pszName))
+			return pItem;
 
-	if (Delidx < 0)
+	return nullptr;
+}
+
+CGenericItem *CItemList::GetItem(ulong lID)
+{
+	for (CGenericItem *pItem : *this)
+		if (pItem->m_iId == lID)
+			return pItem;
+
+	return nullptr;
+}
+
+bool CItemList::RemoveItem(CGenericItem *pDelItem)
+{
+	auto it = std::find(begin(), end(), pDelItem);
+	if (it == end())
 		return false;
 
-	erase(Delidx);
-
+	erase(it);
 	return true;
 }
-float CItemList ::FilledVolume()
+
+float CItemList::FilledVolume()
 {
-	//FilledVolume... also known as weight
 	float Volume = 0;
-	for (int i = 0; i < size(); i++)
-		Volume += operator[](i)->Weight();
+	for (CGenericItem *pItem : *this)
+		Volume += pItem->Weight();
 
 	return Volume;
 }

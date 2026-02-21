@@ -34,8 +34,11 @@ struct packdata_t
 	{
 		for (int i = ItemList.size() - 1; i >= 0; i--) //Go backwards - sure to delete each item
 		{
-			ItemList[i]->RemoveFromContainer();
-			ItemList[i]->SUB_Remove();
+			// for whatever reason mslist was still able to reference the data after RemoveFromContainer deleted it?
+			// since we now use a vector we just cache the item pointer.
+			CGenericItem* item = ItemList[i];
+			item->RemoveFromContainer();
+			item->SUB_Remove();
 		}
 	}
 };
