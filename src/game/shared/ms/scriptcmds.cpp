@@ -1163,12 +1163,12 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop.starts_with("angles"))
 	{
 		RETURN_ANGLE("angles", pTarget->pev->angles)
-			RETURN_POSITION("angles", pTarget->pev->angles)
+		RETURN_POSITION("angles", pTarget->pev->angles)
 	}
 	else if (Prop.starts_with("viewangles"))
 	{
 		RETURN_ANGLE("viewangles", pTarget->pev->v_angle)
-			RETURN_POSITION("viewangles", pTarget->pev->v_angle)
+		RETURN_POSITION("viewangles", pTarget->pev->v_angle)
 	}
 	else if (Prop == "target")
 	{
