@@ -457,7 +457,6 @@ void VGUI_ContainerPanel::AddInventoryItems()
 
 		if (GearItem.IsContainer)
 		{
-
 			const int itemCount = pGearItem->Container_ItemCount();
 			for (int j = 0; j < itemCount; j++)
 			{

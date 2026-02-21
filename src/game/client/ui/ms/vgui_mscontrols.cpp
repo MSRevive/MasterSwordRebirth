@@ -629,6 +629,7 @@ VGUI_Container::VGUI_Container( int x, int y, int w, int h, VGUI_ItemCallbackPan
 
 	m_pScrollPanel->validate( );
 }
+
 VGUI_Container::~VGUI_Container( )
 {
 	/*PurgeButtons( );
@@ -640,159 +641,109 @@ VGUI_Container::~VGUI_Container( )
 	delete m_pScrollPanel;*/
 }
 
-VGUI_ItemButton *VGUI_Container::AddItem( containeritem_t &Item )
+VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 {
-	if( m_ItemButtonTotal >= m_InitializedItemButtons )
+	if (m_ItemButtonTotal >= m_InitializedItemButtons)
 	{
-		//Initialize the item button
-		m_ItemButtons.add( new VGUI_ItemButton( 0, 0, m_CallbackPanel, m_pScrollPanel ) ); // // MiB FEB2015_07 - Set position in UpdatePosition
-		m_AlphabetizedItemButtons.add( m_ItemButtons[m_ItemButtonTotal] );
+		VGUI_ItemButton *pNewButton = new VGUI_ItemButton(0, 0, m_CallbackPanel, m_pScrollPanel);
+		m_ItemButtons.push_back(pNewButton);
+		m_AlphabetizedItemButtons.push_back(pNewButton);
 		m_InitializedItemButtons++;
 	}
 
 	VGUI_ItemButton &NewItemButton = *m_ItemButtons[m_ItemButtonTotal];
-	NewItemButton.SetItem( Item );
+	NewItemButton.SetItem(Item);
 
-	// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	int	iAlphaLoc = 0;
-	if (!m_ItemButtonTotal)
+	int iAlphaLoc = m_ItemButtonTotal;
+
+	if (m_ItemButtonTotal > 0)
 	{
-		m_AlphabetizedItemButtons[0] = &NewItemButton;
-	}
-	else
-	{
-		// Find the location of this item
 		msstring sNewItemName = Item.getFullName();
 
-		// Walk the list backwards
-		for (int i = m_ItemButtonTotal - 1; i >= 0; --i)
+		// Binary search to find the insertion point
+		int lo = 0, hi = m_ItemButtonTotal - 1;
+		while (lo <= hi)
 		{
-			msstring sCurItemName = m_AlphabetizedItemButtons[i]->m_Data.getFullName();
-
-			// If i-button's name < new name, add at i+1 and break
-			if (_stricmp(sCurItemName, sNewItemName) <= 0)
-			{
-				iAlphaLoc = i+1;
-				m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
-				break;
-			}
-			// Else move i-button to i+1 and continue
+			int mid = lo + (hi - lo) / 2;
+			if (_stricmp(m_AlphabetizedItemButtons[mid]->m_Data.getFullName().c_str(), sNewItemName) <= 0)
+				lo = mid + 1;
 			else
-			{
-				m_AlphabetizedItemButtons[i+1] = m_AlphabetizedItemButtons[i];
-				// That was the last one, set to the beginning
-				if ( i == 0 )
-				{
-					m_AlphabetizedItemButtons[0] = &NewItemButton;
-					break;
-				}
-			}
+				hi = mid - 1;
 		}
+		iAlphaLoc = lo;
+
+		for (int i = m_ItemButtonTotal; i > iAlphaLoc; --i)
+			m_AlphabetizedItemButtons[i] = m_AlphabetizedItemButtons[i - 1];
 	}
+
+	m_AlphabetizedItemButtons[iAlphaLoc] = &NewItemButton;
 
 	m_NoItems->setVisible(false);
 	m_ItemButtonTotal++;
+
+	const int invType = atoi(gEngfuncs.pfnGetCvarString("ms_invtype"));
 	if (IsAlphabetical())
 	{
-		// Need to update everything at the new location and after
-		for(int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
-		{
-			UpdatePosition(i);
-		}
+		for (int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
+			UpdatePosition(i, invType);
 	}
 	else
 	{
-		UpdatePosition(m_ItemButtonTotal-1);
+		UpdatePosition(m_ItemButtonTotal - 1, invType);
 	}
-	m_pScrollPanel->validate();
 
+	m_pScrollPanel->validate();
 	return &NewItemButton;
 }
 
 void VGUI_Container::Update( )
 {
 	bool bIsAlpha = IsAlphabetical();
+	const int invType = atoi(gEngfuncs.pfnGetCvarString("ms_invtype"));
 	for (int i = 0; i < m_ItemButtonTotal; i++) 
 	{
 		// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 		if ( bIsAlpha )
-		{
 			m_AlphabetizedItemButtons[i]->Update();
-		}
 		else
-		{
-			m_ItemButtons[i]->Update( );
-		}
-		UpdatePosition( i );
+			m_ItemButtons[i]->Update();
+
+		UpdatePosition(i, invType);
 	}
 	m_pScrollPanel->validate();
 }
 
-void VGUI_Container::UpdatePosition( int idx )
+void VGUI_Container::UpdatePosition(int idx, int invType)
 {
+	auto &ActiveList = IsAlphabetical() ? m_AlphabetizedItemButtons : m_ItemButtons;
+
 	int x = 0, y = 10;
 
-	//Find the spot for this item
-	if( idx )
+	if (idx > 0)
 	{
-		// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-		VGUI_ItemButton *LastItemButton = nullptr;
-		if ( IsAlphabetical() )
+		VGUI_ItemButton *LastItemButton = ActiveList[idx - 1];
+		LastItemButton->getPos(x, y);
+
+		switch (invType)
 		{
-			LastItemButton = m_AlphabetizedItemButtons[idx-1];
-		}
-		else
-		{
-			LastItemButton = m_ItemButtons[idx-1];
-		}
-		LastItemButton->getPos( x, y );
-		switch( atoi(gEngfuncs.pfnGetCvarString("ms_invtype")) )
-		{
-			case INVTYPE_ORIGINAL: // Original
-			{
-				/*
-					[  icon 1  ] [  icon 2  ]
-					[Item Name1] [Item Name2]
-				*/
+			case INVTYPE_ORIGINAL:
 				x += LastItemButton->getWide();
-				if(x + LastItemButton->getWide() >= (m_pScrollPanel->getWide() - m_pScrollPanel->getVerticalScrollBar()->getWide()))
+				if (x + LastItemButton->getWide() >= (m_pScrollPanel->getWide() - m_pScrollPanel->getVerticalScrollBar()->getWide()))
 				{
 					x = 0;
 					y += LastItemButton->getTall();
 				}
-			}
-			break;
+				break;
+
 			case INVTYPE_SMALL:
 			case INVTYPE_DESC:
-			{
-				/*	INVTYPE_SMALL:
-					[smaller_icon1] [Item Name1]
-					[smaller_icon2] [Item Name2]
-					[smaller_icon3] [Item Name3]
-				*/
-				/*  INVTYPE_DESC:
-					[icon1] [Item Name1]
-					[     ] [Item Description1]
-					[icon2] [Item Name2]
-					[     ] [Item Description2]
-					[icon3] [Item Name3]
-					[     ] [Item Description3]
-				*/
-				// Both require the same thing here: All the way to the left and on a new line
 				x = 0;
-				y += LastItemButton->getTall( );
-			}
-			break;
+				y += LastItemButton->getTall();
+				break;
 		}
 	}
-	if ( IsAlphabetical() )
-	{
-		m_AlphabetizedItemButtons[idx]->setPos( x , y );
-	}
-	else
-	{
-		m_ItemButtons[idx]->setPos( x , y );
-	}
+
+	ActiveList[idx]->setPos(x, y);
 }
 
 void VGUI_Container::PurgeButtons( )
