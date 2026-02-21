@@ -1,4 +1,4 @@
-		#include "msdllheaders.h"
+#include "msdllheaders.h"
 #include "player/player.h"
 #include "vgui_menudefsshared.h"
 
@@ -10,6 +10,7 @@ void CStore ::SetName(const char *pszName)
 {
 	m_Name = pszName;
 }
+
 bool CStore ::AddItem(const char *pszItemName, int iQuantity, int iCost, float flSellRatio, int iBundleAmt)
 {
 	storeitem_t *pNewItem;
@@ -27,23 +28,26 @@ bool CStore ::AddItem(const char *pszItemName, int iQuantity, int iCost, float f
 	pNewItem->flSellRatio = flSellRatio;
 	pNewItem->iBundleAmt = iBundleAmt;
 
-	return TRUE;
+	return true;
 }
+
 storeitem_t *CStore ::GetItem(const char *pszItemName)
 {
 	for (int i = 0; i < Items.size(); i++)
 		if (FStrEq(Items[i].Name, pszItemName))
 			return &Items[i];
 
-	return NULL;
+	return nullptr;
 }
+
 storeitem_t *CStore ::GetItem(int idx)
 {
 	if (idx < 0 || idx >= (signed)Items.size())
-		return NULL;
+		return nullptr;
 
 	return &Items[idx];
 }
+
 void CStore::RemoveItem(const char* Name)
 {
 	for (int i = 0; i < Items.size(); i++)
@@ -53,10 +57,12 @@ void CStore::RemoveItem(const char* Name)
 			break;
 		}
 }
+
 void CStore::RemoveAllItems()
 {
 	Items.clear();
 }
+
 void CStore ::Deactivate()
 {
 	RemoveAllItems();
@@ -67,6 +73,7 @@ void CStore ::Deactivate()
 			break;
 		}
 }
+
 void CStore ::Offer(edict_t *pePlayer, int iBuyFlags, CBaseMonster *pVendor)
 {
 	CBasePlayer *pPlayer = (CBasePlayer *)MSInstance(pePlayer);
