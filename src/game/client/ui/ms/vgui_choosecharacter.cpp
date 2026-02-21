@@ -1221,7 +1221,7 @@ void CRenderChar::Render( )
 	//Thothie FEB2011_02 - don't figure gear for gender entries, or will inherit from other slots
 	if( m_Stage != STG_CHOOSEGENDER )
 	{
-		m_GearItems.clearitems( );
+		m_GearItems.clear();
 		m_Gear.clear();
 		uint BodyParts[HUMAN_BODYPARTS] = { 0 };
 		
@@ -1262,7 +1262,7 @@ void CRenderChar::Render( )
 			SetBits( ItemEnt.curstate.oldbuttons, MSRDR_NOREFLECT );
 			SetBits( ItemEnt.curstate.colormap, MSRDR_LIGHT_NORMAL );
 
-			m_GearItems.add( pItem );
+			m_GearItems.push_back( pItem );
 
 			pItem.RemoveFromOwner();
 			pItem.Container_RemoveAllItems();

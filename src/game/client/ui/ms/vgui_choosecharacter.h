@@ -46,7 +46,7 @@ public:
 	bool m_ReturnToAttention;
 	bool m_Done;
 	bool m_ItemInHand;
-	mslist<CGenericItem> m_GearItems;
+	std::vector<CGenericItem> m_GearItems;
 	enum rendercharstate_e
 	{
 		RCS_IDLE,
@@ -55,6 +55,7 @@ public:
 		RCS_INACTIVE
 	} m_AnimState;
 };
+
 class CRenderSpawnbox : public CRenderEntity
 {
 public:
