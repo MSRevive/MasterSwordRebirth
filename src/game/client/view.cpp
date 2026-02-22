@@ -55,9 +55,9 @@ extern "C"
 	int iIsSpectator;
 }
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
+int PM_GetVisEntInfo(int ent);
+void PM_ParticleLine(float *start, float *end, int pcolor, float life, float vert);
+int PM_GetPhysEntInfo(int ent);
 
 extern "C"
 {
@@ -65,11 +65,7 @@ extern "C"
 	void CL_CameraOffset(float *ofs);
 
 	void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams);
-
-	void PM_ParticleLine(float *start, float *end, int pcolor, float life, float vert);
-	int PM_GetVisEntInfo(int ent);
-	int PM_GetPhysEntInfo(int ent);
-
+	
 	float vJumpOrigin[3];
 	float vJumpAngles[3];
 }

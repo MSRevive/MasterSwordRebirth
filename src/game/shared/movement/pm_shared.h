@@ -21,7 +21,7 @@
 #pragma once
 
 void PM_Init(struct playermove_s *ppmove);
-void PM_Move(struct playermove_s *ppmove, int server);
+void PM_Move(struct playermove_s *ppmove, qboolean server);
 char PM_FindTextureType(char *name);
 
 /**
@@ -39,5 +39,7 @@ char* memfgets(const byte* pMemFile, std::size_t fileSize, std::size_t& filePos,
 #define OBS_IN_EYE 4
 #define OBS_MAP_FREE 5
 #define OBS_MAP_CHASE 6
+
+inline bool g_CheckForPlayerStuck = false;
 
 #endif

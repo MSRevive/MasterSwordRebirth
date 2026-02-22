@@ -1807,7 +1807,39 @@ allow for the cut precision of the net coordinates
 */
 #define PM_CHECKSTUCK_MINTIME 0.05 // Don't check again too quickly.
 
-int PM_CheckStuck(void)
+bool PM_TryToUnstuck(Vector base)
+{
+	float x, y, z;
+	float xystep = 8.0;
+	float zstep = 18.0;
+	float xyminmax = xystep;
+	float zminmax = 4 * zstep;
+	Vector test;
+
+	for (z = 0; z <= zminmax; z += zstep)
+	{
+		for (x = -xyminmax; x <= xyminmax; x += xystep)
+		{
+			for (y = -xyminmax; y <= xyminmax; y += xystep)
+			{
+				test = base;
+				test[0] += x;
+				test[1] += y;
+				test[2] += z;
+
+				if (pmove->PM_TestPlayerPosition(test, NULL) == -1)
+				{
+					VectorCopy(test, pmove->origin);
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool PM_CheckStuck(void)
 {
 	vec3_t base;
 	vec3_t offset;
@@ -1825,7 +1857,7 @@ int PM_CheckStuck(void)
 	if (hitent == -1)
 	{
 		PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-		return 0;
+		return false;
 	}
 
 	VectorCopy(pmove->origin, base);
@@ -1851,28 +1883,28 @@ int PM_CheckStuck(void)
 					PM_ResetStuckOffsets(pmove->player_index, pmove->server);
 
 					VectorCopy(test, pmove->origin);
-					return 0;
+					return false;
 				}
 				nReps++;
 			} while (nReps < 54);
 		}
 	}
 
-	// Only an issue on the client.
-
-	if (pmove->server)
-		idx = 0;
-	else
-		idx = 1;
-
-	fTime = pmove->Sys_FloatTime();
-	// Too soon?
-	if (rgStuckCheckTime[pmove->player_index][idx] >=
-		(fTime - PM_CHECKSTUCK_MINTIME))
+	// Always check if we've just changed levels.
+	if (!(pmove->server != 0 && g_CheckForPlayerStuck))
 	{
-		return 1;
+		// TODO: not really necessary to have separate arrays for client and server since the code is separate anyway.
+		const int idx = 0 != pmove->server ? 0 : 1;
+
+		const float fTime = pmove->Sys_FloatTime();
+		// Too soon?
+		if (rgStuckCheckTime[pmove->player_index][idx] >=
+			(fTime - PM_CHECKSTUCK_MINTIME))
+		{
+			return true;
+		}
+		rgStuckCheckTime[pmove->player_index][idx] = fTime;
 	}
-	rgStuckCheckTime[pmove->player_index][idx] = fTime;
 
 	pmove->PM_StuckTouch(hitent, &traceresult);
 
@@ -1888,43 +1920,38 @@ int PM_CheckStuck(void)
 		if (i >= 27)
 			VectorCopy(test, pmove->origin);
 
-		return 0;
+		return false;
+	}
+
+	// Try to unstuck the player after a level change.
+	// This only works in singleplayer. In multiplayer there it's too unreliable to try, so only the first player gets unstuck.
+	if (pmove->server != 0 && g_CheckForPlayerStuck)
+	{
+		g_CheckForPlayerStuck = false;
+
+		// Are we stuck inside the world?
+		if (hitent == 0)
+		{
+			if (!PM_TryToUnstuck(base))
+			{
+				return false;
+			}
+		}
 	}
 
 	// If player is flailing while stuck in another player ( should never happen ), then see
 	//  if we can't "unstick" them forceably.
-	if (pmove->cmd.buttons & (IN_JUMP | IN_DUCK | IN_ATTACK) && (pmove->physents[hitent].player != 0))
+	if ((pmove->cmd.buttons & (IN_JUMP | IN_DUCK | IN_ATTACK)) != 0 && (pmove->physents[hitent].player != 0))
 	{
-		float x, y, z;
-		float xystep = 8.0;
-		float zstep = 18.0;
-		float xyminmax = xystep;
-		float zminmax = 4 * zstep;
-
-		for (z = 0; z <= zminmax; z += zstep)
+		if (!PM_TryToUnstuck(base))
 		{
-			for (x = -xyminmax; x <= xyminmax; x += xystep)
-			{
-				for (y = -xyminmax; y <= xyminmax; y += xystep)
-				{
-					VectorCopy(base, test);
-					test[0] += x;
-					test[1] += y;
-					test[2] += z;
-
-					if (pmove->PM_TestPlayerPosition(test, NULL) == -1)
-					{
-						VectorCopy(test, pmove->origin);
-						return 0;
-					}
-				}
-			}
+			return false;
 		}
 	}
 
 	//VectorCopy (base, pmove->origin);
 
-	return 1;
+	return true;
 }
 
 /*
@@ -3143,7 +3170,13 @@ void PM_PlayerMove(qboolean server)
 	{
 		if (PM_CheckStuck())
 		{
-			return; // Can't move, we're stuck
+			// Let the user try to duck to get unstuck
+			PM_Duck();
+
+			if (PM_CheckStuck())
+			{
+				return; // Can't move, we're stuck
+			}
 		}
 	}
 
@@ -3476,7 +3509,7 @@ invoked by each side as appropriate.  There should be no distinction, internally
 and client.  This will ensure that prediction behaves appropriately.
 */
 
-void PM_Move(struct playermove_s *ppmove, int server)
+void PM_Move(struct playermove_s *ppmove, qboolean server)
 {
 	assert(pm_shared_initialized);
 
@@ -3491,7 +3524,7 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	PMScript = HUDScript;
 #endif
 
-	PM_PlayerMove((server != 0) ? true : false);
+	PM_PlayerMove(server);
 
 	if (pmove->onground != -1)
 	{
@@ -3511,7 +3544,16 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	PMScript = NULL;
 }
 
-extern "C" int PM_GetPhysEntInfo(int ent)
+int PM_GetVisEntInfo(int ent)
+{
+	if (ent >= 0 && ent <= pmove->numvisent)
+	{
+		return pmove->visents[ent].info;
+	}
+	return -1;
+}
+
+int PM_GetPhysEntInfo(int ent)
 {
 	if (ent >= 0 && ent <= pmove->numphysent)
 	{
