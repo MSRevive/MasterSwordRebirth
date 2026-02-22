@@ -11,12 +11,13 @@
 #include "const.h"
 #include "camera.h"
 #include "in_defs.h"
+#include <mathlib.h>
 
 //#define LATER
 void V_GetChaseOrigin(float *angles, float *origin, float distance, float *returnvec);
 extern float v_lastDistance;
 
-extern "C" void NormalizeAngles(float *angles); //Master Sword
+extern void NormalizeAngles(float *angles); //Master Sword
 bool Cam_SwitchingTo1StPerson = false;
 
 float CL_KeyState(kbutton_t *key);

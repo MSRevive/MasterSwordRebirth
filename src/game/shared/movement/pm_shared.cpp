@@ -24,7 +24,6 @@
 #include <ctype.h>	// isspace
 #include <string>
 #include <iostream>
-//#include "mathlib.h"
 #include "const.h"
 #include "usercmd.h"
 #include "pm_defs.h"
@@ -33,15 +32,7 @@
 #include "pm_debug.h"
 #include "player/player.h"
 #include "filesystem_shared.h"
-
-extern "C" vec3_t vec3_origin;
-
-//Dogg -- Ripped from mathlib.h
-extern "C"
-{
-	extern int nanmask;
-#define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
-};
+#include "mathlib.h"
 //-----------------------------
 
 //Master Sword -----
@@ -58,41 +49,6 @@ extern "C"
 	extern float vJumpOrigin[3];
 	extern float vJumpAngles[3];
 }
-#else
-
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
-#define VectorSubtract(a, b, c)   \
-	{                             \
-		(c)[0] = (a)[0] - (b)[0]; \
-		(c)[1] = (a)[1] - (b)[1]; \
-		(c)[2] = (a)[2] - (b)[2]; \
-	}
-#define VectorAdd(a, b, c)        \
-	{                             \
-		(c)[0] = (a)[0] + (b)[0]; \
-		(c)[1] = (a)[1] + (b)[1]; \
-		(c)[2] = (a)[2] + (b)[2]; \
-	}
-#define VectorCopy(a, b) \
-	{                    \
-		(b)[0] = (a)[0]; \
-		(b)[1] = (a)[1]; \
-		(b)[2] = (a)[2]; \
-	}
-inline void VectorClear(float *a)
-{
-	a[0] = 0.0;
-	a[1] = 0.0;
-	a[2] = 0.0;
-}
-float Length(const float *v);
-void VectorMA(const float *veca, float scale, const float *vecb, float *vecc);
-void VectorScale(const float *in, float scale, float *out);
-float VectorNormalize(float *v);
-void VectorInverse(float *v);
-
-extern "C" vec3_t vec3_origin;
-extern "C" void AngleVectors(const float *angles, float *forward, float *right, float *up);
 #endif
 
 IScripted *PMScript = NULL;
@@ -189,12 +145,6 @@ typedef struct hull_s
 
 // double to float warning
 #pragma warning(disable : 4244)
-// up / down
-#define PITCH 0
-// left / right
-#define YAW 1
-// fall over
-#define ROLL 2
 
 #define MAX_CLIENTS 32
 
@@ -206,6 +156,15 @@ typedef struct hull_s
 #define CONTENTS_CURRENT_DOWN -14
 
 #define CONTENTS_TRANSLUCENT -15
+
+// up / down
+#define PITCH 0
+// left / right
+#define YAW 1
+// fall over
+#define ROLL 2
+
+Vector vec3_origin(0,0,0);
 
 static vec3_t rgv3tStuckTable[54];
 static int rgStuckLast[MAX_CLIENTS][2];
@@ -2310,7 +2269,7 @@ void PM_LadderMove(physent_t *pLadder)
 		float forward = 0, right = 0;
 		vec3_t vpn, v_right;
 
-		AngleVectors(pmove->angles, vpn, v_right, NULL);
+		AngleVectors(pmove->angles, &vpn, &v_right, NULL);
 		if (pmove->cmd.buttons & IN_BACK)
 			forward -= MAX_CLIMB_SPEED;
 		if (pmove->cmd.buttons & IN_FORWARD)
@@ -2991,7 +2950,7 @@ float PM_CalcRoll(vec3_t angles, vec3_t velocity, float rollangle, float rollspe
 	float value;
 	vec3_t forward, right, up;
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	side = DotProduct(velocity, right);
 
@@ -3167,7 +3126,7 @@ void PM_PlayerMove(qboolean server)
 	PM_ReduceTimers();
 
 	// Convert view angles to vectors
-	AngleVectors(pmove->angles, pmove->forward, pmove->right, pmove->up);
+	AngleVectors(pmove->angles, &pmove->forward, &pmove->right, &pmove->up);
 
 	// PM_ShowClipBox();
 
@@ -3627,89 +3586,3 @@ const char* PM_GetValue(msstringlist &Params)
 
 	RETURN_NOTHING;
 }
-
-#ifdef VALVE_DLL
-// c++ version of the utils, ripped from the client's util.h
-double sqrt(double x);
-
-float Length(const float *v)
-{
-	int i;
-	float length;
-
-	length = 0;
-	for (i = 0; i < 3; i++)
-		length += v[i] * v[i];
-	length = sqrt(length); // FIXME
-
-	return length;
-}
-
-void VectorAngles(const float *forward, float *angles)
-{
-	float tmp, yaw, pitch;
-
-	if (forward[1] == 0 && forward[0] == 0)
-	{
-		yaw = 0;
-		if (forward[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
-		if (yaw < 0)
-			yaw += 360;
-
-		tmp = sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
-		pitch = (atan2(forward[2], tmp) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[0] = pitch;
-	angles[1] = yaw;
-	angles[2] = 0;
-}
-
-float VectorNormalize(float *v)
-{
-	float length, ilength;
-
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt(length); // FIXME
-
-	if (length)
-	{
-		ilength = 1 / length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-
-	return length;
-}
-
-void VectorInverse(float *v)
-{
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
-}
-
-void VectorScale(const float *in, float scale, float *out)
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
-}
-
-void VectorMA(const float *veca, float scale, const float *vecb, float *vecc)
-{
-	vecc[0] = veca[0] + scale * vecb[0];
-	vecc[1] = veca[1] + scale * vecb[1];
-	vecc[2] = veca[2] + scale * vecb[2];
-}
-#endif

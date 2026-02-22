@@ -90,7 +90,7 @@ public:
 			{
 				Vector Forward;
 				Vector NewAng = ViewMgr.Angles + Vector(0, RightPlaneYaw, 0);
-				EngineFunc::MakeVectors(NewAng, Forward);
+				EngineFunc::MakeVectors(NewAng, &Forward);
 				plane.m_Normal = Forward;
 				plane.m_Dist = DotProduct(ViewMgr.Origin, plane.m_Normal);
 				break;
@@ -99,7 +99,7 @@ public:
 			{
 				Vector Forward;
 				Vector NewAng = ViewMgr.Angles + Vector(0, -RightPlaneYaw, 0);
-				EngineFunc::MakeVectors(NewAng, Forward);
+				EngineFunc::MakeVectors(NewAng, &Forward);
 				plane.m_Normal = Forward;
 				plane.m_Dist = DotProduct(ViewMgr.Origin, plane.m_Normal);
 				break;
@@ -108,7 +108,7 @@ public:
 			{
 				Vector Forward;
 				Vector NewAng = ViewMgr.Angles + Vector(-UpPlanePitch, 0, 0);
-				EngineFunc::MakeVectors(NewAng, Forward);
+				EngineFunc::MakeVectors(NewAng, &Forward);
 				plane.m_Normal = Forward;
 				plane.m_Dist = DotProduct(ViewMgr.Origin, plane.m_Normal);
 				break;
@@ -117,7 +117,7 @@ public:
 			{
 				Vector Forward;
 				Vector NewAng = ViewMgr.Angles + Vector(UpPlanePitch, 0, 0);
-				EngineFunc::MakeVectors(NewAng, Forward);
+				EngineFunc::MakeVectors(NewAng, &Forward);
 				plane.m_Normal = Forward;
 				plane.m_Dist = DotProduct(ViewMgr.Origin, plane.m_Normal);
 				break;

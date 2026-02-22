@@ -35,6 +35,7 @@
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"
 #include <GL/gl.h> // Header File For The OpenGL32 Library
+#include <mathlib.h>
 
 extern "C" int nanmask;
 #define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
@@ -1482,7 +1483,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			m_pPlayerInfo = IEngineStudio.PlayerInfo(ZeroBasedPlayerIdx);
 			Vector PrevOrigin = m_pPlayerInfo->prevgaitorigin;
 			Vector vForward;
-			EngineFunc::MakeVectors(m_pCurrentEntity->angles, vForward, NULL, NULL);
+			EngineFunc::MakeVectors(m_pCurrentEntity->angles, &vForward, NULL, NULL);
 			//Set the "last origin" to behind me to the walk code thinks I'm walking forward.
 			//This needs to be scaled from the original velocity, incase I'm drawing a fake player of a different size
 

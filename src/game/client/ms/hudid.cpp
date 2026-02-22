@@ -30,6 +30,7 @@ extern void HUD_PrepEntity(CBaseEntity *pEntity, CBasePlayer *pWeaponOwner);
 
 #include "hudid.h"
 #include "ms/vgui_hud.h"
+#include <mathlib.h>
 
 MS_DECLARE_MESSAGE(m_HUDId, EntInfo);
 
@@ -167,7 +168,7 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 	Vector vViewAngle;
 	gEngfuncs.GetViewAngles(vViewAngle);
 	cl_entity_s *clplayer = gEngfuncs.GetLocalPlayer();
-	AngleVectors(vViewAngle, vForward, NULL, NULL);
+	AngleVectors(vViewAngle, &vForward, NULL, NULL);
 	Vector vecSrc = clplayer->origin, vecEnd,
 		   viewOfs;
 	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(viewOfs);

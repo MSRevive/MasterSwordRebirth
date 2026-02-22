@@ -11,6 +11,7 @@
 #include "hudscript.h"
 #include "ms/vgui_hud.h"
 #include "mslogger.h"
+#include <mathlib.h>
 //#include "SteamClientHelper.h"
 //#include "richpresence.h"
 
@@ -291,7 +292,7 @@ char* UTIL_VarArgs(const char *format, ...)
 Vector UTIL_VecToAngles(const Vector &vec)
 {
 	float rgflVecOut[3];
-	AngleVectors(vec, rgflVecOut, NULL, NULL);
+	VEC_TO_ANGLES(vec, rgflVecOut);
 	return Vector(rgflVecOut);
 }
 

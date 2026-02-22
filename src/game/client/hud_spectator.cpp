@@ -30,8 +30,7 @@
 #include "vgui_scorepanel.h"
 #include "vgui_menudefsshared.h"
 #include "filesystem_shared.h"
-
-extern "C" float* vec3_origin;
+#include <mathlib.h>
 
 #pragma warning(disable : 4244)
 
@@ -43,7 +42,7 @@ extern void V_GetInEyePos(int entity, float *origin, float *angles);
 extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float *cl_angles, float *origin, float *angles);
 extern void VectorAngles(const float *forward, float *angles);
-extern "C" void NormalizeAngles(float *angles);
+extern void NormalizeAngles(float *angles);
 extern float *GetClientColor(int clientIndex);
 
 extern vec3_t v_origin;	   // last view origin
@@ -74,7 +73,7 @@ void SpectatorSpray(void)
 	if (!gEngfuncs.IsSpectateOnly())
 		return;
 
-	AngleVectors(v_angles, forward, NULL, NULL);
+	AngleVectors(v_angles, &forward, NULL, NULL);
 	VectorScale(forward, 128, forward);
 	VectorAdd(forward, v_origin, forward);
 	pmtrace_t *trace = gEngfuncs.PM_TraceLine(v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1);
@@ -349,11 +348,8 @@ void CHudSpectator::SetSpectatorStartPosition()
 	else
 	{
 		// jump to 0,0,0 if no better position was found
-		if (vec3_origin != NULL)
-		{
-			VectorCopy(vec3_origin, m_cameraOrigin);
-			VectorCopy(vec3_origin, m_cameraAngles);
-		}
+		VectorCopy(Vector(0,0,0), m_cameraOrigin);
+		VectorCopy(Vector(0,0,0), m_cameraAngles);
 	}
 
 	VectorCopy(m_cameraOrigin, vJumpOrigin);
@@ -414,7 +410,7 @@ int CHudSpectator::Draw(float flTime)
 	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
 	{
 		vec3_t right;
-		AngleVectors(v_angles, NULL, right, NULL);
+		AngleVectors(v_angles, NULL, &right, NULL);
 		VectorNormalize(right);
 		VectorScale(right, m_moveDelta, right);
 
@@ -1212,7 +1208,7 @@ void CHudSpectator::DrawOverviewEntities()
 		// see R_DrawSpriteModel
 		// draws players sprite
 
-		AngleVectors(ent->angles, right, up, NULL);
+		AngleVectors(ent->angles, &right, &up, NULL);
 
 		VectorCopy(ent->origin, origin);
 
@@ -1343,7 +1339,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	gEngfuncs.pTriAPI->Color4f(r, g, b, 1.0);
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, NULL, NULL);
 	VectorScale(forward, 512.0f, forward);
 
 	offset[0] = 0.0f;

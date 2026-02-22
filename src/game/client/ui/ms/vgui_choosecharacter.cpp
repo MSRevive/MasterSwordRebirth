@@ -1204,7 +1204,7 @@ void CRenderChar::Render( )
 		return;
 
 	Vector vForward, vRight, vUp;
-	EngineFunc::MakeVectors( ViewMgr.Angles, vForward, vRight, vUp );
+	EngineFunc::MakeVectors( ViewMgr.Angles, &vForward, &vRight, &vUp );
 
 	m_Ent.origin = ViewMgr.Origin + vForward * 5.0f + vUp * 0.4;
 	if( m_Stage == STG_CHOOSECHAR )
@@ -1413,7 +1413,7 @@ void CRenderSpawnbox::Init( )
 void CRenderSpawnbox::Render( )
 {
 	Vector vForward, vRight, vUp;
-	EngineFunc::MakeVectors( ViewMgr.Angles, vForward, vRight, vUp );
+	EngineFunc::MakeVectors( ViewMgr.Angles, &vForward, &vRight, &vUp );
 	m_Ent.origin = ViewMgr.Origin;
 	m_Ent.angles = Vector( ViewMgr.Angles.x, ViewMgr.Angles.y + 180, 0 );
  	m_Ent.curstate.angles = m_Ent.angles;

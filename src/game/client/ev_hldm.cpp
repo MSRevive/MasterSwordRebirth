@@ -30,10 +30,9 @@
 #include "event_api.h"
 #include "event_args.h"
 #include "in_defs.h"
+#include "mathlib.h"
 
 #include <string.h>
-
-extern "C" float* vec3_origin;
 
 static int tracerCount[32];
 
@@ -474,7 +473,7 @@ void EV_FireGlock1(event_args_t *args)
 	VectorCopy(args->velocity, velocity);
 
 	empty = args->bparam1;
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
 
@@ -528,7 +527,7 @@ void EV_FireGlock2(event_args_t *args)
 	VectorCopy(args->angles, angles);
 	VectorCopy(args->velocity, velocity);
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
 
@@ -583,7 +582,7 @@ void EV_FireShotGunDouble(event_args_t *args)
 	VectorCopy(args->angles, angles);
 	VectorCopy(args->velocity, velocity);
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl"); // brass shell
 
@@ -649,7 +648,7 @@ void EV_FireShotGunSingle(event_args_t *args)
 	VectorCopy(args->angles, angles);
 	VectorCopy(args->velocity, velocity);
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shotgunshell.mdl"); // brass shell
 
@@ -710,7 +709,7 @@ void EV_FireMP5(event_args_t *args)
 	VectorCopy(args->angles, angles);
 	VectorCopy(args->velocity, velocity);
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	shell = gEngfuncs.pEventAPI->EV_FindModelIndex("models/shell.mdl"); // brass shell
 
@@ -769,7 +768,7 @@ void EV_FirePython(event_args_t *args)
 	VectorCopy(args->angles, angles);
 	VectorCopy(args->velocity, velocity);
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	if (EV_IsLocal(idx))
 	{
@@ -866,7 +865,7 @@ void EV_FireGauss(event_args_t *args)
 	m_iBeam = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/smoke.spr");
 	m_iBalls = m_iGlow = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/hotglow.spr");
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	VectorMA(vecSrc, 8192, forward, vecDest);
 
@@ -968,7 +967,7 @@ void EV_FireGauss(event_args_t *args)
 				VectorMA(tr.endpos, 8.0, forward, vecSrc);
 				VectorMA(vecSrc, 8192.0, forward, vecDest);
 
-				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage * n / 255.0, flDamage * n * 0.5 * 0.1, FTENT_FADEOUT);
+				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage * n / 255.0, flDamage * n * 0.5 * 0.1, FTENT_FADEOUT);
 
 				{
 					vec3_t fwd;
@@ -990,7 +989,7 @@ void EV_FireGauss(event_args_t *args)
 				// tunnel
 				EV_HLDM_DecalGunshot(&tr, BULLET_MONSTER_12MM);
 
-				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 1.0, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
+				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 1.0, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
 
 				// limit it to one hole punch
 				if (fHasPunched)
@@ -1047,7 +1046,7 @@ void EV_FireGauss(event_args_t *args)
 
 							EV_HLDM_DecalGunshot(&beam_tr, BULLET_MONSTER_12MM);
 
-							gEngfuncs.pEfxAPI->R_TempSprite(beam_tr.endpos, vec3_origin, 0.1, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
+							gEngfuncs.pEfxAPI->R_TempSprite(beam_tr.endpos, Vector(0,0,0), 0.1, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT);
 
 							// balls
 							{
@@ -1073,7 +1072,7 @@ void EV_FireGauss(event_args_t *args)
 					{
 						// slug doesn't punch through ever with primary
 						// fire, so leave a little glowy bit and make some balls
-						gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT);
+						gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT);
 
 						{
 							vec3_t fwd;

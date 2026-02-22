@@ -89,7 +89,7 @@ Vector GetRelativePos(Vector &Ang, Vector &Dir)
 {
 	Vector vForward, vRight, vUp, vPosition;
 
-	EngineFunc::MakeVectors(Ang, vForward, vRight, vUp); //Use the mutal client/server friendly version of this
+	EngineFunc::MakeVectors(Ang, &vForward, &vRight, &vUp); //Use the mutal client/server friendly version of this
 
 	vPosition = vRight * Dir.x;
 	vPosition += vForward * Dir.y;

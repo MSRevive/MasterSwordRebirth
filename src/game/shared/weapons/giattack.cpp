@@ -1045,7 +1045,7 @@ void CGenericItem::ChargeThrowProj()
 		Vector vStartPos = GetRelativePos(vAngle, vOffsets);
 		vStartPos += vOrigin;
 
-		EngineFunc::MakeVectors(vAngle, vForward, NULL, NULL);
+		EngineFunc::MakeVectors(vAngle, &vForward, NULL, NULL);
 		float flRange = CurrentAttack->flRange * flTimeHeldAdjusted;
 		Vector vTemp = vForward * flRange;
 		pProjectile->TossProjectile(this, vStartPos, vTemp);

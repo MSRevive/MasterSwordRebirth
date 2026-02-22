@@ -23,6 +23,7 @@
 
 #include "eventscripts.h"
 #include "event_api.h"
+#include "mathlib.h"
 
 /*
 =================
