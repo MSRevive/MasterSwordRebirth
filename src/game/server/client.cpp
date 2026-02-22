@@ -934,6 +934,14 @@ void ClientCommand2(edict_t *pEntity)
 		}
 		pPlayer->m_hEnemy = NULL;
 	}
+	else if (FStrEq(pcmd, "pnoclip"))
+	{
+		pPlayer->pev->movetype = MOVETYPE_NOCLIP;
+		pPlayer->pev->solid = SOLID_NOT;
+		SetBits(pPlayer->m_afPhysicsFlags, PFLAG_OBSERVER);
+		SetBits(pPlayer->pev->flags, FL_NOTARGET);
+		//pPlayer->SetSpeed( 300 );
+	}
 	else if (FStrEq(pcmd, "storage"))
 	{
 		if (CMD_ARGC() < 2)
@@ -1337,77 +1345,6 @@ void ClientCommand2(edict_t *pEntity)
 			//Fix it by forcing an update
 			pPlayer->m_ClientCurrentHand = -1;
 		}*/
-	}
-	//Thothie JUL2011_02 - Dynamic Client Command
-	else if (FStrEq(pcmd, "ce"))
-	{
-		//clcmd <player|GM> <event> <params> - called by client-side script command clcmd
-		/*IScripted *pScripted = NULL;
-		if (!strcmp(CMD_ARGV(1), "GM"))
-		{
-			ALERT(at_console, "DEBUG: ce - requested GM as target\n");
-			CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-			if (pGameMasterEnt)
-			{
-				pScripted = pGameMasterEnt->GetScripted();
-			}
-			else
-			{
-				ALERT(at_console, "ERROR: ce - Failed to find game master!\n");
-			}
-		}
-		else
-		{
-			if (!strcmp(CMD_ARGV(1), "player"))
-			{
-				pScripted = pPlayer->GetScripted();
-			}
-		}
-
-		if (pScripted)
-		{
-			static msstringlist Params;
-			Params.clearitems();
-			int i = 0;
-			for (i = 0; i < CMD_ARGC(); i++)
-			{
-				if (i > 2)
-				{
-					Params.add(CMD_ARGV(i));
-				}
-			}
-			Params.add(CMD_ARGV(i + 1));
-			pScripted->CallScriptEvent(CMD_ARGV(2), &Params);
-		}*/
-
-		/*
-		CBaseEntity *pEntity = StringToEnt( CMD_ARGV(1) );
-		if( pEntity )
-		{
-			pScripted = pEntity->GetScripted();
-			if ( pScripted )
-			{
-				static msstringlist Params;
-				Params.clearitems( );
-				 for (int i = 0; i < CMD_ARGC(); i++)
-				{
-					if ( i > 2 )
-					{
-						Params.add( CMD_ARGV(i) );
-					}
-				}
-				pScripted->CallScriptEvent( CMD_ARGV(2), &Params );
-			}
-			else
-			{
-				MSErrorConsoleText( "clcmd - entity ", msstring(CMD_ARGV(1)) + " found, but not scripted." );
-			}
-		}
-		else
-		{
-			MSErrorConsoleText( "clcmd - entity ", msstring(CMD_ARGV(1)) + " not found." );
-		}
-		*/
 	}
 	else if (FStrEq(pcmd, "inv") && CMD_ARGV(1) && bCanUseInventory) //MAY2008 - no pulling invenotry when you cant attack
 	{
