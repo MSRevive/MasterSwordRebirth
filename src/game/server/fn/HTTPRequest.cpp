@@ -32,6 +32,8 @@ HTTPRequest::HTTPRequest(HTTPMethod method, const char* url, const char* body, s
 	m_sRequestBody = nullptr;
 	m_iRequestBodySize = 0;
 	m_Handle = nullptr;
+	m_pHeaderList = nullptr;
+	m_pShareHandle = nullptr;
 
 	m_iSteamID64 = steamID64;
 	m_iSlot = slot;
@@ -53,11 +55,17 @@ HTTPRequest::~HTTPRequest()
 
 void HTTPRequest::Cleanup()
 {
-	delete m_sRequestBody;
+	delete[] m_sRequestBody;
 	m_sRequestBody = nullptr;
 	m_sRequestBuffer.clear();
 
 	m_sResponseBody.clear();
+
+	if (m_pHeaderList)
+	{
+		curl_slist_free_all(m_pHeaderList);
+		m_pHeaderList = nullptr;
+	}
 	
 	// just incase it's not cleaned up already.
 	if (m_Handle)
@@ -94,12 +102,13 @@ void HTTPRequest::SetupRequest()
 	curl_easy_setopt(m_Handle, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(m_Handle, CURLOPT_USERAGENT, "MSR Game Server");
 
-	// Process request body.
+	if (m_pShareHandle)
+		curl_easy_setopt(m_Handle, CURLOPT_SHARE, m_pShareHandle);
+
 	if (m_sRequestBody != nullptr)
 	{
-		struct curl_slist *list = nullptr;
-		list = curl_slist_append(list, "Content-Type: application/json; charset=UTF-8");
-		curl_easy_setopt(m_Handle, CURLOPT_HTTPHEADER, list);
+		m_pHeaderList = curl_slist_append(m_pHeaderList, "Content-Type: application/json; charset=UTF-8");
+		curl_easy_setopt(m_Handle, CURLOPT_HTTPHEADER, m_pHeaderList);
 
 		char steamID64String[REQUEST_URL_SIZE];
 		_snprintf(steamID64String, REQUEST_URL_SIZE, "%llu", m_iSteamID64);
@@ -181,19 +190,43 @@ bool HTTPRequest::AsyncSendRequest()
 	return result;
 }
 
-// This ignores the result of the async thread.
-void HTTPRequest::AsyncSendRequestDiscard()
+CURL* HTTPRequest::PrepareForMulti()
 {
 	if (m_Handle)
-		return;
+		return nullptr;
 
 	m_Handle = curl_easy_init();
+	if (!m_Handle)
+		return nullptr;
+
 	SetupRequest();
 
-	std::thread(&HTTPRequest::PerformRequest, this).detach();
-	//auto future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
-	//curl_easy_cleanup(m_Handle);
-	//m_Handle = nullptr;
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
+	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
+
+	// Store a back-pointer so we can recover 'this' from a completed easy handle.
+	curl_easy_setopt(m_Handle, CURLOPT_PRIVATE, this);
+
+	m_iRequestState = RequestState::EXECUTED;
+	return m_Handle;
+}
+
+// Called by CRequestManager when curl_multi reports this transfer finished.
+void HTTPRequest::OnMultiComplete(CURLcode result)
+{
+	if (result == CURLE_OK)
+	{
+		int httpCode = 200;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
+		ResponseCallback(httpCode);
+	}
+	else
+	{
+		ResponseCallback(0);
+	}
+
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
 }
 
 bool HTTPRequest::PerformRequest()
@@ -268,7 +301,6 @@ void HTTPRequest::ResponseCallback(int httpCode)
 		return;
 	}
 
-	//JSONDocument* m_JSONResponse = ParseJSON(m_sResponseBody.c_str());
 	OnResponse();
 	
 	m_iRequestState = RequestState::FINISHED;

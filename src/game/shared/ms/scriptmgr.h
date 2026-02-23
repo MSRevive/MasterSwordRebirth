@@ -9,7 +9,6 @@ class CScript;
 class ScriptMgr
 {
 public:
-	static CGameGroupFile m_GroupFile;
 	static int m_TotalScripts;
 
 	static void RegisterScript(CScript *NewScript);

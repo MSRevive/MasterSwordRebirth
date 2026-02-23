@@ -87,6 +87,7 @@ private:
 	std::vector<pakDirectory_t> m_EntryList;
 	std::string m_Filename; // Store filename for refresh functionality
 };
+extern CGameGroupFile g_ScriptPack;
 
 #endif
 #endif

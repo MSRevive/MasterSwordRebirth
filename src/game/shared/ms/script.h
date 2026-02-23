@@ -4,6 +4,8 @@
 
 */
 #include <ctime>
+#include <vector>
+
 class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
@@ -70,7 +72,7 @@ public:
 		bool m_HandleRender;		//Handle certain callbacks
 		ulong	m_Iteration;		//Current iteration, when called from calleventloop
 	};
-  props m;
+	props m;
 
 	mslist<scriptvar_t>	m_Constants;	//Local constants
 	static mslist<scriptvar_t> m_gVariables;	//Global variables
@@ -100,8 +102,7 @@ public:
 	scriptvar_t *SetVar( const char *pszVarName, float flValue, bool fGlobal = false );
 	Vector StringToVec(const char* String );
 	void CopyAllData( CScript *pDestScript, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface );
-	//int NewParseLine(std::string &pszCommandLine, int LineNum, SCRIPT_EVENT **pCurrentEvent, scriptcmd_list **pCurrentCmds, mslist<scriptcmd_list *> &ParentCmds);
-	int ParseLine(const char *pszCommandLine /*in*/, int LineNum /*in*/, SCRIPT_EVENT **pCurrentEvent /*in/out*/, scriptcmd_list **pCurrentCmds /*in/out*/, mslist<scriptcmd_list *> &ParentCmds /*in/out*/);
+	int ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** pCurrentEvent, scriptcmd_list** pCurrentCmds, std::vector<scriptcmd_list*>& ParentCmds);
 	void SendScript( scriptsendcmd_t &SendCmd );	//Send script to client
 	CBaseEntity *RetrieveEntity(const char* Name );
   Vector DetermineOrigin(msstring & vsOrigin);

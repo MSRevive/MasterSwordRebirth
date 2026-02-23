@@ -185,10 +185,10 @@ void CHalfLifeMultiplay::Think( void )
 	}
 
 	//if player joins and timer was started than reset timer.
-	if (UTIL_NumPlayers() && g_ServerResetTimer > 0.0f)
+	if ((UTIL_NumPlayers() > 0) && (g_ServerResetTimer > 0.0f))
 		g_ServerResetTimer = 0.0f;
 
-	if ((CVAR_GET_FLOAT("ms_reset_time") > 0) && !UTIL_NumPlayers())
+	if ((CVAR_GET_FLOAT("ms_reset_time") > 0.0f) && (UTIL_NumPlayers() == 0))
 	{
 		ALERT(at_console, "Server empty checking for reset.\n");
 		if (!g_ServerResetTimer)
@@ -205,47 +205,8 @@ void CHalfLifeMultiplay::Think( void )
 		}
 	}
 
-	///// Check game rules /////
-	/*static int last_frags;
-	static int last_time;
-
-	int frags_remaining = 0;
-	int time_remaining = 0;
-
-	if ( g_fGameOver )   // someone else quit the game already
-	{
-		if ( m_flIntermissionEndTime < gpGlobals->time )
-		{
-			if ( m_iEndIntermissionButtonHit  // check that someone has pressed a key, or the max intermission time is over
-				|| ((m_flIntermissionEndTime + MAX_INTERMISSION_TIME) < gpGlobals->time) ) 
-				ChangeLevel(); // intermission is over
-		}
-		return;
-	}
-*/
-
-	// Updates when frags change
-/*	if ( frags_remaining != last_frags )
-	{
-		g_engfuncs.pfnCvar_DirectSet( &fragsleft, UTIL_VarArgs( "%i", frags_remaining ) );
-	}*/
-
-
-	//Master Sword stuff
-	/*if( !g_TimeTryValidate ) g_TimeTryValidate = gpGlobals->time;
-
-	if( gpGlobals->time >= g_TimeTryValidate && strlen(CVAR_GET_STRING("ms_key")) )
-	{
-		g_TimeTryValidate = gpGlobals->time + VALIDATE_DELAY;
-		CheckValidation( );
-	}*/
-
-	//Check for clients sending item or stat info
-//	while( CheckData( ) );
-
-	//dbg( "Check switch to start map" );
-	//If players join the server, but their characters aren't on the map, switch the map to a start map
 	if( ms_joinreset.value )
+	{
 		if( m_TimeCheckSwitchToStartMap && gpGlobals->time > m_TimeCheckSwitchToStartMap )
 		{
 			bool Switch = !IsAnyPlayerAllowedInMap( );
@@ -258,6 +219,7 @@ void CHalfLifeMultiplay::Think( void )
 				SendHUDMsgAll( "#JOINRESET_TITLE", "#JOINRESET_TEXT" );
 			}
 		}
+	}
 
 	if( m_TimeSwitchToNewMap && gpGlobals->time >= m_TimeSwitchToNewMap )
 	{

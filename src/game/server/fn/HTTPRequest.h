@@ -16,7 +16,6 @@
 #define REQUEST_URL_SIZE 512
 #define HTTP_CONTENT_TYPE "application/json"
 #define ID64 unsigned long long
-//using uint8 = unsigned char; // Same thing as byte
 
 class HTTPRequest
 {
@@ -45,14 +44,19 @@ public:
 
 	bool SendRequest();
 	bool AsyncSendRequest();
-	void AsyncSendRequestDiscard();
 	static JSONDocument ParseJSON(const char* data);
+
+	void SetShareHandle(CURLSH* share) { m_pShareHandle = share; }
+
+	CURL* PrepareForMulti();
+
+	void OnMultiComplete(CURLcode result);
 
 	int m_iRequestState;
 	bool m_bNoCallback = false;
 	std::string m_sResponseBody;
 
-protected: // Expose data to inheriting classes.
+protected:
 	char m_sPchAPIUrl[REQUEST_URL_SIZE];
 
 	char* m_sRequestBody;
@@ -62,7 +66,7 @@ protected: // Expose data to inheriting classes.
 	ID64 m_iSteamID64;
 	ID64 m_iSlot;
 
-private: // Keep this private.
+private:
 	static size_t WriteCallbackDispatcher(void* buf, size_t sz, size_t n, void* curlGet);
 	size_t WriteCallback(void* ptr, size_t size, size_t nmemb);
 
@@ -74,8 +78,9 @@ private: // Keep this private.
 
 	HTTPMethod m_eHTTPMethod;
 	CURL* m_Handle;
+	CURLSH* m_pShareHandle;
 
-	//std::promise<bool> m_Promise;
+	struct curl_slist* m_pHeaderList; // Track header list for proper cleanup.
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.

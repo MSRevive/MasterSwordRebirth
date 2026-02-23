@@ -397,6 +397,18 @@ set(ALL_FILES
 )
 
 target_sources(client PRIVATE ${ALL_FILES})
+
+if(INSTALL_DIR)
+	add_custom_command(TARGET client POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:client> "${INSTALL_DIR}/cl_dlls/"
+		COMMENT "Copying client to ${INSTALL_DIR}/cl_dlls")
+
+	if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+		add_custom_command(TARGET client POST_BUILD
+			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:client> "${INSTALL_DIR}/cl_dlls/")
+	endif()
+endif()
+
 install(TARGETS client
 	DESTINATION "msr/cl_dlls"
 	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE

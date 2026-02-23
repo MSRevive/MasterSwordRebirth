@@ -3,6 +3,7 @@
 
 #include "HTTPRequest.h"
 #include <vector>
+#include <curl/curl.h>
 
 class CRequestManager
 {
@@ -16,9 +17,17 @@ public:
 	void Clear(void) { m_vRequests.clear(); }
 	void QueueRequest(HTTPRequest* req);
 
+	CURLSH* GetShareHandle() const { return m_pShareHandle; }
+
 private:
+	void ProcessMultiCompleted();
+
 	bool m_bLoaded = false;
 
+	CURLM* m_pMultiHandle = nullptr;
+	CURLSH* m_pShareHandle = nullptr;
+
+	int m_iRunningTransfers = 0; // this is for curl_multi_perform to keep track of handles.
 	std::vector<HTTPRequest*> m_vRequests;
 };
 
