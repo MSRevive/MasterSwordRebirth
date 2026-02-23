@@ -33,6 +33,7 @@
 #include "health.h"
 #include "hudmisc.h"
 #include "menu.h"
+#include <mathlib.h>
 
 MS_DECLARE_MESSAGE(m_Health, HP)
 MS_DECLARE_MESSAGE(m_Health, MP)
@@ -313,7 +314,7 @@ void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
 	float flDistToTarget = vecFrom.Length();
 
 	vecFrom = vecFrom.Normalize();
-	AngleVectors(vecAngles, forward, right, up);
+	AngleVectors(vecAngles, &forward, &right, &up);
 
 	front = DotProduct(vecFrom, right);
 	side = DotProduct(vecFrom, forward);

@@ -37,6 +37,7 @@ extern "C"
 #include "clientlibrary.h"
 #include "scriptmgr.h"
 #include "ms/clglobal.h"
+#include <mathlib.h>
 
 extern "C"
 {
@@ -52,7 +53,6 @@ extern cl_enginefunc_t gEngfuncs;
 extern CClientLibrary gClient;
 
 // Defined in pm_math.c
-extern "C" float anglemod(float a);
 
 void IN_Init(void);
 void IN_Move(float frametime, usercmd_t *cmd);

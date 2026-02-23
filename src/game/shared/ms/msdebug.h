@@ -41,7 +41,7 @@ public:
 	static void CVAR_SetFloat(const char* Cvar, float Value);
 	static void CVAR_SetString(const char* Cvar, const char* Value);
 #ifdef VECTOR_H
-	static void MakeVectors(const Vector &vecAngles, float *p_vForward, float *p_vRight = NULL, float *p_vUp = NULL);
+	static void MakeVectors(const Vector &vecAngles, Vector *p_vForward, Vector *p_vRight = NULL, Vector *p_vUp = NULL);
 #endif
 #ifdef CVARDEF_H
 #ifndef VALVE_DLL

@@ -747,7 +747,7 @@ msstring CScript::ScriptGetter_Cone(msstring& FullName, msstring& ParserName, ms
 		float ConeFOV = cosf(atof(Params[3]) / 2.0f);
 
 		Vector vForward;
-		EngineFunc::MakeVectors(ConeAngles, vForward, NULL, NULL);
+		EngineFunc::MakeVectors(ConeAngles, &vForward, NULL, NULL);
 
 		Vector	vec2LOS = PointOrigin - ConeOrigin;
 
@@ -3620,7 +3620,7 @@ msstring CScript::ScriptGetter_RelVel(msstring& FullName, msstring& ParserName, 
 		}
 
 		Vector vForward, vRight, vUp;
-		EngineFunc::MakeVectors(Angle, vForward, vRight, vUp);
+		EngineFunc::MakeVectors(Angle, &vForward, &vRight, &vUp);
 
 		Vector Final = vRight * RelVel.x + vForward * RelVel.y + vUp * RelVel.z;
 

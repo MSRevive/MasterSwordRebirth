@@ -23,6 +23,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
+#include <mathlib.h>
 
 //#define EXTENSIVE_LOGGING		//Causes EXTENSIVE logging of every dbg operation
 
@@ -553,13 +554,15 @@ int EngineFunc::AllocString(const char* String)
 	return ALLOC_STRING(String);
 }
 
-void EngineFunc::MakeVectors(const Vector &vecAngles, float *p_vForward, float *p_vRight, float *p_vUp)
+void EngineFunc::MakeVectors(const Vector &vecAngles, Vector *p_vForward, Vector *p_vRight, Vector *p_vUp)
 {
-#ifdef VALVE_DLL
-	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
-#else
+	// not sure if this will have any undesired side effects.
+//#ifdef VALVE_DLL
+//	g_engfuncs.pfnAngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
+//#else
+//	AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
+//#endif
 	AngleVectors(vecAngles, p_vForward, p_vRight, p_vUp);
-#endif
 }
 
 float EngineFunc::CVAR_GetFloat(const char* Cvar)

@@ -81,7 +81,7 @@ CParticle::CParticle()
 
 void CParticle::SetAngles(Vector Angles)
 {
-	EngineFunc::MakeVectors(Angles, m_DirForward, m_DirRight, m_DirUp);
+	EngineFunc::MakeVectors(Angles, &m_DirForward, &m_DirRight, &m_DirUp);
 }
 
 void CParticle::BillBoard()

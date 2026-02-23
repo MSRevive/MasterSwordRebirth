@@ -29,6 +29,7 @@
 // Master Sword includes
 #include "mslogger.h"
 #include "sharedutil.h"
+#include <mathlib.h>
 
 // External client globals
 extern cl_enginefunc_t gEngfuncs;

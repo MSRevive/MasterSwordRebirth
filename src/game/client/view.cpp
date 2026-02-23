@@ -32,6 +32,7 @@
 #include "player/player.h"
 #include "render/clrender.h"
 #include "ms/clglobal.h"
+#include <mathlib.h>
 
 //Master Sword - viewmode testing
 static bool MSTestView = false;
@@ -54,9 +55,9 @@ extern "C"
 	int iIsSpectator;
 }
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
+int PM_GetVisEntInfo(int ent);
+void PM_ParticleLine(float *start, float *end, int pcolor, float life, float vert);
+int PM_GetPhysEntInfo(int ent);
 
 extern "C"
 {
@@ -64,14 +65,7 @@ extern "C"
 	void CL_CameraOffset(float *ofs);
 
 	void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams);
-
-	void PM_ParticleLine(float *start, float *end, int pcolor, float life, float vert);
-	int PM_GetVisEntInfo(int ent);
-	int PM_GetPhysEntInfo(int ent);
-	void InterpolateAngles(float *start, float *end, float *output, float frac);
-	void NormalizeAngles(float *angles);
-	float AngleBetweenVectors(const float *v1, const float *v2);
-
+	
 	float vJumpOrigin[3];
 	float vJumpAngles[3];
 }
@@ -255,7 +249,7 @@ float V_CalcRoll(vec3_t angles, vec3_t velocity, float rollangle, float rollspee
 	float value;
 	vec3_t forward, right, up;
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	side = DotProduct(velocity, right);
 	sign = side < 0 ? -1 : 1;
@@ -632,7 +626,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 	// offsets
 	VectorCopy(pparams->cl_viewangles, angles);
 
-	AngleVectors(angles, pparams->forward, pparams->right, pparams->up);
+	AngleVectors(angles, &pparams->forward, &pparams->right, &pparams->up);
 
 	// don't allow cheats in multiplayer
 	if (pparams->maxclients <= 1)
@@ -655,7 +649,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 		VectorCopy(ofs, camAngles);
 		camAngles[ROLL] = 0;
 
-		AngleVectors(camAngles, camForward, camRight, camUp);
+		AngleVectors(camAngles, &camForward, &camRight, &camUp);
 
 		for (i = 0; i < 3; i++)
 		{
@@ -959,7 +953,7 @@ void V_GetChaseOrigin(float *angles, float *origin, float distance, float *retur
 	cl_entity_t *ent = NULL;
 
 	// Trace back from the target using the player's view angles
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, NULL, NULL);
 
 	VectorScale(forward, -1, forward);
 
@@ -1385,7 +1379,7 @@ void V_GetMapFreePosition(float *cl_angles, float *origin, float *angles)
 	zScaledTarget[1] = gHUD.m_Spectator.m_mapOrigin[1];
 	zScaledTarget[2] = gHUD.m_Spectator.m_mapOrigin[2] * ((90.0f - angles[0]) / 90.0f);
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, NULL, NULL);
 
 	VectorNormalize(forward);
 
@@ -1428,7 +1422,7 @@ void V_GetMapChasePosition(int target, float *cl_angles, float *origin, float *a
 	origin[2] *= ((90.0f - angles[0]) / 90.0f);
 	angles[2] = 0.0f; // don't roll angle (if chased player is dead)
 
-	AngleVectors(angles, forward, NULL, NULL);
+	AngleVectors(angles, &forward, NULL, NULL);
 
 	VectorNormalize(forward);
 
@@ -1719,7 +1713,7 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 
 	//Must recalculate this, for the extra stuff that gets rendered later.
 	//This new calculation takes view lowers/view rotations from falling into account
-	EngineFunc::MakeVectors(pparams->viewangles, pparams->forward, pparams->right, pparams->up);
+	EngineFunc::MakeVectors(pparams->viewangles, &pparams->forward, &pparams->right, &pparams->up);
 
 	screenfade_t sf;
 	gEngfuncs.pfnGetScreenFade(&sf);

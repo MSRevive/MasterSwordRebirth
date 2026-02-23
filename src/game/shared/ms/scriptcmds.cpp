@@ -1035,7 +1035,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "forwardspeed")
 	{
 		Vector vForward;
-		EngineFunc::MakeVectors(pTarget->pev->v_angle, vForward, NULL, NULL);
+		EngineFunc::MakeVectors(pTarget->pev->v_angle, &vForward, NULL, NULL);
 		RETURN_FLOAT(DotProduct(pTarget->pev->velocity, vForward));
 	}
 	else if (Prop == "absmin") //Thothie DEC2014_12

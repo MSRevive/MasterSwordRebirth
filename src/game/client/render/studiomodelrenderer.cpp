@@ -35,9 +35,7 @@
 #include "ms/clglobal.h"
 #include "ms/hudscript.h"
 #include <GL/gl.h> // Header File For The OpenGL32 Library
-
-extern "C" int nanmask;
-#define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
+#include <mathlib.h>
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
@@ -45,7 +43,6 @@ engine_studio_api_t IEngineStudio;
 modelinfo_t CModelMgr::m_ModelInfo[4096];
 
 void Print(const char* szFmt, ...);
-void VectorAngles(const float* forward, float* angles);
 
 int ViewModel_ExclusiveViewHand = -1;
 void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEntity)
@@ -1482,7 +1479,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			m_pPlayerInfo = IEngineStudio.PlayerInfo(ZeroBasedPlayerIdx);
 			Vector PrevOrigin = m_pPlayerInfo->prevgaitorigin;
 			Vector vForward;
-			EngineFunc::MakeVectors(m_pCurrentEntity->angles, vForward, NULL, NULL);
+			EngineFunc::MakeVectors(m_pCurrentEntity->angles, &vForward, NULL, NULL);
 			//Set the "last origin" to behind me to the walk code thinks I'm walking forward.
 			//This needs to be scaled from the original velocity, incase I'm drawing a fake player of a different size
 

@@ -23,6 +23,7 @@
 #include "vgui_helpers.h"
 #include "VGUI_MouseCode.h"
 #include "filesystem_shared.h"
+#include "mathlib.h"
 
 using namespace vgui;
 

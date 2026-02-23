@@ -27,6 +27,7 @@
 #include "ms/hudscript.h"
 #include "ms/clglobal.h"
 #include "script.h"
+#include <mathlib.h>
 
 #undef DLLEXPORT //Master Sword
 #define DLLEXPORT EXPORT

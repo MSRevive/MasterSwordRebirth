@@ -24,7 +24,6 @@
 #include <ctype.h>	// isspace
 #include <string>
 #include <iostream>
-//#include "mathlib.h"
 #include "const.h"
 #include "usercmd.h"
 #include "pm_defs.h"
@@ -33,15 +32,7 @@
 #include "pm_debug.h"
 #include "player/player.h"
 #include "filesystem_shared.h"
-
-extern "C" vec3_t vec3_origin;
-
-//Dogg -- Ripped from mathlib.h
-extern "C"
-{
-	extern int nanmask;
-#define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
-};
+#include "mathlib.h"
 //-----------------------------
 
 //Master Sword -----
@@ -58,41 +49,6 @@ extern "C"
 	extern float vJumpOrigin[3];
 	extern float vJumpAngles[3];
 }
-#else
-
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
-#define VectorSubtract(a, b, c)   \
-	{                             \
-		(c)[0] = (a)[0] - (b)[0]; \
-		(c)[1] = (a)[1] - (b)[1]; \
-		(c)[2] = (a)[2] - (b)[2]; \
-	}
-#define VectorAdd(a, b, c)        \
-	{                             \
-		(c)[0] = (a)[0] + (b)[0]; \
-		(c)[1] = (a)[1] + (b)[1]; \
-		(c)[2] = (a)[2] + (b)[2]; \
-	}
-#define VectorCopy(a, b) \
-	{                    \
-		(b)[0] = (a)[0]; \
-		(b)[1] = (a)[1]; \
-		(b)[2] = (a)[2]; \
-	}
-inline void VectorClear(float *a)
-{
-	a[0] = 0.0;
-	a[1] = 0.0;
-	a[2] = 0.0;
-}
-float Length(const float *v);
-void VectorMA(const float *veca, float scale, const float *vecb, float *vecc);
-void VectorScale(const float *in, float scale, float *out);
-float VectorNormalize(float *v);
-void VectorInverse(float *v);
-
-extern "C" vec3_t vec3_origin;
-extern "C" void AngleVectors(const float *angles, float *forward, float *right, float *up);
 #endif
 
 IScripted *PMScript = NULL;
@@ -189,12 +145,6 @@ typedef struct hull_s
 
 // double to float warning
 #pragma warning(disable : 4244)
-// up / down
-#define PITCH 0
-// left / right
-#define YAW 1
-// fall over
-#define ROLL 2
 
 #define MAX_CLIENTS 32
 
@@ -206,6 +156,15 @@ typedef struct hull_s
 #define CONTENTS_CURRENT_DOWN -14
 
 #define CONTENTS_TRANSLUCENT -15
+
+// up / down
+#define PITCH 0
+// left / right
+#define YAW 1
+// fall over
+#define ROLL 2
+
+Vector vec3_origin(0,0,0);
 
 static vec3_t rgv3tStuckTable[54];
 static int rgStuckLast[MAX_CLIENTS][2];
@@ -1848,14 +1807,44 @@ allow for the cut precision of the net coordinates
 */
 #define PM_CHECKSTUCK_MINTIME 0.05 // Don't check again too quickly.
 
-int PM_CheckStuck(void)
+bool PM_TryToUnstuck(Vector base)
+{
+	float x, y, z;
+	float xystep = 8.0;
+	float zstep = 18.0;
+	float xyminmax = xystep;
+	float zminmax = 4 * zstep;
+	Vector test;
+
+	for (z = 0; z <= zminmax; z += zstep)
+	{
+		for (x = -xyminmax; x <= xyminmax; x += xystep)
+		{
+			for (y = -xyminmax; y <= xyminmax; y += xystep)
+			{
+				test = base;
+				test[0] += x;
+				test[1] += y;
+				test[2] += z;
+
+				if (pmove->PM_TestPlayerPosition(test, NULL) == -1)
+				{
+					VectorCopy(test, pmove->origin);
+					return false;
+				}
+			}
+		}
+	}
+
+	return true;
+}
+
+bool PM_CheckStuck(void)
 {
 	vec3_t base;
 	vec3_t offset;
 	vec3_t test;
 	int hitent;
-	int idx;
-	float fTime;
 	int i;
 	pmtrace_t traceresult;
 
@@ -1866,7 +1855,7 @@ int PM_CheckStuck(void)
 	if (hitent == -1)
 	{
 		PM_ResetStuckOffsets(pmove->player_index, pmove->server);
-		return 0;
+		return false;
 	}
 
 	VectorCopy(pmove->origin, base);
@@ -1892,28 +1881,28 @@ int PM_CheckStuck(void)
 					PM_ResetStuckOffsets(pmove->player_index, pmove->server);
 
 					VectorCopy(test, pmove->origin);
-					return 0;
+					return false;
 				}
 				nReps++;
 			} while (nReps < 54);
 		}
 	}
 
-	// Only an issue on the client.
-
-	if (pmove->server)
-		idx = 0;
-	else
-		idx = 1;
-
-	fTime = pmove->Sys_FloatTime();
-	// Too soon?
-	if (rgStuckCheckTime[pmove->player_index][idx] >=
-		(fTime - PM_CHECKSTUCK_MINTIME))
+	// Always check if we've just changed levels.
+	if (!(pmove->server != 0 && g_CheckForPlayerStuck))
 	{
-		return 1;
+		// TODO: not really necessary to have separate arrays for client and server since the code is separate anyway.
+		const int idx = 0 != pmove->server ? 0 : 1;
+
+		const float fTime = pmove->Sys_FloatTime();
+		// Too soon?
+		if (rgStuckCheckTime[pmove->player_index][idx] >=
+			(fTime - PM_CHECKSTUCK_MINTIME))
+		{
+			return true;
+		}
+		rgStuckCheckTime[pmove->player_index][idx] = fTime;
 	}
-	rgStuckCheckTime[pmove->player_index][idx] = fTime;
 
 	pmove->PM_StuckTouch(hitent, &traceresult);
 
@@ -1929,43 +1918,38 @@ int PM_CheckStuck(void)
 		if (i >= 27)
 			VectorCopy(test, pmove->origin);
 
-		return 0;
+		return false;
+	}
+
+	// Try to unstuck the player after a level change.
+	// This only works in singleplayer. In multiplayer there it's too unreliable to try, so only the first player gets unstuck.
+	if (pmove->server != 0 && g_CheckForPlayerStuck)
+	{
+		g_CheckForPlayerStuck = false;
+
+		// Are we stuck inside the world?
+		if (hitent == 0)
+		{
+			if (!PM_TryToUnstuck(base))
+			{
+				return false;
+			}
+		}
 	}
 
 	// If player is flailing while stuck in another player ( should never happen ), then see
 	//  if we can't "unstick" them forceably.
-	if (pmove->cmd.buttons & (IN_JUMP | IN_DUCK | IN_ATTACK) && (pmove->physents[hitent].player != 0))
+	if ((pmove->cmd.buttons & (IN_JUMP | IN_DUCK | IN_ATTACK)) != 0 && (pmove->physents[hitent].player != 0))
 	{
-		float x, y, z;
-		float xystep = 8.0;
-		float zstep = 18.0;
-		float xyminmax = xystep;
-		float zminmax = 4 * zstep;
-
-		for (z = 0; z <= zminmax; z += zstep)
+		if (!PM_TryToUnstuck(base))
 		{
-			for (x = -xyminmax; x <= xyminmax; x += xystep)
-			{
-				for (y = -xyminmax; y <= xyminmax; y += xystep)
-				{
-					VectorCopy(base, test);
-					test[0] += x;
-					test[1] += y;
-					test[2] += z;
-
-					if (pmove->PM_TestPlayerPosition(test, NULL) == -1)
-					{
-						VectorCopy(test, pmove->origin);
-						return 0;
-					}
-				}
-			}
+			return false;
 		}
 	}
 
 	//VectorCopy (base, pmove->origin);
 
-	return 1;
+	return true;
 }
 
 /*
@@ -2310,7 +2294,7 @@ void PM_LadderMove(physent_t *pLadder)
 		float forward = 0, right = 0;
 		vec3_t vpn, v_right;
 
-		AngleVectors(pmove->angles, vpn, v_right, NULL);
+		AngleVectors(pmove->angles, &vpn, &v_right, NULL);
 		if (pmove->cmd.buttons & IN_BACK)
 			forward -= MAX_CLIMB_SPEED;
 		if (pmove->cmd.buttons & IN_FORWARD)
@@ -2991,7 +2975,7 @@ float PM_CalcRoll(vec3_t angles, vec3_t velocity, float rollangle, float rollspe
 	float value;
 	vec3_t forward, right, up;
 
-	AngleVectors(angles, forward, right, up);
+	AngleVectors(angles, &forward, &right, &up);
 
 	side = DotProduct(velocity, right);
 
@@ -3167,7 +3151,7 @@ void PM_PlayerMove(qboolean server)
 	PM_ReduceTimers();
 
 	// Convert view angles to vectors
-	AngleVectors(pmove->angles, pmove->forward, pmove->right, pmove->up);
+	AngleVectors(pmove->angles, &pmove->forward, &pmove->right, &pmove->up);
 
 	// PM_ShowClipBox();
 
@@ -3184,7 +3168,13 @@ void PM_PlayerMove(qboolean server)
 	{
 		if (PM_CheckStuck())
 		{
-			return; // Can't move, we're stuck
+			// Let the user try to duck to get unstuck
+			PM_Duck();
+
+			if (PM_CheckStuck())
+			{
+				return; // Can't move, we're stuck
+			}
 		}
 	}
 
@@ -3517,7 +3507,7 @@ invoked by each side as appropriate.  There should be no distinction, internally
 and client.  This will ensure that prediction behaves appropriately.
 */
 
-void PM_Move(struct playermove_s *ppmove, int server)
+void PM_Move(struct playermove_s *ppmove, qboolean server)
 {
 	assert(pm_shared_initialized);
 
@@ -3532,7 +3522,7 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	PMScript = HUDScript;
 #endif
 
-	PM_PlayerMove((server != 0) ? true : false);
+	PM_PlayerMove(server);
 
 	if (pmove->onground != -1)
 	{
@@ -3552,7 +3542,16 @@ void PM_Move(struct playermove_s *ppmove, int server)
 	PMScript = NULL;
 }
 
-extern "C" int PM_GetPhysEntInfo(int ent)
+int PM_GetVisEntInfo(int ent)
+{
+	if (ent >= 0 && ent <= pmove->numvisent)
+	{
+		return pmove->visents[ent].info;
+	}
+	return -1;
+}
+
+int PM_GetPhysEntInfo(int ent)
 {
 	if (ent >= 0 && ent <= pmove->numphysent)
 	{
@@ -3627,89 +3626,3 @@ const char* PM_GetValue(msstringlist &Params)
 
 	RETURN_NOTHING;
 }
-
-#ifdef VALVE_DLL
-// c++ version of the utils, ripped from the client's util.h
-double sqrt(double x);
-
-float Length(const float *v)
-{
-	int i;
-	float length;
-
-	length = 0;
-	for (i = 0; i < 3; i++)
-		length += v[i] * v[i];
-	length = sqrt(length); // FIXME
-
-	return length;
-}
-
-void VectorAngles(const float *forward, float *angles)
-{
-	float tmp, yaw, pitch;
-
-	if (forward[1] == 0 && forward[0] == 0)
-	{
-		yaw = 0;
-		if (forward[2] > 0)
-			pitch = 90;
-		else
-			pitch = 270;
-	}
-	else
-	{
-		yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
-		if (yaw < 0)
-			yaw += 360;
-
-		tmp = sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
-		pitch = (atan2(forward[2], tmp) * 180 / M_PI);
-		if (pitch < 0)
-			pitch += 360;
-	}
-
-	angles[0] = pitch;
-	angles[1] = yaw;
-	angles[2] = 0;
-}
-
-float VectorNormalize(float *v)
-{
-	float length, ilength;
-
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt(length); // FIXME
-
-	if (length)
-	{
-		ilength = 1 / length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-
-	return length;
-}
-
-void VectorInverse(float *v)
-{
-	v[0] = -v[0];
-	v[1] = -v[1];
-	v[2] = -v[2];
-}
-
-void VectorScale(const float *in, float scale, float *out)
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
-}
-
-void VectorMA(const float *veca, float scale, const float *vecb, float *vecc)
-{
-	vecc[0] = veca[0] + scale * vecb[0];
-	vecc[1] = veca[1] + scale * vecb[1];
-	vecc[2] = veca[2] + scale * vecb[2];
-}
-#endif
