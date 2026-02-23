@@ -1845,8 +1845,6 @@ bool PM_CheckStuck(void)
 	vec3_t offset;
 	vec3_t test;
 	int hitent;
-	int idx;
-	float fTime;
 	int i;
 	pmtrace_t traceresult;
 

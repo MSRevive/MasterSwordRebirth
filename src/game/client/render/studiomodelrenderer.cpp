@@ -37,16 +37,12 @@
 #include <GL/gl.h> // Header File For The OpenGL32 Library
 #include <mathlib.h>
 
-extern "C" int nanmask;
-#define IS_NAN(x) (((*(int *)&x) & nanmask) == nanmask)
-
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
 
 modelinfo_t CModelMgr::m_ModelInfo[4096];
 
 void Print(const char* szFmt, ...);
-void VectorAngles(const float* forward, float* angles);
 
 int ViewModel_ExclusiveViewHand = -1;
 void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEntity)

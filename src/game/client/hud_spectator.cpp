@@ -41,8 +41,6 @@ extern "C" float vJumpAngles[3];
 extern void V_GetInEyePos(int entity, float *origin, float *angles);
 extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float *cl_angles, float *origin, float *angles);
-extern void VectorAngles(const float *forward, float *angles);
-extern void NormalizeAngles(float *angles);
 extern float *GetClientColor(int clientIndex);
 
 extern vec3_t v_origin;	   // last view origin
