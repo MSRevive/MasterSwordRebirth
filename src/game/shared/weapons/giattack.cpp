@@ -788,13 +788,6 @@ void CGenericItem::StrikeLand()
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
-	//Print( "In damage: %f\nLast charged: %f\n", flDamage, m_LastChargedAmt );
-	if (m_LastChargedAmt < 1)
-	{
-		flDamage *= (m_LastChargedAmt + 1);
-		//Print("Out damage: %f\nCharge Multiplier: %f\n", flDamage, (m_LastChargedAmt+1));
-	}
-
 	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
