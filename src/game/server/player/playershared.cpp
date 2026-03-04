@@ -168,56 +168,54 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 const char* CBasePlayer::GetTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
+
 	if (!CustomTitle.contains("NONESET") && CustomTitle)
 		return CustomTitle.c_str();
-	else
-	{
-		//Old Way
-		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
-		if (pTitle) {
-			return pTitle->Name.c_str();
-		}
-		else {
-			return CTitleManager::DefaultTitle.Name.c_str();
-		}
+
+	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+	if (pTitle) {
+		return pTitle->Name.c_str();
 	}
+	else {
+		return CTitleManager::DefaultTitle.Name.c_str();
+	}
+	
 }
 
 const char* CBasePlayer::GetFullTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if (!CustomTitle.contains("NONESET"))
-		return CustomTitle;
-	else
-	{
-		//Old Way
-		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
-		if (pTitle)
-		{
-			static msstring Title;   //Format: "<skilllevel> Title"
-
-			Title = "";
-
-			int SkillLevel = 0;
-			int SkillsReq = pTitle->SkillsReq.size();
-			if (SkillsReq)   //Only add the skill level if this title requires skills
-			{
-				for (int s = 0; s < SkillsReq; s++)
-				{
-					SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
-				}
-				SkillLevel /= SkillsReq;
-
-				Title += SkillLevel;
-				Title += " ";
-			}
-
-			Title += pTitle->Name;
-			return Title.c_str();
-		}
+	if (!CustomTitle.contains("NONESET") && CustomTitle) {
+		return CustomTitle.c_str();
 	}
 
-	return "Unknown";
+	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+	if (pTitle)
+	{
+		static msstring Title;   //Format: "<skilllevel> Title"
+
+		Title = "";
+
+		int SkillLevel = 0;
+		int SkillsReq = pTitle->SkillsReq.size();
+		if (SkillsReq)   //Only add the skill level if this title requires skills
+		{
+			for (int s = 0; s < SkillsReq; s++)
+			{
+				SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
+			}
+			SkillLevel /= SkillsReq;
+
+			Title += SkillLevel;
+			Title += " ";
+		}
+
+		Title += pTitle->Name;
+		return Title.c_str();
+	}
+	else {
+		return CTitleManager::DefaultTitle.Name.c_str();
+	}
 }
 
 bool CBasePlayer::CreateStats()
