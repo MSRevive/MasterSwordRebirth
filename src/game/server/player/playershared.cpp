@@ -150,13 +150,16 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 
 		//Is this the first valid title, or is this title better than the previous best title?
 
-		if (!pBestTitle) {
+		if (!pBestTitle)
+		{
 			pBestTitle = &Title;
 		}
-		else if (Title.SkillsReq.size() > pBestTitle->SkillsReq.size()) {
+		else if (Title.SkillsReq.size() > pBestTitle->SkillsReq.size())
+		{
 			pBestTitle = &Title;
 		}
-		else if (Title.MinLevel > pBestTitle->MinLevel) {
+		else if (Title.MinLevel > pBestTitle->MinLevel)
+		{
 			pBestTitle = &Title;
 		}
 
@@ -173,21 +176,21 @@ const char* CBasePlayer::GetTitle()
 		return CustomTitle.c_str();
 
 	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
-	if (pTitle) {
+	if (pTitle)
+	{
 		return pTitle->Name.c_str();
 	}
-	else {
+	else
+	{
 		return CTitleManager::DefaultTitle.Name.c_str();
 	}
-	
 }
 
 const char* CBasePlayer::GetFullTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if (!CustomTitle.contains("NONESET") && CustomTitle) {
+	if (!CustomTitle.contains("NONESET") && CustomTitle) 
 		return CustomTitle.c_str();
-	}
 
 	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
 	if (pTitle)
@@ -213,7 +216,8 @@ const char* CBasePlayer::GetFullTitle()
 		Title += pTitle->Name;
 		return Title.c_str();
 	}
-	else {
+	else
+	{
 		return CTitleManager::DefaultTitle.Name.c_str();
 	}
 }
