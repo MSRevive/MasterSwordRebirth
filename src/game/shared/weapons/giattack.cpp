@@ -776,48 +776,33 @@ void CGenericItem::StrikeLand()
 
 	float CurrentAttackBalance = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance);
 	float CurrentAttackPower = m_pOwner->GetSkillStat(CurrentAttack->StatPower, CurrentAttack->PropPower);
-	float flDmgFraction = 0.0f;
-	char sz[256] = "";
+	float flDamageFraction = 0.0f;
 
 	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
 	float flDamage = CurrentAttack->flDamage + randomMulti; //fine even if 0.
 
-	//fraction based on balance. Balance stat for weapon -> 45? Multiplier is 0.45
-	flDmgFraction = CurrentAttackBalance / STATPROP_MAX_VALUE;
-	flDmgFraction = V_max(flDmgFraction, 0);
+	flDamageFraction = CurrentAttackBalance / STATPROP_MAX_VALUE;
+	flDamageFraction = V_max(flDamageFraction, 0);
 
 	std::string szDamage = std::to_string(flDamage);
 	std::string szBalance = std::to_string(CurrentAttackBalance);
-	std::string szFraction = std::to_string(flDmgFraction);
+	std::string szFraction = std::to_string(flDamageFraction);
 
-	UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Incoming Damage: %s", szDamage.c_str());
-	UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Incoming Damage: %s", szDamage.c_str());
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
 
 	//fraction based on balance. Power stat for weapon -> 45? Multiplier is 0.45
-	flDmgFraction = CurrentAttackPower / STATPROP_MAX_VALUE;
-	flDmgFraction = V_max(flDmgFraction, 0.001f);
+	flDamageFraction = CurrentAttackPower / STATPROP_MAX_VALUE;
+	flDamageFraction = V_max(flDamageFraction, 0.001f); //why is this 0.001f?
 
 	std::string szPower = std::to_string(CurrentAttackPower);
-	szFraction = std::to_string(flDmgFraction);
+	szFraction = std::to_string(flDamageFraction);
 
-	UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Power: %s : Fraction: %s", szPower.c_str(), szFraction.c_str());
-
-	//why is one zero and on 0.001f.
-	//minimum should be current weapons minimum level requirement.
-	//unless this is supposed to also prevent damage from wapons if not enough proficiency.
-	//in which cas that damage remove for non-proficiency shouild be a separate check.
-	//in the above event if the GetSkillStat() function fails, damage will be essentially be nulled.
-	//applying a minimum would atleast allow the damage of the strike through
-	//but would essentially be 'the worst hit poosible'
-
-
-
-	
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Power: %s : Fraction: %s", szPower.c_str(), szFraction.c_str());	
 
 	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
-	
-	
+	// 	
 
 	flDamage *= flDmgFraction;
 	if (bUnderleveled)
