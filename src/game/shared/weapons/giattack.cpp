@@ -804,7 +804,7 @@ void CGenericItem::StrikeLand()
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
 	// 	
 
-	flDamage *= flDmgFraction;
+	flDamage *= flDamageFraction;
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
