@@ -41,10 +41,10 @@ constexpr int FL_FLOAT = (1 << 15);	   // Apply floating force to this entity wh
 constexpr int FL_GRAPHED = (1 << 16);	   // worldgraph has this ent listed as something that blocks a connection
 
 // UNDONE: Do we need these?
-#define FL_IMMUNE_WATER (1 << 17)
+constexpr int FL_IMMUNE_WATER = (1 << 17);
 //#define FL_IMMUNE_SLIME (1 << 18)
-#define FL_CLIENTONLY (1 << 18)		// Strip edicts
-#define FL_IMMUNE_LAVA (1 << 19)
+constexpr int FL_CLIENTONLY = (1 << 18);		// Strip edicts
+constexpr int FL_IMMUNE_LAVA = (1 << 19);
 
 constexpr int FL_PROXY = (1 << 20);		  // This is a spectator proxy
 constexpr int FL_ALWAYSTHINK = (1 << 21); // Brush model flag -- call think every frame regardless of nextthink - ltime (for constantly changing velocity/path)
