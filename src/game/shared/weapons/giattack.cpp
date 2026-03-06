@@ -725,9 +725,6 @@ void CGenericItem::StrikeLand()
 
 	Vector vecEnd = vecSrc + vForward * CurrentAttack->flRange;
 
-	float flDmgFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STATPROP_MAX_VALUE;
-	flDmgFraction = V_max(flDmgFraction, 0);
-
 	//Thothie SEP2007 - attempting to make level limit work by decreasing accuracy
 	bool bUnderleveled = false;
 	if (m_pOwner->GetSkillStat(CurrentAttack->StatProf, CurrentAttack->PropProf) < CurrentAttack->RequiredSkill)
@@ -749,24 +746,41 @@ void CGenericItem::StrikeLand()
 	if (m_pOwner->m_HITMulti > 0)
 		flHitPercentage *= m_pOwner->m_HITMulti; //FEB2009_18
 
-	flDmgFraction = m_pOwner->GetSkillStat(CurrentAttack->StatPower, CurrentAttack->PropPower) / STATPROP_MAX_VALUE;
-	flDmgFraction = V_max(flDmgFraction, 0.001f);
+	float CurrentAttackBalance = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance);
+	float CurrentAttackPower = m_pOwner->GetSkillStat(CurrentAttack->StatPower, CurrentAttack->PropPower);
+	float flDamageFraction = 0.0f;
+
+	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
+	float flDamage = CurrentAttack->flDamage + randomMulti; //fine even if 0.
+
+	flDamageFraction = CurrentAttackBalance / STATPROP_MAX_VALUE;
+	flDamageFraction = V_max(flDamageFraction, 0);
+
+	std::string szDamage = std::to_string(flDamage);
+	std::string szBalance = std::to_string(CurrentAttackBalance);
+	std::string szFraction = std::to_string(flDamageFraction);
+
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Incoming Damage: %s", szDamage.c_str());
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
+
+	//fraction based on balance. Power stat for weapon -> 45? Multiplier is 0.45
+	flDamageFraction = CurrentAttackPower / STATPROP_MAX_VALUE;
+	flDamageFraction = V_max(flDamageFraction, 0.001f); //why is this 0.001f?
+
+	std::string szPower = std::to_string(CurrentAttackPower);
+	szFraction = std::to_string(flDamageFraction);
+
+	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Power: %s : Fraction: %s", szPower.c_str(), szFraction.c_str());	
 
 	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
 	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
-	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
-	float flDamage = CurrentAttack->flDamage + randomMulti;
-	flDamage *= flDmgFraction;
+	// 	
+
+	flDamage *= flDamageFraction;
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
-	//Print( "In damage: %f\nLast charged: %f\n", flDamage, m_LastChargedAmt );
-	if (m_LastChargedAmt < 1)
-	{
-		flDamage *= (m_LastChargedAmt + 1);
-		//Print("Out damage: %f\nCharge Multiplier: %f\n", flDamage, (m_LastChargedAmt+1));
-	}
-
+	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
 		bitsDamage |= DMG_SIMPLEBBOX;

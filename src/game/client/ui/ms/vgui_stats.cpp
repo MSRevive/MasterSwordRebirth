@@ -216,6 +216,7 @@ void CStatPanel::Update()
 {
 	pMainPanel->setVisible(true);
 
+
 	int i;
 	char cDisplayText[128];
 	for (i = 0; i < INFO_STAT_NUM; i++)
@@ -229,7 +230,7 @@ void CStatPanel::Update()
 			 _snprintf(cDisplayText, sizeof(cDisplayText),  "Gender: %s\n",  GenderList[player.m_Gender] );
 			break;
 		case 2:
-			 _snprintf(cDisplayText, sizeof(cDisplayText),  "%s %s\n", "human",  player.GetTitle() );
+			 _snprintf(cDisplayText, sizeof(cDisplayText),  "%s %s\n", "Human",  player.GetTitle());
 			break;
 		case 3:
 			cDisplayText[0] = 0;
