@@ -60,8 +60,8 @@ typedef struct
 
 typedef struct cl_entity_s cl_entity_t;
 
-#define HISTORY_MAX 64 // Must be power of 2
-#define HISTORY_MASK (HISTORY_MAX - 1)
+constexpr unsigned int HISTORY_MAX = 64; // Must be power of 2
+constexpr unsigned int HISTORY_MASK = (HISTORY_MAX - 1);
 
 #if !defined(ENTITY_STATEH)
 #include "entity_state.h"

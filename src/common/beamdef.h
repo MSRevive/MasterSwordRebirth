@@ -18,18 +18,18 @@
 #pragma once
 #endif
 
-#define FBEAM_STARTENTITY 0x00000001
-#define FBEAM_ENDENTITY 0x00000002
-#define FBEAM_FADEIN 0x00000004
-#define FBEAM_FADEOUT 0x00000008
-#define FBEAM_SINENOISE 0x00000010
-#define FBEAM_SOLID 0x00000020
-#define FBEAM_SHADEIN 0x00000040
-#define FBEAM_SHADEOUT 0x00000080
-#define FBEAM_STARTVISIBLE 0x10000000 // Has this client actually seen this beam's start entity yet?
-#define FBEAM_ENDVISIBLE 0x20000000	  // Has this client actually seen this beam's end entity yet?
-#define FBEAM_ISACTIVE 0x40000000
-#define FBEAM_FOREVER 0x80000000
+constexpr int FBEAM_STARTENTITY = 0x00000001;
+constexpr int FBEAM_ENDENTITY = 0x00000002;
+constexpr int FBEAM_FADEIN = 0x00000004;
+constexpr int FBEAM_FADEOUT = 0x00000008;
+constexpr int FBEAM_SINENOISE = 0x00000010;
+constexpr int FBEAM_SOLID = 0x00000020;
+constexpr int FBEAM_SHADEIN = 0x00000040;
+constexpr int FBEAM_SHADEOUT = 0x00000080;
+constexpr int FBEAM_STARTVISIBLE = 0x10000000; // Has this client actually seen this beam's start e= ntity yet?;
+constexpr int FBEAM_ENDVISIBLE = 0x20000000;	  // Has this client actually seen this beam's end e= ntity yet?;
+constexpr int FBEAM_ISACTIVE = 0x40000000;
+constexpr int FBEAM_FOREVER = 0x80000000;
 
 typedef struct beam_s BEAM;
 struct beam_s
