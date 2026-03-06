@@ -780,7 +780,7 @@ void CGenericItem::StrikeLand()
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
-	SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
+	//SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
 		bitsDamage |= DMG_SIMPLEBBOX;
