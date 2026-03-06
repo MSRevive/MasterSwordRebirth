@@ -26,8 +26,8 @@ constexpr int FBEAM_SINENOISE = 0x00000010;
 constexpr int FBEAM_SOLID = 0x00000020;
 constexpr int FBEAM_SHADEIN = 0x00000040;
 constexpr int FBEAM_SHADEOUT = 0x00000080;
-constexpr int FBEAM_STARTVISIBLE = 0x10000000; // Has this client actually seen this beam's start e= ntity yet?;
-constexpr int FBEAM_ENDVISIBLE = 0x20000000;	  // Has this client actually seen this beam's end e= ntity yet?;
+constexpr int FBEAM_STARTVISIBLE = 0x10000000; // Has this client actually seen this beam's start entity yet?;
+constexpr int FBEAM_ENDVISIBLE = 0x20000000;	  // Has this client actually seen this beam's end entity yet?;
 constexpr int FBEAM_ISACTIVE = 0x40000000;
 constexpr int FBEAM_FOREVER = 0x80000000;
 

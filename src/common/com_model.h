@@ -24,16 +24,16 @@
 #pragma once
 #endif
 
-constexpr unsigned int STUDIO_RENDER = 1;
-constexpr unsigned int STUDIO_EVENTS = 2;
-constexpr unsigned int MAX_MAP_HULLS = 4;
-constexpr unsigned int MIPLEVELS = 4;
-constexpr unsigned int NUM_AMBIENTS = 4; // automatic ambient sounds
-constexpr unsigned int MAXLIGHTMAPS = 4;
-constexpr unsigned int PLANE_ANYZ = 5;
-constexpr unsigned int MAX_CLIENTS = 32;
-constexpr unsigned int MAX_MODEL_NAME = 64;
-constexpr unsigned int MAX_EDICTS = 2048;
+constexpr int STUDIO_RENDER = 1;
+constexpr int STUDIO_EVENTS = 2;
+constexpr int MAX_MAP_HULLS = 4;
+constexpr int MIPLEVELS = 4;
+constexpr int NUM_AMBIENTS = 4; // automatic ambient sounds
+constexpr int MAXLIGHTMAPS = 4;
+constexpr int PLANE_ANYZ = 5;
+constexpr int MAX_CLIENTS = 32;
+constexpr int MAX_MODEL_NAME = 64;
+constexpr int MAX_EDICTS = 2048;
 
 constexpr unsigned int ALIAS_Z_CLIP_PLANE = 5;
 
