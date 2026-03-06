@@ -581,16 +581,16 @@ constexpr int CONTENTS_SLIME = -4;
 constexpr int CONTENTS_LAVA  = -5;
 constexpr int CONTENTS_SKY   = -6;
 /* These additional contents constants are defined in bspfile.h
-constexpr int	CONTENTS_ORIGIN		-7		// removed at csg time
-constexpr int	CONTENTS_CLIP		-8		// changed to contents_solid
-constexpr int	CONTENTS_CURRENT_0		-9
-constexpr int	CONTENTS_CURRENT_90		-10
-constexpr int	CONTENTS_CURRENT_180	-11
-constexpr int	CONTENTS_CURRENT_270	-12
-constexpr int	CONTENTS_CURRENT_UP		-13
-constexpr int	CONTENTS_CURRENT_DOWN	-14
+constexpr int	CONTENTS_ORIGIN	=	-7;		// removed at csg time
+constexpr int	CONTENTS_CLIP =		-8;		// changed to contents_solid
+constexpr int	CONTENTS_CURRENT_0 =	-9;
+constexpr int	CONTENTS_CURRENT_90 =	-10;
+constexpr int	CONTENTS_CURRENT_180 =	-11;
+constexpr int	CONTENTS_CURRENT_270 =	-12;
+constexpr int	CONTENTS_CURRENT_UP	=	-13;
+constexpr int	CONTENTS_CURRENT_DOWN =	-14;
 
-constexpr int CONTENTS_TRANSLUCENT	-15
+constexpr int CONTENTS_TRANSLUCENT =	-15;
 */
 constexpr int CONTENTS_LADDER  = -16;
 constexpr int CONTENT_FLYFIELD = -17;
