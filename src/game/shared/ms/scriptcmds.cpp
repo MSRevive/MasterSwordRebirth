@@ -5020,38 +5020,42 @@ bool CScript::ScriptCmd_RegisterTexture(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 //- registers possible player titles based on weapon skills under the default title system
 bool CScript::ScriptCmd_RegisterTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-	if (Params.size() >= 1)
-	{
-		if (Params.size() < 2)
-		{	//Default title
-			CTitleManager::DefaultTitle.Name = Params[0];
-			CTitleManager::DefaultTitle.MinLevel = 0;
-		}
-		else
-		{	//Specific title
-			title_t NewTitle;
-			NewTitle.Name = Params[0];
-			NewTitle.MinLevel = atoi(GetScriptVar("TITLE_MINSKILL"));
-			static msstringlist Skills;
-			Skills.clearitems();
-			TokenizeString(Params[1], Skills);
-			bool SkillSuccess = true;
-			for(int s = 0; s < Skills.size(); s++)
-			{
-				int Skill = GetSkillStatByName(SCRIPTVAR(Skills[s]));
-				if (Skill == -1)
-				{
-					SkillSuccess = false;
-					break;
-				}
-				NewTitle.SkillsReq.add(Skill);
-			}
 
-			if (SkillSuccess)
-				CTitleManager::AddTitle(NewTitle);
-		}
+	if (Params.size() < 1) 
+	{
+		ERROR_MISSING_PARMS;
+		return false;
 	}
-	else ERROR_MISSING_PARMS;
+
+	if (Params.size() == 1)
+	{	//Default title
+		CTitleManager::DefaultTitle.Name = Params[0];
+		CTitleManager::DefaultTitle.MinLevel = 0;
+	}
+	else
+	{	//Specific title
+		title_t NewTitle;
+		NewTitle.Name = Params[0];
+		NewTitle.MinLevel = atoi(GetScriptVar("TITLE_MINSKILL"));
+		static msstringlist Skills;
+		Skills.clearitems();
+		TokenizeString(Params[1], Skills);
+		bool SkillSuccess = true;
+		int SKILL_FAILURE = -1;
+		for(int s = 0; s < Skills.size(); s++)
+		{
+			int Skill = GetSkillStatByName(SCRIPTVAR(Skills[s]));
+			if (Skill == SKILL_FAILURE)
+			{
+				SkillSuccess = false;
+				break;
+			}
+			NewTitle.SkillsReq.add(Skill);
+		}
+
+		if (SkillSuccess)
+			CTitleManager::AddTitle(NewTitle);
+	}
 
 	return true;
 }

@@ -117,6 +117,7 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 	{
 		title_t& Title = Titles[i];
 		bool SkillsAreValid = true;
+
 		for (int s = 0; s < Title.SkillsReq.size(); s++)
 		{
 			int Skill = Title.SkillsReq[s] - SKILL_FIRSTSKILL;
@@ -128,20 +129,16 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 				break;
 			} //Skill not high enough
 
-			/*#ifndef VALVE_DLL
-		Print( "Title: %s Skill #%i, [%i]%s (%i/%i)\n", STRING(Title.Name), s, Title.SkillsReq[s], GetSkillName( SKILL_FIRSTSKILL + Skills[Skill].Skill ), Skills[Skill].Value, Title.MinLevel );
-#endif*/
-
-//Is this skill the highest skill? (If x skills are required, then is it one of the top x skills?)
 			bool IsHighestSkill = false;
-			for (int h = 0; h < Title.SkillsReq.size(); h++)
+			for (int h = 0; h < Title.SkillsReq.size(); h++) 
+			{
 				if (SortedSkills[h].Skill == Skill)
 				{
 					IsHighestSkill = true;
 					break;
 				}
-
-			if (!IsHighestSkill)
+			}
+			if (!IsHighestSkill) 
 			{
 				SkillsAreValid = false;
 				break;
@@ -152,12 +149,20 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 			continue; //At lesat one skill required by this title wasn't a top skill
 
 		//Is this the first valid title, or is this title better than the previous best title?
-		if (!pBestTitle ||												 //First valid title
-			(pBestTitle &&												 //Previous title exists
-				((Title.SkillsReq.size() > pBestTitle->SkillsReq.size()) || //This title is better because it requires more skills
-					(Title.MinLevel > pBestTitle->MinLevel))					 //This title is better because it requires a higher level
-				))
+
+		if (!pBestTitle)
+		{
 			pBestTitle = &Title;
+		}
+		else if (Title.SkillsReq.size() > pBestTitle->SkillsReq.size())
+		{
+			pBestTitle = &Title;
+		}
+		else if (Title.MinLevel > pBestTitle->MinLevel)
+		{
+			pBestTitle = &Title;
+		}
+
 	}
 
 	return pBestTitle;
@@ -166,52 +171,55 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 const char* CBasePlayer::GetTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if (!CustomTitle.contains("NONESET"))
-		return CustomTitle;
+
+	if (!CustomTitle.contains("NONESET") && CustomTitle)
+		return CustomTitle.c_str();
+
+	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+	if (pTitle)
+	{
+		return pTitle->Name.c_str();
+	}
 	else
 	{
-		//Old Way
-		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
-		if (pTitle) return pTitle->Name;
-		return "Unknown";
+		return CTitleManager::DefaultTitle.Name.c_str();
 	}
 }
 
 const char* CBasePlayer::GetFullTitle()
 {
 	//Lark DEC2017_16: Only replace old titles if CustomTitle is set.
-	if (!CustomTitle.contains("NONESET"))
-		return CustomTitle;
+	if (!CustomTitle.contains("NONESET") && CustomTitle) 
+		return CustomTitle.c_str();
+
+	title_t* pTitle = CTitleManager::GetPlayerTitle(this);
+	if (pTitle)
+	{
+		static msstring Title;   //Format: "<skilllevel> Title"
+
+		Title = "";
+
+		int SkillLevel = 0;
+		int SkillsReq = pTitle->SkillsReq.size();
+		if (SkillsReq)   //Only add the skill level if this title requires skills
+		{
+			for (int s = 0; s < SkillsReq; s++)
+			{
+				SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
+			}
+			SkillLevel /= SkillsReq;
+
+			Title += SkillLevel;
+			Title += " ";
+		}
+
+		Title += pTitle->Name;
+		return Title.c_str();
+	}
 	else
 	{
-		//Old Way
-		title_t* pTitle = CTitleManager::GetPlayerTitle(this);
-		if (pTitle)
-		{
-			static msstring Title;   //Format: "<skilllevel> Title"
-
-			Title = "";
-
-			int SkillLevel = 0;
-			int SkillsReq = pTitle->SkillsReq.size();
-			if (SkillsReq)   //Only add the skill level if this title requires skills
-			{
-				for (int s = 0; s < SkillsReq; s++)
-				{
-					SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
-				}
-				SkillLevel /= SkillsReq;
-
-				Title += SkillLevel;
-				Title += " ";
-			}
-
-			Title += pTitle->Name;
-			return Title.c_str();
-		}
+		return CTitleManager::DefaultTitle.Name.c_str();
 	}
-
-	return "Unknown";
 }
 
 bool CBasePlayer::CreateStats()
