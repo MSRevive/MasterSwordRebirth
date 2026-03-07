@@ -14,11 +14,11 @@
 
 //typedef void ( *xcommand_t ) ( void );
 
-#define RENDERTYPE_UNDEFINED 0
-#define RENDERTYPE_SOFTWARE 1
-#define RENDERTYPE_HARDWARE 2
+constexpr int RENDERTYPE_UNDEFINED = 0;
+constexpr int RENDERTYPE_SOFTWARE = 1;
+constexpr int RENDERTYPE_HARDWARE = 2;
 
-#define ENGINE_LAUNCHER_API_VERSION 1
+constexpr int ENGINE_LAUNCHER_API_VERSION = 1;
 
 typedef struct engine_api_s
 {
