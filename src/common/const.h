@@ -42,7 +42,7 @@ constexpr int FL_GRAPHED = (1 << 16);	   // worldgraph has this ent listed as so
 
 // UNDONE: Do we need these?
 constexpr int FL_IMMUNE_WATER = (1 << 17);
-//#define FL_IMMUNE_SLIME (1 << 18)
+//constexpr int FL_IMMUNE_SLIME (1 << 18);
 constexpr int FL_CLIENTONLY = (1 << 18);		// Strip edicts
 constexpr int FL_IMMUNE_LAVA = (1 << 19);
 
