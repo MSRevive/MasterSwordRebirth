@@ -35,7 +35,7 @@ constexpr int MAX_CLIENTS = 32;
 constexpr int MAX_MODEL_NAME = 64;
 constexpr int MAX_EDICTS = 2048;
 
-constexpr unsigned int ALIAS_Z_CLIP_PLANE = 5;
+constexpr int ALIAS_Z_CLIP_PLANE = 5;
 
 // flags in finalvert_t.flags
 constexpr int ALIAS_LEFT_CLIP = 0x0001;
