@@ -43,8 +43,8 @@ public:
 	virtual			~IBaseInterface() {}
 };
 
+constexpr const char* CREATEINTERFACE_PROCNAME = "CreateInterface";
 
-#define CREATEINTERFACE_PROCNAME	"CreateInterface"
 typedef IBaseInterface* (*CreateInterfaceFn)(const char *pName, int *pReturnCode);
 
 

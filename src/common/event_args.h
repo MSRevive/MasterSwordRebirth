@@ -19,10 +19,10 @@
 #endif
 
 // Event was invoked with stated origin
-#define FEVENT_ORIGIN (1 << 0)
+constexpr int FEVENT_ORIGIN = (1 << 0);
 
 // Event was invoked with stated angles
-#define FEVENT_ANGLES (1 << 1)
+constexpr int FEVENT_ANGLES = (1 << 1);
 
 typedef struct event_args_s
 {
