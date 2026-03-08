@@ -14,9 +14,12 @@
 
 //typedef void ( *xcommand_t ) ( void );
 
-constexpr int RENDERTYPE_UNDEFINED = 0;
-constexpr int RENDERTYPE_SOFTWARE = 1;
-constexpr int RENDERTYPE_HARDWARE = 2;
+enum {
+	RENDERTYPE_UNDEFINED = 0,
+	RENDERTYPE_SOFTWARE = 1,
+	RENDERTYPE_HARDWARE = 2
+};
+
 
 constexpr int ENGINE_LAUNCHER_API_VERSION = 1;
 
