@@ -21,6 +21,8 @@
 
 #include "Platform.h"
 
+constexpr double PI = 3.14159265358979323846;
+
 // edict->flags
 constexpr int FL_FLY = (1 << 0);	 // Changes the SV_Movestep() behavior to not need to be on ground
 constexpr int FL_SWIM = (1 << 1); // Changes the SV_Movestep() behavior to not need to be on ground (but stay in water)

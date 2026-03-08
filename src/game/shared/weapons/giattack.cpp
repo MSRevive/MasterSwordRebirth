@@ -1048,7 +1048,7 @@ void CGenericItem::ChargeThrowProj()
 		float LoweredSpreadDeg = CurrentAttack->flAccBest + ((CurrentAttack->flAccuracyDefault - CurrentAttack->flAccBest) * (1 - flTimeHeldAdjusted));
 
 		float Spread = V_max(LoweredSpreadDeg, 0);
-		float VeerAng = RANDOM_FLOAT(0.0f, M_PI);
+		float VeerAng = RANDOM_FLOAT(0.0f, PI);
 		vAngle.x += cosf(VeerAng) * Spread; //Veer off at the angle, multiplied by the spread
 		vAngle.y += sinf(VeerAng) * Spread;
 

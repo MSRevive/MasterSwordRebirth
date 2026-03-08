@@ -270,7 +270,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	else if (Cmd.Name() == "fov")
 	{
 		if (Params.size() >= 1)
-			m_flFieldOfView = cosf((atof(Params[0]) / 2.0) * (M_PI / 180));
+			m_flFieldOfView = cosf((atof(Params[0]) / 2.0) * (PI / 180));
 
 		else
 			ERROR_MISSING_PARMS;

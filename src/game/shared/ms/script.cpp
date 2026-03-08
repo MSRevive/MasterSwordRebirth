@@ -610,7 +610,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 		else
 		{
 			if (Vec_Org.x)
-				lyaw = (atan2(Vec_Org.y, Vec_Org.x) * 180 / M_PI);
+				lyaw = (atan2(Vec_Org.y, Vec_Org.x) * 180 / PI);
 			else if (Vec_Org.y > 0)
 				lyaw = 90;
 			else
@@ -620,7 +620,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 				lyaw += 360;
 
 			lforward = sqrt(Vec_Org.x*Vec_Org.x + Vec_Org.y*Vec_Org.y);
-			lpitch = (atan2(Vec_Org.y, lforward) * 180 / M_PI);
+			lpitch = (atan2(Vec_Org.y, lforward) * 180 / PI);
 			if (lpitch < 0)
 				lpitch += 360;
 		}

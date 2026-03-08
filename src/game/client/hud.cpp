@@ -765,7 +765,7 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 		m_iFOV = newfov;
 	}
 
-	ClFOV = cosf((m_iFOV / 2.0) * (M_PI / 180));
+	ClFOV = cosf((m_iFOV / 2.0) * (PI / 180));
 
 	// the clients fov is actually set in the client data update section of the hud
 

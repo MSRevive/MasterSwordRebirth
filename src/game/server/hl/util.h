@@ -80,11 +80,6 @@ typedef int EOFFSET;
 typedef int BOOL;
 
 // In case this ever changes
-#ifndef PI
-#define PI
-constexpr double M_PI = 3.14159265358979323846;
-#endif
-
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void UTIL_DLLEXPORT MethodName( void )
 #define GLOBAL_METHOD(funcname)					void UTIL_DLLEXPORT funcname(void)

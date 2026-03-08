@@ -7,18 +7,14 @@
 
 #pragma once
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
-
 #ifndef PITCH
 // MOVEMENT INFO
 // up / down
-#define PITCH 0
+constexpr int PITCH = 0;
 // left / right
-#define YAW 1
+constexpr int YAW = 1;
 // fall over
-#define ROLL 2
+constexpr int ROLL = 2;
 #endif
 
 #define FDotProduct(a, b) (fabs((a[0]) * (b[0])) + fabs((a[1]) * (b[1])) + fabs((a[2]) * (b[2])))
