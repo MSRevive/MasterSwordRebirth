@@ -38,15 +38,19 @@ constexpr int MAX_EDICTS = 2048;
 constexpr int ALIAS_Z_CLIP_PLANE = 5;
 
 // flags in finalvert_t.flags
-constexpr int ALIAS_LEFT_CLIP = 0x0001;
-constexpr int ALIAS_TOP_CLIP = 0x0002;
-constexpr int ALIAS_RIGHT_CLIP = 0x0004;
-constexpr int ALIAS_BOTTOM_CLIP = 0x0008;
-constexpr int ALIAS_Z_CLIP = 0x0010;
-constexpr int ALIAS_ONSEAM = 0x0020;
-constexpr int ALIAS_XY_CLIP_MASK = 0x000F;
-constexpr float ZISCALE = ((float)0x8000);
 
+
+enum {
+    ALIAS_LEFT_CLIP = 0x0001,
+    ALIAS_TOP_CLIP = 0x0002,
+    ALIAS_RIGHT_CLIP = 0x0004,
+    ALIAS_BOTTOM_CLIP = 0x0008,
+    ALIAS_Z_CLIP = 0x0010,
+    ALIAS_ONSEAM = 0x0020,
+    ALIAS_XY_CLIP_MASK = 0x000F
+};
+
+constexpr float ZISCALE = (float)0x8000;
 constexpr int CACHE_SIZE = 32; // used to align key data structures
 
 typedef enum
