@@ -22,12 +22,12 @@
 #include "mscharacter.h"
 #include "iscript.h"
 
-#define MAX_ID_RANGE 2048
-#define SBAR_STRING_SIZE 128
-#define NUM_MAX_ITEMS 100 //Thothie APR2011_28
+constexpr int MAX_ID_RANGE = 2048;
+constexpr int SBAR_STRING_SIZE = 128;
+constexpr int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
 
 // was 1500, but there shouldn't be any issues with increasing.
-#define NUM_MAX_STACK 9999 //stack is stored as either a unsigned short, so that's the actual max it can be.
+constexpr int NUM_MAX_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
 
 enum sbar_data
 {
@@ -37,7 +37,7 @@ enum sbar_data
 	SBAR_END,
 };
 
-#define CHAT_INTERVAL 1.0f
+constexpr float CHAT_INTERVAL = 1.0f;
 //Master Sword
 
 class CStat;
@@ -100,7 +100,7 @@ struct quickslot_t //Quickslots for items, spells
 	quickslottype_e Type;
 	uint ID;
 };
-#define MAX_QUICKSLOTS 36 //MiB MAR2012 - Increase quickslots
+constexpr int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
 
 #include "sharedmenu.h"
 
@@ -114,10 +114,9 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer);
 //macros (just to shorten things up a bit)
 #define CREATE_ENT(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)));
 
-#define VAR_NPC_ANIM_TORSO "game.monster.torso_anim"
-#define VAR_NPC_ANIM_LEGS "game.monster.legs_anim"
-
-#define PLAYER_SCRIPT "player/player"
+constexpr const char* VAR_NPC_ANIM_TORSO = "game.monster.torso_anim";
+constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
+constexpr const char* PLAYER_SCRIPT = "player/player";
 //#define mCH m_pOwner->iCurrentHand
 
 /*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
@@ -125,34 +124,31 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer);
 //#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
 #define CHWielded Wielded(iCurrentHand)*/
 
-#define CH Hand[iCurrentHand]
-#define MAX_PLAYER_HANDS 2
-#define MAX_PLAYER_HANDITEMS 3
-#define MAX_KEYHISTORY 10
+constexpr int MAX_PLAYER_HANDS = 2;
+constexpr int MAX_PLAYER_HANDITEMS = 3;
+constexpr int MAX_KEYHISTORY = 10;
+constexpr int MSGFLAG_SPAWN = (1 << 0);
 
-#define mSStat m_pOwner->GetSkillStat
-#define mNStat m_pOwner->GetNatStat
 
-#define MSGFLAG_SPAWN (1 << 0)
 
 //-----------------
 
-#define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
-#define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
-#define DAMAGE_FOR_FALL_SPEED (float)100 / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED) // damage per unit per second.
-#define PLAYER_MIN_BOUNCE_SPEED 200
-#define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
+constexpr int PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
+constexpr int PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
+constexpr float DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
+constexpr int PLAYER_MIN_BOUNCE_SPEED = 200;
+constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 350.0f;// won't punch player's screen/make scrape noise unless player falling at least this fast.
 
 //
 // Player PHYSICS FLAGS bits
 //
-#define PFLAG_ONLADDER (1 << 0)
-#define PFLAG_ONSWING (1 << 0)
-#define PFLAG_ONTRAIN (1 << 1)
-#define PFLAG_ONBARNACLE (1 << 2)
-#define PFLAG_DUCKING (1 << 3)	// In the process of ducking, but totally squatted yet
-#define PFLAG_USING (1 << 4)	// Using a continuous entity
-#define PFLAG_OBSERVER (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
+constexpr int PFLAG_ONLADDER = (1 << 0);
+constexpr int PFLAG_ONSWING = (1 << 0);
+constexpr int PFLAG_ONTRAIN = (1 << 1);
+constexpr int PFLAG_ONBARNACLE = (1 << 2);
+constexpr int PFLAG_DUCKING = (1 << 3);	// In the process of ducking, but totally squatted yet
+constexpr int PFLAG_USING = (1 << 4);	// Using a continuous entity
+constexpr int PFLAG_OBSERVER = (1 << 5); // player is locked in stationary cam mode. Spectators can move, observers can't.
 
 //
 // generic player
