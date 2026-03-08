@@ -37,7 +37,7 @@ struct mplane_s;
 extern Vector vec3_origin;
 constexpr int nanmask = 255 << 23;
 
-inline static bool IS_NAN(const float* x) {
+inline static bool IS_NAN(const float &x) {
 
 	if ((((*(int*)&x) & nanmask) == nanmask)) {
 		return true;

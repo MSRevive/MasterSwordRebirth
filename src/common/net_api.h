@@ -27,7 +27,7 @@ enum {
 // Set this flag for things like broadcast requests, etc. where the engine should not
 //  kill the request hook after receiving the first response
 enum {
-	FNETAPI_MULTIPLE_RESPONSE = (1 << 0);
+	FNETAPI_MULTIPLE_RESPONSE = (1 << 0)
 };
 
 typedef void (*net_api_response_func_t)(struct net_response_s *response);
