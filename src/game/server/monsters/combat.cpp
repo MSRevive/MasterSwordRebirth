@@ -1046,7 +1046,7 @@ void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
-		if (pEntity->pev->takedamage != DAMAGE_NO)
+		if (static_cast<int>(pEntity->pev->takedamage) != DAMAGE_NO)
 		{
 			// UNDONE: this should check a damage mask, not an ignore
 			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)

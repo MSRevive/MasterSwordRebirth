@@ -1501,7 +1501,7 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		CBaseEntity *pTarget = NULL, *pClosestHit = NULL;
 		while ((pTarget = UTIL_FindEntityInSphere(pTarget, Damage.vecSrc, Damage.flRange)) != NULL)
 		{
-			if (pTarget->pev->takedamage == DAMAGE_NO || //Don't hurt world objects, godmode entities, or the entity I originally struck
+			if (static_cast<int>(pTarget->pev->takedamage) == DAMAGE_NO || //Don't hurt world objects, godmode entities, or the entity I originally struck
 				FBitSet(pTarget->pev->flags, FL_GODMODE) ||
 				!pTarget->IsAlive() ||
 				pTarget == Damage.pInflictor ||
