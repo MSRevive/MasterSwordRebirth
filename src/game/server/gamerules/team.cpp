@@ -20,7 +20,6 @@ CTeam *CTeam::CreateTeam(const char *pszName, ulong ID)
 
 	//Create new team
 	CTeam* NewTeam = msnew CTeam;
-    char pszTeamName[MAX_TEAMNAME_LEN + 1];
 
 	strncpy((char*)NewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
 	NewTeam->m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
