@@ -3,7 +3,7 @@
 
 // Allow "DEBUG" in addition to default "_DEBUG"
 #ifdef _DEBUG
-#define DEBUG 1
+constexpr int DEBUG = 1
 #endif
 
 // Silence certain warnings
@@ -41,7 +41,16 @@ using word = unsigned short;
 // #undef ARRAYSIZE
 // #endif
 // #define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
-#define V_min(a, b) (((a) < (b)) ? (a) : (b))
-#define V_max(a, b) (((a) > (b)) ? (a) : (b))
+
+
+template <typename T1, typename T2>
+auto V_min(const T1& a, const T2& b) {
+	return (a < b) ? a : b;
+}
+
+template <typename T1, typename T2>
+auto V_max(const T1& a, const T2& b) {
+	return (a > b) ? a : b;
+}
 
 #endif
