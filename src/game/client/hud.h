@@ -73,12 +73,13 @@ typedef struct
 
 typedef struct cvar_s cvar_t;
 
-#define HUD_ACTIVE 1
-#define HUD_INTERMISSION 2
+enum {
+	HUD_ACTIVE = 1,
+	HUD_INTERMISSION = 2
+};
 
-#define MAX_PLAYER_NAME_LENGTH 32
-
-#define MAX_MOTD_LENGTH 1024
+constexpr int MAX_PLAYER_NAME_LENGTH = 32;
+constexpr int MAX_MOTD_LENGTH = 1024;
 
 //					Master Sword
 //-----------------------------------------------------
@@ -99,7 +100,7 @@ typedef int BOOL;
 #endif
 
 //Moved here from CHudStatusIcons
-#define MAX_SPRITE_NAME_LENGTH 24
+constexpr int MAX_SPRITE_NAME_LENGTH = 24;
 
 typedef struct
 {
@@ -150,7 +151,7 @@ private:
 	float m_fFade;
 };
 
-#define FADE_TIME 100
+constexpr int FADE_TIME = 100;
 
 //
 //-----------------------------------------------------
@@ -255,7 +256,7 @@ private:
 //
 //-----------------------------------------------------
 //
-const int maxHUDMessages = 16;
+constexpr int maxHUDMessages = 16;
 struct message_parms_t
 {
 	client_textmessage_t *pMessage;
