@@ -16,11 +16,13 @@
 #if !defined(ENTITY_TYPESH)
 #define ENTITY_TYPESH
 
-constexpr int ET_NORMAL = 0;
-constexpr int ET_PLAYER = 1;
-constexpr int ET_TEMPENTITY = 2;
-constexpr int ET_BEAM = 3;
-// BMODEL or SPRITE that was split across BSP nodes
-constexpr int ET_FRAGMENTED = 4;
+enum {
+	ET_NORMAL = 0,
+	ET_PLAYER = 1,
+	ET_TEMPENTITY = 2,
+	ET_BEAM = 3,
+	// BMODEL or SPRITE that was split across BSP nodes
+	ET_FRAGMENTED = 4
+};
 
 #endif // !ENTITY_TYPESH
