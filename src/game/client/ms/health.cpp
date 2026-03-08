@@ -39,27 +39,27 @@ MS_DECLARE_MESSAGE(m_Health, HP)
 MS_DECLARE_MESSAGE(m_Health, MP)
 MS_DECLARE_MESSAGE(m_Health, Damage)
 
-#define MOVE_INC 3
-#define PAIN_NAME "sprites/%d_pain.spr"
-#define DAMAGE_NAME "sprites/%d_dmg.spr"
+constexpr int MOVE_INC = 3;
+constexpr const char* PAIN_NAME = "sprites/%d_pain.spr";
+constexpr const char* DAMAGE_NAME = "sprites/%d_dmg.spr";
 
 int giDmgHeight, giDmgWidth;
 
 int giDmgFlags[NUM_DMG_TYPES] =
-	{
-		DMG_POISON,
-		DMG_ACID,
-		DMG_FREEZE | DMG_SLOWFREEZE,
-		DMG_DROWN,
-		DMG_BURN | DMG_SLOWBURN,
-		DMG_NERVEGAS,
-		DMG_RADIATION,
-		DMG_SHOCK,
-	
-		DMG_CALTROP,
-		DMG_TRANQ,
-		DMG_CONCUSS,
-		DMG_HALLUC};
+{
+	DMG_POISON,
+	DMG_ACID,
+	DMG_FREEZE | DMG_SLOWFREEZE,
+	DMG_DROWN,
+	DMG_BURN | DMG_SLOWBURN,
+	DMG_NERVEGAS,
+	DMG_RADIATION,
+	DMG_SHOCK,
+	DMG_CALTROP,
+	DMG_TRANQ,
+	DMG_CONCUSS,
+	DMG_HALLUC
+};
 
 int CHudHealth::Init(void)
 {
@@ -77,14 +77,6 @@ int CHudHealth::Init(void)
 	m_iTempHP = m_iTempMP = 0;
 
 	memset(m_dmg, 0, sizeof(DAMAGE_IMAGE) * NUM_DMG_TYPES);
-
-	/*	if( !CVAR_GET_FLOAT("gl_polyoffset") ) {
-		char a[64];
-		 _snprintf(a, sizeof(a),  "Software mode detected!  Disabling Health/Mana Flasks!.\n",  CVAR_GET_FLOAT("gl_polyoffset") ); 
-		ConsolePrint( a );
-		m_iFlags = 0;
-	}*/
-
 	gHUD.AddHudElem(this);
 	return 1;
 }
@@ -185,7 +177,7 @@ void CHudHealth::GetPainColor(int &r, int &g, int &b)
 		iHealth -= 25;
 	else if (iHealth < 0)
 		iHealth = 0;
-#if 0
+#if 0 
 	g = iHealth * 255 / 100;
 	r = 255 - g;
 	b = 0;
@@ -209,90 +201,6 @@ void CHudHealth::GetPainColor(int &r, int &g, int &b)
 int CHudHealth::Draw(float flTime)
 {	
 	return 1;
-	/*	int HPr, HPg, HPb;
-	int x, y;
-	int xFlask, yFlask;
-	int iHealth = player.m_HP,
-		iMaxHP = player.m_MaxHP,
-		iMana = player.m_MP,
-		iMaxMP = player.m_MaxMP;
-
-	if( player.m_HP < 1.0f && player.m_HP > 0 ) iHealth = 1;	//Cap integers at 1
-	if( player.m_MP < 1.0f && player.m_MP > 0 ) iMana = 1;
-
-	if ( gHUD.m_iHideHUDDisplay & (HIDEHUD_HEALTH|HIDEHUD_ALL) || !(m_iFlags&HUD_ACTIVE) )
-		return 1;
-
-	if ( !m_hSprite )
-		m_hSprite = LoadSprite(PAIN_NAME);
-	
-
-	// If health is getting low, make it bright red
-	//if (m_iHealth <= 15) ScaleColors(r, g, b, a );
-		
-	if( (gHUD.m_flTime-flChangeTime) >= .007) {
-		float inc = (100/MOVE_INC);
-		if( m_iTempHP > iHealth ) { m_iTempHP -= (iHealth/inc)+1; if(m_iTempHP<iHealth) m_iTempHP = iHealth; }
-		else if( m_iTempHP < iHealth ) { m_iTempHP += (iHealth/inc)+1; if(m_iTempHP>iHealth) m_iTempHP = iHealth; }
-		if( m_iTempMP > iMana ) { m_iTempMP -= (iMana/inc)+1; if(m_iTempMP<iMana) m_iTempMP = iMana; }
-		else if( m_iTempMP < iMana ) { m_iTempMP += (iMana/inc)+1; if(m_iTempMP>iMana) m_iTempMP = iMana; }
-		flChangeTime = gHUD.m_flTime;
-	}
-
-//	if( m_iTempHP < iHealth ) m_iTempHP = iHealth;
-//	if( m_iTempMP < iMana ) m_iTempMP = iMana;
-
-//	ScaleColors(r, g, b, a );
-
-	int iHealthFlask = gHUD.GetSpriteIndex("healthflask"),
-		iManaFlask = gHUD.GetSpriteIndex("manaflask"),
-		iframe;
-	int SMLNumWidth = gHUD.GetSpriteRect(gHUD.m_HUD_numberSML_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_numberSML_0).left,
-		SMLSlashWidth = gHUD.GetSpriteRect(gHUD.m_HUD_char_slashSML).right - gHUD.GetSpriteRect(gHUD.m_HUD_char_slashSML).left,
-		HFlaskWidth = gHUD.GetSpriteRect(iHealthFlask).right - gHUD.GetSpriteRect(iHealthFlask).left,
-		MFlaskWidth = gHUD.GetSpriteRect(iManaFlask).right - gHUD.GetSpriteRect(iManaFlask).left;
-	int xStart, yStart;
-
-	//y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	yFlask = ScreenHeight - 110; xFlask = XRES(15);
-
-	xStart = (xFlask+(HFlaskWidth/2))-(((numofdigits(m_iTempHP)*SMLNumWidth)+(numofdigits(iMaxHP)*SMLNumWidth)+SMLSlashWidth)/2); yStart = ScreenHeight - 40;
-
-	y = yStart; x = xStart;
-
-
-	float fltemp; int maxframes;
-	maxframes = (SPR_Frames(gHUD.GetSprite(iHealthFlask))-1);
-	fltemp = (float)((float)m_iTempHP/(float)iMaxHP) * maxframes;
-	iframe = min(fltemp,maxframes); //round up if not at integer
-	SPR_Set(gHUD.GetSprite(iHealthFlask), 128, 128, 128 );
-	SPR_DrawHoles( iframe, xFlask, yFlask, &gHUD.GetSpriteRect(iHealthFlask));
-
-	GetPainColor( HPr, HPg, HPb );
-	x = gHUD.DrawHudNumberSML(x, y, NULL, m_iTempHP, HPr, HPg, HPb);
-
-	x = gHUD.DrawHudStringSML( x, y, "/", 255, 255, 255 );
-	
-	x = gHUD.DrawHudNumberSML(x, y, NULL, iMaxHP, 255, 255, 255);
-
-	xFlask += (gHUD.GetSpriteRect(iHealthFlask).right - gHUD.GetSpriteRect(iHealthFlask).left) + XRES(10);
-	
-	maxframes = (SPR_Frames(gHUD.GetSprite(iManaFlask))-1);
-	fltemp = (float)((float)m_iTempMP/(float)iMaxMP) * maxframes;
-	iframe = min(fltemp,maxframes); //round up if not at integer
-	SPR_Set(gHUD.GetSprite(iManaFlask), 128, 128, 128 );
-	SPR_DrawHoles( iframe, xFlask, yFlask, &gHUD.GetSpriteRect(iManaFlask));
-
-	x = (xFlask+(MFlaskWidth/2))-(((numofdigits(m_iTempMP)*SMLNumWidth)+(numofdigits(iMaxMP)*SMLNumWidth)+SMLSlashWidth)/2); yStart = ScreenHeight - 40;
-	
-	x = gHUD.DrawHudNumberSML(x, y, NULL, m_iTempMP, 255, 255, 255);
-
-	x = gHUD.DrawHudStringSML( x, y, "/", 255, 255, 255 );
-	
-	x = gHUD.DrawHudNumberSML(x, y, NULL, iMaxMP, 255, 255, 255);
-
-	DrawDamage(flTime);
-	return DrawPain(flTime);*/
 }
 
 void CHudHealth::CalcDamageDirection(vec3_t vecFrom)
@@ -430,66 +338,6 @@ int CHudHealth::DrawPain(float flTime)
 	return 1;
 }
 
-/*int CHudHealth::DrawDamage(float flTime)
-{
-	int r, g, b, a;
-	DAMAGE_IMAGE *pdmg;
-
-	if (!m_bitsDamage)
-		return 1;
-
-	UnpackRGB(r,g,b, RGB_YELLOWISH);
-	
-	a = (int)( fabs(sin(flTime*2)) * 256.0);
-
-	ScaleColors(r, g, b, a);
-
-	// Draw all the items
-	for (int i = 0; i < NUM_DMG_TYPES; i++)
-	{
-		if (m_bitsDamage & giDmgFlags[i])
-		{
-			pdmg = &m_dmg[i];
-			SPR_Set(gHUD.GetSprite(m_HUD_dmg_bio + i), r, g, b );
-			SPR_DrawAdditive(0, pdmg->x, pdmg->y, &gHUD.GetSpriteRect(m_HUD_dmg_bio + i));
-		}
-	}
-
-
-	// check for bits that should be expired
-	for ( i = 0; i < NUM_DMG_TYPES; i++ )
-	{
-		DAMAGE_IMAGE *pdmg = &m_dmg[i];
-
-		if ( m_bitsDamage & giDmgFlags[i] )
-		{
-			pdmg->fExpire = min( flTime + DMG_IMAGE_LIFE, pdmg->fExpire );
-
-			if ( pdmg->fExpire <= flTime		// when the time has expired
-				&& a < 40 )						// and the flash is at the low point of the cycle
-			{
-				pdmg->fExpire = 0;
-
-				int y = pdmg->y;
-				pdmg->x = pdmg->y = 0;
-
-				// move everyone above down
-				for (int j = 0; j < NUM_DMG_TYPES; j++)
-				{
-					pdmg = &m_dmg[j];
-					if ((pdmg->y) && (pdmg->y < y))
-						pdmg->y += giDmgHeight;
-
-				}
-
-				m_bitsDamage &= ~giDmgFlags[i];  // clear the bits
-			}
-		}
-	}
-
-	return 1;
-}*/
-
 void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 {
 	DAMAGE_IMAGE *pdmg;
@@ -504,7 +352,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 		// Is this one already on?
 		if (m_bitsDamage & giDmgFlags[i])
 		{
-			pdmg->fExpire = flTime + DMG_IMAGE_LIFE; // extend the duration
+			pdmg->fExpire = flTime + static_cast<float>(DMG_IMAGE_LIFE); // extend the duration
 			if (!pdmg->fBaseline)
 				pdmg->fBaseline = flTime;
 		}
@@ -515,7 +363,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 			// put this one at the bottom
 			pdmg->x = giDmgWidth / 8;
 			pdmg->y = ScreenHeight - giDmgHeight * 2;
-			pdmg->fExpire = flTime + DMG_IMAGE_LIFE;
+			pdmg->fExpire = flTime + static_cast<float>(DMG_IMAGE_LIFE);
 
 			// move everyone else up
 			for (int j = 0; j < NUM_DMG_TYPES; j++)
