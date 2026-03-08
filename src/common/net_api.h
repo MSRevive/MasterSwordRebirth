@@ -15,22 +15,22 @@
 #include "netadr.h"
 #endif
 
-#define NETAPI_REQUEST_SERVERLIST (0) // Doesn't need a remote address
-#define NETAPI_REQUEST_PING (1)
-#define NETAPI_REQUEST_RULES (2)
-#define NETAPI_REQUEST_PLAYERS (3)
-#define NETAPI_REQUEST_DETAILS (4)
+constexpr int NETAPI_REQUEST_SERVERLIST = 0; // Doesn't need a remote address
+constexpr int NETAPI_REQUEST_PING = 1;
+constexpr int NETAPI_REQUEST_RULES = 2;
+constexpr int NETAPI_REQUEST_PLAYERS = 3;
+constexpr int NETAPI_REQUEST_DETAILS = 4;
 
 // Set this flag for things like broadcast requests, etc. where the engine should not
 //  kill the request hook after receiving the first response
-#define FNETAPI_MULTIPLE_RESPONSE (1 << 0)
+constexpr int FNETAPI_MULTIPLE_RESPONSE = (1 << 0);
 
 typedef void (*net_api_response_func_t)(struct net_response_s *response);
 
-#define NET_SUCCESS (0)
-#define NET_ERROR_TIMEOUT (1 << 0)
-#define NET_ERROR_PROTO_UNSUPPORTED (1 << 1)
-#define NET_ERROR_UNDEFINED (1 << 2)
+constexpr int NET_SUCCESS = 0;
+constexpr int NET_ERROR_TIMEOUT = 1 << 0;
+constexpr int NET_ERROR_PROTO_UNSUPPORTED = 1 << 1;
+constexpr int NET_ERROR_UNDEFINED = 1 << 2;
 
 typedef struct net_adrlist_s
 {
