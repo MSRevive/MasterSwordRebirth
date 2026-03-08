@@ -19,8 +19,10 @@
 #endif
 
 // For entityType below
-constexpr int ENTITY_NORMAL  = (1 << 0);
-constexpr int ENTITY_BEAM = (1 << 1);
+enum {
+	ENTITY_NORMAL = (1 << 0),
+	ENTITY_BEAM = (1 << 1)
+};
 
 // Entity state is used for the baseline and for delta compression of a packet of
 //  entities that is sent to a client.
