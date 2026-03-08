@@ -59,32 +59,32 @@ color24 gTracerColors[] =
 */
 
 // Temporary entity array
-#define TENTPRIORITY_LOW 0
-#define TENTPRIORITY_HIGH 1
+constexpr int TENTPRIORITY_LOW = 0;
+constexpr int TENTPRIORITY_HIGH = 1;
 
 // TEMPENTITY flags
-#define FTENT_NONE 0x00000000
-#define FTENT_SINEWAVE 0x00000001
-#define FTENT_GRAVITY 0x00000002
-#define FTENT_ROTATE 0x00000004
-#define FTENT_SLOWGRAVITY 0x00000008
-#define FTENT_SMOKETRAIL 0x00000010
-#define FTENT_COLLIDEWORLD 0x00000020
-#define FTENT_FLICKER 0x00000040
-#define FTENT_FADEOUT 0x00000080
-#define FTENT_SPRANIMATE 0x00000100
-#define FTENT_HITSOUND 0x00000200
-#define FTENT_SPIRAL 0x00000400
-#define FTENT_SPRCYCLE 0x00000800
-#define FTENT_COLLIDEALL 0x00001000		// will collide with world and slideboxes
-#define FTENT_PERSIST 0x00002000		// tent is not removed when unable to draw
-#define FTENT_COLLIDEKILL 0x00004000	// tent is removed upon collision with anything
-#define FTENT_PLYRATTACHMENT 0x00008000 // tent is attached to a player (owner)
-#define FTENT_SPRANIMATELOOP 0x00010000 // animating sprite doesn't die when last frame is displayed
-#define FTENT_SPARKSHOWER 0x00020000
-#define FTENT_NOMODEL 0x00040000	  // Doesn't have a model, never try to draw ( it just triggers other things )
-#define FTENT_CLIENTCUSTOM 0x00080000 // Must specify callback.  Callback function is responsible for killing tempent and updating fields ( unless other flags specify how to do things )
-#define FTENT_SKIPENT 0x00100000	  // AUG2013_25 Thothie - Skip collision checks for stored ent index
+constexpr int FTENT_NONE = 0x00000000;
+constexpr int FTENT_SINEWAVE = 0x00000001;
+constexpr int FTENT_GRAVITY = 0x00000002;
+constexpr int FTENT_ROTATE = 0x00000004;
+constexpr int FTENT_SLOWGRAVITY = 0x00000008;
+constexpr int FTENT_SMOKETRAIL = 0x00000010;
+constexpr int FTENT_COLLIDEWORLD = 0x00000020;
+constexpr int FTENT_FLICKER = 0x00000040;
+constexpr int FTENT_FADEOUT = 0x00000080;
+constexpr int FTENT_SPRANIMATE = 0x00000100;
+constexpr int FTENT_HITSOUND = 0x00000200;
+constexpr int FTENT_SPIRAL = 0x00000400;
+constexpr int FTENT_SPRCYCLE = 0x00000800;
+constexpr int FTENT_COLLIDEALL = 0x00001000;	// will collide with world and slideboxes
+constexpr int FTENT_PERSIST = 0x00002000;		// tent is not removed when unable to draw
+constexpr int FTENT_COLLIDEKILL = 0x00004000;	// tent is removed upon collision with anything
+constexpr int FTENT_PLYRATTACHMENT = 0x00008000; // tent is attached to a player (owner)
+constexpr int FTENT_SPRANIMATELOOP = 0x00010000; // animating sprite doesn't die when last frame is displayed
+constexpr int FTENT_SPARKSHOWER = 0x00020000;
+constexpr int FTENT_NOMODEL = 0x00040000;	  // Doesn't have a model, never try to draw ( it just triggers other things )
+constexpr int FTENT_CLIENTCUSTOM = 0x00080000; // Must specify callback.  Callback function is responsible for killing tempent and updating fields ( unless other flags specify how to do things )
+constexpr int FTENT_SKIPENT = 0x00100000;  // AUG2013_25 Thothie - Skip collision checks for stored ent index
 
 typedef struct tempent_s TEMPENTITY;
 typedef struct tempent_s
