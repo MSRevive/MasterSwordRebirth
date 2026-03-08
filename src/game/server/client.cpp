@@ -2197,7 +2197,7 @@ const char *GetGameDescription()
 #else
 	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10]};
 	static char gameDesc[64];
-	sprintf(gameDesc, "MS:R - %sa", strupr(build));
+	sprintf(gameDesc, "MS:R - %sa", _strupr(build));
 #endif
 
 	return gameDesc;
