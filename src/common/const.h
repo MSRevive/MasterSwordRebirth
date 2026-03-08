@@ -667,10 +667,14 @@ enum {
 };
 // volume values
 
-constexpr float VOL_NORM = 1.0;
+enum {
+	VOL_NORM = 1
+};
 
 // plats
-constexpr int PLAT_LOW_TRIGGER = 1;
+enum {
+	PLAT_LOW_TRIGGER = 1
+};
 
 // Trains
 enum {
