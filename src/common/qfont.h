@@ -20,7 +20,7 @@
 
 // Font stuff
 
-#define NUM_GLYPHS 256
+constexpr int NUM_GLYPHS = 256;
 
 typedef struct
 {

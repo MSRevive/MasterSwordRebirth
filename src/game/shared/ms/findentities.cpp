@@ -374,7 +374,7 @@ bool CCylinderFilter::SetFromString(msstring vsString)
 	float vRadiusSquared;
 	float vPosZ;
 	float vNegZ;
-	bool bOk = sscanf(vsString.c_str(), "Cyl((%f,%f,%f),%f,%f,%f,%f)", &vOrigin, &vRadius, &vRadiusSquared, &vPosZ, &vNegZ) == 7;
+	bool bOk = sscanf(vsString.c_str(), "Cyl((%f,%f,%f),%f,%f,%f,%f)", &vOrigin.x, &vOrigin.y, &vOrigin.z, &vRadius, &vRadiusSquared, &vPosZ, &vNegZ) == 7;
 	if (bOk)
 	{
 		mOrigin = vOrigin;
