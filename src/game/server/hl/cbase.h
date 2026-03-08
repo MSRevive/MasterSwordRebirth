@@ -836,111 +836,112 @@ public:
 #define SetMoveDone(a) m_pfnCallWhenMoveDone = static_cast<void (CBaseToggle::*)(void)>(a)
 
 // people gib if their health is <= this at the time of death
-#define GIB_HEALTH_VALUE -30
+constexpr int GIB_HEALTH_VALUE = -30;
+constexpr int ROUTE_SIZE = 8;	  // how many waypoints a monster can store at one time
+constexpr int MAX_OLD_ENEMIES = 4; // how many old enemies to remember
 
-#define ROUTE_SIZE 8	  // how many waypoints a monster can store at one time
-#define MAX_OLD_ENEMIES 4 // how many old enemies to remember
-
-#define bits_CAP_DUCK (1 << 0)		 // crouch
-#define bits_CAP_JUMP (1 << 1)		 // jump/leap
-#define bits_CAP_STRAFE (1 << 2)	 // strafe ( walk/run sideways)
-#define bits_CAP_SQUAD (1 << 3)		 // can form squads
-#define bits_CAP_SWIM (1 << 4)		 // proficiently navigate in water
-#define bits_CAP_CLIMB (1 << 5)		 // climb ladders/ropes
-#define bits_CAP_USE (1 << 6)		 // open doors/push buttons/pull levers
-#define bits_CAP_HEAR (1 << 7)		 // can hear forced sounds
-#define bits_CAP_AUTO_DOORS (1 << 8) // can trigger auto doors
-#define bits_CAP_OPEN_DOORS (1 << 9) // can open manual doors
-#define bits_CAP_TURN_HEAD (1 << 10) // can turn head, always bone controller 0
-
-#define bits_CAP_RANGE_ATTACK1 (1 << 11) // can do a range attack 1
-#define bits_CAP_RANGE_ATTACK2 (1 << 12) // can do a range attack 2
-#define bits_CAP_MELEE_ATTACK1 (1 << 13) // can do a melee attack 1
-#define bits_CAP_MELEE_ATTACK2 (1 << 14) // can do a melee attack 2
-
-#define bits_CAP_FLY (1 << 15) // can fly, move all around
-
-#define bits_CAP_DOORS_GROUP (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
-
+enum {
+	bits_CAP_DUCK = (1 << 0),		 // crouch
+	bits_CAP_JUMP = (1 << 1),		 // jump/leap
+	bits_CAP_STRAFE = (1 << 2),		// strafe ( walk/run sideways)
+	bits_CAP_SQUAD = (1 << 3),		 // can form squads
+	bits_CAP_SWIM = (1 << 4),		 // proficiently navigate in water
+	bits_CAP_CLIMB = (1 << 5),		 // climb ladders/ropes
+	bits_CAP_USE = (1 << 6),		 // open doors/push buttons/pull levers
+	bits_CAP_HEAR = (1 << 7),		 // can hear forced sounds
+	bits_CAP_AUTO_DOORS = (1 << 8), // can trigger auto doors
+	bits_CAP_OPEN_DOORS = (1 << 9), // can open manual doors
+	bits_CAP_TURN_HEAD = (1 << 10), // can turn head, always bone controller 0
+	bits_CAP_RANGE_ATTACK1 = (1 << 11), // can do a range attack 1
+	bits_CAP_RANGE_ATTACK2 = (1 << 12), // can do a range attack 2
+	bits_CAP_MELEE_ATTACK1 = (1 << 13), // can do a melee attack 1
+	bits_CAP_MELEE_ATTACK2 = (1 << 14), // can do a melee attack 2
+	bits_CAP_FLY = (1 << 15), // can fly, move all around
+	bits_CAP_DOORS_GROUP = (bits_CAP_USE | bits_CAP_AUTO_DOORS | bits_CAP_OPEN_DOORS)
+};
 // used by suit voice to indicate damage sustained and repaired type to player
 
 // instant damage
-
-#define DMG_GENERIC 0			 // generic damage was done
-#define DMG_CRUSH (1 << 0)		 // crushed by falling or moving object
-#define DMG_BULLET (1 << 1)		 // shot
-#define DMG_SLASH (1 << 2)		 // cut, clawed, stabbed
-#define DMG_BURN (1 << 3)		 // heat burned
-#define DMG_FREEZE (1 << 4)		 // frozen
-#define DMG_FALL (1 << 5)		 // fell too far
-#define DMG_BLAST (1 << 6)		 // explosive blast damage
-#define DMG_CLUB (1 << 7)		 // crowbar, punch, headbutt
-#define DMG_SHOCK (1 << 8)		 // electric shock
-#define DMG_SONIC (1 << 9)		 // sound pulse shockwave
-#define DMG_ENERGYBEAM (1 << 10) // laser or other high energy beam
-#define DMG_NEVERGIB (1 << 12)	 // with this bit OR'd in, no damage type will be able to gib victims upon death
-#define DMG_ALWAYSGIB (1 << 13)	 // with this bit OR'd in, any damage type can be made to gib victims upon death.
-#define DMG_DROWN (1 << 14)		 // Drowning
-// time-based damage
-#define DMG_TIMEBASED (~(0x3fff)) // mask for time-based damage
-
-#define DMG_PARALYZE (1 << 15)	   // slows affected creature down
-#define DMG_NERVEGAS (1 << 16)	   // nerve toxins, very bad
-#define DMG_POISON (1 << 17)	   // blood poisioning
-#define DMG_RADIATION (1 << 18)	   // radiation exposure
-#define DMG_DROWNRECOVER (1 << 19) // drowning recovery
-#define DMG_ACID (1 << 20)		   // toxic chemicals or acid burns
-#define DMG_SLOWBURN (1 << 21)	   // in an oven
-#define DMG_SLOWFREEZE (1 << 22)   // in a subzero freezer
-#define DMG_MORTAR (1 << 23)	   // Hit by air raid (done to distinguish grenade from mortar)
-//Master Sword --
-#define DMG_NOKILL (1 << 24)	  // (Dogg) This damage cannot kill you (fists reflective damage...)
-#define DMG_SIMPLEBBOX (1 << 25)  // (Dogg) Use a simple BBox for tracelines
-#define DMG_DIRECT (1 << 26)	  // (Dogg) Ignore the traceline and just do damage to the target
-#define DMG_REFLECTIVE (1 << 27)  // (Dogg) This damage can hurt you
-#define DMG_AOE (1 << 28)		  // (Dogg) Area of Effect Damage
-#define DMG_NONE (1 << 29)		  // (Dogg) Find a target, but don't damage it
-#define DMG_NOSKIN (1 << 30)	  // (Dogg) This damage won't skin creatures (arrows, fireball, etc.)
-#define DMG_MARTIALARTS (1 << 31) // (Dogg) Martial arts attack (punch, kick, jumpkick...)
-//---------------
-// these are the damage types that are allowed to gib corpses
-#define DMG_GIB_CORPSE (DMG_CRUSH | DMG_FALL | DMG_BLAST | DMG_SONIC | DMG_CLUB)
-
-// these are the damage types that have client hud art
-#define DMG_SHOWNHUD (DMG_POISON | DMG_ACID | DMG_FREEZE | DMG_SLOWFREEZE | DMG_DROWN | DMG_BURN | DMG_SLOWBURN | DMG_NERVEGAS | DMG_RADIATION | DMG_SHOCK)
-
+	
+enum {
+	DMG_GENERIC = (0 << 0),			 // generic damage was done
+	DMG_CRUSH = (1 << 0),		 // crushed by falling or moving object
+	DMG_BULLET = (1 << 1),		 // shot
+	DMG_SLASH = (1 << 2),		 // cut, clawed, stabbed
+	DMG_BURN = (1 << 3),		 // heat burned
+	DMG_FREEZE = (1 << 4),		 // frozen
+	DMG_FALL = (1 << 5),		 // fell too far
+	DMG_BLAST = (1 << 6),		 // explosive blast damage
+	DMG_CLUB = (1 << 7),		 // crowbar, punch, headbutt
+	DMG_SHOCK = (1 << 8),		 // electric shock
+	DMG_SONIC = (1 << 9),		 // sound pulse shockwave
+	DMG_ENERGYBEAM = (1 << 10), // laser or other high energy beam
+	DMG_NEVERGIB = (1 << 12),	 // with this bit OR'd in, no damage type will be able to gib victims upon death
+	DMG_ALWAYSGIB = (1 << 13),	 // with this bit OR'd in, any damage type can be made to gib victims upon death.
+	DMG_DROWN = (1 << 14),		 // Drowning
+	DMG_TIMEBASED = (~(0x3fff)), // mask for time-based damage
+	DMG_PARALYZE = (1 << 15),	   // slows affected creature down
+	DMG_NERVEGAS = (1 << 16),	   // nerve toxins, very bad
+	DMG_POISON = (1 << 17),	   // blood poisioning
+	DMG_RADIATION = (1 << 18),	   // radiation exposure
+	DMG_DROWNRECOVER = (1 << 19), // drowning recovery
+	DMG_ACID = (1 << 20),		   // toxic chemicals or acid burns
+	DMG_SLOWBURN = (1 << 21),	   // in an oven
+	DMG_SLOWFREEZE = (1 << 22),   // in a subzero freezer
+	DMG_MORTAR = (1 << 23),	   // Hit by air raid (done to distinguish grenade from mortar)
+	DMG_CALTROP = (1 << 30),
+	DMG_HALLUC = (1 << 31),
+	DMG_TRANQ = DMG_MORTAR,
+	DMG_CONCUSS = DMG_SONIC,
+	//Master Sword --
+	DMG_NOKILL = (1 << 24),	  // (Dogg) This damage cannot kill you (fists reflective damage...)
+	DMG_SIMPLEBBOX = (1 << 25),  // (Dogg) Use a simple BBox for tracelines
+	DMG_DIRECT = (1 << 26),	  // (Dogg) Ignore the traceline and just do damage to the target
+	DMG_REFLECTIVE = (1 << 27),  // (Dogg) This damage can hurt you
+	DMG_AOE = (1 << 28),		  // (Dogg) Area of Effect Damage
+	DMG_NONE = (1 << 29),		  // (Dogg) Find a target, but don't damage it
+	DMG_NOSKIN = (1 << 30),	  // (Dogg) This damage won't skin creatures (arrows, fireball, etc.)
+	DMG_MARTIALARTS = (1 << 31), // (Dogg) Martial arts attack (punch, kick, jumpkick...)
+	//---------------
+	// these are the damage types that are allowed to gib corpses
+	DMG_GIB_CORPSE = (DMG_CRUSH | DMG_FALL | DMG_BLAST | DMG_SONIC | DMG_CLUB),
+	// these are the damage types that have client hud art
+	DMG_SHOWNHUD = (DMG_POISON | DMG_ACID | DMG_FREEZE | DMG_SLOWFREEZE | DMG_DROWN | DMG_BURN | DMG_SLOWBURN | DMG_NERVEGAS | DMG_RADIATION | DMG_SHOCK)
+};
 // NOTE: tweak these values based on gameplay feedback:
 
-#define PARALYZE_DURATION 2 // number of 2 second intervals to take damage
-#define PARALYZE_DAMAGE 1.0 // damage to take each 2 second interval
+constexpr int   PARALYZE_DURATION = 2; // number of 2 second intervals to take damage
+constexpr float PARALYZE_DAMAGE = 1.0;// damage to take each 2 second interval
 
-#define NERVEGAS_DURATION 2
-#define NERVEGAS_DAMAGE 5.0
+constexpr int   NERVEGAS_DURATION = 2;
+constexpr float NERVEGAS_DAMAGE = 5.0;
 
-#define POISON_DURATION 5
-#define POISON_DAMAGE 2.0
+constexpr int   POISON_DURATION = 5;
+constexpr float POISON_DAMAGE = 2.0;
 
-#define RADIATION_DURATION 2
-#define RADIATION_DAMAGE 1.0
+constexpr int   RADIATION_DURATION = 2;
+constexpr float RADIATION_DAMAGE = 1.0;
 
-#define ACID_DURATION 2
-#define ACID_DAMAGE 5.0
+constexpr int   ACID_DURATION = 2;
+constexpr float ACID_DAMAGE = 5.0;
 
-#define SLOWBURN_DURATION 2
-#define SLOWBURN_DAMAGE 1.0
+constexpr int   SLOWBURN_DURATION = 2;
+constexpr float SLOWBURN_DAMAGE = 1.0;
 
-#define SLOWFREEZE_DURATION 2
-#define SLOWFREEZE_DAMAGE 1.0
+constexpr int   SLOWFREEZE_DURATION = 2;
+constexpr float SLOWFREEZE_DAMAGE = 1.0;
 
-#define itbd_Paralyze 0
-#define itbd_NerveGas 1
-#define itbd_Poison 2
-#define itbd_Radiation 3
-#define itbd_DrownRecover 4
-#define itbd_Acid 5
-#define itbd_SlowBurn 6
-#define itbd_SlowFreeze 7
-#define CDMG_TIMEBASED 8
+enum {
+	itbd_Paralyze = 0,
+	itbd_NerveGas = 1,
+	itbd_Poison = 2,
+	itbd_Radiation = 3,
+	itbd_DrownRecover = 4,
+	itbd_Acid = 5,
+	itbd_SlowBurn = 6,
+	itbd_SlowFreeze = 7,
+	CDMG_TIMEBASED = 8
+};
 
 // when calling KILLED(), a value that governs gib behavior is expected to be
 // one of these three values
