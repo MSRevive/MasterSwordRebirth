@@ -18,7 +18,7 @@
 #pragma once
 #endif
 
-#define EVENT_API_VERSION 1
+constexpr int EVENT_API_VERSION = 1;
 
 typedef struct event_api_s
 {
