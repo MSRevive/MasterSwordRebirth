@@ -200,22 +200,28 @@ struct random_monster_t
 //NOV2014_20 - Thothie msmonster_random [end]
 
 //Frame conditions
-#define FC_STEP (1 << 1)  //Monster walked up a step this frame
-#define FC_JUMP (1 << 2)  //Monster began a jump this frame
-#define FC_AVOID (1 << 3) //Monster is avoiding an object this frame
+
+enum {
+	FC_STEP = (1 << 1),  //Monster walked up a step this frame
+	FC_JUMP = (1 << 2),  //Monster began a jump this frame
+	FC_AVOID = (1 << 3) //Monster is avoiding an object this frame
+};
 
 //General Conditions (Added to those defined in schedule.h)
-#define MONSTER_ROAM (1 << 23)			// Monster should roam around
-#define MONSTER_HASMOVEDEST (1 << 24)	// vMoveDest is valid
-#define MONSTER_TRADING (1 << 25)		// NPC is trading with a player
-#define MONSTER_REFLECTIVEDMG (1 << 26) // Damage is reflected back to attacker
-#define MONSTER_NOAI (1 << 27)			// Don't normal script events
-#define MONSTER_OPENCONTAINER (1 << 28) // Player is looking inside a pack
-#define MONSTER_BLIND (1 << 29)			// MAR2008b - Monster is blind
-#define MONSTER_INVISIBLE (1 << 30)		// MAR2008b - Monster is invisible
 
-#define MAX_ENEMYLIST 12
-#define MAX_NPC_HANDS 3
+enum {
+	MONSTER_ROAM = (1 << 23),// Monster should roam around
+	MONSTER_HASMOVEDEST = (1 << 24),// vMoveDest is valid
+	MONSTER_TRADING = (1 << 25),// NPC is trading with a player
+	MONSTER_REFLECTIVEDMG = (1 << 26),// Damage is reflected back to attacker
+	MONSTER_NOAI = (1 << 27),// Don't normal script events
+	MONSTER_OPENCONTAINER = (1 << 28),// Player is looking inside a pack
+	MONSTER_BLIND = (1 << 29),// MAR2008b - Monster is blind
+	MONSTER_INVISIBLE = (1 << 30),// MAR2008b - Monster is invisible
+};
+
+constexpr int MAX_ENEMYLIST = 12;
+constexpr int MAX_NPC_HANDS = 3;
 
 class CMSMonster : public CBaseMonster
 {
