@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-#define STUDIO_INTERFACE_VERSION 1
+constexpr int STUDIO_INTERFACE_VERSION = 1;
 
 typedef struct engine_studio_api_s
 {
@@ -126,7 +126,7 @@ typedef struct r_studio_interface_s
 extern r_studio_interface_t *pStudioAPI;
 
 // server blending
-#define SV_BLENDING_INTERFACE_VERSION 1
+constexpr int SV_BLENDING_INTERFACE_VERSION = 1;
 
 typedef struct sv_blending_interface_s
 {
