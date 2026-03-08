@@ -584,11 +584,11 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//Save skills
 	gFile.WriteByte(CHARDATA_SKILLS1); //[BYTE - CHUNK - STATS]
 	statlist &StatList = pPlayer->m_Stats;
-	gFile.WriteByte(StatList.size()); //[BYTE]
+	gFile.WriteByte(static_cast<byte>(StatList.size())); //[BYTE]
 	for (int i = 0; i < StatList.size(); i++)
 	{
 		CStat &Stat = StatList[i];
-		gFile.WriteByte(Stat.m_SubStats.size()); //[BYTE]
+		gFile.WriteByte(static_cast<byte>(Stat.m_SubStats.size())); //[BYTE]
 		for (int r = 0; r < Stat.m_SubStats.size(); r++)
 		{
 			CSubStat &SubStat = Stat.m_SubStats[r];
@@ -600,7 +600,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//Save magic spells
 	spellgroup_v &SpellList = pPlayer->m_SpellList;
 	gFile.WriteByte(CHARDATA_SPELLS1); //[BYTE - CHUNK - SPELLS]
-	gFile.WriteByte(SpellList.size()); //[BYTE]
+	gFile.WriteByte(static_cast<byte>(SpellList.size())); //[BYTE]
 
 	for (int s = 0; s < SpellList.size(); s++)
 		gFile.WriteString(SpellList[s]); //[X STRINGS]
@@ -615,7 +615,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		if (pPlayer->Gear[i] != pPlayer->PlayerHands) //Skip player hands
 			WriteList.add(pPlayer->Gear[i]);
 
-	gFile.WriteByte(WriteList.size()); //[BYTE]
+	gFile.WriteByte(static_cast<byte>(WriteList.size())); //[BYTE]
 
 	for (int i = 0; i < WriteList.size(); i++)
 	{
@@ -625,21 +625,21 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Save storage items
 	gFile.WriteByte(CHARDATA_STORAGE1);			  //[BYTE - CHUNK - STORAGE ITEMS]
-	gFile.WriteShort(pPlayer->m_Storages.size()); //[SHORT]
+	gFile.WriteShort(static_cast<short>(pPlayer->m_Storages.size())); //[SHORT]
 
 	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
 	{
 		storage_t &Storage = pPlayer->m_Storages[s];
 
 		gFile.WriteString(Storage.Name);		//[STRING]
-		gFile.WriteShort(Storage.Items.size()); //[SHORT]
+		gFile.WriteShort(static_cast<short>(Storage.Items.size())); //[SHORT]
 		for (int i = 0; i < Storage.Items.size(); i++)
 			WriteItem(gFile, Storage.Items[i]); //[X ITEMS]
 	}
 
 	//Save Companions
 	gFile.WriteByte(CHARDATA_COMPANIONS1);			//[BYTE - CHUNK - COMPANIONS]
-	gFile.WriteShort(pPlayer->m_Companions.size()); //[SHORT]
+	gFile.WriteShort(static_cast<short>(pPlayer->m_Companions.size())); //[SHORT]
 	static msstringlist SaveVarName, SaveVarValue;
 	SaveVarName.clearitems();
 	SaveVarValue.clearitems();
@@ -667,7 +667,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 				SaveVarValue.add(Script->m_Variables[v].Value);
 			}
 
-		gFile.WriteShort(SaveVarName.size()); //[SHORT]
+		gFile.WriteShort(static_cast<short>(SaveVarName.size())); //[SHORT]
 		for (int var = 0; var < SaveVarName.size(); var++)
 		{
 			gFile.WriteString(SaveVarName[var]);  //[STRING]
@@ -679,7 +679,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Save Help tips
 	gFile.WriteByte(CHARDATA_HELPTIPS1);				//[BYTE - CHUNK - HELPTIPS]
-	gFile.WriteShort(pPlayer->m_ViewedHelpTips.size()); //[SHORT]
+	gFile.WriteShort(static_cast<short>(pPlayer->m_ViewedHelpTips.size())); //[SHORT]
 	for (int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
 		gFile.WriteString(pPlayer->m_ViewedHelpTips[t]); //[STRING]
 
