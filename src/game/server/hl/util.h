@@ -80,8 +80,9 @@ typedef int EOFFSET;
 typedef int BOOL;
 
 // In case this ever changes
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
+#ifndef PI
+#define PI
+constexpr double M_PI = 3.14159265358979323846;
 #endif
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
