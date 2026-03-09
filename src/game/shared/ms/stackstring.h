@@ -32,8 +32,9 @@ extern "C" char *strlwr(char *str);
 
 //#define clrmem(a) memset(&a, 0, sizeof(a));
 
+
 template <typename T>
-void clrmem(T type) {
+void clrmem(T& type) {
 	memset(&type, 0, sizeof(type));
 };
 
