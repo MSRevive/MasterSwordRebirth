@@ -20,7 +20,7 @@ race_t *CRaceManager::GetRacePtr(const char* pszName)
 	if (!pszName || strlen(pszName) < 1) //Null or empty string
 		return NULL;
 
-	for (int r = 0; r < Races.size(); r++)
+	for (unsigned int r = 0; r < Races.size(); r++)
 	{
 		race_t &Race = Races[r];
 		if (!_stricmp(Race.Name, pszName))
@@ -30,7 +30,7 @@ race_t *CRaceManager::GetRacePtr(const char* pszName)
 }
 bool CRaceManager::RelationshipContains(msstringlist &RaceList, const char* pszTargetRace)
 {
-	for (int i = 0; i < RaceList.size(); i++)
+	for (unsigned int i = 0; i < RaceList.size(); i++)
 	{
 		const char* pszRaceName = RaceList[i];
 

@@ -51,7 +51,7 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	WRITE_LONG(SendInfo.DataLen);
 	MESSAGE_END();
 
-	hudtextparms_t htp;
+	hudtextparms_t htp = {};
 	clrmem(htp);
 	htp.x = 0.02;
 	htp.y = 0.6;
@@ -143,7 +143,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 		SendInfo.Status = CSS_DORMANT;
 
 #ifdef VALVE_DLL
-		hudtextparms_t htp;
+		hudtextparms_t htp = {};
 		clrmem(htp);
 		htp.x = 0.02;
 		htp.y = 0.6;

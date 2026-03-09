@@ -65,7 +65,7 @@ public:
 
 	CSubStat* GetSubStat(int index)
 	{
-		if ((index < 0) || (index >= m_SubStats.size()))
+		if ((index < 0) || (static_cast<unsigned int>(index) >= m_SubStats.size()))
 			return NULL;
 		return &m_SubStats[index];
 	}

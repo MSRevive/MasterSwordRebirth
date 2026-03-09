@@ -189,7 +189,7 @@ void CStat::Update() // Updates the stat to current - no updates sent
 {
 	bNeedsUpdate = false;
 
-	for (int i = 0; i < m_SubStats.size(); i++)
+	for (unsigned int i = 0; i < m_SubStats.size(); i++)
 	{
 		m_SubStats[i].OldValue = m_SubStats[i].Value;
 		m_SubStats[i].OldExp = m_SubStats[i].Exp;
@@ -202,7 +202,7 @@ bool CStat::Changed()
 		return true;
 
 	// If any values changed -> update.
-	for (int i = 0; i < m_SubStats.size(); i++)
+	for (unsigned int i = 0; i < m_SubStats.size(); i++)
 		if ((m_SubStats[i].Exp != m_SubStats[i].OldExp) || (m_SubStats[i].Value != m_SubStats[i].OldValue))
 			return true;
 
@@ -212,7 +212,7 @@ bool CStat::Changed()
 bool CStat::operator!=(const CStat& Other)
 {
 	// Just check the substats
-	for (int i = 0; i < m_SubStats.size(); i++)
+	for (unsigned int i = 0; i < m_SubStats.size(); i++)
 	{
 		if (i >= (signed)Other.m_SubStats.size())
 			break;

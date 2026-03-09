@@ -27,7 +27,15 @@ extern "C" char *strlwr(char *str);
 
 #include "strhelper.h"
 
-#define clrmem(a) memset(&a, 0, sizeof(a));
+
+//what a mess
+
+//#define clrmem(a) memset(&a, 0, sizeof(a));
+
+template <typename T>
+void clrmem(T type) {
+	memset(&type, 0, sizeof(type));
+};
 
 //Deuplicated from msdebug.h
 #ifdef DEV_BUILD
