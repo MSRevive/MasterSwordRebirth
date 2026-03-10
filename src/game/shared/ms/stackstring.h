@@ -27,14 +27,10 @@ extern "C" char *strlwr(char *str);
 
 #include "strhelper.h"
 
-
-//what a mess
-
 //#define clrmem(a) memset(&a, 0, sizeof(a));
 
-
-template <typename T>
-void clrmem(T& type) {
+template <typename Type>
+inline void clrmem(Type& type) {
 	memset(&type, 0, sizeof(type));
 };
 
