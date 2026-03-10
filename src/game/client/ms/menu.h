@@ -35,7 +35,7 @@ public:
 	//Master Sword
 	TCallbackMenu m;
 
-	int ShowMenu(int bitsValidSlots, const char *pszMenuString, MenuCallback CallBack, MenuType mtMenuType = MENU_NORMAL, float ShutOffTime = 0);
+	int ShowMenu(int bitsValidSlots, const char *pszMenuString, MenuCallback CallBack, MenuType mtMenuType = MenuType::MENU_NORMAL, float ShutOffTime = 0);
 	bool HideMyMenu(int mtMenuType);
 	//------------
 };
