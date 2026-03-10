@@ -31,6 +31,81 @@
 
 extern physent_t *MSUTIL_EntityByIndex( int playerindex );
 
+
+static void SCRIPT_CONTROLVEC_POS(CScript* Script, const char* name, Vector& vec) {
+
+	const char* ofsX = "_ofs.x";
+	const char* ofsY = "_ofs.y";
+	const char* ofsZ = "_ofs.z";
+	const char* setX = "_set.x";
+	const char* setY = "_set.y";
+	const char* setZ = "_set.z";
+
+	std::string ScriptVarNameX = name;	ScriptVarNameX += ofsX;
+	std::string ScriptVarNameY = name;	ScriptVarNameY += ofsY;
+	std::string ScriptVarNameZ = name;	ScriptVarNameZ += ofsZ;
+
+	std::string ScriptVarSetNameX = {name};	ScriptVarSetNameX += setX;
+	std::string ScriptVarSetNameY = {name}; ScriptVarSetNameY += setY;
+	std::string ScriptVarSetNameZ = {name};	ScriptVarSetNameZ += setZ;
+
+	if (Script->VarExists(ScriptVarNameX.c_str())) vec.x += atof(Script->GetVar(ScriptVarNameX.c_str()));
+	if (Script->VarExists(ScriptVarNameY.c_str())) vec.y += atof(Script->GetVar(ScriptVarNameY.c_str()));
+	if (Script->VarExists(ScriptVarNameZ.c_str())) vec.z += atof(Script->GetVar(ScriptVarNameZ.c_str()));
+	if (Script->VarExists(ScriptVarSetNameX.c_str())) vec.x += atof(Script->GetVar(ScriptVarNameX.c_str()));
+	if (Script->VarExists(ScriptVarSetNameY.c_str())) vec.y += atof(Script->GetVar(ScriptVarNameY.c_str()));
+	if (Script->VarExists(ScriptVarSetNameZ.c_str())) vec.z += atof(Script->GetVar(ScriptVarNameZ.c_str()));
+
+
+};
+
+static void SCRIPT_CONTROLVEC_ANG(CScript* Script, const char* name, Vector& vec) {
+
+	const char* ofsPitch = "_ofs.pitch";
+	const char* ofsYaw = "_ofs.yaw";
+	const char* ofsRoll = "_ofs.roll";
+	const char* setPitch = "_set.pitch";
+	const char* setYaw = "_set.yaw";
+	const char* setRoll = "_set.roll";
+
+	std::string ScriptVarPitch = { name };	ScriptVarPitch += ofsPitch;
+	std::string ScriptVarYaw = {name};		ScriptVarYaw += ofsYaw;
+	std::string ScriptVarRoll = {name};		ScriptVarRoll += ofsRoll;
+
+	std::string ScriptVarSetPitch = {name};	ScriptVarSetPitch += setPitch;
+	std::string ScriptVarSetYaw = {name};	ScriptVarSetYaw += setYaw;
+	std::string ScriptVarSetRoll = {name};	ScriptVarSetRoll += setRoll;
+
+	if (Script->VarExists(ScriptVarPitch.c_str())) vec.x += atof(Script->GetVar(ScriptVarPitch.c_str()));
+	if (Script->VarExists(ScriptVarYaw.c_str()))   vec.y += atof(Script->GetVar(ScriptVarYaw.c_str()));
+	if (Script->VarExists(ScriptVarRoll.c_str()))  vec.z += atof(Script->GetVar(ScriptVarRoll.c_str()));
+	if (Script->VarExists(ScriptVarSetPitch.c_str())) vec.x = atof(Script->GetVar(ScriptVarSetPitch.c_str()));
+	if (Script->VarExists(ScriptVarSetYaw.c_str()))   vec.y = atof(Script->GetVar(ScriptVarSetYaw.c_str()));
+	if (Script->VarExists(ScriptVarSetRoll.c_str()))  vec.z = atof(Script->GetVar(ScriptVarSetRoll.c_str()));
+};
+
+static void SCRIPT_CONTROLVEC_POS_CUSTOM(CScript* Script, const char* name, Vector& vec, const char* xname, const char* yname, const char* zname) {
+	
+	const char* ofs = "_ofs.";
+	const char* set = "_set.";
+
+	std::string ScriptVarCustomXOffset{ name }; ScriptVarCustomXOffset += ofs; ScriptVarCustomXOffset += xname;
+	std::string ScriptVarCustomYOffset{ name }; ScriptVarCustomYOffset += ofs; ScriptVarCustomYOffset += yname;
+	std::string ScriptVarCustomZOffset{ name }; ScriptVarCustomZOffset += ofs; ScriptVarCustomZOffset += zname;
+
+	std::string ScriptVarCustomXSet{ name }; ScriptVarCustomXSet += set; ScriptVarCustomXSet += xname;
+	std::string ScriptVarCustomYSet{ name }; ScriptVarCustomYSet += set; ScriptVarCustomYSet += yname;
+	std::string ScriptVarCustomZSet{ name }; ScriptVarCustomZSet += set; ScriptVarCustomZSet += zname;
+
+	if (Script->VarExists(ScriptVarCustomXOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomXOffset.c_str())); 
+	if (Script->VarExists(ScriptVarCustomYOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomYOffset.c_str()));
+	if (Script->VarExists(ScriptVarCustomZOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomZOffset.c_str()));
+	if (Script->VarExists(ScriptVarCustomXSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomXSet.c_str()));
+	if (Script->VarExists(ScriptVarCustomYSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomYSet.c_str()));
+	if (Script->VarExists(ScriptVarCustomZSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomZSet.c_str()));
+
+};
+/*
 #define SCRIPT_CONTROLVEC_POS( name, vec ) \
 		if( Script->VarExists( name "_ofs.x" ) ) vec.x += atof(Script->GetVar( name "_ofs.x" )); \
 		if( Script->VarExists( name "_ofs.y" ) ) vec.y += atof(Script->GetVar( name "_ofs.y" )); \
@@ -54,10 +129,10 @@ extern physent_t *MSUTIL_EntityByIndex( int playerindex );
 		if( Script->VarExists( name "_set." xname ) ) vec.x  = atof(Script->GetVar( name "_set." xname )); \
 		if( Script->VarExists( name "_set." yname ) ) vec.y  = atof(Script->GetVar( name "_set." yname )); \
 		if( Script->VarExists( name "_set." zname ) ) vec.z  = atof(Script->GetVar( name "_set." zname ));
-
+\
+*/
 //----------------
 
-#include "hudscript.h"
 
 int CHudScript::Init( void )
 {
@@ -213,10 +288,10 @@ void CHudScript::Effects_GetView( ref_params_s *pparams, cl_entity_t *ViewModel 
 		Vector &ViewAng = *(Vector *)&pparams->viewangles;
 		Vector &ViewMdlOfs = *(Vector *)&ViewModel->origin;
 		Vector &ViewMdlAng = *(Vector *)&ViewModel->angles;
-		SCRIPT_CONTROLVEC_POS( "game.cleffect.view", ViewOfs );
-		SCRIPT_CONTROLVEC_ANG( "game.cleffect.view", ViewAng );
-		SCRIPT_CONTROLVEC_POS( "game.cleffect.viewmodel", ViewMdlOfs );
-		SCRIPT_CONTROLVEC_ANG( "game.cleffect.viewmodel", ViewMdlAng );
+		SCRIPT_CONTROLVEC_POS(Script, "game.cleffect.view", ViewOfs );
+		SCRIPT_CONTROLVEC_ANG(Script, "game.cleffect.view", ViewAng );
+		SCRIPT_CONTROLVEC_POS(Script, "game.cleffect.viewmodel", ViewMdlOfs );
+		SCRIPT_CONTROLVEC_ANG(Script, "game.cleffect.viewmodel", ViewMdlAng );
 	}
 }
 Vector CHudScript::Effects_GetMoveScale( )
