@@ -35,7 +35,6 @@
 #include "action.h"
 #include "menu.h"
 
-#define MAX_MENU_STRING 512
 //char m.cMenuText[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
