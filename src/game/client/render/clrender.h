@@ -22,7 +22,7 @@ enum {
 	MSRDR_HANDMODEL = (1 << 9),	//This is one of the two hand models (coming off the viewmodel)
 
 	//mouth.sndavg
-	MSRDR_HASEXTRA(1 << 0) //The extra info is initialied
+	MSRDR_HASEXTRA = (1 << 0) //The extra info is initialied
 };
 
 //Specifics
@@ -34,8 +34,7 @@ enum {
 	ANIM_SIT = 19,
 	ANIM_ATTENTION = 4,
 	ANIM_DEEPIDLE = 5,
-	ANIM_JUMP = 6,
-	ANIM_SIT = 19
+	ANIM_JUMP = 6
 };
 typedef struct msurface_s msurface_t;
 typedef struct decal_s decal_t;
