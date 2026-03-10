@@ -598,7 +598,7 @@ float CGenericItem::Weight()
 	float MyVolume = CBaseEntity::m_Weight;
 	if (FBitSet(MSProperties(), ITEM_CONTAINER))
 		MyVolume += Container_Weight();
-	else if FBitSet(MSProperties(), ITEM_GROUPABLE)
+	else if (FBitSet(MSProperties(), ITEM_GROUPABLE))
 		MyVolume *= iQuantity;
 	return MyVolume;
 }

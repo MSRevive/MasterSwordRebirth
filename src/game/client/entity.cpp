@@ -1725,7 +1725,7 @@ void SetClEntityProp(cl_entity_t &Ent, msstring &Cmd, mslist<msstring *> &Params
 	else if (Cmd == "frame")
 		Ent.curstate.frame = atof(Value);
 	else if (Cmd == "update")
-		Ent.curstate.iuser4 = atoi(Value) ? SetBits(Ent.curstate.iuser4, MSTEMPENT_CALLBACK) : ClearBits(Ent.curstate.iuser4, MSTEMPENT_CALLBACK);
+		atoi(Value) ? SetBits(Ent.curstate.iuser4, MSTEMPENT_CALLBACK) : ClearBits(Ent.curstate.iuser4, MSTEMPENT_CALLBACK);
 	else if (Cmd == "rendermode")
 	{
 		if (Value.find("normal") != msstring_error)

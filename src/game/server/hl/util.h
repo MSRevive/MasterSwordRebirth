@@ -61,9 +61,26 @@ inline edict_t *FIND_ENTITY_BY_TARGET(edict_t *entStart, const char *pszName)
 	ENGINE_FPRINTF(pf, "\"%s\" \"%f %f %f\"\n", szKeyName, flX, flY, flZ)
 
 // Keeps clutter down a bit, when using a float as a bit-vector
-#define SetBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) | (bits))
-#define ClearBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) & ~(bits))
-#define FBitSet(flBitVector, bit) ((int)(flBitVector) & (bit))
+
+template <typename Type>
+void SetBits(Type& vector, const int bits) {
+	vector = (int)vector | bits;
+}
+
+template <typename Type>
+void ClearBits(Type& vector, const int bits) {
+	vector = (int)vector & ~bits;
+}
+
+template <typename Type>
+bool FBitSet(const Type& vector, const int bit) {
+	return (int)vector & bit;
+}
+
+
+//#define SetBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) | (bits))
+//#define ClearBits(flBitVector, bits) ((flBitVector) = (int)(flBitVector) & ~(bits))
+//#define FBitSet(flBitVector, bit) ((int)(flBitVector) & (bit))
 
 // Makes these more explicit, and easier to find
 #define FILE_GLOBAL static
@@ -160,7 +177,7 @@ inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin, entv
 }
 
 // Testing the three types of "entity" for nullity
-#define eoNullEntity 0
+constexpr int eoNullEntity = 0;
 inline BOOL FNullEnt(EOFFSET eoffset)
 {
 	return eoffset == 0;
@@ -169,13 +186,13 @@ inline BOOL FNullEnt(const edict_t *pent) { return pent == NULL || FNullEnt(OFFS
 inline BOOL FNullEnt(entvars_t *pev) { return pev == NULL || FNullEnt(OFFSET(pev)); }
 
 // Testing strings for nullity
-#define iStringNull 0
+constexpr int iStringNull = 0;
 inline BOOL FStringNull(int iString)
 {
 	return iString == iStringNull;
 }
 
-#define cchMapNameMost 32
+constexpr int cchMapNameMost = 32;
 
 // Dot products for view cone checking
 constexpr float VIEW_FIELD_FULL = -1.0f;		   // +-180 degrees

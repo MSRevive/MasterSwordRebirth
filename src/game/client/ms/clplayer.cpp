@@ -595,7 +595,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	static int PreserveMask = PLAYER_MOVE_RUNNING | PLAYER_MOVE_ATTACKING; //These are client-side bits to be saved
 	int PreserveBits = (player.m_StatusFlags & PreserveMask);			   //Save the client-side bits
 
-	player.m_StatusFlags = ClearBits(from->client.iuser3, PreserveMask); //Copy all the flags except the client-side ones
+	ClearBits(from->client.iuser3, PreserveMask); //clear flags execpt client side ones
+	player.m_StatusFlags = from->client.iuser3;  //Copy all the flags except the client-side ones
 	SetBits(player.m_StatusFlags, PreserveBits);						 //Copy the client-side bits back over
 
 	to->playerstate.iuser3 = from->playerstate.iuser3;
