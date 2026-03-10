@@ -37,16 +37,12 @@ struct mplane_s;
 extern Vector vec3_origin;
 constexpr int nanmask = 255 << 23;
 
-inline bool IS_NAN(const float &x) {
+static inline bool IS_NAN(float flVelocity) {
 
-	if ((((*(int*)&x) & nanmask) == nanmask)) {
-		return true;
-	}
-	else {
-		return false;
-	}
+	int i = *(int*)&flVelocity;
+	return (i & 0x7F800000) == 0x7F800000 && (i & 0x007FFFFF) != 0;
+
 };
-
 
 inline void VectorSubtract(const float* a, const float* b, float* c)
 {
