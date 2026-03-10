@@ -152,7 +152,7 @@ inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound
 
 template <typename Type>
 Type fabs(Type x) {
-	if (x > 0) return x;
+	if (x >= 0) return x;
 	else return (0 - x);
 };
 
