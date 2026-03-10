@@ -22,8 +22,8 @@ enum {
 	MSRDR_HANDMODEL = (1 << 9),	//This is one of the two hand models (coming off the viewmodel)
 
 	//mouth.sndavg
-	MSRDR_HASEXTRA (1 << 0) //The extra info is initialied
-}
+	MSRDR_HASEXTRA(1 << 0) //The extra info is initialied
+};
 
 //Specifics
 constexpr float INSET_SCALE = 0.026f; //0.02f
