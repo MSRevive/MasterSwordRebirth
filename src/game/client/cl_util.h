@@ -150,20 +150,30 @@ inline void PlaySound(const char *szSound, float vol) { gEngfuncs.pfnPlaySoundBy
 inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSound, vol); }
 inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound, vol); }
 
-#define fabs(x) ((x) > 0 ? (x) : 0 - (x))
+template <typename Type>
+Type fabs(Type x) {
+	if (x > 0) return x;
+	else return (0 - x);
+};
+
 
 void ScaleColors(int &r, int &g, int &b, int a);
 
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
+template <typename Type>
+float DotProduct(Type* x, Type* y) {
+	return (x[0] * y[0]) + (x[1] * y[1]) + (x[2] + y[2]);
+};
+
+//#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
 
 // ugh, some bits of the client code expect a float[3] while others expect a Vector, and there's a macro that pretends they're the same
 // handle the extern with the correct types in the places where it's required
 // extern vec3_t vec3_origin;
 
 // disable 'possible loss of data converting float to int' warning message
-#pragma warning(disable : 4244)
+//#pragma warning(disable : 4244)
 // disable 'truncation from 'const double' to 'float' warning message
-#pragma warning(disable : 4305)
+//#pragma warning(disable : 4305)
 
 inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)
 {
