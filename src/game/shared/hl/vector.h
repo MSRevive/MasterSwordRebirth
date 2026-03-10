@@ -68,7 +68,7 @@ public:
 	inline constexpr Vector(float X, float Y, float Z) {
 		x = X;
 		y = Y;
-		x = Z;
+		z = Z;
 	}
 
 	//inline Vector(double X, double Y, double Z)		{ x = (float)X; y = (float)Y; z = (float)Z;	}
