@@ -64,22 +64,22 @@ class Vector // same data-layout as engine's vec3_t,
 {			 //		which is a vec_t[3]
 public:
 	// Construction/destruction
-	inline Vector(void) {}
-	inline Vector(float X, float Y, float Z)
-	{
+	inline constexpr Vector(void) {}
+	inline constexpr Vector(float X, float Y, float Z) {
 		x = X;
 		y = Y;
-		z = Z;
+		x = Z;
 	}
+
 	//inline Vector(double X, double Y, double Z)		{ x = (float)X; y = (float)Y; z = (float)Z;	}
 	//inline Vector(int X, int Y, int Z)				{ x = (float)X; y = (float)Y; z = (float)Z;	}
-	inline Vector(const Vector &v)
+	inline constexpr Vector(const Vector &v)
 	{
 		x = v.x;
 		y = v.y;
 		z = v.z;
 	}
-	inline Vector(float rgfl[3])
+	inline constexpr Vector(float rgfl[3])
 	{
 		x = rgfl[0];
 		y = rgfl[1];
@@ -129,7 +129,9 @@ public:
 	inline float Length2D(void) const { return sqrt( (x * x) + (y * y) ); }
 
 	// Members
-	vec_t x, y, z; //just floats
+	vec_t x{};
+	vec_t y{};
+	vec_t z{}; //just floats
 };
 
 inline Vector operator*(float fl, const Vector& v) { return v * fl; }
