@@ -40,7 +40,7 @@ constexpr int nanmask = 255 << 23;
 static inline bool IS_NAN(float flVelocity) {
 
 	int i = *(int*)&flVelocity;
-	return (i & 0x7F800000) == 0x7F800000 && (i & 0x007FFFFF) != 0;
+	return (i & nanmask) == 0x7F800000 && (i & 0x007FFFFF) != 0;
 
 };
 
