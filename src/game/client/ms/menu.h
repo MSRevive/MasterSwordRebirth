@@ -1,5 +1,7 @@
 //Master Sword
-#define MAX_MENU_STRING 512
+#include "sharedmenu.h"
+
+constexpr int MAX_MENU_STRING = 512;
 
 enum MenuType
 { //menutypes
@@ -11,7 +13,7 @@ enum MenuType
 	MENU_DYNAMICNPC,
 };
 //------------
-#include "sharedmenu.h"
+
 class CHudMenu : public CHudBase
 {
 public:
