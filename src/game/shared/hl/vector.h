@@ -129,9 +129,7 @@ public:
 	inline float Length2D(void) const { return sqrt( (x * x) + (y * y) ); }
 
 	// Members
-	vec_t x{};
-	vec_t y{};
-	vec_t z{}; //just floats
+	vec_t x, y, z; //just floats
 };
 
 inline Vector operator*(float fl, const Vector& v) { return v * fl; }
