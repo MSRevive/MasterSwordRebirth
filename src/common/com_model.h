@@ -493,8 +493,8 @@ typedef struct auxvert_s
 //
 #include "custom.h"
 
-#define MAX_INFO_STRING 256
-#define MAX_SCOREBOARDNAME 32
+constexpr int  MAX_INFO_STRING = 256;
+constexpr int  MAX_SCOREBOARDNAME = 32;
 typedef struct player_info_s
 {
     // User id on server
