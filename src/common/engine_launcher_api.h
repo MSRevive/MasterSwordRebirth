@@ -6,7 +6,7 @@
 //=============================================================================
 
 // engine/launcher interface
-#if !defined(ENGINE_LAUNCHER_APIH)
+#ifndef ENGINE_LAUNCHER_APIH
 #define ENGINE_LAUNCHER_APIH
 #ifdef _WIN32
 #pragma once
