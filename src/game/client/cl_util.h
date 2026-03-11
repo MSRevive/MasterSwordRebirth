@@ -15,6 +15,7 @@
 //
 // cl_util.h
 //
+
 #include "sharedutil.h"
 #include "msdebug.h"
 
@@ -25,6 +26,7 @@
 #define FALSE 0
 #endif
 
+//these must stay macros, or we need to make a msg function for every command.
 // Macros to hook function calls into the HUD object
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x);
 
@@ -57,7 +59,7 @@
 		gHUD.y->UserCmd_##x();   \
 	}
 //------------------------------------------
-
+//end required macros
 //Master Sword
 #undef CVAR_GET_FLOAT
 #undef CVAR_GET_STRING
@@ -65,6 +67,15 @@
 inline float CVAR_GET_FLOAT(const char *x) { return gEngfuncs.pfnGetCvarFloat(x); }
 inline const char *CVAR_GET_STRING(const char *x) { return gEngfuncs.pfnGetCvarString(x); }
 inline struct cvar_s *CVAR_CREATE(const char *cv, const char *val, const int flags) { return gEngfuncs.pfnRegisterVariable(cv, val, flags); }
+
+//HLSPRITE SPR_Load(const char* sprName) {
+//return gEngfuncs.pfnSPR_Load(sprName);
+//}
+
+
+//void SPR_Set(HLSPRITE& hPic, const int r, const int g, const int b ) {
+//	gEngfuncs.pfnSPR_Set(&hPic, r, g, b);
+//}
 
 #define SPR_Load (*gEngfuncs.pfnSPR_Load)
 #define SPR_Set (*gEngfuncs.pfnSPR_Set)
@@ -150,8 +161,7 @@ inline void PlaySound(const char *szSound, float vol) { gEngfuncs.pfnPlaySoundBy
 inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSound, vol); }
 inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound, vol); }
 
-template <typename Type>
-Type fabs(Type x) {
+inline float fabs(float x) {
 	if (x >= 0) return x;
 	else return (0 - x);
 };

@@ -44,12 +44,12 @@ using word = unsigned short;
 
 
 template <typename T1, typename T2>
-auto V_min(const T1& a, const T2& b) {
+inline auto V_min(const T1& a, const T2& b) {
 	return (a < b) ? a : b;
 };
 
 template <typename T1, typename T2>
-auto V_max(const T1& a, const T2& b) {
+inline auto V_max(const T1& a, const T2& b) {
 	return (a > b) ? a : b;
 };
 

@@ -18,7 +18,7 @@ constexpr int ROLL = 2;
 #endif
 
 template <typename Type>
-Type FDotProduct(const Type a, const Type b) {
+inline Type FDotProduct(const Type a, const Type b) {
 	return fabs(a[0] * b[0]) + fabs(a[1] * b[1]) + fabs(a[2] * b[2]);
 }
 
