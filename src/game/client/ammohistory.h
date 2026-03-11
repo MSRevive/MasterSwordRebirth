@@ -17,7 +17,6 @@
 //
 
 // this is the max number of items in each bucket
-#define MAX_WEAPON_POSITIONS MAX_WEAPON_SLOTS
 
 class WeaponsResource
 {
@@ -94,7 +93,7 @@ public:
 
 extern WeaponsResource gWR;
 
-#define MAX_HISTORY 12
+constexpr int MAX_HISTORY = 12;
 enum
 {
 	HISTSLOT_EMPTY,

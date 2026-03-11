@@ -48,7 +48,7 @@
 extern CGraph WorldGraph;
 extern int gEvilImpulse101;
 
-#define NOT_USED 255
+constexpr int NOT_USED = 255;
 
 //DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam
 //DLL_GLOBAL  const char *g_pModelNameLaser = "sprites/laserbeam.spr";

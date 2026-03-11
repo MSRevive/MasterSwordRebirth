@@ -39,20 +39,27 @@ class CHudMisc;
 
 ///////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\//
 
-#define RGB_YELLOWISH 0x00FFA000 //255,160,0
-#define RGB_REDISH 0x00FF1010	 //255,160,0
-#define RGB_GREENISH 0x0000A000	 //0,160,0
+enum {
+	RGB_YELLOWISH = 0x00FFA000,		//255,160,0
+	RGB_REDISH = 0x00FF1010,		//255,160,0
+	RGB_GREENISH = 0x0000A000		//0,160,0
+};
 
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
 
-#define DHN_DRAWZERO 1
-#define DHN_2DIGITS 2
-#define DHN_3DIGITS 4
-#define MIN_ALPHA 100
+enum {
+	DHN_DRAWZERO = 1,
+	DHN_2DIGITS = 2,
+	DHN_3DIGITS = 4
+};
 
-#define HUDELEM_ACTIVE 1
+constexpr int MIN_ALPHA = 100;
+
+enum {
+	HUDELEM_ACTIVE = 1
+};
 
 enum
 {
@@ -448,7 +455,7 @@ public:
 	void ReloadClient();
 	int UpdateClientData(client_data_t *cdata, float time);
 
-	CHud() = default;
+	 CHud() = default;
 	~CHud() = default; // destructor, frees allocated memory
 
 	// user messages
