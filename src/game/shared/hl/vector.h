@@ -134,6 +134,12 @@ public:
 
 inline Vector operator*(float fl, const Vector& v) { return v * fl; }
 inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
+
+//template <typename Type1, typename Type2>
+//inline float DotProduct(const Type1* x, const Type2* y) {
+	//return (x[0] * y[0]) + (x[1] * y[1]) + (x[2] + y[2]);
+//};
+
 inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
 
 #define vec3_t Vector // temporary until we change all the files to use Vector.

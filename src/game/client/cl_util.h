@@ -234,13 +234,6 @@ inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound
 
 void ScaleColors(int &r, int &g, int &b, int a);
 
-template <typename Type>
-float DotProduct(Type* x, Type* y) {
-	return (x[0] * y[0]) + (x[1] * y[1]) + (x[2] + y[2]);
-};
-
-//#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
-
 // ugh, some bits of the client code expect a float[3] while others expect a Vector, and there's a macro that pretends they're the same
 // handle the extern with the correct types in the places where it's required
 // extern vec3_t vec3_origin;

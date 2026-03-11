@@ -433,7 +433,7 @@ int CHudSpectator::Draw(float flTime)
 			continue;
 
 		// check if name would be in inset window
-		if (m_pip->value != INSET_OFF)
+		if ((int)m_pip->value != INSET_OFF)
 		{
 			if (m_vPlayerPos[i][0] > XRES(m_OverviewData.insetWindowX) &&
 				m_vPlayerPos[i][1] > YRES(m_OverviewData.insetWindowY) &&
@@ -1307,11 +1307,11 @@ void CHudSpectator::DrawOverviewEntities()
 
 	// get current camera position and angle
 
-	if (m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
+	if ((int)m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
 	{
 		V_GetInEyePos(g_iUser2, origin, angles);
 	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
+	else if ((int)m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
 	{
 		V_GetChasePos(g_iUser2, v_cl_angles, origin, angles);
 	}
@@ -1373,7 +1373,7 @@ void CHudSpectator::DrawOverview()
 	if (m_iDrawCycle == 0 && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
 		return;
 
-	if (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE)
+	if (m_iDrawCycle == 1 && m_pip->value < (float)INSET_MAP_FREE)
 		return;
 
 	DrawOverviewLayer();
@@ -1465,13 +1465,13 @@ void CHudSpectator::CheckSettings()
 
 	m_pip->value = (int)m_pip->value;
 
-	if ((g_iUser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
+	if ((g_iUser1 < OBS_MAP_FREE) && ((int)m_pip->value == INSET_CHASE_FREE || (int)m_pip->value == INSET_IN_EYE))
 	{
 		// otherwise both would show in World picures
 		m_pip->value = INSET_MAP_FREE;
 	}
 
-	if ((g_iUser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
+	if ((g_iUser1 >= OBS_MAP_FREE) && ((int)m_pip->value >= INSET_MAP_FREE))
 	{
 		// both would show map views
 		m_pip->value = INSET_CHASE_FREE;
@@ -1520,7 +1520,7 @@ void CHudSpectator::CheckSettings()
 		m_pip->value = INSET_OFF;
 
 	// draw small border around inset view, adjust upper black bar
-	gViewPort->m_pSpectatorPanel->EnableInsetView(m_pip->value != INSET_OFF);
+	gViewPort->m_pSpectatorPanel->EnableInsetView((int)m_pip->value != INSET_OFF);
 }
 
 int CHudSpectator::ToggleInset(bool allowOff)
