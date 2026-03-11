@@ -65,7 +65,7 @@ public:
 	int WriteFields(const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount);
 
 private:
-	int DataEmpty(const char *pdata, int size);
+	int DataEmpty(const char *pdata, unsigned int size);
 	void BufferField(const char *pname, int size, const char *pdata);
 	void BufferString(char *pdata, int len);
 	void BufferData(const char *pdata, int size);

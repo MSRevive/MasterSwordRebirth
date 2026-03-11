@@ -1029,11 +1029,11 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		msstring Event = READ_STRING();
-		int numParams = READ_BYTE();
+		unsigned int numParams = READ_BYTE();
 
 		msstringlist Params;
 		Params.clear();
-		for (int i = 0; i < numParams; i++)
+		for (unsigned int i = 0; i < numParams; i++)
 			Params.add(READ_STRING());
 
 		if (pItem)
@@ -1094,7 +1094,7 @@ int __MsgFunc_SetProp(const char* pszName, int iSize, void* pbuf)
 			//Memory dellocation errors when using '.erase()', so I'm now using this loop
 			int idx = READ_BYTE();
 			msstringlist newSpells;
-			for (int i = 0; i < player.m_SpellList.size(); i++)
+			for (unsigned int i = 0; i < player.m_SpellList.size(); i++)
 				if (i != idx)
 					newSpells.add(player.m_SpellList[i]); //Add all spells to the new list except the one to erase
 			player.m_SpellList = newSpells;				  //Overwrite the player spells with the new list
@@ -1128,7 +1128,7 @@ void Player_ToggleInventory()
 	}
 
 	CGenericItem* pWearable = NULL; //Fallback, in case a pack isn't found
-	for (int i = 0; i < player.Gear.size(); i++)
+	for (unsigned int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem* pPack = player.Gear[i];
 		if (FBitSet(pPack->MSProperties(), ITEM_CONTAINER) && pPack->m_Location > ITEMPOS_HANDS)
@@ -1232,7 +1232,7 @@ void __CmdFunc_DynamicNPC(void)
 	}
 
 	int iBitsValid = 0;
-	for (int i = 0; i < NPCList.size(); i++)
+	for (unsigned int i = 0; i < NPCList.size(); i++)
 	{
 		const char* arg = UTIL_VarArgs("%i. %s\n", i + 1, NPCList[i].c_str());
 		strncat(MenuText, arg, strlen(arg));
@@ -1500,7 +1500,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 
 	case 21: //Retrieve all quickslots (Sent at spawn)
 	{
-		for (int i = 0; i < MAX_QUICKSLOTS; i++)
+		for (unsigned int i = 0; i < MAX_QUICKSLOTS; i++)
 		{
 			quickslot_t& QuickSlot = player.m_QuickSlots[i];
 			QuickSlot.Active = READ_BYTE() ? true : false;

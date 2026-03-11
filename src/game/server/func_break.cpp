@@ -597,7 +597,7 @@ int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 						if (Tokens.size() > 1)
 						{
-							for (int i = 0; i < Tokens.size(); i++)
+							for (unsigned int i = 0; i < Tokens.size(); i++)
 							{
 								if (i > 0)
 									Params.add(Tokens[i].c_str());
@@ -623,7 +623,7 @@ int CBreakable ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 						Params.clearitems();
 						if (Tokens.size() > 1)
 						{
-							for (int i = 0; i < Tokens.size(); i++)
+							for (unsigned int i = 0; i < Tokens.size(); i++)
 							{
 								if (i > 0)
 									Params.add(Tokens[i].c_str());
@@ -802,10 +802,10 @@ void CBreakable::Die(void)
 
 	// BUGBUG -- can only find 256 entities on a breakable -- should be enough
 	CBaseEntity *pList[256];
-	int count = UTIL_EntitiesInBox(pList, 256, mins, maxs, FL_ONGROUND);
+	unsigned int count = UTIL_EntitiesInBox(pList, 256, mins, maxs, FL_ONGROUND);
 	if (count)
 	{
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
 			ClearBits(pList[i]->pev->flags, FL_ONGROUND);
 			pList[i]->pev->groundentity = NULL;
@@ -915,7 +915,7 @@ void CPushable ::Spawn(void)
 
 void CPushable ::Precache(void)
 {
-	for (int i = 0; i < 3; i++)
+	for (unsigned int i = 0; i < 3; i++)
 		PRECACHE_SOUND(m_soundNames[i]);
 
 	if (pev->spawnflags & SF_PUSH_BREAKABLE)

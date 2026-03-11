@@ -109,7 +109,7 @@ namespace Tartan
 
 			DataPixels = new GLubyte[NewSize];
 			int OldOfs = 0, NewOfs = 0;
-			for (int i = 0; i < (signed)LoadTex.Height; i++)
+			for (unsigned int i = 0; i < (signed)LoadTex.Height; i++)
 			{
 				int RowSize = BytesPerPixel * LoadTex.Width;
 				memcpy(&DataPixels[NewOfs], &Texture.imageData[OldOfs], RowSize);

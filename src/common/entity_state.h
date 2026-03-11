@@ -44,7 +44,7 @@ struct entity_state_s
 	vec3_t angles;
 
 	int modelindex;
-	int sequence;
+	unsigned int sequence;
 	float frame;
 	int colormap;
 	short skin;
@@ -87,7 +87,7 @@ struct entity_state_s
 	int health;
 	qboolean spectator;
 	int weaponmodel;
-	int gaitsequence;
+	unsigned int gaitsequence;
 	// If standing on conveyor, e.g.
 	vec3_t basevelocity;
 	// Use the crouched hull, or the regular player hull.

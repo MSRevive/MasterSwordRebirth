@@ -179,7 +179,7 @@ namespace PrimaryHUD
 			m_HUDImage.setPos(coords[0] + BAR_W, coords[1] - (7 * BAR_SCALE));
 
 			//Charge system
-			for (int i = 0; i < 2; i++)
+			for (unsigned int i = 0; i < 2; i++)
 			{
 				int Multiplier = (i == 0) ? -1 : 1;
 				float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
@@ -196,14 +196,14 @@ namespace PrimaryHUD
 		void Update()
 		{
 			//Update flasks
-			for (int i = 0; i < 4; i++)
+			for (unsigned int i = 0; i < 4; i++)
 				m_Bar[i]->Update();
 
 			bool bShowHealth = ShowHealth();
 
 			m_HUDImage.setVisible(bShowHealth);
 
-			for (int i = 0; i < 2; i++)
+			for (unsigned int i = 0; i < 2; i++)
 			{
 				m_Charge[i]->setVisible(false);
 				m_ChargeLbl[i]->setVisible(false);
@@ -213,7 +213,7 @@ namespace PrimaryHUD
 			std::vector<CGenericItem*> *vHandsItems = new std::vector<CGenericItem*>;
 
 			//get all hands items
-			for (int i = 0; i < player.Gear.size(); i++)
+			for (unsigned int i = 0; i < player.Gear.size(); i++)
 			{
 				CGenericItem* Item = player.Gear[i];
 				if (Item->m_Location != ITEMPOS_HANDS)
@@ -222,7 +222,7 @@ namespace PrimaryHUD
 				vHandsItems->push_back(Item);
 			}
 
-			for (int i = 0; i < vHandsItems->size(); i++)
+			for (unsigned int i = 0; i < vHandsItems->size(); i++)
 			{
 				CGenericItem* Item = vHandsItems->at(i);
 

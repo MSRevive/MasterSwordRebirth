@@ -74,7 +74,7 @@ MULTIDAMAGE gMultiDamage;
 //=========================================================
 int MaxAmmoCarry(int iszName)
 {
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	for (unsigned int i = 0; i < MAX_WEAPONS; i++)
 	{
 		if (CBasePlayerItem::ItemInfoArray[i].pszAmmo1 && !strcmp(STRING(iszName), CBasePlayerItem::ItemInfoArray[i].pszAmmo1))
 			return CBasePlayerItem::ItemInfoArray[i].iMaxAmmo1;

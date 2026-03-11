@@ -145,7 +145,7 @@ CStoreMenuPanel::CStoreMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 	m_pScrollPanel->validate();
 
 	// Create the Store buttons
-	for (int i = 0; i < STORE_BUTTONS; i++)
+	for (unsigned int i = 0; i < STORE_BUTTONS; i++)
 	{
 		int iYPos = STORE_SIDEBUTTON_TOPLEFT_Y + ( (STORE_SIDEBUTTON_SIZE_Y + STORE_SIDEBUTTON_SPACER_Y) * i );
 
@@ -205,7 +205,7 @@ void CStoreMenuPanel::Update()
 	char sz[256];
 	int width, height;
 	pTitleLabel->setText( "%s's Shop", CStorePanel::StoreVendorName.c_str() );
-	 for (int i = 0; i < STORE_BUTTONS; i++) 
+	 for (unsigned int i = 0; i < STORE_BUTTONS; i++) 
 	{
 		//Don't show buttons if not activated
 		m_pButtons[i]->setVisible( false );
@@ -256,7 +256,7 @@ void CStoreMenuPanel::Initialize( void )
 void CStoreMenuPanel::SetActiveInfo( int iInput )
 {
 	// Remove all the Info panels and bring up the specified one
-	for (int i = 0; i < STORE_BUTTONS; i++)
+	for (unsigned int i = 0; i < STORE_BUTTONS; i++)
 	{
 		m_pButtons[i]->setArmed( false );
 		m_pClassInfoPanel[i]->setVisible( false );

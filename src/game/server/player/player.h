@@ -384,7 +384,7 @@ struct chardata_t : savedata_t
 
 	CStat* GetStat(int index)
 	{
-		if ((index < 0) || (index >= m_Stats.size()))
+		if ((index < 0) || ((unsigned)index > m_Stats.size() - 1))
 			return NULL;
 		return &m_Stats[index];
 	}

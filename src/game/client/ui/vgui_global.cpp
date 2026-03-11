@@ -75,7 +75,7 @@ bool VGUI::HideMenu(VGUI_MainPanel *pPanel)
 
 VGUI_MainPanel *VGUI::FindPanel(const char* Name)
 {
-	for (int i = 0; i < gViewPort->m_Menus.size(); i++)
+	for (unsigned int i = 0; i < gViewPort->m_Menus.size(); i++)
 	{
 		VGUI_MainPanel *pPanel = gViewPort->m_Menus[i];
 		if (pPanel->m_Name == Name)

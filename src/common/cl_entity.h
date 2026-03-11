@@ -42,7 +42,7 @@ typedef struct
 	vec3_t prevorigin;
 	vec3_t prevangles;
 
-	int prevsequence;
+	unsigned int prevsequence;
 	float prevframe;
 
 	byte prevcontroller[4];

@@ -148,7 +148,7 @@ int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 	EntData.Type = (EntType)READ_BYTE();
 
 	//Search for a current entry with this info
-	for (int i = 0; i < player.m_EntInfo.size(); i++)
+	for (unsigned int i = 0; i < player.m_EntInfo.size(); i++)
 		if (player.m_EntInfo[i].entindex == EntData.entindex)
 		{
 			player.m_EntInfo[i] = EntData;
@@ -190,7 +190,7 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 	if (tr.fraction < 1.0 && tr.ent)
 	{
 		physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
-		for (int i = 0; i < player.m_EntInfo.size(); i++)
+		for (unsigned int i = 0; i < player.m_EntInfo.size(); i++)
 			if (player.m_EntInfo[i].entindex == pe->info)
 				return &player.m_EntInfo[i];
 	}

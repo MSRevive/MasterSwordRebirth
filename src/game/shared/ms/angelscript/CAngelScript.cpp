@@ -288,8 +288,8 @@ bool CAngelScript::ExecuteFunction(asIScriptFunction* pFunc, ASEventParams* pPar
     // Set parameters
     if (pParams)
     {
-        int paramCount = pFunc->GetParamCount();
-        for (int i = 0; i < paramCount && i < (int)pParams->Count(); i++)
+        unsigned int paramCount = pFunc->GetParamCount();
+        for (unsigned int i = 0; i < paramCount && i < (unsigned int)pParams->Count(); i++)
         {
             // For now, pass all as strings
             // TODO: Implement proper type handling

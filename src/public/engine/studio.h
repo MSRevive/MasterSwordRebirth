@@ -70,7 +70,7 @@ typedef struct
 	int					numhitboxes;			// complex bounding boxes
 	int					hitboxindex;			
 	
-	int					numseq;				// animation sequences
+	unsigned int					numseq;				// animation sequences
 	int					seqindex;
 
 	int					numseqgroups;		// demand loaded sequences
@@ -169,7 +169,7 @@ typedef struct
 	int					activity;
 	int					actweight;
 
-	int					numevents;
+	unsigned int		numevents;
 	int					eventindex;
 
 	int					numframes;	// number of frames per sequence

@@ -207,17 +207,17 @@ VGUI_Inv_GearItem *VGUI_InventoryPanel::AddGearItem(gearitem_t &GearItem)
 void VGUI_InventoryPanel::Reset()
 {
 	//Delete the old
-	for (int i = 0; i < GearItemButtonTotal; i++)
+	for (unsigned int i = 0; i < GearItemButtonTotal; i++)
 		GearItemButtons[i]->Reset();
 	GearItemButtonTotal = 0;
 }
 
-void VGUI_InventoryPanel::Select(int Idx)
+void VGUI_InventoryPanel::Select(unsigned int Idx)
 {
 	if (Idx < 0 || Idx >= GearItemButtonTotal)
 		return;
 
-	for (int i = 0; i < GearItemButtonTotal; i++)
+	for (unsigned int i = 0; i < GearItemButtonTotal; i++)
 		GearItemButtons[i]->DeSelect();
 
 	m_Selected = Idx;
@@ -246,7 +246,7 @@ CTFScrollPanel* VGUI_InventoryPanel::GetScrollForStepInput()
 {
 	if ( mbScrollHighlighted ) return m_Scroll;
 
-	for (int i = 0; i < GearItemButtons.size(); i++)
+	for (unsigned int i = 0; i < GearItemButtons.size(); i++)
 	{
 		if (GearItemButtons[i]->IsMouseOver())
 		{
@@ -412,7 +412,7 @@ void VGUI_ContainerPanel::Update()
 void VGUI_ContainerPanel::AddInventoryItems()
 {
 	gearitem_t GearItem;
-	const int gearSize = player.Gear.size();
+	const unsigned int gearSize = player.Gear.size();
 	std::vector<CGenericItem*> sortedItems;
 	std::vector<CGenericItem*> sortedOther;
 	sortedItems.reserve(gearSize);
@@ -422,7 +422,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	GearItem.ID = 0;
 	GearItem.IsContainer = true;
 	VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
-	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 	{
 		if (player.Hand(i))
 		{
@@ -431,7 +431,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 		}
 	}
 
-	for (int i = 0; i < gearSize; i++)
+	for (unsigned int i = 0; i < gearSize; i++)
 	{
 		CGenericItem *pGearItem = player.Gear[i];
 		const auto props = pGearItem->MSProperties(); // cache property lookup
@@ -530,7 +530,7 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 	pAlphaCheckBox->SetHandler(new AlphabetizeCheckBoxHandler(pCallback));
 	addChild(pAlphaCheckBox);
 
-	for (int i = 0; i < INVTYPE_BUTTONS_TOTAL; i++)
+	for (unsigned int i = 0; i < INVTYPE_BUTTONS_TOTAL; i++)
 	{
 		int x = 0, y;
 
@@ -569,7 +569,7 @@ void VGUI_ContainerPanel::Close(void)
 	m_AllowUpdate = false;
 }
 
-bool VGUI_ContainerPanel::SlotInput(int iSlot)
+bool VGUI_ContainerPanel::SlotInput(unsigned int iSlot)
 {
 	iSlot--;
 
@@ -601,10 +601,10 @@ void VGUI_ContainerPanel::ItemHighlighted(void *pData)
 
 bool VGUI_ContainerPanel::HasSelectedItems()
 {
-	for(int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
+	for(unsigned int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[i];
-		for(int g = 0; g < GearItem.m_ItemContainer->m_ItemButtonTotal; g++)
+		for(unsigned int g = 0; g < GearItem.m_ItemContainer->m_ItemButtonTotal; g++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[g];
 			if(ItemButton.m_Selected) 
@@ -619,10 +619,10 @@ void VGUI_ContainerPanel::GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedIt
 {
 	SelectedItems.clear();
 
-	for (int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
+	for (unsigned int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[g];
-		for (int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
+		for (unsigned int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[i];
 			if (!ItemButton.m_Selected)
@@ -636,6 +636,6 @@ void VGUI_ContainerPanel::UnSelectAllItems()
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
 	GetSelectedItems(SelectedItems);
-	for (int i = 0; i < SelectedItems.size(); i++)
+	for (unsigned int i = 0; i < SelectedItems.size(); i++)
 		SelectedItems[i]->Select(false);
 }

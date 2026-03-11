@@ -631,7 +631,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
 #define PRECACHE_SOUND_ARRAY(a)                \
 	{                                          \
-		for (int i = 0; i < std::size(a); i++) \
+		for (unsigned int i = 0; i < std::size(a); i++) \
 			PRECACHE_SOUND((char *)a[i]);      \
 	}
 

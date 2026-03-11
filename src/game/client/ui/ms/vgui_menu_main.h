@@ -41,7 +41,7 @@ public:
 				"#CANCEL", XRES(33), 0};
 
 		m_ButtonY = BTN_START_Y;
-		for (int i = 0; i < std::size(g_ButtonNames); i++)
+		for (unsigned int i = 0; i < std::size(g_ButtonNames); i++)
 			MSButton *pButton = AddButton(Localized(g_ButtonNames[i].Name), g_ButtonNames[i].Width, msvariant(g_ButtonNames[i].OptionScreen));
 
 		m_OptionsPanel = new CPanel_Options(this);
@@ -53,7 +53,7 @@ public:
 	{
 		m_Buttons[OPT_VOTEKICK]->setEnabled(false);
 		m_Buttons[OPT_VOTETIME]->setEnabled(false);
-		for (int i = 0; i < vote_t::VotesTypesAllowed.size(); i++)
+		for (unsigned int i = 0; i < vote_t::VotesTypesAllowed.size(); i++)
 		{
 			if (vote_t::VotesTypesAllowed[i] == "kick")
 				m_Buttons[OPT_VOTEKICK]->setEnabled(true);

@@ -73,7 +73,7 @@
 #include "mslogger.h"
 
 extern engine_studio_api_t IEngineStudio;
-int			ChooseChar_Interface::ServerCharNum = 0;
+unsigned int			ChooseChar_Interface::ServerCharNum = 0;
 bool		ChooseChar_Interface::CentralServer;
 
 const char *GenderPanel_MainBtnText[] =
@@ -96,7 +96,7 @@ class CAction_SelectOption : public ActionSignal
 {
 //protected:
 	CNewCharacterPanel *m_pPanel;
-	int m_Option, m_Value;
+	unsigned int m_Option, m_Value;
 	static createchar_t m_NewChar;
 public:
 	CAction_SelectOption( CNewCharacterPanel *pPanel, int iOption, int iValue )
@@ -141,7 +141,7 @@ public:
 				}
 				else
 				{
-					msstring CharCmd = msstring("char ") + m_Value + "\n";
+					msstring CharCmd = msstring("char ") + (int)m_Value + "\n";
 					ServerCmd( CharCmd );
 				}
 				return;
@@ -558,7 +558,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Gender_GenderLabel->addInputSignal( new GenderInput_ChangeName( this, 1 ) );
 
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), CHOOSE_BTNWIDTH, 2, XRES(32) );
-	for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = CHOOSE_BTNY + CHOOSE_CHARHANDLING_H;
 		//int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = GENDER_BTNY;
@@ -585,7 +585,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), WEAPON_BTN_SIZEX, 3, CHOOSE_BTNSPACERX );
 	int WeaponPanelSizeY = m_WeaponPanel->getTall( );
-	for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
+	for (unsigned int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
 	{
 		if( i >= WEAPONPANEL_MAINBTNMAX )
 			break;							//Max of 9 starting weapon choices
@@ -693,7 +693,7 @@ void CNewCharacterPanel::Update()
 		m_ChoosePanel->setVisible( true );
 		iButtons = CHOOSEPANEL_MAINBTNS;
 
-		for (int i = 0; i < iButtons; i++) 
+		for (unsigned int i = 0; i < iButtons; i++) 
 		{
 			//Only certain fields can be assumed valid in this savedata
 			//If client-side characters - all savedata_t info is valid;
@@ -812,7 +812,7 @@ void CNewCharacterPanel::Update()
 		iButtons = GENDERPANEL_MAINBTNS;
 		break;
 	case STG_CHOOSEWEAPON:
-		 for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
+		 for (unsigned int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
 			Weapon_MainBtnImg[i]->LoadImg( );
 		m_WeaponPanel->setVisible( true );
 		m_BackBtn->setVisible( true );
@@ -849,7 +849,7 @@ void CNewCharacterPanel::Gender_SelectItem( int Btn )
 	Gender_CharEnts[0].m_Gender = GENDER_MALE; //Thothie FEB2011_02 gender bender fixes
 	Gender_CharEnts[1].m_Gender = GENDER_FEMALE; //Thothie FEB2011_02 gender bender fixes
 
-	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		Gender_CharEnts[i].SetActive( Btn == 1 ? true : false );
 		Gender_MainBtn[i]->setEnabled( Btn == 1 ? true : false );
@@ -905,13 +905,13 @@ void CNewCharacterPanel::Close( void )
 		return;
 	}*/
 
-	 for (int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
+	 for (unsigned int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = m_CharEnts[i];
 		CharEnt.UnRegister( );
 	}
 
-	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = Gender_CharEnts[i];
 		CharEnt.UnRegister( );
@@ -958,7 +958,7 @@ void CNewCharacterPanel::Close( void )
 	//gViewPort->HideTopMenu( );
 
 	//Remove from menu list
-	 for (int i = 0; i < gViewPort->m_Menus.size(); i++) 
+	 for (unsigned int i = 0; i < gViewPort->m_Menus.size(); i++) 
 		if( gViewPort->m_Menus[i] == this ) 
 			{ gViewPort->m_Menus.erase( i ); break; }
 
@@ -966,7 +966,7 @@ void CNewCharacterPanel::Close( void )
 }
 //======================================
 // Key inputs for the Class Menu
-bool CNewCharacterPanel::SlotInput( int iSlot )
+bool CNewCharacterPanel::SlotInput( unsigned int iSlot )
 {
 	//Convert iSlot to be zero-based
 	iSlot--;
@@ -1013,7 +1013,7 @@ void CNewCharacterPanel::Open( void )
 
 	CMenuPanel::Open();
 
-	 for (int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
+	 for (unsigned int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = m_CharEnts[i];
 		CharEnt.m_Stage = STG_CHOOSECHAR;
@@ -1021,7 +1021,7 @@ void CNewCharacterPanel::Open( void )
 		CharEnt.Init( i );
 	}
 
-	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = Gender_CharEnts[i];
 		CharEnt.m_Stage = STG_CHOOSEGENDER;
@@ -1088,8 +1088,8 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 
 	if (CharMsgType == CHAR_TYPE_ITEMS)
 	{
-		int GearItems = READ_BYTE();
-		for (int i = 0; i < GearItems; i++)
+		unsigned int GearItems = READ_BYTE();
+		for (unsigned int i = 0; i < GearItems; i++)
 		{
 			gearinfo_t GearInfo;
 			GearInfo.Flags = READ_BYTE();
@@ -1183,7 +1183,7 @@ void CRenderChar::Init( int Idx, msstring model )
 	
 	m_Gender = GENDER_MALE;
 
-	for (int i = 0; i < 4; i++) 
+	for (unsigned int i = 0; i < 4; i++) 
 		m_Ent.latched.prevcontroller[i] = m_Ent.curstate.controller[i] = 127;
 		
  	m_Ent.curstate.gaitsequence = 0;
@@ -1225,7 +1225,7 @@ void CRenderChar::Render( )
 		m_Gear.clear();
 		uint BodyParts[HUMAN_BODYPARTS] = { 0 };
 		
-		for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
+		for (unsigned int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 		{
 			gearinfo_t &GearInfo = player.m_CharInfo[m_Idx].GearInfo[i];
 			CGenericItem pItem = CGenericItem();
@@ -1241,7 +1241,7 @@ void CRenderChar::Render( )
 			ItemEnt.curstate.skin = GearInfo.Skin;
 			ItemEnt.PlayAnim( GearInfo.Anim );
 
-			for (int i = 0; i < HUMAN_BODYPARTS; i++)
+			for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++)
 			{
 				if( FBitSet( GearInfo.Flags, (1<<i) ) )
 					BodyParts[i] = 1;
@@ -1269,7 +1269,7 @@ void CRenderChar::Render( )
 			pItem.Deactivate();
 
 		}
-		for (int i = 0; i < m_GearItems.size(); i++) 
+		for (unsigned int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.push_back( &m_GearItems[i] );
 	}
 
@@ -1333,7 +1333,7 @@ void CRenderChar::PlayAttnAnim( )
 	m_ItemInHand = false;
 
 	if( m_Stage == STG_CHOOSECHAR )
-		 for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
+		 for (unsigned int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 			if( !FBitSet( player.m_CharInfo[m_Idx].GearInfo[i].Flags,GEARFL_WEARING ) ) { m_ItemInHand = true; break; }
 
 

@@ -35,7 +35,7 @@ void Game_AddObjects(void)
 {
 	g_FirstRender = true;
 
-	for (int i = 0; i < MSCLGlobals::m_ClModels.size(); i++)
+	for (unsigned int i = 0; i < MSCLGlobals::m_ClModels.size(); i++)
 	{
 		cl_entity_t &Entity = MSCLGlobals::m_ClModels[i];
 		CLFrameShowModel(Entity);
@@ -108,7 +108,7 @@ bool cl_entity_s::PlayAnim(const char* Anim)
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex);
 
-	for (int i = 0; i < pstudiohdr->numseq; i++)
+	for (unsigned int i = 0; i < pstudiohdr->numseq; i++)
 	{
 		if (_stricmp(pseqdesc[i].label, Anim) != 0)
 			continue;
@@ -206,7 +206,7 @@ void CBasePlayer::BeginRender()
 
 void CBasePlayer::Render()
 {
-	for (int i = 0; i < g_RenderEnts.size(); i++)
+	for (unsigned int i = 0; i < g_RenderEnts.size(); i++)
 		g_RenderEnts[i]->Render();
 }
 void CBasePlayer::RenderCleanup()
@@ -214,8 +214,8 @@ void CBasePlayer::RenderCleanup()
 	mslist<CRenderEntity *> RenderEntListCopy;
 	RenderEntListCopy = g_RenderEnts;
 
-	int size = RenderEntListCopy.size();
-	for (int i = 0; i < size; i++)
+	unsigned int size = RenderEntListCopy.size();
+	for (unsigned int i = 0; i < size; i++)
 	{
 		CRenderEntity *pRdrEnt = RenderEntListCopy[i];
 		if (pRdrEnt->IsPermanent())
@@ -236,7 +236,7 @@ void CRenderEntity::Render()
 }
 void CRenderEntity::UnRegister()
 {
-	for (int i = 0; i < g_RenderEnts.size(); i++)
+	for (unsigned int i = 0; i < g_RenderEnts.size(); i++)
 		if (g_RenderEnts[i] == this)
 		{
 			g_RenderEnts.erase(i--);
@@ -261,7 +261,7 @@ void CRenderPlayer::Render()
 	//m_Ent.origin and m_Ent.angles are calulated in V_CalcRefdef for precise accuracy.
 	cl_entity_t &Ent = GetEntity();
 
-	/* for (int i = 0; i < HUMAN_BODYPARTS; i++) 
+	/* for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++) 
 	{
 		cl_entity_t &BPEnt = m_BodyParts[i];
 		BPEnt.SetModel( ModelList[i][m_Gender] );
@@ -282,10 +282,10 @@ void CRenderPlayer::Render()
 	CRenderEntity::Render();
 
 	CItemList &Gear = GetGear();
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		RenderGearItem(*Gear[i]);
 
-	/* for (int i = 0; i < HUMAN_BODYPARTS; i++) 
+	/* for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++) 
 	{
 		cl_entity_t &BPEnt = m_BodyParts[i];
 		if( BPEnt.curstate.number != 0 ) CLFrameShowModel( BPEnt );
@@ -312,7 +312,7 @@ void CRenderPlayer::RenderGearItem(CGenericItem &Item)
 	//		foreach( i, Item.m_WearModelPositions.size( ) )
 	//			Ent.SetBody( Item.m_WearModelPositions[i], 1 );
 
-	/* for (int i = 0; i < HUMAN_BODYPARTS; i++) 
+	/* for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++) 
 		{
 			cl_entity_t &BPEnt = m_BodyParts[i];
 			int PlayerBody = Item.Armor_GetBody( i );
@@ -375,11 +375,11 @@ void CRenderPlayerInset::Render()
 	//m_Ent.index = clplayer->index;
 	//m_Ent.curstate.number = clplayer->index;
 
-	/* for (int i = 0; i < 4; i++) 
+	/* for (unsigned int i = 0; i < 4; i++) 
 		m_Ent.latched.prevcontroller[i] = m_Ent.curstate.controller[i] = 127;
  	m_Ent.curstate.gaitsequence = 0;
 	m_Ent.curstate.framerate = 1;
-	 for (int i = 0; i < 4; i++) 
+	 for (unsigned int i = 0; i < 4; i++) 
 		m_Ent.attachment[i] = clplayer->attachment[i];
 
 	ClearBits( m_Ent.curstate.colormap, MSRDR_ANIM_ONCE );

@@ -240,7 +240,7 @@ int CSoundEnt :: InsertSound ( int iType, const Vector &vecOrigin, int iVolume, 
 //=========================================================
 void CSoundEnt :: Initialize ( void )
 {
-  	int i;
+  	unsigned int i;
 	int iSound;
 
 	m_cLastActiveSounds;
@@ -286,7 +286,7 @@ void CSoundEnt :: Initialize ( void )
 //=========================================================
 int CSoundEnt :: ISoundsInList ( int iListType )
 {
-	int i;
+	unsigned int i;
 	int iThisSound;
 
 	if ( iListType == SOUNDLISTTYPE_FREE )

@@ -44,8 +44,8 @@ public:
 	byte m_Region[3];		// Which of 256 regions do each of the coordinate belong?
 	int m_afNodeInfo;		// bits that tell us more about this location
 
-	int m_cNumLinks;  // how many links this node has
-	int m_iFirstLink; // index of this node's first link in the link pool.
+	unsigned int m_cNumLinks;  // how many links this node has
+	unsigned int m_iFirstLink; // index of this node's first link in the link pool.
 
 	// Where to start looking in the compressed routing table (offset into m_pRouteInfo).
 	// (4 hull sizes -- smallest to largest + fly/swim), and secondly, door capability.
@@ -121,9 +121,9 @@ public:
 	CLink *m_pLinkPool; // big list of all node connections
 	char *m_pRouteInfo; // compressed routing information the nodes use.
 
-	int m_cNodes;	  // total number of nodes
-	int m_cLinks;	  // total number of links
-	int m_nRouteInfo; // size of m_pRouteInfo in bytes.
+	unsigned int m_cNodes;	  // total number of nodes
+	unsigned int m_cLinks;	  // total number of links
+	unsigned int m_nRouteInfo; // size of m_pRouteInfo in bytes.
 
 	// Tables for making nearest node lookup faster. SortedBy provided nodes in a
 	// order of a particular coordinate. Instead of doing a binary search, RangeStart
@@ -137,8 +137,8 @@ public:
 #define CACHE_SIZE 128
 #define NUM_RANGES 256
 	DIST_INFO *m_di; // This is m_cNodes long, but the entries don't correspond to CNode entries.
-	int m_RangeStart[3][NUM_RANGES];
-	int m_RangeEnd[3][NUM_RANGES];
+	unsigned int m_RangeStart[3][NUM_RANGES];
+	unsigned int m_RangeEnd[3][NUM_RANGES];
 	float m_flShortest;
 	int m_iNearest;
 	int m_minX, m_minY, m_minZ, m_maxX, m_maxY, m_maxZ;
@@ -149,12 +149,12 @@ public:
 
 	int m_HashPrimes[16];
 	short *m_pHashLinks;
-	int m_nHashLinks;
+	unsigned int m_nHashLinks;
 
 	// kinda sleazy. In order to allow variety in active idles for monster groups in a room with more than one node,
 	// we keep track of the last node we searched from and store it here. Subsequent searches by other monsters will pick
 	// up where the last search stopped.
-	int m_iLastActiveIdleSearch;
+	unsigned int m_iLastActiveIdleSearch;
 
 	// another such system used to track the search for cover nodes, helps greatly with two monsters trying to get to the same node.
 	int m_iLastCoverSearch;

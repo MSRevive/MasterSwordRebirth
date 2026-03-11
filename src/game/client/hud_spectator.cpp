@@ -426,7 +426,7 @@ int CHudSpectator::Draw(float flTime)
 	gViewPort->GetAllPlayersInfo();
 
 	// loop through all the players and draw additional infos to their sprites on the map
-	for (int i = 0; i < MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYERS; i++)
 	{
 
 		if (m_vPlayerPos[i][2] < 0) // marked as invisible ?
@@ -1385,7 +1385,7 @@ void CHudSpectator::CheckOverviewEntities()
 	double time = gEngfuncs.GetClientTime();
 
 	// removes old entities from list
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
 	{
 		// remove entity from list if it is too old
 		if (m_OverviewEntities[i].killTime < time)
@@ -1445,7 +1445,7 @@ void CHudSpectator::DeathMessage(int victim)
 
 bool CHudSpectator::AddOverviewEntityToList(HLSPRITE sprite, cl_entity_t *ent, double killTime)
 {
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
 	{
 		// find empty entity slot
 		if (m_OverviewEntities[i].entity == NULL)

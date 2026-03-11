@@ -46,7 +46,7 @@ void MSCLGlobals::AddEnt(CBaseEntity *pEntity)
 }
 void MSCLGlobals::RemoveEnt(CBaseEntity *pEntity, bool fDelete)
 {
-	for (int e = 0; e < m_ClEntites.size(); e++)
+	for (unsigned int e = 0; e < m_ClEntites.size(); e++)
 		if (m_ClEntites[e] == pEntity)
 		{
 			m_ClEntites.erase(e);
@@ -92,7 +92,7 @@ void MSCLGlobals::InitializePlayer()
 	player.m_SprintDelay = gpGlobals->time;
 	player.m_Initialized = false;
 
-	for (int i = 0; i < MAX_PLAYER_HANDITEMS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDITEMS; i++)
 	{
 		MSCLGlobals::CLViewEntities[i].index = MSGlobals::ClEntities[(i != 2) ? CLPERMENT_LEFTVIEW + i : CLPERMENT_LEFTVIEW];
 		MSCLGlobals::CLViewEntities[i].curstate.number = MSGlobals::ClEntities[(i != 2) ? CLPERMENT_LEFTVIEW + i : CLPERMENT_LEFTVIEW];
@@ -115,7 +115,7 @@ void MSCLGlobals::Think()
 			RemoveEnt(m_ClEntites[e], m_ClEntites[e] != &player);
 
 	//Call entity Think() functions
-	for (int e = 0; e < m_ClEntites.size(); e++)
+	for (unsigned int e = 0; e < m_ClEntites.size(); e++)
 		if (flLastThinkTime <= m_ClEntites[e]->pev->nextthink && m_ClEntites[e]->pev->nextthink < gpGlobals->time)
 			m_ClEntites[e]->Think();
 
@@ -130,7 +130,7 @@ void MSCLGlobals::PrintAllEntites()
 	Print("Global Items...\n");
 
 	int items = 0;
-	for (int e = 0; e < m_ClEntites.size(); e++)
+	for (unsigned int e = 0; e < m_ClEntites.size(); e++)
 		Print("Item %i: %s", items++, m_ClEntites[e]->DisplayName());
 }
 
@@ -148,7 +148,7 @@ void MSCLGlobals::RemoveAllEntities()
 	//deleted beforehand
 	//(presumably within RemoveAllItems() somewhere)
 	int killed = 0;
-	for (int e = 0; e < m_ClEntites.size(); e++)
+	for (unsigned int e = 0; e < m_ClEntites.size(); e++)
 	{
 		CBaseEntity *pEntity = m_ClEntites[e];
 		if (!pEntity) continue;
@@ -235,7 +235,7 @@ string_t MSCLGlobals::AllocString(const char *pszString)
 		return 0;
 
 	size_t size = m_Strings.size();
-	for (int s = 0; s < size; s++)
+	for (unsigned int s = 0; s < size; s++)
 	{
 		if (FStrEq(m_Strings[s].c_str(), pszString))
 			return m_Strings[s].c_str() - gpGlobals->pStringBase;

@@ -136,7 +136,7 @@ CHalfLifeMultiplay::CHalfLifeMultiplay()
 	SERVER_EXECUTE( );
 	m_CurrentVote.fActive = false;
 
-	for (int i = 0; i < CLPERMENT_TOTAL; i++) 
+	for (unsigned int i = 0; i < CLPERMENT_TOTAL; i++) 
 	{
 		CBaseEntity *pInvEntity = GetClassPtr( (CBaseEntity *)NULL );
 		SetBits( pInvEntity->pev->flags, FL_DORMANT );
@@ -238,7 +238,7 @@ void CHalfLifeMultiplay::Think( void )
 
 bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap()
 {
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 		if (!pPlayer) continue;
@@ -364,7 +364,7 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pPlayer )
 	//Notify all the entities with scripts
 	CBaseEntity *pEntity = NULL;
 	edict_t		*pEdict = NULL;
-	for( int i = 1; i < gpGlobals->maxEntities; i++ )
+	for( unsigned int i = 1; i < gpGlobals->maxEntities; i++ )
 	{
 		pEdict = g_engfuncs.pfnPEntityOfEntIndex( i );
 
@@ -394,7 +394,7 @@ void CHalfLifeMultiplay::InitHUD( CBasePlayer *pPlayer )
 	//SendMOTDToClient( pl->edict() );
 
 	// loop through all active players and send their score info to the new client
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if( !pOtherPlayer ) continue;
@@ -783,7 +783,7 @@ float CHalfLifeMultiplay::FlWeaponTryRespawn( CBasePlayerItem *pWeapon )
 {
 	if ( pWeapon && pWeapon->m_iId && (pWeapon->iFlags() & ITEM_FLAG_LIMITINWORLD) )
 	{
-		if ( NUMBER_OF_ENTITIES() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE) )
+		if ( (unsigned int)NUMBER_OF_ENTITIES() < (gpGlobals->maxEntities - ENTITY_INTOLERANCE) )
 			return 0;
 
 		// we're past the entity tolerance level,  so delay the respawn
@@ -1018,7 +1018,7 @@ typedef struct mapcycle_item_s
 	struct mapcycle_item_s *next;
 
 	char mapname[ 32 ];
-	int  minplayers, maxplayers;
+	unsigned int minplayers, maxplayers;
 	char rulebuffer[ MAX_RULE_BUFFER ];
 } mapcycle_item_t;
 
@@ -1214,6 +1214,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 
 				item->minplayers = 0;
 				item->maxplayers = 0;
+				unsigned int Minimum = 0;
 
 				memset( item->rulebuffer, 0, MAX_RULE_BUFFER );
 
@@ -1223,14 +1224,14 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 					if ( s && s[0] )
 					{
 						item->minplayers = atoi( s );
-						item->minplayers = V_max( item->minplayers, 0 );
+						item->minplayers = V_max( item->minplayers, Minimum);
 						item->minplayers = V_min( item->minplayers, gpGlobals->maxClients );
 					}
 					s = g_engfuncs.pfnInfoKeyValue( szBuffer, "maxplayers" );
 					if ( s && s[0] )
 					{
 						item->maxplayers = atoi( s );
-						item->maxplayers = V_max( item->maxplayers, 0 );
+						item->maxplayers = V_max( item->maxplayers, Minimum);
 						item->maxplayers = V_min( item->maxplayers, gpGlobals->maxClients );
 					}
 
@@ -1336,7 +1337,7 @@ bool CheckBanned(const char* SteamID )
 {
 	if( g_BanList.size() <= 0 ) return false;
 
-	 for (int b = 0; b < g_BanList.size(); b++) 
+	 for (unsigned int b = 0; b < g_BanList.size(); b++) 
 		if( g_BanList[b] == (const char *)SteamID )
 			return true;
 
@@ -1417,7 +1418,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	int minplayers = 0, maxplayers = 0;
 	strncpy(szFirstMapInList, "edana", sizeof(szFirstMapInList));  // the absolute default level is edana
 
-	int	curplayers;
+	unsigned int curplayers;
 	BOOL do_cycle = TRUE;
 
 	// find the map to change to
@@ -1697,7 +1698,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			pPlayer->SendInfoMsg( "You leave the %s party\n", pTeam->TeamName() );
 			int iTeamPlayers = pTeam->MemberList.size();
 			if( iTeamPlayers )
-				 for (int i = 0; i < pTeam->MemberList.size(); i++) 
+				 for (unsigned int i = 0; i < pTeam->MemberList.size(); i++) 
 				{
 					CBasePlayer *pOtherPlayer = pTeam->GetPlayer( i );
 					//Send to all other players, but not myself
@@ -1754,7 +1755,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		if( pPlayer->m_pTeam && pPlayer->m_pTeam->GetPlayer( 0 ) == pPlayer )
 		{
 			CBasePlayer *pCheckPlayer = NULL;
-			for( int n = 1; n <= gpGlobals->maxClients; n++ )
+			for(unsigned int n = 1; n <= gpGlobals->maxClients; n++ )
 			{
 				pCheckPlayer = (CBasePlayer *)UTIL_PlayerByIndex( n );
 				if( pCheckPlayer && pCheckPlayer->m_pJoinTeam == pPlayer->m_pTeam ) 
@@ -1771,7 +1772,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 
 				msstring JoinMsg = msstring(pCheckPlayer->DisplayName()) + " joins your party";
 				pTeam->ValidateUnits( );
-				 for (int i = 0; i < pTeam->MemberList.size(); i++) 
+				 for (unsigned int i = 0; i < pTeam->MemberList.size(); i++) 
 				{
 					CBasePlayer *pOtherPlayer = pTeam->GetPlayer( i );
 					//if( pOtherPlayer ) pOtherPlayer->SendInfoMsg( "%s joins your party\n", STRING(pCheckPlayer->DisplayName) );
@@ -1840,7 +1841,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				ALERT(at_console, "as_reload_scripts: Script hot-reload completed successfully\n");
 				
 				// Send notification to all players
-				for( int i = 1; i <= gpGlobals->maxClients; i++ )
+				for(unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
 				{
 					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
 					if( pOtherPlayer && pOtherPlayer != pPlayer )
@@ -2164,7 +2165,7 @@ void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, const char
 void CHalfLifeMultiplay::EndMultiplayerGame( void )
 {
 	//Delete all the teams
-	 for (int i = 0; i < CTeam::Teams.size(); i++) 
+	 for (unsigned int i = 0; i < CTeam::Teams.size(); i++) 
 		delete CTeam::Teams[0];
 	CTeam::Teams.clear();
 	
@@ -2272,7 +2273,7 @@ void CHalfLifeMultiplay	:: UpdateVote( )
 	
 	//Count SPAWNED players (Connecting players don't count)
 	int	iTotalPlayers = 0;
-	for ( int i = 1; i <= gpGlobals->maxClients; i++ )
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if( pPlayer && pPlayer->m_fGameHUDInitialized )
@@ -2285,7 +2286,7 @@ void CHalfLifeMultiplay	:: UpdateVote( )
 
 	//Count votes
 	int iYesVotes = 0;
-	for(int i = 0; i < gpGlobals->maxClients; i++ )
+	for(unsigned int i = 0; i < gpGlobals->maxClients; i++ )
 	{
 		if( FBitSet( m_CurrentVote.VoteTally,(1<<i) ) )
 			iYesVotes++;

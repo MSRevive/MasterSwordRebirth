@@ -136,7 +136,7 @@ CVoiceStatus::~CVoiceStatus()
 {
 	g_pInternalVoiceStatus = NULL;
 
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		delete m_Labels[i].m_pLabel;
 		m_Labels[i].m_pLabel = NULL;
@@ -189,7 +189,7 @@ int CVoiceStatus::Init(
 	m_VoiceHeadModel = NULL;
 	memset(m_Labels, 0, sizeof(m_Labels));
 
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		CVoiceLabel *pLabel = &m_Labels[i];
 
@@ -304,16 +304,16 @@ void CVoiceStatus::Frame(double frametime)
 	// Update speaker labels.
 	if (m_pHelper->CanShowSpeakerLabels())
 	{
-		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+		for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 			m_Labels[i].m_pBackground->setVisible(m_Labels[i].m_clientindex != -1);
 	}
 	else
 	{
-		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+		for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 			m_Labels[i].m_pBackground->setVisible(false);
 	}
 
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 		UpdateBanButton(i);
 }
 
@@ -326,7 +326,7 @@ void CVoiceStatus::CreateEntities()
 	cl_entity_t *localPlayer = gEngfuncs.GetLocalPlayer();
 
 	int iOutModel = 0;
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 	{
 		if (!m_VoicePlayers[i])
 			continue;
@@ -654,7 +654,7 @@ bool CVoiceStatus::IsInSquelchMode()
 
 CVoiceLabel* CVoiceStatus::FindVoiceLabel(int clientindex)
 {
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		if (m_Labels[i].m_clientindex == clientindex)
 			return &m_Labels[i];
@@ -682,7 +682,7 @@ void CVoiceStatus::RepositionLabels()
 	}
 
 	// Reposition active labels.
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		CVoiceLabel *pLabel = &m_Labels[i];
 
@@ -778,7 +778,7 @@ void CVoiceStatus::FreeBitmaps()
 	m_pScoreboardBanned = NULL;
 
 	// Clear references to the images in panels.
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 	{
 		if (m_pBanButtons[i])
 		{

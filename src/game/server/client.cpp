@@ -186,7 +186,8 @@ void ClientDisconnect(edict_t *pEntity)
 		
 		// Try to get Steam ID from client info
 		int iPlayerIndex = ENTINDEX(pEntity) - 1;
-		if (iPlayerIndex >= 0 && iPlayerIndex < gpGlobals->maxClients)
+
+		if (iPlayerIndex >= 0 && (unsigned int)iPlayerIndex < gpGlobals->maxClients)
 		{
 			clientaddr_t &ClientInfo = g_NewClients[iPlayerIndex];
 			if (ClientInfo.Addr[0])
@@ -624,7 +625,7 @@ void ClientCommand2(edict_t *pEntity)
 				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload completed successfully\n");
 				
 				// Send notification to all players
-				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 				{
 					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 					if (pOtherPlayer && pOtherPlayer != pPlayer && pOtherPlayer->m_Initialized)
@@ -754,7 +755,7 @@ void ClientCommand2(edict_t *pEntity)
 
 					//Validate default weapon spawn
 					bool validItem = false;
-					for (int i = 0; i < MSGlobals::DefaultWeapons.size(); i++)
+					for (unsigned int i = 0; i < MSGlobals::DefaultWeapons.size(); i++)
 					{
 						if (MSGlobals::DefaultWeapons[i] == NewChar.Weapon)
 						{
@@ -968,7 +969,7 @@ void ClientCommand2(edict_t *pEntity)
 						for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
 						{
 							bool Duplicate = false;
-							for (int i = 0; i < pStorage->Items.size(); i++)
+							for (unsigned int i = 0; i < pStorage->Items.size(); i++)
 								if (pStorage->Items[i].ID == ID)
 								{
 									Duplicate = true;
@@ -1385,7 +1386,7 @@ void ClientCommand2(edict_t *pEntity)
 		else if (FStrEq(CMD_ARGV(1), "open"))
 		{
 			//Thothie MAR2011_18 - moved item stacker here to prevent overflow
-			for (int i = 0; i < pPlayer->Gear.size(); i++)
+			for (unsigned int i = 0; i < pPlayer->Gear.size(); i++)
 			{
 				CGenericItem *pItem = pPlayer->Gear[i];
 				if (pItem)
@@ -1473,7 +1474,7 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "entcount"))
 	{
 		int e = 0;
-		for (int i = 0; i < gpGlobals->maxEntities; i++)
+		for (unsigned int i = 0; i < gpGlobals->maxEntities; i++)
 		{
 			edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
 			if (!pEdict)
@@ -2535,7 +2536,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	state->owner = 0;
 	if (ent->v.owner)
 	{
-		int owner = ENTINDEX(ent->v.owner);
+		unsigned int owner = ENTINDEX(ent->v.owner);
 
 		// Only care if owned by a player or using special follow
 		if ((owner >= 1 && owner <= gpGlobals->maxClients))

@@ -12,7 +12,7 @@ VGUI_MoveItemPanel::VGUI_MoveItemPanel(CContainerPanel *pParent) : CTransparentP
 	int y = 0;
 	int w = 0;
 
-	for(int i = 0; i < gNumMoveNumbers + 1; i++)
+	for(unsigned int i = 0; i < gNumMoveNumbers + 1; i++)
 	{
 		int vNumMove;
 		msstring vsText;
@@ -57,7 +57,7 @@ void VGUI_MoveItemPanel::ShowForButton(VGUI_ItemButton *pButton)
 	pButton->getAbsExtents(x, y, w, h);
 	setPos(x,y);
 
-	for(int i = 0; i < gNumMoveNumbers; i++)
+	for(unsigned int i = 0; i < gNumMoveNumbers; i++)
 	{
 		mButtons[i]->setEnabled(pButton->m_Data.Quantity >= gMoveNumbers[i]);
 	}
@@ -76,7 +76,7 @@ void VGUI_MoveItemPanel::Move(int vNumMove)
 void VGUI_MoveItemPanel::setVisible(bool bVisible)
 {
 	CTransparentPanel::setVisible(bVisible);
-	for(int i = 0; i < gNumMoveNumbers + 1; i++)
+	for(unsigned int i = 0; i < gNumMoveNumbers + 1; i++)
 	{
 		mButtons[i]->setArmed(false);
 	}

@@ -33,7 +33,7 @@ CTeam *CTeam::GetTeam(const char *pszName)
 {
 	if (!pszName || !pszName[0])
 		return NULL;
-	for (int i = 0; i < Teams.size(); i++)
+	for (unsigned int i = 0; i < Teams.size(); i++)
 		if (FStrEq(Teams[i]->TeamName(), pszName))
 			return Teams[i];
 
@@ -41,7 +41,7 @@ CTeam *CTeam::GetTeam(const char *pszName)
 }
 CTeam *CTeam::GetTeam(ulong ID)
 {
-	for (int i = 0; i < Teams.size(); i++)
+	for (unsigned int i = 0; i < Teams.size(); i++)
 		if (Teams[i]->m_ID == ID)
 			return Teams[i];
 
@@ -50,7 +50,7 @@ CTeam *CTeam::GetTeam(ulong ID)
 
 void CTeam ::ValidateUnits()
 {
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 	{
 		teamunit_t &Unit = MemberList[i];
 		if ((ulong)UTIL_PlayerByIndex(Unit.idx) != Unit.ID)
@@ -84,7 +84,7 @@ void CTeam ::AddToTeam(CBasePlayer *pPlayer)
 	MemberList.add(Unit);
 
 	//Update everyone
-	for (int n = 1; n <= gpGlobals->maxClients; n++)
+	for (unsigned int n = 1; n <= gpGlobals->maxClients; n++)
 	{
 		CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(n);
 		if (!pSendPlayer)
@@ -98,7 +98,7 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 	if (!pPlayer || !ExistsInList(pPlayer))
 		return;
 
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 		if (GetPlayer(i) == pPlayer)
 		{
 			MemberList.erase(i);
@@ -106,7 +106,7 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 		}
 
 	//Update everyone
-	for (int n = 1; n <= gpGlobals->maxClients; n++)
+	for (unsigned int n = 1; n <= gpGlobals->maxClients; n++)
 	{
 		CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(n);
 		if (!pSendPlayer)
@@ -123,7 +123,7 @@ BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 	if (!pPlayer)
 		return FALSE;
 	ValidateUnits();
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 		if (MemberList[i].idx == pPlayer->entindex() && MemberList[i].ID == (ulong)pPlayer)
 			return TRUE;
 	return FALSE;
@@ -131,7 +131,7 @@ BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 CTeam::~CTeam()
 {
 	ValidateUnits();
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(MemberList[i].idx);
 		if (!pPlayer || (ulong)pPlayer != MemberList[i].ID)

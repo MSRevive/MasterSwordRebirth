@@ -314,7 +314,7 @@ struct saverestore_s
 	int			size;			// Current data size
 	int			bufferSize;		// Total space for data
 	int			tokenSize;		// Size of the linear list of tokens
-	int			tokenCount;		// Number of elements in the pTokens table
+	unsigned int			tokenCount;		// Number of elements in the pTokens table
 	char		**pTokens;		// Hash table of entity strings (sparse)
 	int			currentIndex;	// Holds a global entity table ID
 	int			tableCount;		// Number of elements in the entity table

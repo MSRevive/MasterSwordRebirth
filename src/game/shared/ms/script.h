@@ -34,7 +34,7 @@ public:
 	CEventList &operator = (const CEventList &OtherList)
 	{
 		clear();
-		for(int i = 0; i < OtherList.size(); i++)
+		for(unsigned int i = 0; i < OtherList.size(); i++)
 			add(OtherList[i]);
 
 		return *this;

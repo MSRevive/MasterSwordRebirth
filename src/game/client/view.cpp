@@ -513,7 +513,7 @@ V_CalcRefdef
 void V_CalcNormalRefdef(struct ref_params_s *pparams)
 {
 	cl_entity_t *ent;
-	int i;
+	unsigned int i;
 	vec3_t angles;
 	float bob, waterOffset;
 	static viewinterp_t ViewInterp;
@@ -572,7 +572,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 		if (pparams->hardware)
 		{
 			waterEntity = gEngfuncs.PM_WaterEntity(pparams->simorg);
-			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
+			if (waterEntity >= 0 && (unsigned int)waterEntity < pparams->max_entities)
 			{
 				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
 				if (pwater && (pwater->model != NULL))
@@ -890,7 +890,7 @@ void V_SmoothInterpolateAngles(float *startAngle, float *endAngle, float *finalA
 	NormalizeAngles(startAngle);
 	NormalizeAngles(endAngle);
 
-	for (int i = 0; i < 3; i++)
+	for (unsigned int i = 0; i < 3; i++)
 	{
 		d = endAngle[i] - startAngle[i];
 
@@ -1119,7 +1119,7 @@ float MaxAngleBetweenAngles(float *a1, float *a2)
 	NormalizeAngles(a1);
 	NormalizeAngles(a2);
 
-	for (int i = 0; i < 3; i++)
+	for (unsigned int i = 0; i < 3; i++)
 	{
 		d = a2[i] - a1[i];
 		if (d > 180)

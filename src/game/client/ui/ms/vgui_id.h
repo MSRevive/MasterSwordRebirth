@@ -26,7 +26,7 @@ public:
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);
 
-		for (int i = 0; i < 3; i++)
+		for (unsigned int i = 0; i < 3; i++)
 		{
 			m_Label[i] = new VGUI_FadeText(this, 0.2, "", 0, i * g_FontID->getTall(), MSLabel::a_center);
 			m_Label[i]->setFont(g_FontID);
@@ -155,7 +155,7 @@ public:
 		}
 		else
 		{
-			for (int i = 0; i < 3; i++)
+			for (unsigned int i = 0; i < 3; i++)
 			{
 				float PrevDelta = gpGlobals->time - m_Label[i]->m_StartTime;
 				PrevDelta = V_min(PrevDelta, m_Label[i]->m_FadeDuration);
@@ -167,12 +167,12 @@ public:
 		m_LastID = pEntInfo;
 		m_pClientEnt = (pEntInfo ? gEngfuncs.GetEntityByIndex(pEntInfo->entindex) : NULL);
 		SetStatus();
-		for (int i = 0; i < 3; i++)
+		for (unsigned int i = 0; i < 3; i++)
 			m_Label[i]->Update();
 	}
 	void Update()
 	{
-		for (int i = 0; i < 3; i++)
+		for (unsigned int i = 0; i < 3; i++)
 			m_Label[i]->Update();
 
 		//get our wanted position
@@ -248,7 +248,7 @@ public:
 	void NewLevel()
 	{
 		m_LastID = NULL;
-		for (int i = 0; i < 3; i++)
+		for (unsigned int i = 0; i < 3; i++)
 		{
 			m_Label[i]->m_StartTime = -1000; //Ensure ID doesn't show up after a level change
 			m_Label[i]->setText("");

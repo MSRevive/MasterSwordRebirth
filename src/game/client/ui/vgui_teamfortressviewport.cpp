@@ -98,7 +98,7 @@ void VGUI_Think()
 	if (!gViewPort)
 		return;
 
-	for (int i = 0; i < gViewPort->m_Menus.size(); i++)
+	for (unsigned int i = 0; i < gViewPort->m_Menus.size(); i++)
 	{
 		gViewPort->m_Menus[i]->Think();
 	}
@@ -224,7 +224,7 @@ void CCommandMenu::AddButton(CommandButton *pButton)
 bool CCommandMenu::KeyInput(int keyNum)
 {
 	// loop through all our buttons looking for one bound to keyNum
-	for (int i = 0; i < m_iButtons; i++)
+	for (unsigned int i = 0; i < m_iButtons; i++)
 	{
 		if (!m_aButtons[i]->IsNotValid())
 		{
@@ -256,7 +256,7 @@ bool CCommandMenu::KeyInput(int keyNum)
 //-----------------------------------------------------------------------------
 void CCommandMenu::ClearButtonsOfArmedState(void)
 {
-	for (int i = 0; i < GetNumButtons(); i++)
+	for (unsigned int i = 0; i < GetNumButtons(); i++)
 	{
 		m_aButtons[i]->setArmed(false);
 
@@ -274,7 +274,7 @@ void CCommandMenu::ClearButtonsOfArmedState(void)
 //-----------------------------------------------------------------------------
 CommandButton *CCommandMenu::FindButtonWithSubmenu(CCommandMenu *pSubMenu)
 {
-	for (int i = 0; i < GetNumButtons(); i++)
+	for (unsigned int i = 0; i < GetNumButtons(); i++)
 	{
 		if (m_aButtons[i]->GetSubMenu() == pSubMenu)
 			return m_aButtons[i];
@@ -294,7 +294,7 @@ bool CCommandMenu::RecalculateVisibles(int iNewYPos, bool bHideAll)
 		setPos(_pos[0], iNewYPos);
 
 	// Cycle through all the buttons in this menu, and see which will be visible
-	for (int i = 0; i < m_iButtons; i++)
+	for (unsigned int i = 0; i < m_iButtons; i++)
 	{
 		int iClass = m_aButtons[i]->GetPlayerClass();
 		if ((iClass && iClass != g_iPlayerClass) || (m_aButtons[i]->IsNotValid()) || bHideAll)
@@ -362,7 +362,7 @@ void CCommandMenu::RecalculatePositions(int iYOffset)
 
 	// We need to force all menus below this one to update their positions now, because they
 	// might have submenus riding off buttons in this menu that have just shifted.
-	for (int i = 0; i < m_iButtons; i++)
+	for (unsigned int i = 0; i < m_iButtons; i++)
 		m_aButtons[i]->UpdateSubMenus(iAdjust);
 
 	setPos(_pos[0], iNewYPos);
@@ -373,7 +373,7 @@ void CCommandMenu::MakeVisible(CCommandMenu *pChildMenu)
 {
 	/*
 	// Push down the button leading to the child menu
-	for (int i = 0; i < m_iButtons; i++)
+	for (unsigned int i = 0; i < m_iButtons; i++)
 	{
 		if ( (pChildMenu != NULL) && (m_aButtons[i]->GetSubMenu() == pChildMenu) )
 		{
@@ -643,7 +643,7 @@ void TeamFortressViewport::Initialize(void)
 
 	 strncpy(m_sMapName,  "", sizeof(m_sMapName) );
 	 strncpy(m_szServerName,  "", sizeof(m_szServerName) );
-	for (int i = 0; i < 5; i++)
+	for (unsigned int i = 0; i < 5; i++)
 	{
 		m_iValidClasses[i] = 0;
 		strncpy(m_sTeamNames[i], "", MAX_TEAMNAME_SIZE);
@@ -1003,7 +1003,7 @@ void TeamFortressViewport::HideScoreBoard(void)
 // Set the submenu of the Command Menu
 void TeamFortressViewport::SetCurrentCommandMenu(CCommandMenu *pNewMenu)
 {
-	for (int i = 0; i < m_iNumMenus; i++)
+	for (unsigned int i = 0; i < m_iNumMenus; i++)
 		m_pCommandMenus[i]->setVisible(false);
 
 	m_pCurrentCommandMenu = pNewMenu;
@@ -1586,7 +1586,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 	m_Menus.add(CreateHUD_MenuInteract(this)); //Create Interact menu
 	m_Menus.add(m_pLocalizedMenu = new CLocalizedPanel(this)); // MiB MAR2015_01 [LOCAL_PANEL] - Add local panel to list and set pointer
 
-	for (int i = 0; i < m_Menus.size(); i++)
+	for (unsigned int i = 0; i < m_Menus.size(); i++)
 		m_Menus[i]->setVisible(false);
 
 	m_pHUDPanel->setVisible(true);
@@ -1912,7 +1912,7 @@ int TeamFortressViewport::MsgFunc_ValClass(const char *pszName, int iSize, void 
 {
 	BEGIN_READ(pbuf, iSize);
 
-	for (int i = 0; i < 5; i++)
+	for (unsigned int i = 0; i < 5; i++)
 		m_iValidClasses[i] = READ_SHORT();
 
 	// Force the menu to update
@@ -1927,7 +1927,7 @@ int TeamFortressViewport::MsgFunc_TeamNames(const char *pszName, int iSize, void
 
 	m_iNumberOfTeams = READ_BYTE();
 
-	for (int i = 0; i < m_iNumberOfTeams; i++)
+	for (unsigned int i = 0; i < m_iNumberOfTeams; i++)
 	{
 		int teamNum = i + 1;
 

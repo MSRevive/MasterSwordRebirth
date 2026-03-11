@@ -115,7 +115,7 @@ bool CGameGroupFile::Open(const char* pszFilename)
 
 	//Read entries
 	printf("CGameGroupFile::Open: Reading %u directory entries...\n", Header.DirectoryCount);
-	for (int i = 0; i < Header.DirectoryCount; i++)
+	for (unsigned int i = 0; i < Header.DirectoryCount; i++)
 	{
 		pakDirectory_t Entry;
 		memset(&Entry, 0, sizeof(Entry)); // Initialize entry to prevent garbage data
@@ -198,7 +198,7 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 	msstring EntryName = pszName;
 	ReplaceChar(EntryName, '\\', '/');
 
-	for (int i = 0; i < m_EntryList.size(); i++)
+	for (unsigned int i = 0; i < m_EntryList.size(); i++)
 	{
 		pakDirectory_t Entry = m_EntryList[i];
 		

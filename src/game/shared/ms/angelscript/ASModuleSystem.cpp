@@ -1547,7 +1547,7 @@ bool ASModuleSystem::RefreshFromPak()
         printf("ASModuleSystem::RefreshFromPak: PAK file not currently open, searching for scripts.pak...\n");
         
         bool found = false;
-        for (int i = 0; i < numLocations; i++)
+        for (unsigned int i = 0; i < numLocations; i++)
         {
             printf("ASModuleSystem::RefreshFromPak: Trying location: %s\n", pakLocations[i]);
             
@@ -1564,7 +1564,7 @@ bool ASModuleSystem::RefreshFromPak()
         {
             printf("ASModuleSystem::RefreshFromPak: ERROR - Could not find scripts.pak in any location\n");
             printf("ASModuleSystem::RefreshFromPak: Searched locations:\n");
-            for (int i = 0; i < numLocations; i++)
+            for (unsigned int i = 0; i < numLocations; i++)
             {
                 printf("  - %s\n", pakLocations[i]);
             }
@@ -1601,7 +1601,7 @@ bool ASModuleSystem::RefreshFromPak()
         {
             printf("ASModuleSystem::RefreshFromPak: Initial refresh failed, trying fallback locations...\n");
             
-            for (int i = 0; i < numLocations; i++)
+            for (unsigned int i = 0; i < numLocations; i++)
             {
                 printf("ASModuleSystem::RefreshFromPak: Fallback attempt with: %s\n", pakLocations[i]);
                 

@@ -40,7 +40,7 @@ const char* GetPlayerTitle(int Title)
 
 int GetPlayerTitleIdx(const char* pszTitle)
 {
-	for (int i = 0; i < CTitleManager::Titles.size(); i++)
+	for (unsigned int i = 0; i < CTitleManager::Titles.size(); i++)
 		if (FStrEq(CTitleManager::Titles[i].Name, pszTitle))
 			return i;
 	return 0;
@@ -71,13 +71,13 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 	skillcache_t Temp;
 	skillcache_t SwapTemp;
 
-	for (int i = 0; i < SKILL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < (unsigned int)SKILL_MAX_STATS; i++)
 	{
 		Temp.Skill = i;
 		Temp.Value = pPlayer->GetSkillStat(SKILL_FIRSTSKILL + i);
 		Skills[i] = Temp;
 
-		for (int n = 0; n < i; n++)
+		for (unsigned int n = 0; n < i; n++)
 		{
 			if (Temp.Value > SortedSkills[n].Value)
 			{
@@ -90,19 +90,19 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 	}
 
 	/*#ifndef VALVE_DLL
-	 for (int i = 0; i < SKILL_MAX_STATS; i++)
+	 for (unsigned int i = 0; i < SKILL_MAX_STATS; i++)
 		Print( "Skill %i, [%i]%s (%i)\n", i, SortedSkills[i].Skill, SkillStatList[SortedSkills[i].Skill].Name, GetSkillName( SKILL_FIRSTSKILL + SortedSkills[i].Skill ) );
 #endif*/
 
 //Find a title
 	title_t* pBestTitle = &DefaultTitle;
 
-	for (int i = 0; i < Titles.size(); i++)
+	for (unsigned int i = 0; i < Titles.size(); i++)
 	{
 		title_t& Title = Titles[i];
 		bool SkillsAreValid = true;
 
-		for (int s = 0; s < Title.SkillsReq.size(); s++)
+		for (unsigned int s = 0; s < Title.SkillsReq.size(); s++)
 		{
 			int Skill = Title.SkillsReq[s] - SKILL_FIRSTSKILL;
 
@@ -114,7 +114,7 @@ title_t* CTitleManager::GetPlayerTitle(CBasePlayer* pPlayer)
 			} //Skill not high enough
 
 			bool IsHighestSkill = false;
-			for (int h = 0; h < Title.SkillsReq.size(); h++) 
+			for (unsigned int h = 0; h < Title.SkillsReq.size(); h++) 
 			{
 				if (SortedSkills[h].Skill == Skill)
 				{
@@ -184,10 +184,10 @@ const char* CBasePlayer::GetFullTitle()
 		Title = "";
 
 		int SkillLevel = 0;
-		int SkillsReq = pTitle->SkillsReq.size();
+		unsigned int SkillsReq = pTitle->SkillsReq.size();
 		if (SkillsReq)   //Only add the skill level if this title requires skills
 		{
-			for (int s = 0; s < SkillsReq; s++)
+			for (unsigned int s = 0; s < SkillsReq; s++)
 			{
 				SkillLevel += GetSkillStat(pTitle->SkillsReq[s]);
 			}
@@ -246,7 +246,7 @@ void CBasePlayer::InitialSpawn(void)
 	m_AnimSpeedAdj = 1;
 
 	// Reset char info
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 		m_CharInfo[i].Index = i;
 
 	CreateStats();
@@ -270,7 +270,7 @@ void CBasePlayer::InitialSpawn(void)
 		CGlobalScriptedEffects::RegisterEffect( ManualEffect );
 			*/
 
-	for (int i = 0; i < CGlobalScriptedEffects::Effects.size(); i++)
+	for (unsigned int i = 0; i < CGlobalScriptedEffects::Effects.size(); i++)
 	{
 		globalscripteffect_t& Effect = CGlobalScriptedEffects::Effects[i];
 		if (!FBitSet(Effect.m_Flags, SCRIPTEFFECT_PLAYERACTION))
@@ -357,7 +357,7 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 	if (!pItem)
 		return -1;
 
-	for (int i = 0; i < MAX_PLAYER_HANDS; i++) //Am I already holding it?
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++) //Am I already holding it?
 		if (Hand(i) && Hand(i) == pItem)
 			return 0;
 
@@ -366,7 +366,7 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 
 	bool HoldingTwoHandedItem = false;
 
-	for (int i = 0; i < MAX_PLAYER_HANDS; i++) //If either hand is holding a two-handed items, my hands are full
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++) //If either hand is holding a two-handed items, my hands are full
 		if (Hand(i) && Hand(i)->m_PrefHand == BOTH_HANDS)
 		{
 			HoldingTwoHandedItem = true;
@@ -382,13 +382,13 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 			//check both, and use iPrefHand if both are empty
 			bool fHandAllowed[MAX_PLAYER_HANDS] = { false };
 			if (pItem->m_PrefHand == ANY_HAND)
-				for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+				for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 					fHandAllowed[i] = true;
 			else
 				fHandAllowed[pItem->m_PrefHand] = true;
 
 			//Check left hand first, so items set to ANY_HAND will go into it first
-			for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+			for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 				if (fHandAllowed[i] && !Hand(i))
 				{
 					iAddHand = i;
@@ -400,7 +400,7 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 			//Item requires both hands
 			iAddHand = m_PrefHand;
 
-			for (int i = 0; i < MAX_PLAYER_HANDS; i++) //If either hand is full, the item can't be held
+			for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++) //If either hand is full, the item can't be held
 				if (Hand(i))
 				{
 					iAddHand = -1;
@@ -448,7 +448,7 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 		{
 			if (FreeHands) //Try to free both hands
 			{
-				for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+				for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 				{
 					if (Hand(i))
 						if (!Hand(i)->PutAway(false))
@@ -482,11 +482,11 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 //#item Return Thothie SEP2011_07
 int CBasePlayer::NumItems(void)
 {
-	int TotalItems = Gear.size() - 1;
-	for (int i = 0; i < Gear.size(); i++)
+	unsigned int TotalItems = Gear.size() - 1;
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem* pPack = Gear[i];
-		for (int n = 0; n < pPack->Container_ItemCount(); n++)
+		for (unsigned int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			++TotalItems;
 		}
@@ -509,7 +509,7 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 	int MaxItems = NUM_MAX_ITEMS;
 	int WarnItems = NUM_MAX_ITEMS - 5;
 	/*
-	 for (int i = 0; i < Gear.size(); i++)
+	 for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pPack = Gear[i];
 		 for (int n = 0; n < pPack->Container_ItemCount(); n++)
@@ -684,7 +684,7 @@ bool CBasePlayer::PutInAnyPack(CGenericItem* pItem, bool bVerbose)
 {
 	int PackCount = 0;
 	CGenericItem* pFirstPack = NULL;
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) &&
 			Gear[i]->m_Location != ITEMPOS_HANDS)
 		{
@@ -735,7 +735,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		//Try to find a weapon to pull out from a sheath
 
 		CGenericItem *pItem = NULL;
-		 for (int i = 0; i < Gear.size(); i++)
+		 for (unsigned int i = 0; i < Gear.size(); i++)
 		{
 			CGenericItem *pPack = Gear[i];
 			if( !FBitSet(pPack->MSProperties(),ITEM_CONTAINER) || pPack->Container_Type() != CGenericItem::PACK_SHEATH || !pPack->Container_ItemCount() )
@@ -852,7 +852,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 // Better way to remove items without dropping them.
 void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 {
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 	{
 		CGenericItem* pItem = Hand(i);
 		if (!pItem)
@@ -1061,7 +1061,7 @@ int CBasePlayer::SkillAvg()
 {
 	//Get the average of all skills
 	int iTemp = 0;
-	for (int i = 0; i < SKILL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < SKILL_MAX_STATS; i++)
 		iTemp += GetSkillStat(i);
 	iTemp /= SKILL_MAX_STATS;
 
@@ -1108,7 +1108,7 @@ void CBasePlayer::SendHelpMsg(const char* Tipname, const char* Title, const char
 	if (mstipname.contains("generic"))
 		generic_tip = true;
 
-	for (int i = 0; i < m_ViewedHelpTips.size(); i++)
+	for (unsigned int i = 0; i < m_ViewedHelpTips.size(); i++)
 		if (m_ViewedHelpTips[i] == Tipname && !generic_tip)
 			return;
 
@@ -1277,7 +1277,7 @@ void CBasePlayer::Deactivate()
 	RemoveAllItems(false, true); // Destroy all of the player's weapons and items
 
 	//Must manually deallocate any player memory that was dynamically allocated
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 		m_CharInfo[i].Destroy();
 
 	m_EntInfo.clear();
@@ -1325,7 +1325,7 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 {
 	spellgroup_v& SpellList = m_SpellList;
 
-	for (int s = 0; s < SpellList.size(); s++) //Already know this spell?
+	for (unsigned int s = 0; s < SpellList.size(); s++) //Already know this spell?
 		if (SpellList[s] == pszSpellScript)
 			return;
 
@@ -1341,7 +1341,7 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 	/*	MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_SPELLS], NULL, pev );
 				WRITE_SHORT( SpellList.size() );					//Number of spells
 				WRITE_SHORT( fVerbose ? SpellList.size() : 0 );		//If Verbose: Which spell was learned (incremented by 1 | 0 = Non-verbose)
-				 for (int s = 0; s < SpellList.size(); s++)
+				 for (unsigned int s = 0; s < SpellList.size(); s++)
 					WRITE_STRING( SpellList[s] );				//Spell scriptname
 			MESSAGE_END();		*/
 #else
@@ -1358,7 +1358,7 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 
 storage_t* CBasePlayer::Storage_GetStorage(const char* pszStorageName)
 {
-	for (int s = 0; s < m_Storages.size(); s++)
+	for (unsigned int s = 0; s < m_Storages.size(); s++)
 		if (m_Storages[s].Name == pszStorageName)
 			return &m_Storages[s];
 
@@ -1423,7 +1423,7 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 
 	//Load all characters from file, locally
 
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 	{
 		charinfo_t& Char = m_CharInfo[i];
 		CPlayer_DataBuffer gFile;
@@ -1477,7 +1477,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 
 		//MiB JAN2010_27 - Char Selection Fix
 		//Find last body used
-		for (int i = 0; i < CharData.m_Quests.size(); i++)
+		for (unsigned int i = 0; i < CharData.m_Quests.size(); i++)
 		{
 			if (CharData.m_Quests[i].Name == "BODY")
 			{
@@ -1486,7 +1486,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 			}
 		}
 
-		for (int i = 0; i < CharData.m_Items.size(); i++) //Determine what model/body my gear is using
+		for (unsigned int i = 0; i < CharData.m_Items.size(); i++) //Determine what model/body my gear is using
 		{
 			genericitem_full_t& Item = CharData.m_Items[i];
 			CGenericItem* pItem = (CGenericItem*)Item;
@@ -1517,7 +1517,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 
 			gearinfo_t Info;
 			Info.Flags = 0;
-			for (int w = 0; w < pItem->m_WearModelPositions.size(); w++)
+			for (unsigned int w = 0; w < pItem->m_WearModelPositions.size(); w++)
 				SetBits(Info.Flags, (1 << pItem->m_WearModelPositions[w]));
 			if (Item.Location != ITEMPOS_HANDS)
 				SetBits(Info.Flags, GEARFL_WEARING);
@@ -1545,7 +1545,7 @@ charinfo_t::~charinfo_t()
 const char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
 {
 #ifdef VALVE_DLL
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 		if (!pOtherPlayer || pOtherPlayer == pPlayer)

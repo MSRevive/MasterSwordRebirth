@@ -321,8 +321,8 @@ void CBaseMonster ::Look(int iDistance)
 
 		// Find only monsters/clients in box, NOT limited to PVS
 		//dbg("Entities in box");
-		int count = UTIL_EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER);
-		for (int i = 0; i < count; i++)
+		unsigned int count = UTIL_EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER);
+		for (unsigned int i = 0; i < count; i++)
 		{
 			//dbg("Assign ent Pre");
 			if (!pList[i])
@@ -2230,7 +2230,7 @@ int CBaseMonster::IRelationship(CBaseEntity *pTarget)
 
 BOOL CBaseMonster ::FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
 {
-	int i;
+	unsigned int i;
 	int iMyHullIndex;
 	int iMyNode;
 	int iThreatNode;
@@ -2335,7 +2335,7 @@ BOOL CBaseMonster ::FindCover(Vector vecThreat, Vector vecViewOffset, float flMi
 //=========================================================
 BOOL CBaseMonster ::BuildNearestRoute(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist)
 {
-	int i;
+	unsigned int i;
 	int iMyHullIndex;
 	int iMyNode;
 	float flDist;
@@ -2822,7 +2822,7 @@ BOOL CBaseMonster ::FGetNodeRoute(Vector vecDest)
 //=========================================================
 int CBaseMonster ::FindHintNode(void)
 {
-	int i;
+	unsigned int i;
 	TraceResult tr;
 
 	if (!WorldGraph.m_fGraphPresent)

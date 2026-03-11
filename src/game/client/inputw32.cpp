@@ -655,10 +655,11 @@ void IN_StartupJoystick(void)
 	// assume no joystick
 	joy_avail = 0;
 
-	int nJoysticks = SDL_NumJoysticks();
+	unsigned int nJoysticks = SDL_NumJoysticks();
+
 	if (nJoysticks > 0)
 	{
-		for (int i = 0; i < nJoysticks; i++)
+		for (unsigned int i = 0; i < nJoysticks; i++)
 		{
 			if (SDL_IsGameController(i))
 			{

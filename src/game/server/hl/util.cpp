@@ -407,7 +407,7 @@ void UTIL_MoveToOrigin(edict_t *pent, const Vector &vecGoal, float flDist, int i
 
 int UTIL_EntitiesInBox(CBaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs, int flagMask, int startIndex)
 {
-	if (startIndex >= gpGlobals->maxEntities) //End recursion if you have no more entities to search (shouldn't happen anyway) MiB Feb2008a
+	if ((unsigned int)startIndex >= gpGlobals->maxEntities) //End recursion if you have no more entities to search (shouldn't happen anyway) MiB Feb2008a
 		return 0;
 
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(startIndex);
@@ -423,7 +423,7 @@ int UTIL_EntitiesInBox(CBaseEntity **pList, int listMax, const Vector &mins, con
 		//return count;
 	}
 
-	for (int i = startIndex + 1; i < gpGlobals->maxEntities; i++, pEdict++) //MAR2008b - zapping neo-chatbug
+	for (unsigned int i = startIndex + 1; i < gpGlobals->maxEntities; i++, pEdict++) //MAR2008b - zapping neo-chatbug
 	{
 		if (pEdict->free || !pEdict->pvPrivateData) //MAR2008b - zapping neo-chatbug
 			continue;
@@ -455,7 +455,7 @@ int UTIL_EntitiesInBox(CBaseEntity **pList, int listMax, const Vector &mins, con
 
 int UTIL_MonstersInSphere(CBaseEntity **pList, int listMax, const Vector &center, float radius, int startIndex)
 {
-	if (startIndex >= gpGlobals->maxEntities) //End recursion if you have no more entities to search (shouldn't happen anyway) MiB Feb2008a
+	if ((unsigned int)startIndex >= gpGlobals->maxEntities) //End recursion if you have no more entities to search (shouldn't happen anyway) MiB Feb2008a
 		return 0;
 
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(startIndex);
@@ -474,7 +474,7 @@ int UTIL_MonstersInSphere(CBaseEntity **pList, int listMax, const Vector &center
 		//return count;
 	}
 
-	for (int i = startIndex + 1; i < gpGlobals->maxEntities; i++, pEdict++) //MAR2008b - zapping neo-chatbug
+	for (unsigned int i = startIndex + 1; i < gpGlobals->maxEntities; i++, pEdict++) //MAR2008b - zapping neo-chatbug
 	{
 		if (pEdict->free || !pEdict->pvPrivateData) //MAR2008b - zapping neo-chatbug
 			continue;
@@ -588,7 +588,7 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 {
 	CBaseEntity *pPlayer = NULL;
 
-	if (playerIndex > 0 && playerIndex <= gpGlobals->maxClients)
+	if (playerIndex > 0 && (unsigned int)playerIndex <= gpGlobals->maxClients)
 	{
 		edict_t *pPlayerEdict = INDEXENT(playerIndex);
 		if (pPlayerEdict && !pPlayerEdict->free)
@@ -602,7 +602,7 @@ CBaseEntity *UTIL_PlayerByIndex(int playerIndex)
 
 CBasePlayer* UTIL_PlayerBySteamID(ID64 steamID64)
 {
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity* pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer* pPlayer = (pEntity ? (CBasePlayer*)pEntity : NULL);
@@ -683,7 +683,7 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 			TokenizeString(m_scriptevent.c_str(), Tokens);
 			if (Tokens.size() > 1)
 			{
-				for (int i = 0; i < Tokens.size(); i++)
+				for (unsigned int i = 0; i < Tokens.size(); i++)
 				{
 					if (i > 0)
 						Params.add(Tokens[i].c_str());
@@ -711,7 +711,7 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 			Params.clearitems();
 			if (Tokens.size() > 1)
 			{
-				for (int i = 0; i < Tokens.size(); i++)
+				for (unsigned int i = 0; i < Tokens.size(); i++)
 				{
 					if (i > 0)
 						Params.add(Tokens[i].c_str());
@@ -845,7 +845,7 @@ void Util_ScriptArray(CBaseEntity *pEntity, const char *array_operation, const c
 int UTIL_NumPlayers()
 {
 	int total_valid_players = 0;
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer *pPlayer = pEntity ? (CBasePlayer *)pEntity : NULL;
@@ -869,7 +869,7 @@ int UTIL_NumActivePlayers()
 {
 	int total_valid_players = 0;
 	bool flagged_invalid = false;
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer *pPlayer = pEntity ? (CBasePlayer *)pEntity : NULL;
@@ -905,7 +905,7 @@ float UTIL_TotalHP()
 	int total_valid_players = 0;
 	bool flagged_invalid = false;
 	float total_hp = 0;
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer *pPlayer = pEntity ? (CBasePlayer *)pEntity : NULL;
@@ -942,7 +942,7 @@ float UTIL_AvgHP()
 	int total_valid_players = 0;
 	bool flagged_invalid = false;
 	float total_hp = 0;
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer *pPlayer = pEntity ? (CBasePlayer *)pEntity : NULL;
@@ -1056,7 +1056,7 @@ static short FixedSigned16(float value, float scale)
 // UNDONE: Affect user controls?
 void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, float duration, float radius)
 {
-	int i;
+	unsigned int i;
 	float localAmplitude;
 	ScreenShake shake;
 
@@ -1154,7 +1154,7 @@ void UTIL_ScreenFadeWrite(const ScreenFade &fade, CBaseEntity *pEntity)
 
 void UTIL_ScreenFadeAll(const Vector &color, float fadeTime, float fadeHold, int alpha, int flags)
 {
-	int i;
+	unsigned int i;
 	ScreenFade fade;
 
 	UTIL_ScreenFadeBuild(fade, color, fadeTime, fadeHold, alpha, flags);
@@ -1211,7 +1211,7 @@ void UTIL_HudMessage(CBaseEntity *pEntity, const hudtextparms_t &textparms, cons
 
 void UTIL_HudMessageAll(const hudtextparms_t &textparms, const char *pMessage)
 {
-	int i = 0;
+	unsigned int i = 0;
 	//UTIL_ClientPrintAll( HUD_PRINTNOTIFY, "Game_text reached UTIL_HudMessageAll","test");
 	for (i = 1; i <= gpGlobals->maxClients; i++)
 	{
@@ -1319,7 +1319,7 @@ void UTIL_ShowMessage(const char *pString, CBaseEntity *pEntity)
 
 void UTIL_ShowMessageAll(const char *pString)
 {
-	int i;
+	unsigned int i;
 
 	// loop through all players
 
@@ -2176,7 +2176,7 @@ unsigned short CSaveRestoreBuffer ::TokenHash(const char *pszToken)
 		ALERT(at_error, "No token table array in TokenHash()!");
 #endif
 
-	for (int i = 0; i < m_pdata->tokenCount; i++)
+	for (unsigned int i = 0; i < m_pdata->tokenCount; i++)
 	{
 #if _DEBUG
 		static qboolean beentheredonethat = FALSE;
@@ -2187,7 +2187,7 @@ unsigned short CSaveRestoreBuffer ::TokenHash(const char *pszToken)
 		}
 #endif
 
-		int index = hash + i;
+		unsigned int index = hash + i;
 		if (index >= m_pdata->tokenCount)
 			index -= m_pdata->tokenCount;
 
@@ -2503,9 +2503,9 @@ void CSave ::BufferString(char *pdata, int len)
 	BufferData(&c, 1);		// Write a null terminator
 }
 
-int CSave ::DataEmpty(const char *pdata, int size)
+int CSave ::DataEmpty(const char *pdata, unsigned int size)
 {
-	for (int i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		if (pdata[i])
 			return 0;

@@ -37,7 +37,7 @@ private:
 
 public:
 
-	int    getCount();
+	unsigned int    getCount();
 	String operator+(String text);
 	String operator+(const char* text);
 	bool   operator==(String text);

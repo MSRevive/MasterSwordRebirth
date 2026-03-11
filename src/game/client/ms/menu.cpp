@@ -94,7 +94,7 @@ int CHudMenu ::Draw(float flTime)
 
 	// count the number of newlines
 	int nlc = 0;
-	for (int i = 0; i < MAX_MENU_STRING && m.cMenuText[i] != '\0'; i++)
+	for (unsigned int i = 0; i < MAX_MENU_STRING && m.cMenuText[i] != '\0'; i++)
 	{
 		if (m.cMenuText[i] == '\n')
 			nlc++;

@@ -131,7 +131,7 @@ public:
 	static CGenericItem *NewGenericItem(CGenericItem *pGlobalItem);										 //Copy a global item to a usable item
 	static CGenericItem *NewGenericItem(int idx);														 //[PackSwap]
 	static void AddGlobalItem(GenItem_t &NewGlobalItem);												 //Add a new global item
-	static int ItemCount();																				 //Number of global items
+	static unsigned int ItemCount();																	 //Number of global items
 	static GenItem_t *Item(int idx);																	 //Retreive item
 	static void DeleteItem(CGenericItem *pItem);														 //Delete one item by pointer
 	static void DeleteItem(int idx);																	 //Delete one item by index
@@ -247,7 +247,7 @@ public:
 	float flItemWeight; // TODO: This is for storing a item's weight on the actual item instead of the entity.
 
 	//Groupables
-	int iQuantity, iMaxGroupable, m_MaxGroupable; //MiB FEB2010_13 - Stackable Stacks added m_MaxGroupable
+	unsigned int iQuantity, iMaxGroupable, m_MaxGroupable; //MiB FEB2010_13 - Stackable Stacks added m_MaxGroupable
 
 	//Wearbles
 	mslist<wearpos_t> m_WearPositions; //Where the item goes when worn. Can use up multiple locations
@@ -269,7 +269,7 @@ public:
 	virtual void StrikeLand();
 	virtual void StrikeHold();
 	virtual void ChargeThrowProj();
-	virtual bool UseAmmo(int iAmt);
+	virtual bool UseAmmo(unsigned int iAmt);
 	virtual int ActivateButton();
 	virtual bool Attack_IsCharging();
 	virtual bool Attack_CanAttack();
@@ -301,7 +301,7 @@ public:
 	void Container_StackItems(); //FEB2011_16 Thothie
 	void Container_SendItem(CGenericItem *pItem, bool fAddItem);
 	//int Container_Type( );
-	int Container_ItemCount();
+	unsigned int Container_ItemCount();
 	float Container_Weight();
 	bool Container_IsOpen();
 	float Volume();

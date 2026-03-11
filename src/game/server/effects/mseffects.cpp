@@ -114,7 +114,7 @@ void CTorchLight ::Create(float flDuration, edict_t *peOwner)
 }
 void CTorchLight ::Spawn()
 {
-	for (int i = 0; i < TORCH_LIGHTS; i++)
+	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
 	{
 		pLight[i] = GetClassPtr((CBaseEntity *)NULL);
 		SET_MODEL(pLight[i]->edict(), "models/null.mdl");
@@ -144,13 +144,13 @@ void CTorchLight ::Think()
 
 	if (FBitSet(pTorchTouse->pev->effects, EF_NODRAW) ||
 		pTorchTouse->pev->waterlevel > 2)
-		for (int i = 0; i < TORCH_LIGHTS; i++)
+		for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
 			SetBits(pLight[i]->pev->effects, EF_NODRAW);
 	else
-		for (int i = 0; i < TORCH_LIGHTS; i++)
+		for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
 			ClearBits(pLight[i]->pev->effects, EF_NODRAW);
 
-	for (int i = 0; i < TORCH_LIGHTS; i++)
+	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
 	{
 		if (pLight[i])
 		{
@@ -166,7 +166,7 @@ void CTorchLight ::Think()
 }
 void CTorchLight ::SUB_Remove()
 {
-	for (int i = 0; i < TORCH_LIGHTS; i++)
+	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
 		pLight[i]->SUB_Remove();
 	CBaseEntity ::SUB_Remove();
 }
@@ -231,7 +231,7 @@ void CChangePlayerSpeed ::Spawn(void)
 void CChangePlayerSpeed ::Think(void)
 {
 
-	for (int i = 0; i < 256; i++)
+	for (unsigned int i = 0; i < 256; i++)
 	{
 		playerinfo_t *pInfo = &m_PlayerInfo[i];
 		if (!pInfo->pePlayer)
@@ -267,7 +267,7 @@ void CChangePlayerSpeed ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 		return;
 
 	playerinfo_t *pInfo = NULL;
-	for (int i = 0; i < 256; i++)
+	for (unsigned int i = 0; i < 256; i++)
 	{
 		if (!m_PlayerInfo[i].pePlayer)
 		{
@@ -398,7 +398,7 @@ class CMSChangeLevel : public CBaseEntity
 	string_t sDestMap, sDestTrans;
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pPlayer)

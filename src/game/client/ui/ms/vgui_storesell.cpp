@@ -79,7 +79,7 @@ CStoreSellPanel::CStoreSellPanel(Panel *pParent) : CStorePanel()
 
 bool CStoreSellPanel::InterestedInItem(const char* pszItemName)
 {
-	for (int i = 0; i < CStorePanel::StoreItems.size(); i++)
+	for (unsigned int i = 0; i < CStorePanel::StoreItems.size(); i++)
 		if (CStorePanel::StoreItems[i].Name == pszItemName)
 			return true;
 
@@ -104,7 +104,7 @@ void CStoreSellPanel::ItemHighlighted(void *pData)
 		m_InfoPanel->m_SaleText->setText("Worthless");
 
 		containeritem_t &Item = ItemButton.m_Data;
-		for (int s = 0; s < CStorePanel::StoreItems.size(); s++)
+		for (unsigned int s = 0; s < CStorePanel::StoreItems.size(); s++)
 		{
 			storeitem_t &StoreItem = CStorePanel::StoreItems[s];
 			if (Item.Name != StoreItem.Name)
@@ -126,17 +126,17 @@ void CStoreSellPanel::ItemSelectChanged(ulong ID, bool fSelected)
 
 	int Valuetotal = 0;
 
-	for (int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
+	for (unsigned int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[g];
-		for (int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
+		for (unsigned int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[i];
 			if (!ItemButton.m_Selected)
 				continue;
 
 			containeritem_t &Item = ItemButton.m_Data;
-			for (int s = 0; s < CStorePanel::StoreItems.size(); s++)
+			for (unsigned int s = 0; s < CStorePanel::StoreItems.size(); s++)
 			{
 				storeitem_t &StoreItem = CStorePanel::StoreItems[s];
 				if (Item.Name != StoreItem.Name)
@@ -159,7 +159,7 @@ void CStoreSellPanel::SellAll()
 	if (m_SelectedItems.size() > 0)
 	{
 		CommandString = "trade sell";
-		for (int i = 0; i < m_SelectedItems.size(); i++)
+		for (unsigned int i = 0; i < m_SelectedItems.size(); i++)
 		{
 			CommandString += " ";
 			CommandString += (int)m_SelectedItems[i].ID;

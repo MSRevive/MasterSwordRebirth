@@ -232,9 +232,9 @@ void CEnvExplosion::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	// draw sparks
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NOSPARKS))
 	{
-		int sparkCount = RANDOM_LONG(0, 3);
+		unsigned int sparkCount = RANDOM_LONG(0, 3);
 
-		for (int i = 0; i < sparkCount; i++)
+		for (unsigned int i = 0; i < sparkCount; i++)
 		{
 			Create("spark_shower", pev->origin, tr.vecPlaneNormal, NULL);
 		}

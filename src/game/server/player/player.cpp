@@ -31,7 +31,6 @@
 #include "ms/angelscript/CAngelScriptManager.h"
 #include "decals.h"
 #include "gamerules/gamerules.h"
-#include "decals.h"
 #include "game.h"
 #include "hltv.h"
 
@@ -286,7 +285,7 @@ void LinkUserMessages(void)
 	gmsgFade = REG_USER_MSG("ScreenFade", sizeof(ScreenFade));
 
 	//Master Sword
-	for (int i = 0; i < NETMSG_NUM; i++)
+	for (unsigned int i = 0; i < NETMSG_NUM; i++)
 		g_netmsg[i] = REG_USER_MSG(g_PlayerMsgs[i], -1);
 	//------------
 
@@ -401,7 +400,7 @@ float CBasePlayer ::TraceAttack(damage_t &Damage)
 		Damage.iHitGroup = m_LastHitGroup = HitGroupToBodyPart(Damage.outTraceResult.iHitgroup);
 
 	//Let armor and shield do their magic
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		Gear[i]->OwnerTakeDamage(Damage);
 
 	if (Damage.flDamage <= 0)
@@ -504,7 +503,7 @@ int CBasePlayer ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 		static int damageTypes[CDMG_TIMEBASED] = {
 			DMG_PARALYZE, DMG_NERVEGAS, DMG_POISON, DMG_RADIATION, DMG_DROWNRECOVER, DMG_ACID, DMG_SLOWBURN, DMG_SLOWFREEZE
 		};
-		for (int i = 0; i < CDMG_TIMEBASED; i++)
+		for (unsigned int i = 0; i < CDMG_TIMEBASED; i++)
 		{
 			if (bitsDamageType & damageTypes[i])
 				m_rgbTimeBasedDamage[i] = 0;
@@ -775,7 +774,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 		IScripted *pScripted = GetScripted(); // UScripted? IScripted.
 		if (pScripted)
 		{
-			for (int i = 0; i < pScripted->m_Scripts.size(); i++)							 // Check each
+			for (unsigned int i = 0; i < pScripted->m_Scripts.size(); i++)							 // Check each
 			{
 				if (m_Scripts[i]->VarExists("game.effect.id"))								 //This is an effect
 				{
@@ -1271,7 +1270,7 @@ void FixPlayerCrouchStuck(edict_t *pPlayer)
 	TraceResult trace;
 
 	// Move up as many as 18 pixels if the player is stuck.
-	for (int i = 0; i < 18; i++)
+	for (unsigned int i = 0; i < 18; i++)
 	{
 		UTIL_TraceHull(pPlayer->v.origin, pPlayer->v.origin, dont_ignore_monsters, head_hull, pPlayer, &trace);
 		if (trace.fStartSolid)
@@ -1289,7 +1288,7 @@ void CBasePlayer::PlayerAction(const char* Action)
 {
 	CScript *EventScript = NULL;
 
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		if (!strcmp(m_Scripts[i]->GetVar("game.effect.id"), Action))
 		{
 			EventScript = m_Scripts[i];
@@ -2303,7 +2302,7 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 	// Vector vMinBounds = pSpot->pev->origin - Vector(Range, Range, Range);
 	// Vector vMaxBounds = pSpot->pev->origin + Vector(Range, Range, Range);
 	// int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
-	// for (int i = 0; i < count; i++)
+	// for (unsigned int i = 0; i < count; i++)
 	// {
 	// 	CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
 	// 	if (!pSightEnt || pSightEnt->pev->solid == SOLID_NOT ||
@@ -2589,7 +2588,7 @@ void CBasePlayer::Spawn(void)
 	//Thothie - yeah, but we really, really need it now, attempting to compensate
 	if (!fRespawnPlayer)
 	{
-		for (int i = 0; i < Gear.size(); i++)
+		for (unsigned int i = 0; i < Gear.size(); i++)
 		{
 			CGenericItem *cur_item = Gear[i];
 
@@ -2800,7 +2799,7 @@ void CBasePlayer::Spawn(void)
 		//Shuriken - This should send an Exp message for all the players' stats.
 		//I have no idea how costly it is to send this many message each time a player joins
 		//so you might be better off just axing this and letting them update on monster kills.
-		/*for(int i = 0; i < SKILL_MAX_ATTACK; i++) {
+		/*for(unsigned int i = 0; i < SKILL_MAX_ATTACK; i++) {
 			CStat *pStat = FindStat( i + SKILL_FIRSTSKILL );
 			for(int p = 0; p < (signed)pStat->m_SubStats.size();p++) {
 				CSubStat &SubStat = pStat->m_SubStats[p];
@@ -2890,7 +2889,7 @@ void CBasePlayer::Spawn(void)
 	pev->netname = MAKE_STRING(m_NetName.c_str());
 
 	//Shurik3n AUG2007a - attempts to fix 100% bug
-	for (int i = 0; i < SKILL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < SKILL_MAX_STATS; i++)
 	{
 		CStat *pStat = FindStat(i + SKILL_FIRSTSKILL);
 		for (int p = 0; p < (signed)pStat->m_SubStats.size(); p++)
@@ -3245,7 +3244,7 @@ CBaseEntity *CBasePlayer::GiveNamedItem(const char *pszName)
 		return NULL;
 
 	const char* WeaponScript = NULL;
-	for (int i = 0; i < CGenericItemMgr::ItemCount(); i++)
+	for (unsigned int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
 		GenItem_t &GlobalItem = *CGenericItemMgr::Item(i);
 		if (strstr(GlobalItem.pItem->ItemName.c_str(), pszName))
@@ -3649,7 +3648,7 @@ void CBasePlayer::UpdateClientData(void)
 				PlayerInterface += const char*(msstring(":") + (int)g_NetCode.s.FilePort);
 				logfile << "Sending server IP to " << DisplayName() << ": " << PlayerInterface.c_str() << "\r\n";
 				WRITE_STRING( PlayerInterface.c_str() );*/
-			for (int i = 0; i < CLPERMENT_TOTAL; i++)
+			for (unsigned int i = 0; i < CLPERMENT_TOTAL; i++)
 				WRITE_SHORT(MSGlobals::ClEntities[i]);
 
 			byte Flags = 0;
@@ -3712,7 +3711,7 @@ void CBasePlayer::UpdateClientData(void)
 		//Send all quickslots
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pev); //Send the quickslots
 		WRITE_BYTE(21);
-		for (int i = 0; i < MAX_QUICKSLOTS; i++)
+		for (unsigned int i = 0; i < MAX_QUICKSLOTS; i++)
 		{
 			quickslot_t &QuickSlot = m_QuickSlots[i];
 			WRITE_BYTE(QuickSlot.Active ? 1 : 0);
@@ -3741,7 +3740,7 @@ void CBasePlayer::UpdateClientData(void)
 	}*/
 
 	//Send new items
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pItem = Gear[i];
 
@@ -3749,7 +3748,7 @@ void CBasePlayer::UpdateClientData(void)
 
 		bool fInCache = false, fCached = false;
 
-		for (int n = 0; n < m_ClientItems.size(); n++)
+		for (unsigned int n = 0; n < m_ClientItems.size(); n++)
 			if (m_ClientItems[n].ID == pItem->m_iId)
 			{
 				fInCache = true;
@@ -3798,7 +3797,7 @@ void CBasePlayer::UpdateClientData(void)
 	}
 
 	//Update and delete old items
-	for (int i = 0; i < m_ClientItems.size(); i++)
+	for (unsigned int i = 0; i < m_ClientItems.size(); i++)
 	{
 		ulong ClientItemID = m_ClientItems[i].ID;
 
@@ -3828,7 +3827,7 @@ void CBasePlayer::UpdateClientData(void)
 		m_ClientCurrentHand = m_CurrentHand;
 	}
 
-	for (int i = 0; i < m_Stats.size(); i++)
+	for (unsigned int i = 0; i < m_Stats.size(); i++)
 	{
 		CStat &Stat = m_Stats[i];
 		if (Stat.Changed())
@@ -3836,7 +3835,7 @@ void CBasePlayer::UpdateClientData(void)
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_SETSTAT], NULL, pev);
 			WRITE_BYTE(1);
 			WRITE_BYTE(i);
-			for (int r = 0; r < Stat.m_SubStats.size(); r++)
+			for (unsigned int r = 0; r < Stat.m_SubStats.size(); r++)
 			{
 				WRITE_BYTE(Stat.m_SubStats[r].Value);
 				if (Stat.m_Type == CStat::STAT_SKILL)
@@ -3897,7 +3896,7 @@ void CBasePlayer::UpdateClientData(void)
 	}*/
 
 	int Msg = 0, Amt = 0, *pLastAmt = NULL, Type = 0;
-	for (int i = 0; i < 4; i++)
+	for (unsigned int i = 0; i < 4; i++)
 	{
 		switch (i)
 		{
@@ -3960,7 +3959,7 @@ void CBasePlayer::UpdateClientData(void)
 	float *pLastSent; //MiB JAN2010_26 - Slowing down how often these send
 
 	//MiBJAN2010_17 - alterations to loop below
-	 for (int i = 0; i < 4; i++)
+	 for (unsigned int i = 0; i < 4; i++)
 	{
 		switch( i )
 		{
@@ -4021,7 +4020,7 @@ void CBasePlayer::UpdateClientData(void)
 	//Update player actions list
 	ClearBits(m_StatusFlags, PLAYER_MOVE_NORUN | PLAYER_MOVE_NOJUMP | PLAYER_MOVE_NODUCK | PLAYER_MOVE_NOATTACK | PLAYER_MOVE_NOMOVE | PLAYER_MOVE_STOPRUN);
 
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript *Script = m_Scripts[i];
 
@@ -4619,8 +4618,8 @@ void CBasePlayer::UpdateMiscPositions(void)
 		Vector vMinBounds = pev->origin - Vector(Range, Range, Range);
 		Vector vMaxBounds = pev->origin + Vector(Range, Range, Range);
 
-		int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
-		for (int i = 0; i < count && EntriesSent < 2; i++) //only send 2 at a time now
+		unsigned int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
+		for (unsigned int i = 0; i < count && EntriesSent < 2; i++) //only send 2 at a time now
 		{
 			CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
 
@@ -4683,7 +4682,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 			}
 
 			entinfo_t *pSlot = NULL;
-			for (int e = 0; e < m_EntInfo.size(); e++) // Find the slot for this entity
+			for (unsigned int e = 0; e < m_EntInfo.size(); e++) // Find the slot for this entity
 				if (m_EntInfo[e].entindex == EntData.entindex)
 				{
 					pSlot = &m_EntInfo[e];
@@ -4697,7 +4696,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 				else //Too many entities - overwrite the furthest one away
 				{
 					int iFarthestDist = -1, iFarthestEnt = 0;
-					for (int e = 0; e < m_EntInfo.size(); e++)
+					for (unsigned int e = 0; e < m_EntInfo.size(); e++)
 					{
 						CBaseEntity* pEntity = MSInstance(INDEXENT(m_EntInfo[e].entindex));
 						if (!pEntity)
@@ -4955,7 +4954,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 			if (memcmp(&Info, &m_ScoreInfoCache, sizeof(scoreinfo_t)))
 			{
 				pev->frags = m_MaxHP; //FEB2008a - Report HP to Scoreboard
-				for (int i = 1; i <= gpGlobals->maxClients; i++)
+				for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 				{
 					CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 					if (pSendPlayer)
@@ -5045,13 +5044,13 @@ enum transtype_e
 };
 struct itemdesc_t
 {
-	int iEntIndex;
+	unsigned int iEntIndex;
 	CBaseEntity *pItem;
 	itemtype_e ItemType;
 	void *pvExtra;
 	CBasePlayerItem *pGroupList[256];
 	int GroupListEntidx[256];
-	int iGroupedItems, iGroupedItemTotal;
+	unsigned int iGroupedItems, iGroupedItemTotal;
 };
 
 #define MAX_GET_ITEMS 9
@@ -5060,7 +5059,7 @@ struct itemdesc_t
 struct itemtrans_t
 {
 	transtype_e TransType;
-	int ItemTotal;
+	unsigned int ItemTotal;
 	itemdesc_t ItemList[MAX_GET_ITEMS];
 	void *pvExtra;
 };
@@ -5070,7 +5069,7 @@ struct itemtrans_t
 void CBasePlayer::GetAnyItems()
 {
 	CBaseEntity *pObject = NULL;
-	int ItemCount = 0, MenuCount = 0;
+	unsigned int ItemCount = 0, MenuCount = 0;
 	char cItemList[256], cTemp[256];
 	itemtrans_t itItemTransaction;
 	memset(&itItemTransaction, 0, sizeof(itemtrans_t));
@@ -5108,7 +5107,7 @@ void CBasePlayer::GetAnyItems()
 		if(pArray)
 		{
 			ALLOW = false;
-			for(int i = 0; i < pArray->size(); i++)
+			for(unsigned int i = 0; i < pArray->size(); i++)
 			{
 				if (EntToString(this) == (*pArray)[i])
 				{
@@ -5148,7 +5147,7 @@ void CBasePlayer::GetAnyItems()
 		if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE))
 		{
 			CBaseEntity *pTestItem;
-			for (int i = 0; i < ItemCount; i++)
+			for (unsigned int i = 0; i < ItemCount; i++)
 			{
 				itemdesc_t *pOwnerDesc = NULL;
 				pTestItem = itItemTransaction.ItemList[i].pItem;
@@ -5160,7 +5159,7 @@ void CBasePlayer::GetAnyItems()
 					if (((CGenericItem *)pTestItem)->iQuantity +
 							pOwnerDesc->iGroupedItemTotal +
 							pItem->iQuantity <
-						V_min(pItem->iMaxGroupable, 256))
+						V_min(pItem->iMaxGroupable, (unsigned int)256))
 					{
 						pOwnerDesc->GroupListEntidx[pOwnerDesc->iGroupedItems] = pItem->entindex();
 						pOwnerDesc->pGroupList[pOwnerDesc->iGroupedItems++] = pItem;
@@ -5216,7 +5215,7 @@ void CBasePlayer::GetAnyItems()
 		}
 	}
 
-	for (int i = 0; i < ItemCount; i++)
+	for (unsigned int i = 0; i < ItemCount; i++)
 	{
 		CBaseEntity *pEnt = itItemTransaction.ItemList[i].pItem;
 		if (pEnt->IsMSMonster())
@@ -5465,7 +5464,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 	itemtrans_t *pTransaction = (itemtrans_t *)pcbMenu->vData;
 
 	//slot == -1: Free this menu data, the menu got cancelled
-	if (slot < 0 || slot >= pTransaction->ItemTotal)
+	if (slot < 0 || (unsigned int)slot >= pTransaction->ItemTotal)
 		goto freememory;
 
 	switch (pTransaction->TransType)
@@ -5510,7 +5509,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 			SendInfoMsg("You pick up %s", SPEECH_GetItemName(pItem));
 
 			if (pItemDesc->iGroupedItems)
-				for (int i = 0; i < pItemDesc->iGroupedItems; i++)
+				for (unsigned int i = 0; i < pItemDesc->iGroupedItems; i++)
 				{
 					edict_t *peGroupedItem = INDEXENT(pItemDesc->GroupListEntidx[i]);
 					if (peGroupedItem && peGroupedItem->pvPrivateData == pItemDesc->pGroupList[i])
@@ -5864,7 +5863,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 					char stat_name[256];
 					 strncpy(stat_name,  StatName.c_str(), sizeof(stat_name) );
 					_strlwr(stat_name);
-					for (int i = 0; i < sizeof(stat_name); i++)
+					for (unsigned int i = 0; i < sizeof(stat_name); i++)
 					{
 						if (stat_name[i] == 0)
 							break;
@@ -5923,7 +5922,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 						SendInfoMsg("You receive %s.", SPEECH_GetItemName(ptiTradeAnswer->pItem));
 						ptiTradeAnswer->pItem->GiveTo(this);
 						GiveGold(-ptiTradeAnswer->iPrice, false);
-						ptiTradeAnswer->psiStoreItem->Quantity -= V_max(ptiTradeAnswer->pItem->iQuantity, 1);
+						ptiTradeAnswer->psiStoreItem->Quantity -= V_max(ptiTradeAnswer->pItem->iQuantity, (unsigned int)1);
 
 						//Thothie FEB2008a - allow informing of other players of item transfer
 						static msstringlist Params;
@@ -5965,9 +5964,10 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 				if (!ptiTradeAnswer->pItem)
 					goto EndTrade;
 
+				unsigned int Minimum = 1;
 				SendInfoMsg("You sell %s for %i gold.", SPEECH_GetItemName(ptiTradeAnswer->pItem), ptiTradeAnswer->iPrice);
 				GiveGold(ptiTradeAnswer->iPrice, false);
-				ptiTradeAnswer->psiStoreItem->Quantity += (short)V_max(ptiTradeAnswer->pItem->iQuantity, 1);
+				ptiTradeAnswer->psiStoreItem->Quantity += (short)V_max(ptiTradeAnswer->pItem->iQuantity, Minimum);
 				RemoveItem(ptiTradeAnswer->pItem);
 				ptiTradeAnswer->pItem->SUB_Remove();
 
@@ -6058,7 +6058,7 @@ bool CBasePlayer::PrepareSpell(const char *pszName)
 	//Thothie - make sure player actually HAS SPELL before giving it to him
 	//otherwise you can summon any spell with prep command
 	bool bCanGiveSpell = false;
-	for (int i = 0; i < m_SpellList.size(); i++)
+	for (unsigned int i = 0; i < m_SpellList.size(); i++)
 	{
 		msstring ShortName = m_SpellList[i];
 		if (ShortName == pszName)
@@ -6273,7 +6273,7 @@ void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 		ALERT( at_aiconsole, "Hard_Code-erasing quest data");
 		m_Quests.clearitems();
 		m_Quests.clear();
-		 for (int i = 0; i < m_Quests.size(); i++)
+		 for (unsigned int i = 0; i < m_Quests.size(); i++)
 		{
 			m_Quests.erase(i);
 		}
@@ -6282,7 +6282,7 @@ void CBasePlayer::SetQuest(bool SetData, const char* Name, const char* Data)
 	{*/
 
 	int Found = -1;
-	for (int i = 0; i < m_Quests.size(); i++)
+	for (unsigned int i = 0; i < m_Quests.size(); i++)
 	{
 		if (m_Quests[i].Name == Name)
 		{
@@ -6445,13 +6445,13 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	MESSAGE_END();
 
 	//Read Magic spells
-	for (int s = 0; s < Data.m_Spells.size(); s++)
+	for (unsigned int s = 0; s < Data.m_Spells.size(); s++)
 		LearnSpell(Data.m_Spells[s]);
 
 	mslist<CGenericItem *> Items; //Keep track of ALL items, for quickslot assignment later
 
 	//Read Items
-	for (int i = 0; i < Data.m_Items.size(); i++)
+	for (unsigned int i = 0; i < Data.m_Items.size(); i++)
 	{
 		CGenericItem *pItem = Data.m_Items[i].operator CGenericItem *();
 		
@@ -6465,7 +6465,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 			pItem->AddToOwner(this);
 
 		Items.add(pItem);
-		for (int c = 0; c < pItem->Container_ItemCount(); c++)
+		for (unsigned int c = 0; c < pItem->Container_ItemCount(); c++)
 			Items.add(pItem->Container_GetItem(c));
 
 		//if( FBitSet(pItem->MSProperties(), ITEM_WEARABLE) && pItem->IsWorn() )	//Wear the wearable items
@@ -6481,7 +6481,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	m_Companions = Data.m_Companions;
 	//Thothie JUN2008a - just read in companions, save the summoning until the script command "summonpets"
 	//- scratch the above, if the player saves while his pet is not present, it corrupts the pet and character
-	for (int c = 0; c < m_Companions.size(); c++)
+	for (unsigned int c = 0; c < m_Companions.size(); c++)
 	{
 		companion_t &Companion = m_Companions[c];
 
@@ -6502,7 +6502,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 		IScripted *pScripted = pCompanion->GetScripted();
 		if (!pScripted || !pScripted->m_Scripts.size())
 			continue;
-		for (int v = 0; v < Companion.SaveVarName.size(); v++)
+		for (unsigned int v = 0; v < Companion.SaveVarName.size(); v++)
 			pScripted->SetScriptVar(Companion.SaveVarName[v].c_str(), Companion.SaveVarValue[v].c_str());
 
 		pScripted->CallScriptEvent("game_companion_restore");
@@ -6515,7 +6515,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	m_Quests = Data.m_Quests;
 
 	//Read QuickSlots
-	for (int q = 0; q < Data.m_QuickSlots.size(); q++)
+	for (unsigned int q = 0; q < Data.m_QuickSlots.size(); q++)
 	{
 		quickslot_t &QuickSlot = Data.m_QuickSlots[q];
 		if (QuickSlot.Active && (QuickSlot.Type == QS_ITEM))
@@ -6536,7 +6536,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	}
 
 	//Make sure an update is sent from UpdateClientData ASAP
-	for (int i = 0; i < m_Stats.size(); i++)
+	for (unsigned int i = 0; i < m_Stats.size(); i++)
 		m_Stats[i].OutDate();
 
 	m_CharacterState = CHARSTATE_LOADED;
@@ -6586,7 +6586,7 @@ void CBasePlayer::Think_SendCharData()
 
 	msstringlist VisitedMaps;
 
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 	{
 		charinfo_t& CharInfo = m_CharInfo[i];
 
@@ -6628,12 +6628,13 @@ void CBasePlayer::Think_SendCharData()
 		// Send items data
 		if (CharInfo.Status == CDS_LOADED)
 		{
-			const int maxItemsToSend = V_min(CharInfo.GearInfo.size(), 20);
+			unsigned int Maximum = 20;
+			const unsigned int maxItemsToSend = V_min(CharInfo.GearInfo.size(), Maximum);
 			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CHARINFO], NULL, pev);
 			WRITE_BYTE(CHAR_TYPE_ITEMS);
 			WRITE_BYTE(CharInfo.Index);
 			WRITE_BYTE(maxItemsToSend);
-			for (int i = 0; i < maxItemsToSend; i++)
+			for (unsigned int i = 0; i < maxItemsToSend; i++)
 			{
 				const gearinfo_t& GearInfo = CharInfo.GearInfo[i];
 				WRITE_BYTE(GearInfo.Flags);
@@ -6659,7 +6660,7 @@ bool CBasePlayer::IsInAttackStance()
 	if (m_TimeResetLegs && gpGlobals->time < m_TimeResetLegs)
 		return true;
 
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if (Hand(i) && Hand(i)->IsInAttackStance())
 			return true;
 
@@ -6689,7 +6690,7 @@ void CBasePlayer::Storage_Send()
 	MESSAGE_END();
 
 	//Send all storage items.
-	for (int s = 0; s < m_Storages.size(); s++)
+	for (unsigned int s = 0; s < m_Storages.size(); s++)
 	{
 		if (!m_Storages[s].Items.size())
 		{
@@ -6703,7 +6704,7 @@ void CBasePlayer::Storage_Send()
 		else
 		{
 			//If the storage has items, send a full message
-			for (int i = 0; i < m_Storages[s].Items.size(); i++)
+			for (unsigned int i = 0; i < m_Storages[s].Items.size(); i++)
 			{
 				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 				WRITE_BYTE(2); //storage item
@@ -6746,7 +6747,7 @@ void CBasePlayer::QuickSlot_Create(int Slot, ulong ID, bool Verbose)
 		}
 		else
 		{
-			for (int i = 0; i < m_SpellList.size(); i++)
+			for (unsigned int i = 0; i < m_SpellList.size(); i++)
 			{
 				msstring LongName = pItem->m_Scripts[0]->m.ScriptFile;
 				msstring ShortName = m_SpellList[i];

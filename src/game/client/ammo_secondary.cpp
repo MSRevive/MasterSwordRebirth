@@ -35,7 +35,7 @@ int CHudAmmoSecondary ::Init(void)
 	gHUD.AddHudElem(this);
 	m_HUD_ammoicon = 0;
 
-	for (int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
+	for (unsigned int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
 		m_iAmmoAmounts[i] = -1; // -1 means don't draw this value
 
 	Reset();
@@ -139,7 +139,7 @@ int CHudAmmoSecondary ::MsgFunc_SecAmmoVal(const char *pszName, int iSize, void 
 
 	// check to see if there is anything left to draw
 	int count = 0;
-	for (int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
+	for (unsigned int i = 0; i < MAX_SEC_AMMO_VALUES; i++)
 	{
 		count += V_max(0, m_iAmmoAmounts[i]);
 	}

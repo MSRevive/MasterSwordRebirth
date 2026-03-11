@@ -244,7 +244,7 @@ bool ASServerEngine::IsValidPlayerImpl(void* player) const
     MinimalEntity* pEntity = (MinimalEntity*)player;
     if (pEntity && pEntity->edict_ptr) {
         int index = g_engfuncs.pfnIndexOfEdict(pEntity->edict_ptr);
-        return (index > 0 && index <= gpGlobals->maxClients);
+        return (index > 0 && (unsigned int)index <= gpGlobals->maxClients);
     }
     return false;
 }
@@ -317,7 +317,7 @@ void* ASServerEngine::GetEdict(void* entity) const
 int ASServerEngine::GetPlayerCountImpl() const
 {
     int count = 0;
-    for (int i = 1; i <= gpGlobals->maxClients; i++)
+    for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
     {
         CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
         if (pPlayer && IsValidPlayerImpl(pPlayer))
@@ -546,7 +546,7 @@ void* ASServerEngine::FindPlayerBySteamID(const std::string& steamID) const
 {
     if (steamID.empty()) return nullptr;
     
-    for (int i = 1; i <= gpGlobals->maxClients; i++)
+    for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
     {
         CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
         if (!pPlayer || !IsValidPlayerImpl(pPlayer)) continue;
@@ -567,7 +567,7 @@ void* ASServerEngine::FindPlayerByName(const std::string& playerName) const
 {
     if (playerName.empty()) return nullptr;
     
-    for (int i = 1; i <= gpGlobals->maxClients; i++)
+    for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
     {
         CBasePlayer* pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
         if (!pPlayer || !IsValidPlayerImpl(pPlayer)) continue;

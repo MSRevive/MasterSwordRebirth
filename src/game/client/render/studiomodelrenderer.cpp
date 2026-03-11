@@ -977,7 +977,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	if (m_fDoInterp &&
 		Ent.latched.sequencetime &&
 		(Ent.latched.sequencetime + 0.2 > m_clTime) &&
-		(Ent.latched.prevsequence < m_pStudioHeader->numseq))
+		(Ent.latched.prevsequence < (float)m_pStudioHeader->numseq))
 	{
 		// blend from last sequence
 		static float pos1b[MAXSTUDIOBONES][3];

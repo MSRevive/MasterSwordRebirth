@@ -50,7 +50,7 @@ public:
 	{
 		CBaseEntity *pClosest = NULL;
 		float ClosestDist = 9999999;
-		for (int h = 0; h < size(); h++)
+		for (unsigned int h = 0; h < size(); h++)
 		{
 			hitent_t &Hit = operator[](h);
 			if (Hit.Dist < ClosestDist)

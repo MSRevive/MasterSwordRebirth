@@ -145,7 +145,7 @@ CStatPanel::CStatPanel(Panel *pParent) : CMenuPanel(0, false, 0, 0, ScreenWidth,
 	pLabel->getPos(ix, iy);
 	offset = iy + pLabel->getTall();
 
-	for (int i = 0; i < SKILL_MAX_STATS + 1; i++)
+	for (unsigned int i = 0; i < SKILL_MAX_STATS + 1; i++)
 	{
 		TextPanel *pTextbox = Skill_StatLabel[i] =
 			new TextPanel("", TITLE_SKILLS_X, offset + i * MAINBUTTON_SIZE_Y, MAINBUTTON_SIZE_X, MAINBUTTON_SIZE_Y);
@@ -267,7 +267,7 @@ void CStatPanel::Update()
 	}
 
 	bool FOUND_PARRY = false;
-	for (int i = 0; i < SKILL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < SKILL_MAX_STATS; i++)
 	{
 		FOUND_PARRY = FOUND_PARRY || msstring(SkillStatList[i].Name) == "Parry";
 		bool blank = i == SKILL_MAX_STATS - 1;
@@ -306,9 +306,9 @@ void CStatPanel::Update()
 	{
 		int Height = SKILLINFOPANEL_TITLE_Y + SKILLINFOPANEL_TITLE_H + SKILLINFOPANEL_BTM_BORDERSPACER_H;
 		int UnusedSlots = 0;
-		for (int i = 0; i < STAT_MAGIC_TOTAL; i++)
+		for (unsigned int i = 0; i < STAT_MAGIC_TOTAL; i++)
 		{
-			int iSubStats = pStat->m_SubStats.size();
+			unsigned int iSubStats = pStat->m_SubStats.size();
 			if (i >= iSubStats)
 			{
 				m_StatTypeLabel[i]->setVisible(false);
@@ -467,7 +467,7 @@ int __MsgFunc_SetStat(const char *pszName, int iSize, void *pbuf)
 		if (iStat < (signed)player.m_Stats.size())
 		{
 			CStat &Stat = player.m_Stats[iStat];
-			for (int i = 0; i < Stat.m_SubStats.size(); i++)
+			for (unsigned int i = 0; i < Stat.m_SubStats.size(); i++)
 			{
 				Stat.m_SubStats[i].Value = READ_BYTE();
 				if (Stat.m_Type == CStat::STAT_SKILL)

@@ -273,9 +273,9 @@ public:
 		m_HPReq_min,  //Thothie AUG2007a - adding optional req total hp on server to spawn monster
 		m_HPReq_max,  //Thothie FEB2011_22 - adding option for "min;max" hpreq
 		m_ReqPlayers, //Thothie AUG2007a - adding optional REQ players to spawn monster
-		m_nRndMobs,	  //NOV2014_20 - Thothie msmonster_random
 		m_HPReq_useavg;
 
+	unsigned int m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
 	float m_HPMulti, //Thothie SEP2007a - multiply HP by this amount
 		m_DMGMulti;	 //Thothie SEP2007a - multiply DMG by this amount
 
@@ -324,7 +324,7 @@ public:
 	//a relationship better than R_NO)
 	EHANDLE m_hEnemyList[MAX_ENEMYLIST],
 		m_LastEnemy;
-	int m_EnemyListNum;
+	unsigned int m_EnemyListNum;
 
 	CBaseBody *Body;								//If this monster uses body parts
 	CItemList Gear;									//This monster's gear

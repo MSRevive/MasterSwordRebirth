@@ -91,7 +91,7 @@ int CHudDeathNotice ::Draw(float flTime)
 {
 	int x, y, r, g, b;
 
-	for (int i = 0; i < MAX_DEATHNOTICES; i++)
+	for (unsigned int i = 0; i < MAX_DEATHNOTICES; i++)
 	{
 		if (rgDeathNoticeList[i].iId == 0)
 			break; // we've gone through them all

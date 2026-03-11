@@ -176,7 +176,7 @@ bool VGUI_MenuBase::SlotInput(int iSlot)
 // Update the menu before opening it
 void VGUI_MenuBase::Open(void)
 {
-	for (int i = 0; i < m_Buttons.size(); i++)
+	for (unsigned int i = 0; i < m_Buttons.size(); i++)
 		m_Buttons[i]->setArmed(false);
 
 	Reset();
@@ -208,7 +208,7 @@ void VGUI_MenuBase::UpdateFade(void)
 	//m_pMainPanel->setBorder( NULL );
 	//m_pMainPanel->setBorder( m_Border );
 
-	for (int i = 0; i < m_Buttons.size(); i++)
+	for (unsigned int i = 0; i < m_Buttons.size(); i++)
 	{
 		m_Buttons[i]->m_ArmedColor.a = InveserdFade;
 		m_Buttons[i]->m_UnArmedColor.a = InveserdFade;

@@ -53,7 +53,7 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	int iThisCmd = 0;
 
 	//Count the number of keys required
-	for (int i = 0; i < pAttData->ComboKeys.size(); i++)
+	for (unsigned int i = 0; i < pAttData->ComboKeys.size(); i++)
 	{
 		if (pAttData->ComboKeys[i].c_str()[0] == '~')
 			iThisCmd += 2;
@@ -89,7 +89,7 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	int LastCmdIdx = 0;
 	iLen = 0;
 	bool fFirstKey = true;
-	for (int i = 0; i < pAttData->ComboKeys.size(); i++)
+	for (unsigned int i = 0; i < pAttData->ComboKeys.size(); i++)
 	{
 		msstring &FullCmdString = pAttData->ComboKeys[i];
 
@@ -263,7 +263,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	else if (!CurrentAttack)
 	{
 		//bool thoth_unskill_base = false;
-		for (int a = 0; a < m_Attacks.size(); a++)
+		for (unsigned int a = 0; a < m_Attacks.size(); a++)
 		{
 			attackdata_t &AttData = m_Attacks[a];
 
@@ -601,7 +601,7 @@ float CGenericItem::GetHighestAttackCharge()
 {
 	float HighestCharge = 0;
 
-	for (int i = 0; i < m_Attacks.size(); i++)
+	for (unsigned int i = 0; i < m_Attacks.size(); i++)
 	{
 		attackdata_t &Attack = m_Attacks[i];
 
@@ -856,7 +856,7 @@ void CGenericItem::StrikeHold()
 }
 
 //Uses ammo.  Projectiles or MP
-bool CGenericItem::UseAmmo(int iAmt)
+bool CGenericItem::UseAmmo(unsigned int iAmt)
 {
 	if (!m_pOwner || !CurrentAttack)
 		return false;
@@ -1341,7 +1341,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 						//Each script either sets a ratio of damage to be dealt or cancels the damage
 						msstringlist DamageRatios;
 						TokenizeString( pAttMonster->m_ReturnData, DamageRatios );
-						 for (int i = 0; i < DamageRatios.size(); i++)
+						 for (unsigned int i = 0; i < DamageRatios.size(); i++)
 						{
 							if( DamageRatios[i] == "canceldamage" )
 							{
@@ -1555,7 +1555,7 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 	{
 		if (Hits.size())
 		{
-			for (int h = 0; h < Hits.size(); h++)
+			for (unsigned int h = 0; h < Hits.size(); h++)
 			{
 				//Thothie FEB2009 - critical crash fix - make sure attacker is alive when passing damage
 				//- if he damages multiple targets while dead, it causes crash
@@ -1721,7 +1721,7 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 						//Each script either sets a ratio of damage to be dealt or cancels the damage
 						msstringlist DamageRatios;
 						TokenizeString(pAttMonster->m_ReturnData, DamageRatios);
-						for (int i = 0; i < DamageRatios.size(); i++)
+						for (unsigned int i = 0; i < DamageRatios.size(); i++)
 						{
 							if (DamageRatios[i] == "canceldamage")
 							{
@@ -1840,7 +1840,7 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				float tdm_modifier;
 				if (pVictim)
 				{
-					for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
+					for (unsigned int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
 					{
 						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
 						msstring tdm_damage_type = TDM.DamageType;

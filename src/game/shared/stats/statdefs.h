@@ -86,7 +86,7 @@ struct playerdamage_t
 	// MiB MAR2019_22 [SLOT_EXP] - Added because this is done in multiple places and shouldn't be written out...
 	void Clear()
 	{
-		for(int i = 0; i < SKILL_MAX_ATTACK; i++)
+		for(unsigned int i = 0; i < SKILL_MAX_ATTACK; i++)
 		{
 			for(int j = 0; j < STATPROP_ALL_TOTAL; j++)
 			{

@@ -121,8 +121,8 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 
 	if (iContents != CONTENTS_WATER)
 	{
-		int sparkCount = RANDOM_LONG(0, 3);
-		for (int i = 0; i < sparkCount; i++)
+		unsigned int sparkCount = RANDOM_LONG(0, 3);
+		for (unsigned int i = 0; i < sparkCount; i++)
 			Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, NULL);
 	}
 }

@@ -706,8 +706,9 @@ struct monster_data_t
 		livesleft,
 		hpreq_min,	//Thothie FEB2011_22 - allow min;max hpreq definition
 		hpreq_max,	//Thothie FEB2011_22 - allow min;max hpreq definition
-		nplayers,	//Thothie AUG2007a - req# players for monster to spawn
-		m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
+		nplayers;	//Thothie AUG2007a - req# players for monster to spawn
+		
+	unsigned int m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
 
 	Vector origin, angles;
 	bool spawned,
@@ -724,7 +725,7 @@ class CAreaMonsterSpawn : public CAreaInvisible
 {
 public:
 	monster_data_t mdSpawnMonster[32];
-	int iMonstersToSpawn;
+	unsigned int iMonstersToSpawn;
 	int iPlayerReq;			//Thothie AUG2007a - adding optional player req
 	int iHPReq_min;			//Thothie AUG2007a - adding optional total HP on server req
 	int iHPReq_max;			//Thothie FEB2011_22 - adding min;max option for reqhp
@@ -771,7 +772,7 @@ public:
 		if (resetwhen == 1 && didfirstspawn) //>= just to deal with the stump below
 		{
 			//cycle through my m obs, see if any are out of lives, if so, reset their lives
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				if (mdSpawnMonster[i].livesleft == 0 && !mdSpawnMonster[i].spawned)
 				{
@@ -785,7 +786,7 @@ public:
 		if (resetwhen == 2 && didfirstspawn)
 		{
 			//trigger a new wave
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				mdSpawnMonster[i].spawned = false;
@@ -797,7 +798,7 @@ public:
 		if (resetwhen && !didfirstspawn)
 		{
 			didfirstspawn = true;
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				RespawnMonster(&mdSpawnMonster[i]);
@@ -810,7 +811,7 @@ public:
 		if (!resetwhen)
 		{
 			didfirstspawn = true;
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				RespawnMonster(&mdSpawnMonster[i]);
@@ -940,8 +941,8 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonsterData->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
-			for (int i = 0; i < pMonsterData->m_nRndMobs; i++)
+			unsigned int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
+			for (unsigned int i = 0; i < pMonsterData->m_nRndMobs; i++)
 			{
 				MS_DEBUG("DEBUG: respawn randommob list #%i / %i as %s", pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName.c_str() ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
 			}
@@ -1014,9 +1015,9 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonster->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, float(pMonster->m_nRndMobs) - 1);
+			unsigned int idx = RANDOM_LONG(0, float(pMonster->m_nRndMobs) - 1);
 			mdSpawnMonster[iMonstersToSpawn].m_nRndMobs = pMonster->m_nRndMobs;
-			for (int i = 0; i < pMonster->m_nRndMobs; i++)
+			for (unsigned int i = 0; i < pMonster->m_nRndMobs; i++)
 			{
 				// logfile << UTIL_VarArgs("DEBUG: spawn adding randommob #%i / %i as %s\n", i, pMonster->m_nRndMobs, pMonster->random_monsterdata[i].m_ScriptName ? pMonster->random_monsterdata[i].m_ScriptName.c_str() : "???");
 				mdSpawnMonster[iMonstersToSpawn].random_monsterdata.add(pMonster->random_monsterdata[i]); //read em in
@@ -1116,7 +1117,7 @@ public:
 		if (!pMonster)
 			return;
 
-		for (int i = 0; i < iMonstersToSpawn; i++)
+		for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 		{
 			if (mdSpawnMonster[i].lPrivData == (long)pMonster)
 			{
@@ -1130,7 +1131,7 @@ public:
 	{
 		if ( SpawnLimitReached() ) return; //Thothie OCT2016_18 spawnlimiter
 		
-		int i = 0, iDeadMonsters = 0;
+		unsigned int i = 0, iDeadMonsters = 0;
 		CMSMonster *pMonster;
 		for (i = 0; i < iMonstersToSpawn; i++)
 		{
@@ -1316,7 +1317,7 @@ public:
 		if (!pMonster)
 			return NULL;
 
-		for (int i = 0; i < iMonstersToSpawn; i++)
+		for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			if (mdSpawnMonster[i].lTrigPrivData == (long)pMonster)
 			{
 				mdSpawnMonster[i].triggered = true;
@@ -1567,7 +1568,7 @@ public:
 	bool FAllPlayersAreTouchingMe()
 	{
 		Print("DEBUG: Ltrans FAllPlayersAreTouchingMe\n");
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer)
@@ -1629,7 +1630,7 @@ public:
 
 	bool FAllPlayersAreTouchingMe()
 	{
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer)
@@ -1696,7 +1697,7 @@ public:
 
 		if (fChangeLocalMap)
 		{
-			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 			{
 				CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 				if (!pOtherPlayer)
@@ -1883,7 +1884,7 @@ public:
 
 		//Compare the votes to what it should be
 		int AllVotes = 0;
-		for (int i = 1; i <= gpGlobals->maxClients; i++)
+		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer || pOtherPlayer->m_CharacterState == CHARSTATE_UNLOADED || !pOtherPlayer->IsActive())
@@ -1900,7 +1901,7 @@ public:
 		if (PlayerVotes == AllVotes)
 		{
 			UTIL_ClientPrintAll(HUD_PRINTCENTER, UTIL_VarArgs("Traveling to %s\n", STRING(sDestName)));
-			for (int i = 1; i <= gpGlobals->maxClients; i++)
+			for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 			{
 				CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 				if (!pOtherPlayer)

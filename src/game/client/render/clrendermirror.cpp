@@ -9,7 +9,6 @@
 #include "cl_entity.h"
 #include "dlight.h"
 #include "triangleapi.h"
-#include "com_model.h"
 #include "studio_util.h"
 #include "../r_studioint.h"
 #include "studiomodelrenderer.h"
@@ -70,7 +69,7 @@ public:
 		float FOV = gHUD.m_iFOV ? ((float)gHUD.m_iFOV / 2.0f) : 45;
 		float RightPlaneYaw = FOV;
 		float UpPlanePitch = FOV;
-		for (int i = 0; i < 6; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			Plane &plane = Planes[i];
 			switch (i)
@@ -128,7 +127,7 @@ public:
 
 	bool IsBBoxVisible(Vector Bounds[2])
 	{
-		for (int i = 0; i < 6; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			Plane &plane = Planes[i];
 			if (!plane.BBoxIsInFront(Bounds))
@@ -147,7 +146,7 @@ bool CheckBBox(Vector Bounds[2])
 void CMirrorMgr::Cleanup()
 {
 	//Clear out old mirror data
-	for (int m = 0; m < CMirrorMgr::m_MirrorTextures.size(); m++)
+	for (unsigned int m = 0; m < CMirrorMgr::m_MirrorTextures.size(); m++)
 	{
 		//CMirror &Mirror = CMirrorMgr::m_LevelMirrors[m];
 		glDeleteTextures(1, &m_MirrorTextures[m]);
@@ -182,7 +181,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 		return false;*/
 
 	mstexture_t *pCustomTexture = NULL;
-	for (int t = 0; t < MSCLGlobals::Textures.size(); t++)
+	for (unsigned int t = 0; t < MSCLGlobals::Textures.size(); t++)
 	{
 		mstexture_t &MSTexture = MSCLGlobals::Textures[t];
 
@@ -204,7 +203,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 	{
 		CMirror *pUseMirror = NULL;
 
-		for (int m = 0; m < CMirrorMgr::m_Mirrors.size(); m++)
+		for (unsigned int m = 0; m < CMirrorMgr::m_Mirrors.size(); m++)
 		{
 			CMirror &Mirror = CMirrorMgr::m_Mirrors[m];
 			if (Mirror.Normal == SurfaceNormal &&
@@ -223,7 +222,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 		for (int t = 0; t < Surface.polys->numverts; t++, Vertex += VERTEXSIZE)
 		{
 			Vector Vert = Vector(Vertex);
-			for (int i = 0; i < 3; i++)
+			for (unsigned int i = 0; i < 3; i++)
 			{
 				if (Vert[i] < Bounds[0][i])
 					Bounds[0][i] = Vert[i];
@@ -357,7 +356,7 @@ void CMirrorMgr::MarkCustomTextures()
 	if (!m_pStartLeaf || m_pStartLeaf->contents == CONTENTS_SOLID)
 		return;
 
-	for (int e = 0; e < ViewMgr.Params->max_entities; e++) //MAX_MAP_MODELS
+	for (unsigned int e = 0; e < ViewMgr.Params->max_entities; e++) //MAX_MAP_MODELS
 	{
 		cl_entity_t *pEntity = gEngfuncs.GetEntityByIndex(e);
 		if (!pEntity || !pEntity->model)
@@ -382,7 +381,7 @@ void CMirrorMgr::MarkCustomTextures()
 				//This is being called on a frame basis.  Don't search the world, just check cached level mirrors
 
 				//Find any cached mirrors with at least one surface close enough to the camera
-				for (int wm = 0; wm < m_WorldMirrors.size(); wm++)
+				for (unsigned int wm = 0; wm < m_WorldMirrors.size(); wm++)
 				{
 					CMirror &Mirror = m_WorldMirrors[wm];
 
@@ -416,17 +415,17 @@ void CMirrorMgr::MarkCustomTextures()
 				continue;
 
 			//Success = false;
-			for (int s = 0; s < Model.nummodelsurfaces; s++)
+			for (unsigned int s = 0; s < Model.nummodelsurfaces; s++)
 				CheckSurface(Info, &Model.surfaces[Model.firstmodelsurface + s]);
 		}
 	}
 
 	//Store a lookup table.
 	//Surface --> mirror, So I can find child mirrors by the surface
-	for (int i = 0; i < m_Mirrors.size(); i++)
+	for (unsigned int i = 0; i < m_Mirrors.size(); i++)
 	{
 		CMirror &Mirror = m_Mirrors[i];
-		for (int s = 0; s < Mirror.m_Surfaces.size(); s++)
+		for (unsigned int s = 0; s < Mirror.m_Surfaces.size(); s++)
 		{
 			rendersurface_t RendSurface;
 			RendSurface.Mirror = &m_Mirrors[i];
@@ -469,7 +468,7 @@ void CMirrorMgr::Render_SetupViewReflection()
 		{
 			// cl_entity_t &WorldEntity = *gEngfuncs.GetEntityByIndex( 0 );
 
-			for (int i = 0; i < m_Mirrors.size(); i++)
+			for (unsigned int i = 0; i < m_Mirrors.size(); i++)
 			{
 				CMirror &Mirror = m_Mirrors[i];
 
@@ -639,7 +638,7 @@ void CMirrorMgr::HUD_DrawTransparentTriangles()
 	{
 		CRender::SyncOffScreenSurface();
 
-		for (int i = 0; i < CMirrorMgr::m_RdrMirrors.size(); i++)
+		for (unsigned int i = 0; i < CMirrorMgr::m_RdrMirrors.size(); i++)
 		{
 			CMirrorMgr::SetupMirrorView(i);
 			CMirrorMgr::m_RdrMirrors[i]->RenderMirroredWorld(0);
@@ -712,7 +711,7 @@ bool CMirror::Vis_Eye() //Check if the camera is facing the mirror and not behin
 }
 bool CMirror::Vis_Surface() //Check if the camera is close enough to the mirror
 {
-	for (int s = 0; s < m_Surfaces.size(); s++)
+	for (unsigned int s = 0; s < m_Surfaces.size(); s++)
 	{
 		CSurface &Surface = m_Surfaces[s];
 
@@ -808,7 +807,7 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 
 		gEngfuncs.pTriAPI->CullFace(TRI_NONE);
 
-		for (int i = 0; i < CMirrorMgr::m_BrushEnts.size(); i++)
+		for (unsigned int i = 0; i < CMirrorMgr::m_BrushEnts.size(); i++)
 		{
 			cl_entity_t *pEntity = CMirrorMgr::m_BrushEnts[i];
 			if (!pEntity || !pEntity->model)
@@ -851,7 +850,7 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 						glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					}
 
-					for (int s = 0; s < Model.nummodelsurfaces; s++)
+					for (unsigned int s = 0; s < Model.nummodelsurfaces; s++)
 						Mirror_DrawSurface(Info, &Model.surfaces[Model.firstmodelsurface + s]);
 				}
 
@@ -876,7 +875,7 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 	//Warning: Drawing entites causes half-life to kill the culling order, so restore it afterwards
 
 	if (!Mirror.m_Texture->Mirror.NoEnts)
-		for (int i = 0; i < CMirrorMgr::m_FrameEnts.size(); i++)
+		for (unsigned int i = 0; i < CMirrorMgr::m_FrameEnts.size(); i++)
 			RenderModel(CMirrorMgr::m_FrameEnts[i]);
 
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE); //Warning: This must be reset after calling RenderModel.  HL changes the mode
@@ -897,7 +896,7 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 
 	int ChildMirrors = 0;
 	if (!m_Parent && !m_Texture->Mirror.NoWorld)
-		for (int m = 0; m < m_ChildMirrors.size(); m++)
+		for (unsigned int m = 0; m < m_ChildMirrors.size(); m++)
 		{
 			CMirror &ChildMirror = *m_ChildMirrors[m];
 			if (m_ChildMirrors[m] == this)
@@ -963,7 +962,7 @@ mleaf_t *FindLeaf(Vector &Origin, mnode_t *pNode)
 
 	int Side = (Dist >= 0) ? 0 : 1;
 
-	for (int i = 0; i < 2; i++)
+	for (unsigned int i = 0; i < 2; i++)
 	{
 		mleaf_t *pLeaf = FindLeaf(Origin, Node.children[(i == 0) ? Side : !Side]);
 		if (pLeaf)
@@ -983,7 +982,7 @@ inline bool ParseLeaf(TraverseInfo_t &Info, mleaf_t &Leaf)
 		CallFunc = Info.ClipPlane.BBoxIsInFront(Bounds);
 
 	if (CallFunc)
-		for (int s = 0; s < Leaf.nummarksurfaces; s++)
+		for (unsigned int s = 0; s < Leaf.nummarksurfaces; s++)
 			if ((*(ParseSurfaceFunc *)Info.Func)(Info, Leaf.firstmarksurface[s]))
 				Success = true;
 
@@ -1043,7 +1042,7 @@ bool IsLeafVisible(cl_entity_t *pEntity, mnode_t *pNode, mleaf_t *pSearchLeaf)
 	}
 
 	//Search child nodes
-	for (int i = 0; i < 2; i++)
+	for (unsigned int i = 0; i < 2; i++)
 	{
 		bool Found = IsLeafVisible(pEntity, Node.children[i], pSearchLeaf);
 		if (Found)
@@ -1151,14 +1150,14 @@ bool Mirror_DrawSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 		glStencilOp(GL_REPLACE, GL_KEEP, GL_REPLACE);
 		IsMirrorSurface = true;
 
-		for (int r = 0; r < CMirrorMgr::m_RenderSurfaces.size(); r++)
+		for (unsigned int r = 0; r < CMirrorMgr::m_RenderSurfaces.size(); r++)
 		{
 			rendersurface_t &Rend = CMirrorMgr::m_RenderSurfaces[r];
 			if (Rend.Surface != pSurface || Rend.Mirror == Info.Mirror)
 				continue;
 
 			bool MirrorAlreadyFound = false;
-			for (int m = 0; m < Mirror.m_ChildMirrors.size(); m++)
+			for (unsigned int m = 0; m < Mirror.m_ChildMirrors.size(); m++)
 				if (Mirror.m_ChildMirrors[m] == Rend.Mirror)
 				{
 					MirrorAlreadyFound = true;
@@ -1492,7 +1491,7 @@ void CMirror::Draw(int Flags)
 		glMultMatrixf((float *)m_Parent->MirrorMatrix);
 	}
 
-	for (int s = 0; s < m_Surfaces.size(); s++)
+	for (unsigned int s = 0; s < m_Surfaces.size(); s++)
 	{
 		//if( !Mirror.Surfaces[s]->visframe )//!= Mirror.Entity->model->nodes[0].visframe )
 		//	continue;

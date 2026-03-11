@@ -140,7 +140,7 @@ public:
 	bool BBoxIsInFront(Vector Bounds[2])
 	{
 		Vector Point;
-		for (int i = 0; i < 6; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			switch (i)
 			{

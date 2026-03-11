@@ -87,7 +87,7 @@ SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 
 void ScorePanel::HitTestPanel::internalMousePressed(MouseCode code)
 {
-	for (int i = 0; i < _inputSignalDar.getCount(); i++)
+	for (unsigned int i = 0; i < _inputSignalDar.getCount(); i++)
 	{
 		_inputSignalDar[i]->mousePressed(code, this);
 	}
@@ -133,7 +133,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_HeaderGrid.SetDimensions(NUM_COLUMNS, 1);
 	m_HeaderGrid.SetSpacing(0, 0);
 
-	for (int i = 0; i < NUM_COLUMNS; i++)
+	for (unsigned int i = 0; i < NUM_COLUMNS; i++)
 	{
 		if (g_ColumnInfo[i].m_pTitle && g_ColumnInfo[i].m_pTitle[0] == '#')
 			m_HeaderLabels[i].setText(CHudTextMessage::BufferedLocaliseTextString(g_ColumnInfo[i].m_pTitle));
@@ -900,7 +900,7 @@ void ScorePanel::cursorMoved(int x, int y, Panel *panel)
 	if (GetClientVoiceMgr()->IsInSquelchMode())
 	{
 		// look for which cell the mouse is currently over
-		for (int i = 0; i < NUM_ROWS; i++)
+		for (unsigned int i = 0; i < NUM_ROWS; i++)
 		{
 			int row, col;
 			if (m_PlayerGrids[i].getCellAtPoint(x, y, row, col))

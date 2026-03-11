@@ -90,7 +90,7 @@ float CGenericItem::Armor_Protect(damage_t Damage)
 	//Thothie JAN2010_13 - not used, commetning out to save cycles (not related to Char screen display bug)
 	/*
 	bool ShouldProtect = false;
-	 for (int i = 0; i < m_WearModelPositions.size(); i++) 
+	 for (unsigned int i = 0; i < m_WearModelPositions.size(); i++) 
 		if( Damage.iHitGroup == m_WearModelPositions[i] )
 		{
 			ShouldProtect = true;

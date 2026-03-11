@@ -280,7 +280,7 @@ typedef struct mleaf_s
     struct efrag_s *efrags;
 
     msurface_t **firstmarksurface;
-    int nummarksurfaces;
+    unsigned int nummarksurfaces;
     int key; // BSP sequence number for leaf's contents
     byte ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
@@ -420,7 +420,7 @@ typedef struct model_s
     //
     // brush model
     //
-    int firstmodelsurface, nummodelsurfaces; // +0x070, +0x074
+    unsigned int firstmodelsurface, nummodelsurfaces; // +0x070, +0x074
 
     int numsubmodels;    // +0x078
     dmodel_t *submodels; // +0x07C
@@ -521,7 +521,7 @@ typedef struct player_info_s
     int renderframe;
 
     // Gait frame estimation
-    int gaitsequence;
+    unsigned int gaitsequence;
     float gaitframe;
     float gaityaw;
     vec3_t prevgaitorigin;

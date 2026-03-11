@@ -383,7 +383,7 @@ void CHud::Shutdown()
 int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (int i = 0; i < m_Sprites.size() - 1; ++i)
+	for (unsigned int i = 0; i < m_Sprites.size() - 1; ++i)
 	{
 		if (m_Sprites[i].Name == SpriteName)
 			return static_cast<int>(i);

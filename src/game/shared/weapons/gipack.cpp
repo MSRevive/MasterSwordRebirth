@@ -77,7 +77,7 @@ void CGenericItem::RegisterContainer()
 
 	return PackData->Type;
 }*/
-int CGenericItem::Container_ItemCount()
+unsigned int CGenericItem::Container_ItemCount()
 {
 	if (!PackData)
 		return 0;
@@ -87,7 +87,7 @@ int CGenericItem::Container_ItemCount()
 	if ( PackData->iLockStrength != 44 )
 	{
 		//logfile << "======= PACK: " << m_Name << "======== \n";
-		 for (int i = 0; i < PackData->ItemList.size(); i++) 
+		 for (unsigned int i = 0; i < PackData->ItemList.size(); i++) 
 		{
 			//THOTHIEDEBUG
 			Print("Checking %i in %s", i, m_Name);
@@ -212,9 +212,12 @@ void CGenericItem::Wearable_WearOnOwner()
 }
 void CGenericItem::Container_SendContents()
 {
+	unsigned int TotalItemCount = Container_ItemCount();
 	//Send all items down to the client
-	for (int i = 0; i < Container_ItemCount(); i++)
-		Container_SendItem(Container_GetItem(i), true);
+	for (unsigned int i = 0; i < TotalItemCount; i++) {
+		int idx = static_cast<int>(i);
+		Container_SendItem(Container_GetItem(idx), true);
+	}
 }
 void CGenericItem::Wearable_ResetClientUpdate()
 {
@@ -247,13 +250,13 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 
 #ifdef VALVE_DLL
 	//Some packs (like sheathes) can only hold a certain amount of items
-	if (PackData->MaxItems && Container_ItemCount() + 1 > PackData->MaxItems)
+	if (PackData->MaxItems && (int)Container_ItemCount() + 1 > PackData->MaxItems)
 	{
 		//MiB FEB2010_13 - Making this into an if-block - If the pack is "full" we check to see
 		//		if the item is groupable and if it can be fully grouped into another.
 		if (FBitSet(pItem->Properties, ITEM_GROUPABLE))
 		{
-			for (int i = 0; i < PackData->ItemList.size(); i++)
+			for (unsigned int i = 0; i < PackData->ItemList.size(); i++)
 			{
 				CGenericItem *pCur = Container_GetItem(i);
 
@@ -290,7 +293,7 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 			fAccepted = false;
 		else
 		{
-			for (int i = 0; i < PackData->RejectItemsTypes.size(); i++)
+			for (unsigned int i = 0; i < PackData->RejectItemsTypes.size(); i++)
 			{
 				if (strstr(pItem->ItemName.c_str(), PackData->RejectItemsTypes[i]))
 				{
@@ -305,7 +308,7 @@ bool CGenericItem::Container_CanAcceptItem(CGenericItem *pItem)
 	if (PackData->AcceptItemsTypes.size())
 		fAccepted = false;
 
-	for (int i = 0; i < PackData->AcceptItemsTypes.size(); i++)
+	for (unsigned int i = 0; i < PackData->AcceptItemsTypes.size(); i++)
 	{
 		//fAccepted = false;
 		if (strstr(pItem->ItemName.c_str(), PackData->AcceptItemsTypes[i]))
@@ -340,7 +343,7 @@ int CGenericItem::Container_AddItem(CGenericItem *pItem)
 			if ( pOwner->m_CharacterState == CHARSTATE_LOADED )
 			{
 				//Only if I r loaded and in world
-				 for (int i = 0; i < PackData->ItemList.size(); i++) 
+				 for (unsigned int i = 0; i < PackData->ItemList.size(); i++) 
 				{
 					CGenericItem *pCur = Container_GetItem( i );
 					if ( msstring(pCur->m_Name) != msstring( pItem->m_Name ) ) //If it has the same script name
@@ -478,7 +481,7 @@ void CGenericItem::Container_StackItems()
 	if (!PackData)
 		return;
 
-	for (int i1 = 0; i1 < PackData->ItemList.size(); i1++)
+	for (unsigned int i1 = 0; i1 < PackData->ItemList.size(); i1++)
 	{
 		CGenericItem *pItem = Container_GetItem(i1);
 		if (FBitSet(pItem->Properties, ITEM_GROUPABLE))
@@ -489,7 +492,7 @@ void CGenericItem::Container_StackItems()
 				if (pOwner->m_CharacterState == CHARSTATE_LOADED)
 				{
 					//Only if I r loaded and in world
-					for (int i2 = 0; i2 < PackData->ItemList.size(); i2++)
+					for (unsigned int i2 = 0; i2 < PackData->ItemList.size(); i2++)
 					{
 						CGenericItem *pCur = Container_GetItem(i2);
 						if (pCur == pItem)

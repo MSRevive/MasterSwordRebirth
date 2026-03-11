@@ -346,7 +346,7 @@ const char* CScript::GetConst(const char* Text)
 			MS_ERROR("%s: Script: %s, \"%s\" - Mismatched Parenthesis!", m.ScriptFile.c_str(), Text);
 	}
 	else
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 			if (m_Constants[i].Name == Text)
 				return m_Constants[i].Value;
 
@@ -356,9 +356,9 @@ const char* CScript::GetConst(const char* Text)
 bool GetString(char* Return, size_t size, const char* sentence, int start, const char* endchars)
 {
 	// Quickie function to return the next CMD or parameter in a script string
-	int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
+	unsigned int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
 	strncpy(Return, "", size);
-	while (i < (size - 1))
+	while (i < (unsigned int)(size - 1))
 	{
 		for (n = 0; n < endCharSize; n++)
 			if (sentence[iPosition] == endchars[n])
@@ -378,7 +378,7 @@ bool GetString(char* Return, size_t size, const char* sentence, int start, const
 scriptvar_t* IVariables::FindVar(const char* Name)
 {
 	//Check local variables
-	for (int i = 0; i < m_Variables.size(); i++)
+	for (unsigned int i = 0; i < m_Variables.size(); i++)
 	{
 		if (FStrEq(Name, m_Variables[i].Name)) return &m_Variables[i];
 	}
@@ -403,7 +403,7 @@ scriptvar_t* IVariables::SetVar(const char* Name, const char* Value)
 // Find an event by its name...
 SCRIPT_EVENT* CScript::EventByName(const char* pszEventName)
 {
-	for (int i = 0; i < m.Events.size(); i++)
+	for (unsigned int i = 0; i < m.Events.size(); i++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[i];
 		if (!seEvent.Name || seEvent.Name != pszEventName)
@@ -421,10 +421,10 @@ scriptvar_t* CScript::FindVar(const char* pszName)
 	if (pScriptvar) return pScriptvar;
 
 	//Check global variables
-	for (int i = 0; i < m_gVariables.size(); i++)
+	for (unsigned int i = 0; i < m_gVariables.size(); i++)
 		if (FStrEq(pszName, m_gVariables[i].Name)) return &m_gVariables[i];
 
-	for (int i = 0; i < m_Constants.size(); i++)
+	for (unsigned int i = 0; i < m_Constants.size(); i++)
 	{
 		if (FStrEq(pszName, m_Constants[i].Name))
 		{
@@ -456,7 +456,7 @@ msstring CScript::ScriptGetter_Conjunction(msstring& FullName, msstring& ParserN
 
 	if (bIsAnd || bIsOr || bIsXor)
 	{
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			// Allow shortcutting
 			if (atoi(SCRIPTVAR(Params[i])))
@@ -505,7 +505,7 @@ msstring CScript::ScriptGetter_AlphaNum(msstring& FullName, msstring& ParserName
 		//yes, this is a shit way of doing this, but I'm in a rush...
 		msstring num_conv = Params[0];
 		msstring out_str;
-		int in_length = num_conv.len();
+		unsigned int in_length = num_conv.len();
 		const char* cc;
 		bool char_legit;
 		msstring extra_list;
@@ -515,7 +515,7 @@ msstring CScript::ScriptGetter_AlphaNum(msstring& FullName, msstring& ParserName
 			extra_list = Params[1];
 			check_extras = true;
 		}
-		for (int i = 0; i <= in_length; i++)
+		for (unsigned int i = 0; i <= in_length; i++)
 		{
 			char_legit = false;
 			cc = num_conv.substr(i, 1).c_str();
@@ -1009,7 +1009,7 @@ msstring CScript::ScriptGetter_Func(msstring& FullName, msstring& ParserName, ms
 	OutParams.clearitems();
 	if (Params.size() > 1)
 	{
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i >= 1)
 			{
@@ -1523,7 +1523,7 @@ msstring CScript::ScriptGetter_GetCl(msstring& FullName, msstring& ParserName, m
 			int EntIdx = atoi(Params[0]);
 			if (EntIdx > 0)
 			{
-				for (int i = 0; i < CLPERMENT_TOTAL; i++)
+				for (unsigned int i = 0; i < CLPERMENT_TOTAL; i++)
 					if (EntIdx == MSCLGlobals::CLViewEntities[i].index)
 					{
 						pclEntity = &MSCLGlobals::CLViewEntities[i]; break;
@@ -1559,7 +1559,7 @@ msstring CScript::ScriptGetter_GetCl(msstring& FullName, msstring& ParserName, m
 msstring CScript::ScriptGetter_GetConst(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
 	//Thothie - JUNE2007 $get_cvar(<cvar_name>)
-	for (int i = 0; i < m_Constants.size(); i++)
+	for (unsigned int i = 0; i < m_Constants.size(); i++)
 	{
 		if (m_Constants[i].Name == Params[0])
 		{
@@ -1689,7 +1689,7 @@ msstring CScript::ScriptGetter_GetFileLine(msstring& FullName, msstring& ParserN
 		bool found = false;
 		if (m.pScriptedEnt->filesOpen.size() >= 1)
 		{
-			for (int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++)
+			for (unsigned int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++)
 			{
 				//Check to see if we already have this file open
 				if (m.pScriptedEnt->filesOpen[i].fileName == fileName)
@@ -1746,7 +1746,7 @@ msstring CScript::ScriptGetter_GetFindToken(msstring& FullName, msstring& Parser
 
 		int iFoundAtPos = -1;
 
-		for (int i = 0; i < Tokens.size(); i++)
+		for (unsigned int i = 0; i < Tokens.size(); i++)
 		{
 			if (!bPartialSearch) { if (Tokens[i] == TokenAdd) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
 			else { if (Tokens[i].contains(TokenAdd)) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
@@ -1790,7 +1790,7 @@ msstring CScript::ScriptGetter_tokenize(msstring& FullName, msstring& ParserName
 	if (Params.size() >= 1)
 	{
 		msstring stemp = "";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			stemp.append(Params[i].c_str());
 			stemp.append(";");
@@ -2029,7 +2029,7 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 	Vector StartPos;
 	if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 	else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-	int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
+	unsigned int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 	bool spec_search = false;
 
 	CBaseEntity* pSpecificEnt = RetrieveEntity(Name);
@@ -2038,7 +2038,7 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 
 	//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 
@@ -2182,7 +2182,7 @@ msstring CScript::ScriptGetter_GetQuestData(msstring& FullName, msstring& Parser
 	if (pEntity && pEntity->IsPlayer())
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
-		for (int i = 0; i < pPlayer->m_Quests.size(); i++)
+		for (unsigned int i = 0; i < pPlayer->m_Quests.size(); i++)
 			if (pPlayer->m_Quests[i].Name == Name)
 				return pPlayer->m_Quests[i].Data;
 	}
@@ -2392,14 +2392,14 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 		if (Params[1] == "listall")
 		{
 			Print("Scriptflags for %s:\n", pEntity->m_DisplayName.c_str());
-			for (int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
+			for (unsigned int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 			{
 				Print("# %i type %s name %s val %s exp %s\n", i, pEntity->m_scriptflags.types[i].c_str(), pEntity->m_scriptflags.names[i].c_str(), pEntity->m_scriptflags.values[i].c_str(), pEntity->m_scriptflags.expiretimes[i].c_str());
 			}
 			return "0";
 		}
 #endif
-		for (int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
+		for (unsigned int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 		{
 			if (!sf_get_by_name)
 			{
@@ -2579,7 +2579,7 @@ msstring CScript::ScriptGetter_GetTakeDmg(msstring& FullName, msstring& ParserNa
 
 	msstring Return;
 	if (Params[1] == "all") RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
-	for (int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
+	for (unsigned int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
 	{
 		CMSMonster::takedamagemodifier_t& TDM = pTarget->m.TakeDamageModifiers[i];
 		msstring read_dmgtype = TDM.DamageType;
@@ -2828,11 +2828,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 		Vector StartPos;
 		if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 		else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-		int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
+		unsigned int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
 			if ((int)msTokenString.len() > str_limit) break; //outta room
 
@@ -2955,11 +2955,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 			vMaximumBox = StringToVec(Params[2]);
 		}
 
-		int count = UTIL_EntitiesInBox(pList, 255, vMinimumBox, vMaximumBox, FL_CLIENT | FL_MONSTER);
+		unsigned int count = UTIL_EntitiesInBox(pList, 255, vMinimumBox, vMaximumBox, FL_CLIENT | FL_MONSTER);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
 			if ((int)msTokenString.len() > str_limit) continue;
 
@@ -3224,7 +3224,7 @@ msstring CScript::ScriptGetter_inrange(msstring& FullName, msstring& ParserName,
 			return "0"; //not enough params
 		}
 		msstring Result = "0";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i > 0)
 			{
@@ -3241,7 +3241,7 @@ msstring CScript::ScriptGetter_inrange(msstring& FullName, msstring& ParserName,
 			return "0"; //not enough params
 		}
 		msstring Result = "0";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i > 0)
 			{
@@ -3449,7 +3449,7 @@ msstring CScript::ScriptGetter_MinMax(msstring& FullName, msstring& ParserName, 
 	{
 		float best = atof(Params[0].c_str());
 		bool max = ParserName == "$max";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 			best = max ? V_max(best, atof(Params[i].c_str())) : V_min(best, atof(Params[i].c_str()));
 		RETURN_FLOAT(best);
 	}
@@ -3486,7 +3486,7 @@ msstring CScript::ScriptGetter_Num(msstring& FullName, msstring& ParserName, mss
 		//yes, this is a shit way of doing this, but I'm in a rush...
 		msstring num_conv = Params[0];
 		msstring out_str;
-		int in_length = num_conv.len();
+		unsigned int in_length = num_conv.len();
 		const char* cc;
 		bool char_legit;
 		msstring extra_list;
@@ -3496,7 +3496,7 @@ msstring CScript::ScriptGetter_Num(msstring& FullName, msstring& ParserName, mss
 			extra_list = Params[1];
 			check_extras = true;
 		}
-		for (int i = 0; i <= in_length; i++)
+		for (unsigned int i = 0; i <= in_length; i++)
 		{
 			char_legit = false;
 			cc = num_conv.substr(i, 1).c_str();
@@ -3526,7 +3526,7 @@ msstring CScript::ScriptGetter_Quote(msstring& FullName, msstring& ParserName, m
 	{
 		msstring out_str = "\"";
 
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i) out_str += " ";
 			out_str += Params[i];
@@ -3923,7 +3923,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 				, m.pScriptedEnt
 #endif
 			);
-			for (int i = 0; i < vFilterList.size(); i++)
+			for (unsigned int i = 0; i < vFilterList.size(); i++)
 			{
 				delete vFilterList[i];
 			}
@@ -3931,7 +3931,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 
 			msstring                    vsIndxString;
 			bool                        bFir = true;
-			for (int i = 0; i < vEntityList.size(); i++)
+			for (unsigned int i = 0; i < vEntityList.size(); i++)
 			{
 				CFindEntity             vEntity = vEntityList[i];
 				if (pArray)
@@ -3963,7 +3963,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 		}
 		catch (...)
 		{
-			for (int i = 0; i < vFilterList.size(); i++)
+			for (unsigned int i = 0; i < vFilterList.size(); i++)
 			{
 				delete vFilterList[i];
 			}
@@ -4011,10 +4011,10 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 
 		if (Tokens.size() == 1) return Params[0].c_str(); //Thothie APR2016_23 - smashes if only given one entity otherwise
 
-		int size = (signed)Tokens.size();
-		for (int i = 0; i < size; i++)
+		unsigned int size = (signed)Tokens.size();
+		for (unsigned int i = 0; i < size; i++)
 		{
-			int curIdx = 0;
+			unsigned int curIdx = 0;
 			float curVal = 0;
 
 			CMSMonster* pZeroEnt = (m.pScriptedEnt ? (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[0]) : NULL);
@@ -4032,7 +4032,7 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 				else if (compParam == "mp") curVal = pZeroEnt->m_MP;
 				else if (compParam == "maxmp") curVal = pZeroEnt->m_MaxMP;
 
-				for (int j = 0; j < (Tokens.size() - 1); j++)
+				for (unsigned int j = 0; j < (Tokens.size() - 1); j++)
 				{
 					float compVal = 0;
 					CMSMonster* pCurEnt = (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[j + 1]);
@@ -4077,7 +4077,7 @@ msstring CScript::ScriptGetter_StrAdd(msstring& FullName, msstring& ParserName, 
 	//Add strings together
 	//priority: moderate, scope: shared
 	msstring Return;
-	for (int i = 0; i < Params.size(); i++)
+	for (unsigned int i = 0; i < Params.size(); i++)
 		Return += Params[i];
 
 	return Return;
@@ -4413,7 +4413,7 @@ const char* CScript::GetVar(const char* pszText)
 	if (pszText[0] == '$')
 	{
 		BreakUpLine(FullName, ParserName, Params);
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 			Params[i] = SCRIPTVAR(Params[i]);
 
 		//Handle entity-specific parser
@@ -4796,8 +4796,8 @@ void CScript::CopyAllData(CScript* pDestScript, CBaseEntity* pScriptedEnt, IScri
 	//pDestScript->m.Events = m.Events;
 
 	//Copy Variables
-	int variables = m_Variables.size();
-	for (int i = 0; i < variables; i++)
+	unsigned int variables = m_Variables.size();
+	for (unsigned int i = 0; i < variables; i++)
 		pDestScript->m_Variables.add(m_Variables[i]);
 }
 float GetNumeric(const char* pszText) {
@@ -4835,7 +4835,7 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 	//Update: A script can specify when it wants to allow duplicate includes
 	if (!m.AllowDupInclude)
 	{
-		for (int i = 0; i < m_Dependencies.size(); i++)
+		for (unsigned int i = 0; i < m_Dependencies.size(); i++)
 		{
 			if (!_stricmp(m_Dependencies[i], Filename))
 			{
@@ -4966,8 +4966,8 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
 	//Run script events
 	//~ Runs unnamed events or named events that were specified with calleventtimed ~
-	int events = m.Events.size();
-	for (int i = 0; i < events; i++)
+	unsigned int events = m.Events.size();
+	for (unsigned int i = 0; i < events; i++)
 	{
 		SCRIPT_EVENT& Event = m.Events[i];
 		//Skip unnamed events when running named events only
@@ -4986,7 +4986,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 			Event.fNextExecutionTime = -1;
 		}
 
-		for (int e = 0; e < Event.TimedExecutions.size(); e++)
+		for (unsigned int e = 0; e < Event.TimedExecutions.size(); e++)
 		{
 			if (gpGlobals->time < Event.TimedExecutions[e])
 				continue;
@@ -4996,7 +4996,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 			Event.TimedExecutions.erase(e--);
 		}
 
-		for (int e = 0; e < CachedExecutions.size(); e++)
+		for (unsigned int e = 0; e < CachedExecutions.size(); e++)
 		{
 			Script_ExecuteEvent(Event);
 		}
@@ -5007,7 +5007,7 @@ void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Param
 	SCRIPT_EVENT* CurrentEvent = m.CurrentEvent; //Save the event currently executing
 
 	//Run every event with this name
-	for (int i = 0; i < m.Events.size(); i++)
+	for (unsigned int i = 0; i < m.Events.size(); i++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[i];
 		if (!seEvent.Name || seEvent.Name != pszEventName)
@@ -5036,8 +5036,8 @@ void CScript::CallLogged(const char* title, std::clock_t start)
 	std::string word = "";
 	bool inQuote = false;
 
-	int strlen = str.length();
-	for (int i = 0; i < strlen; i++)
+	unsigned int strlen = str.length();
+	for (unsigned int i = 0; i < strlen; i++)
 	{
 		const char ch = str[i];
 
@@ -5194,7 +5194,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			Event.Scope = esScope;
 
 			if (Name.len() && Override)
-				for (int i = 0; i < m.Events.size(); i++)
+				for (unsigned int i = 0; i < m.Events.size(); i++)
 					if (Name == m.Events[i].Name)
 					{
 						m.Events.erase(i); i--;
@@ -5308,7 +5308,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 			if (*CmdLineTmp == '(') TmpLineOfs++;
 			msstring ParamStr = msstring(CmdLineTmp).skip(SKIP_STR);
-			for (int i = 0; i < 3; i++)
+			for (unsigned int i = 0; i < 3; i++)
 			{
 				ScriptCmd.m_Params.add(GetConst(ParamStr.thru_char(SKIP_STR)));
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);
@@ -5409,7 +5409,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			{
 				bool AddConst = true;
 
-				for (int i = 0; i < m_Constants.size(); i++)
+				for (unsigned int i = 0; i < m_Constants.size(); i++)
 				{
 					if (m_Constants[i].Name == VarName)
 					{
@@ -5429,7 +5429,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 	{
 		msstring VarName = Line.thru_char(SKIP_STR);
 
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 			if (m_Constants[i].Name == VarName)
 			{
 				m_Constants.erase(i);
@@ -5461,7 +5461,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 		if (!m.PrecacheOnly)
 		{
-			for (int i = 0; i < m_Constants.size(); i++)
+			for (unsigned int i = 0; i < m_Constants.size(); i++)
 			{
 				if (m_Constants[i].Name == VarName)
 				{
@@ -5528,7 +5528,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			pSearchLine = "%[ \t\r\n]%s";
 		}
 
-		for (int i = 0; i < Resources.size(); i++)
+		for (unsigned int i = 0; i < Resources.size(); i++)
 		{
 			msstring& FileName = Resources[i];
 
@@ -5695,7 +5695,7 @@ bool CScript::Script_SetupEvent(SCRIPT_EVENT& Event, msstringlist* Parameters)
 
 	//Setup option parameter variables
 	if (Parameters)
-		for (int i = 0; i < (*Parameters).size(); i++)
+		for (unsigned int i = 0; i < (*Parameters).size(); i++)
 			Event.SetLocal(msstring("PARAM") + int(i + 1), (*Parameters)[i]);
 
 	return m.pScriptedInterface ? m.pScriptedInterface->Script_SetupEvent(this, Event) : true;
@@ -5704,8 +5704,8 @@ void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, m
 {
 #if !TURN_OFF_ALERT
 	msstring                            vsParams;
-	for (int i = 0; i < vParams.size() - vParamStrt; i++)
-		vsParams += msstring("\n  ") + i + ": " + vParams[i + vParamStrt];
+	for (unsigned int i = 0; i < vParams.size() - vParamStrt; i++)
+		vsParams += msstring("\n  ") + (int)i + ": " + vParams[i + vParamStrt];
 	ErrorPrint(vsUniqueTag
 		, ERRORPRINT_LOG | ERRORPRINT_CONSOLE
 		, "Error with command '%s' %s for script file %s. Parameters:%s\n%s"
@@ -5725,13 +5725,13 @@ void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, m
 }
 bool CScript::Script_ExecuteCmds(SCRIPT_EVENT& Event, scriptcmd_list& Cmdlist)
 {
-	for (int c = 0; c < Cmdlist.m_Cmds.size(); c++)
+	for (unsigned int c = 0; c < Cmdlist.m_Cmds.size(); c++)
 	{
 		scriptcmd_t& Cmd = Cmdlist.m_Cmds[c];
 
 		//Convert the variable parameters
 		msstringlist Params;
-		for (int icmd = 0; icmd < Cmd.m_Params.size() - 1; icmd++)
+		for (unsigned int icmd = 0; icmd < Cmd.m_Params.size() - 1; icmd++)
 			Params.add(GetVar(Event.GetLocal(Cmd.m_Params[icmd + 1])));
 
 		// if Script_ExecuteCmd returns false, break execution of the event
@@ -5746,7 +5746,7 @@ bool CScript::Script_ExecuteCmds(SCRIPT_EVENT& Event, scriptcmd_list& Cmdlist)
 			if (!Cmd.m_NewConditional)
 				break; //Old if command.  Breaks event execution on failure
 
-			for (int e = 0; e < Cmd.m_ElseCmds.size(); e++) // Parse all else statements
+			for (unsigned int e = 0; e < Cmd.m_ElseCmds.size(); e++) // Parse all else statements
 				if (Script_ExecuteCmds(Event, Cmd.m_ElseCmds[e]))
 					break; //As soon as one returns true, don't parse any more
 
@@ -5791,9 +5791,9 @@ void CScript::SendScript(scriptsendcmd_t& SendCmd)
 			WRITE_BYTE(Type); //0 == Add | 1 == Update | 2 = Remove
 			WRITE_LONG(SendCmd.UniqueID);
 			if (Type == ST_NEW) WRITE_STRING(SendCmd.ScriptName);
-			int Parameters = SendCmd.Params.size();
+			unsigned int Parameters = SendCmd.Params.size();
 			WRITE_BYTE(Parameters);
-			for (int i = 0; i < Parameters; i++)
+			for (unsigned int i = 0; i < Parameters; i++)
 				WRITE_STRING(SendCmd.Params[i]);
 			MESSAGE_END();
 		}
@@ -5814,7 +5814,7 @@ Vector CScript::DetermineOrigin(msstring& vsOrigin)
 void CScript::CallEventTimed(const char* EventName, float Delay)
 {
 	float Time = gpGlobals->time + Delay;
-	for (int e = 0; e < m.Events.size(); e++)
+	for (unsigned int e = 0; e < m.Events.size(); e++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[e];
 		if (!seEvent.Name || seEvent.Name != EventName)
@@ -5834,7 +5834,7 @@ IScripted::IScripted()
 }
 void IScripted::Deactivate()
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		Script_Remove(i); i--;
 	}
@@ -5862,7 +5862,7 @@ CScript* IScripted::Script_Add(msstring ScriptName, CBaseEntity* pEntity)
 }
 CScript* IScripted::Script_Get(msstring ScriptName)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		if (!strcmp(m_Scripts[i]->m.ScriptFile, ScriptName))
 			return m_Scripts[i];
 	return NULL;
@@ -5883,7 +5883,7 @@ int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scr
 		return 0;
 
 	if (m_pScriptCommands)
-		for (int icommand = 0; icommand < m_pScriptCommands->size(); icommand++)
+		for (unsigned int icommand = 0; icommand < m_pScriptCommands->size(); icommand++)
 		{
 			scriptcmdname_t& Checkcmd = (*m_pScriptCommands)[icommand];
 			if (!_stricmp(TestCommand, Checkcmd.m_Name.c_str()))
@@ -5895,7 +5895,7 @@ int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scr
 
 void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript* Script = m_Scripts[i];
 
@@ -5915,14 +5915,14 @@ void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 
 void IScripted::CallScriptEventTimed(const char* EventName, float Delay)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->CallEventTimed(EventName, Delay);
 }
 
 void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 {
 	m_ReturnData = "";
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->RunScriptEventByName(EventName, Parameters);
 	
 	// Also try calling registered AngelScript global function handlers
@@ -5935,11 +5935,11 @@ void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 
 void IScripted::Script_InitHUD(CBasePlayer* pPlayer)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript* Script = m_Scripts[i];
 		if (Script == NULL) continue;
-		for (int e = 0; e < Script->m.PersistentSendCmds.size(); e++)
+		for (unsigned int e = 0; e < Script->m.PersistentSendCmds.size(); e++)
 			Script->SendScript(Script->m.PersistentSendCmds[e]);
 	}
 }
@@ -5969,7 +5969,7 @@ const char* SCRIPT_EVENT::GetLocal(const char* Name)
 		if (Params->size() > 1)
 		{
 			msstring stemp = "";
-			for (int i = 0; i < Params->size(); i++)
+			for (unsigned int i = 0; i < Params->size(); i++)
 			{
 				msstring l_param = (*Params)[i];
 				stemp.append(l_param);
@@ -5991,7 +5991,7 @@ void CScript::CallScriptEventAll(const char* EventName, msstringlist* Parameters
 	CBaseEntity* pEntity = NULL;
 	IScripted* pScripted = NULL;
 
-	for (int i = 1; i < gpGlobals->maxEntities; i++)
+	for (unsigned int i = 1; i < gpGlobals->maxEntities; i++)
 	{
 		pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
 
@@ -6025,7 +6025,7 @@ void CScript::CallScriptPlayers(const char* EventName, msstringlist* Parameters)
 
 	IScripted* pScripted = NULL;
 
-	for (int i = 1; i <= gpGlobals->maxClients; i++)
+	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity* pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer* pPlayer = (CBasePlayer*)pEntity;;
@@ -6055,10 +6055,10 @@ void CScript::ClCallScriptPlayers(const char* EventName, msstringlist* Parameter
 		WRITE_BYTE(17);
 		WRITE_BYTE(1); //0 == Add | 1 == Update | 2 = Remove
 		WRITE_LONG(-2);
-		int nParameters = Parameters->size();
+		unsigned int nParameters = Parameters->size();
 		WRITE_BYTE(nParameters + 1);
 		WRITE_STRING(EventName);
-		for (int i = 0; i < nParameters; i++)
+		for (unsigned int i = 0; i < nParameters; i++)
 			WRITE_STRING((*Parameters)[i]);
 		MESSAGE_END();
 	}
@@ -6167,7 +6167,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 
 	if (cc_check_against_const)
 	{
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 		{
 			if (m_Constants[i].Name == testvar)
 			{
@@ -6178,7 +6178,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 	}
 	if (cc_check_against_var)
 	{
-		for (int i = 0; i < m_Variables.size(); i++)
+		for (unsigned int i = 0; i < m_Variables.size(); i++)
 		{
 			if (m_Variables[i].Name == testvar)
 			{
@@ -6189,7 +6189,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 	}
 	if (cc_check_against_global)
 	{
-		for (int i = 0; i < m_gVariables.size(); i++)
+		for (unsigned int i = 0; i < m_gVariables.size(); i++)
 		{
 			if (m_gVariables[i].Name == testvar)
 			{

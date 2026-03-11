@@ -56,7 +56,7 @@ int CHudStatusBar ::VidInit(void)
 void CHudStatusBar ::Reset(void)
 {
 	m_iFlags &= ~HUD_ACTIVE; // start out inactive
-	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+	for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 		m_szStatusText[i][0] = 0;
 	memset(m_iStatusValues, 0, sizeof m_iStatusValues);
 
@@ -166,13 +166,13 @@ int CHudStatusBar ::Draw(float fTime)
 {
 	if (m_bReparseString)
 	{
-		for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+		for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 			ParseStatusString(i);
 		m_bReparseString = FALSE;
 	}
 
 	// Draw the status bar lines
-	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+	for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 	{
 		int TextHeight, TextWidth;
 		GetConsoleStringSize(m_szStatusBar[i], &TextWidth, &TextHeight);

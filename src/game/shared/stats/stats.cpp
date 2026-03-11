@@ -51,7 +51,7 @@ const char* SpellTypeList[5] =
 
 int GetSkillStatByName(const char* pszName) // Index lookup by name (Skill stats only)
 {
-	for (int i = 0; i < SKILL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < SKILL_MAX_STATS; i++)
 		if (!_stricmp(pszName, SkillStatList[i].DllName))
 			return SKILL_FIRSTSKILL + i;
 	return -1;
@@ -70,17 +70,17 @@ int GetSubSkillByName(const char* pszName)
 {
 	if (!_stricmp(pszName, "prof")) // alias for proficiency
 		return 0;
-	for (int i = 0; i < STATPROP_TOTAL; i++)
+	for (unsigned int i = 0; i < STATPROP_TOTAL; i++)
 		if (!_stricmp(pszName, SkillTypeList[i]))
 			return i;
-	for (int i = 0; i < STAT_MAGIC_TOTAL; i++)
+	for (unsigned int i = 0; i < STAT_MAGIC_TOTAL; i++)
 		if (!_stricmp(pszName, SpellTypeList[i]))
 			return i;
 	return -1;
 }
 int GetNatStatByName(const char* pszName)
 {
-	for (int i = 0; i < NATURAL_MAX_STATS; i++)
+	for (unsigned int i = 0; i < NATURAL_MAX_STATS; i++)
 		if (!_stricmp(pszName, NatStatList[i].Name))
 			return i;
 	return -1;
@@ -145,8 +145,8 @@ int CStat::operator+=(int Add)
 int CStat::Value()
 {
 	int Total = 0;
-	int iSubStats = m_SubStats.size();
-	for (int i = 0; i < iSubStats; i++)
+	unsigned int iSubStats = m_SubStats.size();
+	for (unsigned int i = 0; i < iSubStats; i++)
 		Total += m_SubStats[i].Value;
 
 	// (x + floor(y / 2)) / y
@@ -227,7 +227,7 @@ bool CStat::operator!=(const CStat& Other)
 void CStat::InitStatList(statlist& Stats)
 {
 	Stats.reserve_once(STATS_TOTAL, STATS_TOTAL);
-	for (int i = 0; i < STATS_TOTAL; i++)
+	for (unsigned int i = 0; i < STATS_TOTAL; i++)
 	{
 		const char* Name = (i < NATURAL_MAX_STATS) ? NatStatList[i].Name : SkillStatList[i - NATURAL_MAX_STATS].DllName;
 		CStat::skilltype_e Type = (i < NATURAL_MAX_STATS) ? CStat::STAT_NAT : CStat::STAT_SKILL;

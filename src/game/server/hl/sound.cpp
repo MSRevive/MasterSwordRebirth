@@ -1530,7 +1530,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // on material type.
 #define CTEXTURESMAX 512 // max number of textures loaded
 
-int gcTextures = 0;
+unsigned int gcTextures = 0;
 char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX]; // texture names
 char grgchTextureType[CTEXTURESMAX];				   // parallel array of texture types
 
@@ -1544,7 +1544,7 @@ char TEXTURETYPE_Find(char *name)
 {
 	// CONSIDER: pre-sort texture names and perform faster binary search here
 
-	for (int i = 0; i < gcTextures; i++)
+	for (unsigned int i = 0; i < gcTextures; i++)
 	{
 		if (!_strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
 			return (grgchTextureType[i]);

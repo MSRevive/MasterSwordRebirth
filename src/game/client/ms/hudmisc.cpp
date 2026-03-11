@@ -202,7 +202,7 @@ void CHudMisc ::UserCmd_RemovePack(void)
 	 strncpy(MenuText,  "Remove item:\n\n", sizeof(MenuText) );
 
 	m_RemoveList.clear();
-	for (int i = 0; i < player.Gear.size(); i++)
+	for (unsigned int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem *pGearItem = player.Gear[i];
 		if (!FBitSet(pGearItem->MSProperties(), ITEM_WEARABLE) || pGearItem->m_Location == ITEMPOS_HANDS)
@@ -315,7 +315,7 @@ void CHudMisc ::UserCmd_Offer(void)
 	}
 
 	int r = 0;
-	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 	{
 		if (!player.Hand(i))
 			continue;

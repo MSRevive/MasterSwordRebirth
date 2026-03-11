@@ -259,7 +259,7 @@ static void SetFN(bool Up)
 static void AddStatus(const char* Icon, const char* Name, float Dur, bool bSprite = false)
 {
 	// MiB FEB2019_22 - When sent a duplicate name, reset the duration
-	for (int i = 0; i < StatusIcons->m_Status.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Status.size(); i++)
 	{
 		VGUI_StatusIcon* pIcon = StatusIcons->m_Status[i];
 		if (pIcon == NULL) continue;
@@ -276,7 +276,7 @@ static void AddImg(const char *Img, const char *Name,
 				   int x, int y, int w, int h, float Dur = -1.0)
 {
 	bool found = false;
-	for (int i = 0; i < StatusIcons->m_Img.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Img.size(); i++)
 		//Check for ID conflictions
 		if (!strcmp(Name, StatusIcons->m_Img[i]->m_Name))
 		{
@@ -304,7 +304,7 @@ static void AddImg(const char *Img, const char *Name,
 
 void KillStatus(const char *Name)
 {
-	for (int i = 0; i < StatusIcons->m_Status.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Status.size(); i++)
 	{
 		if (!strcmp(StatusIcons->m_Status[i]->m_Name, Name))
 		{
@@ -316,7 +316,7 @@ void KillStatus(const char *Name)
 }
 void KillImg(const char *Name)
 {
-	for (int i = 0; i < StatusIcons->m_Img.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Img.size(); i++)
 	{
 		if (!strcmp(StatusIcons->m_Img[i]->m_Name, Name))
 		{

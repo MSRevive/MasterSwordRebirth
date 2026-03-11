@@ -91,7 +91,7 @@ void HistoryResource ::AddToHistory(int iType, const char *szName, int iCount)
 
 void HistoryResource ::CheckClearHistory(void)
 {
-	for (int i = 0; i < MAX_HISTORY; i++)
+	for (unsigned int i = 0; i < MAX_HISTORY; i++)
 	{
 		if (rgAmmoHistory[i].type)
 			return;

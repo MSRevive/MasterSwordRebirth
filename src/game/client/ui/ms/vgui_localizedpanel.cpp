@@ -120,7 +120,7 @@ void CLocalizedPanel::Hide(void)
 
 void CLocalizedPanel::Close(void)
 {
-	for (int i = 0; i < m_iButtonTotal; i++)
+	for (unsigned int i = 0; i < m_iButtonTotal; i++)
 		m_ButtonList[i]->setArmed(false);
 	m_pCloseButton->setArmed(false);
 	setVisible(false);
@@ -196,7 +196,7 @@ void CLocalizedPanel::AddButton(msstring sText, bool bEnabled, bool bCloseOnClic
 void CLocalizedPanel::PositionButtons(void)
 {
 	int x = GetCenteredItem(m_pMainPanel->getWide(), LOCAL_BUTTON_WIDTH, m_iButtonTotal, LOCAL_BUTTON_SPACE);
-	for (int i = 0; i < m_iButtonTotal; i++)
+	for (unsigned int i = 0; i < m_iButtonTotal; i++)
 	{
 		m_ButtonList[i]->setPos(x + i * (LOCAL_BUTTON_WIDTH + LOCAL_BUTTON_SPACE), LOCAL_BUTTON_Y);
 	}
@@ -204,7 +204,7 @@ void CLocalizedPanel::PositionButtons(void)
 
 void CLocalizedPanel::ClearButtons(void)
 {
-	for (int i = 0; i < m_iButtonTotal; i++)
+	for (unsigned int i = 0; i < m_iButtonTotal; i++)
 	{
 		m_ButtonList[i]->setVisible(false);
 		m_pMainPanel->removeChild(m_ButtonList[i]);
@@ -284,7 +284,7 @@ void CLocalizedPanel::AddSubPanel( Panel *pPanel )
 
 void CLocalizedPanel::ClearSubPanels( void )
 {
-	for(int i = 0; i < m_iSubPanelTotal; i++)
+	for(unsigned int i = 0; i < m_iSubPanelTotal; i++)
 	{
 		m_pTextPanel->removeChild( m_SubPanelList[i] );
 		delete m_SubPanelList[i];

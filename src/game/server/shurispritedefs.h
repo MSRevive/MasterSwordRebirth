@@ -84,7 +84,7 @@ const char *SpriteArray[INV_SPRITE_NUM] = {
 //Shuriken FEB2008a to check old sprite names and get their frame
 int SpriteIsInArray(const char *SpriteName)
 {
-	for (int i = 0; i < INV_SPRITE_NUM; i++)
+	for (unsigned int i = 0; i < INV_SPRITE_NUM; i++)
 	{
 		if (strcmp(SpriteName, SpriteArray[i]) == 0)
 		{

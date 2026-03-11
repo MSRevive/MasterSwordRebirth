@@ -243,7 +243,7 @@ private:
 
 	// Buttons in this menu
 	CommandButton *m_aButtons[MAX_BUTTONS];
-	int m_iButtons;
+	unsigned int m_iButtons;
 
 public:
 	CCommandMenu(CCommandMenu *pParentMenu, int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
@@ -264,7 +264,7 @@ public:
 	CCommandMenu *GetParentMenu() { return m_pParentMenu; };
 	int GetXOffset() { return m_iXOffset; };
 	int GetYOffset() { return m_iYOffset; };
-	int GetNumButtons() { return m_iButtons; };
+	unsigned int GetNumButtons() { return m_iButtons; };
 	CommandButton *FindButtonWithSubmenu(CCommandMenu *pSubMenu);
 
 	void ClearButtonsOfArmedState(void);
@@ -290,7 +290,7 @@ private:
 	float m_flMenuOpenTime;
 	float m_flScoreBoardLastUpdated;
 	float m_flSpectatorPanelLastUpdated;
-	int m_iNumMenus;
+	unsigned int m_iNumMenus;
 	int m_iCurrentTeamNumber;
 	int m_iCurrentPlayerClass;
 	int m_iUser1;
@@ -333,7 +333,7 @@ private:
 	int m_iValidClasses[5];
 	int m_iIsFeigning;
 	int m_iIsSettingDetpack;
-	int m_iNumberOfTeams;
+	unsigned int m_iNumberOfTeams;
 	int m_iBuildState;
 	int m_iRandomPC;
 	char m_sTeamNames[5][MAX_TEAMNAME_SIZE];

@@ -14,10 +14,10 @@ private:
 	TextPanel *m_pTitle; // Title label
 
 	mslist<ClassButton *> m_ButtonList; // List of all dynamic buttons
-	int m_iButtonTotal;					// Total number of buttons allocated
+	unsigned int m_iButtonTotal;					// Total number of buttons allocated
 
 	mslist<Panel *>	m_SubPanelList; // List of all dynamic sub-panels
-	int	m_iSubPanelTotal;		// Total number of sub-panels
+	unsigned int	m_iSubPanelTotal;		// Total number of sub-panels
 
 	CTFScrollPanel *m_pScroll; // Scrolling window
 	Panel *m_pTextPanel;	   // Panel inside scrolling window

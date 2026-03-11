@@ -47,11 +47,15 @@
 // Helper function to get player by index - implemented differently on server vs client
 static CBasePlayer* GetPlayerByIndexHelper(int index)
 {
+
+
 #ifndef VALVE_DLL
     return nullptr; // Client doesn't have access to other players
 #else
+
+    unsigned int idx = static_cast<unsigned int>(index);
     // Server-side implementation
-    if (index < 1 || index > gpGlobals->maxClients) {
+    if (idx < 1 || idx > gpGlobals->maxClients) {
         return nullptr;
     }
     
@@ -469,19 +473,22 @@ namespace ASBuiltinFunctions
             MS_ANGEL_DEBUG("GetPlayerByIndex called on client (index: %d)", index);
             return nullptr;
         #else
+
+        unsigned int idx = static_cast<unsigned int>(index);
+
             // Server-side: Real player lookup
-            if (index < 1 || index > gpGlobals->maxClients) {
-                MS_ANGEL_DEBUG("GetPlayerByIndex: Invalid index %d (max: %d)", index, gpGlobals->maxClients);
+            if (idx < 1 || idx > gpGlobals->maxClients) {
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Invalid index %d (max: %d)", idx, gpGlobals->maxClients);
                 return nullptr;
             }
             
             CBasePlayer* pPlayer = GetPlayerByIndexHelper(index);
             if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
-                MS_ANGEL_DEBUG("GetPlayerByIndex: Found player %d (%s)", index, STRING(pPlayer->edict()->v.netname));
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Found player %d (%s)", idx, STRING(pPlayer->edict()->v.netname));
                 return pPlayer;
             }
             
-            MS_ANGEL_DEBUG("GetPlayerByIndex: No valid player at index %d", index);
+            MS_ANGEL_DEBUG("GetPlayerByIndex: No valid player at index %d", idx);
             return nullptr;
         #endif
     }
@@ -495,7 +502,7 @@ namespace ASBuiltinFunctions
         #else
             // Server-side: Count connected players
             int playerCount = 0;
-            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+            for (unsigned int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
                     // Additional check: ensure player is fully connected
@@ -525,7 +532,7 @@ namespace ASBuiltinFunctions
         
         #ifdef VALVE_DLL
             // Server-side: Populate with real players
-            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+            for (unsigned int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
                     if (pPlayer->edict()->v.flags & FL_CLIENT) {
@@ -635,7 +642,7 @@ namespace ASBuiltinFunctions
                 return nullptr;
             }
             
-            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+            for (unsigned int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free && (pPlayer->edict()->v.flags & FL_CLIENT)) {
                     // Get player's Steam ID through engine
@@ -739,7 +746,7 @@ namespace ASBuiltinFunctions
                           title.c_str(), message.c_str());
         #else
             // Send info message to all connected players
-            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+            for (unsigned int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free && (pPlayer->edict()->v.flags & FL_CLIENT)) {
                     //ASEngineProvider::SendInfoMsg((void*)pPlayer, fullMessage);
@@ -1169,8 +1176,8 @@ void CallAngelScriptEventHandler(const char* eventName, msstringlist* params)
             }
         }
         
-        int paramCount = handler->GetParamCount();
-        for (int i = 0; i < paramCount && i < (int)stringParams.size(); i++) {
+        unsigned int paramCount = handler->GetParamCount();
+        for (unsigned int i = 0; i < paramCount && i < (int)stringParams.size(); i++) {
             // Check if parameter is by reference
             int typeId;
             asDWORD flags;
@@ -1359,7 +1366,7 @@ namespace ASBuiltinFunctions
             g_AdvancedSystems.activeSequences.clear();
             
             // Initialize HP monitoring for all players
-            for (int i = 1; i <= gpGlobals->maxClients; i++) {
+            for (unsigned int i = 1; i <= gpGlobals->maxClients; i++) {
                 CBasePlayer* pPlayer = GetPlayerByIndexHelper(i);
                 if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free && (pPlayer->edict()->v.flags & FL_CLIENT)) {
                     // Set up HP monitoring for this player

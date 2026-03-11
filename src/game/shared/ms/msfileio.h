@@ -25,7 +25,9 @@ public:
 	virtual bool Read(void* pvData, size_t Size);
 	void ReadByte(byte& Data) { Read((void*)&Data, 1); }
 	void ReadShort(short& Data) { Read((void*)&Data, 2); }
+	void ReadShort(unsigned short& Data) { Read((void*)&Data, 2); }
 	void ReadInt(int& Data) { Read((void*)&Data, sizeof(int)); }
+	void ReadInt(unsigned int& Data) { Read((void*)&Data, sizeof(int)); }
 	void ReadFloat(float& Data) { Read((void*)&Data, 8); }
 	void ReadCoord(Vector& Data) { Read((void*)&Data, 8 * 3); }
 	void ReadString(char* Data, size_t length);

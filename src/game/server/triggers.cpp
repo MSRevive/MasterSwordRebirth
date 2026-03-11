@@ -308,8 +308,8 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	int m_cTargets;							  // the total number of targets in this manager's fire list.
-	int m_index;							  // Current target
+	unsigned int m_cTargets;							  // the total number of targets in this manager's fire list.
+	unsigned int m_index;							  // Current target
 	float m_startTime;						  // Time we started firing
 	int m_iTargetName[MAX_MULTI_TARGETS];	  // list if indexes into global string array
 	float m_flTargetDelay[MAX_MULTI_TARGETS]; // delay (in seconds) from time of manager fire to target fire
@@ -386,7 +386,7 @@ void CMultiManager ::Spawn(void)
 	while (swapped)
 	{
 		swapped = 0;
-		for (int i = 1; i < m_cTargets; i++)
+		for (unsigned int i = 1; i < m_cTargets; i++)
 		{
 			if (m_flTargetDelay[i] < m_flTargetDelay[i - 1])
 			{
@@ -405,7 +405,7 @@ void CMultiManager ::Spawn(void)
 
 BOOL CMultiManager::HasTarget(string_t targetname)
 {
-	for (int i = 0; i < m_cTargets; i++)
+	for (unsigned int i = 0; i < m_cTargets; i++)
 		if (FStrEq(STRING(targetname), STRING(m_iTargetName[i])))
 			return TRUE;
 
@@ -1537,7 +1537,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		if (myclass.starts_with("trigger_once") && trig_eventallinbounds)
 		{
 			CBaseEntity *pList[255];
-			int tcount;
+			unsigned int tcount;
 			//can't remember how to build flags off hand, so h4x...
 			if (!(pev->spawnflags & SF_TRIGGER_NOCLIENTS) && !(pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_CLIENT);
@@ -1545,7 +1545,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_CLIENT | FL_MONSTER);
 			else if ((pev->spawnflags & SF_TRIGGER_NOCLIENTS) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_MONSTER);
-			for (int i = 0; i < tcount; i++)
+			for (unsigned int i = 0; i < tcount; i++)
 			{
 				//Print("DEBUG: trigger_once running %s on %s\n", m_scriptevent.c_str(), pList[i]->m_DisplayName.c_str());
 				if (pList[i] != pActivator)
@@ -2715,7 +2715,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_hPlayer[MAXPLAYERS];
-	int m_iNumPlayers;
+	unsigned int m_iNumPlayers;
 
 	EHANDLE m_hTarget;
 	CBaseEntity *m_pentPath;
@@ -2829,7 +2829,7 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	//Camera takes control of all players?
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALL)) 
 	{
-		for (int i = 0; i < gpGlobals->maxClients; i++)
+		for (unsigned int i = 0; i < gpGlobals->maxClients; i++)
 		{
 			pActivator = UTIL_PlayerByIndex(i + 1); //get pointer to player's cbaseentity
 			if (!pActivator || !pActivator->IsPlayer())
@@ -2867,7 +2867,7 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)) //Freeze player(s)?
 	{
-		for (int i = 0; i < m_iNumPlayers; i++)
+		for (unsigned int i = 0; i < m_iNumPlayers; i++)
 		{
 			((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(FALSE);
 		}
@@ -2888,7 +2888,7 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	
-	for (int i = 0; i < m_iNumPlayers; i++)
+	for (unsigned int i = 0; i < m_iNumPlayers; i++)
 	{
 		SET_VIEW(m_hPlayer[i]->edict(), edict());
 
@@ -2907,7 +2907,7 @@ void CTriggerCamera::FollowTarget()
 {
 	if (m_hTarget == NULL || m_flReturnTime < gpGlobals->time) //Attempt to restore player view
 	{
-		for (int i = 0; i < m_iNumPlayers; i++) 
+		for (unsigned int i = 0; i < m_iNumPlayers; i++) 
 		{
 			if (m_hPlayer == NULL)
 				continue;

@@ -588,7 +588,7 @@ void CHudScript::Effects_UpdateTempEnt(const char* EventName, msstringlist *Para
 {
 	//Update tempents
 	TEMPENTITY *pTempEnt = g_CurrentTempEnt; //Save a copy, because this could get set to NULL during RunScriptEventByName
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript *Script = m_Scripts[i];
 		if (pTempEnt->entity.curstate.iuser2 != (int)Script)
@@ -649,7 +649,7 @@ const char* CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 	BEAM *pBeam = found_beam ? m_Beams[beamid] : NULL;
 	/*
 	bool found_beam = false;
-	 for (int i = 0; i < m_Beams.size(); i++) 
+	 for (unsigned int i = 0; i < m_Beams.size(); i++) 
 	{
 		Print("DEBUG: $get_clbeam checking %i for %i\n",i,beamid);
 		if ( m_Beams[i]->id == beamid )
@@ -963,7 +963,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			p->die += 1.0;
 
 			int Spot = 0;
-			for (int i = 0; i < MAX_TEMPENT_EXTRA; i++)
+			for (unsigned int i = 0; i < MAX_TEMPENT_EXTRA; i++)
 				if (!g_TempEntExtra[i].Active)
 				{
 					Spot = i;
@@ -1115,7 +1115,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 				static mslist<msstring *> ValueParams;
 				ValueParams.clearitems();
 
-				for (int i = 0; i < Params.size() - 3; i++)
+				for (unsigned int i = 0; i < Params.size() - 3; i++)
 					ValueParams.add(&(Params[i + 3]));
 
 				SetClEntityProp(p->entity, Cmd, ValueParams);
@@ -1181,7 +1181,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			static mslist<msstring *> ValueParams;
 			ValueParams.clearitems();
 
-			for (int i = 0; i < Params.size() - 3; i++)
+			for (unsigned int i = 0; i < Params.size() - 3; i++)
 				ValueParams.add(&Params[i + 3]);
 
 			SetClEntityProp(*g_CurrentEnt, Cmd, ValueParams);
@@ -1207,7 +1207,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			static mslist<msstring *> ValueParams;
 			ValueParams.clearitems();
 
-			for (int i = 0; i < Params.size() - 3; i++)
+			for (unsigned int i = 0; i < Params.size() - 3; i++)
 				ValueParams.add(&Params[i + 3]);
 
 			SetClEntityProp(*pEnt, Cmd, ValueParams);
@@ -1222,7 +1222,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		dlight_t NewLight;
 		clrmem(NewLight);
 		bool EntityLight = false;
-		int NextParm = 2;
+		unsigned int NextParm = 2;
 
 		NewLight.origin = StringToVec(Params[NextParm++]);
 		NewLight.radius = atof(Params[NextParm++]);
@@ -1385,7 +1385,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			if ( m_Beams.size() > 0 )
 			{
 				float gcltime = gEngfuncs.GetClientTime();
-				 for (int i = 0; i < m_Beams.size(); i++) 
+				 for (unsigned int i = 0; i < m_Beams.size(); i++) 
 					if ( m_Beams[i]->die > 0 && m_Beams[i]->die < gcltime )
 						m_Beams.erase(i);
 			}
@@ -1418,7 +1418,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 		if (Params.size() >= 2 && Params[1] == "removeall")
 		{
 			size_t size = m_Beams.size();
-			for (int i = 0; i < size; i++)
+			for (unsigned int i = 0; i < size; i++)
 			{
 				BEAM* pBeam = m_Beams[i];
 				if ( pBeam ) pBeam->die = 0;
@@ -1433,7 +1433,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 
 			/*
 			bool found_beam =false;
-			 for (int i = 0; i < m_Beams.size(); i++) 
+			 for (unsigned int i = 0; i < m_Beams.size(); i++) 
 			{
 				Print("DEBUG: beam_update checking %i for %i\n",i,beamid);
 				if ( m_Beams[i]->id == beamid )
@@ -1530,7 +1530,7 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			/*if(Params[2].contains("clmsg"))
 			{
 				msstring sTemp = "ce";
-				for (int i = 0; i < Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
+				for (unsigned int i = 0; i < Params.size(); i++) //Thothie SEP2019_03 - fix need for "x" param (was Params.size()-1 )
 				{
 					if (i > 0)
 					{
@@ -1897,7 +1897,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 	{
 		if (g_TempEntNewLevel)
 		{
-			for (int i = 0; i < MAX_TEMPENT_EXTRA; i++) //On level change, this is called.  Clear all tempent extra data from last level
+			for (unsigned int i = 0; i < MAX_TEMPENT_EXTRA; i++) //On level change, this is called.  Clear all tempent extra data from last level
 				clrmem(g_TempEntExtra[i]);
 
 			g_TempEntNewLevel = false;

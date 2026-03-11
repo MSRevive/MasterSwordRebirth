@@ -85,7 +85,7 @@ public:
 		setSize(x, y);
 	}
 
-	void Update(std::vector<CInfoWindow*> &Windows, int idx)
+	void Update(std::vector<CInfoWindow*> &Windows, unsigned int idx)
 	{
 		float elapsedtime = gpGlobals->time - m_TimeDisplayed;
 
@@ -108,7 +108,7 @@ public:
 		m_iTransparency = 255 - ((255 - INFOWIN_BKTRANS) * fadeamt);
 
 		int yPos = m_StartY;
-		for (int i = 0; i < idx; i++)
+		for (unsigned int i = 0; i < idx; i++)
 			yPos += Windows[i]->getTall() + INFOWIN_DISPLAY_SPACER_Y;
 
 		if (idx > 0)

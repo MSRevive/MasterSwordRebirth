@@ -3571,7 +3571,7 @@ void PM_Init(struct playermove_s *ppmove)
 	PM_InitTextureTypes();
 
 	//The engine copies the hull sizes initialized by PM_GetHullBounds *before* PM_GetHullBounds is actually called, so manually initialize these.
-	for (int i = 0; i < NUM_HULLS; ++i)
+	for (unsigned int i = 0; i < NUM_HULLS; ++i)
 	{
 		if (!PM_GetHullBounds(i, pmove->player_mins[i], pmove->player_maxs[i]))
 		{

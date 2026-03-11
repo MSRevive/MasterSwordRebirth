@@ -92,7 +92,7 @@ int LookupActivity(void *pmodel, entvars_t *pev, int activity)
 
 	int weighttotal = 0;
 	int seq = ACTIVITY_NOT_AVAILABLE;
-	for (int i = 0; i < pstudiohdr->numseq; i++)
+	for (unsigned int i = 0; i < pstudiohdr->numseq; i++)
 	{
 		if (pseqdesc[i].activity == activity)
 		{
@@ -119,7 +119,7 @@ int LookupActivityHeaviest(void *pmodel, entvars_t *pev, int activity)
 
 	int weight = 0;
 	int seq = ACTIVITY_NOT_AVAILABLE;
-	for (int i = 0; i < pstudiohdr->numseq; i++)
+	for (unsigned int i = 0; i < pstudiohdr->numseq; i++)
 	{
 		if (pseqdesc[i].activity == activity)
 		{
@@ -162,7 +162,7 @@ int LookupSequence(void* pmodel, const char* label)
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex);
 
-	for (int i = 0; i < pstudiohdr->numseq; i++)
+	for (unsigned int i = 0; i < pstudiohdr->numseq; i++)
 	{
 		if (_stricmp(pseqdesc[i].label, label) == 0)
 			return i;
@@ -202,7 +202,7 @@ int IsSoundEvent(int eventNumber)
 
 void SequencePrecache(void *pmodel, const char *pSequenceName)
 {
-	int index = LookupSequence(pmodel, pSequenceName);
+	unsigned int index = LookupSequence(pmodel, pSequenceName);
 	if (index >= 0)
 	{
 		studiohdr_t *pstudiohdr;
@@ -217,7 +217,7 @@ void SequencePrecache(void *pmodel, const char *pSequenceName)
 		pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex) + index;
 		pevent = (mstudioevent_t *)((byte *)pstudiohdr + pseqdesc->eventindex);
 
-		for (int i = 0; i < pseqdesc->numevents; i++)
+		for (unsigned int i = 0; i < pseqdesc->numevents; i++)
 		{
 			// Don't send client-side events to the server AI
 			if (pevent[i].event >= EVENT_CLIENT)
@@ -287,7 +287,7 @@ int GetSequenceFlags(void *pmodel, entvars_t *pev)
 	return pseqdesc->flags;
 }
 
-int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, int index)
+int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEvent, float flStart, float flEnd, unsigned int index)
 {
 	studiohdr_t* pstudiohdr;
 
@@ -317,7 +317,7 @@ int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEven
 		flEnd = 1.0;
 	}
 
-	for (; index < pseqdesc->numevents; index++)
+	for (index; index < pseqdesc->numevents; index++)
 	{
 		// Don't send client-side events to the server AI
 		if (pevent[index].event >= EVENT_CLIENT)
@@ -477,7 +477,7 @@ int FindTransition(void *pmodel, int iEndingAnim, int iGoalAnim, int *piDir)
 	if (iInternNode == 0)
 		return iGoalAnim;
 
-	int i;
+	unsigned int i;
 
 	// look for someone going
 	for (i = 0; i < pstudiohdr->numseq; i++)

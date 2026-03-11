@@ -15,13 +15,13 @@ int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>&
 	bool bValid;
 	bool bFilterFail;
 	bool bCheckMax = vMax > 0;
-	for (int i = 0; i < MAX_SEARCH_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_SEARCH_ENTITIES; i++)
 	{
 		CFindEntity vEntity = CFindEntity::GetEntity(i, bValid);
 		if (!bValid || vEntity.GetWrapped() == pIgnoreEntity) continue;
 
 		bFilterFail = false;
-		for (int j = 0; j < vFilters.size(); j++)
+		for (unsigned int j = 0; j < vFilters.size(); j++)
 		{
 			if (!vFilters[j]->Allow(vEntity))
 			{

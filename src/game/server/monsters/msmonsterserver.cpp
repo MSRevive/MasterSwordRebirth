@@ -136,7 +136,7 @@ void CMSMonster::Spawn()
 	m_OldGold = 0;
 
 	// Initialize menu protection flags to false for all players
-	for (int i = 0; i < MAXPLAYERS; i++)
+	for (unsigned int i = 0; i < MAXPLAYERS; i++)
 	{
 		m_MenuOptionsProtected[i] = false;
 	}
@@ -150,7 +150,7 @@ void CMSMonster::Spawn()
 	{
 		//precache all random mob scripts
 		msstring orig_scriptName = m_ScriptName;
-		for (int i = 0; i < m_nRndMobs; i++)
+		for (unsigned int i = 0; i < m_nRndMobs; i++)
 		{
 			MS_DEBUG("DEBUG: msmonster_random precache #%i / %i as %s", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
@@ -430,7 +430,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (random_monsterdata.size() == 0)
 		{
 			//random_monster_t tmp;
-			for (int i = 0; i < 32; i++)
+			for (unsigned int i = 0; i < 32; i++)
 			{
 				random_monsterdata.add_blank();
 			};
@@ -1262,7 +1262,7 @@ void CMSMonster::AvoidFrontObject(float MoveAmt)
 
 			Vector vAng, vAvoidDir, SideAng[2];
 			float Dist[2];
-			for (int i = 0; i < 2; i++) //Try each side
+			for (unsigned int i = 0; i < 2; i++) //Try each side
 			{
 				//Finds the forward vector of the avoidance direction
 				vAng.y = UTIL_AngleMod(m_LastYaw + ang * -Side[i]);
@@ -1613,13 +1613,13 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 
 	CBaseEntity* pList[255], * pEnt = NULL;
 	// Fill pList with a all the monsters and players on the level including players that have died.
-	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
+	unsigned int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
 
 	// Keep track of players that have already received a message;
 	std::set<CBaseEntity*> pTrackAlreadySent = {};
 
 	// Now try to speak to each one
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 		if (pEnt == NULL)
@@ -1727,18 +1727,18 @@ void CMSMonster::HearPhrase(CMSMonster* pSpeaker, const char* phrase)
 	listenphrase_t* BestPhrase = NULL;
 	float BestMatchedRatio = 0;
 
-	for (int i = 0; i < m_Phrases.size(); i++)
+	for (unsigned int i = 0; i < m_Phrases.size(); i++)
 	{
 		listenphrase_t& Phrase = m_Phrases[i];
-		for (int p = 0; p < Phrase.Phrases.size(); p++)
+		for (unsigned int p = 0; p < Phrase.Phrases.size(); p++)
 		{
 			const char* CheckPhrase = Phrase.Phrases[p];
 			const char* SubPhrase = NULL;
 			if (SubPhrase = strstr(cTemp1, CheckPhrase))
 			{
 				int Matched = 0;
-				int len = strlen(CheckPhrase);
-				for (int x = 0; x < len; x++)
+				unsigned int len = strlen(CheckPhrase);
+				for (unsigned int x = 0; x < len; x++)
 					if (SubPhrase[x] == CheckPhrase[x])
 						Matched++;
 
@@ -2213,7 +2213,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		//Damage Modifiers ( takedmg xxx )
 		Damage.flDamage *= m.GenericTDM;
 		if (Damage.sDamageType)
-			for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
+			for (unsigned int i = 0; i < m.TakeDamageModifiers.size(); i++)
 			{
 				takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 				//msstring thoth_my_dmgtype = TDM.DamageType;
@@ -2260,7 +2260,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//Each script sets a ratio of damage you should take.  Factor each one into the damage
 			msstringlist DamageRatios;
 			TokenizeString(m_ReturnData, DamageRatios);
-			for (int i = 0; i < DamageRatios.size(); i++)
+			for (unsigned int i = 0; i < DamageRatios.size(); i++)
 				Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
 		}
 
@@ -2408,7 +2408,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		IScripted* pScripted = (pTarget ? pTarget->GetScripted() : NULL);
 		if (pScripted)
 		{
-			for (int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
+			for (unsigned int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
 			{
 				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect 
 				{
@@ -2707,7 +2707,7 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 
 		//Look through the other SubStats for one that's not at the cap, yet.
 		//Not random, but good enough.
-		for (int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 1; i++)
 		{
 			iStatType = (iStatType + 1) % 3;
 			CSubStat& SubStat = pStat->m_SubStats[iStatType];
@@ -2795,7 +2795,7 @@ void CMSMonster::SetSpeed()
 	float SpeedPercent = 100.0f;
 	m_Framerate_Modifier = 1.0;
 
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		if (!m_Scripts[i]->VarExists("game.effect.id"))
 			continue;
@@ -2819,7 +2819,7 @@ void CMSMonster::SetSpeed()
 	//Can't move while a spell is preparing
 	//Thothie/Orochi APR2011_04 - undone
 	/*
-	 for (int i = 0; i < MAX_NPC_HANDS; i++)
+	 for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if( Hand(i) && !Hand(i)->Spell_CanAttack() )
 			SpeedPercent = 0;  //Percentage of normal speed
 	*/
@@ -2869,7 +2869,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 
 	m_MenuCurrentOptions = NULL;
 
-	for (int i = 0; i < Menuoptions.size(); i++)
+	for (unsigned int i = 0; i < Menuoptions.size(); i++)
 	{
 		menuoption_t& MenuOption = Menuoptions[i];
 		if (MenuOption.Access != MOA_ALL)
@@ -2973,7 +2973,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			static mslist<CGenericItem*> TotalFoundItems;
 			TotalFoundItems.clearitems();
 
-			for (int i = 0; i < Payments.size(); i++)
+			for (unsigned int i = 0; i < Payments.size(); i++)
 			{
 				msstring& Payment = Payments[i];
 				if (Payment.starts_with("gold"))
@@ -3019,7 +3019,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 						break;
 					}
 
-					for (int x = 0; x < FoundItems.size(); x++)
+					for (unsigned int x = 0; x < FoundItems.size(); x++)
 						TotalFoundItems.add(FoundItems[x]);
 				}
 			}
@@ -3035,7 +3035,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			if (PlayerCanPay)
 			{
 				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
+				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
 					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
 				//pPlayer->RemoveItem( TotalFoundItems[i] );
 			}
@@ -3131,7 +3131,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			static mslist<CGenericItem*> TotalFoundItems;
 			TotalFoundItems.clearitems();
 
-			for (int i = 0; i < Payments.size(); i++)
+			for (unsigned int i = 0; i < Payments.size(); i++)
 			{
 				msstring& Payment = Payments[i];
 				if (Payment.starts_with("gold"))
@@ -3177,7 +3177,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 						break;
 					}
 
-					for (int x = 0; x < FoundItems.size(); x++)
+					for (unsigned int x = 0; x < FoundItems.size(); x++)
 						TotalFoundItems.add(FoundItems[x]);
 				}
 			}
@@ -3193,7 +3193,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			if (PlayerCanPay)
 			{
 				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
+				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
 					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
 				//pPlayer->RemoveItem( TotalFoundItems[i] );
 			}

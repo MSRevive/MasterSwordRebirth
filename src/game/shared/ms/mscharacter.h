@@ -52,7 +52,7 @@ enum charClientType
 struct charinfo_base_t
 {
 	int Index; // Keep track of index, because the characters might not be loaded in order	
-	int DataLen;
+	unsigned int DataLen;
 	char* Data;
 
 	charinfo_base_t()
@@ -194,7 +194,7 @@ struct charslot_t
 class ChooseChar_Interface
 {
 public:
-	static int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
+	static unsigned int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
 	static bool CentralServer;
 	static void UpdateCharScreen();
 	static void UpdateCharScreenUpload();

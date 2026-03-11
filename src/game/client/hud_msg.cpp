@@ -65,7 +65,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 	//g_NetCode.m.HostIP = READ_STRING();
 
 	MS_INFO("[MsgFunc_InitHUD: CLEnt Readin]");
-	for (int i = 0; i < CLPERMENT_TOTALK; i++)
+	for (unsigned int i = 0; i < CLPERMENT_TOTALK; i++)
 		MSGlobals::ClEntities[i] = READ_SHORT();
 	int flags = READ_BYTE();
 
@@ -86,7 +86,7 @@ void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 
 	MS_INFO("[MsgFunc_InitHUD: Clearvotes]");
 	vote_t::VotesTypesAllowed.clearitems();
-	for (int i = 0; i < vote_t::VotesTypes.size(); i++)
+	for (unsigned int i = 0; i < vote_t::VotesTypes.size(); i++)
 		if (FBitSet(VotesAllowed, (1 << i)))
 			vote_t::VotesTypesAllowed.add(vote_t::VotesTypes[i]);
 
