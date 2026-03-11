@@ -161,12 +161,6 @@ inline void PlaySound(const char *szSound, float vol) { gEngfuncs.pfnPlaySoundBy
 inline void PlaySound(int iSound, float vol) { gEngfuncs.pfnPlaySoundByIndex(iSound, vol); }
 inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound, vol); }
 
-inline float fabs(float x) {
-	if (x >= 0) return x;
-	else return (0 - x);
-};
-
-
 void ScaleColors(int &r, int &g, int &b, int a);
 
 template <typename Type>
