@@ -52,9 +52,9 @@ static void SCRIPT_CONTROLVEC_POS(CScript* Script, const char* name, Vector& vec
 	if (Script->VarExists(ScriptVarNameX.c_str())) vec.x += atof(Script->GetVar(ScriptVarNameX.c_str()));
 	if (Script->VarExists(ScriptVarNameY.c_str())) vec.y += atof(Script->GetVar(ScriptVarNameY.c_str()));
 	if (Script->VarExists(ScriptVarNameZ.c_str())) vec.z += atof(Script->GetVar(ScriptVarNameZ.c_str()));
-	if (Script->VarExists(ScriptVarSetNameX.c_str())) vec.x += atof(Script->GetVar(ScriptVarNameX.c_str()));
-	if (Script->VarExists(ScriptVarSetNameY.c_str())) vec.y += atof(Script->GetVar(ScriptVarNameY.c_str()));
-	if (Script->VarExists(ScriptVarSetNameZ.c_str())) vec.z += atof(Script->GetVar(ScriptVarNameZ.c_str()));
+	if (Script->VarExists(ScriptVarSetNameX.c_str())) vec.x = atof(Script->GetVar(ScriptVarNameX.c_str()));
+	if (Script->VarExists(ScriptVarSetNameY.c_str())) vec.y = atof(Script->GetVar(ScriptVarNameY.c_str()));
+	if (Script->VarExists(ScriptVarSetNameZ.c_str())) vec.z = atof(Script->GetVar(ScriptVarNameZ.c_str()));
 
 
 };
@@ -98,11 +98,11 @@ static void SCRIPT_CONTROLVEC_POS_CUSTOM(CScript* Script, const char* name, Vect
 	std::string ScriptVarCustomZSet{ name }; ScriptVarCustomZSet += set; ScriptVarCustomZSet += zname;
 
 	if (Script->VarExists(ScriptVarCustomXOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomXOffset.c_str())); 
-	if (Script->VarExists(ScriptVarCustomYOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomYOffset.c_str()));
-	if (Script->VarExists(ScriptVarCustomZOffset.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomZOffset.c_str()));
-	if (Script->VarExists(ScriptVarCustomXSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomXSet.c_str()));
-	if (Script->VarExists(ScriptVarCustomYSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomYSet.c_str()));
-	if (Script->VarExists(ScriptVarCustomZSet.c_str())) vec.x += atof(Script->GetVar(ScriptVarCustomZSet.c_str()));
+	if (Script->VarExists(ScriptVarCustomYOffset.c_str())) vec.y += atof(Script->GetVar(ScriptVarCustomYOffset.c_str()));
+	if (Script->VarExists(ScriptVarCustomZOffset.c_str())) vec.z += atof(Script->GetVar(ScriptVarCustomZOffset.c_str()));
+	if (Script->VarExists(ScriptVarCustomXSet.c_str())) vec.x = atof(Script->GetVar(ScriptVarCustomXSet.c_str()));
+	if (Script->VarExists(ScriptVarCustomYSet.c_str())) vec.y = atof(Script->GetVar(ScriptVarCustomYSet.c_str()));
+	if (Script->VarExists(ScriptVarCustomZSet.c_str())) vec.z = atof(Script->GetVar(ScriptVarCustomZSet.c_str()));
 
 };
 /*
