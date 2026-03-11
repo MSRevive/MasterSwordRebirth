@@ -39,17 +39,16 @@ struct DeathNoticeItem
 	float *VictimColor;
 };
 
-#define MAX_DEATHNOTICES 4
+constexpr int MAX_DEATHNOTICES = 4;
 static int DEATHNOTICE_DISPLAY_TIME = 6;
-
-#define DEATHNOTICE_TOP 20
+constexpr int DEATHNOTICE_TOP = 20;
 
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES + 1];
 
-float g_ColorBlue[3] = {0.6, 0.8, 1.0};
-float g_ColorRed[3] = {1.0, 0.25, 0.25};
-float g_ColorGreen[3] = {0.6, 1.0, 0.6};
-float g_ColorYellow[3] = {1.0, 0.7, 0.0};
+constexpr float g_ColorBlue[3] = {0.6, 0.8, 1.0};
+constexpr float g_ColorRed[3] = {1.0, 0.25, 0.25};
+constexpr float g_ColorGreen[3] = {0.6, 1.0, 0.6};
+constexpr float g_ColorYellow[3] = {1.0, 0.7, 0.0};
 
 float *GetClientColor(int clientIndex)
 {
