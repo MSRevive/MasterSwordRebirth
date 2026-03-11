@@ -91,7 +91,6 @@ int GreatestCommonDivisor(int i1, int i2);
 
 void AngleVectors(const Vector& angles, Vector* forward, Vector* right, Vector* up);
 void AngleVectorsTranspose(const Vector& angles, Vector* forward, Vector* right, Vector* up);
-#define AngleIVectors AngleVectorsTranspose
 
 void AngleMatrix(const float* angles, float (*matrix)[4]);
 void AngleIMatrix(const Vector& angles, float (*matrix)[4]);
