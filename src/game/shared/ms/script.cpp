@@ -35,7 +35,6 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 //#include <unordered_map>
 
 #undef SCRIPTVAR
-#define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
 #define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser

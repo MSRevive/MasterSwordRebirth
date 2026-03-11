@@ -34,7 +34,6 @@
 #undef SCRIPTVAR
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define ERROR_MISSING_PARMS MS_ERROR("ExecuteScriptCmd: Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), Cmd.Name().c_str())
-#define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )
 void Player_UseStamina(float flAddAmt);
 extern "C" playermove_t *pmove;
 

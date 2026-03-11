@@ -6,6 +6,10 @@
 #include <ctime>
 #include <vector>
 
+inline Vector VecMultiply(Vector a, Vector b) {
+	return Vector(a[0] * b[0], a[1] * b[1], a[2] * b[2]);
+};
+
 class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
