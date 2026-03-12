@@ -2184,7 +2184,7 @@ void CStudioModelRenderer::StudioRenderModel(void)
 	alight_t lighting;
 	vec3_t lightdir;
 
-	HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
+	gHUD.m_HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
 
 	lighting.plightvec = lightdir;
 	IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);

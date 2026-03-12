@@ -582,7 +582,7 @@ void TempEntHitCallback(struct tempent_s *ent, struct pmtrace_s *ptr)
 		{
 			Params.add("world");
 		}
-		HUDScript->Effects_UpdateTempEnt(TempEntExtra.CBCollide_CallbackEvent, &Params);
+		gHUD.m_HUDScript->Effects_UpdateTempEnt(TempEntExtra.CBCollide_CallbackEvent, &Params);
 	}
 	g_CurrentTempEnt = NULL;
 }
@@ -2065,7 +2065,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 							TempExtra.CBTimer_Enabled = false;
 
 							g_CurrentTempEnt = pTemp;
-							HUDScript->Effects_UpdateTempEnt(TempExtra.CBTimer_CallbackEvent);
+							gHUD.m_HUDScript->Effects_UpdateTempEnt(TempExtra.CBTimer_CallbackEvent);
 							g_CurrentTempEnt = NULL;
 						}
 
@@ -2086,7 +2086,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 						{
 							TempExtra.CBWater_Enabled = false;
 							g_CurrentTempEnt = pTemp;
-							HUDScript->Effects_UpdateTempEnt(TempExtra.CBWater_CallbackEvent);
+							gHUD.m_HUDScript->Effects_UpdateTempEnt(TempExtra.CBWater_CallbackEvent);
 							g_CurrentTempEnt = NULL;
 						}
 				}

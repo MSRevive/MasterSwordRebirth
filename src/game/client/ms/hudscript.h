@@ -35,6 +35,6 @@ public:
 	void Effects_Render(cl_entity_t &Ent, bool InMirror);
 	void Effects_DrawTransPararentTriangles();
 };
-#define HUDScript gHUD.m_HUDScript
+
 
 #endif //HUDSCRIPT_H

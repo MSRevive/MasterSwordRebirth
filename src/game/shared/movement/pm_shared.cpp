@@ -3521,7 +3521,7 @@ void PM_Move(struct playermove_s *ppmove, qboolean server)
 	CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(pmove->player_index + 1);
 	PMScript = pPlayer ? pPlayer->GetScripted() : NULL;
 #else
-	PMScript = HUDScript;
+	PMScript = gHUD.m_HUDScript;
 #endif
 
 	PM_PlayerMove(server);
