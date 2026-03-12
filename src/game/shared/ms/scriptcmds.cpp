@@ -1662,16 +1662,16 @@ const char* CBaseEntity::GetProp(CBaseEntity* pTarget, msstring& FullParams, mss
 				else if (Prop.starts_with("skill."))
 				{
 					int SubSkill = -1;
-					if (Prop.contains(".prof"))				SubSkill = STATPROP_SKILL;
-					else if (Prop.contains(".balance"))		SubSkill = STATPROP_BALANCE;
-					else if (Prop.contains(".power"))		SubSkill = STATPROP_POWER;
+					if (Prop.contains(".prof"))				SubSkill = STAT_PROP_SKILL;
+					else if (Prop.contains(".balance"))		SubSkill = STAT_PROP_BALANCE;
+					else if (Prop.contains(".power"))		SubSkill = STAT_PROP_POWER;
 					else if (Prop.contains(".fire"))		SubSkill = STAT_MAGIC_FIRE;
 					else if (Prop.contains(".ice"))			SubSkill = STAT_MAGIC_ICE;
 					else if (Prop.contains(".lightning"))	SubSkill = STAT_MAGIC_LIGHTNING;
 					else if (Prop.contains(".divination"))	SubSkill = STAT_MAGIC_DIVINATION;
 					else if (Prop.contains(".affliction"))	SubSkill = STAT_MAGIC_AFFLICTION;
 
-					int Max = (SubSkill > -1) ? (int)STATPROP_MAX_VALUE : (int)STAT_MAX_VALUE;
+					int Max = (SubSkill > -1) ? (int)STAT_PROP_MAX_VALUE : (int)STAT_MAX_VALUE;
 
 					if (Prop.contains(".max")) return RETURN_INT(Max);
 					else

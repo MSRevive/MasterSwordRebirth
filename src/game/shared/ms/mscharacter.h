@@ -109,17 +109,17 @@ struct charsendinfo_t : charinfo_base_t
 
 struct natstat_t
 {
-	short Value[STATPROP_TOTAL];
+	short Value[STAT_PROP_TOTAL];
 };
 struct skillstat_t
 {
-	short Value[STATPROP_TOTAL];
-	ulong Exp[STATPROP_TOTAL];
+	short Value[STAT_PROP_TOTAL];
+	ulong Exp[STAT_PROP_TOTAL];
 };
 struct spellskillstat_t
 {
-	short Value[STATPROP_TOTAL];
-	long Exp[STATPROP_TOTAL];
+	short Value[STAT_PROP_TOTAL];
+	long Exp[STAT_PROP_TOTAL];
 };
 
 #define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic

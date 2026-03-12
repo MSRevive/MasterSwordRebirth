@@ -5336,7 +5336,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 				}
 			}
 			else
-				MS_ERROR("Script::ParseLine() Script: %s Line: %i - if() statement missing ')'!", (const char*)m.ScriptFile.c_str(), LineNum);
+				MS_ERROR("Script::ParseLine() Script: %s Line: %i - if() statement missing ')'! Value: %c", (const char*)m.ScriptFile.c_str(), LineNum, ParamStr.c_str()[0]);
 		}
 	}
 	else if (!_stricmp(TestCommand, "else"))

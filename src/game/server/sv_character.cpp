@@ -46,9 +46,9 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 		CStat &Stat = m_Stats[i];
 		if (Stat.m_SubStats.size() == 1) //Parry - Only give 1 to proficiency
 			Stat.m_SubStats[0].Value = 1;
-		else if (Stat.m_SubStats.size() <= STATPROP_TOTAL) //Weapon Skills - Give 1 to power
-			Stat.m_SubStats[STATPROP_POWER].Value = 1;
-		else if (Stat.m_SubStats.size() > STATPROP_TOTAL) //Spellcasting - Give 1 to each spell category
+		else if (Stat.m_SubStats.size() <= STAT_PROP_TOTAL) //Weapon Skills - Give 1 to power
+			Stat.m_SubStats[STAT_PROP_POWER].Value = 1;
+		else if (Stat.m_SubStats.size() > STAT_PROP_TOTAL) //Spellcasting - Give 1 to each spell category
 			for (unsigned int r = 0; r < Stat.m_SubStats.size(); r++)
 				Stat.m_SubStats[r].Value = 1;
 	}

@@ -409,7 +409,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
 				// {
-				// 	for (unsigned int s = 0; s < STATPROP_ALL_TOTAL; s++)
+				// 	for (unsigned int s = 0; s < STAT_PROP_ALL_TOTAL; s++)
 				// 		m_PlayerDamage[p].dmg[r][s] = 0;
 				// }
 				// m_PlayerDamage[p].dmgInTotal = 0;
@@ -441,7 +441,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				{
 					// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
 					// {
-					// 	for (unsigned int s = 0; s < STATPROP_ALL_TOTAL; s++)
+					// 	for (unsigned int s = 0; s < STAT_PROP_ALL_TOTAL; s++)
 					// 		m_PlayerDamage[p].dmg[r][s] = 0;
 					// }
 					// m_PlayerDamage[p].dmgInTotal = 0;
@@ -1345,7 +1345,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 						if (iProp > -1)
 						{
 							int value = atoi(Params[1]);
-							pStat->m_SubStats[iProp].Value = V_min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = V_min(value, STAT_PROP_MAX_VALUE);
 						}
 					}
 				}

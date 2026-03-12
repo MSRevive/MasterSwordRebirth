@@ -16,18 +16,18 @@ statinfo_t NatStatList[6] =
 
 skillstatinfo_t SkillStatList[9] =
 {
-	{"Swordsmanship", "swordsmanship", STATPROP_TOTAL},
-	{"Martial Arts", "martialarts", STATPROP_TOTAL},
-	{"Small Arms", "smallarms", STATPROP_TOTAL},
-	{"Axe Handling", "axehandling", STATPROP_TOTAL},
-	{"Blunt Arms", "bluntarms", STATPROP_TOTAL},
-	{"Archery", "archery", STATPROP_TOTAL},
+	{"Swordsmanship", "swordsmanship", STAT_PROP_TOTAL},
+	{"Martial Arts", "martialarts", STAT_PROP_TOTAL},
+	{"Small Arms", "smallarms", STAT_PROP_TOTAL},
+	{"Axe Handling", "axehandling", STAT_PROP_TOTAL},
+	{"Blunt Arms", "bluntarms", STAT_PROP_TOTAL},
+	{"Archery", "archery", STAT_PROP_TOTAL},
 	//	"Shield handling",
 	//	"Two-handed weapons",
 	//	"Dual weapons",
 	{"Spell Casting", "spellcasting", STAT_MAGIC_TOTAL},
 	{"Parry", "parry", 1},
-	{"Pole Arms", "polearms", STATPROP_TOTAL}, // MiB JUL2010_02 - Pole Arms!
+	{"Pole Arms", "polearms", STAT_PROP_TOTAL}, // MiB JUL2010_02 - Pole Arms!
 	//	"Spell Preparation",
 	//	"Swimming",
 	//	"Pickpocket", true,
@@ -70,7 +70,7 @@ int GetSubSkillByName(const char* pszName)
 {
 	if (!_stricmp(pszName, "prof")) // alias for proficiency
 		return 0;
-	for (unsigned int i = 0; i < STATPROP_TOTAL; i++)
+	for (unsigned int i = 0; i < STAT_PROP_TOTAL; i++)
 		if (!_stricmp(pszName, SkillTypeList[i]))
 			return i;
 	for (unsigned int i = 0; i < STAT_MAGIC_TOTAL; i++)

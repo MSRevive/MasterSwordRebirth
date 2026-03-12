@@ -2129,7 +2129,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//- maybe internalize Parry for monsters?
 			//- Thothie note of FEB2008a
 
-			int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
+			int ParryValue = GetSkillStat("parry", STAT_PROP_SKILL);
 
 			if (ParryValue > 60)
 				ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
@@ -2198,14 +2198,14 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 				//Learn parry skill from  a successful parry
 				if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
 					if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
-						LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
+						LearnSkill ( SKILL_PARRY, STAT_PROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
 				//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
 
 					/*if (pMonster->m_SkillLevel * 2 > 0)
-						LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
+						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, pMonster->m_SkillLevel * 2 );
 					else
-						LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
-					//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
+						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, 0 );
+					//LearnSkill( SKILL_PARRY, STAT_PROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
 			}
 		}
 
@@ -2434,7 +2434,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			float mult = V_min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
 			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
-				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
+				for (int r = 0; r < STAT_PROP_ALL_TOTAL; r++)
 				{
 					float dmg = m_PlayerDamage[i - 1].dmg[n][r];
 					if (dmg > 0)
@@ -2760,8 +2760,8 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
-	if (SubStat.Value > STATPROP_MAX_VALUE)
-		SubStat.Value = STATPROP_MAX_VALUE;
+	if (SubStat.Value > STAT_PROP_MAX_VALUE)
+		SubStat.Value = STAT_PROP_MAX_VALUE;
 	SubStat.Exp = 0;
 
 	//Thothie - why's this here twice? I dont see where oldval could change.

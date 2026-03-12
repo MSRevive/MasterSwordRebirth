@@ -504,9 +504,9 @@ void CGenericItem::RegisterAttack()
 		attData.StatPower = Stat;
 		attData.StatProf = Stat;
 		attData.StatExp = Stat;
-		attData.PropBalance = STATPROP_BALANCE;
-		attData.PropPower = STATPROP_POWER;
-		attData.PropProf = STATPROP_BALANCE;
+		attData.PropBalance = STAT_PROP_BALANCE;
+		attData.PropPower = STAT_PROP_POWER;
+		attData.PropProf = STAT_PROP_BALANCE;
 		attData.PropExp = -1;	//Random
 	}*/
 
@@ -753,7 +753,7 @@ void CGenericItem::StrikeLand()
 	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
 	float flDamage = CurrentAttack->flDamage + randomMulti; //fine even if 0.
 
-	flDamageFraction = CurrentAttackBalance / STATPROP_MAX_VALUE;
+	flDamageFraction = CurrentAttackBalance / STAT_PROP_MAX_VALUE;
 	flDamageFraction = V_max(flDamageFraction, 0);
 
 	std::string szDamage = std::to_string(flDamage);
@@ -764,7 +764,7 @@ void CGenericItem::StrikeLand()
 	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
 
 	//fraction based on balance. Power stat for weapon -> 45? Multiplier is 0.45
-	flDamageFraction = CurrentAttackPower / STATPROP_MAX_VALUE;
+	flDamageFraction = CurrentAttackPower / STAT_PROP_MAX_VALUE;
 	flDamageFraction = V_max(flDamageFraction, 0.001f); //why is this 0.001f?
 
 	std::string szPower = std::to_string(CurrentAttackPower);
@@ -772,8 +772,8 @@ void CGenericItem::StrikeLand()
 
 	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Power: %s : Fraction: %s", szPower.c_str(), szFraction.c_str());	
 
-	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
-	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
+	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STAT_PROP_POWER ) / STAT_PROP_MAX_VALUE,0);
+	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_POWER ) );
 	// 	
 
 	flDamage *= flDamageFraction;
@@ -1041,7 +1041,7 @@ void CGenericItem::ChargeThrowProj()
 		flTimeHeldAdjusted = CurrentAttack->tMaxHold ? (flTimeHeldAdjusted / CurrentAttack->tMaxHold) : 0; //[0.0 to 1.0]
 
 		//Shoot more accurately for higher skill
-		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STATPROP_MAX_VALUE;
+		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STAT_PROP_MAX_VALUE;
 		flAccFraction = 1 - V_min(V_max(flAccFraction, 0.0f), 1.0f);
 
 		//Shoot more accurately for drawing the bow back longer
@@ -1286,12 +1286,12 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 //									AttackStat = GetStatByName( STRING(pItem->CurrentAttack->sAttackStat) );
 //									//I missed the monster, so learn about accuracy
 //									if( !bActualHit )
-//										pPlayer->LearnSkill( AttackStat, STATPROP_BALANCE, pMonster->m_SkillLevel );
+//										pPlayer->LearnSkill( AttackStat, STAT_PROP_BALANCE, pMonster->m_SkillLevel );
 //									//I hit the monster, so learn about damage
 //									else
-//										pPlayer->LearnSkill( AttackStat, STATPROP_POWER, pMonster->m_SkillLevel );
+//										pPlayer->LearnSkill( AttackStat, STAT_PROP_POWER, pMonster->m_SkillLevel );
 //									//Always learn about proficiency
-//									pPlayer->LearnSkill( AttackStat, STATPROP_SKILL, pMonster->m_SkillLevel * max(pItem->CurrentAttack->iPriority,0.5) );
+//									pPlayer->LearnSkill( AttackStat, STAT_PROP_SKILL, pMonster->m_SkillLevel * max(pItem->CurrentAttack->iPriority,0.5) );
 //
 //								}
 //							}

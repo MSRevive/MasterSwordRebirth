@@ -5549,7 +5549,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 		StealNoticeCheck( this, pMonster, false );
 		m_TimeCanSteal = gpGlobals->time + 3.0;
 		}
-		if( !pMonster->IsPlayer() ) LearnSkill( MAKE_STRING("stealing"), STATPROP_SKILL, 15 );
+		if( !pMonster->IsPlayer() ) LearnSkill( MAKE_STRING("stealing"), STAT_PROP_SKILL, 15 );
 		*/}
 		break;
 		case TRANS_STEALITEM:
@@ -5675,7 +5675,7 @@ void StealNoticeCheck(CBasePlayer *pPlayer, CMSMonster *pVictim, bool fStealSucc
 	}
 	else {
 		//Succes, advance the skill
-		if( !pVictim->IsPlayer() ) pPlayer->LearnSkill( MAKE_STRING("theft"), STATPROP_SKILL, pVictim->GetNatStat(NATURAL_AWR) + pVictim->SkillLevel );
+		if( !pVictim->IsPlayer() ) pPlayer->LearnSkill( MAKE_STRING("theft"), STAT_PROP_SKILL, pVictim->GetNatStat(NATURAL_AWR) + pVictim->SkillLevel );
 	}
 	*/
 }

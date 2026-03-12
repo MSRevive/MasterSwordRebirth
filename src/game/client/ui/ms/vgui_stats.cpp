@@ -330,7 +330,7 @@ void CStatPanel::Update()
 				Percent = 0.0;
 
 			const char* Name = "";
-			if (iSubStats <= STATPROP_TOTAL)
+			if (iSubStats <= STAT_PROP_TOTAL)
 				Name = SkillTypeList[i];
 			else
 				Name = SpellTypeList[i];
