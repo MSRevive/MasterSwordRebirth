@@ -189,10 +189,10 @@ public:
 	mslist<CScript *> m_Scripts;		   //List of scripts
 	msstring m_ReturnData;				   //Data returned from an event.  Reset at next CallScriptEvent()
 };
-#define SKIP_STR " \t" //Whitespace characters
+constexpr const char* SKIP_STR = " \t"; //Whitespace characters
 
-#define DEFAULT_SCRIPT_ID -1
-#define PLAYER_SCRIPT_ID -2
+constexpr int DEFAULT_SCRIPT_ID = -1;
+constexpr int PLAYER_SCRIPT_ID = -2;
 
 // MiB 30NOV_2014 - Template structure for script function pointers
 // Keeps track of whether or not it's a conditional command and how many times it's been referenced (for testing and curiosity)
@@ -219,24 +219,6 @@ public:
 	bool GetConditional() const { return m_Conditional; }
 	P GetFunc() const { return pFunc; }
 };
-
-//Definitions for functions like GetProp(), CLGetCurrentTempEntProp()
-//Returns different types of data as a string.  Requires static msstring Return
-
-/*
-#define RETURN_TRUE \
-	{               \
-		return "1"; \
-	}
-
-
-#define RETURN_FALSE \
-	{                \
-		return "0";  \
-	}
-
-
-*/
 
 constexpr const char* RETURN_NOTHING_STR = "-NA-";
 inline const char* RETURN_NOTHING() {
@@ -273,44 +255,14 @@ inline char* RETURN_INT(const int& i) {
 	return Return;
 }
 
-inline char* RETURN_VECTOR(const Vector vector){
+inline char* RETURN_VECTOR(const Vector& vec){
 	msstring Return;
-	_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)",vector.x, vector.y, vector.z);
+	_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)",vec.x, vec.y, vec.z);
 	return Return;
 }
 
 
-/*
-#define RETURN_FLOAT_PRECISION(a) \
-	{                             \
-
-		_snprintf(Return, MSSTRING_SIZE, "%f", a); \
-		return Return;            \
-	}
-
-#define RETURN_FLOAT(a)             \
-	{                               \
-		_snprintf(Return, MSSTRING_SIZE, "%.2f", a); \
-		return Return;              \
-	}
-
-#define RETURN_INT(a)             \
-	{                             \
-		_snprintf(Return, MSSTRING_SIZE, "%i", a); \
-		return Return;            \
-	}
-
-	
-#define RETURN_VECTOR(a)                                    \
-	{                                                       \
-		_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)", a.x, a.y, a.z); \
-		return Return;                                      \
-	}
-	*/
-
-
-
-inline const char* VecToString(const Vector& Vec, bool bAs2D)
+inline const char* VecToString(const Vector& Vec, bool bAs2D = false)
 {
 	msstring Return;
 	if (bAs2D)
@@ -383,38 +335,6 @@ inline const char* RETURN_ANGLE(const char* Prop, const char* name, const Vector
 
 	return RETURN_NOTHING();
 }
-
-
-
-
-
-
-/*
-#define RETURN_POSITION(name, position)              \
-	{                                                \
-		if (Prop == name)                            \
-			return (Return = VecToString(position)); \
-		else if (Prop == name ".x")                  \
-			return RETURN_FLOAT(position.x);                \
-		else if (Prop == name ".y")                  \
-			return RETURN_FLOAT(position.y);               \
-		else if (Prop == name ".z")                  \
-			return RETURN_FLOAT(position.z);                \
-	}
-	
-#define RETURN_ANGLE(name, angles)                 \
-	{                                              \
-		if (Prop == name)                          \
-			return (Return = VecToString(angles)); \
-		else if (Prop == name ".pitch")            \
-			return RETURN_FLOAT(angles.x);             \
-		else if (Prop == name ".yaw")              \
-			return RETURN_FLOAT(angles.y);                 \
-		else if (Prop == name ".roll")             \
-			return RETURN_FLOAT(angles.z);                 \
-	}
-	*/
-
 
 
 // Legacy compatibility typedefs

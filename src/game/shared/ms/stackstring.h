@@ -160,9 +160,9 @@ private:
 
 //mstring - A fast string with features... no dynamic allocation
 //-Dogg
-#define MSSTRING_SIZE 256
-#define MSSTRING_MAXLEN (MSSTRING_SIZE-1)
-#define msstring_error ((size_t)-1)
+constexpr int MSSTRING_SIZE = 256;
+constexpr int MSSTRING_MAXLEN = (MSSTRING_SIZE - 1);
+constexpr int msstring_error = ((size_t)-1);
 
 class msstring
 {
