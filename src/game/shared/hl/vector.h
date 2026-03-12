@@ -12,8 +12,15 @@
 *   without written permission from Valve LLC.
 *
 ****/
+#ifndef vec_t
+typedef float vec_t;
+#endif
+
 #ifndef VECTOR_H
 #define VECTOR_H
+
+
+
 
 //=========================================================
 // 2DVector - used for many pathfinding and many other
@@ -134,6 +141,7 @@ public:
 
 inline Vector operator*(float fl, const Vector& v) { return v * fl; }
 inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
+
 
 //template <typename Type1, typename Type2>
 //inline float DotProduct(const Type1* x, const Type2* y) {

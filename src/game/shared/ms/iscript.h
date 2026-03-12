@@ -7,7 +7,12 @@
 class CScript;
 class CBaseEntity;
 #include <stdio.h>
+#include "sharedutil.h"
 #include "../../../public/archtypes.h"  // For ulong typedef
+
+#ifndef VECTOR_H
+#include "..\shared\hl\vector.h"
+#endif
 
 // Add Windows-specific ulong definition if not already defined
 #ifdef _WIN32
@@ -15,6 +20,7 @@ class CBaseEntity;
 typedef unsigned long ulong;
 #endif
 #endif
+
 
 struct scriptvar_t
 {
@@ -216,59 +222,200 @@ public:
 
 //Definitions for functions like GetProp(), CLGetCurrentTempEntProp()
 //Returns different types of data as a string.  Requires static msstring Return
+
+/*
 #define RETURN_TRUE \
 	{               \
 		return "1"; \
 	}
+
+
 #define RETURN_FALSE \
 	{                \
 		return "0";  \
 	}
+
+
+*/
+
+constexpr const char* RETURN_NOTHING_STR = "-NA-";
+inline const char* RETURN_NOTHING() {
+	return RETURN_NOTHING_STR;
+}
+
+inline const char* RETURN_ZERO() {
+	return "0";
+}
+
+inline const char* RETURN_TRUE(){
+	return "1";
+}
+
+inline const char* RETURN_FALSE() {
+	return "0";
+}
+
+inline char * RETURN_FLOAT_PRECISION(const float &prfl) {
+	msstring Return;
+	_snprintf(Return, MSSTRING_SIZE, "%f", prfl); 
+	return Return;
+}
+
+inline char* RETURN_FLOAT(const float& fl) {
+	msstring Return;
+	_snprintf(Return, MSSTRING_SIZE, "%.2f", fl);
+	return Return;
+}
+
+inline char* RETURN_INT(const int& i) {
+	msstring Return;
+	_snprintf(Return, MSSTRING_SIZE, "%i", i);
+	return Return;
+}
+
+inline char* RETURN_VECTOR(const Vector vector){
+	msstring Return;
+	_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)",vector.x, vector.y, vector.z);
+	return Return;
+}
+
+
+/*
 #define RETURN_FLOAT_PRECISION(a) \
 	{                             \
+
 		_snprintf(Return, MSSTRING_SIZE, "%f", a); \
 		return Return;            \
 	}
+
 #define RETURN_FLOAT(a)             \
 	{                               \
 		_snprintf(Return, MSSTRING_SIZE, "%.2f", a); \
 		return Return;              \
 	}
+
 #define RETURN_INT(a)             \
 	{                             \
 		_snprintf(Return, MSSTRING_SIZE, "%i", a); \
 		return Return;            \
 	}
+
+	
 #define RETURN_VECTOR(a)                                    \
 	{                                                       \
 		_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)", a.x, a.y, a.z); \
 		return Return;                                      \
 	}
+	*/
+
+
+
+inline const char* VecToString(const Vector& Vec, bool bAs2D)
+{
+	msstring Return;
+	if (bAs2D)
+		_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f)", Vec.x, Vec.y);
+	else
+		_snprintf(Return, MSSTRING_SIZE, "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
+	return Return;
+}
+
+
+inline const char* RETURN_POSITION(const char* Prop, const char * name, const Vector position, bool as2d = false) {
+
+	msstring NameExt;
+
+	if (Prop == name)	
+		return VecToString(position, as2d); 
+
+	NameExt = name;
+	NameExt += ".x";
+
+	if (Prop == NameExt) return RETURN_FLOAT(position.x);
+
+
+	NameExt = name;
+	NameExt += ".y";
+
+	if (Prop == NameExt) return RETURN_FLOAT(position.y);
+
+	NameExt = name;
+	NameExt += ".y";
+
+	if (Prop == NameExt) return RETURN_FLOAT(position.z);
+
+	return RETURN_NOTHING();
+
+}
+
+
+inline const char* RETURN_ANGLE(const char* Prop, const char* name, const Vector& angles, bool as2d = false) {
+
+	msstring NameExt;
+
+	if (Prop == name) {
+		return VecToString(angles, as2d);
+	}
+	
+
+	NameExt = name;
+	NameExt += ".pitch";
+
+
+	if (Prop == NameExt) {
+		return RETURN_FLOAT(angles.x);
+	}
+
+	NameExt = name;
+	NameExt += ".yaw";
+
+	if (Prop == NameExt) {
+		return RETURN_FLOAT(angles.y);
+	}
+
+	NameExt = name;
+	NameExt += ".roll";
+
+
+	if (Prop == NameExt) {
+		return RETURN_FLOAT(angles.z);
+	}
+
+	return RETURN_NOTHING();
+}
+
+
+
+
+
+
+/*
 #define RETURN_POSITION(name, position)              \
 	{                                                \
 		if (Prop == name)                            \
 			return (Return = VecToString(position)); \
 		else if (Prop == name ".x")                  \
-			RETURN_FLOAT(position.x)                 \
+			return RETURN_FLOAT(position.x);                \
 		else if (Prop == name ".y")                  \
-			RETURN_FLOAT(position.y)                 \
+			return RETURN_FLOAT(position.y);               \
 		else if (Prop == name ".z")                  \
-			RETURN_FLOAT(position.z)                 \
+			return RETURN_FLOAT(position.z);                \
 	}
+	
 #define RETURN_ANGLE(name, angles)                 \
 	{                                              \
 		if (Prop == name)                          \
 			return (Return = VecToString(angles)); \
 		else if (Prop == name ".pitch")            \
-			RETURN_FLOAT(angles.x)                 \
+			return RETURN_FLOAT(angles.x);             \
 		else if (Prop == name ".yaw")              \
-			RETURN_FLOAT(angles.y)                 \
+			return RETURN_FLOAT(angles.y);                 \
 		else if (Prop == name ".roll")             \
-			RETURN_FLOAT(angles.z)                 \
+			return RETURN_FLOAT(angles.z);                 \
 	}
-#define RETURN_NOTHING_STR "-NA-"
-#define RETURN_NOTHING return RETURN_NOTHING_STR
-#define RETURN_ZERO return "0"
+	*/
+
+
 
 // Legacy compatibility typedefs
 typedef LegacyScriptCmd scriptcmd_t;
@@ -278,9 +425,11 @@ typedef LegacyEventScope eventscope_e;
 
 // Legacy EVENTSCOPE macros - only define if not already defined by AngelScript headers
 #ifndef EVENTSCOPE_SERVER
-#define EVENTSCOPE_SERVER LEGACY_EVENTSCOPE_SERVER
-#define EVENTSCOPE_CLIENT LEGACY_EVENTSCOPE_CLIENT
-#define EVENTSCOPE_SHARED LEGACY_EVENTSCOPE_SHARED
+
+constexpr eventscope_e EVENTSCOPE_SERVER = LEGACY_EVENTSCOPE_SERVER;
+constexpr eventscope_e EVENTSCOPE_CLIENT = LEGACY_EVENTSCOPE_CLIENT;
+constexpr eventscope_e EVENTSCOPE_SHARED = LEGACY_EVENTSCOPE_SHARED;
+
 #endif
 
 #endif // MiB MAR2015_01 [LOCAL_PANEL] - Made this include-

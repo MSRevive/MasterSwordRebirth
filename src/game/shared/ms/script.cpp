@@ -568,7 +568,7 @@ msstring CScript::ScriptGetter_Angles(msstring& FullName, msstring& ParserName, 
 		float dx = End.x - Start.x;
 		float rang = atan2(dy, dx); //gets radians
 		float xang = rang * 57.295779; //back to degrees
-		RETURN_FLOAT(xang)
+		return RETURN_FLOAT(xang);
 	}
 	else return "0";
 }
@@ -590,7 +590,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 	//$angles3d(<viewer_origin>,<origin_to_face>) - returns angles required for a vector to face a location
 	//engine function fast, but not very accurate and doesn't work client side (returns normalized) - will need to flip pitch
 	out_vector = UTIL_VecToAngles((Start - End).Normalize());
-	RETURN_VECTOR(out_vector)
+	return RETURN_VECTOR(out_vector);
 		/*
 		//FAIL Thoth JAN2010_22 - steelin from the Quake source code so weez can do this client side
 		//- meh, think this is an entirely different function - maybe I can just vectormultiply the results of $dir(vec,vec) for same result?
@@ -674,10 +674,10 @@ msstring CScript::ScriptGetter_CanDamage(msstring& FullName, msstring& ParserNam
 
 		if (ThisEnt && ThatEnt)
 		{
-			RETURN_INT(ThisEnt->CanDamage(ThatEnt) ? 1 : 0)
+			return RETURN_INT(ThisEnt->CanDamage(ThatEnt) ? 1 : 0);
 		}
 	}
-	RETURN_INT(0)
+	return RETURN_INT(0);
 #endif
 		return FullName;
 }
@@ -760,12 +760,15 @@ msstring CScript::ScriptGetter_Cone(msstring& FullName, msstring& ParserName, ms
 
 		if (ParserName.starts_with("$within_cone"))
 		{
-			if (flDot >= ConeFOV) RETURN_TRUE
-			else RETURN_FALSE
+			if (flDot >= ConeFOV) 
+				return RETURN_TRUE();
+			else 
+				return RETURN_FALSE();
 		}
-		else RETURN_FLOAT(flDot);
+		else return RETURN_FLOAT(flDot);
 	}
-	else return "0";
+
+	return "0";
 }
 
 //$dir(<start origin>,<end origin>)
@@ -788,9 +791,10 @@ msstring CScript::ScriptGetter_Dir(msstring& FullName, msstring& ParserName, mss
 		Vector Start = StringToVec(Params[1]);
 		Vector End = StringToVec(Params[0]);
 		Vector Dir = (Start - End).Normalize();
-		RETURN_VECTOR(Dir);
+		return RETURN_VECTOR(Dir);
 	}
-	else return "0";
+
+	return "0";
 }
 
 //$dist(<start origin>,<end origin>)
@@ -811,7 +815,7 @@ msstring CScript::ScriptGetter_Dist(msstring& FullName, msstring& ParserName, ms
 		Vector Start = StringToVec(Params[0]);
 		Vector End = StringToVec(Params[1]);
 		float Dist = (ParserName == "$dist" ? (Start - End).Length() : (Start - End).Length2D());
-		RETURN_FLOAT(Dist);
+		return RETURN_FLOAT(Dist);
 	}
 	else
 		return "0";
@@ -892,7 +896,7 @@ msstring CScript::ScriptGetter_FileSize(msstring& FullName, msstring& ParserName
 			file.seekg(0, std::ios_base::end);
 			long fileSize = file.tellg();
 			file.close();
-			RETURN_INT(fileSize);
+			return RETURN_INT(fileSize);
 		}
 		else return "-1";
 	}
@@ -1328,17 +1332,17 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 							break;
 						}
 						if (bFnd)
-							RETURN_INT(i);
+							return RETURN_INT(i);
 					}
 
-					RETURN_INT(-1);
+					return RETURN_INT(-1);
 				}
 				else
 					return "[ERROR_MISSING_PARAMS]";
 
 			}
 			else if (ParserName.ends_with("amt"))
-				RETURN_INT(pArray->size())
+				return RETURN_INT(pArray->size());
 	}
 	else
 		return "[ERROR_MISSING_PARAMS]";
@@ -1376,36 +1380,35 @@ msstring CScript::ScriptGetter_GetAttackProp(msstring& FullName, msstring& Parse
 		attackdata_t& AttData = pItem->m_Attacks[attackNum];
 		msstring& PropName = Params[2];
 
-		if (PropName == "type") return msstring(AttData.sDamageType.c_str());
-		else if (PropName == "numattacks") RETURN_INT(pItem->m_Attacks.size()) //Thothie OCT2016_22 get number of attacks
-		else if (PropName == "range") RETURN_FLOAT(AttData.flRange)
-		else if (PropName == "dmg") RETURN_FLOAT(AttData.flDamage)
-		else if (PropName == "dmg.range") RETURN_FLOAT(AttData.flDamageRange)
-		else if (PropName == "dmg.type") return msstring(AttData.sDamageType.c_str());
-		else if (PropName == "dmg.multi") RETURN_FLOAT(AttData.f1DmgMulti)
-		else if (PropName == "aoe.range") RETURN_FLOAT(AttData.flDamageAOERange)
-		else if (PropName == "aoe.falloff") RETURN_FLOAT(AttData.flDamageAOEAttn)
-		else if (PropName == "energydrain") RETURN_FLOAT(AttData.flEnergy)
-		else if (PropName == "mpdrain") RETURN_FLOAT(AttData.flMPDrain)
-			//else if( PropName == "stat" ) return STRING( AttData.
-		else if (PropName == "stat.prof") RETURN_INT(AttData.StatProf)
-		else if (PropName == "stat.balance") RETURN_INT(AttData.StatBalance)
-		else if (PropName == "stat.power") RETURN_INT(AttData.StatPower)
-		else if (PropName == "stat.exp") RETURN_INT(AttData.StatExp)
-		else if (PropName == "noise") RETURN_FLOAT(AttData.flNoise)
-		else if (PropName == "callback") return AttData.CallbackName;
-		else if (PropName == "ofs.startpos") return STRING(VecToString(AttData.StartOffset));
-		else if (PropName == "ofs.aimang") return STRING(VecToString(AttData.AimOffset));
-		else if (PropName == "priority") RETURN_INT(AttData.iPriority)
-		else if (PropName == "keys") return AttData.ComboKeys[0];
-		else if (PropName == "dmg.ignore") return AttData.NoDamage ? "1" : "0";
-		else if (PropName == "hitchance") RETURN_FLOAT(AttData.flAccuracyDefault)
-		else if (PropName == "critthreshold") RETURN_FLOAT(AttData.flCritThreshold)
-		else if (PropName == "critmulti") RETURN_FLOAT(AttData.flCritMulti) 
-		else if (PropName == "delay.end") RETURN_FLOAT(AttData.tDuration)
-		else if (PropName == "delay.strike") RETURN_FLOAT(AttData.tLandDelay)
-		else if (PropName == "dmg.noautoaim") return AttData.NoAutoAim ? "1" : "0";
-		else if (PropName == "ammodrain") RETURN_INT(AttData.iAmmoDrain)
+		if (PropName == "type")					return msstring(AttData.sDamageType.c_str());
+		else if (PropName == "numattacks")		return RETURN_INT(pItem->m_Attacks.size()); //Thothie OCT2016_22 get number of attacks;
+		else if (PropName == "range")			return RETURN_FLOAT(AttData.flRange);
+		else if (PropName == "dmg")				return RETURN_FLOAT(AttData.flDamage);
+		else if (PropName == "dmg.range")		return RETURN_FLOAT(AttData.flDamageRange);
+		else if (PropName == "dmg.type")		return msstring(AttData.sDamageType.c_str());
+		else if (PropName == "dmg.multi")		return RETURN_FLOAT(AttData.f1DmgMulti);
+		else if (PropName == "aoe.range")		return RETURN_FLOAT(AttData.flDamageAOERange);
+		else if (PropName == "aoe.falloff")		return RETURN_FLOAT(AttData.flDamageAOEAttn);
+		else if (PropName == "energydrain")		return RETURN_FLOAT(AttData.flEnergy);
+		else if (PropName == "mpdrain")			return RETURN_FLOAT(AttData.flMPDrain);
+		else if (PropName == "stat.prof")		return RETURN_INT(AttData.StatProf);
+		else if (PropName == "stat.balance")	return RETURN_INT(AttData.StatBalance);
+		else if (PropName == "stat.power")		return RETURN_INT(AttData.StatPower);
+		else if (PropName == "stat.exp")		return RETURN_INT(AttData.StatExp);
+		else if (PropName == "noise")			return RETURN_FLOAT(AttData.flNoise);
+		else if (PropName == "callback")		return AttData.CallbackName;
+		else if (PropName == "ofs.startpos")	return STRING(VecToString(AttData.StartOffset));
+		else if (PropName == "ofs.aimang")		return STRING(VecToString(AttData.AimOffset));
+		else if (PropName == "priority")		return RETURN_INT(AttData.iPriority);
+		else if (PropName == "keys")			return AttData.ComboKeys[0];
+		else if (PropName == "dmg.ignore")		return AttData.NoDamage ? "1" : "0";
+		else if (PropName == "hitchance")		return RETURN_FLOAT(AttData.flAccuracyDefault);
+		else if (PropName == "critthreshold")	return RETURN_FLOAT(AttData.flCritThreshold);
+		else if (PropName == "critmulti")		return RETURN_FLOAT(AttData.flCritMulti);
+		else if (PropName == "delay.end")		return RETURN_FLOAT(AttData.tDuration);
+		else if (PropName == "delay.strike")	return RETURN_FLOAT(AttData.tLandDelay);
+		else if (PropName == "dmg.noautoaim")	return AttData.NoAutoAim ? "1" : "0";
+		else if (PropName == "ammodrain")		return RETURN_INT(AttData.iAmmoDrain);
 		else if (PropName == "hold_min&max")
 		{
 			msstring Return;
@@ -1752,7 +1755,7 @@ msstring CScript::ScriptGetter_GetFindToken(msstring& FullName, msstring& Parser
 			else { if (Tokens[i].contains(TokenAdd)) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
 		}
 
-		RETURN_INT(iFoundAtPos);
+		return RETURN_INT(iFoundAtPos);
 	}
 	else return "-1";
 }
@@ -1831,7 +1834,7 @@ msstring CScript::ScriptGetter_GetGroundHeight(msstring& FullName, msstring& Par
 		EngineFunc::Shared_TraceLine(StartOrigin, EndOrigin, ignore_monsters, Tr, 0, PM_GLASS_IGNORE | PM_WORLD_ONLY, NULL);
 
 		if (Tr.Fraction < 1.0)
-			RETURN_FLOAT(Tr.EndPos.z)
+			return RETURN_FLOAT(Tr.EndPos.z);
 			return "none";
 	}
 
@@ -1928,7 +1931,7 @@ msstring CScript::ScriptGetter_GetHashMap(
 				else
 					if (vsSubCmd == "get_hashmap_amt")
 					{
-						RETURN_INT(pHashMap->size());
+						return RETURN_INT(pHashMap->size());
 					}
 					else
 						if (vsSubCmd == "get_hashmap_keys"
@@ -2000,7 +2003,7 @@ msstring CScript::ScriptGetter_GetHashMap(
 									vsTokenReturn += vsToken;
 								}
 							}
-							if (pFirstArr) RETURN_INT(pFirstArr->size());
+							if (pFirstArr) return RETURN_INT(pFirstArr->size());
 							return vsTokenReturn;
 						}
 	}
@@ -2298,7 +2301,7 @@ msstring CScript::ScriptGetter_GetSet(msstring& FullName, msstring& ParserName, 
 			else
 				if (vsSubCmd == "get_set_amt")
 				{
-					RETURN_INT(pSet->size());
+					return RETURN_INT(pSet->size());
 				}
 	}
 
@@ -2479,7 +2482,7 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 			//either type_value or type_count or type_array
 			if (!sf_array_values)
 			{
-				RETURN_FLOAT(sf_total_values)
+				return RETURN_FLOAT(sf_total_values);
 			}
 			else
 			{
@@ -2538,7 +2541,7 @@ msstring CScript::ScriptGetter_GetSkillRatio(msstring& FullName, msstring& Parse
 
 		float Range = Max - Min;
 		float Value = Min + Range * Ratio;
-		RETURN_FLOAT(Value)
+		return RETURN_FLOAT(Value);
 	}
 
 	return FullName;
@@ -2555,7 +2558,7 @@ msstring CScript::ScriptGetter_GetSkyHeight(msstring& FullName, msstring& Parser
 	{
 		float SkyHeight = 0;
 		bool FoundSky = FindSkyHeight(StringToVec(GetScriptVar(Params[0])), SkyHeight);
-		if (FoundSky) RETURN_FLOAT(SkyHeight);
+		if (FoundSky) return RETURN_FLOAT(SkyHeight);
 		return "none";
 	}
 
@@ -2578,13 +2581,13 @@ msstring CScript::ScriptGetter_GetTakeDmg(msstring& FullName, msstring& ParserNa
 	if (!pTarget) return "-1"; //FEB2009
 
 	msstring Return;
-	if (Params[1] == "all") RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
+	if (Params[1] == "all") return RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
 	for (unsigned int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
 	{
 		CMSMonster::takedamagemodifier_t& TDM = pTarget->m.TakeDamageModifiers[i];
 		msstring read_dmgtype = TDM.DamageType;
 		//Print("Reading_Takedmg %s\n", read_dmgtype.c_str() );
-		if (read_dmgtype.contains(Params[1]))	RETURN_FLOAT(TDM.modifier)
+		if (read_dmgtype.contains(Params[1]))	return RETURN_FLOAT(TDM.modifier);
 	}
 	return "1.0";
 #endif
@@ -2663,7 +2666,7 @@ msstring CScript::ScriptGetter_GetTokenAmt(msstring& FullName, msstring& ParserN
 
 		TokenizeString(Params[0], Tokens);
 
-		RETURN_INT(Tokens.size());
+		return RETURN_INT(Tokens.size());
 	}
 	else return "0";
 }
@@ -3185,7 +3188,7 @@ msstring CScript::ScriptGetter_Len(msstring& FullName, msstring& ParserName, mss
 	//priority: high, scope: shared
 	msstring Return;
 	if (Params.size() >= 1)
-		RETURN_INT(Params[0].len())
+		return RETURN_INT(Params[0].len());
 	else
 		return "0";
 }
@@ -3285,14 +3288,14 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 			{
 				float num = atof(Params[1]);
 				num = sqrt(num);
-				RETURN_FLOAT(num);
+				return RETURN_FLOAT(num);
 			}
 		}
 		else if (Params[0] == "sin")
 		{
 			if (Params.size() > 1)
 			{
-				RETURN_FLOAT(sin(atof(Params[1])));
+				return RETURN_FLOAT(sin(atof(Params[1])));
 			}
 		}
 		MS_ERROR("ExecuteScriptCmd Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), ParserName.c_str());
@@ -3404,7 +3407,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 		return "0";
 	}
 
-	RETURN_FLOAT(end_result);
+	return RETURN_FLOAT( end_result);
 }
 
 //$mid(<var>,<start>,[length])
@@ -3451,7 +3454,7 @@ msstring CScript::ScriptGetter_MinMax(msstring& FullName, msstring& ParserName, 
 		bool max = ParserName == "$max";
 		for (unsigned int i = 0; i < Params.size(); i++)
 			best = max ? V_max(best, atof(Params[i].c_str())) : V_min(best, atof(Params[i].c_str()));
-		RETURN_FLOAT(best);
+		return RETURN_FLOAT( best);
 	}
 
 	return FullName;
@@ -3466,7 +3469,7 @@ msstring CScript::ScriptGetter_Neg(msstring& FullName, msstring& ParserName, mss
 	//priority: very high, scope: shared
 	msstring Return;
 	if (Params.size() >= 1)
-		RETURN_FLOAT((-atof(Params[0])))
+		return RETURN_FLOAT( (-atof(Params[0])));
 	else return "0";
 }
 
@@ -3548,9 +3551,9 @@ msstring CScript::ScriptGetter_Rand(msstring& FullName, msstring& ParserName, ms
 	//priority: very high, scope: shared
 	msstring Return;
 	if (ParserName.c_str()[5] == 'f') //float version
-		RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])))
+		return RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])));
 	else  //int version
-		RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])))
+		return RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])));
 }
 
 //$relpos(<vec_ofs>)
@@ -3588,7 +3591,7 @@ msstring CScript::ScriptGetter_RelPos(msstring& FullName, msstring& ParserName, 
 		Vector vRelPos = GetRelativePos(Angle, vPosStr);
 		Vector vPos = StartPos + vRelPos;
 		//sprintf( cReturn, "(%.2f,%.2f,%.2f)", Pos.x, Pos.y, Pos.z );
-		RETURN_VECTOR(vPos)
+		return RETURN_VECTOR(vPos);
 	}
 	else return "0";
 }
@@ -3623,7 +3626,7 @@ msstring CScript::ScriptGetter_RelVel(msstring& FullName, msstring& ParserName, 
 
 		Vector Final = vRight * RelVel.x + vForward * RelVel.y + vUp * RelVel.z;
 
-		RETURN_VECTOR(Final)
+		return RETURN_VECTOR(Final);
 	}
 	else return "0";
 }
@@ -3954,7 +3957,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 			}
 			if (pArray)
 			{
-				RETURN_INT(vNumFound);
+				return RETURN_INT(vNumFound);
 			}
 			else
 			{
@@ -3984,7 +3987,7 @@ msstring CScript::ScriptGetter_SearchString(msstring& FullName, msstring& Parser
 	if (Params.size() >= 2)
 	{
 		int start = Params.size() >= 3 ? atoi(Params[2]) : 0;
-		RETURN_INT(Params[0].find(Params[1], start))
+		return RETURN_INT(Params[0].find(Params[1], start));
 	}
 	else
 		return "0";
@@ -4066,7 +4069,7 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 		return SortedList;
 	}
 	else
-		RETURN_INT(-1);
+		return RETURN_INT(-1);
 }
 
 //$stradd(<string...>,<string...>,<string...>)
@@ -4217,9 +4220,9 @@ msstring CScript::ScriptGetter_Vec(msstring& FullName, msstring& ParserName, mss
 		if (Params.size() == 1)
 		{
 			Vector Vec = StringToVec(Params[0]);
-			if (CoordName == "x" || CoordName == "pitch") RETURN_FLOAT(Vec.x)
-			else if (CoordName == "y" || CoordName == "yaw") RETURN_FLOAT(Vec.y)
-			else if (CoordName == "z" || CoordName == "roll") RETURN_FLOAT(Vec.z)
+			if (CoordName == "x" || CoordName == "pitch")     return RETURN_FLOAT(Vec.x);
+			else if (CoordName == "y" || CoordName == "yaw")  return RETURN_FLOAT(Vec.y);
+			else if (CoordName == "z" || CoordName == "roll") return RETURN_FLOAT(Vec.z);
 		}
 		else if (Params.size() >= 3)
 		{
@@ -4250,7 +4253,7 @@ msstring CScript::ScriptGetter_VecLen(msstring& FullName, msstring& ParserName, 
 	if (Params.size() >= 1)
 	{
 		Vector Start = StringToVec(Params[0]);
-		RETURN_FLOAT(ParserName == "$veclen" ? Start.Length() : Start.Length2D());
+		return RETURN_FLOAT(ParserName == "$veclen" ? Start.Length() : Start.Length2D());
 	}
 	else return "0";
 }
@@ -4452,36 +4455,36 @@ const char* CScript::GetVar(const char* pszText)
 			if (PropName.starts_with("movetype."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(9);
-				if (PropName == "none")				RETURN_INT(MOVETYPE_NONE)
-				else if (PropName == "walk")			RETURN_INT(MOVETYPE_WALK)
-				else if (PropName == "step")			RETURN_INT(MOVETYPE_STEP)
-				else if (PropName == "fly")			RETURN_INT(MOVETYPE_FLY)
-				else if (PropName == "toss")			RETURN_INT(MOVETYPE_TOSS)
-				else if (PropName == "push")			RETURN_INT(MOVETYPE_PUSH)
-				else if (PropName == "noclip")			RETURN_INT(MOVETYPE_NOCLIP)
-				else if (PropName == "flymissle")		RETURN_INT(MOVETYPE_FLYMISSILE)
-				else if (PropName == "bounce")			RETURN_INT(MOVETYPE_BOUNCE)
-				else if (PropName == "bouncemissle")	RETURN_INT(MOVETYPE_BOUNCEMISSILE)
-				else if (PropName == "follow")			RETURN_INT(MOVETYPE_FOLLOW)
-				else if (PropName == "pushstep")		RETURN_INT(MOVETYPE_PUSHSTEP)
+				if (PropName == "none")					return RETURN_INT(MOVETYPE_NONE);
+				else if (PropName == "walk")			return RETURN_INT(MOVETYPE_WALK);
+				else if (PropName == "step")			return RETURN_INT(MOVETYPE_STEP);
+				else if (PropName == "fly")				return RETURN_INT(MOVETYPE_FLY);
+				else if (PropName == "toss")			return RETURN_INT(MOVETYPE_TOSS);
+				else if (PropName == "push")			return RETURN_INT(MOVETYPE_PUSH);
+				else if (PropName == "noclip")			return RETURN_INT(MOVETYPE_NOCLIP);
+				else if (PropName == "flymissle")		return RETURN_INT(MOVETYPE_FLYMISSILE);
+				else if (PropName == "bounce")			return RETURN_INT(MOVETYPE_BOUNCE);
+				else if (PropName == "bouncemissle")	return RETURN_INT(MOVETYPE_BOUNCEMISSILE);
+				else if (PropName == "follow")			return RETURN_INT(MOVETYPE_FOLLOW);
+				else if (PropName == "pushstep")		return RETURN_INT(MOVETYPE_PUSHSTEP);
 			}
 			else if (PropName.starts_with("snd."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(4);
-				if (PropName == "auto_channel")		RETURN_INT(CHAN_AUTO)
-				else if (PropName == "weapon")			RETURN_INT(CHAN_WEAPON)
-				else if (PropName == "voice")			RETURN_INT(CHAN_VOICE)
-				else if (PropName == "item")			RETURN_INT(CHAN_ITEM)
-				else if (PropName == "body")			RETURN_INT(CHAN_BODY)
-				else if (PropName == "stream")			RETURN_INT(CHAN_STREAM)
-				else if (PropName == "static")			RETURN_INT(CHAN_STATIC)
-				else if (PropName == "fullvol" || PropName == "maxvol")	RETURN_INT(10)
-				else if (PropName == "slientvol" || PropName == "novol")	RETURN_INT(0)
+				if (PropName == "auto_channel")			return RETURN_INT(CHAN_AUTO);
+				else if (PropName == "weapon")			return RETURN_INT(CHAN_WEAPON);
+				else if (PropName == "voice")			return RETURN_INT(CHAN_VOICE);
+				else if (PropName == "item")			return RETURN_INT(CHAN_ITEM);
+				else if (PropName == "body")			return RETURN_INT(CHAN_BODY);
+				else if (PropName == "stream")			return RETURN_INT(CHAN_STREAM);
+				else if (PropName == "static")			return RETURN_INT(CHAN_STATIC);
+				else if (PropName == "fullvol" || PropName == "maxvol")	return RETURN_INT(10);
+				else if (PropName == "slientvol" || PropName == "novol") return	RETURN_INT(0);
 			}
 			else if (PropName.starts_with("localplayer."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(12);
-				if (PropName == "scriptID")		RETURN_INT(PLAYER_SCRIPT_ID)
+				if (PropName == "scriptID")		return RETURN_INT(PLAYER_SCRIPT_ID);
 			}
 		}
 		else if (FullName.starts_with("game."))
@@ -4498,7 +4501,7 @@ const char* CScript::GetVar(const char* pszText)
 
 			if (Name == "time")
 			{
-				RETURN_FLOAT(gpGlobals->time)
+				return RETURN_FLOAT(gpGlobals->time);
 			}
 			else if (Name.starts_with("time."))
 			{
@@ -4582,25 +4585,25 @@ const char* CScript::GetVar(const char* pszText)
 
 				}
 
-				RETURN_INT(theReturn);
+				return RETURN_INT(theReturn);
 			}
-			else if (Name == "frametime") RETURN_FLOAT(gpGlobals->frametime)
+			else if (Name == "frametime") return RETURN_FLOAT(gpGlobals->frametime);
 #ifdef VALVE_DLL
 			else if (Name == "maxlevel")
 			{
-				RETURN_INT(CHAR_LEVEL_CAP);
+				return RETURN_INT(CHAR_LEVEL_CAP);
 			}
 			//Thothie FEB2013_24 - consolidating all "game.players.xxx" functions into one conditional, and adding noafk
 			else if (Name.starts_with("players"))
 			{
 				//Thothie JUN2007a - make sure game.players does not return bots
 				//Thothie NOV2014_09 - using new centralized checking
-				if (Name.contains("totalhp")) RETURN_FLOAT(UTIL_TotalHP())
-				else if (Name.contains("avghp")) RETURN_FLOAT(UTIL_AvgHP())
-				else if (Name.contains("playersnb") || Name.contains("noafk")) RETURN_INT(UTIL_NumActivePlayers())
+				if (Name.contains("totalhp"))		return RETURN_FLOAT(UTIL_TotalHP());
+				else if (Name.contains("avghp"))	return RETURN_FLOAT(UTIL_AvgHP());
+				else if (Name.contains("playersnb") || Name.contains("noafk")) return RETURN_INT(UTIL_NumActivePlayers());
 				else
 				{
-					RETURN_INT(UTIL_NumPlayers())
+					return RETURN_INT(UTIL_NumPlayers());
 				}
 			}
 #endif
@@ -4633,7 +4636,7 @@ const char* CScript::GetVar(const char* pszText)
 				}
 				else if (Prop == "maxviewdistance") //Thothie SEP2007a, updated OCT2007a
 				{
-					RETURN_FLOAT(MSGlobals::maxviewdistance)
+					return RETURN_FLOAT(MSGlobals::maxviewdistance);
 				}
 				else if (Prop == "hpwarn") //Thothie SEP2007a, updated OCT2007a
 				{
@@ -4667,24 +4670,24 @@ const char* CScript::GetVar(const char* pszText)
 			else if (Name.starts_with("script."))
 			{
 				msstring Property = Name.substr(7);
-				if (Property == "last_sent_id")		RETURN_INT(m_gLastSendID)
-				else if (Property == "last_light_id")  RETURN_INT(m_gLastLightID)
-				else if (Property == "iteration")		RETURN_INT(m.m_Iteration)
+				if (Property == "last_sent_id")			return RETURN_INT(m_gLastSendID);
+				else if (Property == "last_light_id")	return RETURN_INT(m_gLastLightID);
+				else if (Property == "iteration")		return RETURN_INT(m.m_Iteration);
 			}
 			else if (Name.starts_with("sound."))
 			{
 				//ONLY STILL HERE FOR BACKWARDS COMPATIBILITY
 				//MOVED TO --> game.const.snd.x
 				msstring SoundProp = Name.substr(6);
-				if (SoundProp == "auto_channel")			RETURN_INT(CHAN_AUTO)
-				else if (SoundProp == "weapon")			RETURN_INT(CHAN_WEAPON)
-				else if (SoundProp == "voice")				RETURN_INT(CHAN_VOICE)
-				else if (SoundProp == "item")				RETURN_INT(CHAN_ITEM)
-				else if (SoundProp == "body")				RETURN_INT(CHAN_BODY)
-				else if (SoundProp == "stream")			RETURN_INT(CHAN_STREAM)
-				else if (SoundProp == "static")			RETURN_INT(CHAN_STATIC)
-				else if (SoundProp == "fullvol" || SoundProp == "maxvol")	RETURN_INT(10)
-				else if (SoundProp == "slientvol" || SoundProp == "novol")	RETURN_INT(0)
+				if (SoundProp == "auto_channel")	return RETURN_INT(CHAN_AUTO);
+				else if (SoundProp == "weapon")		return RETURN_INT(CHAN_WEAPON);
+				else if (SoundProp == "voice")		return RETURN_INT(CHAN_VOICE);
+				else if (SoundProp == "item")		return RETURN_INT(CHAN_ITEM);
+				else if (SoundProp == "body")		return RETURN_INT(CHAN_BODY);
+				else if (SoundProp == "stream")		return RETURN_INT(CHAN_STREAM);
+				else if (SoundProp == "static")		return RETURN_INT(CHAN_STATIC);
+				else if (SoundProp == "fullvol" || SoundProp == "maxvol")	return RETURN_INT(10);
+				else if (SoundProp == "slientvol" || SoundProp == "novol")	return RETURN_INT(0);
 			}
 			else
 			{
@@ -4707,14 +4710,14 @@ const char* CScript::GetVar(const char* pszText)
 				{
 
 					msstring& Prop = FullProp;
-					if (Prop == "index") RETURN_INT(MSCLGlobals::GetLocalPlayerIndex())
-					else if (Prop == "viewangles") RETURN_VECTOR(player.pev->v_angle) //Thothie JAN2013_08 - viewangles, sorta, only returns yaw
-					else if (Prop == "eyepos") RETURN_VECTOR(player.EyePosition()) //Thothie JAN2013_08 eyepos - sorta, returns pos on model
-					else if (Prop == "thirdperson") RETURN_INT((MSCLGlobals::CamThirdPerson ? 1 : 0))
-					else if (Prop == "viewmodel.left.id" || Prop == "viewmodel.0.id") RETURN_INT(player.Hand(0) ? player.Hand(0)->GetViewModelID() : -1)
-					else if (Prop == "viewmodel.right.id" || Prop == "viewmodel.1.id") RETURN_INT(player.Hand(1) ? player.Hand(1)->GetViewModelID() : -1)
-					else if (Prop == "viewmodel.active.id") RETURN_INT(player.ActiveItem() ? player.ActiveItem()->GetViewModelID() : -1)
-					else if (Prop == "canattack") RETURN_INT(FBitSet(player.m_StatusFlags, PLAYER_MOVE_NOATTACK) ? 0 : 1)
+					if (Prop == "index") return RETURN_INT(MSCLGlobals::GetLocalPlayerIndex());
+					else if (Prop == "viewangles") return RETURN_VECTOR(player.pev->v_angle); //Thothie JAN2013_08 - viewangles, sorta, only returns yaw
+					else if (Prop == "eyepos") return RETURN_VECTOR(player.EyePosition()); //Thothie JAN2013_08 eyepos - sorta, returns pos on model
+					else if (Prop == "thirdperson") return RETURN_INT((MSCLGlobals::CamThirdPerson ? 1 : 0));
+					else if (Prop == "viewmodel.left.id" || Prop == "viewmodel.0.id") return RETURN_INT(player.Hand(0) ? player.Hand(0)->GetViewModelID() : -1);
+					else if (Prop == "viewmodel.right.id" || Prop == "viewmodel.1.id") return RETURN_INT(player.Hand(1) ? player.Hand(1)->GetViewModelID() : -1);
+					else if (Prop == "viewmodel.active.id") return RETURN_INT(player.ActiveItem() ? player.ActiveItem()->GetViewModelID() : -1);
+					else if (Prop == "canattack") return RETURN_INT(FBitSet(player.m_StatusFlags, PLAYER_MOVE_NOATTACK) ? 0 : 1);
 				}
 				else if (Name == "tempent")
 					Value = CLGetCurrentTempEntProp(FullProp);

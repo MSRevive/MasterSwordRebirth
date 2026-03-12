@@ -609,14 +609,14 @@ void CHudScript::Effects_UpdateTempEnt(const char* EventName, msstringlist *Para
 const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)
 {
 	if (!g_CurrentTempEnt)
-		RETURN_NOTHING;
+		return RETURN_NOTHING();
 	TEMPENTITY *p = g_CurrentTempEnt;
 
 	static msstring Return;
 	if (Prop == "deathtime")
-		RETURN_FLOAT(p->die)
+		return RETURN_FLOAT( p->die);
 	else if (Prop == "bouncefactor")
-		RETURN_FLOAT(p->bounceFactor)
+		return RETURN_FLOAT( p->bounceFactor);
 	else
 	{
 		static msstringlist Params;
@@ -626,9 +626,42 @@ const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)
 		return CLGetEntProp(&p->entity, Params);
 	}
 
-	RETURN_NOTHING;
+	return RETURN_NOTHING();
 }
 
+const char* RETURN_COLOR(const char* Prop, const char* name, const color24& color) {
+
+	if (Prop == name)
+	{
+		Vector vTemp = Vector(color.r, color.g, color.b);
+		return VecToString(vTemp);
+	}
+
+	msstring NameExt;
+	NameExt = name;
+	NameExt += ".r";
+
+
+	if (Prop == NameExt)
+		return RETURN_INT(color.r);
+
+	NameExt = name;
+	NameExt += ".g";
+
+
+	if (Prop == NameExt)
+		return RETURN_INT(color.g);
+
+	NameExt = name;
+	NameExt += ".b";
+
+	if (Prop == NameExt)
+		return RETURN_INT(color.b);
+
+	return RETURN_NOTHING();
+
+}
+/*
 #define RETURN_COLOR(name, color)                             \
 	{                                                         \
 		if (Prop == name)                                     \
@@ -637,13 +670,14 @@ const char* CScript::CLGetCurrentTempEntProp(msstring &Prop)
 			return (Return = VecToString(vTemp));             \
 		}                                                     \
 		else if (Prop == name ".r")                           \
-			RETURN_INT(color.r)                             \
+			return RETURN_INT(color.r);                               \
 		else if (Prop == name ".g")                           \
-			RETURN_INT(color.g)                             \
+			return RETURN_INT(color.g);                            \
 		else if (Prop == name ".b")                           \
-			RETURN_INT(color.b)                             \
+			return RETURN_INT(color.b);                             \
 	}
 
+*/
 //[begin] DEC2014_09 Thothie - beam_update
 //$getcl_beam(<idx|all>,<property>)
 const char* CScript::CLGetBeamProp(int beamid, msstringlist &Params)
@@ -676,35 +710,35 @@ const char* CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 		else if (Prop == "delta")
 			beamret = VecToString(pBeam->delta);
 		else if (Prop == "width")
-			beamret = FloatToString(pBeam->width);
+			beamret = UTIL_VarArgs("%.2f", pBeam->width);
 		else if (Prop == "amplitude")
-			beamret = FloatToString(pBeam->amplitude);
+			beamret = UTIL_VarArgs("%.2f", pBeam->amplitude);
 		else if (Prop == "color")
 		{
 			beamret = UTIL_VarArgs("(%f,%f,%f)", pBeam->r, pBeam->g, pBeam->b);
 		}
 		else if (Prop == "brightness")
-			beamret = FloatToString(pBeam->brightness);
+			beamret = UTIL_VarArgs("%.2f", pBeam->brightness);
 		else if (Prop == "speed")
-			beamret = FloatToString(pBeam->speed);
+			beamret = UTIL_VarArgs("%.2f", pBeam->speed);
 		else if (Prop == "life")
-			beamret = FloatToString(pBeam->die);
+			beamret = UTIL_VarArgs("%.2f", pBeam->die);
 		else if (Prop == "segments")
-			beamret = IntToString(pBeam->segments);
+			beamret = UTIL_VarArgs("%i", pBeam->segments);
 		else if (Prop == "framerate")
-			beamret = FloatToString(pBeam->frameRate);
+			beamret = UTIL_VarArgs("%.2f", pBeam->frameRate);
 		else if (Prop == "framecount")
-			beamret = IntToString(pBeam->frameCount);
+			beamret = UTIL_VarArgs("%i", pBeam->frameCount);
 		else if (Prop == "sprite")
-			beamret = IntToString(pBeam->modelIndex);
+			beamret = UTIL_VarArgs("%i", pBeam->modelIndex);
 		else if (Prop == "startent")
-			beamret = IntToString(pBeam->startEntity);
+			beamret = UTIL_VarArgs("%i", pBeam->startEntity);
 		else if (Prop == "endent")
-			beamret = IntToString(pBeam->endEntity);
+			beamret = UTIL_VarArgs("%i", pBeam->endEntity);
 		else if (Prop == "flags")
-			beamret = IntToString(pBeam->flags);
+			beamret = UTIL_VarArgs("%i", pBeam->flags);
 		else if (Prop == "t")
-			beamret = FloatToString(pBeam->t);
+			beamret = UTIL_VarArgs("%.2f", pBeam->t);
 		return beamret;
 	}
 	else
@@ -717,21 +751,21 @@ const char* CScript::CLGetBeamProp(int beamid, msstringlist &Params)
 const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 {
 	if (!pclEntity)
-		RETURN_NOTHING;
+		return RETURN_NOTHING();
 	cl_entity_t &ent = *pclEntity;
 	static msstring Return;
 	msstring &Prop = Params[1];
 	if (Prop.starts_with("origin"))
-		RETURN_POSITION("origin", ent.origin)
+		return RETURN_POSITION( Prop, "origin", ent.origin);
 	else if (Prop.starts_with("center"))
 	{
 		Vector vecCenter = ent.curstate.origin + ((ent.curstate.mins + ent.curstate.maxs) * 0.5);
-		RETURN_POSITION("center", vecCenter)
+		return RETURN_POSITION( Prop, "center", vecCenter);
 	}
 	else if (Prop.starts_with("angles"))
-		RETURN_ANGLE("angles", ent.angles)
+		return RETURN_ANGLE( Prop, "angles", ent.angles);
 	else if (Prop.starts_with("velocity"))
-		RETURN_POSITION("velocity", ent.baseline.vuser1) //can't use baseline.origin - it's used by networked ents
+		return RETURN_POSITION( Prop, "velocity", ent.baseline.vuser1); //can't use baseline.origin - it's used by networked ents
 	else if (Prop.starts_with("inwater"))
 		return EngineFunc::Shared_PointContents(Vector(ent.origin.x, ent.origin.y, ent.origin.z + ent.curstate.mins.z)) == CONTENTS_WATER ? "1" : "0";
 	else if (Prop.starts_with("underwater"))
@@ -743,7 +777,7 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 		{
 			Origin.x = ent.origin.x;
 			Origin.y = ent.origin.y;
-			RETURN_POSITION("waterorigin", Origin)
+			return RETURN_POSITION( Prop, "waterorigin", Origin);
 		}
 	}
 	else if (Prop == "model")
@@ -763,106 +797,106 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	//however you can store the time the tempent began on fuserX in the creation event
 	//then guess how far along the anim has gotten in that time based on the frame rate
 	/*
-	else if( Prop == "animtime" ) RETURN_FLOAT( ent.curstate.animtime ) //FEB2009_19 - experimenting
-	else if( Prop == "starttime" ) RETURN_FLOAT( ent.curstate.starttime ) //FEB2009_19 - experimenting
+	else if( Prop == "animtime" ) return RETURN_FLOAT( ent.curstate.animtime ); //FEB2009_19 - experimenting
+	else if( Prop == "starttime" ) return RETURN_FLOAT( ent.curstate.starttime ); //FEB2009_19 - experimenting
 	*/
 	else if (Prop == "ducking")
 		return FBitSet(player.pev->flags, FL_DUCKING) ? "1" : "0"; //Thothie JUN2010_25
 	else if (Prop == "modelidx")
-		RETURN_INT(ent.curstate.modelindex)
+		return RETURN_INT( ent.curstate.modelindex);
 	else if (Prop == "anim")
-		RETURN_INT(ent.curstate.sequence)
+		return RETURN_INT( ent.curstate.sequence);
 	else if (Prop == "height")
-		RETURN_FLOAT((ent.curstate.maxs.z) - (ent.curstate.mins.z)) //Thothie SEP2018_15 - return height/width for $getcl
+		return RETURN_FLOAT( (ent.curstate.maxs.z) - (ent.curstate.mins.z)); //Thothie SEP2018_15 - return height/width for $getcl
 	else if (Prop == "width")
-		RETURN_FLOAT((ent.curstate.maxs.x) - (ent.curstate.mins.x)) //Thothie SEP2018_15 - return height/width for $getcl
+		return RETURN_FLOAT( (ent.curstate.maxs.x) - (ent.curstate.mins.x)); //Thothie SEP2018_15 - return height/width for $getcl
 	else if (Prop == "mins")
-		RETURN_VECTOR(ent.curstate.mins)
+		return RETURN_VECTOR( ent.curstate.mins);
 	else if (Prop == "maxs")
-		RETURN_VECTOR(ent.curstate.maxs)
+		return RETURN_VECTOR( ent.curstate.maxs);
 	else if (Prop == "frame")
-		RETURN_FLOAT(ent.curstate.frame)
+		return RETURN_FLOAT( ent.curstate.frame);
 	else if (Prop == "framerate")
-		RETURN_FLOAT(ent.curstate.framerate)
+		return RETURN_FLOAT( ent.curstate.framerate);
 	else if (Prop == "exists")
 		return pclEntity->Exists() ? "1" : "0";
 	else if (Prop == "gravity")
-		RETURN_FLOAT(ent.curstate.gravity)
+		return	RETURN_FLOAT( ent.curstate.gravity);
 	else if (Prop == "scale")
-		RETURN_FLOAT(ent.curstate.scale)
+		return RETURN_FLOAT( ent.curstate.scale);
 	//NOV2014_16 dealing with the fact that MSC scripts can't hanle percision more than 2f
 	else if (Prop == "scaleHD")
-		RETURN_FLOAT(ent.curstate.scale * 1000)
+		return RETURN_FLOAT( ent.curstate.scale * 1000);
 	else if (Prop == "fuser1HD")
-		RETURN_FLOAT(ent.curstate.fuser1 * 1000)
+		return RETURN_FLOAT( ent.curstate.fuser1 * 1000);
 	else if (Prop == "renderfx")
-		RETURN_INT(ent.curstate.renderfx)
+		return RETURN_INT( ent.curstate.renderfx);
 	else if (Prop == "rendermode")
-		RETURN_INT(ent.curstate.rendermode)
+		return RETURN_INT( ent.curstate.rendermode);
 	else if (Prop == "renderamt")
-		RETURN_INT(ent.curstate.renderamt)
+		return RETURN_INT( ent.curstate.renderamt);
 	else if (Prop.starts_with("rendercolor"))
-		RETURN_COLOR("rendercolor", ent.curstate.rendercolor)
+		return RETURN_COLOR( Prop,"rendercolor", ent.curstate.rendercolor);
 	else if (Prop == "visible")
 		return FBitSet(ent.curstate.effects, EF_NODRAW) ? "0" : "1";
 	else if (Prop == "isplayer")
 		return ent.player ? "1" : "0";
 	else if (Prop.starts_with("attachment0"))
-		RETURN_POSITION("attachment0", ent.attachment[0])
+		return RETURN_POSITION( Prop, "attachment0", ent.attachment[0]);
 	else if (Prop.starts_with("attachment1"))
-		RETURN_POSITION("attachment1", ent.attachment[1])
+		return RETURN_POSITION( Prop, "attachment1", ent.attachment[1]);
 	else if (Prop.starts_with("attachment2"))
-		RETURN_POSITION("attachment2", ent.attachment[2])
+		return RETURN_POSITION( Prop, "attachment2", ent.attachment[2]);
 	else if (Prop.starts_with("attachment3"))
-		RETURN_POSITION("attachment3", ent.attachment[3])
+		return RETURN_POSITION( Prop, "attachment3", ent.attachment[3]);
 	else if (Prop == "iuser1")
-		RETURN_INT(ent.curstate.iuser1)
+		return RETURN_INT(ent.curstate.iuser1);
 	else if (Prop == "iuser2")
-		RETURN_INT(ent.curstate.iuser2)
+		return RETURN_INT(ent.curstate.iuser2);
 	else if (Prop == "iuser3")
-		RETURN_INT(ent.curstate.iuser3)
+		return RETURN_INT(ent.curstate.iuser3);
 	else if (Prop == "iuser4")
-		RETURN_INT(ent.curstate.iuser4)
+		return RETURN_INT(ent.curstate.iuser4);
 	else if (Prop == "fuser1")
-		RETURN_FLOAT(ent.curstate.fuser1)
+		return RETURN_FLOAT(ent.curstate.fuser1);
 	else if (Prop == "fuser2")
-		RETURN_FLOAT(ent.curstate.fuser2)
+		return RETURN_FLOAT(ent.curstate.fuser2);
 	else if (Prop == "fuser3")
-		RETURN_FLOAT(ent.curstate.fuser3)
+		return RETURN_FLOAT(ent.curstate.fuser3);
 	else if (Prop == "fuser4")
-		RETURN_FLOAT(ent.curstate.fuser4)
+		return RETURN_FLOAT(ent.curstate.fuser4);
 	else if (Prop == "prevstate.iuser1")
-		RETURN_INT(ent.prevstate.iuser1)
+		return RETURN_INT(ent.prevstate.iuser1);
 	else if (Prop == "prevstate.iuser2")
-		RETURN_INT(ent.prevstate.iuser2)
+		return RETURN_INT( ent.prevstate.iuser2);
 	else if (Prop == "prevstate.iuser3")
-		RETURN_INT(ent.prevstate.iuser3)
+		return RETURN_INT(ent.prevstate.iuser3);
 	else if (Prop == "prevstate.iuser4")
-		RETURN_INT(ent.prevstate.iuser4)
+		return RETURN_INT( ent.prevstate.iuser4);
 	else if (Prop == "prevstate.fuser1")
-		RETURN_FLOAT(ent.prevstate.fuser1)
+		return RETURN_FLOAT( ent.prevstate.fuser1);
 	else if (Prop == "prevstate.fuser2")
-		RETURN_FLOAT(ent.prevstate.fuser2)
+		return RETURN_FLOAT(ent.prevstate.fuser2);
 	else if (Prop == "prevstate.fuser3")
-		RETURN_FLOAT(ent.prevstate.fuser3)
+		return RETURN_FLOAT( ent.prevstate.fuser3);
 	else if (Prop == "prevstate.fuser4")
-		RETURN_FLOAT(ent.prevstate.fuser4)
+		return RETURN_FLOAT( ent.prevstate.fuser4);
 	else if (Prop == "baseline.iuser1")
-		RETURN_INT(ent.baseline.iuser1) //Baseline props are not overriden by
+		return RETURN_INT(ent.baseline.iuser1); //Baseline props are not overriden by;
 	else if (Prop == "baseline.iuser2")
-		RETURN_INT(ent.baseline.iuser2) //incoming server packets
+		return RETURN_INT(ent.baseline.iuser2); //incoming server packets;
 	else if (Prop == "baseline.iuser3")
-		RETURN_INT(ent.baseline.iuser3) //Stuff stored here is persistent
+		return RETURN_INT(ent.baseline.iuser3); //Stuff stored here is persistent;
 	else if (Prop == "baseline.iuser4")
-		RETURN_INT(ent.baseline.iuser4)
+		return RETURN_INT(ent.baseline.iuser4);
 	else if (Prop == "baseline.fuser1")
-		RETURN_FLOAT(ent.baseline.fuser1)
+		return RETURN_FLOAT( ent.baseline.fuser1);
 	else if (Prop == "baseline.fuser2")
-		RETURN_FLOAT(ent.baseline.fuser2)
+		return RETURN_FLOAT( ent.baseline.fuser2);
 	else if (Prop == "baseline.fuser3")
-		RETURN_FLOAT(ent.baseline.fuser3)
+		return RETURN_FLOAT( ent.baseline.fuser3);
 	else if (Prop == "baseline.fuser4")
-		RETURN_FLOAT(ent.baseline.fuser4)
+		return RETURN_FLOAT( ent.baseline.fuser4);
 	else if (Prop == "bonepos")
 	{
 		//Thothie (Comment Only) - We may want to move this up, as it is sometimes used every frame
@@ -870,33 +904,33 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 		//Vector Pos;
 		/*
 		if( !pclEntity->GetBonePos( atoi(Params[2]), Pos ) )
-			RETURN_ZERO;
+			return RETURN_ZERO();
 		*/
 
 		//AUG2013_25 Thothie - attempting to fix client side bonepos function
 		Vector Pos;
 		ent.GetBonePosVec(atoi(Params[2]), Pos); //GetBonePos is boolean, wtf?
 		//pclEntity->GetBonePosVec( atoi(Params[2]), Pos );
-		RETURN_VECTOR(Pos);
+		return RETURN_VECTOR( Pos);
 	}
 	else if (Prop.starts_with("bonecount"))
 	{
 		//AUG2013_25 - enabling getting bone count (be good to have this serverside too)
-		RETURN_INT(ent.GetBoneCount())
+		return RETURN_INT(ent.GetBoneCount());
 	}
 	else if (Prop.starts_with("viewangles"))
 	{
 		//MIB AUG2010_05
 		vec3_t viewangles;
 		gEngfuncs.GetViewAngles((float *)viewangles);
-		RETURN_ANGLE("viewangles", viewangles)
+		RETURN_ANGLE( Prop, "viewangles", viewangles);
 	}
 	/*
 	else if ( Prop.starts_with("eyepos") )
 	{
 		//Thoth APR2012_05 - attempting to return eye position (fail)
 		vec3_t eyepos = player.pev->view_ofs;
-		RETURN_ANGLE( "eyepos", eyepos )
+		return RETURN_ANGLE(Prop, "eyepos", eyepos );
 	}
 	*/
 
@@ -910,7 +944,7 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 		else if ( Prop == "race" ) return pPlayer->m_Race;
 	}
 	*/
-	RETURN_ZERO;
+	return RETURN_ZERO();
 }
 
 int CL_LoadModel(const char* RelativePathname, model_s **ppModel = NULL)

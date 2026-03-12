@@ -31,11 +31,16 @@
 #include "angelscript/ASEngineEventManager.h"
 #endif
 
+
+
+
 #undef SCRIPTVAR
 #define SCRIPTVAR GetVar								//A script-wide or global variable
 #define ERROR_MISSING_PARMS MS_ERROR("ExecuteScriptCmd: Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), Cmd.Name().c_str())
 void Player_UseStamina(float flAddAmt);
 extern "C" playermove_t *pmove;
+
+
 
 void CScript::Script_Setup()
 {
@@ -929,9 +934,9 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "atkspeed")
 	{
 #ifdef VALVE_DLL
-		RETURN_FLOAT( pPlayer ? pPlayer->m_AnimSpeedAdj : 1 );
+		return RETURN_FLOAT(pPlayer ? pPlayer->m_AnimSpeedAdj : 1);
 #else
-		RETURN_FLOAT(player.m_AnimSpeedAdj);
+		return RETURN_FLOAT(player.m_AnimSpeedAdj);
 #endif
 	}
 	/* thothie - this failed, I *guess* because it's trying to pull a var for the player
@@ -945,17 +950,17 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	}*/
 #ifdef VALVE_DLL
 	//Client can't use entity.index.  Only player.index (handled later under player)
-	else if( Prop == "index" ) RETURN_INT( pTarget->entindex() )
+	else if (Prop == "index") return RETURN_INT(pTarget->entindex());
 #endif
 	else if (Prop == "exists")			fSuccess = true;
 	else if (Prop == "alive" || Prop == "isalive")			fSuccess = pTarget->IsAlive() ? true : false;
-	else if (Prop == "hp")				RETURN_FLOAT(pTarget->pev->health)
+	else if (Prop == "hp")				return RETURN_FLOAT(pTarget->pev->health);
 #ifdef VALVE_DLL
 	else if( Prop == "xp" || Prop == "skilllevel" )
 	{
 		//Thothie JUN2008a - return monsters XP value
 		//NOV2014_21 - moving to top, as this is one we'll have to use at mob spawn repeatedly
-		RETURN_FLOAT( pMonster->m_SkillLevel )
+		return RETURN_FLOAT(pMonster->m_SkillLevel);
 	}
 	else if ( Prop == "blood" ) //greatguys1 August2018
 	{
@@ -1025,15 +1030,15 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		//thoth_return_scriptname = thoth_return_scriptname.substr( thoth_return_scriptname.len() - ( thoth_return_scriptname.len() -1 ) );
 		return msScriptNameReturn.c_str();
 	}
-	else if (Prop == "gravity")		RETURN_FLOAT(pTarget->pev->gravity)
-	else if (Prop == "height")			RETURN_FLOAT(pTarget->pev->maxs.z - pTarget->pev->mins.z)
-	else if (Prop == "speed")			RETURN_FLOAT(pTarget->pev->velocity.Length())
-	else if (Prop == "speed2D")		RETURN_FLOAT(pTarget->pev->velocity.Length2D())
+	else if (Prop == "gravity")		return RETURN_FLOAT(pTarget->pev->gravity);
+	else if (Prop == "height")		return RETURN_FLOAT(pTarget->pev->maxs.z - pTarget->pev->mins.z);
+	else if (Prop == "speed")		return RETURN_FLOAT(pTarget->pev->velocity.Length());
+	else if (Prop == "speed2D")		return RETURN_FLOAT(pTarget->pev->velocity.Length2D());
 	else if (Prop == "forwardspeed")
 	{
 		Vector vForward;
 		EngineFunc::MakeVectors(pTarget->pev->v_angle, &vForward, NULL, NULL);
-		RETURN_FLOAT(DotProduct(pTarget->pev->velocity, vForward));
+		return RETURN_FLOAT(DotProduct(pTarget->pev->velocity, vForward));
 	}
 	else if (Prop == "absmin") //Thothie DEC2014_12
 	{
@@ -1091,7 +1096,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	//MIB JUL2010_31 - debuggary
 	else if ( Prop == "deadflag" )
 	{
-	RETURN_INT(pTarget->pev->deadflag)
+	return RETURN_INT(pTarget->pev->deadflag);
 	}
 	*/
 	else if (Prop == "sitting") //Thothie JAN2010_09 - spariments
@@ -1109,7 +1114,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		if (pItem && pItem->m_Value)
 		{
 			int iRealCost = int(pItem->m_Value);
-			RETURN_INT(iRealCost)
+			return RETURN_INT(iRealCost);
 		}
 		else return "unset";
 	}
@@ -1119,13 +1124,13 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		//fSuccess = FBitSet(pTarget->pev->flags,FL_GODMODE) ? true : false;
 		//(still not workign) :/
 		//Thothie FEB2015_18 - yet another attempt:
-		RETURN_INT((pTarget->pev->flags & FL_GODMODE) ? 1 : 0);
+		return RETURN_INT( (pTarget->pev->flags & FL_GODMODE) ? 1 : 0);
 	}
-	else if (Prop == "waterlevel")		RETURN_INT(pTarget->pev->waterlevel)
-	else if (Prop == "anim.current_frame")		RETURN_FLOAT(pTarget->pev->frame)
-	else if (Prop == "anim.max_frames")		RETURN_FLOAT(255.0f)
-	//else if( Prop == "anim.lastset" ) RETURN_FLOAT ( pTarget->pev->animtime ) //Thothie - JUN2007b - useless, just keeps increasing regardless of anims
-	else if (Prop == "anim.index")  RETURN_INT(pTarget->pev->sequence)  //Thothie - JUN2007b
+	else if (Prop == "waterlevel")			return RETURN_INT(pTarget->pev->waterlevel);
+	else if (Prop == "anim.current_frame")	return RETURN_FLOAT(pTarget->pev->frame);
+	else if (Prop == "anim.max_frames")		return RETURN_FLOAT(255.0f);
+	//else if( Prop == "anim.lastset" )		return RETURN_FLOAT (Return, pTarget->pev->animtime ); //Thothie - JUN2007b - useless, just keeps increasing regardless of anims
+	else if (Prop == "anim.index")			return RETURN_INT(pTarget->pev->sequence);  //Thothie - JUN2007b
 	else if (Prop == "anim.name")
 	{
 		//Thothie - JUN2007b
@@ -1133,8 +1138,8 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		//- meh, fail, just going to set animation indexes in the scripts for now
 		//return LookupSequenceName(pTarget->pev->model,pTarget->pev->sequence);
 	}
-	else if (Prop.starts_with("origin"))			RETURN_POSITION("origin", pTarget->pev->origin)
-	else if (Prop.starts_with("origin_center"))	RETURN_POSITION("origin_center", pTarget->Center())
+	else if (Prop.starts_with("origin"))		return RETURN_POSITION(Prop, "origin", pTarget->pev->origin);
+	else if (Prop.starts_with("origin_center"))	return RETURN_POSITION(Prop, "origin_center", pTarget->Center());
 	else if (Prop == "dist" || Prop == "dist2D" || Prop == "range" || Prop == "range2D")
 	{
 		//MIB JAN2010_20 - range check take model widths into account
@@ -1150,22 +1155,23 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		else
 			Dist = (pTarget->pev->origin - pev->origin).Length2D();
 
-		RETURN_FLOAT(Dist)
+		return RETURN_FLOAT(Dist);
 			//original
 			//float Dist = (Prop == "range" || Prop == "dist" ) ? (pTarget->pev->origin - pev->origin).Length() : (pTarget->pev->origin - pev->origin).Length2D();
 			//RETURN_FLOAT( Dist )
 	}
-	else if (Prop.starts_with("eyepos"))	RETURN_POSITION("eyepos", pTarget->EyePosition())
-	else if (Prop.starts_with("velocity"))	RETURN_POSITION("velocity", pTarget->pev->velocity)
+	else if (Prop.starts_with("eyepos"))	return RETURN_POSITION(Prop, "eyepos", pTarget->EyePosition());
+	else if (Prop.starts_with("velocity"))	return RETURN_POSITION(Prop, "velocity", pTarget->pev->velocity);
 	else if (Prop.starts_with("angles"))
 	{
-		RETURN_ANGLE("angles", pTarget->pev->angles)
-		RETURN_POSITION("angles", pTarget->pev->angles)
+		return RETURN_ANGLE(Prop, "angles", pTarget->pev->angles);
+		//return RETURN_POSITION(Prop,"angles", pTarget->pev->angles); These would not be hit in this statement
 	}
 	else if (Prop.starts_with("viewangles"))
 	{
-		RETURN_ANGLE("viewangles", pTarget->pev->v_angle)
-		RETURN_POSITION("viewangles", pTarget->pev->v_angle)
+		return RETURN_ANGLE(Prop, "viewangles", pTarget->pev->v_angle);
+
+		//RETURN_POSITION(Prop,"viewangles", pTarget->pev->v_angle)// this would not be his in this statement due to previous macro return
 	}
 	else if (Prop == "target")
 	{
@@ -1278,7 +1284,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if( Prop == "slot" )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)pTarget; //MAR2010_08
-		if ( pPlayer ) RETURN_INT( pPlayer->m_CharacterNum )
+		if (pPlayer) return RETURN_INT(pPlayer->m_CharacterNum);
 	}
 #endif
 
@@ -1312,27 +1318,27 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			else if (Prop == "inhand")			fSuccess = (pItem->m_Location == ITEMPOS_HANDS) ? true : false;
 			else if (Prop == "is_worn")		fSuccess = pItem->IsWorn() ? true : false;
 			else if (Prop == "inworld") fSuccess = pItem->IsInWorld() ? true : false;
-			else if (Prop == "drink_amt")	RETURN_INT(pItem->DrinkGetAmt()) //Thothie JUN2007
-			else if (Prop == "quality") RETURN_INT(pItem->Quality ? pItem->Quality : 0) //Thothie NOV2014_14
-			else if (Prop == "maxquality") RETURN_INT(pItem->MaxQuality ? pItem->MaxQuality : 0) //Thothie NOV2014_14
-			else if (Prop == "quantity") RETURN_INT(pItem->iQuantity ? pItem->iQuantity : 0) //Thothie NOV2014_14
-			else if (Prop == "hand_index") RETURN_INT(pItem->m_Hand)
+			else if (Prop == "drink_amt")	return RETURN_INT( pItem->DrinkGetAmt()); //Thothie JUN2007
+			else if (Prop == "quality")		return RETURN_INT( pItem->Quality ? pItem->Quality : 0); //Thothie NOV2014_14
+			else if (Prop == "maxquality")	return RETURN_INT( pItem->MaxQuality ? pItem->MaxQuality : 0); //Thothie NOV2014_14
+			else if (Prop == "quantity")	return RETURN_INT( pItem->iQuantity ? pItem->iQuantity : 0); //Thothie NOV2014_14
+			else if (Prop == "hand_index")	return RETURN_INT( pItem->m_Hand);
 			else if (Prop == "wielded") //Thothie OCT2015_31 - need a reliable way to be sure if item is active or not
 			{
-				if (pItem->IsWorn()) RETURN_INT(0); //reliable, item is worn thus not wielded (eg. bow/shield on back)
+				if (pItem->IsWorn()) return RETURN_INT(0); //reliable, item is worn thus not wielded (eg. bow/shield on back)
 				if (pItem->Owner())
 				{
-					CBasePlayer *pPlayerOwner = pItem->Owner()->IsPlayer() ? (CBasePlayer *)pItem->Owner() : NULL;
+					CBasePlayer* pPlayerOwner = pItem->Owner()->IsPlayer() ? (CBasePlayer*)pItem->Owner() : NULL;
 					//CBasePlayer *pPlayer = pItem->Owner();
 					if (pPlayerOwner)
 					{
-						if (pItem == pPlayerOwner->Hand(0)) RETURN_INT(1)
-						if (pItem == pPlayerOwner->Hand(1)) RETURN_INT(1)
+						if (pItem == pPlayerOwner->Hand(0)) return RETURN_INT( 1);
+							if (pItem == pPlayerOwner->Hand(1)) return RETURN_INT( 1);
 					}
 				}
-				RETURN_INT(0)
+				return RETURN_INT(0);
 			}
-			else if (Prop == "handpref") RETURN_INT(pItem->m_PrefHand) //Thothie DEC2010_04
+			else if (Prop == "handpref") return RETURN_INT( pItem->m_PrefHand); //Thothie DEC2010_04
 			else if (Prop == "owner")
 			{
 				//Thothie FEB2016_17 - this somehow got switched to no longer returning owner ID
@@ -1341,25 +1347,25 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 				//client can't determine owner ID, so just return if owned or not
 				fSuccess = pItem->m_pOwner ? true : false;
 #else
-				if ( pItem->RetrieveEntity(ENT_OWNER) )
+				if (pItem->RetrieveEntity(ENT_OWNER))
 				{
 					//on server, this will return proper for any item not on the ground
 					return EntToString(pItem->RetrieveEntity(ENT_OWNER));
 				}
 				else
-				if ( pItem->Owner() && pItem->Owner()->GetScripted() )
-				{
-					//this will handle items on ground or undeterminable
-					return EntToString(pItem->Owner());
-					//return pItem->RetrieveEntity(ENT_OWNER) ? EntToString(pItem->RetrieveEntity(ENT_OWNER)) : "0";
-				}
+					if (pItem->Owner() && pItem->Owner()->GetScripted())
+					{
+						//this will handle items on ground or undeterminable
+						return EntToString(pItem->Owner());
+						//return pItem->RetrieveEntity(ENT_OWNER) ? EntToString(pItem->RetrieveEntity(ENT_OWNER)) : "0";
+					}
 #endif
 			}
 			else if (Prop == "container.open") fSuccess = pItem->Container_IsOpen() ? true : false;
-			else if (Prop == "container.items") RETURN_INT(pItem->Container_ItemCount())
+			else if (Prop == "container.items") return RETURN_INT( pItem->Container_ItemCount());
 #ifndef VALVE_DLL
 			else if (Prop == "viewmodel")		return pItem->m_ViewModel;
-			else if (Prop == "viewmodel.id")  RETURN_INT(pItem->GetViewModelID());
+			else if (Prop == "viewmodel.id")  return RETURN_INT( pItem->GetViewModelID());
 #endif
 			//Thothie OCT2016_18 Item Mods
 #ifdef VALVE_DLL
@@ -1380,12 +1386,12 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		else if (pMonster)
 		{
 			if (Prop == "race")		return _strlwr(pMonster->m_Race);
-			else if (Prop == "maxhp")	RETURN_FLOAT(pMonster->MaxHP())
+			else if (Prop == "maxhp")	return RETURN_FLOAT(pMonster->MaxHP());
 			else if (Prop == "relationship" && Params.size() >= 3)
 			{
-				CBaseEntity *pOtherEntity = RetrieveEntity(Params[2]);
+				CBaseEntity* pOtherEntity = RetrieveEntity(Params[2]);
 				int RelationShip = pMonster->IRelationship(pOtherEntity);
-				switch(RelationShip)
+				switch (RelationShip)
 				{
 				case RELATIONSHIP_NO:
 					return "neutral";
@@ -1409,35 +1415,35 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			}
 			else if (Prop == "height")
 			{
-				RETURN_FLOAT(pMonster->m_Height)
+				return RETURN_FLOAT(pMonster->m_Height);
 			}
 			else if (Prop == "nopush") return (pMonster->m_nopush) ? "1" : "0";
 			else if (Prop == "width")
 			{
-				RETURN_FLOAT(pMonster->m_Width) //MIBJAN2010_20
+				return RETURN_FLOAT(pMonster->m_Width); //MIBJAN2010_20
 			}
-			else if (Prop == "mp")		RETURN_FLOAT(pMonster->m_MP)
-			else if (Prop == "maxmp")	RETURN_FLOAT(pMonster->MaxMP())
-			else if (Prop == "movedir") VecToString(pMonster->pev->movedir); //Thothie APR2016_07
+			else if (Prop == "mp")		return RETURN_FLOAT(pMonster->m_MP);
+			else if (Prop == "maxmp")	return RETURN_FLOAT(pMonster->MaxMP());
+			else if (Prop == "movedir") return VecToString(pMonster->pev->movedir); //Thothie APR2016_07
 #ifdef VALVE_DLL
-			else if( Prop == "svbonepos" )
+			else if (Prop == "svbonepos")
 			{
 				//Thothie MAR2008a - get positions of bones from server side
 				//$get(<target>,svbonepos,<bone_idx>)
 				Vector vBoneVec;
 				Vector vBoneAngle;
-				pMonster->GetBonePosition( atoi(Params[2]), vBoneVec, vBoneAngle );
-				return VecToString( vBoneVec );
+				pMonster->GetBonePosition(atoi(Params[2]), vBoneVec, vBoneAngle);
+				return VecToString(vBoneVec);
 				//if need be ye can return vBoneAngle by making a seperate command svboneang)
 			}
-			else if( Prop == "attachpos" )
+			else if (Prop == "attachpos")
 			{
 				//Thothie MAR2008a - get position of an attachment
 				//$get(<target>,attachpos,<attchment_idx>)
 				Vector vAttVec;
 				Vector vAttAngle;
-				pMonster->GetAttachment(atoi(Params[2]), vAttVec, vAttAngle );
-				return VecToString( vAttVec );
+				pMonster->GetAttachment(atoi(Params[2]), vAttVec, vAttAngle);
+				return VecToString(vAttVec);
 			}
 			/*
 			else if( Prop == "attachang" )
@@ -1452,24 +1458,24 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			*/
 			//AUG2013_21 Thothie - attempting to return last hit group (for headshots)
 			//kinda working for players (always returns 2, lest not hit), but not monsters
-			else if( Prop == "lasthitgroup" )
+			else if (Prop == "lasthitgroup")
 			{
-				RETURN_INT( pMonster->m_LastHitGroup );
+				return RETURN_INT(pMonster->m_LastHitGroup);
 			}
 #endif
-			else if (Prop == "movedest.origin")	return VecToString(pMonster->m_MoveDest.Origin);
-			else if (Prop == "movedest.prox")		RETURN_FLOAT(pMonster->m_MoveDest.Proximity)
-			else if (Prop == "moveprox")			RETURN_FLOAT(pMonster->GetDefaultMoveProximity())
-			else if (Prop == "movedest.id")		return EntToString(pMonster->m_MoveDest.MoveTarget.Entity());
-			else if (Prop == "anim_end") RETURN_FLOAT(gpGlobals->time + ((256 / pMonster->m_flFrameRate) * pMonster->pev->framerate))
-			else if (Prop == "stepsize") RETURN_FLOAT(pMonster->m_StepSize)	//MiB DEC2007a
-			else if (Prop == "movetype") RETURN_INT(pTarget->pev->movetype) //Thothie JAN2013_20 (post patch)
-			else if (Prop == "name.full") return SPEECH::NPCName(pMonster);
-			else if (Prop == "name.prefix") return pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix) : msstring(""); //Thothie JAN2011_30
+			else if (Prop == "movedest.origin")		return VecToString(pMonster->m_MoveDest.Origin);
+			else if (Prop == "movedest.prox")		return RETURN_FLOAT( pMonster->m_MoveDest.Proximity);
+			else if (Prop == "moveprox")			return RETURN_FLOAT( pMonster->GetDefaultMoveProximity());
+			else if (Prop == "movedest.id")			return EntToString(pMonster->m_MoveDest.MoveTarget.Entity());
+			else if (Prop == "anim_end")			return RETURN_FLOAT( gpGlobals->time + ((256 / pMonster->m_flFrameRate) * pMonster->pev->framerate));
+			else if (Prop == "stepsize")			return RETURN_FLOAT( pMonster->m_StepSize);	//MiB DEC2007a
+			else if (Prop == "movetype")			return RETURN_INT(pTarget->pev->movetype); //Thothie JAN2013_20 (post patch)
+			else if (Prop == "name.full")			return SPEECH::NPCName(pMonster);
+			else if (Prop == "name.prefix")			return pMonster->DisplayPrefix.len() ? msstring(pMonster->DisplayPrefix) : msstring(""); //Thothie JAN2011_30
 			else if (Prop == "name.full.capital")	return SPEECH::NPCName(pMonster, true);
-			else if (Prop == "dmgmulti") RETURN_FLOAT(pMonster->m_DMGMulti) //APR2008a
-			else if (Prop == "hpmulti") RETURN_FLOAT(pMonster->m_HPMulti) //APR2008a
-			else if (Prop == "hitmulti") RETURN_FLOAT(pMonster->m_HITMulti) //FEB2009_18
+			else if (Prop == "dmgmulti")			return RETURN_FLOAT( pMonster->m_DMGMulti); //APR2008a
+			else if (Prop == "hpmulti")				return RETURN_FLOAT( pMonster->m_HPMulti); //APR2008a
+			else if (Prop == "hitmulti")			return RETURN_FLOAT( pMonster->m_HITMulti); //FEB2009_18
 			else if (Prop == "fly")
 			{
 				//NOV2014_13 - needed for anti-stuck
@@ -1494,7 +1500,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 						{
 						return EntToString(pOther);
 						}
-						else
+						else 
 						{
 						return "0";
 						}
@@ -1509,9 +1515,9 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			{
 				if (Prop == "curhand") //Thothie JUN2018_13 return current active hand index
 				{
-					RETURN_INT(pPlayer->m_CurrentHand); //0=Left Hand Active, 1=Right Hand Active (active hand=left click, off hand=right click)
+					return RETURN_INT(pPlayer->m_CurrentHand); //0=Left Hand Active, 1=Right Hand Active (active hand=left click, off hand=right click)
 				}
-				else if (Prop == "glowcolor") RETURN_VECTOR(pPlayer->m_GlowColor) // MiB APR2019_10 [GLOW_COLOR] - Glow color
+				else if (Prop == "glowcolor") return RETURN_VECTOR(pPlayer->m_GlowColor); // MiB APR2019_10 [GLOW_COLOR] - Glow color
 				else if (Prop == "gender")
 				{
 					return (pPlayer->m_Gender == GENDER_MALE) ? "male" : "female";
@@ -1519,23 +1525,23 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 				else if (Prop == "ip") //MiB Dec2007a Returns the ip address of the player NOTE: This COULD be loopback.
 				{
 #ifdef VALVE_DLL
-					clientaddr_t &ClientInfo = g_NewClients[pPlayer->entindex()-1];
+					clientaddr_t& ClientInfo = g_NewClients[pPlayer->entindex() - 1];
 					return ClientInfo.Addr;
 #endif
 				}
 #ifdef VALVE_DLL
-				else if( Prop == "spellname" ) //MiB Dec2007a - returns the name of the spell on target player at slot 'idx'
+				else if (Prop == "spellname") //MiB Dec2007a - returns the name of the spell on target player at slot 'idx'
 				{
-					int idx = atoi( Params[2] );
+					int idx = atoi(Params[2]);
 					msstring msSpellNameReturn = pPlayer->m_SpellList[idx].c_str();
 					return msSpellNameReturn.c_str();
 				}
-				else if( Prop == "jumping" )	fSuccess = FBitSet( pPlayer->m_StatusFlags, PLAYER_MOVE_JUMPING ) ? true : false;
-				else if( Prop == "companions" )
+				else if (Prop == "jumping")	fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_JUMPING) ? true : false;
+				else if (Prop == "companions")
 				{
 					//Thothie JUN2008a - return # of companions
 					//$get(<target>,companions)
-					RETURN_INT( pPlayer->m_Companions.size() )
+					return RETURN_INT(pPlayer->m_Companions.size());
 				}
 #endif
 				//Thothie JUL2010_29 - get keydown value
@@ -1555,12 +1561,12 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 					else if (msKeyCheck.starts_with("duck")) return ((FBitSet(pPlayer->pbs.ButtonsDown, IN_DUCK)) ? "1" : "0"); //APR2014_03 - Thothie - forgot about duck
 				}
 #ifndef VALVE_DLL
-				else if (Prop == "stamina")		RETURN_FLOAT(pPlayer->Stamina)
-				else if (Prop == "stamina.ratio")	RETURN_FLOAT(pPlayer->Stamina / pPlayer->MaxStamina())
+				else if (Prop == "stamina")			return RETURN_FLOAT(pPlayer->Stamina);
+				else if (Prop == "stamina.ratio")	return RETURN_FLOAT(pPlayer->Stamina / pPlayer->MaxStamina());
 #endif
-				else if (Prop == "stamina.max")	RETURN_FLOAT(pPlayer->MaxStamina())
+				else if (Prop == "stamina.max")		return RETURN_FLOAT(pPlayer->MaxStamina());
 				//else if( pPlayer && Prop == "sitting" )	fSuccess = FBitSet( pPlayer->m_StatusFlags, PLAYER_MOVE_SITTING ) ? true : false;
-				else if (Prop == "anim.type") { if (pPlayer->m_pAnimHandler) RETURN_INT(pPlayer->m_pAnimHandler->GetID()) else fSuccess = false; }
+				else if (Prop == "anim.type") { if (pPlayer->m_pAnimHandler) return RETURN_INT(pPlayer->m_pAnimHandler->GetID()); else fSuccess = false; }
 				else if (Prop == "anim.uselegs") { if (pPlayer->m_pAnimHandler) fSuccess = pPlayer->m_pAnimHandler->UseGait; }
 				else if (Prop == "torso_anim") return pPlayer->m_szAnimTorso;
 				else if (Prop == "legs_anim") return pPlayer->m_szAnimLegs;
@@ -1602,7 +1608,8 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 				{
 					int Max = 100;
 
-					if (Prop.contains(".max")) RETURN_INT(Max)
+					if (Prop.contains(".max")) 
+						return RETURN_INT(Max);
 					else
 					{
 						msstring Stat = Prop.substr(5).thru_char(".");
@@ -1611,8 +1618,10 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 						{
 							int Amount = pPlayer->GetNatStat(iStat);
 
-							if (Prop.contains(".ratio")) RETURN_FLOAT_PRECISION(Amount / (float)Max)
-							else RETURN_INT(Amount);
+							if (Prop.contains(".ratio"))
+								return RETURN_FLOAT_PRECISION(Amount / (float)Max);
+							else 
+								return RETURN_INT(Amount);
 						}
 						else ALERT(at_console, "Player stat %s doesn't exist!\n", Stat.c_str());
 					}
@@ -1633,13 +1642,13 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 					}
 					}
 					*/
-					RETURN_INT( pPlayer->NumItems() );
+					return RETURN_INT( pPlayer->NumItems() );
 				}
 				//Thothie SEP2011_17 - This failed because of differences in the two CBasePlayer Defines (I guess)
 				/*
 				else if( Prop == "lastpush" )
 				{
-				RETURN_FLOAT( pPlayer->LastPush );
+				return RETURN_FLOAT( pPlayer->LastPush );
 				}
 				*/
 #endif
@@ -1658,7 +1667,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 
 					int Max = (SubSkill > -1) ? (int)STATPROP_MAX_VALUE : (int)STAT_MAX_VALUE;
 
-					if (Prop.contains(".max")) RETURN_INT(Max)
+					if (Prop.contains(".max")) return RETURN_INT(Max);
 					else
 					{
 						msstring Skill = Prop.substr(6).thru_char(".");
@@ -1669,8 +1678,8 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 							if (SubSkill > -1) Amount = pPlayer->GetSkillStat(Skill.c_str(), SubSkill);
 							else Amount = pPlayer->GetSkillStat(Stat);
 
-							if (Prop.contains(".ratio")) RETURN_FLOAT_PRECISION(Amount / (float)Max)
-							else RETURN_INT(Amount);
+							if (Prop.contains(".ratio")) return RETURN_FLOAT_PRECISION(Amount / (float)Max);
+							else return RETURN_INT(Amount);
 						}
 						else ALERT(at_console, "Player skill %s doesn't exist!\n", Skill.c_str());
 					}

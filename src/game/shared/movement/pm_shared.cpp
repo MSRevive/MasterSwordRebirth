@@ -40,6 +40,7 @@
 #include "hud.h"
 #include "cl_util.h"
 #include "ms/hudscript.h"
+
 void Player_DoJump();
 
 // Spectator Mode
@@ -177,6 +178,7 @@ static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];
 static char grgchTextureType[CTEXTURESMAX];
 
 int g_onladder = 0;
+
 
 char* memfgets(const byte* pMemFile, std::size_t fileSize, std::size_t& filePos, char* pBuffer, std::size_t bufferSize)
 {
@@ -3612,17 +3614,17 @@ const char* PM_GetValue(msstringlist &Params)
 	msstring &Value = Params[2];
 
 	if (Name == "fallvelocity")
-		RETURN_FLOAT(pmove->flFallVelocity)
+		return RETURN_FLOAT(pmove->flFallVelocity);
 	else if (Name == "waterlevel")
-		RETURN_INT(pmove->waterlevel)
+		return RETURN_INT(pmove->waterlevel);
 	else if (Name == "oldwaterlevel")
-		RETURN_INT(pmove->oldwaterlevel)
+		return RETURN_INT(pmove->oldwaterlevel);
 	else if (Name == "origin")
-		RETURN_POSITION("origin", pmove->origin)
+		return RETURN_POSITION(Prop, "origin", pmove->origin);
 	else if (Name == "angles")
-		RETURN_ANGLE("angles", pmove->angles)
+		return RETURN_ANGLE(Prop, "angles", pmove->angles);
 	else if (Name == "velocity")
-		RETURN_ANGLE("velocity", pmove->velocity)
+		return RETURN_ANGLE(Prop, "velocity", pmove->velocity);
 
-	RETURN_NOTHING;
+	return RETURN_NOTHING();
 }

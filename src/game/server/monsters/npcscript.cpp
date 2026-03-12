@@ -8,6 +8,8 @@
 #include "stats/races.h"
 #include "msitemdefs.h"
 
+
+
 // TODO: get rid of the macro for logging when we get rid of MSScript.
 #include "mslogger.h"
 
@@ -1908,13 +1910,13 @@ const char* CMSMonster::GetProp(CBaseEntity *pTarget, msstring &FullParams, msst
 	msstring &Prop = FullParams;
 
 	if (pMonster && Prop == "walkspeed")
-		RETURN_FLOAT(pMonster->WalkSpeed(true))
+		return RETURN_FLOAT(pMonster->WalkSpeed(true));
 	else if (pMonster && Prop == "runspeed")
-		RETURN_FLOAT(pMonster->RunSpeed(true))
+		return RETURN_FLOAT(pMonster->RunSpeed(true));
 	else if (pMonster && Prop == "movespeed")
-		RETURN_FLOAT(pMonster->m_flGroundSpeed) //Thothie MAR2008 - attempting to fix freeze_solid issues
+		return RETURN_FLOAT(pMonster->m_flGroundSpeed); //Thothie MAR2008 - attempting to fix freeze_solid issues
 	else if (pMonster && Prop == "framerate")
-		RETURN_FLOAT(pMonster->m_Framerate) //Thothie MAR2008 - attempting to fix freeze_solid issues
+		return RETURN_FLOAT(pMonster->m_Framerate); //Thothie MAR2008 - attempting to fix freeze_solid issues
 
 	return fSuccess ? "1" : CBaseEntity::GetProp(pTarget, FullParams, Params);
 }

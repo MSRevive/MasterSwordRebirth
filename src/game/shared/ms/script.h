@@ -414,3 +414,10 @@ extern globalscriptinfo_t *g_MSScriptInfo;
 #else
 	#define SCRIPT_ID_START 10000	//Client: ID of next script to be created
 #endif
+
+
+#ifndef VECTOR_H
+
+#endif // !VECTOR_H
+
+
