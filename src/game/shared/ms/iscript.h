@@ -262,7 +262,7 @@ inline char* RETURN_VECTOR(const Vector& vec){
 }
 
 
-inline const char* VecToString(const Vector& Vec, bool bAs2D = false)
+inline const char* VecToString(const Vector& Vec, bool bAs2D)
 {
 	msstring Return;
 	if (bAs2D)

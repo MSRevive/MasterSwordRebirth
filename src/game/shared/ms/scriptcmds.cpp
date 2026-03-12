@@ -916,18 +916,18 @@ bool CScript::ScriptCmd_endgame(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 //Param1 = Property name
 //Param2 = Extra data
-const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, msstringlist &Params)
+const char* CBaseEntity::GetProp(CBaseEntity* pTarget, msstring& FullParams, msstringlist& Params)
 {
 	if (!pTarget) pTarget = this;
-	CGenericItem *pItem = pTarget->IsMSItem() ? (CGenericItem *)pTarget : NULL;
-	CMSMonster *pMonster = pTarget->IsMSMonster() ? (CMSMonster *)pTarget : NULL;
-	CBasePlayer *pPlayer = pTarget->IsPlayer() ? (CBasePlayer *)pTarget : NULL;
-	IScripted *pScripted = pTarget->GetScripted();
+	CGenericItem* pItem = pTarget->IsMSItem() ? (CGenericItem*)pTarget : NULL;
+	CMSMonster* pMonster = pTarget->IsMSMonster() ? (CMSMonster*)pTarget : NULL;
+	CBasePlayer* pPlayer = pTarget->IsPlayer() ? (CBasePlayer*)pTarget : NULL;
+	IScripted* pScripted = pTarget->GetScripted();
 
 	bool fSuccess = false;
 	int Stat = -1;
 	static msstring Return;
-	msstring &Prop = FullParams;
+	msstring& Prop = FullParams;
 
 	if (Prop == "name")				return pTarget->DisplayName();
 	else if (Prop == "id")				return EntToString(pTarget);
@@ -956,24 +956,24 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "alive" || Prop == "isalive")			fSuccess = pTarget->IsAlive() ? true : false;
 	else if (Prop == "hp")				return RETURN_FLOAT(pTarget->pev->health);
 #ifdef VALVE_DLL
-	else if( Prop == "xp" || Prop == "skilllevel" )
+	else if (Prop == "xp" || Prop == "skilllevel")
 	{
 		//Thothie JUN2008a - return monsters XP value
 		//NOV2014_21 - moving to top, as this is one we'll have to use at mob spawn repeatedly
 		return RETURN_FLOAT(pMonster->m_SkillLevel);
 	}
-	else if ( Prop == "blood" ) //greatguys1 August2018
+	else if (Prop == "blood") //greatguys1 August2018
 	{
 		msstring blood;
-		if ( pTarget->BloodColor() == BLOOD_COLOR_RED )
+		if (pTarget->BloodColor() == BLOOD_COLOR_RED)
 		{
 			blood.append("red");
 		}
-		else if ( pTarget->BloodColor() == BLOOD_COLOR_GREEN )
+		else if (pTarget->BloodColor() == BLOOD_COLOR_GREEN)
 		{
 			blood.append("green");
 		}
-		else if ( pTarget->BloodColor() == BLOOD_COLOR_YELLOW )
+		else if (pTarget->BloodColor() == BLOOD_COLOR_YELLOW)
 		{
 			blood.append("yellow");
 		}
@@ -984,7 +984,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 
 		return blood.c_str();
 	}
-	else if( Prop == "renderprops" ) //Thothie MAR2015_17)
+	else if (Prop == "renderprops") //Thothie MAR2015_17)
 	{
 		msstring renderprops;
 		renderprops.append(FloatToString(pTarget->pev->scale));
@@ -1051,43 +1051,43 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	else if (Prop == "ducking")		fSuccess = FBitSet(pTarget->pev->flags, FL_DUCKING) ? true : false;
 	else if (Prop == "onground")		fSuccess = FBitSet(pTarget->pev->flags, FL_ONGROUND) ? true : false;
 #ifdef VALVE_DLL
-	else if( Prop == "canattack" ) //Thothie AUG2007a
+	else if (Prop == "canattack") //Thothie AUG2007a
 	{
-		if ( pTarget->IsPlayer() )
+		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NOATTACK) ? false : true;
 		}
 	}
-	else if( Prop == "canmove" ) //Thothie AUG2007a
+	else if (Prop == "canmove") //Thothie AUG2007a
 	{
-		if ( pTarget->IsPlayer() )
+		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NOMOVE) ? false : true;
 		}
 	}
-	else if( Prop == "canjump" ) //Thothie AUG2007a
+	else if (Prop == "canjump") //Thothie AUG2007a
 	{
-		if ( pTarget->IsPlayer() )
+		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NOJUMP) ? false : true;
 		}
 	}
-	else if( Prop == "canrun" ) //Thothie AUG2007a
+	else if (Prop == "canrun") //Thothie AUG2007a
 	{
-		if ( pTarget->IsPlayer() )
+		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NORUN) ? false : true;
 		}
 	}
-	else if( Prop == "canduck" ) //Thothie AUG2007a
+	else if (Prop == "canduck") //Thothie AUG2007a
 	{
-		if ( pTarget->IsPlayer() )
+		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_NODUCK) ? false : true;
 		}
 	}
@@ -1103,7 +1103,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	{
 		if (pTarget->IsPlayer())
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+			CBasePlayer* pPlayer = (CBasePlayer*)pTarget;
 			fSuccess = FBitSet(pPlayer->m_StatusFlags, PLAYER_MOVE_SITTING) ? true : false;
 		}
 	}
@@ -1124,7 +1124,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		//fSuccess = FBitSet(pTarget->pev->flags,FL_GODMODE) ? true : false;
 		//(still not workign) :/
 		//Thothie FEB2015_18 - yet another attempt:
-		return RETURN_INT( (pTarget->pev->flags & FL_GODMODE) ? 1 : 0);
+		return RETURN_INT((pTarget->pev->flags & FL_GODMODE) ? 1 : 0);
 	}
 	else if (Prop == "waterlevel")			return RETURN_INT(pTarget->pev->waterlevel);
 	else if (Prop == "anim.current_frame")	return RETURN_FLOAT(pTarget->pev->frame);
@@ -1144,7 +1144,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 	{
 		//MIB JAN2010_20 - range check take model widths into account
 		float Dist;
-		CMSMonster *pMonsterMe = IsMSMonster() ? (CMSMonster *)this : NULL;
+		CMSMonster* pMonsterMe = IsMSMonster() ? (CMSMonster*)this : NULL;
 		if (Prop == "range" || Prop == "dist")
 		{
 			if (pMonster && pMonsterMe)
@@ -1156,22 +1156,29 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 			Dist = (pTarget->pev->origin - pev->origin).Length2D();
 
 		return RETURN_FLOAT(Dist);
-			//original
-			//float Dist = (Prop == "range" || Prop == "dist" ) ? (pTarget->pev->origin - pev->origin).Length() : (pTarget->pev->origin - pev->origin).Length2D();
-			//RETURN_FLOAT( Dist )
+		//original
+		//float Dist = (Prop == "range" || Prop == "dist" ) ? (pTarget->pev->origin - pev->origin).Length() : (pTarget->pev->origin - pev->origin).Length2D();
+		//RETURN_FLOAT( Dist )
 	}
 	else if (Prop.starts_with("eyepos"))	return RETURN_POSITION(Prop, "eyepos", pTarget->EyePosition());
 	else if (Prop.starts_with("velocity"))	return RETURN_POSITION(Prop, "velocity", pTarget->pev->velocity);
 	else if (Prop.starts_with("angles"))
 	{
-		return RETURN_ANGLE(Prop, "angles", pTarget->pev->angles);
-		//return RETURN_POSITION(Prop,"angles", pTarget->pev->angles); These would not be hit in this statement
+		if (Prop.contains("yaw") || Prop.contains("pitch") || Prop.contains("roll")) {
+			return RETURN_ANGLE(Prop, "angles", pTarget->pev->angles);
+		}
+		else {
+			return RETURN_POSITION(Prop, "angles", pTarget->pev->angles);
+		}
 	}
 	else if (Prop.starts_with("viewangles"))
 	{
-		return RETURN_ANGLE(Prop, "viewangles", pTarget->pev->v_angle);
-
-		//RETURN_POSITION(Prop,"viewangles", pTarget->pev->v_angle)// this would not be his in this statement due to previous macro return
+		if (Prop.contains("yaw") || Prop.contains("pitch") || Prop.contains("roll")) {
+			return RETURN_ANGLE(Prop, "viewangles", pTarget->pev->v_angle);
+		}
+		else {
+			return RETURN_POSITION(Prop, "viewangles", pTarget->pev->v_angle); 
+		}
 	}
 	else if (Prop == "target")
 	{
@@ -1186,7 +1193,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 
 		if (Params.size() > 1) remove_on_find = true;
 
-		if (!pPlayer->m_ChosenArrow || pPlayer->m_ChosenArrow->iQuantity <= 0 || !msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
+		if (pPlayer && !pPlayer->m_ChosenArrow || pPlayer->m_ChosenArrow->iQuantity <= 0 || !msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
 		{
 			//return "unset";
 			CGenericItem *pProjInPack = NULL, *pPack = NULL;
@@ -1655,15 +1662,14 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 				else if (Prop.starts_with("skill."))
 				{
 					int SubSkill = -1;
-					if (Prop.contains(".prof"))			SubSkill = 0;
-					else if (Prop.contains(".balance"))	SubSkill = 1;
-					else if (Prop.contains(".power"))		SubSkill = 2;
-
-					else if (Prop.contains(".fire"))			SubSkill = 0;	//Magic
-					else if (Prop.contains(".ice"))			SubSkill = 1;
-					else if (Prop.contains(".lightning"))		SubSkill = 2;
-					else if (Prop.contains(".divination"))		SubSkill = 3;
-					else if (Prop.contains(".affliction"))		SubSkill = 4;
+					if (Prop.contains(".prof"))				SubSkill = STATPROP_SKILL;
+					else if (Prop.contains(".balance"))		SubSkill = STATPROP_BALANCE;
+					else if (Prop.contains(".power"))		SubSkill = STATPROP_POWER;
+					else if (Prop.contains(".fire"))		SubSkill = STAT_MAGIC_FIRE;
+					else if (Prop.contains(".ice"))			SubSkill = STAT_MAGIC_ICE;
+					else if (Prop.contains(".lightning"))	SubSkill = STAT_MAGIC_LIGHTNING;
+					else if (Prop.contains(".divination"))	SubSkill = STAT_MAGIC_DIVINATION;
+					else if (Prop.contains(".affliction"))	SubSkill = STAT_MAGIC_AFFLICTION;
 
 					int Max = (SubSkill > -1) ? (int)STATPROP_MAX_VALUE : (int)STAT_MAX_VALUE;
 
@@ -1678,7 +1684,7 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 							if (SubSkill > -1) Amount = pPlayer->GetSkillStat(Skill.c_str(), SubSkill);
 							else Amount = pPlayer->GetSkillStat(Stat);
 
-							if (Prop.contains(".ratio")) return RETURN_FLOAT_PRECISION(Amount / (float)Max);
+							if (Prop.contains(".ratio")) return RETURN_FLOAT_PRECISION((float)Amount / (float)Max);
 							else return RETURN_INT(Amount);
 						}
 						else ALERT(at_console, "Player skill %s doesn't exist!\n", Skill.c_str());

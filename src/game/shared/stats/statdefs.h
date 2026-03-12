@@ -72,8 +72,8 @@ int GetNatStatByName(const char *pszName);					 //Returns -1 if not found
 void GetStatIndices(const char *Name, int &Stat, int &Prop); //Converts stat.prop into valid indices
 const char *GetSkillName(int Skill);						 //Looks any skill
 
-#define STAT_MAX_VALUE 300.0
-#define STATPROP_MAX_VALUE 100.0
+constexpr float STAT_MAX_VALUE = 300.0f;
+constexpr float STATPROP_MAX_VALUE = 100.0f;
 	//level cap
 
 //For MSMonster::m_PlayerDamage
