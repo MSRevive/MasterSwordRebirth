@@ -120,7 +120,7 @@ typedef struct enginefuncs_s
 	int			(*pfnGetEntityIllum)		(edict_t* pEnt);
 	edict_t*	(*pfnFindEntityInSphere)	(edict_t *pEdictStartSearchAfter, const float *org, float rad);
 	edict_t*	(*pfnFindClientInPVS)		(edict_t *pEdict);
-	edict_t*    (*pfnEntitiesInPVS)			(edict_t *pplayer);
+	edict_t* (*pfnEntitiesInPVS)			(edict_t *pplayer);
 	void		(*pfnMakeVectors)			(const float *rgflVector);
 	void		(*pfnAngleVectors)			(const float *rgflVector, float *forward, float *right, float *up);
 	edict_t*	(*pfnCreateEntity)			(void);
@@ -169,7 +169,7 @@ typedef struct enginefuncs_s
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
 	void		(*pfnFreeEntPrivateData)	(edict_t *pEdict);
 	const char*	(*pfnSzFromIndex)			(int iString);
-	unsigned int		(*pfnAllocString)			(const char *szValue);
+	unsigned int			(*pfnAllocString)			(const char *szValue);
 	struct entvars_s*	(*pfnGetVarsOfEnt)			(edict_t *pEdict);
 	edict_t*	(*pfnPEntityOfEntOffset)	(int iEntOffset);
 	int			(*pfnEntOffsetOfPEntity)	(const edict_t *pEdict);
@@ -219,7 +219,7 @@ typedef struct enginefuncs_s
 	void		(*pfnBuildSoundMsg)			(edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch, int msg_dest, int msg_type, const float *pOrigin, edict_t *ed);
 	int			(*pfnIsDedicatedServer)		(void);// is this a dedicated server?
 	cvar_t		*(*pfnCVarGetPointer)		(const char *szVarName);
-	int (*pfnGetPlayerWONId)				(edict_t *e); // returns the server assigned WONid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
+	unsigned int (*pfnGetPlayerWONId)		(edict_t *e); // returns the server assigned WONid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
 
 	// YWB 8/1/99 TFF Physics additions
 	void		(*pfnInfo_RemoveKey)		(const char* s, const char *key );
