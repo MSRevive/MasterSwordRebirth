@@ -14,6 +14,7 @@ extern CBasePlayer player;
 #endif
 
 CBaseEntity *MSInstance(edict_t *pent);
+
 #define ENT_FORMAT ENT_PREFIX "(%i,%u)"
 msstring EntToString(class CBaseEntity *pEntity)
 {
@@ -44,7 +45,7 @@ CBaseEntity *StringToEnt(const char* EntString)
 	int Idx = -1;
 	unsigned int Addr = ~0;
 
-	if (sscanf(EntString, ENT_FORMAT, &Idx, &Addr) <  2)
+	if (sscanf(EntString, ENT_FORMAT, &Idx, &Addr) < 2)
 		return NULL;
 
 	CBaseEntity *pEntity = MSInstance(INDEXENT(Idx));

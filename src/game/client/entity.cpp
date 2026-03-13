@@ -31,7 +31,7 @@
 
 #undef DLLEXPORT //Master Sword
 #define DLLEXPORT EXPORT
-constexpr int MAX_TEMPENT_EXTRA = 4096;
+#define MAX_TEMPENT_EXTRA 4096
 
 void Game_AddObjects(void);
 void SetClEntityProp(cl_entity_t &Ent, msstring &Cmd, mslist<msstring *> &ValueParams);
@@ -108,7 +108,7 @@ int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s *ent, const char *model
 	{
 		gHUD.m_Spectator.AddOverviewEntity(type, ent, modelname);
 
-		if ((g_iUser1 == OBS_IN_EYE || (int)gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
+		if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) &&
 			ent->index == g_iUser2)
 			return 0; // don't draw the player we are following in eye
 	}
@@ -544,13 +544,10 @@ void DLLEXPORT HUD_CreateEntities(void)
 //Put here because all the cool headers are already defined here
 TEMPENTITY *g_CurrentTempEnt = NULL;
 cl_entity_t *g_CurrentEnt = NULL;
-
-enum {
-	MSTEMPENT_ID = (1 << 0),
-	MSTEMPENT_CALLBACK = (1 << 1),
-	MSTEMPENT_GRAVITY = (1 << 2),
-	MSTEMPENT_FOLLOWENT = (1 << 3)
-};
+#define MSTEMPENT_ID (1 << 0)
+#define MSTEMPENT_CALLBACK (1 << 1)
+#define MSTEMPENT_GRAVITY (1 << 2)
+#define MSTEMPENT_FOLLOWENT (1 << 3)
 
 void TempEntCallback(struct tempent_s *ent, float frametime, float currenttime)
 {
@@ -558,7 +555,7 @@ void TempEntCallback(struct tempent_s *ent, float frametime, float currenttime)
 		return;
 
 	g_CurrentTempEnt = ent;
-	gHUD.m_HUDScript->Effects_UpdateTempEnt(STRING(ent->entity.curstate.iuser3));
+	HUDScript->Effects_UpdateTempEnt(STRING(ent->entity.curstate.iuser3));
 	g_CurrentTempEnt = nullptr;
 }
 

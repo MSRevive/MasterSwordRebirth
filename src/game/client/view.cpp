@@ -1498,7 +1498,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 	VectorCopy(pparams->viewangles, v_angles);
 	VectorCopy(pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || (int)gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;

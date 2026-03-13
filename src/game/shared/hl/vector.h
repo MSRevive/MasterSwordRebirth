@@ -142,7 +142,6 @@ public:
 inline Vector operator*(float fl, const Vector& v) { return v * fl; }
 inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + a.y * b.y + a.z * b.z); }
 
-
 //template <typename Type1, typename Type2>
 //inline float DotProduct(const Type1* x, const Type2* y) {
 	//return (x[0] * y[0]) + (x[1] * y[1]) + (x[2] + y[2]);

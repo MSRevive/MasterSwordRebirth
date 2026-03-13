@@ -72,14 +72,6 @@ void WRITE_FLOAT( float Float );
 char *GetFullResourceName(const char* PartialName );	//Adds models/ or sprites/ to a model or sprite filename
 void dbgtxt(const char* Text );
 
-enum {
-	ERRORPRINT_LOG      = (1 << 0),
-	ERRORPRINT_CONSOLE  = (1 << 1),
-	ERRORPRINT_INFOMSG  = (1 << 2),
-	ERRORPRINT_CVAR     = (1 << 3),
-	ERRORPRINT_POPUP    = (1 << 4)
-};
-
 #ifdef CONST_H
 	//Data used in the client item delta comparison
 #pragma pack( push, 1 )
@@ -98,7 +90,11 @@ enum {
 #pragma pack( pop )
 #endif
 
-	
+#define ERRORPRINT_LOG      (1 << 0)
+#define ERRORPRINT_CONSOLE  (1 << 1)
+#define ERRORPRINT_INFOMSG  (1 << 2)
+#define ERRORPRINT_CVAR     (1 << 3)
+#define ERRORPRINT_POPUP    (1 << 4)
 void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...);
 
 #endif // SHAREDUTIL_H

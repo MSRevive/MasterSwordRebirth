@@ -11,20 +11,18 @@
 
 #include "cl_entity.h"
 
-enum {
-	INSET_OFF = 0,
-	INSET_CHASE_FREE = 1,
-	INSET_IN_EYE = 2,
-	INSET_MAP_FREE = 3,
-	INSET_MAP_CHASE = 4
-};
+#define INSET_OFF 0
+#define INSET_CHASE_FREE 1
+#define INSET_IN_EYE 2
+#define INSET_MAP_FREE 3
+#define INSET_MAP_CHASE 4
 
-constexpr int MAX_SPEC_HUD_MESSAGES = 8;
+#define MAX_SPEC_HUD_MESSAGES 8
 
-constexpr int OVERVIEW_TILE_SIZE = 128; // don't change this
-constexpr int OVERVIEW_MAX_LAYERS = 1;
+#define OVERVIEW_TILE_SIZE 128 // don't change this
+#define OVERVIEW_MAX_LAYERS 1
 
-;//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Purpose: Handles the drawing of the spectator stuff (camera & top-down map and all the things on it )
 //-----------------------------------------------------------------------------
 
@@ -52,7 +50,7 @@ typedef struct overviewEntity_s
 	double killTime;
 } overviewEntity_t;
 
-constexpr int MAX_OVERVIEW_ENTITIES = 128;
+#define MAX_OVERVIEW_ENTITIES 128
 
 class CHudSpectator : public CHudBase
 {

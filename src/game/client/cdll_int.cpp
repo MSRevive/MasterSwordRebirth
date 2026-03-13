@@ -499,7 +499,7 @@ void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
 {
 	if (g_iUser1 != 0 || gEngfuncs.IsSpectateOnly())
 	{
-		if ((int)gHUD.m_Spectator.m_pip->value == INSET_OFF)
+		if (gHUD.m_Spectator.m_pip->value == INSET_OFF)
 		{
 			*y = YRES(64);
 		}
