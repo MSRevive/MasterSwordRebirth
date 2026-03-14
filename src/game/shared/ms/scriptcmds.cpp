@@ -1197,7 +1197,7 @@ const char* CBaseEntity::GetProp(CBaseEntity* pTarget, msstring& FullParams, mss
 
 		if (Params.size() > 1) remove_on_find = true;
 
-		if (pPlayer && !pPlayer->m_ChosenArrow || pPlayer->m_ChosenArrow->iQuantity <= 0 || !msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
+		if (!pPlayer && !pPlayer->m_ChosenArrow || pPlayer->m_ChosenArrow->iQuantity <= 0 || !msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
 		{
 			//return "unset";
 			CGenericItem *pProjInPack = NULL, *pPack = NULL;
