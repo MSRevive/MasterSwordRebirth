@@ -555,7 +555,7 @@ void TempEntCallback(struct tempent_s *ent, float frametime, float currenttime)
 		return;
 
 	g_CurrentTempEnt = ent;
-	HUDScript->Effects_UpdateTempEnt(STRING(ent->entity.curstate.iuser3));
+	gHUD.m_HUDScript->Effects_UpdateTempEnt(STRING(ent->entity.curstate.iuser3));
 	g_CurrentTempEnt = nullptr;
 }
 

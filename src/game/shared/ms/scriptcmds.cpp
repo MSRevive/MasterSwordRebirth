@@ -1164,21 +1164,25 @@ const char* CBaseEntity::GetProp(CBaseEntity* pTarget, msstring& FullParams, mss
 	else if (Prop.starts_with("velocity"))	return RETURN_POSITION(Prop, "velocity", pTarget->pev->velocity);
 	else if (Prop.starts_with("angles"))
 	{
-		if (Prop.contains("yaw") || Prop.contains("pitch") || Prop.contains("roll")) {
-			return RETURN_ANGLE(Prop, "angles", pTarget->pev->angles);
+		Return  = RETURN_ANGLE(Prop, "angles", pTarget->pev->angles);
+		if (Return.contains(RETURN_NOTHING_STR)) {
+			Return = RETURN_POSITION(Prop, "angles", pTarget->pev->angles);
 		}
-		else {
-			return RETURN_POSITION(Prop, "angles", pTarget->pev->angles);
-		}
+
+		return Return;
+
 	}
 	else if (Prop.starts_with("viewangles"))
 	{
-		if (Prop.contains("yaw") || Prop.contains("pitch") || Prop.contains("roll")) {
-			return RETURN_ANGLE(Prop, "viewangles", pTarget->pev->v_angle);
+
+		Return = RETURN_ANGLE(Prop, "viewangles", pTarget->pev->v_angle);
+		if (Return.contains(RETURN_NOTHING_STR)) {
+			Return = RETURN_POSITION(Prop, "viewangles", pTarget->pev->v_angle);
 		}
-		else {
-			return RETURN_POSITION(Prop, "viewangles", pTarget->pev->v_angle); 
-		}
+
+		return Return;
+
+
 	}
 	else if (Prop == "target")
 	{

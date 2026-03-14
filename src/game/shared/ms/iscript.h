@@ -273,9 +273,10 @@ inline const char* VecToString(const Vector& Vec, bool bAs2D)
 }
 
 
-inline const char* RETURN_POSITION(const char* Prop, const char * name, const Vector& position, bool as2d = false) {
+inline const char* RETURN_POSITION(const char* prop, const char * name, const Vector& position, bool as2d = false) {
 
-	msstring NameExt;
+	msstring NameExt = name;
+	msstring Prop = prop;
 
 	if (Prop == name)	
 		return VecToString(position, as2d); 
@@ -301,9 +302,10 @@ inline const char* RETURN_POSITION(const char* Prop, const char * name, const Ve
 }
 
 
-inline const char* RETURN_ANGLE(const char* Prop, const char* name, const Vector& angles, bool as2d = false) {
+inline const char* RETURN_ANGLE(const char* prop, const char* name, const Vector& angles, bool as2d = false) {
 
-	msstring NameExt;
+	msstring NameExt = name;
+	msstring Prop = prop;
 
 	if (Prop == name) {
 		return VecToString(angles, as2d);
