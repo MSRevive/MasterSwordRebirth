@@ -187,7 +187,7 @@ bool CGenericItem::Attack_CanAttack()
 {
 	if (!m_Attacks.size())
 		return false; //Must have registered an attack
-	if (!m_pOwner || !m_pOwner->IsAlive())
+	if (!m_pOwner || !m_pPlayer || !m_pOwner->IsAlive())
 		return false; //Owner must be alive
 	if (m_Location != ITEMPOS_HANDS)
 		return false; //Must be in owner's hands
