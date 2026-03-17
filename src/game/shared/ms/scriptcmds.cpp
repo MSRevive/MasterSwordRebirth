@@ -4801,7 +4801,7 @@ bool CScript::ScriptCmd_PlaySound(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 
 			if (Cmd.Name() == "playrandomsound" || Cmd.Name() == "svplayrandomsound")
 			{
-				pszSound = Params[NextParm + RANDOM_LONG(0, Params.size() - (Volume > -1 ? 3 : 2))];
+				pszSound = Params[NextParm + RANDOM_LONG((unsigned int)0, Params.size() - (Volume > -1 ? 3 : 2))];
 			}
 
 			//Todo: Allow changing pitch/attenuation with additional parameters on playsound/svplaysound
@@ -7004,7 +7004,7 @@ bool CScript::ScriptCmd_TokenScramble(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 
 		for(unsigned int i = 0; i < n_loops; i++)
 		{
-			unsigned int r = RANDOM_LONG(0, Tokens.size() - 1);
+			unsigned int r = RANDOM_LONG((unsigned int)0, Tokens.size() - 1);
 			new_tokens += Tokens[r];
 			new_tokens += ";";
 			Tokens.erase(r);
@@ -7087,7 +7087,7 @@ bool CScript::ScriptCmd_ToRandomSpawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 
 			if ( Spawnpoints.size() )
 			{
-				int loc = RANDOM_LONG( 0 , Spawnpoints.size()-1 );
+				int loc = RANDOM_LONG( (unsigned int)0 , Spawnpoints.size()-1 );
 				pTarget->pev->origin = Spawnpoints[ loc ]->pev->origin;
 			}
 		}

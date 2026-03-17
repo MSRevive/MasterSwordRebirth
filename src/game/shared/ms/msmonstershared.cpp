@@ -612,7 +612,7 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float 
 		CStat * pStat = pPlayer->FindStat(vStat);
 		if(pStat)
 		{
-			vProp = RANDOM_LONG( 0, pStat->m_SubStats.size() - 1 );
+			vProp = RANDOM_LONG( (unsigned int)0, pStat->m_SubStats.size() - 1 );
 		}
 	}
 

@@ -2385,7 +2385,7 @@ spawnspot_e GetRandomSpawnSpot(const char* Name, const char* TransitionName, CBa
 
 	while (Spawnpoints.size())
 	{
-		RandSpot = RANDOM_LONG(0, (Spawnpoints.size() - 1));
+		RandSpot = RANDOM_LONG((unsigned int)0, (Spawnpoints.size() - 1));
 
 		pSpot = Spawnpoints[RandSpot];
 		if (!IsSpawnPointValid(pPlayer, pSpot))

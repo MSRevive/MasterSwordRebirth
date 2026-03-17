@@ -485,7 +485,7 @@ void CMultiManager ::ManagerUse(CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	float flNextThink = gpGlobals->time;
 	if (fFireRandom)
 	{
-		m_index = RANDOM_LONG(0, m_cTargets - 1);
+		m_index = RANDOM_LONG((unsigned int)0, m_cTargets - 1);
 		flNextThink = gpGlobals->time + m_flTargetDelay[m_index];
 	}
 

@@ -1778,7 +1778,7 @@ msstring CScript::ScriptGetter_get_random_token(msstring& FullName, msstring& Pa
 		//int token_found_at = -1;
 
 		//int max_token = Tokens.size()-1; //Thothie SEP2019_04 Never seems to return 0 token
-		int rnd_token_idx = (RANDOM_LONG(1, Tokens.size())) - 1;
+		int rnd_token_idx = (RANDOM_LONG((unsigned int)1, Tokens.size())) - 1;
 		return Tokens[rnd_token_idx].c_str();
 	}
 	else return "-1";

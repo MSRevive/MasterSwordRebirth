@@ -898,7 +898,7 @@ namespace ASBuiltinFunctions
         if (spawnpoints.size() > 0)
         {
             // Pick a random spawn point
-            int loc = RANDOM_LONG(0, spawnpoints.size() - 1);
+            int loc = RANDOM_LONG((unsigned int)0, spawnpoints.size() - 1);
             pPlayer->pev->origin = spawnpoints[loc]->pev->origin;
             
             MS_ANGEL_INFO("MovePlayerToRandomSpawn: Moved player %s to random spawn (found %d nearby spawns)", 

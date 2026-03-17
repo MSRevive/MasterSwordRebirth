@@ -72,7 +72,21 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define CRC32_PROCESS_BUFFER (*g_engfuncs.pfnCRC32_ProcessBuffer)
 #define CRC32_PROCESS_BYTE (*g_engfuncs.pfnCRC32_ProcessByte)
 #define CRC32_FINAL (*g_engfuncs.pfnCRC32_Final)
-#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
+//#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
+
+template <typename Type1, typename Type2>
+int32 RANDOM_LONG(Type1 low, Type2 high) {
+
+	if (low < high) {
+		return g_engfuncs.pfnRandomLong(low, high);
+	}
+	else {
+		return g_engfuncs.pfnRandomLong(high, low);
+	}
+}
+
+
+
 #define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
 #define ALERT (*g_engfuncs.pfnAlertMessage)
