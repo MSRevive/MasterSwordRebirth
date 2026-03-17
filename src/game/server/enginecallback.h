@@ -75,19 +75,31 @@ void SET_MODEL( edict_t *e, const char *szModel );
 //#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
 
 template <typename Type1, typename Type2>
-int32 RANDOM_LONG(Type1 low, Type2 high) {
+int32 RANDOM_LONG(const Type1 &lLow, const Type2 &lHigh) {
 
-	if (low < high) {
-		return g_engfuncs.pfnRandomLong(low, high);
+	if (lLow > lHigh) {
+		return g_engfuncs.pfnRandomLong(lHigh, lLow);
 	}
-	else {
-		return g_engfuncs.pfnRandomLong(high, low);
-	}
+
+	return g_engfuncs.pfnRandomLong(lLow, lHigh);
+
+
 }
 
 
+template <typename Type1, typename Type2>
+float RANDOM_FLOAT(const Type1 &flLow, const Type2 &flHigh) {
 
-#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
+	if (flLow > flHigh) {
+		return g_engfuncs.pfnRandomFloat(flHigh, flLow);
+	}
+	
+	return g_engfuncs.pfnRandomFloat(flLow, flHigh);
+
+}
+
+
+//#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
 #define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
 #define ALERT (*g_engfuncs.pfnAlertMessage)
 
