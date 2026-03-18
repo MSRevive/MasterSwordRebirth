@@ -638,7 +638,7 @@ const char* RETURN_COLOR(const char* Prop, const char* name, const color24& colo
 		return VecToString(vTemp);
 	}
 
-	msstring NameExt;
+	std::string NameExt;
 	NameExt = name;
 	NameExt += ".r";
 

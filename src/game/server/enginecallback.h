@@ -73,6 +73,8 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define CRC32_PROCESS_BYTE (*g_engfuncs.pfnCRC32_ProcessByte)
 #define CRC32_FINAL (*g_engfuncs.pfnCRC32_Final)
 //#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
+//#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
+//#define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
 
 template <typename Type1, typename Type2>
 int32 RANDOM_LONG(const Type1 &lLow, const Type2 &lHigh) {
@@ -99,8 +101,12 @@ float RANDOM_FLOAT(const Type1 &flLow, const Type2 &flHigh) {
 }
 
 
-//#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
-#define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
+inline const char* GETPLAYERAUTHID(edict_t* e) {
+	return g_engfuncs.pfnGetPlayerAuthId(e);
+}
+
+
+//undoing this would just invite more macros, will keep this and any others that user variadic args / fmt
 #define ALERT (*g_engfuncs.pfnAlertMessage)
 
 //MIB JUN2010_17 - enable total disable of debug alert messages
@@ -214,7 +220,12 @@ inline void *GET_PRIVATE(edict_t *pent)
 int ALLOC_STRING(const char *szValue); //Master Sword - Keep track of all string allocations on server
 void ClearStringPool();
 #else
-#define ALLOC_STRING (*g_engfuncs.pfnAllocString)
+
+inline unsigned int ALLOC_STRING(const char* szValue) {
+	return g_engfuncs.pfnAllocString(szValue);
+}
+
+//#define ALLOC_STRING (*g_engfuncs.pfnAllocString)
 #endif
 
 #define FIND_ENTITY_BY_STRING (*g_engfuncs.pfnFindEntityByString)
