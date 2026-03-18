@@ -438,7 +438,7 @@ For debugging, draw a box around a player made out of particles
 void UTIL_ParticleBox(CBasePlayer* player, float* mins, float* maxs, float life, unsigned char r, unsigned char g, unsigned char b)
 {
 	int i;
-	vec3_t mmin, mmax;
+	Vector  mmin, mmax;
 
 	for (i = 0; i < 3; i++)
 	{
@@ -461,7 +461,7 @@ void UTIL_ParticleBoxes(void)
 	int idx;
 	physent_t* pe;
 	cl_entity_t* player;
-	vec3_t mins, maxs;
+	Vector  mins, maxs;
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 

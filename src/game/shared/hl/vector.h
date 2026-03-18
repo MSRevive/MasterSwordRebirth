@@ -67,7 +67,7 @@ inline Vector2D operator*(float fl, const Vector2D &v) { return v * fl; }
 //=========================================================
 // 3D Vector
 //=========================================================
-class Vector // same data-layout as engine's vec3_t,
+class Vector // same data-layout as engine's Vector ,
 {			 //		which is a vec_t[3]
 public:
 	// Construction/destruction
@@ -149,6 +149,5 @@ inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + 
 
 inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
 
-#define vec3_t Vector // temporary until we change all the files to use Vector.
 
 #endif
