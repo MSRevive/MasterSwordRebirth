@@ -52,18 +52,20 @@ extern "C"
 	void EV_TrainPitchAdjust(struct event_args_s *args);
 }
 
-#define VECTOR_CONE_1DEGREES Vector(0.00873, 0.00873, 0.00873)
-#define VECTOR_CONE_2DEGREES Vector(0.01745, 0.01745, 0.01745)
-#define VECTOR_CONE_3DEGREES Vector(0.02618, 0.02618, 0.02618)
-#define VECTOR_CONE_4DEGREES Vector(0.03490, 0.03490, 0.03490)
-#define VECTOR_CONE_5DEGREES Vector(0.04362, 0.04362, 0.04362)
-#define VECTOR_CONE_6DEGREES Vector(0.05234, 0.05234, 0.05234)
-#define VECTOR_CONE_7DEGREES Vector(0.06105, 0.06105, 0.06105)
-#define VECTOR_CONE_8DEGREES Vector(0.06976, 0.06976, 0.06976)
-#define VECTOR_CONE_9DEGREES Vector(0.07846, 0.07846, 0.07846)
-#define VECTOR_CONE_10DEGREES Vector(0.08716, 0.08716, 0.08716)
-#define VECTOR_CONE_15DEGREES Vector(0.13053, 0.13053, 0.13053)
-#define VECTOR_CONE_20DEGREES Vector(0.17365, 0.17365, 0.17365)
+
+
+constexpr Vector VECTOR_CONE_1DEGREES = Vector(0.00873, 0.00873, 0.00873);
+constexpr Vector VECTOR_CONE_2DEGREES = Vector(0.01745, 0.01745, 0.01745);
+constexpr Vector VECTOR_CONE_3DEGREES = Vector(0.02618, 0.02618, 0.02618);
+constexpr Vector VECTOR_CONE_4DEGREES = Vector(0.03490, 0.03490, 0.03490);
+constexpr Vector VECTOR_CONE_5DEGREES = Vector(0.04362, 0.04362, 0.04362);
+constexpr Vector VECTOR_CONE_6DEGREES = Vector(0.05234, 0.05234, 0.05234);
+constexpr Vector VECTOR_CONE_7DEGREES = Vector(0.06105, 0.06105, 0.06105);
+constexpr Vector VECTOR_CONE_8DEGREES = Vector(0.06976, 0.06976, 0.06976);
+constexpr Vector VECTOR_CONE_9DEGREES = Vector(0.07846, 0.07846, 0.07846);
+constexpr Vector VECTOR_CONE_10DEGREES = Vector(0.08716, 0.08716, 0.08716);
+constexpr Vector VECTOR_CONE_15DEGREES = Vector(0.13053, 0.13053, 0.13053);
+constexpr Vector VECTOR_CONE_20DEGREES = Vector(0.17365, 0.17365, 0.17365);
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -367,7 +369,7 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, float *vecSpread, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount)
+void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount)
 {
 	int i;
 	pmtrace_t tr;
@@ -802,7 +804,9 @@ void EV_FirePython(event_args_t *args)
 	}
 }
 
-#define SND_CHANGE_PITCH (1 << 7) // duplicated in protocol.h change sound pitch
+enum {
+	SND_CHANGE_PITCH = (1 << 7) // duplicated in protocol.h change sound pitch
+};
 
 void EV_SpinGauss(event_args_t *args)
 {
