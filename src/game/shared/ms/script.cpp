@@ -3713,7 +3713,7 @@ msstring CScript::ScriptGetter_ShapeSphere(
 {
 	if (Params.size() > 1)
 	{
-		Vector                          vOrigin = DetermineOrigin(Params[0]);
+		Vector                         vOrigin = DetermineOrigin(Params[0]);
 		float                           vRadius = atof(Params[1]);
 
 		CSphereFilter                   vFilter(vOrigin, vRadius);

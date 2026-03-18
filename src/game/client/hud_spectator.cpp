@@ -43,10 +43,10 @@ extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float *cl_angles, float *origin, float *angles);
 extern float *GetClientColor(int clientIndex);
 
-extern Vector  v_origin;	   // last view origin
-extern Vector  v_angles;	   // last view angle
-extern Vector  v_cl_angles; // last client/mouse angle
-extern Vector  v_sim_org;   // last sim origin
+extern Vector v_origin;	   // last view origin
+extern Vector v_angles;	   // last view angle
+extern Vector v_cl_angles; // last client/mouse angle
+extern Vector v_sim_org;   // last sim origin
 
 void SpectatorMode(void)
 {
@@ -65,7 +65,7 @@ void SpectatorMode(void)
 
 void SpectatorSpray(void)
 {
-	Vector  forward;
+	Vector forward;
 	char string[128];
 
 	if (!gEngfuncs.IsSpectateOnly())
@@ -407,7 +407,7 @@ int CHudSpectator::Draw(float flTime)
 	// if user moves in map mode, change map origin
 	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
 	{
-		Vector  right;
+		Vector right;
 		AngleVectors(v_angles, NULL, &right, NULL);
 		VectorNormalize(right);
 		VectorScale(right, m_moveDelta, right);
@@ -1172,7 +1172,7 @@ void CHudSpectator::DrawOverviewEntities()
 {
 	int i, ir, ig, ib;
 	struct model_s *hSpriteModel;
-	Vector  origin, angles, point, forward, right, left, up, world, screen, offset;
+	Vector origin, angles, point, forward, right, left, up, world, screen, offset;
 	float x, y, z, r, g, b, sizeScale = 4.0f;
 	cl_entity_t *ent;
 	float rmatrix[3][4]; // transformation matrix

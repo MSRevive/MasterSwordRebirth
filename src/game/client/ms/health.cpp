@@ -153,7 +153,7 @@ int CHudHealth::MsgFunc_Damage(const char *pszName, int iSize, void *pbuf)
 	int damageTaken = READ_BYTE(); // health
 	long bitsDamage = READ_LONG(); // damage bits
 
-	Vector  vecFrom;
+	Vector vecFrom;
 
 	for (unsigned int i = 0; i < 3; i++)
 		vecFrom[i] = READ_COORD();
@@ -203,11 +203,11 @@ int CHudHealth::Draw(float flTime)
 	return 1;
 }
 
-void CHudHealth::CalcDamageDirection(Vector  vecFrom)
+void CHudHealth::CalcDamageDirection(Vector vecFrom)
 {
-	Vector  forward, right, up;
+	Vector forward, right, up;
 	float side, front;
-	Vector  vecOrigin, vecAngles;
+	Vector vecOrigin, vecAngles;
 
 	if (!vecFrom[0] && !vecFrom[1] && !vecFrom[2])
 	{

@@ -68,7 +68,7 @@ cvar_t *c_maxdistance;
 cvar_t *c_mindistance;
 
 // pitch, yaw, dist
-Vector  cam_ofs;
+Vector cam_ofs;
 
 // In third person
 int cam_mousemove; //true if we are moving the cam with the mouse, False if not
@@ -158,20 +158,20 @@ float MoveToward(float cur, float goal, float maxspeed)
 	qboolean	monsterclip;
 } moveclip_t;
 
-extern trace_t SV_ClipMoveToEntity (edict_t *ent, Vector  start, Vector  mins, Vector  maxs, Vector  end);
+extern trace_t SV_ClipMoveToEntity (edict_t *ent, Vector start, Vector mins, Vector maxs, Vector end);
 */
 void DLLEXPORT CAM_Think(void)
 {
-	Vector  origin;
-	Vector  ext, pnt, camForward, camRight, camUp;
+	Vector origin;
+	Vector ext, pnt, camForward, camRight, camUp;
 	//moveclip_t	clip;
 	float dist;
-	Vector  camAngles;
+	Vector camAngles;
 	float flSensitivity;
 	/*#ifdef LATER
 	int i;
 #endif*/
-	Vector  viewangles;
+	Vector viewangles;
 
 	switch ((int)cam_command->value)
 	{
@@ -477,7 +477,7 @@ void CAM_OutUp(void) { KeyUp(&cam_out); }
 
 void CAM_ToThirdPerson(void)
 {
-	Vector  viewangles;
+	Vector viewangles;
 
 	Cam_SwitchingTo1StPerson = false;
 	gEngfuncs.GetViewAngles((float *)viewangles);
@@ -548,7 +548,7 @@ void CAM_Init(void)
 
 void CAM_ClearStates(void)
 {
-	Vector  viewangles;
+	Vector viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 

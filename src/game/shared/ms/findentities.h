@@ -138,7 +138,7 @@ public:
 //class CConeFilter : public CShapeFilter
 //{
 //protected:
-//    Vector                              mAngle;
+//    Vector                             mAngle;
 //    virtual void CreateStringCache(
 //        ) const;
 //public:

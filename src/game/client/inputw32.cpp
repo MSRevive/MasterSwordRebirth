@@ -165,7 +165,7 @@ Force_CenterView_f
 */
 void Force_CenterView_f(void)
 {
-	Vector  viewangles;
+	Vector viewangles;
 
 	if (!iMouseInUse)
 	{
@@ -463,7 +463,7 @@ IN_MouseMove
 void IN_MouseMove(float frametime, usercmd_t *cmd)
 {
 	int mx, my;
-	Vector  viewangles;
+	Vector viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 
@@ -858,7 +858,7 @@ void IN_JoyMove(float frametime, usercmd_t *cmd)
 	float speed, aspeed;
 	float fAxisValue, fTemp;
 	int i;
-	Vector  viewangles;
+	Vector viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 

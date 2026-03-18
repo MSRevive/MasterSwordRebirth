@@ -325,11 +325,11 @@ int EV_HLDM_CheckTracer(int idx, float *vecSrc, float *end, float *forward, floa
 
 	if (iTracerFreq != 0 && ((*tracerCount)++ % iTracerFreq) == 0)
 	{
-		Vector  vecTracerSrc;
+		Vector vecTracerSrc;
 
 		if (player)
 		{
-			Vector  offset(0, 0, -4);
+			Vector offset(0, 0, -4);
 
 			// adjust tracer position for player
 			for (i = 0; i < 3; i++)
@@ -372,7 +372,7 @@ void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int c
 	int i;
 	pmtrace_t tr;
 	int iShot;
-	Vector  vecRight, vecUp;
+	Vector vecRight, vecUp;
 	int tracer;
 
 	VectorCopy(right, vecRight);
@@ -380,10 +380,10 @@ void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int c
 
 	for (iShot = 1; iShot <= cShots; iShot++)
 	{
-		Vector  vecDir, vecEnd;
+		Vector vecDir, vecEnd;
 
 		// get circular gaussian spread
-		Vector  spread;
+		Vector spread;
 		do
 		{
 			spread[0] = gEngfuncs.pfnRandomFloat(-0.5, 0.5) + gEngfuncs.pfnRandomFloat(-0.5, 0.5);
@@ -453,18 +453,18 @@ void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int c
 void EV_FireGlock1(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 	int empty;
 
 	int i;
-	Vector  ShellVelocity;
-	Vector  ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	int shell;
-	Vector  vecSrc, vecAiming;
-	Vector  vecSpread;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector vecSpread;
+	Vector up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -509,17 +509,17 @@ void EV_FireGlock1(event_args_t *args)
 void EV_FireGlock2(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
 	int i;
-	Vector  ShellVelocity;
-	Vector  ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	int shell;
-	Vector  vecSrc, vecAiming;
-	Vector  vecSpread;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector vecSpread;
+	Vector up, right, forward;
 	float flSpread = 0.1;
 
 	idx = args->entindex;
@@ -564,17 +564,17 @@ void EV_FireGlock2(event_args_t *args)
 void EV_FireShotGunDouble(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
 	int i, j;
-	Vector  ShellVelocity;
-	Vector  ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	int shell;
-	Vector  vecSrc, vecAiming;
-	Vector  vecSpread;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector vecSpread;
+	Vector up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -630,17 +630,17 @@ void EV_FireShotGunDouble(event_args_t *args)
 void EV_FireShotGunSingle(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
 	int i;
-	Vector  ShellVelocity;
-	Vector  ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	int shell;
-	Vector  vecSrc, vecAiming;
-	Vector  vecSpread;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector vecSpread;
+	Vector up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -693,15 +693,15 @@ void EV_FireShotGunSingle(event_args_t *args)
 void EV_FireMP5(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
-	Vector  ShellVelocity;
-	Vector  ShellOrigin;
+	Vector ShellVelocity;
+	Vector ShellOrigin;
 	int shell;
-	Vector  vecSrc, vecAiming;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -755,12 +755,12 @@ void EV_FireMP5(event_args_t *args)
 void EV_FirePython(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 
-	Vector  vecSrc, vecAiming;
-	Vector  up, right, forward;
+	Vector vecSrc, vecAiming;
+	Vector up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -807,9 +807,9 @@ void EV_FirePython(event_args_t *args)
 void EV_SpinGauss(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 	int iSoundState = 0;
 
 	int pitch;
@@ -830,16 +830,16 @@ void EV_SpinGauss(event_args_t *args)
 void EV_FireGauss(event_args_t *args)
 {
 	int idx;
-	Vector  origin;
-	Vector  angles;
-	Vector  velocity;
+	Vector origin;
+	Vector angles;
+	Vector velocity;
 	float flDamage = args->fparam1;
 	int primaryfire = args->bparam1;
 
 	int m_fPrimaryFire = args->bparam1;
 	int m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
-	Vector  vecSrc;
-	Vector  vecDest;
+	Vector vecSrc;
+	Vector vecDest;
 	edict_t *pentIgnore;
 	pmtrace_t tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -849,7 +849,7 @@ void EV_FireGauss(event_args_t *args)
 	int nMaxHits = 10;
 	physent_t *pEntity;
 	int m_iBeam, m_iGlow, m_iBalls;
-	Vector  up, right, forward;
+	Vector up, right, forward;
 
 	idx = args->entindex;
 	VectorCopy(args->origin, origin);
@@ -956,7 +956,7 @@ void EV_FireGauss(event_args_t *args)
 			{
 				// ALERT( at_console, "reflect %f\n", n );
 				// reflect
-				Vector  r;
+				Vector r;
 
 				VectorMA(forward, 2.0 * n, tr.plane.normal, r);
 
@@ -970,7 +970,7 @@ void EV_FireGauss(event_args_t *args)
 				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage * n / 255.0, flDamage * n * 0.5 * 0.1, FTENT_FADEOUT);
 
 				{
-					Vector  fwd;
+					Vector fwd;
 					VectorAdd(tr.endpos, tr.plane.normal, fwd);
 					gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, (int)(n * flDamage * 0.3), 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 													  255, 200);
@@ -1001,7 +1001,7 @@ void EV_FireGauss(event_args_t *args)
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				if (!m_fPrimaryFire)
 				{
-					Vector  start;
+					Vector start;
 
 					VectorMA(tr.endpos, 8.0, forward, start);
 
@@ -1016,7 +1016,7 @@ void EV_FireGauss(event_args_t *args)
 
 					if (!beam_tr.allsolid)
 					{
-						Vector  delta;
+						Vector delta;
 						float n;
 
 						// trace backwards to find exit point
@@ -1035,7 +1035,7 @@ void EV_FireGauss(event_args_t *args)
 
 							// absorption balls
 							{
-								Vector  fwd;
+								Vector fwd;
 								VectorSubtract(tr.endpos, forward, fwd);
 								gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 3, 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 																  255, 100);
@@ -1050,7 +1050,7 @@ void EV_FireGauss(event_args_t *args)
 
 							// balls
 							{
-								Vector  fwd;
+								Vector fwd;
 								VectorSubtract(beam_tr.endpos, forward, fwd);
 								gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, beam_tr.endpos, fwd, m_iBalls, (int)(flDamage * 0.3), 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 200,
 																  255, 40);
@@ -1075,7 +1075,7 @@ void EV_FireGauss(event_args_t *args)
 						gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT);
 
 						{
-							Vector  fwd;
+							Vector fwd;
 							VectorAdd(tr.endpos, tr.plane.normal, fwd);
 							gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 8, 0.6, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 															  255, 200);
@@ -1102,7 +1102,7 @@ void EV_TrainPitchAdjust(event_args_t *args)
 	int stop;
 	int idx = args->entindex;
 
-	Vector  origin;
+	Vector origin;
 	VectorCopy(args->origin, origin);
 
 	us_params = (unsigned short)args->iparam1;

@@ -40,8 +40,8 @@ struct entity_state_s
 	int messagenum;
 
 	// Fields which can be transmitted and reconstructed over the network stream
-	Vector  origin;
-	Vector  angles;
+	Vector origin;
+	Vector angles;
 
 	int modelindex;
 	unsigned int sequence;
@@ -66,11 +66,11 @@ struct entity_state_s
 	int body;
 	byte controller[4];
 	byte blending[4];
-	Vector  velocity;
+	Vector velocity;
 
 	// Send bbox down to client for use during prediction.
-	Vector  mins;
-	Vector  maxs;
+	Vector mins;
+	Vector maxs;
 
 	int aiment;
 	// If owned by a player, the index of that player ( for projectiles ).
@@ -89,7 +89,7 @@ struct entity_state_s
 	int weaponmodel;
 	unsigned int gaitsequence;
 	// If standing on conveyor, e.g.
-	Vector  basevelocity;
+	Vector basevelocity;
 	// Use the crouched hull, or the regular player hull.
 	int usehull;
 	// Latched buttons last time state updated.
@@ -104,8 +104,8 @@ struct entity_state_s
 	int weaponanim;
 
 	// Parametric movement overrides
-	Vector  startpos;
-	Vector  endpos;
+	Vector startpos;
+	Vector endpos;
 	float impacttime; //MS - Used for model scale
 	float starttime;
 
@@ -118,25 +118,25 @@ struct entity_state_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector  vuser1;
-	Vector  vuser2;
-	Vector  vuser3;
-	Vector  vuser4; //MS - vuser4.x used to store idx of extra info (including all current bone positions)
+	Vector vuser1;
+	Vector vuser2;
+	Vector vuser3;
+	Vector vuser4; //MS - vuser4.x used to store idx of extra info (including all current bone positions)
 };
 
 #include "pm_info.h"
 
 typedef struct clientdata_s
 {
-	Vector  origin;
-	Vector  velocity;
+	Vector origin;
+	Vector velocity;
 
 	int viewmodel;
-	Vector  punchangle;
+	Vector punchangle;
 	int flags;
 	int waterlevel;
 	int watertype;
-	Vector  view_ofs;
+	Vector view_ofs;
 	float health;
 
 	int bInDuck;
@@ -177,10 +177,10 @@ typedef struct clientdata_s
 	float fuser2;
 	float fuser3;
 	float fuser4;
-	Vector  vuser1;
-	Vector  vuser2;
-	Vector  vuser3;
-	Vector  vuser4;
+	Vector vuser1;
+	Vector vuser2;
+	Vector vuser3;
+	Vector vuser4;
 } clientdata_t;
 
 #include "weaponinfo.h"

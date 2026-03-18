@@ -853,7 +853,7 @@ static CBeam* AS_CreateBeamEntPoint(int startIdx, int attachment, const Vector3&
 
 static void AS_CreateSpark(const Vector3& origin)
 {
-    Vector  pos = {origin.x, origin.y, origin.z};
+    Vector pos = {origin.x, origin.y, origin.z};
     gEngfuncs.pEfxAPI->R_SparkEffect(pos, 5, -200, 200);
 }
 
@@ -862,7 +862,7 @@ static void AS_CreateSparkOnModel(int entityIndex, int attachment)
     cl_entity_t* pEnt = gEngfuncs.GetEntityByIndex(entityIndex);
     if (pEnt)
     {
-        Vector  pos;
+        Vector pos;
         VectorCopy(pEnt->origin, pos);
         gEngfuncs.pEfxAPI->R_SparkEffect(pos, 5, -200, 200);
     }
@@ -956,7 +956,7 @@ public:
     
     void PlaySoundAtPosition(const Vector3& pos, const std::string& soundPath, float volume)
     {
-        Vector  position = {pos.x, pos.y, pos.z};
+        Vector position = {pos.x, pos.y, pos.z};
         gEngfuncs.pEfxAPI->R_RicochetSound((float*)&position);
     }
 };
@@ -975,8 +975,8 @@ static CClientSound* AS_GetClientSound()
 static Vector3 AS_GetGroundHeight(const Vector3& origin)
 {
     pmtrace_t trace;
-    Vector  start = {origin.x, origin.y, origin.z};
-    Vector  end = {origin.x, origin.y, origin.z - 8192.0f};
+    Vector start = {origin.x, origin.y, origin.z};
+    Vector end = {origin.x, origin.y, origin.z - 8192.0f};
     gEngfuncs.pEventAPI->EV_PlayerTrace(start, end, PM_WORLD_ONLY, -1, &trace);
     return Vector3(trace.endpos[0], trace.endpos[1], trace.endpos[2]);
 }
@@ -984,8 +984,8 @@ static Vector3 AS_GetGroundHeight(const Vector3& origin)
 static Vector3 AS_GetSkyHeight(const Vector3& origin)
 {
     pmtrace_t trace;
-    Vector  start = {origin.x, origin.y, origin.z};
-    Vector  end = {origin.x, origin.y, origin.z + 8192.0f};
+    Vector start = {origin.x, origin.y, origin.z};
+    Vector end = {origin.x, origin.y, origin.z + 8192.0f};
     gEngfuncs.pEventAPI->EV_PlayerTrace(start, end, PM_WORLD_ONLY, -1, &trace);
     return Vector3(trace.endpos[0], trace.endpos[1], trace.endpos[2]);
 }
@@ -993,8 +993,8 @@ static Vector3 AS_GetSkyHeight(const Vector3& origin)
 static bool AS_IsUnderSky(const Vector3& origin)
 {
     pmtrace_t trace;
-    Vector  start = {origin.x, origin.y, origin.z};
-    Vector  end = {origin.x, origin.y, origin.z + 8192.0f};
+    Vector start = {origin.x, origin.y, origin.z};
+    Vector end = {origin.x, origin.y, origin.z + 8192.0f};
     gEngfuncs.pEventAPI->EV_PlayerTrace(start, end, PM_WORLD_ONLY, -1, &trace);
     return trace.fraction >= 1.0f || trace.ent == 0;
 }
@@ -1002,8 +1002,8 @@ static bool AS_IsUnderSky(const Vector3& origin)
 static Vector3 AS_TraceLine(const Vector3& start, const Vector3& end, bool worldOnly)
 {
     pmtrace_t trace;
-    Vector  vStart = {start.x, start.y, start.z};
-    Vector  vEnd = {end.x, end.y, end.z};
+    Vector vStart = {start.x, start.y, start.z};
+    Vector vEnd = {end.x, end.y, end.z};
     gEngfuncs.pEventAPI->EV_PlayerTrace(vStart, vEnd, worldOnly ? PM_WORLD_ONLY : PM_NORMAL, -1, &trace);
     return Vector3(trace.endpos[0], trace.endpos[1], trace.endpos[2]);
 }
@@ -1011,15 +1011,15 @@ static Vector3 AS_TraceLine(const Vector3& start, const Vector3& end, bool world
 static int AS_TraceLineEntity(const Vector3& start, const Vector3& end)
 {
     pmtrace_t trace;
-    Vector  vStart = {start.x, start.y, start.z};
-    Vector  vEnd = {end.x, end.y, end.z};
+    Vector vStart = {start.x, start.y, start.z};
+    Vector vEnd = {end.x, end.y, end.z};
     gEngfuncs.pEventAPI->EV_PlayerTrace(vStart, vEnd, PM_NORMAL, -1, &trace);
     return trace.ent;
 }
 
 static int AS_GetContents(const Vector3& origin)
 {
-    Vector  pos = {origin.x, origin.y, origin.z};
+    Vector pos = {origin.x, origin.y, origin.z};
     return gEngfuncs.PM_PointContents(pos, nullptr);
 }
 

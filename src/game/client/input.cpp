@@ -749,12 +749,12 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 void DLLEXPORT CL_CreateMove(float frametime, struct usercmd_s *cmd, int active)
 {
 	float spd;
-	Vector  viewangles;
-	static Vector  oldangles;
+	Vector viewangles;
+	static Vector oldangles;
 
 	if (active)
 	{
-		//memset( viewangles, 0, sizeof( Vector  ) );
+		//memset( viewangles, 0, sizeof( Vector ) );
 		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
 		gEngfuncs.GetViewAngles((float *)viewangles);
 

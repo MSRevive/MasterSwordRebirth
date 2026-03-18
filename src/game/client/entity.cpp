@@ -464,7 +464,7 @@ void TempEnts( void )
 	TEMPENTITY *p;
 	int i, j;
 	struct model_s *mod;
-	Vector  origin;
+	Vector origin;
 	int index;
 
 	mod = gEngfuncs.CL_LoadModel( "sprites/laserdot.spr", &index );
@@ -920,7 +920,7 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	else if (Prop.starts_with("viewangles"))
 	{
 		//MIB AUG2010_05
-		Vector  viewangles;
+		Vector viewangles;
 		gEngfuncs.GetViewAngles((float *)viewangles);
 		RETURN_ANGLE( Prop, "viewangles", viewangles);
 	}
@@ -928,7 +928,7 @@ const char* CScript::CLGetEntProp(cl_entity_t *pclEntity, msstringlist &Params)
 	else if ( Prop.starts_with("eyepos") )
 	{
 		//Thoth APR2012_05 - attempting to return eye position (fail)
-		Vector  eyepos = player.pev->view_ofs;
+		Vector eyepos = player.pev->view_ofs;
 		return RETURN_ANGLE(Prop, "eyepos", eyepos );
 	}
 	*/
@@ -2191,7 +2191,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 
 				if (pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD))
 				{
-					Vector  traceNormal;
+					Vector traceNormal;
 					float traceFraction = 1;
 
 					if (pTemp->flags & FTENT_COLLIDEALL)
