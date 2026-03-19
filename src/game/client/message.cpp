@@ -456,7 +456,7 @@ int CHudMessage::MsgFunc_HudText(const char *pszName, int iSize, void *pbuf)
 int CHudMessage::MsgFunc_GameTitle(const char *pszName, int iSize, void *pbuf)
 {
 	m_pGameTitle = TextMessageGet("GAMETITLE");
-	if (m_pGameTitle != NULL)
+	if (m_pGameTitle != nullptr)
 	{
 		m_gameTitleTime = gHUD.m_flTime;
 
