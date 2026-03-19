@@ -34,6 +34,8 @@ public:
 	void Effects_PreRender();
 	void Effects_Render(cl_entity_t &Ent, bool InMirror);
 	void Effects_DrawTransPararentTriangles();
+
+	char Name[32] = "CHudScript";
 };
 
 

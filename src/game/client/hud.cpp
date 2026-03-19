@@ -236,10 +236,7 @@ int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-#define SetMSHUD(ptr, type) \
-	ptr = new (type);       \
-	strncpy(ptr->Name,  #type, 32 )
-	 
+	
 // This is called every time the DLL is loaded
 void CHud::Init(void)
 {
@@ -247,15 +244,15 @@ void CHud::Init(void)
 	//ClientCmd( "r_shadows 1" );
 	ClientCmd("cl_himodels 0");
 
-	SetMSHUD(m_Menu, CHudMenu);
-	SetMSHUD(m_Fatigue, CHudFatigue);
-	SetMSHUD(m_Magic, CHudMagic);
-	SetMSHUD(m_Music, CHudMusic);
-	SetMSHUD(m_Action, CHudAction);
-	SetMSHUD(m_Health, CHudHealth);
-	SetMSHUD(m_HUDScript, CHudScript);
-	SetMSHUD(m_Misc, CHudMisc);
-	SetMSHUD(m_HUDId, CHudID);
+	m_Menu = new(CHudMenu);
+	m_Fatigue = new(CHudFatigue);
+	m_Magic	= new(CHudMagic);
+	m_Music = new(CHudMusic);
+	m_Action = new(CHudAction);
+	m_Health = new(CHudHealth);
+	m_HUDScript	= new(CHudScript);
+	m_Misc = new(CHudMisc);
+	m_HUDId = new(CHudID);
 
 	//MS commands and messages
 	//HOOK_COMMAND( "use", PlayerUseItem );

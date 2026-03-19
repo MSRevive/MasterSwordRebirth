@@ -31,6 +31,7 @@ public:
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
 	bool m_fOfferedNextMenu;
+	char Name[32] = "CHudMenu";
 
 	//Master Sword
 	TCallbackMenu m;

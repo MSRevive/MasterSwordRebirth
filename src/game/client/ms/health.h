@@ -59,6 +59,7 @@ public:
 	int m_HUD_dmg_bio;
 	int m_HUD_cross;
 	float flChangeTime;
+	char Name[32] = "CHudHealth";
 
 private:
 	HLSPRITE m_hSprite;

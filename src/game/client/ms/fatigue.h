@@ -13,6 +13,7 @@ public:
 	void InitHUDData(void);
 	int MsgFunc_Fatigue(const char *pszName, int iSize, void *pbuf);
 	void UserCmd_ToggleFatigue(void);
+	char Name[32] = "CHudFatigue";
 
 private:
 	float fBreatheTime;
