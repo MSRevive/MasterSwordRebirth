@@ -51,7 +51,7 @@
 //-----------------
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
-cvar_t *cl_lw = nullptr;
+cvar_t *cl_lw = NULL;
 
 void ShutdownInput(void);
 
@@ -355,7 +355,7 @@ void CHud::Init(void)
 	MSCLGlobals::Initialize();
 	//------------
 
-	MsgFunc_ResetHUD(0, 0, nullptr);
+	MsgFunc_ResetHUD(0, 0, NULL);
 }
 
 void CHud::Shutdown()

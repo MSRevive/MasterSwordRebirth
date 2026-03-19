@@ -27,9 +27,9 @@
 #endif
 
 // ScreenHeight returns the height of the screen, in pixels
-inline const int ScreenHeight = (gHUD.m_scrinfo.iHeight);
+#define ScreenHeight (gHUD.m_scrinfo.iHeight)
 // ScreenWidth returns the width of the screen, in pixels
-inline const int ScreenWidth = (gHUD.m_scrinfo.iWidth);
+#define ScreenWidth (gHUD.m_scrinfo.iWidth)
 
 //these must stay macros, or we need to make a msg function for every command.
 // Macros to hook function calls into the HUD object
