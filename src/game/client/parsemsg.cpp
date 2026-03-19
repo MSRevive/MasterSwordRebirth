@@ -68,6 +68,12 @@ int READ_BYTE( void )
 	return c;
 }
 
+
+bool READ_BOOL( void ) {
+	return (READ_BYTE() == 1);
+}
+
+
 int READ_SHORT( void )
 {
 	int     c;
