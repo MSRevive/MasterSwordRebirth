@@ -2,12 +2,14 @@
 #define IN_DEFSH
 #pragma once
 
-// up / down
-#define PITCH 0
+enum {
+	// up / down
+	PITCH = 0,
 // left / right
-#define YAW 1
+	YAW = 1,
 // fall over
-#define ROLL 2
+	ROLL = 2
+};
 
 #define DLLEXPORT EXPORT
 

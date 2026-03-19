@@ -140,7 +140,7 @@ typedef struct kblist_s
 	char name[32];
 } kblist_t;
 
-kblist_t *g_kbkeys = NULL;
+kblist_t *g_kbkeys = nullptr;
 
 /*
 ============
@@ -163,7 +163,7 @@ int KB_ConvertString(char *in, char **ppout)
 	if (!ppout)
 		return 0;
 
-	*ppout = NULL;
+	*ppout = nullptr;
 	p = in;
 	pOut = sz;
 	while (*p)
@@ -178,7 +178,7 @@ int KB_ConvertString(char *in, char **ppout)
 
 			*pEnd = '\0';
 
-			pBinding = NULL;
+			pBinding = nullptr;
 			if (strlen(binding + 1) > 0)
 			{
 				// See if there is a binding for binding?
@@ -240,7 +240,7 @@ struct kbutton_s DLLEXPORT *KB_Find(const char *name)
 		p = p->next;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -279,7 +279,7 @@ Add kbutton_t definitions that the engine can query if needed
 */
 void KB_Init(void)
 {
-	g_kbkeys = NULL;
+	g_kbkeys = nullptr;
 
 	KB_Add("in_graph", &in_graph);
 	KB_Add("in_mlook", &in_mlook);
@@ -303,7 +303,7 @@ void KB_Shutdown(void)
 		free(p);
 		p = n;
 	}
-	g_kbkeys = NULL;
+	g_kbkeys = nullptr;
 }
 
 /*
@@ -442,7 +442,11 @@ void IN_ForwardUp(void)
 	gHUD.m_Spectator.HandleButtonsUp(IN_FORWARD);
 }
 
-#define GAME_LEAP(dir) ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, player.Stamina))
+//#define GAME_LEAP(dir) ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, player.Stamina))
+
+inline void GAME_LEAP(const char * dir, float& stamina){
+	ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, stamina));
+}
 
 void IN_BackDown(void)
 {
@@ -452,7 +456,7 @@ void IN_BackDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("back");
+		GAME_LEAP("back", player.Stamina);
 }
 
 void IN_BackUp(void)
@@ -475,7 +479,7 @@ void IN_MoveleftDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("left");
+		GAME_LEAP("left", player.Stamina);
 }
 
 void IN_MoveleftUp(void)
@@ -493,7 +497,7 @@ void IN_MoverightDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("right");
+		GAME_LEAP("right", player.Stamina);
 }
 
 void IN_MoverightUp(void)
