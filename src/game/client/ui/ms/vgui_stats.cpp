@@ -64,7 +64,7 @@ static COLOR Color_TitleText = COLOR(255, 255, 255, 0),
 			 Color_TransparentText = COLOR(0, 0, 0, 255);
 
 // Creation
-CStatPanel::CStatPanel(Panel *pParent) : CMenuPanel(0, false, 0, 0, ScreenWidth, ScreenHeight)
+CStatPanel::CStatPanel(Panel *pParent) : CMenuPanel(0, false, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	setParent(pParent);
 	setVisible(false);

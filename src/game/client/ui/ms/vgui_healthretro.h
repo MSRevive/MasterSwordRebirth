@@ -136,7 +136,7 @@ namespace RetroHUD
 		VGUI_Image3D m_HUDImage;
 
 	public:
-		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 		{
 			FLASK_SPACER = XRES(10);
 
@@ -165,7 +165,7 @@ namespace RetroHUD
 			// m_HUDImage.LoadImg("hud_main3", true, false);
 			// m_HUDImage.setFgColor(255, 255, 255, 255);
 			// m_HUDImage.setSize(256, 256);
-			// m_HUDImage.setPos(0, ScreenHeight - 256);
+			// m_HUDImage.setPos(0, ScreenHeight() - 256);
 
 			//Health and mana flasks
 			m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);

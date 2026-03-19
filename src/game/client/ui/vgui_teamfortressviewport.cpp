@@ -343,10 +343,10 @@ void CCommandMenu::RecalculatePositions(int iYOffset)
 
 	// Calculate if this is going to fit onscreen, and shuffle it up if it won't
 	int iBottom = iNewYPos + _size[1];
-	if (iBottom > ScreenHeight)
+	if (iBottom > ScreenHeight())
 	{
 		// Move in increments of button sizes
-		while (iAdjust < (iBottom - ScreenHeight))
+		while (iAdjust < (iBottom - ScreenHeight()))
 		{
 			iAdjust += BUTTON_SIZE_Y - 1;
 		}
@@ -568,7 +568,7 @@ TeamFortressViewport::TeamFortressViewport(int x, int y, int wide, int tall) : P
 	//CreateCommandMenu();
 
 	// Create the spectator Panel
-	m_pSpectatorPanel = new SpectatorPanel(0, 0, ScreenWidth, ScreenHeight);
+	m_pSpectatorPanel = new SpectatorPanel(0, 0, ScreenWidth(), ScreenHeight());
 	m_pSpectatorPanel->setParent(this);
 	m_pSpectatorPanel->setVisible(false);
 
@@ -1180,18 +1180,18 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 void TeamFortressViewport::CreateScoreBoard(void)
 {
 	int xdent = SBOARD_INDENT_X, ydent = SBOARD_INDENT_Y;
-	if (ScreenWidth == 512)
+	if (ScreenWidth() == 512)
 	{
 		xdent = SBOARD_INDENT_X_512;
 		ydent = SBOARD_INDENT_Y_512;
 	}
-	else if (ScreenWidth == 400)
+	else if (ScreenWidth() == 400)
 	{
 		xdent = SBOARD_INDENT_X_400;
 		ydent = SBOARD_INDENT_Y_400;
 	}
 
-	m_pScoreBoard = new ScorePanel(xdent, ydent, ScreenWidth - (xdent * 2), ScreenHeight - (ydent * 2));
+	m_pScoreBoard = new ScorePanel(xdent, ydent, ScreenWidth() - (xdent * 2), ScreenHeight() - (ydent * 2));
 	m_pScoreBoard->setParent(this);
 	m_pScoreBoard->setVisible(false);
 
@@ -1322,7 +1322,7 @@ CMenuPanel *TeamFortressViewport::CreateTextWindow(int iTextToShow)
 	}*/
 
 	// if we're in the game (ie. have selected a class), flag the menu to be only grayed in the dialog box, instead of full screen
-	CMenuPanel *pMOTDPanel = CMessageWindowPanel_Create(cText, cTitle, g_iPlayerClass == PC_UNDEFINED, false, 0, 0, ScreenWidth, ScreenHeight);
+	CMenuPanel *pMOTDPanel = CMessageWindowPanel_Create(cText, cTitle, g_iPlayerClass == PC_UNDEFINED, false, 0, 0, ScreenWidth(), ScreenHeight());
 	pMOTDPanel->setParent(this);
 
 	if (pfile)
@@ -1510,7 +1510,7 @@ bool TeamFortressViewport::AllowedToPrintText(void)
 void TeamFortressViewport::CreateTeamMenu()
 {
 	// Create the panel
-	m_pTeamMenu = new CTeamMenuPanel(100, false, 0, 0, ScreenWidth, ScreenHeight);
+	m_pTeamMenu = new CTeamMenuPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight());
 	m_pTeamMenu->setParent( this );
 	m_pTeamMenu->setVisible( false );
 }*/
@@ -1558,12 +1558,12 @@ void TeamFortressViewport::CreateStoreMenu()
 	if (m_pStoreMenu)
 		return;
 	// Create the panel
-	m_pStoreMenu = new CStoreMenuPanel(100, false, 0, 0, ScreenWidth, ScreenHeight);
+	m_pStoreMenu = new CStoreMenuPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight());
 	m_pStoreMenu->setParent(this);
 	m_pStoreMenu->setVisible(false);
 
 	// Create the buy panel
-	m_pStoreBuyMenu = new CStoreBuyPanel(100, false, 0, 0, ScreenWidth, ScreenHeight);
+	m_pStoreBuyMenu = new CStoreBuyPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight());
 	m_pStoreBuyMenu->setParent(this);
 
 	// Create the sell panel
@@ -1573,7 +1573,7 @@ void TeamFortressViewport::CreateStoreMenu()
 	m_pStoreStorageMenu = new CStoragePanel(this);
 
 	// Create the container panel
-	m_pContainerMenu = new CContainerPanel(100, false, 0, 0, ScreenWidth, ScreenHeight);
+	m_pContainerMenu = new CContainerPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight());
 	m_pContainerMenu->setParent(this);
 	m_pContainerMenu->setVisible(false);
 }
@@ -1601,7 +1601,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 /*void TeamFortressViewport::CreateSpectatorMenu()
 {
 	// Create the Panel
-	m_pSpectatorMenu = new CTransparentPanel(100, 0, ScreenHeight - YRES(60), ScreenWidth, YRES(60));
+	m_pSpectatorMenu = new CTransparentPanel(100, 0, ScreenHeight() - YRES(60), ScreenWidth(), YRES(60));
 	m_pSpectatorMenu->setParent(this);
 	m_pSpectatorMenu->setVisible(false);
 
@@ -1616,7 +1616,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 	int r, g, b, a;
 
 	// Create the title
-	m_pSpectatorLabel = new Label( "Spectator", 0, 0, ScreenWidth, YRES(25) );
+	m_pSpectatorLabel = new Label( "Spectator", 0, 0, ScreenWidth(), YRES(25) );
 	m_pSpectatorLabel->setParent( m_pSpectatorMenu );
 	m_pSpectatorLabel->setFont( pSchemes->getFont(hTitleScheme) );
 	pSchemes->getFgColor( hTitleScheme, r, g, b, a );
@@ -1626,7 +1626,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 	m_pSpectatorLabel->setContentAlignment( vgui::Label::a_north );
 
 	// Create the Help
-	Label *pLabel = new Label( CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help" ), 0, YRES(25), ScreenWidth, YRES(15) );
+	Label *pLabel = new Label( CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help" ), 0, YRES(25), ScreenWidth(), YRES(15) );
 	pLabel->setParent( m_pSpectatorMenu );
 	pLabel->setFont( pSchemes->getFont(hHelpText) );
 	pSchemes->getFgColor( hHelpText, r, g, b, a );
@@ -1635,7 +1635,7 @@ void TeamFortressViewport::CreateVGUIMenus()
 	pLabel->setBgColor( r, g, b, 255 );
 	pLabel->setContentAlignment( vgui::Label::a_north );
 
-	pLabel = new Label( CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help2" ), 0, YRES(40), ScreenWidth, YRES(20) );
+	pLabel = new Label( CHudTextMessage::BufferedLocaliseTextString( "#Spec_Help2" ), 0, YRES(40), ScreenWidth(), YRES(20) );
 	pLabel->setParent( m_pSpectatorMenu );
 	pLabel->setFont( pSchemes->getFont(hHelpText) );
 	pSchemes->getFgColor( hHelpText, r, g, b, a );

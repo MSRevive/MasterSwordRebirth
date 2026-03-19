@@ -14,7 +14,7 @@ public:
 		*m_pVoteDesc;
 	TextPanel *m_YesVotes;
 
-	VGUI_VoteInfo(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+	VGUI_VoteInfo(Panel *pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 	{
 		setParent(pParent);
 		setBgColor(0, 0, 0, 255);

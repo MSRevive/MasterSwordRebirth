@@ -47,8 +47,8 @@ int CHudFatigue::Draw(float flTime)
 {
 	if (m_DrawFatigue)
 	{
-		gHUD.DrawHudNumberSML(ScreenWidth - 40, ScreenHeight - 40, NULL, player.Stamina, 255, 255, 255);
-		gHUD.DrawHudNumberSML(ScreenWidth - 20, ScreenHeight - 40, NULL, player.MaxStamina(), 255, 255, 255);
+		gHUD.DrawHudNumberSML(ScreenWidth() - 40, ScreenHeight() - 40, NULL, player.Stamina, 255, 255, 255);
+		gHUD.DrawHudNumberSML(ScreenWidth() - 20, ScreenHeight() - 40, NULL, player.MaxStamina(), 255, 255, 255);
 	}
 	return 1;
 }

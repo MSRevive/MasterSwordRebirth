@@ -400,7 +400,7 @@ int GetCenteredItemX( int WorkSpaceSizeX, int ItemSizeX, int Items, int SpaceBew
 // Creation
 CMenuPanel *CreateNewCharacterPanel( )
 {
-	return new CNewCharacterPanel( 1, true, 0, 0, ScreenWidth, ScreenHeight);
+	return new CNewCharacterPanel( 1, true, 0, 0, ScreenWidth(), ScreenHeight());
 }
 CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, TRUE, x, y, wide, tall )
 {

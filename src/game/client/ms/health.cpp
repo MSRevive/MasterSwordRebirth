@@ -281,8 +281,8 @@ int CHudHealth::DrawPain(float flTime)
 		ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 0) / 2;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 0) * 3;
+		x = ScreenWidth() / 2 - SPR_Width(m_hSprite, 0) / 2;
+		y = ScreenHeight() / 2 - SPR_Height(m_hSprite, 0) * 3;
 		SPR_DrawAdditive(0, x, y, NULL);
 		m_fAttackFront = V_max(0, m_fAttackFront - fFade);
 	}
@@ -296,8 +296,8 @@ int CHudHealth::DrawPain(float flTime)
 		ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b);
 
-		x = ScreenWidth / 2 + SPR_Width(m_hSprite, 1) * 2;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 1) / 2;
+		x = ScreenWidth() / 2 + SPR_Width(m_hSprite, 1) * 2;
+		y = ScreenHeight() / 2 - SPR_Height(m_hSprite, 1) / 2;
 		SPR_DrawAdditive(1, x, y, NULL);
 		m_fAttackRight = V_max(0, m_fAttackRight - fFade);
 	}
@@ -311,8 +311,8 @@ int CHudHealth::DrawPain(float flTime)
 		ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 2) / 2;
-		y = ScreenHeight / 2 + SPR_Height(m_hSprite, 2) * 2;
+		x = ScreenWidth() / 2 - SPR_Width(m_hSprite, 2) / 2;
+		y = ScreenHeight() / 2 + SPR_Height(m_hSprite, 2) * 2;
 		SPR_DrawAdditive(2, x, y, NULL);
 		m_fAttackRear = V_max(0, m_fAttackRear - fFade);
 	}
@@ -326,8 +326,8 @@ int CHudHealth::DrawPain(float flTime)
 		ScaleColors(r, g, b, shade);
 		SPR_Set(m_hSprite, r, g, b);
 
-		x = ScreenWidth / 2 - SPR_Width(m_hSprite, 3) * 3;
-		y = ScreenHeight / 2 - SPR_Height(m_hSprite, 3) / 2;
+		x = ScreenWidth() / 2 - SPR_Width(m_hSprite, 3) * 3;
+		y = ScreenHeight() / 2 - SPR_Height(m_hSprite, 3) / 2;
 		SPR_DrawAdditive(3, x, y, NULL);
 
 		m_fAttackLeft = V_max(0, m_fAttackLeft - fFade);
@@ -362,7 +362,7 @@ void CHudHealth::UpdateTiles(float flTime, long bitsDamage)
 		{
 			// put this one at the bottom
 			pdmg->x = giDmgWidth / 8;
-			pdmg->y = ScreenHeight - giDmgHeight * 2;
+			pdmg->y = ScreenHeight() - giDmgHeight * 2;
 			pdmg->fExpire = flTime + static_cast<float>(DMG_IMAGE_LIFE);
 
 			// move everyone else up

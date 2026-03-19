@@ -347,7 +347,7 @@ bool CMirrorMgr::InitMirrors()
 	// Create the p-buffer...
 	//
 
-	GetCompatibleTextureSize(ScreenWidth * CRender::m_RT_SizeRatio, ScreenHeight * CRender::m_RT_SizeRatio, CRender::m_RT_Width, CRender::m_RT_Height, CRender::m_RT_TexU, CRender::m_RT_TexV);
+	GetCompatibleTextureSize(ScreenWidth() * CRender::m_RT_SizeRatio, ScreenHeight() * CRender::m_RT_SizeRatio, CRender::m_RT_Width, CRender::m_RT_Height, CRender::m_RT_TexU, CRender::m_RT_TexV);
 
 	g_pbuffer.hPBuffer = wglCreatePbufferARB(OldhDC, pixelFormat, CRender::m_RT_Width, CRender::m_RT_Height, pb_attr);
 	g_pbuffer.hDC = wglGetPbufferDCARB(g_pbuffer.hPBuffer);

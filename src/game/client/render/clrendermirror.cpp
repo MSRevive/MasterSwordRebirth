@@ -273,7 +273,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 			pUseMirror->m_OnWorld = !Info.pEntity->index ? true : false;
 			//Surface.texinfo->texture->gl_texturenum = 0;
 			//The texture must have dimensions 2^X
-			float Power = logf(ScreenWidth) / logf(2); //Use ScreenHeight because it's smaller than width
+			float Power = logf(ScreenWidth()) / logf(2); //Use ScreenHeight() because it's smaller than width
 			int IntPower = (int)Power;
 			if (Power > IntPower)
 				IntPower++; //Screen Width is in-between standardized texure sizes.  Use the next highest size
@@ -287,7 +287,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 
 			pUseMirror->TexSize.x = pUseMirror->TexSize.y = TexSize;
 
-			//logfile	<< "Mirror #" << CMirrorMgr::m_LevelMirrors.size() << " - Screen: " << ScreenWidth << "x" << ScreenHeight << " Power: " << Power << " (" << IntPower << ")" << endl;
+			//logfile	<< "Mirror #" << CMirrorMgr::m_LevelMirrors.size() << " - Screen: " << ScreenWidth() << "x" << ScreenHeight() << " Power: " << Power << " (" << IntPower << ")" << endl;
 			//logfile	<< "Mirror #" << CMirrorMgr::m_LevelMirrors.size() << " - Size: " << pUseMirror->TexSize.x << "x" << pUseMirror->TexSize.y << " Max: " << TexSizeMax << "x" << TexSizeMax << endl;
 
 			pUseMirror->CreateMatrix();
@@ -564,13 +564,13 @@ void CMirrorMgr::SetupNormalView()
 		//Only use a portion of the screen, so I can see what the mirror sees in the top left
 		Params.viewport[0] = MIRRORTEX_W;
 		Params.viewport[1] = MIRRORTEX_H;
-		Params.viewport[2] = ScreenWidth - MIRRORTEX_W;
- 		Params.viewport[3] = ScreenHeight - MIRRORTEX_H;
+		Params.viewport[2] = ScreenWidth() - MIRRORTEX_W;
+ 		Params.viewport[3] = ScreenHeight() - MIRRORTEX_H;
 	#else*/
 	Params.viewport[0] = 0;
 	Params.viewport[1] = 0;
-	Params.viewport[2] = ScreenWidth;
-	Params.viewport[3] = ScreenHeight;
+	Params.viewport[2] = ScreenWidth();
+	Params.viewport[3] = ScreenHeight();
 	//#endif
 	m_CurrentMirror.Enabled = false;
 }
@@ -1392,8 +1392,8 @@ void CMirror::Draw(int Flags)
 		//have extra space (For compatibility, I force them to be 2^x, but I dont use all the space).
 		//So below is the modified equation
 
-		float RatioW = (float)ScreenWidth / TexSize.x;
-		float RatioH = (float)ScreenHeight / TexSize.y;
+		float RatioW = (float)ScreenWidth() / TexSize.x;
+		float RatioH = (float)ScreenHeight() / TexSize.y;
 		//glTranslatef( 0.5f * RatioW, 0.5f * (1-(1-RatioH)), 0.0f );
 		glTranslatef(0.5f * RatioW, 0.5f * RatioH, 0.0f);
 		glScalef(0.5f * RatioW, 0.5f * RatioH, 1);

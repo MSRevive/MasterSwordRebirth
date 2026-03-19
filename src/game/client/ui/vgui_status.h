@@ -133,8 +133,8 @@ public:
 		//thothie messes JAN2010_29 - sloppy but works
 		//moved to side that calls this
 		/*
-		float fimgsize_w = ScreenWidth * (w*0.01); 
-		float fimgsize_h = ScreenHeight * (h*0.01);
+		float fimgsize_w = ScreenWidth() * (w*0.01); 
+		float fimgsize_h = ScreenHeight() * (h*0.01);
 		int imgsize_w = (int)fimgsize_w;
 		int imgsize_h = (int)fimgsize_h;
 		*/
@@ -186,7 +186,7 @@ public:
 	CImageDelayed m_FN;
 	bool m_bFN;
 
-	VGUI_Status(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+	VGUI_Status(Panel *pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 	{
 		StatusIcons = this;
 
@@ -287,13 +287,13 @@ static void AddImg(const char *Img, const char *Name,
 	if (!found)
 	{
 		//Thothie JAN2010_29 - convert x/y/h/w coords to % of screen
-		float fimg_x = ScreenWidth * (x * 0.01);
-		float fimg_y = ScreenHeight * (y * 0.01);
+		float fimg_x = ScreenWidth() * (x * 0.01);
+		float fimg_y = ScreenHeight() * (y * 0.01);
 		int img_x = (int)fimg_x;
 		int img_y = (int)fimg_y;
 
-		float fimg_w = ScreenWidth * (w * 0.01);
-		float fimg_h = ScreenHeight * (h * 0.01);
+		float fimg_w = ScreenWidth() * (w * 0.01);
+		float fimg_h = ScreenHeight() * (h * 0.01);
 		int img_w = (int)fimg_w;
 		int img_h = (int)fimg_h;
 

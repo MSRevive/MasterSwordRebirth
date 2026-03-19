@@ -33,7 +33,7 @@ extern float *GetClientColor( int clientIndex );
 #define MAX_CHARS_PER_LINE	256  /* it can be less than this, depending on char size */
 
 // allow 20 pixels on either side of the text
-#define MAX_LINE_WIDTH  ( ScreenWidth - 40 )
+#define MAX_LINE_WIDTH  ( ScreenWidth() - 40 )
 #define LINE_START  10
 static float SCROLL_SPEED = 5;
 
@@ -42,7 +42,7 @@ static float *g_pflNameColors[ MAX_LINES + 1 ];
 static int g_iNameLengths[ MAX_LINES + 1 ];
 static float flScrollTime = 0;  // the time at which the lines next scroll up
 
-#define SAYTEXT_START_Y  ( ScreenHeight - YRES(160) )
+#define SAYTEXT_START_Y  ( ScreenHeight() - YRES(160) )
 static int Y_START = 0; //varies
 static int line_height = 0;
 
@@ -239,10 +239,10 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound( "misc/talk.wav", 1 );
 
-	//if ( ScreenHeight >= 480 )
+	//if ( ScreenHeight() >= 480 )
 		Y_START = SAYTEXT_START_Y;
 	//else
-	//	Y_START = ScreenHeight - 45;
+	//	Y_START = ScreenHeight() - 45;
 	Y_START -= (line_height * (MAX_LINES+1));
 
 }

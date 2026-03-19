@@ -673,7 +673,7 @@ CVoiceLabel* CVoiceStatus::GetFreeVoiceLabel()
 void CVoiceStatus::RepositionLabels()
 {
 	// find starting position to draw from, along right-hand side of screen
-	int y = ScreenHeight / 2;
+	int y = ScreenHeight() / 2;
 
 	int iconWide = 8, iconTall = 8;
 	if (m_pSpeakerLabelIcon)
@@ -698,14 +698,14 @@ void CVoiceStatus::RepositionLabels()
 		pLabel->m_pLabel->getContentSize(textWide, textTall);
 
 		// Don't let it stretch too far across their screen.
-		if (textWide > (ScreenWidth * 2) / 3)
-			textWide = (ScreenWidth * 2) / 3;
+		if (textWide > (ScreenWidth() * 2) / 3)
+			textWide = (ScreenWidth() * 2) / 3;
 
 		// Setup the background label to fit everything in.
 		int border = 2;
 		int bgWide = textWide + iconWide + border * 3;
 		int bgTall = V_max(textTall, iconTall) + border * 2;
-		pLabel->m_pBackground->setBounds(ScreenWidth - bgWide - 8, y, bgWide, bgTall);
+		pLabel->m_pBackground->setBounds(ScreenWidth() - bgWide - 8, y, bgWide, bgTall);
 
 		// Put the text at the left.
 		pLabel->m_pLabel->setBounds(border, (bgTall - textTall) / 2, textWide, textTall);
@@ -735,7 +735,7 @@ void CVoiceStatus::RepositionLabels()
 		int sizeX, sizeY;
 		m_pLocalBitmap->getSize(sizeX, sizeY);
 
-		int local_xPos = ScreenWidth - sizeX - 10;
+		int local_xPos = ScreenWidth() - sizeX - 10;
 		int local_yPos = m_pHelper->GetAckIconHeight() - sizeY;
 
 		m_pLocalLabel->setPos(local_xPos, local_yPos);
@@ -878,7 +878,7 @@ void CHLVoiceStatusHelper::UpdateCursorState()
 
 int	CHLVoiceStatusHelper::GetAckIconHeight()
 {
-	return ScreenHeight - gHUD.m_iFontHeight * 3 - 6;
+	return ScreenHeight() - gHUD.m_iFontHeight * 3 - 6;
 }
 
 bool CHLVoiceStatusHelper::CanShowSpeakerLabels()

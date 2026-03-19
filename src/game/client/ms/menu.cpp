@@ -101,7 +101,7 @@ int CHudMenu ::Draw(float flTime)
 	}
 
 	// center it
-	int y = (ScreenHeight / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
+	int y = (ScreenHeight() / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
 	int x = 20;
 	int i = 0;
 

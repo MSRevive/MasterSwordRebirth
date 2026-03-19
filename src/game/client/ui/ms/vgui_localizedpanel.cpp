@@ -16,8 +16,8 @@
 
 #define LOCAL_TRANSPARENCY 60
 #define LOCAL_MAINPANEL_RATIO (.875)
-#define LOCAL_MAINPANEL_WIDTH (LOCAL_MAINPANEL_RATIO * ScreenWidth)
-#define LOCAL_MAINPANEL_HEIGHT (LOCAL_MAINPANEL_RATIO * ScreenHeight)
+#define LOCAL_MAINPANEL_WIDTH (LOCAL_MAINPANEL_RATIO * ScreenWidth())
+#define LOCAL_MAINPANEL_HEIGHT (LOCAL_MAINPANEL_RATIO * ScreenHeight())
 
 #define LOCAL_SCROLLPANEL_X_SPACE_L XRES(10)
 #define LOCAL_SCROLLPANEL_X_SPACE_R LOCAL_SCROLLPANEL_X_SPACE_L
@@ -49,7 +49,7 @@ bool LocalExists(msstring title)
 }
 
 CLocalizedPanel::CLocalizedPanel(Panel *pParent)
-	: CMenuPanel(LOCAL_TRANSPARENCY, false, 0, 0, ScreenWidth, ScreenHeight)
+	: CMenuPanel(LOCAL_TRANSPARENCY, false, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	setParent(pParent);
 	m_Name = LOCAL_MENU_NAME;
@@ -59,8 +59,8 @@ CLocalizedPanel::CLocalizedPanel(Panel *pParent)
 	m_iButtonTotal = 0;
 	m_iSubPanelTotal = 0;
 
-	int xMainPanel = GetCenteredItem(ScreenWidth, LOCAL_MAINPANEL_WIDTH, 1, 0);
-	int yMainPanel = GetCenteredItem(ScreenHeight, LOCAL_MAINPANEL_HEIGHT, 1, 0);
+	int xMainPanel = GetCenteredItem(ScreenWidth(), LOCAL_MAINPANEL_WIDTH, 1, 0);
+	int yMainPanel = GetCenteredItem(ScreenHeight(), LOCAL_MAINPANEL_HEIGHT, 1, 0);
 	m_pMainPanel = new CTransparentPanel(LOCAL_TRANSPARENCY, xMainPanel, yMainPanel, LOCAL_MAINPANEL_WIDTH, LOCAL_MAINPANEL_HEIGHT);
 	m_pMainPanel->setParent(this);
 	m_pMainPanel->setVisible(true);

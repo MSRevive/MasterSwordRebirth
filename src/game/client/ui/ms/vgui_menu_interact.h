@@ -42,7 +42,7 @@ public:
 
 		int w, h;
 		m_pMainPanel->getPos(w, h);
-		m_pMainPanel->setPos(ScreenWidth - m_pMainPanel->getWide() - XRES(80), h); //Thothie JAN2008a was  XRES(20)
+		m_pMainPanel->setPos(ScreenWidth() - m_pMainPanel->getWide() - XRES(80), h); //Thothie JAN2008a was  XRES(20)
 
 		m_ButtonY = BTN_START_Y;
 

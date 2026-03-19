@@ -26,10 +26,20 @@
 #define FALSE 0
 #endif
 
-// ScreenHeight returns the height of the screen, in pixels
-#define ScreenHeight (gHUD.m_scrinfo.iHeight)
-// ScreenWidth returns the width of the screen, in pixels
-#define ScreenWidth (gHUD.m_scrinfo.iWidth)
+// ScreenHeight() returns the height of the screen, in pixels
+
+inline int ScreenHeight(void) {
+	return gHUD.m_scrinfo.iHeight;
+}
+
+inline int ScreenWidth(void){
+	return gHUD.m_scrinfo.iWidth;
+}
+
+
+//#define ScreenHeight() (gHUD.m_scrinfo.iHeight)
+// ScreenWidth() returns the width of the screen, in pixels
+//#define ScreenWidth() (gHUD.m_scrinfo.iWidth)
 
 //these must stay macros, or we need to make a msg function for every command.
 // Macros to hook function calls into the HUD object
@@ -93,12 +103,12 @@ inline struct cvar_s *CVAR_CREATE(const char *cv, const char *val, const int fla
 //#define FillRGBA (*gEngfuncs.pfnFillRGBA)
 
 // Use this to set any co-ords in 640x480 space
-//#define XRES(x) ((int)(float(x) * ((float)ScreenWidth / 640.0f) + 0.5f))
-//#define YRES(y) ((int)(float(y) * ((float)ScreenHeight / 480.0f) + 0.5f))
+//#define XRES(x) ((int)(float(x) * ((float)ScreenWidth() / 640.0f) + 0.5f))
+//#define YRES(y) ((int)(float(y) * ((float)ScreenHeight() / 480.0f) + 0.5f))
 
 // use this to project world coordinates to screen coordinates
-//#define XPROJECT(x) ((1.0f + (x)) * ScreenWidth * 0.5f)
-//#define YPROJECT(y) ((1.0f - (y)) * ScreenHeight * 0.5f)
+//#define XPROJECT(x) ((1.0f + (x)) * ScreenWidth() * 0.5f)
+//#define YPROJECT(y) ((1.0f - (y)) * ScreenHeight() * 0.5f)
 
 //#define GetScreenInfo (*gEngfuncs.pfnGetScreenInfo)
 //#define ServerCmd (*gEngfuncs.pfnServerCmd)
@@ -151,19 +161,19 @@ inline void FillRGBA(const int x, const int y, const int width, const int height
 
 
 inline int XRES(const int x) {
-	return (int)(float(x) * ((float)ScreenWidth / 640.0f) + 0.5f);
+	return (int)(float(x) * ((float)ScreenWidth() / 640.0f) + 0.5f);
 }
 
 inline int YRES(const int y) {
-	return (int)(float(y) * ((float)ScreenHeight / 480.0f) + 0.5f);
+	return (int)(float(y) * ((float)ScreenHeight() / 480.0f) + 0.5f);
 }
 
 inline float XPROJECT(const float x) {
-	return (float)(1.0f + x) * ScreenWidth * 0.5f;
+	return (float)(1.0f + x) * ScreenWidth() * 0.5f;
 }
 
 inline float YPROJECT(const float y) {
-	return (float)(1.0f - y) * ScreenHeight * 0.5f;
+	return (float)(1.0f - y) * ScreenHeight() * 0.5f;
 }
 
 inline int GetScreenInfo(SCREENINFO_s * psScreenInfo) {

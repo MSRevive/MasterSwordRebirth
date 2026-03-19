@@ -463,7 +463,7 @@ int CHud::Redraw(float flTime, int intermission)
 	// 	SPR_Set(m_hsprLogo, 250, 250, 250);
 
 	// 	x = SPR_Width(m_hsprLogo, 0);
-	// 	x = ScreenWidth - x;
+	// 	x = ScreenWidth() - x;
 	// 	y = SPR_Height(m_hsprLogo, 0) / 2;
 
 	// 	// Draw the logo at 20 fps
@@ -563,7 +563,7 @@ void CHud::VidInit(void)
 	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
-	if (ScreenWidth < 640)
+	if (ScreenWidth() < 640)
 		m_iRes = 320;
 	else
 		m_iRes = 640;

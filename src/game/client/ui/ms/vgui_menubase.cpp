@@ -90,7 +90,7 @@ void CAction_SelectMainOption::actionPerformed(Panel *panel)
 int GetCenteredItemX(int WorkSpaceSizeX, int ItemSizeX, int Items, int SpaceBewteenItems);
 
 // Creation
-VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenWidth, ScreenHeight)
+VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	m_AllowKeys = true; // MiB NOV2014_25, block number shortcuts: NpcInteractMenus.rft
 	setParent(myParent);

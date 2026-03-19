@@ -113,7 +113,7 @@ int CHudMisc::Draw(float flTime)
 	}
 
 	SPR_Set(gHUD.GetSprite(SpriteIndex), 255, 255, 255 );
-	SPR_DrawAdditive( 0, ScreenWidth - 70, ScreenHeight - 70, &gHUD.GetSpriteRect(SpriteIndex));*/
+	SPR_DrawAdditive( 0, ScreenWidth() - 70, ScreenHeight() - 70, &gHUD.GetSpriteRect(SpriteIndex));*/
 
 	return 1;
 }

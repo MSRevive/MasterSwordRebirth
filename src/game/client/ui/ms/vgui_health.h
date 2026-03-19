@@ -6,7 +6,7 @@
 #include "vgui_ihud.h"
 
 //Scales flasks down to only 40% wide of the screen if sprites are too big
-#define BAR_SCALE (1.0f - ((730 - (ScreenWidth * 0.40f)) / ScreenHeight))
+#define BAR_SCALE (1.0f - ((730 - (ScreenWidth() * 0.40f)) / ScreenHeight()))
 #define BAR_W (320 * BAR_SCALE)
 #define BAR_H (40 * BAR_SCALE)
 
@@ -144,7 +144,7 @@ namespace PrimaryHUD
 
 	public:
 		//Main HUD Image
-		VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+		VGUI_Health(Panel* pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 		{
 			CHARGE_W = XRES(30);
 			CHARGE_H = YRES(6);
@@ -157,7 +157,7 @@ namespace PrimaryHUD
 			float coords[2];
 
 			coords[0] = 10; //x
-			coords[1] = (ScreenHeight - (2 * BAR_H) - YRES(10)); //y, from the bottom of the screen, as high as the sprites are
+			coords[1] = (ScreenHeight() - (2 * BAR_H) - YRES(10)); //y, from the bottom of the screen, as high as the sprites are
 
 			//	Status Bars
 			

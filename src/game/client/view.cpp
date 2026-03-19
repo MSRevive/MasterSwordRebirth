@@ -1844,10 +1844,10 @@ void V_Move(int mx, int my)
 	Vector farpoint;
 	pmtrace_t tr;
 
-	fov = CalcFov(in_fov, (float)ScreenWidth, (float)ScreenHeight);
+	fov = CalcFov(in_fov, (float)ScreenWidth(), (float)ScreenHeight());
 
-	c_x = (float)ScreenWidth / 2.0;
-	c_y = (float)ScreenHeight / 2.0;
+	c_x = (float)ScreenWidth() / 2.0;
+	c_y = (float)ScreenHeight() / 2.0;
 
 	dx = (float)mx - c_x;
 	dy = (float)my - c_y;

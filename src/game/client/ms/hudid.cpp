@@ -81,10 +81,10 @@ int CHudID::Draw(float flTime)
 	GetConsoleStringSize( pDrawInfo->Name, &TextWidth, &TextHeight );
 
 	int Y_START;
-	if ( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 128;
+	if ( ScreenHeight() >= 480 )
+		Y_START = ScreenHeight() - 128;
 	else
-		Y_START = ScreenHeight - 64;
+		Y_START = ScreenHeight() - 64;
 
 	int x = 5;
 	int y = Y_START - TextHeight; // draw along bottom of screen
