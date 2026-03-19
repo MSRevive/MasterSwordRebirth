@@ -97,15 +97,15 @@ static bool g_ReceivedFirstMouseActivate = false;
 // where should defines be moved?
 
 enum {
-JOY_ABSOLUTE_AXIS = 0x00000000,	// control like a joystick
-JOY_RELATIVE_AXIS = 0x00000010,	// control like a mouse, spinner, trackball
-JOY_MAX_AXES = 6,				// X, Y, Z, R, U, V
-JOY_AXIS_X = 0,
-JOY_AXIS_Y = 1,
-JOY_AXIS_Z = 2,
-JOY_AXIS_R = 3,
-JOY_AXIS_U = 4,
-JOY_AXIS_V = 5
+	JOY_ABSOLUTE_AXIS = 0x00000000,	// control like a joystick
+	JOY_RELATIVE_AXIS = 0x00000010,	// control like a mouse, spinner, trackball
+	JOY_MAX_AXES = 6,				// X, Y, Z, R, U, V
+	JOY_AXIS_X = 0,
+	JOY_AXIS_Y = 1,
+	JOY_AXIS_Z = 2,
+	JOY_AXIS_R = 3,
+	JOY_AXIS_U = 4,
+	JOY_AXIS_V = 5
 };
 
 enum _ControlList
