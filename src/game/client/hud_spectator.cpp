@@ -251,7 +251,7 @@ int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 				return 0;
 			};
 
-			 strncpy_s(keyname,  token, sizeof(keyname) );
+			 strncpy(keyname,  token, sizeof(keyname) );
 			 keyname[255] = '\0';
 
 			// another hack to fix keynames with trailing spaces
