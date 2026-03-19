@@ -27,7 +27,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
 
-#define MOUSE_BUTTON_COUNT 5
+constexpr int MOUSE_BUTTON_COUNT = 5;
 
 // Set this to 1 to show mouse cursor.  Experimental
 int g_iVisibleMouse = 0;
@@ -95,15 +95,18 @@ static bool g_ReceivedFirstMouseActivate = false;
 
 // joystick defines and variables
 // where should defines be moved?
-#define JOY_ABSOLUTE_AXIS 0x00000000 // control like a joystick
-#define JOY_RELATIVE_AXIS 0x00000010 // control like a mouse, spinner, trackball
-#define JOY_MAX_AXES 6				 // X, Y, Z, R, U, V
-#define JOY_AXIS_X 0
-#define JOY_AXIS_Y 1
-#define JOY_AXIS_Z 2
-#define JOY_AXIS_R 3
-#define JOY_AXIS_U 4
-#define JOY_AXIS_V 5
+
+enum {
+JOY_ABSOLUTE_AXIS = 0x00000000,	// control like a joystick
+JOY_RELATIVE_AXIS = 0x00000010,	// control like a mouse, spinner, trackball
+JOY_MAX_AXES = 6,				// X, Y, Z, R, U, V
+JOY_AXIS_X = 0,
+JOY_AXIS_Y = 1,
+JOY_AXIS_Z = 2,
+JOY_AXIS_R = 3,
+JOY_AXIS_U = 4,
+JOY_AXIS_V = 5
+};
 
 enum _ControlList
 {
@@ -317,6 +320,7 @@ void IN_Shutdown(void)
 
 	if (s_hMouseThread)
 	{
+
 		TerminateThread(s_hMouseThread, 0);
 		CloseHandle(s_hMouseThread);
 		s_hMouseThread = (HANDLE)0;
