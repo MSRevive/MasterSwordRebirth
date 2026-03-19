@@ -71,7 +71,7 @@ void SpectatorSpray(void)
 	if (!gEngfuncs.IsSpectateOnly())
 		return;
 
-	AngleVectors(v_angles, &forward, NULL, NULL);
+	AngleVectors(v_angles, &forward, nullptr, nullptr);
 	VectorScale(forward, 128, forward);
 	VectorAdd(forward, v_origin, forward);
 	pmtrace_t *trace = gEngfuncs.PM_TraceLine(v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1);
@@ -174,16 +174,18 @@ int CHudSpectator::Init()
 
 void UTIL_StringToVector(float *pVector, const char *pString)
 {
-	char *pstr, *pfront, tempString[128];
+	
+	const unsigned int bufferLength = 128;
+	char* pstr, * pfront, tempString[bufferLength] = { 0 };
 	int j;
 
-	 strncpy(tempString,  pString, sizeof(tempString) );
-	pstr = pfront = tempString;
+	strcpy_s(tempString, sizeof(tempString), pString);
+	pstr = tempString;
+	pfront = tempString;
 
 	for (j = 0; j < 3; j++)
 	{
 		pVector[j] = atof(pfront);
-
 		while (*pstr && *pstr != ' ')
 			pstr++;
 		if (!*pstr)
@@ -249,7 +251,8 @@ int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 				return 0;
 			};
 
-			 strncpy(keyname,  token, sizeof(keyname) );
+			 strncpy_s(keyname,  token, sizeof(keyname) );
+			 keyname[255] = '\0';
 
 			// another hack to fix keynames with trailing spaces
 			n = strlen(keyname);
@@ -386,7 +389,7 @@ int CHudSpectator::Draw(float flTime)
 	int lx;
 
 	char string[256];
-	float *color;
+	float *color = nullptr;
 
 	// draw only in spectator mode
 	if (!g_iUser1)
@@ -445,7 +448,7 @@ int CHudSpectator::Draw(float flTime)
 		color = GetClientColor(i + 1);
 
 		// draw the players name and health underneath
-		 _snprintf(string, sizeof(string),  "%s",  g_PlayerInfoList[i + 1].name );
+		 _snprintf_s(string, sizeof(string),  "%s",  g_PlayerInfoList[i + 1].name );
 
 		lx = strlen(string) * 3; // 3 is avg. character length :)
 
@@ -869,8 +872,8 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		}
 
 		char string[128];
-		 _snprintf(string, sizeof(string),  "#Spec_Mode%d",  g_iUser1 );
-		 _snprintf(string, sizeof(string),  "%c%s",  HUD_PRINTCENTER,  CHudTextMessage::BufferedLocaliseTextString(string) );
+		 _snprintf_s(string, sizeof(string),  "#Spec_Mode%d",  g_iUser1 );
+		 _snprintf_s(string, sizeof(string),  "%c%s",  HUD_PRINTCENTER,  CHudTextMessage::BufferedLocaliseTextString(string) );
 		gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
 	}
 
@@ -1321,7 +1324,7 @@ void CHudSpectator::DrawOverviewEntities()
 		VectorCopy(v_cl_angles, angles);
 	}
 	else
-		V_GetChasePos(g_iUser2, NULL, origin, angles);
+		V_GetChasePos(g_iUser2, nullptr, origin, angles);
 
 	// draw camera sprite
 
@@ -1337,7 +1340,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	gEngfuncs.pTriAPI->Color4f(r, g, b, 1.0);
 
-	AngleVectors(angles, &forward, NULL, NULL);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 	VectorScale(forward, 512.0f, forward);
 
 	offset[0] = 0.0f;
