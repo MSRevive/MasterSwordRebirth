@@ -64,7 +64,7 @@ float CBaseAnimating ::StudioFrameAdvance(float flInterval)
 			pev->frame -= (int)(pev->frame / 256.0) * 256.0;
 		else
 			pev->frame = (pev->frame < 0.0) ? 0 : 255;
-		m_fSequenceFinished = TRUE; // just in case it wasn't caught in GetEvents
+		m_fSequenceFinished = true; // just in case it wasn't caught in GetEvents
 	}
 
 	return flInterval;
@@ -113,7 +113,7 @@ void CBaseAnimating ::ResetSequenceInfo()
 	m_fSequenceLoops = ((GetSequenceFlags() & STUDIO_LOOPING) != 0);
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0;
-	m_fSequenceFinished = FALSE;
+	m_fSequenceFinished = false;
 	m_flLastEventCheck = gpGlobals->time;
 }
 
@@ -154,9 +154,9 @@ void CBaseAnimating ::DispatchAnimEvents(float flInterval)
 	float flEnd = pev->frame + flInterval * m_flFrameRate * pev->framerate;
 	m_flLastEventCheck = pev->animtime + flInterval;
 
-	m_fSequenceFinished = FALSE;
+	m_fSequenceFinished = false;
 	if (flEnd >= 256 || flEnd <= 0.0)
-		m_fSequenceFinished = TRUE;
+		m_fSequenceFinished = true;
 
 	int index = 0;
 

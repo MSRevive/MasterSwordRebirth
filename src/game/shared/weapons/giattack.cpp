@@ -1218,8 +1218,8 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	//BeamEffect( vecSrc, vecEnd, iBeam, 0, 0, 100, 10, 0, 255, 255, 255, 255, 20 );
 
 	//bActualHit: Did the combination of luck&skill produce a hit?
-	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
-	//	fReportHit = FALSE, fDodged = FALSE;
+	//bool fDidHit = false, fHitWorld = true, bActualHit = false,
+	//	fReportHit = false, fDodged = false;
 
 	bool fReportHit = false;
 	Damage.AttackHit = false;
@@ -1230,7 +1230,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	if( Damage.outTraceResult.flFraction < 1.0 )
 	{
 		// hit
-		//fDidHit = TRUE;
+		//fDidHit = true;
 
 		pEntity = CBaseEntity::Instance(Damage.outTraceResult.pHit);
 
@@ -1628,8 +1628,8 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 		}
 
 		//bActualHit: Did the combination of luck&skill produce a hit?
-		//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
-		//	fReportHit = FALSE, fDodged = FALSE;
+		//bool fDidHit = false, fHitWorld = true, bActualHit = false,
+		//	fReportHit = false, fDodged = false;
 
 		bool fReportHit = false;
 		Damage.AttackHit = true;

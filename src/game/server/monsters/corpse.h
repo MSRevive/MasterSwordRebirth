@@ -13,8 +13,8 @@ public:
 	void Spawn();
 	bool AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int ForceHand = -1);
 	bool RemoveItem(CGenericItem* pItem);
-	BOOL HasHumanGibs() { return TRUE; }
-	BOOL HasAlienGibs() { return FALSE; }
+	BOOL HasHumanGibs() { return true; }
+	BOOL HasAlienGibs() { return false; }
 	int BloodColor(void) { return BLOOD_COLOR_RED; }
 	bool ShouldGibMonster(int iGib) { return true; }
 	int Classify() { return CLASS_NONE; }

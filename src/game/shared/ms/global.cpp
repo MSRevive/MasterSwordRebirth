@@ -513,10 +513,10 @@ void CScriptedEnt::KeyValue(KeyValueData *pkvd)
 	{
 		Script_Add(pkvd->szValue, this);
 		RunScriptEvents(); //For precachefile
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
-		pkvd->fHandled = FALSE;
+		pkvd->fHandled = false;
 }
 
 void CScriptedEnt::Deactivate()

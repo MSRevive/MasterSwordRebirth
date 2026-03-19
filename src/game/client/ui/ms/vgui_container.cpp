@@ -343,7 +343,7 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 }
 
 // Creation
-VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, ScreenWidth(), ScreenHeight()), VGUI_ItemCallbackPanel()
+VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight()), VGUI_ItemCallbackPanel()
 {
 	COLOR Color_TitleText = COLOR(255, 100, 100, 0),
 		  Color_SubtitleText = COLOR(160, 160, 160, 0),

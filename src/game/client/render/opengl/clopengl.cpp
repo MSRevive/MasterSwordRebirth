@@ -308,15 +308,15 @@ bool CMirrorMgr::InitMirrors()
 
 	int pf_attr[] =
 		{
-			WGL_SUPPORT_OPENGL_ARB, TRUE,		// P-buffer will be used with OpenGL
-			WGL_DRAW_TO_PBUFFER_ARB, TRUE,		// Enable render to p-buffer
-			WGL_BIND_TO_TEXTURE_RGBA_ARB, TRUE, // P-buffer will be used as a texture
+			WGL_SUPPORT_OPENGL_ARB, true,		// P-buffer will be used with OpenGL
+			WGL_DRAW_TO_PBUFFER_ARB, true,		// Enable render to p-buffer
+			WGL_BIND_TO_TEXTURE_RGBA_ARB, true, // P-buffer will be used as a texture
 			WGL_RED_BITS_ARB, 8,				// At least 8 bits for RED channel
 			WGL_GREEN_BITS_ARB, 8,				// At least 8 bits for GREEN channel
 			WGL_BLUE_BITS_ARB, 8,				// At least 8 bits for BLUE channel
 			WGL_ALPHA_BITS_ARB, 8,				// At least 8 bits for ALPHA channel
 			WGL_DEPTH_BITS_ARB, 16,				// At least 16 bits for depth buffer
-			WGL_DOUBLE_BUFFER_ARB, FALSE,		// We don't require double buffering
+			WGL_DOUBLE_BUFFER_ARB, false,		// We don't require double buffering
 			0									// Zero terminates the list
 		};
 

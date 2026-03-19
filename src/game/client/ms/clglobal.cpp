@@ -87,7 +87,7 @@ void MSCLGlobals::InitializePlayer()
 	player.Gear.clear();
 	player.m_HP = player.m_MP = 0;
 
-	player.m_fGameHUDInitialized = TRUE;
+	player.m_fGameHUDInitialized = true;
 	//player.pbs.fMaxForwardPressTime = 0;
 	player.m_SprintDelay = gpGlobals->time;
 	player.m_Initialized = false;
@@ -333,6 +333,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		DLLAttach(hinstDLL);
 	else if (fdwReason == DLL_PROCESS_DETACH)
 		DLLDetach();
-	return TRUE;
+	return true;
 }
 #endif

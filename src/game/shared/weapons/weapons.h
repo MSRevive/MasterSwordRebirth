@@ -231,7 +231,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; } // return TRUE if you want your duplicate removed from world
+	virtual int AddDuplicate(CBasePlayerItem *pItem) { return false; } // return true if you want your duplicate removed from world
 	//void EXPORT DestroyItem( void );
 	void EXPORT AttemptToMaterialize(void); // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity *Respawn(void);				// copy a weapon
@@ -309,7 +309,7 @@ public:
 	virtual void Reload(void) { return; }				// do "+RELOAD"
 	virtual int UpdateClientData(CBasePlayer *pPlayer); // sends hud info to client dll, if things have changed
 	virtual void Holster(int skiplocal = 0);
-	virtual BOOL UseDecrement(void) { return FALSE; };
+	virtual BOOL UseDecrement(void) { return false; };
 
 	void PrintState(void);
 
@@ -332,7 +332,7 @@ class CBasePlayerAmmo : public CBaseEntity
 {
 public:
 	/*	virtual void Spawn( void );
-	virtual BOOL AddAmmo( CBaseEntity *pOther ) { return TRUE; };
+	virtual BOOL AddAmmo( CBaseEntity *pOther ) { return true; };
 
 	CBaseEntity* Respawn( void );
 	void EXPORT Materialize( void );*/

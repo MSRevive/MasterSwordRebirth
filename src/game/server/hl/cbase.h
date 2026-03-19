@@ -397,7 +397,7 @@ public:
 	// initialization functions
 	virtual void Spawn(void) {}
 	virtual void Precache(void) { return; }
-	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = FALSE; }
+	virtual void KeyValue(KeyValueData *pkvd) { pkvd->fHandled = false; }
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
 
@@ -421,7 +421,7 @@ public:
 	virtual void Killed(entvars_t *pevAttacker, int iGib);
 	virtual int BloodColor(void) { return DONT_BLEED; }
 	virtual void TraceBleed(float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
-	virtual BOOL IsTriggered(CBaseEntity *pActivator) { return TRUE; }
+	virtual BOOL IsTriggered(CBaseEntity *pActivator) { return true; }
 	virtual CBaseMonster *MyMonsterPointer(void) { return NULL; }
 	virtual CSquadMonster *MySquadMonsterPointer(void) { return NULL; }
 	virtual bool IsMSMonster(void) { return false; }
@@ -437,15 +437,15 @@ public:
 	virtual void SetToggleState(int state) {}
 	virtual void StartSneaking(void) {}
 	virtual void StopSneaking(void) {}
-	virtual BOOL OnControls(entvars_t *pev) { return FALSE; }
-	virtual BOOL IsSneaking(void) { return FALSE; }
+	virtual BOOL OnControls(entvars_t *pev) { return false; }
+	virtual BOOL IsSneaking(void) { return false; }
 	virtual BOOL IsAlive(void) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual BOOL IsBSPModel(void) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
 	virtual BOOL ReflectGauss(void) { return (IsBSPModel() && !pev->takedamage); }
 	virtual BOOL HasTarget(string_t targetname) { return FStrEq(STRING(targetname), STRING(pev->targetname)); }
 	virtual BOOL IsInWorld(void);
-	virtual BOOL IsPlayer(void) { return FALSE; }
-	virtual BOOL IsNetClient(void) { return FALSE; }
+	virtual BOOL IsPlayer(void) { return false; }
+	virtual BOOL IsNetClient(void) { return false; }
 	virtual const char *TeamID(void) { return ""; }
 
 	//	virtual void	SetActivator( CBaseEntity *pActivator ) {}
@@ -516,7 +516,7 @@ public:
 	int Intersects(CBaseEntity *pOther);
 	void MakeDormant(void);
 	int IsDormant(void);
-	BOOL IsLockedByMaster(void) { return FALSE; }
+	BOOL IsLockedByMaster(void) { return false; }
 
 	static CBaseEntity *Instance(edict_t *pent)
 	{
@@ -592,7 +592,7 @@ public:
 	//
 	static CBaseEntity *Create(const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner = NULL);
 
-	virtual BOOL FBecomeProne(void) { return FALSE; };
+	virtual BOOL FBecomeProne(void) { return false; };
 	edict_t *edict()
 	{ //Master Sword... Client has no edict_t !
 #ifdef VALVE_DLL

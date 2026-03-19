@@ -121,12 +121,12 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 {
 	if (!pPlayer)
-		return FALSE;
+		return false;
 	ValidateUnits();
 	for (unsigned int i = 0; i < MemberList.size(); i++)
 		if (MemberList[i].idx == pPlayer->entindex() && MemberList[i].ID == (ulong)pPlayer)
-			return TRUE;
-	return FALSE;
+			return true;
+	return false;
 }
 CTeam::~CTeam()
 {
@@ -160,15 +160,15 @@ void CTeam ::SetSolidMembers(BOOL fSolid)
 BOOL SameTeam(CBaseEntity *pObject1, CBaseEntity *pObject2)
 {
 	//Original:
-	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return FALSE;
-	if( pObject1->TeamID() == pObject2->TeamID() ) return TRUE;
-	return FALSE;*/
+	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return false;
+	if( pObject1->TeamID() == pObject2->TeamID() ) return true;
+	return false;*/
 
 	if (!pObject1->TeamID()[0] || !pObject2->TeamID()[0])
-		return FALSE;
+		return false;
 	if (strcmp(pObject1->TeamID(), pObject2->TeamID()) == 0)
-		return TRUE; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
-	return FALSE;
+		return true; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
+	return false;
 }
 /*int CBaseEntity::TeamID( void ) { return m_pTeam ? m_pTeam->TeamID() : -1; }
 void CBaseEntity::SetTeam( CTeam *pTeam ) {

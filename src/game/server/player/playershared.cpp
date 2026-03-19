@@ -350,7 +350,7 @@ bool CBasePlayer::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, in
 int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbose, bool FreeHands, char* pszErrorString)
 {
 	//Returns the hand (or -1) of where the new item can be held
-	//bNonVerbose == TRUE means don't say anything just return the value
+	//bNonVerbose == true means don't say anything just return the value
 	int iAddHand = -1;
 	char cErrorString[128];
 
@@ -609,9 +609,9 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 }*/
 /*
 	RemovePlayerItem - Removes an item from the player's hands or packlist.
-	(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   Set bCallItemDropFunc to TRUE if you want to call
+	(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)(c)   Set bCallItemDropFunc to true if you want to call
 					   pItem->Drop which completely disassociates the item
-					   from its owner.  Set to FALSE if you're just removing
+					   from its owner.  Set to false if you're just removing
 					   it from the player's hands (to wear it or something)
 */
 bool CBasePlayer::RemoveItem(CGenericItem* pItem)
@@ -749,7 +749,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 		if( pItem )
 		{
 			pItem->GiveTo( this, true, false );
-			//if( AddItem( pItem, TRUE ) )
+			//if( AddItem( pItem, true ) )
 			//	pPack->Container_RemoveItem( pItem );
 
 			//#ifdef VALVE_DLL

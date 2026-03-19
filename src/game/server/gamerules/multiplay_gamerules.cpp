@@ -261,14 +261,14 @@ bool CHalfLifeMultiplay::IsAnyPlayerAllowedInMap()
 //=========================================================
 BOOL CHalfLifeMultiplay::IsMultiplayer( void )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
 //=========================================================
 BOOL CHalfLifeMultiplay::IsDeathmatch( void )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -285,33 +285,33 @@ BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerI
 	if ( !pWeapon->CanDeploy() )
 	{
 		// that weapon can't deploy anyway.
-		return FALSE;
+		return false;
 	}
 
 	if ( !pPlayer->m_pActiveItem )
 	{
 		// player doesn't have an active item!
-		return TRUE;
+		return true;
 	}
 
 	if ( !pPlayer->m_pActiveItem->CanHolster() )
 	{
 		// can't put away the active item.
-		return FALSE;
+		return false;
 	}
 
 	if ( pWeapon->iWeight() > pPlayer->m_pActiveItem->iWeight() )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 BOOL CHalfLifeMultiplay::GetNextBestWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon )
 {
 	//Function unused
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -326,12 +326,12 @@ BOOL CHalfLifeMultiplay::ClientConnected(edict_t *pEntity, const char *pszName, 
 	if( CheckBanned( AuthID ) )
 	{
 		strncpy(szRejectReason, "You are BANNED\n", 128);
-		return FALSE;
+		return false;
 	}
 
 	g_ServerResetTimer = NULL;
 
-	return TRUE;
+	return true;
 }
 
 extern int gmsgSayText;
@@ -487,7 +487,7 @@ float CHalfLifeMultiplay::FlPlayerFallDamage( CBasePlayer *pPlayer )
 //=========================================================
 BOOL CHalfLifeMultiplay::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -498,7 +498,7 @@ void CHalfLifeMultiplay::PlayerThink( CBasePlayer *pPlayer )
 	{
 		// check for button presses
 		if ( pPlayer->m_afButtonPressed & ( IN_DUCK | IN_ATTACK | IN_ATTACK2 | IN_USE | IN_JUMP ) )
-			m_iEndIntermissionButtonHit = TRUE;
+			m_iEndIntermissionButtonHit = true;
 
 		// clear attack/use commands from player
 		pPlayer->m_afButtonPressed = 0;
@@ -518,7 +518,7 @@ void CHalfLifeMultiplay::PlayerSpawn( CBasePlayer *pPlayer )
 //=========================================================
 BOOL CHalfLifeMultiplay::FPlayerCanRespawn( CBasePlayer *pPlayer )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -530,7 +530,7 @@ float CHalfLifeMultiplay::FlPlayerSpawnTime( CBasePlayer *pPlayer )
 
 BOOL CHalfLifeMultiplay::AllowAutoTargetCrosshair( void )
 {
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -817,7 +817,7 @@ int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
 }
 
 //=========================================================
-// CanHaveWeapon - returns FALSE if the player is not allowed
+// CanHaveWeapon - returns false if the player is not allowed
 // to pick up this weapon
 //=========================================================
 /*BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerItem *pItem )
@@ -836,7 +836,7 @@ int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
 			{
 				if ( it->m_iId == pItem->m_iId )
 				{
-					return FALSE;
+					return false;
 				}
 
 				it = it->m_pNext;
@@ -851,7 +851,7 @@ int CHalfLifeMultiplay::WeaponShouldRespawn( CBasePlayerItem *pWeapon )
 //=========================================================
 BOOL CHalfLifeMultiplay::CanHaveItem( CBasePlayer *pPlayer, CItem *pItem )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -900,7 +900,7 @@ void CHalfLifeMultiplay::PlayerGotAmmo( CBasePlayer *pPlayer, char *szName, int 
 //=========================================================
 BOOL CHalfLifeMultiplay::IsAllowedToSpawn( CBaseEntity *pEntity )
 {
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -973,24 +973,24 @@ int CHalfLifeMultiplay::PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *p
 BOOL CHalfLifeMultiplay::PlayFootstepSounds( CBasePlayer *pl, float fvol )
 {
 	if ( g_footsteps && g_footsteps->value == 0 )
-		return FALSE;
+		return false;
 
 	if ( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 220 )
-		return TRUE;  // only make step sounds in multiplayer if the player is moving fast enough
+		return true;  // only make step sounds in multiplayer if the player is moving fast enough
 
-	return FALSE;
+	return false;
 }
 
 BOOL CHalfLifeMultiplay::FAllowFlashlight( void ) 
 { 
-	return FALSE; 
+	return false; 
 }
 
 //=========================================================
 //=========================================================
 BOOL CHalfLifeMultiplay::FAllowMonsters( void )
 {
-	return TRUE;
+	return true;
 	//return ( CVAR_GET_FLOAT( "mp_allowmonsters" ) != 0 );
 }
 
@@ -1007,8 +1007,8 @@ void CHalfLifeMultiplay::GoToIntermission( void )
 	MESSAGE_END();
 
 	m_flIntermissionEndTime = gpGlobals->time + INTERMISSION_TIME;
-	g_fGameOver = TRUE;
-	m_iEndIntermissionButtonHit = FALSE;
+	g_fGameOver = true;
+	m_iEndIntermissionButtonHit = false;
 }
 
 #define MAX_RULE_BUFFER 1024
@@ -1419,7 +1419,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	strncpy(szFirstMapInList, "edana", sizeof(szFirstMapInList));  // the absolute default level is edana
 
 	unsigned int curplayers;
-	BOOL do_cycle = TRUE;
+	BOOL do_cycle = true;
 
 	// find the map to change to
 	char *mapcfile = (char*)CVAR_GET_STRING( "mapcyclefile" );
@@ -1440,14 +1440,14 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 		if ( !ReloadMapCycleFile( mapcfile, &mapcycle ) || ( !mapcycle.items ) )
 		{
 			ALERT( at_console, "Unable to load map cycle file %s\n", mapcfile );
-			do_cycle = FALSE;
+			do_cycle = false;
 		}
 	}
 
 	if ( do_cycle && mapcycle.items )
 	{
-		BOOL keeplooking = FALSE;
-		BOOL found = FALSE;
+		BOOL keeplooking = false;
+		BOOL found = false;
 		mapcycle_item_s *item;
 
 		// Assume current map
@@ -1457,7 +1457,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 		// Traverse list
 		for ( item = mapcycle.next_item; item->next != mapcycle.next_item; item = item->next )
 		{
-			keeplooking = FALSE;
+			keeplooking = false;
 
 			ASSERT( item != NULL );
 
@@ -1465,12 +1465,12 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 			{
 				if ( curplayers >= item->minplayers )
 				{
-					found = TRUE;
+					found = true;
 					minplayers = item->minplayers;
 				}
 				else
 				{
-					keeplooking = TRUE;
+					keeplooking = true;
 				}
 			}
 
@@ -1478,19 +1478,19 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 			{
 				if ( curplayers <= item->maxplayers )
 				{
-					found = TRUE;
+					found = true;
 					maxplayers = item->maxplayers;
 				}
 				else
 				{
-					keeplooking = TRUE;
+					keeplooking = true;
 				}
 			}
 
 			if ( keeplooking )
 				continue;
 
-			found = TRUE;
+			found = true;
 			break;
 		}
 
@@ -1514,7 +1514,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 		 strncpy(szNextMap,  szFirstMapInList, sizeof(szNextMap) );
 	}
 
-	g_fGameOver = TRUE;
+	g_fGameOver = true;
 
 	ALERT( at_console, "CHANGE LEVEL: %s\n", szNextMap );
 	if ( minplayers || maxplayers )
@@ -1572,7 +1572,7 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 			*pFileList = 0;
 
 		MESSAGE_BEGIN( MSG_ONE, gmsgMOTD, NULL, client );
-			WRITE_BYTE( *pFileList ? FALSE : TRUE );	// FALSE means there is still more message to come
+			WRITE_BYTE( *pFileList ? false : true );	// false means there is still more message to come
 			WRITE_STRING_LIMIT(chunk, sizeof(chunk));
 		MESSAGE_END();
 	}
@@ -1588,13 +1588,13 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 {
 	if(g_VoiceGameMgr.ClientCommand(pPlayer, pcmd))
-		return TRUE;
+		return true;
 
 	int OldMenu;
 	if( FStrEq( pcmd, "menuselect" ) )
 	{
 		if ( CMD_ARGC() < 2 )
-			return FALSE;
+			return false;
 
 		int slot = atoi( CMD_ARGV(1) );//Starts at 1
 
@@ -1603,7 +1603,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		//Check if you've set a different menu first
 		if( pPlayer->CurrentMenu == OldMenu
 			&& !pPlayer->CurrentCallbackMenu ) pPlayer->CurrentMenu = NULL;
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "forgive" ) )
 	{
@@ -1629,7 +1629,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		else {
 			pPlayer->SendInfoMsg( "Forgive: Use this command to remove your accidental death from the killer's record\n" );
 		}
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "joinparty" ) )
 	{
@@ -1638,7 +1638,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			if( pPlayer->m_pTeam )
 			{
 				pPlayer->SendInfoMsg( "You are already in a party!  Type 'leaveparty' to leave it\n" );
-				return TRUE;
+				return true;
 			}
 			//Get the party name
 			char Name[MAX_TEAMNAME_LEN+1];
@@ -1687,7 +1687,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				pPlayer->SetTeam( pTeam );
 			}
 		}
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "leaveparty" ) )
 	{
@@ -1714,7 +1714,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		else {
 			pPlayer->SendInfoMsg( "You aren't in a party!\n" );
 		}
-		return TRUE;
+		return true;
 	}
 	else if (FStrEq(pcmd, "startvote") && CMD_ARGC() >= 3 )
 	{
@@ -1732,13 +1732,13 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			else 
 				pPlayer->SendInfoMsg( "This server doesn't allow time voting\n" );
 		}
-		else return FALSE;
-		return TRUE;
+		else return false;
+		return true;
 	}
 	else if (FStrEq(pcmd, "vote") && CMD_ARGV(1))
 	{
 		TallyVote( pPlayer, atoi(CMD_ARGV(1)) ? true : false );
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "accept" ) )
 	{
@@ -1801,7 +1801,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				AcceptType = 3;
 			}
 		}
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "as_reload_scripts" ) )
 	{
@@ -1814,7 +1814,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			{
 				pPlayer->SendInfoMsg("Error: This command requires developer permissions.");
 				ALERT(at_console, "as_reload_scripts: Permission denied for %s (Steam ID: %s)\n", pPlayer->DisplayName(), pszSteamID ? pszSteamID : "Unknown");
-				return TRUE;
+				return true;
 			}
 		}
 		
@@ -1823,7 +1823,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		{
 			pPlayer->SendInfoMsg("Error: Development mode must be enabled (ms_dev_mode 1).");
 			ALERT(at_console, "as_reload_scripts: Development mode not enabled\n");
-			return TRUE;
+			return true;
 		}
 		
 		pPlayer->SendInfoMsg("Initiating script hot-reload...");
@@ -1862,13 +1862,13 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			ALERT(at_console, "as_reload_scripts: Module system not available\n");
 		}
 		
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "as_pak_status" ) )
 	{
 		// Console command to check PAK file status
 		if( !pPlayer )
-			return TRUE;
+			return true;
 		
 		// Check developer permissions
 		msstring steamid = pPlayer->AuthID();
@@ -1877,7 +1877,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
 		{
 			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
-			return TRUE;
+			return true;
 		}
 		
 		// Display PAK file diagnostic information
@@ -1929,13 +1929,13 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			ALERT(at_console, "Module System: NOT AVAILABLE\n");
 		}
 		
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "as_pak_test" ) )
 	{
 		// Console command to test PAK file access
 		if( !pPlayer )
-			return TRUE;
+			return true;
 		
 		// Check developer permissions
 		msstring steamid = pPlayer->AuthID();
@@ -1944,7 +1944,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		if( !( szSteamID && ( FStrEq( szSteamID, "STEAM_0:1:630973602" ) || pPlayer->IsElite() ) ) )
 		{
 			pPlayer->SendInfoMsg("Access denied. Developer permissions required.");
-			return TRUE;
+			return true;
 		}
 		
 		pPlayer->SendInfoMsg("Testing PAK file refresh...");
@@ -1972,7 +1972,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			ALERT(at_console, "as_pak_test: Module system not available\n");
 		}
 		
-		return TRUE;
+		return true;
 	}
 	else if( FStrEq( pcmd, "say" ) )
 	{
@@ -1983,7 +1983,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		if( !pszText )
 		{
 			ALERT( at_console, "Say command: CMD_ARGS() returned NULL pointer\n" );
-			return FALSE; // Let default handling continue
+			return false; // Let default handling continue
 		}
 		
 		// Additional memory validation - check if pointer is in valid memory range
@@ -1991,14 +1991,14 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		/*if( IsBadReadPtr( pszText, 1 ) )
 		{
 			ALERT( at_console, "Say command: CMD_ARGS() returned invalid memory pointer\n" );
-			return FALSE;
+			return false;
 		}*/
 		
 		// Check for empty string
 		if( !*pszText )
 		{
 			// Empty text - let default handling continue
-			return FALSE;
+			return false;
 		}
 		
 		// Safe length calculation with additional bounds checking
@@ -2015,21 +2015,21 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		
 		if( textLen == 0 )
 		{
-			return FALSE; // Empty text
+			return false; // Empty text
 		}
 		
 		if( textLen >= MAX_SAFE_LENGTH )
 		{
 			ALERT( at_console, "Say command: Text length exceeds safety limit (%zu >= %zu)\n", textLen, MAX_SAFE_LENGTH );
 			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "Message too long" );
-			return TRUE; // Block this command
+			return true; // Block this command
 		}
 		
 		if( textLen > 256 )
 		{
 			// Reject excessively long messages
 			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "Message too long" );
-			return TRUE; // Block this command
+			return true; // Block this command
 		}
 		
 		// Create a safe copy of the text for further processing
@@ -2046,7 +2046,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		else
 		{
 			ALERT( at_console, "Say command: Text length invalid for safe copy (%zu)\n", textLen );
-			return FALSE;
+			return false;
 		}
 		
 		// Use the safe copy for all further operations
@@ -2112,13 +2112,13 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		if( isVoteCommand )
 		{
 			// Block the normal chat message since this is a command
-			return TRUE;
+			return true;
 		}
 		
 		// Let normal chat messages continue through default handling
-		return FALSE;
+		return false;
 	}
-	return FALSE;
+	return false;
 }
 
 //=========================================================

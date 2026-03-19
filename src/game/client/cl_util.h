@@ -21,10 +21,6 @@
 
 #include "cvardef.h"
 
-#ifndef TRUE
-#define TRUE 1
-#define FALSE 0
-#endif
 
 // ScreenHeight() returns the height of the screen, in pixels
 

@@ -363,7 +363,7 @@ public:
 	virtual float MaxMP() { return m_MaxMP; }
 	virtual float GetDefaultMoveProximity() { return m_Width * 1.1; }
 
-	BOOL IsAlive() { return pev ? pev->deadflag == DEAD_NO : FALSE; }
+	BOOL IsAlive() { return pev ? pev->deadflag == DEAD_NO : false; }
 	virtual void CancelAttack();
 	//virtual void Step( );
 	//virtual void Jump( );
@@ -435,8 +435,8 @@ public:
 	int MSProperties();
 	float HearingSensitivity(void) { return m_HearingSensitivity; }
 	int ObjectCaps(void) { return CBaseMonster ::ObjectCaps() | FCAP_IMPULSE_USE; }
-	BOOL HasHumanGibs() { return TRUE; }
-	BOOL ShouldFadeOnDeath(void) { return FALSE; }
+	BOOL HasHumanGibs() { return true; }
+	BOOL ShouldFadeOnDeath(void) { return false; }
 
 #ifdef VALVE_DLL
 	virtual float GiveHP(float flAmount)
@@ -462,7 +462,7 @@ public:
 	virtual void Used(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Trade();												 // Handle trading with others
 	virtual bool AcceptOffer();											 // Accept an offer from a player or monster
-	virtual BOOL SkinMonster(CMSMonster *pDeadMonster) { return FALSE; } //Skin other monsters
+	virtual BOOL SkinMonster(CMSMonster *pDeadMonster) { return false; } //Skin other monsters
 	virtual tradeinfo_t *TradeItem(tradeinfo_t *tiTradeInfo);			 // Trade an item
 	virtual void Attacked(CBaseEntity *pAttacker, damage_t &Damage);
 	virtual void Seen(CMSMonster *pMonster) {}

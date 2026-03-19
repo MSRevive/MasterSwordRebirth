@@ -293,7 +293,7 @@ void CChangePlayerSpeed ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "duration"))
 	{
 		m_Duration = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -445,12 +445,12 @@ class CMSChangeLevel : public CBaseEntity
 		if (FStrEq(pkvd->szKeyName, "destmap"))
 		{
 			sDestMap = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "desttrans"))
 		{
 			sDestTrans = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);

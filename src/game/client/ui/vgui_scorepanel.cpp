@@ -341,9 +341,9 @@ void ScorePanel::SortTeams()
 		g_TeamInfo[j].packetloss += g_PlayerInfoList[i].packetloss;
 
 		if (g_PlayerInfoList[i].thisplayer)
-			g_TeamInfo[j].ownteam = TRUE;
+			g_TeamInfo[j].ownteam = true;
 		else
-			g_TeamInfo[j].ownteam = FALSE;
+			g_TeamInfo[j].ownteam = false;
 
 		// Set the team's number (used for team colors)
 		g_TeamInfo[j].teamnumber = g_PlayerExtraInfo[i].teamnumber;
@@ -352,7 +352,7 @@ void ScorePanel::SortTeams()
 	// find team ping/packetloss averages
 	for (i = 1; i <= m_iNumTeams; i++)
 	{
-		g_TeamInfo[i].already_drawn = FALSE;
+		g_TeamInfo[i].already_drawn = false;
 
 		if (g_TeamInfo[i].players > 0)
 		{
@@ -391,7 +391,7 @@ void ScorePanel::SortTeams()
 		// Put this team in the sorted list
 		m_iSortedRows[m_iRows] = best_team;
 		m_iIsATeam[m_iRows] = TEAM_YES;
-		g_TeamInfo[best_team].already_drawn = TRUE; // set the already_drawn to be TRUE, so this team won't get sorted again
+		g_TeamInfo[best_team].already_drawn = true; // set the already_drawn to be true, so this team won't get sorted again
 		m_iRows++;
 
 		// Now sort all the players on this team

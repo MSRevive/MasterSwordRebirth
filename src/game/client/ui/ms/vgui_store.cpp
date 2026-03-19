@@ -154,7 +154,7 @@ CStoreMenuPanel::CStoreMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 
 		m_pButtons[i]->setContentAlignment( vgui::Label::a_west );
 		if( i != 2 ) m_pButtons[i]->addActionSignal( new CStoreBtn(iMenuToShow[i]) );
-		else m_pButtons[i]->addActionSignal( new CMenuHandler_StringCommand( "trade sell 0", TRUE ) );
+		else m_pButtons[i]->addActionSignal( new CMenuHandler_StringCommand( "trade sell 0", true ) );
 		m_pButtons[i]->addInputSignal( new CHandler_MenuButtonOver(this, i) );
 		m_pButtons[i]->setParent( this );
 

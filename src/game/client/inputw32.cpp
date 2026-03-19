@@ -190,7 +190,7 @@ long ThreadInterlockedExchange(long *pDest, long value)
 
 DWORD WINAPI MousePos_ThreadFunction(LPVOID p)
 {
-	s_hMouseDoneQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	s_hMouseDoneQuitEvent = CreateEvent(NULL, false, false, NULL);
 
 	while (1)
 	{
@@ -1096,7 +1096,7 @@ void IN_Init(void)
 	{
 		s_mouseDeltaX = s_mouseDeltaY = 0;
 
-		s_hMouseQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		s_hMouseQuitEvent = CreateEvent(NULL, false, false, NULL);
 		if (s_hMouseQuitEvent)
 		{
 			s_hMouseThread = CreateThread(NULL, 0, MousePos_ThreadFunction, NULL, 0, &s_hMouseThreadId);

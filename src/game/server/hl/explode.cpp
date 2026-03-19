@@ -115,7 +115,7 @@ void CEnvExplosion::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "iMagnitude"))
 	{
 		m_iMagnitude = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);

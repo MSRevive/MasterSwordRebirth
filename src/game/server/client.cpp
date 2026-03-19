@@ -1511,7 +1511,7 @@ void ClientCommand2(edict_t *pEntity)
 		//#else
 		/*if( IsGM(GETPLAYERWONID(pPlayer->edict())) )
 					pPlayer->m_fIsElite = !pPlayer->m_fIsElite;
-				else return FALSE;*/
+				else return false;*/
 		//	pPlayer->m_fIsElite = true;
 		//#endif
 
@@ -1732,7 +1732,7 @@ void ClientCommand2(edict_t *pEntity)
 				}
 				break;
 			case 1:
-				//pPlayer->RemoveAllItems( FALSE, TRUE );
+				//pPlayer->RemoveAllItems( false, true );
 				MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, NULL, pPlayer->pev);
 				WRITE_BYTE(HIDEHUD_ALL);
 				MESSAGE_END();

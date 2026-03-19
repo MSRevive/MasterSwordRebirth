@@ -123,7 +123,7 @@ bool CCorpse::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int Fo
 		if (!pItem->WearItem())
 		{
 			pItem->SUB_Remove();
-			fReturn = FALSE;
+			fReturn = false;
 		}
 	}
 	else

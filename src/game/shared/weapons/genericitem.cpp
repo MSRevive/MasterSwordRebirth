@@ -1145,7 +1145,7 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 			CGenericItem* pNextPack = pPlayer->Gear[i];
 
 			if (FBitSet(pNextPack->MSProperties(), ITEM_CONTAINER) &&
-				//pPlayer->PutInPack( this, pNextPack, FALSE ) )
+				//pPlayer->PutInPack( this, pNextPack, false ) )
 				CanPutInPack(pNextPack))
 			{
 				pPack = pNextPack;
@@ -1186,7 +1186,7 @@ bool CGenericItem::PutInAnyPack(CBasePlayer* pPlayer, bool fVerbose)
 				pOldPlayer->m_ClientHandID[LastHand] = (pOldPlayer->Hand[LastHand] ? pOldPlayer->Hand[LastHand]->m_iId : 0);
 				pOldPlayer->m_ClientCurrentHand = pOldPlayer->iCurrentHand;
 			}
-			return TRUE;
+			return true;
 		}
 	#endif*/
 	return PutInPack(pPack);
@@ -1498,7 +1498,7 @@ void CGenericItem::RemoveFromOwner()
 		ClearBits(pev->flags, FL_SKIPLOCALHOST); // Start sending the entity to the owner again
 
 	m_Location = ITEMPOS_HANDS;
-	Wielded = FALSE;
+	Wielded = false;
 
 	if (m_pPlayer)
 		m_pPlayer->m_TimeResetLegs = 0;
@@ -2036,9 +2036,9 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 						UsedHands++;
 
 				if (MAX_PLAYER_HANDS - (UsedHands + ReqHands) >= 0)
-					Wielded = TRUE;
+					Wielded = true;
 				else
-					Wielded = FALSE;
+					Wielded = false;
 			}
 		}
 		else

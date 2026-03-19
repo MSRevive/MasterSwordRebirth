@@ -64,12 +64,12 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "scriptevent"))
 	{
 		m_scriptevent = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// UNDONE_WC: explicitly ignoring these fields, but they shouldn't be in the map file!
@@ -82,7 +82,7 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 		else
 			m_Explosion = expRandom;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "material"))
 	{
@@ -95,21 +95,21 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 		else
 			m_Material = (Materials)i;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "deadmodel"))
 	{
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "shards"))
 	{
 		//			m_iShards = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "gibmodel"))
 	{
 		m_iszGibModel = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnobject"))
 	{
@@ -117,16 +117,16 @@ void CBreakable::KeyValue(KeyValueData *pkvd)
 		//if ( object > 0 && object < ARRAYSIZE(pSpawnObjects) )
 		//	m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
 
-		//pkvd->fHandled = TRUE;
+		//pkvd->fHandled = true;
 		CBaseDelay::KeyValue(pkvd);
 	}
 	else if (FStrEq(pkvd->szKeyName, "explodemagnitude"))
 	{
 		ExplosionSetMagnitude(atoi(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "lip"))
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else
 		CBaseDelay::KeyValue(pkvd);
 }
@@ -826,7 +826,7 @@ void CBreakable::Die(void)
 
 	if (Explodable())
 	{
-		ExplosionCreate(Center(), pev->angles, edict(), ExplosionMagnitude(), TRUE);
+		ExplosionCreate(Center(), pev->angles, edict(), ExplosionMagnitude(), true);
 	}
 }
 
@@ -927,7 +927,7 @@ void CPushable ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "size"))
 	{
 		int bbox = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 
 		switch (bbox)
 		{
@@ -952,7 +952,7 @@ void CPushable ::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "buoyancy"))
 	{
 		pev->skin = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBreakable::KeyValue(pkvd);

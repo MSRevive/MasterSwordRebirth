@@ -761,9 +761,9 @@ msstring CScript::ScriptGetter_Cone(msstring& FullName, msstring& ParserName, ms
 		if (ParserName.starts_with("$within_cone"))
 		{
 			if (flDot >= ConeFOV) 
-				return RETURN_TRUE();
+				return RETURN_true();
 			else 
-				return RETURN_FALSE();
+				return RETURN_false();
 		}
 		else return RETURN_FLOAT(flDot);
 	}

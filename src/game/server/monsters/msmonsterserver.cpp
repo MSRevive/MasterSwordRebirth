@@ -300,32 +300,32 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 	if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "perishtarget"))
 	{
 		m_iszPerishTarget = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnarea"))
 	{
 		m_iszMonsterSpawnArea = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delaylow"))
 	{
 		m_SpawnDelayLow = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delayhigh"))
 	{
 		m_SpawnDelayHigh = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "lives"))
 	{
 		m_Lives = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnchance"))
 	{
@@ -339,18 +339,18 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 		if (!m_SpawnChance)
 			m_SpawnChance = -1;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 	{
 		m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "nplayers"))
 	{
 		//Thothie - AUG2007a - adding option to only spawn monster if # players present
 		m_ReqPlayers = (atoi(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "reqhp"))
 	{
@@ -375,19 +375,19 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		if (reqhp_stringlist.size() >= 2 && reqhp_stringlist[1].contains("avg"))
 			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "title"))
 	{
 		//Thothie - AUG2007b - adding option to change monster name
 		m_title = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "params"))
 	{
 		//Thothie - DEC2007b - adding option to send params to script
 		m_addparams = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "hpmulti"))
 	{
@@ -396,7 +396,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flHealthMulti > 1)
 		{
 			m_HPMulti = flHealthMulti;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "dmgmulti"))
@@ -406,14 +406,14 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flDamageMulti > 1)
 		{
 			m_DMGMulti = flDamageMulti;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "scriptfile") ||
 		(FStrEq(pkvd->szKeyName, "defscriptfile") && !m_ScriptName))
 	{
 		m_ScriptName = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	//NOV2014_20 - Thothie msmonster_random [begin]
 	else if (randomdata.starts_with("random_")) //optimize this - dis is stupid lazy
@@ -493,7 +493,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		//Gotta use the logfile here, dernitall
 		MS_DEBUG("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
 	else
@@ -829,7 +829,7 @@ bool CMSMonster::MoveExecute(moveexec_t& MoveExec)
 
 	return fSuccess;
 }
-BOOL CMSMonster::CanSetVelocity() { return TRUE; }
+BOOL CMSMonster::CanSetVelocity() { return true; }
 
 void CMSMonster::Float()
 {
@@ -1402,19 +1402,19 @@ void CMSMonster::Act()
 
 				if( m_fSequenceFinished ) {
 					//m_Hand->CurrentAttack->tStart = -65534;
-					//m_Hand->CurrentAttack->fCanCancel = TRUE;
+					//m_Hand->CurrentAttack->fCanCancel = true;
 					StopWalking( );
 					CurrentHand->CancelAttack( );
 					return;
 				}
-				else CurrentHand->CurrentAttack->fCanCancel = FALSE;
+				else CurrentHand->CurrentAttack->fCanCancel = false;
 
 				if( LastEvent.event == 600 ) //call attack this frame
 				{
 					CurrentHand->CurrentAttack->fAttackThisFrame = true;
 					pev->iuser4 = -1;
 				}
-				else CurrentHand->CurrentAttack->fAttackThisFrame = FALSE; //basically never
+				else CurrentHand->CurrentAttack->fAttackThisFrame = false; //basically never
 			}
 
 			//m_Hand->AttackButtonDown( );
@@ -2384,7 +2384,7 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	BOOL DeleteMe = TRUE;
+	BOOL DeleteMe = true;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
 	bool xp_dump = (strcmp(GetFirstScriptVar("NPC_DUMP_XP"), "1") == 0);	 //dump hits to array
@@ -2528,7 +2528,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			//			ALERT( at_console, "m_flFrameRate: %f\n", m_flFrameRate );
 			//pev->nextthink = gpGlobals->time + ((256 / m_flFrameRate) * pev->framerate);
 			pev->health = pev->max_health / 2; //Thothie - Dunno what this is about
-			DeleteMe = FALSE;				   //live until the body's dead
+			DeleteMe = false;				   //live until the body's dead
 
 			if (FStrEq(STRING(pev->classname), "msmonster_summoned"))
 				g_SummonedMonsters--;
@@ -2579,7 +2579,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			m_SkillLevel = 0; //Thothie APR2011_06 - attempt to make sure monster does not give additional skill post mortem
 		}
 		else
-			DeleteMe = TRUE; // Gibbed, destroy this entity
+			DeleteMe = true; // Gibbed, destroy this entity
 	}
 	if (DeleteMe)
 	{
@@ -2895,7 +2895,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 		MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
 					pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
 		MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
-					m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
+					m_MenuOptionsProtected[playerIndex] ? "true" : "false", entindex());
 		
 		pPlayer->InMenu = false;
 		mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];

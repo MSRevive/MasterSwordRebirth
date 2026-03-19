@@ -19,7 +19,7 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
 	// Don't treat as a live target
-	virtual BOOL IsAlive(void) { return FALSE; }
+	virtual BOOL IsAlive(void) { return false; }
 
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
@@ -122,7 +122,7 @@ void CCycler::Think(void)
 		// hack to avoid reloading model every frame
 		pev->animtime = gpGlobals->time;
 		pev->framerate = 1.0;
-		m_fSequenceFinished = FALSE;
+		m_fSequenceFinished = false;
 		m_flLastEventCheck = gpGlobals->time;
 		pev->frame = 0;
 		if (!m_animate)
@@ -274,13 +274,13 @@ public:
 		if (FStrEq(pkvd->szKeyName, "prefix"))
 		{
 			thoth_event_prefix = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "nevents")) 
 		{
 			//Thothie - AUG2007a - adding option to only spawn monster if # players present
 			thoth_nevents = (atoi(pkvd->szValue));
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 }*/
@@ -355,7 +355,7 @@ void CTargetMP3Audio ::Spawn(void)
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
 
-	m_bPlaying = FALSE; // start out not playing
+	m_bPlaying = false; // start out not playing
 }
 
 void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
@@ -367,10 +367,10 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 		return;
 
 	if (!m_bPlaying) // if we're not playing, start playing!
-		m_bPlaying = TRUE;
+		m_bPlaying = true;
 	else
 	{ // if we're already playing, stop the mp3
-		m_bPlaying = FALSE;
+		m_bPlaying = false;
 		CLIENT_COMMAND(pActivator->edict(), "mp3 stop\n");
 		return;
 	}
@@ -432,12 +432,12 @@ public:
 		if (FStrEq(pkvd->szKeyName, "npcname"))
 		{
 			ms_npcname = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "sayasnpc"))
 		{
 			ms_sayasnpc = (atoi(pkvd->szValue) == 1) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 };
@@ -547,22 +547,22 @@ public:
 		if (FStrEq(pkvd->szKeyName, "midle"))
 		{
 			mt_idle = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "mcombat"))
 		{
 			mt_combat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playall"))
 		{
 			mt_global = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playnow"))
 		{
 			mt_playnow = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -624,12 +624,12 @@ public:
 		if (keyName == "song")
 		{
 			m_sSong = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (keyName.find(".mp3") != std::string::npos) //Legacy way of playing mp3s
 		{
 			m_sSong = pkvd->szKeyName;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -832,7 +832,7 @@ public:
 			m_SpawnLoc = (spawnloc_e)atoi(pkvd->szValue);
 			if (m_SpawnLoc < SPAWNLOC_FIXED || m_SpawnLoc > SPAWNLOC_RANDOM)
 				m_SpawnLoc = SPAWNLOC_FIXED;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 		{
@@ -854,7 +854,7 @@ public:
 			m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
 			//Thothie - store original spawnstart state
 			bSpawnImmediately = (atoi(pkvd->szValue)) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		//NOV2014_20 seeing if we can change how ms_monsterspawn handles mob respawning
 		//- the fact that ms_monster and ms_monsterspawn seem to kinda be the same entity is making this confusing though
@@ -862,24 +862,24 @@ public:
 		{
 			//0=all mobs depleated, 1=any mob depleated, 2=whenever called
 			resetwhen = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "fireallperish"))
 		{
 			m_sTargetAllPerish = pev->target = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "params"))
 		{
 			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
 			sAddParams = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "nplayers"))
 		{
 			//Thothie AUG2007a - player req for monster spawns
 			iPlayerReq = (atoi(pkvd->szValue));
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "reqhp"))
 		{
@@ -903,7 +903,7 @@ public:
 				//if ( iHPReq_min == 0 ) iHPReq_min = 1; //OCT2015_28 disabled in case all players flagged AFK
 			}
 			if (reqhp_stringlist.size() > 2 && reqhp_stringlist[1].contains("avg")) hpreq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -1403,37 +1403,37 @@ public:
 		if (FStrEq(pkvd->szKeyName, "rallplayers"))
 		{
 			mtl_req_all_players = (strcmp(pkvd->szValue, "1") == 0);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "title"))
 		{
 			mtl_title = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
 		{
 			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "teleport"))
 		{
 			mtl_teledest = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "spawntotie"))
 		{
 			mtl_respawnat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "firetarget"))
 		{
 			mtl_target = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "touchtarget"))
 		{
 			mtl_touchtarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -1544,7 +1544,7 @@ public:
 								pevToucher->flags &= ~FL_ONGROUND;
 								UTIL_SetOrigin(pevToucher, tmp);
 								pevToucher->angles = pentTarget->v.angles;
-								pevToucher->fixangle = TRUE;
+								pevToucher->fixangle = true;
 								pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
 							}
 							else
@@ -1668,7 +1668,7 @@ public:
 			if (!UTIL_IsMasterTriggered(ms_master, pMchecker))
 			{
 				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", "msarea_transition");
-				return FALSE;
+				return false;
 			}
 			else
 			{
@@ -1679,15 +1679,15 @@ public:
 		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
-			return FALSE;
+			return false;
 
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 
 		if (pPlayer->CurrentTransArea == this)
-			return FALSE;
+			return false;
 		pPlayer->CurrentTransArea = this;
 		if (pPlayer->m_MapStatus == FIRST_MAP)
 			pPlayer->m_MapStatus = OLD_MAP;
@@ -1761,7 +1761,7 @@ public:
 		WRITE_STRING_LIMIT(STRING(sDestTrans), 32);
 		MESSAGE_END();
 
-		return TRUE;
+		return true;
 	}
 
 	// DeathNotice - Lets this transition area know that a client has left it;
@@ -1911,7 +1911,7 @@ public:
 
 				msstring dest_map = STRING(sDestMap);
 				if (IS_MAP_VALID(dest_map.c_str()))
-					pOtherPlayer->EnableControl(FALSE);
+					pOtherPlayer->EnableControl(false);
 				
 				if (as_enabled.value > 0)
 				{
@@ -1969,22 +1969,22 @@ public:
 		if (FStrEq(pkvd->szKeyName, "destname"))
 		{
 			sDestName = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "destmap"))
 		{
 			sDestMap = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "desttrans"))
 		{
 			sDestTrans = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
 		{
 			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -2004,11 +2004,11 @@ public:
 	BOOL OnControls(entvars_t *pev)
 	{
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 		if (pPlayer->CurrentNoSaveArea == this)
-			return FALSE;
+			return false;
 		pPlayer->CurrentNoSaveArea = this;
 
 		//Let the client know they can no longer save
@@ -2017,7 +2017,7 @@ public:
 		WRITE_BYTE(0);
 		MESSAGE_END();
 
-		return TRUE;
+		return true;
 	}
 	// DeathNotice - Let the client save again
 	void DeathNotice(entvars_t *pev)
@@ -2053,15 +2053,15 @@ public:
 	BOOL OnControls(entvars_t *pev)
 	{
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 		if (pPlayer->CurrentTownArea == this)
-			return FALSE;
+			return false;
 
 		pPlayer->CurrentTownArea = this;
 
-		return TRUE;
+		return true;
 	}
 	// DeathNotice - Player left the area
 	void DeathNotice(entvars_t *pev)
@@ -2080,8 +2080,8 @@ public:
 	void *MSQuery(int iRequest)
 	{
 		if (m_fAllowPK)
-			return (void *)TRUE;
-		return (void *)FALSE;
+			return (void *)true;
+		return (void *)false;
 	}
 
 	void KeyValue(KeyValueData *pkvd)
@@ -2089,7 +2089,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "pkill"))
 		{
 			m_fAllowPK = atoi(pkvd->szValue) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);

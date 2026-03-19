@@ -168,7 +168,7 @@ int CHudStatusBar ::Draw(float fTime)
 	{
 		for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 			ParseStatusString(i);
-		m_bReparseString = FALSE;
+		m_bReparseString = false;
 	}
 
 	// Draw the status bar lines
@@ -228,7 +228,7 @@ int CHudStatusBar ::MsgFunc_StatusText(const char *pszName, int iSize, void *pbu
 	else
 		m_iFlags |= HUD_ACTIVE; // we have status text, so turn on the status bar
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	return 1;
 }
@@ -247,7 +247,7 @@ int CHudStatusBar ::MsgFunc_StatusValue(const char *pszName, int iSize, void *pb
 
 	m_iStatusValues[index] = READ_SHORT();
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	return 1;
 }

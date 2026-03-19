@@ -73,7 +73,7 @@ int CHudStatusIcons::Draw(float flTime)
 
 // Message handler for StatusIcon message
 // accepts five values:
-//		byte   : TRUE = ENABLE icon, FALSE = DISABLE icon
+//		byte   : true = ENABLE icon, false = DISABLE icon
 //		string : the sprite name to display
 //		byte   : red
 //		byte   : green

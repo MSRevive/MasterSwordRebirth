@@ -8,7 +8,7 @@
 
 #undef Wielded
 #undef CHWielded
-#define CHWielded ((m_pPlayer->Hand[m_pPlayer->iCurrentHand]) ? m_pPlayer->Hand[m_pPlayer->iCurrentHand]->Wielded() : (m_pPlayer->PlayerHands ? m_pPlayer->PlayerHands->Wielded() : FALSE))
+#define CHWielded ((m_pPlayer->Hand[m_pPlayer->iCurrentHand]) ? m_pPlayer->Hand[m_pPlayer->iCurrentHand]->Wielded() : (m_pPlayer->PlayerHands ? m_pPlayer->PlayerHands->Wielded() : false))
 
 CAnimation *CAnimation::ChangeTo(MONSTER_ANIM NewAnim)
 {
@@ -100,7 +100,7 @@ void CAnimation ::GaitAnimate()
 				NewGait = LookupSequence("crouch");
 		}
 	}
-	else if (speed > m_pOwner->WalkSpeed(FALSE) + 1)
+	else if (speed > m_pOwner->WalkSpeed(false) + 1)
 	{
 		if (bCustomLegs)
 			NewGait = LookupSequence(UTIL_VarArgs("run_%s", m_szAnimLegs));
@@ -167,18 +167,18 @@ void CWalkAnim ::Animate()
 }
 
 CAnimHold gAnimHold; //Never submits to MONSTER_ANIM_WALK
-					 //Submits to anything else if ReleaseAnim == TRUE
+					 //Submits to anything else if ReleaseAnim == true
 					 //Only uses gait if specified with flags
 void CAnimHold ::Initialize(void *vData)
 {
-	ReleaseAnim = TRUE;
+	ReleaseAnim = true;
 	UseGait = false; //defaults
 	int Flags = (int)vData;
 	if (Flags & (1 << 0))
-		ReleaseAnim = FALSE; //Release to any anim besides walk
+		ReleaseAnim = false; //Release to any anim besides walk
 	if (Flags & (1 << 1))
-		UseGait = TRUE; //Use gait
-	IsNewAnim = TRUE;
+		UseGait = true; //Use gait
+	IsNewAnim = true;
 }
 bool CAnimHold ::CanChangeTo(MONSTER_ANIM NewAnim, void *vData)
 {
@@ -243,13 +243,13 @@ void CAnimOnce ::Animate()
 
 /*					//stays in the last pose
 void CAnimAct :: Initialize( void *vData ) {
-	if( vData ) ReleaseAnim = FALSE;
-	else ReleaseAnim = TRUE;
-	IsNewAnim = TRUE;
+	if( vData ) ReleaseAnim = false;
+	else ReleaseAnim = true;
+	IsNewAnim = true;
 }
 bool CAnimAct :: CanChangeTo( MONSTER_ANIM NewAnim, void *vData ) {
-	if( m_fSequenceFinished && ReleaseAnim ) return TRUE;
-	return FALSE;
+	if( m_fSequenceFinished && ReleaseAnim ) return true;
+	return false;
 }
 void CAnimAct :: Animate( ) {
 	if( !IsNewAnim ) return;

@@ -119,9 +119,9 @@ constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
 constexpr const char* PLAYER_SCRIPT = "player/player";
 //#define mCH m_pOwner->iCurrentHand
 
-/*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
-#define Wielded( iHand ) ((Hand[iHand])?TRUE:(PlayerHands?PlayerHands->Wielded:FALSE))
-//#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
+/*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
+#define Wielded( iHand ) ((Hand[iHand])?true:(PlayerHands?PlayerHands->Wielded:false))
+//#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
 #define CHWielded Wielded(iCurrentHand)*/
 
 constexpr int MAX_PLAYER_HANDS = 2;
@@ -158,8 +158,8 @@ constexpr int PFLAG_OBSERVER = (1 << 5); // player is locked in stationary cam m
 //-----------------------------------------------------
 /*#define CSUITPLAYLIST	4		// max of 4 suit sentences queued up at any time
 
-#define SUIT_GROUP			TRUE
-#define	SUIT_SENTENCE		FALSE
+#define SUIT_GROUP			true
+#define	SUIT_SENTENCE		false
 
 #define	SUIT_REPEAT_OK		0
 #define SUIT_NEXT_IN_30SEC	30
@@ -568,7 +568,7 @@ public:
 	//	void				UpdateFatigue( );
 	//	void				UpdateMana( );
 	//bool				SwapHands( bool bVerbose = true );
-	void ShowMenu(const char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = FALSE);
+	void ShowMenu(const char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = false);
 	int GiveGold(int iAmount, bool bVerbose = true);
 	//float				TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, int iAccuracyRoll);
 	void AttackSound();
@@ -581,7 +581,7 @@ public:
 	void PlayerAction(const char* Action);
 	bool PrepareSpell(const char *pszName);
 	void TakeDamageEffect(CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, int bitsDamageType);
-	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = FALSE);
+	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = false);
 	CBaseEntity *GiveNamedItem(const char *szName);
 
 	CGenericItem *ActiveItem();
@@ -718,7 +718,7 @@ public:
 	BOOL m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
 	BOOL m_fGameHUDInitialized;
 	int m_iTrain;	// Train control position
-	BOOL m_fWeapon; // Set this to FALSE to force a reset of the current weapon HUD info
+	BOOL m_fWeapon; // Set this to false to force a reset of the current weapon HUD info
 
 	EHANDLE m_pTank;   // the tank which the player is currently controlling,  NULL if no tank
 	float m_fDeadTime; // the time at which the player died  (used in PlayerDeathThink())
@@ -767,11 +767,11 @@ public:
 	virtual void StartSneaking(void) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking(void) { m_tSneaking = gpGlobals->time + 30; }
 	virtual BOOL IsSneaking(void) { return m_tSneaking <= gpGlobals->time; }
-	virtual BOOL ShouldFadeOnDeath(void) { return FALSE; }
-	virtual BOOL IsPlayer(void) { return TRUE; } // Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
+	virtual BOOL ShouldFadeOnDeath(void) { return false; }
+	virtual BOOL IsPlayer(void) { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
 
-	virtual BOOL IsNetClient(void) { return TRUE; } // Bots should return FALSE for this, they can't receive NET messages
-													// Spectators should return TRUE for this
+	virtual BOOL IsNetClient(void) { return true; } // Bots should return false for this, they can't receive NET messages
+													// Spectators should return true for this
 	virtual const char *TeamID(void);
 
 	virtual int Save(CSave &save);

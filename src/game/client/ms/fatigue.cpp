@@ -31,7 +31,7 @@ MS_DECLARE_MESSAGE(m_Fatigue, Fatigue);
 
 int CHudFatigue::Init(void)
 {
-	m_DrawFatigue = FALSE;
+	m_DrawFatigue = false;
 
 	HOOK_MESSAGE(Fatigue);
 	//HOOK_COMMAND("fatigue", ToggleFatigue);

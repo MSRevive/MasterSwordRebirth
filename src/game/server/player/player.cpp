@@ -76,7 +76,7 @@ extern DLL_GLOBAL BOOL g_fGameOver;
 extern DLL_GLOBAL BOOL g_fDrawLines;
 int gEvilImpulse101;
 extern DLL_GLOBAL int g_iSkillLevel, gDisplayTitle;
-BOOL gInitHUD = TRUE;
+BOOL gInitHUD = true;
 
 extern void respawn(entvars_t *pev, BOOL fCopyCorpse);
 extern Vector VecBModelOrigin(entvars_t *pevBModel);
@@ -433,7 +433,7 @@ float CBasePlayer ::TraceAttack(damage_t &Damage)
 			{
 				if( CH && ((CGenericItem *)CH)->CurrentAttack )
 					((CGenericItem *)CH)->CancelAttack( );
-				SwitchHands( iHand, FALSE );
+				SwitchHands( iHand, false );
 			}
 
 			if( iCurrentHand == iHand )
@@ -467,7 +467,7 @@ int CBasePlayer ::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, fl
 {
 	// have suit diagnose the problem - ie: report damage type
 	int bitsDamage = bitsDamageType;
-	int ffound = TRUE;
+	int ffound = true;
 	int fTookDamage;
 	//float flHealthPrev = pev->health;
 
@@ -560,7 +560,7 @@ void CBasePlayer::TakeDamageEffect(CBaseEntity *pInflictor, CBaseEntity *pAttack
 void CBasePlayer::PackDeadPlayerItems(void)
 {
 	if (m_fDropAllItems)
-		RemoveAllItems(TRUE); // now strip off everything the player has
+		RemoveAllItems(true); // now strip off everything the player has
 	m_fDropAllItems = false;
 }
 
@@ -686,7 +686,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 
 	if (FBitSet(pev->flags, FL_DUCKING))
 	{
-		CinematicCamera(FALSE);
+		CinematicCamera(false);
 		ClearBits(pev->flags, FL_DUCKING);
 		ClearBits(m_afPhysicsFlags, PFLAG_DUCKING);
 		pev->origin.z = pev->origin.z + ((Size(0).z / 2) - (Size(FL_DUCKING).z / 2));
@@ -795,7 +795,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 	m_Corpse = (CCorpse *)GetClassPtr((CCorpse *)NULL);
 	m_Corpse->CreateCorpse(this, LoseGoldPercent);
 
-	CinematicCamera(TRUE, vOrigin, vAngles);
+	CinematicCamera(true, vOrigin, vAngles);
 	pev->effects |= EF_NODRAW;
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 	pev->takedamage = DAMAGE_NO;
@@ -934,7 +934,7 @@ void CBasePlayer::WaterMove()
 	//	pev->velocity = pev->velocity - 0.8 * pev->waterlevel * gpGlobals->frametime * pev->velocity;
 }
 
-// TRUE if the player is attached to a ladder
+// true if the player is attached to a ladder
 BOOL CBasePlayer::IsOnLadder(void)
 {
 	return (pev->movetype == MOVETYPE_FLY);
@@ -1057,7 +1057,7 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 
 	pev->view_ofs = g_vecZero;
 	pev->angles = pev->v_angle = vecViewAngle;
-	pev->fixangle = TRUE;
+	pev->fixangle = true;
 	pev->solid = SOLID_NOT;
 	pev->takedamage = DAMAGE_NO;
 	pev->movetype = MOVETYPE_NONE;
@@ -1066,7 +1066,7 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 }
 void CBasePlayer::CinematicCamera(BOOL OnorOff, Vector vecPosition, Vector vecViewAngle, BOOL bCreateClone)
 {
-	if (OnorOff == TRUE)
+	if (OnorOff == true)
 	{
 		m_afPhysicsFlags |= PFLAG_OBSERVER;
 		CamEntity = GetClassPtr((CBaseEntity *)NULL);
@@ -1342,7 +1342,7 @@ void CBasePlayer::DoAction( int iAction ) {
 				SetAnimation( MONSTER_ANIM_BREAK );
 				SetAnimation( MONSTER_ANIM_HOLD, "sitdown", (void *)0 );
 				SetBits( m_StatusFlags, PLAYER_MOVE_SITTING );
-				LockSpeed = TRUE;
+				LockSpeed = true;
 				UTIL_MakeVectors( pev->angles );
 				m_TimeGainHP = 0;  //Reset the gain HP time
 			}
@@ -1361,8 +1361,8 @@ void CBasePlayer::DoAction( int iAction ) {
 					SendInfoMsg( "You stand back up." );
 					//strcpy( m_szAnimExtention, m_szAnimLast );
 					ClearBits( m_StatusFlags, PLAYER_MOVE_SITTING );
-					CinematicCamera( FALSE );
-					LockSpeed = FALSE;
+					CinematicCamera( false );
+					LockSpeed = false;
 
 					ClearBits(pev->flags,FL_DUCKING);
 					ClearBits(m_afPhysicsFlags,PFLAG_DUCKING);
@@ -1444,7 +1444,7 @@ void CBasePlayer::UpdateStatusBar()
 		}
 	}
 
-	BOOL bForceResend = FALSE;
+	BOOL bForceResend = false;
 
 	if (strcmp(sbuf0, m_SbarString0))
 	{
@@ -1456,7 +1456,7 @@ void CBasePlayer::UpdateStatusBar()
 		 strncpy(m_SbarString0,  sbuf0, sizeof(m_SbarString0) );
 
 		// make sure everything's resent
-		bForceResend = TRUE;
+		bForceResend = true;
 	}
 
 	if (strcmp(sbuf1, m_SbarString1))
@@ -1469,7 +1469,7 @@ void CBasePlayer::UpdateStatusBar()
 		 strncpy(m_SbarString1,  sbuf1, sizeof(m_SbarString1) );
 
 		// make sure everything's resent
-		bForceResend = TRUE;
+		bForceResend = true;
 	}
 
 	// Check values and send if they don't match
@@ -1679,7 +1679,7 @@ void CBasePlayer::PreThink(void)
 
 	if (m_TimeTillSuicide)
 	{
-		EnableControl(FALSE);
+		EnableControl(false);
 		if (gpGlobals->time >= m_TimeTillSuicide)
 		{
 			// have the player kill themself
@@ -1853,7 +1853,7 @@ void CBasePlayer::CheckTimeBasedDamage()
 					{
 						m_rgbTimeBasedDamage[i] = 0;
 						m_rgItems[ITEM_ANTIDOTE]--;
-						//						SetSuitUpdate("!HEV_HEAL4", FALSE, SUIT_REPEAT_OK);
+						//						SetSuitUpdate("!HEV_HEAL4", false, SUIT_REPEAT_OK);
 					}
 				}
 
@@ -2288,14 +2288,14 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 
 	// if (!pSpot->IsTriggered(pPlayer))
 	// {
-	// 	return FALSE;
+	// 	return false;
 	// }
 
 	// /*	while ( (ent = UTIL_FindEntityInSphere( ent, pSpot->pev->origin, 128 )) != NULL )
 	// {
 	// 	// if ent is a client, don't spawn on 'em
 	// 	if ( ent->IsPlayer() && ent != pPlayer )
-	// 		return FALSE;
+	// 		return false;
 	// }*/
 	// bool fBlocked = false;
 	// float Range = 72;
@@ -2314,7 +2314,7 @@ BOOL IsSpawnPointValid(CBaseEntity *pPlayer, CBaseEntity *pSpot)
 	// 	break;
 	// }
 
-	return TRUE;
+	return true;
 }
 void CBasePlayer::AddNoise(float flNoiseAmt)
 {
@@ -2704,7 +2704,7 @@ void CBasePlayer::Spawn(void)
 		//because the coords were sent from client.
 		//If not the first spawn, then a spawn spot was selected and
 		//the above !pentSpawnSpot skips over this
-		if( m_MapStatus != OLD_MAP ) SpawnPlayer = FALSE;
+		if( m_MapStatus != OLD_MAP ) SpawnPlayer = false;
 	}
 	else {
 	}*/
@@ -2725,12 +2725,12 @@ void CBasePlayer::Spawn(void)
 	if (m_iPlayerSound == SOUNDLIST_EMPTY)
 		ALERT(at_console, "Couldn't alloc player sound slot!\n");
 
-	m_fNoPlayerSound = FALSE; // normal sound behavior.
+	m_fNoPlayerSound = false; // normal sound behavior.
 
 	m_pLastItem = NULL;
-	m_fInitHUD = TRUE;
+	m_fInitHUD = true;
 	m_iClientHideHUD = -1; // force this to be recalculated
-	m_fWeapon = FALSE;
+	m_fWeapon = false;
 	m_pClientActiveItem = NULL;
 
 	if (!SpawnPlayer)
@@ -2748,7 +2748,7 @@ void CBasePlayer::Spawn(void)
 		SetBits(pev->flags, FL_NOTARGET);
 		m_afPhysicsFlags |= PFLAG_OBSERVER;
 		m_iHideHUD = HIDEHUD_ALL;
-		EnableControl(FALSE); //So you can't move
+		EnableControl(false); //So you can't move
 
 
 		//Load the list of characters either from file or from the Central Server
@@ -2787,13 +2787,13 @@ void CBasePlayer::Spawn(void)
 		ClearBits(pev->flags, FL_NOTARGET);
 		//SetBits( pev->effects, EF_NODRAW ); //Thothie - making char invisible for new body
 		UTIL_ScreenFade(this, Vector(0, 0, 0), 1, 0, 0, FFADE_IN);
-		CinematicCamera(FALSE); //Returns you to normal viewing
-		LockSpeed = FALSE;
+		CinematicCamera(false); //Returns you to normal viewing
+		LockSpeed = false;
 		m_SkillLevel = -1; //Force a score screen update
 		//Call the client dll spawn function in UpdateClientData
 		SetBits(m_MsgFlags, MSGFLAG_SPAWN);
 		m_iHideHUD = 0; //Unhide HUD, if hidden
-		EnableControl(TRUE);
+		EnableControl(true);
 		UTIL_SetOrigin(pev, pev->origin);
 
 		//Shuriken - This should send an Exp message for all the players' stats.
@@ -2857,7 +2857,7 @@ void CBasePlayer::Spawn(void)
 	}
 	m_pLastAnimHandler = NULL;				 // Set these
 	m_pAnimHandler = &gAnimWalk;			 // or it crashes
-	m_fSequenceFinished = TRUE;				 //So it knows to begin the first animation
+	m_fSequenceFinished = true;				 //So it knows to begin the first animation
 	pev->sequence = LookupSequence("stand"); //LookupActivity( ACT_IDLE )
 	BlockButton(IN_ATTACK);					 //Make it inconsequential if the player is still holding down the button
 
@@ -2929,7 +2929,7 @@ bool CBasePlayer::MoveToSpawnSpot()
 		pev->velocity = g_vecZero;
 		pev->angles = pSpawnSpot->pev->angles;
 		pev->punchangle = g_vecZero;
-		pev->fixangle = TRUE;
+		pev->fixangle = true;
 		if (pSpawnSpot->pev->target)
 			FireTargets(STRING(pSpawnSpot->pev->target), this, this, USE_TOGGLE, 0);
 	}
@@ -3053,7 +3053,7 @@ void CBasePlayer ::Precache(void)
 	m_iUpdateTime = 5; // won't update for 1/2 a second
 
 	if (gInitHUD)
-		m_fInitHUD = TRUE;
+		m_fInitHUD = true;
 }
 
 int CBasePlayer::Save(CSave &save)
@@ -3093,7 +3093,7 @@ int CBasePlayer::Restore(CRestore &restore)
 	pev->v_angle.z = 0;	// Clear out roll
 	pev->angles = pev->v_angle;
 
-	pev->fixangle = TRUE;           // turn this way immediately
+	pev->fixangle = true;           // turn this way immediately
 
 // Copied from spawn() for now
 	m_bloodColor	= BLOOD_COLOR_RED;
@@ -3192,7 +3192,7 @@ void CSprayCan::Think(void)
 	}
 	else
 	{
-		UTIL_PlayerDecalTrace(&tr, playernum, pev->frame, TRUE);
+		UTIL_PlayerDecalTrace(&tr, playernum, pev->frame, true);
 		// Just painted last custom frame.
 		if (pev->frame++ >= (nFrames - 1))
 			UTIL_Remove(this);
@@ -3343,8 +3343,8 @@ Reset stuff so that the state is transmitted.
 {
 	m_iClientHealth  = -1;
 	m_iTrain |= TRAIN_NEW;  // Force new train message.
-	m_fWeapon = FALSE;          // Force weapon send
-	m_fKnownItem = FALSE;    // Force weaponinit messages.
+	m_fWeapon = false;          // Force weapon send
+	m_fKnownItem = false;    // Force weaponinit messages.
 
 	// Now force all the necessary messages
 	//  to be sent.
@@ -3439,11 +3439,11 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 	}
 
 	case 101:
-		gEvilImpulse101 = TRUE;
+		gEvilImpulse101 = true;
 
 		//GiveDefaultItems( );
 
-		gEvilImpulse101 = FALSE;
+		gEvilImpulse101 = false;
 		break;
 
 	case 102:
@@ -3472,12 +3472,12 @@ void CBasePlayer::CheatImpulseCommands(int iImpulse)
 		if (m_fNoPlayerSound)
 		{
 			ALERT(at_console, "Player is audible\n");
-			m_fNoPlayerSound = FALSE;
+			m_fNoPlayerSound = false;
 		}
 		else
 		{
 			ALERT(at_console, "Player is silent\n");
-			m_fNoPlayerSound = TRUE;
+			m_fNoPlayerSound = true;
 		}
 		break;
 	}
@@ -3628,8 +3628,8 @@ void CBasePlayer::UpdateClientData(void)
 		//Thothie nothing changed here, but somewhere whithin we are getting:
 		//Error (SERVER): Error: CBasePlayer::UpdateClientData --> Call InitHUD
 		//Maybe caused by a script, not sure
-		m_fInitHUD = FALSE;
-		gInitHUD = FALSE;
+		m_fInitHUD = false;
+		gInitHUD = false;
 
 		MESSAGE_BEGIN(MSG_ONE, gmsgResetHUD, NULL, pev);
 		WRITE_BYTE(0);
@@ -3686,7 +3686,7 @@ void CBasePlayer::UpdateClientData(void)
 			WRITE_BYTE(FNShared::IsEnabled() ? 1 : 0);
 			MESSAGE_END();
 
-			m_fGameHUDInitialized = TRUE;
+			m_fGameHUDInitialized = true;
 			InitHUD();
 			fConnectedThisFrame = true;
 		}
@@ -4119,7 +4119,7 @@ void CBasePlayer::UpdateClientData(void)
 BOOL CBasePlayer ::FBecomeProne(void)
 {
 	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
-	return TRUE;
+	return true;
 }
 
 //=========================================================
@@ -4276,7 +4276,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 
 	if ( CVAR_GET_FLOAT("sv_aim") == 0 )
 	{
-		m_fOnTarget = FALSE;
+		m_fOnTarget = false;
 		return g_vecZero;
 	}
 
@@ -4287,7 +4287,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 	bestdot = flDelta; // +- 10 degrees
 	bestent = NULL;
 
-	m_fOnTarget = FALSE;
+	m_fOnTarget = false;
 
 	UTIL_TraceLine( vecSrc, vecSrc + bestdir * flDist, dont_ignore_monsters, edict(), &tr );
 
@@ -4299,7 +4299,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 			|| (pev->waterlevel == 3 && tr.pHit->v.waterlevel == 0)))
 		{
 			if (tr.pHit->v.takedamage == DAMAGE_AIM)
-				m_fOnTarget = TRUE;
+				m_fOnTarget = true;
 
 			return m_vecAutoAim;
 		}
@@ -4380,7 +4380,7 @@ Vector CBasePlayer ::GetAutoaimVector(float flDelta)
 		bestdir = bestdir - pev->v_angle - pev->punchangle;
 
 		if (bestent->v.takedamage == DAMAGE_AIM)
-			m_fOnTarget = TRUE;
+			m_fOnTarget = true;
 
 		return bestdir;
 	}
@@ -4395,7 +4395,7 @@ void CBasePlayer ::ResetAutoaim()
 		m_vecAutoAim = Vector(0, 0, 0);
 		SET_CROSSHAIRANGLE(edict(), 0, 0);
 	}
-	m_fOnTarget = FALSE;
+	m_fOnTarget = false;
 }
 
 /*
@@ -4451,7 +4451,7 @@ void CStripWeapons ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	if (pPlayer)
-		pPlayer->RemoveAllItems(FALSE);
+		pPlayer->RemoveAllItems(false);
 }
 
 class CRevertSaved : public CPointEntity
@@ -4496,22 +4496,22 @@ void CRevertSaved ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "duration"))
 	{
 		SetDuration(atof(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "holdtime"))
 	{
 		SetHoldTime(atof(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "messagetime"))
 	{
 		SetMessageTime(atof(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "loadtime"))
 	{
 		SetLoadTime(atof(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -5575,7 +5575,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 		#define MIN_GOLD_STEAL 5
 		int StealAmt = min(max(GetSkillStat(SKILL_THEFT) * 10,MIN_GOLD_STEAL),pMonster->Gold); //Max amt (skill * 10)
 		StealAmt = RANDOM_LONG(0,StealAmt); //Actual amt to steal
-		GiveGold( StealAmt, FALSE );
+		GiveGold( StealAmt, false );
 		SendInfoMsg( "You steal %i gold coins from %s\n", StealAmt, STRING(pMonster->DisplayName) );
 		pMonster->Gold -= StealAmt;
 		StealNoticeCheck( this, pMonster, true );
@@ -5704,7 +5704,7 @@ void CBasePlayer ::ShowMenu(const char *pszText, int bitsValidSlots,
 			strncpy(cTemp, &pszText[n], 127);
 			cTemp[127] = 0;
 			n += 127;
-			bLclNeedMore = TRUE;
+			bLclNeedMore = true;
 		}
 		else
 		{
@@ -6015,7 +6015,7 @@ bool CBasePlayer ::AcceptOffer()
 BOOL CBasePlayer::SkinMonster(CMSMonster *pDeadMonster)
 {
 	/*if( !pDeadMonster->Skin )
-		return FALSE;
+		return false;
 
 	CGenericItem *pSkin = NULL;
 	bool fSkinIt = false;
@@ -6040,12 +6040,12 @@ BOOL CBasePlayer::SkinMonster(CMSMonster *pDeadMonster)
 		if( fSkinIt ) {
 			pSkin->pev->origin = pDeadMonster->pev->origin;
 			pSkin->pev->angles.y = RANDOM_FLOAT(0,360);
-			return TRUE;
+			return true;
 		}
 		else pSkin->SUB_Remove( );
 	}*/
 
-	return FALSE;
+	return false;
 }
 void CBasePlayer::InitHUD()
 {

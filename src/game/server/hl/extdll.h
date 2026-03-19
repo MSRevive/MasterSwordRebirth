@@ -25,8 +25,6 @@
 #ifdef _WIN32
 #include "PlatformWin.h"
 #else // _WIN32
-#define FALSE 0
-#define TRUE 1
 
 typedef unsigned int uint;
 typedef int BOOL;

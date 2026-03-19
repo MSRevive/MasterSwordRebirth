@@ -1381,7 +1381,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			//Set up a variable to switch back
 			if (g_SwitchToHand == -1)
 				g_SwitchToHand = player.m_CurrentHand;
-			if (player.SwitchHands(iHand, FALSE))
+			if (player.SwitchHands(iHand, false))
 				player.BlockButton(IN_ATTACK);
 			else
 				g_SwitchToHand = -1;

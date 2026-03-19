@@ -402,7 +402,7 @@ CMenuPanel *CreateNewCharacterPanel( )
 {
 	return new CNewCharacterPanel( 1, true, 0, 0, ScreenWidth(), ScreenHeight());
 }
-CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, TRUE, x, y, wide, tall )
+CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, true, x, y, wide, tall )
 {
 	SetBits( m_Flags, MENUFLAG_TRAPNUMINPUT );
 
