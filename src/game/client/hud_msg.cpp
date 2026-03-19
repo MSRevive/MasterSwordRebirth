@@ -49,7 +49,7 @@ int CHud ::MsgFunc_ResetHUD(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-#define CLPERMENT_TOTALK 3
+constexpr unsigned int CLPERMENT_TOTALK = 3;
 
 void CHud ::MsgFunc_InitHUD(const char *pszName, int iSize, void *pbuf)
 {
