@@ -22,7 +22,7 @@ extern enginefuncs_t g_engfuncs;
 
 extern unsigned int g_iNumBytesWritten;
 extern int g_iUserMessageType;
-#define MAX_USERMESSAGE_SIZE 192
+constexpr int MAX_USERMESSAGE_SIZE = 192;
 
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
@@ -43,7 +43,7 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define VEC_TO_YAW (*g_engfuncs.pfnVecToYaw)
 //#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
 
-void VEC_TO_ANGLES(const float* rgflVectorIn, float* rgflVectorOut ) {
+inline void VEC_TO_ANGLES(const float* rgflVectorIn, float* rgflVectorOut ) {
 	g_engfuncs.pfnVecToAngles(rgflVectorIn, rgflVectorOut);
 }
 
