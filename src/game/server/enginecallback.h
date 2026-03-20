@@ -22,7 +22,7 @@ extern enginefuncs_t g_engfuncs;
 
 extern unsigned int g_iNumBytesWritten;
 extern int g_iUserMessageType;
-constexpr int MAX_USERMESSAGE_SIZE = 192;
+inline constexpr int MAX_USERMESSAGE_SIZE = 192;
 
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
