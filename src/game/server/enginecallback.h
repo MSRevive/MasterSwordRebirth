@@ -41,7 +41,12 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define GET_SPAWN_PARMS (*g_engfuncs.pfnGetSpawnParms)
 #define SAVE_SPAWN_PARMS (*g_engfuncs.pfnSaveSpawnParms)
 #define VEC_TO_YAW (*g_engfuncs.pfnVecToYaw)
-#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
+//#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
+
+void VEC_TO_ANGLES(const float* rgflVectorIn, float* rgflVectorOut ) {
+	g_engfuncs.pfnVecToAngles(rgflVectorIn, rgflVectorOut);
+}
+
 #define MOVE_TO_ORIGIN (*g_engfuncs.pfnMoveToOrigin)
 #define oldCHANGE_YAW (*g_engfuncs.pfnChangeYaw)
 #define CHANGE_PITCH (*g_engfuncs.pfnChangePitch)
