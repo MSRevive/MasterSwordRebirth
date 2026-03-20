@@ -97,8 +97,10 @@ extern cvar_t *chase_active;
 extern cvar_t *scr_ofsx, *scr_ofsy, *scr_ofsz;
 extern cvar_t *cl_vsmoothing;
 
-#define CAM_MODE_RELAX 1
-#define CAM_MODE_FOCUS 2
+enum {
+	CAM_MODE_RELAX = 1,
+	CAM_MODE_FOCUS = 2
+};
 
 Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 Vector g_ViewForward, g_ViewRight, g_ViewUp;
@@ -489,8 +491,8 @@ void V_CalcIntermissionRefdef(struct ref_params_s *pparams)
 	v_angles = pparams->viewangles;
 }
 
-#define ORIGIN_BACKUP 64
-#define ORIGIN_MASK (ORIGIN_BACKUP - 1)
+constexpr unsigned int ORIGIN_BACKUP = 64;
+constexpr unsigned int ORIGIN_MASK = (ORIGIN_BACKUP - 1);
 
 typedef struct
 {
