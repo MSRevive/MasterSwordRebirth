@@ -166,7 +166,7 @@ char *ConvertCRtoNL(char *str)
 // the next (optional) one to four strings are parameters for that string (which can also be message names if they begin with '#')
 int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 {
-	#define MSG_BUF_SIZE 128
+	constexpr unsigned int MSG_BUF_SIZE = 128;
 	BEGIN_READ(pbuf, iSize);
 
 	int msg_dest = READ_BYTE();
@@ -223,6 +223,6 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 void PrintNotifyMsg(char *pszmsg)
 {
 	static char string[1024];
-	_snprintf(string, sizeof(string), "%c%s", HUD_PRINTNOTIFY, pszmsg);
+	_snprintf_s(string, sizeof(string), "%c%s", HUD_PRINTNOTIFY, pszmsg);
 	gHUD.m_TextMessage.MsgFunc_TextMsg(string, strlen(string), &string[0]);
 }
