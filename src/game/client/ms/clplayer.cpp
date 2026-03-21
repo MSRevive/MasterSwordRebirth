@@ -509,7 +509,7 @@ physent_t* MSUTIL_EntityByIndex(int playerindex)
 		}
 	}
 	gEngfuncs.pEventAPI->EV_PopPMStates();
-	return NULL;
+	return nullptr;
 }
 /*
 =====================
@@ -1127,7 +1127,7 @@ void Player_ToggleInventory()
 		return;
 	}
 
-	CGenericItem* pWearable = NULL; //Fallback, in case a pack isn't found
+	CGenericItem* pWearable = nullptr; //Fallback, in case a pack isn't found
 	for (unsigned int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem* pPack = player.Gear[i];
@@ -1477,7 +1477,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 				msg.fadein = 0.01;
 				msg.holdtime = 3.0;
 				msg.fadeout = 1.0;
-				msg.pName = NULL;
+				msg.pName = nullptr;
 				msg.fxtime = 4.0;
 
 				static char msgtext[256];
