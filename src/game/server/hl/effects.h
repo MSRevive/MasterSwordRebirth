@@ -47,9 +47,14 @@ enum {
 	SF_MESSAGE_ALL = 0x0002,  // Send to all clients
 	SF_DETONATE = 0x0001,
 	SF_LOOP = 1,
-	SF_REMOVE_ON_FIRE = 2
+	SF_REMOVE_ON_FIRE = 2,
+	SF_DECAL_NOTINDEATHMATCH = 2048,
+	SF_WORLD_DARK = 0x0001,	  // Fade from black at startup
+	SF_WORLD_TITLE = 0x0002,	  // Display game title at startup
+	SF_WORLD_FORCETEAM = 0x0004 // Force teams
 
 };
+
 
 class CSprite : public CPointEntity
 {
