@@ -666,7 +666,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_afButtonLast = KeyHistory[0].Buttons; //player.pev->button;
 
 	// Wipe it so we can't use it after this frame
-	g_finalstate = NULL;
+	g_finalstate = nullptr;
 }
 /*
 =====================
@@ -731,7 +731,7 @@ void ShowWeaponDesc(CGenericItem* pItem)
 	msg.fadein = 2.0;
 	msg.holdtime = 5.0;
 	msg.fadeout = 3.0;
-	msg.pName = NULL;
+	msg.pName = nullptr;
 	msg.pMessage = cDescString;
 	gHUD.m_Message.MessageAdd(msg);
 }
@@ -1300,7 +1300,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	case 1: //Killed
 		if (player.m_CharacterState == CHARSTATE_UNLOADED)
 			break;
-		player.Killed(NULL, NULL);
+		player.Killed(nullptr, NULL);
 		break;
 
 	case 2: //[OPEN]
