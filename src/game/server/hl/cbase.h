@@ -789,7 +789,7 @@ public:
 //
 // generic Toggle entity.
 //
-#define SF_ITEM_USE_ONLY 256 //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
+
 
 class CBaseToggle : public CBaseAnimating
 {

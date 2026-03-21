@@ -27,6 +27,8 @@ enum {
 	SF_DOOR_ROTATE_Z = 64,
 	SF_DOOR_ROTATE_X = 128,
 	SF_DOOR_USE_ONLY = 256,    // door must be opened by player's use button.
+	SF_ITEM_USE_ONLY = 256, //  ITEM_USE_ONLY = BUTTON_USE_ONLY = DOOR_USE_ONLY!!!
+	SF_BUTTON_USE_ONLY = 256,
 	SF_DOOR_NOMONSTERS = 512 ,  // Monster can't open
 	SF_DOOR_UNBLOCKABLE = 1024, //Thothie AUG2011_29 - make door unstoppable
 	SF_DOOR_SILENT = 0x80000000,
