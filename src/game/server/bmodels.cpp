@@ -29,8 +29,7 @@ extern DLL_GLOBAL Vector g_vecAttackDir;
 
 // covering cheesy noise1, noise2, & noise3 fields so they make more sense (for rotating fans)
 
-
-
+//overloaded generic variable names
 #define noiseStart noise1
 #define noiseStop noise2
 #define noiseRunning noise3

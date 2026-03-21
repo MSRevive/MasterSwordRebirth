@@ -25,6 +25,7 @@
 
 extern void SetMovedir(entvars_t *ev);
 
+//overloaded varables with generic names
 #define noiseMoving noise1
 #define noiseArrived noise2
 
