@@ -25,12 +25,15 @@
 #include "soundent.h"
 #include "decals.h"
 
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif
+
 //===================grenade
 
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
-#define SF_DETONATE 0x0001
 
 //
 // Grenade Explode

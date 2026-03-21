@@ -44,7 +44,9 @@ enum {
 	SF_FADE_MODULATE = 0x0002, // Modulate, don't blend
 	SF_FADE_ONLYONE = 0x0004,
 	SF_MESSAGE_ONCE = 0x0001, // Fade in, not out
-	SF_MESSAGE_ALL = 0x0002  // Send to all clients
+	SF_MESSAGE_ALL = 0x0002,  // Send to all clients
+	SF_DETONATE = 0x0001
+
 };
 
 class CSprite : public CPointEntity
