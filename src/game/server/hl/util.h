@@ -182,8 +182,8 @@ inline BOOL FNullEnt(EOFFSET eoffset)
 {
 	return eoffset == 0;
 }
-inline BOOL FNullEnt(const edict_t *pent) { return pent == NULL || FNullEnt(OFFSET(pent)); }
-inline BOOL FNullEnt(entvars_t *pev) { return pev == NULL || FNullEnt(OFFSET(pev)); }
+inline BOOL FNullEnt(const edict_t *pent) { return pent == nullptr || FNullEnt(OFFSET(pent)); }
+inline BOOL FNullEnt(entvars_t *pev) { return pev == nullptr || FNullEnt(OFFSET(pev)); }
 
 // Testing strings for nullity
 constexpr int iStringNull = 0;
