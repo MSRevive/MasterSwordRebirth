@@ -124,8 +124,9 @@ struct spellskillstat_t
 
 #define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
 #define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
+#define SAVECHAR_VERSION_MSR_PROTOBUF 13 // MS Rebirth protocol buffers
 
-#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR_PROTOBUF
 
 //The types of headers.  Each time the save file is revised, a new header is added.
 //The old headers are kept so the game knows when it is encountering an old save file

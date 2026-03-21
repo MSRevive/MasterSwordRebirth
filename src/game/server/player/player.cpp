@@ -58,6 +58,7 @@
 #include "magic.h"
 #include "fn/FNSharedDefs.h"
 #include "mslogger.h"
+#include "save/protosave.h"
 
 #define MAX_ENTITIES_TO_SEARCH 4096
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
@@ -6719,7 +6720,14 @@ void CBasePlayer::Storage_Send()
 void CBasePlayer::SaveChar()
 {
 	//Save right now
-	MSChar_Interface::SaveChar(this, NULL);
+	if (SAVECHAR_VERSION == SAVECHAR_VERSION_MSR_PROTOBUF)
+	{
+		msr::ProtoSave::SaveCharProtobuf(this, NULL);
+	}
+	else
+	{
+		MSChar_Interface::SaveChar(this, NULL);
+	}
 }
 
 void CBasePlayer::QuickSlot_Create(int Slot, ulong ID, bool Verbose)

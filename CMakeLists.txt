@@ -18,7 +18,7 @@ if (UNIX)
 	# which compilers to use for C and C++
 	set(CMAKE_C_COMPILER gcc)
 	set(CMAKE_CXX_COMPILER g++)
-	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++ -D_GLIBCXX_USE_CXX11_ABI=0")
+	set(CMAKE_CXX_FLAGS "-m32 -static-libgcc -static-libstdc++")
 
 	set(CMAKE_MAKE_PROGRAM make)
 	set(VCPKG_TARGET_TRIPLET x86-linux)
@@ -134,6 +134,8 @@ endfunction(set_common_properties)
 
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
+
+find_package(Protobuf REQUIRED)
 
 # Add Projects
 add_subdirectory(src/game/client)

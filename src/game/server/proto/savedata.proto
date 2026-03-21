@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package MSRProto;
+
+/** STATS **/
+message Stat {
+    enum StatId {
+        StatId_UNKNOWN=0; // default value for backward compatibility
+        // stats
+        Strength=1;
+        Agility=2;
+        Concentration=3;
+        Awareness=4;
+        Fitness=5;
+        Wisdom=6;
+        // skills
+        Swordsmanship=1001;
+        MartialArts=1002;
+        SmallArms=1003;
+        AxeHandling=1004;
+        BluntArms=1005;
+        Archery=1006;
+        SpellCasting=1007;
+        Parry=1008;
+        PoleArms=1009;
+    }
+    StatId statId=1;
+
+    message SubStat {
+        enum SubStatId {
+            SubStatId_UNKNOWN=0; // default value for backward compatibility
+            // substats
+            Proficiency=1;
+            Balance=2;
+            Power=3;
+            // spells
+            Fire=1001;
+            Ice=1002;
+            Lightning=1003;
+            Divination=1004;
+            Affliction=1005;
+        }
+        SubStatId substatId=1;
+        uint32 value=2; // level
+        uint32 exp=3;
+    }
+    repeated SubStat subStats=2;
+}
+
+/** ITEMS **/
+message GenericItemFull {
+    message GenericItem {
+        uint32 id=1;
+        string name=2;
+
+        /* {
+            ITEM_WEARABLE = 1;        // (1 <<  0)
+            ITEM_SHIELD = 2;          // (1 <<  1)
+            ITEM_ARMOR = 4;           // (1 <<  2)
+            ITEM_GENERIC = 8          // (1 <<  3)
+            ITEM_GROUPABLE = 16;      // (1 <<  4)
+            ITEM_CONTAINER = 32;      // (1 <<  5)
+            ITEM_PROJECTILE = 64;     // (1 <<  6)
+            ITEM_DRINKABLE = 128;     // (1 <<  7)
+            ITEM_PERISHABLE = 256;    // (1 <<  8)
+            ITEM_SPELL = 512;         // (1 <<  9)
+            ITEM_NOPICKUP = 32768;    // (1 << 15)
+
+            ENT_BODYPART = 1024;      // (1 << 10)
+            MS_NPC = 2048;            // (1 << 11)
+            MS_PLAYER = 4096;         // (1 << 12)
+            MS_CORPSE = 8192;         // (1 << 13)
+            MS_SHIELD = 16384;        // (1 << 14)
+        } */
+        uint32 properties=3; // flags, see list above
+        uint32 quantity=4; // ITEM_GROUPABLE (like arrows)
+        uint32 quality=5; // uses/durability
+        uint32 maxQuality=6; // may be zero (e.g. for potions)
+    }
+    GenericItem genericItem=1;
+
+    /* {
+        ITEMPOS_NONE = 0;
+        ITEMPOS_HANDS = 1;
+        ITEMPOS_BODY = 2;
+    } */
+    uint32 Location=2; // see above, Location of the item on the monster (Hands, back, etc)
+
+    enum HandId { // NOTE hand_e starts with LEFT_HAND=0
+        HandId_UNKNOWN=0; // default value for backward compatibility
+        LEFT_HAND=1;
+        RIGHT_HAND=2;
+
+        HAND_PLAYERHANDS=3; // Special undroppable item -- Player hands
+        ANY_HAND=4;
+        BOTH_HANDS=5;
+    }
+    HandId Hand=3;
+    repeated GenericItemFull containerItems=4;
+}
+
+message Storage {
+    string name=1;
+    repeated GenericItemFull items=2;
+}
+
+
+/** SAVE DATA **/
+message CharData {
+    message SaveData {
+        int32 version=1;
+        string name=2;
+        string steamId=3;
+        string race=4; // Human after all?
+
+        enum GenderId {
+            GenderId_UNKNOWN=0; // default value for backward compatibility
+            Male=1;
+            Female=2;
+        }
+        GenderId gender=5;
+        string mapName=6; // Current map
+        string nextMap=7;
+        string oldTransition=8; // Map transition
+        string newTransition=9; // Map transition
+
+        message Vector3 {
+            double x=1;
+            double y=2;
+            double z=3;
+        }
+        Vector3 origin=10;
+        Vector3 angles=11;
+        bool isElite=12; // @todo is developer?
+        uint32 gold=13;
+        uint32 maxHP=14;
+        uint32 maxMP=15;
+        uint32 currentHP=16;
+        uint32 currentMP=17;
+        string partyName=18;
+        uint32 partyId=19; // Unique Id for party.  If I join a server that has a party with the same name, I won't automatically join their party
+        uint32 playerKills=20;
+        double timeWaitedToForgetKill=21; // Counts up... when reachs a certain number, decrement PlayerKills
+        double timeWaitedToForgetSteal=22; // Counts up... when reachs a certain number, player is not considered a thief
+    }
+    SaveData saveData=1;
+    repeated string visitedMaps=2; // All the maps I've visited
+    repeated Stat statList=3; // All stats.  Natural stats and Skill-based stats
+    repeated string knownSpells=4; // All known spells
+    repeated GenericItemFull items=5; // All carried items
+    repeated Storage storages=6; // Storage places where I have items
+
+    message Companion {
+        string scriptName=1;
+        map<string, string> scriptedSaveVariables=2; // Save any variables that start with "companion.save."
+    }
+    repeated Companion companions=7; // Companions
+    repeated string viewedHelpTips=8; // List of all help tips the player has already viewed
+
+    map<string, string> quests=9; // All the quests I've completed
+
+    message QuickSlot {
+        enum QuickSlotTypeId { // NOTE quickslottype_e starts with QS_ITEM=0
+            QuickSlotTypeId_UNKNOWN=0; // default value for backward compatibility
+            QS_EMPTY=1;
+            QS_ITEM=2;
+            QS_SPELL=3;
+            QS_ARROW=4;
+        }
+        QuickSlotTypeId type=1;
+        uint32 id=2;
+    }
+    repeated QuickSlot quickslots=10; // All the quickslots (based on the item Ids of the last save)
+}
