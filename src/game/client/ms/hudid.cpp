@@ -50,7 +50,7 @@ void CHudID::Reset(void)
 	m_iFlags |= HUD_ACTIVE;
 	TimeDecAlpha = 0;
 	Alpha = 0;
-	pActiveInfo = pDrawInfo = NULL;
+	pActiveInfo = pDrawInfo = nullptr;
 }
 void CHudID ::InitHUDData(void)
 {
