@@ -1,3 +1,16 @@
+
+
+
+
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif // !EFFECTS_H
+
+
+
+constexpr int = SPRITE_TORCH = 1;
+constexpr int = TORCH_LIGHTS = 2;
+
 class CPortal : public CBaseEntity
 {
 public:
@@ -8,9 +21,6 @@ public:
 	void CloseSpawnPortal(void);
 };
 
-#define SPRITE_TORCH 1
-
-#include "effects.h"
 
 class CMSSprite : public CSprite
 {
@@ -22,7 +32,7 @@ public:
 	void Think();
 };
 
-#define TORCH_LIGHTS 2
+
 
 class CTorchLight : public CBaseEntity
 {
