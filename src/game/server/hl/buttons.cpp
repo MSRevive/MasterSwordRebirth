@@ -150,8 +150,6 @@ void CMultiSource::KeyValue(KeyValueData *pkvd)
 		CPointEntity::KeyValue(pkvd);
 }
 
-#define SF_MULTI_INIT 1
-
 void CMultiSource::Spawn()
 {
 	// set up think for later registration
@@ -951,7 +949,7 @@ void CRotButton::Spawn(void)
 // This will disable use and make the button solid
 // rotating buttons were made SOLID_NOT by default since their were some
 // collision problems with them...
-#define SF_MOMENTARY_DOOR 0x0001
+
 
 class CMomentaryRotButton : public CBaseToggle
 {
@@ -1295,9 +1293,6 @@ void EXPORT CEnvSpark::SparkStop(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 	SetUse(&CEnvSpark::SparkStart);
 	SetThink(NULL);
 }
-
-#define SF_BTARGET_USE 0x0001
-#define SF_BTARGET_ON 0x0002
 
 class CButtonTarget : public CBaseEntity
 {
