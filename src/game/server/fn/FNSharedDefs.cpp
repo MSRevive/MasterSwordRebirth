@@ -20,7 +20,7 @@
 #include "LoadCharacterReq.h"
 #include "DeleteCharacterReq.h"
 
-#define STRING_BUFFER 1024
+constexpr unsigned int STRING_BUFFER = 1024;
 
 // AsyncSendRequest does not make use the connection pooling.
 // Frequent requests should make use the RequestManager to take advantage of
