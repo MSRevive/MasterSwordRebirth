@@ -78,7 +78,8 @@ enum speech_type
 	SPEECH_LOCAL,
 	SPEECH_PARTY
 };
-#define SPEECH_LOCAL_RANGE 300
+
+constexpr float SPEECH_LOCAL_RANGE = 300;
 
 enum gender_e
 {

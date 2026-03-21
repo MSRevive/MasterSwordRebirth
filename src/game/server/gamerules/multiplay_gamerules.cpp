@@ -51,12 +51,12 @@ extern int gmsgMOTD;
 bool CheckBanned(const char* SteamID );
 
 //float g_TimeTryValidate = 0.0f;
-#define VALIDATE_DELAY (60 * 30)// 30 mins
+constexpr int VALIDATE_DELAY = (60 * 30);// 30 mins
 float g_ServerResetTimer = 0.0f;
 
-#define ITEM_RESPAWN_TIME	30
-#define WEAPON_RESPAWN_TIME	20
-#define AMMO_RESPAWN_TIME	20
+constexpr int ITEM_RESPAWN_TIME	= 30;
+constexpr int WEAPON_RESPAWN_TIME = 20;
+constexpr int AMMO_RESPAWN_TIME = 20;
 
 CVoiceGameMgr	g_VoiceGameMgr;
 
@@ -156,8 +156,7 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 }
 
 // longest the intermission can last, in seconds
-#define MAX_INTERMISSION_TIME		120
-
+constexpr int MAX_INTERMISSION_TIME = 120;
 //Master Sword
 //bool CheckData( );
 //------------
@@ -775,7 +774,7 @@ float CHalfLifeMultiplay::FlWeaponRespawnTime( CBasePlayerItem *pWeapon )
 
 // when we are within this close to running out of entities,  items 
 // marked with the ITEM_FLAG_LIMITINWORLD will delay their respawn
-#define ENTITY_INTOLERANCE 100
+constexpr int ENTITY_INTOLERANCE = 100;
 
 //=========================================================
 // FlWeaponRespawnTime - Returns 0 if the weapon can respawn 
@@ -999,7 +998,7 @@ BOOL CHalfLifeMultiplay::FAllowMonsters( void )
 
 //=========================================================
 //======== CHalfLifeMultiplay private functions ===========
-#define INTERMISSION_TIME 6
+constexpr int INTERMISSION_TIME = 6;
 
 void CHalfLifeMultiplay::GoToIntermission( void )
 {
@@ -1013,8 +1012,7 @@ void CHalfLifeMultiplay::GoToIntermission( void )
 	g_fGameOver = true;
 	m_iEndIntermissionButtonHit = false;
 }
-
-#define MAX_RULE_BUFFER 1024
+constexpr int MAX_RULE_BUFFER = 1024;
 
 typedef struct mapcycle_item_s
 {
@@ -1536,8 +1534,8 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	}
 }
 
-#define MAX_MOTD_CHUNK	  60
-#define MAX_MOTD_LENGTH   (MAX_MOTD_CHUNK * 4)
+constexpr int MAX_MOTD_CHUNK = 60;
+constexpr int MAX_MOTD_LENGTH = (MAX_MOTD_CHUNK * 4);
 
 void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 {
