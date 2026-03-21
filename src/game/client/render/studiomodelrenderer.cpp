@@ -52,7 +52,7 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
 
-cl_entity_t* DrawEnt = NULL;
+cl_entity_t* DrawEnt = nullptr;
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -89,24 +89,24 @@ CStudioModelRenderer
 */
 CStudioModelRenderer::CStudioModelRenderer(void)
 {
-	m_fDoInterp = 1;
-	m_fGaitEstimation = 1;
-	m_pCurrentEntity = NULL;
-	m_pCvarHiModels = NULL;
-	m_pCvarDeveloper = NULL;
-	m_pCvarDrawEntities = NULL;
-	m_pChromeSprite = NULL;
-	m_pStudioModelCount = NULL;
-	m_pModelsDrawn = NULL;
-	m_protationmatrix = NULL;
-	m_paliastransform = NULL;
-	m_pbonetransform = NULL;
-	m_plighttransform = NULL;
-	m_pStudioHeader = NULL;
-	m_pBodyPart = NULL;
-	m_pSubModel = NULL;
-	m_pPlayerInfo = NULL;
-	m_pRenderModel = NULL;
+	m_fDoInterp			= 1;
+	m_fGaitEstimation	= 1;
+	m_pCurrentEntity	= nullptr;
+	m_pCvarHiModels		= nullptr;
+	m_pCvarDeveloper	= nullptr;
+	m_pCvarDrawEntities = nullptr;
+	m_pChromeSprite		= nullptr;
+	m_pStudioModelCount = nullptr;
+	m_pModelsDrawn		= nullptr;
+	m_protationmatrix	= nullptr;
+	m_paliastransform	= nullptr;
+	m_pbonetransform	= nullptr;
+	m_plighttransform	= nullptr;
+	m_pStudioHeader		= nullptr;
+	m_pBodyPart			= nullptr;
+	m_pSubModel			= nullptr;
+	m_pPlayerInfo		= nullptr;
+	m_pRenderModel		= nullptr;
 	//m_MirrorRender		= false;
 	/*AngleMatrix( g_vecZero, m_FlipMatrix );
 	float scalemat[ 3 ][ 4 ] =
@@ -1340,7 +1340,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			studiohdr_t* pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(RenderEnt.model);
 
 			cl_entity_s* view = gEngfuncs.GetViewModel();
-			view->model = NULL; //MiB JUN2010_21 - Disable the HL viewmodel. We use our own.
+			view->model = nullptr; //MiB JUN2010_21 - Disable the HL viewmodel. We use our own.
 
 			RenderEnt.SetBody(pItem->m_ViewModelPart, pItem->m_ViewModelSubmodel); //Set the specified submodel on the item
 
@@ -1522,7 +1522,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 			m_pPlayerInfo = IEngineStudio.PlayerInfo(ZeroBasedPlayerIdx);
 			m_pPlayerInfo->prevgaitorigin = PrevOrigin;
-			m_pPlayerInfo = NULL;
+			m_pPlayerInfo = nullptr;
 
 			m_pCurrentEntity->curstate.number = oldnum;
 			m_pCurrentEntity->index = oldidx;
@@ -1732,7 +1732,7 @@ StudioProcessGait
 */
 void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 {
-	mstudioseqdesc_t* pseqdesc = NULL;
+	mstudioseqdesc_t* pseqdesc = nullptr;
 	//float frametime;
 	int iBlend = 0;
 	float flYaw = 0; // view direction relative to movement
@@ -1913,7 +1913,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		return 0;
 
 	m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
-	if (m_pRenderModel == NULL)
+	if (m_pRenderModel == nullptr)
 		return 0;
 
 	m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(m_pRenderModel);
@@ -1944,7 +1944,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 		else
 		{
-			modelinfo_t* pModelInfo = NULL;
+			modelinfo_t* pModelInfo = nullptr;
 			if (Ent.HasExtra())
 				pModelInfo = &CModelMgr::m_ModelInfo[Ent.index];
 
@@ -2108,7 +2108,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		//Instead, the bodypart attachmets are rendered -- UNDONE
 		StudioRenderModel();
 
-		m_pPlayerInfo = NULL;
+		m_pPlayerInfo = nullptr;
 
 		/*
 		Master Sword - don't render the weaponmodel
