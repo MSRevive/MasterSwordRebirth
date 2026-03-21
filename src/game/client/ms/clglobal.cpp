@@ -82,7 +82,7 @@ void MSCLGlobals::InitializePlayer()
 	player.CreateStats();
 	player.m_CharacterState = CHARSTATE_UNLOADED;
 	player.m_DisplayName = "Adventurer";
-	player.PlayerHands = NULL;
+	player.PlayerHands = nullptr;
 	player.ClearConditions(MONSTER_OPENCONTAINER);
 	player.Gear.clear();
 	player.m_HP = player.m_MP = 0;
@@ -139,7 +139,7 @@ void MSCLGlobals::RemoveAllEntities()
 	//Delete all entites
 	if (player.m_CharacterState == CHARSTATE_LOADED)
 	{
-		player.Killed(NULL, 0);
+		player.Killed(nullptr, 0);
 		player.RemoveAllItems(false, true);
 	}
 
@@ -158,7 +158,7 @@ void MSCLGlobals::RemoveAllEntities()
 
 		//unset player hands (should happen in CBasePlayer::RemoveAllItems() first...)
 		if (pEntity == (CBaseEntity *)player.PlayerHands)
-			player.PlayerHands = NULL;
+			player.PlayerHands = nullptr;
 
 		Print("Cleanup Item %i: %s\n", killed++, pEntity->DisplayName());
 
