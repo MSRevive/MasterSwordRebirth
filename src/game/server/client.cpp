@@ -2592,7 +2592,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 }
 
 // defaults for clientinfo messages
-#define DEFAULT_VIEWHEIGHT 28
+constexpr int DEFAULT_VIEWHEIGHT = 28;
 
 /*
 ===================
