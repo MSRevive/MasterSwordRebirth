@@ -29,9 +29,9 @@ static void FixupAngles2(Vector& v)
 //
 // ---------------------------------------------------------------------
 
-#define VEHICLE_STARTPITCH 60
-#define VEHICLE_MAXPITCH 200
-#define VEHICLE_MAXSPEED 1500 // approx max speed for sound pitch calculation
+constexpr float VEHICLE_STARTPITCH = 60;
+constexpr float VEHICLE_MAXPITCH = 200;
+constexpr float VEHICLE_MAXSPEED = 1500; // approx max speed for sound pitch calculation
 
 LINK_ENTITY_TO_CLASS(func_vehicle, CFuncVehicle);
 
