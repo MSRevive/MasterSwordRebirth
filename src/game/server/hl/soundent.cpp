@@ -102,7 +102,7 @@ void CSoundEnt :: Think ( void )
 
 	while ( iSound != SOUNDLIST_EMPTY )
 	{
-		if ( m_SoundPool[ iSound ].m_flExpireTime <= gpGlobals->time && m_SoundPool[ iSound ].m_flExpireTime != SOUND_NEVER_EXPIRE )
+		if ( m_SoundPool[ iSound ].m_flExpireTime <= gpGlobals->time && (int)m_SoundPool[ iSound ].m_flExpireTime != SOUND_NEVER_EXPIRE )
 		{
 			int iNext = m_SoundPool[ iSound ].m_iNext;
 
