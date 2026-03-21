@@ -25,16 +25,17 @@
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 
-#define SF_BRUSH_ACCDCC 16		 // brush should accelerate and decelerate when toggled
-#define SF_BRUSH_HURT 32		 // rotating brush that inflicts pain based on rotation speed
-#define SF_ROTATING_NOT_SOLID 64 // some special rotating objects are not solid.
+
 
 // covering cheesy noise1, noise2, & noise3 fields so they make more sense (for rotating fans)
+
+
+
 #define noiseStart noise1
 #define noiseStop noise2
 #define noiseRunning noise3
 
-#define SF_PENDULUM_SWING 2 // spawnflag that makes a pendulum a rope swing.
+
 //
 // BModelOrigin - calculates origin of a bmodel from absmin/size because all bmodel origins are 0 0 0
 //
@@ -79,7 +80,6 @@ void CFuncWall ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	CScriptedEnt::Use(pActivator, pCaller, useType, value);
 }
 
-#define SF_WALL_START_OFF 0x0001
 
 class CFuncWallToggle : public CFuncWall
 {
@@ -135,9 +135,6 @@ void CFuncWallToggle ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	CScriptedEnt::Use(pActivator, pCaller, useType, value);
 }
 
-#define SF_CONVEYOR_VISUAL 0x0001
-#define SF_CONVEYOR_NOTSOLID 0x0002
-#define SF_CONVEYOR_TOGGLE 0x0004 //Thothie AUG2011_30 toggle conveyors
 
 class CFuncConveyor : public CFuncWall
 {
@@ -274,7 +271,7 @@ void CFuncIllusionary ::Spawn(void)
 //
 // -------------------------------------------------------------------------------
 
-#define SF_MONSTERCLIP_START_OFF 0x0001
+
 
 class CFuncMonsterClip : public CFuncWallToggle
 {
@@ -352,7 +349,7 @@ BOOL CFuncMonsterClip::IsOn(void)
 //
 // -------------------------------------------------------------------------------
 
-#define SF_PLAYERCLIP_START_OFF 0x0001
+
 
 class CMSFuncPlayerClip : public CFuncWallToggle
 {
@@ -717,8 +714,8 @@ void CFuncRotating ::HurtTouch(CBaseEntity *pOther)
 // RampPitchVol - ramp pitch and volume up to final values, based on difference
 // between how fast we're going vs how fast we plan to go
 //
-#define FANPITCHMIN 30
-#define FANPITCHMAX 100
+constexpr float FANPITCHMIN = 30;
+constexpr float FANPITCHMAX = 100;
 
 void CFuncRotating ::RampPitchVol(int fUp)
 {

@@ -1066,10 +1066,10 @@ void CBasePlayer::StartObserver(Vector vecPosition, Vector vecViewAngle)
 }
 void CBasePlayer::CinematicCamera(BOOL OnorOff, Vector vecPosition, Vector vecViewAngle, BOOL bCreateClone)
 {
-	if (OnorOff == true)
+	if ((bool)OnorOff == true)
 	{
 		m_afPhysicsFlags |= PFLAG_OBSERVER;
-		CamEntity = GetClassPtr((CBaseEntity *)NULL);
+		CamEntity = GetClassPtr((CBaseEntity *)nullptr);
 		CamEntity->pev->classname = MAKE_STRING("camera");
 		CamEntity->pev->modelindex = MODEL_INDEX("models/null.mdl");
 		CamEntity->pev->renderamt = 0; // The engine won't draw this model if this is set to 0 and blending is on
@@ -1089,7 +1089,7 @@ void CBasePlayer::CinematicCamera(BOOL OnorOff, Vector vecPosition, Vector vecVi
 		if (CamEntity)
 		{
 			CamEntity->SUB_Remove();
-			CamEntity = NULL;
+			CamEntity = nullptr;
 		}
 	}
 }
@@ -1127,7 +1127,7 @@ void CBasePlayer::PlayerUse(void)
 				m_iTrain = TRAIN_NEW | TRAIN_OFF;
 				CBaseEntity* pTrain = CBaseEntity::Instance(pev->groundentity);
 				if (pTrain && (pTrain->Classify() == CLASS_VEHICLE))
-					((CFuncVehicle*)pTrain)->m_pDriver = NULL;
+					((CFuncVehicle*)pTrain)->m_pDriver = nullptr;
 				return;
 			}
 			else
@@ -1146,8 +1146,8 @@ void CBasePlayer::PlayerUse(void)
 		}
 	}
 
-	CBaseEntity *pObject = NULL;
-	CBaseEntity *pClosest = NULL;
+	CBaseEntity *pObject = nullptr;
+	CBaseEntity *pClosest = nullptr;
 	Vector vecLOS;
 	float flMaxDot = VIEW_FIELD_NARROW;
 	float flDot;

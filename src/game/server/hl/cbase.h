@@ -27,28 +27,34 @@ CBaseEntity
 #ifndef CBASE_H
 #define CBASE_H
 
-#define MAX_PATH_SIZE 10 // max number of nodes available for a path.
+constexpr int MAX_PATH_SIZE = 10; // max number of nodes available for a path.
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
-#define FCAP_CUSTOMSAVE 0x00000001
-#define FCAP_ACROSS_TRANSITION 0x00000002 // should transfer between transitions
-#define FCAP_MUST_SPAWN 0x00000004		  // Spawn after restore
-#define FCAP_DONT_SAVE 0x80000000		  // Don't save this
-#define FCAP_IMPULSE_USE 0x00000008		  // can be used by the player
-#define FCAP_CONTINUOUS_USE 0x00000010	  // can be used by the player
-#define FCAP_ONOFF_USE 0x00000020		  // can be used by the player
-#define FCAP_DIRECTIONAL_USE 0x00000040	  // Player sends +/- 1 when using (currently only tracktrains)
-#define FCAP_MASTER 0x00000080			  // Can be used to "master" other entities (like multisource)
+enum {
+	FCAP_CUSTOMSAVE = 0x00000001,
+	FCAP_ACROSS_TRANSITION = 0x00000002,// should transfer between transitions
+	FCAP_MUST_SPAWN = 0x00000004,		// Spawn after restore
+	FCAP_DONT_SAVE = 0x80000000,		// Don't save this
+	FCAP_IMPULSE_USE = 0x00000008,		// can be used by the player
+	FCAP_CONTINUOUS_USE = 0x00000010,	// can be used by the player
+	FCAP_ONOFF_USE = 0x00000020,		// can be used by the player
+	FCAP_DIRECTIONAL_USE = 0x00000040,	// Player sends +/- 1 when using (currently only tracktrains)
+	FCAP_MASTER = 0x00000080,			// Can be used to "master" other entities (like multisource)
 
-// UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
-#define FCAP_FORCE_TRANSITION 0x00000080 // ALWAYS goes across transitions
+	// UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
+	FCAP_FORCE_TRANSITION = 0x00000080 // ALWAYS goes across transitions
+};
+
+
+
+
 
 #include "iscript.h"
 
 #include "archtypes.h"     // DAL
 
 //Master Sword - no save/restore in client dll
-#define MAXPLAYERS 32
+constexpr int MAXPLAYERS = 32;
 #ifdef VALVE_DLL
 #include "saverestore.h"
 #else
@@ -117,38 +123,42 @@ typedef void (CBaseEntity::*USEPTR)(CBaseEntity *pActivator, CBaseEntity *pCalle
 
 // Master Sword - New CLASS defs:
 
-#define CLASS_NONE 0
-#define CLASS_MACHINE 1
-#define CLASS_PLAYER 2
-#define CLASS_NPC 3
-#define CLASS_MONSTER 4 //CLASS_HUMAN_MILITARY
+enum {
+	CLASS_NONE = 0,
+	CLASS_MACHINE = 1,
+	CLASS_PLAYER = 2,
+	CLASS_NPC = 3,
+	CLASS_MONSTER = 4, //CLASS_HUMAN_MILITARY
 
-// OLD DEFS!
-// For CLASSIFY
-//#define	CLASS_NONE				0
-//#define CLASS_MACHINE			1
-//#define CLASS_PLAYER			2
-#define CLASS_HUMAN_PASSIVE 5
-#define CLASS_HUMAN_MILITARY 6
-#define CLASS_ALIEN_MILITARY 7
-#define CLASS_ALIEN_PASSIVE 8
-#define CLASS_ALIEN_MONSTER 9
-#define CLASS_ALIEN_PREY 10
-#define CLASS_ALIEN_PREDATOR 11
-#define CLASS_INSECT 12
-#define CLASS_PLAYER_ALLY 13
-#define CLASS_PLAYER_BIOWEAPON 14 // hornets and snarks.launched by players
-#define CLASS_ALIEN_BIOWEAPON 15  // hornets and snarks.launched by the alien menace
-#define CLASS_BARNACLE 99		  // special because no one pays attention to it, and it eats a wide cross-section of creatures.
-#define CHAR_LEVEL_CAP 45		  // MiB JAN2010_15 Global Level Cap
-#define CLASS_VEHICLE 16 // we use 16 because of MS class defines.
+	// OLD DEFS!
+	// For CLASSIFY
+	//#define	CLASS_NONE				0
+	//#define CLASS_MACHINE			1
+	//#define CLASS_PLAYER			2
+	CLASS_HUMAN_PASSIVE = 5,
+	CLASS_HUMAN_MILITARY = 6,
+	CLASS_ALIEN_MILITARY = 7,
+	CLASS_ALIEN_PASSIVE = 8,
+	CLASS_ALIEN_MONSTER = 9,
+	CLASS_ALIEN_PREY = 10,
+	CLASS_ALIEN_PREDATOR = 11,
+	CLASS_INSECT = 12,
+	CLASS_PLAYER_ALLY = 13,
+	CLASS_PLAYER_BIOWEAPON = 14, // hornets and snarks.launched by players
+	CLASS_ALIEN_BIOWEAPON = 15,  // hornets and snarks.launched by the alien menace
+	CLASS_BARNACLE = 99,	  // special because no one pays attention to it, and it eats a wide cross-section of creatures.
+	CLASS_VEHICLE = 16, // we use 16 because of MS class defines.
+};
+
+constexpr int CHAR_LEVEL_CAP = 45;		  // MiB JAN2010_15 Global Level Cap
 
 class CBaseEntity;
 class CBaseMonster;
 class CBasePlayerItem;
 class CSquadMonster;
 
-#define SF_NORESPAWN (1 << 30) // !!!set this bit on guns and stuff that should never respawn.
+
+
 
 //
 // EHANDLE. Safe way to point to CBaseEntities who may die between frames

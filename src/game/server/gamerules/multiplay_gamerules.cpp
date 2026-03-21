@@ -34,6 +34,9 @@
 #include	"trains.h" // for CFuncVehicle
 #include	<asbind20/asbind.hpp>
 
+#ifndef DOORS_H
+#include "doors.h"
+#endif
 #include <climits>
 #include <string>
 #include <algorithm>
