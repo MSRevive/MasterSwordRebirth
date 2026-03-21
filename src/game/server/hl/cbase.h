@@ -700,8 +700,8 @@ void PlayLockSounds(entvars_t *pev, locksound_t *pls, int flocked, int fbutton);
 // MultiSouce
 //
 
-#define MAX_MULTI_TARGETS 16 // maximum number of targets a single multi_manager entity may be assigned.
-#define MS_MAX_TARGETS 32
+constexpr int MAX_MULTI_TARGETS = 16; // maximum number of targets a single multi_manager entity may be assigned.
+constexpr int MS_MAX_TARGETS = 32;
 
 class CMultiSource : public CPointEntity
 {
@@ -955,10 +955,12 @@ enum {
 
 // when calling KILLED(), a value that governs gib behavior is expected to be
 // one of these three values
-#define GIB_NORMAL 0 // gib if entity was overkilled
-#define GIB_NEVER 1	 // never gib, no matter how much death damage is done ( freezing, etc )
-#define GIB_ALWAYS 2 // always gib ( Houndeye Shock, Barnacle Bite )
 
+enum {
+	GIB_NORMAL = 0, // gib if entity was overkilled
+	GIB_NEVER = 1,	 // never gib, no matter how much death damage is done ( freezing, etc )
+	GIB_ALWAYS = 2 // always gib ( Houndeye Shock, Barnacle Bite )
+};
 class CBaseMonster;
 class CCineMonster;
 class CSound;
@@ -1079,7 +1081,7 @@ env_sound_data
 push_trigger_data
 */
 
-#define TRACER_FREQ 4 // Tracers fire every 4 bullets
+constexpr int TRACER_FREQ = 4; // Tracers fire every 4 bullets
 
 typedef struct _SelAmmo
 {

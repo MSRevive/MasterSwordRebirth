@@ -651,7 +651,7 @@ void CBreakable::Die(void)
 {
 	Vector vecSpot;		// shard origin
 	Vector vecVelocity; // shard velocity
-	CBaseEntity *pEntity = NULL;
+	CBaseEntity *pEntity = nullptr;
 	char cFlag = 0;
 	int pitch;
 	float fvol;
