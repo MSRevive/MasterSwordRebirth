@@ -199,7 +199,7 @@ void CHudMisc ::UserCmd_RemovePack(void)
 	int test = *(int *)&m_RemoveList;
 	int test2 = m_RemoveList.size();
 
-	 strncpy(MenuText,  "Remove item:\n\n", sizeof(MenuText) );
+	 strncpy_s(MenuText,  "Remove item:\n\n", sizeof(MenuText) );
 
 	m_RemoveList.clear();
 	for (unsigned int i = 0; i < player.Gear.size(); i++)
@@ -305,7 +305,7 @@ void CHudMisc ::UserCmd_Offer(void)
 	clrmem(m_OfferInfo);
 	//bool fOfferedSomething = false;
 
-	 _snprintf(MenuText, sizeof(MenuText),  "Offer to %s:\n",  pEntInfo->Name.c_str() );
+	 _snprintf_s(MenuText, sizeof(MenuText),  "Offer to %s:\n",  pEntInfo->Name.c_str() );
 
 	//if( player.m_Gold )
 	{
