@@ -20,8 +20,6 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-
-
 enum {
 	ACTIVITY_NOT_AVAILABLE = -1
 };
