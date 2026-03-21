@@ -37,6 +37,19 @@ enum sbar_data
 	SBAR_END,
 };
 
+enum transtype_e
+{
+	TRANS_GETGROUND,
+	TRANS_STEAL,
+	TRANS_STEALITEM,
+	TRANS_STEALPACKITEM,
+	TRANS_GIVE,
+	TRANS_AUTOSHOWBROWSER = (1 << 0),
+	TRANS_PLAYSOUND = (1 << 1),
+
+};
+
+
 constexpr float CHAT_INTERVAL = 1.0f;
 //Master Sword
 

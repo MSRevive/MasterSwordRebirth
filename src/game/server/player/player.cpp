@@ -5034,14 +5034,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 	//	UpdateMana( );
 }
 
-enum transtype_e
-{
-	TRANS_GETGROUND,
-	TRANS_STEAL,
-	TRANS_STEALITEM,
-	TRANS_STEALPACKITEM,
-	TRANS_GIVE,
-};
+
 struct itemdesc_t
 {
 	unsigned int iEntIndex;

@@ -45,7 +45,9 @@ enum {
 	SF_FADE_ONLYONE = 0x0004,
 	SF_MESSAGE_ONCE = 0x0001, // Fade in, not out
 	SF_MESSAGE_ALL = 0x0002,  // Send to all clients
-	SF_DETONATE = 0x0001
+	SF_DETONATE = 0x0001,
+	SF_LOOP = 1,
+	SF_REMOVE_ON_FIRE = 2
 
 };
 

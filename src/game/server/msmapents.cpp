@@ -7,6 +7,11 @@
 #include "mslogger.h"
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif // !EFFECTS_H
+
+
 class CCycler : public CBaseMonster
 {
 public:
@@ -334,8 +339,7 @@ LINK_ENTITY_TO_CLASS(env_model, CStaticModel);
 
 // MP3 Playback
 
-#define SF_LOOP 1
-#define SF_REMOVE_ON_FIRE 2
+
 
 class CTargetMP3Audio : public CPointEntity
 {
@@ -1707,8 +1711,6 @@ public:
 			}
 		}
 
-#define TRANS_AUTOSHOWBROWSER (1 << 0)
-#define TRANS_PLAYSOUND (1 << 1)
 
 		strncpy(pPlayer->m_OldTransition,  STRING(sName), sizeof(pPlayer->m_OldTransition) );
 		strncpy(pPlayer->m_NextMap,  STRING(sDestMap), sizeof(pPlayer->m_NextMap) );
