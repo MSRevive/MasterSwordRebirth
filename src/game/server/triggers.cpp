@@ -27,29 +27,10 @@
 #include "gamerules.h"
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif // !EFFECTS_H
 
-enum {
-	SF_AUTO_FIREONCE = 0x0001,
-	SF_TRIGGER_PUSH_START_OFF = 2,		   //spawnflag that makes trigger_push spawn turned OFF
-	SF_TRIGGER_HURT_TARGETONCE = 1,	   // Only fire hurt target once
-	SF_TRIGGER_HURT_START_OFF = 2,		   //spawnflag that makes trigger_push spawn turned OFF
-	SF_TRIGGER_HURT_NO_CLIENTS = 8,	   //spawnflag that makes trigger_push spawn turned OFF
-	SF_TRIGGER_HURT_CLIENTONLYFIRE = 16,  // trigger hurt will only fire its target if it is hurting a client
-	SF_TRIGGER_HURT_CLIENTONLYTOUCH = 32, // only clients may touch this trigger.
-	SF_RELAY_FIREONCE = 0x0001,
-	SF_MULTIMAN_CLONE = 0x80000000,
-	SF_MULTIMAN_THREAD = 0x00000001,
-	SF_RENDER_MASKFX = (1 << 0),
-	SF_RENDER_MASKAMT = (1 << 1),
-	SF_RENDER_MASKMODE = (1 << 2),
-	SF_RENDER_MASKCOLOR = (1 << 3),
-	SF_CHANGELEVEL_USEONLY = 0x0002,
-	SF_ENDSECTION_USEONLY = 0x0001,
-	SF_CAMERA_PLAYER_POSITION = 1,
-	SF_CAMERA_PLAYER_TARGET = 2,
-	SF_CAMERA_PLAYER_TAKECONTROL = 4,
-	SF_CAMERA_PLAYER_ALL = 8
-};
 extern DLL_GLOBAL BOOL g_fGameOver;
 
 extern void SetMovedir(entvars_t *pev);
