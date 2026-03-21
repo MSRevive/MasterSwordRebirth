@@ -197,7 +197,7 @@ inline void WRITE_STRING(const char* sz)
 }
 
 #ifdef VALVE_DLL
-#define WRITE_STRING_MAX 180 // Upper limit for a usermessage is around 192 bytes, keep this in mind!
+constexpr unsigned int WRITE_STRING_MAX = 180; // Upper limit for a usermessage is around 192 bytes, keep this in mind!
 extern char g_pTempStringLimit[WRITE_STRING_MAX];
 // Use this to ensure that we only write this many bytes, ensure null terminated string, prevent overflows.
 #define WRITE_STRING_LIMIT(src, len) memset(g_pTempStringLimit, 0, WRITE_STRING_MAX); strncpy(g_pTempStringLimit, src, WRITE_STRING_MAX); g_pTempStringLimit[V_min((unsigned int)WRITE_STRING_MAX-1, (unsigned int)len)] = 0; WRITE_STRING(g_pTempStringLimit)
