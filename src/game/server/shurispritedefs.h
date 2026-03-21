@@ -1,6 +1,6 @@
 //Shuriken FEB2008a Sprite crap
-#define INV_SPRITE_NUM 77
-#define INV_SPRITE "allitems"
+constexpr unsigned int INV_SPRITE_NUM = 77;
+constexpr const char* INV_SPRITE = "allitems";
 
 const char *SpriteArray[INV_SPRITE_NUM] = {
 	"apple",
