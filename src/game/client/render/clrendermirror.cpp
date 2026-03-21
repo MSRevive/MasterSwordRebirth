@@ -56,7 +56,7 @@ extern int OldVisFrame, OldContents;
 
 //#define DEBUG_MIRRORS		//Enable viewing mirrors at world origin
 //#define MIRROR_STENCIL_MASK 0x3
-#define MIRROR_STENCIL_MASK 0xFFFFFFFF
+constexpr unsigned int MIRROR_STENCIL_MASK = 0xFFFFFFFF;
 
 class CFrustum
 {
@@ -180,7 +180,7 @@ bool CheckSurface(TraverseInfo_t &Info, msurface_t *pSurface)
 	if( Surface.plane->dist != -64 )
 		return false;*/
 
-	mstexture_t *pCustomTexture = NULL;
+	mstexture_t *pCustomTexture = nullptr;
 	for (unsigned int t = 0; t < MSCLGlobals::Textures.size(); t++)
 	{
 		mstexture_t &MSTexture = MSCLGlobals::Textures[t];
