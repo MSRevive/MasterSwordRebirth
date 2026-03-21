@@ -57,9 +57,12 @@ public:
 	void SetGlow(bool On);
 
 	entityinfo_t m_Target;
-	float m_Amount, m_CurentAmount;
+	float m_Amount, m_CurrentAmount;
 	float m_StartTime;
 	float m_Duration;
 	float m_FadeDuration;
 	Vector m_Color;
 };
+
+
+bool REQPARAMS(msstring& ScriptFileName, msstringlist& Params, unsigned int count);
