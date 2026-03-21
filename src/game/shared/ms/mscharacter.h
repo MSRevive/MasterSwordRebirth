@@ -63,11 +63,13 @@ struct charinfo_base_t
 	}
 };
 
-#define GEARFL_COVER_HEAD (1 << 0)
-#define GEARFL_COVER_TORSO (1 << 1)
-#define GEARFL_COVER_ARMS (1 << 2)
-#define GEARFL_COVER_LEGS (1 << 3)
-#define GEARFL_WEARING (1 << 4)
+enum {
+	GEARFL_COVER_HEAD = (1 << 0),
+	GEARFL_COVER_TORSO = (1 << 1),
+	GEARFL_COVER_ARMS = (1 << 2),
+	GEARFL_COVER_LEGS = (1 << 3),
+	GEARFL_WEARING = (1 << 4)
+};
 
 struct gearinfo_t
 {
@@ -122,10 +124,11 @@ struct spellskillstat_t
 	long Exp[STAT_PROP_TOTAL];
 };
 
-#define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
-#define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
-
-#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
+enum {
+	SAVECHAR_VERSION_MSC = 11, // Legacy MS: Classic
+	SAVECHAR_VERSION_MSR = 12, // MS Rebirth and up.
+	SAVECHAR_VERSION = SAVECHAR_VERSION_MSR
+};
 
 //The types of headers.  Each time the save file is revised, a new header is added.
 //The old headers are kept so the game knows when it is encountering an old save file
@@ -180,7 +183,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer = NULL);	 //Cli
 bool IsValidCharVersion(int Version);										 //Client & Server
 savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps); //Client & Server
 
-#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
+constexpr unsigned int MAX_CHARSLOTS = 3; //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
 
 struct charslot_t
 {
