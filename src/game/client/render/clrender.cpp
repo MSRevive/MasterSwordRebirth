@@ -25,8 +25,8 @@
 //OGL
 void DeleteGLTextures();
 #ifdef _WIN32
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = nullptr;
+PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = nullptr;
 #endif
 
 //Environment Manager
@@ -58,7 +58,7 @@ CParticle::CParticle()
 {
 	m_Width = 0;
 	m_Origin = g_vecZero;
-	m_Texture = NULL;
+	m_Texture = nullptr;
 	m_Color = Color4F(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Brightness = 1.0f;
 	m_DirForward = g_vecZero;
@@ -184,7 +184,7 @@ struct skyface_t
 	//Vector Offset;
 };
 
-#define SKYFILENAME_PREFIX "gfx/env/"
+constexpr const char* SKYFILENAME_PREFIX = "gfx/env/";
 struct
 {
 	Vector Dir; //Dir the wall is facing.  It gets scooted back in the opp. direction
@@ -392,7 +392,9 @@ uint CRender::m_RT_Height = 256;
 float CRender::m_RT_TexU = 1.0f;
 float CRender::m_RT_TexV = 1.0f;
 
-#define MS_GL_ATTRIBUTES GL_ALL_ATTRIB_BITS
+enum {
+	MS_GL_ATTRIBUTES = GL_ALL_ATTRIB_BITS
+};
 //#define MS_GL_ATTRIBUTES
 
 void CRender::PushHLStates()

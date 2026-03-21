@@ -184,7 +184,7 @@ public:
 class CSurface
 {
 public:
-	CSurface() { m_Surface = NULL; }
+	CSurface() { m_Surface = nullptr; }
 	CSurface(msurface_t *Surface) { m_Surface = Surface; }
 	void Draw();
 	void DrawProjective();
