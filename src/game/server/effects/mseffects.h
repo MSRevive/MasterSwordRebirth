@@ -8,8 +8,8 @@
 
 
 
-constexpr int = SPRITE_TORCH = 1;
-constexpr int = TORCH_LIGHTS = 2;
+constexpr int SPRITE_TORCH = 1;
+constexpr int TORCH_LIGHTS = 2;
 
 class CPortal : public CBaseEntity
 {
