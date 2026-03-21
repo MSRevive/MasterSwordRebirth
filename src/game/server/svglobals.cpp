@@ -526,7 +526,7 @@ void MSGameThink()
 
 //Called when the map changes or server is shutdown from ServerDeactivate
 //Note that ClientDisconnect is called after this, and the player is deallocated again!
-#define WORLD_MAX 6000
+constexpr int WORLD_MAX = 6000;
 void MSGameEnd()
 {
 	if(MSGlobals::GameScript)
