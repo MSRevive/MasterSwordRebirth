@@ -193,7 +193,7 @@ int CHudScript::MsgFunc_ClientScript( const char *pszName, int iSize, void *pbuf
 
 			 for (unsigned int p = 0; p < Parameters.size(); p++) 
 				Script->SetVar( msstring("PARAM") + ((int)p+1), Parameters[p].c_str() );
-			Script->RunScriptEventByName( EventName, Parameters.size() ? &Parameters : NULL );
+			Script->RunScriptEventByName( EventName, Parameters.size() ? &Parameters : nullptr );
 			break;
 		}
 	}
@@ -228,7 +228,7 @@ CScript *CHudScript::CreateScript(const char* ScriptName, msstringlist &Paramete
 
 	//Create a new script if not latching onto a prev copy
 	CScript *Script = Script_Add( ScriptName, &player );
-	if( !Script ) return NULL;
+	if( !Script ) return nullptr;
 
 
 	Script->m.pScriptedInterface = &player;
@@ -249,7 +249,7 @@ void CHudScript::HandleAnimEvent(const char* Options, const cl_entity_s *clEntit
 	const char* ScriptName = ParsedOptions[0];
 	const char* EventName = ParsedOptions[1];
 
-	CScript *Script = NULL;
+	CScript *Script = nullptr;
 
 	//Latch onto an existing script
 	if( Type == HAE_EITHER || Type == HAE_ATTACH )

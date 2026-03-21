@@ -92,7 +92,7 @@ public:
 #endif
 	bool Spawn(msstring Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
-	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = NULL );	//Run one named event
+	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = nullptr );	//Run one named event
 	void CallLogged(const char* title, std::clock_t start);
 	bool ParseScriptFile( const char *pszScriptData );
 	LegacyScriptEvent *EventByName( const char *pszEventName );
