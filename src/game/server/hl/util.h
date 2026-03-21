@@ -162,7 +162,7 @@ inline entvars_t *VARS(entvars_t *pev) { return pev; }
 inline entvars_t *VARS(edict_t *pent)
 {
 	if (!pent)
-		return NULL;
+		return nullptr;
 
 	return &pent->v;
 }
@@ -364,8 +364,8 @@ extern void UTIL_BubbleTrail(Vector from, Vector to, int count);
 extern void UTIL_PrecacheOther(const char *szClassname);
 
 // prints a message to each client
-extern void UTIL_ClientPrintAll(int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);
-inline void UTIL_CenterPrintAll(const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL)
+extern void UTIL_ClientPrintAll(int msg_dest, const char *msg_name, const char *param1 = nullptr, const char *param2 = nullptr, const char *param3 = nullptr, const char *param4 = nullptr);
+inline void UTIL_CenterPrintAll(const char *msg_name, const char *param1 = nullptr, const char *param2 = nullptr, const char *param3 = nullptr, const char *param4 = nullptr)
 {
 	UTIL_ClientPrintAll(HUD_PRINTCENTER, msg_name, param1, param2, param3, param4);
 }
@@ -379,7 +379,7 @@ extern CBasePlayer* UTIL_PlayerBySteamID(ID64 steamID64);
 extern ID64 UTIL_ComputeSteamID64(const char* id, char sep = ':');
 
 // prints messages through the HUD
-extern void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = NULL, const char *param2 = NULL, const char *param3 = NULL, const char *param4 = NULL);
+extern void ClientPrint(entvars_t *client, int msg_dest, const char *msg_name, const char *param1 = nullptr, const char *param2 = nullptr, const char *param3 = nullptr, const char *param4 = nullptr);
 
 // prints a message to the HUD say (chat)
 extern void UTIL_SayText(const char *pText, CBaseEntity *pEntity);
@@ -643,9 +643,10 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 #define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 #define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 
-#define GROUP_OP_AND 0
-#define GROUP_OP_NAND 1
-
+enum {
+	GROUP_OP_AND = 0,
+	GROUP_OP_NAND = 1
+};
 extern int g_groupmask;
 extern int g_groupop;
 
