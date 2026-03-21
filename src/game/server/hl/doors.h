@@ -42,6 +42,13 @@ enum {
 	SF_CONVEYOR_VISUAL = 0x0001,
 	SF_CONVEYOR_NOTSOLID = 0x0002,
 	SF_CONVEYOR_TOGGLE = 0x0004, //Thothie AUG2011_30 toggle conveyors
-	SF_NORESPAWN = (1 << 30) // !!!set this bit on guns and stuff that should never respawn.
+	SF_NORESPAWN = (1 << 30), // !!!set this bit on guns and stuff that should never respawn.
+	SF_GLOBAL_SET = 1,
+	SF_BUTTON_DONTMOVE = 1,
+	SF_ROTBUTTON_NOTSOLID = 1,
+	SF_BUTTON_TOGGLE = 32,		  // button stays pushed until reactivated
+	SF_BUTTON_SPARK_IF_OFF = 64, // button sparks in OFF state
+	SF_BUTTON_TOUCH_ONLY = 256  // button only fires as a result of USE key.
+
 };
 
