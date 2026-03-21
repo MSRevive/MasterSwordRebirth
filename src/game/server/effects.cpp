@@ -21,9 +21,6 @@
 #include "func_break.h"
 #include "shake.h"
 
-#define SF_GIBSHOOTER_REPEATABLE 1 // allows a gibshooter to be refired
-
-#define SF_FUNNEL_REVERSE 1 // funnel effect repels particles instead of attracting them.
 
 // Lightning target, just alias landmark
 LINK_ENTITY_TO_CLASS(info_target, CPointEntity);
@@ -62,7 +59,6 @@ TYPEDESCRIPTION CBubbling::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CBubbling, CBaseEntity);
 
-#define SF_BUBBLES_STARTOFF 0x0001
 
 void CBubbling::Spawn(void)
 {
@@ -847,8 +843,8 @@ void CLightning::BeamUpdateVars(void)
 	int beamType;
 	int pointStart, pointEnd;
 
-	edict_t *pStart = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszStartEntity));
-	edict_t *pEnd = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszEndEntity));
+	edict_t *pStart = FIND_ENTITY_BY_TARGETNAME(nullptr, STRING(m_iszStartEntity));
+	edict_t *pEnd = FIND_ENTITY_BY_TARGETNAME(nullptr, STRING(m_iszEndEntity));
 	pointStart = IsPointEntity(CBaseEntity::Instance(pStart));
 	pointEnd = IsPointEntity(CBaseEntity::Instance(pEnd));
 
@@ -1678,11 +1674,6 @@ private:
 
 LINK_ENTITY_TO_CLASS(env_blood, CBlood);
 
-#define SF_BLOOD_RANDOM 0x0001
-#define SF_BLOOD_STREAM 0x0002
-#define SF_BLOOD_PLAYER 0x0004
-#define SF_BLOOD_DECAL 0x0008
-
 void CBlood::Spawn(void)
 {
 	pev->solid = SOLID_NOT;
@@ -1794,10 +1785,7 @@ LINK_ENTITY_TO_CLASS(env_shake, CShake);
 // radius of 0 means all players
 // NOTE: UTIL_ScreenShake() will only shake players who are on the ground
 
-#define SF_SHAKE_EVERYONE 0x0001 // Don't check radius
-// UNDONE: These don't work yet
-#define SF_SHAKE_DISRUPT 0x0002 // Disrupt controls
-#define SF_SHAKE_INAIR 0x0004	// Shake players in air
+
 
 void CShake::Spawn(void)
 {
@@ -1861,9 +1849,6 @@ LINK_ENTITY_TO_CLASS(env_fade, CFade);
 
 // pev->dmg_take is duration
 // pev->dmg_save is hold duration
-#define SF_FADE_IN 0x0001		// Fade in, not out
-#define SF_FADE_MODULATE 0x0002 // Modulate, don't blend
-#define SF_FADE_ONLYONE 0x0004
 
 void CFade::Spawn(void)
 {
