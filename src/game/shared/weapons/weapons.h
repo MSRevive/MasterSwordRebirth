@@ -26,9 +26,11 @@ extern int gmsgWeapPickup;
 #ifdef VALVE_DLL
 void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool fEnlargeboxes);
 
-#define MSTRACE_SOLIDSHIELDS (1 << 0)
-#define MSTRACE_LARGEHITBOXES (1 << 1)
-#define MSTRACE_HITCORPSES (1 << 2)
+enum {
+	MSTRACE_SOLIDSHIELDS = (1 << 0),
+	MSTRACE_LARGEHITBOXES = (1 << 1),
+	MSTRACE_HITCORPSES = (1 << 2)
+};
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags);
 
