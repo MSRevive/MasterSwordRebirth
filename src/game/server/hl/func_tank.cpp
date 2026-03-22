@@ -21,13 +21,15 @@
 
 #include "player.h"
 
-#define SF_TANK_ACTIVE 0x0001
-#define SF_TANK_PLAYER 0x0002
-#define SF_TANK_HUMANS 0x0004
-#define SF_TANK_ALIENS 0x0008
-#define SF_TANK_LINEOFSIGHT 0x0010
-#define SF_TANK_CANCONTROL 0x0020
-#define SF_TANK_SOUNDON 0x8000
+enum sf_tank_e {
+	SF_TANK_ACTIVE = 0x0001,
+	SF_TANK_PLAYER = 0x0002,
+	SF_TANK_HUMANS = 0x0004,
+	SF_TANK_ALIENS = 0x0008,
+	SF_TANK_LINEOFSIGHT = 0x0010,
+	SF_TANK_CANCONTROL = 0x0020,
+	SF_TANK_SOUNDON = 0x8000,
+};
 
 enum TANKBULLET
 {
@@ -178,7 +180,8 @@ static Vector gTankSpread[] =
 		Vector(0.1, 0.1, 0.1),		 // large cone
 		Vector(0.25, 0.25, 0.25),	 // extra-large cone
 };
-#define MAX_FIRING_SPREADS std::size(gTankSpread)
+
+constexpr size_t MAX_FIRING_SPREADS = std::size(gTankSpread);
 
 void CFuncTank ::Spawn(void)
 {
