@@ -995,7 +995,7 @@ void UTIL_MakeAimVectors(const Vector &vecAngles)
 //#define SWAP(a, b, temp) ((temp) = (a), (a) = (b), (b) = (temp))
 template <typename Type>
 inline void SWAP (Type &a, Type &b, Type &temp) {
-	Type temp = a;
+	temp = a;
 	a = b;
 	b = temp;
 }
