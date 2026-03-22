@@ -26,13 +26,11 @@
 #include "doors.h"
 #include "filesystem_shared.h"
 
-#define HULL_STEP_SIZE 16 // how far the test hull moves on each step
-#define NODE_HEIGHT 8	  // how high to lift nodes off the ground after we drop them all (make stair/ramp mapping easier)
+
 
 // to help eliminate node clutter by level designers, this is used to cap how many other nodes
 // any given node is allowed to 'see' in the first stage of graph creation "LinkVisibleNodes()".
-#define MAX_NODE_INITIAL_LINKS 128
-#define MAX_NODES 1024
+
 
 extern DLL_GLOBAL edict_t *g_pBodyQueueHead;
 
@@ -1588,7 +1586,7 @@ void CNodeEnt ::Spawn(void)
 	}
 
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOriginPeek =
-		WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOrigin = pev->origin;
+	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_vecOrigin = pev->origin;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_flHintYaw = pev->angles.y;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintType = m_sHintType;
 	WorldGraph.m_pNodes[WorldGraph.m_cNodes].m_sHintActivity = m_sHintActivity;
@@ -2262,9 +2260,20 @@ int CQueuePriority ::Remove(float &fPriority)
 	return iReturn;
 }
 
-#define HEAP_LEFT_CHILD(x) (2 * (x) + 1)
-#define HEAP_RIGHT_CHILD(x) (2 * (x) + 2)
-#define HEAP_PARENT(x) (((x)-1) / 2)
+int HEAP_LEFT_CHILD(int parent) {
+	return ((2 * parent) + 1);
+}
+int HEAP_RIGHT_CHILD(int parent) {
+	return ((2 * parent) + 2);
+}
+
+int HEAP_PARENT(int child) {
+	return ((child-1) / 2);
+}
+
+//#define HEAP_LEFT_CHILD(x) (2 * (x) + 1)
+//#define HEAP_RIGHT_CHILD(x) (2 * (x) + 2)
+//#define HEAP_PARENT(x) (((x)-1) / 2)
 
 void CQueuePriority::Heap_SiftDown(int iSubRoot)
 {
@@ -2630,17 +2639,9 @@ int CGraph ::CheckNODFile(const char *szMapName)
 	return retValue;
 }
 
-#define ENTRY_STATE_EMPTY -1
-
-struct tagNodePair
-{
-	short iSrc;
-	short iDest;
-};
-
 void CGraph::HashInsert(int iSrcNode, int iDestNode, int iKey)
 {
-	struct tagNodePair np;
+	struct tagNodePair np {};
 
 	np.iSrc = iSrcNode;
 	np.iDest = iDestNode;
@@ -2690,24 +2691,9 @@ void CGraph::HashSearch(int iSrcNode, int iDestNode, int &iKey)
 	iKey = m_pHashLinks[i];
 }
 
-#define NUMBER_OF_PRIMES 177
-
-int Primes[NUMBER_OF_PRIMES] =
-	{1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
-	 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
-	 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239,
-	 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337,
-	 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433,
-	 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
-	 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641,
-	 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743,
-	 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857,
-	 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971,
-	 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 0};
-
 void CGraph::HashChoosePrimes(int TableSize)
 {
-	int LargestPrime = TableSize / 2;
+	unsigned int LargestPrime = TableSize / 2;
 	if (LargestPrime > Primes[NUMBER_OF_PRIMES - 2])
 	{
 		LargestPrime = Primes[NUMBER_OF_PRIMES - 2];
@@ -2769,7 +2755,7 @@ void CGraph::HashChoosePrimes(int TableSize)
 
 // Renumber nodes so that nodes that link together are together.
 //
-#define UNNUMBERED_NODE -1
+
 void CGraph::SortNodes(void)
 {
 	// We are using m_iPreviousNode to be the new node number.
@@ -3018,10 +3004,18 @@ void CGraph::BuildRegionTables(void)
 	memset(m_Cache, 0, sizeof(m_Cache));
 }
 
+
+//#define FROM_TO(x, y) ((x)*m_cNodes + (y))
+
+int FROM_TO(unsigned int iFrom, unsigned int iTo, int nodes) {
+	return (iFrom * nodes) + iTo;
+}
+
+
 void CGraph ::ComputeStaticRoutingTables(void)
 {
 	int nRoutes = m_cNodes * m_cNodes;
-#define FROM_TO(x, y) ((x)*m_cNodes + (y))
+
 	short *Routes = new short[nRoutes];
 
 	int *pMyPath = new int[m_cNodes];
@@ -3054,15 +3048,15 @@ void CGraph ::ComputeStaticRoutingTables(void)
 				{
 					for (unsigned int iTo = 0; iTo < m_cNodes; iTo++)
 					{
-						Routes[FROM_TO(iFrom, iTo)] = -1;
+						Routes[FROM_TO(iFrom, iTo, m_cNodes)] = -1;
 					}
 				}
 
 				for (iFrom = 0; iFrom < m_cNodes; iFrom++)
 				{
-					for (iTo = m_cNodes - 1; iTo >= 0; iTo--)
+					for (iTo = m_cNodes - 1; iTo > 0; iTo--)
 					{
-						if (Routes[FROM_TO(iFrom, iTo)] != -1)
+						if (Routes[FROM_TO(iFrom, iTo, m_cNodes)] != -1)
 							continue;
 
 						int cPathSize = FindShortestPath(pMyPath, iFrom, iTo, iHull, iCapMask);
@@ -3078,7 +3072,7 @@ void CGraph ::ComputeStaticRoutingTables(void)
 								for (int iNode1 = iNode + 1; iNode1 < cPathSize; iNode1++)
 								{
 									int iEnd = pMyPath[iNode1];
-									Routes[FROM_TO(iStart, iEnd)] = iNext;
+									Routes[FROM_TO(iStart, iEnd, m_cNodes)] = iNext;
 								}
 							}
 #if 0
@@ -3094,15 +3088,15 @@ void CGraph ::ComputeStaticRoutingTables(void)
 								for (int iNode1 = iNode-1; iNode1 >= 0; iNode1--)
 								{
 									int iEnd = pMyPath[iNode1];
-									Routes[FROM_TO(iStart, iEnd)] = iNext;
+									Routes[FROM_TO(iStart, iEnd, m_cNodes)] = iNext;
 								}
 							}
 #endif
 						}
 						else
 						{
-							Routes[FROM_TO(iFrom, iTo)] = iFrom;
-							Routes[FROM_TO(iTo, iFrom)] = iTo;
+							Routes[FROM_TO(iFrom, iTo, m_cNodes)] = iFrom;
+							Routes[FROM_TO(iTo, iFrom, m_cNodes)] = iTo;
 						}
 					}
 				}
@@ -3111,7 +3105,7 @@ void CGraph ::ComputeStaticRoutingTables(void)
 				{
 					for (unsigned int iTo = 0; iTo < m_cNodes; iTo++)
 					{
-						BestNextNodes[iTo] = Routes[FROM_TO(iFrom, iTo)];
+						BestNextNodes[iTo] = Routes[FROM_TO(iFrom, iTo, m_cNodes)];
 					}
 
 					// Compress this node's routing table.
