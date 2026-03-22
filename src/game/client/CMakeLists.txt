@@ -4,13 +4,16 @@ add_library(fmod SHARED IMPORTED)
 add_library(discord SHARED IMPORTED)
 add_library(steam_api SHARED IMPORTED)
 
+find_package(OpenGL REQUIRED)
+
 # for some reason it can't find these libraries, even when installed?
-if (LINUX)
+if (LINUX AND NOT OpenGL_gl_LIBRARY)
 	set(OPENGL_gl_LIBRARY /usr/lib/i386-linux-gnu/libGL.so)
+endif()
+if (LINUX AND NOT OPENGL_glx_LIBRARY)
 	set(OPENGL_glx_LIBRARY /usr/lib/i386-linux-gnu/libGLX.so)
 endif()
 
-find_package(OpenGL REQUIRED)
 
 target_include_directories(vgui INTERFACE ${BASEDIR}/lib/include/vgui)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/lib/include/SDL2)
