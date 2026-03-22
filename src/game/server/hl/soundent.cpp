@@ -287,7 +287,7 @@ void CSoundEnt :: Initialize ( void )
 int CSoundEnt :: ISoundsInList ( int iListType )
 {
 	unsigned int i;
-	int iThisSound;
+	int iThisSound{};
 
 	if ( iListType == SOUNDLISTTYPE_FREE )
 	{
