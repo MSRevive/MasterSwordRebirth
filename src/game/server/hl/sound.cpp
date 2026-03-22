@@ -80,7 +80,7 @@ typedef struct dynpitchvol
 
 } dynpitchvol_t;
 
-#define CDPVPRESETMAX 27
+constexpr unsigned int CDPVPRESETMAX = 27;
 
 // presets for runtime pitch and vol modulation of ambient sounds
 
@@ -1045,7 +1045,7 @@ void CEnvSound ::Spawn()
 
 // ==================== SENTENCE GROUPS, UTILITY FUNCTIONS  ======================================
 
-#define CSENTENCE_LRU_MAX 32 // max number of elements per sentence group
+constexpr unsigned int CSENTENCE_LRU_MAX = 32; // max number of elements per sentence group
 
 // group of related sentences
 
@@ -1057,7 +1057,7 @@ typedef struct sentenceg
 
 } SENTENCEG;
 
-#define CSENTENCEG_MAX 200 // max number of sentence groups
+constexpr unsigned int CSENTENCEG_MAX = 200; // max number of sentence groups
 // globals
 
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
@@ -1528,7 +1528,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // Used to detect the texture the player is standing on, map the
 // texture name to a material type.  Play footstep sound based
 // on material type.
-#define CTEXTURESMAX 512 // max number of textures loaded
+constexpr unsigned int CTEXTURESMAX = 512; // max number of textures loaded
 
 unsigned int gcTextures = 0;
 char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX]; // texture names
