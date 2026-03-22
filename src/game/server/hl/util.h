@@ -88,7 +88,7 @@ bool FBitSet(const Type& vector, const int bit) {
 
 // Until we figure out why "const" gives the compiler problems, we'll just have to use
 // this bogus "empty" define to mark things as constant.
-#define CONSTANT
+//#define CONSTANT
 
 // More explicit than "int"
 typedef int EOFFSET;
