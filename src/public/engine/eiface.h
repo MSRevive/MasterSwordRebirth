@@ -283,7 +283,7 @@ typedef struct
 	edict_t	*pentLandmark;
 	Vector 		vecLandmarkOrigin;
 } LEVELLIST;
-#define MAX_LEVEL_CONNECTIONS	16		// These are encoded in the lower 16bits of ENTITYTABLE->flags
+constexpr unsigned int MAX_LEVEL_CONNECTIONS = 16;		// These are encoded in the lower 16bits of ENTITYTABLE->flags
 
 typedef struct 
 {
@@ -297,10 +297,12 @@ typedef struct
 
 } ENTITYTABLE;
 
-#define FENTTABLE_PLAYER		0x80000000
-#define FENTTABLE_REMOVED		0x40000000
-#define FENTTABLE_MOVEABLE		0x20000000
-#define FENTTABLE_GLOBAL		0x10000000
+enum fent_table_e {
+	FENTTABLE_PLAYER		= 0x80000000,
+	FENTTABLE_REMOVED		= 0x40000000,
+	FENTTABLE_MOVEABLE		= 0x20000000,
+	FENTTABLE_GLOBAL		= 0x10000000
+};
 
 typedef struct saverestore_s SAVERESTOREDATA;
 
@@ -370,8 +372,9 @@ typedef enum _fieldtypes
 #define DEFINE_ENTITY_GLOBAL_FIELD(name,fieldtype)	_FIELD(entvars_t, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 #define DEFINE_GLOBAL_FIELD(type,name,fieldtype)	_FIELD(type, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 
-
-#define FTYPEDESC_GLOBAL			0x0001		// This field is masked for global entity save/restore
+enum g_ftype_desc_e {
+	FTYPEDESC_GLOBAL = 0x0001		// This field is masked for global entity save/restore
+};
 
 typedef struct 
 {

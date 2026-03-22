@@ -316,7 +316,7 @@ TYPEDESCRIPTION gEntvarsDescription[] =
 		DEFINE_ENTITY_FIELD(radsuit_finished, FIELD_TIME),
 };
 
-#define ENTVARS_COUNT (sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]))
+constexpr unsigned int ENTVARS_COUNT = (sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]));
 
 #ifdef DEBUG
 edict_t *DBG_EntOfVars(const entvars_t *pev)
@@ -992,7 +992,13 @@ void UTIL_MakeAimVectors(const Vector &vecAngles)
 	MAKE_VECTORS(rgflVec);
 }
 
-#define SWAP(a, b, temp) ((temp) = (a), (a) = (b), (b) = (temp))
+//#define SWAP(a, b, temp) ((temp) = (a), (a) = (b), (b) = (temp))
+template <typename Type>
+inline void SWAP (Type &a, Type &b, Type &temp) {
+	Type temp = a;
+	a = b;
+	b = temp;
+}
 
 void UTIL_MakeInvVectors(const Vector &vec, globalvars_t *pgv)
 {
@@ -1058,7 +1064,7 @@ void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, fl
 {
 	unsigned int i;
 	float localAmplitude;
-	ScreenShake shake;
+	ScreenShake shake{};
 
 	shake.duration = FixedUnsigned16(duration, 1 << 12);  // 4.12 fixed
 	shake.frequency = FixedUnsigned16(frequency, 1 << 8); // 8.8 fixed
