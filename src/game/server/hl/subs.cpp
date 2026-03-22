@@ -80,7 +80,6 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 BOOL CBaseDMStart::IsTriggered(CBaseEntity *pEntity)
 {
 	BOOL master = UTIL_IsMasterTriggered(pev->netname, pEntity);
-
 	return master;
 }
 

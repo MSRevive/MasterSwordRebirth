@@ -669,5 +669,5 @@ float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
 float UTIL_WeaponTimeBase(void);
 
 //Master Sword
-#include "sharedutil.h"
+//#include "sharedutil.h"
 #endif

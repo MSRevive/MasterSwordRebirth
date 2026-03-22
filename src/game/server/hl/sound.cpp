@@ -17,7 +17,7 @@
 //=========================================================
 
 #define VALVE_DLL 1
-#define CHAR_TEX_SNOW 'N'
+constexpr char CHAR_TEX_SNOW = 'N';
 
 #include "msdllheaders.h"
 #include "weapons.h"
@@ -1811,8 +1811,9 @@ void CSpeaker ::Spawn(void)
 	Precache();
 }
 
-#define ANNOUNCE_MINUTES_MIN 0.25
-#define ANNOUNCE_MINUTES_MAX 2.25
+
+constexpr float ANNOUNCE_MINUTES_MIN = 0.25;
+constexpr float ANNOUNCE_MINUTES_MAX = 2.25;
 static float g_talkWaitTime = 0.0f; // time delay until it's ok to speak: used so that two NPCs don't talk at once
 
 void CSpeaker ::Precache(void)
