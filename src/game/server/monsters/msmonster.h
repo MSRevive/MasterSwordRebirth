@@ -202,7 +202,7 @@ struct random_monster_t
 
 //Frame conditions
 
-enum {
+enum frame_condition_monster_e {
 	FC_STEP = (1 << 1),  //Monster walked up a step this frame
 	FC_JUMP = (1 << 2),  //Monster began a jump this frame
 	FC_AVOID = (1 << 3) //Monster is avoiding an object this frame
@@ -210,7 +210,7 @@ enum {
 
 //General Conditions (Added to those defined in schedule.h)
 
-enum {
+enum monster_conditions_e {
 	MONSTER_ROAM = (1 << 23),// Monster should roam around
 	MONSTER_HASMOVEDEST = (1 << 24),// vMoveDest is valid
 	MONSTER_TRADING = (1 << 25),// NPC is trading with a player
