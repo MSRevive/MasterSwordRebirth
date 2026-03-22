@@ -19,7 +19,9 @@
 #ifndef	SCHEDULE_H
 #define	SCHEDULE_H
 
-enum {
+
+
+enum taskstatus_e {
 	TASKSTATUS_NEW = 0,			// Just started
 	TASKSTATUS_RUNNING = 1,		// Running task & movement
 	TASKSTATUS_RUNNING_MOVEMENT = 2,			// Just running movement
@@ -177,7 +179,7 @@ typedef enum
 
 
 // These go in the flData member of the TASK_WALK_TO_TARGET, TASK_RUN_TO_TARGET
-enum 
+enum target_move_e
 {
 	TARGET_MOVE_NORMAL = 0,
 	TARGET_MOVE_SCRIPTED = 1,
@@ -188,7 +190,7 @@ enum
 // The goal index should indicate which schedule (ordinally) the monster is running.  
 // That way, when tasks fail, the AI can make decisions based on the context of the 
 // current goal and sequence rather than just the current schedule.
-enum
+enum goal_e
 {
 	GOAL_ATTACK_ENEMY,
 	GOAL_MOVE,
