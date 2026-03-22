@@ -141,6 +141,9 @@ float GetSkillCvar(char *pName);
 
 extern DLL_GLOBAL int g_iSkillLevel;
 
-#define SKILL_EASY 1
-#define SKILL_MEDIUM 2
-#define SKILL_HARD 3
+
+enum skill_level_e {
+	SKILL_EASY = 1,
+	SKILL_MEDIUM = 2,
+	SKILL_HARD = 3
+};
