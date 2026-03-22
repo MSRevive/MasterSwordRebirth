@@ -26,4 +26,4 @@ gcc -v
 
 ./createall.sh -p $path -t $type
 
-make -C $path/build
+make -C $path/build -j 8
