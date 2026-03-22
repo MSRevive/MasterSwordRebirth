@@ -28,8 +28,10 @@
 
 static void PlatSpawnInsideTrigger(entvars_t *pevPlatform);
 
-#define SF_PLAT_TOGGLE 0x0001
-#define SF_PLAT_ADJUST 0x0002 //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
+enum sf_plat_e {
+	SF_PLAT_TOGGLE = 0x0001,
+	SF_PLAT_ADJUST = 0x0002 //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
+};
 
 class CBasePlatTrain : public CBaseToggle
 {
