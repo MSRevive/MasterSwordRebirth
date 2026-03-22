@@ -31,6 +31,13 @@ enum script_conditions_e {
 	SCRIPT_BREAK_CONDITIONS = (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE)
 };
 
+enum sf_sentence_e {
+	SF_SENTENCE_ONCE = 0x0001,
+	SF_SENTENCE_FOLLOWERS = 0x0002, // only say if following player
+	SF_SENTENCE_INTERRUPT = 0x0004, // force talking except when dead
+	SF_SENTENCE_CONCURRENT = 0x0008 // allow other people to keep talking
+};
+
 enum SS_INTERRUPT
 {
 	SS_INTERRUPT_IDLE = 0,

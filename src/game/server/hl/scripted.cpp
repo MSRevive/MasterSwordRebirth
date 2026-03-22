@@ -924,10 +924,7 @@ private:
 	int m_iszListener; // name of entity to look at while talking
 };
 
-#define SF_SENTENCE_ONCE 0x0001
-#define SF_SENTENCE_FOLLOWERS 0x0002  // only say if following player
-#define SF_SENTENCE_INTERRUPT 0x0004  // force talking except when dead
-#define SF_SENTENCE_CONCURRENT 0x0008 // allow other people to keep talking
+
 
 TYPEDESCRIPTION CScriptedSentence::m_SaveData[] =
 	{
