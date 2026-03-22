@@ -34,7 +34,7 @@
 #include "soundent.h"
 #include "gamerules.h"
 
-#define MONSTER_CUT_CORNER_DIST 8 // 8 means the monster's bounding box is contained without the box of the node in WC
+constexpr float MONSTER_CUT_CORNER_DIST = 8; // 8 means the monster's bounding box is contained without the box of the node in WC
 
 Vector VecBModelOrigin(entvars_t *pevBModel);
 
@@ -1293,7 +1293,7 @@ void CBaseMonster ::SetSequenceByName(char *szSequence)
 // !!!PERFORMANCE - should we try to load balance this?
 // DON"T USE SETORIGIN!
 //=========================================================
-#define LOCAL_STEP_SIZE 16
+constexpr float LOCAL_STEP_SIZE = 16;
 int CBaseMonster ::CheckLocalMove(const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist)
 {
 	Vector vecStartPos; // record monster's position before trying the move
@@ -1792,7 +1792,7 @@ BOOL CBaseMonster ::FTriangulate(const Vector &vecStart, const Vector &vecEnd, f
 //=========================================================
 // Move - take a single step towards the next ROUTE location
 //=========================================================
-#define DIST_TO_CHECK 200
+constexpr float DIST_TO_CHECK = 200;
 
 void CBaseMonster ::Move(float flInterval)
 {
@@ -3106,8 +3106,10 @@ int CBaseMonster ::CanPlaySequence(BOOL fDisregardMonsterState, int interruptLev
 // directly to the left or right of the caller that will
 // conceal them from view of pSightEnt
 //=========================================================
-#define COVER_CHECKS 5 // how many checks are made
-#define COVER_DELTA 48 // distance between checks
+
+
+constexpr unsigned int COVER_CHECKS = 5;	// how many checks are made
+constexpr unsigned int COVER_DELTA = 48;	// distance between checks
 
 BOOL CBaseMonster ::FindLateralCover(const Vector &vecThreat, const Vector &vecViewOffset)
 {
