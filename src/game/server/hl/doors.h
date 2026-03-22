@@ -18,6 +18,11 @@
 
 // doors
 
+constexpr int DOOR_SENTENCEWAIT = 6;
+constexpr int DOOR_SOUNDWAIT = 3;
+constexpr float BUTTON_SOUNDWAIT = 0.5;
+
+
 enum {
 	SF_GLOBAL_SET = 1,
 	SF_MULTI_INIT = 1,
