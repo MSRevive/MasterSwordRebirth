@@ -766,6 +766,8 @@ void CBaseButton::ButtonActivate()
 	ASSERT(m_toggle_state == TS_AT_BOTTOM);
 	m_toggle_state = TS_GOING_UP;
 
+
+
 	SetMoveDone(&CBaseButton::TriggerAndWait);
 	if (!m_fRotating)
 		LinearMove(m_vecPosition2, pev->speed);

@@ -843,7 +843,11 @@ public:
 						// the button will be allowed to operate. Otherwise, it will be
 						// deactivated.
 };
+
+
 #define SetMoveDone(a) m_pfnCallWhenMoveDone = static_cast<void (CBaseToggle::*)(void)>(a)
+
+
 
 // people gib if their health is <= this at the time of death
 constexpr int GIB_HEALTH_VALUE = -30;
