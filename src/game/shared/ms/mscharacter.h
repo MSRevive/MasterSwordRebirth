@@ -65,7 +65,7 @@ struct charinfo_base_t
 	}
 };
 
-enum {
+enum gear_flag_location_e {
 	GEARFL_COVER_HEAD = (1 << 0),
 	GEARFL_COVER_TORSO = (1 << 1),
 	GEARFL_COVER_ARMS = (1 << 2),
@@ -126,7 +126,7 @@ struct spellskillstat_t
 	long Exp[STAT_PROP_TOTAL];
 };
 
-enum {
+enum savechar_version_e {
 	SAVECHAR_VERSION_MSC = 11, // Legacy MS: Classic
 	SAVECHAR_VERSION_MSR = 12, // MS Rebirth and up.
 	SAVECHAR_VERSION = SAVECHAR_VERSION_MSR
@@ -136,7 +136,7 @@ enum {
 //The old headers are kept so the game knows when it is encountering an old save file
 //and can call the legacy code for converison to the new format.
 
-enum
+enum char_data_type_e
 {
 	CHARDATA_HEADER1 = 0,
 	CHARDATA_MAPSVISITED1,
