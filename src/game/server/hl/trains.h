@@ -15,6 +15,19 @@
 #ifndef TRAINS_H
 #define TRAINS_H
 
+enum train_state_e {
+
+	TRAIN_ACTIVE = 0x80,
+	TRAIN_NEW = 0xc0,
+	TRAIN_OFF = 0x00,
+	TRAIN_NEUTRAL = 0x01,
+	TRAIN_SLOW = 0x02,
+	TRAIN_MEDIUM = 0x03,
+	TRAIN_FAST = 0x04,
+	TRAIN_BACK = 0x05
+
+};
+
 // Tracktrain spawn flags
 enum sf_tracktrain_e {
 	SF_TRACKTRAIN_NOPITCH = 0x0001,

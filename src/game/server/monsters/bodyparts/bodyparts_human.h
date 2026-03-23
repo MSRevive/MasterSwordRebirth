@@ -1,5 +1,7 @@
-#include "bodyparts.h"
 
+#ifndef BODYPARTS_HUMAN_H
+#include "bodyparts.h"
+#define BODYPARTS_HUMAN_H
 enum
 {
 	//Human bodyparts
@@ -24,3 +26,4 @@ public:
 };
 
 int HitGroupToBodyPart(int HitGroup);
+#endif

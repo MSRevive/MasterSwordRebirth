@@ -58,7 +58,7 @@
 #include "fn/FNSharedDefs.h"
 #include "mslogger.h"
 
-#define MAX_ENTITIES_TO_SEARCH 4096
+constexpr unsigned int MAX_ENTITIES_TO_SEARCH = 4096;
 static CBaseEntity* g_pEntitiesInBox[MAX_ENTITIES_TO_SEARCH];
 
 clientitem_t::clientitem_t(class CGenericItem *pItem) : genericitem_t(pItem)
@@ -85,17 +85,9 @@ int MapTextureTypeStepType(char chTextureType);
 // the world node graph
 extern CGraph WorldGraph;
 
-#define TRAIN_ACTIVE 0x80
-#define TRAIN_NEW 0xc0
-#define TRAIN_OFF 0x00
-#define TRAIN_NEUTRAL 0x01
-#define TRAIN_SLOW 0x02
-#define TRAIN_MEDIUM 0x03
-#define TRAIN_FAST 0x04
-#define TRAIN_BACK 0x05
 
-#define FLASH_DRAIN_TIME 1.2  //100 units/3 minutes
-#define FLASH_CHARGE_TIME 0.2 // 100 units/20 seconds  (seconds per unit)
+constexpr float FLASH_DRAIN_TIME = 1.2;  //100 units/3 minutes
+constexpr float FLASH_CHARGE_TIME = 0.2; // 100 units/20 seconds  (seconds per unit)
 
 //#define PLAYER_MAX_SAFE_FALL_DIST	20// falling any farther than this many feet will inflict damage
 //#define	PLAYER_FATAL_FALL_DIST		60// 100% damage inflicted if player falls this many feet
@@ -1094,7 +1086,6 @@ void CBasePlayer::CinematicCamera(BOOL OnorOff, Vector vecPosition, Vector vecVi
 //
 // PlayerUse - handles USE keypress
 //
-#define PLAYER_SEARCH_RADIUS (float)64
 
 void CBasePlayer::PlayerUse(void)
 {

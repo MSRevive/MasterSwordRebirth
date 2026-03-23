@@ -24,6 +24,7 @@
 constexpr int MAX_ID_RANGE = 2048;
 constexpr int SBAR_STRING_SIZE = 128;
 constexpr int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
+constexpr float PLAYER_SEARCH_RADIUS = 64;
 
 // was 1500, but there shouldn't be any issues with increasing.
 constexpr int NUM_MAX_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
