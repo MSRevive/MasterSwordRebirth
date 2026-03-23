@@ -1,7 +1,7 @@
 #include "findentities.h"
 #ifdef VALVE_DLL
 #include "cbase.h"
-#define MAX_SEARCH_ENTITIES gpGlobals->maxEntities
+#define MAX_SEARCH_ENTITIES gpGlobals->maxEntities //dont think can be changed to constexpr
 #else
 #include "inc_huditem.h"
 #include "movement/pm_defs.h"
