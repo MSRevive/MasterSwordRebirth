@@ -85,9 +85,6 @@ int MapTextureTypeStepType(char chTextureType);
 // the world node graph
 extern CGraph WorldGraph;
 
-#define PLAYER_WALLJUMP_SPEED 300 // how fast we can spring off walls
-#define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
-
 #define TRAIN_ACTIVE 0x80
 #define TRAIN_NEW 0xc0
 #define TRAIN_OFF 0x00

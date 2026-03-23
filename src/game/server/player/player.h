@@ -137,31 +137,36 @@ constexpr const char* PLAYER_SCRIPT = "player/player";
 //#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
 #define CHWielded Wielded(iCurrentHand)*/
 
-constexpr int MAX_PLAYER_HANDS = 2;
-constexpr int MAX_PLAYER_HANDITEMS = 3;
-constexpr int MAX_KEYHISTORY = 10;
-constexpr int MSGFLAG_SPAWN = (1 << 0);
+constexpr unsigned int MAX_PLAYER_HANDS = 2;
+constexpr unsigned int MAX_PLAYER_HANDITEMS = 3;
+constexpr unsigned int MAX_KEYHISTORY = 10;
 
-
+enum ms_flag_e {
+	MSGFLAG_SPAWN = (1 << 0)
+};
 
 //-----------------
 
-constexpr int PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
-constexpr int PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
+constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
+constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
 constexpr float DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
-constexpr int PLAYER_MIN_BOUNCE_SPEED = 200;
+constexpr float PLAYER_MIN_BOUNCE_SPEED = 200;
 constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 350.0f;// won't punch player's screen/make scrape noise unless player falling at least this fast.
+constexpr float PLAYER_WALLJUMP_SPEED = 300; // how fast we can spring off walls
+constexpr float PLAYER_LONGJUMP_SPEED = 350; // how fast we longjump
 
 //
 // Player PHYSICS FLAGS bits
 //
-constexpr int PFLAG_ONLADDER = (1 << 0);
-constexpr int PFLAG_ONSWING = (1 << 0);
-constexpr int PFLAG_ONTRAIN = (1 << 1);
-constexpr int PFLAG_ONBARNACLE = (1 << 2);
-constexpr int PFLAG_DUCKING = (1 << 3);	// In the process of ducking, but totally squatted yet
-constexpr int PFLAG_USING = (1 << 4);	// Using a continuous entity
-constexpr int PFLAG_OBSERVER = (1 << 5); // player is locked in stationary cam mode. Spectators can move, observers can't.
+enum player_flag_e {
+	PFLAG_ONLADDER = (1 << 0),
+	PFLAG_ONSWING = (1 << 0),
+	PFLAG_ONTRAIN = (1 << 1),
+	PFLAG_ONBARNACLE = (1 << 2),
+	PFLAG_DUCKING = (1 << 3),	// In the process of ducking, but totally squatted yet
+	PFLAG_USING = (1 << 4),	// Using a continuous entity
+	PFLAG_OBSERVER = (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
+};
 
 //
 // generic player
