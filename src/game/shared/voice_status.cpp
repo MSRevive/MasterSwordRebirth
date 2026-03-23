@@ -30,15 +30,7 @@ using namespace vgui;
 //extern int cam_thirdperson;
 extern "C" int CL_IsThirdPerson();
 
-
-#define VOICE_MODEL_INTERVAL		0.3
-#define SCOREBOARD_BLINK_FREQUENCY	0.3	// How often to blink the scoreboard icons.
-#define SQUELCHOSCILLATE_PER_SECOND	2.0f
-
-
 extern BitmapTGA *LoadTGA(const char* pImageName);
-
-
 
 // ---------------------------------------------------------------------- //
 // The voice manager for the client.
@@ -49,8 +41,6 @@ CVoiceStatus* GetClientVoiceMgr()
 {
 	return &g_VoiceStatus;
 }
-
-
 
 // ---------------------------------------------------------------------- //
 // CVoiceStatus.
@@ -73,7 +63,6 @@ int __MsgFunc_ReqState(const char *pszName, int iSize, void *pbuf)
 
 	return 1;
 }
-
 
 int g_BannedPlayerPrintCount;
 void ForEachBannedPlayer(char id[16])
