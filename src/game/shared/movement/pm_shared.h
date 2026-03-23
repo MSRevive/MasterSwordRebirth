@@ -27,6 +27,7 @@ constexpr unsigned int MAX_CTEXTURES = 512;	// max number of textures loaded
 void PM_Init(struct playermove_s *ppmove);
 void PM_Move(struct playermove_s *ppmove, qboolean server);
 char PM_FindTextureType(char *name);
+constexpr float PM_CHECKSTUCK_MINTIME = 0.05; // Don't check again too quickly.
 
 /**
 *	@brief Engine calls this to enumerate player collision hulls, for prediction. Return false if the hullnumber doesn't exist.

@@ -67,19 +67,6 @@ static bool pm_shared_initialized = false;
 
 extern "C" playermove_t *pmove = nullptr;
 
-//#define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
-//#define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
-//#define DAMAGE_FOR_FALL_SPEED (float)100 / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED) // damage per unit per second.
-//#define PLAYER_MIN_BOUNCE_SPEED 200
-//#define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
-//#define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
-//#define PLAYER_MOVE_NODUCK (1 << 5)
-
-// double to float warning
-//#pragma warning(disable : 4244)
-
-//#define MAX_CLIENTS 32
-
 enum {
 	// up / down
 	PITCH = 0,
@@ -1731,7 +1718,6 @@ try nudging slightly on all axis to
 allow for the cut precision of the net coordinates
 =================
 */
-#define PM_CHECKSTUCK_MINTIME 0.05 // Don't check again too quickly.
 
 bool PM_TryToUnstuck(Vector base)
 {
@@ -2527,7 +2513,7 @@ void PM_NoClip()
 }
 
 // Only allow bunny jumping up to 1.7x server / player maxspeed setting
-#define BUNNYJUMP_MAX_SPEED_FACTOR 1.7f
+constexpr float  MAX_BUNNYJUMP_SPEED_FACTOR = 1.7f;
 
 //-----------------------------------------------------------------------------
 // Purpose: Corrects bunny jumping ( where player initiates a bunny jump before other
@@ -2544,7 +2530,7 @@ void PM_PreventMegaBunnyJumping(void)
 	// Speed at which bunny jumping is limited
 	float maxscaledspeed;
 
-	maxscaledspeed = BUNNYJUMP_MAX_SPEED_FACTOR * pmove->maxspeed;
+	maxscaledspeed = MAX_BUNNYJUMP_SPEED_FACTOR * pmove->maxspeed;
 
 	// Don't divide by zero
 	if (maxscaledspeed <= 0.0f)
