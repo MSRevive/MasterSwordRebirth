@@ -13,27 +13,31 @@
 *
 ****/
 // pm_defs.h
+
+#if !defined(USERCMD_H)
+#include "usercmd.h"
+#endif
+
 #if !defined(PM_DEFSH)
 #define PM_DEFSH
 #pragma once
 
-constexpr int MAX_PHYSENTS = 600; // Must have room for all entities in the world.
-constexpr int MAX_MOVEENTS = 64;
-constexpr int MAX_CLIP_PLANES = 5;
-// Values for flags parameter of PM_TraceLine
-enum {
-	PM_TRACELINE_PHYSENTSONLY = 0,
-	PM_TRACELINE_ANYVISIBLE = 1
-};
 
 #include "pm_info.h"
 
 // PM_PlayerTrace results.
 #include "pmtrace.h"
 
-#if !defined(USERCMD_H)
-#include "usercmd.h"
-#endif
+
+constexpr unsigned int MAX_PHYSENTS = 600; // Must have room for all entities in the world.
+constexpr unsigned int MAX_MOVEENTS = 64;
+constexpr unsigned int MAX_CLIP_PLANES = 5;
+
+// Values for flags parameter of PM_TraceLine
+enum pm_traceline_e {
+	PM_TRACELINE_PHYSENTSONLY = 0,
+	PM_TRACELINE_ANYVISIBLE = 1
+};
 
 // physent_t
 typedef struct physent_s
