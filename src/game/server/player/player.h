@@ -935,6 +935,8 @@ private:
 
 class CSpawnPointBegin : public CPointEntity
 {
+
+	//Map must have a ms_player_begin in order for people to create characters there!
 	void Spawn()
 	{
 		MSGlobals::CanCreateCharOnMap = true;
@@ -982,7 +984,5 @@ struct itemtrans_t
 };
 
 
-
-//Map must have a ms_player_begin in order for people to create characters there!
 
 #endif // PLAYER_H
