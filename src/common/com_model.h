@@ -24,28 +24,31 @@
 #pragma once
 #endif
 
-constexpr int STUDIO_RENDER = 1;
-constexpr int STUDIO_EVENTS = 2;
-constexpr int MAX_MAP_HULLS = 4;
-constexpr int MIPLEVELS = 4;
-constexpr int NUM_AMBIENTS = 4; // automatic ambient sounds
-constexpr int MAXLIGHTMAPS = 4;
-constexpr int PLANE_ANYZ = 5;
-constexpr int MAX_CLIENTS = 32;
-constexpr int MAX_MODEL_NAME = 64;
-constexpr int MAX_EDICTS = 2048;
 
-constexpr int ALIAS_Z_CLIP_PLANE = 5;
+constexpr unsigned int MAX_MAP_HULLS = 4;
+constexpr unsigned int MAX_LIGHTMAPS = 4;
+constexpr unsigned int MAX_CLIENTS = 32;
+constexpr unsigned int MAX_MODEL_NAME = 64;
+constexpr unsigned int MAX_EDICTS = 2048;
+constexpr unsigned int MIPLEVELS = 4;
+constexpr unsigned int NUM_AMBIENTS = 4; // automatic ambient sounds
+
 
 // flags in finalvert_t.flags
 
 
-enum {
+enum studio_e {
+    STUDIO_RENDER = 1,
+    STUDIO_EVENTS = 2
+};
+
+enum alias_clip_e {
     ALIAS_LEFT_CLIP = 0x0001,
     ALIAS_TOP_CLIP = 0x0002,
     ALIAS_RIGHT_CLIP = 0x0004,
     ALIAS_BOTTOM_CLIP = 0x0008,
     ALIAS_Z_CLIP = 0x0010,
+    ALIAS_Z_CLIP_PLANE = 5,
     ALIAS_ONSEAM = 0x0020,
     ALIAS_XY_CLIP_MASK = 0x000F
 };
@@ -315,7 +318,7 @@ struct msurface_s
     mtexinfo_t *texinfo;
 
     // lighting info
-    byte styles[MAXLIGHTMAPS]; // index into d_lightstylevalue[] for animated lights
+    byte styles[MAX_LIGHTMAPS]; // index into d_lightstylevalue[] for animated lights
                                // no one surface can be effected by more than 4
                                // animated lights.
     color24 *samples;          // actual light map data for this surface
@@ -357,8 +360,8 @@ typedef struct msurface_s
     int dlightbits;
 
     int lightmaptexturenum;
-    byte styles[MAXLIGHTMAPS];
-    int cached_light[MAXLIGHTMAPS]; // values currently used in lightmap
+    byte styles[MAX_LIGHTMAPS];
+    int cached_light[MAX_LIGHTMAPS]; // values currently used in lightmap
     qboolean cached_dlight;         // true if dynamic light in cache
 
     //  byte        *samples;                   // [numstyles*surfsize]

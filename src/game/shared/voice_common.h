@@ -13,8 +13,8 @@
 
 #include "bitvec.h"
 
-#define VOICE_MAX_PLAYERS 32 // (todo: this should just be set to MAX_CLIENTS).
-#define VOICE_MAX_PLAYERS_DW ((VOICE_MAX_PLAYERS / 32) + !!(VOICE_MAX_PLAYERS & 31))
+constexpr unsigned int VOICE_MAX_PLAYERS = 32; // (todo: this should just be set to MAX_CLIENTS).
+constexpr unsigned int VOICE_MAX_PLAYERS_DW = ((VOICE_MAX_PLAYERS / 32) + !!(VOICE_MAX_PLAYERS & 31));
 
 typedef CBitVec<VOICE_MAX_PLAYERS> CPlayerBitVec;
 

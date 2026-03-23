@@ -11,34 +11,32 @@
 
 // upper design bounds
 
-#define	MAX_MAP_HULLS		4
-
-#define	MAX_MAP_MODELS		400
-#define	MAX_MAP_BRUSHES		4096
-#define	MAX_MAP_ENTITIES	1024
-#define	MAX_MAP_ENTSTRING	(128*1024)
-
-#define	MAX_MAP_PLANES		32767
-#define	MAX_MAP_NODES		32767		// because negative shorts are contents
-#define	MAX_MAP_CLIPNODES	32767		//
-#define	MAX_MAP_LEAFS		8192
-#define	MAX_MAP_VERTS		65535
-#define	MAX_MAP_FACES		65535
-#define	MAX_MAP_MARKSURFACES 65535
-#define	MAX_MAP_TEXINFO		8192
-#define	MAX_MAP_EDGES		256000
-#define	MAX_MAP_SURFEDGES	512000
-#define	MAX_MAP_TEXTURES	512
-#define	MAX_MAP_MIPTEX		0x200000
-#define	MAX_MAP_LIGHTING	0x200000
-#define	MAX_MAP_VISIBILITY	0x200000
-
-#define	MAX_MAP_PORTALS		65536
+constexpr unsigned int MAX_LIGHTMAPS		= 4;
+constexpr unsigned int MAX_MAP_HULLS		= 4;
+constexpr unsigned int MAX_MAP_MODELS		= 400;
+constexpr unsigned int MAX_MAP_BRUSHES		= 4096;
+constexpr unsigned int MAX_MAP_ENTITIES		= 1024;
+constexpr unsigned int MAX_MAP_ENTSTRING	= (128 * 1024);
+constexpr unsigned int MAX_MAP_PLANES		= 32767;
+constexpr unsigned int MAX_MAP_NODES		= 32767;	// because negative shorts are contents
+constexpr unsigned int MAX_MAP_CLIPNODES	= 32767;	
+constexpr unsigned int MAX_MAP_LEAFS		= 8192;
+constexpr unsigned int MAX_MAP_VERTS		= 65535;
+constexpr unsigned int MAX_MAP_FACES		= 65535;
+constexpr unsigned int MAX_MAP_MARKSURFACES = 65535;
+constexpr unsigned int MAX_MAP_TEXINFO		= 8192;
+constexpr unsigned int MAX_MAP_EDGES		= 256000;
+constexpr unsigned int MAX_MAP_SURFEDGES	= 512000;
+constexpr unsigned int MAX_MAP_TEXTURES		= 512;
+constexpr unsigned int MAX_MAP_MIPTEX		= 0x200000;
+constexpr unsigned int MAX_MAP_LIGHTING		= 0x200000;
+constexpr unsigned int MAX_MAP_VISIBILITY	= 0x200000;
+constexpr unsigned int MAX_MAP_PORTALS		= 65536;
 
 // key / value pair sizes
 
-#define	MAX_KEY		32
-#define	MAX_VALUE	1024
+constexpr unsigned int MAX_KEY		= 32;
+constexpr unsigned int MAX_VALUE	= 1024;
 
 //=============================================================================
 
@@ -52,23 +50,24 @@ typedef struct
 	int		fileofs, filelen;
 } lump_t;
 
-#define	LUMP_ENTITIES	0
-#define	LUMP_PLANES		1
-#define	LUMP_TEXTURES	2
-#define	LUMP_VERTEXES	3
-#define	LUMP_VISIBILITY	4
-#define	LUMP_NODES		5
-#define	LUMP_TEXINFO	6
-#define	LUMP_FACES		7
-#define	LUMP_LIGHTING	8
-#define	LUMP_CLIPNODES	9
-#define	LUMP_LEAFS		10
-#define	LUMP_MARKSURFACES 11
-#define	LUMP_EDGES		12
-#define	LUMP_SURFEDGES	13
-#define	LUMP_MODELS		14
-
-#define	HEADER_LUMPS	15
+enum lump_e {
+	LUMP_ENTITIES		= 0,
+	LUMP_PLANES			= 1,
+	LUMP_TEXTURES		= 2,
+	LUMP_VERTEXES		= 3,
+	LUMP_VISIBILITY		= 4,
+	LUMP_NODES			= 5,
+	LUMP_TEXINFO		= 6,
+	LUMP_FACES			= 7,
+	LUMP_LIGHTING		= 8,
+	LUMP_CLIPNODES		= 9,
+	LUMP_LEAFS			= 10,
+	LUMP_MARKSURFACES	= 11,
+	LUMP_EDGES			= 12,
+	LUMP_SURFEDGES		= 13,
+	LUMP_MODELS			= 14,
+	LUMP_HEADER			= 15
+};
 
 typedef struct
 {
@@ -91,7 +90,7 @@ typedef struct
 	int			dataofs[4];		// [nummiptex]
 } dmiptexlump_t;
 
-#define	MIPLEVELS	4
+constexpr unsigned int	MIPLEVELS = 4;
 typedef struct miptex_s
 {
 	char		name[16];
@@ -106,15 +105,17 @@ typedef struct
 } dvertex_t;
 
 
-// 0-2 are axial planes
-#define	PLANE_X			0
-#define	PLANE_Y			1
-#define	PLANE_Z			2
 
-// 3-5 are non-axial planes snapped to the nearest
-#define	PLANE_ANYX		3
-#define	PLANE_ANYY		4
-#define	PLANE_ANYZ		5
+enum plane_e {
+	// 0-2 are axial planes
+	PLANE_X			= 0,
+	PLANE_Y			= 1,
+	PLANE_Z			= 2,
+	// 3-5 are non-axial planes snapped to the nearest
+	PLANE_ANYX		= 3,
+	PLANE_ANYY		= 4,
+	PLANE_ANYZ		= 5
+};
 
 typedef struct
 {
@@ -123,25 +124,23 @@ typedef struct
 	int		type;		// PLANE_X - PLANE_ANYZ ?remove? trivial to regenerate
 } dplane_t;
 
-
-
-#define	CONTENTS_EMPTY		-1
-#define	CONTENTS_SOLID		-2
-#define	CONTENTS_WATER		-3
-#define	CONTENTS_SLIME		-4
-#define	CONTENTS_LAVA		-5
-#define	CONTENTS_SKY		-6
-#define	CONTENTS_ORIGIN		-7		// removed at csg time
-#define	CONTENTS_CLIP		-8		// changed to contents_solid
-
-#define	CONTENTS_CURRENT_0		-9
-#define	CONTENTS_CURRENT_90		-10
-#define	CONTENTS_CURRENT_180	-11
-#define	CONTENTS_CURRENT_270	-12
-#define	CONTENTS_CURRENT_UP		-13
-#define	CONTENTS_CURRENT_DOWN	-14
-
-#define CONTENTS_TRANSLUCENT	-15
+enum contents_e {
+	CONTENTS_EMPTY			= -1,
+	CONTENTS_SOLID			= -2,
+	CONTENTS_WATER			= -3,
+	CONTENTS_SLIME			= -4,
+	CONTENTS_LAVA			= -5,
+	CONTENTS_SKY			= -6,
+	CONTENTS_ORIGIN			= -7,		// removed at csg time
+	CONTENTS_CLIP			= -8,		// changed to contents_solid
+	CONTENTS_CURRENT_0		= -9,
+	CONTENTS_CURRENT_90		= -10,
+	CONTENTS_CURRENT_180	= -11,
+	CONTENTS_CURRENT_270	= -12,
+	CONTENTS_CURRENT_UP		= -13,
+	CONTENTS_CURRENT_DOWN	= -14,
+	CONTENTS_TRANSLUCENT	= -15
+};
 
 // !!! if this is changed, it must be changed in asm_i386.h too !!!
 typedef struct
@@ -167,8 +166,10 @@ typedef struct texinfo_s
 	int			miptex;
 	int			flags;
 } texinfo_t;
-#define	TEX_SPECIAL		1		// sky or slime, no lightmap or 256 subdivision
 
+enum tex_special_e {
+	TEX_SPECIAL	= 1		// sky or slime, no lightmap or 256 subdivision
+};
 // note that edge 0 is never used, because negative edge nums are used for
 // counterclockwise use of the edge in a face
 typedef struct
@@ -176,7 +177,6 @@ typedef struct
 	unsigned short	v[2];		// vertex numbers
 } dedge_t;
 
-#define	MAXLIGHTMAPS	4
 typedef struct
 {
 	short		planenum;
@@ -192,13 +192,13 @@ typedef struct
 } dface_t;
 
 
-
-#define	AMBIENT_WATER	0
-#define	AMBIENT_SKY		1
-#define	AMBIENT_SLIME	2
-#define	AMBIENT_LAVA	3
-
-#define	NUM_AMBIENTS			4		// automatic ambient sounds
+enum {
+	AMBIENT_WATER	= 0,
+	AMBIENT_SKY		= 1,
+	AMBIENT_SLIME	= 2,
+	AMBIENT_LAVA	= 3
+};
+constexpr unsigned int NUM_AMBIENTS = 4;		// automatic ambient sounds
 
 // leaf 0 is the generic CONTENTS_SOLID leaf, used for all solid areas
 // all other leafs need visibility info
@@ -221,8 +221,10 @@ typedef struct
 
 #ifndef QUAKE_GAME
 
-#define	ANGLE_UP	-1
-#define	ANGLE_DOWN	-2
+enum angle_e {
+	ANGLE_UP	= -1,
+	ANGLE_DOWN	= -2
+};
 
 
 // the utilities get to be lazy and just use large static arrays

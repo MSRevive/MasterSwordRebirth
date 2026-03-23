@@ -10,12 +10,21 @@
 #ifndef PITCH
 // MOVEMENT INFO
 // up / down
-constexpr int PITCH = 0;
-// left / right
-constexpr int YAW = 1;
-// fall over
-constexpr int ROLL = 2;
+enum {
+	PITCH = 0,
+	// left / right
+	YAW = 1,
+	// fall over
+	ROLL = 2
+};
 #endif
+
+enum planes_e {
+	PLANE_X = 0,
+	PLANE_Y = 1,
+	PLANE_Z = 2,
+	PLANE_ANYZ = 5,
+};
 
 template <typename Type>
 inline Type FDotProduct(const Type a, const Type b) {
