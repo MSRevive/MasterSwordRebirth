@@ -24,17 +24,24 @@
 #include "soundent.h"
 #endif
 
+#include "iscript.h"
+
 //extern iBeam;
+class IScripted;
+
 bool GetString(char *Return, size_t size, const char *sentence, int start, const char *endchars);
-#define ReadStat(Name, StatVar, PropVar)            \
-	{                                               \
-		Temp = GetFirstScriptVar(Name);             \
-		if (Temp != Name)                           \
-		{                                           \
-			StatVar = 0, PropVar = -1;              \
-			GetStatIndices(Temp, StatVar, PropVar); \
-		}                                           \
+
+
+
+void CGenericItem::ReadStat(const char* Name, int& StatVar, int& PropVar) {
+	const char* Temp = IScripted::GetFirstScriptVar(Name);
+	if (Temp != Name)
+	{
+		StatVar = 0, PropVar = -1;
+		GetStatIndices(Temp, StatVar, PropVar);
 	}
+
+};
 
 bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 {

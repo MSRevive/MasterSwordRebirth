@@ -96,8 +96,10 @@ struct attackdata_t
 	msstring sProjectile; //Name of the next projectile item to be fired
 };
 
-#define GET_CHARGE_FROM_TIME(a) (a + V_max(a - 1, 0) * .5)
 
+inline float GET_CHARGE_FROM_TIME(float flTime) {
+	return flTime + V_max(flTime - 1.0f, 0.0f) * 0.5;
+}
 // Global GenericItem
 class CGenericItem;
 class CScript;
@@ -277,7 +279,7 @@ public:
 	virtual bool Attack_CanAttack();
 	virtual float Attack_Charge();
 	virtual float GetHighestAttackCharge();
-
+	
 	float m_TimeChargeStart; //Time I started charging for a special attack.  0 - not charging
 	float m_LastChargedAmt;	 //Last amount charged up
 	damage_t *m_CurrentDamage;
@@ -424,6 +426,7 @@ public:
 	void FallThink();
 	void Think(void);
 	void SUB_Remove(void);
+	void ReadStat(const char* Name, int& StatVar, int& PropVar);
 
 	//IScripted
 	void Script_Setup();																				  //Ties m_pScriptActions and m_pScriptConditions to
