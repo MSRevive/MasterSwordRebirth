@@ -291,7 +291,7 @@ void CGenericItem::Projectile_CheckHit(void)
 		CBaseEntity *pEntity = MSInstance(tr.pHit);
 		if (pEntity)
 		{
-			/*if( pEntity->MSProperties() == MS_SHIELD ) 
+			/*if( pEntity->MSProperties() == ITEM_MS_SHIELD ) 
 			{
 				CGenericItem *pShield = (CGenericItem *)CBaseEntity::Instance(pEntity->pev->owner);
 				CBasePlayer *pPlayer = pShield->m_pPlayer->IsPlayer() ? pShield->m_pPlayer : NULL;

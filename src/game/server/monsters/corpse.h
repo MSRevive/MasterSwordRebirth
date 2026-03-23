@@ -9,7 +9,7 @@ public:
 	CBasePlayer* pPlayerSource;
 	//Overridden
 	int ObjectCaps(void) { return FCAP_DONT_SAVE; }
-	int MSProperties() { return MS_CORPSE; }
+	int MSProperties() { return ITEM_MS_CORPSE; }
 	void Spawn();
 	bool AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int ForceHand = -1);
 	bool RemoveItem(CGenericItem* pItem);

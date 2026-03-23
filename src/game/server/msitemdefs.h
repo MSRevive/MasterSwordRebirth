@@ -102,16 +102,12 @@ enum {
 	ITEM_DRINKABLE = (1 << 7),
 	ITEM_PERISHABLE = (1 << 8),
 	ITEM_SPELL = (1 << 9),
+	ITEM_MS_BODYPART = (1 << 10),
+	ITEM_MS_NPC = (1 << 11),
+	ITEM_MS_PLAYER = (1 << 12),
+	ITEM_MS_CORPSE = (1 << 13),
+	ITEM_MS_SHIELD = (1 << 14),
 	ITEM_NOPICKUP = (1 << 15) //MIB FEB2010_13 [thothie: 1<<10 is taken below - switched to 1<<15]
-};
-
-//***** Others *****
-enum {
-	MS_BODYPART = (1 << 10),
-	MS_NPC = (1 << 11),
-	MS_PLAYER = (1 << 12),
-	MS_CORPSE = (1 << 13),
-	MS_SHIELD = (1 << 14)
 };
 
 //Shield Sounds

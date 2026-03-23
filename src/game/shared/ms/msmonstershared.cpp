@@ -45,7 +45,7 @@ CMSMonster::~CMSMonster()
 }
 
 CMSMonster::CMSMonster() {}
-int CMSMonster::MSProperties() { return MS_NPC; }
+int CMSMonster::MSProperties() { return ITEM_MS_NPC; }
 
 bool CMSMonster::IsActing()
 {
