@@ -20,7 +20,7 @@
 #include "parsemsg.h"
 #endif
 
-#define UUENC_OFS 'A'
+constexpr char UUENC_OFS = 'A';
 
 //Send char to client or to server (client-side characters only)
 //Send to server at client connect
@@ -118,11 +118,11 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 #endif
 
 #ifdef VALVE_DLL
-#define MAX_UL_SIZE 150
-#define SEND_DELAY 0.8f
+	constexpr int MAX_UL_SIZE = 150;
+	constexpr float SEND_DELAY = 0.8f;
 #else
-#define MAX_UL_SIZE 64
-#define SEND_DELAY 0.4f
+	constexpr int MAX_UL_SIZE = 64;
+	constexpr float SEND_DELAY = 0.4f;
 #endif
 
 	charsendinfo_t &SendInfo = pPlayer->m_CharSend;
