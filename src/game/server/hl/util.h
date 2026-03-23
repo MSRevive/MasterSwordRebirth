@@ -561,10 +561,10 @@ enum teleport_sound_e {
 
 
 // sentence groups
-constexpr int CBSENTENCENAME_MAX = 16;
-constexpr int CVOXFILESENTENCEMAX = 1536;// max number of sentences in game. NOTE: this must match CVOXFILESENTENCEMAX in engine\sound.h!!!
+constexpr int MAX_CBSENTENCENAME = 16;
+constexpr int MAX_CVOXFILESENTENCE = 1536;// max number of sentences in game. NOTE: this must match CVOXFILESENTENCEMAX in engine\sound.h!!!
 
-extern char gszallsentencenames[CVOXFILESENTENCEMAX][CBSENTENCENAME_MAX];
+extern char gszallsentencenames[MAX_CVOXFILESENTENCE][MAX_CBSENTENCENAME];
 extern int gcallsentences;
 
 int USENTENCEG_Pick(int isentenceg, char *szfound);
@@ -638,6 +638,9 @@ void EMIT_SOUND_SUIT(edict_t *entity, const char *sample);
 void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg);
 void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
+
+//these don't look used
+/*
 #define PRECACHE_SOUND_ARRAY(a)                \
 	{                                          \
 		for (unsigned int i = 0; i < std::size(a); i++) \
@@ -651,6 +654,7 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname);
 
 #define PLAYBACK_EVENT(flags, who, index) PLAYBACK_EVENT_FULL(flags, who, index, 0, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
 #define PLAYBACK_EVENT_DELAY(flags, who, index, delay) PLAYBACK_EVENT_FULL(flags, who, index, delay, (float *)&g_vecZero, (float *)&g_vecZero, 0.0, 0.0, 0, 0, 0, 0);
+*/
 
 enum {
 	GROUP_OP_AND = 0,

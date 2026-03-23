@@ -1051,7 +1051,7 @@ constexpr unsigned int CSENTENCE_LRU_MAX = 32; // max number of elements per sen
 
 typedef struct sentenceg
 {
-	char szgroupname[CBSENTENCENAME_MAX];
+	char szgroupname[MAX_CBSENTENCENAME];
 	int count;
 	unsigned char rgblru[CSENTENCE_LRU_MAX];
 
@@ -1063,7 +1063,7 @@ constexpr unsigned int CSENTENCEG_MAX = 200; // max number of sentence groups
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
 bool bSentencesInit = false;
 
-char gszallsentencenames[CVOXFILESENTENCEMAX][CBSENTENCENAME_MAX];
+char gszallsentencenames[MAX_CVOXFILESENTENCE][MAX_CBSENTENCENAME];
 int gcallsentences = 0;
 
 // randomize list of sentence name indices
@@ -1121,7 +1121,7 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 		ipick = count - 1;
 
 	strncpy(szfound, "!", 64);
-	strncat(szfound, szgroupname, CBSENTENCENAME_MAX);	
+	strncat(szfound, szgroupname, MAX_CBSENTENCENAME);	
 	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(szfound, sznum, sizeof(sznum));
 
@@ -1181,7 +1181,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 		else
 		{
 			strncpy(szfound, "!", 64);
-			strncat(szfound, szgroupname, CBSENTENCENAME_MAX);
+			strncat(szfound, szgroupname, MAX_CBSENTENCENAME);
 			_snprintf(sznum, sizeof(sznum), "%i", ipick);
 			strncat(szfound, sznum, sizeof(sznum));
 			return ipick;
@@ -1304,7 +1304,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 		return;
 
 	strncpy(buffer, "!", sizeof(buffer));
-	strncat(buffer, rgsentenceg[isentenceg].szgroupname, CBSENTENCENAME_MAX);
+	strncat(buffer, rgsentenceg[isentenceg].szgroupname, MAX_CBSENTENCENAME);
 	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(buffer, sznum, sizeof(sznum));
 
@@ -1325,7 +1325,7 @@ void SENTENCEG_Init()
 	if (bSentencesInit)
 		return;
 
-	memset(gszallsentencenames, 0, CVOXFILESENTENCEMAX * CBSENTENCENAME_MAX);
+	memset(gszallsentencenames, 0, MAX_CVOXFILESENTENCE * MAX_CBSENTENCENAME);
 	gcallsentences = 0;
 
 	memset(rgsentenceg, 0, CSENTENCEG_MAX * sizeof(SENTENCEG));
@@ -1359,7 +1359,7 @@ void SENTENCEG_Init()
 		if (!buffer[j])
 			continue;
 
-		if (gcallsentences > CVOXFILESENTENCEMAX)
+		if (gcallsentences > MAX_CVOXFILESENTENCE)
 		{
 			ALERT(at_error, "Too many sentences in sentences.txt!\n");
 			break;
@@ -1369,10 +1369,10 @@ void SENTENCEG_Init()
 		buffer[j] = 0;
 		const char *pString = buffer + i;
 
-		if (strlen(pString) >= CBSENTENCENAME_MAX)
-			ALERT(at_warning, "Sentence %s longer than %d letters\n", pString, CBSENTENCENAME_MAX - 1);
+		if (strlen(pString) >= MAX_CBSENTENCENAME)
+			ALERT(at_warning, "Sentence %s longer than %d letters\n", pString, MAX_CBSENTENCENAME - 1);
 
-		strncpy(gszallsentencenames[gcallsentences++], pString, CBSENTENCENAME_MAX);
+		strncpy(gszallsentencenames[gcallsentences++], pString, MAX_CBSENTENCENAME);
 
 		j--;
 		if (j <= i)
@@ -1403,7 +1403,7 @@ void SENTENCEG_Init()
 				break;
 			}
 
-			strncpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]), CBSENTENCENAME_MAX);
+			strncpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]), MAX_CBSENTENCENAME);
 			rgsentenceg[isentencegs].count = 1;
 			strncpy(szgroup, &(buffer[i]), 64);
 
