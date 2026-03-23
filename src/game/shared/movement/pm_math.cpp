@@ -18,14 +18,16 @@
 #include "mathlib.h"
 #include "const.h"
 
-// up / down
-constexpr int PITCH = 0;
+enum {
+	// up / down
+	PITCH = 0,
 // left / right
-constexpr int YAW = 1;
+	YAW = 1,
 // fall over
-constexpr int ROLL = 2;
+	ROLL = 2
+};
 
-#pragma warning(disable : 4244)
+//#pragma warning(disable : 4244)
 
 float anglemod(float a)
 {
