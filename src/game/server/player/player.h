@@ -21,10 +21,15 @@
 #include "pm_materials.h"
 #include "mscharacter.h"
 
-constexpr int MAX_ID_RANGE = 2048;
-constexpr int SBAR_STRING_SIZE = 128;
-constexpr int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
+constexpr unsigned int MAX_ID_RANGE = 2048;
+constexpr unsigned int SBAR_STRING_SIZE = 128;
+constexpr unsigned int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
 constexpr float PLAYER_SEARCH_RADIUS = 64;
+constexpr float CLIMB_SHAKE_FREQUENCY = 22; // how many frames in between screen shakes when climbing
+constexpr float MAX_CLIMB_SPEED = 200;		 // fastest vertical climbing speed possible
+constexpr float CLIMB_SPEED_DEC = 15;		 // climbing deceleration rate
+constexpr float CLIMB_PUNCH_X = -7;		 // how far to 'punch' client X axis when climbing
+constexpr float CLIMB_PUNCH_Z = 7;		 // how far to 'punch' client Z axis when climbing
 
 // was 1500, but there shouldn't be any issues with increasing.
 constexpr int NUM_MAX_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
