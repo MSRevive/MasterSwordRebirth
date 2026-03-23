@@ -69,14 +69,6 @@ extern "C" playermove_t *pmove = nullptr;
 
 // Ducking time
 
-
-
-
-//#undef VEC_DUCK_VIEW
-//#define VEC_DUCK_VIEW 12
-
-#undef VEC_VIEW
-#define VEC_VIEW 28
 #define STOP_EPSILON 0.1
 #define	DIST_EPSILON 0.125f	// Max error from network coordinate quantization
 
@@ -2099,7 +2091,7 @@ void PM_UnDuck(void)
 
 		pmove->flags &= ~FL_DUCKING;
 		pmove->bInDuck = false;
-		pmove->view_ofs[2] = VEC_VIEW;
+		pmove->view_ofs[2] = VEC_VIEW.z;
 		pmove->flDuckTime = 0;
 
 		VectorCopy(newOrigin, pmove->origin);
@@ -2192,7 +2184,7 @@ void PM_Duck(void)
 
 					// Calc parametric time
 					duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
-					pmove->view_ofs[2] = ((VEC_DUCK_VIEW.z - fMore) * duckFraction) + (VEC_VIEW * (1 - duckFraction));
+					pmove->view_ofs[2] = ((VEC_DUCK_VIEW.z - fMore) * duckFraction) + (VEC_VIEW.z * (1 - duckFraction));
 				}
 			}
 		}
