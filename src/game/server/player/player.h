@@ -41,7 +41,6 @@ constexpr unsigned int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
 constexpr unsigned int MAX_PLAYER_HANDS = 2;
 constexpr unsigned int MAX_PLAYER_HANDITEMS = 3;
 constexpr unsigned int MAX_KEYHISTORY = 10;
-constexpr unsigned int CLIMB_MAX_SPEED = 200; 
 constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
 constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
 constexpr float PLAYER_DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
@@ -55,15 +54,23 @@ constexpr float PLAYER_BASE_SPEED = 160;
 constexpr float PLAYER_WALKSPEED_MAX_WEIGHT_SLOWDOWN = 70;
 constexpr float PLAYER_WALKSPEED_MAX_DEX = 75.0f;
 constexpr float CLIMB_SHAKE_FREQUENCY = 22; // how many frames in between screen shakes when climbing
-//constexpr float CLIMB_MAX_SPEED = 200;		 // fastest vertical climbing speed possible
 constexpr float CLIMB_SPEED_DEC = 15;		 // climbing deceleration rate
 constexpr float CLIMB_PUNCH_X = -7;		 // how far to 'punch' client X axis when climbing
 constexpr float CLIMB_PUNCH_Z = 7;		 // how far to 'punch' client Z axis when climbing
+constexpr float CLIMB_MAX_SPEED = 200;
 constexpr float CHAT_INTERVAL = 1.0f;
+constexpr float TIME_TO_DUCK = 0.4;
+constexpr float PM_DEAD_VIEWHEIGHT = -8;
+
 constexpr double AUTOAIM_2DEGREES = 0.0348994967025;
 constexpr double AUTOAIM_5DEGREES = 0.08715574274766;
 constexpr double AUTOAIM_8DEGREES = 0.1391731009601;
 constexpr double AUTOAIM_10DEGREES = 0.1736481776669;
+
+enum player_stuck_move {
+	STUCK_MOVEUP = 1,
+	STUCK_MOVEDOWN = -1
+};
 
 enum sbar_data
 {

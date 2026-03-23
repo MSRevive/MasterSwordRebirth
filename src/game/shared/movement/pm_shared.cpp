@@ -70,14 +70,11 @@ extern "C" playermove_t *pmove = nullptr;
 // Ducking time
 
 
-constexpr float TIME_TO_DUCK = 0.4;
-constexpr float PM_DEAD_VIEWHEIGHT = -8;
+
 
 //#undef VEC_DUCK_VIEW
 //#define VEC_DUCK_VIEW 12
 
-#define STUCK_MOVEUP 1
-#define STUCK_MOVEDOWN -1
 #undef VEC_VIEW
 #define VEC_VIEW 28
 #define STOP_EPSILON 0.1
