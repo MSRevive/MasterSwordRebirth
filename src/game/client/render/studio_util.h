@@ -23,7 +23,7 @@ enum planes_e {
 	PLANE_X = 0,
 	PLANE_Y = 1,
 	PLANE_Z = 2,
-	PLANE_ANYZ = 5,
+	PLANE_ANYZ = 5
 };
 
 template <typename Type>
