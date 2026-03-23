@@ -29,7 +29,6 @@
 #endif
 
 constexpr unsigned int MAX_CDPVPRESET = 27;
-constexpr unsigned int MAX_CDPVPRESET = 27;
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 // THOTHIE: I cut and pasted from the original HL1SDK's SOUND.CPP the entire Ambient Generic section in an effort to restore functionality
