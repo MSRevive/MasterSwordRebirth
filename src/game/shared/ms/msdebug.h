@@ -22,7 +22,7 @@ struct sharedtrace_t
 	int Hitgroup;
 };
 
-enum {
+enum pm_type_e {
 	PM_NORMAL = 0x00000000,
 	PM_STUDIO_IGNORE = 0x00000001,	// Skip studio models
 	PM_STUDIO_BOX = 0x00000002,		// Use boxes for non-complex studio models (even in traceline)
