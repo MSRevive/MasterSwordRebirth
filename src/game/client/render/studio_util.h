@@ -7,7 +7,7 @@
 
 #pragma once
 
-#ifndef PITCH
+//#ifndef PITCH
 // MOVEMENT INFO
 // up / down
 enum {
@@ -17,7 +17,7 @@ enum {
 	// fall over
 	ROLL = 2
 };
-#endif
+//#endif
 
 enum planes_e {
 	PLANE_X = 0,
