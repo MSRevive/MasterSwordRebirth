@@ -34,7 +34,7 @@ bool PM_GetHullBounds(int hullnumber, float* mins, float* maxs);
 char* memfgets(const byte* pMemFile, std::size_t fileSize, std::size_t& filePos, char* pBuffer, std::size_t bufferSize);
 
 // Spectator Movement modes (stored in pev->iuser1, so the physics code can get at them)
-enum {
+enum obs_type_e {
 
 	OBS_NONE = 0,
 	OBS_CHASE_LOCKED = 1,
@@ -47,5 +47,21 @@ enum {
 };
 
 inline bool g_CheckForPlayerStuck = false;
+
+enum step_surface_e {
+
+	STEP_CONCRETE = 0, // default step sound
+	STEP_METAL = 1,	// metal floor
+	STEP_DIRT = 2,		// dirt, sand, rock
+	STEP_VENT = 3,		// ventillation duct
+	STEP_GRATE = 4,	// metal grating
+	STEP_TILE = 5,		// floor tiles
+	STEP_SLOSH = 6,	// shallow liquid puddle
+	STEP_WADE = 7,		// wading in liquid
+	STEP_LADDER = 8,	// climbing ladder
+	STEP_SNOW = 9		// MAR2008a snow
+
+};
+
 
 #endif

@@ -36,6 +36,8 @@
 
 #include "com_model.h"
 
+
+
 //-----------------------------
 
 //Master Sword -----
@@ -64,34 +66,8 @@ static bool pm_shared_initialized = false;
 
 extern "C" playermove_t *pmove = nullptr;
 
-/*
-typedef struct
-{
-	int planenum;
-	short children[2]; // negative numbers are contents
-} dclipnode_t;
-
-typedef struct mplane_s
-{
-	Vector normal; // surface normal
-	float dist;	   // closest appoach to origin
-	byte type;	   // for texture axis selection and fast side tests
-	byte signbits; // signx + signy<<1 + signz<<1
-	byte pad[2];
-} mplane_t;
-
-typedef struct hull_s
-{
-	dclipnode_t *clipnodes;
-	mplane_t *planes;
-	int firstclipnode;
-	int lastclipnode;
-	Vector clip_mins;
-	Vector clip_maxs;
-} hull_t;
-*/
-
 // Ducking time
+
 
 #define TIME_TO_DUCK 0.4
 #undef VEC_DUCK_VIEW
@@ -108,16 +84,6 @@ typedef struct hull_s
 #define CTEXTURESMAX 512	// max number of textures loaded
 #define MAX_CBTEXTURENAME 13 // only load first n chars of name
 
-#define STEP_CONCRETE 0 // default step sound
-#define STEP_METAL 1	// metal floor
-#define STEP_DIRT 2		// dirt, sand, rock
-#define STEP_VENT 3		// ventillation duct
-#define STEP_GRATE 4	// metal grating
-#define STEP_TILE 5		// floor tiles
-#define STEP_SLOSH 6	// shallow liquid puddle
-#define STEP_WADE 7		// wading in liquid
-#define STEP_LADDER 8	// climbing ladder
-#define STEP_SNOW 9		// MAR2008a snow
 
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
 #define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
