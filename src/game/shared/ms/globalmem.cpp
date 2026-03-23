@@ -21,7 +21,7 @@ void EnableAllocateTrace() { AllocationStack--; }
 #endif
 #endif
 
-void MS_FATAL_ERROR_MEM(const char * MemErrMsg) {
+static void MS_FATAL_ERROR_MEM(const char * MemErrMsg) {
 	Print("%s\n", MemErrMsg);
 }
 
