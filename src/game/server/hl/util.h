@@ -264,7 +264,12 @@ extern CBaseEntity *UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, f
 // Index is 1 based
 extern CBaseEntity *UTIL_PlayerByIndex(int playerIndex);
 
-#define UTIL_EntitiesInPVS(pent) (*g_engfuncs.pfnEntitiesInPVS)(pent)
+//#define UTIL_EntitiesInPVS(edict_t * pent) (*g_engfuncs.pfnEntitiesInPVS)(pent)
+
+inline edict_t* UTIL_EntitiesInPVS(edict_t* pent) {
+	return g_engfuncs.pfnEntitiesInPVS(pent);
+}
+
 extern void UTIL_MakeVectors(const Vector &vecAngles);
 
 // Pass in an array of pointers and an array size, it fills the array and returns the number inserted
@@ -309,20 +314,24 @@ typedef enum
 	dont_ignore_monsters = 0,
 	missile = 2
 } IGNORE_MONSTERS;
+
 typedef enum
 {
 	ignore_glass = 1,
 	dont_ignore_glass = 0
 } IGNORE_GLASS;
+
 extern void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
-enum
+
+enum hull_e
 {
 	point_hull = 0,
 	human_hull = 1,
 	large_hull = 2,
 	head_hull = 3
 };
+
 extern void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
 extern TraceResult UTIL_GetGlobalTrace(void);
 extern void UTIL_TraceModel(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr);
@@ -442,7 +451,7 @@ extern DLL_GLOBAL const Vector g_vecZero;
 // Un-comment only as needed
 //
 
-enum {
+enum language_setting_e {
 	LANGUAGE_ENGLISH = 0,
 	LANGUAGE_GERMAN = 1,
 	LANGUAGE_FRENCH = 2,
@@ -450,7 +459,7 @@ enum {
 };
 extern DLL_GLOBAL int g_Language;
 
-enum {
+enum amient_sound_e {
 	AMBIENT_SOUND_STATIC = 0,// medium radius attenuation
 	AMBIENT_SOUND_EVERYWHERE = 1,
 	AMBIENT_SOUND_SMALLRADIUS = 2,
@@ -460,24 +469,24 @@ enum {
 	AMBIENT_SOUND_NOT_LOOPING = 32
 };
 
-enum {
+enum speaker_start_e {
 	SPEAKER_START_SILENT = 1 // wait for trigger 'on' to start announcements
 };
 
-enum {	 
+enum sound_cmd_e {	 
 	SND_STOP = (1 << 5),		   // duplicated in protocol.h stop sound
 	SND_CHANGE_VOL = (1 << 6),	   // duplicated in protocol.h change sound vol
 	SND_CHANGE_PITCH = (1 << 7),    // duplicated in protocol.h change sound pitch
 	SND_SPAWNING = (1 << 8)			// duplicated in protocol.h we're spawing, used in some cases for ambients
 };
 
-enum {
+enum lfo_wave_e {
 	LFO_SQUARE = 1,
 	LFO_TRIANGLE = 2,
 	LFO_RANDOM = 3
 };
 
-enum {
+enum sf_brush_e {
 	SF_BRUSH_ROTATE_Y_AXIS = 0,
 	SF_BRUSH_ROTATE_INSTANT = 1,
 	SF_BRUSH_ROTATE_BACKWARDS = 2,
@@ -491,7 +500,7 @@ enum {
 };
 
 
-enum {
+enum push_block_e {
 	PUSH_BLOCK_ONLY_X = 1,
 	PUSH_BLOCK_ONLY_Y = 2
 };
@@ -506,7 +515,7 @@ constexpr Vector VEC_DUCK_HULL_MIN = Vector(-16, -16, -18);
 constexpr Vector VEC_DUCK_HULL_MAX = Vector(16, 16, 18);
 constexpr Vector VEC_DUCK_VIEW = Vector(0, 0, 12);
 
-enum {
+enum svc_type_e {
 	SVC_TEMPENTITY = 23,
 	SVC_INTERMISSION = 30,
 	SVC_CDTRACK = 32,
@@ -517,7 +526,7 @@ enum {
 
 // triggers
 
-enum {
+enum sf_trigger_e {
 	SF_TRIG_PUSH_ONCE = 1,
 	SF_TRIGGER_ALLOWMONSTERS = 1, // monsters allowed to fire this trigger
 	SF_TRIGGER_NOCLIENTS = 2,	   // players not allowed to fire this trigger
@@ -525,7 +534,7 @@ enum {
 };
 
 // func breakable
-enum {
+enum sf_func_breakable_e {
 	SF_BREAK_TRIGGER_ONLY = 1, // may only be broken by trigger
 	SF_BREAK_TOUCH = 2,		// can be 'crashed through' by running player (plate glass)
 	SF_BREAK_PRESSURE = 4,		// can be broken by a player standing on it
@@ -533,18 +542,18 @@ enum {
 	SF_BREAK_CROWBAR = 256	// instant break if hit with crowbar
 };
 
-enum {
+enum sf_light_start_e {
 	SF_LIGHT_START_OFF = 1
 };
 
-enum {
+enum spawnflag_e {
 	SPAWNFLAG_NOMESSAGE = 1,
 	SPAWNFLAG_NOTOUCH = 1,
 	SPAWNFLAG_USEONLY = 1,
 	SPAWNFLAG_DROIDONLY = 4
 };
 
-enum {
+enum teleport_sound_e {
 	TELE_PLAYER_ONLY = 1,
 	TELE_SILENT = 2
 };
