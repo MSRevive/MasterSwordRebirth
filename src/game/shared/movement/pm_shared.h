@@ -20,7 +20,8 @@
 #define PM_SHAREDH
 #pragma once
 
-
+constexpr float STOP_EPSILON = 0.1;
+constexpr float DIST_EPSILON = 0.125f;	// Max error from network coordinate quantization
 
 void PM_Init(struct playermove_s *ppmove);
 void PM_Move(struct playermove_s *ppmove, qboolean server);

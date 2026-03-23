@@ -69,9 +69,6 @@ extern "C" playermove_t *pmove = nullptr;
 
 // Ducking time
 
-#define STOP_EPSILON 0.1
-#define	DIST_EPSILON 0.125f	// Max error from network coordinate quantization
-
 #define CTEXTURESMAX 512	// max number of textures loaded
 #define MAX_CBTEXTURENAME 13 // only load first n chars of name
 
