@@ -69,8 +69,7 @@ extern "C" playermove_t *pmove = nullptr;
 
 // Ducking time
 
-#define CTEXTURESMAX 512	// max number of textures loaded
-#define MAX_CBTEXTURENAME 13 // only load first n chars of name
+constexpr unsigned int MAX_CTEXTURES = 512;	// max number of textures loaded
 
 
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
@@ -106,8 +105,8 @@ static int rgStuckLast[MAX_CLIENTS][2];
 static bool bTextureTypeInit = false;
 
 static int gcTextures = 0;
-static char grgszTextureName[CTEXTURESMAX][MAX_CBTEXTURENAME];
-static char grgchTextureType[CTEXTURESMAX];
+static char grgszTextureName[MAX_CTEXTURES][MAX_CBTEXTURENAME];
+static char grgchTextureType[MAX_CTEXTURES];
 
 int g_onladder = 0;
 
@@ -200,13 +199,13 @@ void PM_SortTextures(void)
 void PM_InitTextureTypes()
 {
 	char buffer[512];
-	int i, j;
+	unsigned int i, j;
 
 	if (bTextureTypeInit)
 		return;
 
-	memset(&(grgszTextureName[0][0]), 0, CTEXTURESMAX * MAX_CBTEXTURENAME);
-	memset(grgchTextureType, 0, CTEXTURESMAX);
+	memset(&(grgszTextureName[0][0]), 0, MAX_CTEXTURES * MAX_CBTEXTURENAME);
+	memset(grgchTextureType, 0, MAX_CTEXTURES);
 
 	gcTextures = 0;
 	memset(buffer, 0, 512);
@@ -219,7 +218,7 @@ void PM_InitTextureTypes()
 	std::size_t filePos = 0;
 
 	// for each line in the file...
-	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, 511) != NULL && (gcTextures < CTEXTURESMAX))
+	while (memfgets(fileContents.data(), fileContents.size(), filePos, buffer, 511) != NULL && (gcTextures < MAX_CTEXTURES))
 	{
 		// skip whitespace
 		i = 0;
