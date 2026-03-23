@@ -20,13 +20,11 @@
 extern int gmsgWeapPickup;
 
 //Master Sword
-#define MakeAnim(ref) strncpy(m_pOwner->m_szAnimExtention, ref, 32)
-#define MakeAnimLR(ref) strncpy(m_pOwner->m_szAnimExtention, UTIL_VarArgs("%s_%s", ref, (m_pOwner->iCurrentHand == 0) ? "L" : "R"), 32)
 
 #ifdef VALVE_DLL
 void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool fEnlargeboxes);
 
-enum {
+enum mstrace_target_e {
 	MSTRACE_SOLIDSHIELDS = (1 << 0),
 	MSTRACE_LARGEHITBOXES = (1 << 1),
 	MSTRACE_HITCORPSES = (1 << 2)
@@ -108,14 +106,14 @@ public:
 };
 
 // constant items
-enum {
+enum constant_items_e {
 	ITEM_HEALTHKIT = 1,
 	ITEM_ANTIDOTE = 2,
 	ITEM_SECURITY = 3,
 	ITEM_BATTERY = 4
 };
 
-enum {
+enum weapon_type_e {
 	WEAPON_NONE = 0,
 	WEAPON_CROWBAR = 1,
 	WEAPON_GLOCK = 2,
@@ -369,7 +367,7 @@ typedef struct
 
 extern MULTIDAMAGE gMultiDamage;
 
-enum {
+enum weapon_volume_e {
 	LOUD_GUN_VOLUME = 1000,
 	NORMAL_GUN_VOLUME = 600,
 	QUIET_GUN_VOLUME = 200,
