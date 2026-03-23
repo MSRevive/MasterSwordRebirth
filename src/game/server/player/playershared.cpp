@@ -506,8 +506,8 @@ bool CBasePlayer::CanHold(CGenericItem* pItem, bool bVerbose, char* pszErrorStri
 	//Gear.size() returns # packs, not #items
 
 	int TotalItems = NumItems(); //Gear.size() - 1;
-	int MaxItems = NUM_MAX_ITEMS;
-	int WarnItems = NUM_MAX_ITEMS - 5;
+	int MaxItems  = MAX_NUM_ITEMS;
+	int WarnItems = MAX_NUM_ITEMS - 5;
 	/*
 	 for (unsigned int i = 0; i < Gear.size(); i++)
 	{

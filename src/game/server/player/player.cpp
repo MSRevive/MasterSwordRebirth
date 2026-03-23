@@ -798,7 +798,7 @@ void CBasePlayer::Killed(entvars_t *pevAttacker, int iGib)
 WaterMove
 ============
 */
-#define AIRTIME 12 // lung full of air lasts this many seconds
+constexpr int AIRTIME = 12; // lung full of air lasts this many seconds
 
 void CBasePlayer::WaterMove()
 {
@@ -3113,18 +3113,7 @@ ulong CBasePlayer::GetPartyID(void)
 	return m_pTeam->m_ID;
 }
 
-//==============================================
-// !!!UNDONE:ultra temporary SprayCan entity to apply
-// decal frame at a time. For PreAlpha CD
-//==============================================
-class CSprayCan : public CBaseEntity
-{
-public:
-	void Spawn(entvars_t *pevOwner);
-	void Think(void);
 
-	virtual int ObjectCaps(void) { return FCAP_DONT_SAVE; }
-};
 
 void CSprayCan::Spawn(entvars_t *pevOwner)
 {
@@ -4496,11 +4485,7 @@ void CRevertSaved ::LoadThink(void)
 //=========================================================
 // Multiplayer intermission spots.
 //=========================================================
-class CInfoIntermission : public CPointEntity
-{
-	void Spawn(void);
-	void Think(void);
-};
+
 
 void CInfoIntermission::Spawn(void)
 {
@@ -4983,27 +4968,11 @@ void CBasePlayer::UpdateMiscPositions(void)
 }
 
 
-struct itemdesc_t
-{
-	unsigned int iEntIndex;
-	CBaseEntity *pItem;
-	itemtype_e ItemType;
-	void *pvExtra;
-	CBasePlayerItem *pGroupList[256];
-	int GroupListEntidx[256];
-	unsigned int iGroupedItems, iGroupedItemTotal;
-};
 
-#define MAX_GET_ITEMS 9
-#define PICKUPITEM_DISTANCE 68.0 //Search and pickup dist might have to be different
-#define SEARCH_DISTANCE 64.0
-struct itemtrans_t
-{
-	transtype_e TransType;
-	unsigned int ItemTotal;
-	itemdesc_t ItemList[MAX_GET_ITEMS];
-	void *pvExtra;
-};
+
+
+
+
 /*
 	GetAnyItems - Look for items in front of you and give a list of them
 */
@@ -5017,7 +4986,7 @@ void CBasePlayer::GetAnyItems()
 
 	strncpy(cItemList,  "Gather items:\n\n", sizeof(cItemList) );
 
-	while (pObject = UTIL_FindEntityInSphere(pObject, EyePosition(), SEARCH_DISTANCE))
+	while (pObject = UTIL_FindEntityInSphere(pObject, EyePosition(), PLAYER_SEARCH_RADIUS))
 	{
 		if (pObject == this || !FVisible(pObject) || !FInViewCone(pObject))
 			continue;
@@ -5421,7 +5390,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 			break;
 		}
 		CBaseEntity *pObject = NULL;
-		while ((pObject = UTIL_FindEntityInSphere(pObject, Center(), SEARCH_DISTANCE)) != NULL)
+		while ((pObject = UTIL_FindEntityInSphere(pObject, Center(), PLAYER_SEARCH_RADIUS)) != NULL)
 			if (pObject == pEnt)
 				break;
 		if (!pObject)

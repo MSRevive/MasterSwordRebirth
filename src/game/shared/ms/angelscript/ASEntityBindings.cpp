@@ -752,7 +752,7 @@ namespace ASEntityBindings
         }
         
         // Check inventory full
-        if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+        if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
         {
             pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
             MS_ANGEL_DEBUG("OpenVoteMenu: Player inventory full");

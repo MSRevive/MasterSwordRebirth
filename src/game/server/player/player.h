@@ -26,7 +26,9 @@
 
 constexpr unsigned int MAX_ID_RANGE = 2048;
 constexpr unsigned int SBAR_STRING_SIZE = 128;
-constexpr unsigned int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
+constexpr unsigned int MAX_NUM_ITEMS = 100; //Thothie APR2011_28
+constexpr unsigned int MAX_GET_ITEMS = 9;
+constexpr float PICKUPITEM_DISTANCE = 68.0; //Search and pickup dist might have to be different
 constexpr float PLAYER_SEARCH_RADIUS = 64;
 constexpr float CLIMB_SHAKE_FREQUENCY = 22; // how many frames in between screen shakes when climbing
 constexpr float MAX_CLIMB_SPEED = 200;		 // fastest vertical climbing speed possible
@@ -939,6 +941,46 @@ class CSpawnPointBegin : public CPointEntity
 		CPointEntity::Spawn();
 	}
 };
+
+//==============================================
+// !!!UNDONE:ultra temporary SprayCan entity to apply
+// decal frame at a time. For PreAlpha CD
+//==============================================
+
+class CSprayCan : public CBaseEntity
+{
+public:
+	void Spawn(entvars_t* pevOwner);
+	void Think(void);
+
+	virtual int ObjectCaps(void) { return FCAP_DONT_SAVE; }
+};
+
+class CInfoIntermission : public CPointEntity
+{
+	void Spawn(void);
+	void Think(void);
+};
+
+struct itemdesc_t
+{
+	unsigned int iEntIndex;
+	CBaseEntity* pItem;
+	itemtype_e ItemType;
+	void* pvExtra;
+	CBasePlayerItem* pGroupList[256];
+	int GroupListEntidx[256];
+	unsigned int iGroupedItems, iGroupedItemTotal;
+};
+
+struct itemtrans_t
+{
+	transtype_e TransType;
+	unsigned int ItemTotal;
+	itemdesc_t ItemList[MAX_GET_ITEMS];
+	void* pvExtra;
+};
+
 
 
 //Map must have a ms_player_begin in order for people to create characters there!

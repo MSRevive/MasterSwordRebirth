@@ -644,7 +644,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool inventory_full = false;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
 					inventory_full = true;
 			}
 
@@ -839,7 +839,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (pPlayer)
 			{
 				pPlayer->CallScriptEvent("ext_remove_afk"); //flag player as non-afk when first offered store
-				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
 				{
 					inventory_full = true;
 					pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use stores/chests while inventory full.");
@@ -1020,7 +1020,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			CBasePlayer *pPlayer = pTarget ? (pTarget->IsPlayer() ? (CBasePlayer *)pTarget : NULL) : NULL;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() < NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() < MAX_NUM_ITEMS)
 				{
 					OpenMenu(pPlayer);
 				}
