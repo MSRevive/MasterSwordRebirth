@@ -753,7 +753,7 @@ void CGenericItem::StrikeLand()
 	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
 	float flDamage = CurrentAttack->flDamage + randomMulti; //fine even if 0.
 
-	flDamageFraction = CurrentAttackBalance / STAT_PROP_MAX_VALUE;
+	flDamageFraction = CurrentAttackBalance / MAX_STAT_PROPVALUE;
 	flDamageFraction = V_max(flDamageFraction, 0);
 
 	std::string szDamage = std::to_string(flDamage);
@@ -764,7 +764,7 @@ void CGenericItem::StrikeLand()
 	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
 
 	//fraction based on balance. Power stat for weapon -> 45? Multiplier is 0.45
-	flDamageFraction = CurrentAttackPower / STAT_PROP_MAX_VALUE;
+	flDamageFraction = CurrentAttackPower / MAX_STAT_PROPVALUE;
 	flDamageFraction = V_max(flDamageFraction, 0.001f); //why is this 0.001f?
 
 	std::string szPower = std::to_string(CurrentAttackPower);
@@ -1041,7 +1041,7 @@ void CGenericItem::ChargeThrowProj()
 		flTimeHeldAdjusted = CurrentAttack->tMaxHold ? (flTimeHeldAdjusted / CurrentAttack->tMaxHold) : 0; //[0.0 to 1.0]
 
 		//Shoot more accurately for higher skill
-		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STAT_PROP_MAX_VALUE;
+		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / MAX_STAT_PROPVALUE;
 		flAccFraction = 1 - V_min(V_max(flAccFraction, 0.0f), 1.0f);
 
 		//Shoot more accurately for drawing the bow back longer

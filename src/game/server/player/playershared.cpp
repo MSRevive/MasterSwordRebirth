@@ -466,7 +466,7 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 		else
 		{
 			if (bVerbose)
-				_snprintf(cErrorString, sizeof(cErrorString), "You can't get %s because %s!", SPEECH_GetItemName(pItem), cHandStr);
+				_snprintf(cErrorString, sizeof(cErrorString), "You can't get %s because %s!", SPEECH::ItemName(pItem), cHandStr);
 			iAddHand = -2;
 		}
 	}
@@ -640,7 +640,7 @@ bool CBasePlayer::PutInPack(int iHand, CGenericItem* pContainer, bool bVerbose)
 	if (!Hand(iHand))
 	{
 		if (bVerbose)
-			SendInfoMsg("There is nothing in your %s hand.\n", SPEECH_IntToHand(iHand));
+			SendInfoMsg("There is nothing in your %s hand.\n", SPEECH::HandName(iHand));
 		return false;
 	}
 
@@ -658,7 +658,7 @@ bool CBasePlayer::PutInPack(CGenericItem* pItem, CGenericItem* pContainer, bool 
 				if (!RANDOM_LONG(0, 1))
 					SendInfoMsg("Your %s can't fit that!\n", pContainer->DisplayName());
 				else
-					SendInfoMsg("You try to stuff %s into your %s, but to no avail.\n", SPEECH_GetItemName(pItem), pContainer->DisplayName());
+					SendInfoMsg("You try to stuff %s into your %s, but to no avail.\n", SPEECH::ItemName(pItem), pContainer->DisplayName());
 			}
 		}
 		return false;
@@ -666,9 +666,9 @@ bool CBasePlayer::PutInPack(CGenericItem* pItem, CGenericItem* pContainer, bool 
 
 	//RemovePlayerItem() gets called from the Item's PutInPack( ) function
 	char sz[32];
-	strncpy(sz, SPEECH_GetItemName(pItem), sizeof(sz));
+	strncpy(sz, SPEECH::ItemName(pItem), sizeof(sz));
 	if (bVerbose)
-		SendInfoMsg("You put %s in %s\n", sz, SPEECH_GetItemName(pContainer));
+		SendInfoMsg("You put %s in %s\n", sz, SPEECH::ItemName(pContainer));
 #ifndef VALVE_DLL
 	ContainerWindowUpdate();
 #endif
@@ -704,7 +704,7 @@ bool CBasePlayer::PutInAnyPack(CGenericItem* pItem, bool bVerbose)
 		//No packs or all packs full
 		if (!pItem->SpellData) //Spells don't give error messages
 			//Give a generic error message
-			SendEventMsg(HUDEVENT_UNABLE, msstring(SPEECH_GetItemName(pItem)) + " won't fit into any of your packs");
+			SendEventMsg(HUDEVENT_UNABLE, msstring(SPEECH::ItemName(pItem)) + " won't fit into any of your packs");
 	}
 	return false;
 }
@@ -760,7 +760,7 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 			return true;
 		}
-		else if( bVerbose ) SendEventMsg( HUDEVENT_UNABLE, msstring("There is nothing in your ") + SPEECH_IntToHand(iUseHand) + " hand" );
+		else if( bVerbose ) SendEventMsg( HUDEVENT_UNABLE, msstring("There is nothing in your ") + SPEECH::HandName(iUseHand) + " hand" );
 
 		return false;
 	}*/
@@ -769,12 +769,12 @@ bool CBasePlayer::UseItem(int iHand, bool bVerbose)
 
 	if (pUse && !pUse->UseItem(bVerbose))
 	{
-		//if( bVerbose ) SendInfoMsg( "You cannot use %s\n", SPEECH_GetItemName( Hand[iUseHand] ) );
+		//if( bVerbose ) SendInfoMsg( "You cannot use %s\n", SPEECH::ItemName( Hand[iUseHand] ) );
 		return false;
 	}
 
 	if (pUse && pUse->SpellData)
-		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pUse) + " spell is canceled");
+		SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH::ItemName(pUse) + " spell is canceled");
 
 	return true;
 }
@@ -903,7 +903,7 @@ void CBasePlayer::RemoveAllItems(bool fDead, bool fDeleteItems)
 	if( !Hand(DropHand) ) {
 		#ifndef VALVE_DLL
 			if( !ForceDrop )
-				SendEventMsg( HUDEVENT_UNABLE, msstring("There is nothing in your ") + SPEECH_IntToHand(m_CurrentHand) + " hand to drop." );
+				SendEventMsg( HUDEVENT_UNABLE, msstring("There is nothing in your ") + SPEECH::HandName(m_CurrentHand) + " hand to drop." );
 		#endif
 		return false;
 	}
@@ -928,12 +928,12 @@ bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose
 			if (Verbose)
 			{
 				if (FBitSet(pDropItem->MSProperties(), ITEM_SPELL))
-					SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(pDropItem) + " spell is canceled");
+					SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH::ItemName(pDropItem) + " spell is canceled");
 				else if (pDropItem->bDropAttempted) {
-					SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH_GetItemName(pDropItem));
+					SendEventMsg(HUDEVENT_NORMAL, msstring("You drop ") + SPEECH::ItemName(pDropItem));
 				}
 				else {
-					//SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH_GetItemName(pDropItem));
+					//SendEventMsg(HUDEVENT_NORMAL, msstring("Press again to drop ") + SPEECH::ItemName(pDropItem));
 				}
 			}
 
@@ -946,7 +946,7 @@ bool CBasePlayer::DropItem(CGenericItem* pDropItem, bool ForceDrop, bool Verbose
 		else
 		{
 			if (Verbose && !FBitSet(pDropItem->MSProperties(), ITEM_SPELL) && pDropItem->m_PrefHand != HAND_PLAYERHANDS)
-				SendEventMsg(HUDEVENT_UNABLE, msstring("You cannot drop ") + SPEECH_GetItemName(pDropItem) + " right now");
+				SendEventMsg(HUDEVENT_UNABLE, msstring("You cannot drop ") + SPEECH::ItemName(pDropItem) + " right now");
 			return false;
 		}
 	}
@@ -1205,14 +1205,14 @@ bool CBasePlayer::SwitchHands(int iHand, bool bVerbose)
 	if (!pNewItem)
 	{
 		if (bVerbose)
-			SendEventMsg(HUDEVENT_UNABLE, msstring("You aren't holding anything in your ") + SPEECH_IntToHand(iHand) + " hand.");
+			SendEventMsg(HUDEVENT_UNABLE, msstring("You aren't holding anything in your ") + SPEECH::HandName(iHand) + " hand.");
 		return false;
 	}
 
 	if (!pNewItem->CanDeploy())
 	{
 		if (bVerbose)
-			SendEventMsg(HUDEVENT_UNABLE, msstring("Can't switch to your ") + SPEECH_IntToHand(iHand) + " hand.");
+			SendEventMsg(HUDEVENT_UNABLE, msstring("Can't switch to your ") + SPEECH::HandName(iHand) + " hand.");
 		return false;
 	}
 
@@ -1224,7 +1224,7 @@ bool CBasePlayer::SwitchHands(int iHand, bool bVerbose)
 
 		//if (!pPrevActiveItem->CanHolster()) //I dont think this is needed, as the item is already in the players hands. Ends up introducing a bug
 		//{
-			//if( bVerbose ) SendInfoMsg( "Can't switch to your %s hand.\n", SPEECH_IntToHand(iHand) );
+			//if( bVerbose ) SendInfoMsg( "Can't switch to your %s hand.\n", SPEECH::HandName(iHand) );
 		//	return false;
 		//}
 		//pPrevActiveItem->Holster();

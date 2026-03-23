@@ -209,7 +209,7 @@ void CHudMisc ::UserCmd_RemovePack(void)
 			continue;
 
 		msstring ItemName;
-		ItemName += SPEECH_GetItemName(pGearItem);
+		ItemName += SPEECH::ItemName(pGearItem);
 
 		msstring SendString;
 		int Size = m_RemoveList.size();
@@ -320,7 +320,7 @@ void CHudMisc ::UserCmd_Offer(void)
 		if (!player.Hand(i))
 			continue;
 
-		const char *arg = UTIL_VarArgs("%i. %s hand: %s\n", r + 2, SPEECH_IntToHand(i, true), SPEECH::ItemName(player.Hand(i), true));
+		const char *arg = UTIL_VarArgs("%i. %s hand: %s\n", r + 2, SPEECH::HandName(i, true), SPEECH::ItemName(player.Hand(i), true));
 		strncat(MenuText, arg, strlen(arg));
 		m_OfferInfo.OfferItem[r] = i;
 		iBitsValid |= (1 << (++r)); //Starts at 1

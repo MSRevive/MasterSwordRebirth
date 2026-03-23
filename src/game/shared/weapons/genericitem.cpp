@@ -1027,7 +1027,7 @@ bool CGenericItem::CanWearItem()
 			if (!pPlayerPos)
 			{
 				if (Verbose)
-					m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
+					m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
 				return false; //Couldn't find position on player (the position's name isn't defined)
 			}
 
@@ -1063,14 +1063,14 @@ bool CGenericItem::CanWearItem()
 				{
 					if (PlayerPos.MaxAmt == 0)
 					{
-						m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
+						m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
 					}
 					else if (PlayerPos.MaxAmt == 1)
 					{
 						if (pItemConflict)
-							m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str()); //Thothie DEC2007a - was "You've are already wearing a %s\n", SPEECH_GetItemName(pItemConflict)
+							m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str()); //Thothie DEC2007a - was "You've are already wearing a %s\n", SPEECH::ItemName(pItemConflict)
 						else
-							m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
+							m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
 					}
 					else
 						m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str());

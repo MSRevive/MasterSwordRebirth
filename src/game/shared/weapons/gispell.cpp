@@ -55,7 +55,7 @@ void CGenericItem::Spell_Think()
 	if (gpGlobals->time >= Spell_TimeCast + SpellData->TimeFizzle)
 	{
 		if (m_pPlayer)
-			m_pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH_GetItemName(this) + " spell’s duration ends");
+			m_pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("The ") + SPEECH::ItemName(this) + " spell’s duration ends");
 		DelayedRemove();
 	}
 }
@@ -67,7 +67,7 @@ bool CGenericItem::Spell_Prepare()
 
 	Spell_TimeCast = gpGlobals->time;
 
-	float OwnerPercent = m_pOwner->GetSkillStat(SKILL_SPELLCASTING) / STAT_MAX_VALUE;
+	float OwnerPercent = m_pOwner->GetSkillStat(SKILL_SPELLCASTING) / MAX_STAT_VALUE;
 	float Number = SpellData->CastSuccess + (100.0f - SpellData->CastSuccess) * OwnerPercent;
 	if (RANDOM_LONG(0, 100) > (int)Number)
 	{

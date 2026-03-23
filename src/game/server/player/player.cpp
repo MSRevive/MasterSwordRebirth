@@ -5119,7 +5119,7 @@ void CBasePlayer::GetAnyItems()
 			if ((!FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) || itItemTransaction.ItemList[0].iGroupedItems == 0))
 			{
 				if (pItem->GiveTo(this))
-					SendInfoMsg("You pick up %s", SPEECH_GetItemName(pItem));
+					SendInfoMsg("You pick up %s", SPEECH::ItemName(pItem));
 				return;
 			}
 		}
@@ -5141,7 +5141,7 @@ void CBasePlayer::GetAnyItems()
 			itItemTransaction.ItemList[i].iGroupedItemTotal += pItem->iQuantity;
 			int iSave = pItem->iQuantity;
 			pItem->iQuantity = itItemTransaction.ItemList[i].iGroupedItemTotal;
-			 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  ++MenuCount,  SPEECH_GetItemName(pItem,  true) );
+			 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  ++MenuCount,  SPEECH::ItemName(pItem,  true) );
 			pItem->iQuantity = iSave;
 			strcat(cItemList, cTemp);
 		}
@@ -5235,7 +5235,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 		//			pItemDesc->pItem = pItem;
 		//			pItemDesc->ItemType = ITEM_NORMAL;
 		//			sprintf( cTemp, "%i. %s (%s hand)\n", MenuCount+1,
-		//				SPEECH_GetItemName(pItem), (i < MAX_PLAYER_HANDS) ? SPEECH_IntToHand(i) : "other" );
+		//				SPEECH::ItemName(pItem), (i < MAX_PLAYER_HANDS) ? SPEECH_IntToHand(i) : "other" );
 		//			strcat( cItemList, cTemp );
 		//			itItemTransaction.ItemTotal++;
 		//			MenuCount++;
@@ -5246,7 +5246,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 			pItemDesc->iEntIndex = pItem->entindex();
 			pItemDesc->pItem = pItem;
 			pItemDesc->ItemType = ITEM_NORMAL;
-			 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  MenuCount+1,  SPEECH_GetItemName(pItem) );
+			 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  MenuCount+1,  SPEECH::ItemName(pItem) );
 			strcat( cItemList, cTemp );
 			itItemTransaction.ItemTotal++;
 			if( itItemTransaction.ItemTotal >= MAX_GET_ITEMS ) break; //max of 10 items
@@ -5280,7 +5280,7 @@ void CBasePlayer ::StealAnyItems(CBaseEntity *pVictim)
 				pItemDesc->iEntIndex = pItem->entindex();
 				pItemDesc->pItem = pItem;
 				pItemDesc->ItemType = ITEM_NORMAL;
-				 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  MenuCount+1,  SPEECH_GetItemName(pItem) );
+				 _snprintf(cTemp, sizeof(cTemp),  "%i. %s\n",  MenuCount+1,  SPEECH::ItemName(pItem) );
 				strcat( cItemList, cTemp );
 				itItemTransaction.ItemTotal++;
 				if( itItemTransaction.ItemTotal >= MAX_GET_ITEMS ) break; //max of 10 items
@@ -5351,7 +5351,7 @@ void CBasePlayer ::OfferItem(offerinfo_t &OfferInfo)
 	else if (OfferInfo.ItemType == ITEM_NORMAL)
 	{
 		if (pDestPlayer)
-			pDestPlayer->SendHUDMsg("Receive Item", msstring(DisplayName()) + " offers you " + SPEECH_GetItemName((CGenericItem *)OfferInfo.pItemData2) + ".\nPress enter (accept) to recieve them.");
+			pDestPlayer->SendHUDMsg("Receive Item", msstring(DisplayName()) + " offers you " + SPEECH::ItemName((CGenericItem *)OfferInfo.pItemData2) + ".\nPress enter (accept) to recieve them.");
 		else
 		{
 			pMonster->StoreEntity(this, ENT_LASTOFFERITEM);
@@ -5416,7 +5416,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 
 		if (pItem->GiveTo(this))
 		{
-			SendInfoMsg("You pick up %s", SPEECH_GetItemName(pItem));
+			SendInfoMsg("You pick up %s", SPEECH::ItemName(pItem));
 
 			if (pItemDesc->iGroupedItems)
 				for (unsigned int i = 0; i < pItemDesc->iGroupedItems; i++)
@@ -5513,7 +5513,7 @@ void CBasePlayer::TransactionCallback(CBasePlayer *pPlayer, int slot, TCallbackM
 		else
 		{
 		pItem->GiveTo( this, false );
-		SendInfoMsg( "You steal %s from %s\n", SPEECH_GetItemName(pItem), STRING(pMonster->DisplayName) );
+		SendInfoMsg( "You steal %s from %s\n", SPEECH::ItemName(pItem), STRING(pMonster->DisplayName) );
 		StealNoticeCheck( this, pMonster, true );
 		m_TimeCanSteal = gpGlobals->time + 3.0;
 		}
@@ -5813,7 +5813,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 						fCanGetItem = false;
 					if (m_Gold < ptiTradeAnswer->iPrice)
 					{
-						SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford ") + SPEECH_GetItemName(ptiTradeAnswer->pItem) + ".");
+						SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford ") + SPEECH::ItemName(ptiTradeAnswer->pItem) + ".");
 						fCanGetItem = false;
 					}
 
@@ -5822,14 +5822,14 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 					{
 						if (ptiTradeAnswer->psiStoreItem->Quantity <= 0)
 						{
-							SendEventMsg(HUDEVENT_UNABLE, msstring("Vendor out of item: ") + SPEECH_GetItemName(ptiTradeAnswer->pItem) + ".");
+							SendEventMsg(HUDEVENT_UNABLE, msstring("Vendor out of item: ") + SPEECH::ItemName(ptiTradeAnswer->pItem) + ".");
 							fCanGetItem = false;
 						}
 					}
 
 					if (fCanGetItem)
 					{
-						SendInfoMsg("You receive %s.", SPEECH_GetItemName(ptiTradeAnswer->pItem));
+						SendInfoMsg("You receive %s.", SPEECH::ItemName(ptiTradeAnswer->pItem));
 						ptiTradeAnswer->pItem->GiveTo(this);
 						GiveGold(-ptiTradeAnswer->iPrice, false);
 						ptiTradeAnswer->psiStoreItem->Quantity -= V_max(ptiTradeAnswer->pItem->iQuantity, (unsigned int)1);
@@ -5875,7 +5875,7 @@ tradeinfo_t *CBasePlayer::TradeItem(tradeinfo_t *ptiTradeInfo)
 					goto EndTrade;
 
 				unsigned int Minimum = 1;
-				SendInfoMsg("You sell %s for %i gold.", SPEECH_GetItemName(ptiTradeAnswer->pItem), ptiTradeAnswer->iPrice);
+				SendInfoMsg("You sell %s for %i gold.", SPEECH::ItemName(ptiTradeAnswer->pItem), ptiTradeAnswer->iPrice);
 				GiveGold(ptiTradeAnswer->iPrice, false);
 				ptiTradeAnswer->psiStoreItem->Quantity += (short)V_max(ptiTradeAnswer->pItem->iQuantity, Minimum);
 				RemoveItem(ptiTradeAnswer->pItem);
@@ -5910,8 +5910,8 @@ bool CBasePlayer ::AcceptOffer()
 	if (OfferInfo.ItemType == ITEM_NORMAL)
 	{
 		if (pPlayer)
-			pPlayer->SendInfoMsg("%s accepts your %s", DisplayName(), SPEECH_GetItemName((CGenericItem *)OfferInfo.pItemData2));
-		SendInfoMsg("You recieve %s from %s", SPEECH_GetItemName((CGenericItem *)OfferInfo.pItemData2), pMonster->DisplayName());
+			pPlayer->SendInfoMsg("%s accepts your %s", DisplayName(), SPEECH::ItemName((CGenericItem *)OfferInfo.pItemData2));
+		SendInfoMsg("You recieve %s from %s", SPEECH::ItemName((CGenericItem *)OfferInfo.pItemData2), pMonster->DisplayName());
 	}
 	else if (OfferInfo.ItemType == ITEM_GOLD)
 	{
