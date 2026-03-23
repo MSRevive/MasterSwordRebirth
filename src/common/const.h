@@ -621,7 +621,7 @@ enum {
 	CONTENTS_SLIME = -4,
 	CONTENTS_LAVA = -5,
 	CONTENTS_SKY = -6,
-	/* These additional contents constants are defined in bspfile.h
+	//These additional contents constants are defined in bspfile.h
 	CONTENTS_ORIGIN	=	-7,		// removed at csg time
 	CONTENTS_CLIP =		-8,		// changed to contents_solid
 	CONTENTS_CURRENT_0 =	-9,
@@ -631,7 +631,6 @@ enum {
 	CONTENTS_CURRENT_UP	=	-13,
 	CONTENTS_CURRENT_DOWN =	-14,
 	CONTENTS_TRANSLUCENT =	-15,
-	*/
 	CONTENTS_LADDER = -16,
 	CONTENTS_FLYFIELD = -17,
 	CONTENTS_GRAVITY_FLYFIELD = -18,
