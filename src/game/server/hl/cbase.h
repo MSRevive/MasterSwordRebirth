@@ -30,7 +30,7 @@ CBaseEntity
 constexpr int MAX_PATH_SIZE = 10; // max number of nodes available for a path.
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
-enum {
+enum fcap_bits_e {
 	FCAP_CUSTOMSAVE = 0x00000001,
 	FCAP_ACROSS_TRANSITION = 0x00000002,// should transfer between transitions
 	FCAP_MUST_SPAWN = 0x00000004,		// Spawn after restore
@@ -45,16 +45,12 @@ enum {
 	FCAP_FORCE_TRANSITION = 0x00000080 // ALWAYS goes across transitions
 };
 
-
-
-
-
 #include "iscript.h"
 
 #include "archtypes.h"     // DAL
 
 //Master Sword - no save/restore in client dll
-constexpr int MAXPLAYERS = 32;
+constexpr unsigned int MAXPLAYERS = 32;
 #ifdef VALVE_DLL
 #include "saverestore.h"
 #else
@@ -123,7 +119,7 @@ typedef void (CBaseEntity::*USEPTR)(CBaseEntity *pActivator, CBaseEntity *pCalle
 
 // Master Sword - New CLASS defs:
 
-enum {
+enum class_entity_e {
 	CLASS_NONE = 0,
 	CLASS_MACHINE = 1,
 	CLASS_PLAYER = 2,
@@ -150,15 +146,12 @@ enum {
 	CLASS_VEHICLE = 16, // we use 16 because of MS class defines.
 };
 
-constexpr int CHAR_LEVEL_CAP = 45;		  // MiB JAN2010_15 Global Level Cap
+constexpr unsigned int CHAR_LEVEL_CAP = 45;		  // MiB JAN2010_15 Global Level Cap
 
 class CBaseEntity;
 class CBaseMonster;
 class CBasePlayerItem;
 class CSquadMonster;
-
-
-
 
 //
 // EHANDLE. Safe way to point to CBaseEntities who may die between frames
@@ -854,7 +847,7 @@ constexpr int GIB_HEALTH_VALUE = -30;
 constexpr int ROUTE_SIZE = 8;	  // how many waypoints a monster can store at one time
 constexpr int MAX_OLD_ENEMIES = 4; // how many old enemies to remember
 
-enum {
+enum bits_cap_e {
 	bits_CAP_DUCK = (1 << 0),		 // crouch
 	bits_CAP_JUMP = (1 << 1),		 // jump/leap
 	bits_CAP_STRAFE = (1 << 2),		// strafe ( walk/run sideways)
@@ -877,7 +870,7 @@ enum {
 
 // instant damage
 	
-enum {
+enum dmg_type_e {
 	DMG_GENERIC = (0 << 0),			 // generic damage was done
 	DMG_CRUSH = (1 << 0),		 // crushed by falling or moving object
 	DMG_BULLET = (1 << 1),		 // shot
@@ -945,7 +938,7 @@ constexpr float SLOWBURN_DAMAGE = 1.0;
 constexpr int   SLOWFREEZE_DURATION = 2;
 constexpr float SLOWFREEZE_DAMAGE = 1.0;
 
-enum {
+enum dot_type_e {
 	itbd_Paralyze = 0,
 	itbd_NerveGas = 1,
 	itbd_Poison = 2,
@@ -960,7 +953,7 @@ enum {
 // when calling KILLED(), a value that governs gib behavior is expected to be
 // one of these three values
 
-enum {
+enum gib_setting_e {
 	GIB_NORMAL = 0, // gib if entity was overkilled
 	GIB_NEVER = 1,	 // never gib, no matter how much death damage is done ( freezing, etc )
 	GIB_ALWAYS = 2 // always gib ( Houndeye Shock, Barnacle Bite )
@@ -1035,7 +1028,7 @@ public:
 // Weapons
 //
 
-#define BAD_WEAPON 0x00007FFF
+constexpr unsigned int BAD_WEAPON = 0x00007FFF;
 
 //
 // Converts a entvars_t * to a class pointer
