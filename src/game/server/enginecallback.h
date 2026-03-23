@@ -85,10 +85,10 @@ template <typename Type1, typename Type2>
 int32 RANDOM_LONG(const Type1 &lLow, const Type2 &lHigh) {
 
 	if (lLow > lHigh) {
-		return g_engfuncs.pfnRandomLong(lHigh, lLow);
+		return g_engfuncs.pfnRandomLong(static_cast<int32>(lHigh), static_cast<int32>(lLow));
 	}
 
-	return g_engfuncs.pfnRandomLong(lLow, lHigh);
+	return g_engfuncs.pfnRandomLong(static_cast<int32>(lLow), static_cast<int32>(lHigh));
 
 
 }
@@ -98,10 +98,10 @@ template <typename Type1, typename Type2>
 float RANDOM_FLOAT(const Type1 &flLow, const Type2 &flHigh) {
 
 	if (flLow > flHigh) {
-		return g_engfuncs.pfnRandomFloat(flHigh, flLow);
+		return g_engfuncs.pfnRandomFloat( static_cast<float>(flHigh), static_cast<float>(flLow) );
 	}
 	
-	return g_engfuncs.pfnRandomFloat(flLow, flHigh);
+	return g_engfuncs.pfnRandomFloat(static_cast<float>(flLow), static_cast<float>(flHigh));
 
 }
 
