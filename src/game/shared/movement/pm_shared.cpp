@@ -52,12 +52,12 @@ extern "C"
 }
 #endif
 
-IScripted *PMScript = NULL;
+IScripted* PMScript = nullptr;
 //------------------
 
 static bool pm_shared_initialized = false;
 
-#pragma warning(disable : 4305)
+//#pragma warning(disable : 4305)
 
 typedef enum
 {
@@ -67,7 +67,7 @@ typedef enum
 	mod_studio
 } modtype_t;
 
-extern "C" playermove_t *pmove = NULL;
+extern "C" playermove_t *pmove = nullptr;
 
 typedef struct
 {
@@ -95,6 +95,7 @@ typedef struct hull_s
 } hull_t;
 
 // Ducking time
+
 #define TIME_TO_DUCK 0.4
 #undef VEC_DUCK_VIEW
 #define VEC_DUCK_VIEW 12
@@ -109,19 +110,6 @@ typedef struct hull_s
 
 #define CTEXTURESMAX 512	// max number of textures loaded
 #define MAX_CBTEXTURENAME 13 // only load first n chars of name
-
-#define CHAR_TEX_CONCRETE 'C' // texture types
-#define CHAR_TEX_METAL 'M'
-#define CHAR_TEX_DIRT 'D'
-#define CHAR_TEX_VENT 'V'
-#define CHAR_TEX_GRATE 'G'
-#define CHAR_TEX_TILE 'T'
-#define CHAR_TEX_SLOSH 'S'
-#define CHAR_TEX_WOOD 'W'
-#define CHAR_TEX_COMPUTER 'P'
-#define CHAR_TEX_GLASS 'Y'
-#define CHAR_TEX_FLESH 'F'
-#define CHAR_TEX_SNOW 'N' //MAR2008a Thothie - for Crow
 
 #define STEP_CONCRETE 0 // default step sound
 #define STEP_METAL 1	// metal floor
