@@ -9,7 +9,7 @@
 //////////////////////////////////
 //	Special container behavior  //
 //////////////////////////////////
-#pragma warning(disable : 4800) // forcing int to bool
+//#pragma warning(disable : 4800) // forcing int to bool
 
 #include "inc_weapondefs.h"
 #include "vgui_menudefsshared.h"
@@ -57,10 +57,6 @@ void CGenericItem::RegisterContainer()
 	PackData->fCanClose = (bool)atoi(GetFirstScriptVar("reg.container.canclose"));
 	PackData->iLockStrength = atof(GetFirstScriptVar("reg.container.lock_str"));
 	PackData->MaxItems = atof(GetFirstScriptVar("reg.container.maxitem"));
-
-#define CONTAINER_ITEM_ACCEPT "reg.container.accept_mask"
-#define CONTAINER_ITEM_REJECT "reg.container.reject_mask"
-
 	const char *pszItemList = "";
 	if (strcmp(pszItemList = GetFirstScriptVar(CONTAINER_ITEM_ACCEPT), CONTAINER_ITEM_ACCEPT))
 		TokenizeString(pszItemList, PackData->AcceptItemsTypes);

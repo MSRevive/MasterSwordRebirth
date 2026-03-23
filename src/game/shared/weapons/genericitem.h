@@ -228,7 +228,8 @@ public:
 	struct armordata_t *ArmorData = nullptr;
 	struct projectiledata_t *ProjectileData = nullptr;
 	struct spelldata_t *SpellData = nullptr;
-
+	const char* CONTAINER_ITEM_ACCEPT = "reg.container.accept_mask";
+	const char* CONTAINER_ITEM_REJECT = "reg.container.reject_mask";
 	int m_Location,																	 //Location of the item on the monster (Hands, back, etc)
 		m_Hand;																		 //The hand I'm in... if I'm in a hand
 	float m_TimeExpire;																 //Time the item should be deleted
