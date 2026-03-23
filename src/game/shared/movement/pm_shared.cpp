@@ -69,7 +69,6 @@ extern "C" playermove_t *pmove = nullptr;
 
 // Ducking time
 
-constexpr unsigned int MAX_CTEXTURES = 512;	// max number of textures loaded
 
 
 #define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet

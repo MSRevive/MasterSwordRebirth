@@ -22,6 +22,7 @@
 
 constexpr float STOP_EPSILON = 0.1;
 constexpr float DIST_EPSILON = 0.125f;	// Max error from network coordinate quantization
+constexpr unsigned int MAX_CTEXTURES = 512;	// max number of textures loaded
 
 void PM_Init(struct playermove_s *ppmove);
 void PM_Move(struct playermove_s *ppmove, qboolean server);

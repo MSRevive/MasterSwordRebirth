@@ -1526,8 +1526,6 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // Used to detect the texture the player is standing on, map the
 // texture name to a material type.  Play footstep sound based
 // on material type.
-constexpr unsigned int MAX_CTEXTURES = 512; // max number of textures loaded
-
 unsigned int gcTextures = 0;
 char grgszTextureName[MAX_CTEXTURES][MAX_CBTEXTURENAME]; // texture names
 char grgchTextureType[MAX_CTEXTURES];				   // parallel array of texture types
