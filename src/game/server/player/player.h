@@ -23,21 +23,39 @@
 
 #include "global.h"
 
+#include "sharedmenu.h"
 
+
+
+constexpr const char* VAR_NPC_ANIM_TORSO = "game.monster.torso_anim";
+constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
+constexpr const char* PLAYER_SCRIPT = "player/player";
+
+// was 1500, but there shouldn't be any issues with increasing.
+constexpr unsigned int MAX_NUM_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
 constexpr unsigned int MAX_ID_RANGE = 2048;
-constexpr unsigned int SBAR_STRING_SIZE = 128;
 constexpr unsigned int MAX_NUM_ITEMS = 100; //Thothie APR2011_28
 constexpr unsigned int MAX_GET_ITEMS = 9;
-constexpr float PICKUPITEM_DISTANCE = 68.0; //Search and pickup dist might have to be different
+constexpr unsigned int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
+constexpr unsigned int SBAR_STRING_SIZE = 128;
+constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
+constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
+constexpr float PLAYER_DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
+constexpr float PLAYER_MIN_BOUNCE_SPEED = 200;
+constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 350.0f;// won't punch player's screen/make scrape noise unless player falling at least this fast.
+constexpr float PLAYER_WALLJUMP_SPEED = 300; // how fast we can spring off walls
+constexpr float PLAYER_LONGJUMP_SPEED = 350; // how fast we longjump
 constexpr float PLAYER_SEARCH_RADIUS = 64;
+constexpr float PLAYER_PICKUPITEM_DISTANCE = 68.0; //Search and pickup dist might have to be different
+constexpr float PLAYER_BASE_SPEED = 160;
+constexpr float PLAYER_WALKSPEED_MAX_WEIGHT_SLOWDOWN = 70;
+constexpr float PLAYER_WALKSPEED_MAX_DEX = 75.0f;
 constexpr float CLIMB_SHAKE_FREQUENCY = 22; // how many frames in between screen shakes when climbing
-constexpr float MAX_CLIMB_SPEED = 200;		 // fastest vertical climbing speed possible
+constexpr float CLIMB_MAX_SPEED = 200;		 // fastest vertical climbing speed possible
 constexpr float CLIMB_SPEED_DEC = 15;		 // climbing deceleration rate
 constexpr float CLIMB_PUNCH_X = -7;		 // how far to 'punch' client X axis when climbing
 constexpr float CLIMB_PUNCH_Z = 7;		 // how far to 'punch' client Z axis when climbing
-
-// was 1500, but there shouldn't be any issues with increasing.
-constexpr int NUM_MAX_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
+constexpr float CHAT_INTERVAL = 1.0f;
 
 enum sbar_data
 {
@@ -59,8 +77,6 @@ enum transtype_e
 
 };
 
-
-constexpr float CHAT_INTERVAL = 1.0f;
 //Master Sword
 
 class CStat;
@@ -123,9 +139,6 @@ struct quickslot_t //Quickslots for items, spells
 	quickslottype_e Type;
 	uint ID;
 };
-constexpr int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
-
-#include "sharedmenu.h"
 
 void SendViewAnim(CBasePlayer *pPlayer, int iAnim, int body = 0);
 //void SetViewModel( const char *pszViewModel );
@@ -137,9 +150,6 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer);
 //macros (just to shorten things up a bit)
 #define CREATE_ENT(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)));
 
-constexpr const char* VAR_NPC_ANIM_TORSO = "game.monster.torso_anim";
-constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
-constexpr const char* PLAYER_SCRIPT = "player/player";
 //#define mCH m_pOwner->iCurrentHand
 
 /*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
@@ -156,15 +166,6 @@ enum ms_flag_e {
 };
 
 //-----------------
-
-constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
-constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
-constexpr float DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
-constexpr float PLAYER_MIN_BOUNCE_SPEED = 200;
-constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 350.0f;// won't punch player's screen/make scrape noise unless player falling at least this fast.
-constexpr float PLAYER_WALLJUMP_SPEED = 300; // how fast we can spring off walls
-constexpr float PLAYER_LONGJUMP_SPEED = 350; // how fast we longjump
-
 //
 // Player PHYSICS FLAGS bits
 //
