@@ -14,10 +14,6 @@ struct spelldata_t
 	float TimeFizzle;  //Fizzle after this amount of time
 };
 
-#define SpellCheck  \
-	if (!SpellData) \
-	return
-
 void CGenericItem::RegisterSpell()
 {
 	Spell_Deactivate();
@@ -50,7 +46,7 @@ bool CGenericItem::Spell_LearnSpell(const char *pszSpellName)
 
 void CGenericItem::Spell_Think()
 {
-	SpellCheck;
+	if (!SpellData) return;
 
 	if (gpGlobals->time >= Spell_TimeCast + SpellData->TimeFizzle)
 	{
