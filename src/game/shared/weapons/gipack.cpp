@@ -504,14 +504,14 @@ void CGenericItem::Container_StackItems()
 						if (!FBitSet(pCur->Properties, ITEM_GROUPABLE)) //If it's groupable (Paranoia)
 							continue;
 
-						if (pItem->iQuantity != NUM_MAX_STACK)
+						if (pItem->iQuantity != MAX_NUM_STACK)
 						{
 							pItem->iQuantity += pCur->iQuantity;
-							if (pItem->iQuantity > NUM_MAX_STACK)
+							if (pItem->iQuantity > MAX_NUM_STACK)
 							{
-								int remainder = pItem->iQuantity - NUM_MAX_STACK;
+								int remainder = pItem->iQuantity - MAX_NUM_STACK;
 								pCur->iQuantity = remainder;
-								pItem->iQuantity = NUM_MAX_STACK;
+								pItem->iQuantity = MAX_NUM_STACK;
 							}
 							else
 							{

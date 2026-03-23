@@ -980,22 +980,18 @@ float CBasePlayer::WalkSpeed(bool fParseSpeed)
 	float fSpeed;
 	float Dex = GetNatStat(NATURAL_DEX);
 
-#define BASE_SPEED 160
-#define WALKSPEED_MAX_WEIGHT_SLOWDOWN 70
-#define WALKSPEED_MAX_DEX 75.0f
-
-	float StatEnhancement = (V_min(Dex, WALKSPEED_MAX_DEX) / WALKSPEED_MAX_DEX) * 100;
+	float StatEnhancement = (V_min(Dex, PLAYER_WALKSPEED_MAX_DEX) / PLAYER_WALKSPEED_MAX_DEX) * 100;
 
 	//Speed detriment - When weight over 50% the volume, speed reduces
 	float VolumeHalf = Volume() / 2.0f;
 
 	float SpeedDetriment = Weight() - VolumeHalf;
-	SpeedDetriment = (V_max(SpeedDetriment, 0) / VolumeHalf) * WALKSPEED_MAX_WEIGHT_SLOWDOWN;
+	SpeedDetriment = (V_max(SpeedDetriment, 0) / VolumeHalf) * PLAYER_WALKSPEED_MAX_WEIGHT_SLOWDOWN;
 
-	SpeedDetriment = V_min(SpeedDetriment, WALKSPEED_MAX_WEIGHT_SLOWDOWN);
+	SpeedDetriment = V_min(SpeedDetriment, PLAYER_WALKSPEED_MAX_WEIGHT_SLOWDOWN);
 	SpeedDetriment = V_max(SpeedDetriment, 0);
 
-	fSpeed = BASE_SPEED + StatEnhancement - SpeedDetriment;
+	fSpeed = PLAYER_BASE_SPEED + StatEnhancement - SpeedDetriment;
 
 	return fParseSpeed ? ParseSpeed(fSpeed) : fSpeed;
 }
