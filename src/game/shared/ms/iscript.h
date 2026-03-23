@@ -22,6 +22,10 @@ typedef unsigned long ulong;
 #endif
 
 
+constexpr const char* SKIP_STR = " \t"; //Whitespace characters
+constexpr int DEFAULT_SCRIPT_ID = -1;
+constexpr int PLAYER_SCRIPT_ID = -2;
+
 struct scriptvar_t
 {
 	scriptvar_t() {}
@@ -189,10 +193,6 @@ public:
 	mslist<CScript *> m_Scripts;		   //List of scripts
 	msstring m_ReturnData;				   //Data returned from an event.  Reset at next CallScriptEvent()
 };
-constexpr const char* SKIP_STR = " \t"; //Whitespace characters
-
-constexpr int DEFAULT_SCRIPT_ID = -1;
-constexpr int PLAYER_SCRIPT_ID = -2;
 
 // MiB 30NOV_2014 - Template structure for script function pointers
 // Keeps track of whether or not it's a conditional command and how many times it's been referenced (for testing and curiosity)
