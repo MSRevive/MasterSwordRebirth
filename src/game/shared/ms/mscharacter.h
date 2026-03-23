@@ -8,6 +8,8 @@
 #include "buildcontrol.h"
 #include "monsters/msmonster.h"
 
+
+
 // Char Files
 enum chardatastatus_e
 {
@@ -202,4 +204,7 @@ public:
 	static void UpdateCharScreen();
 	static void UpdateCharScreenUpload();
 };
+
+
+
 #endif //MSCHARACTER_H

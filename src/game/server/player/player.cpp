@@ -1923,7 +1923,7 @@ Things powered by the battery
 */
 
 // if in range of radiation source, ping geiger counter
-#define GEIGERDELAY 0.25
+constexpr float GEIGERDELAY = 0.25;
 
 void CBasePlayer ::UpdateGeigerCounter(void)
 {
@@ -2540,15 +2540,6 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 	return pSpot;
 }
 
-//Map must have a ms_player_begin in order for people to create characters there!
-class CSpawnPointBegin : public CPointEntity
-{
-	void Spawn()
-	{
-		MSGlobals::CanCreateCharOnMap = true;
-		CPointEntity::Spawn();
-	}
-};
 
 LINK_ENTITY_TO_CLASS(ms_player_spec, CPointEntity);
 LINK_ENTITY_TO_CLASS(ms_player_spawn, CPointEntity);
@@ -4146,19 +4137,19 @@ void CBasePlayer ::EnableControl(BOOL fControl)
 		pev->flags &= ~FL_FROZEN;
 }
 
-#define DOT_1DEGREE 0.9998476951564
-#define DOT_2DEGREE 0.9993908270191
-#define DOT_3DEGREE 0.9986295347546
-#define DOT_4DEGREE 0.9975640502598
-#define DOT_5DEGREE 0.9961946980917
-#define DOT_6DEGREE 0.9945218953683
-#define DOT_7DEGREE 0.9925461516413
-#define DOT_8DEGREE 0.9902680687416
-#define DOT_9DEGREE 0.9876883405951
-#define DOT_10DEGREE 0.9848077530122
-#define DOT_15DEGREE 0.9659258262891
-#define DOT_20DEGREE 0.9396926207859
-#define DOT_25DEGREE 0.9063077870367
+constexpr double DOT_1DEGREE = 0.9998476951564;
+constexpr double DOT_2DEGREE = 0.9993908270191;
+constexpr double DOT_3DEGREE = 0.9986295347546;
+constexpr double DOT_4DEGREE = 0.9975640502598;
+constexpr double DOT_5DEGREE = 0.9961946980917;
+constexpr double DOT_6DEGREE = 0.9945218953683;
+constexpr double DOT_7DEGREE = 0.9925461516413;
+constexpr double DOT_8DEGREE = 0.9902680687416;
+constexpr double DOT_9DEGREE = 0.9876883405951;
+constexpr double DOT_10DEGREE = 0.9848077530122;
+constexpr double DOT_15DEGREE = 0.9659258262891;
+constexpr double DOT_20DEGREE = 0.9396926207859;
+constexpr double DOT_25DEGREE = 0.9063077870367;
 
 //=========================================================
 // Autoaim
@@ -4437,37 +4428,11 @@ void CStripWeapons ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		pPlayer->RemoveAllItems(false);
 }
 
-class CRevertSaved : public CPointEntity
-{
-public:
-	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
-	void EXPORT MessageThink(void);
-	void EXPORT LoadThink(void);
-	void KeyValue(KeyValueData *pkvd);
-
-	virtual int Save(CSave &save);
-	virtual int Restore(CRestore &restore);
-	static TYPEDESCRIPTION m_SaveData[];
-
-	inline float Duration(void) { return pev->dmg_take; }
-	inline float HoldTime(void) { return pev->dmg_save; }
-	inline float MessageTime(void) { return m_messageTime; }
-	inline float LoadTime(void) { return m_loadTime; }
-
-	inline void SetDuration(float duration) { pev->dmg_take = duration; }
-	inline void SetHoldTime(float hold) { pev->dmg_save = hold; }
-	inline void SetMessageTime(float time) { m_messageTime = time; }
-	inline void SetLoadTime(float time) { m_loadTime = time; }
-
-private:
-	float m_messageTime;
-	float m_loadTime;
-};
 
 LINK_ENTITY_TO_CLASS(player_loadsaved, CRevertSaved);
 
 TYPEDESCRIPTION CRevertSaved::m_SaveData[] =
-	{
+{
 		DEFINE_FIELD(CRevertSaved, m_messageTime, FIELD_FLOAT), // These are not actual times, but durations, so save as floats
 		DEFINE_FIELD(CRevertSaved, m_loadTime, FIELD_FLOAT),
 };

@@ -21,6 +21,9 @@
 #include "pm_materials.h"
 #include "mscharacter.h"
 
+#include "global.h"
+
+
 constexpr unsigned int MAX_ID_RANGE = 2048;
 constexpr unsigned int SBAR_STRING_SIZE = 128;
 constexpr unsigned int NUM_MAX_ITEMS = 100; //Thothie APR2011_28
@@ -890,14 +893,54 @@ extern CBasePlayer player;
 extern int playerBodyArray[16];
 #endif
 
-#define AUTOAIM_2DEGREES 0.0348994967025
-#define AUTOAIM_5DEGREES 0.08715574274766
-#define AUTOAIM_8DEGREES 0.1391731009601
-#define AUTOAIM_10DEGREES 0.1736481776669
+constexpr double AUTOAIM_2DEGREES = 0.0348994967025;
+constexpr double AUTOAIM_5DEGREES = 0.08715574274766;
+constexpr double AUTOAIM_8DEGREES = 0.1391731009601;
+constexpr double AUTOAIM_10DEGREES = 0.1736481776669;
 
 extern int gmsgHudText;
 extern BOOL gInitHUD;
 
 const char *GetOtherPlayerTransition(CBasePlayer *pPlayer);
+
+class CRevertSaved : public CPointEntity
+{
+public:
+	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+	void EXPORT MessageThink(void);
+	void EXPORT LoadThink(void);
+	void KeyValue(KeyValueData* pkvd);
+
+	virtual int Save(CSave& save);
+	virtual int Restore(CRestore& restore);
+	static TYPEDESCRIPTION m_SaveData[];
+
+	inline float Duration(void) { return pev->dmg_take; }
+	inline float HoldTime(void) { return pev->dmg_save; }
+	inline float MessageTime(void) { return m_messageTime; }
+	inline float LoadTime(void) { return m_loadTime; }
+
+	inline void SetDuration(float duration) { pev->dmg_take = duration; }
+	inline void SetHoldTime(float hold) { pev->dmg_save = hold; }
+	inline void SetMessageTime(float time) { m_messageTime = time; }
+	inline void SetLoadTime(float time) { m_loadTime = time; }
+
+private:
+	float m_messageTime;
+	float m_loadTime;
+};
+
+
+class CSpawnPointBegin : public CPointEntity
+{
+	void Spawn()
+	{
+		MSGlobals::CanCreateCharOnMap = true;
+		CPointEntity::Spawn();
+	}
+};
+
+
+//Map must have a ms_player_begin in order for people to create characters there!
 
 #endif // PLAYER_H
