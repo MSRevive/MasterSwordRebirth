@@ -1672,7 +1672,7 @@ const char* CBaseEntity::GetProp(CBaseEntity* pTarget, msstring& FullParams, mss
 					else if (Prop.contains(".divination"))	SubSkill = STAT_MAGIC_DIVINATION;
 					else if (Prop.contains(".affliction"))	SubSkill = STAT_MAGIC_AFFLICTION;
 
-					int Max = (SubSkill > -1) ? (int)STAT_PROP_MAX_VALUE : (int)STAT_MAX_VALUE;
+					int Max = (SubSkill > -1) ? (int)MAX_STAT_PROPVALUE : (int)MAX_STAT_VALUE;
 
 					if (Prop.contains(".max")) return RETURN_INT(Max);
 					else

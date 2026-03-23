@@ -2760,8 +2760,8 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
-	if (SubStat.Value > STAT_PROP_MAX_VALUE)
-		SubStat.Value = STAT_PROP_MAX_VALUE;
+	if (SubStat.Value > MAX_STAT_PROPVALUE)
+		SubStat.Value = MAX_STAT_PROPVALUE;
 	SubStat.Exp = 0;
 
 	//Thothie - why's this here twice? I dont see where oldval could change.

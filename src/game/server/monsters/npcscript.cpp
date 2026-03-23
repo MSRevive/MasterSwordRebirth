@@ -1345,7 +1345,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 						if (iProp > -1)
 						{
 							int value = atoi(Params[1]);
-							pStat->m_SubStats[iProp].Value = V_min(value, STAT_PROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = V_min(value, MAX_STAT_PROPVALUE);
 						}
 					}
 				}

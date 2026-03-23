@@ -58,7 +58,7 @@ enum
 	STAT_PROP_TOTAL,
 
 	STAT_MAGIC_FIRE = 0, //Magic.  These override the above properties for spellcasting
-	STAT_MAGIC_ICE,
+	STAT_MAGIC_ICE ,
 	STAT_MAGIC_LIGHTNING,
 	STAT_MAGIC_DIVINATION,
 	STAT_MAGIC_AFFLICTION,
@@ -72,8 +72,8 @@ int GetNatStatByName(const char *pszName);					 //Returns -1 if not found
 void GetStatIndices(const char *Name, int &Stat, int &Prop); //Converts stat.prop into valid indices
 const char *GetSkillName(int Skill);						 //Looks any skill
 
-constexpr float STAT_MAX_VALUE = 300.0f;
-constexpr float STAT_PROP_MAX_VALUE = 100.0f;
+constexpr float MAX_STAT_VALUE = 300.0f;
+constexpr float MAX_STAT_PROPVALUE = 100.0f;
 	//level cap
 
 //For MSMonster::m_PlayerDamage
