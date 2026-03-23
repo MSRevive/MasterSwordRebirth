@@ -5,7 +5,7 @@
 #else
 #include "inc_huditem.h"
 #include "movement/pm_defs.h"
-#define MAX_SEARCH_ENTITIES 1500 // TODO
+constexpr unsigned int MAX_SEARCH_ENTITIES = 1500; // TODO
 #endif
 
 int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>& vFilters, CFindEntity::YWrapType * pIgnoreEntity, int vMax)
