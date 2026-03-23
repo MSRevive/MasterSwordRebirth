@@ -31,11 +31,6 @@
 #include "angelscript/ASEngineEventManager.h"
 #endif
 
-
-
-
-#undef SCRIPTVAR
-#define SCRIPTVAR GetVar								//A script-wide or global variable
 #define ERROR_MISSING_PARMS MS_ERROR("ExecuteScriptCmd: Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), Cmd.Name().c_str())
 void Player_UseStamina(float flAddAmt);
 extern "C" playermove_t *pmove;
@@ -1757,7 +1752,7 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	}
 	else if (Cmd.Name() == "registerlocal.menu")
 	{
-		msstring sTitle = SCRIPTVAR("reg.local.menu.title");
+		msstring sTitle = GetVar("reg.local.menu.title");
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
 		WRITE_BYTE( 3 );
@@ -1770,18 +1765,18 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	}
 	else if (Cmd.Name() == "registerlocal.button")
 	{
-		msstring sText = SCRIPTVAR("reg.local.button.text");
-		bool bCloseOnClick = atoi(SCRIPTVAR("reg.local.button.closeonclick")) ? true : false;
-		bool bEnabled = atoi(SCRIPTVAR("reg.local.button.enabled")) ? true : false;
-		int	cbType = atoi(SCRIPTVAR("reg.local.button.docallback")) ?
+		msstring sText = GetVar("reg.local.button.text");
+		bool bCloseOnClick = atoi(GetVar("reg.local.button.closeonclick")) ? true : false;
+		bool bEnabled = atoi(GetVar("reg.local.button.enabled")) ? true : false;
+		int	cbType = atoi(GetVar("reg.local.button.docallback")) ?
 #ifdef VALVE_DLL
 			1  // Server
 #else
 			2  // Client
 #endif
 			: 0; // None
-		msstring sCallBack = cbType ? SCRIPTVAR("reg.local.button.callback") : "";
-		msstring sCallBackData = SCRIPTVAR("reg.local.button.data");
+		msstring sCallBack = cbType ? GetVar("reg.local.button.callback") : "";
+		msstring sCallBackData = GetVar("reg.local.button.data");
 		if (sCallBackData == "reg.local.button.callback")
 		{
 			sCallBackData = "";
@@ -1803,8 +1798,8 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	}
 	else if (Cmd.Name() == "registerlocal.paragraph")
 	{
-		msstring srcType = SCRIPTVAR("reg.local.paragraph.source.type");
-		msstring src = SCRIPTVAR("reg.local.paragraph.source");
+		msstring srcType = GetVar("reg.local.paragraph.source.type");
+		msstring src = GetVar("reg.local.paragraph.source");
 
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
@@ -1844,11 +1839,11 @@ bool CScript::ScriptCmd_LocalPanel(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	else if (Cmd.Name() == "registerlocal.image")
 	{
 		// MIB FEB2019_22 [LOCAL_PANEL_IMAGE]
-		msstring	vName = SCRIPTVAR("reg.local.image.name");
-		bool        bIsTga = atoi(SCRIPTVAR("reg.local.image.tga")) == 1;
+		msstring	vName = GetVar("reg.local.image.name");
+		bool        bIsTga = atoi(GetVar("reg.local.image.tga")) == 1;
 
-		int			vFrame = atoi(SCRIPTVAR("reg.local.image.frame"));
-		bool		bBorder = atoi(SCRIPTVAR("reg.local.image.border")) == 1;
+		int			vFrame = atoi(GetVar("reg.local.image.frame"));
+		bool		bBorder = atoi(GetVar("reg.local.image.border")) == 1;
 
 #ifdef VALVE_DLL
 		MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_LOCALPANEL], NULL, pPlayer->pev );
@@ -4041,7 +4036,7 @@ bool CScript::ScriptCmd_If(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &
 		if (Params[0].c_str()[0] == '!')
 		{
 			Opposite = true;
-			Value = SCRIPTVAR(Params[0].substr(1));	//The '!' interferes with the default variable resolution, so remove it and resolve the variable again
+			Value = GetVar(Params[0].substr(1));	//The '!' interferes with the default variable resolution, so remove it and resolve the variable again
 		}
 
 		ConditionsMet = atoi(Value) ? true : false;
@@ -4984,26 +4979,26 @@ bool CScript::ScriptCmd_RegisterDefaults(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, 
 	MSGlobals::DefaultWeapons.clearitems();
 	MSGlobals::DefaultFreeItems.clearitems();
 
-	TokenizeString(SCRIPTVAR("reg.newchar.weaponlist"), MSGlobals::DefaultWeapons);
-	TokenizeString(SCRIPTVAR("reg.newchar.freeitems"), MSGlobals::DefaultFreeItems);
-	MSGlobals::DefaultGold = atoi(SCRIPTVAR("reg.newchar.gold"));
-	MSGlobals::DefaultSpawnBoxModel = SCRIPTVAR("reg.hud.spawnbox");
+	TokenizeString(GetVar("reg.newchar.weaponlist"), MSGlobals::DefaultWeapons);
+	TokenizeString(GetVar("reg.newchar.freeitems"), MSGlobals::DefaultFreeItems);
+	MSGlobals::DefaultGold = atoi(GetVar("reg.newchar.gold"));
+	MSGlobals::DefaultSpawnBoxModel = GetVar("reg.hud.spawnbox");
 #ifdef VALVE_DLL
 	PRECACHE_MODEL( MSGlobals::DefaultSpawnBoxModel );
 #else
-	MSCLGlobals::DefaultHUDCharAnims.Idle_Weapon = SCRIPTVAR("reg.hud.char.active_weapon");
-	MSCLGlobals::DefaultHUDCharAnims.Idle_NoWeapon = SCRIPTVAR("reg.hud.char.active_noweap");
-	MSCLGlobals::DefaultHUDCharAnims.Fidget = SCRIPTVAR("reg.hud.char.figet");
-	MSCLGlobals::DefaultHUDCharAnims.Highlighted = SCRIPTVAR("reg.hud.char.highlight");
-	MSCLGlobals::DefaultHUDCharAnims.Uploading = SCRIPTVAR("reg.hud.char.upload");
-	MSCLGlobals::DefaultHUDCharAnims.Inactive = SCRIPTVAR("reg.hud.char.inactive");
+	MSCLGlobals::DefaultHUDCharAnims.Idle_Weapon = GetVar("reg.hud.char.active_weapon");
+	MSCLGlobals::DefaultHUDCharAnims.Idle_NoWeapon = GetVar("reg.hud.char.active_noweap");
+	MSCLGlobals::DefaultHUDCharAnims.Fidget = GetVar("reg.hud.char.figet");
+	MSCLGlobals::DefaultHUDCharAnims.Highlighted = GetVar("reg.hud.char.highlight");
+	MSCLGlobals::DefaultHUDCharAnims.Uploading = GetVar("reg.hud.char.upload");
+	MSCLGlobals::DefaultHUDCharAnims.Inactive = GetVar("reg.hud.char.inactive");
 
-	MSCLGlobals::DefaultHUDSounds.QuickSlot_Select = SCRIPTVAR("reg.hud.quickslot.select");
-	MSCLGlobals::DefaultHUDSounds.QuickSlot_Confirm = SCRIPTVAR("reg.hud.quickslot.confirm");
-	MSCLGlobals::DefaultHUDSounds.QuickSlot_Assign = SCRIPTVAR("reg.hud.quickslot.assign");
+	MSCLGlobals::DefaultHUDSounds.QuickSlot_Select = GetVar("reg.hud.quickslot.select");
+	MSCLGlobals::DefaultHUDSounds.QuickSlot_Confirm = GetVar("reg.hud.quickslot.confirm");
+	MSCLGlobals::DefaultHUDSounds.QuickSlot_Assign = GetVar("reg.hud.quickslot.assign");
 
-	MSCLGlobals::DefaultHUDCoords.ItemDesc_X = atof(SCRIPTVAR("reg.hud.desctext.x"));
-	MSCLGlobals::DefaultHUDCoords.ItemDesc_Y = atof(SCRIPTVAR("reg.hud.desctext.y"));
+	MSCLGlobals::DefaultHUDCoords.ItemDesc_X = atof(GetVar("reg.hud.desctext.x"));
+	MSCLGlobals::DefaultHUDCoords.ItemDesc_Y = atof(GetVar("reg.hud.desctext.y"));
 #endif
 
 	return true;
@@ -5017,10 +5012,10 @@ bool CScript::ScriptCmd_RegisterEffect(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, ms
 #ifdef VALVE_DLL
 	globalscripteffect_t Effect;
 
-	Effect.m_Name = SCRIPTVAR("reg.effect.name");
-	Effect.m_ScriptName = SCRIPTVAR("reg.effect.script");
+	Effect.m_Name = GetVar("reg.effect.name");
+	Effect.m_ScriptName = GetVar("reg.effect.script");
 
-	msstring Flags = SCRIPTVAR("reg.effect.flags");
+	msstring Flags = GetVar("reg.effect.flags");
 
 	Effect.m_Flags = SCRIPTEFFECT_NORMAL;
 	if( Flags.contains("player_action") )	SetBits( Effect.m_Flags, SCRIPTEFFECT_PLAYERACTION );
@@ -5039,10 +5034,10 @@ bool CScript::ScriptCmd_RegisterRace(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 {
 #ifdef VALVE_DLL
 	race_t NewRace;
-	NewRace.Name = SCRIPTVAR("reg.race.name");
-	TokenizeString( SCRIPTVAR("reg.race.enemies"), NewRace.Enemies );
-	TokenizeString( SCRIPTVAR("reg.race.allies"), NewRace.Allies );
-	TokenizeString( SCRIPTVAR("reg.race.wary"), NewRace.Wary );
+	NewRace.Name = GetVar("reg.race.name");
+	TokenizeString( GetVar("reg.race.enemies"), NewRace.Enemies );
+	TokenizeString( GetVar("reg.race.allies"), NewRace.Allies );
+	TokenizeString( GetVar("reg.race.wary"), NewRace.Wary );
 
 	CRaceManager::AddRace( NewRace );
 #endif
@@ -5060,26 +5055,26 @@ bool CScript::ScriptCmd_RegisterTexture(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 	clrmem(NewTexture);
 
 	//Load settings
-	NewTexture.Name = SCRIPTVAR("reg.texture.name");
+	NewTexture.Name = GetVar("reg.texture.name");
 
 	msstringlist ColorParts;
-	NewTexture.IsReflective = atoi(SCRIPTVAR("reg.texture.reflect")) ? true : false;
-	NewTexture.IsWater = atoi(SCRIPTVAR("reg.texture.water")) ? true : false;
+	NewTexture.IsReflective = atoi(GetVar("reg.texture.reflect")) ? true : false;
+	NewTexture.IsWater = atoi(GetVar("reg.texture.water")) ? true : false;
 
 	//Reflection settings
-	NewTexture.Mirror.Blending = atoi(SCRIPTVAR("reg.texture.reflect.blend")) ? true : false;
-	TokenizeString(SCRIPTVAR("reg.texture.reflect.color"), ColorParts);
+	NewTexture.Mirror.Blending = atoi(GetVar("reg.texture.reflect.blend")) ? true : false;
+	TokenizeString(GetVar("reg.texture.reflect.color"), ColorParts);
 	for(unsigned int i = 0; i < ColorParts.size(); i++)
 	{
 		if (i == 4) break;	//Too many elements specified - a color only has 4 elements
 		NewTexture.Mirror.Color[i] = atof(ColorParts[i]);
 	}
-	NewTexture.Mirror.Blending = atoi(SCRIPTVAR("reg.texture.reflect.blend")) ? true : false;
-	NewTexture.Mirror.Range = atof(SCRIPTVAR("reg.texture.reflect.range"));
+	NewTexture.Mirror.Blending = atoi(GetVar("reg.texture.reflect.blend")) ? true : false;
+	NewTexture.Mirror.Range = atof(GetVar("reg.texture.reflect.range"));
 	if (VarExists("reg.texture.reflect.world"))	//Check var existence, because the default is "1"
-		NewTexture.Mirror.NoWorld = !atoi(SCRIPTVAR("reg.texture.reflect.world"));
+		NewTexture.Mirror.NoWorld = !atoi(GetVar("reg.texture.reflect.world"));
 	if (VarExists("reg.texture.reflect.ents"))
-		NewTexture.Mirror.NoEnts = !atoi(SCRIPTVAR("reg.texture.reflect.ents"));
+		NewTexture.Mirror.NoEnts = !atoi(GetVar("reg.texture.reflect.ents"));
 
 	MSCLGlobals::Textures.add(NewTexture);
 #endif
@@ -5116,7 +5111,7 @@ bool CScript::ScriptCmd_RegisterTitle(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, mss
 		int SKILL_FAILURE = -1;
 		for (unsigned int s = 0; s < Skills.size(); s++)
 		{
-			int Skill = GetSkillStatByName(SCRIPTVAR(Skills[s]));
+			int Skill = GetSkillStatByName(GetVar(Skills[s]));
 			if (Skill == SKILL_FAILURE)
 			{
 				SkillSuccess = false;
