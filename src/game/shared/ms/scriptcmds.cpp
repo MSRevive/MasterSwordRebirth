@@ -283,18 +283,20 @@ void CScript::Script_Setup()
 
 //MIB MAR2019_31 Internal Script Debug
 #ifdef VALVE_DLL
-#define DBGALL          (1 << 0)
-#define DBGTARGET       (1 << 1)
-#define DBGITEMS        (1 << 2)
-#define DBGHANDACTIVE   (1 << 3)
-#define DBGHANDOFF      (1 << 4)
-#define DBGPLAYERS      (1 << 5)
-#define DBGWORLD        (1 << 6)
-#define DBGGM           (1 << 7)
-#define DBGINDEX        (1 << 8)
-#define DBGSCRIPTNAME   (1 << 9)
-#define DBGNPCS         (1 << 10)
 
+enum server_debug_target_e {
+	DBGALL          = (1 << 0),
+	DBGTARGET       = (1 << 1),
+	DBGITEMS        = (1 << 2),
+	DBGHANDACTIVE   = (1 << 3),
+	DBGHANDOFF      = (1 << 4),
+	DBGPLAYERS      = (1 << 5),
+	DBGWORLD        = (1 << 6),
+	DBGGM           = (1 << 7),
+	DBGINDEX        = (1 << 8),
+	DBGSCRIPTNAME   = (1 << 9),
+	DBGNPCS         = (1 << 10)
+};
 struct SDebugInfo
 {
 	// Info for finding entities

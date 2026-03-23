@@ -31,9 +31,6 @@ CScript *CGlobalScriptedEffects::ApplyEffect(const char* ScriptName, IScripted *
 
 	Script->RunScriptEvents(); //Initialize 'game.effect.X'
 
-#define EFFECT_ID "game.effect.id"
-#define EFFECT_FLAGS "game.effect.flags"
-
 	//Check if this effect is being stacked
 	if (Script->VarExists(EFFECT_ID))
 		for (unsigned int i = 0; i < pScriptTarget->m_Scripts.size(); i++)
