@@ -20,7 +20,7 @@
 #define PM_SHAREDH
 #pragma once
 
-constexpr unsigned int MAX_CDPVPRESET = 27;
+
 
 void PM_Init(struct playermove_s *ppmove);
 void PM_Move(struct playermove_s *ppmove, qboolean server);
