@@ -21,7 +21,9 @@ void EnableAllocateTrace() { AllocationStack--; }
 #endif
 #endif
 
-#define MS_FATAL_ERROR_MEM(MemErrMsg) Print("%s\n", MemErrMsg);
+void MS_FATAL_ERROR_MEM(const char * MemErrMsg) {
+	Print("%s\n", MemErrMsg);
+}
 
 #ifdef DEV_BUILD
 void* operator new(size_t size, const char* pszSourceFile, int LineNum)
