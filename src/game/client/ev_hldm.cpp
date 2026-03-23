@@ -117,7 +117,7 @@ float EV_HLDM_PlayTextureSound(int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 
 			// '}}'
 			strncpy(szbuffer,  pTextureName, sizeof(szbuffer));
-			szbuffer[CBTEXTURENAMEMAX - 1] = 0;
+			szbuffer[MAX_CBTEXTURENAME - 1] = 0;
 
 			// get texture type
 			chTextureType = PM_FindTextureType(szbuffer);

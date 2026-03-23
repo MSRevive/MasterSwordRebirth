@@ -16,9 +16,9 @@
 #define PM_MATERIALSH
 #pragma once
 
-inline constexpr int CBTEXTURENAMEMAX = 13; // only load first n chars of name
+inline constexpr unsigned int MAX_CBTEXTURENAME = 13; // only load first n chars of name
 
-enum {
+enum char_texture_e {
 	CHAR_TEX_CONCRETE = 'C', // texture types
 	CHAR_TEX_METAL = 'M',
 	CHAR_TEX_DIRT = 'D',
@@ -29,7 +29,9 @@ enum {
 	CHAR_TEX_WOOD = 'W',
 	CHAR_TEX_COMPUTER = 'P',
 	CHAR_TEX_GLASS = 'Y',
-	CHAR_TEX_FLESH = 'F'
+	CHAR_TEX_FLESH = 'F',
+	CHAR_TEX_SNOW = 'N'
+
 };
 
 #endif // !PM_MATERIALSH

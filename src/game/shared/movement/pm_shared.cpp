@@ -108,7 +108,7 @@ typedef struct hull_s
 #define	DIST_EPSILON 0.125f	// Max error from network coordinate quantization
 
 #define CTEXTURESMAX 512	// max number of textures loaded
-#define CBTEXTURENAMEMAX 13 // only load first n chars of name
+#define MAX_CBTEXTURENAME 13 // only load first n chars of name
 
 #define CHAR_TEX_CONCRETE 'C' // texture types
 #define CHAR_TEX_METAL 'M'
@@ -174,7 +174,7 @@ static int rgStuckLast[MAX_CLIENTS][2];
 static bool bTextureTypeInit = false;
 
 static int gcTextures = 0;
-static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];
+static char grgszTextureName[CTEXTURESMAX][MAX_CBTEXTURENAME];
 static char grgchTextureType[CTEXTURESMAX];
 
 int g_onladder = 0;
@@ -233,15 +233,15 @@ char* memfgets(const byte* pMemFile, std::size_t fileSize, std::size_t& filePos,
 void PM_SwapTextures(int i, int j)
 {
 	char chTemp;
-	char szTemp[CBTEXTURENAMEMAX];
+	char szTemp[MAX_CBTEXTURENAME];
 
-	strncpy(szTemp, grgszTextureName[i], CBTEXTURENAMEMAX);
+	strncpy(szTemp, grgszTextureName[i], MAX_CBTEXTURENAME);
 	chTemp = grgchTextureType[i];
 
-	strncpy(grgszTextureName[i], grgszTextureName[j], CBTEXTURENAMEMAX);
+	strncpy(grgszTextureName[i], grgszTextureName[j], MAX_CBTEXTURENAME);
 	grgchTextureType[i] = grgchTextureType[j];
 
-	strncpy(grgszTextureName[j], szTemp, CBTEXTURENAMEMAX);
+	strncpy(grgszTextureName[j], szTemp, MAX_CBTEXTURENAME);
 	grgchTextureType[j] = chTemp;
 }
 
@@ -273,7 +273,7 @@ void PM_InitTextureTypes()
 	if (bTextureTypeInit)
 		return;
 
-	memset(&(grgszTextureName[0][0]), 0, CTEXTURESMAX * CBTEXTURENAMEMAX);
+	memset(&(grgszTextureName[0][0]), 0, CTEXTURESMAX * MAX_CBTEXTURENAME);
 	memset(grgchTextureType, 0, CTEXTURESMAX);
 
 	gcTextures = 0;
@@ -320,9 +320,9 @@ void PM_InitTextureTypes()
 			continue;
 
 		// null-terminate name and save in sentences array
-		j = V_min(j, CBTEXTURENAMEMAX - 1 + i);
+		j = V_min(j, MAX_CBTEXTURENAME - 1 + i);
 		buffer[j] = 0;
-		strncpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]), CBTEXTURENAMEMAX);
+		strncpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]), MAX_CBTEXTURENAME);
 	}
 
 	PM_SortTextures();
@@ -344,7 +344,7 @@ char PM_FindTextureType(char *name)
 	{
 		pivot = (left + right) / 2;
 
-		val = _strnicmp(name, grgszTextureName[pivot], CBTEXTURENAMEMAX - 1);
+		val = _strnicmp(name, grgszTextureName[pivot], MAX_CBTEXTURENAME - 1);
 		if (val == 0)
 		{
 			return grgchTextureType[pivot];
@@ -662,7 +662,7 @@ void PM_CatagorizeTextureType(void)
 	// '}}'
 
 	strncpy(pmove->sztexturename,  pTextureName, sizeof(pmove->sztexturename) );
-	pmove->sztexturename[CBTEXTURENAMEMAX - 1] = 0;
+	pmove->sztexturename[MAX_CBTEXTURENAME - 1] = 0;
 
 	// get texture type
 	pmove->chtexturetype = PM_FindTextureType(pmove->sztexturename);

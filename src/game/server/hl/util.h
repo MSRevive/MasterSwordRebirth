@@ -582,7 +582,7 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum);
 char TEXTURETYPE_Find(char *name);
 float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int iBulletType);
 
-/*#define CBTEXTURENAMEMAX	13			// only load first n chars of name
+/*#define MAX_CBTEXTURENAME	13			// only load first n chars of name
 
 #define CHAR_TEX_CONCRETE	'C'			// texture types
 #define CHAR_TEX_METAL		'M'

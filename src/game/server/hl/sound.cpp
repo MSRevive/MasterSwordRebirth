@@ -17,8 +17,6 @@
 //=========================================================
 
 #define VALVE_DLL 1
-constexpr char CHAR_TEX_SNOW = 'N';
-
 #include "msdllheaders.h"
 #include "weapons.h"
 #include "player.h"
@@ -1528,11 +1526,11 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // Used to detect the texture the player is standing on, map the
 // texture name to a material type.  Play footstep sound based
 // on material type.
-constexpr unsigned int CTEXTURESMAX = 512; // max number of textures loaded
+constexpr unsigned int MAX_CTEXTURES = 512; // max number of textures loaded
 
 unsigned int gcTextures = 0;
-char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX]; // texture names
-char grgchTextureType[CTEXTURESMAX];				   // parallel array of texture types
+char grgszTextureName[MAX_CTEXTURES][MAX_CBTEXTURENAME]; // texture names
+char grgchTextureType[MAX_CTEXTURES];				   // parallel array of texture types
 
 // given texture name, find texture type
 // if not found, return type 'concrete'
@@ -1546,7 +1544,7 @@ char TEXTURETYPE_Find(char *name)
 
 	for (unsigned int i = 0; i < gcTextures; i++)
 	{
-		if (!_strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
+		if (!_strnicmp(name, &(grgszTextureName[i][0]), MAX_CBTEXTURENAME - 1))
 			return (grgchTextureType[i]);
 	}
 
@@ -1609,7 +1607,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int 
 				pTextureName++;
 			// '}}'
 			 strncpy(szbuffer,  pTextureName, sizeof(szbuffer) );
-			szbuffer[CBTEXTURENAMEMAX - 1] = 0;
+			szbuffer[MAX_CBTEXTURENAME - 1] = 0;
 
 			// ALERT ( at_console, "texture hit: %s\n", szbuffer);
 
