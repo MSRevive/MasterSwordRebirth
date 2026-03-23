@@ -71,20 +71,6 @@ enum {
 
 //These are for CBasePlayer::m_StatusFlags
 
-enum {
-	PLAYER_MOVE_RUNNING = (1 << 0),
-	PLAYER_MOVE_ATTACKING = (1 << 1),
-	PLAYER_MOVE_JUMPING = (1 << 2),
-	PLAYER_MOVE_SWIMMING = (1 << 3) ,//Set by script.. really just an indicator for the client that it should rotate the model by pitch
-	PLAYER_MOVE_NORUN = (1 << 3),
-	PLAYER_MOVE_NOJUMP = (1 << 4),
-	PLAYER_MOVE_NODUCK = (1 << 5),
-	PLAYER_MOVE_NOATTACK = (1 << 6),
-	PLAYER_MOVE_NOMOVE = (1 << 7),
-	PLAYER_MOVE_SITTING = (1 << 8), //JAN2010_09 Thothie - Attempting to allow inventory access while sittin again
-	PLAYER_MOVE_STOPRUN = (1 << 9)
-};
-
 //#define PLAYER_MOVE_SPECTATE		(1<<3)
 //#define PLAYER_MOVE_SPECTATE_MOVE	(1<<4)
 //#define PLAYER_MOVE_STUNNED		(1<<3)
