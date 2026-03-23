@@ -100,6 +100,8 @@ public:
 	scriptvar_t *FindVar( const char *pszName );
 	const char* GetVar(const char* pszText );
 	bool VarExists(const char* pszText );
+	const char* SCRIPTCONST(const char* var);
+	const char* GETCONST_COMPATIBLE(const char* var);
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, bool fGlobal = false );
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, LegacyScriptEvent &Event );
 	scriptvar_t *SetVar( const char *pszVarName, int iValue, bool fGlobal = false );
@@ -406,13 +408,13 @@ struct globalscriptinfo_t
 };
 
 extern globalscriptinfo_t *g_MSScriptInfo;
-#define FILE_DEV_ITEMLIST "scripts/items.txt"
-#define FILE_ITEMLIST "items.txt"
+constexpr const char * FILE_DEV_ITEMLIST = "scripts/items.txt";
+constexpr const char* FILE_ITEMLIST = "items.txt";
 
 #ifdef VALVE_DLL
-	#define SCRIPT_ID_START 0		//Server: ID of last script sent to a client
+	constexpr unsigned int SCRIPT_ID_START = 0;		//Server: ID of last script sent to a client
 #else
-	#define SCRIPT_ID_START 10000	//Client: ID of next script to be created
+	constexpr unsigned int SCRIPT_ID_START = 10000;	//Client: ID of next script to be created
 #endif
 
 

@@ -34,11 +34,24 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #include <unordered_set>
 //#include <unordered_map>
 
-#undef SCRIPTVAR
-#define SCRIPTVAR GetVar								//A script-wide or global variable
-#define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
-#define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
-//int CountPlayers( void );
+const char* CScript::SCRIPTCONST(const char* var) {
+	//A const, script-wide, or global variable - loadtime only
+	return GetVar(GetConst(var));
+}
+
+
+const char * CScript::GETCONST_COMPATIBLE(const char* var) { 
+	//Loadtime - Only parse it as a var if it's not a $parser
+
+	if (var[0] == '$') {
+		return GetConst(var);
+	}
+	else {
+		return GetVar(GetConst(var));
+	}
+}
+
+
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
 const char* PM_GetValue(msstringlist& Params);
@@ -459,7 +472,7 @@ msstring CScript::ScriptGetter_Conjunction(msstring& FullName, msstring& ParserN
 		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			// Allow shortcutting
-			if (atoi(SCRIPTVAR(Params[i])))
+			if (atoi(GetVar(Params[i])))
 			{
 				if (bIsOr)
 				{
@@ -4417,7 +4430,7 @@ const char* CScript::GetVar(const char* pszText)
 	{
 		BreakUpLine(FullName, ParserName, Params);
 		for (unsigned int i = 0; i < Params.size(); i++)
-			Params[i] = SCRIPTVAR(Params[i]);
+			Params[i] = GetVar(Params[i]);
 
 		//Handle entity-specific parser
 		if (m.pScriptedInterface && m.pScriptedInterface->GetScriptVar(ParserName, Params, this, Return))
@@ -4745,13 +4758,13 @@ const char* CScript::GetVar(const char* pszText)
 
 Vector CScript::StringToVec(const char* String)
 {
-	msstring Inside = SCRIPTVAR(msstring(String).thru_char(")"));
+	msstring Inside = GetVar(msstring(String).thru_char(")"));
 
-	msstring X = SCRIPTVAR(Inside.substr(1).thru_char(" ,"));
+	msstring X = GetVar(Inside.substr(1).thru_char(" ,"));
 	Inside = msstring(Inside.findchar_str(" ,")).skip(" ,");
-	msstring Y = SCRIPTVAR(Inside.thru_char(" ,"));
+	msstring Y = GetVar(Inside.thru_char(" ,"));
 	Inside = msstring(Inside.findchar_str(" ,")).skip(" ,");
-	msstring Z = SCRIPTVAR(Inside.thru_char(" )"));
+	msstring Z = GetVar(Inside.thru_char(" )"));
 
 	return Vector(atof(X), atof(Y), atof(Z));
 }
@@ -4808,7 +4821,7 @@ float GetNumeric(const char* pszText) {
 }
 const char* CScript::GetScriptVar(const char* VarName)
 {
-	return SCRIPTVAR(VarName);
+	return GetVar(VarName);
 }
 
 
@@ -5371,7 +5384,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 	else if (!_stricmp(TestCommand, "repeatdelay"))
 	{
 		sscanf(CmdLineTmp, "%s", cBuffer);
-		CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(cBuffer));
+		CurrentEvent->fRepeatDelay = atof(GetVar(GetConst(cBuffer)));
 		CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
 		KeepCmd = true;
 	}
@@ -5508,7 +5521,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 			if (!SkipFirst || ResourceIdx)
 			{
-				msstring Resolved = SCRIPTCONST(cBuffer);
+				msstring Resolved = GetVar(GetConst(cBuffer));
 				if (!strcmp(TestCommand, "say"))
 				{
 					Resolved = Resolved.thru_char("[");
