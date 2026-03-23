@@ -1590,6 +1590,7 @@ void CGenericItem::Script_Setup()
 
 bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
+
 	//Parse one command
 	msstring sTemp;
 
@@ -2128,18 +2129,18 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 
 	//This is handled here for the client-side entities.  This returns false and handles it again in CScript for the server side
 	//******************************* SETMODEL ****************************
-#define m_ClEntNormal m_ClEntity[ITEMENT_NORMAL]
 	else if (Cmd.Name() == "setmodel")
 	{
+		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 1)
 		{
 			if (Params[0] == "none")
-				m_ClEntNormal.model = NULL;
+				m_ClEntNormal->model = NULL;
 			else
 			{
 				sTemp = "models/";
 				sTemp += Params[0];
-				m_ClEntNormal.model = IEngineStudio.Mod_ForName(sTemp, 0);
+				m_ClEntNormal->model = IEngineStudio.Mod_ForName(sTemp, 0);
 			}
 		}
 		return false;
@@ -2147,12 +2148,13 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	//****************************** SETMODELBODY ************************
 	else if (Cmd.Name() == "setmodelbody")
 	{
+		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 2)
-			if (m_ClEntNormal.model)
+			if (m_ClEntNormal->model)
 			{
 				int iGroup = atoi(Params[0]);
 				int iValue = atoi(Params[1]);
-				m_ClEntNormal.SetBody(iGroup, iValue);
+				m_ClEntNormal->SetBody(iGroup, iValue);
 			}
 		return false;
 	}
@@ -2160,8 +2162,9 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	//****************************** SETMODELSKIN ************************
 	else if (Cmd.Name() == "setmodelskin")
 	{
+		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 1)
-			m_ClEntNormal.curstate.skin = atoi(Params[0]);
+			m_ClEntNormal->curstate.skin = atoi(Params[0]);
 		return false;
 	}
 	else if (Cmd.Name() == "setviewmodelskin")

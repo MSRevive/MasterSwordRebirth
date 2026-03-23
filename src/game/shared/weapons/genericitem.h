@@ -168,8 +168,10 @@ CGenericItem *MSUtil_GetItemByID(ulong m_iId, CMSMonster *pOwner); //Retreives a
 #endif
 
 //Various properties
-#define GI_JUSTSPAWNED (1 << 0)
-#define GI_INPACK (1 << 1)
+enum  generic_item_properties_e {
+	GI_JUSTSPAWNED = (1 << 0),
+	GI_INPACK = (1 << 1)
+};
 
 struct drinkdata_t {
 	int Type, Intensity, IdleAnim;
