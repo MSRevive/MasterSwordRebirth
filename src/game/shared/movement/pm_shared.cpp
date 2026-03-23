@@ -38,6 +38,7 @@
 
 
 
+
 //-----------------------------
 
 //Master Sword -----
@@ -69,11 +70,12 @@ extern "C" playermove_t *pmove = nullptr;
 // Ducking time
 
 
-#define TIME_TO_DUCK 0.4
-#undef VEC_DUCK_VIEW
-#define VEC_DUCK_VIEW 12
-#define PM_DEAD_VIEWHEIGHT -8
-#define MAX_CLIMB_SPEED 200
+constexpr float TIME_TO_DUCK = 0.4;
+constexpr float PM_DEAD_VIEWHEIGHT = -8;
+
+//#undef VEC_DUCK_VIEW
+//#define VEC_DUCK_VIEW 12
+
 #define STUCK_MOVEUP 1
 #define STUCK_MOVEDOWN -1
 #undef VEC_VIEW
@@ -2169,7 +2171,7 @@ void PM_Duck(void)
 					(pmove->onground == -1))
 				{
 					pmove->usehull = 1;
-					pmove->view_ofs[2] = VEC_DUCK_VIEW;
+					pmove->view_ofs[2] = VEC_DUCK_VIEW.z;
 					pmove->flags |= FL_DUCKING;
 					pmove->bInDuck = false;
 
@@ -2193,7 +2195,7 @@ void PM_Duck(void)
 
 					// Calc parametric time
 					duckFraction = PM_SplineFraction(time, (1.0 / TIME_TO_DUCK));
-					pmove->view_ofs[2] = ((VEC_DUCK_VIEW - fMore) * duckFraction) + (VEC_VIEW * (1 - duckFraction));
+					pmove->view_ofs[2] = ((VEC_DUCK_VIEW.z - fMore) * duckFraction) + (VEC_VIEW * (1 - duckFraction));
 				}
 			}
 		}
@@ -2242,13 +2244,13 @@ void PM_LadderMove(physent_t *pLadder)
 
 		AngleVectors(pmove->angles, &vpn, &v_right, NULL);
 		if (pmove->cmd.buttons & IN_BACK)
-			forward -= MAX_CLIMB_SPEED;
+			forward -= CLIMB_MAX_SPEED;
 		if (pmove->cmd.buttons & IN_FORWARD)
-			forward += MAX_CLIMB_SPEED;
+			forward += CLIMB_MAX_SPEED;
 		if (pmove->cmd.buttons & IN_MOVELEFT)
-			right -= MAX_CLIMB_SPEED;
+			right -= CLIMB_MAX_SPEED;
 		if (pmove->cmd.buttons & IN_MOVERIGHT)
-			right += MAX_CLIMB_SPEED;
+			right += CLIMB_MAX_SPEED;
 
 		if (pmove->cmd.buttons & IN_JUMP)
 		{
@@ -2294,7 +2296,7 @@ void PM_LadderMove(physent_t *pLadder)
 				VectorMA(lateral, -normal, tmp, pmove->velocity);
 				if (onFloor && normal > 0) // On ground moving away from the ladder
 				{
-					VectorMA(pmove->velocity, MAX_CLIMB_SPEED, trace.plane.normal, pmove->velocity);
+					VectorMA(pmove->velocity, CLIMB_MAX_SPEED, trace.plane.normal, pmove->velocity);
 				}
 				//pev->velocity = lateral - (CrossProduct( trace.vecPlaneNormal, perp ) * normal);
 			}
