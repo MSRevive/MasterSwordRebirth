@@ -30,6 +30,7 @@
 constexpr const char* VAR_NPC_ANIM_TORSO = "game.monster.torso_anim";
 constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
 constexpr const char* PLAYER_SCRIPT = "player/player";
+constexpr unsigned int SBAR_STRING_SIZE = 128;
 
 // was 1500, but there shouldn't be any issues with increasing.
 constexpr unsigned int MAX_NUM_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
@@ -37,7 +38,9 @@ constexpr unsigned int MAX_ID_RANGE = 2048;
 constexpr unsigned int MAX_NUM_ITEMS = 100; //Thothie APR2011_28
 constexpr unsigned int MAX_GET_ITEMS = 9;
 constexpr unsigned int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
-constexpr unsigned int SBAR_STRING_SIZE = 128;
+constexpr unsigned int MAX_PLAYER_HANDS = 2;
+constexpr unsigned int MAX_PLAYER_HANDITEMS = 3;
+constexpr unsigned int MAX_KEYHISTORY = 10;
 constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
 constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
 constexpr float PLAYER_DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
@@ -56,6 +59,10 @@ constexpr float CLIMB_SPEED_DEC = 15;		 // climbing deceleration rate
 constexpr float CLIMB_PUNCH_X = -7;		 // how far to 'punch' client X axis when climbing
 constexpr float CLIMB_PUNCH_Z = 7;		 // how far to 'punch' client Z axis when climbing
 constexpr float CHAT_INTERVAL = 1.0f;
+constexpr double AUTOAIM_2DEGREES = 0.0348994967025;
+constexpr double AUTOAIM_5DEGREES = 0.08715574274766;
+constexpr double AUTOAIM_8DEGREES = 0.1391731009601;
+constexpr double AUTOAIM_10DEGREES = 0.1736481776669;
 
 enum sbar_data
 {
@@ -157,9 +164,6 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer);
 //#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
 #define CHWielded Wielded(iCurrentHand)*/
 
-constexpr unsigned int MAX_PLAYER_HANDS = 2;
-constexpr unsigned int MAX_PLAYER_HANDITEMS = 3;
-constexpr unsigned int MAX_KEYHISTORY = 10;
 
 enum ms_flag_e {
 	MSGFLAG_SPAWN = (1 << 0)
@@ -895,11 +899,6 @@ extern CBasePlayer player;
 //Mib MAR2010_12 - Armor Fix FINAL
 extern int playerBodyArray[16];
 #endif
-
-constexpr double AUTOAIM_2DEGREES = 0.0348994967025;
-constexpr double AUTOAIM_5DEGREES = 0.08715574274766;
-constexpr double AUTOAIM_8DEGREES = 0.1391731009601;
-constexpr double AUTOAIM_10DEGREES = 0.1736481776669;
 
 extern int gmsgHudText;
 extern BOOL gInitHUD;
