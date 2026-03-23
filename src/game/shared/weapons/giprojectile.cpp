@@ -16,10 +16,6 @@
 #include "stats/stats.h"
 #include "stats/statdefs.h"
 
-#define TypeCheck        \
-	if (!ProjectileData) \
-	return
-
 void CGenericItem::RegisterProjectile()
 {
 	if (ProjectileData)
@@ -40,7 +36,9 @@ void CGenericItem::RegisterProjectile()
 }
 void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage, int iStat, int iProp)
 {
-	TypeCheck;
+	if (!ProjectileData) {
+		return;
+	}
 	if (!pTossDevice)
 		return;
 
@@ -118,7 +116,9 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 {
 	//if ( ProjectileData->IgnoreNPC ) return;
 
-	TypeCheck;
+	if (!ProjectileData) {
+		return;
+	}
 
 	if (pev->owner == pOther->edict() || pOther->MSMoveType == MOVETYPE_ARROW || !FBitSet(MSProperties(), ITEM_PROJECTILE))
 		return;
@@ -242,7 +242,9 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 
 void CGenericItem::Projectile_Move()
 {
-	TypeCheck;
+	if (!ProjectileData) {
+		return;
+	}
 
 	if (MSMoveType == MOVETYPE_ARROW)
 	{

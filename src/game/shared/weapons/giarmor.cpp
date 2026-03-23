@@ -12,10 +12,6 @@
 
 #include "inc_weapondefs.h"
 
-#define TypeCheck   \
-	if (!ArmorData) \
-	return
-
 void CGenericItem::RegisterArmor()
 {
 	if (ArmorData)
