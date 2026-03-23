@@ -98,4 +98,8 @@ enum MusicType {
 	MUSIC_STOP //For map triggers, stops combat & area music
 };
 
+inline bool PlayerVotedYes(int idx) {
+	return MSGlobals::CurrentVote.VoteTally & (1 << (idx - 1));
+};
+
 #endif
