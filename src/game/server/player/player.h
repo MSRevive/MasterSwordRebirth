@@ -20,7 +20,6 @@
 #include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
-#include "iscript.h"
 
 constexpr int MAX_ID_RANGE = 2048;
 constexpr int SBAR_STRING_SIZE = 128;
