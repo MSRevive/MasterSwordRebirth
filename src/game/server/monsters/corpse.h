@@ -1,4 +1,4 @@
-#define SKELETON_MODEL "models/monsters/skeleton.mdl"
+constexpr const char* SKELETON_MODEL = "models/monsters/skeleton.mdl";
 
 class CCorpse : public CMSMonster
 {
