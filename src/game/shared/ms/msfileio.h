@@ -88,4 +88,12 @@ public:
 	bool ReadFromFile(const char* pszFileName, const char* OpenFlags, bool ReadBackup);
 };
 
-#define BACKUP_NAME(a) (msstring(a) + ".backup")
+
+inline msstring BACKUP_NAME(const char* string) {
+	msstring Result = string;
+	Result += ".backup";
+	return Result;
+
+}
+
+//#define BACKUP_NAME(a) (msstring(a) + ".backup")
