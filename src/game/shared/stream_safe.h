@@ -30,7 +30,8 @@
 #undef max
 #endif
 
-#define min(a, b) (((a) < (b)) ? (a) : (b))
-#define max(a, b) (((a) > (b)) ? (a) : (b))
+
+//#define min(a, b) (((a) < (b)) ? (a) : (b))
+//#define max(a, b) (((a) > (b)) ? (a) : (b))
 
 #endif // STREAM_SAFE_H
