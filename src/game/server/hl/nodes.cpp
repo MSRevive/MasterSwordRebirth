@@ -538,7 +538,7 @@ int CGraph::NextNodeInRoute(int iCurrentNode, int iDest, int iHull, int iCap)
 
 			// Repeat phrase
 			//
-			if (nCount <= unsigned char(ch + 1))
+			if (nCount <= (unsigned char)(ch + 1))
 			{
 				iNext = iCurrentNode + *pRoute;
 				if (iNext >= m_cNodes)
