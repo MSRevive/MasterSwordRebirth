@@ -179,7 +179,7 @@ void UTIL_StringToVector(float *pVector, const char *pString)
 	char* pstr, * pfront, tempString[bufferLength] = { 0 };
 	int j;
 
-	strcpy_s(tempString, sizeof(tempString), pString);
+	strcpy(tempString, pString);
 	pstr = tempString;
 	pfront = tempString;
 
@@ -448,7 +448,7 @@ int CHudSpectator::Draw(float flTime)
 		color = GetClientColor(i + 1);
 
 		// draw the players name and health underneath
-		 _snprintf_s(string, sizeof(string),  "%s",  g_PlayerInfoList[i + 1].name );
+		 _snprintf(string, sizeof(string),  "%s",  g_PlayerInfoList[i + 1].name );
 
 		lx = strlen(string) * 3; // 3 is avg. character length :)
 
@@ -872,8 +872,8 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		}
 
 		char string[128];
-		 _snprintf_s(string, sizeof(string),  "#Spec_Mode%d",  g_iUser1 );
-		 _snprintf_s(string, sizeof(string),  "%c%s",  HUD_PRINTCENTER,  CHudTextMessage::BufferedLocaliseTextString(string) );
+		 _snprintf(string, sizeof(string),  "#Spec_Mode%d",  g_iUser1 );
+		 _snprintf(string, sizeof(string),  "%c%s",  HUD_PRINTCENTER,  CHudTextMessage::BufferedLocaliseTextString(string) );
 		gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string) + 1, string);
 	}
 
