@@ -70,7 +70,7 @@ Color4F StringToColor(const char* String) //Converts a string of the format "(r,
 {
 	Color4F Color(0, 0, 0, 0);
 
-	sscanf_s(String, "(%f,%f,%f,%f)", &Color.r, &Color.g, &Color.b, &Color.a);
+	sscanf(String, "(%f,%f,%f,%f)", &Color.r, &Color.g, &Color.b, &Color.a);
 	return Color;
 }
 
