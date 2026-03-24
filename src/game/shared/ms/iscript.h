@@ -11,7 +11,7 @@ class CBaseEntity;
 #include "../../../public/archtypes.h"  // For ulong typedef
 
 #ifndef VECTOR_H
-#include "..\shared\hl\vector.h"
+#include "hl/vector.h"
 #endif
 
 // Add Windows-specific ulong definition if not already defined
