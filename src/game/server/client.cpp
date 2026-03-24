@@ -365,9 +365,9 @@ void Host_Say(edict_t *pEntity, int teamonly)
 
 	// turn on color set 2  (color on,  no sound)
 	if (teamonly)
-		_snprintf_s(text, sizeof(text), "%c(TEAM) %s: ",  2, STRING(pEntity->v.netname) );
+		_snprintf(text, sizeof(text), "%c(TEAM) %s: ",  2, STRING(pEntity->v.netname) );
 	else
-		_snprintf_s(text, sizeof(text), "%c%s: ",  2, STRING(pEntity->v.netname) );
+		_snprintf(text, sizeof(text), "%c%s: ",  2, STRING(pEntity->v.netname) );
 
 	j = sizeof(text) - 2 - strlen(text); // -2 for /n and null terminator
 	if ((int)strlen(p) > j)
