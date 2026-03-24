@@ -223,6 +223,6 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 void PrintNotifyMsg(char *pszmsg)
 {
 	static char string[1024];
-	_snprintf_s(string, sizeof(string), "%c%s", HUD_PRINTNOTIFY, pszmsg);
+	_snprintf(string, sizeof(string), "%c%s", HUD_PRINTNOTIFY, pszmsg);
 	gHUD.m_TextMessage.MsgFunc_TextMsg(string, strlen(string), &string[0]);
 }
