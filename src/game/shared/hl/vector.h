@@ -16,6 +16,7 @@
 typedef float vec_t;
 #endif
 
+#include <cmath>
 #ifndef VECTOR_H
 #define VECTOR_H
 
