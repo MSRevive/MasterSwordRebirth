@@ -41,6 +41,7 @@
 #define DLLEXPORT  __attribute__ ((visibility("default")))
 #endif
 */
+
 typedef enum
 	{
 	at_notice,

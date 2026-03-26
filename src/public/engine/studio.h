@@ -28,6 +28,7 @@ Studio models are position independent, so the cache manager can move them.
 ==============================================================================
 */
 
+
 #define MAXSTUDIOTRIANGLES	20000	// TODO: tune this
 #define MAXSTUDIOVERTS		2048	// TODO: tune this
 #define MAXSTUDIOSEQUENCES	2048	// total animation sequences
@@ -69,7 +70,7 @@ typedef struct
 	int					numhitboxes;			// complex bounding boxes
 	int					hitboxindex;			
 	
-	int				    numseq;				// animation sequences
+	int					numseq;				// animation sequences
 	int					seqindex;
 
 	int					numseqgroups;		// demand loaded sequences
