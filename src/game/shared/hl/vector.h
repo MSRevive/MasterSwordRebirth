@@ -20,7 +20,7 @@ typedef float vec_t;
 #ifndef VECTOR_H
 #define VECTOR_H
 
-
+#undef DotProduct
 
 
 //=========================================================
@@ -148,7 +148,8 @@ inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + 
 	//return (x[0] * y[0]) + (x[1] * y[1]) + (x[2] + y[2]);
 //};
 
-inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
+inline Vector CrossProduct(const Vector& a, const Vector& b) { return Vector{ a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x }; }
 
 
+using vec3_t = Vector;
 #endif
