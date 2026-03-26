@@ -28,21 +28,22 @@ Studio models are position independent, so the cache manager can move them.
 ==============================================================================
 */
 
+using vec3_t = Vector;
 
-constexpr int MAXSTUDIOTRIANGLES	= 20000;	// TODO: tune this
-constexpr int MAXSTUDIOVERTS		= 2048;		// TODO: tune this
-constexpr int MAXSTUDIOSEQUENCES	= 2048;		// total animation sequences
-constexpr int MAXSTUDIOSKINS		= 100;		// total textures
-constexpr int MAXSTUDIOSRCBONES		= 512;		// bones allowed at source movement
-constexpr int MAXSTUDIOBONES		= 128;		// total bones actually used
-constexpr int MAXSTUDIOMODELS		= 32;		// sub-models per model
-constexpr int MAXSTUDIOBODYPARTS	= 32;
-constexpr int MAXSTUDIOGROUPS		= 16;
-constexpr int MAXSTUDIOANIMATIONS	= 2048;		// per sequence
-constexpr int MAXSTUDIOMESHES		= 256;
-constexpr int MAXSTUDIOEVENTS		= 1024;
-constexpr int MAXSTUDIOPIVOTS		= 256;
-constexpr int MAXSTUDIOCONTROLLERS	= 8;
+#define MAXSTUDIOTRIANGLES	20000	// TODO: tune this
+#define MAXSTUDIOVERTS		2048	// TODO: tune this
+#define MAXSTUDIOSEQUENCES	2048	// total animation sequences
+#define MAXSTUDIOSKINS		100		// total textures
+#define MAXSTUDIOSRCBONES	512		// bones allowed at source movement
+#define MAXSTUDIOBONES		128		// total bones actually used
+#define MAXSTUDIOMODELS		32		// sub-models per model
+#define MAXSTUDIOBODYPARTS	32
+#define MAXSTUDIOGROUPS		16
+#define MAXSTUDIOANIMATIONS	2048	// per sequence
+#define MAXSTUDIOMESHES		256
+#define MAXSTUDIOEVENTS		1024
+#define MAXSTUDIOPIVOTS		256
+#define MAXSTUDIOCONTROLLERS 8
 
 typedef struct 
 {
@@ -52,12 +53,12 @@ typedef struct
 	char				name[64];
 	int					length;
 
-	Vector 				eyeposition;	// ideal eye position
-	Vector 				min;			// ideal movement hull size
-	Vector 				max;			
+	vec3_t				eyeposition;	// ideal eye position
+	vec3_t				min;			// ideal movement hull size
+	vec3_t				max;			
 
-	Vector 				bbmin;			// clipping bounding box
-	Vector 				bbmax;		
+	vec3_t				bbmin;			// clipping bounding box
+	vec3_t				bbmax;		
 
 	int					flags;
 
@@ -70,7 +71,7 @@ typedef struct
 	int					numhitboxes;			// complex bounding boxes
 	int					hitboxindex;			
 	
-	unsigned int					numseq;				// animation sequences
+	int					numseq;				// animation sequences
 	int					seqindex;
 
 	int					numseqgroups;		// demand loaded sequences
@@ -137,8 +138,8 @@ typedef struct
 {
 	int					bone;
 	int					group;			// intersection group
-	Vector 				bbmin;		// bounding box
-	Vector 				bbmax;		
+	vec3_t				bbmin;		// bounding box
+	vec3_t				bbmax;		
 } mstudiobbox_t;
 
 #if !defined( CACHE_USER ) && !defined( QUAKEDEF_H )
@@ -169,7 +170,7 @@ typedef struct
 	int					activity;
 	int					actweight;
 
-	unsigned int		numevents;
+	int					numevents;
 	int					eventindex;
 
 	int					numframes;	// number of frames per sequence
@@ -179,12 +180,12 @@ typedef struct
 
 	int					motiontype;	
 	int					motionbone;
-	Vector 				linearmovement;
+	vec3_t				linearmovement;
 	int					automoveposindex;
 	int					automoveangleindex;
 
-	Vector 				bbmin;		// per sequence bounding box
-	Vector 				bbmax;		
+	vec3_t				bbmin;		// per sequence bounding box
+	vec3_t				bbmax;		
 
 	int					numblends;
 	int					animindex;		// mstudioanim_t pointer relative to start of sequence group data
@@ -219,7 +220,7 @@ typedef struct
 // pivots
 typedef struct 
 {
-	Vector 				org;	// pivot point
+	vec3_t				org;	// pivot point
 	int					start;
 	int					end;
 } mstudiopivot_t;
@@ -230,8 +231,8 @@ typedef struct
 	char				name[32];
 	int					type;
 	int					bone;
-	Vector 				org;	// attachment point
-	Vector 				vectors[3];
+	vec3_t				org;	// attachment point
+	vec3_t				vectors[3];
 } mstudioattachment_t;
 
 typedef struct
@@ -290,17 +291,17 @@ typedef struct
 
 	int					numverts;		// number of unique vertices
 	int					vertinfoindex;	// vertex bone info
-	int					vertindex;		// vertex Vector 
+	int					vertindex;		// vertex vec3_t
 	int					numnorms;		// number of unique surface normals
 	int					norminfoindex;	// normal bone info
-	int					normindex;		// normal Vector 
+	int					normindex;		// normal vec3_t
 
 	int					numgroups;		// deformation groups
 	int					groupindex;
 } mstudiomodel_t;
 
 
-// Vector 	boundingbox[model][bone][2];	// complex intersection info
+// vec3_t	boundingbox[model][bone][2];	// complex intersection info
 
 
 // meshes
@@ -310,7 +311,7 @@ typedef struct
 	int					triindex;
 	int					skinref;
 	int					numnorms;		// per mesh normals
-	int					normindex;		// normal Vector 
+	int					normindex;		// normal vec3_t
 } mstudiomesh_t;
 
 // triangles
@@ -324,58 +325,53 @@ typedef struct
 #endif
 
 // model flags
-enum {
-	EF_ROCKET	= 1,
-	EF_GRENADE	= 2,
-	EF_GIB		= 4,
-	EF_ROTATE	= 8,
-	EF_TRACER	= 16,
-	EF_ZOMGIB	= 32,
-	EF_TRACER2	= 64,
-	EF_TRACER3	= 128
-};
+#define	EF_ROCKET	1
+#define	EF_GRENADE	2
+#define	EF_GIB		4
+#define	EF_ROTATE	8
+#define	EF_TRACER	16
+#define	EF_ZOMGIB	32
+#define	EF_TRACER2	64
+#define	EF_TRACER3	128
+
 // lighting options
+#define STUDIO_NF_FLATSHADE		0x0001
+#define STUDIO_NF_CHROME		0x0002
+#define STUDIO_NF_FULLBRIGHT	0x0004
+#define STUDIO_NF_NOMIPS        0x0008
+#define STUDIO_NF_ALPHA         0x0010
+#define STUDIO_NF_ADDITIVE      0x0020
+#define STUDIO_NF_MASKED        0x0040
 
-enum {
-	STUDIO_NF_FLATSHADE		= 0x0001,
-	STUDIO_NF_CHROME		= 0x0002,
-	STUDIO_NF_FULLBRIGHT	= 0x0004,
-	STUDIO_NF_NOMIPS        = 0x0008,
-	STUDIO_NF_ALPHA         = 0x0010,
-	STUDIO_NF_ADDITIVE      = 0x0020,
-	STUDIO_NF_MASKED        = 0x0040
-};
 // motion flags
-enum {
-	STUDIO_X = 0x0001,
-	STUDIO_Y = 0x0002,
-	STUDIO_Z = 0x0004,
-	STUDIO_XR = 0x0008,
-	STUDIO_YR = 0x0010,
-	STUDIO_ZR = 0x0020,
-	STUDIO_LX = 0x0040,
-	STUDIO_LY = 0x0080,
-	STUDIO_LZ = 0x0100,
-	STUDIO_AX = 0x0200,
-	STUDIO_AY = 0x0400,
-	STUDIO_AZ = 0x0800,
-	STUDIO_AXR = 0x1000,
-	STUDIO_AYR = 0x2000,
-	STUDIO_AZR = 0x4000,
-	STUDIO_TYPES = 0x7FFF,
-	STUDIO_RLOOP = 0x8000,		// controller that wraps shortest distance
-	// sequence flags
-	STUDIO_LOOPING = 0x0001,
-};
+#define STUDIO_X		0x0001
+#define STUDIO_Y		0x0002	
+#define STUDIO_Z		0x0004
+#define STUDIO_XR		0x0008
+#define STUDIO_YR		0x0010
+#define STUDIO_ZR		0x0020
+#define STUDIO_LX		0x0040
+#define STUDIO_LY		0x0080
+#define STUDIO_LZ		0x0100
+#define STUDIO_AX		0x0200
+#define STUDIO_AY		0x0400
+#define STUDIO_AZ		0x0800
+#define STUDIO_AXR		0x1000
+#define STUDIO_AYR		0x2000
+#define STUDIO_AZR		0x4000
+#define STUDIO_TYPES	0x7FFF
+#define STUDIO_RLOOP	0x8000	// controller that wraps shortest distance
 
-enum {
+// sequence flags
+#define STUDIO_LOOPING	0x0001
+
 // bone flags
-	STUDIO_HAS_NORMALS	= 0x0001,
-	STUDIO_HAS_VERTICES = 0x0002,
-	STUDIO_HAS_BBOX		= 0x0004,
-	STUDIO_HAS_CHROME	= 0x0008		// if any of the textures have chrome on them
-};
+#define STUDIO_HAS_NORMALS	0x0001
+#define STUDIO_HAS_VERTICES 0x0002
+#define STUDIO_HAS_BBOX		0x0004
+#define STUDIO_HAS_CHROME	0x0008	// if any of the textures have chrome on them
 
-constexpr float RAD_TO_STUDIO		= (32768.0/PI);
-constexpr float STUDIO_TO_RAD		= (PI / 32768.0);
+#define RAD_TO_STUDIO		(32768.0/M_PI)
+#define STUDIO_TO_RAD		(M_PI/32768.0)
+
 #endif
