@@ -76,7 +76,7 @@ typedef struct
 	int		fInOpen;
 	int		fInWater;
 	float	flFraction;			// time completed, 1.0 = didn't hit anything
-	Vector 	vecEndPos;			// final position
+	Vector vecEndPos;			// final position
 	float	flPlaneDist;
 	Vector 	vecPlaneNormal;		// surface normal at impact
 	edict_t	*pHit;				// entity the surface is on
@@ -120,7 +120,7 @@ typedef struct enginefuncs_s
 	int			(*pfnGetEntityIllum)		(edict_t* pEnt);
 	edict_t*	(*pfnFindEntityInSphere)	(edict_t *pEdictStartSearchAfter, const float *org, float rad);
 	edict_t*	(*pfnFindClientInPVS)		(edict_t *pEdict);
-	edict_t*    (*pfnEntitiesInPVS)			(edict_t *pplayer);
+	edict_t* (*pfnEntitiesInPVS)			(edict_t *pplayer);
 	void		(*pfnMakeVectors)			(const float *rgflVector);
 	void		(*pfnAngleVectors)			(const float *rgflVector, float *forward, float *right, float *up);
 	edict_t*	(*pfnCreateEntity)			(void);
@@ -169,7 +169,7 @@ typedef struct enginefuncs_s
 	void*		(*pfnPvEntPrivateData)		(edict_t *pEdict);
 	void		(*pfnFreeEntPrivateData)	(edict_t *pEdict);
 	const char*	(*pfnSzFromIndex)			(int iString);
-	unsigned int		(*pfnAllocString)			(const char *szValue);
+	unsigned int			(*pfnAllocString)			(const char *szValue);
 	struct entvars_s*	(*pfnGetVarsOfEnt)			(edict_t *pEdict);
 	edict_t*	(*pfnPEntityOfEntOffset)	(int iEntOffset);
 	int			(*pfnEntOffsetOfPEntity)	(const edict_t *pEdict);
@@ -219,7 +219,7 @@ typedef struct enginefuncs_s
 	void		(*pfnBuildSoundMsg)			(edict_t *entity, int channel, const char *sample, /*int*/float volume, float attenuation, int fFlags, int pitch, int msg_dest, int msg_type, const float *pOrigin, edict_t *ed);
 	int			(*pfnIsDedicatedServer)		(void);// is this a dedicated server?
 	cvar_t		*(*pfnCVarGetPointer)		(const char *szVarName);
-	int (*pfnGetPlayerWONId)				(edict_t *e); // returns the server assigned WONid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
+	unsigned int (*pfnGetPlayerWONId)		(edict_t *e); // returns the server assigned WONid for this player.  useful for logging frags, etc.  returns -1 if the edict couldn't be found in the list of clients
 
 	// YWB 8/1/99 TFF Physics additions
 	void		(*pfnInfo_RemoveKey)		(const char* s, const char *key );
@@ -281,9 +281,9 @@ typedef struct
 	char		mapName[ 32 ];
 	char		landmarkName[ 32 ];
 	edict_t	*pentLandmark;
-	Vector 		vecLandmarkOrigin;
+	Vector		vecLandmarkOrigin;
 } LEVELLIST;
-constexpr unsigned int MAX_LEVEL_CONNECTIONS = 16;		// These are encoded in the lower 16bits of ENTITYTABLE->flags
+#define MAX_LEVEL_CONNECTIONS	16		// These are encoded in the lower 16bits of ENTITYTABLE->flags
 
 typedef struct 
 {
@@ -297,12 +297,10 @@ typedef struct
 
 } ENTITYTABLE;
 
-enum fent_table_e {
-	FENTTABLE_PLAYER		= 0x80000000,
-	FENTTABLE_REMOVED		= 0x40000000,
-	FENTTABLE_MOVEABLE		= 0x20000000,
-	FENTTABLE_GLOBAL		= 0x10000000
-};
+#define FENTTABLE_PLAYER		0x80000000
+#define FENTTABLE_REMOVED		0x40000000
+#define FENTTABLE_MOVEABLE		0x20000000
+#define FENTTABLE_GLOBAL		0x10000000
 
 typedef struct saverestore_s SAVERESTOREDATA;
 
@@ -316,7 +314,7 @@ struct saverestore_s
 	int			size;			// Current data size
 	int			bufferSize;		// Total space for data
 	int			tokenSize;		// Size of the linear list of tokens
-	unsigned int			tokenCount;		// Number of elements in the pTokens table
+	int			tokenCount;		// Number of elements in the pTokens table
 	char		**pTokens;		// Hash table of entity strings (sparse)
 	int			currentIndex;	// Holds a global entity table ID
 	int			tableCount;		// Number of elements in the entity table
@@ -372,9 +370,8 @@ typedef enum _fieldtypes
 #define DEFINE_ENTITY_GLOBAL_FIELD(name,fieldtype)	_FIELD(entvars_t, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 #define DEFINE_GLOBAL_FIELD(type,name,fieldtype)	_FIELD(type, name, fieldtype, 1, FTYPEDESC_GLOBAL )
 
-enum g_ftype_desc_e {
-	FTYPEDESC_GLOBAL = 0x0001		// This field is masked for global entity save/restore
-};
+
+#define FTYPEDESC_GLOBAL			0x0001		// This field is masked for global entity save/restore
 
 typedef struct 
 {
@@ -444,7 +441,7 @@ typedef struct
 	void			(*pfnSetupVisibility)( struct edict_s *pViewEntity, struct edict_s *pClient, unsigned char **pvs, unsigned char **pas );
 	void			(*pfnUpdateClientData) ( const struct edict_s *ent, int sendweapons, struct clientdata_s *cd );
 	int				(*pfnAddToFullPack)( struct entity_state_s *state, int e, edict_t *ent, edict_t *host, int hostflags, int player, unsigned char *pSet );
-	void			(*pfnCreateBaseline) ( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, Vector  player_mins, Vector  player_maxs );
+	void			(*pfnCreateBaseline) ( int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs );
 	void			(*pfnRegisterEncoders)	( void );
 	int				(*pfnGetWeaponData)		( struct edict_s *player, struct weapon_data_s *info );
 
