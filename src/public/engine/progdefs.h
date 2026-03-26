@@ -18,8 +18,6 @@
 #pragma once
 #endif
 
-using vec3_t = Vector;
-
 typedef struct
 {	
 	float		time;
@@ -48,9 +46,9 @@ typedef struct
 	int			trace_flags;
 	int			msg_entity;
 	int			cdAudioTrack;
-	unsigned int			maxClients;
+	int			maxClients;
 	//int			PreCount;
-	unsigned int			maxEntities;
+	int			maxEntities;
 	const char	*pStringBase;
 
 	void		*pSaveData;
@@ -115,7 +113,7 @@ typedef struct entvars_s
 	
 	int			light_level;
 
-	unsigned int			sequence;		// animation sequence
+	int			sequence;		// animation sequence
 	int			gaitsequence;	// movement animation sequence for player (0 for none)
 	float		frame;			// % playback position in animation sequences (0..255)
 	float		animtime;		// world time when frame was set

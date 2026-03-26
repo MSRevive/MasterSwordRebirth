@@ -41,9 +41,6 @@
 #define DLLEXPORT  __attribute__ ((visibility("default")))
 #endif
 */
-
-using vec3_t = Vector;
-
 typedef enum
 	{
 	at_notice,
