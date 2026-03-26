@@ -449,7 +449,7 @@ void asCThreadReadWriteLock::AcquireExclusive()
 	// If we try to lock all at once it is quite possible the writer will
 	// never succeed.
 	for( asUINT n = 0; n < maxReaders; n++ )
-		WaitForSingleObjectEx(readLocks, INFINITE, false);
+		WaitForSingleObjectEx(readLocks, INFINITE, FALSE);
 
 	// Allow another writer to lock. It will only be able to
 	// lock the readers when this writer releases them anyway.
@@ -473,7 +473,7 @@ void asCThreadReadWriteLock::AcquireShared()
 	pthread_rwlock_rdlock(&lock);
 #elif defined AS_WINDOWS_THREADS
 	// Lock a reader slot
-	WaitForSingleObjectEx(readLocks, INFINITE, false);
+	WaitForSingleObjectEx(readLocks, INFINITE, FALSE);
 #endif
 }
 
