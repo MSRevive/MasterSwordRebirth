@@ -48,9 +48,9 @@ typedef struct
 	int			trace_flags;
 	int			msg_entity;
 	int			cdAudioTrack;
-	int			maxClients;
+	unsigned int			maxClients;
 	//int			PreCount;
-	int			maxEntities;
+	unsigned int			maxEntities;
 	const char	*pStringBase;
 
 	void		*pSaveData;
@@ -115,7 +115,7 @@ typedef struct entvars_s
 	
 	int			light_level;
 
-	int			sequence;		// animation sequence
+	unsigned int			sequence;		// animation sequence
 	int			gaitsequence;	// movement animation sequence for player (0 for none)
 	float		frame;			// % playback position in animation sequences (0..255)
 	float		animtime;		// world time when frame was set

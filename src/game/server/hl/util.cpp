@@ -2182,7 +2182,7 @@ unsigned short CSaveRestoreBuffer ::TokenHash(const char *pszToken)
 		ALERT(at_error, "No token table array in TokenHash()!");
 #endif
 
-	for (unsigned int i = 0; i < m_pdata->tokenCount; i++)
+	for (int i = 0; i < m_pdata->tokenCount; i++)
 	{
 #if _DEBUG
 		static qboolean beentheredonethat = false;
@@ -2193,7 +2193,7 @@ unsigned short CSaveRestoreBuffer ::TokenHash(const char *pszToken)
 		}
 #endif
 
-		unsigned int index = hash + i;
+		int index = hash + i;
 		if (index >= m_pdata->tokenCount)
 			index -= m_pdata->tokenCount;
 
