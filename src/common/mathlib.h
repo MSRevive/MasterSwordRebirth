@@ -32,45 +32,41 @@ typedef int fixed4_t;
 typedef int fixed8_t;
 typedef int fixed16_t;
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
 struct mplane_s;
 
 extern Vector vec3_origin;
-constexpr int nanmask = 255 << 23;
+extern int nanmask;
 
-static inline bool IS_NAN(float flVelocity) {
+#define IS_NAN(x) (((*(int*)&x) & nanmask) == nanmask)
 
-	int i = *(int*)&flVelocity;
-	return (i & nanmask) == 0x7F800000 && (i & 0x007FFFFF) != 0;
-
-};
-
-inline void VectorSubtract(const float* a, const float* b, float* c)
-{
-	c[0] = a[0] - b[0];
-	c[1] = a[1] - b[1];
-	c[2] = a[2] - b[2];
-};
-
-inline void VectorAdd(const float* a, const float* b, float* c)
-{
-	(c)[0] = (a)[0] + (b)[0];
-	(c)[1] = (a)[1] + (b)[1];
-	(c)[2] = (a)[2] + (b)[2];
-};
-
-inline void VectorCopy(const float* source, float* destination)
-{
-	(destination)[0] = (source)[0];
-	(destination)[1] = (source)[1];
-	(destination)[2] = (source)[2];
-};
-
+#define VectorSubtract(a, b, c)   \
+	{                             \
+		(c)[0] = (a)[0] - (b)[0]; \
+		(c)[1] = (a)[1] - (b)[1]; \
+		(c)[2] = (a)[2] - (b)[2]; \
+	}
+#define VectorAdd(a, b, c)        \
+	{                             \
+		(c)[0] = (a)[0] + (b)[0]; \
+		(c)[1] = (a)[1] + (b)[1]; \
+		(c)[2] = (a)[2] + (b)[2]; \
+	}
+#define VectorCopy(a, b) \
+	{                    \
+		(b)[0] = (a)[0]; \
+		(b)[1] = (a)[1]; \
+		(b)[2] = (a)[2]; \
+	}
 inline void VectorClear(float* a)
 {
 	a[0] = 0.0;
 	a[1] = 0.0;
 	a[2] = 0.0;
-};
+}
 
 void VectorMA(const float* veca, float scale, const float* vecb, float* vecc);
 
@@ -91,6 +87,7 @@ int GreatestCommonDivisor(int i1, int i2);
 
 void AngleVectors(const Vector& angles, Vector* forward, Vector* right, Vector* up);
 void AngleVectorsTranspose(const Vector& angles, Vector* forward, Vector* right, Vector* up);
+#define AngleIVectors AngleVectorsTranspose
 
 void AngleMatrix(const float* angles, float (*matrix)[4]);
 void AngleIMatrix(const Vector& angles, float (*matrix)[4]);
@@ -155,11 +152,10 @@ extern DLONG dlong;
 #define restore_fpu_cw() /* */
 #endif
 
-//#define BOX_ON_PLANE_SIDE(emins, emaxs, p)                                                                 \
-//	(((p)->type < 3) ? (                                                                                   \
-//						   ((p)->dist <= (emins)[(p)->type]) ? 1                                           \
-//															 : (                                           \
-//																   ((p)->dist >= (emaxs)[(p)->type]) ? 2   \
-//																									 : 3)) \
-//					 : BoxOnPlaneSide((emins), (emaxs), (p)))
-//
+#define BOX_ON_PLANE_SIDE(emins, emaxs, p)                                                                 \
+	(((p)->type < 3) ? (                                                                                   \
+						   ((p)->dist <= (emins)[(p)->type]) ? 1                                           \
+															 : (                                           \
+																   ((p)->dist >= (emaxs)[(p)->type]) ? 2   \
+																									 : 3)) \
+					 : BoxOnPlaneSide((emins), (emaxs), (p)))

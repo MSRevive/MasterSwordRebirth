@@ -7,6 +7,9 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "msitemdefs.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
 
 
 
@@ -272,7 +275,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	else if (Cmd.Name() == "fov")
 	{
 		if (Params.size() >= 1)
-			m_flFieldOfView = cosf((atof(Params[0]) / 2.0) * (PI / 180));
+			m_flFieldOfView = cosf((atof(Params[0]) / 2.0) * (M_PI / 180));
 
 		else
 			ERROR_MISSING_PARMS;

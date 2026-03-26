@@ -33,11 +33,12 @@
 #include "player/player.h"
 #include "filesystem_shared.h"
 #include "mathlib.h"
-
 #include "com_model.h"
 
-
-
+//defined in bspfile.h
+#define	CONTENTS_CURRENT_0 -9
+#define	CONTENTS_CURRENT_DOWN -14
+#define CONTENTS_TRANSLUCENT - 15
 
 //-----------------------------
 

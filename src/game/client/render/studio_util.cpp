@@ -11,6 +11,10 @@
 #include "const.h"
 #include "com_model.h"
 #include "studio_util.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
 
 // angles index are not the same as ROLL, PITCH, YAW
 
@@ -96,8 +100,8 @@ void QuaternionSlerp( vec4_t p, vec4_t q, float t, vec4_t qt )
 		qt[1] = q[0];
 		qt[2] = -q[3];
 		qt[3] = q[2];
-		sclp = sin( (1.0 - t) * (0.5 * PI));
-		sclq = sin( t * (0.5 * PI));
+		sclp = sin( (1.0 - t) * (0.5 * M_PI));
+		sclq = sin( t * (0.5 * M_PI));
 		for (i = 0; i < 3; i++)
 		{
 			qt[i] = sclp * p[i] + sclq * qt[i];

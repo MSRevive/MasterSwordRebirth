@@ -27,6 +27,7 @@ enum {
 	ROLL = 2
 };
 
+int nanmask = 255 << 23;
 //#pragma warning(disable : 4244)
 
 float anglemod(float a)
@@ -40,13 +41,13 @@ void AngleVectors(const Vector& angles, Vector* forward, Vector* right, Vector* 
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (PI * 2 / 360);
+	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
-	angle = angles[PITCH] * (PI * 2 / 360);
+	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp = sin(angle);
 	cp = cos(angle);
-	angle = angles[ROLL] * (PI * 2 / 360);
+	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
 
@@ -75,13 +76,13 @@ void AngleVectorsTranspose(const Vector& angles, Vector* forward, Vector* right,
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (PI * 2 / 360);
+	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
-	angle = angles[PITCH] * (PI * 2 / 360);
+	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp = sin(angle);
 	cp = cos(angle);
-	angle = angles[ROLL] * (PI * 2 / 360);
+	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
 
@@ -110,13 +111,13 @@ void AngleMatrix(const float* angles, float (*matrix)[4])
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (PI * 2 / 360);
+	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
-	angle = angles[PITCH] * (PI * 2 / 360);
+	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp = sin(angle);
 	cp = cos(angle);
-	angle = angles[ROLL] * (PI * 2 / 360);
+	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
 
@@ -140,13 +141,13 @@ void AngleIMatrix(const Vector& angles, float matrix[3][4])
 	float angle;
 	float sr, sp, sy, cr, cp, cy;
 
-	angle = angles[YAW] * (PI * 2 / 360);
+	angle = angles[YAW] * (M_PI * 2 / 360);
 	sy = sin(angle);
 	cy = cos(angle);
-	angle = angles[PITCH] * (PI * 2 / 360);
+	angle = angles[PITCH] * (M_PI * 2 / 360);
 	sp = sin(angle);
 	cp = cos(angle);
-	angle = angles[ROLL] * (PI * 2 / 360);
+	angle = angles[ROLL] * (M_PI * 2 / 360);
 	sr = sin(angle);
 	cr = cos(angle);
 
@@ -238,7 +239,7 @@ float AngleBetweenVectors(const Vector& v1, const Vector& v2)
 		return 0.0f;
 
 	angle = acos(DotProduct(v1, v2)) / (l1 * l2);
-	angle = (angle * 180.0f) / PI;
+	angle = (angle * 180.0f) / M_PI;
 
 	return angle;
 }
@@ -372,12 +373,12 @@ void VectorAngles(const float* forward, float* angles)
 	}
 	else
 	{
-		yaw = (atan2(forward[1], forward[0]) * 180 / PI);
+		yaw = (atan2(forward[1], forward[0]) * 180 / M_PI);
 		if (yaw < 0)
 			yaw += 360;
 
 		tmp = sqrt(forward[0] * forward[0] + forward[1] * forward[1]);
-		pitch = (atan2(forward[2], tmp) * 180 / PI);
+		pitch = (atan2(forward[2], tmp) * 180 / M_PI);
 		if (pitch < 0)
 			pitch += 360;
 	}

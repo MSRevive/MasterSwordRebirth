@@ -21,6 +21,9 @@
 */
 
 #define VALVE_DLL 1
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
 
 #include "msdllheaders.h"
 #include "animation.h"
@@ -263,7 +266,7 @@ void CBaseAnimating ::SetSequenceBox(void)
 	{
 		// expand box for rotation
 		// find min / max for rotations
-		float yaw = pev->angles.y * (PI / 180.0);
+		float yaw = pev->angles.y * (M_PI / 180.0);
 
 		Vector xvector, yvector;
 		xvector.x = cos(yaw);

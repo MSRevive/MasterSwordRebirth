@@ -19,6 +19,8 @@ enum {
 };
 //#endif
 
+#undef PLANE_ANYZ
+
 enum planes_e {
 	PLANE_X = 0,
 	PLANE_Y = 1,

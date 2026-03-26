@@ -16,13 +16,11 @@
 #if !defined(ENTITY_TYPESH)
 #define ENTITY_TYPESH
 
-enum {
-	ET_NORMAL = 0,
-	ET_PLAYER = 1,
-	ET_TEMPENTITY = 2,
-	ET_BEAM = 3,
-	// BMODEL or SPRITE that was split across BSP nodes
-	ET_FRAGMENTED = 4
-};
+#define ET_NORMAL 0
+#define ET_PLAYER 1
+#define ET_TEMPENTITY 2
+#define ET_BEAM 3
+// BMODEL or SPRITE that was split across BSP nodes
+#define ET_FRAGMENTED 4
 
 #endif // !ENTITY_TYPESH

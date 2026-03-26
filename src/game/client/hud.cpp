@@ -48,6 +48,11 @@
 #include "fmod/soundengine.h"
 #include "mslogger.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
+
 //-----------------
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
@@ -762,7 +767,7 @@ int CHud::MsgFunc_SetFOV(const char *pszName, int iSize, void *pbuf)
 		m_iFOV = newfov;
 	}
 
-	ClFOV = cosf((m_iFOV / 2.0) * (PI / 180));
+	ClFOV = cosf((m_iFOV / 2.0) * (M_PI / 180));
 
 	// the clients fov is actually set in the client data update section of the hud
 

@@ -61,7 +61,6 @@ EXPORT_FUNCTION IBaseInterface *CreateInterface(const char *pName, int *pReturnC
 #ifdef _WIN32
 HINTERFACEMODULE Sys_LoadModule(const char *pModuleName)
 {
-	//preprocessor protection
 	return (HINTERFACEMODULE)LoadLibrary(pModuleName);
 }
 

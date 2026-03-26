@@ -60,7 +60,7 @@ typedef struct ref_params_s
 	int maxclients;
 	int viewentity;
 	int playernum;
-	unsigned int max_entities;
+	int max_entities;
 	int demoplayback;
 	int hardware;
 

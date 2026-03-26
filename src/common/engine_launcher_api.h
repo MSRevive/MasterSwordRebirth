@@ -14,14 +14,11 @@
 
 //typedef void ( *xcommand_t ) ( void );
 
-enum {
-	RENDERTYPE_UNDEFINED = 0,
-	RENDERTYPE_SOFTWARE = 1,
-	RENDERTYPE_HARDWARE = 2
-};
+#define RENDERTYPE_UNDEFINED 0
+#define RENDERTYPE_SOFTWARE 1
+#define RENDERTYPE_HARDWARE 2
 
-
-constexpr int ENGINE_LAUNCHER_API_VERSION = 1;
+#define ENGINE_LAUNCHER_API_VERSION 1
 
 typedef struct engine_api_s
 {

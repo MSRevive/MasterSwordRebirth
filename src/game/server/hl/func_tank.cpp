@@ -20,6 +20,10 @@
 #include "explode.h"
 
 #include "player.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
 
 enum sf_tank_e {
 	SF_TANK_ACTIVE = 0x0001,
@@ -636,12 +640,12 @@ void CFuncTank::AdjustAnglesForBarrel(Vector &angles, float distance)
 		if (m_barrelPos.y)
 		{
 			r2 = m_barrelPos.y * m_barrelPos.y;
-			angles.y += (180.0 / PI) * atan2(m_barrelPos.y, sqrt(d2 - r2));
+			angles.y += (180.0 / M_PI) * atan2(m_barrelPos.y, sqrt(d2 - r2));
 		}
 		if (m_barrelPos.z)
 		{
 			r2 = m_barrelPos.z * m_barrelPos.z;
-			angles.x += (180.0 / PI) * atan2(-m_barrelPos.z, sqrt(d2 - r2));
+			angles.x += (180.0 / M_PI) * atan2(-m_barrelPos.z, sqrt(d2 - r2));
 		}
 	}
 }

@@ -32,7 +32,7 @@ public:
 	virtual ~IBaseInterface() {}
 };
 
-constexpr const char* CREATEINTERFACE_PROCNAME = "CreateInterface";
+#define CREATEINTERFACE_PROCNAME "CreateInterface"
 typedef IBaseInterface *(*CreateInterfaceFn)(const char *pName, int *pReturnCode);
 
 typedef IBaseInterface *(*InstantiateInterfaceFn)();
@@ -80,7 +80,6 @@ public:
 	EXPOSE_SINGLE_INTERFACE_GLOBALVAR(className, interfaceName, versionName, __g_##className##_singleton)
 
 #ifdef WIN32
-//this is recommended standard practice, keep this as macro.
 #define EXPORT_FUNCTION __declspec(dllexport)
 #else
 #define EXPORT_FUNCTION

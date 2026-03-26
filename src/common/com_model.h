@@ -24,37 +24,33 @@
 #pragma once
 #endif
 
+#define STUDIO_RENDER 1
+#define STUDIO_EVENTS 2
 
-constexpr unsigned int MAX_MAP_HULLS = 4;
-constexpr unsigned int MAX_LIGHTMAPS = 4;
-constexpr unsigned int MAX_CLIENTS = 32;
-constexpr unsigned int MAX_MODEL_NAME = 64;
-constexpr unsigned int MAX_EDICTS = 2048;
-constexpr unsigned int MIPLEVELS = 4;
-constexpr unsigned int NUM_AMBIENTS = 4; // automatic ambient sounds
+#define MAX_CLIENTS 32
+#define MAX_EDICTS 2048
 
+#define MAX_MODEL_NAME 64
+#define MAX_MAP_HULLS 4
+#define MIPLEVELS 4
+#define NUM_AMBIENTS 4 // automatic ambient sounds
+#define MAXLIGHTMAPS 4
+#define PLANE_ANYZ 5
+
+#define ALIAS_Z_CLIP_PLANE 5
 
 // flags in finalvert_t.flags
+#define ALIAS_LEFT_CLIP 0x0001
+#define ALIAS_TOP_CLIP 0x0002
+#define ALIAS_RIGHT_CLIP 0x0004
+#define ALIAS_BOTTOM_CLIP 0x0008
+#define ALIAS_Z_CLIP 0x0010
+#define ALIAS_ONSEAM 0x0020
+#define ALIAS_XY_CLIP_MASK 0x000F
 
+#define ZISCALE ((float)0x8000)
 
-enum studio_e {
-    STUDIO_RENDER = 1,
-    STUDIO_EVENTS = 2
-};
-
-enum alias_clip_e {
-    ALIAS_LEFT_CLIP = 0x0001,
-    ALIAS_TOP_CLIP = 0x0002,
-    ALIAS_RIGHT_CLIP = 0x0004,
-    ALIAS_BOTTOM_CLIP = 0x0008,
-    ALIAS_Z_CLIP = 0x0010,
-    ALIAS_Z_CLIP_PLANE = 5,
-    ALIAS_ONSEAM = 0x0020,
-    ALIAS_XY_CLIP_MASK = 0x000F
-};
-
-constexpr float ZISCALE = (float)0x8000;
-constexpr int CACHE_SIZE = 32; // used to align key data structures
+#define CACHE_SIZE 32 // used to align key data structures
 
 typedef enum
 {
@@ -91,7 +87,7 @@ typedef struct
 //  'model.h' and 'gl_model.h'
 typedef struct mplane_s
 {
-    Vector normal; // surface normal
+    vec3_t normal; // surface normal
     float dist;    // closest appoach to origin
     byte type;     // for texture axis selection and fast side tests
     byte signbits; // signx + signy<<1 + signz<<1
@@ -100,7 +96,7 @@ typedef struct mplane_s
 
 typedef struct
 {
-    Vector position;
+    vec3_t position;
 } mvertex_t;
 
 // 06/23/2002 MAH
@@ -163,7 +159,7 @@ typedef struct
 #ifdef HARDWARE_MODE
 // 06/23/2002 MAH
 // This structure is only need for hardware rendering
-constexpr int VERTEXSIZE = 7;
+#define VERTEXSIZE 7
 
 typedef struct glpoly_s
 {
@@ -283,7 +279,7 @@ typedef struct mleaf_s
     struct efrag_s *efrags;
 
     msurface_t **firstmarksurface;
-    unsigned int nummarksurfaces;
+    int nummarksurfaces;
     int key; // BSP sequence number for leaf's contents
     byte ambient_sound_level[NUM_AMBIENTS];
 } mleaf_t;
@@ -318,7 +314,7 @@ struct msurface_s
     mtexinfo_t *texinfo;
 
     // lighting info
-    byte styles[MAX_LIGHTMAPS]; // index into d_lightstylevalue[] for animated lights
+    byte styles[MAXLIGHTMAPS]; // index into d_lightstylevalue[] for animated lights
                                // no one surface can be effected by more than 4
                                // animated lights.
     color24 *samples;          // actual light map data for this surface
@@ -360,8 +356,8 @@ typedef struct msurface_s
     int dlightbits;
 
     int lightmaptexturenum;
-    byte styles[MAX_LIGHTMAPS];
-    int cached_light[MAX_LIGHTMAPS]; // values currently used in lightmap
+    byte styles[MAXLIGHTMAPS];
+    int cached_light[MAXLIGHTMAPS]; // values currently used in lightmap
     qboolean cached_dlight;         // true if dynamic light in cache
 
     //  byte        *samples;                   // [numstyles*surfsize]
@@ -391,8 +387,8 @@ typedef struct hull_s
     mplane_t *planes;
     int firstclipnode;
     int lastclipnode;
-    Vector clip_mins;
-    Vector clip_maxs;
+    vec3_t clip_mins;
+    vec3_t clip_maxs;
 } hull_t;
 
 #if !defined(CACHE_USER) && !defined(QUAKEDEF_H)
@@ -417,13 +413,13 @@ typedef struct model_s
     //
     // volume occupied by the model
     //
-    Vector mins, maxs; // +0x054, +060
+    vec3_t mins, maxs; // +0x054, +060
     float radius;      // +0x06C
 
     //
     // brush model
     //
-    unsigned int firstmodelsurface, nummodelsurfaces; // +0x070, +0x074
+    int firstmodelsurface, nummodelsurfaces; // +0x070, +0x074
 
     int numsubmodels;    // +0x078
     dmodel_t *submodels; // +0x07C
@@ -482,7 +478,7 @@ typedef struct alight_s
 {
     int ambientlight; // clip at 128
     int shadelight;   // clip at 192 - ambientlight
-    Vector color;
+    vec3_t color;
     float *plightvec;
 } alight_t;
 
@@ -496,8 +492,8 @@ typedef struct auxvert_s
 //
 #include "custom.h"
 
-constexpr int  MAX_INFO_STRING = 256;
-constexpr int  MAX_SCOREBOARDNAME = 32;
+#define MAX_INFO_STRING 256
+#define MAX_SCOREBOARDNAME 32
 typedef struct player_info_s
 {
     // User id on server
@@ -524,10 +520,10 @@ typedef struct player_info_s
     int renderframe;
 
     // Gait frame estimation
-    unsigned int gaitsequence;
+    int gaitsequence;
     float gaitframe;
     float gaityaw;
-    Vector prevgaitorigin;
+    vec3_t prevgaitorigin;
 
     customization_t customdata;
 } player_info_t;

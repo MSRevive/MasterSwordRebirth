@@ -24,18 +24,15 @@ typedef enum
 	TRI_NONE = 1,
 } TRICULLSTYLE;
 
+#define TRI_API_VERSION 1
 
-constexpr int TRI_API_VERSION = 1;
-
-enum {
-	TRI_TRIANGLES = 0,
-	TRI_TRIANGLE_FAN = 1,
-	TRI_QUADS = 2,
-	TRI_POLYGON = 3,
-	TRI_LINES = 4,
-	TRI_TRIANGLE_STRIP = 5,
-	TRI_QUAD_STRIP = 6
-};
+#define TRI_TRIANGLES 0
+#define TRI_TRIANGLE_FAN 1
+#define TRI_QUADS 2
+#define TRI_POLYGON 3
+#define TRI_LINES 4
+#define TRI_TRIANGLE_STRIP 5
+#define TRI_QUAD_STRIP 6
 
 typedef struct triangleapi_s
 {

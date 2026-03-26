@@ -11,7 +11,7 @@
 #pragma once
 #endif
 
-constexpr int STUDIO_INTERFACE_VERSION = 1;
+#define STUDIO_INTERFACE_VERSION 1
 
 typedef struct engine_studio_api_s
 {
@@ -126,7 +126,7 @@ typedef struct r_studio_interface_s
 extern r_studio_interface_t *pStudioAPI;
 
 // server blending
-constexpr int SV_BLENDING_INTERFACE_VERSION = 1;
+#define SV_BLENDING_INTERFACE_VERSION 1
 
 typedef struct sv_blending_interface_s
 {
@@ -135,8 +135,8 @@ typedef struct sv_blending_interface_s
 	void (*SV_StudioSetupBones)(struct model_s *pModel,
 								float frame,
 								int sequence,
-								const Vector  angles,
-								const Vector  origin,
+								const vec3_t angles,
+								const vec3_t origin,
 								const byte *pcontroller,
 								const byte *pblending,
 								int iBone,

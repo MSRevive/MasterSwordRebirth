@@ -39,10 +39,10 @@ typedef struct
 	float prevanimtime;
 	float sequencetime;
 	byte prevseqblending[2];
-	Vector prevorigin;
-	Vector prevangles;
+	vec3_t prevorigin;
+	vec3_t prevangles;
 
-	unsigned int prevsequence;
+	int prevsequence;
 	float prevframe;
 
 	byte prevcontroller[4];
@@ -54,14 +54,14 @@ typedef struct
 	// Time stamp for this movement
 	float animtime;
 
-	Vector origin;
-	Vector angles;
+	vec3_t origin;
+	vec3_t angles;
 } position_history_t;
 
 typedef struct cl_entity_s cl_entity_t;
 
-constexpr int HISTORY_MAX = 64; // Must be power of 2
-constexpr int HISTORY_MASK = (HISTORY_MAX - 1);
+#define HISTORY_MAX 64 // Must be power of 2
+#define HISTORY_MASK (HISTORY_MAX - 1)
 
 #if !defined(ENTITY_STATEH)
 #include "entity_state.h"
@@ -93,11 +93,11 @@ struct cl_entity_s
 	float lastmove;
 
 	// Actual render position and angles
-	Vector origin;
-	Vector angles;
+	vec3_t origin;
+	vec3_t angles;
 
 	// Attachment points
-	Vector attachment[4];
+	vec3_t attachment[4];
 
 	// Other entity local information
 	int trivial_accept;

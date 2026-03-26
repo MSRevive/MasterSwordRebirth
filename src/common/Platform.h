@@ -3,7 +3,7 @@
 
 // Allow "DEBUG" in addition to default "_DEBUG"
 #ifdef _DEBUG
-constexpr int DEBUG = 1
+#define DEBUG 1
 #endif
 
 // Silence certain warnings
@@ -12,6 +12,7 @@ constexpr int DEBUG = 1
 #pragma warning(disable : 4201)	 // nameless struct/union
 #pragma warning(disable : 4514)	 // unreferenced inline function removed
 #pragma warning(disable : 4100)	 // unreferenced formal parameter
+#pragma warning(disable : 4018) // signed/unsigned mismatch, this this probably isn't a good idea...
 #pragma warning(disable : 26495) // Variable is uninitialized
 #pragma warning(disable : 26451) // Arithmetic overflow
 #pragma warning(disable : 26812) // The enum type is unscoped
@@ -40,15 +41,7 @@ using word = unsigned short;
 // #undef ARRAYSIZE
 // #endif
 // #define ARRAYSIZE(p) (sizeof(p) / sizeof(p[0]))
-
-template <typename T1, typename T2>
-inline auto V_min(const T1& a, const T2& b) {
-	return (a <= b) ? a : b;
-};
-
-template <typename T1, typename T2>
-inline auto V_max(const T1& a, const T2& b) {
-	return (a >= b) ? a : b;
-};
+#define V_min(a, b) (((a) < (b)) ? (a) : (b))
+#define V_max(a, b) (((a) > (b)) ? (a) : (b))
 
 #endif

@@ -18,20 +18,18 @@
 #pragma once
 #endif
 
-enum {
-	FBEAM_STARTENTITY  = 0x00000001,
-	FBEAM_ENDENTITY    = 0x00000002,
-	FBEAM_FADEIN       = 0x00000004,
-	FBEAM_FADEOUT      = 0x00000008,
-	FBEAM_SINENOISE    = 0x00000010,
-	FBEAM_SOLID        = 0x00000020,
-	FBEAM_SHADEIN      = 0x00000040,
-	FBEAM_SHADEOUT     = 0x00000080,
-	FBEAM_STARTVISIBLE = 0x10000000, // Has this client actually seen this beam's start entity yet?;
-	FBEAM_ENDVISIBLE   = 0x20000000,	  // Has this client actually seen this beam's end entity yet?;
-	FBEAM_ISACTIVE     = 0x40000000,
-	FBEAM_FOREVER      = 0x80000000
-};
+#define FBEAM_STARTENTITY 0x00000001
+#define FBEAM_ENDENTITY 0x00000002
+#define FBEAM_FADEIN 0x00000004
+#define FBEAM_FADEOUT 0x00000008
+#define FBEAM_SINENOISE 0x00000010
+#define FBEAM_SOLID 0x00000020
+#define FBEAM_SHADEIN 0x00000040
+#define FBEAM_SHADEOUT 0x00000080
+#define FBEAM_STARTVISIBLE 0x10000000 // Has this client actually seen this beam's start entity yet?
+#define FBEAM_ENDVISIBLE 0x20000000	  // Has this client actually seen this beam's end entity yet?
+#define FBEAM_ISACTIVE 0x40000000
+#define FBEAM_FOREVER 0x80000000
 
 typedef struct beam_s BEAM;
 struct beam_s
@@ -39,9 +37,9 @@ struct beam_s
 	BEAM *next;
 	int type;
 	int flags;
-	Vector  source;
-	Vector  target;
-	Vector  delta;
+	vec3_t source;
+	vec3_t target;
+	vec3_t delta;
 	float t; // 0 .. 1 over lifetime of beam
 	float freq;
 	float die;

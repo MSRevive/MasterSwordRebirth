@@ -18,13 +18,11 @@
 #pragma once
 #endif
 
-enum {
-	// Event was invoked with stated origin
-	FEVENT_ORIGIN = (1 << 0),
+// Event was invoked with stated origin
+#define FEVENT_ORIGIN (1 << 0)
 
-	// Event was invoked with stated angles
-	FEVENT_ANGLES = (1 << 1)
-};
+// Event was invoked with stated angles
+#define FEVENT_ANGLES (1 << 1)
 
 typedef struct event_args_s
 {
