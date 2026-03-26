@@ -25,8 +25,8 @@ void ValidateScriptsRequest::OnResponse(int iRespCode)
 	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
 	if (!doc["data"].GetBool())
 	{
-		FNShared::Print("Script file not verified for FN!\n");
+		FNShared::Print("Script file not verified for FN!");
 	}
 
-	FNShared::Print("Scripts verified for FN.\n");
+	FNShared::Print("Scripts verified for FN.");
 }

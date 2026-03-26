@@ -265,7 +265,7 @@ void HTTPRequest::ResponseCallback(int httpCode)
 	
 	if (httpCode == 0)
 	{
-		FNShared::Print("Request Failed. %s, '%s'\n", GetName(), g_szBaseUrl);
+		FNShared::Print("Request Failed. %s, '%s'", GetName(), g_szBaseUrl);
 		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
@@ -274,13 +274,13 @@ void HTTPRequest::ResponseCallback(int httpCode)
 	{
 		if (httpCode == 401)
 		{
-			FNShared::Print("FN Authorization failed! %s\n", GetName());
+			FNShared::Print("FN Authorization failed! %s", GetName());
 			OnResponse(httpCode);
 			m_iRequestState = RequestState::FINISHED;
 			return;
 		}
 
-		FNShared::Print("FN Server Error. %s Code: %d\n", GetName(), httpCode);
+		FNShared::Print("FN Server Error. %s Code: %d", GetName(), httpCode);
 		OnResponse(httpCode);
 		m_iRequestState = RequestState::FINISHED;
 		return;
@@ -295,7 +295,7 @@ void HTTPRequest::ResponseCallback(int httpCode)
 
 	if (m_sResponseBody.empty())
 	{
-		FNShared::Print("The data hasn't been received. HTTP code: %d\n", httpCode);
+		FNShared::Print("The data hasn't been received. HTTP code: %d", httpCode);
 		OnResponse(httpCode);
 		m_iRequestState = RequestState::FINISHED;
 		return;

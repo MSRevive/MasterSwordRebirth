@@ -19,14 +19,14 @@ void LoadCharacterRequest::OnResponse(int iRespCode)
 {
 	if ((iRespCode != 200) && (iRespCode != 204))
 	{
-		FNShared::Print("Unable to load character %i for SteamID %llu!\n", (m_iSlot + 1), m_iSteamID64);
+		FNShared::Print("Unable to load character %i for SteamID %llu!", (m_iSlot + 1), m_iSteamID64);
 		return;
 	}
 
 	CBasePlayer* pPlayer = UTIL_PlayerBySteamID(m_iSteamID64);
 	if (pPlayer == nullptr)
 	{
-		FNShared::Print("FATALITY: Unable to get player with SteamID64 %llu\n", m_iSteamID64);
+		FNShared::Print("FATALITY: Unable to get player with SteamID64 %llu", m_iSteamID64);
 		return;
 	}
 
@@ -46,7 +46,7 @@ void LoadCharacterRequest::OnResponse(int iRespCode)
 
 	if (FNShared::IsBanned(flags) == true)
 	{
-		FNShared::Print("Account banned from FN! %llu!\n", m_iSteamID64);
+		FNShared::Print("Account banned from FN! %llu!", m_iSteamID64);
 		pPlayer->KickPlayer("You have been banned from FN!");
 		return;
 	}

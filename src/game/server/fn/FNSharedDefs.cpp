@@ -35,7 +35,6 @@ void FNShared::Print(const char* fmt, ...)
 	vsnprintf(string, sizeof(string), fmt, argptr);
 	va_end(argptr);
 
-	g_engfuncs.pfnServerPrint(string);
 	MS_INFO("[FuzzNet] %s", string);
 }
 
@@ -192,7 +191,7 @@ void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const cha
 	{
 		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid);
 		
-		FNShared::Print("Send update request for %s\n", std::to_string(pPlayer->steamID64).c_str());
+		FNShared::Print("Send update request for %s", std::to_string(pPlayer->steamID64).c_str());
 		g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
 	}
 	else

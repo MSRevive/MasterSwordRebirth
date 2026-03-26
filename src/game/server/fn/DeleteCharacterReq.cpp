@@ -18,7 +18,7 @@ void DeleteCharacterRequest::OnResponse(int iRespCode)
 {
 	if (iRespCode != 200)
 	{
-		FNShared::Print("Unable to delete character for SteamID %llu!\n", m_iSteamID64);
+		FNShared::Print("Unable to delete character for SteamID %llu!", m_iSteamID64);
 		return;
 	}
 
