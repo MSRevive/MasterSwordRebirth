@@ -536,7 +536,7 @@ void MSGameEnd()
 	}
 	
 	//Save all characters now - Solokiller 5/10/2017
-	for(unsigned int i = 1; i <= gpGlobals->maxClients; ++i)
+	for(int i = 1; i <= gpGlobals->maxClients; ++i)
 	{
 		CBasePlayer *pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
@@ -557,7 +557,7 @@ void MSGameEnd()
 	//Deallocate any 'extra' memory the mod allocated for any entity
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(0);
 	if (pEdict)
-		for (unsigned int i = 0; i < gpGlobals->maxEntities; i++, pEdict++)
+		for (int i = 0; i < gpGlobals->maxEntities; i++, pEdict++)
 		{
 			if (pEdict->free)
 				continue;
@@ -622,7 +622,7 @@ void MSGameEnd()
 
 void SendHUDMsgAll(const char* Title, const char* Text)
 {
-	for (unsigned int p = 0; p < gpGlobals->maxClients; p++)
+	for (int p = 0; p < gpGlobals->maxClients; p++)
 		if (MSInstance(INDEXENT(p + 1)))
 			((CBasePlayer *)MSInstance(INDEXENT(p + 1)))->SendHUDMsg(Title, Text);
 }

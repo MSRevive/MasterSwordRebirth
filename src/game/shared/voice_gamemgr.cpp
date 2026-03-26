@@ -38,7 +38,7 @@ cvar_t sv_alltalk = {"sv_alltalk", "0"};
 // Find a player with a case-insensitive name search.
 static CBasePlayer *FindPlayerByName(const char *pTestName)
 {
-	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
 		if (pEdict)

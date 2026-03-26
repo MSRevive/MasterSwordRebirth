@@ -321,7 +321,7 @@ namespace ASEntityBindings
 #ifdef VALVE_DLL
         // Server-side: Populate with actual connected players using real engine functions
         
-        for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+        for (int i = 1; i <= gpGlobals->maxClients; i++)
         {
             edict_t* pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
             if (!pEdict || pEdict->free)
@@ -360,7 +360,7 @@ namespace ASEntityBindings
     {
 #ifdef VALVE_DLL
         
-        unsigned int idx = index;
+        int idx = index;
 
         if (idx < 1 || idx > gpGlobals->maxClients)
         {
@@ -407,7 +407,7 @@ namespace ASEntityBindings
             return nullptr;
         }
         
-        for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+        for (int i = 1; i <= gpGlobals->maxClients; i++)
         {
             CBasePlayer* pPlayer = AS_PlayerByIndex(i);
             if (pPlayer)

@@ -4887,7 +4887,7 @@ void CBasePlayer::UpdateMiscPositions(void)
 			if (memcmp(&Info, &m_ScoreInfoCache, sizeof(scoreinfo_t)))
 			{
 				pev->frags = m_MaxHP; //FEB2008a - Report HP to Scoreboard
-				for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
 				{
 					CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 					if (pSendPlayer)

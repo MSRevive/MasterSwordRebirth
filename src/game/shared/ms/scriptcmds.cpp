@@ -302,7 +302,7 @@ struct SDebugInfo
 	// Info for finding entities
 	int                                 mTargetType;
 	int                                 mTimesLooked;
-	unsigned int                        mStartIndex;
+	int									mStartIndex;
 	msstring                            msScriptName;
 	CBaseEntity *                       mpFoundEntity;
 
@@ -2552,7 +2552,7 @@ bool CScript::ScriptCmd_ClientCmd(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstrin
 		}
 		else
 		{
-			for( unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+			for(int i = 1; i <= gpGlobals->maxClients; i++ )
 			{
 				CBaseEntity *pEntity = UTIL_PlayerByIndex( i );
 				CBasePlayer *pPlayer = (CBasePlayer *)pEntity;;
@@ -3375,7 +3375,7 @@ bool CScript::ScriptCmd_GetPlayers(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 	//- get all players, store in token string
 #ifdef VALVE_DLL
 	msstring msStorePlayers;
-	for(unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+	for(int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pOtherPlayer ) continue;
@@ -3402,7 +3402,7 @@ bool CScript::ScriptCmd_GetPlayersArray(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, m
 	msscriptarray *                     pArray = m.pScriptedEnt->GetScriptedArray( ArrName, true );
 	pArray->clearitems();
 
-	for(unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+	for(int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pOtherPlayer ) continue;
@@ -3424,7 +3424,7 @@ bool CScript::ScriptCmd_GetPlayersNB(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	//- saves a step in the bot mess, but for better security, use the script side verifications too (see base_treasurechest)
 #ifdef VALVE_DLL
 	msstring msStorePlayers;
-	for(unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+	for(int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
 		CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 		if ( !pOtherPlayer )
@@ -3686,7 +3686,7 @@ bool CScript::ScriptCmd_HelpTip(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 		}
 		else
 		{
-			for( unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+			for(int i = 1; i <= gpGlobals->maxClients; i++ )
 			{
 				CBaseEntity *pEntity = UTIL_PlayerByIndex(i);
 				CBasePlayer *pPlayer = (CBasePlayer *)pEntity;;
@@ -3808,7 +3808,7 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			}
 			else
 			{
-				for(unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+				for(int i = 1; i <= gpGlobals->maxClients; i++ )
 				{
 					CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 					if ( !pPlayer ) continue;
@@ -3878,7 +3878,7 @@ bool CScript::ScriptCmd_HudIcon(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 			}
 			else
 			{
-				for( unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+				for(int i = 1; i <= gpGlobals->maxClients; i++ )
 				{
 					CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 					if ( !pPlayer ) continue;
@@ -4397,7 +4397,7 @@ bool CScript::ScriptCmd_MessageAll(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 			msTemp += Params[i+1];
 		}
 
-		for(unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+		for(int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 
@@ -5216,7 +5216,7 @@ bool CScript::ScriptCmd_Respawn(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringl
 
 		if( Params[0] == "all" )
 		{
-			for( unsigned int i = 1; i <= gpGlobals->maxClients; i++ )
+			for(int i = 1; i <= gpGlobals->maxClients; i++ )
 			{
 				CBaseEntity *pEntity = UTIL_PlayerByIndex( i );
 				if( pEntity ) PlayerList.add( (CBasePlayer *)pEntity );

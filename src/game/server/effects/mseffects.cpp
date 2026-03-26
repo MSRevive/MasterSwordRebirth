@@ -400,7 +400,7 @@ class CMSChangeLevel : public CBaseEntity
 	string_t sDestMap, sDestTrans;
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
 	{
-		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pPlayer)

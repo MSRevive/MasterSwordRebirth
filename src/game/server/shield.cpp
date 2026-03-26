@@ -21,7 +21,7 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 	//Make corpses solid here too...
 	CBaseEntity *pEnt = NULL;
 	edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(1);
-	for (unsigned int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
+	for (int i = 1; i < gpGlobals->maxEntities; i++, pEdict++)
 	{
 		if (pEdict->free) // Not in use
 			continue;

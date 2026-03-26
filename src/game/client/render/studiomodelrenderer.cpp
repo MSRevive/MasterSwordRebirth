@@ -928,7 +928,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	static vec4_t q4[MAXSTUDIOBONES];
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
-	if (Ent.curstate.sequence >= m_pStudioHeader->numseq)
+	if (Ent.curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
 	{
 		Ent.curstate.sequence = 0;
 	}
@@ -984,7 +984,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 		static vec4_t q1b[MAXSTUDIOBONES];
 		float s;
 
-		if (Ent.latched.prevsequence >= m_pStudioHeader->numseq)
+		if (Ent.latched.prevsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
 			Ent.latched.prevsequence = 0;
 
 		pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + Ent.latched.prevsequence;
@@ -1028,7 +1028,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	pbones = (mstudiobone_t*)((byte*)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 	// bounds checking
-	if (m_pPlayerInfo && (m_pPlayerInfo->gaitsequence >= m_pStudioHeader->numseq))
+	if (m_pPlayerInfo && (m_pPlayerInfo->gaitsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq)))
 		m_pPlayerInfo->gaitsequence = 0;
 
 	// calc gait animation
@@ -1137,7 +1137,7 @@ void CStudioModelRenderer::StudioMergeBones(model_t* m_pSubModel)
 	float bonematrix[3][4];
 	static vec4_t q[MAXSTUDIOBONES];
 
-	if (Ent.curstate.sequence >= m_pStudioHeader->numseq)
+	if (Ent.curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
 	{
 		Ent.curstate.sequence = 0;
 	}
@@ -1738,7 +1738,7 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 	float flYaw = 0; // view direction relative to movement
 	float frametime = 0;
 
-	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
+	if (m_pCurrentEntity->curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
 		m_pCurrentEntity->curstate.sequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
@@ -1817,7 +1817,7 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 		m_pCurrentEntity->latched.prevcontroller[3] = m_pCurrentEntity->curstate.controller[3];
 	}
 
-	if (pplayer->gaitsequence >= m_pStudioHeader->numseq)
+	if (pplayer->gaitsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
 		pplayer->gaitsequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + pplayer->gaitsequence;

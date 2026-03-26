@@ -1541,7 +1541,7 @@ charinfo_t::~charinfo_t()
 const char* GetOtherPlayerTransition(CBasePlayer* pPlayer)
 {
 #ifdef VALVE_DLL
-	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 		if (!pOtherPlayer || pOtherPlayer == pPlayer)

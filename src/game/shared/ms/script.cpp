@@ -6007,7 +6007,7 @@ void CScript::CallScriptEventAll(const char* EventName, msstringlist* Parameters
 	CBaseEntity* pEntity = NULL;
 	IScripted* pScripted = NULL;
 
-	for (unsigned int i = 1; i < gpGlobals->maxEntities; i++)
+	for (int i = 1; i < gpGlobals->maxEntities; i++)
 	{
 		pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
 
@@ -6041,7 +6041,7 @@ void CScript::CallScriptPlayers(const char* EventName, msstringlist* Parameters)
 
 	IScripted* pScripted = NULL;
 
-	for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+	for (int i = 1; i <= gpGlobals->maxClients; i++)
 	{
 		CBaseEntity* pEntity = UTIL_PlayerByIndex(i);
 		CBasePlayer* pPlayer = (CBasePlayer*)pEntity;;

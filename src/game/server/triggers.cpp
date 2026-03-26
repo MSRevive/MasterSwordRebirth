@@ -2812,7 +2812,7 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	//Camera takes control of all players?
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_ALL)) 
 	{
-		for (unsigned int i = 0; i < gpGlobals->maxClients; i++)
+		for (int i = 0; i < gpGlobals->maxClients; i++)
 		{
 			pActivator = UTIL_PlayerByIndex(i + 1); //get pointer to player's cbaseentity
 			if (!pActivator || !pActivator->IsPlayer())

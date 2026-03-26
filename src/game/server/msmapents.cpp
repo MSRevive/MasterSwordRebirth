@@ -1572,7 +1572,7 @@ public:
 	bool FAllPlayersAreTouchingMe()
 	{
 		Print("DEBUG: Ltrans FAllPlayersAreTouchingMe\n");
-		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer)
@@ -1634,7 +1634,7 @@ public:
 
 	bool FAllPlayersAreTouchingMe()
 	{
-		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer)
@@ -1701,7 +1701,7 @@ public:
 
 		if (fChangeLocalMap)
 		{
-			for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
 			{
 				CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 				if (!pOtherPlayer)
@@ -1886,7 +1886,7 @@ public:
 
 		//Compare the votes to what it should be
 		int AllVotes = 0;
-		for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+		for (int i = 1; i <= gpGlobals->maxClients; i++)
 		{
 			CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 			if (!pOtherPlayer || pOtherPlayer->m_CharacterState == CHARSTATE_UNLOADED || !pOtherPlayer->IsActive())
@@ -1903,7 +1903,7 @@ public:
 		if (PlayerVotes == AllVotes)
 		{
 			UTIL_ClientPrintAll(HUD_PRINTCENTER, UTIL_VarArgs("Traveling to %s\n", STRING(sDestName)));
-			for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+			for (int i = 1; i <= gpGlobals->maxClients; i++)
 			{
 				CBasePlayer *pOtherPlayer = (CBasePlayer *)UTIL_PlayerByIndex(i);
 				if (!pOtherPlayer)

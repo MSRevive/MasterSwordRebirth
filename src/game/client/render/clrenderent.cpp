@@ -108,7 +108,7 @@ bool cl_entity_s::PlayAnim(const char* Anim)
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex);
 
-	for (unsigned int i = 0; i < pstudiohdr->numseq; i++)
+	for (int i = 0; i < pstudiohdr->numseq; i++)
 	{
 		if (_stricmp(pseqdesc[i].label, Anim) != 0)
 			continue;

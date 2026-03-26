@@ -84,7 +84,7 @@ void CTeam ::AddToTeam(CBasePlayer *pPlayer)
 	MemberList.add(Unit);
 
 	//Update everyone
-	for (unsigned int n = 1; n <= gpGlobals->maxClients; n++)
+	for (int n = 1; n <= gpGlobals->maxClients; n++)
 	{
 		CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(n);
 		if (!pSendPlayer)
@@ -106,7 +106,7 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 		}
 
 	//Update everyone
-	for (unsigned int n = 1; n <= gpGlobals->maxClients; n++)
+	for (int n = 1; n <= gpGlobals->maxClients; n++)
 	{
 		CBasePlayer *pSendPlayer = (CBasePlayer *)UTIL_PlayerByIndex(n);
 		if (!pSendPlayer)

@@ -187,7 +187,7 @@ void ClientDisconnect(edict_t *pEntity)
 		// Try to get Steam ID from client info
 		int iPlayerIndex = ENTINDEX(pEntity) - 1;
 
-		if (iPlayerIndex >= 0 && (unsigned int)iPlayerIndex < gpGlobals->maxClients)
+		if (iPlayerIndex >= 0 && iPlayerIndex < gpGlobals->maxClients)
 		{
 			clientaddr_t &ClientInfo = g_NewClients[iPlayerIndex];
 			if (ClientInfo.Addr[0])
@@ -625,7 +625,7 @@ void ClientCommand2(edict_t *pEntity)
 				ALERT(at_console, "[AS_RELOAD_SCRIPTS] Script hot-reload completed successfully\n");
 				
 				// Send notification to all players
-				for (unsigned int i = 1; i <= gpGlobals->maxClients; i++)
+				for (int i = 1; i <= gpGlobals->maxClients; i++)
 				{
 					CBasePlayer* pOtherPlayer = (CBasePlayer*)UTIL_PlayerByIndex(i);
 					if (pOtherPlayer && pOtherPlayer != pPlayer && pOtherPlayer->m_Initialized)
@@ -1474,7 +1474,7 @@ void ClientCommand2(edict_t *pEntity)
 	else if (FStrEq(pcmd, "entcount"))
 	{
 		int e = 0;
-		for (unsigned int i = 0; i < gpGlobals->maxEntities; i++)
+		for (int i = 0; i < gpGlobals->maxEntities; i++)
 		{
 			edict_t *pEdict = g_engfuncs.pfnPEntityOfEntIndex(i);
 			if (!pEdict)
@@ -2536,7 +2536,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 	state->owner = 0;
 	if (ent->v.owner)
 	{
-		unsigned int owner = ENTINDEX(ent->v.owner);
+		int owner = ENTINDEX(ent->v.owner);
 
 		// Only care if owned by a player or using special follow
 		if ((owner >= 1 && owner <= gpGlobals->maxClients))
