@@ -33,8 +33,10 @@
 
 typedef int HLSPRITE; // handle to a graphic
 
-#define SCRINFO_SCREENFLASH 1
-#define SCRINFO_STRETCHED 2
+enum {
+	SCRINFO_SCREENFLASH = 1,
+	SCRINFO_STRETCHED = 2
+};
 
 typedef struct SCREENINFO_s
 {
@@ -86,7 +88,7 @@ typedef struct hud_player_info_s
 
 #include "in_buttons.h"
 
-#define CLDLL_INTERFACE_VERSION 7
+constexpr int CLDLL_INTERFACE_VERSION = 7;
 
 //#include "server.h" // server_static_t define for apiproxy
 #include "APIProxy.h"

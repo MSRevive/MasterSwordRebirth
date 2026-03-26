@@ -149,6 +149,6 @@ inline float DotProduct(const Vector &a, const Vector &b) { return (a.x * b.x + 
 //};
 
 inline Vector CrossProduct(const Vector &a, const Vector &b) { return Vector(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x); }
-typedef Vector vec3_t;// temporary until we change all the files to use Vector.
+
 
 #endif
