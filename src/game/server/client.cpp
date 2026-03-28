@@ -462,6 +462,9 @@ void ClientCommand2(edict_t *pEntity)
 	CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
 	int iHand = -1;
 
+	if (!pPlayer)
+		return;
+
 	if (MSGlobals::GameScript)
 	{
 		CBaseEntity *pWorld = CBaseEntity::Instance(ENT(0));
@@ -531,7 +534,7 @@ void ClientCommand2(edict_t *pEntity)
 				pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, Text.c_str());
 			}
 
-			pPlayer->Speak(Text, (speech_type)SayType);
+			pPlayer->Speak(Text, static_cast<speech_type>(SayType));
 		}
 	}
 	else if (FStrEq(pcmd, "setsay"))
