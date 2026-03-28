@@ -229,11 +229,11 @@ inline const char* RETURN_ZERO() {
 	return "0";
 }
 
-inline const char* RETURN_true(){
+inline const char* RETURN_TRUE(){
 	return "1";
 }
 
-inline const char* RETURN_false() {
+inline const char* RETURN_FALSE() {
 	return "0";
 }
 
