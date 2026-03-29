@@ -55,7 +55,7 @@ bool msstring::operator==(const char *a) const { return !strcmp(data, a); }
 bool msstring::operator==(msstring a) const { return !strcmp(data, a.data); }
 msstring::operator char *() { return data; }
 msstring::operator const char *() { return data; }
-const char *msstring::c_str() { return data; }
+const char *msstring::c_str() const { return data; }
 char* msstring::str()
 {
     if (data[0] == 0)
