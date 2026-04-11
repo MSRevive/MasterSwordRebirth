@@ -135,8 +135,6 @@ endfunction(set_common_properties)
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
 
-find_package(Protobuf REQUIRED)
-
 # Add Projects
 add_subdirectory(src/game/client)
 add_subdirectory(src/game/server)

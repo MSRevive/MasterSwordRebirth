@@ -2,7 +2,19 @@ set(ZLIB_USE_STATIC_LIBS "ON")
 set(ZLIB_ROOT "${BASEDIR}/lib/zlib")
 find_package(ZLIB REQUIRED)
 
-add_subdirectory(proto)
+if (WIN32)
+	include(${BASEDIR}/cmake/protobuf.cmake)
+
+	# cannot regenerate savedata.pb.* here because that would require compiling protoc before running `cmake -B` and BPN has no support for multi step builds
+	#   maybe adding protoc to the bins/debug and bins/release directory would solve that
+	if (TARGET protobuf::protoc)
+		add_subdirectory(proto)
+	endif()
+else()
+	find_package(Protobuf REQUIRED)
+
+	add_subdirectory(proto)
+endif()
 
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 add_library(libcurl STATIC IMPORTED)
@@ -30,8 +42,8 @@ target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Normaliz>
 	${ZLIB_LIBRARIES}
 	libcurl
-	savedata-protoc
-	${Protobuf_LIBRARIES}
+	$<$<PLATFORM_ID:Windows>:libprotobuf>
+	$<$<PLATFORM_ID:Linux>:${Protobuf_LIBRARIES}>
   )
 
 # Include directories
@@ -415,6 +427,8 @@ set(ThirdParty_AngelScript
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
 set(Shared_Save
+	"proto/savedata.pb.cc"
+	"proto/savedata.pb.h"
 	"save/protosave.cpp"
 	"save/protosave.h"
 )

@@ -1,5 +1,5 @@
 #include "protosave.h"
-#include "savedata.pb.h"
+#include "proto/savedata.pb.h"
 
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
