@@ -21,7 +21,9 @@ void EnableAllocateTrace() { AllocationStack--; }
 #endif
 #endif
 
-#define MS_FATAL_ERROR_MEM(MemErrMsg) Print("%s\n", MemErrMsg);
+static void MS_FATAL_ERROR_MEM(const char * MemErrMsg) {
+	Print("%s\n", MemErrMsg);
+}
 
 #ifdef DEV_BUILD
 void* operator new(size_t size, const char* pszSourceFile, int LineNum)
@@ -115,7 +117,7 @@ void operator delete(void* ptr)
 		if (!AllocationStack)
 		{
 			bool found = false;
-			for (int i = 0; i < alloctotal; i++)
+			for (unsigned int i = 0; i < alloctotal; i++)
 				if (Allocations[i]->pAddr == ptr)
 				{
 					found = true;
@@ -166,7 +168,7 @@ void LogMemoryUsage(const char* Title)
 #ifdef TRACK_MEMORY
 	MS_INFO(Title);
 	MS_INFO("[Current Memory Allocations: %i][Highest Ever: %i]", alloctotal, allochighest);
-	for (int i = 0; i < alloctotal; i++)
+	for (unsigned int i = 0; i < alloctotal; i++)
 	{
 		//if( Allocations[i]->Index == 124117 )
 		MS_INFO("[Unfreed #%i][%i] %s:%i", i, Allocations[i]->Index, Allocations[i]->SourceFile.c_str(), Allocations[i]->LineNum);

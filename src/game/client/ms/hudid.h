@@ -16,10 +16,10 @@ public:
 
 	void SearchThink(void);
 	entinfo_t *GetEntInFrontOfMe(float Range);
-
 	entinfo_t *pActiveInfo, *pDrawInfo;
 	float Alpha;
 	float TimeDecAlpha;
+	char Name[32] = "CHudID";
 };
 
 #endif //__HUDID

@@ -25,16 +25,16 @@
 
 extern DLL_GLOBAL Vector g_vecAttackDir;
 
-#define SF_BRUSH_ACCDCC 16		 // brush should accelerate and decelerate when toggled
-#define SF_BRUSH_HURT 32		 // rotating brush that inflicts pain based on rotation speed
-#define SF_ROTATING_NOT_SOLID 64 // some special rotating objects are not solid.
+
 
 // covering cheesy noise1, noise2, & noise3 fields so they make more sense (for rotating fans)
+
+//overloaded generic variable names
 #define noiseStart noise1
 #define noiseStop noise2
 #define noiseRunning noise3
 
-#define SF_PENDULUM_SWING 2 // spawnflag that makes a pendulum a rope swing.
+
 //
 // BModelOrigin - calculates origin of a bmodel from absmin/size because all bmodel origins are 0 0 0
 //
@@ -79,7 +79,6 @@ void CFuncWall ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	CScriptedEnt::Use(pActivator, pCaller, useType, value);
 }
 
-#define SF_WALL_START_OFF 0x0001
 
 class CFuncWallToggle : public CFuncWall
 {
@@ -117,8 +116,8 @@ void CFuncWallToggle ::TurnOn(void)
 BOOL CFuncWallToggle ::IsOn(void)
 {
 	if (pev->solid == SOLID_NOT)
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 void CFuncWallToggle ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
@@ -135,9 +134,6 @@ void CFuncWallToggle ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 	CScriptedEnt::Use(pActivator, pCaller, useType, value);
 }
 
-#define SF_CONVEYOR_VISUAL 0x0001
-#define SF_CONVEYOR_NOTSOLID 0x0002
-#define SF_CONVEYOR_TOGGLE 0x0004 //Thothie AUG2011_30 toggle conveyors
 
 class CFuncConveyor : public CFuncWall
 {
@@ -241,7 +237,7 @@ void CFuncIllusionary ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "skin")) //skin is used for content type
 	{
 		pev->skin = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -274,7 +270,7 @@ void CFuncIllusionary ::Spawn(void)
 //
 // -------------------------------------------------------------------------------
 
-#define SF_MONSTERCLIP_START_OFF 0x0001
+
 
 class CFuncMonsterClip : public CFuncWallToggle
 {
@@ -338,9 +334,9 @@ void CFuncMonsterClip::TurnOn(void)
 BOOL CFuncMonsterClip::IsOn(void)
 {
 	if (pev->flags & FL_MONSTERCLIP)
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 // -------------------------------------------------------------------------------
@@ -352,7 +348,7 @@ BOOL CFuncMonsterClip::IsOn(void)
 //
 // -------------------------------------------------------------------------------
 
-#define SF_PLAYERCLIP_START_OFF 0x0001
+
 
 class CMSFuncPlayerClip : public CFuncWallToggle
 {
@@ -426,9 +422,9 @@ void CMSFuncPlayerClip::TurnOn(void)
 BOOL CMSFuncPlayerClip::IsOn(void)
 {
 	if (pev->solid & SOLID_TRIGGER)
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 // -------------------------------------------------------------------------------
@@ -500,7 +496,7 @@ void CFuncRotating ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "fanfriction"))
 	{
 		m_flFanFriction = atof(pkvd->szValue) / 100;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "volume"))
 	{
@@ -510,7 +506,7 @@ void CFuncRotating ::KeyValue(KeyValueData *pkvd)
 			m_flVolume = 1.0;
 		if (m_flVolume < 0.0)
 			m_flVolume = 0.0;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnorigin"))
 	{
@@ -522,7 +518,7 @@ void CFuncRotating ::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		BaseClass::KeyValue(pkvd);
@@ -717,8 +713,8 @@ void CFuncRotating ::HurtTouch(CBaseEntity *pOther)
 // RampPitchVol - ramp pitch and volume up to final values, based on difference
 // between how fast we're going vs how fast we plan to go
 //
-#define FANPITCHMIN 30
-#define FANPITCHMAX 100
+constexpr float FANPITCHMIN = 30;
+constexpr float FANPITCHMAX = 100;
 
 void CFuncRotating ::RampPitchVol(int fUp)
 {
@@ -787,7 +783,7 @@ void CFuncRotating ::SpinUp(void)
 	}
 	else
 	{
-		RampPitchVol(TRUE);
+		RampPitchVol(true);
 	}
 }
 
@@ -828,7 +824,7 @@ void CFuncRotating ::SpinDown(void)
 	}
 	else
 	{
-		RampPitchVol(FALSE);
+		RampPitchVol(false);
 	}
 }
 
@@ -923,8 +919,8 @@ public:
 	float m_damp;
 	float m_maxSpeed;
 	float m_dampSpeed;
-	vec3_t m_center;
-	vec3_t m_start;
+	Vector m_center;
+	Vector m_start;
 };
 
 LINK_ENTITY_TO_CLASS(func_pendulum, CPendulum);
@@ -948,12 +944,12 @@ void CPendulum ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "distance"))
 	{
 		m_distance = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damp"))
 	{
 		m_damp = atof(pkvd->szValue) * 0.001;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CScriptedEnt::KeyValue(pkvd);

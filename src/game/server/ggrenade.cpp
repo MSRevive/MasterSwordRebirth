@@ -25,12 +25,15 @@
 #include "soundent.h"
 #include "decals.h"
 
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif
+
 //===================grenade
 
 LINK_ENTITY_TO_CLASS(grenade, CGrenade);
 
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
-#define SF_DETONATE 0x0001
 
 //
 // Grenade Explode
@@ -121,8 +124,8 @@ void CGrenade::Explode(TraceResult *pTrace, int bitsDamageType)
 
 	if (iContents != CONTENTS_WATER)
 	{
-		int sparkCount = RANDOM_LONG(0, 3);
-		for (int i = 0; i < sparkCount; i++)
+		unsigned int sparkCount = RANDOM_LONG(0, 3);
+		for (unsigned int i = 0; i < sparkCount; i++)
 			Create("spark_shower", pev->origin, pTrace->vecPlaneNormal, NULL);
 	}
 }
@@ -250,7 +253,7 @@ void CGrenade::BounceTouch(CBaseEntity *pOther)
 
 		// register a radius louder than the explosion, so we make sure everyone gets out of the way
 		CSoundEnt::InsertSound(bits_SOUND_DANGER, pev->origin, pev->dmg / 0.4, 0.3);
-		m_fRegisteredSound = TRUE;
+		m_fRegisteredSound = true;
 	}
 
 	if (pev->flags & FL_ONGROUND)
@@ -351,7 +354,7 @@ void CGrenade::Spawn(void)
 	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
-	m_fRegisteredSound = FALSE;
+	m_fRegisteredSound = false;
 }
 
 CGrenade *CGrenade::ShootContact(entvars_t *pevOwner, Vector vecStart, Vector vecVelocity)

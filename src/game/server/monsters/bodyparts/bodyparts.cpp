@@ -47,7 +47,7 @@ CBodypart *CBodypart::Duplicate(CBodypart *pExistingBodypart)
 	CMSMonster *pOwner = (CMSMonster *)MSInstance( pev->owner );
 	if( !pOwner ) return flDamage;
 
-	 for (int i = 0; i < pOwner->Gear.size(); i++) 
+	 for (unsigned int i = 0; i < pOwner->Gear.size(); i++) 
 	{
 		CGenericItem *pItemWorn = pOwner->Gear[ i ];
 
@@ -66,7 +66,7 @@ CBodypart *CBodypart::Duplicate(CBodypart *pExistingBodypart)
 	CMSMonster *pOwner = (CMSMonster *)MSInstance( pev->owner );
 	if( !pOwner ) return flDamage;
 
-	 for (int i = 0; i < pOwner->Gear.size(); i++) 
+	 for (unsigned int i = 0; i < pOwner->Gear.size(); i++) 
 	{
 		CGenericItem *Item = *pOwner->Gear[ i ];
 		if( FBitSet(Item.MSProperties(),ITEM_ARMOR) )
@@ -127,16 +127,16 @@ void CBodypart::Set(int iState, void *vData)
 }
 void CBaseBody::Set(int iState, void *vData)
 {
-	for (int i = 0; i < Bodyparts.size(); i++)
+	for (unsigned int i = 0; i < Bodyparts.size(); i++)
 		Bodyparts[i]->Set(iState, vData);
 }
 void CBaseBody::Think(CMSMonster *pOwner)
 {
-	for (int b = 0; b < Bodyparts.size(); b++)
+	for (unsigned int b = 0; b < Bodyparts.size(); b++)
 	{
 		int Body = 0;
 		bool Visible = true;
-		for (int i = 0; i < pOwner->Gear.size(); i++)
+		for (unsigned int i = 0; i < pOwner->Gear.size(); i++)
 		{
 			if (pOwner->Gear[i]->m_Location <= ITEMPOS_HANDS)
 				continue;
@@ -157,13 +157,13 @@ void CBaseBody::Think(CMSMonster *pOwner)
 CBaseBody *CBaseBody::Duplicate()
 {
 	CBaseBody &NewBody = *msnew(CBaseBody);
-	for (int i = 0; i < Bodyparts.size(); i++)
+	for (unsigned int i = 0; i < Bodyparts.size(); i++)
 		NewBody.Bodyparts[i] = Bodyparts[i]->Duplicate();
 	return &NewBody;
 }
 void CBaseBody::Delete()
 {
-	for (int i = 0; i < Bodyparts.size(); i++)
+	for (unsigned int i = 0; i < Bodyparts.size(); i++)
 	{
 		Bodyparts[i]->SUB_Remove();
 		Bodyparts.erase(i--);

@@ -66,7 +66,7 @@ public:
 		}
 		_count=count;
 	}
-	int getCount()
+	unsigned int getCount()
 	{
 		return _count;
 	}

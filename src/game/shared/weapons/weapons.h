@@ -20,15 +20,15 @@
 extern int gmsgWeapPickup;
 
 //Master Sword
-#define MakeAnim(ref) strncpy(m_pOwner->m_szAnimExtention, ref, 32)
-#define MakeAnimLR(ref) strncpy(m_pOwner->m_szAnimExtention, UTIL_VarArgs("%s_%s", ref, (m_pOwner->iCurrentHand == 0) ? "L" : "R"), 32)
 
 #ifdef VALVE_DLL
 void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool fEnlargeboxes);
 
-#define MSTRACE_SOLIDSHIELDS (1 << 0)
-#define MSTRACE_LARGEHITBOXES (1 << 1)
-#define MSTRACE_HITCORPSES (1 << 2)
+enum mstrace_target_e {
+	MSTRACE_SOLIDSHIELDS = (1 << 0),
+	MSTRACE_LARGEHITBOXES = (1 << 1),
+	MSTRACE_HITCORPSES = (1 << 2)
+};
 
 void MSTraceLine(const Vector &vecSrc, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult &tr, int flags);
 
@@ -50,7 +50,7 @@ public:
 	{
 		CBaseEntity *pClosest = NULL;
 		float ClosestDist = 9999999;
-		for (int h = 0; h < size(); h++)
+		for (unsigned int h = 0; h < size(); h++)
 		{
 			hitent_t &Hit = operator[](h);
 			if (Hit.Dist < ClosestDist)
@@ -106,38 +106,36 @@ public:
 };
 
 // constant items
-#define ITEM_HEALTHKIT 1
-#define ITEM_ANTIDOTE 2
-#define ITEM_SECURITY 3
-#define ITEM_BATTERY 4
+enum constant_items_e {
+	ITEM_HEALTHKIT = 1,
+	ITEM_ANTIDOTE = 2,
+	ITEM_SECURITY = 3,
+	ITEM_BATTERY = 4
+};
 
-#define WEAPON_NONE 0
-#define WEAPON_CROWBAR 1
-#define WEAPON_GLOCK 2
-#define WEAPON_PYTHON 3
-#define WEAPON_MP5 4
-#define WEAPON_CHAINGUN 5
-#define WEAPON_CROSSBOW 6
-#define WEAPON_SHOTGUN 7
-#define WEAPON_RPG 8
-#define WEAPON_GAUSS 9
-#define WEAPON_EGON 10
-#define WEAPON_HORNETGUN 11
-#define WEAPON_HANDGRENADE 12
-#define WEAPON_TRIPMINE 13
-#define WEAPON_SATCHEL 14
-#define WEAPON_SNARK 15
-
-#define WEAPON_ALLWEAPONS (~(1 << WEAPON_SUIT))
-
-#define WEAPON_SUIT 31 // ?????
-
-#define MAX_WEAPONS 32
-
-#define MAX_NORMAL_BATTERY 100
+enum weapon_type_e {
+	WEAPON_NONE = 0,
+	WEAPON_CROWBAR = 1,
+	WEAPON_GLOCK = 2,
+	WEAPON_PYTHON = 3,
+	WEAPON_MP5 = 4,
+	WEAPON_CHAINGUN = 5,
+	WEAPON_CROSSBOW = 6,
+	WEAPON_SHOTGUN = 7,
+	WEAPON_RPG = 8,
+	WEAPON_GAUSS = 9,
+	WEAPON_EGON = 10,
+	WEAPON_HORNETGUN = 11,
+	WEAPON_HANDGRENADE = 12,
+	WEAPON_TRIPMINE = 13,
+	WEAPON_SATCHEL = 14,
+	WEAPON_SNARK = 15,
+	WEAPON_SUIT = 31,
+	WEAPON_ALLWEAPONS = (~(1 << WEAPON_SUIT))
+};
 
 // the maximum amount of ammo each weapon's clip can hold
-#define WEAPON_NOCLIP -1
+
 
 // bullet types
 typedef enum
@@ -148,19 +146,19 @@ typedef enum
 	BULLET_PLAYER_357,		// python
 	BULLET_PLAYER_BUCKSHOT, // shotgun
 	BULLET_PLAYER_CROWBAR,	// crowbar swipe
-
 	BULLET_MONSTER_9MM,
 	BULLET_MONSTER_MP5,
-	BULLET_MONSTER_12MM,
+	BULLET_MONSTER_12MM
 } Bullet;
 
-#define ITEM_FLAG_SELECTONEMPTY 1
-#define ITEM_FLAG_NOAUTORELOAD 2
-#define ITEM_FLAG_NOAUTOSWITCHEMPTY 4
-#define ITEM_FLAG_LIMITINWORLD 8
-#define ITEM_FLAG_EXHAUSTIBLE 16 // A player can totally exhaust their ammo supply and lose this weapon
-
-#define WEAPON_IS_ONTARGET 0x40
+enum {
+	ITEM_FLAG_SELECTONEMPTY = 1,
+	ITEM_FLAG_NOAUTORELOAD = 2,
+	ITEM_FLAG_NOAUTOSWITCHEMPTY = 4,
+	ITEM_FLAG_LIMITINWORLD = 8,
+	ITEM_FLAG_EXHAUSTIBLE = 16 
+	// A player can totally exhaust their ammo supply and lose this weapon
+};
 
 typedef struct
 {
@@ -233,7 +231,7 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	virtual int AddDuplicate(CBasePlayerItem *pItem) { return FALSE; } // return TRUE if you want your duplicate removed from world
+	virtual int AddDuplicate(CBasePlayerItem *pItem) { return false; } // return true if you want your duplicate removed from world
 	//void EXPORT DestroyItem( void );
 	void EXPORT AttemptToMaterialize(void); // the weapon desires to become visible and tangible, if the game rules allow for it
 	CBaseEntity *Respawn(void);				// copy a weapon
@@ -311,7 +309,7 @@ public:
 	virtual void Reload(void) { return; }				// do "+RELOAD"
 	virtual int UpdateClientData(CBasePlayer *pPlayer); // sends hud info to client dll, if things have changed
 	virtual void Holster(int skiplocal = 0);
-	virtual BOOL UseDecrement(void) { return FALSE; };
+	virtual BOOL UseDecrement(void) { return false; };
 
 	void PrintState(void);
 
@@ -334,7 +332,7 @@ class CBasePlayerAmmo : public CBaseEntity
 {
 public:
 	/*	virtual void Spawn( void );
-	virtual BOOL AddAmmo( CBaseEntity *pOther ) { return TRUE; };
+	virtual BOOL AddAmmo( CBaseEntity *pOther ) { return true; };
 
 	CBaseEntity* Respawn( void );
 	void EXPORT Materialize( void );*/
@@ -369,31 +367,30 @@ typedef struct
 
 extern MULTIDAMAGE gMultiDamage;
 
-#define LOUD_GUN_VOLUME 1000
-#define NORMAL_GUN_VOLUME 600
-#define QUIET_GUN_VOLUME 200
+enum weapon_volume_e {
+	LOUD_GUN_VOLUME = 1000,
+	NORMAL_GUN_VOLUME = 600,
+	QUIET_GUN_VOLUME = 200,
+	BRIGHT_GUN_FLASH = 512,
+	NORMAL_GUN_FLASH = 256,
+	DIM_GUN_FLASH = 128,
+	BIG_EXPLOSION_VOLUME = 2048,
+	NORMAL_EXPLOSION_VOLUME = 1024,
+	SMALL_EXPLOSION_VOLUME = 512,
+	WEAPON_ACTIVITY_VOLUME = 64
+};
 
-#define BRIGHT_GUN_FLASH 512
-#define NORMAL_GUN_FLASH 256
-#define DIM_GUN_FLASH 128
-
-#define BIG_EXPLOSION_VOLUME 2048
-#define NORMAL_EXPLOSION_VOLUME 1024
-#define SMALL_EXPLOSION_VOLUME 512
-
-#define WEAPON_ACTIVITY_VOLUME 64
-
-#define VECTOR_CONE_1DEGREES Vector(0.00873, 0.00873, 0.00873)
-#define VECTOR_CONE_2DEGREES Vector(0.01745, 0.01745, 0.01745)
-#define VECTOR_CONE_3DEGREES Vector(0.02618, 0.02618, 0.02618)
-#define VECTOR_CONE_4DEGREES Vector(0.03490, 0.03490, 0.03490)
-#define VECTOR_CONE_5DEGREES Vector(0.04362, 0.04362, 0.04362)
-#define VECTOR_CONE_6DEGREES Vector(0.05234, 0.05234, 0.05234)
-#define VECTOR_CONE_7DEGREES Vector(0.06105, 0.06105, 0.06105)
-#define VECTOR_CONE_8DEGREES Vector(0.06976, 0.06976, 0.06976)
-#define VECTOR_CONE_9DEGREES Vector(0.07846, 0.07846, 0.07846)
-#define VECTOR_CONE_10DEGREES Vector(0.08716, 0.08716, 0.08716)
-#define VECTOR_CONE_15DEGREES Vector(0.13053, 0.13053, 0.13053)
-#define VECTOR_CONE_20DEGREES Vector(0.17365, 0.17365, 0.17365)
+constexpr Vector VECTOR_CONE_1DEGREES = Vector(0.00873, 0.00873, 0.00873);
+constexpr Vector VECTOR_CONE_2DEGREES = Vector(0.01745, 0.01745, 0.01745);
+constexpr Vector VECTOR_CONE_3DEGREES = Vector(0.02618, 0.02618, 0.02618);
+constexpr Vector VECTOR_CONE_4DEGREES = Vector(0.03490, 0.03490, 0.03490);
+constexpr Vector VECTOR_CONE_5DEGREES = Vector(0.04362, 0.04362, 0.04362);
+constexpr Vector VECTOR_CONE_6DEGREES = Vector(0.05234, 0.05234, 0.05234);
+constexpr Vector VECTOR_CONE_7DEGREES = Vector(0.06105, 0.06105, 0.06105);
+constexpr Vector VECTOR_CONE_8DEGREES = Vector(0.06976, 0.06976, 0.06976);
+constexpr Vector VECTOR_CONE_9DEGREES = Vector(0.07846, 0.07846, 0.07846);
+constexpr Vector VECTOR_CONE_10DEGREES = Vector(0.08716, 0.08716, 0.08716);
+constexpr Vector VECTOR_CONE_15DEGREES = Vector(0.13053, 0.13053, 0.13053);
+constexpr Vector VECTOR_CONE_20DEGREES = Vector(0.17365, 0.17365, 0.17365);
 
 #endif // WEAPONS_H

@@ -17,7 +17,7 @@ unsigned char HashPlayerID(char const playerID[16])
 {
 	unsigned char curHash = 0;
 
-	for (int i = 0; i < 16; i++)
+	for (unsigned int i = 0; i < 16; i++)
 		curHash = (curHash + (playerID[i] & 0xFF)) & 0xFF; //Used 0xFF to cast down to byte
 
 	return curHash;
@@ -49,10 +49,10 @@ bool CVoiceBanMgr::Init(char const *pGameDir)
 		if (version == BANMGR_FILEVERSION)
 		{
 			fseek(fp, 0, SEEK_END);
-			int nIDs = (ftell(fp) - sizeof(version)) / 16;
+			unsigned int nIDs = (ftell(fp) - sizeof(version)) / 16;
 			fseek(fp, sizeof(version), SEEK_SET);
 
-			for (int i = 0; i < nIDs; i++)
+			for (unsigned int i = 0; i < nIDs; i++)
 			{
 				char playerID[16];
 				fread(playerID, 1, 16, fp);
@@ -69,7 +69,7 @@ bool CVoiceBanMgr::Init(char const *pGameDir)
 void CVoiceBanMgr::Term()
 {
 	// Free all the player structures.
-	for (int i = 0; i < 256; i++)
+	for (unsigned int i = 0; i < 256; i++)
 	{
 		BannedPlayer *pListHead = &m_PlayerHash[i];
 		BannedPlayer *pNext;
@@ -95,7 +95,7 @@ void CVoiceBanMgr::SaveState(char const *pGameDir)
 		int version = BANMGR_FILEVERSION;
 		fwrite(&version, 1, sizeof(version), fp);
 
-		for (int i = 0; i < 256; i++)
+		for (unsigned int i = 0; i < 256; i++)
 		{
 			BannedPlayer *pListHead = &m_PlayerHash[i];
 			for (BannedPlayer *pCur = pListHead->m_pNext; pCur != pListHead; pCur = pCur->m_pNext)
@@ -137,7 +137,7 @@ void CVoiceBanMgr::SetPlayerBan(char const playerID[16], bool bSquelch)
 
 void CVoiceBanMgr::ForEachBannedPlayer(void (*callback)(char id[16]))
 {
-	for (int i = 0; i < 256; i++)
+	for (unsigned int i = 0; i < 256; i++)
 	{
 		for (BannedPlayer *pCur = m_PlayerHash[i].m_pNext; pCur != &m_PlayerHash[i]; pCur = pCur->m_pNext)
 		{
@@ -149,7 +149,7 @@ void CVoiceBanMgr::ForEachBannedPlayer(void (*callback)(char id[16]))
 void CVoiceBanMgr::Clear()
 {
 	// Tie off the hash table entries.
-	for (int i = 0; i < 256; i++)
+	for (unsigned int i = 0; i < 256; i++)
 		m_PlayerHash[i].m_pNext = m_PlayerHash[i].m_pPrev = &m_PlayerHash[i];
 }
 

@@ -87,7 +87,7 @@ SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 
 void ScorePanel::HitTestPanel::internalMousePressed(MouseCode code)
 {
-	for (int i = 0; i < _inputSignalDar.getCount(); i++)
+	for (unsigned int i = 0; i < _inputSignalDar.getCount(); i++)
 	{
 		_inputSignalDar[i]->mousePressed(code, this);
 	}
@@ -120,7 +120,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	setPaintBorderEnabled(true);
 
 	int xpos = g_ColumnInfo[0].m_Width + 3;
-	if (ScreenWidth >= 640)
+	if (ScreenWidth() >= 640)
 	{
 		// only expand column size for res greater than 640
 		xpos = XRES(xpos);
@@ -133,7 +133,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 	m_HeaderGrid.SetDimensions(NUM_COLUMNS, 1);
 	m_HeaderGrid.SetSpacing(0, 0);
 
-	for (int i = 0; i < NUM_COLUMNS; i++)
+	for (unsigned int i = 0; i < NUM_COLUMNS; i++)
 	{
 		if (g_ColumnInfo[i].m_pTitle && g_ColumnInfo[i].m_pTitle[0] == '#')
 			m_HeaderLabels[i].setText(CHudTextMessage::BufferedLocaliseTextString(g_ColumnInfo[i].m_pTitle));
@@ -141,11 +141,11 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 			m_HeaderLabels[i].setText(g_ColumnInfo[i].m_pTitle);
 
 		int xwide = g_ColumnInfo[i].m_Width;
-		if (ScreenWidth >= 640)
+		if (ScreenWidth() >= 640)
 		{
 			xwide = XRES(xwide);
 		}
-		else if (ScreenWidth == 400)
+		else if (ScreenWidth() == 400)
 		{
 			// hack to make 400x300 resolution scoreboard fit
 			if (i == 1)
@@ -168,7 +168,7 @@ ScorePanel::ScorePanel(int x, int y, int wide, int tall) : Panel(x, y, wide, tal
 		m_HeaderLabels[i].setContentAlignment(g_ColumnInfo[i].m_Alignment);
 
 		int yres = 12;
-		if (ScreenHeight >= 480)
+		if (ScreenHeight() >= 480)
 		{
 			yres = YRES(yres);
 		}
@@ -341,9 +341,9 @@ void ScorePanel::SortTeams()
 		g_TeamInfo[j].packetloss += g_PlayerInfoList[i].packetloss;
 
 		if (g_PlayerInfoList[i].thisplayer)
-			g_TeamInfo[j].ownteam = TRUE;
+			g_TeamInfo[j].ownteam = true;
 		else
-			g_TeamInfo[j].ownteam = FALSE;
+			g_TeamInfo[j].ownteam = false;
 
 		// Set the team's number (used for team colors)
 		g_TeamInfo[j].teamnumber = g_PlayerExtraInfo[i].teamnumber;
@@ -352,7 +352,7 @@ void ScorePanel::SortTeams()
 	// find team ping/packetloss averages
 	for (i = 1; i <= m_iNumTeams; i++)
 	{
-		g_TeamInfo[i].already_drawn = FALSE;
+		g_TeamInfo[i].already_drawn = false;
 
 		if (g_TeamInfo[i].players > 0)
 		{
@@ -391,7 +391,7 @@ void ScorePanel::SortTeams()
 		// Put this team in the sorted list
 		m_iSortedRows[m_iRows] = best_team;
 		m_iIsATeam[m_iRows] = TEAM_YES;
-		g_TeamInfo[best_team].already_drawn = TRUE; // set the already_drawn to be TRUE, so this team won't get sorted again
+		g_TeamInfo[best_team].already_drawn = true; // set the already_drawn to be true, so this team won't get sorted again
 		m_iRows++;
 
 		// Now sort all the players on this team
@@ -573,7 +573,7 @@ void ScorePanel::FillGrid()
 			pLabel->setTextOffset(0, 0);
 
 			int rowheight = 13;
-			if (ScreenHeight > 480)
+			if (ScreenHeight() > 480)
 			{
 				rowheight = YRES(rowheight);
 			}
@@ -608,7 +608,7 @@ void ScorePanel::FillGrid()
 
 				// different height for team header rows
 				rowheight = 20;
-				if (ScreenHeight >= 480)
+				if (ScreenHeight() >= 480)
 				{
 					rowheight = YRES(rowheight);
 				}
@@ -630,7 +630,7 @@ void ScorePanel::FillGrid()
 
 				// different height for team header rows
 				rowheight = 20;
-				if (ScreenHeight >= 480)
+				if (ScreenHeight() >= 480)
 				{
 					rowheight = YRES(rowheight);
 				}
@@ -900,7 +900,7 @@ void ScorePanel::cursorMoved(int x, int y, Panel *panel)
 	if (GetClientVoiceMgr()->IsInSquelchMode())
 	{
 		// look for which cell the mouse is currently over
-		for (int i = 0; i < NUM_ROWS; i++)
+		for (unsigned int i = 0; i < NUM_ROWS; i++)
 		{
 			int row, col;
 			if (m_PlayerGrids[i].getCellAtPoint(x, y, row, col))

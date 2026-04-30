@@ -16,7 +16,7 @@ public:
 	int MsgFunc_Action(const char *pszName, int iSize, void *pbuf);
 	void UserCmd_Action(void);
 	void SelectMenuItem(int menu_item);
-
+	char Name[32] = "CHudAction";
 	mslist<playeraction_t> PlayerActions;
 };
 #endif //HUD_ACTION_H

@@ -68,9 +68,9 @@ int	c_removed;
 void	RemoveColinearPoints (winding_t *w)
 {
 	int		i, j, k;
-	vec3_t	v1, v2;
+	Vector 	v1, v2;
 	int		nump;
-	vec3_t	p[MAX_POINTS_ON_WINDING];
+	Vector 	p[MAX_POINTS_ON_WINDING];
 
 	nump = 0;
 	for (i=0 ; i<w->numpoints ; i++)
@@ -101,9 +101,9 @@ void	RemoveColinearPoints (winding_t *w)
 WindingPlane
 ============
 */
-void WindingPlane (winding_t *w, vec3_t normal, vec_t *dist)
+void WindingPlane (winding_t *w, Vector  normal, vec_t *dist)
 {
-	vec3_t	v1, v2;
+	Vector 	v1, v2;
 
 	VectorSubtract (w->p[1], w->p[0], v1);
 	VectorSubtract (w->p[2], w->p[0], v2);
@@ -121,7 +121,7 @@ WindingArea
 vec_t	WindingArea (winding_t *w)
 {
 	int		i;
-	vec3_t	d1, d2, cross;
+	Vector 	d1, d2, cross;
 	vec_t	total;
 
 	total = 0;
@@ -135,7 +135,7 @@ vec_t	WindingArea (winding_t *w)
 	return total;
 }
 
-void	WindingBounds (winding_t *w, vec3_t mins, vec3_t maxs)
+void	WindingBounds (winding_t *w, Vector  mins, Vector  maxs)
 {
 	vec_t	v;
 	int		i,j;
@@ -161,10 +161,10 @@ void	WindingBounds (winding_t *w, vec3_t mins, vec3_t maxs)
 WindingCenter
 =============
 */
-void	WindingCenter (winding_t *w, vec3_t center)
+void	WindingCenter (winding_t *w, Vector  center)
 {
 	int		i;
-	vec3_t	d1, d2, cross;
+	Vector 	d1, d2, cross;
 	float	scale;
 
 	VectorCopy (vec3_origin, center);
@@ -180,11 +180,11 @@ void	WindingCenter (winding_t *w, vec3_t center)
 BaseWindingForPlane
 =================
 */
-winding_t *BaseWindingForPlane (vec3_t normal, float dist)
+winding_t *BaseWindingForPlane (Vector  normal, float dist)
 {
 	int		i, x;
 	vec_t	max, v;
-	vec3_t	org, vright, vup;
+	Vector 	org, vright, vup;
 	winding_t	*w;
 	
 // find the major axis
@@ -268,7 +268,7 @@ winding_t	*CopyWinding (winding_t *w)
 ClipWinding
 =============
 */
-void	ClipWinding (winding_t *in, vec3_t normal, vec_t dist,
+void	ClipWinding (winding_t *in, Vector  normal, vec_t dist,
 					 winding_t **front, winding_t **back)
 {
 	vec_t	dists[MAX_POINTS_ON_WINDING+4];
@@ -277,7 +277,7 @@ void	ClipWinding (winding_t *in, vec3_t normal, vec_t dist,
 	vec_t	dot;
 	int		i, j;
 	vec_t	*p1, *p2;
-	vec3_t	mid;
+	Vector 	mid;
 	winding_t	*f, *b;
 	int		maxpts;
 	
@@ -381,7 +381,7 @@ void	ClipWinding (winding_t *in, vec3_t normal, vec_t dist,
 ClipWindingNoCopy
 =============
 */
-void	ClipWindingNoCopy (winding_t *in, vec3_t normal, vec_t dist,
+void	ClipWindingNoCopy (winding_t *in, Vector  normal, vec_t dist,
 					 winding_t **front, winding_t **back)
 {
 	vec_t	dists[MAX_POINTS_ON_WINDING+4];
@@ -390,7 +390,7 @@ void	ClipWindingNoCopy (winding_t *in, vec3_t normal, vec_t dist,
 	vec_t	dot;
 	int		i, j;
 	vec_t	*p1, *p2;
-	vec3_t	mid;
+	Vector 	mid;
 	winding_t	*f, *b;
 	int		maxpts;
 	
@@ -493,7 +493,7 @@ void	ClipWindingNoCopy (winding_t *in, vec3_t normal, vec_t dist,
 ChopWindingNoFree
 =============
 */
-winding_t	*ChopWindingNoFree (winding_t *in, vec3_t normal, vec_t dist)
+winding_t	*ChopWindingNoFree (winding_t *in, Vector  normal, vec_t dist)
 {
 	vec_t	dists[MAX_POINTS_ON_WINDING+4];
 	int		sides[MAX_POINTS_ON_WINDING+4];
@@ -501,7 +501,7 @@ winding_t	*ChopWindingNoFree (winding_t *in, vec3_t normal, vec_t dist)
 	vec_t	dot;
 	int		i, j;
 	vec_t	*p1, *p2;
-	vec3_t	mid;
+	Vector 	mid;
 	winding_t	*f;
 	int		maxpts;
 
@@ -591,7 +591,7 @@ Returns the fragment of in that is on the front side
 of the cliping plane.  The original is freed.
 =================
 */
-winding_t	*ChopWinding (winding_t *in, vec3_t normal, vec_t dist)
+winding_t	*ChopWinding (winding_t *in, Vector  normal, vec_t dist)
 {
 	winding_t	*f, *b;
 
@@ -614,7 +614,7 @@ void CheckWinding (winding_t *w)
 	int		i, j;
 	vec_t	*p1, *p2;
 	vec_t	d, edgedist;
-	vec3_t	dir, edgenormal, facenormal;
+	Vector 	dir, edgenormal, facenormal;
 	vec_t	area;
 	vec_t	facedist;
 
@@ -672,7 +672,7 @@ void CheckWinding (winding_t *w)
 WindingOnPlaneSide
 ============
 */
-int		WindingOnPlaneSide (winding_t *w, vec3_t normal, vec_t dist)
+int		WindingOnPlaneSide (winding_t *w, Vector  normal, vec_t dist)
 {
 	qboolean	front, back;
 	int			i;

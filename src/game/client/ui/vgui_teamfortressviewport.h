@@ -97,20 +97,20 @@ extern int iTeamColors[5][3];
 #define MAPBRIEF_INDENT 30
 
 // Team Menu
-#define TMENU_INDENT_X (30 * ((float)ScreenHeight / 640))
+#define TMENU_INDENT_X (30 * ((float)ScreenHeight() / 640))
 #define TMENU_HEADER 100
-#define TMENU_SIZE_X (ScreenWidth - (TMENU_INDENT_X * 2))
+#define TMENU_SIZE_X (ScreenWidth() - (TMENU_INDENT_X * 2))
 #define TMENU_SIZE_Y (TMENU_HEADER + BUTTON_SIZE_Y * 7)
 #define TMENU_PLAYER_INDENT (((float)TMENU_SIZE_X / 3) * 2)
-#define TMENU_INDENT_Y (((float)ScreenHeight - TMENU_SIZE_Y) / 2)
+#define TMENU_INDENT_Y (((float)ScreenHeight() - TMENU_SIZE_Y) / 2)
 
 // Class Menu
-#define CLMENU_INDENT_X (30 * ((float)ScreenHeight / 640))
+#define CLMENU_INDENT_X (30 * ((float)ScreenHeight() / 640))
 #define CLMENU_HEADER 100
-#define CLMENU_SIZE_X (ScreenWidth - (CLMENU_INDENT_X * 2))
+#define CLMENU_SIZE_X (ScreenWidth() - (CLMENU_INDENT_X * 2))
 #define CLMENU_SIZE_Y (CLMENU_HEADER + BUTTON_SIZE_Y * 11)
 #define CLMENU_PLAYER_INDENT (((float)CLMENU_SIZE_X / 3) * 2)
-#define CLMENU_INDENT_Y (((float)ScreenHeight - CLMENU_SIZE_Y) / 2)
+#define CLMENU_INDENT_Y (((float)ScreenHeight() - CLMENU_SIZE_Y) / 2)
 
 // Arrows
 enum
@@ -243,7 +243,7 @@ private:
 
 	// Buttons in this menu
 	CommandButton *m_aButtons[MAX_BUTTONS];
-	int m_iButtons;
+	unsigned int m_iButtons;
 
 public:
 	CCommandMenu(CCommandMenu *pParentMenu, int x, int y, int wide, int tall) : Panel(x, y, wide, tall)
@@ -264,7 +264,7 @@ public:
 	CCommandMenu *GetParentMenu() { return m_pParentMenu; };
 	int GetXOffset() { return m_iXOffset; };
 	int GetYOffset() { return m_iYOffset; };
-	int GetNumButtons() { return m_iButtons; };
+	unsigned int GetNumButtons() { return m_iButtons; };
 	CommandButton *FindButtonWithSubmenu(CCommandMenu *pSubMenu);
 
 	void ClearButtonsOfArmedState(void);
@@ -290,7 +290,7 @@ private:
 	float m_flMenuOpenTime;
 	float m_flScoreBoardLastUpdated;
 	float m_flSpectatorPanelLastUpdated;
-	int m_iNumMenus;
+	unsigned int m_iNumMenus;
 	int m_iCurrentTeamNumber;
 	int m_iCurrentPlayerClass;
 	int m_iUser1;
@@ -333,7 +333,7 @@ private:
 	int m_iValidClasses[5];
 	int m_iIsFeigning;
 	int m_iIsSettingDetpack;
-	int m_iNumberOfTeams;
+	unsigned int m_iNumberOfTeams;
 	int m_iBuildState;
 	int m_iRandomPC;
 	char m_sTeamNames[5][MAX_TEAMNAME_SIZE];

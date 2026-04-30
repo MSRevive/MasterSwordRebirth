@@ -41,20 +41,20 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 	RemoveAllItems(false, true);
 #endif
 	//Give 1 skill to each stat
-	for (int i = 0; i < m_Stats.size(); i++)
+	for (unsigned int i = 0; i < m_Stats.size(); i++)
 	{
 		CStat &Stat = m_Stats[i];
 		if (Stat.m_SubStats.size() == 1) //Parry - Only give 1 to proficiency
 			Stat.m_SubStats[0].Value = 1;
-		else if (Stat.m_SubStats.size() <= STATPROP_TOTAL) //Weapon Skills - Give 1 to power
-			Stat.m_SubStats[STATPROP_POWER].Value = 1;
-		else if (Stat.m_SubStats.size() > STATPROP_TOTAL) //Spellcasting - Give 1 to each spell category
-			for (int r = 0; r < Stat.m_SubStats.size(); r++)
+		else if (Stat.m_SubStats.size() <= STAT_PROP_TOTAL) //Weapon Skills - Give 1 to power
+			Stat.m_SubStats[STAT_PROP_POWER].Value = 1;
+		else if (Stat.m_SubStats.size() > STAT_PROP_TOTAL) //Spellcasting - Give 1 to each spell category
+			for (unsigned int r = 0; r < Stat.m_SubStats.size(); r++)
 				Stat.m_SubStats[r].Value = 1;
 	}
 
 	//Give free items.  Wear any packs
-	for (int i = 0; i < MSGlobals::DefaultFreeItems.size(); i++)
+	for (unsigned int i = 0; i < MSGlobals::DefaultFreeItems.size(); i++)
 	{
 		CGenericItem *pStartingItem = NewGenericItem(MSGlobals::DefaultFreeItems[i]);
 		if (!pStartingItem)
@@ -177,7 +177,7 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 		byte Stats = 0;
 		m_File.ReadByte(Stats);
 
-		for (int i = 0; i < Stats; i++)
+		for (unsigned int i = 0; i < Stats; i++)
 		{
 			pStat = GetStat(i);
 			byte SubStats = 0;
@@ -217,8 +217,8 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 
 		// MiB JUL2010_02 - Hacky, but if we add more stats and we load a character that doesn't have said stat in the file
 		//		we set it to the default new stat value (level 0 in Prof and Balance, 1 in Power)
-		int StatsRemaining = (m_Stats.size() - Stats);
-		for (int i = 0; i < StatsRemaining; i++)
+		unsigned int StatsRemaining = (m_Stats.size() - Stats);
+		for (unsigned int i = 0; i < StatsRemaining; i++)
 		{
 			CStat& Stat = m_Stats[i + Stats];
 			Stat.m_SubStats[Stat.m_SubStats.size() - 1].Value = 1;
@@ -233,7 +233,7 @@ void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 		//Read Magic spells
 		byte Spells = 0;
 		m_File.ReadByte(Spells); //[BYTE]
-		for (int s = 0; s < Spells; s++)
+		for (unsigned int s = 0; s < Spells; s++)
 		{
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
 			m_Spells.add(cTemp);
@@ -248,7 +248,7 @@ void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 		//Read Items
 		byte GearItems = 0;
 		m_File.ReadByte(GearItems); //[SHORT]
-		for (int i = 0; i < GearItems; i++)
+		for (unsigned int i = 0; i < GearItems; i++)
 		{
 			genericitem_full_t Item;
 			if (!ReadItem1(DataID, m_File, Item)) //[X ITEMS]
@@ -265,16 +265,16 @@ void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 	{
 		//Read storage items
 
-		short Storages = 0;
+		unsigned short Storages = 0;
 		m_File.ReadShort(Storages); //[SHORT]
-		for (int i = 0; i < Storages; i++)
+		for (unsigned int i = 0; i < Storages; i++)
 		{
 			storage_t Storage;
 			m_File.ReadString(Storage.Name, MSSTRING_SIZE); //[X STRINGS]
 
-			short Items = 0;
+			unsigned short Items = 0;
 			m_File.ReadShort(Items); //[X SHORTS]
-			for (int i = 0; i < Items; i++)
+			for (unsigned int i = 0; i < Items; i++)
 			{
 				genericitem_full_t Item;
 				if (!ReadItem1(DataID, m_File, Item)) //[Y ITEMS]
@@ -443,11 +443,11 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 
 	if (FBitSet(Properties, ITEM_CONTAINER))
 	{
-		short iItemCount = 0;
+		unsigned short iItemCount = 0;
 		Data.ReadShort(iItemCount); //[SHORT]
 
 		genericitem_full_t PackItem;
-		for (int i = 0; i < iItemCount; i++)
+		for (unsigned int i = 0; i < iItemCount; i++)
 		{
 			bool Success = ReadItem1(DataID, Data, PackItem);
 			if (!Success)
@@ -578,18 +578,18 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//Must come just after writing savedata_t Data
 	gFile.WriteByte(CHARDATA_MAPSVISITED1); //[BYTE - CHUNK - MAPS VISITED]
 	gFile.WriteInt(pPlayer->m_Maps.size()); //[INT]
-	for (int m = 0; m < pPlayer->m_Maps.size(); m++)
+	for (unsigned int m = 0; m < pPlayer->m_Maps.size(); m++)
 		gFile.WriteString(pPlayer->m_Maps[m]); //[STRING]
 
 	//Save skills
 	gFile.WriteByte(CHARDATA_SKILLS1); //[BYTE - CHUNK - STATS]
 	statlist &StatList = pPlayer->m_Stats;
-	gFile.WriteByte(StatList.size()); //[BYTE]
-	for (int i = 0; i < StatList.size(); i++)
+	gFile.WriteByte(static_cast<byte>(StatList.size())); //[BYTE]
+	for (unsigned int i = 0; i < StatList.size(); i++)
 	{
 		CStat &Stat = StatList[i];
-		gFile.WriteByte(Stat.m_SubStats.size()); //[BYTE]
-		for (int r = 0; r < Stat.m_SubStats.size(); r++)
+		gFile.WriteByte(static_cast<byte>(Stat.m_SubStats.size())); //[BYTE]
+		for (unsigned int r = 0; r < Stat.m_SubStats.size(); r++)
 		{
 			CSubStat &SubStat = Stat.m_SubStats[r];
 			gFile.WriteShort(SubStat.Value); //[SHORT]
@@ -600,9 +600,9 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//Save magic spells
 	spellgroup_v &SpellList = pPlayer->m_SpellList;
 	gFile.WriteByte(CHARDATA_SPELLS1); //[BYTE - CHUNK - SPELLS]
-	gFile.WriteByte(SpellList.size()); //[BYTE]
+	gFile.WriteByte(static_cast<byte>(SpellList.size())); //[BYTE]
 
-	for (int s = 0; s < SpellList.size(); s++)
+	for (unsigned int s = 0; s < SpellList.size(); s++)
 		gFile.WriteString(SpellList[s]); //[X STRINGS]
 
 	//Save Items
@@ -611,13 +611,13 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	static mslist<CGenericItem *> WriteList;
 	WriteList.clearitems();
 
-	for (int i = 0; i < pPlayer->Gear.size(); i++)
+	for (unsigned int i = 0; i < pPlayer->Gear.size(); i++)
 		if (pPlayer->Gear[i] != pPlayer->PlayerHands) //Skip player hands
 			WriteList.add(pPlayer->Gear[i]);
 
-	gFile.WriteByte(WriteList.size()); //[BYTE]
+	gFile.WriteByte(static_cast<byte>(WriteList.size())); //[BYTE]
 
-	for (int i = 0; i < WriteList.size(); i++)
+	for (unsigned int i = 0; i < WriteList.size(); i++)
 	{
 		genericitem_full_t charItem = genericitem_full_t(WriteList[i]);
 		WriteItem(gFile, charItem); //[X ITEMS]
@@ -625,26 +625,26 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Save storage items
 	gFile.WriteByte(CHARDATA_STORAGE1);			  //[BYTE - CHUNK - STORAGE ITEMS]
-	gFile.WriteShort(pPlayer->m_Storages.size()); //[SHORT]
+	gFile.WriteShort(static_cast<short>(pPlayer->m_Storages.size())); //[SHORT]
 
-	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
+	for (unsigned int s = 0; s < pPlayer->m_Storages.size(); s++)
 	{
 		storage_t &Storage = pPlayer->m_Storages[s];
 
 		gFile.WriteString(Storage.Name);		//[STRING]
-		gFile.WriteShort(Storage.Items.size()); //[SHORT]
-		for (int i = 0; i < Storage.Items.size(); i++)
+		gFile.WriteShort(static_cast<short>(Storage.Items.size())); //[SHORT]
+		for (unsigned int i = 0; i < Storage.Items.size(); i++)
 			WriteItem(gFile, Storage.Items[i]); //[X ITEMS]
 	}
 
 	//Save Companions
 	gFile.WriteByte(CHARDATA_COMPANIONS1);			//[BYTE - CHUNK - COMPANIONS]
-	gFile.WriteShort(pPlayer->m_Companions.size()); //[SHORT]
+	gFile.WriteShort(static_cast<short>(pPlayer->m_Companions.size())); //[SHORT]
 	static msstringlist SaveVarName, SaveVarValue;
 	SaveVarName.clearitems();
 	SaveVarValue.clearitems();
 
-	for (int c = 0; c < pPlayer->m_Companions.size(); c++)
+	for (unsigned int c = 0; c < pPlayer->m_Companions.size(); c++)
 	{
 		companion_t &Companion = pPlayer->m_Companions[c];
 		gFile.WriteString(Companion.ScriptName); //[STRING]
@@ -660,15 +660,15 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		pScripted->CallScriptEvent("game_companion_save");
 
 		CScript *Script = pScripted->m_Scripts[0];
-		for (int v = 0; v < Script->m_Variables.size(); v++)
+		for (unsigned int v = 0; v < Script->m_Variables.size(); v++)
 			if (Script->m_Variables[v].Name.starts_with("companion.save."))
 			{
 				SaveVarName.add(Script->m_Variables[v].Name);
 				SaveVarValue.add(Script->m_Variables[v].Value);
 			}
 
-		gFile.WriteShort(SaveVarName.size()); //[SHORT]
-		for (int var = 0; var < SaveVarName.size(); var++)
+		gFile.WriteShort(static_cast<short>(SaveVarName.size())); //[SHORT]
+		for (unsigned int var = 0; var < SaveVarName.size(); var++)
 		{
 			gFile.WriteString(SaveVarName[var]);  //[STRING]
 			gFile.WriteString(SaveVarValue[var]); //[STRING]
@@ -679,14 +679,14 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Save Help tips
 	gFile.WriteByte(CHARDATA_HELPTIPS1);				//[BYTE - CHUNK - HELPTIPS]
-	gFile.WriteShort(pPlayer->m_ViewedHelpTips.size()); //[SHORT]
-	for (int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
+	gFile.WriteShort(static_cast<short>(pPlayer->m_ViewedHelpTips.size())); //[SHORT]
+	for (unsigned int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
 		gFile.WriteString(pPlayer->m_ViewedHelpTips[t]); //[STRING]
 
 	//Save Quests
 	gFile.WriteByte(CHARDATA_QUESTS1);		  //[BYTE - CHUNK - QUESTS]
 	gFile.WriteInt(pPlayer->m_Quests.size()); //[INT]
-	for (int q = 0; q < pPlayer->m_Quests.size(); q++)
+	for (unsigned int q = 0; q < pPlayer->m_Quests.size(); q++)
 	{
 		gFile.WriteString(pPlayer->m_Quests[q].Name); //[STRING]
 		gFile.WriteString(pPlayer->m_Quests[q].Data); //[STRING]
@@ -695,7 +695,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//Save Quickslots
 	gFile.WriteByte(CHARDATA_QUICKSLOTS1); //[BYTE - CHUNK - QUICKSLOTS]
 	gFile.WriteByte(MAX_QUICKSLOTS);	   //[INT]
-	for (int q = 0; q < MAX_QUICKSLOTS; q++)
+	for (unsigned int q = 0; q < MAX_QUICKSLOTS; q++)
 	{
 		quickslot_t &QuickSlot = pPlayer->m_QuickSlots[q];
 		if (QuickSlot.Active)

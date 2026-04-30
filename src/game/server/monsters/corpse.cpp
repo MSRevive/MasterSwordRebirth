@@ -56,8 +56,8 @@ void CCorpse::CreateCorpse(CMSMonster* pSource, float LoseGoldPercent)
 	float CheckRange = 1024;
 	Vector delta = Vector(CheckRange, CheckRange, CheckRange);
 	CBaseEntity* pEnt[100];
-	int count = UTIL_EntitiesInBox(pEnt, 100, pev->origin - delta, pev->origin + delta, NULL);
-	for (int i = 0; i < count; i++)
+	unsigned int count = UTIL_EntitiesInBox(pEnt, 100, pev->origin - delta, pev->origin + delta, NULL);
+	for (unsigned int i = 0; i < count; i++)
 	{
 		//Cut every corpse's expire time in half
 		pCorpse = pEnt[i];
@@ -123,7 +123,7 @@ bool CCorpse::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int Fo
 		if (!pItem->WearItem())
 		{
 			pItem->SUB_Remove();
-			fReturn = FALSE;
+			fReturn = false;
 		}
 	}
 	else

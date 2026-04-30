@@ -42,12 +42,12 @@ public:
 
 		int w, h;
 		m_pMainPanel->getPos(w, h);
-		m_pMainPanel->setPos(ScreenWidth - m_pMainPanel->getWide() - XRES(80), h); //Thothie JAN2008a was  XRES(20)
+		m_pMainPanel->setPos(ScreenWidth() - m_pMainPanel->getWide() - XRES(80), h); //Thothie JAN2008a was  XRES(20)
 
 		m_ButtonY = BTN_START_Y;
 
-		for (int i = 0; i < INTERACT_MAX_BUTTONS; i++) //Create all the buttons now.  Fill them in later
-			AddButton("", 0, i);
+		for (unsigned int i = 0; i < INTERACT_MAX_BUTTONS; i++) //Create all the buttons now.  Fill them in later
+			AddButton("", 0, (int)i);
 
 		// MiB NOV2014_25, center the title and separator NpcInteractMenus.rft
 		m_AllowKeys = true; // MiB 25NOV_2014 - Disable key-input
@@ -63,7 +63,7 @@ public:
 		m_EntIdx = -1;
 		m_Options.clearitems();
 
-		for (int i = 0; i < m_Buttons.size(); i++) //Reset all buttons except cance
+		for (unsigned int i = 0; i < m_Buttons.size(); i++) //Reset all buttons except cance
 		{
 			m_Buttons[i]->setVisible(false);
 			m_Buttons[i]->setEnabled(true);

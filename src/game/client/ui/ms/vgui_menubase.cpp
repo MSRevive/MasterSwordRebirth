@@ -90,7 +90,7 @@ void CAction_SelectMainOption::actionPerformed(Panel *panel)
 int GetCenteredItemX(int WorkSpaceSizeX, int ItemSizeX, int Items, int SpaceBewteenItems);
 
 // Creation
-VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenWidth, ScreenHeight)
+VGUI_MenuBase::VGUI_MenuBase(Panel *myParent) : CMenuPanel(255, 0, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	m_AllowKeys = true; // MiB NOV2014_25, block number shortcuts: NpcInteractMenus.rft
 	setParent(myParent);
@@ -176,7 +176,7 @@ bool VGUI_MenuBase::SlotInput(int iSlot)
 // Update the menu before opening it
 void VGUI_MenuBase::Open(void)
 {
-	for (int i = 0; i < m_Buttons.size(); i++)
+	for (unsigned int i = 0; i < m_Buttons.size(); i++)
 		m_Buttons[i]->setArmed(false);
 
 	Reset();
@@ -208,7 +208,7 @@ void VGUI_MenuBase::UpdateFade(void)
 	//m_pMainPanel->setBorder( NULL );
 	//m_pMainPanel->setBorder( m_Border );
 
-	for (int i = 0; i < m_Buttons.size(); i++)
+	for (unsigned int i = 0; i < m_Buttons.size(); i++)
 	{
 		m_Buttons[i]->m_ArmedColor.a = InveserdFade;
 		m_Buttons[i]->m_UnArmedColor.a = InveserdFade;

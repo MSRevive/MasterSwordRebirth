@@ -45,12 +45,12 @@ CMSMonster::~CMSMonster()
 }
 
 CMSMonster::CMSMonster() {}
-int CMSMonster::MSProperties() { return MS_NPC; }
+int CMSMonster::MSProperties() { return ITEM_MS_NPC; }
 
 bool CMSMonster::IsActing()
 {
 	bool Charging = false;
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		if (Gear[i]->Attack_IsCharging())
 		{
 			Charging = true;
@@ -63,7 +63,7 @@ bool CMSMonster::IsActing()
 //MiB JUN2010_19 - Check if the player is holding a shield up
 bool CMSMonster::IsShielding()
 {
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		if (Gear[i]->CurrentAttack && msstring(Gear[i]->m_Name).starts_with("shields_"))
 			return true;
 	return false;
@@ -74,7 +74,7 @@ float CMSMonster::RunSpeed(bool bParseSpeed) { return 1.0; }
 
 void CMSMonster::CancelAttack()
 {
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if (Hand(i))
 			Hand(i)->CancelAttack();
 
@@ -88,7 +88,7 @@ void CMSMonster::CancelAttack()
 
 CGenericItem *CMSMonster::GetContainer(const char *pNameSubstring)
 {
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) && strstr(Gear[i]->ItemName.c_str(), pNameSubstring))
 			return Gear[i];
 
@@ -96,7 +96,7 @@ CGenericItem *CMSMonster::GetContainer(const char *pNameSubstring)
 }
 CGenericItem *CMSMonster::GetContainer(ulong ID)
 {
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		if (FBitSet(Gear[i]->MSProperties(), ITEM_CONTAINER) && Gear[i]->m_iId == ID)
 			return Gear[i];
 
@@ -108,7 +108,7 @@ CGenericItem *CMSMonster::GetGearItem(ulong ID)
 }
 CGenericItem *CMSMonster::FindItem(ulong ID, bool CheckHands, bool CheckWorn, bool CheckPacks)
 {
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pPack = Gear[i];
 
@@ -122,7 +122,7 @@ CGenericItem *CMSMonster::FindItem(ulong ID, bool CheckHands, bool CheckWorn, bo
 		if (!CheckPacks || !FBitSet(pPack->MSProperties(), ITEM_CONTAINER))
 			continue;
 
-		for (int n = 0; n < pPack->Container_ItemCount(); n++)
+		for (unsigned int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			CGenericItem *pPackItem = pPack->Container_GetItem(n);
 			if (pPackItem->m_iId == ID)
@@ -142,14 +142,14 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 	ItemDesc.retContainer = NULL;
 
 	//Loop twice.  First time, only check the hands.  Second time, check everything else
-	for (int t = 0; t < 2; t++)
+	for (unsigned int t = 0; t < 2; t++)
 	{
 		bool Loop_CheckHands = (t == 0);
 
 		if ((ItemDesc.IgnoreHands && Loop_CheckHands) || (ItemDesc.IgnoreWornItems && !Loop_CheckHands))
 			continue;
 
-		for (int i = 0; i < Gear.size(); i++)
+		for (unsigned int i = 0; i < Gear.size(); i++)
 		{
 			CGenericItem *pItem = Gear[i];
 
@@ -167,7 +167,7 @@ bool CMSMonster::GetItem(getitem_t &ItemDesc)
 			if (ItemDesc.IgnoreInsideContainers || !FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
 				continue;
 
-			for (int n = 0; n < pItem->Container_ItemCount(); n++)
+			for (unsigned int n = 0; n < pItem->Container_ItemCount(); n++)
 			{
 				CGenericItem *pItemInPack = pItem->Container_GetItem(n);
 
@@ -194,19 +194,19 @@ CGenericItem *CMSMonster::GetItem(const char *pItemName, CGenericItem **rpPack)
 		*rpPack = NULL;
 
 	//Check hands first
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if (Hand(i) && strstr(Hand(i)->ItemName.c_str(), pItemName))
 			return Hand(i);
 
 	//Check inside each pack
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pPack = Gear[i];
 
 		if (!FBitSet(pPack->MSProperties(), ITEM_CONTAINER))
 			continue;
 
-		for (int n = 0; n < pPack->Container_ItemCount(); n++)
+		for (unsigned int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			CGenericItem *pProjInPack = pPack->Container_GetItem(n);
 			if (!strstr(pProjInPack->ItemName.c_str(), pItemName))
@@ -233,7 +233,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 
 	//Check hands first
 	if (CheckHands)
-		for (int i = 0; i < MAX_NPC_HANDS; i++)
+		for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		{
 			CGenericItem *pItem = Hand(i);
 			if (pItem)
@@ -242,7 +242,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 		}
 
 	//Check inside each pack
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pPack = Gear[i];
 
@@ -258,7 +258,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 		if (!FBitSet(pPack->MSProperties(), ITEM_CONTAINER))
 			continue;
 
-		for (int n = 0; n < pPack->Container_ItemCount(); n++)
+		for (unsigned int n = 0; n < pPack->Container_ItemCount(); n++)
 		{
 			CGenericItem *pItem = pPack->Container_GetItem(n);
 			if (!SearchName.len() || msstring(pItem->m_Name).starts_with(SearchName))
@@ -268,7 +268,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 
 	//Remove items that aren't weapons
 	if (WeaponOnly)
-		for (int i = 0; i < Items.size(); i++)
+		for (unsigned int i = 0; i < Items.size(); i++)
 		{
 			CGenericItem *pItem = Items[i];
 
@@ -277,7 +277,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 		}
 
 	bool UseNextItem = false;
-	for (int i = 0; i < Items.size(); i++)
+	for (unsigned int i = 0; i < Items.size(); i++)
 	{
 		CGenericItem *pItem = Items[i];
 
@@ -299,7 +299,7 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 //-1 if none
 int CMSMonster::NewItemHand(CGenericItem *pItem, bool CheckWeight, bool bVerbose, bool FreeHands, char *pszErrorString)
 {
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if (!Hand(i))
 			return i;
 
@@ -405,7 +405,7 @@ bool CMSMonster ::SwitchHands(int iHand, bool bVerbose)
 //Switchs to the best hand
 bool CMSMonster ::SwitchToBestHand()
 {
-	for (int i = 0; i < MAX_NPC_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if (SwitchHands(i))
 			return true;
 
@@ -416,7 +416,7 @@ CGenericItem *CMSMonster ::Hand(int iHand)
 	if (iHand < 0 || iHand >= MAX_NPC_HANDS)
 		return NULL;
 
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 	{
 		CGenericItem *pItem = Gear[i];
 		if (pItem->m_Location == ITEMPOS_HANDS && pItem->m_Hand == iHand)
@@ -434,7 +434,7 @@ float CMSMonster::Weight()
 void CMSMonster ::DropAllItems()
 {
 	//Drop all items... Called here so it won't crash if I kill myself
-	for (int i = 0; i < Gear.size(); i++)
+	for (unsigned int i = 0; i < Gear.size(); i++)
 		Gear[i]->Drop();
 }
 
@@ -499,7 +499,7 @@ CStat *CMSMonster::FindStat(int idx)
 }
 CStat *CMSMonster::FindStat(const char* Name)
 {
-	for (int i = 0; i < m_Stats.size(); i++)
+	for (unsigned int i = 0; i < m_Stats.size(); i++)
 		if (!_stricmp(m_Stats[i].m_Name, Name)) //case in-sensitive compare
 			return &m_Stats[i];
 
@@ -612,7 +612,7 @@ void CMSMonster ::MarkDamage(CBasePlayer * pPlayer, int vStat, int vProp, float 
 		CStat * pStat = pPlayer->FindStat(vStat);
 		if(pStat)
 		{
-			vProp = RANDOM_LONG( 0, pStat->m_SubStats.size() - 1 );
+			vProp = RANDOM_LONG( (unsigned int)0, pStat->m_SubStats.size() - 1 );
 		}
 	}
 

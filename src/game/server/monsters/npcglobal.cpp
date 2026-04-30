@@ -12,7 +12,7 @@ void CMSMonster::DynamicPrecache()
 
 	TokenizeString(pszString, NPCs);
 
-	for (int i = 0; i < NPCs.size(); i++)
+	for (unsigned int i = 0; i < NPCs.size(); i++)
 	{
 		const char* ScriptFile = NPCs[i];
 

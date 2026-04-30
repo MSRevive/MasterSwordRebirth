@@ -56,7 +56,7 @@ CStorePanel::CStorePanel() : VGUI_ContainerPanel()
 	m_SaleLabel->setText("Selling 0 Items (0 Gold)");
 
 	//Set up the cancel button
-	m_pCancelButton->addActionSignal(new CMenuHandler_StringCommand("trade stop", TRUE));
+	m_pCancelButton->addActionSignal(new CMenuHandler_StringCommand("trade stop", true));
 	m_pCancelButton->setText(Localized("#CLOSE"));
 
 	Text_StoreGold = "GOLD";

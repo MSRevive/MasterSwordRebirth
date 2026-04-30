@@ -12,10 +12,17 @@
 *   without written permission from Valve LLC.
 *
 ****/
+
+#ifndef STUDIO_H
+#include "studio.h"
+#endif
+
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#define ACTIVITY_NOT_AVAILABLE -1
+enum {
+	ACTIVITY_NOT_AVAILABLE = -1
+};
 
 #ifndef MONSTEREVENT_H
 #include "monsterevent.h"
@@ -40,8 +47,5 @@ int GetBodygroup(void *pmodel, entvars_t *pev, int iGroup);
 
 int GetAnimationEvent(void *pmodel, entvars_t *pev, MonsterEvent_t *pMonsterEvent, float flStart, float flEnd, int index);
 int ExtractBbox(void *pmodel, int sequence, float *mins, float *maxs);
-
-// From /engine/studio.h
-#define STUDIO_LOOPING 0x0001
 
 #endif //ANIMATION_H

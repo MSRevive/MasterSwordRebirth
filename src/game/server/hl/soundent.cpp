@@ -48,29 +48,29 @@ void CSound :: Reset ( void )
 }
 
 //=========================================================
-// FIsSound - returns TRUE if the sound is an Audible sound
+// FIsSound - returns true if the sound is an Audible sound
 //=========================================================
 BOOL CSound :: FIsSound ( void )
 {
 	if ( m_iType & ( bits_SOUND_COMBAT | bits_SOUND_WORLD | bits_SOUND_PLAYER | bits_SOUND_DANGER ) )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
-// FIsScent - returns TRUE if the sound is actually a scent
+// FIsScent - returns true if the sound is actually a scent
 //=========================================================
 BOOL CSound :: FIsScent ( void )
 {
 	if ( m_iType & ( bits_SOUND_CARCASS | bits_SOUND_MEAT | bits_SOUND_GARBAGE ) )
 	{
-		return TRUE;
+		return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================
@@ -102,7 +102,7 @@ void CSoundEnt :: Think ( void )
 
 	while ( iSound != SOUNDLIST_EMPTY )
 	{
-		if ( m_SoundPool[ iSound ].m_flExpireTime <= gpGlobals->time && m_SoundPool[ iSound ].m_flExpireTime != SOUND_NEVER_EXPIRE )
+		if ( m_SoundPool[ iSound ].m_flExpireTime <= gpGlobals->time && (int)m_SoundPool[ iSound ].m_flExpireTime != SOUND_NEVER_EXPIRE )
 		{
 			int iNext = m_SoundPool[ iSound ].m_iNext;
 
@@ -272,11 +272,11 @@ void CSoundEnt :: Initialize ( void )
 
 	if ( CVAR_GET_FLOAT("displaysoundlist") == 1 )
 	{
-		m_fShowReport = TRUE;
+		m_fShowReport = true;
 	}
 	else
 	{
-		m_fShowReport = FALSE;
+		m_fShowReport = false;
 	}
 }
 
@@ -286,8 +286,8 @@ void CSoundEnt :: Initialize ( void )
 //=========================================================
 int CSoundEnt :: ISoundsInList ( int iListType )
 {
-	int i;
-	int iThisSound;
+	unsigned int i;
+	int iThisSound{};
 
 	if ( iListType == SOUNDLISTTYPE_FREE )
 	{

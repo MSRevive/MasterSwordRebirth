@@ -460,8 +460,8 @@ class VGUI_Container : public CTransparentPanel
 public:
 	std::vector<VGUI_ItemButton *> m_ItemButtons;
 	std::vector<VGUI_ItemButton *> m_AlphabetizedItemButtons; // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
-	int m_ItemButtonTotal;
-	int m_InitializedItemButtons;
+	unsigned int m_ItemButtonTotal;
+	unsigned int m_InitializedItemButtons;
 	CTFScrollPanel *m_pScrollPanel;
 	VGUI_ItemCallbackPanel *m_CallbackPanel;
 	MSLabel	*m_NoItems;
@@ -619,7 +619,7 @@ public:
 		int w, h;
 		m_MessageLabel->getTextSize( w, h );
 		x += w + 1;
-		for (int i = 0; i < m_FadeLabels.size(); i++) { m_FadeLabels[i]->getTextSize(w, h); x += w; }
+		for (unsigned int i = 0; i < m_FadeLabels.size(); i++) { m_FadeLabels[i]->getTextSize(w, h); x += w; }
 		m_FadeLabels.add( new VGUI_FadeText( this, 0, Letter, x, y, XRES(16), m_MessageLabel->getTall() ) );
 		m_Message += Letter;
 
@@ -636,8 +636,8 @@ public:
 	{
 		m_VisibleMsg = m_Message;
 		m_MessageLabel->setText( m_Message );
-		int sz =  m_FadeLabels.size();
-		for (int i = 0; i < sz; i++) 
+		unsigned int sz =  m_FadeLabels.size();
+		for (unsigned int i = 0; i < sz; i++) 
 		{
 			m_FadeLabels[0]->setParent( NULL );
 			delete m_FadeLabels[0];
@@ -654,7 +654,7 @@ public:
 
 	void Update( )
 	{
-		for (int i = 0; i < m_FadeLabels.size(); i++) 
+		for (unsigned int i = 0; i < m_FadeLabels.size(); i++) 
 		{
 			VGUI_FadeText *pFadeText = m_FadeLabels[i];
 			pFadeText->Update( );

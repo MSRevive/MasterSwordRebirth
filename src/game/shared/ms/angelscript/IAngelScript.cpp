@@ -450,8 +450,8 @@ bool IAngelScript::SetEventParameters(asIScriptContext* pCtx, ASEventParams* pPa
     if (!pFunc || reinterpret_cast<uintptr_t>(pFunc) <= 0x10000)
         return false;
         
-    int paramCount = pFunc->GetParamCount();
-    for (int i = 0; i < paramCount && i < (int)pParams->Count(); i++)
+    unsigned int paramCount = pFunc->GetParamCount();
+    for (unsigned int i = 0; i < paramCount && i < (unsigned int)pParams->Count(); i++)
     {
         // For now, pass all parameters as strings
         // Later we can add type detection

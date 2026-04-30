@@ -87,10 +87,10 @@ void SpectatorPanel::Initialize()
 
 	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle("Team Info Text");
 
-	m_TopBorder = new CTransparentPanel(64, 0, 0, ScreenWidth, YRES(PANEL_HEIGHT));
+	m_TopBorder = new CTransparentPanel(64, 0, 0, ScreenWidth(), YRES(PANEL_HEIGHT));
 	m_TopBorder->setParent(this);
 
-	m_BottomBorder = new CTransparentPanel(64, 0, ScreenHeight - YRES(32), ScreenWidth, YRES(PANEL_HEIGHT));
+	m_BottomBorder = new CTransparentPanel(64, 0, ScreenHeight() - YRES(32), ScreenWidth(), YRES(PANEL_HEIGHT));
 	m_BottomBorder->setParent(this);
 
 	setPaintBackgroundEnabled(false);
@@ -143,7 +143,7 @@ void SpectatorPanel::Initialize()
 	m_OptionButton->setUnArmedColor(143, 143, 54, 0);
 	m_OptionButton->setArmedColor(194, 202, 54, 0);
 
-	m_CamButton = new ColorButton(CHudTextMessage::BufferedLocaliseTextString("#CAM_OPTIONS"), ScreenWidth - (XRES(CAMOPTIONS_BUTTON_X) + 15), YRES(6), XRES(CAMOPTIONS_BUTTON_X), YRES(20), false, false);
+	m_CamButton = new ColorButton(CHudTextMessage::BufferedLocaliseTextString("#CAM_OPTIONS"), ScreenWidth() - (XRES(CAMOPTIONS_BUTTON_X) + 15), YRES(6), XRES(CAMOPTIONS_BUTTON_X), YRES(20), false, false);
 	m_CamButton->setParent(m_BottomBorder);
 	m_CamButton->setContentAlignment(vgui::Label::a_center);
 	m_CamButton->setBoundKey((char)255); // special no bound to avoid leading spaces in name
@@ -163,7 +163,7 @@ void SpectatorPanel::Initialize()
 	m_PrevPlayerButton->setUnArmedColor(143, 143, 54, 0);
 	m_PrevPlayerButton->setArmedColor(194, 202, 54, 0);
 
-	m_NextPlayerButton = new ColorButton(">", (ScreenWidth - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15), YRES(6), XRES(24), YRES(20), false, false);
+	m_NextPlayerButton = new ColorButton(">", (ScreenWidth() - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15), YRES(6), XRES(24), YRES(20), false, false);
 	m_NextPlayerButton->setParent(m_BottomBorder);
 	m_NextPlayerButton->setContentAlignment(vgui::Label::a_center);
 	m_NextPlayerButton->setBoundKey((char)255); // special no bound to avoid leading spaces in name
@@ -175,7 +175,7 @@ void SpectatorPanel::Initialize()
 
 	// Initialize the bottom title.
 
-	float flLabelSize = ((ScreenWidth - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15)) - XRES((15 + OPTIONS_BUTTON_X + 15) + 38);
+	float flLabelSize = ((ScreenWidth() - (XRES(CAMOPTIONS_BUTTON_X) + 15)) - XRES(24 + 15)) - XRES((15 + OPTIONS_BUTTON_X + 15) + 38);
 
 	m_BottomMainLabel = new Label("Spectator Bottom", XRES((15 + OPTIONS_BUTTON_X + 15) + 31), YRES(6), flLabelSize, YRES(20));
 	m_BottomMainLabel->setParent(m_BottomBorder);
@@ -222,7 +222,7 @@ void SpectatorPanel::ShowMenu(bool isVisible)
 	{
 		int iLabelSizeX, iLabelSizeY;
 		m_BottomMainLabel->getSize(iLabelSizeX, iLabelSizeY);
-		m_BottomMainLabel->setPos((ScreenWidth / 2) - (iLabelSizeX / 2), YRES(6));
+		m_BottomMainLabel->setPos((ScreenWidth() / 2) - (iLabelSizeX / 2), YRES(6));
 	}
 	else
 		m_BottomMainLabel->setPos(XRES((15 + OPTIONS_BUTTON_X + 15) + 31), YRES(6));
@@ -315,7 +315,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 		else
 			m_TopBanner->setVisible(false);
 
-		m_TopBorder->setBounds(0, 0, ScreenWidth, YRES(PANEL_HEIGHT));
+		m_TopBorder->setBounds(0, 0, ScreenWidth(), YRES(PANEL_HEIGHT));
 
 		m_InsetViewButton->setVisible(false);
 	}
@@ -360,7 +360,7 @@ void SpectatorPanel::Update()
 	if (iTimeWidth > iTextWidth)
 		iTextWidth = iTimeWidth;
 
-	int xPos = ScreenWidth - (iTextWidth + XRES(4 + offset));
+	int xPos = ScreenWidth() - (iTextWidth + XRES(4 + offset));
 
 	m_ExtraInfo->setBounds(xPos, YRES(1), iTextWidth, iTextHeight);
 
@@ -368,7 +368,7 @@ void SpectatorPanel::Update()
 
 	m_CurrentTime->setBounds(xPos + XRES(14 + 1), YRES(2) + iTextHeight, iTimeWidth, iTimeHeight);
 
-	m_Separator->setPos(ScreenWidth - (iTextWidth + XRES(4 + 2 + 4 + offset)), YRES(1));
+	m_Separator->setPos(ScreenWidth() - (iTextWidth + XRES(4 + 2 + 4 + offset)), YRES(1));
 	m_Separator->setSize(XRES(4), YRES(PANEL_HEIGHT - 2));
 
 	for (j = 0; j < TEAM_NUMBER; j++)
@@ -376,6 +376,6 @@ void SpectatorPanel::Update()
 		int iwidth, iheight;
 
 		m_TeamScores[j]->getTextSize(iwidth, iheight);
-		m_TeamScores[j]->setBounds(ScreenWidth - (iTextWidth + XRES(4 + 2 + 4 + 2 + offset) + iwidth), YRES(1) + (iheight * j), iwidth, iheight);
+		m_TeamScores[j]->setBounds(ScreenWidth() - (iTextWidth + XRES(4 + 2 + 4 + 2 + offset) + iwidth), YRES(1) + (iheight * j), iwidth, iheight);
 	}
 }

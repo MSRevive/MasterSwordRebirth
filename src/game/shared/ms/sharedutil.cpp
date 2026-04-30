@@ -15,7 +15,6 @@ extern CBasePlayer player;
 
 CBaseEntity *MSInstance(edict_t *pent);
 
-#define ENT_FORMAT ENT_PREFIX "(%i,%u)"
 msstring EntToString(class CBaseEntity *pEntity)
 {
 	if (!pEntity)
@@ -55,15 +54,6 @@ CBaseEntity *StringToEnt(const char* EntString)
 	return pEntity;
 }
 
-const char* VecToString(const Vector& Vec, bool bAs2D)
-{
-	static char RetString[128];
-	if (bAs2D)
-		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f)", Vec.x, Vec.y);
-	else
-		_snprintf(RetString, sizeof(RetString), "(%.2f,%.2f,%.2f)", Vec.x, Vec.y, Vec.z);
-	return RetString;
-}
 
 Vector StringToVec(const char* String)
 {

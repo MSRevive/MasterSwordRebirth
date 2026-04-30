@@ -65,7 +65,7 @@ public:
 	int WriteFields(const char *pname, void *pBaseData, TYPEDESCRIPTION *pFields, int fieldCount);
 
 private:
-	int DataEmpty(const char *pdata, int size);
+	int DataEmpty(const char *pdata, unsigned int size);
 	void BufferField(const char *pname, int size, const char *pdata);
 	void BufferString(char *pdata, int len);
 	void BufferData(const char *pdata, int size);
@@ -85,7 +85,7 @@ public:
 	CRestore(SAVERESTOREDATA *pdata) : CSaveRestoreBuffer(pdata)
 	{
 		m_global = 0;
-		m_precache = TRUE;
+		m_precache = true;
 	}
 
 	int ReadEntVars(const char *pname, entvars_t *pev); // entvars_t

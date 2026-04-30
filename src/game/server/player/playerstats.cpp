@@ -84,7 +84,7 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 		//see if anything has lower substats than the first skill in the list
 		if (csExpStat->m_SubStats.size() < 4)
 		{
-			for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
+			for (unsigned int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
 				if (csExpStat->m_SubStats[idx].Value < iFirstSubValue) {
 					iBestSubstatId = idx;
 				} 
@@ -100,7 +100,7 @@ std::tuple<bool, int> CBasePlayer::LearnSkill(int iStat, int iStatType, int Enem
 			//if we didn't find a low substat, go through the remaining exp instead
 			if (iEqualCount == 3) {
 
-				for (int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
+				for (unsigned int idx = 0; idx < csExpStat->m_SubStats.size(); idx++) {
 					long double ldCurrentExpRemaining = abs(GetExpNeeded(csExpStat->m_SubStats[idx].Value) - csExpStat->m_SubStats[idx].Exp);
 
 					if (ldCurrentExpRemaining >= ldHighestExpRemaining) {

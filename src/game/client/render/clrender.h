@@ -1,37 +1,41 @@
 
 //curstate.oldbuttons
-#define MSRDR_VIEWMODEL (1 << 0) //Model is a view model (parent view model... never rendered fully)
-#define MSRDR_FLIPPED (1 << 1)	 //Model is flipped across the verical axis, changing it from the right to left hand
-#define MSRDR_SKIP (1 << 2)		 //Do all setup (for attachments later), but don't render
-#define MSRDR_NOREFLECT (1 << 3) //Don't render to mirrors
-#define MSRDR_FULLROT (1 << 4)	 //Use full rotation this frame (automatically unset in )
 
-//Separate flags from the above -- stored in curstate.colormap
-#define MSRDR_GLOW_GRN (1 << 0) //Green glow
-#define MSRDR_GLOW_RED (1 << 1) //Highlight slected weapons - Red Glow
-#define MSRDR_DARK (1 << 2)		//Dim lights on the inset player model
-#define MSRDR_LIGHT_DIM (1 << 3)
-#define MSRDR_LIGHT_NORMAL (1 << 4) //Give a moderate amount of artificial light
-#define MSRDR_LIGHT_BRIGHT (1 << 5) //Make it fullbright
-#define MSRDR_ANIM_ONCE (1 << 6)	//Only play the client-side anim once (no loop)
-#define MSRDR_ASPLAYER (1 << 7)		//Render as player
-#define MSRDR_COPYPLAYER (1 << 8)	//Copy the local player's anims
-#define MSRDR_HANDMODEL (1 << 9)	//This is one of the two hand models (coming off the viewmodel)
 
-//mouth.sndavg
-#define MSRDR_HASEXTRA (1 << 0) //The extra info is initialied
+enum {
+	MSRDR_VIEWMODEL = (1 << 0), //Model is a view model (parent view model... never rendered fully)
+	MSRDR_FLIPPED = (1 << 1),	 //Model is flipped across the verical axis, changing it from the right to left hand
+	MSRDR_SKIP = (1 << 2),		 //Do all setup (for attachments later), but don't render
+	MSRDR_NOREFLECT = (1 << 3), //Don't render to mirrors
+	MSRDR_FULLROT = (1 << 4),	 //Use full rotation this frame (automatically unset in )
+
+	//Separate flags from the above -- stored in curstate.colormap
+	MSRDR_GLOW_GRN = (1 << 0), //Green glow
+	MSRDR_GLOW_RED = (1 << 1), //Highlight slected weapons - Red Glow
+	MSRDR_DARK = (1 << 2),		//Dim lights on the inset player model
+	MSRDR_LIGHT_DIM = (1 << 3),
+	MSRDR_LIGHT_NORMAL = (1 << 4), //Give a moderate amount of artificial light
+	MSRDR_LIGHT_BRIGHT = (1 << 5), //Make it fullbright
+	MSRDR_ANIM_ONCE = (1 << 6),	//Only play the client-side anim once (no loop)
+	MSRDR_ASPLAYER = (1 << 7),		//Render as player
+	MSRDR_COPYPLAYER = (1 << 8),	//Copy the local player's anims
+	MSRDR_HANDMODEL = (1 << 9),	//This is one of the two hand models (coming off the viewmodel)
+
+	//mouth.sndavg
+	MSRDR_HASEXTRA = (1 << 0) //The extra info is initialied
+};
 
 //Specifics
-#define INSET_SCALE 0.026f //0.02f
-#define ANIM_RUN 11
-#define ANIM_CROUCH 0
-#define ANIM_CRAWL 1
-#define ANIM_SIT 19
-#define ANIM_ATTENTION 4
-#define ANIM_DEEPIDLE 5
-#define ANIM_JUMP 6
-#define ANIM_SIT 19
-
+constexpr float INSET_SCALE = 0.026f; //0.02f
+enum {
+	ANIM_RUN = 11,
+	ANIM_CROUCH = 0,
+	ANIM_CRAWL = 1,
+	ANIM_SIT = 19,
+	ANIM_ATTENTION = 4,
+	ANIM_DEEPIDLE = 5,
+	ANIM_JUMP = 6
+};
 typedef struct msurface_s msurface_t;
 typedef struct decal_s decal_t;
 
@@ -136,7 +140,7 @@ public:
 	bool BBoxIsInFront(Vector Bounds[2])
 	{
 		Vector Point;
-		for (int i = 0; i < 6; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			switch (i)
 			{
@@ -180,7 +184,7 @@ public:
 class CSurface
 {
 public:
-	CSurface() { m_Surface = NULL; }
+	CSurface() { m_Surface = nullptr; }
 	CSurface(msurface_t *Surface) { m_Surface = Surface; }
 	void Draw();
 	void DrawProjective();
@@ -199,14 +203,16 @@ public:
 	Vector m_SurfaceNormal;
 };
 
-#define RDR_TEXTURE (1 << 0)
-#define RDR_PROJECTIVE (1 << 1)
-#define RDR_ALPHATEST (1 << 2)
-#define RDR_STENCIL (1 << 3)
-#define RDR_CLRSTENCIL (1 << 4)
-#define RDR_CHKSTENCIL (1 << 5)
-#define RDR_CLEARZ (1 << 6)
-#define RDR_CLRALPHA (1 << 7)
+enum {
+	RDR_TEXTURE = (1 << 0),
+	RDR_PROJECTIVE = (1 << 1),
+	RDR_ALPHATEST = (1 << 2),
+	RDR_STENCIL = (1 << 3),
+	RDR_CLRSTENCIL = (1 << 4),
+	RDR_CHKSTENCIL = (1 << 5),
+	RDR_CLEARZ = (1 << 6),
+	RDR_CLRALPHA = (1 << 7)
+};
 
 class CMirror
 {
@@ -307,13 +313,18 @@ public:
 };
 void RenderModel(cl_entity_t *pEntity);
 
-#define SURF_PLANEBACK 2
-#define SURF_DRAWSKY 4
-#define SURF_DRAWSPRITE 8
-#define SURF_DRAWTURB 0x10
-#define SURF_DRAWTILED 0x20
-#define SURF_DRAWBACKGROUND 0x40
-#define SURF_UNDERWATER 0x80
+
+enum {
+
+	SURF_PLANEBACK = 2,
+	SURF_DRAWSKY = 4,
+	SURF_DRAWSPRITE = 8,
+	SURF_DRAWTURB = 0x10,
+	SURF_DRAWTILED = 0x20,
+	SURF_DRAWBACKGROUND = 0x40,
+	SURF_UNDERWATER = 0x80
+
+};
 
 #include <GL/gl.h>	  // Header File For The OpenGL32 Library
 #include <GL/glext.h>

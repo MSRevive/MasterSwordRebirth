@@ -30,15 +30,7 @@ using namespace vgui;
 //extern int cam_thirdperson;
 extern "C" int CL_IsThirdPerson();
 
-
-#define VOICE_MODEL_INTERVAL		0.3
-#define SCOREBOARD_BLINK_FREQUENCY	0.3	// How often to blink the scoreboard icons.
-#define SQUELCHOSCILLATE_PER_SECOND	2.0f
-
-
 extern BitmapTGA *LoadTGA(const char* pImageName);
-
-
 
 // ---------------------------------------------------------------------- //
 // The voice manager for the client.
@@ -49,8 +41,6 @@ CVoiceStatus* GetClientVoiceMgr()
 {
 	return &g_VoiceStatus;
 }
-
-
 
 // ---------------------------------------------------------------------- //
 // CVoiceStatus.
@@ -73,7 +63,6 @@ int __MsgFunc_ReqState(const char *pszName, int iSize, void *pbuf)
 
 	return 1;
 }
-
 
 int g_BannedPlayerPrintCount;
 void ForEachBannedPlayer(char id[16])
@@ -136,7 +125,7 @@ CVoiceStatus::~CVoiceStatus()
 {
 	g_pInternalVoiceStatus = NULL;
 
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		delete m_Labels[i].m_pLabel;
 		m_Labels[i].m_pLabel = NULL;
@@ -189,7 +178,7 @@ int CVoiceStatus::Init(
 	m_VoiceHeadModel = NULL;
 	memset(m_Labels, 0, sizeof(m_Labels));
 
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		CVoiceLabel *pLabel = &m_Labels[i];
 
@@ -304,16 +293,16 @@ void CVoiceStatus::Frame(double frametime)
 	// Update speaker labels.
 	if (m_pHelper->CanShowSpeakerLabels())
 	{
-		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+		for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 			m_Labels[i].m_pBackground->setVisible(m_Labels[i].m_clientindex != -1);
 	}
 	else
 	{
-		for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+		for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 			m_Labels[i].m_pBackground->setVisible(false);
 	}
 
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 		UpdateBanButton(i);
 }
 
@@ -326,7 +315,7 @@ void CVoiceStatus::CreateEntities()
 	cl_entity_t *localPlayer = gEngfuncs.GetLocalPlayer();
 
 	int iOutModel = 0;
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 	{
 		if (!m_VoicePlayers[i])
 			continue;
@@ -654,7 +643,7 @@ bool CVoiceStatus::IsInSquelchMode()
 
 CVoiceLabel* CVoiceStatus::FindVoiceLabel(int clientindex)
 {
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		if (m_Labels[i].m_clientindex == clientindex)
 			return &m_Labels[i];
@@ -673,7 +662,7 @@ CVoiceLabel* CVoiceStatus::GetFreeVoiceLabel()
 void CVoiceStatus::RepositionLabels()
 {
 	// find starting position to draw from, along right-hand side of screen
-	int y = ScreenHeight / 2;
+	int y = ScreenHeight() / 2;
 
 	int iconWide = 8, iconTall = 8;
 	if (m_pSpeakerLabelIcon)
@@ -682,7 +671,7 @@ void CVoiceStatus::RepositionLabels()
 	}
 
 	// Reposition active labels.
-	for (int i = 0; i < MAX_VOICE_SPEAKERS; i++)
+	for (unsigned int i = 0; i < MAX_VOICE_SPEAKERS; i++)
 	{
 		CVoiceLabel *pLabel = &m_Labels[i];
 
@@ -698,14 +687,14 @@ void CVoiceStatus::RepositionLabels()
 		pLabel->m_pLabel->getContentSize(textWide, textTall);
 
 		// Don't let it stretch too far across their screen.
-		if (textWide > (ScreenWidth * 2) / 3)
-			textWide = (ScreenWidth * 2) / 3;
+		if (textWide > (ScreenWidth() * 2) / 3)
+			textWide = (ScreenWidth() * 2) / 3;
 
 		// Setup the background label to fit everything in.
 		int border = 2;
 		int bgWide = textWide + iconWide + border * 3;
 		int bgTall = V_max(textTall, iconTall) + border * 2;
-		pLabel->m_pBackground->setBounds(ScreenWidth - bgWide - 8, y, bgWide, bgTall);
+		pLabel->m_pBackground->setBounds(ScreenWidth() - bgWide - 8, y, bgWide, bgTall);
 
 		// Put the text at the left.
 		pLabel->m_pLabel->setBounds(border, (bgTall - textTall) / 2, textWide, textTall);
@@ -735,7 +724,7 @@ void CVoiceStatus::RepositionLabels()
 		int sizeX, sizeY;
 		m_pLocalBitmap->getSize(sizeX, sizeY);
 
-		int local_xPos = ScreenWidth - sizeX - 10;
+		int local_xPos = ScreenWidth() - sizeX - 10;
 		int local_yPos = m_pHelper->GetAckIconHeight() - sizeY;
 
 		m_pLocalLabel->setPos(local_xPos, local_yPos);
@@ -778,7 +767,7 @@ void CVoiceStatus::FreeBitmaps()
 	m_pScoreboardBanned = NULL;
 
 	// Clear references to the images in panels.
-	for (int i = 0; i < VOICE_MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < VOICE_MAX_PLAYERS; i++)
 	{
 		if (m_pBanButtons[i])
 		{
@@ -878,7 +867,7 @@ void CHLVoiceStatusHelper::UpdateCursorState()
 
 int	CHLVoiceStatusHelper::GetAckIconHeight()
 {
-	return ScreenHeight - gHUD.m_iFontHeight * 3 - 6;
+	return ScreenHeight() - gHUD.m_iFontHeight * 3 - 6;
 }
 
 bool CHLVoiceStatusHelper::CanShowSpeakerLabels()

@@ -22,15 +22,14 @@ typedef bool BOOL;
 // hack into header files that we can ship
 typedef int qboolean;
 typedef unsigned char byte;
-#include "../utils/common/mathlib.h"
+//#include "../utils/common/mathlib.h"
+#include "hl/vector.h"
 #include "const.h"
-
+#include "mathlib.h"
 #include "progdefs.h"
 #include "edict.h"
 #include "eiface.h"
-
 #include "studio.h"
-
 #include "../engine/studio.h"
 
 #ifndef ACTIVITY_H
@@ -291,6 +290,7 @@ int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEven
 {
 	studiohdr_t* pstudiohdr;
 
+
 	pstudiohdr = (studiohdr_t*)pmodel;
 	if (!pstudiohdr || pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq || !pMonsterEvent)
 		return 0;
@@ -303,7 +303,7 @@ int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEven
 	pseqdesc = (mstudioseqdesc_t*)((byte*)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
 	pevent = (mstudioevent_t*)((byte*)pstudiohdr + pseqdesc->eventindex);
 
-	if (pseqdesc->numevents == 0 || index > pseqdesc->numevents)
+	if (pseqdesc->numevents == 0 || static_cast<int>(index) > pseqdesc->numevents)
 		return 0;
 
 	if (pseqdesc->numframes > 1)
@@ -317,7 +317,7 @@ int GetAnimationEvent(void* pmodel, entvars_t* pev, MonsterEvent_t* pMonsterEven
 		flEnd = 1.0;
 	}
 
-	for (; index < pseqdesc->numevents; index++)
+	for (index; index < pseqdesc->numevents; index++)
 	{
 		// Don't send client-side events to the server AI
 		if (pevent[index].event >= EVENT_CLIENT)

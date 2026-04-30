@@ -24,15 +24,47 @@ class CFile;
 //=========================================================
 // DEFINE
 //=========================================================
-#define MAX_STACK_NODES 100
-#define NO_NODE -1
-#define MAX_NODE_HULLS 4
 
-#define bits_NODE_LAND (1 << 0)	 // Land node, so nudge if necessary.
-#define bits_NODE_AIR (1 << 1)	 // Air node, don't nudge.
-#define bits_NODE_WATER (1 << 2) // Water node, don't nudge.
-#define bits_NODE_GROUP_REALM (bits_NODE_LAND | bits_NODE_AIR | bits_NODE_WATER)
+constexpr unsigned int MAX_STACK_NODES = 100;
+constexpr unsigned int MAX_NODE_HULLS = 4;
+constexpr unsigned int CACHE_SIZE = 128;
+constexpr unsigned int NUM_RANGES = 256;
+constexpr unsigned MAX_NODE_INITIAL_LINKS = 128;
+constexpr unsigned MAX_NODES = 1024;
+constexpr float HULL_STEP_SIZE = 16; // how far the test hull moves on each step
+constexpr float NODE_HEIGHT = 8;	  // how high to lift nodes off the ground after we drop them all (make stair/ramp mapping easier)
+constexpr unsigned int NUMBER_OF_PRIMES = 177;
+constexpr int NO_NODE = -1;
+constexpr int UNNUMBERED_NODE = -1;
+constexpr int ENTRY_STATE_EMPTY = -1;
 
+constexpr unsigned int Primes[NUMBER_OF_PRIMES] =
+{ 1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67,
+ 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151,
+ 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239,
+ 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337,
+ 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433,
+ 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
+ 547, 557, 563, 569, 571, 577, 587, 593, 599, 601, 607, 613, 617, 619, 631, 641,
+ 643, 647, 653, 659, 661, 673, 677, 683, 691, 701, 709, 719, 727, 733, 739, 743,
+ 751, 757, 761, 769, 773, 787, 797, 809, 811, 821, 823, 827, 829, 839, 853, 857,
+ 859, 863, 877, 881, 883, 887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971,
+ 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 0 };
+
+struct tagNodePair
+{
+	short iSrc;
+	short iDest;
+};
+
+enum bits_node_type_e {
+
+	bits_NODE_LAND = (1 << 0),	 // Land node, so nudge if necessary.
+	bits_NODE_AIR = (1 << 1),	 // Air node, don't nudge.
+	bits_NODE_WATER = (1 << 2), // Water node, don't nudge.
+	bits_NODE_GROUP_REALM = (bits_NODE_LAND | bits_NODE_AIR | bits_NODE_WATER)
+
+};
 //=========================================================
 // Instance of a node.
 //=========================================================
@@ -44,8 +76,8 @@ public:
 	byte m_Region[3];		// Which of 256 regions do each of the coordinate belong?
 	int m_afNodeInfo;		// bits that tell us more about this location
 
-	int m_cNumLinks;  // how many links this node has
-	int m_iFirstLink; // index of this node's first link in the link pool.
+	unsigned int m_cNumLinks;  // how many links this node has
+	unsigned int m_iFirstLink; // index of this node's first link in the link pool.
 
 	// Where to start looking in the compressed routing table (offset into m_pRouteInfo).
 	// (4 hull sizes -- smallest to largest + fly/swim), and secondly, door capability.
@@ -67,17 +99,23 @@ public:
 //=========================================================
 // CLink - A link between 2 nodes
 //=========================================================
-#define bits_LINK_SMALL_HULL (1 << 0) // headcrab box can fit through this connection
-#define bits_LINK_HUMAN_HULL (1 << 1) // player box can fit through this connection
-#define bits_LINK_LARGE_HULL (1 << 2) // big box can fit through this connection
-#define bits_LINK_FLY_HULL (1 << 3)	  // a flying big box can fit through this connection
-#define bits_LINK_DISABLED (1 << 4)	  // link is not valid when the set
 
-#define NODE_SMALL_HULL 0
-#define NODE_HUMAN_HULL 1
-#define NODE_LARGE_HULL 2
-#define NODE_FLY_HULL 3
+enum bits_clink_e {
+	bits_LINK_SMALL_HULL = (1 << 0), // headcrab box can fit through this connection
+	bits_LINK_HUMAN_HULL = (1 << 1), // player box can fit through this connection
+	bits_LINK_LARGE_HULL = (1 << 2), // big box can fit through this connection
+	bits_LINK_FLY_HULL = (1 << 3),	  // a flying big box can fit through this connection
+	bits_LINK_DISABLED = (1 << 4)	  // link is not valid when the set
+};
 
+enum node_hull_e {
+
+	NODE_SMALL_HULL = 0,
+	NODE_HUMAN_HULL = 1,
+	NODE_LARGE_HULL = 2,
+	NODE_FLY_HULL = 3
+
+};
 class CLink
 {
 public:
@@ -121,9 +159,9 @@ public:
 	CLink *m_pLinkPool; // big list of all node connections
 	char *m_pRouteInfo; // compressed routing information the nodes use.
 
-	int m_cNodes;	  // total number of nodes
-	int m_cLinks;	  // total number of links
-	int m_nRouteInfo; // size of m_pRouteInfo in bytes.
+	unsigned int m_cNodes;	  // total number of nodes
+	unsigned int m_cLinks;	  // total number of links
+	unsigned int m_nRouteInfo; // size of m_pRouteInfo in bytes.
 
 	// Tables for making nearest node lookup faster. SortedBy provided nodes in a
 	// order of a particular coordinate. Instead of doing a binary search, RangeStart
@@ -134,11 +172,10 @@ public:
 	// search each range. After the search is exhausted, we know we have the closest
 	// node.
 	//
-#define CACHE_SIZE 128
-#define NUM_RANGES 256
+
 	DIST_INFO *m_di; // This is m_cNodes long, but the entries don't correspond to CNode entries.
-	int m_RangeStart[3][NUM_RANGES];
-	int m_RangeEnd[3][NUM_RANGES];
+	unsigned int m_RangeStart[3][NUM_RANGES];
+	unsigned int m_RangeEnd[3][NUM_RANGES];
 	float m_flShortest;
 	int m_iNearest;
 	int m_minX, m_minY, m_minZ, m_maxX, m_maxY, m_maxZ;
@@ -149,12 +186,12 @@ public:
 
 	int m_HashPrimes[16];
 	short *m_pHashLinks;
-	int m_nHashLinks;
+	unsigned int m_nHashLinks;
 
 	// kinda sleazy. In order to allow variety in active idles for monster groups in a room with more than one node,
 	// we keep track of the last node we searched from and store it here. Subsequent searches by other monsters will pick
 	// up where the last search stopped.
-	int m_iLastActiveIdleSearch;
+	unsigned int m_iLastActiveIdleSearch;
 
 	// another such system used to track the search for cover nodes, helps greatly with two monsters trying to get to the same node.
 	int m_iLastCoverSearch;
@@ -347,7 +384,7 @@ private:
 // hints - these MUST coincide with the HINTS listed under
 // info_node in the FGD file!
 //=========================================================
-enum
+enum hint_node_e
 {
 	HINT_NONE = 0,
 	HINT_WORLD_DOOR,

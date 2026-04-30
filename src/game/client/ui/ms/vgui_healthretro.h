@@ -136,7 +136,7 @@ namespace RetroHUD
 		VGUI_Image3D m_HUDImage;
 
 	public:
-		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 		{
 			FLASK_SPACER = XRES(10);
 
@@ -165,7 +165,7 @@ namespace RetroHUD
 			// m_HUDImage.LoadImg("hud_main3", true, false);
 			// m_HUDImage.setFgColor(255, 255, 255, 255);
 			// m_HUDImage.setSize(256, 256);
-			// m_HUDImage.setPos(0, ScreenHeight - 256);
+			// m_HUDImage.setPos(0, ScreenHeight() - 256);
 
 			//Health and mana flasks
 			m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);
@@ -191,7 +191,7 @@ namespace RetroHUD
 			pLabel->SetFGColorRGB(Color_Text_White);
 
 			//Charge system
-			for (int i = 0; i < 2; i++)
+			for (unsigned int i = 0; i < 2; i++)
 			{
 				int Multiplier = (i == 0) ? -1 : 1;
 				float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
@@ -208,7 +208,7 @@ namespace RetroHUD
 		void Update()
 		{
 			//Update Health & Mana flasks
-			for (int i = 0; i < 2; i++)
+			for (unsigned int i = 0; i < 2; i++)
 				m_Flask[i]->Update();
 
 			bool bShowHealth = ShowHealth();
@@ -229,7 +229,7 @@ namespace RetroHUD
 
 			m_pWeight->Set(player.Weight(), player.Volume());
 
-			for (int i = 0; i < 2; i++)
+			for (unsigned int i = 0; i < 2; i++)
 			{
 				m_Charge[i]->setVisible(false);
 				m_ChargeLbl[i]->setVisible(false);
@@ -239,7 +239,7 @@ namespace RetroHUD
 			std::vector<CGenericItem*> *vHandsItems = new std::vector<CGenericItem*>;
 
 			//get all hands items
-			for (int i = 0; i < player.Gear.size(); i++)
+			for (unsigned int i = 0; i < player.Gear.size(); i++)
 			{
 				CGenericItem* Item = player.Gear[i];
 				if (Item->m_Location != ITEMPOS_HANDS)
@@ -248,7 +248,7 @@ namespace RetroHUD
 				vHandsItems->push_back(Item);
 			}
 
-			for (int i = 0; i < vHandsItems->size(); i++)
+			for (unsigned int i = 0; i < vHandsItems->size(); i++)
 			{
 				CGenericItem* Item = vHandsItems->at(i);
 

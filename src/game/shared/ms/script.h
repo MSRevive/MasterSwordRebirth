@@ -6,6 +6,10 @@
 #include <ctime>
 #include <vector>
 
+inline Vector VecMultiply(Vector a, Vector b) {
+	return Vector(a[0] * b[0], a[1] * b[1], a[2] * b[2]);
+};
+
 class CEventList : public mslist<SCRIPT_EVENT *> //This class was created so I can store Events as pointers, but still access them as
 {															//dereferenced objects
 public:
@@ -30,7 +34,7 @@ public:
 	CEventList &operator = (const CEventList &OtherList)
 	{
 		clear();
-		for(int i = 0; i < OtherList.size(); i++)
+		for(unsigned int i = 0; i < OtherList.size(); i++)
 			add(OtherList[i]);
 
 		return *this;
@@ -88,7 +92,7 @@ public:
 #endif
 	bool Spawn(msstring Filename, CBaseEntity *pScriptedEnt, IScripted *pScriptedInterface, bool PrecacheOnly = false, bool Casual = false);
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
-	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = NULL );	//Run one named event
+	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = nullptr );	//Run one named event
 	void CallLogged(const char* title, std::clock_t start);
 	bool ParseScriptFile( const char *pszScriptData );
 	LegacyScriptEvent *EventByName( const char *pszEventName );
@@ -96,6 +100,8 @@ public:
 	scriptvar_t *FindVar( const char *pszName );
 	const char* GetVar(const char* pszText );
 	bool VarExists(const char* pszText );
+	const char* SCRIPTCONST(const char* var);
+	const char* GETCONST_COMPATIBLE(const char* var);
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, bool fGlobal = false );
 	scriptvar_t *SetVar( const char *pszVarName, const char *pszValue, LegacyScriptEvent &Event );
 	scriptvar_t *SetVar( const char *pszVarName, int iValue, bool fGlobal = false );
@@ -402,11 +408,18 @@ struct globalscriptinfo_t
 };
 
 extern globalscriptinfo_t *g_MSScriptInfo;
-#define FILE_DEV_ITEMLIST "scripts/items.txt"
-#define FILE_ITEMLIST "items.txt"
+constexpr const char * FILE_DEV_ITEMLIST = "scripts/items.txt";
+constexpr const char* FILE_ITEMLIST = "items.txt";
 
 #ifdef VALVE_DLL
-	#define SCRIPT_ID_START 0		//Server: ID of last script sent to a client
+	constexpr unsigned int SCRIPT_ID_START = 0;		//Server: ID of last script sent to a client
 #else
-	#define SCRIPT_ID_START 10000	//Client: ID of next script to be created
+	constexpr unsigned int SCRIPT_ID_START = 10000;	//Client: ID of next script to be created
 #endif
+
+
+#ifndef VECTOR_H
+
+#endif // !VECTOR_H
+
+

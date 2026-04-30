@@ -151,7 +151,7 @@ private:
 
 VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); }
 
-CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
+CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	setParent(pParent);
 
@@ -211,12 +211,12 @@ CHUDPanel::~CHUDPanel()
 	delete m_StartSayText;
 	delete m_DebugText;
 
-	for(int i = 0; i < m_HUDElements.size(); i++)
+	for(unsigned int i = 0; i < m_HUDElements.size(); i++)
 	{
 		delete m_HUDElements[i];
 	}
 
-	for(int i = 0; i < m_Consoles.size(); i++)
+	for(unsigned int i = 0; i < m_Consoles.size(); i++)
 	{
 		delete m_Consoles[i];
 	}
@@ -241,12 +241,12 @@ void CHUDPanel::Cleanup()
 	delete m_StartSayText;
 	delete m_DebugText;
 
-	for(int i = 0; i < m_HUDElements.size(); i++)
+	for(unsigned int i = 0; i < m_HUDElements.size(); i++)
 	{
 		delete m_HUDElements[i];
 	}
 
-	for(int i = 0; i < m_Consoles.size(); i++)
+	for(unsigned int i = 0; i < m_Consoles.size(); i++)
 	{
 		delete m_Consoles[i];
 	}
@@ -283,8 +283,8 @@ void CHUDPanel::AddHelpWin(const char* Title, const char* Text)
 		return;
 
 	//Replaces '|' with '\n'
-	int size = strlen(Text);
-	for (int i = 0; i < size; i++)
+	unsigned int size = strlen(Text);
+	for (unsigned int i = 0; i < size; i++)
 	{
 		if (Text[i] == '|')
 			((char*)Text)[i] = '\n';
@@ -325,7 +325,7 @@ void CHUDPanel::Think()
 	m_ID->Update();
 
 	//Update HUD Elements
-	for (int i = 0; i < m_HUDElements.size(); i++)
+	for (unsigned int i = 0; i < m_HUDElements.size(); i++)
 	{
 		msstring d = "HUD Elements loop: ";
 		d += i;
@@ -347,7 +347,7 @@ void CHUDPanel::Think()
 	UpdateInfoWindows(m_HelpWindows); //Update Help windows
 
 	//Update Text Consoles
-	for (int i = 0; i < m_Consoles.size(); i++)
+	for (unsigned int i = 0; i < m_Consoles.size(); i++)
 	{
 		msstring d = "Text Consoles: ";
 		d += i;
@@ -464,7 +464,7 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 		msstring sTitle = READ_STRING();
 
 		std::string buffer = "";
-		for (int i = 0; i < HelpParts.size(); i++)
+		for (unsigned int i = 0; i < HelpParts.size(); i++)
 			buffer += static_cast<const char*>(HelpParts[i]);
 
 		HUD_ShowHelpWin(sTitle, buffer.c_str());

@@ -59,7 +59,7 @@ void CGameFile::ReadString(char* Data, size_t length)
 {
 	byte ReadIn = 0;
 	Data[0] = 0;
-	int i = 0;
+	int unsigned i = 0;
 	do
 	{
 		if (!Read(&ReadIn, 1))

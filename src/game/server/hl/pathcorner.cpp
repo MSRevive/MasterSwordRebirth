@@ -56,7 +56,7 @@ void CPathCorner ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -135,7 +135,7 @@ void CPathTrack ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "altpath"))
 	{
 		m_altName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);

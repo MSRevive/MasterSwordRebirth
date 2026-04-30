@@ -198,7 +198,7 @@ void NPCScript ::PlayAnim()
 		pMonster->SetAnimation(MONSTER_ANIM_ONCE, (char *)STRING(m_sActionAnim));
 	}
 	pMonster->pev->frame = 0;			   //In case the previous AND current anim is sequence 0
-	pMonster->m_fSequenceFinished = FALSE; //ditto...
+	pMonster->m_fSequenceFinished = false; //ditto...
 	SetThink(&NPCScript::AnimateThink);
 	pev->nextthink = gpGlobals->time + 0.1;
 }
@@ -327,42 +327,42 @@ void NPCScript ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "type"))
 	{
 		m_iType = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "moveanim"))
 	{
 		m_sMoveAnim = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "actionanim"))
 	{
 		m_sActionAnim = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "eventname"))
 	{
 		m_sEventName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "firewhendone"))
 	{
 		m_sFireWhenDone = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "fireonbreak"))
 	{
 		m_sFireOnBreak = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "firedelay"))
 	{
 		m_flFireDelay = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "stopai"))
 	{
 		m_fStopAI = atoi(pkvd->szValue) ? true : false;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity ::KeyValue(pkvd);

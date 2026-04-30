@@ -88,18 +88,18 @@ int CHudMessage::XPosition(float x, int width, int totalWidth)
 
 	if (x == -1)
 	{
-		xPos = (ScreenWidth - width) / 2;
+		xPos = (ScreenWidth() - width) / 2;
 	}
 	else
 	{
 		if (x < 0)
-			xPos = (1.0 + x) * ScreenWidth - totalWidth; // Alight right
+			xPos = (1.0 + x) * ScreenWidth() - totalWidth; // Alight right
 		else
-			xPos = x * ScreenWidth;
+			xPos = x * ScreenWidth();
 	}
 
-	if (xPos + width > ScreenWidth)
-		xPos = ScreenWidth - width;
+	if (xPos + width > ScreenWidth())
+		xPos = ScreenWidth() - width;
 	else if (xPos < 0)
 		xPos = 0;
 
@@ -111,18 +111,18 @@ int CHudMessage::YPosition(float y, int height)
 	int yPos;
 
 	if (y == -1) // Centered?
-		yPos = (ScreenHeight - height) * 0.5;
+		yPos = (ScreenHeight() - height) * 0.5;
 	else
 	{
 		// Alight bottom?
 		if (y < 0)
-			yPos = (1.0 + y) * ScreenHeight - height; // Alight bottom
+			yPos = (1.0 + y) * ScreenHeight() - height; // Alight bottom
 		else										  // align top
-			yPos = y * ScreenHeight;
+			yPos = y * ScreenHeight();
 	}
 
-	if (yPos + height > ScreenHeight)
-		yPos = ScreenHeight - height;
+	if (yPos + height > ScreenHeight())
+		yPos = ScreenHeight() - height;
 	else if (yPos < 0)
 		yPos = 0;
 
@@ -187,7 +187,7 @@ void CHudMessage::MessageScanNextChar(void)
 
 	if (m_parms.pMessage->effect == 1 && m_parms.charTime != 0)
 	{
-		if (m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.m_scrinfo.charWidths[m_parms.text]) <= ScreenWidth)
+		if (m_parms.x >= 0 && m_parms.y >= 0 && (m_parms.x + gHUD.m_scrinfo.charWidths[m_parms.text]) <= ScreenWidth())
 			TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.text, m_parms.pMessage->r2, m_parms.pMessage->g2, m_parms.pMessage->b2);
 	}
 }
@@ -292,7 +292,7 @@ void CHudMessage::MessageDrawScan(client_textmessage_t *pMessage, float time)
 			int next = m_parms.x + gHUD.m_scrinfo.charWidths[m_parms.text];
 			MessageScanNextChar();
 
-			if (m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth)
+			if (m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth())
 				TextMessageDrawChar(m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b);
 			m_parms.x = next;
 		}
@@ -456,7 +456,7 @@ int CHudMessage::MsgFunc_HudText(const char *pszName, int iSize, void *pbuf)
 int CHudMessage::MsgFunc_GameTitle(const char *pszName, int iSize, void *pbuf)
 {
 	m_pGameTitle = TextMessageGet("GAMETITLE");
-	if (m_pGameTitle != NULL)
+	if (m_pGameTitle != nullptr)
 	{
 		m_gameTitleTime = gHUD.m_flTime;
 

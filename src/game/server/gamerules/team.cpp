@@ -20,7 +20,6 @@ CTeam *CTeam::CreateTeam(const char *pszName, ulong ID)
 
 	//Create new team
 	CTeam* NewTeam = msnew CTeam;
-    char pszTeamName[MAX_TEAMNAME_LEN + 1];
 
 	strncpy((char*)NewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
 	NewTeam->m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
@@ -34,7 +33,7 @@ CTeam *CTeam::GetTeam(const char *pszName)
 {
 	if (!pszName || !pszName[0])
 		return NULL;
-	for (int i = 0; i < Teams.size(); i++)
+	for (unsigned int i = 0; i < Teams.size(); i++)
 		if (FStrEq(Teams[i]->TeamName(), pszName))
 			return Teams[i];
 
@@ -42,7 +41,7 @@ CTeam *CTeam::GetTeam(const char *pszName)
 }
 CTeam *CTeam::GetTeam(ulong ID)
 {
-	for (int i = 0; i < Teams.size(); i++)
+	for (unsigned int i = 0; i < Teams.size(); i++)
 		if (Teams[i]->m_ID == ID)
 			return Teams[i];
 
@@ -51,7 +50,7 @@ CTeam *CTeam::GetTeam(ulong ID)
 
 void CTeam ::ValidateUnits()
 {
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 	{
 		teamunit_t &Unit = MemberList[i];
 		if ((ulong)UTIL_PlayerByIndex(Unit.idx) != Unit.ID)
@@ -99,7 +98,7 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 	if (!pPlayer || !ExistsInList(pPlayer))
 		return;
 
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 		if (GetPlayer(i) == pPlayer)
 		{
 			MemberList.erase(i);
@@ -122,17 +121,17 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 {
 	if (!pPlayer)
-		return FALSE;
+		return false;
 	ValidateUnits();
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 		if (MemberList[i].idx == pPlayer->entindex() && MemberList[i].ID == (ulong)pPlayer)
-			return TRUE;
-	return FALSE;
+			return true;
+	return false;
 }
 CTeam::~CTeam()
 {
 	ValidateUnits();
-	for (int i = 0; i < MemberList.size(); i++)
+	for (unsigned int i = 0; i < MemberList.size(); i++)
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(MemberList[i].idx);
 		if (!pPlayer || (ulong)pPlayer != MemberList[i].ID)
@@ -161,15 +160,15 @@ void CTeam ::SetSolidMembers(BOOL fSolid)
 BOOL SameTeam(CBaseEntity *pObject1, CBaseEntity *pObject2)
 {
 	//Original:
-	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return FALSE;
-	if( pObject1->TeamID() == pObject2->TeamID() ) return TRUE;
-	return FALSE;*/
+	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return false;
+	if( pObject1->TeamID() == pObject2->TeamID() ) return true;
+	return false;*/
 
 	if (!pObject1->TeamID()[0] || !pObject2->TeamID()[0])
-		return FALSE;
+		return false;
 	if (strcmp(pObject1->TeamID(), pObject2->TeamID()) == 0)
-		return TRUE; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
-	return FALSE;
+		return true; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
+	return false;
 }
 /*int CBaseEntity::TeamID( void ) { return m_pTeam ? m_pTeam->TeamID() : -1; }
 void CBaseEntity::SetTeam( CTeam *pTeam ) {

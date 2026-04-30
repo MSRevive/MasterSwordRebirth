@@ -35,7 +35,6 @@
 #include "action.h"
 #include "menu.h"
 
-#define MAX_MENU_STRING 512
 //char m.cMenuText[MAX_MENU_STRING];
 char g_szPrelocalisedMenuString[MAX_MENU_STRING];
 
@@ -66,7 +65,7 @@ void CHudMenu ::InitHUDData(void)
 void CHudMenu ::Reset(void)
 {
 	g_szPrelocalisedMenuString[0] = 0;
-	m_fWaitingForMore = FALSE;
+	m_fWaitingForMore = false;
 }
 
 int CHudMenu ::VidInit(void)
@@ -95,14 +94,14 @@ int CHudMenu ::Draw(float flTime)
 
 	// count the number of newlines
 	int nlc = 0;
-	for (int i = 0; i < MAX_MENU_STRING && m.cMenuText[i] != '\0'; i++)
+	for (unsigned int i = 0; i < MAX_MENU_STRING && m.cMenuText[i] != '\0'; i++)
 	{
 		if (m.cMenuText[i] == '\n')
 			nlc++;
 	}
 
 	// center it
-	int y = (ScreenHeight / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
+	int y = (ScreenHeight() / 2) - ((nlc / 2) * 12) - 40; // make sure it is above the say text
 	int x = 20;
 	int i = 0;
 
@@ -145,7 +144,7 @@ void Menu_ServerMenuCallback(int idx, struct TCallbackMenu *pcbMenu)
 // takes four values:
 //		short: a bitfield of keys that are valid input
 //		char : the duration, in seconds, the menu should stay up. -1 means is stays until something is chosen.
-//		byte : a boolean, TRUE if there is more string yet to be received before displaying the menu, FALSE if it's the last string
+//		byte : a boolean, true if there is more string yet to be received before displaying the menu, false if it's the last string
 //		string: menu string to display
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudMenu ::MsgFunc_ShowMenu(const char *pszName, int iSize, void *pbuf)
@@ -204,7 +203,7 @@ int CHudMenu ::MsgFunc_ShowMenu(const char *pszName, int iSize, void *pbuf)
 }
 int CHudMenu ::ShowMenu(int bitsValidSlots, const char *pcMenuText, MenuCallback CallBack, MenuType mtMenuType, float ShutOffTime)
 {
-	//	if( !pcMenuText ) return FALSE;
+	//	if( !pcMenuText ) return false;
 	m_fOfferedNextMenu = true;
 	m_bitsValidSlots = bitsValidSlots;
 	 strncpy(m.cMenuText,  pcMenuText, sizeof(m.cMenuText) );
@@ -213,7 +212,7 @@ int CHudMenu ::ShowMenu(int bitsValidSlots, const char *pcMenuText, MenuCallback
 	m_flShutoffTime = ShutOffTime;
 	m_fMenuDisplayed = 1;
 	m_iFlags |= HUD_ACTIVE;
-	return TRUE;
+	return true;
 }
 
 //Hides a certain menu only if that menu is open

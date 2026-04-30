@@ -1,9 +1,17 @@
 //Scripted effects
 
 //Flags
-#define SCRIPTEFFECT_NORMAL (0)
-#define SCRIPTEFFECT_PLAYERACTION (1 << 0)
-#define SCRIPTEFFECT_NOSTACK (1 << 1)
+
+constexpr const char* EFFECT_ID		= "game.effect.id";
+constexpr const char* EFFECT_FLAGS	= "game.effect.flags";
+
+
+enum scripteffect_e {
+	SCRIPTEFFECT_NORMAL = (0),
+	SCRIPTEFFECT_PLAYERACTION = (1 << 0),
+	SCRIPTEFFECT_NOSTACK = (1 << 1)
+};
+
 
 //Interface for monsters, items, etc.
 /*class IScriptedEffect

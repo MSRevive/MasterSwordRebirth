@@ -254,7 +254,7 @@ void Slider2::addIntChangeSignal(IntChangeSignal* s)
 
 void Slider2::fireIntChangeSignal()
 {	
-	for(int i=0;i<_intChangeSignalDar.getCount();i++)
+	for(unsigned int i=0;i<_intChangeSignalDar.getCount();i++)
 	{
 		_intChangeSignalDar[i]->intChanged(getValue(),this);
 	}

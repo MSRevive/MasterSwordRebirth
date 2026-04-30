@@ -78,7 +78,8 @@ enum speech_type
 	SPEECH_LOCAL,
 	SPEECH_PARTY
 };
-#define SPEECH_LOCAL_RANGE 300
+
+constexpr float SPEECH_LOCAL_RANGE = 300;
 
 enum gender_e
 {
@@ -200,22 +201,28 @@ struct random_monster_t
 //NOV2014_20 - Thothie msmonster_random [end]
 
 //Frame conditions
-#define FC_STEP (1 << 1)  //Monster walked up a step this frame
-#define FC_JUMP (1 << 2)  //Monster began a jump this frame
-#define FC_AVOID (1 << 3) //Monster is avoiding an object this frame
+
+enum frame_condition_monster_e {
+	FC_STEP = (1 << 1),  //Monster walked up a step this frame
+	FC_JUMP = (1 << 2),  //Monster began a jump this frame
+	FC_AVOID = (1 << 3) //Monster is avoiding an object this frame
+};
 
 //General Conditions (Added to those defined in schedule.h)
-#define MONSTER_ROAM (1 << 23)			// Monster should roam around
-#define MONSTER_HASMOVEDEST (1 << 24)	// vMoveDest is valid
-#define MONSTER_TRADING (1 << 25)		// NPC is trading with a player
-#define MONSTER_REFLECTIVEDMG (1 << 26) // Damage is reflected back to attacker
-#define MONSTER_NOAI (1 << 27)			// Don't normal script events
-#define MONSTER_OPENCONTAINER (1 << 28) // Player is looking inside a pack
-#define MONSTER_BLIND (1 << 29)			// MAR2008b - Monster is blind
-#define MONSTER_INVISIBLE (1 << 30)		// MAR2008b - Monster is invisible
 
-#define MAX_ENEMYLIST 12
-#define MAX_NPC_HANDS 3
+enum monster_conditions_e {
+	MONSTER_ROAM = (1 << 23),// Monster should roam around
+	MONSTER_HASMOVEDEST = (1 << 24),// vMoveDest is valid
+	MONSTER_TRADING = (1 << 25),// NPC is trading with a player
+	MONSTER_REFLECTIVEDMG = (1 << 26),// Damage is reflected back to attacker
+	MONSTER_NOAI = (1 << 27),// Don't normal script events
+	MONSTER_OPENCONTAINER = (1 << 28),// Player is looking inside a pack
+	MONSTER_BLIND = (1 << 29),// MAR2008b - Monster is blind
+	MONSTER_INVISIBLE = (1 << 30),// MAR2008b - Monster is invisible
+};
+
+constexpr int MAX_ENEMYLIST = 12;
+constexpr int MAX_NPC_HANDS = 3;
 
 class CMSMonster : public CBaseMonster
 {
@@ -267,9 +274,9 @@ public:
 		m_HPReq_min,  //Thothie AUG2007a - adding optional req total hp on server to spawn monster
 		m_HPReq_max,  //Thothie FEB2011_22 - adding option for "min;max" hpreq
 		m_ReqPlayers, //Thothie AUG2007a - adding optional REQ players to spawn monster
-		m_nRndMobs,	  //NOV2014_20 - Thothie msmonster_random
 		m_HPReq_useavg;
 
+	unsigned int m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
 	float m_HPMulti, //Thothie SEP2007a - multiply HP by this amount
 		m_DMGMulti;	 //Thothie SEP2007a - multiply DMG by this amount
 
@@ -318,7 +325,7 @@ public:
 	//a relationship better than R_NO)
 	EHANDLE m_hEnemyList[MAX_ENEMYLIST],
 		m_LastEnemy;
-	int m_EnemyListNum;
+	unsigned int m_EnemyListNum;
 
 	CBaseBody *Body;								//If this monster uses body parts
 	CItemList Gear;									//This monster's gear
@@ -357,7 +364,7 @@ public:
 	virtual float MaxMP() { return m_MaxMP; }
 	virtual float GetDefaultMoveProximity() { return m_Width * 1.1; }
 
-	BOOL IsAlive() { return pev ? pev->deadflag == DEAD_NO : FALSE; }
+	BOOL IsAlive() { return pev ? pev->deadflag == DEAD_NO : false; }
 	virtual void CancelAttack();
 	//virtual void Step( );
 	//virtual void Jump( );
@@ -429,8 +436,8 @@ public:
 	int MSProperties();
 	float HearingSensitivity(void) { return m_HearingSensitivity; }
 	int ObjectCaps(void) { return CBaseMonster ::ObjectCaps() | FCAP_IMPULSE_USE; }
-	BOOL HasHumanGibs() { return TRUE; }
-	BOOL ShouldFadeOnDeath(void) { return FALSE; }
+	BOOL HasHumanGibs() { return true; }
+	BOOL ShouldFadeOnDeath(void) { return false; }
 
 #ifdef VALVE_DLL
 	virtual float GiveHP(float flAmount)
@@ -456,7 +463,7 @@ public:
 	virtual void Used(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 	virtual void Trade();												 // Handle trading with others
 	virtual bool AcceptOffer();											 // Accept an offer from a player or monster
-	virtual BOOL SkinMonster(CMSMonster *pDeadMonster) { return FALSE; } //Skin other monsters
+	virtual BOOL SkinMonster(CMSMonster *pDeadMonster) { return false; } //Skin other monsters
 	virtual tradeinfo_t *TradeItem(tradeinfo_t *tiTradeInfo);			 // Trade an item
 	virtual void Attacked(CBaseEntity *pAttacker, damage_t &Damage);
 	virtual void Seen(CMSMonster *pMonster) {}

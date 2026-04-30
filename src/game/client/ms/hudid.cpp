@@ -50,7 +50,7 @@ void CHudID::Reset(void)
 	m_iFlags |= HUD_ACTIVE;
 	TimeDecAlpha = 0;
 	Alpha = 0;
-	pActiveInfo = pDrawInfo = NULL;
+	pActiveInfo = pDrawInfo = nullptr;
 }
 void CHudID ::InitHUDData(void)
 {
@@ -81,10 +81,10 @@ int CHudID::Draw(float flTime)
 	GetConsoleStringSize( pDrawInfo->Name, &TextWidth, &TextHeight );
 
 	int Y_START;
-	if ( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 128;
+	if ( ScreenHeight() >= 480 )
+		Y_START = ScreenHeight() - 128;
 	else
-		Y_START = ScreenHeight - 64;
+		Y_START = ScreenHeight() - 64;
 
 	int x = 5;
 	int y = Y_START - TextHeight; // draw along bottom of screen
@@ -148,7 +148,7 @@ int CHudID::MsgFunc_EntInfo(const char *pszName, int iSize, void *pbuf)
 	EntData.Type = (EntType)READ_BYTE();
 
 	//Search for a current entry with this info
-	for (int i = 0; i < player.m_EntInfo.size(); i++)
+	for (unsigned int i = 0; i < player.m_EntInfo.size(); i++)
 		if (player.m_EntInfo[i].entindex == EntData.entindex)
 		{
 			player.m_EntInfo[i] = EntData;
@@ -168,7 +168,7 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 	Vector vViewAngle;
 	gEngfuncs.GetViewAngles(vViewAngle);
 	cl_entity_s *clplayer = gEngfuncs.GetLocalPlayer();
-	AngleVectors(vViewAngle, &vForward, NULL, NULL);
+	AngleVectors(vViewAngle, &vForward, nullptr, nullptr);
 	Vector vecSrc = clplayer->origin, vecEnd,
 		   viewOfs;
 	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(viewOfs);
@@ -179,7 +179,7 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 
 	physent_t *pPhyplayer = gEngfuncs.pEventAPI->EV_GetPhysent(clplayer->index);
 	if (!pPhyplayer)
-		return NULL;
+		return nullptr;
 
 	// Now add in all of the players.
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(clplayer->index - 1);
@@ -190,10 +190,10 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 	if (tr.fraction < 1.0 && tr.ent)
 	{
 		physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
-		for (int i = 0; i < player.m_EntInfo.size(); i++)
+		for (unsigned int i = 0; i < player.m_EntInfo.size(); i++)
 			if (player.m_EntInfo[i].entindex == pe->info)
 				return &player.m_EntInfo[i];
 	}
 
-	return NULL;
+	return nullptr;
 }

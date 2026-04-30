@@ -76,7 +76,7 @@
 #define MSG_H YRES(60)
 
 // Creation
-CSpawnPanel::CSpawnPanel(Panel *pParent) : CMenuPanel(1, false, 0, 0, ScreenWidth, ScreenHeight)
+CSpawnPanel::CSpawnPanel(Panel *pParent) : CMenuPanel(1, false, 0, 0, ScreenWidth(), ScreenHeight())
 {
 	// Get the scheme used for the Titles
 	CSchemeManager *pSchemes = gViewPort->GetSchemeManager();

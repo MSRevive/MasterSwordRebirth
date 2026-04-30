@@ -11,16 +11,18 @@
 
 #include "cl_entity.h"
 
-#define INSET_OFF 0
-#define INSET_CHASE_FREE 1
-#define INSET_IN_EYE 2
-#define INSET_MAP_FREE 3
-#define INSET_MAP_CHASE 4
+enum {
+	INSET_OFF = 0,
+	INSET_CHASE_FREE = 1,
+	INSET_IN_EYE = 2,
+	INSET_MAP_FREE = 3,
+	INSET_MAP_CHASE = 4
+};
 
-#define MAX_SPEC_HUD_MESSAGES 8
 
-#define OVERVIEW_TILE_SIZE 128 // don't change this
-#define OVERVIEW_MAX_LAYERS 1
+constexpr int MAX_SPEC_HUD_MESSAGES = 8;
+constexpr int OVERVIEW_TILE_SIZE = 128;// don't change this
+constexpr int OVERVIEW_MAX_LAYERS = 1;
 
 //-----------------------------------------------------------------------------
 // Purpose: Handles the drawing of the spectator stuff (camera & top-down map and all the things on it )
@@ -29,7 +31,7 @@
 typedef struct overviewInfo_s
 {
 	char map[64];  // cl.levelname or empty
-	vec3_t origin; // center of map
+	Vector origin; // center of map
 	float zoom;	   // zoom of map images
 	int layers;	   // how may layers do we have
 	float layersHeights[OVERVIEW_MAX_LAYERS];
@@ -50,7 +52,7 @@ typedef struct overviewEntity_s
 	double killTime;
 } overviewEntity_t;
 
-#define MAX_OVERVIEW_ENTITIES 128
+constexpr int MAX_OVERVIEW_ENTITIES = 128;
 
 class CHudSpectator : public CHudBase
 {
@@ -91,7 +93,7 @@ public:
 	int m_iSpectatorNumber;
 
 	float m_mapZoom;	// zoom the user currently uses
-	vec3_t m_mapOrigin; // origin where user rotates around
+	Vector m_mapOrigin; // origin where user rotates around
 	cvar_t *m_drawnames;
 	cvar_t *m_drawcone;
 	cvar_t *m_drawstatus;
@@ -100,11 +102,11 @@ public:
 
 	qboolean m_chatEnabled;
 
-	vec3_t m_cameraOrigin; // a help camera
-	vec3_t m_cameraAngles; // and it's angles
+	Vector m_cameraOrigin; // a help camera
+	Vector m_cameraAngles; // and it's angles
 
 private:
-	vec3_t m_vPlayerPos[MAX_PLAYERS];
+	Vector m_vPlayerPos[MAX_PLAYERS];
 	HLSPRITE m_hsprPlayerBlue;
 	HLSPRITE m_hsprPlayerRed;
 	HLSPRITE m_hsprPlayer;

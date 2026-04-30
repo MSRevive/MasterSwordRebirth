@@ -438,7 +438,7 @@ For debugging, draw a box around a player made out of particles
 void UTIL_ParticleBox(CBasePlayer* player, float* mins, float* maxs, float life, unsigned char r, unsigned char g, unsigned char b)
 {
 	int i;
-	vec3_t mmin, mmax;
+	Vector mmin, mmax;
 
 	for (i = 0; i < 3; i++)
 	{
@@ -461,7 +461,7 @@ void UTIL_ParticleBoxes(void)
 	int idx;
 	physent_t* pe;
 	cl_entity_t* player;
-	vec3_t mins, maxs;
+	Vector mins, maxs;
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
 
@@ -509,7 +509,7 @@ physent_t* MSUTIL_EntityByIndex(int playerindex)
 		}
 	}
 	gEngfuncs.pEventAPI->EV_PopPMStates();
-	return NULL;
+	return nullptr;
 }
 /*
 =====================
@@ -595,7 +595,8 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	static int PreserveMask = PLAYER_MOVE_RUNNING | PLAYER_MOVE_ATTACKING; //These are client-side bits to be saved
 	int PreserveBits = (player.m_StatusFlags & PreserveMask);			   //Save the client-side bits
 
-	player.m_StatusFlags = ClearBits(from->client.iuser3, PreserveMask); //Copy all the flags except the client-side ones
+	ClearBits(from->client.iuser3, PreserveMask); //clear flags execpt client side ones
+	player.m_StatusFlags = from->client.iuser3;  //Copy all the flags except the client-side ones
 	SetBits(player.m_StatusFlags, PreserveBits);						 //Copy the client-side bits back over
 
 	to->playerstate.iuser3 = from->playerstate.iuser3;
@@ -665,7 +666,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_afButtonLast = KeyHistory[0].Buttons; //player.pev->button;
 
 	// Wipe it so we can't use it after this frame
-	g_finalstate = NULL;
+	g_finalstate = nullptr;
 }
 /*
 =====================
@@ -730,7 +731,7 @@ void ShowWeaponDesc(CGenericItem* pItem)
 	msg.fadein = 2.0;
 	msg.holdtime = 5.0;
 	msg.fadeout = 3.0;
-	msg.pName = NULL;
+	msg.pName = nullptr;
 	msg.pMessage = cDescString;
 	gHUD.m_Message.MessageAdd(msg);
 }
@@ -1028,11 +1029,11 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		msstring Event = READ_STRING();
-		int numParams = READ_BYTE();
+		unsigned int numParams = READ_BYTE();
 
 		msstringlist Params;
 		Params.clear();
-		for (int i = 0; i < numParams; i++)
+		for (unsigned int i = 0; i < numParams; i++)
 			Params.add(READ_STRING());
 
 		if (pItem)
@@ -1093,7 +1094,7 @@ int __MsgFunc_SetProp(const char* pszName, int iSize, void* pbuf)
 			//Memory dellocation errors when using '.erase()', so I'm now using this loop
 			int idx = READ_BYTE();
 			msstringlist newSpells;
-			for (int i = 0; i < player.m_SpellList.size(); i++)
+			for (unsigned int i = 0; i < player.m_SpellList.size(); i++)
 				if (i != idx)
 					newSpells.add(player.m_SpellList[i]); //Add all spells to the new list except the one to erase
 			player.m_SpellList = newSpells;				  //Overwrite the player spells with the new list
@@ -1126,8 +1127,8 @@ void Player_ToggleInventory()
 		return;
 	}
 
-	CGenericItem* pWearable = NULL; //Fallback, in case a pack isn't found
-	for (int i = 0; i < player.Gear.size(); i++)
+	CGenericItem* pWearable = nullptr; //Fallback, in case a pack isn't found
+	for (unsigned int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem* pPack = player.Gear[i];
 		if (FBitSet(pPack->MSProperties(), ITEM_CONTAINER) && pPack->m_Location > ITEMPOS_HANDS)
@@ -1231,7 +1232,7 @@ void __CmdFunc_DynamicNPC(void)
 	}
 
 	int iBitsValid = 0;
-	for (int i = 0; i < NPCList.size(); i++)
+	for (unsigned int i = 0; i < NPCList.size(); i++)
 	{
 		const char* arg = UTIL_VarArgs("%i. %s\n", i + 1, NPCList[i].c_str());
 		strncat(MenuText, arg, strlen(arg));
@@ -1299,7 +1300,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	case 1: //Killed
 		if (player.m_CharacterState == CHARSTATE_UNLOADED)
 			break;
-		player.Killed(NULL, NULL);
+		player.Killed(nullptr, NULL);
 		break;
 
 	case 2: //[OPEN]
@@ -1380,7 +1381,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			//Set up a variable to switch back
 			if (g_SwitchToHand == -1)
 				g_SwitchToHand = player.m_CurrentHand;
-			if (player.SwitchHands(iHand, FALSE))
+			if (player.SwitchHands(iHand, false))
 				player.BlockButton(IN_ATTACK);
 			else
 				g_SwitchToHand = -1;
@@ -1476,7 +1477,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 				msg.fadein = 0.01;
 				msg.holdtime = 3.0;
 				msg.fadeout = 1.0;
-				msg.pName = NULL;
+				msg.pName = nullptr;
 				msg.fxtime = 4.0;
 
 				static char msgtext[256];
@@ -1499,7 +1500,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 
 	case 21: //Retrieve all quickslots (Sent at spawn)
 	{
-		for (int i = 0; i < MAX_QUICKSLOTS; i++)
+		for (unsigned int i = 0; i < MAX_QUICKSLOTS; i++)
 		{
 			quickslot_t& QuickSlot = player.m_QuickSlots[i];
 			QuickSlot.Active = READ_BYTE() ? true : false;

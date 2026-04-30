@@ -531,7 +531,7 @@ void CAngelScriptManager::PrepareForLevelChange()
                   currentSize, totalDestroyed, totalDetected);
     
     // Force multiple full GC cycles to ensure everything is cleaned up
-    for (int i = 0; i < 3; i++)
+    for (unsigned int i = 0; i < 3; i++)
     {
         m_pEngine->GarbageCollect(asGC_FULL_CYCLE | asGC_DESTROY_GARBAGE);
     }
@@ -592,7 +592,7 @@ void CAngelScriptManager::ReinitializeForLevelChange()
     
     // Run final garbage collection before destroying engine
     MS_ANGEL_INFO("  Running final garbage collection...");
-    for (int i = 0; i < 5; i++)  // Extra cycles to be thorough
+    for (unsigned int i = 0; i < 5; i++)  // Extra cycles to be thorough
     {
         m_pEngine->GarbageCollect(asGC_FULL_CYCLE | asGC_DESTROY_GARBAGE | asGC_DETECT_GARBAGE);
     }

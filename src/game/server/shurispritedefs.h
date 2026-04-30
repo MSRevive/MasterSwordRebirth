@@ -1,6 +1,6 @@
 //Shuriken FEB2008a Sprite crap
-#define INV_SPRITE_NUM 77
-#define INV_SPRITE "allitems"
+constexpr unsigned int INV_SPRITE_NUM = 77;
+constexpr const char* INV_SPRITE = "allitems";
 
 const char *SpriteArray[INV_SPRITE_NUM] = {
 	"apple",
@@ -84,7 +84,7 @@ const char *SpriteArray[INV_SPRITE_NUM] = {
 //Shuriken FEB2008a to check old sprite names and get their frame
 int SpriteIsInArray(const char *SpriteName)
 {
-	for (int i = 0; i < INV_SPRITE_NUM; i++)
+	for (unsigned int i = 0; i < INV_SPRITE_NUM; i++)
 	{
 		if (strcmp(SpriteName, SpriteArray[i]) == 0)
 		{

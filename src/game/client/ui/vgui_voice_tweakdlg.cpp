@@ -175,8 +175,8 @@ void CVoiceVGUITweakDlg::Open()
 
 	g_bTweakDlgOpen = true;
 
-	m_DlgWidth = ScreenWidth;
-	m_DlgHeight = ScreenHeight;
+	m_DlgWidth = ScreenWidth();
+	m_DlgHeight = ScreenHeight();
 
 	m_pVoiceTweak = gEngfuncs.pVoiceTweak;
 
@@ -184,7 +184,7 @@ void CVoiceVGUITweakDlg::Open()
 	m_pVoiceTweak->StartVoiceTweakMode();
 
 	// Set our size.
-	setPos((ScreenWidth - m_DlgWidth) / 2, (ScreenHeight - m_DlgHeight) / 2);
+	setPos((ScreenWidth() - m_DlgWidth) / 2, (ScreenHeight() - m_DlgHeight) / 2);
 	setSize(m_DlgWidth, m_DlgHeight);
 
 	int curY = ITEM_BORDER;

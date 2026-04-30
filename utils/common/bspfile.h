@@ -308,7 +308,7 @@ typedef struct epair_s
 
 typedef struct
 {
-	vec3_t		origin;
+	Vector 		origin;
 	int			firstbrush;
 	int			numbrushes;
 	epair_t		*epairs;
@@ -325,7 +325,7 @@ char 	*ValueForKey (entity_t *ent, char *key);
 // will return "" if not present
 
 vec_t	FloatForKey (entity_t *ent, char *key);
-void 	GetVectorForKey (entity_t *ent, char *key, vec3_t vec);
+void 	GetVectorForKey (entity_t *ent, char *key, Vector  vec);
 
 epair_t *ParseEpair (void);
 

@@ -57,7 +57,7 @@ void CBaseEntity::SetFollow(CBaseEntity *pTarget, int Flags)
 
 bool CBaseEntity::CanDamage(CBaseEntity *pOther)
 {
-	return (pOther->pev->takedamage > DAMAGE_NO) &&	   //The entity can take damage
+	return (static_cast<int>(pOther->pev->takedamage) > DAMAGE_NO) &&	   //The entity can take damage
 		   (!FBitSet(pOther->pev->flags, FL_GODMODE)); //The entity is not invulnerable;
 }
 

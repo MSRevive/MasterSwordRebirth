@@ -1,5 +1,7 @@
 //Master Sword
-#define MAX_MENU_STRING 512
+#include "sharedmenu.h"
+
+constexpr int MAX_MENU_STRING = 512;
 
 enum MenuType
 { //menutypes
@@ -11,7 +13,7 @@ enum MenuType
 	MENU_DYNAMICNPC,
 };
 //------------
-#include "sharedmenu.h"
+
 class CHudMenu : public CHudBase
 {
 public:
@@ -29,11 +31,12 @@ public:
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
 	bool m_fOfferedNextMenu;
+	char Name[32] = "CHudMenu";
 
 	//Master Sword
 	TCallbackMenu m;
 
-	int ShowMenu(int bitsValidSlots, const char *pszMenuString, MenuCallback CallBack, MenuType mtMenuType = MENU_NORMAL, float ShutOffTime = 0);
+	int ShowMenu(int bitsValidSlots, const char *pszMenuString, MenuCallback CallBack, MenuType mtMenuType = MenuType::MENU_NORMAL, float ShutOffTime = 0);
 	bool HideMyMenu(int mtMenuType);
 	//------------
 };

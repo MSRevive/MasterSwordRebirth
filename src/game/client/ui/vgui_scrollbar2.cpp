@@ -189,7 +189,7 @@ void ScrollBar2::setRange(int min, int max)
 
 void ScrollBar2::fireIntChangeSignal()
 {
-	for (int i = 0; i < _intChangeSignalDar.getCount(); i++)
+	for (unsigned int i = 0; i < _intChangeSignalDar.getCount(); i++)
 	{
 		_intChangeSignalDar[i]->intChanged(_slider->getValue(), this);
 	}
@@ -280,7 +280,7 @@ void ScrollBar2::validate()
 	{
 		int buttonOffset = 0;
 
-		for (int i = 0; i < 2; i++)
+		for (unsigned int i = 0; i < 2; i++)
 		{
 			if (_button[i] != null)
 			{

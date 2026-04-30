@@ -13,6 +13,7 @@ public:
 	void Shutdown(void);
 	void Reload(void);
 	int MsgFunc_Music(const char* pszName, int iSize, void* pbuf);
+	char Name[32] = "CHudMusic";
 
 private:
 	CMusicSystem m_MP3;

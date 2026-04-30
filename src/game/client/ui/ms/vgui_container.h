@@ -16,7 +16,7 @@
 
 #define ITEM_CONTAINER_X (GEARPNL_X + GEARPNL_SIZE_X) + CONTAINERMENU_SPACER_X
 #define ITEM_CONTAINER_Y GEARPNL_Y
-#define ITEM_CONTAINER_SIZE_X (ScreenWidth - (ITEM_CONTAINER_X + CONTAINERMENU_SPACER_X))
+#define ITEM_CONTAINER_SIZE_X (ScreenWidth() - (ITEM_CONTAINER_X + CONTAINERMENU_SPACER_X))
 #define ITEM_CONTAINER_SIZE_Y YRES(340)
 
 #define ACTBTN_SIZE_X XRES(130)
@@ -61,9 +61,9 @@ class VGUI_InventoryPanel : public CTransparentPanel, public VGUI_ItemCallbackPa
 {
 public:
 	mslist<VGUI_Inv_GearItem*> GearItemButtons;
-	int GearItemButtonTotal;
+	unsigned int GearItemButtonTotal;
 	int m_Selected;
-	int m_InitializedItemButtons;
+	unsigned int m_InitializedItemButtons;
 	VGUI_ItemCallbackPanel *m_pCallbackPanel;
 	CTFScrollPanel *m_Scroll;
 	bool mbScrollHighlighted;
@@ -71,7 +71,7 @@ public:
 	VGUI_InventoryPanel(VGUI_ItemCallbackPanel *pCallbackPanel, Panel *pParent);
 
 	virtual VGUI_Inv_GearItem *AddGearItem(gearitem_t &GearItem);
-	virtual void Select(int Idx);
+	virtual void Select(unsigned int Idx);
 	virtual void Reset();
 
 	//Callbacks
@@ -118,7 +118,7 @@ public:
 	virtual void Close(void);
 	virtual void Update(void);
 	virtual void Initialize(void);
-	virtual bool SlotInput(int iSlot);
+	virtual bool SlotInput(unsigned int iSlot);
 
 	//Callbacks
 	virtual void ItemHighlighted(void* pData);

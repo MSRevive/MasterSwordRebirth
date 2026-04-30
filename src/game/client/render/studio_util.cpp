@@ -11,6 +11,10 @@
 #include "const.h"
 #include "com_model.h"
 #include "studio_util.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
 
 // angles index are not the same as ROLL, PITCH, YAW
 

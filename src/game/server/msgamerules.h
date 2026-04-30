@@ -40,7 +40,7 @@ public:
 	virtual BOOL IsCoOp( void );
 
 // Client connection/disconnection
-	// If ClientConnected returns FALSE, the connection is rejected and the user is provided the reason specified in
+	// If ClientConnected returns false, the connection is rejected and the user is provided the reason specified in
 	//  svRejectReason
 	// Only the client's name and remote address are provided to the dll for verification.
 	virtual BOOL ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ] );
@@ -107,7 +107,7 @@ public:
 	virtual const char *GetTeamID( CBaseEntity *pEntity ) {return "";}
 	virtual int PlayerRelationship( CBaseEntity *pPlayer, CBaseEntity *pTarget );
 
-	virtual BOOL PlayTextureSounds( void ) { return FALSE; }
+	virtual BOOL PlayTextureSounds( void ) { return false; }
 	virtual BOOL PlayFootstepSounds( CBasePlayer *pl, float fvol );
 
 // Monsters

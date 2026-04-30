@@ -33,7 +33,7 @@ bool FileSystem_Init()
 	szFSDir[0] = '\0';
 
 #ifdef ISCLIENT
-	if(gEngfuncs.COM_ExpandFilename(szFsModule, szFSDir, sizeof(szFSDir)) == FALSE)
+	if(gEngfuncs.COM_ExpandFilename(szFsModule, szFSDir, sizeof(szFSDir)) == false)
 	{
 		return false;
 	}

@@ -17,8 +17,6 @@
 	#include "cl_util.h"
 #endif
 
-#define DrinkableCheck if( !DrinkData ) return
-
 void CGenericItem::RegisterDrinkable( )
 {
 	if( DrinkData ) delete DrinkData;
@@ -36,9 +34,9 @@ void CGenericItem::RegisterDrinkable( )
 
 	SetBits( Properties, ITEM_DRINKABLE );
 }
-void CGenericItem::Drink( )
-{
-	DrinkableCheck;
+void CGenericItem::Drink( ) { 
+
+	if (!DrinkData) return;
 
 	//The server *only* calls this when told, from the client
 	if( DrinkData->fDrinking || !m_pOwner )
@@ -61,7 +59,7 @@ void CGenericItem::Drink( )
 }
 void CGenericItem::DrinkThink( )
 {
-	DrinkableCheck;
+	if (!DrinkData) return;
 
 	if( !DrinkData->fDrinking ) return;
 
@@ -95,14 +93,14 @@ void CGenericItem::DrinkThink( )
 }
 void CGenericItem::DrinkCancel( )
 {
-	DrinkableCheck;
+	if (!DrinkData) return;
 
 	DrinkData->fDrinking = false;
 }
 
 void CGenericItem::DrinkSetAmt( int iAmount )
 {
-	DrinkableCheck;
+	if (!DrinkData) return;
 
 	Quality = iAmount;
 }

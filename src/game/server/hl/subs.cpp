@@ -71,7 +71,7 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		pev->netname = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -80,7 +80,6 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 BOOL CBaseDMStart::IsTriggered(CBaseEntity *pEntity)
 {
 	BOOL master = UTIL_IsMasterTriggered(pev->netname, pEntity);
-
 	return master;
 }
 
@@ -102,7 +101,7 @@ void CBaseEntity::UpdateOnRemove(void)
 		{
 			// this entity was a LinkEnt in the world node graph, so we must remove it from
 			// the graph since we are removing it from the world.
-			for (int i = 0; i < WorldGraph.m_cLinks; i++)
+			for (unsigned int i = 0; i < WorldGraph.m_cLinks; i++)
 			{
 				if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev)
 				{
@@ -161,12 +160,12 @@ void CBaseDelay ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "delay"))
 	{
 		m_flDelay = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -395,22 +394,22 @@ void CBaseToggle::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "lip"))
 	{
 		m_flLip = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		m_sMaster = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "distance"))
 	{
 		m_flMoveDistance = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -469,9 +468,9 @@ void CBaseToggle ::LinearMoveDone(void)
 BOOL CBaseToggle ::IsLockedByMaster(void)
 {
 	if (m_sMaster && !UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 /*
@@ -560,7 +559,7 @@ float CBaseToggle ::AxisDelta(int flags, const Vector &angle1, const Vector &ang
 =============
 FEntIsVisible
 
-returns TRUE if the passed entity is visible to caller, even if not infront ()
+returns true if the passed entity is visible to caller, even if not infront ()
 =============
 */
 BOOL FEntIsVisible(
@@ -574,10 +573,10 @@ BOOL FEntIsVisible(
 	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, ENT(pev), &tr);
 
 	if (tr.fInOpen && tr.fInWater)
-		return FALSE; // sight line crossed contents
+		return false; // sight line crossed contents
 
 	if (tr.flFraction == 1)
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }

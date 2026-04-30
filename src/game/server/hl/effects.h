@@ -15,20 +15,69 @@
 #ifndef EFFECTS_H
 #define EFFECTS_H
 
-#define SF_BEAM_STARTON 0x0001
-#define SF_BEAM_TOGGLE 0x0002
-#define SF_BEAM_RANDOM 0x0004
-#define SF_BEAM_RING 0x0008
-#define SF_BEAM_SPARKSTART 0x0010
-#define SF_BEAM_SPARKEND 0x0020
-#define SF_BEAM_DECALS 0x0040
-#define SF_BEAM_SHADEIN 0x0080
-#define SF_BEAM_SHADEOUT 0x0100
-#define SF_BEAM_TEMPORARY 0x8000
+enum {
+	SF_BEAM_STARTON = 0x0001,
+	SF_BEAM_TOGGLE = 0x0002,
+	SF_BEAM_RANDOM = 0x0004,
+	SF_BEAM_RING = 0x0008,
+	SF_BEAM_SPARKSTART = 0x0010,
+	SF_BEAM_SPARKEND = 0x0020,
+	SF_BEAM_DECALS = 0x0040,
+	SF_BEAM_SHADEIN = 0x0080,
+	SF_BEAM_SHADEOUT = 0x0100,
+	SF_BEAM_TEMPORARY = 0x8000,
+	SF_SPRITE_STARTON = 0x0001,
+	SF_SPRITE_ONCE = 0x0002,
+	SF_SPRITE_TEMPORARY = 0x8000,
+	SF_GIBSHOOTER_REPEATABLE = 1, // allows a gibshooter to be refired
+	SF_FUNNEL_REVERSE = 1, // funnel effect repels particles instead of attracting them.
+	SF_BUBBLES_STARTOFF = 0x0001,
+	SF_BLOOD_RANDOM = 0x0001,
+	SF_BLOOD_STREAM = 0x0002,
+	SF_BLOOD_PLAYER = 0x0004,
+	SF_BLOOD_DECAL = 0x0008,
+	SF_SHAKE_EVERYONE = 0x0001, // Don't check radius
+	// UNDONE: These don't work yet
+	SF_SHAKE_DISRUPT = 0x0002, // Disrupt controls
+	SF_SHAKE_INAIR = 0x0004,	// Shake players in air
+	SF_FADE_IN = 0x0001,		// Fade in, not out
+	SF_FADE_MODULATE = 0x0002, // Modulate, don't blend
+	SF_FADE_ONLYONE = 0x0004,
+	SF_MESSAGE_ONCE = 0x0001, // Fade in, not out
+	SF_MESSAGE_ALL = 0x0002,  // Send to all clients
+	SF_DETONATE = 0x0001,
+	SF_LOOP = 1,
+	SF_REMOVE_ON_FIRE = 2,
+	SF_DECAL_NOTINDEATHMATCH = 2048,
+	SF_WORLD_DARK = 0x0001,	  // Fade from black at startup
+	SF_WORLD_TITLE = 0x0002,	  // Display game title at startup
+	SF_WORLD_FORCETEAM = 0x0004 // Force teams
 
-#define SF_SPRITE_STARTON 0x0001
-#define SF_SPRITE_ONCE 0x0002
-#define SF_SPRITE_TEMPORARY 0x8000
+};
+
+
+enum {
+	SF_AUTO_FIREONCE = 0x0001,
+	SF_TRIGGER_PUSH_START_OFF = 2,		   //spawnflag that makes trigger_push spawn turned OFF
+	SF_TRIGGER_HURT_TARGETONCE = 1,	   // Only fire hurt target once
+	SF_TRIGGER_HURT_START_OFF = 2,		   //spawnflag that makes trigger_push spawn turned OFF
+	SF_TRIGGER_HURT_NO_CLIENTS = 8,	   //spawnflag that makes trigger_push spawn turned OFF
+	SF_TRIGGER_HURT_CLIENTONLYFIRE = 16,  // trigger hurt will only fire its target if it is hurting a client
+	SF_TRIGGER_HURT_CLIENTONLYTOUCH = 32, // only clients may touch this trigger.
+	SF_RELAY_FIREONCE = 0x0001,
+	SF_MULTIMAN_CLONE = 0x80000000,
+	SF_MULTIMAN_THREAD = 0x00000001,
+	SF_RENDER_MASKFX = (1 << 0),
+	SF_RENDER_MASKAMT = (1 << 1),
+	SF_RENDER_MASKMODE = (1 << 2),
+	SF_RENDER_MASKCOLOR = (1 << 3),
+	SF_CHANGELEVEL_USEONLY = 0x0002,
+	SF_ENDSECTION_USEONLY = 0x0001,
+	SF_CAMERA_PLAYER_POSITION = 1,
+	SF_CAMERA_PLAYER_TARGET = 2,
+	SF_CAMERA_PLAYER_TAKECONTROL = 4,
+	SF_CAMERA_PLAYER_ALL = 8
+};
 
 class CSprite : public CPointEntity
 {
@@ -189,8 +238,7 @@ public:
 	}
 };
 
-#define SF_MESSAGE_ONCE 0x0001 // Fade in, not out
-#define SF_MESSAGE_ALL 0x0002  // Send to all clients
+
 
 class CLaser : public CBeam
 {

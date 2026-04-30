@@ -29,9 +29,9 @@ static void FixupAngles2(Vector& v)
 //
 // ---------------------------------------------------------------------
 
-#define VEHICLE_STARTPITCH 60
-#define VEHICLE_MAXPITCH 200
-#define VEHICLE_MAXSPEED 1500 // approx max speed for sound pitch calculation
+constexpr float VEHICLE_STARTPITCH = 60;
+constexpr float VEHICLE_MAXPITCH = 200;
+constexpr float VEHICLE_MAXSPEED = 1500; // approx max speed for sound pitch calculation
 
 LINK_ENTITY_TO_CLASS(func_vehicle, CFuncVehicle);
 
@@ -40,38 +40,38 @@ void CFuncVehicle::KeyValue(KeyValueData* pkvd)
 	if (FStrEq(pkvd->szKeyName, "length"))
 	{
 		m_length = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	if (FStrEq(pkvd->szKeyName, "width"))
 	{
 		m_width = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "height"))
 	{
 		m_height = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "startspeed"))
 	{
 		m_startSpeed = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "volume"))
 	{
 		m_flVolume = (float)(atoi(pkvd->szValue));
 		m_flVolume *= 0.1;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "bank"))
 	{
 		m_flBank = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "acceleration"))
 	{
@@ -80,7 +80,7 @@ void CFuncVehicle::KeyValue(KeyValueData* pkvd)
 			m_acceleration = 1;
 		else if (m_acceleration > 10)
 			m_acceleration = 10;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		return CBaseEntity::KeyValue(pkvd);
@@ -796,7 +796,7 @@ BOOL CFuncVehicle ::OnControls(entvars_t* pevTest)
 	Vector offset = pevTest->origin - pev->origin;
 
 	if (pev->spawnflags & SF_TRACKTRAIN_NOCONTROL)
-		return FALSE;
+		return false;
 
 	// Transform offset into local coordinates
 	UTIL_MakeVectors(pev->angles);
@@ -807,9 +807,9 @@ BOOL CFuncVehicle ::OnControls(entvars_t* pevTest)
 
 	if (local.x >= m_controlMins.x && local.y >= m_controlMins.y && local.z >= m_controlMins.z &&
 		local.x <= m_controlMaxs.x && local.y <= m_controlMaxs.y && local.z <= m_controlMaxs.z)
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 

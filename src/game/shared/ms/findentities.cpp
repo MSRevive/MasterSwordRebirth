@@ -1,11 +1,11 @@
 #include "findentities.h"
 #ifdef VALVE_DLL
 #include "cbase.h"
-#define MAX_SEARCH_ENTITIES gpGlobals->maxEntities
+#define MAX_SEARCH_ENTITIES static_cast<unsigned int>(gpGlobals->maxEntities) //dont think can be changed to constexpr
 #else
 #include "inc_huditem.h"
 #include "movement/pm_defs.h"
-#define MAX_SEARCH_ENTITIES 1500 // TODO
+constexpr unsigned int MAX_SEARCH_ENTITIES = 1500; // TODO
 #endif
 
 int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>& vFilters, CFindEntity::YWrapType * pIgnoreEntity, int vMax)
@@ -15,13 +15,13 @@ int UtilFindEntities(mslist<CFindEntity>& rFound, const mslist<CEntityFilter *>&
 	bool bValid;
 	bool bFilterFail;
 	bool bCheckMax = vMax > 0;
-	for (int i = 0; i < MAX_SEARCH_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_SEARCH_ENTITIES; i++)
 	{
 		CFindEntity vEntity = CFindEntity::GetEntity(i, bValid);
 		if (!bValid || vEntity.GetWrapped() == pIgnoreEntity) continue;
 
 		bFilterFail = false;
-		for (int j = 0; j < vFilters.size(); j++)
+		for (unsigned int j = 0; j < vFilters.size(); j++)
 		{
 			if (!vFilters[j]->Allow(vEntity))
 			{
@@ -374,7 +374,7 @@ bool CCylinderFilter::SetFromString(msstring vsString)
 	float vRadiusSquared;
 	float vPosZ;
 	float vNegZ;
-	bool bOk = sscanf(vsString.c_str(), "Cyl((%f,%f,%f),%f,%f,%f,%f)", &vOrigin, &vRadius, &vRadiusSquared, &vPosZ, &vNegZ) == 7;
+	bool bOk = sscanf(vsString.c_str(), "Cyl((%f,%f,%f),%f,%f,%f,%f)", &vOrigin.x, &vOrigin.y, &vOrigin.z, &vRadius, &vRadiusSquared, &vPosZ, &vNegZ) == 7;
 	if (bOk)
 	{
 		mOrigin = vOrigin;

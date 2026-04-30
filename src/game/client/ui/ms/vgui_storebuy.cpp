@@ -41,7 +41,7 @@ void CStoreBuyPanel::AddInventoryItems()
 	pGearItemButton->setVisible(false);
 
 	//Add store items with at least 1 in inventory to the container
-	for (int i = 0; i < StoreItems.size(); i++)
+	for (unsigned int i = 0; i < StoreItems.size(); i++)
 		if (StoreItems[i].Quantity > 0)
 			pGearItemButton->m_ItemContainer->AddItem(StoreItems[i]);
 
@@ -91,7 +91,7 @@ void CStoreBuyPanel::ItemHighlighted(void *pData)
 			m_InfoPanel->m_SaleText->setText("Price");
 
 			containeritem_t &Item = ItemButton.m_Data;
-			for (int s = 0; s < CStorePanel::StoreItems.size(); s++)
+			for (unsigned int s = 0; s < CStorePanel::StoreItems.size(); s++)
 			{
 				storeitem_t &StoreItem = CStorePanel::StoreItems[s];
 				if (Item.Name != StoreItem.Name)

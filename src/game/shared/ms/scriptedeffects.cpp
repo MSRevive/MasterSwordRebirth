@@ -10,7 +10,7 @@ mslist<globalscripteffect_t> CGlobalScriptedEffects::Effects;
 
 void CGlobalScriptedEffects::RegisterEffect(globalscripteffect_t &Effect)
 {
-	for (int i = 0; i < Effects.size(); i++)
+	for (unsigned int i = 0; i < Effects.size(); i++)
 	{
 		if (!_stricmp(Effects[i].m_Name, Effect.m_Name))
 			return;
@@ -31,12 +31,9 @@ CScript *CGlobalScriptedEffects::ApplyEffect(const char* ScriptName, IScripted *
 
 	Script->RunScriptEvents(); //Initialize 'game.effect.X'
 
-#define EFFECT_ID "game.effect.id"
-#define EFFECT_FLAGS "game.effect.flags"
-
 	//Check if this effect is being stacked
 	if (Script->VarExists(EFFECT_ID))
-		for (int i = 0; i < pScriptTarget->m_Scripts.size(); i++)
+		for (unsigned int i = 0; i < pScriptTarget->m_Scripts.size(); i++)
 			if (pScriptTarget->m_Scripts[i] != Script && FStrEq(pScriptTarget->m_Scripts[i]->GetVar(EFFECT_ID), Script->GetVar(EFFECT_ID)))
 			{
 				//Check if the effect doesn't allow stacking
