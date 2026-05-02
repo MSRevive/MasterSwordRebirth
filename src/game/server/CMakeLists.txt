@@ -21,6 +21,14 @@ add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
 
+if (UNIX)
+	# do not throw an error because of libcurl.a relocations in .text
+	# fixes:
+	# /usr/bin/ld.bfd: /workspace/msrebirth/lib/curl/libcurl.a(mime.c.o): warning: relocation against `curl_mime_data' in read-only section `.text'
+	# /usr/bin/ld.bfd: error: read-only segment has dynamic relocations
+	set_target_properties(server PROPERTIES LINK_FLAGS "-Wl,-ztextoff")
+endif()
+
 target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/include/curl")
 
 if (WIN32)

@@ -99,6 +99,14 @@ if (MSVC)
 		VS_DEBUGGER_COMMAND "${VS_DEBUG_WORK_DIR}/msr.exe)")
 endif()
 
+if (UNIX)
+	# do not throw an error because of libdiscord-rpc.a relocations, the library is long deprecated anyway
+	# fixes:
+	# /usr/bin/ld.bfd: /workspace/msrebirth/lib/discord/libdiscord-rpc.a(rpc_connection.cpp.o): warning: relocation against `<...>' in read-only section `.text.<...>´
+	# /usr/bin/ld.bfd: error: read-only segment has dynamic relocations
+	set_target_properties(client PROPERTIES LINK_FLAGS "-Wl,-ztextoff")
+endif()
+
 ################################################################################
 # Source groups
 ################################################################################

@@ -3,6 +3,7 @@ FROM fedora:latest as BASE_IMAGE
 
 RUN dnf install -y su sudo cmake gcc gcc-c++ pkgconf-pkg-config libstdc++.i686 libstdc++-static.i686 gdb gdbserver strace file binutils patchelf htop nano procps-ng  \
     glibc.i686 glibc-devel.i686 \
+    libatomic.i686 libatomic.x86_64 \
     glfw-devel.i686 \
     libglvnd-glx.i686 \
     mesa-libGL-devel.i686 \
