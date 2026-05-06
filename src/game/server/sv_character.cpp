@@ -19,6 +19,8 @@
 #include "game.h"
 //END NOTE
 
+#include "save/protosave.h"
+
 void CBasePlayer::CreateChar(createchar_t &CharData)
 {
 	//Create a new character, using the options the user specified.
@@ -98,7 +100,15 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 
 	m_CharacterNum = CharData.iChar;
 	m_CharacterState = CHARSTATE_LOADED;	 //Temporary, so the save will succeed
-	MSChar_Interface::SaveChar(this, &Data); //Save the new character
+
+	if (SAVECHAR_VERSION == SAVECHAR_VERSION_MSR_PROTOBUF)
+	{
+		msr::ProtoSave::SaveCharProtobuf(this, &Data); //Save the new char with protobuf
+	}
+	else
+	{
+		MSChar_Interface::SaveChar(this, &Data); //Save the new character
+	}
 
 	m_CharacterState = CHARSTATE_UNLOADED; //Created a new character... this one is no longer valid
 
@@ -197,13 +207,13 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 				{
 					switch (r)
 					{
-					case 5: // Used to be DIVINATION
-						pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_DIVINATION) : NULL);
-						break;
+						case 5: // Used to be DIVINATION
+							pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_DIVINATION) : NULL);
+							break;
 
-					case 6: // Used to be AFFLICTION
-						pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_AFFLICTION) : NULL);
-						break;
+						case 6: // Used to be AFFLICTION
+							pSubStat = (pStat ? pStat->GetSubStat(STAT_MAGIC_AFFLICTION) : NULL);
+							break;
 					}
 				}
 
@@ -394,10 +404,10 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 	if (!cTemp || !cTemp[0])
 		return false;
 
-	outItem.Name = cTemp;	
+	outItem.Name = cTemp;
 	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(outItem.Name);
-	if (iAlias != CGenericItemMgr::mItemAlias.end())	
-		outItem.Name = iAlias->second;	
+	if (iAlias != CGenericItemMgr::mItemAlias.end())
+		outItem.Name = iAlias->second;
 
 	//It is now possible to read an item from file correctly, but not be able to spawn that item.
 	//Be sure that, even if the item can't be created, all of the item's data is read from file properly
@@ -423,7 +433,7 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 	}
 
 	if (FBitSet(Properties, ITEM_PERISHABLE) ||
-		FBitSet(Properties, ITEM_DRINKABLE))
+			FBitSet(Properties, ITEM_DRINKABLE))
 	{
 		short Quality = 0, MaxQuality = 0;
 		Data.ReadShort(Quality);	//[SHORT]
@@ -484,8 +494,8 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Can I save right now?
 	if (pPlayer->m_CharacterState == CHARSTATE_UNLOADED /*||	//Can't save if no character is created
-		MSGlobals::GameType != GAMETYPE_ADVENTURE*/
-		)												//If the gametype isn't adventure, we can't save no matter what.
+								MSGlobals::GameType != GAMETYPE_ADVENTURE*/
+			)												//If the gametype isn't adventure, we can't save no matter what.
 	{
 		return;
 	}

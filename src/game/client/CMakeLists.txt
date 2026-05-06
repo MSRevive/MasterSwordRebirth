@@ -4,13 +4,16 @@ add_library(fmod SHARED IMPORTED)
 add_library(discord SHARED IMPORTED)
 add_library(steam_api SHARED IMPORTED)
 
+find_package(OpenGL REQUIRED)
+
 # for some reason it can't find these libraries, even when installed?
-if (LINUX)
+if (LINUX AND NOT OpenGL_gl_LIBRARY)
 	set(OPENGL_gl_LIBRARY /usr/lib/i386-linux-gnu/libGL.so)
+endif()
+if (LINUX AND NOT OPENGL_glx_LIBRARY)
 	set(OPENGL_glx_LIBRARY /usr/lib/i386-linux-gnu/libGLX.so)
 endif()
 
-find_package(OpenGL REQUIRED)
 
 target_include_directories(vgui INTERFACE ${BASEDIR}/lib/include/vgui)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/lib/include/SDL2)
@@ -94,6 +97,14 @@ if (MSVC)
 	set_target_properties(client PROPERTIES 
 		VS_DEBUGGER_WORKING_DIRECTORY "${VS_DEBUG_WORK_DIR}"
 		VS_DEBUGGER_COMMAND "${VS_DEBUG_WORK_DIR}/msr.exe)")
+endif()
+
+if (UNIX)
+	# do not throw an error because of libdiscord-rpc.a relocations, the library is long deprecated anyway
+	# fixes:
+	# /usr/bin/ld.bfd: /workspace/msrebirth/lib/discord/libdiscord-rpc.a(rpc_connection.cpp.o): warning: relocation against `<...>' in read-only section `.text.<...>´
+	# /usr/bin/ld.bfd: error: read-only segment has dynamic relocations
+	set_target_properties(client PROPERTIES LINK_FLAGS "-Wl,-ztextoff")
 endif()
 
 ################################################################################

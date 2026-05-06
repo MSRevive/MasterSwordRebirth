@@ -7,6 +7,7 @@
 #ifdef VALVE_DLL
 #include "global.h"
 #include "fn/FNSharedDefs.h"
+#include "save/protosave.h"
 #else
 #include "inc_huditem.h"
 #include "ms/clglobal.h"
@@ -31,7 +32,7 @@ void ReplaceChar(char *pString, char org, char dest);
 
 bool IsValidCharVersion(int Version)
 {
-	return (Version == SAVECHAR_VERSION_MSC) || (Version == SAVECHAR_VERSION_MSR) || (Version == SAVECHAR_VERSION);
+	return (Version == SAVECHAR_VERSION_MSC) || (Version == SAVECHAR_VERSION_MSR);
 }
 
 const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
@@ -119,9 +120,14 @@ savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps)
 
 	return (fCharLoaded ? &Data : NULL);
 }
-
 bool MSChar_Interface::ReadCharData(void *pData, ulong Size, chardata_t *CharData)
 {
+	#ifdef VALVE_DLL
+	if(msr::ProtoSave::LoadCharProtobuf(pData, Size, CharData)) // try protobuf first, if that fails try CharData->ReadData(pData, Size)
+	{
+		return true;
+	}
+	#endif
 	return CharData->ReadData(pData, Size);
 }
 

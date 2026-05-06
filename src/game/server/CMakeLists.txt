@@ -2,10 +2,32 @@ set(ZLIB_USE_STATIC_LIBS "ON")
 set(ZLIB_ROOT "${BASEDIR}/lib/zlib")
 find_package(ZLIB REQUIRED)
 
+if (WIN32)
+	include(${BASEDIR}/cmake/protobuf.cmake)
+
+	# cannot regenerate savedata.pb.* here because that would require compiling protoc before running `cmake -B` and BPN has no support for multi step builds
+	#   maybe adding protoc to the bins/debug and bins/release directory would solve that
+	if (TARGET protobuf::protoc)
+		add_subdirectory(proto)
+	endif()
+else()
+	find_package(Protobuf REQUIRED)
+
+	add_subdirectory(proto)
+endif()
+
 add_library(server SHARED $<$<PLATFORM_ID:Windows>:ms.def>)
 add_library(libcurl STATIC IMPORTED)
 
 set_target_properties(server PROPERTIES OUTPUT_NAME "ms")
+
+if (UNIX)
+	# do not throw an error because of libcurl.a relocations in .text
+	# fixes:
+	# /usr/bin/ld.bfd: /workspace/msrebirth/lib/curl/libcurl.a(mime.c.o): warning: relocation against `curl_mime_data' in read-only section `.text'
+	# /usr/bin/ld.bfd: error: read-only segment has dynamic relocations
+	set_target_properties(server PROPERTIES LINK_FLAGS "-Wl,-ztextoff")
+endif()
 
 target_include_directories(libcurl INTERFACE "${BASEDIR}/lib/include/curl")
 
@@ -27,7 +49,10 @@ target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Crypt32>
 	$<$<PLATFORM_ID:Windows>:Normaliz>
 	${ZLIB_LIBRARIES}
-	libcurl)
+	libcurl
+	$<$<PLATFORM_ID:Windows>:libprotobuf>
+	$<$<PLATFORM_ID:Linux>:${Protobuf_LIBRARIES}>
+  )
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -52,7 +77,11 @@ target_include_directories(server PRIVATE
 	monsters
 	player
 	fn
-	${ZLIB_INCLUDE_DIRS})
+	save
+	${ZLIB_INCLUDE_DIRS}
+	${Protobuf_INCLUDE_DIRS}
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/proto> # protobuf
+)
 
 target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
@@ -405,6 +434,13 @@ set(ThirdParty_AngelScript
 )
 source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 
+set(Shared_Save
+	"proto/savedata.pb.cc"
+	"proto/savedata.pb.h"
+	"save/protosave.cpp"
+	"save/protosave.h"
+)
+
 set(ALL_FILES
 	${Common}
 	${Engine}
@@ -420,6 +456,7 @@ set(ALL_FILES
 	${Shared_AngelScript}
 	${Server_AngelScript}
 	${ThirdParty_AngelScript}
+	${Shared_Save}
 )
 
 target_sources(server PRIVATE ${ALL_FILES})

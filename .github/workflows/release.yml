@@ -7,11 +7,46 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  build:
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+  release-linux:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get Linux Packages
+        run: |
+          dnf install -y -q git cmake gcc gcc-c++ pkgconf-pkg-config \
+          libstdc++.i686 libstdc++-static.i686  \
+          libatomic.i686 libatomic.x86_64 \
+          glibc.i686 glibc-devel.i686 \
+          glfw-devel.i686 \
+          libglvnd-glx.i686 \
+          mesa-libGL-devel.i686 \
+          protobuf-devel.i686 \
+          libcurl-devel.i686 \
+          zlib-ng-compat-devel.i686 \
+          gtest.i686 gtest-devel.i686
+          git config --global user.name github-actions
+          git config --global user.email github-actions@users.noreply.github.com
+
+      - name: Build on Linux
+        run: ${GITHUB_WORKSPACE}/build-linux.sh -p ${GITHUB_WORKSPACE} -t ${{env.BUILD_TYPE}}
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86
+          path: |
+            ${GITHUB_WORKSPACE}/build/src/game/client/client.so
+            ${GITHUB_WORKSPACE}/build/src/game/server/ms.so
+
+  release-windows:
+    runs-on: $windows-latest
 
     steps:
       - name: Checkout
@@ -23,42 +58,18 @@ jobs:
         uses: lukka/get-cmake@latest
         with:
           cmakeVersion: 3.28.3
-      
-      - name: Get Linux Packages
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-          sudo dpkg --add-architecture i386
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo apt update
-          sudo apt install -y libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config gcc-multilib g++-multilib
-
-      - name: Build on Linux
-        if: startsWith(matrix.os, 'ubuntu')
-        run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
 
       - name: Setup MSVC CLI for Windows
-        if: startsWith(matrix.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x86
 
       - name: Build on Windows
-        if: startsWith(matrix.os, 'windows')
         run: |
           cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -A Win32
           msbuild ${{github.workspace}}/build/msr.sln /p:Configuration=${{env.BUILD_TYPE}} /p:Platform=win32
 
-      - name: Upload Linux artifact
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-x86
-          path: |
-            ${{github.workspace}}/build/src/game/client/client.so
-            ${{github.workspace}}/build/src/game/server/ms.so
-
       - name: Upload Windows artifact
-        if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v4
         with:
           name: win32
