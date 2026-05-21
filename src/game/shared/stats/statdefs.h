@@ -52,18 +52,18 @@ enum
 
 enum
 {
-	STATPROP_SKILL = 0,
-	STATPROP_BALANCE,
-	STATPROP_POWER,
-	STATPROP_TOTAL,
+	STAT_PROP_SKILL = 0,
+	STAT_PROP_BALANCE,
+	STAT_PROP_POWER,
+	STAT_PROP_TOTAL,
 
 	STAT_MAGIC_FIRE = 0, //Magic.  These override the above properties for spellcasting
-	STAT_MAGIC_ICE,
+	STAT_MAGIC_ICE ,
 	STAT_MAGIC_LIGHTNING,
 	STAT_MAGIC_DIVINATION,
 	STAT_MAGIC_AFFLICTION,
 	STAT_MAGIC_TOTAL,
-	STATPROP_ALL_TOTAL = STAT_MAGIC_TOTAL,
+	STAT_PROP_ALL_TOTAL = STAT_MAGIC_TOTAL,
 };
 
 int GetSkillStatByName(const char *pszName);				 //Returns -1 if not found
@@ -72,23 +72,23 @@ int GetNatStatByName(const char *pszName);					 //Returns -1 if not found
 void GetStatIndices(const char *Name, int &Stat, int &Prop); //Converts stat.prop into valid indices
 const char *GetSkillName(int Skill);						 //Looks any skill
 
-#define STAT_MAX_VALUE 300.0
-#define STATPROP_MAX_VALUE 100.0
+constexpr float MAX_STAT_VALUE = 300.0f;
+constexpr float MAX_STAT_PROPVALUE = 100.0f;
 	//level cap
 
 //For MSMonster::m_PlayerDamage
 struct playerdamage_t
 {
-	float dmg[SKILL_MAX_ATTACK][STATPROP_ALL_TOTAL]; //Record damage done with with each combat skill
+	float dmg[SKILL_MAX_ATTACK][STAT_PROP_ALL_TOTAL]; //Record damage done with with each combat skill
 	float dmgInTotal; //MiB Mar2008a - For keeping track of all damage a player has done, regardless of what skill it was
 	char msId[32]; // MiB MAR2019_22 [SLOT_EXP] - Keep track of the steam id / slot to avoid passing exp to the wrong character
 
 	// MiB MAR2019_22 [SLOT_EXP] - Added because this is done in multiple places and shouldn't be written out...
 	void Clear()
 	{
-		for(int i = 0; i < SKILL_MAX_ATTACK; i++)
+		for(unsigned int i = 0; i < SKILL_MAX_ATTACK; i++)
 		{
-			for(int j = 0; j < STATPROP_ALL_TOTAL; j++)
+			for(int j = 0; j < STAT_PROP_ALL_TOTAL; j++)
 			{
 				dmg[i][j] = 0;
 			}

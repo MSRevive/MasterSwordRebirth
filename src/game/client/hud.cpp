@@ -48,6 +48,11 @@
 #include "fmod/soundengine.h"
 #include "mslogger.h"
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
+
 //-----------------
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
@@ -236,10 +241,7 @@ int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-#define SetMSHUD(ptr, type) \
-	ptr = new (type);       \
-	strncpy(ptr->Name,  #type, 32 )
-	 
+	
 // This is called every time the DLL is loaded
 void CHud::Init(void)
 {
@@ -247,15 +249,15 @@ void CHud::Init(void)
 	//ClientCmd( "r_shadows 1" );
 	ClientCmd("cl_himodels 0");
 
-	SetMSHUD(m_Menu, CHudMenu);
-	SetMSHUD(m_Fatigue, CHudFatigue);
-	SetMSHUD(m_Magic, CHudMagic);
-	SetMSHUD(m_Music, CHudMusic);
-	SetMSHUD(m_Action, CHudAction);
-	SetMSHUD(m_Health, CHudHealth);
-	SetMSHUD(m_HUDScript, CHudScript);
-	SetMSHUD(m_Misc, CHudMisc);
-	SetMSHUD(m_HUDId, CHudID);
+	m_Menu = new(CHudMenu);
+	m_Fatigue = new(CHudFatigue);
+	m_Magic	= new(CHudMagic);
+	m_Music = new(CHudMusic);
+	m_Action = new(CHudAction);
+	m_Health = new(CHudHealth);
+	m_HUDScript	= new(CHudScript);
+	m_Misc = new(CHudMisc);
+	m_HUDId = new(CHudID);
 
 	//MS commands and messages
 	//HOOK_COMMAND( "use", PlayerUseItem );
@@ -383,7 +385,7 @@ void CHud::Shutdown()
 int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (int i = 0; i < m_Sprites.size() - 1; ++i)
+	for (unsigned int i = 0; i < m_Sprites.size() - 1; ++i)
 	{
 		if (m_Sprites[i].Name == SpriteName)
 			return static_cast<int>(i);
@@ -466,7 +468,7 @@ int CHud::Redraw(float flTime, int intermission)
 	// 	SPR_Set(m_hsprLogo, 250, 250, 250);
 
 	// 	x = SPR_Width(m_hsprLogo, 0);
-	// 	x = ScreenWidth - x;
+	// 	x = ScreenWidth() - x;
 	// 	y = SPR_Height(m_hsprLogo, 0) / 2;
 
 	// 	// Draw the logo at 20 fps
@@ -566,7 +568,7 @@ void CHud::VidInit(void)
 	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
-	if (ScreenWidth < 640)
+	if (ScreenWidth() < 640)
 		m_iRes = 320;
 	else
 		m_iRes = 640;

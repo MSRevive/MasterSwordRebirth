@@ -64,7 +64,7 @@ void G_SolidifyEnts(bool fEnable, bool fSolidShields, bool fEnableCorpses, bool 
 			//CMSMonster *pMonster = (CMSMonster *)pEnt;
 			//if( !pMonster->Skin ) continue;
 		}
-		else if (!fSolidShields || pEnt->MSProperties() != MS_SHIELD)
+		else if (!fSolidShields || pEnt->MSProperties() != ITEM_MS_SHIELD)
 			continue;
 
 		pEnt->pev->solid = fEnable ? SOLID_BBOX : SOLID_NOT;

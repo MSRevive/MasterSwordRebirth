@@ -14,10 +14,9 @@
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "const.h"
+
 #include "com_model.h"
 #include "studio.h"
-#include "entity_state.h"
 #include "studio_util.h"
 #include "r_studioint.h"
 #include "ref_params.h"
@@ -26,8 +25,8 @@
 //OGL
 void DeleteGLTextures();
 #ifdef _WIN32
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = NULL;
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = NULL;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = nullptr;
+PFNGLACTIVETEXTUREARBPROC glActiveTextureARB = nullptr;
 #endif
 
 //Environment Manager
@@ -44,7 +43,6 @@ extern "C"
 };
 
 //TWHL Project - Thothie JUN2010_22
-#include "r_studioint.h"
 
 extern engine_studio_api_t IEngineStudio;
 
@@ -60,7 +58,7 @@ CParticle::CParticle()
 {
 	m_Width = 0;
 	m_Origin = g_vecZero;
-	m_Texture = NULL;
+	m_Texture = nullptr;
 	m_Color = Color4F(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Brightness = 1.0f;
 	m_DirForward = g_vecZero;
@@ -186,7 +184,7 @@ struct skyface_t
 	//Vector Offset;
 };
 
-#define SKYFILENAME_PREFIX "gfx/env/"
+constexpr const char* SKYFILENAME_PREFIX = "gfx/env/";
 struct
 {
 	Vector Dir; //Dir the wall is facing.  It gets scooted back in the opp. direction
@@ -214,7 +212,7 @@ public:
 		m_uiNextTexIdx = 1;
 		m_SkyName = "g_morning";
 
-		for (int i = 0; i < 6; i++)
+		for (unsigned int i = 0; i < 6; i++)
 		{
 			Faces.add(skyface_t());
 
@@ -227,7 +225,7 @@ public:
 	//Called once each level load
 	void Setup() //Be sure to call after EngineFunc stuff is valid
 	{
-		for (int i = 0; i < Faces.size(); i++)
+		for (unsigned int i = 0; i < Faces.size(); i++)
 		{
 			CParticle &Face = Faces[i].Face;
 			Face.SetAngles(g_SkyBoxInfo[i].Dir);
@@ -248,7 +246,7 @@ public:
 	void ChangeTexture(const char* NewTexture)
 	{
 		m_SkyName = NewTexture;
-		for (int i = 0; i < Faces.size(); i++)
+		for (unsigned int i = 0; i < Faces.size(); i++)
 		{
 			msstring FileName = /*msstring(EngineFunc::GetGameDir()) + "/" +*/ msstring(SKYFILENAME_PREFIX) + NewTexture + g_SkyBoxInfo[i].FileNameSuffix + ".tga";
 			Faces[i].Face.m_GLTex = 0;
@@ -261,7 +259,7 @@ public:
 		//if( MSGlobals::GameScript )
 		//	MSGlobals::GameScript->CallScriptEvent( "game_render_sky" );
 
-		for (int i = 0; i < Faces.size(); i++)
+		for (unsigned int i = 0; i < Faces.size(); i++)
 		{
 			CParticle &Face = Faces[i].Face;
 			Face.m_Width = v_ViewDist - 1;
@@ -322,12 +320,12 @@ void TraverseAllNodes(mnode_t *pNode, void *Func)
 	{
 		//Call Function on Leaf
 		mleaf_t &Leaf = *(mleaf_t *)&Node;
-		for (int s = 0; s < Leaf.nummarksurfaces; s++)
+		for (unsigned int s = 0; s < Leaf.nummarksurfaces; s++)
 			(*(ParseAllSurfacesFunc *)Func)(Leaf.firstmarksurface[s]);
 		return;
 	}
 
-	for (int i = 0; i < 2; i++)
+	for (unsigned int i = 0; i < 2; i++)
 		TraverseAllNodes(Node.children[i], Func);
 }
 
@@ -394,7 +392,9 @@ uint CRender::m_RT_Height = 256;
 float CRender::m_RT_TexU = 1.0f;
 float CRender::m_RT_TexV = 1.0f;
 
-#define MS_GL_ATTRIBUTES GL_ALL_ATTRIB_BITS
+enum {
+	MS_GL_ATTRIBUTES = GL_ALL_ATTRIB_BITS
+};
 //#define MS_GL_ATTRIBUTES
 
 void CRender::PushHLStates()
@@ -557,7 +557,7 @@ mslist<VGUI_Image3D *> g_VGUIImages;
 void VGUIImages_NewLevel()
 {
 	//Reload the TGA textures for the 3D VGUI Images
-	for (int i = 0; i < g_VGUIImages.size(); i++)
+	for (unsigned int i = 0; i < g_VGUIImages.size(); i++)
 	{
 		if (g_VGUIImages[i]->m_TGAorSprite)
 		{
@@ -647,7 +647,7 @@ void VGUI_Image3D::paintBackground()
 
 VGUI_Image3D::~VGUI_Image3D()
 {
-	for (int i = 0; i < g_VGUIImages.size(); i++)
+	for (unsigned int i = 0; i < g_VGUIImages.size(); i++)
 		if (g_VGUIImages[i] == this)
 		{
 			g_VGUIImages.erase(i);
@@ -667,7 +667,7 @@ bool LoadGLTexture(const char *FileName, loadtex_t &LoadTex)
 {
 	bool Loaded = false;
 
-	for (int i = 0; i < g_TextureList.size(); i++)
+	for (unsigned int i = 0; i < g_TextureList.size(); i++)
 	{
 		if (g_TextureList[i].Name == FileName)
 		{
@@ -706,7 +706,7 @@ bool LoadGLTexture(const char *FileName, uint &TextureID)
 
 void DeleteGLTextures()
 {
-	for (int i = 0; i < g_TextureList.size(); i++)
+	for (unsigned int i = 0; i < g_TextureList.size(); i++)
 		glDeleteTextures(1, &g_TextureList[i].GLTexureID);
 	g_TextureList.clear();
 }

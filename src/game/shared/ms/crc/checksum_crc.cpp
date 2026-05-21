@@ -6,10 +6,10 @@
 
 #include "checksum_crc.h"
 
-#define CRC32_INIT_VALUE 0xFFFFFFFFUL
-#define CRC32_XOR_VALUE  0xFFFFFFFFUL
+constexpr unsigned long CRC32_INIT_VALUE = 0xFFFFFFFFUL;
+constexpr unsigned long CRC32_XOR_VALUE = 0xFFFFFFFFUL;
 
-#define NUM_BYTES 256
+constexpr unsigned int NUM_BYTES = 256;
 static const VCRC32_t pulCRCTable[NUM_BYTES] =
 {
 	0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,

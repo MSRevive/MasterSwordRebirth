@@ -136,7 +136,7 @@ void CMSMonster::Spawn()
 	m_OldGold = 0;
 
 	// Initialize menu protection flags to false for all players
-	for (int i = 0; i < MAXPLAYERS; i++)
+	for (unsigned int i = 0; i < MAXPLAYERS; i++)
 	{
 		m_MenuOptionsProtected[i] = false;
 	}
@@ -150,7 +150,7 @@ void CMSMonster::Spawn()
 	{
 		//precache all random mob scripts
 		msstring orig_scriptName = m_ScriptName;
-		for (int i = 0; i < m_nRndMobs; i++)
+		for (unsigned int i = 0; i < m_nRndMobs; i++)
 		{
 			MS_DEBUG("DEBUG: msmonster_random precache #%i / %i as %s", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
@@ -300,32 +300,32 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 	if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "perishtarget"))
 	{
 		m_iszPerishTarget = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnarea"))
 	{
 		m_iszMonsterSpawnArea = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delaylow"))
 	{
 		m_SpawnDelayLow = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delayhigh"))
 	{
 		m_SpawnDelayHigh = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "lives"))
 	{
 		m_Lives = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnchance"))
 	{
@@ -339,18 +339,18 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 		if (!m_SpawnChance)
 			m_SpawnChance = -1;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 	{
 		m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "nplayers"))
 	{
 		//Thothie - AUG2007a - adding option to only spawn monster if # players present
 		m_ReqPlayers = (atoi(pkvd->szValue));
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "reqhp"))
 	{
@@ -375,19 +375,19 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		if (reqhp_stringlist.size() >= 2 && reqhp_stringlist[1].contains("avg"))
 			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "title"))
 	{
 		//Thothie - AUG2007b - adding option to change monster name
 		m_title = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "params"))
 	{
 		//Thothie - DEC2007b - adding option to send params to script
 		m_addparams = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "hpmulti"))
 	{
@@ -396,7 +396,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flHealthMulti > 1)
 		{
 			m_HPMulti = flHealthMulti;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "dmgmulti"))
@@ -406,14 +406,14 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flDamageMulti > 1)
 		{
 			m_DMGMulti = flDamageMulti;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "scriptfile") ||
 		(FStrEq(pkvd->szKeyName, "defscriptfile") && !m_ScriptName))
 	{
 		m_ScriptName = pkvd->szValue;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	//NOV2014_20 - Thothie msmonster_random [begin]
 	else if (randomdata.starts_with("random_")) //optimize this - dis is stupid lazy
@@ -430,7 +430,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (random_monsterdata.size() == 0)
 		{
 			//random_monster_t tmp;
-			for (int i = 0; i < 32; i++)
+			for (unsigned int i = 0; i < 32; i++)
 			{
 				random_monsterdata.add_blank();
 			};
@@ -493,7 +493,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		//Gotta use the logfile here, dernitall
 		MS_DEBUG("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
 	else
@@ -829,7 +829,7 @@ bool CMSMonster::MoveExecute(moveexec_t& MoveExec)
 
 	return fSuccess;
 }
-BOOL CMSMonster::CanSetVelocity() { return TRUE; }
+BOOL CMSMonster::CanSetVelocity() { return true; }
 
 void CMSMonster::Float()
 {
@@ -1262,7 +1262,7 @@ void CMSMonster::AvoidFrontObject(float MoveAmt)
 
 			Vector vAng, vAvoidDir, SideAng[2];
 			float Dist[2];
-			for (int i = 0; i < 2; i++) //Try each side
+			for (unsigned int i = 0; i < 2; i++) //Try each side
 			{
 				//Finds the forward vector of the avoidance direction
 				vAng.y = UTIL_AngleMod(m_LastYaw + ang * -Side[i]);
@@ -1402,19 +1402,19 @@ void CMSMonster::Act()
 
 				if( m_fSequenceFinished ) {
 					//m_Hand->CurrentAttack->tStart = -65534;
-					//m_Hand->CurrentAttack->fCanCancel = TRUE;
+					//m_Hand->CurrentAttack->fCanCancel = true;
 					StopWalking( );
 					CurrentHand->CancelAttack( );
 					return;
 				}
-				else CurrentHand->CurrentAttack->fCanCancel = FALSE;
+				else CurrentHand->CurrentAttack->fCanCancel = false;
 
 				if( LastEvent.event == 600 ) //call attack this frame
 				{
 					CurrentHand->CurrentAttack->fAttackThisFrame = true;
 					pev->iuser4 = -1;
 				}
-				else CurrentHand->CurrentAttack->fAttackThisFrame = FALSE; //basically never
+				else CurrentHand->CurrentAttack->fAttackThisFrame = false; //basically never
 			}
 
 			//m_Hand->AttackButtonDown( );
@@ -1613,13 +1613,13 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 
 	CBaseEntity* pList[255], * pEnt = NULL;
 	// Fill pList with a all the monsters and players on the level including players that have died.
-	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
+	unsigned int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
 
 	// Keep track of players that have already received a message;
 	std::set<CBaseEntity*> pTrackAlreadySent = {};
 
 	// Now try to speak to each one
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 		if (pEnt == NULL)
@@ -1727,18 +1727,18 @@ void CMSMonster::HearPhrase(CMSMonster* pSpeaker, const char* phrase)
 	listenphrase_t* BestPhrase = NULL;
 	float BestMatchedRatio = 0;
 
-	for (int i = 0; i < m_Phrases.size(); i++)
+	for (unsigned int i = 0; i < m_Phrases.size(); i++)
 	{
 		listenphrase_t& Phrase = m_Phrases[i];
-		for (int p = 0; p < Phrase.Phrases.size(); p++)
+		for (unsigned int p = 0; p < Phrase.Phrases.size(); p++)
 		{
 			const char* CheckPhrase = Phrase.Phrases[p];
 			const char* SubPhrase = NULL;
 			if (SubPhrase = strstr(cTemp1, CheckPhrase))
 			{
 				int Matched = 0;
-				int len = strlen(CheckPhrase);
-				for (int x = 0; x < len; x++)
+				unsigned int len = strlen(CheckPhrase);
+				for (unsigned int x = 0; x < len; x++)
 					if (SubPhrase[x] == CheckPhrase[x])
 						Matched++;
 
@@ -2129,7 +2129,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//- maybe internalize Parry for monsters?
 			//- Thothie note of FEB2008a
 
-			int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
+			int ParryValue = GetSkillStat("parry", STAT_PROP_SKILL);
 
 			if (ParryValue > 60)
 				ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
@@ -2198,14 +2198,14 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 				//Learn parry skill from  a successful parry
 				if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
 					if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
-						LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
+						LearnSkill ( SKILL_PARRY, STAT_PROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
 				//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
 
 					/*if (pMonster->m_SkillLevel * 2 > 0)
-						LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
+						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, pMonster->m_SkillLevel * 2 );
 					else
-						LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
-					//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
+						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, 0 );
+					//LearnSkill( SKILL_PARRY, STAT_PROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
 			}
 		}
 
@@ -2213,7 +2213,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		//Damage Modifiers ( takedmg xxx )
 		Damage.flDamage *= m.GenericTDM;
 		if (Damage.sDamageType)
-			for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
+			for (unsigned int i = 0; i < m.TakeDamageModifiers.size(); i++)
 			{
 				takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 				//msstring thoth_my_dmgtype = TDM.DamageType;
@@ -2260,7 +2260,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//Each script sets a ratio of damage you should take.  Factor each one into the damage
 			msstringlist DamageRatios;
 			TokenizeString(m_ReturnData, DamageRatios);
-			for (int i = 0; i < DamageRatios.size(); i++)
+			for (unsigned int i = 0; i < DamageRatios.size(); i++)
 				Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
 		}
 
@@ -2384,7 +2384,7 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	BOOL DeleteMe = TRUE;
+	BOOL DeleteMe = true;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
 	bool xp_dump = (strcmp(GetFirstScriptVar("NPC_DUMP_XP"), "1") == 0);	 //dump hits to array
@@ -2408,7 +2408,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		IScripted* pScripted = (pTarget ? pTarget->GetScripted() : NULL);
 		if (pScripted)
 		{
-			for (int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
+			for (unsigned int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
 			{
 				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect 
 				{
@@ -2434,7 +2434,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			float mult = V_min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
 			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
-				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
+				for (int r = 0; r < STAT_PROP_ALL_TOTAL; r++)
 				{
 					float dmg = m_PlayerDamage[i - 1].dmg[n][r];
 					if (dmg > 0)
@@ -2528,7 +2528,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			//			ALERT( at_console, "m_flFrameRate: %f\n", m_flFrameRate );
 			//pev->nextthink = gpGlobals->time + ((256 / m_flFrameRate) * pev->framerate);
 			pev->health = pev->max_health / 2; //Thothie - Dunno what this is about
-			DeleteMe = FALSE;				   //live until the body's dead
+			DeleteMe = false;				   //live until the body's dead
 
 			if (FStrEq(STRING(pev->classname), "msmonster_summoned"))
 				g_SummonedMonsters--;
@@ -2579,7 +2579,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			m_SkillLevel = 0; //Thothie APR2011_06 - attempt to make sure monster does not give additional skill post mortem
 		}
 		else
-			DeleteMe = TRUE; // Gibbed, destroy this entity
+			DeleteMe = true; // Gibbed, destroy this entity
 	}
 	if (DeleteMe)
 	{
@@ -2707,7 +2707,7 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 
 		//Look through the other SubStats for one that's not at the cap, yet.
 		//Not random, but good enough.
-		for (int i = 0; i < 1; i++)
+		for (unsigned int i = 0; i < 1; i++)
 		{
 			iStatType = (iStatType + 1) % 3;
 			CSubStat& SubStat = pStat->m_SubStats[iStatType];
@@ -2760,8 +2760,8 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
-	if (SubStat.Value > STATPROP_MAX_VALUE)
-		SubStat.Value = STATPROP_MAX_VALUE;
+	if (SubStat.Value > MAX_STAT_PROPVALUE)
+		SubStat.Value = MAX_STAT_PROPVALUE;
 	SubStat.Exp = 0;
 
 	//Thothie - why's this here twice? I dont see where oldval could change.
@@ -2795,7 +2795,7 @@ void CMSMonster::SetSpeed()
 	float SpeedPercent = 100.0f;
 	m_Framerate_Modifier = 1.0;
 
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		if (!m_Scripts[i]->VarExists("game.effect.id"))
 			continue;
@@ -2819,7 +2819,7 @@ void CMSMonster::SetSpeed()
 	//Can't move while a spell is preparing
 	//Thothie/Orochi APR2011_04 - undone
 	/*
-	 for (int i = 0; i < MAX_NPC_HANDS; i++)
+	 for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
 		if( Hand(i) && !Hand(i)->Spell_CanAttack() )
 			SpeedPercent = 0;  //Percentage of normal speed
 	*/
@@ -2869,7 +2869,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 
 	m_MenuCurrentOptions = NULL;
 
-	for (int i = 0; i < Menuoptions.size(); i++)
+	for (unsigned int i = 0; i < Menuoptions.size(); i++)
 	{
 		menuoption_t& MenuOption = Menuoptions[i];
 		if (MenuOption.Access != MOA_ALL)
@@ -2895,7 +2895,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 		MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
 					pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
 		MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
-					m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
+					m_MenuOptionsProtected[playerIndex] ? "true" : "false", entindex());
 		
 		pPlayer->InMenu = false;
 		mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
@@ -2973,7 +2973,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			static mslist<CGenericItem*> TotalFoundItems;
 			TotalFoundItems.clearitems();
 
-			for (int i = 0; i < Payments.size(); i++)
+			for (unsigned int i = 0; i < Payments.size(); i++)
 			{
 				msstring& Payment = Payments[i];
 				if (Payment.starts_with("gold"))
@@ -3019,7 +3019,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 						break;
 					}
 
-					for (int x = 0; x < FoundItems.size(); x++)
+					for (unsigned int x = 0; x < FoundItems.size(); x++)
 						TotalFoundItems.add(FoundItems[x]);
 				}
 			}
@@ -3035,7 +3035,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			if (PlayerCanPay)
 			{
 				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
+				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
 					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
 				//pPlayer->RemoveItem( TotalFoundItems[i] );
 			}
@@ -3131,7 +3131,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			static mslist<CGenericItem*> TotalFoundItems;
 			TotalFoundItems.clearitems();
 
-			for (int i = 0; i < Payments.size(); i++)
+			for (unsigned int i = 0; i < Payments.size(); i++)
 			{
 				msstring& Payment = Payments[i];
 				if (Payment.starts_with("gold"))
@@ -3177,7 +3177,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 						break;
 					}
 
-					for (int x = 0; x < FoundItems.size(); x++)
+					for (unsigned int x = 0; x < FoundItems.size(); x++)
 						TotalFoundItems.add(FoundItems[x]);
 				}
 			}
@@ -3193,7 +3193,7 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 			if (PlayerCanPay)
 			{
 				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
+				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
 					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
 				//pPlayer->RemoveItem( TotalFoundItems[i] );
 			}

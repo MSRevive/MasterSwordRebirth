@@ -24,13 +24,6 @@
 #include "saverestore.h"
 #include "doors.h"
 
-#define SF_BUTTON_DONTMOVE 1
-#define SF_ROTBUTTON_NOTSOLID 1
-#define SF_BUTTON_TOGGLE 32		  // button stays pushed until reactivated
-#define SF_BUTTON_SPARK_IF_OFF 64 // button sparks in OFF state
-#define SF_BUTTON_TOUCH_ONLY 256  // button only fires as a result of USE key.
-
-#define SF_GLOBAL_SET 1 // Set global state to initial state on spawn
 
 class CEnvGlobal : public CPointEntity
 {
@@ -62,7 +55,7 @@ LINK_ENTITY_TO_CLASS(env_global, CEnvGlobal);
 
 void CEnvGlobal::KeyValue(KeyValueData *pkvd)
 {
-	pkvd->fHandled = TRUE;
+	pkvd->fHandled = true;
 
 	if (FStrEq(pkvd->szKeyName, "globalstate")) // State name
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
@@ -147,17 +140,15 @@ void CMultiSource::KeyValue(KeyValueData *pkvd)
 		FStrEq(pkvd->szKeyName, "value1") ||
 		FStrEq(pkvd->szKeyName, "value2") ||
 		FStrEq(pkvd->szKeyName, "value3"))
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else if (FStrEq(pkvd->szKeyName, "globalstate"))
 	{
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
-
-#define SF_MULTI_INIT 1
 
 void CMultiSource::Spawn()
 {
@@ -402,32 +393,32 @@ void CBaseButton::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "changetarget"))
 	{
 		m_strChangeTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_sound"))
 	{
 		m_bLockedSound = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_sentence"))
 	{
 		m_bLockedSentence = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlocked_sound"))
 	{
 		m_bUnlockedSound = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlocked_sentence"))
 	{
 		m_bUnlockedSentence = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -531,8 +522,8 @@ void CBaseButton::Spawn()
 	if (((m_vecPosition2 - m_vecPosition1).Length() < 1) || (pev->spawnflags & SF_BUTTON_DONTMOVE))
 		m_vecPosition2 = m_vecPosition1;
 
-	m_fStayPushed = (m_flWait == -1 ? TRUE : FALSE);
-	m_fRotating = FALSE;
+	m_fStayPushed = (m_flWait == -1 ? true : false);
+	m_fRotating = false;
 
 	// if the button is flagged for USE button activation only, take away it's touch function and add a use function
 
@@ -736,7 +727,7 @@ void CBaseButton::ButtonTouch(CBaseEntity *pOther)
 	if (!UTIL_IsMasterTriggered(m_sMaster, pOther))
 	{
 		// play button locked sound
-		PlayLockSounds(pev, &m_ls, TRUE, TRUE);
+		PlayLockSounds(pev, &m_ls, true, true);
 		return;
 	}
 
@@ -763,17 +754,19 @@ void CBaseButton::ButtonActivate()
 	if (!UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
 	{
 		// button is locked, play locked sound
-		PlayLockSounds(pev, &m_ls, TRUE, TRUE);
+		PlayLockSounds(pev, &m_ls, true, true);
 		return;
 	}
 	else
 	{
 		// button is unlocked, play unlocked sound
-		PlayLockSounds(pev, &m_ls, FALSE, TRUE);
+		PlayLockSounds(pev, &m_ls, false, true);
 	}
 
 	ASSERT(m_toggle_state == TS_AT_BOTTOM);
 	m_toggle_state = TS_GOING_UP;
+
+
 
 	SetMoveDone(&CBaseButton::TriggerAndWait);
 	if (!m_fRotating)
@@ -939,8 +932,8 @@ void CRotButton::Spawn(void)
 	m_vecAngle2 = pev->angles + pev->movedir * m_flMoveDistance;
 	ASSERTSZ(m_vecAngle1 != m_vecAngle2, "rotating button start/end positions are equal");
 
-	m_fStayPushed = (m_flWait == -1 ? TRUE : FALSE);
-	m_fRotating = TRUE;
+	m_fStayPushed = (m_flWait == -1 ? true : false);
+	m_fRotating = true;
 
 	// if the button is flagged for USE button activation only, take away it's touch function and add a use function
 	if (!FBitSet(pev->spawnflags, SF_BUTTON_TOUCH_ONLY))
@@ -958,7 +951,7 @@ void CRotButton::Spawn(void)
 // This will disable use and make the button solid
 // rotating buttons were made SOLID_NOT by default since their were some
 // collision problems with them...
-#define SF_MOMENTARY_DOOR 0x0001
+
 
 class CMomentaryRotButton : public CBaseToggle
 {
@@ -991,8 +984,8 @@ public:
 	int m_lastUsed;
 	int m_direction;
 	float m_returnSpeed;
-	vec3_t m_start;
-	vec3_t m_end;
+	Vector m_start;
+	Vector m_end;
 	int m_sounds;
 };
 TYPEDESCRIPTION CMomentaryRotButton::m_SaveData[] =
@@ -1050,12 +1043,12 @@ void CMomentaryRotButton::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "returnspeed"))
 	{
 		m_returnSpeed = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -1104,11 +1097,11 @@ void CMomentaryRotButton::UpdateAllButtons(float value, int start)
 
 void CMomentaryRotButton::UpdateSelf(float value)
 {
-	BOOL fplaysound = FALSE;
+	BOOL fplaysound = false;
 
 	if (!m_lastUsed)
 	{
-		fplaysound = TRUE;
+		fplaysound = true;
 		m_direction = -m_direction;
 	}
 	m_lastUsed = 1;
@@ -1271,7 +1264,7 @@ void CEnvSpark::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "MaxDelay"))
 	{
 		m_flDelay = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "style") ||
 			 FStrEq(pkvd->szKeyName, "height") ||
@@ -1279,7 +1272,7 @@ void CEnvSpark::KeyValue(KeyValueData *pkvd)
 			 FStrEq(pkvd->szKeyName, "value1") ||
 			 FStrEq(pkvd->szKeyName, "value2") ||
 			 FStrEq(pkvd->szKeyName, "value3"))
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	else
 		CBaseEntity::KeyValue(pkvd);
 }
@@ -1302,9 +1295,6 @@ void EXPORT CEnvSpark::SparkStop(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 	SetUse(&CEnvSpark::SparkStart);
 	SetThink(NULL);
 }
-
-#define SF_BTARGET_USE 0x0001
-#define SF_BTARGET_ON 0x0002
 
 class CButtonTarget : public CBaseEntity
 {

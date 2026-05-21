@@ -169,7 +169,7 @@ void CContainerPanel::DropAllSelected()
 {
 	mslist<VGUI_ItemButton *> vSelectedItems;
 	GetSelectedItems( vSelectedItems );
-	for(int i = 0; i < vSelectedItems.size(); i++)
+	for(unsigned int i = 0; i < vSelectedItems.size(); i++)
 	{
 		ServerCmd( msstring("drop ") + (int)vSelectedItems[i]->m_Data.ID + "\n" );
 	}
@@ -293,13 +293,13 @@ bool CContainerPanel::GearItemClicked(ulong ID)
 	//Extract the IDs of the selected items.  I can't keep the list of selected items because the itembuttons get
 	//modified when I start moving items around
 	/*mslist<ulong> SelectedIDs;
-	 for (int i = 0; i < SelectedItems.size(); i++) 
+	 for (unsigned int i = 0; i < SelectedItems.size(); i++) 
 	{
 		SelectedIDs.push_back( SelectedItems[i]->m_Data.ID );
 		SelectedItems[i]->Select( false );
 	}*/
 
-	for (int i = 0; i < SelectedItems.size(); i++)
+	for (unsigned int i = 0; i < SelectedItems.size(); i++)
 	{
 		CGenericItem *pItem = MSUtil_GetItemByID(SelectedItems[i]->m_Data.ID, &player);
 		if (!pItem)
@@ -358,7 +358,7 @@ void CContainerPanel::Open(void)
 	VGUI_ContainerPanel::Open();
 
 	//Select the open pack
-	for (int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
+	for (unsigned int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
 	{
 		if (player.HasConditions(MONSTER_OPENCONTAINER))
 		{

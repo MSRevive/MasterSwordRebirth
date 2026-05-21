@@ -7,21 +7,31 @@
 
 #pragma once
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
-
-#ifndef PITCH
+//#ifndef PITCH
 // MOVEMENT INFO
 // up / down
-#define PITCH 0
-// left / right
-#define YAW 1
-// fall over
-#define ROLL 2
-#endif
+enum {
+	PITCH = 0,
+	// left / right
+	YAW = 1,
+	// fall over
+	ROLL = 2
+};
+//#endif
 
-#define FDotProduct(a, b) (fabs((a[0]) * (b[0])) + fabs((a[1]) * (b[1])) + fabs((a[2]) * (b[2])))
+#undef PLANE_ANYZ
+
+enum planes_e {
+	PLANE_X = 0,
+	PLANE_Y = 1,
+	PLANE_Z = 2,
+	PLANE_ANYZ = 5
+};
+
+template <typename Type>
+inline Type FDotProduct(const Type a, const Type b) {
+	return fabs(a[0] * b[0]) + fabs(a[1] * b[1]) + fabs(a[2] * b[2]);
+}
 
 void AngleMatrix(const float *angles, float (*matrix)[4]);
 bool VectorCompare (const float *v1, const float *v2);

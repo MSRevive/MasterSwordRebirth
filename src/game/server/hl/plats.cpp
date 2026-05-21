@@ -28,8 +28,10 @@
 
 static void PlatSpawnInsideTrigger(entvars_t *pevPlatform);
 
-#define SF_PLAT_TOGGLE 0x0001
-#define SF_PLAT_ADJUST 0x0002 //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
+enum sf_plat_e {
+	SF_PLAT_TOGGLE = 0x0001,
+	SF_PLAT_ADJUST = 0x0002 //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
+};
 
 class CBasePlatTrain : public CBaseToggle
 {
@@ -39,9 +41,9 @@ public:
 	void Precache(void);
 
 	// This is done to fix spawn flag collisions between this class and a derived class
-	virtual BOOL IsTogglePlat(void) { return (pev->spawnflags & SF_PLAT_TOGGLE) ? TRUE : FALSE; }
+	virtual BOOL IsTogglePlat(void) { return (pev->spawnflags & SF_PLAT_TOGGLE) ? true : false; }
 
-	virtual BOOL IsStuckAdjust(void) { return (pev->spawnflags & SF_PLAT_ADJUST) ? TRUE : FALSE; } //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
+	virtual BOOL IsStuckAdjust(void) { return (pev->spawnflags & SF_PLAT_ADJUST) ? true : false; } //MAR2010_10 - Thothie - adjust platform for stuck bugs when reach top
 
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
@@ -66,37 +68,37 @@ void CBasePlatTrain ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "lip"))
 	{
 		m_flLip = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "height"))
 	{
 		m_flHeight = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "rotation"))
 	{
 		m_vecFinalAngle.x = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
 	{
 		m_bStopSnd = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "volume"))
 	{
 		m_volume = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -396,7 +398,7 @@ void CFuncPlat ::PlatUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	if (IsTogglePlat())
 	{
 		// Top is off, bottom is on
-		BOOL on = (m_toggle_state == TS_AT_BOTTOM) ? TRUE : FALSE;
+		BOOL on = (m_toggle_state == TS_AT_BOTTOM) ? true : false;
 
 		if (!ShouldToggle(useType, on))
 			return;
@@ -649,7 +651,7 @@ void CFuncTrain ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBasePlatTrain::KeyValue(pkvd);
@@ -791,7 +793,7 @@ void CFuncTrain ::Activate(void)
 	// Not yet active, so teleport to first target
 	if (!m_activated)
 	{
-		m_activated = TRUE;
+		m_activated = true;
 		entvars_t *pevTarg = VARS(FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->target)));
 
 		pev->target = pevTarg->target;
@@ -843,7 +845,7 @@ void CFuncTrain ::Spawn(void)
 	UTIL_SetSize(pev, pev->mins, pev->maxs);
 	UTIL_SetOrigin(pev, pev->origin);
 
-	m_activated = FALSE;
+	m_activated = false;
 
 	if (m_volume == 0)
 		m_volume = 0.85;
@@ -932,33 +934,33 @@ void CFuncTrackTrain ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "wheels"))
 	{
 		m_length = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "height"))
 	{
 		m_height = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "startspeed"))
 	{
 		m_startSpeed = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		m_sounds = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "volume"))
 	{
 		m_flVolume = (float)(atoi(pkvd->szValue));
 		m_flVolume *= 0.1;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "bank"))
 	{
 		m_flBank = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -1239,7 +1241,7 @@ void CFuncTrackTrain ::Next(void)
 			}
 		}
 		SetThink(&CFuncTrackTrain::Next);
-		NextThink(pev->ltime + time, TRUE);
+		NextThink(pev->ltime + time, true);
 	}
 	else // end of path, stop
 	{
@@ -1260,7 +1262,7 @@ void CFuncTrackTrain ::Next(void)
 			time = distance / m_oldSpeed;
 			pev->velocity = pev->velocity * (m_oldSpeed / distance);
 			SetThink(&CFuncTrackTrain::DeadEnd);
-			NextThink(pev->ltime + time, FALSE);
+			NextThink(pev->ltime + time, false);
 		}
 		else
 		{
@@ -1286,7 +1288,7 @@ void CFuncTrackTrain::DeadEnd(void)
 		{
 			do
 			{
-				pNext = pTrack->ValidPath(pTrack->GetPrevious(), TRUE);
+				pNext = pTrack->ValidPath(pTrack->GetPrevious(), true);
 				if (pNext)
 					pTrack = pNext;
 			} while (pNext);
@@ -1295,7 +1297,7 @@ void CFuncTrackTrain::DeadEnd(void)
 		{
 			do
 			{
-				pNext = pTrack->ValidPath(pTrack->GetNext(), TRUE);
+				pNext = pTrack->ValidPath(pTrack->GetNext(), true);
 				if (pNext)
 					pTrack = pNext;
 			} while (pNext);
@@ -1327,7 +1329,7 @@ BOOL CFuncTrackTrain ::OnControls(entvars_t *pevTest)
 	Vector offset = pevTest->origin - pev->origin;
 
 	if (pev->spawnflags & SF_TRACKTRAIN_NOCONTROL)
-		return FALSE;
+		return false;
 
 	// Transform offset into local coordinates
 	UTIL_MakeVectors(pev->angles);
@@ -1338,9 +1340,9 @@ BOOL CFuncTrackTrain ::OnControls(entvars_t *pevTest)
 
 	if (local.x >= m_controlMins.x && local.y >= m_controlMins.y && local.z >= m_controlMins.z &&
 		local.x <= m_controlMaxs.x && local.y <= m_controlMaxs.y && local.z <= m_controlMaxs.z)
-		return TRUE;
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 void CFuncTrackTrain ::Find(void)
@@ -1372,7 +1374,7 @@ void CFuncTrackTrain ::Find(void)
 	if (pev->spawnflags & SF_TRACKTRAIN_NOPITCH)
 		pev->angles.x = 0;
 	UTIL_SetOrigin(pev, nextPos);
-	NextThink(pev->ltime + 0.1, FALSE);
+	NextThink(pev->ltime + 0.1, false);
 	SetThink(&CFuncTrackTrain::Next);
 	pev->speed = m_startSpeed;
 
@@ -1421,14 +1423,14 @@ void CFuncTrackTrain ::NearestPath(void)
 
 	if (pev->speed != 0)
 	{
-		NextThink(pev->ltime + 0.1, FALSE);
+		NextThink(pev->ltime + 0.1, false);
 		SetThink(&CFuncTrackTrain::Next);
 	}
 }
 
 void CFuncTrackTrain::OverrideReset(void)
 {
-	NextThink(pev->ltime + 0.1, FALSE);
+	NextThink(pev->ltime + 0.1, false);
 	SetThink(&CFuncTrackTrain::NearestPath);
 }
 
@@ -1486,7 +1488,7 @@ void CFuncTrackTrain ::Spawn(void)
 	m_controlMaxs.z += 72;
 	// start trains on the next frame, to make sure their targets have had
 	// a chance to spawn/activate
-	NextThink(pev->ltime + 0.1, FALSE);
+	NextThink(pev->ltime + 0.1, false);
 	SetThink(&CFuncTrackTrain::Find);
 	Precache();
 }
@@ -1621,7 +1623,7 @@ public:
 	virtual void HitTop(void);
 	void Touch(CBaseEntity *pOther);
 	virtual void UpdateAutoTargets(int toggleState);
-	virtual BOOL IsTogglePlat(void) { return TRUE; }
+	virtual BOOL IsTogglePlat(void) { return true; }
 
 	void DisableUse(void) { m_use = 0; }
 	void EnableUse(void) { m_use = 1; }
@@ -1713,17 +1715,17 @@ void CFuncTrackChange ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "train"))
 	{
 		m_trainName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "toptrack"))
 	{
 		m_trackTopName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else if (FStrEq(pkvd->szKeyName, "bottomtrack"))
 	{
 		m_trackBottomName = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 	{
@@ -1810,7 +1812,7 @@ void CFuncTrackChange ::UpdateTrain(Vector &dest)
 
 	m_train->pev->velocity = pev->velocity;
 	m_train->pev->avelocity = pev->avelocity;
-	m_train->NextThink(m_train->pev->ltime + time, FALSE);
+	m_train->NextThink(m_train->pev->ltime + time, false);
 
 	// Attempt at getting the train to rotate properly around the origin of the trackchange
 	if (time <= 0)
@@ -2122,7 +2124,7 @@ void CGunTarget::Spawn(void)
 	pev->takedamage = DAMAGE_NO;
 	pev->flags |= FL_MONSTER;
 
-	m_on = FALSE;
+	m_on = false;
 	pev->max_health = pev->health;
 
 	if (pev->spawnflags & FGUNTARGET_START_ON)

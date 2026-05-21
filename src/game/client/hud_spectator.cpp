@@ -43,10 +43,10 @@ extern void V_ResetChaseCam();
 extern void V_GetChasePos(int target, float *cl_angles, float *origin, float *angles);
 extern float *GetClientColor(int clientIndex);
 
-extern vec3_t v_origin;	   // last view origin
-extern vec3_t v_angles;	   // last view angle
-extern vec3_t v_cl_angles; // last client/mouse angle
-extern vec3_t v_sim_org;   // last sim origin
+extern Vector v_origin;	   // last view origin
+extern Vector v_angles;	   // last view angle
+extern Vector v_cl_angles; // last client/mouse angle
+extern Vector v_sim_org;   // last sim origin
 
 void SpectatorMode(void)
 {
@@ -65,13 +65,13 @@ void SpectatorMode(void)
 
 void SpectatorSpray(void)
 {
-	vec3_t forward;
+	Vector forward;
 	char string[128];
 
 	if (!gEngfuncs.IsSpectateOnly())
 		return;
 
-	AngleVectors(v_angles, &forward, NULL, NULL);
+	AngleVectors(v_angles, &forward, nullptr, nullptr);
 	VectorScale(forward, 128, forward);
 	VectorAdd(forward, v_origin, forward);
 	pmtrace_t *trace = gEngfuncs.PM_TraceLine(v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1);
@@ -174,16 +174,18 @@ int CHudSpectator::Init()
 
 void UTIL_StringToVector(float *pVector, const char *pString)
 {
-	char *pstr, *pfront, tempString[128];
+	
+	const unsigned int bufferLength = 128;
+	char* pstr, * pfront, tempString[bufferLength] = { 0 };
 	int j;
 
-	 strncpy(tempString,  pString, sizeof(tempString) );
-	pstr = pfront = tempString;
+	strcpy(tempString, pString);
+	pstr = tempString;
+	pfront = tempString;
 
 	for (j = 0; j < 3; j++)
 	{
 		pVector[j] = atof(pfront);
-
 		while (*pstr && *pstr != ' ')
 			pstr++;
 		if (!*pstr)
@@ -250,6 +252,7 @@ int UTIL_FindEntityInMap(const char *name, float *origin, float *angle)
 			};
 
 			 strncpy(keyname,  token, sizeof(keyname) );
+			 keyname[255] = '\0';
 
 			// another hack to fix keynames with trailing spaces
 			n = strlen(keyname);
@@ -386,7 +389,7 @@ int CHudSpectator::Draw(float flTime)
 	int lx;
 
 	char string[256];
-	float *color;
+	float *color = nullptr;
 
 	// draw only in spectator mode
 	if (!g_iUser1)
@@ -407,12 +410,12 @@ int CHudSpectator::Draw(float flTime)
 	// if user moves in map mode, change map origin
 	if ((m_moveDelta != 0.0f) && (g_iUser1 != OBS_ROAMING))
 	{
-		vec3_t right;
+		Vector right;
 		AngleVectors(v_angles, NULL, &right, NULL);
 		VectorNormalize(right);
 		VectorScale(right, m_moveDelta, right);
 
-		VectorAdd(m_mapOrigin, right, m_mapOrigin)
+		VectorAdd(m_mapOrigin, right, m_mapOrigin);
 	}
 
 	// Only draw the icon names only if map mode is in Main Mode
@@ -426,14 +429,14 @@ int CHudSpectator::Draw(float flTime)
 	gViewPort->GetAllPlayersInfo();
 
 	// loop through all the players and draw additional infos to their sprites on the map
-	for (int i = 0; i < MAX_PLAYERS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYERS; i++)
 	{
 
 		if (m_vPlayerPos[i][2] < 0) // marked as invisible ?
 			continue;
 
 		// check if name would be in inset window
-		if (m_pip->value != INSET_OFF)
+		if ((int)m_pip->value != INSET_OFF)
 		{
 			if (m_vPlayerPos[i][0] > XRES(m_OverviewData.insetWindowX) &&
 				m_vPlayerPos[i][1] > YRES(m_OverviewData.insetWindowY) &&
@@ -1054,7 +1057,7 @@ void CHudSpectator::DrawOverviewLayer()
 	float screenaspect, xs, ys, xStep, yStep, x, y, z;
 	int ix, iy, i, xTiles, yTiles, frame;
 
-	qboolean hasMapImage = m_MapSprite ? TRUE : FALSE;
+	qboolean hasMapImage = m_MapSprite ? true : false;
 	model_t *dummySprite = (struct model_s *)gEngfuncs.GetSpritePointer(m_hsprUnkownMap);
 
 	if (hasMapImage)
@@ -1172,7 +1175,7 @@ void CHudSpectator::DrawOverviewEntities()
 {
 	int i, ir, ig, ib;
 	struct model_s *hSpriteModel;
-	vec3_t origin, angles, point, forward, right, left, up, world, screen, offset;
+	Vector origin, angles, point, forward, right, left, up, world, screen, offset;
 	float x, y, z, r, g, b, sizeScale = 4.0f;
 	cl_entity_t *ent;
 	float rmatrix[3][4]; // transformation matrix
@@ -1307,11 +1310,11 @@ void CHudSpectator::DrawOverviewEntities()
 
 	// get current camera position and angle
 
-	if (m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
+	if ((int)m_pip->value == INSET_IN_EYE || g_iUser1 == OBS_IN_EYE)
 	{
 		V_GetInEyePos(g_iUser2, origin, angles);
 	}
-	else if (m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
+	else if ((int)m_pip->value == INSET_CHASE_FREE || g_iUser1 == OBS_CHASE_FREE)
 	{
 		V_GetChasePos(g_iUser2, v_cl_angles, origin, angles);
 	}
@@ -1321,7 +1324,7 @@ void CHudSpectator::DrawOverviewEntities()
 		VectorCopy(v_cl_angles, angles);
 	}
 	else
-		V_GetChasePos(g_iUser2, NULL, origin, angles);
+		V_GetChasePos(g_iUser2, nullptr, origin, angles);
 
 	// draw camera sprite
 
@@ -1337,7 +1340,7 @@ void CHudSpectator::DrawOverviewEntities()
 
 	gEngfuncs.pTriAPI->Color4f(r, g, b, 1.0);
 
-	AngleVectors(angles, &forward, NULL, NULL);
+	AngleVectors(angles, &forward, nullptr, nullptr);
 	VectorScale(forward, 512.0f, forward);
 
 	offset[0] = 0.0f;
@@ -1370,10 +1373,10 @@ void CHudSpectator::DrawOverview()
 		return;
 
 	// Only draw the overview if Map Mode is selected for this view
-	if (m_iDrawCycle == 0 && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
+	if (!m_iDrawCycle && ((g_iUser1 != OBS_MAP_FREE) && (g_iUser1 != OBS_MAP_CHASE)))
 		return;
 
-	if (m_iDrawCycle == 1 && m_pip->value < INSET_MAP_FREE)
+	if (m_iDrawCycle && (int)m_pip->value < INSET_MAP_FREE)
 		return;
 
 	DrawOverviewLayer();
@@ -1385,7 +1388,7 @@ void CHudSpectator::CheckOverviewEntities()
 	double time = gEngfuncs.GetClientTime();
 
 	// removes old entities from list
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
 	{
 		// remove entity from list if it is too old
 		if (m_OverviewEntities[i].killTime < time)
@@ -1445,7 +1448,7 @@ void CHudSpectator::DeathMessage(int victim)
 
 bool CHudSpectator::AddOverviewEntityToList(HLSPRITE sprite, cl_entity_t *ent, double killTime)
 {
-	for (int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
+	for (unsigned int i = 0; i < MAX_OVERVIEW_ENTITIES; i++)
 	{
 		// find empty entity slot
 		if (m_OverviewEntities[i].entity == NULL)
@@ -1465,13 +1468,13 @@ void CHudSpectator::CheckSettings()
 
 	m_pip->value = (int)m_pip->value;
 
-	if ((g_iUser1 < OBS_MAP_FREE) && (m_pip->value == INSET_CHASE_FREE || m_pip->value == INSET_IN_EYE))
+	if ((g_iUser1 < OBS_MAP_FREE) && ((int)m_pip->value == INSET_CHASE_FREE || (int)m_pip->value == INSET_IN_EYE))
 	{
 		// otherwise both would show in World picures
 		m_pip->value = INSET_MAP_FREE;
 	}
 
-	if ((g_iUser1 >= OBS_MAP_FREE) && (m_pip->value >= INSET_MAP_FREE))
+	if ((g_iUser1 >= OBS_MAP_FREE) && ((int)m_pip->value >= INSET_MAP_FREE))
 	{
 		// both would show map views
 		m_pip->value = INSET_CHASE_FREE;
@@ -1520,7 +1523,7 @@ void CHudSpectator::CheckSettings()
 		m_pip->value = INSET_OFF;
 
 	// draw small border around inset view, adjust upper black bar
-	gViewPort->m_pSpectatorPanel->EnableInsetView(m_pip->value != INSET_OFF);
+	gViewPort->m_pSpectatorPanel->EnableInsetView((int)m_pip->value != INSET_OFF);
 }
 
 int CHudSpectator::ToggleInset(bool allowOff)

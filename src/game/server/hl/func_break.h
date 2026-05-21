@@ -35,7 +35,7 @@ typedef enum
 	matLastMaterial
 } Materials;
 
-#define NUM_SHARDS 6 // this many shards spawned when breakable objects break;
+constexpr int NUM_SHARDS = 6; // this many shards spawned when breakable objects break;
 
 class CBreakable : public CBaseDelay
 {

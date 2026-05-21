@@ -1,4 +1,4 @@
-#define SKELETON_MODEL "models/monsters/skeleton.mdl"
+constexpr const char* SKELETON_MODEL = "models/monsters/skeleton.mdl";
 
 class CCorpse : public CMSMonster
 {
@@ -9,12 +9,12 @@ public:
 	CBasePlayer* pPlayerSource;
 	//Overridden
 	int ObjectCaps(void) { return FCAP_DONT_SAVE; }
-	int MSProperties() { return MS_CORPSE; }
+	int MSProperties() { return ITEM_MS_CORPSE; }
 	void Spawn();
 	bool AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, int ForceHand = -1);
 	bool RemoveItem(CGenericItem* pItem);
-	BOOL HasHumanGibs() { return TRUE; }
-	BOOL HasAlienGibs() { return FALSE; }
+	BOOL HasHumanGibs() { return true; }
+	BOOL HasAlienGibs() { return false; }
 	int BloodColor(void) { return BLOOD_COLOR_RED; }
 	bool ShouldGibMonster(int iGib) { return true; }
 	int Classify() { return CLASS_NONE; }

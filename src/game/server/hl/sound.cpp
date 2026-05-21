@@ -17,8 +17,6 @@
 //=========================================================
 
 #define VALVE_DLL 1
-#define CHAR_TEX_SNOW 'N'
-
 #include "msdllheaders.h"
 #include "weapons.h"
 #include "player.h"
@@ -29,6 +27,8 @@
 #ifdef POSIX
 #include <stdlib.h>
 #endif
+
+constexpr unsigned int MAX_CDPVPRESET = 27;
 
 // ==================== GENERIC AMBIENT SOUND ======================================
 // THOTHIE: I cut and pasted from the original HL1SDK's SOUND.CPP the entire Ambient Generic section in an effort to restore functionality
@@ -80,11 +80,9 @@ typedef struct dynpitchvol
 
 } dynpitchvol_t;
 
-#define CDPVPRESETMAX 27
-
 // presets for runtime pitch and vol modulation of ambient sounds
 
-dynpitchvol_t rgdpvpreset[CDPVPRESETMAX] =
+dynpitchvol_t rgdpvpreset[MAX_CDPVPRESET] =
 	{
 		// pitch	pstart	spinup	spindwn	volrun	volstrt	fadein	fadeout	lfotype	lforate	modptch modvol	cspnup
 		{1, 255, 75, 95, 95, 10, 1, 50, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -133,8 +131,8 @@ public:
 	float m_flAttenuation; // attenuation value
 	dynpitchvol_t m_dpv;
 
-	BOOL m_fActive;	 // only TRUE when the entity is playing a looping sound
-	BOOL m_fLooping; // TRUE when the sound played will loop
+	BOOL m_fActive;	 // only true when the entity is playing a looping sound
+	BOOL m_fLooping; // true when the sound played will loop
 };
 
 LINK_ENTITY_TO_CLASS(ambient_generic, CAmbientGeneric); //Thothie - attempting to build new amb generic ms MSMapEnts - so this needs to be altered
@@ -211,12 +209,12 @@ void CAmbientGeneric ::Spawn(void)
 
 	SetUse(&CAmbientGeneric::ToggleUse);
 
-	m_fActive = FALSE;
+	m_fActive = false;
 
 	if (FBitSet(pev->spawnflags, AMBIENT_SOUND_NOT_LOOPING))
-		m_fLooping = FALSE;
+		m_fLooping = false;
 	else
-		m_fLooping = TRUE;
+		m_fLooping = true;
 	Precache();
 }
 
@@ -236,7 +234,7 @@ void CAmbientGeneric ::Precache(void)
 	{
 		// start the sound ASAP
 		if (m_fLooping)
-			m_fActive = TRUE;
+			m_fActive = true;
 	}
 	if (m_fActive)
 	{
@@ -258,7 +256,7 @@ void CAmbientGeneric ::RampThink(void)
 	int pitch = m_dpv.pitch;
 	int vol = m_dpv.vol;
 	int flags = 0;
-	int fChanged = 0; // FALSE if pitch and vol remain unchanged this round
+	int fChanged = 0; // false if pitch and vol remain unchanged this round
 	int prev;
 
 	if (!m_dpv.spinup && !m_dpv.spindown && !m_dpv.fadein && !m_dpv.fadeout && !m_dpv.lfotype)
@@ -462,7 +460,7 @@ void CAmbientGeneric ::InitModulationParms(void)
 		m_dpv.volrun = 0;
 
 	// get presets
-	if (m_dpv.preset != 0 && m_dpv.preset <= CDPVPRESETMAX)
+	if (m_dpv.preset != 0 && m_dpv.preset <= MAX_CDPVPRESET)
 	{
 		// load preset values
 		m_dpv = rgdpvpreset[m_dpv.preset - 1];
@@ -593,7 +591,7 @@ void CAmbientGeneric ::ToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 
 	// Toggle
 
-	// m_fActive is TRUE only if a looping sound is playing.
+	// m_fActive is true only if a looping sound is playing.
 
 	if (m_fActive)
 	{ // turn sound off
@@ -624,7 +622,7 @@ void CAmbientGeneric ::ToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		}
 		else
 		{
-			m_fActive = FALSE;
+			m_fActive = false;
 
 			// HACKHACK - this makes the code in Precache() work properly after a save/restore
 			pev->spawnflags |= AMBIENT_SOUND_START_SILENT;
@@ -653,7 +651,7 @@ void CAmbientGeneric ::ToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, 
 		// and then restarted.
 
 		if (m_fLooping)
-			m_fActive = TRUE;
+			m_fActive = true;
 		else
 			// shut sound off now - may be interrupting a long non-looping sound
 			UTIL_EmitAmbientSound(ENT(pev), pev->origin, szSoundFile,
@@ -681,14 +679,14 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "preset"))
 	{
 		m_dpv.preset = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// pitchrun
 	else if (FStrEq(pkvd->szKeyName, "pitch"))
 	{
 		m_dpv.pitchrun = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 
 		if (m_dpv.pitchrun > 255)
 			m_dpv.pitchrun = 255;
@@ -700,7 +698,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "pitchstart"))
 	{
 		m_dpv.pitchstart = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 
 		if (m_dpv.pitchstart > 255)
 			m_dpv.pitchstart = 255;
@@ -721,7 +719,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.spinup > 0)
 			m_dpv.spinup = (101 - m_dpv.spinup) * 64;
 		m_dpv.spinupsav = m_dpv.spinup;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// spindown
@@ -737,7 +735,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.spindown > 0)
 			m_dpv.spindown = (101 - m_dpv.spindown) * 64;
 		m_dpv.spindownsav = m_dpv.spindown;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// volstart
@@ -752,7 +750,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 
 		m_dpv.volstart *= 10; // 0 - 100
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// fadein
@@ -768,7 +766,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.fadein > 0)
 			m_dpv.fadein = (101 - m_dpv.fadein) * 64;
 		m_dpv.fadeinsav = m_dpv.fadein;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// fadeout
@@ -784,7 +782,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.fadeout > 0)
 			m_dpv.fadeout = (101 - m_dpv.fadeout) * 64;
 		m_dpv.fadeoutsav = m_dpv.fadeout;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// lfotype
@@ -793,7 +791,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		m_dpv.lfotype = atoi(pkvd->szValue);
 		if (m_dpv.lfotype > 4)
 			m_dpv.lfotype = LFO_TRIANGLE;
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// lforate
@@ -808,7 +806,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 
 		m_dpv.lforate *= 256;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	// lfomodpitch
 	else if (FStrEq(pkvd->szKeyName, "lfomodpitch"))
@@ -819,7 +817,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.lfomodpitch < 0)
 			m_dpv.lfomodpitch = 0;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// lfomodvol
@@ -831,7 +829,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.lfomodvol < 0)
 			m_dpv.lfomodvol = 0;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 
 	// cspinup
@@ -843,7 +841,7 @@ void CAmbientGeneric ::KeyValue(KeyValueData *pkvd)
 		if (m_dpv.cspinup < 0)
 			m_dpv.cspinup = 0;
 
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -882,16 +880,16 @@ void CEnvSound ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "radius"))
 	{
 		m_flRadius = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	if (FStrEq(pkvd->szKeyName, "roomtype"))
 	{
 		m_flRoomtype = atof(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 }
 
-// returns TRUE if the given sound entity (pev) is in range
+// returns true if the given sound entity (pev) is in range
 // and can see the given player entity (pevTarget)
 
 BOOL FEnvSoundInRange(entvars_t *pev, entvars_t *pevTarget, float *pflRange)
@@ -908,7 +906,7 @@ BOOL FEnvSoundInRange(entvars_t *pev, entvars_t *pevTarget, float *pflRange)
 	// check if line of sight crosses water boundary, or is blocked
 
 	if ((tr.fInOpen && tr.fInWater) || tr.flFraction != 1)
-		return FALSE;
+		return false;
 
 	// calc range from sound entity to player
 
@@ -916,12 +914,12 @@ BOOL FEnvSoundInRange(entvars_t *pev, entvars_t *pevTarget, float *pflRange)
 	flRange = vecRange.Length();
 
 	if (pSound->m_flRadius < flRange)
-		return FALSE;
+		return false;
 
 	if (pflRange)
 		*pflRange = flRange;
 
-	return TRUE;
+	return true;
 }
 
 //
@@ -1045,25 +1043,25 @@ void CEnvSound ::Spawn()
 
 // ==================== SENTENCE GROUPS, UTILITY FUNCTIONS  ======================================
 
-#define CSENTENCE_LRU_MAX 32 // max number of elements per sentence group
+constexpr unsigned int CSENTENCE_LRU_MAX = 32; // max number of elements per sentence group
 
 // group of related sentences
 
 typedef struct sentenceg
 {
-	char szgroupname[CBSENTENCENAME_MAX];
+	char szgroupname[MAX_CBSENTENCENAME];
 	int count;
 	unsigned char rgblru[CSENTENCE_LRU_MAX];
 
 } SENTENCEG;
 
-#define CSENTENCEG_MAX 200 // max number of sentence groups
+constexpr unsigned int CSENTENCEG_MAX = 200; // max number of sentence groups
 // globals
 
 SENTENCEG rgsentenceg[CSENTENCEG_MAX];
 bool bSentencesInit = false;
 
-char gszallsentencenames[CVOXFILESENTENCEMAX][CBSENTENCENAME_MAX];
+char gszallsentencenames[MAX_CVOXFILESENTENCE][MAX_CBSENTENCENAME];
 int gcallsentences = 0;
 
 // randomize list of sentence name indices
@@ -1121,7 +1119,7 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 		ipick = count - 1;
 
 	strncpy(szfound, "!", 64);
-	strncat(szfound, szgroupname, CBSENTENCENAME_MAX);	
+	strncat(szfound, szgroupname, MAX_CBSENTENCENAME);	
 	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(szfound, sznum, sizeof(sznum));
 
@@ -1153,7 +1151,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 	unsigned char count;
 	char sznum[8];
 	unsigned char ipick;
-	int ffound = FALSE;
+	int ffound = false;
 
 	if (!bSentencesInit)
 		return -1;
@@ -1172,7 +1170,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 			{
 				ipick = plru[i];
 				plru[i] = 0xFF;
-				ffound = TRUE;
+				ffound = true;
 				break;
 			}
 
@@ -1181,7 +1179,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 		else
 		{
 			strncpy(szfound, "!", 64);
-			strncat(szfound, szgroupname, CBSENTENCENAME_MAX);
+			strncat(szfound, szgroupname, MAX_CBSENTENCENAME);
 			_snprintf(sznum, sizeof(sznum), "%i", ipick);
 			strncat(szfound, sznum, sizeof(sznum));
 			return ipick;
@@ -1304,7 +1302,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 		return;
 
 	strncpy(buffer, "!", sizeof(buffer));
-	strncat(buffer, rgsentenceg[isentenceg].szgroupname, CBSENTENCENAME_MAX);
+	strncat(buffer, rgsentenceg[isentenceg].szgroupname, MAX_CBSENTENCENAME);
 	_snprintf(sznum, sizeof(sznum), "%i", ipick);
 	strncat(buffer, sznum, sizeof(sznum));
 
@@ -1325,7 +1323,7 @@ void SENTENCEG_Init()
 	if (bSentencesInit)
 		return;
 
-	memset(gszallsentencenames, 0, CVOXFILESENTENCEMAX * CBSENTENCENAME_MAX);
+	memset(gszallsentencenames, 0, MAX_CVOXFILESENTENCE * MAX_CBSENTENCENAME);
 	gcallsentences = 0;
 
 	memset(rgsentenceg, 0, CSENTENCEG_MAX * sizeof(SENTENCEG));
@@ -1359,7 +1357,7 @@ void SENTENCEG_Init()
 		if (!buffer[j])
 			continue;
 
-		if (gcallsentences > CVOXFILESENTENCEMAX)
+		if (gcallsentences > MAX_CVOXFILESENTENCE)
 		{
 			ALERT(at_error, "Too many sentences in sentences.txt!\n");
 			break;
@@ -1369,10 +1367,10 @@ void SENTENCEG_Init()
 		buffer[j] = 0;
 		const char *pString = buffer + i;
 
-		if (strlen(pString) >= CBSENTENCENAME_MAX)
-			ALERT(at_warning, "Sentence %s longer than %d letters\n", pString, CBSENTENCENAME_MAX - 1);
+		if (strlen(pString) >= MAX_CBSENTENCENAME)
+			ALERT(at_warning, "Sentence %s longer than %d letters\n", pString, MAX_CBSENTENCENAME - 1);
 
-		strncpy(gszallsentencenames[gcallsentences++], pString, CBSENTENCENAME_MAX);
+		strncpy(gszallsentencenames[gcallsentences++], pString, MAX_CBSENTENCENAME);
 
 		j--;
 		if (j <= i)
@@ -1403,7 +1401,7 @@ void SENTENCEG_Init()
 				break;
 			}
 
-			strncpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]), CBSENTENCENAME_MAX);
+			strncpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]), MAX_CBSENTENCENAME);
 			rgsentenceg[isentencegs].count = 1;
 			strncpy(szgroup, &(buffer[i]), 64);
 
@@ -1528,11 +1526,9 @@ void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 // Used to detect the texture the player is standing on, map the
 // texture name to a material type.  Play footstep sound based
 // on material type.
-#define CTEXTURESMAX 512 // max number of textures loaded
-
-int gcTextures = 0;
-char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX]; // texture names
-char grgchTextureType[CTEXTURESMAX];				   // parallel array of texture types
+unsigned int gcTextures = 0;
+char grgszTextureName[MAX_CTEXTURES][MAX_CBTEXTURENAME]; // texture names
+char grgchTextureType[MAX_CTEXTURES];				   // parallel array of texture types
 
 // given texture name, find texture type
 // if not found, return type 'concrete'
@@ -1544,9 +1540,9 @@ char TEXTURETYPE_Find(char *name)
 {
 	// CONSIDER: pre-sort texture names and perform faster binary search here
 
-	for (int i = 0; i < gcTextures; i++)
+	for (unsigned int i = 0; i < gcTextures; i++)
 	{
-		if (!_strnicmp(name, &(grgszTextureName[i][0]), CBTEXTURENAMEMAX - 1))
+		if (!_strnicmp(name, &(grgszTextureName[i][0]), MAX_CBTEXTURENAME - 1))
 			return (grgchTextureType[i]);
 	}
 
@@ -1609,7 +1605,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr, Vector vecSrc, Vector vecEnd, int 
 				pTextureName++;
 			// '}}'
 			 strncpy(szbuffer,  pTextureName, sizeof(szbuffer) );
-			szbuffer[CBTEXTURENAMEMAX - 1] = 0;
+			szbuffer[MAX_CBTEXTURENAME - 1] = 0;
 
 			// ALERT ( at_console, "texture hit: %s\n", szbuffer);
 
@@ -1811,8 +1807,9 @@ void CSpeaker ::Spawn(void)
 	Precache();
 }
 
-#define ANNOUNCE_MINUTES_MIN 0.25
-#define ANNOUNCE_MINUTES_MAX 2.25
+
+constexpr float ANNOUNCE_MINUTES_MIN = 0.25;
+constexpr float ANNOUNCE_MINUTES_MAX = 2.25;
 static float g_talkWaitTime = 0.0f; // time delay until it's ok to speak: used so that two NPCs don't talk at once
 
 void CSpeaker ::Precache(void)
@@ -1915,7 +1912,7 @@ void CSpeaker ::ToggleUse(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 {
 	int fActive = (pev->nextthink > 0.0);
 
-	// fActive is TRUE only if an announcement is pending
+	// fActive is true only if an announcement is pending
 
 	if (useType != USE_TOGGLE)
 	{
@@ -1963,7 +1960,7 @@ void CSpeaker ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "preset"))
 	{
 		m_preset = atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
+		pkvd->fHandled = true;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);

@@ -316,7 +316,7 @@ TYPEDESCRIPTION gEntvarsDescription[] =
 		DEFINE_ENTITY_FIELD(radsuit_finished, FIELD_TIME),
 };
 
-#define ENTVARS_COUNT (sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]))
+constexpr unsigned int ENTVARS_COUNT = (sizeof(gEntvarsDescription) / sizeof(gEntvarsDescription[0]));
 
 #ifdef DEBUG
 edict_t *DBG_EntOfVars(const entvars_t *pev)
@@ -683,7 +683,7 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 			TokenizeString(m_scriptevent.c_str(), Tokens);
 			if (Tokens.size() > 1)
 			{
-				for (int i = 0; i < Tokens.size(); i++)
+				for (unsigned int i = 0; i < Tokens.size(); i++)
 				{
 					if (i > 0)
 						Params.add(Tokens[i].c_str());
@@ -711,7 +711,7 @@ void UTIL_DoTokenScriptEvent(const char *tokenevents, CBaseEntity *pTarget)
 			Params.clearitems();
 			if (Tokens.size() > 1)
 			{
-				for (int i = 0; i < Tokens.size(); i++)
+				for (unsigned int i = 0; i < Tokens.size(); i++)
 				{
 					if (i > 0)
 						Params.add(Tokens[i].c_str());
@@ -992,7 +992,13 @@ void UTIL_MakeAimVectors(const Vector &vecAngles)
 	MAKE_VECTORS(rgflVec);
 }
 
-#define SWAP(a, b, temp) ((temp) = (a), (a) = (b), (b) = (temp))
+//#define SWAP(a, b, temp) ((temp) = (a), (a) = (b), (b) = (temp))
+template <typename Type>
+inline void SWAP (Type &a, Type &b, Type &temp) {
+	temp = a;
+	a = b;
+	b = temp;
+}
 
 void UTIL_MakeInvVectors(const Vector &vec, globalvars_t *pgv)
 {
@@ -1058,7 +1064,7 @@ void UTIL_ScreenShake(const Vector &center, float amplitude, float frequency, fl
 {
 	int i;
 	float localAmplitude;
-	ScreenShake shake;
+	ScreenShake shake{};
 
 	shake.duration = FixedUnsigned16(duration, 1 << 12);  // 4.12 fixed
 	shake.frequency = FixedUnsigned16(frequency, 1 << 8); // 8.8 fixed
@@ -1339,12 +1345,12 @@ void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTER
 
 void UTIL_TraceLine(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr)
 {
-	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? TRUE : FALSE), pentIgnore, ptr);
+	TRACE_LINE(vecStart, vecEnd, (igmon == ignore_monsters ? true : false), pentIgnore, ptr);
 }
 
 void UTIL_TraceHull(const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr)
 {
-	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? TRUE : FALSE), hullNumber, pentIgnore, ptr);
+	TRACE_HULL(vecStart, vecEnd, (igmon == ignore_monsters ? true : false), hullNumber, pentIgnore, ptr);
 }
 
 void UTIL_TraceModel(const Vector &vecStart, const Vector &vecEnd, int hullNumber, edict_t *pentModel, TraceResult *ptr)
@@ -1496,15 +1502,15 @@ BOOL UTIL_ShouldShowBlood(int color)
 		if (color == BLOOD_COLOR_RED)
 		{
 			if (CVAR_GET_FLOAT("violence_hblood") != 0)
-				return TRUE;
+				return true;
 		}
 		else
 		{
 			if (CVAR_GET_FLOAT("violence_ablood") != 0)
-				return TRUE;
+				return true;
 		}
 	}
-	return FALSE;
+	return false;
 }
 
 int UTIL_PointContents(const Vector &vec)
@@ -1731,16 +1737,16 @@ BOOL UTIL_TeamsMatch(const char *pTeamName1, const char *pTeamName2)
 {
 	// Everyone matches unless it's teamplay
 	if (!g_pGameRules->IsTeamplay())
-		return TRUE;
+		return true;
 
 	// Both on a team?
 	if (*pTeamName1 != 0 && *pTeamName2 != 0)
 	{
 		if (!_stricmp(pTeamName1, pTeamName2)) // Same Team?
-			return TRUE;
+			return true;
 	}
 
-	return FALSE;
+	return false;
 }
 
 void UTIL_StringToVector(float *pVector, const char *pString)
@@ -1945,8 +1951,8 @@ void UTIL_Remove(CBaseEntity *pEntity)
 BOOL UTIL_IsValidEntity(edict_t *pent)
 {
 	if (!pent || pent->free || (pent->v.flags & FL_KILLME))
-		return FALSE;
-	return TRUE;
+		return false;
+	return true;
 }
 
 void UTIL_PrecacheOther(const char *szClassname)
@@ -2179,10 +2185,10 @@ unsigned short CSaveRestoreBuffer ::TokenHash(const char *pszToken)
 	for (int i = 0; i < m_pdata->tokenCount; i++)
 	{
 #if _DEBUG
-		static qboolean beentheredonethat = FALSE;
+		static qboolean beentheredonethat = false;
 		if (i > 50 && !beentheredonethat)
 		{
-			beentheredonethat = TRUE;
+			beentheredonethat = true;
 			ALERT(at_error, "CSaveRestoreBuffer :: TokenHash() is getting too full!");
 		}
 #endif
@@ -2375,7 +2381,7 @@ void EntvarsKeyvalue(entvars_t *pev, KeyValueData *pkvd)
 				ALERT(at_error, "Bad field in entity!!\n");
 				break;
 			}
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 			return;
 		}
 	}
@@ -2503,9 +2509,9 @@ void CSave ::BufferString(char *pdata, int len)
 	BufferData(&c, 1);		// Write a null terminator
 }
 
-int CSave ::DataEmpty(const char *pdata, int size)
+int CSave ::DataEmpty(const char *pdata, unsigned int size)
 {
-	for (int i = 0; i < size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		if (pdata[i])
 			return 0;

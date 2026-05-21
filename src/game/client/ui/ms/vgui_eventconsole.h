@@ -89,7 +89,7 @@ public:
 		m_ScrollBarWidth = m_ScrollPanel->getVerticalScrollBar()->getWide();
 		int ScrollClientWidth = m_ScrollPanel->getWide() - m_ScrollBarWidth;
 
-		for (int i = 0; i < EVENTCON_PREF_MAXLINES; i++) 
+		for (unsigned int i = 0; i < EVENTCON_PREF_MAXLINES; i++) 
 		{
 			m_Line[i] = new EventConsoleText( 0, 0, ScrollClientWidth, EVENTCON_LINE_SIZE_Y, NULL );
 			if( TextFont ) 
@@ -109,7 +109,7 @@ public:
 		if (!Text || !Text[0])
 			return;
 
-		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
+		unsigned int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
 
 		if( m_TotalLines >= MaxLines )
 		{
@@ -121,7 +121,7 @@ public:
 		}
 
 		// The newest line is always at logical index (m_TotalLines - 1)
-		int iNewLine = m_TotalLines - 1;
+		unsigned int iNewLine = m_TotalLines - 1;
 
 		// If the active line was tracking the bottom, keep it there
 		if( m_ActiveLine >= (iNewLine - 1) )
@@ -129,7 +129,7 @@ public:
 
 		// Reposition all active lines in the scroll panel
 		// (VGUI needs the panels laid out top-to-bottom by logical order)
-		for( int i = 0; i < m_TotalLines; i++ )
+		for (unsigned int i = 0; i < m_TotalLines; i++)
 		{
 			EventConsoleText *line = GetLine(i);
 			line->setParent( m_ScrollPanel->getClient() );
@@ -150,11 +150,11 @@ public:
 		char ctemp[512] = "";
 
 		int w, h;
-		int MaxWidth = NewLine.getWide();
-		int MaxHeight = EVENTCON_LINE_SIZE_Y;
+		unsigned int MaxWidth = NewLine.getWide();
+		unsigned int MaxHeight = EVENTCON_LINE_SIZE_Y;
 		NewLine.getTextImage()->getFont()->getTextSize( ThisLineText, w, h );
 
-		if( w > MaxWidth || h > MaxHeight )
+		if( (unsigned int)w > MaxWidth || (unsigned int)h > MaxHeight )
 		{
 			int TextLen = (int)strlen(Text);
 			int WrapPos = -1;
@@ -170,7 +170,7 @@ public:
 				ctemp[mid + 1] = 0;
 				int testw, testh;
 				NewLine.getTextImage()->getFont()->getTextSize( ctemp, testw, testh );
-				if( testw > MaxWidth || testh > MaxHeight )
+				if( (unsigned int)testw > MaxWidth || (unsigned int)testh > MaxHeight )
 					hi = mid;
 				else
 					lo = mid + 1;
@@ -258,7 +258,7 @@ public:
 		if( m_DynamicWidth )
 		{
 			w = 0;
- 			for (int i = 0; i < m_VisibleLines; i++) 
+ 			for (unsigned int i = 0; i < m_VisibleLines; i++) 
 			{
 				int logIdx = m_ActiveLine - i;
 				EventConsoleText *line = GetLine(logIdx);
@@ -303,7 +303,7 @@ public:
 			m_VisibleLines--;
 			Resize( );
 
-			int TopLine = V_max( m_ActiveLine - (m_VisibleLines - 1), 0 );
+			int TopLine = V_max( m_ActiveLine - (m_VisibleLines - 1), (unsigned int)0 );
 			EventConsoleText *topLine = GetLine(TopLine);
 
 			if (topLine != nullptr && !topLine->m_SpansFromPrevLine)
@@ -337,7 +337,7 @@ public:
 	CTFScrollPanel *m_ScrollPanel;
 	EventConsoleText *m_Line[EVENTCON_MAXLINES];
 	int m_Head;	// index of the oldest (logical 0) line
-	int m_VisibleLines,
+	unsigned int m_VisibleLines,
 		m_TotalLines,
 		m_ActiveLine,
 	    m_StartY,

@@ -3,8 +3,8 @@
 #include "hudbase.h"
 
 //typedef struct cl_entity_s cl_entity_t;
-#define MAX_ARROWS 5
-
+inline constexpr int MAX_ARROWS = 5;
+inline constexpr int MAX_GOLD_OFFER = 1000000;
 class CHudMisc : public CHudBase
 {
 public:
@@ -19,7 +19,7 @@ public:
 	void UserCmd_Accept(void);
 	//void UserCmd_ListSkills( void );
 	void SelectMenuItem(int menu_item, TCallbackMenu *pcbMenu);
-
+	char Name[32] = "CHudMisc";
 	entinfo_t m_OfferTarget;
 
 private:
@@ -29,8 +29,6 @@ private:
 	Rect m_rcCrosshair;
 
 	HLSPRITE GetCrosshairSprite(int type);
-#define MAX_GOLD_OFFER 1000000
-
 	struct offerinfo_t
 	{
 		bool GoldScreen; //Whether I'm currently determining an amount of gold to offer

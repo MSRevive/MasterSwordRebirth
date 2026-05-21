@@ -1,8 +1,8 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#define MUSIC_PATH "music/"
-#define MAX_SONGS 256
+constexpr const char* MUSIC_PATH = "music/";
+constexpr unsigned int MAX_SONGS = 256;
 
 struct song_t
 {

@@ -34,12 +34,24 @@ bool GetModelBounds(CBaseEntity* pEntity, Vector Bounds[2]);
 #include <unordered_set>
 //#include <unordered_map>
 
-#undef SCRIPTVAR
-#define VecMultiply( a, b ) Vector( a[0] * b[0], a[1] * b[1], a[2] * b[2] )		//Thothie APR2016_25 - seems we need this here too
-#define SCRIPTVAR GetVar								//A script-wide or global variable
-#define SCRIPTCONST( a ) SCRIPTVAR(GetConst(a))			//A const, script-wide, or global variable - loadtime only
-#define GETCONST_COMPATIBLE( a ) ( a.c_str()[0] == '$' ? GetConst(a) : SCRIPTCONST(a) )			//Loadtime - Only parse it as a var if it's not a $parser
-//int CountPlayers( void );
+const char* CScript::SCRIPTCONST(const char* var) {
+	//A const, script-wide, or global variable - loadtime only
+	return GetVar(GetConst(var));
+}
+
+
+const char * CScript::GETCONST_COMPATIBLE(const char* var) { 
+	//Loadtime - Only parse it as a var if it's not a $parser
+
+	if (var[0] == '$') {
+		return GetConst(var);
+	}
+	else {
+		return GetVar(GetConst(var));
+	}
+}
+
+
 bool FindSkyHeight(Vector Origin, float& SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
 const char* PM_GetValue(msstringlist& Params);
@@ -347,7 +359,7 @@ const char* CScript::GetConst(const char* Text)
 			MS_ERROR("%s: Script: %s, \"%s\" - Mismatched Parenthesis!", m.ScriptFile.c_str(), Text);
 	}
 	else
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 			if (m_Constants[i].Name == Text)
 				return m_Constants[i].Value;
 
@@ -357,9 +369,9 @@ const char* CScript::GetConst(const char* Text)
 bool GetString(char* Return, size_t size, const char* sentence, int start, const char* endchars)
 {
 	// Quickie function to return the next CMD or parameter in a script string
-	int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
+	unsigned int i = 0, n, iPosition = start, endCharSize = strlen(endchars);
 	strncpy(Return, "", size);
-	while (i < (size - 1))
+	while (i < (unsigned int)(size - 1))
 	{
 		for (n = 0; n < endCharSize; n++)
 			if (sentence[iPosition] == endchars[n])
@@ -379,7 +391,7 @@ bool GetString(char* Return, size_t size, const char* sentence, int start, const
 scriptvar_t* IVariables::FindVar(const char* Name)
 {
 	//Check local variables
-	for (int i = 0; i < m_Variables.size(); i++)
+	for (unsigned int i = 0; i < m_Variables.size(); i++)
 	{
 		if (FStrEq(Name, m_Variables[i].Name)) return &m_Variables[i];
 	}
@@ -404,7 +416,7 @@ scriptvar_t* IVariables::SetVar(const char* Name, const char* Value)
 // Find an event by its name...
 SCRIPT_EVENT* CScript::EventByName(const char* pszEventName)
 {
-	for (int i = 0; i < m.Events.size(); i++)
+	for (unsigned int i = 0; i < m.Events.size(); i++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[i];
 		if (!seEvent.Name || seEvent.Name != pszEventName)
@@ -422,10 +434,10 @@ scriptvar_t* CScript::FindVar(const char* pszName)
 	if (pScriptvar) return pScriptvar;
 
 	//Check global variables
-	for (int i = 0; i < m_gVariables.size(); i++)
+	for (unsigned int i = 0; i < m_gVariables.size(); i++)
 		if (FStrEq(pszName, m_gVariables[i].Name)) return &m_gVariables[i];
 
-	for (int i = 0; i < m_Constants.size(); i++)
+	for (unsigned int i = 0; i < m_Constants.size(); i++)
 	{
 		if (FStrEq(pszName, m_Constants[i].Name))
 		{
@@ -457,10 +469,10 @@ msstring CScript::ScriptGetter_Conjunction(msstring& FullName, msstring& ParserN
 
 	if (bIsAnd || bIsOr || bIsXor)
 	{
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			// Allow shortcutting
-			if (atoi(SCRIPTVAR(Params[i])))
+			if (atoi(GetVar(Params[i])))
 			{
 				if (bIsOr)
 				{
@@ -506,7 +518,7 @@ msstring CScript::ScriptGetter_AlphaNum(msstring& FullName, msstring& ParserName
 		//yes, this is a shit way of doing this, but I'm in a rush...
 		msstring num_conv = Params[0];
 		msstring out_str;
-		int in_length = num_conv.len();
+		unsigned int in_length = num_conv.len();
 		const char* cc;
 		bool char_legit;
 		msstring extra_list;
@@ -516,7 +528,7 @@ msstring CScript::ScriptGetter_AlphaNum(msstring& FullName, msstring& ParserName
 			extra_list = Params[1];
 			check_extras = true;
 		}
-		for (int i = 0; i <= in_length; i++)
+		for (unsigned int i = 0; i <= in_length; i++)
 		{
 			char_legit = false;
 			cc = num_conv.substr(i, 1).c_str();
@@ -569,7 +581,7 @@ msstring CScript::ScriptGetter_Angles(msstring& FullName, msstring& ParserName, 
 		float dx = End.x - Start.x;
 		float rang = atan2(dy, dx); //gets radians
 		float xang = rang * 57.295779; //back to degrees
-		RETURN_FLOAT(xang)
+		return RETURN_FLOAT(xang);
 	}
 	else return "0";
 }
@@ -591,7 +603,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 	//$angles3d(<viewer_origin>,<origin_to_face>) - returns angles required for a vector to face a location
 	//engine function fast, but not very accurate and doesn't work client side (returns normalized) - will need to flip pitch
 	out_vector = UTIL_VecToAngles((Start - End).Normalize());
-	RETURN_VECTOR(out_vector)
+	return RETURN_VECTOR(out_vector);
 		/*
 		//FAIL Thoth JAN2010_22 - steelin from the Quake source code so weez can do this client side
 		//- meh, think this is an entirely different function - maybe I can just vectormultiply the results of $dir(vec,vec) for same result?
@@ -610,7 +622,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 		else
 		{
 			if (Vec_Org.x)
-				lyaw = (atan2(Vec_Org.y, Vec_Org.x) * 180 / M_PI);
+				lyaw = (atan2(Vec_Org.y, Vec_Org.x) * 180 / PI);
 			else if (Vec_Org.y > 0)
 				lyaw = 90;
 			else
@@ -620,7 +632,7 @@ msstring CScript::ScriptGetter_Angles3d(msstring& FullName, msstring& ParserName
 				lyaw += 360;
 
 			lforward = sqrt(Vec_Org.x*Vec_Org.x + Vec_Org.y*Vec_Org.y);
-			lpitch = (atan2(Vec_Org.y, lforward) * 180 / M_PI);
+			lpitch = (atan2(Vec_Org.y, lforward) * 180 / PI);
 			if (lpitch < 0)
 				lpitch += 360;
 		}
@@ -675,10 +687,10 @@ msstring CScript::ScriptGetter_CanDamage(msstring& FullName, msstring& ParserNam
 
 		if (ThisEnt && ThatEnt)
 		{
-			RETURN_INT(ThisEnt->CanDamage(ThatEnt) ? 1 : 0)
+			return RETURN_INT(ThisEnt->CanDamage(ThatEnt) ? 1 : 0);
 		}
 	}
-	RETURN_INT(0)
+	return RETURN_INT(0);
 #endif
 		return FullName;
 }
@@ -761,12 +773,15 @@ msstring CScript::ScriptGetter_Cone(msstring& FullName, msstring& ParserName, ms
 
 		if (ParserName.starts_with("$within_cone"))
 		{
-			if (flDot >= ConeFOV) RETURN_TRUE
-			else RETURN_FALSE
+			if (flDot >= ConeFOV) 
+				return RETURN_TRUE();
+			else 
+				return RETURN_FALSE();
 		}
-		else RETURN_FLOAT(flDot);
+		else return RETURN_FLOAT(flDot);
 	}
-	else return "0";
+
+	return "0";
 }
 
 //$dir(<start origin>,<end origin>)
@@ -789,9 +804,10 @@ msstring CScript::ScriptGetter_Dir(msstring& FullName, msstring& ParserName, mss
 		Vector Start = StringToVec(Params[1]);
 		Vector End = StringToVec(Params[0]);
 		Vector Dir = (Start - End).Normalize();
-		RETURN_VECTOR(Dir);
+		return RETURN_VECTOR(Dir);
 	}
-	else return "0";
+
+	return "0";
 }
 
 //$dist(<start origin>,<end origin>)
@@ -812,7 +828,7 @@ msstring CScript::ScriptGetter_Dist(msstring& FullName, msstring& ParserName, ms
 		Vector Start = StringToVec(Params[0]);
 		Vector End = StringToVec(Params[1]);
 		float Dist = (ParserName == "$dist" ? (Start - End).Length() : (Start - End).Length2D());
-		RETURN_FLOAT(Dist);
+		return RETURN_FLOAT(Dist);
 	}
 	else
 		return "0";
@@ -893,7 +909,7 @@ msstring CScript::ScriptGetter_FileSize(msstring& FullName, msstring& ParserName
 			file.seekg(0, std::ios_base::end);
 			long fileSize = file.tellg();
 			file.close();
-			RETURN_INT(fileSize);
+			return RETURN_INT(fileSize);
 		}
 		else return "-1";
 	}
@@ -1010,7 +1026,7 @@ msstring CScript::ScriptGetter_Func(msstring& FullName, msstring& ParserName, ms
 	OutParams.clearitems();
 	if (Params.size() > 1)
 	{
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i >= 1)
 			{
@@ -1329,17 +1345,17 @@ msstring CScript::ScriptGetter_GetArray(msstring& FullName, msstring& ParserName
 							break;
 						}
 						if (bFnd)
-							RETURN_INT(i);
+							return RETURN_INT(i);
 					}
 
-					RETURN_INT(-1);
+					return RETURN_INT(-1);
 				}
 				else
 					return "[ERROR_MISSING_PARAMS]";
 
 			}
 			else if (ParserName.ends_with("amt"))
-				RETURN_INT(pArray->size())
+				return RETURN_INT(pArray->size());
 	}
 	else
 		return "[ERROR_MISSING_PARAMS]";
@@ -1377,36 +1393,35 @@ msstring CScript::ScriptGetter_GetAttackProp(msstring& FullName, msstring& Parse
 		attackdata_t& AttData = pItem->m_Attacks[attackNum];
 		msstring& PropName = Params[2];
 
-		if (PropName == "type") return msstring(AttData.sDamageType.c_str());
-		else if (PropName == "numattacks") RETURN_INT(pItem->m_Attacks.size()) //Thothie OCT2016_22 get number of attacks
-		else if (PropName == "range") RETURN_FLOAT(AttData.flRange)
-		else if (PropName == "dmg") RETURN_FLOAT(AttData.flDamage)
-		else if (PropName == "dmg.range") RETURN_FLOAT(AttData.flDamageRange)
-		else if (PropName == "dmg.type") return msstring(AttData.sDamageType.c_str());
-		else if (PropName == "dmg.multi") RETURN_FLOAT(AttData.f1DmgMulti)
-		else if (PropName == "aoe.range") RETURN_FLOAT(AttData.flDamageAOERange)
-		else if (PropName == "aoe.falloff") RETURN_FLOAT(AttData.flDamageAOEAttn)
-		else if (PropName == "energydrain") RETURN_FLOAT(AttData.flEnergy)
-		else if (PropName == "mpdrain") RETURN_FLOAT(AttData.flMPDrain)
-			//else if( PropName == "stat" ) return STRING( AttData.
-		else if (PropName == "stat.prof") RETURN_INT(AttData.StatProf)
-		else if (PropName == "stat.balance") RETURN_INT(AttData.StatBalance)
-		else if (PropName == "stat.power") RETURN_INT(AttData.StatPower)
-		else if (PropName == "stat.exp") RETURN_INT(AttData.StatExp)
-		else if (PropName == "noise") RETURN_FLOAT(AttData.flNoise)
-		else if (PropName == "callback") return AttData.CallbackName;
-		else if (PropName == "ofs.startpos") return STRING(VecToString(AttData.StartOffset));
-		else if (PropName == "ofs.aimang") return STRING(VecToString(AttData.AimOffset));
-		else if (PropName == "priority") RETURN_INT(AttData.iPriority)
-		else if (PropName == "keys") return AttData.ComboKeys[0];
-		else if (PropName == "dmg.ignore") return AttData.NoDamage ? "1" : "0";
-		else if (PropName == "hitchance") RETURN_FLOAT(AttData.flAccuracyDefault)
-		else if (PropName == "critthreshold") RETURN_FLOAT(AttData.flCritThreshold)
-		else if (PropName == "critmulti") RETURN_FLOAT(AttData.flCritMulti) 
-		else if (PropName == "delay.end") RETURN_FLOAT(AttData.tDuration)
-		else if (PropName == "delay.strike") RETURN_FLOAT(AttData.tLandDelay)
-		else if (PropName == "dmg.noautoaim") return AttData.NoAutoAim ? "1" : "0";
-		else if (PropName == "ammodrain") RETURN_INT(AttData.iAmmoDrain)
+		if (PropName == "type")					return msstring(AttData.sDamageType.c_str());
+		else if (PropName == "numattacks")		return RETURN_INT(pItem->m_Attacks.size()); //Thothie OCT2016_22 get number of attacks;
+		else if (PropName == "range")			return RETURN_FLOAT(AttData.flRange);
+		else if (PropName == "dmg")				return RETURN_FLOAT(AttData.flDamage);
+		else if (PropName == "dmg.range")		return RETURN_FLOAT(AttData.flDamageRange);
+		else if (PropName == "dmg.type")		return msstring(AttData.sDamageType.c_str());
+		else if (PropName == "dmg.multi")		return RETURN_FLOAT(AttData.f1DmgMulti);
+		else if (PropName == "aoe.range")		return RETURN_FLOAT(AttData.flDamageAOERange);
+		else if (PropName == "aoe.falloff")		return RETURN_FLOAT(AttData.flDamageAOEAttn);
+		else if (PropName == "energydrain")		return RETURN_FLOAT(AttData.flEnergy);
+		else if (PropName == "mpdrain")			return RETURN_FLOAT(AttData.flMPDrain);
+		else if (PropName == "stat.prof")		return RETURN_INT(AttData.StatProf);
+		else if (PropName == "stat.balance")	return RETURN_INT(AttData.StatBalance);
+		else if (PropName == "stat.power")		return RETURN_INT(AttData.StatPower);
+		else if (PropName == "stat.exp")		return RETURN_INT(AttData.StatExp);
+		else if (PropName == "noise")			return RETURN_FLOAT(AttData.flNoise);
+		else if (PropName == "callback")		return AttData.CallbackName;
+		else if (PropName == "ofs.startpos")	return STRING(VecToString(AttData.StartOffset));
+		else if (PropName == "ofs.aimang")		return STRING(VecToString(AttData.AimOffset));
+		else if (PropName == "priority")		return RETURN_INT(AttData.iPriority);
+		else if (PropName == "keys")			return AttData.ComboKeys[0];
+		else if (PropName == "dmg.ignore")		return AttData.NoDamage ? "1" : "0";
+		else if (PropName == "hitchance")		return RETURN_FLOAT(AttData.flAccuracyDefault);
+		else if (PropName == "critthreshold")	return RETURN_FLOAT(AttData.flCritThreshold);
+		else if (PropName == "critmulti")		return RETURN_FLOAT(AttData.flCritMulti);
+		else if (PropName == "delay.end")		return RETURN_FLOAT(AttData.tDuration);
+		else if (PropName == "delay.strike")	return RETURN_FLOAT(AttData.tLandDelay);
+		else if (PropName == "dmg.noautoaim")	return AttData.NoAutoAim ? "1" : "0";
+		else if (PropName == "ammodrain")		return RETURN_INT(AttData.iAmmoDrain);
 		else if (PropName == "hold_min&max")
 		{
 			msstring Return;
@@ -1524,7 +1539,7 @@ msstring CScript::ScriptGetter_GetCl(msstring& FullName, msstring& ParserName, m
 			int EntIdx = atoi(Params[0]);
 			if (EntIdx > 0)
 			{
-				for (int i = 0; i < CLPERMENT_TOTAL; i++)
+				for (unsigned int i = 0; i < CLPERMENT_TOTAL; i++)
 					if (EntIdx == MSCLGlobals::CLViewEntities[i].index)
 					{
 						pclEntity = &MSCLGlobals::CLViewEntities[i]; break;
@@ -1560,7 +1575,7 @@ msstring CScript::ScriptGetter_GetCl(msstring& FullName, msstring& ParserName, m
 msstring CScript::ScriptGetter_GetConst(msstring& FullName, msstring& ParserName, msstringlist& Params)
 {
 	//Thothie - JUNE2007 $get_cvar(<cvar_name>)
-	for (int i = 0; i < m_Constants.size(); i++)
+	for (unsigned int i = 0; i < m_Constants.size(); i++)
 	{
 		if (m_Constants[i].Name == Params[0])
 		{
@@ -1690,7 +1705,7 @@ msstring CScript::ScriptGetter_GetFileLine(msstring& FullName, msstring& ParserN
 		bool found = false;
 		if (m.pScriptedEnt->filesOpen.size() >= 1)
 		{
-			for (int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++)
+			for (unsigned int i = 0; i < m.pScriptedEnt->filesOpen.size(); i++)
 			{
 				//Check to see if we already have this file open
 				if (m.pScriptedEnt->filesOpen[i].fileName == fileName)
@@ -1747,13 +1762,13 @@ msstring CScript::ScriptGetter_GetFindToken(msstring& FullName, msstring& Parser
 
 		int iFoundAtPos = -1;
 
-		for (int i = 0; i < Tokens.size(); i++)
+		for (unsigned int i = 0; i < Tokens.size(); i++)
 		{
 			if (!bPartialSearch) { if (Tokens[i] == TokenAdd) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
 			else { if (Tokens[i].contains(TokenAdd)) iFoundAtPos = i; } //Thothie SEP2019_09 - partial searches
 		}
 
-		RETURN_INT(iFoundAtPos);
+		return RETURN_INT(iFoundAtPos);
 	}
 	else return "-1";
 }
@@ -1776,7 +1791,7 @@ msstring CScript::ScriptGetter_get_random_token(msstring& FullName, msstring& Pa
 		//int token_found_at = -1;
 
 		//int max_token = Tokens.size()-1; //Thothie SEP2019_04 Never seems to return 0 token
-		int rnd_token_idx = (RANDOM_LONG(1, Tokens.size())) - 1;
+		int rnd_token_idx = (RANDOM_LONG((unsigned int)1, Tokens.size())) - 1;
 		return Tokens[rnd_token_idx].c_str();
 	}
 	else return "-1";
@@ -1791,7 +1806,7 @@ msstring CScript::ScriptGetter_tokenize(msstring& FullName, msstring& ParserName
 	if (Params.size() >= 1)
 	{
 		msstring stemp = "";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			stemp.append(Params[i].c_str());
 			stemp.append(";");
@@ -1832,7 +1847,7 @@ msstring CScript::ScriptGetter_GetGroundHeight(msstring& FullName, msstring& Par
 		EngineFunc::Shared_TraceLine(StartOrigin, EndOrigin, ignore_monsters, Tr, 0, PM_GLASS_IGNORE | PM_WORLD_ONLY, NULL);
 
 		if (Tr.Fraction < 1.0)
-			RETURN_FLOAT(Tr.EndPos.z)
+			return RETURN_FLOAT(Tr.EndPos.z);
 			return "none";
 	}
 
@@ -1929,7 +1944,7 @@ msstring CScript::ScriptGetter_GetHashMap(
 				else
 					if (vsSubCmd == "get_hashmap_amt")
 					{
-						RETURN_INT(pHashMap->size());
+						return RETURN_INT(pHashMap->size());
 					}
 					else
 						if (vsSubCmd == "get_hashmap_keys"
@@ -2001,7 +2016,7 @@ msstring CScript::ScriptGetter_GetHashMap(
 									vsTokenReturn += vsToken;
 								}
 							}
-							if (pFirstArr) RETURN_INT(pFirstArr->size());
+							if (pFirstArr) return RETURN_INT(pFirstArr->size());
 							return vsTokenReturn;
 						}
 	}
@@ -2030,7 +2045,7 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 	Vector StartPos;
 	if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 	else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-	int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
+	unsigned int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 	bool spec_search = false;
 
 	CBaseEntity* pSpecificEnt = RetrieveEntity(Name);
@@ -2039,7 +2054,7 @@ msstring CScript::ScriptGetter_GetInSphere(msstring& FullName, msstring& ParserN
 
 	//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 
@@ -2183,7 +2198,7 @@ msstring CScript::ScriptGetter_GetQuestData(msstring& FullName, msstring& Parser
 	if (pEntity && pEntity->IsPlayer())
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)pEntity;
-		for (int i = 0; i < pPlayer->m_Quests.size(); i++)
+		for (unsigned int i = 0; i < pPlayer->m_Quests.size(); i++)
 			if (pPlayer->m_Quests[i].Name == Name)
 				return pPlayer->m_Quests[i].Data;
 	}
@@ -2299,7 +2314,7 @@ msstring CScript::ScriptGetter_GetSet(msstring& FullName, msstring& ParserName, 
 			else
 				if (vsSubCmd == "get_set_amt")
 				{
-					RETURN_INT(pSet->size());
+					return RETURN_INT(pSet->size());
 				}
 	}
 
@@ -2393,14 +2408,14 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 		if (Params[1] == "listall")
 		{
 			Print("Scriptflags for %s:\n", pEntity->m_DisplayName.c_str());
-			for (int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
+			for (unsigned int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 			{
 				Print("# %i type %s name %s val %s exp %s\n", i, pEntity->m_scriptflags.types[i].c_str(), pEntity->m_scriptflags.names[i].c_str(), pEntity->m_scriptflags.values[i].c_str(), pEntity->m_scriptflags.expiretimes[i].c_str());
 			}
 			return "0";
 		}
 #endif
-		for (int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
+		for (unsigned int i = 0; i < pEntity->m_scriptflags.names.size(); i++)
 		{
 			if (!sf_get_by_name)
 			{
@@ -2480,7 +2495,7 @@ msstring CScript::ScriptGetter_GetScriptFlag(msstring& FullName, msstring& Parse
 			//either type_value or type_count or type_array
 			if (!sf_array_values)
 			{
-				RETURN_FLOAT(sf_total_values)
+				return RETURN_FLOAT(sf_total_values);
 			}
 			else
 			{
@@ -2539,7 +2554,7 @@ msstring CScript::ScriptGetter_GetSkillRatio(msstring& FullName, msstring& Parse
 
 		float Range = Max - Min;
 		float Value = Min + Range * Ratio;
-		RETURN_FLOAT(Value)
+		return RETURN_FLOAT(Value);
 	}
 
 	return FullName;
@@ -2556,7 +2571,7 @@ msstring CScript::ScriptGetter_GetSkyHeight(msstring& FullName, msstring& Parser
 	{
 		float SkyHeight = 0;
 		bool FoundSky = FindSkyHeight(StringToVec(GetScriptVar(Params[0])), SkyHeight);
-		if (FoundSky) RETURN_FLOAT(SkyHeight);
+		if (FoundSky) return RETURN_FLOAT(SkyHeight);
 		return "none";
 	}
 
@@ -2579,13 +2594,13 @@ msstring CScript::ScriptGetter_GetTakeDmg(msstring& FullName, msstring& ParserNa
 	if (!pTarget) return "-1"; //FEB2009
 
 	msstring Return;
-	if (Params[1] == "all") RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
-	for (int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
+	if (Params[1] == "all") return RETURN_FLOAT(pTarget->m.GenericTDM); //MAR2010_03
+	for (unsigned int i = 0; i < pTarget->m.TakeDamageModifiers.size(); i++)
 	{
 		CMSMonster::takedamagemodifier_t& TDM = pTarget->m.TakeDamageModifiers[i];
 		msstring read_dmgtype = TDM.DamageType;
 		//Print("Reading_Takedmg %s\n", read_dmgtype.c_str() );
-		if (read_dmgtype.contains(Params[1]))	RETURN_FLOAT(TDM.modifier)
+		if (read_dmgtype.contains(Params[1]))	return RETURN_FLOAT(TDM.modifier);
 	}
 	return "1.0";
 #endif
@@ -2664,7 +2679,7 @@ msstring CScript::ScriptGetter_GetTokenAmt(msstring& FullName, msstring& ParserN
 
 		TokenizeString(Params[0], Tokens);
 
-		RETURN_INT(Tokens.size());
+		return RETURN_INT(Tokens.size());
 	}
 	else return "0";
 }
@@ -2829,11 +2844,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 		Vector StartPos;
 		if (Params.size() == 2) StartPos = m.pScriptedEnt->pev->origin;
 		else if (Params.size() >= 3) StartPos = StringToVec(Params[2]);
-		int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
+		unsigned int count = UTIL_MonstersInSphere(pList, 255, StartPos, flAreaSize);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
 			if ((int)msTokenString.len() > str_limit) break; //outta room
 
@@ -2956,11 +2971,11 @@ msstring CScript::ScriptGetter_GetTSphereAndBox(msstring& FullName, msstring& Pa
 			vMaximumBox = StringToVec(Params[2]);
 		}
 
-		int count = UTIL_EntitiesInBox(pList, 255, vMinimumBox, vMaximumBox, FL_CLIENT | FL_MONSTER);
+		unsigned int count = UTIL_EntitiesInBox(pList, 255, vMinimumBox, vMaximumBox, FL_CLIENT | FL_MONSTER);
 
 		//ALERT( at_aiconsole, "Searching through %i ents\n", count );
 
-		for (int i = 0; i < count; i++)
+		for (unsigned int i = 0; i < count; i++)
 		{
 			if ((int)msTokenString.len() > str_limit) continue;
 
@@ -3186,7 +3201,7 @@ msstring CScript::ScriptGetter_Len(msstring& FullName, msstring& ParserName, mss
 	//priority: high, scope: shared
 	msstring Return;
 	if (Params.size() >= 1)
-		RETURN_INT(Params[0].len())
+		return RETURN_INT(Params[0].len());
 	else
 		return "0";
 }
@@ -3225,7 +3240,7 @@ msstring CScript::ScriptGetter_inrange(msstring& FullName, msstring& ParserName,
 			return "0"; //not enough params
 		}
 		msstring Result = "0";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i > 0)
 			{
@@ -3242,7 +3257,7 @@ msstring CScript::ScriptGetter_inrange(msstring& FullName, msstring& ParserName,
 			return "0"; //not enough params
 		}
 		msstring Result = "0";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i > 0)
 			{
@@ -3286,14 +3301,14 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 			{
 				float num = atof(Params[1]);
 				num = sqrt(num);
-				RETURN_FLOAT(num);
+				return RETURN_FLOAT(num);
 			}
 		}
 		else if (Params[0] == "sin")
 		{
 			if (Params.size() > 1)
 			{
-				RETURN_FLOAT(sin(atof(Params[1])));
+				return RETURN_FLOAT(sin(atof(Params[1])));
 			}
 		}
 		MS_ERROR("ExecuteScriptCmd Script: %s, %s - not enough parameters!", m.ScriptFile.c_str(), ParserName.c_str());
@@ -3405,7 +3420,7 @@ msstring CScript::ScriptGetter_MathReturn(msstring& FullName, msstring& ParserNa
 		return "0";
 	}
 
-	RETURN_FLOAT(end_result);
+	return RETURN_FLOAT( end_result);
 }
 
 //$mid(<var>,<start>,[length])
@@ -3450,9 +3465,9 @@ msstring CScript::ScriptGetter_MinMax(msstring& FullName, msstring& ParserName, 
 	{
 		float best = atof(Params[0].c_str());
 		bool max = ParserName == "$max";
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 			best = max ? V_max(best, atof(Params[i].c_str())) : V_min(best, atof(Params[i].c_str()));
-		RETURN_FLOAT(best);
+		return RETURN_FLOAT( best);
 	}
 
 	return FullName;
@@ -3467,7 +3482,7 @@ msstring CScript::ScriptGetter_Neg(msstring& FullName, msstring& ParserName, mss
 	//priority: very high, scope: shared
 	msstring Return;
 	if (Params.size() >= 1)
-		RETURN_FLOAT((-atof(Params[0])))
+		return RETURN_FLOAT( (-atof(Params[0])));
 	else return "0";
 }
 
@@ -3487,7 +3502,7 @@ msstring CScript::ScriptGetter_Num(msstring& FullName, msstring& ParserName, mss
 		//yes, this is a shit way of doing this, but I'm in a rush...
 		msstring num_conv = Params[0];
 		msstring out_str;
-		int in_length = num_conv.len();
+		unsigned int in_length = num_conv.len();
 		const char* cc;
 		bool char_legit;
 		msstring extra_list;
@@ -3497,7 +3512,7 @@ msstring CScript::ScriptGetter_Num(msstring& FullName, msstring& ParserName, mss
 			extra_list = Params[1];
 			check_extras = true;
 		}
-		for (int i = 0; i <= in_length; i++)
+		for (unsigned int i = 0; i <= in_length; i++)
 		{
 			char_legit = false;
 			cc = num_conv.substr(i, 1).c_str();
@@ -3527,7 +3542,7 @@ msstring CScript::ScriptGetter_Quote(msstring& FullName, msstring& ParserName, m
 	{
 		msstring out_str = "\"";
 
-		for (int i = 0; i < Params.size(); i++)
+		for (unsigned int i = 0; i < Params.size(); i++)
 		{
 			if (i) out_str += " ";
 			out_str += Params[i];
@@ -3549,9 +3564,9 @@ msstring CScript::ScriptGetter_Rand(msstring& FullName, msstring& ParserName, ms
 	//priority: very high, scope: shared
 	msstring Return;
 	if (ParserName.c_str()[5] == 'f') //float version
-		RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])))
+		return RETURN_FLOAT(RANDOM_FLOAT(atof(Params[0]), atof(Params[1])));
 	else  //int version
-		RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])))
+		return RETURN_INT(RANDOM_LONG(atoi(Params[0]), atoi(Params[1])));
 }
 
 //$relpos(<vec_ofs>)
@@ -3589,7 +3604,7 @@ msstring CScript::ScriptGetter_RelPos(msstring& FullName, msstring& ParserName, 
 		Vector vRelPos = GetRelativePos(Angle, vPosStr);
 		Vector vPos = StartPos + vRelPos;
 		//sprintf( cReturn, "(%.2f,%.2f,%.2f)", Pos.x, Pos.y, Pos.z );
-		RETURN_VECTOR(vPos)
+		return RETURN_VECTOR(vPos);
 	}
 	else return "0";
 }
@@ -3624,7 +3639,7 @@ msstring CScript::ScriptGetter_RelVel(msstring& FullName, msstring& ParserName, 
 
 		Vector Final = vRight * RelVel.x + vForward * RelVel.y + vUp * RelVel.z;
 
-		RETURN_VECTOR(Final)
+		return RETURN_VECTOR(Final);
 	}
 	else return "0";
 }
@@ -3711,7 +3726,7 @@ msstring CScript::ScriptGetter_ShapeSphere(
 {
 	if (Params.size() > 1)
 	{
-		Vector                          vOrigin = DetermineOrigin(Params[0]);
+		Vector                         vOrigin = DetermineOrigin(Params[0]);
 		float                           vRadius = atof(Params[1]);
 
 		CSphereFilter                   vFilter(vOrigin, vRadius);
@@ -3924,7 +3939,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 				, m.pScriptedEnt
 #endif
 			);
-			for (int i = 0; i < vFilterList.size(); i++)
+			for (unsigned int i = 0; i < vFilterList.size(); i++)
 			{
 				delete vFilterList[i];
 			}
@@ -3932,7 +3947,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 
 			msstring                    vsIndxString;
 			bool                        bFir = true;
-			for (int i = 0; i < vEntityList.size(); i++)
+			for (unsigned int i = 0; i < vEntityList.size(); i++)
 			{
 				CFindEntity             vEntity = vEntityList[i];
 				if (pArray)
@@ -3955,7 +3970,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 			}
 			if (pArray)
 			{
-				RETURN_INT(vNumFound);
+				return RETURN_INT(vNumFound);
 			}
 			else
 			{
@@ -3964,7 +3979,7 @@ msstring CScript::ScriptGetter_ScanShape(msstring& FullName, msstring& ParserNam
 		}
 		catch (...)
 		{
-			for (int i = 0; i < vFilterList.size(); i++)
+			for (unsigned int i = 0; i < vFilterList.size(); i++)
 			{
 				delete vFilterList[i];
 			}
@@ -3985,7 +4000,7 @@ msstring CScript::ScriptGetter_SearchString(msstring& FullName, msstring& Parser
 	if (Params.size() >= 2)
 	{
 		int start = Params.size() >= 3 ? atoi(Params[2]) : 0;
-		RETURN_INT(Params[0].find(Params[1], start))
+		return RETURN_INT(Params[0].find(Params[1], start));
 	}
 	else
 		return "0";
@@ -4012,10 +4027,10 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 
 		if (Tokens.size() == 1) return Params[0].c_str(); //Thothie APR2016_23 - smashes if only given one entity otherwise
 
-		int size = (signed)Tokens.size();
-		for (int i = 0; i < size; i++)
+		unsigned int size = (signed)Tokens.size();
+		for (unsigned int i = 0; i < size; i++)
 		{
-			int curIdx = 0;
+			unsigned int curIdx = 0;
 			float curVal = 0;
 
 			CMSMonster* pZeroEnt = (m.pScriptedEnt ? (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[0]) : NULL);
@@ -4033,7 +4048,7 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 				else if (compParam == "mp") curVal = pZeroEnt->m_MP;
 				else if (compParam == "maxmp") curVal = pZeroEnt->m_MaxMP;
 
-				for (int j = 0; j < (Tokens.size() - 1); j++)
+				for (unsigned int j = 0; j < (Tokens.size() - 1); j++)
 				{
 					float compVal = 0;
 					CMSMonster* pCurEnt = (CMSMonster*)m.pScriptedEnt->RetrieveEntity(Tokens[j + 1]);
@@ -4067,7 +4082,7 @@ msstring CScript::ScriptGetter_SortEntList(msstring& FullName, msstring& ParserN
 		return SortedList;
 	}
 	else
-		RETURN_INT(-1);
+		return RETURN_INT(-1);
 }
 
 //$stradd(<string...>,<string...>,<string...>)
@@ -4078,7 +4093,7 @@ msstring CScript::ScriptGetter_StrAdd(msstring& FullName, msstring& ParserName, 
 	//Add strings together
 	//priority: moderate, scope: shared
 	msstring Return;
-	for (int i = 0; i < Params.size(); i++)
+	for (unsigned int i = 0; i < Params.size(); i++)
 		Return += Params[i];
 
 	return Return;
@@ -4218,9 +4233,9 @@ msstring CScript::ScriptGetter_Vec(msstring& FullName, msstring& ParserName, mss
 		if (Params.size() == 1)
 		{
 			Vector Vec = StringToVec(Params[0]);
-			if (CoordName == "x" || CoordName == "pitch") RETURN_FLOAT(Vec.x)
-			else if (CoordName == "y" || CoordName == "yaw") RETURN_FLOAT(Vec.y)
-			else if (CoordName == "z" || CoordName == "roll") RETURN_FLOAT(Vec.z)
+			if (CoordName == "x" || CoordName == "pitch")     return RETURN_FLOAT(Vec.x);
+			else if (CoordName == "y" || CoordName == "yaw")  return RETURN_FLOAT(Vec.y);
+			else if (CoordName == "z" || CoordName == "roll") return RETURN_FLOAT(Vec.z);
 		}
 		else if (Params.size() >= 3)
 		{
@@ -4251,7 +4266,7 @@ msstring CScript::ScriptGetter_VecLen(msstring& FullName, msstring& ParserName, 
 	if (Params.size() >= 1)
 	{
 		Vector Start = StringToVec(Params[0]);
-		RETURN_FLOAT(ParserName == "$veclen" ? Start.Length() : Start.Length2D());
+		return RETURN_FLOAT(ParserName == "$veclen" ? Start.Length() : Start.Length2D());
 	}
 	else return "0";
 }
@@ -4414,8 +4429,8 @@ const char* CScript::GetVar(const char* pszText)
 	if (pszText[0] == '$')
 	{
 		BreakUpLine(FullName, ParserName, Params);
-		for (int i = 0; i < Params.size(); i++)
-			Params[i] = SCRIPTVAR(Params[i]);
+		for (unsigned int i = 0; i < Params.size(); i++)
+			Params[i] = GetVar(Params[i]);
 
 		//Handle entity-specific parser
 		if (m.pScriptedInterface && m.pScriptedInterface->GetScriptVar(ParserName, Params, this, Return))
@@ -4453,36 +4468,36 @@ const char* CScript::GetVar(const char* pszText)
 			if (PropName.starts_with("movetype."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(9);
-				if (PropName == "none")				RETURN_INT(MOVETYPE_NONE)
-				else if (PropName == "walk")			RETURN_INT(MOVETYPE_WALK)
-				else if (PropName == "step")			RETURN_INT(MOVETYPE_STEP)
-				else if (PropName == "fly")			RETURN_INT(MOVETYPE_FLY)
-				else if (PropName == "toss")			RETURN_INT(MOVETYPE_TOSS)
-				else if (PropName == "push")			RETURN_INT(MOVETYPE_PUSH)
-				else if (PropName == "noclip")			RETURN_INT(MOVETYPE_NOCLIP)
-				else if (PropName == "flymissle")		RETURN_INT(MOVETYPE_FLYMISSILE)
-				else if (PropName == "bounce")			RETURN_INT(MOVETYPE_BOUNCE)
-				else if (PropName == "bouncemissle")	RETURN_INT(MOVETYPE_BOUNCEMISSILE)
-				else if (PropName == "follow")			RETURN_INT(MOVETYPE_FOLLOW)
-				else if (PropName == "pushstep")		RETURN_INT(MOVETYPE_PUSHSTEP)
+				if (PropName == "none")					return RETURN_INT(MOVETYPE_NONE);
+				else if (PropName == "walk")			return RETURN_INT(MOVETYPE_WALK);
+				else if (PropName == "step")			return RETURN_INT(MOVETYPE_STEP);
+				else if (PropName == "fly")				return RETURN_INT(MOVETYPE_FLY);
+				else if (PropName == "toss")			return RETURN_INT(MOVETYPE_TOSS);
+				else if (PropName == "push")			return RETURN_INT(MOVETYPE_PUSH);
+				else if (PropName == "noclip")			return RETURN_INT(MOVETYPE_NOCLIP);
+				else if (PropName == "flymissle")		return RETURN_INT(MOVETYPE_FLYMISSILE);
+				else if (PropName == "bounce")			return RETURN_INT(MOVETYPE_BOUNCE);
+				else if (PropName == "bouncemissle")	return RETURN_INT(MOVETYPE_BOUNCEMISSILE);
+				else if (PropName == "follow")			return RETURN_INT(MOVETYPE_FOLLOW);
+				else if (PropName == "pushstep")		return RETURN_INT(MOVETYPE_PUSHSTEP);
 			}
 			else if (PropName.starts_with("snd."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(4);
-				if (PropName == "auto_channel")		RETURN_INT(CHAN_AUTO)
-				else if (PropName == "weapon")			RETURN_INT(CHAN_WEAPON)
-				else if (PropName == "voice")			RETURN_INT(CHAN_VOICE)
-				else if (PropName == "item")			RETURN_INT(CHAN_ITEM)
-				else if (PropName == "body")			RETURN_INT(CHAN_BODY)
-				else if (PropName == "stream")			RETURN_INT(CHAN_STREAM)
-				else if (PropName == "static")			RETURN_INT(CHAN_STATIC)
-				else if (PropName == "fullvol" || PropName == "maxvol")	RETURN_INT(10)
-				else if (PropName == "slientvol" || PropName == "novol")	RETURN_INT(0)
+				if (PropName == "auto_channel")			return RETURN_INT(CHAN_AUTO);
+				else if (PropName == "weapon")			return RETURN_INT(CHAN_WEAPON);
+				else if (PropName == "voice")			return RETURN_INT(CHAN_VOICE);
+				else if (PropName == "item")			return RETURN_INT(CHAN_ITEM);
+				else if (PropName == "body")			return RETURN_INT(CHAN_BODY);
+				else if (PropName == "stream")			return RETURN_INT(CHAN_STREAM);
+				else if (PropName == "static")			return RETURN_INT(CHAN_STATIC);
+				else if (PropName == "fullvol" || PropName == "maxvol")	return RETURN_INT(10);
+				else if (PropName == "slientvol" || PropName == "novol") return	RETURN_INT(0);
 			}
 			else if (PropName.starts_with("localplayer."))	//eventually move sound to here
 			{
 				PropName = PropName.substr(12);
-				if (PropName == "scriptID")		RETURN_INT(PLAYER_SCRIPT_ID)
+				if (PropName == "scriptID")		return RETURN_INT(PLAYER_SCRIPT_ID);
 			}
 		}
 		else if (FullName.starts_with("game."))
@@ -4499,7 +4514,7 @@ const char* CScript::GetVar(const char* pszText)
 
 			if (Name == "time")
 			{
-				RETURN_FLOAT(gpGlobals->time)
+				return RETURN_FLOAT(gpGlobals->time);
 			}
 			else if (Name.starts_with("time."))
 			{
@@ -4583,25 +4598,25 @@ const char* CScript::GetVar(const char* pszText)
 
 				}
 
-				RETURN_INT(theReturn);
+				return RETURN_INT(theReturn);
 			}
-			else if (Name == "frametime") RETURN_FLOAT(gpGlobals->frametime)
+			else if (Name == "frametime") return RETURN_FLOAT(gpGlobals->frametime);
 #ifdef VALVE_DLL
 			else if (Name == "maxlevel")
 			{
-				RETURN_INT(CHAR_LEVEL_CAP);
+				return RETURN_INT(CHAR_LEVEL_CAP);
 			}
 			//Thothie FEB2013_24 - consolidating all "game.players.xxx" functions into one conditional, and adding noafk
 			else if (Name.starts_with("players"))
 			{
 				//Thothie JUN2007a - make sure game.players does not return bots
 				//Thothie NOV2014_09 - using new centralized checking
-				if (Name.contains("totalhp")) RETURN_FLOAT(UTIL_TotalHP())
-				else if (Name.contains("avghp")) RETURN_FLOAT(UTIL_AvgHP())
-				else if (Name.contains("playersnb") || Name.contains("noafk")) RETURN_INT(UTIL_NumActivePlayers())
+				if (Name.contains("totalhp"))		return RETURN_FLOAT(UTIL_TotalHP());
+				else if (Name.contains("avghp"))	return RETURN_FLOAT(UTIL_AvgHP());
+				else if (Name.contains("playersnb") || Name.contains("noafk")) return RETURN_INT(UTIL_NumActivePlayers());
 				else
 				{
-					RETURN_INT(UTIL_NumPlayers())
+					return RETURN_INT(UTIL_NumPlayers());
 				}
 			}
 #endif
@@ -4634,7 +4649,7 @@ const char* CScript::GetVar(const char* pszText)
 				}
 				else if (Prop == "maxviewdistance") //Thothie SEP2007a, updated OCT2007a
 				{
-					RETURN_FLOAT(MSGlobals::maxviewdistance)
+					return RETURN_FLOAT(MSGlobals::maxviewdistance);
 				}
 				else if (Prop == "hpwarn") //Thothie SEP2007a, updated OCT2007a
 				{
@@ -4668,24 +4683,24 @@ const char* CScript::GetVar(const char* pszText)
 			else if (Name.starts_with("script."))
 			{
 				msstring Property = Name.substr(7);
-				if (Property == "last_sent_id")		RETURN_INT(m_gLastSendID)
-				else if (Property == "last_light_id")  RETURN_INT(m_gLastLightID)
-				else if (Property == "iteration")		RETURN_INT(m.m_Iteration)
+				if (Property == "last_sent_id")			return RETURN_INT(m_gLastSendID);
+				else if (Property == "last_light_id")	return RETURN_INT(m_gLastLightID);
+				else if (Property == "iteration")		return RETURN_INT(m.m_Iteration);
 			}
 			else if (Name.starts_with("sound."))
 			{
 				//ONLY STILL HERE FOR BACKWARDS COMPATIBILITY
 				//MOVED TO --> game.const.snd.x
 				msstring SoundProp = Name.substr(6);
-				if (SoundProp == "auto_channel")			RETURN_INT(CHAN_AUTO)
-				else if (SoundProp == "weapon")			RETURN_INT(CHAN_WEAPON)
-				else if (SoundProp == "voice")				RETURN_INT(CHAN_VOICE)
-				else if (SoundProp == "item")				RETURN_INT(CHAN_ITEM)
-				else if (SoundProp == "body")				RETURN_INT(CHAN_BODY)
-				else if (SoundProp == "stream")			RETURN_INT(CHAN_STREAM)
-				else if (SoundProp == "static")			RETURN_INT(CHAN_STATIC)
-				else if (SoundProp == "fullvol" || SoundProp == "maxvol")	RETURN_INT(10)
-				else if (SoundProp == "slientvol" || SoundProp == "novol")	RETURN_INT(0)
+				if (SoundProp == "auto_channel")	return RETURN_INT(CHAN_AUTO);
+				else if (SoundProp == "weapon")		return RETURN_INT(CHAN_WEAPON);
+				else if (SoundProp == "voice")		return RETURN_INT(CHAN_VOICE);
+				else if (SoundProp == "item")		return RETURN_INT(CHAN_ITEM);
+				else if (SoundProp == "body")		return RETURN_INT(CHAN_BODY);
+				else if (SoundProp == "stream")		return RETURN_INT(CHAN_STREAM);
+				else if (SoundProp == "static")		return RETURN_INT(CHAN_STATIC);
+				else if (SoundProp == "fullvol" || SoundProp == "maxvol")	return RETURN_INT(10);
+				else if (SoundProp == "slientvol" || SoundProp == "novol")	return RETURN_INT(0);
 			}
 			else
 			{
@@ -4708,14 +4723,14 @@ const char* CScript::GetVar(const char* pszText)
 				{
 
 					msstring& Prop = FullProp;
-					if (Prop == "index") RETURN_INT(MSCLGlobals::GetLocalPlayerIndex())
-					else if (Prop == "viewangles") RETURN_VECTOR(player.pev->v_angle) //Thothie JAN2013_08 - viewangles, sorta, only returns yaw
-					else if (Prop == "eyepos") RETURN_VECTOR(player.EyePosition()) //Thothie JAN2013_08 eyepos - sorta, returns pos on model
-					else if (Prop == "thirdperson") RETURN_INT((MSCLGlobals::CamThirdPerson ? 1 : 0))
-					else if (Prop == "viewmodel.left.id" || Prop == "viewmodel.0.id") RETURN_INT(player.Hand(0) ? player.Hand(0)->GetViewModelID() : -1)
-					else if (Prop == "viewmodel.right.id" || Prop == "viewmodel.1.id") RETURN_INT(player.Hand(1) ? player.Hand(1)->GetViewModelID() : -1)
-					else if (Prop == "viewmodel.active.id") RETURN_INT(player.ActiveItem() ? player.ActiveItem()->GetViewModelID() : -1)
-					else if (Prop == "canattack") RETURN_INT(FBitSet(player.m_StatusFlags, PLAYER_MOVE_NOATTACK) ? 0 : 1)
+					if (Prop == "index") return RETURN_INT(MSCLGlobals::GetLocalPlayerIndex());
+					else if (Prop == "viewangles") return RETURN_VECTOR(player.pev->v_angle); //Thothie JAN2013_08 - viewangles, sorta, only returns yaw
+					else if (Prop == "eyepos") return RETURN_VECTOR(player.EyePosition()); //Thothie JAN2013_08 eyepos - sorta, returns pos on model
+					else if (Prop == "thirdperson") return RETURN_INT((MSCLGlobals::CamThirdPerson ? 1 : 0));
+					else if (Prop == "viewmodel.left.id" || Prop == "viewmodel.0.id") return RETURN_INT(player.Hand(0) ? player.Hand(0)->GetViewModelID() : -1);
+					else if (Prop == "viewmodel.right.id" || Prop == "viewmodel.1.id") return RETURN_INT(player.Hand(1) ? player.Hand(1)->GetViewModelID() : -1);
+					else if (Prop == "viewmodel.active.id") return RETURN_INT(player.ActiveItem() ? player.ActiveItem()->GetViewModelID() : -1);
+					else if (Prop == "canattack") return RETURN_INT(FBitSet(player.m_StatusFlags, PLAYER_MOVE_NOATTACK) ? 0 : 1);
 				}
 				else if (Name == "tempent")
 					Value = CLGetCurrentTempEntProp(FullProp);
@@ -4743,13 +4758,13 @@ const char* CScript::GetVar(const char* pszText)
 
 Vector CScript::StringToVec(const char* String)
 {
-	msstring Inside = SCRIPTVAR(msstring(String).thru_char(")"));
+	msstring Inside = GetVar(msstring(String).thru_char(")"));
 
-	msstring X = SCRIPTVAR(Inside.substr(1).thru_char(" ,"));
+	msstring X = GetVar(Inside.substr(1).thru_char(" ,"));
 	Inside = msstring(Inside.findchar_str(" ,")).skip(" ,");
-	msstring Y = SCRIPTVAR(Inside.thru_char(" ,"));
+	msstring Y = GetVar(Inside.thru_char(" ,"));
 	Inside = msstring(Inside.findchar_str(" ,")).skip(" ,");
-	msstring Z = SCRIPTVAR(Inside.thru_char(" )"));
+	msstring Z = GetVar(Inside.thru_char(" )"));
 
 	return Vector(atof(X), atof(Y), atof(Z));
 }
@@ -4797,8 +4812,8 @@ void CScript::CopyAllData(CScript* pDestScript, CBaseEntity* pScriptedEnt, IScri
 	//pDestScript->m.Events = m.Events;
 
 	//Copy Variables
-	int variables = m_Variables.size();
-	for (int i = 0; i < variables; i++)
+	unsigned int variables = m_Variables.size();
+	for (unsigned int i = 0; i < variables; i++)
 		pDestScript->m_Variables.add(m_Variables[i]);
 }
 float GetNumeric(const char* pszText) {
@@ -4806,7 +4821,7 @@ float GetNumeric(const char* pszText) {
 }
 const char* CScript::GetScriptVar(const char* VarName)
 {
-	return SCRIPTVAR(VarName);
+	return GetVar(VarName);
 }
 
 
@@ -4836,7 +4851,7 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 	//Update: A script can specify when it wants to allow duplicate includes
 	if (!m.AllowDupInclude)
 	{
-		for (int i = 0; i < m_Dependencies.size(); i++)
+		for (unsigned int i = 0; i < m_Dependencies.size(); i++)
 		{
 			if (!_stricmp(m_Dependencies[i], Filename))
 			{
@@ -4967,8 +4982,8 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
 	//Run script events
 	//~ Runs unnamed events or named events that were specified with calleventtimed ~
-	int events = m.Events.size();
-	for (int i = 0; i < events; i++)
+	unsigned int events = m.Events.size();
+	for (unsigned int i = 0; i < events; i++)
 	{
 		SCRIPT_EVENT& Event = m.Events[i];
 		//Skip unnamed events when running named events only
@@ -4987,7 +5002,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 			Event.fNextExecutionTime = -1;
 		}
 
-		for (int e = 0; e < Event.TimedExecutions.size(); e++)
+		for (unsigned int e = 0; e < Event.TimedExecutions.size(); e++)
 		{
 			if (gpGlobals->time < Event.TimedExecutions[e])
 				continue;
@@ -4997,7 +5012,7 @@ void CScript::RunScriptEvents(bool fOnlyRunNamedEvents)
 			Event.TimedExecutions.erase(e--);
 		}
 
-		for (int e = 0; e < CachedExecutions.size(); e++)
+		for (unsigned int e = 0; e < CachedExecutions.size(); e++)
 		{
 			Script_ExecuteEvent(Event);
 		}
@@ -5008,7 +5023,7 @@ void CScript::RunScriptEventByName(const char* pszEventName, msstringlist* Param
 	SCRIPT_EVENT* CurrentEvent = m.CurrentEvent; //Save the event currently executing
 
 	//Run every event with this name
-	for (int i = 0; i < m.Events.size(); i++)
+	for (unsigned int i = 0; i < m.Events.size(); i++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[i];
 		if (!seEvent.Name || seEvent.Name != pszEventName)
@@ -5037,8 +5052,8 @@ void CScript::CallLogged(const char* title, std::clock_t start)
 	std::string word = "";
 	bool inQuote = false;
 
-	int strlen = str.length();
-	for (int i = 0; i < strlen; i++)
+	unsigned int strlen = str.length();
+	for (unsigned int i = 0; i < strlen; i++)
 	{
 		const char ch = str[i];
 
@@ -5195,7 +5210,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			Event.Scope = esScope;
 
 			if (Name.len() && Override)
-				for (int i = 0; i < m.Events.size(); i++)
+				for (unsigned int i = 0; i < m.Events.size(); i++)
 					if (Name == m.Events[i].Name)
 					{
 						m.Events.erase(i); i--;
@@ -5309,7 +5324,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 			if (*CmdLineTmp == '(') TmpLineOfs++;
 			msstring ParamStr = msstring(CmdLineTmp).skip(SKIP_STR);
-			for (int i = 0; i < 3; i++)
+			for (unsigned int i = 0; i < 3; i++)
 			{
 				ScriptCmd.m_Params.add(GetConst(ParamStr.thru_char(SKIP_STR)));
 				ParamStr = msstring(ParamStr.findchar_str(SKIP_STR)).skip(SKIP_STR);
@@ -5334,7 +5349,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 				}
 			}
 			else
-				MS_ERROR("Script::ParseLine() Script: %s Line: %i - if() statement missing ')'!", (const char*)m.ScriptFile.c_str(), LineNum);
+				MS_ERROR("Script::ParseLine() Script: %s Line: %i - if() statement missing ')'! Value: %c", (const char*)m.ScriptFile.c_str(), LineNum, ParamStr.c_str()[0]);
 		}
 	}
 	else if (!_stricmp(TestCommand, "else"))
@@ -5369,7 +5384,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 	else if (!_stricmp(TestCommand, "repeatdelay"))
 	{
 		sscanf(CmdLineTmp, "%s", cBuffer);
-		CurrentEvent->fRepeatDelay = atof(SCRIPTCONST(cBuffer));
+		CurrentEvent->fRepeatDelay = atof(GetVar(GetConst(cBuffer)));
 		CurrentEvent->fNextExecutionTime = gpGlobals->time + CurrentEvent->fRepeatDelay;
 		KeepCmd = true;
 	}
@@ -5410,7 +5425,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			{
 				bool AddConst = true;
 
-				for (int i = 0; i < m_Constants.size(); i++)
+				for (unsigned int i = 0; i < m_Constants.size(); i++)
 				{
 					if (m_Constants[i].Name == VarName)
 					{
@@ -5430,7 +5445,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 	{
 		msstring VarName = Line.thru_char(SKIP_STR);
 
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 			if (m_Constants[i].Name == VarName)
 			{
 				m_Constants.erase(i);
@@ -5462,7 +5477,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 		if (!m.PrecacheOnly)
 		{
-			for (int i = 0; i < m_Constants.size(); i++)
+			for (unsigned int i = 0; i < m_Constants.size(); i++)
 			{
 				if (m_Constants[i].Name == VarName)
 				{
@@ -5506,7 +5521,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 
 			if (!SkipFirst || ResourceIdx)
 			{
-				msstring Resolved = SCRIPTCONST(cBuffer);
+				msstring Resolved = GetVar(GetConst(cBuffer));
 				if (!strcmp(TestCommand, "say"))
 				{
 					Resolved = Resolved.thru_char("[");
@@ -5529,7 +5544,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			pSearchLine = "%[ \t\r\n]%s";
 		}
 
-		for (int i = 0; i < Resources.size(); i++)
+		for (unsigned int i = 0; i < Resources.size(); i++)
 		{
 			msstring& FileName = Resources[i];
 
@@ -5696,7 +5711,7 @@ bool CScript::Script_SetupEvent(SCRIPT_EVENT& Event, msstringlist* Parameters)
 
 	//Setup option parameter variables
 	if (Parameters)
-		for (int i = 0; i < (*Parameters).size(); i++)
+		for (unsigned int i = 0; i < (*Parameters).size(); i++)
 			Event.SetLocal(msstring("PARAM") + int(i + 1), (*Parameters)[i]);
 
 	return m.pScriptedInterface ? m.pScriptedInterface->Script_SetupEvent(this, Event) : true;
@@ -5705,8 +5720,8 @@ void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, m
 {
 #if !TURN_OFF_ALERT
 	msstring                            vsParams;
-	for (int i = 0; i < vParams.size() - vParamStrt; i++)
-		vsParams += msstring("\n  ") + i + ": " + vParams[i + vParamStrt];
+	for (unsigned int i = 0; i < vParams.size() - vParamStrt; i++)
+		vsParams += msstring("\n  ") + (int)i + ": " + vParams[i + vParamStrt];
 	ErrorPrint(vsUniqueTag
 		, ERRORPRINT_LOG | ERRORPRINT_CONSOLE
 		, "Error with command '%s' %s for script file %s. Parameters:%s\n%s"
@@ -5726,13 +5741,13 @@ void CScript::ErrorPrintCommand(const char* vsUniqueTag, SCRIPT_EVENT* pEvent, m
 }
 bool CScript::Script_ExecuteCmds(SCRIPT_EVENT& Event, scriptcmd_list& Cmdlist)
 {
-	for (int c = 0; c < Cmdlist.m_Cmds.size(); c++)
+	for (unsigned int c = 0; c < Cmdlist.m_Cmds.size(); c++)
 	{
 		scriptcmd_t& Cmd = Cmdlist.m_Cmds[c];
 
 		//Convert the variable parameters
 		msstringlist Params;
-		for (int icmd = 0; icmd < Cmd.m_Params.size() - 1; icmd++)
+		for (unsigned int icmd = 0; icmd < Cmd.m_Params.size() - 1; icmd++)
 			Params.add(GetVar(Event.GetLocal(Cmd.m_Params[icmd + 1])));
 
 		// if Script_ExecuteCmd returns false, break execution of the event
@@ -5747,7 +5762,7 @@ bool CScript::Script_ExecuteCmds(SCRIPT_EVENT& Event, scriptcmd_list& Cmdlist)
 			if (!Cmd.m_NewConditional)
 				break; //Old if command.  Breaks event execution on failure
 
-			for (int e = 0; e < Cmd.m_ElseCmds.size(); e++) // Parse all else statements
+			for (unsigned int e = 0; e < Cmd.m_ElseCmds.size(); e++) // Parse all else statements
 				if (Script_ExecuteCmds(Event, Cmd.m_ElseCmds[e]))
 					break; //As soon as one returns true, don't parse any more
 
@@ -5792,9 +5807,9 @@ void CScript::SendScript(scriptsendcmd_t& SendCmd)
 			WRITE_BYTE(Type); //0 == Add | 1 == Update | 2 = Remove
 			WRITE_LONG(SendCmd.UniqueID);
 			if (Type == ST_NEW) WRITE_STRING(SendCmd.ScriptName);
-			int Parameters = SendCmd.Params.size();
+			unsigned int Parameters = SendCmd.Params.size();
 			WRITE_BYTE(Parameters);
-			for (int i = 0; i < Parameters; i++)
+			for (unsigned int i = 0; i < Parameters; i++)
 				WRITE_STRING(SendCmd.Params[i]);
 			MESSAGE_END();
 		}
@@ -5815,7 +5830,7 @@ Vector CScript::DetermineOrigin(msstring& vsOrigin)
 void CScript::CallEventTimed(const char* EventName, float Delay)
 {
 	float Time = gpGlobals->time + Delay;
-	for (int e = 0; e < m.Events.size(); e++)
+	for (unsigned int e = 0; e < m.Events.size(); e++)
 	{
 		SCRIPT_EVENT& seEvent = m.Events[e];
 		if (!seEvent.Name || seEvent.Name != EventName)
@@ -5835,7 +5850,7 @@ IScripted::IScripted()
 }
 void IScripted::Deactivate()
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		Script_Remove(i); i--;
 	}
@@ -5863,7 +5878,7 @@ CScript* IScripted::Script_Add(msstring ScriptName, CBaseEntity* pEntity)
 }
 CScript* IScripted::Script_Get(msstring ScriptName)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		if (!strcmp(m_Scripts[i]->m.ScriptFile, ScriptName))
 			return m_Scripts[i];
 	return NULL;
@@ -5884,7 +5899,7 @@ int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scr
 		return 0;
 
 	if (m_pScriptCommands)
-		for (int icommand = 0; icommand < m_pScriptCommands->size(); icommand++)
+		for (unsigned int icommand = 0; icommand < m_pScriptCommands->size(); icommand++)
 		{
 			scriptcmdname_t& Checkcmd = (*m_pScriptCommands)[icommand];
 			if (!_stricmp(TestCommand, Checkcmd.m_Name.c_str()))
@@ -5896,7 +5911,7 @@ int IScripted::Script_ParseLine(CScript* Script, const char* pszCommandLine, scr
 
 void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript* Script = m_Scripts[i];
 
@@ -5916,14 +5931,14 @@ void IScripted::RunScriptEvents(bool fOnlyRunNamedEvents)
 
 void IScripted::CallScriptEventTimed(const char* EventName, float Delay)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->CallEventTimed(EventName, Delay);
 }
 
 void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 {
 	m_ReturnData = "";
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 		m_Scripts[i]->RunScriptEventByName(EventName, Parameters);
 	
 	// Also try calling registered AngelScript global function handlers
@@ -5936,11 +5951,11 @@ void IScripted::CallScriptEvent(const char* EventName, msstringlist* Parameters)
 
 void IScripted::Script_InitHUD(CBasePlayer* pPlayer)
 {
-	for (int i = 0; i < m_Scripts.size(); i++)
+	for (unsigned int i = 0; i < m_Scripts.size(); i++)
 	{
 		CScript* Script = m_Scripts[i];
 		if (Script == NULL) continue;
-		for (int e = 0; e < Script->m.PersistentSendCmds.size(); e++)
+		for (unsigned int e = 0; e < Script->m.PersistentSendCmds.size(); e++)
 			Script->SendScript(Script->m.PersistentSendCmds[e]);
 	}
 }
@@ -5970,7 +5985,7 @@ const char* SCRIPT_EVENT::GetLocal(const char* Name)
 		if (Params->size() > 1)
 		{
 			msstring stemp = "";
-			for (int i = 0; i < Params->size(); i++)
+			for (unsigned int i = 0; i < Params->size(); i++)
 			{
 				msstring l_param = (*Params)[i];
 				stemp.append(l_param);
@@ -6056,10 +6071,10 @@ void CScript::ClCallScriptPlayers(const char* EventName, msstringlist* Parameter
 		WRITE_BYTE(17);
 		WRITE_BYTE(1); //0 == Add | 1 == Update | 2 = Remove
 		WRITE_LONG(-2);
-		int nParameters = Parameters->size();
+		unsigned int nParameters = Parameters->size();
 		WRITE_BYTE(nParameters + 1);
 		WRITE_STRING(EventName);
-		for (int i = 0; i < nParameters; i++)
+		for (unsigned int i = 0; i < nParameters; i++)
 			WRITE_STRING((*Parameters)[i]);
 		MESSAGE_END();
 	}
@@ -6168,7 +6183,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 
 	if (cc_check_against_const)
 	{
-		for (int i = 0; i < m_Constants.size(); i++)
+		for (unsigned int i = 0; i < m_Constants.size(); i++)
 		{
 			if (m_Constants[i].Name == testvar)
 			{
@@ -6179,7 +6194,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 	}
 	if (cc_check_against_var)
 	{
-		for (int i = 0; i < m_Variables.size(); i++)
+		for (unsigned int i = 0; i < m_Variables.size(); i++)
 		{
 			if (m_Variables[i].Name == testvar)
 			{
@@ -6190,7 +6205,7 @@ void CScript::conflict_check(msstring testvar, msstring testvar_type, msstring t
 	}
 	if (cc_check_against_global)
 	{
-		for (int i = 0; i < m_gVariables.size(); i++)
+		for (unsigned int i = 0; i < m_gVariables.size(); i++)
 		{
 			if (m_gVariables[i].Name == testvar)
 			{

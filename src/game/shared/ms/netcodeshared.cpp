@@ -20,7 +20,7 @@
 #include "parsemsg.h"
 #endif
 
-#define UUENC_OFS 'A'
+constexpr char UUENC_OFS = 'A';
 
 //Send char to client or to server (client-side characters only)
 //Send to server at client connect
@@ -51,7 +51,7 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	WRITE_LONG(SendInfo.DataLen);
 	MESSAGE_END();
 
-	hudtextparms_t htp;
+	hudtextparms_t htp = {};
 	clrmem(htp);
 	htp.x = 0.02;
 	htp.y = 0.6;
@@ -71,7 +71,7 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	SendInfo.DataLen = CharBase.DataLen * 2;
 	SendInfo.Data = msnew char[SendInfo.DataLen];
 
-	for (int i = 0; i < CharBase.DataLen; i++)
+	for (unsigned int i = 0; i < CharBase.DataLen; i++)
 	{
 		byte Value = CharBase.Data[i];
 		char Num1 = (Value / (uint)20) + UUENC_OFS;
@@ -82,7 +82,7 @@ void CBasePlayer::SendChar(charinfo_base_t &CharBase)
 	}
 
 	//Notify server the char file is about to be sent
-	msstring SendStr = msstring("ul new ") + SendInfo.Index + " " + SendInfo.DataLen + " " + CharBase.DataLen + "\n";
+	msstring SendStr = msstring("ul new ") + SendInfo.Index + " " + (int)SendInfo.DataLen + " " + (int)CharBase.DataLen + "\n";
 	ClientCmd(SendStr);
 	ChooseChar_Interface::UpdateCharScreen();
 #endif
@@ -118,11 +118,11 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 #endif
 
 #ifdef VALVE_DLL
-#define MAX_UL_SIZE 150
-#define SEND_DELAY 0.8f
+	constexpr int MAX_UL_SIZE = 150;
+	constexpr float SEND_DELAY = 0.8f;
 #else
-#define MAX_UL_SIZE 64
-#define SEND_DELAY 0.4f
+	constexpr int MAX_UL_SIZE = 64;
+	constexpr float SEND_DELAY = 0.4f;
 #endif
 
 	charsendinfo_t &SendInfo = pPlayer->m_CharSend;
@@ -143,7 +143,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 		SendInfo.Status = CSS_DORMANT;
 
 #ifdef VALVE_DLL
-		hudtextparms_t htp;
+		hudtextparms_t htp = {};
 		clrmem(htp);
 		htp.x = 0.02;
 		htp.y = 0.6;
@@ -161,14 +161,14 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 		return;
 	}
 
-	int PacketDataSize = V_min(DataLeft, MAX_UL_SIZE);
+	unsigned int PacketDataSize = V_min(DataLeft, MAX_UL_SIZE);
 
 #ifdef VALVE_DLL
 	//Sending sequential data for a char
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 	WRITE_BYTE(11);
 	WRITE_BYTE(PacketDataSize);
-	for (int i = 0; i < PacketDataSize; i++)
+	for (unsigned int i = 0; i < PacketDataSize; i++)
 		WRITE_BYTE(SendInfo.Data[SendInfo.DataSent++]);
 	MESSAGE_END();
 #else
@@ -176,7 +176,7 @@ void MSChar_Interface::Think_SendChar(CBasePlayer *pPlayer)
 
 	 strncpy(Buffer,  "ul ", sizeof(Buffer) );
 
-	for (int i = 0; i < PacketDataSize; i++)
+	for (unsigned int i = 0; i < PacketDataSize; i++)
 	{
 		strncat(Buffer, &SendInfo.Data[SendInfo.DataSent++], 1);
 	}
@@ -219,8 +219,8 @@ void MSChar_Interface::HL_SVReadCharData(CBasePlayer *pPlayer, const char *UUEnc
 	if (SendInfo.Status != CSS_RECEIVING)
 		return;
 
-	int Bytes = strlen(UUEncodedData) / 2;
-	for (int i = 0; i < Bytes; i++)
+	unsigned int Bytes = strlen(UUEncodedData) / 2;
+	for (unsigned int i = 0; i < Bytes; i++)
 	{
 		char Num1 = UUEncodedData[i * 2] - UUENC_OFS;
 		char Num2 = UUEncodedData[(i * 2) + 1] - UUENC_OFS;
@@ -275,8 +275,8 @@ void MSChar_Interface::HL_CLReadCharData()
 	if (SendInfo.Status != CSS_RECEIVING)
 		return;
 
-	int Bytes = READ_BYTE();
-	for (int i = 0; i < Bytes; i++)
+	unsigned int Bytes = READ_BYTE();
+	for (unsigned int i = 0; i < Bytes; i++)
 		SendInfo.Data[SendInfo.DataSent++] = READ_BYTE();
 
 	if ((signed)SendInfo.DataSent >= SendInfo.DataLen)

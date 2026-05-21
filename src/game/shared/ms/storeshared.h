@@ -28,6 +28,8 @@ struct storeitem_t : public containeritem_t
 	float flSellRatio;
 };
 
-#define STORE_BUY	(1<<0)
-#define STORE_SELL	(1<<1)
-#define STORE_INV	(1<<2)
+enum store_action_e {
+	STORE_BUY	= (1<<0),
+	STORE_SELL	= (1<<1),
+	STORE_INV	= (1<<2)
+};

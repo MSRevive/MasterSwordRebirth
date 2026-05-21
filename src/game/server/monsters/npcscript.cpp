@@ -7,6 +7,11 @@
 #include "stats/stats.h"
 #include "stats/races.h"
 #include "msitemdefs.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
+#endif
+
+
 
 // TODO: get rid of the macro for logging when we get rid of MSScript.
 #include "mslogger.h"
@@ -108,7 +113,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{ //say <sound>[mouth open length]
 		if (Params.size() >= 1)
 		{
-			for (int i = 0; i < Params.size(); i++)
+			for (unsigned int i = 0; i < Params.size(); i++)
 			{
 				float fDuration = 0.2;
 				msstring &FullWord = Params[i];
@@ -149,7 +154,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			CBaseEntity *pTarget = RetrieveEntity(ENT_ME);
 			IScripted *pScripted = pTarget->GetScripted(); // UScripted? IScripted.
 
-			for (int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each
+			for (unsigned int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each
 			{
 				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect
 				{
@@ -403,11 +408,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			}
 			//[end]
 
-			for (int p = 0; p < m_PlayerDamage.size(); p++)
+			for (unsigned int p = 0; p < m_PlayerDamage.size(); p++)
 			{
 				// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
 				// {
-				// 	for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
+				// 	for (unsigned int s = 0; s < STAT_PROP_ALL_TOTAL; s++)
 				// 		m_PlayerDamage[p].dmg[r][s] = 0;
 				// }
 				// m_PlayerDamage[p].dmgInTotal = 0;
@@ -435,11 +440,11 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (atof(GetFirstScriptVar("NPC_ORIG_EXP")) > 0)
 			{
 				//first, wipe player hits, otherwise, we'll have problems
-				for (int p = 0; p < m_PlayerDamage.size(); p++)
+				for (unsigned int p = 0; p < m_PlayerDamage.size(); p++)
 				{
 					// for (int r = 0; r < SKILL_MAX_ATTACK; r++)
 					// {
-					// 	for (int s = 0; s < STATPROP_ALL_TOTAL; s++)
+					// 	for (unsigned int s = 0; s < STAT_PROP_ALL_TOTAL; s++)
 					// 		m_PlayerDamage[p].dmg[r][s] = 0;
 					// }
 					// m_PlayerDamage[p].dmgInTotal = 0;
@@ -642,7 +647,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			bool inventory_full = false;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
 					inventory_full = true;
 			}
 
@@ -695,7 +700,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 		{ //Parameters: <script event> <trigger1> [trigger2] [trigger3] [etc.]
 			listenphrase_t newphrase;
 			newphrase.ScriptEvent = Params[0];
-			for (int i = 0; i < (Params.size() - 1); i++) // Starts at parameter 2
+			for (unsigned int i = 0; i < (Params.size() - 1); i++) // Starts at parameter 2
 				newphrase.Phrases.add(Params[i + 1]);
 
 			m_Phrases.add(newphrase);
@@ -708,7 +713,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		if (Params.size() >= 1)
 		{
-			for (int i = 0; i < Params.size(); i++)
+			for (unsigned int i = 0; i < Params.size(); i++)
 			{
 				if (i)
 					sTemp += " ";
@@ -837,7 +842,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (pPlayer)
 			{
 				pPlayer->CallScriptEvent("ext_remove_afk"); //flag player as non-afk when first offered store
-				if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
 				{
 					inventory_full = true;
 					pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use stores/chests while inventory full.");
@@ -973,12 +978,12 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			MenuOption.Priority = atoi(SCRIPTVAR("reg.mitem.priority"));
 
 			bool Inserted = false;
-			for (int i = 0; i < Menuoptions.size(); i++)
+			for (unsigned int i = 0; i < Menuoptions.size(); i++)
 				if (MenuOption.Priority > Menuoptions[i].Priority)
 				{
 					Menuoptions.add_blank(); //Add blank item to end
 											 //Scoot all the items with lower priority down the line to make space for this item
-					for (int r = 0; r < (Menuoptions.size() - 1) - i; r++)
+					for (unsigned int r = 0; r < (Menuoptions.size() - 1) - i; r++)
 					{
 						int DstIdx = (Menuoptions.size() - 1) - r;
 						int SrcIdx = DstIdx - 1;
@@ -1001,7 +1006,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			if (m_MenuCurrentOptions)
 			{
 				mslist<menuoption_t> &Menuoptions = *m_MenuCurrentOptions;
-				for (int i = 0; i < Menuoptions.size(); i++)
+				for (unsigned int i = 0; i < Menuoptions.size(); i++)
 					if (Params[0] == Menuoptions[i].ID) //Erase _all_ with this name.  Makes erasing big menus easy
 						Menuoptions.erase(i--);
 			}
@@ -1018,7 +1023,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			CBasePlayer *pPlayer = pTarget ? (pTarget->IsPlayer() ? (CBasePlayer *)pTarget : NULL) : NULL;
 			if (pPlayer)
 			{
-				if (pPlayer->NumItems() < NUM_MAX_ITEMS)
+				if (pPlayer->NumItems() < MAX_NUM_ITEMS)
 				{
 					OpenMenu(pPlayer);
 				}
@@ -1069,7 +1074,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				bool found_entry = false;
 				//char Debug_Type[32];
 				//float Debug_AMT = 0.0;
-				for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
+				for (unsigned int i = 0; i < m.TakeDamageModifiers.size(); i++)
 				{
 					takedamagemodifier_t &TDMC = m.TakeDamageModifiers[i];
 					if (TDM.DamageType == TDMC.DamageType)
@@ -1321,7 +1326,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 						int NextParm = 1;
 						//Thothie NOV2007a - This doesn't work with spellcasting (no changes, just bitching)
 						//- will eventually need this to function on spellcasting for apostle quests
-						for (int i = 0; i < pStat->m_SubStats.size(); i++)
+						for (unsigned int i = 0; i < pStat->m_SubStats.size(); i++)
 						{
 							if ((signed)Params.size() <= NextParm)
 								break; //Keep assigning stats until I run out of stats (for loop) or out of parameters (this check)
@@ -1343,7 +1348,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 						if (iProp > -1)
 						{
 							int value = atoi(Params[1]);
-							pStat->m_SubStats[iProp].Value = V_min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = V_min(value, MAX_STAT_PROPVALUE);
 						}
 					}
 				}
@@ -1663,7 +1668,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 							float StartYaw = UTIL_VecToAngles(FleeDir).y, newYaw;
 							bool fFoundVec = false;
-							for (int i = 0; i < 20; i++)
+							for (unsigned int i = 0; i < 20; i++)
 							{
 								//Try to pick a random flee angle
 								newYaw = StartYaw + RANDOM_FLOAT(-90, 90);
@@ -1679,7 +1684,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 							if (!fFoundVec)
 							{
 								//Couldn't pick a random flee angle, brute force one
-								for (int i = 0; i < 359; i++)
+								for (unsigned int i = 0; i < 359; i++)
 								{
 									newYaw = StartYaw + i;
 									UTIL_MakeVectorsPrivate(Vector(0, newYaw, 0), fleeVec, NULL, NULL);
@@ -1762,10 +1767,10 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 
 		if (pSpecificEnt)
 			SightedList.add(pSpecificEnt);
-		for (int i = 0; i < m_EnemyListNum; i++)
+		for (unsigned int i = 0; i < m_EnemyListNum; i++)
 			SightedList.add((CBaseEntity *)m_hEnemyList[i]);
 
-		for (int i = 0; i < SightedList.size(); i++)
+		for (unsigned int i = 0; i < SightedList.size(); i++)
 		{
 			bool fSawTarget = false;
 
@@ -1861,7 +1866,7 @@ bool CMSMonster::GetScriptVar(msstring &ParserName, msstringlist &Params, CScrip
 			CBaseEntity *pList[255], *pEnt = NULL;
 			ALERT( at_console, "$get_inarea got %f to %f", thoth_boxsize, neg_boxsize );
 			int count = UTIL_EntitiesInBox( pList, 255, Vector(neg_boxsize,neg_boxsize,neg_boxsize), Vector(thoth_boxsize,thoth_boxsize,thoth_boxsize), FL_MONSTER|FL_CLIENT );
-			 for (int i = 0; i < count; i++) 
+			 for (unsigned int i = 0; i < count; i++) 
 			{
 				pEnt = pList[i];
 				if( !pEnt->pev || FNullEnt(pEnt->edict()) ) continue;
@@ -1908,13 +1913,13 @@ const char* CMSMonster::GetProp(CBaseEntity *pTarget, msstring &FullParams, msst
 	msstring &Prop = FullParams;
 
 	if (pMonster && Prop == "walkspeed")
-		RETURN_FLOAT(pMonster->WalkSpeed(true))
+		return RETURN_FLOAT(pMonster->WalkSpeed(true));
 	else if (pMonster && Prop == "runspeed")
-		RETURN_FLOAT(pMonster->RunSpeed(true))
+		return RETURN_FLOAT(pMonster->RunSpeed(true));
 	else if (pMonster && Prop == "movespeed")
-		RETURN_FLOAT(pMonster->m_flGroundSpeed) //Thothie MAR2008 - attempting to fix freeze_solid issues
+		return RETURN_FLOAT(pMonster->m_flGroundSpeed); //Thothie MAR2008 - attempting to fix freeze_solid issues
 	else if (pMonster && Prop == "framerate")
-		RETURN_FLOAT(pMonster->m_Framerate) //Thothie MAR2008 - attempting to fix freeze_solid issues
+		return RETURN_FLOAT(pMonster->m_Framerate); //Thothie MAR2008 - attempting to fix freeze_solid issues
 
 	return fSuccess ? "1" : CBaseEntity::GetProp(pTarget, FullParams, Params);
 }

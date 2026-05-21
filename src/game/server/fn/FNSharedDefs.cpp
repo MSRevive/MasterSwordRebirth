@@ -20,7 +20,7 @@
 #include "LoadCharacterReq.h"
 #include "DeleteCharacterReq.h"
 
-#define STRING_BUFFER 1024
+constexpr unsigned int STRING_BUFFER = 1024;
 
 // AsyncSendRequest does not make use the connection pooling.
 // Frequent requests should make use the RequestManager to take advantage of
@@ -149,7 +149,7 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer)
 	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL))
 		return;
 
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
+	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 	{
 		if (pPlayer->m_CharInfo[i].Status == CDS_LOADING)
 			continue;

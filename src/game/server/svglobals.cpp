@@ -439,7 +439,7 @@ void MSWorldSpawn()
 					};
 					
 					bool bSuccess = true;
-					for (int i = 0; i < 7; i++)
+					for (unsigned int i = 0; i < 7; i++)
 					{
 						unsigned long fileSize;
 						if (!g_ScriptPack.ReadEntry(legacyModules[i], NULL, fileSize))
@@ -526,7 +526,7 @@ void MSGameThink()
 
 //Called when the map changes or server is shutdown from ServerDeactivate
 //Note that ClientDisconnect is called after this, and the player is deallocated again!
-#define WORLD_MAX 6000
+constexpr int WORLD_MAX = 6000;
 void MSGameEnd()
 {
 	if(MSGlobals::GameScript)
@@ -639,7 +639,7 @@ const char *EngineFunc::GetGameDir()
 void WRITE_FLOAT(float Float)
 {
 	byte *pData = (byte *)&Float;
-	for (int i = 0; i < sizeof(float); i++)
+	for (unsigned int i = 0; i < sizeof(float); i++)
 		WRITE_BYTE(pData[i]);
 }
 
@@ -647,7 +647,7 @@ int PRECACHE_SOUND(const char *pszSound)
 {
 	//Thothie tracking model precaches, avoiding duplicates
 	bool bNoLog = false;
-	for (int i = 0; i < gSoundPrecacheList.size(); i++)
+	for (unsigned int i = 0; i < gSoundPrecacheList.size(); i++)
 	{
 		msstring msPrecacheSoundName = pszSound;
 		if (strcmp(msPrecacheSoundName.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
@@ -692,7 +692,7 @@ int PRECACHE_MODEL(const char *pszModelname)
 {
 	//Thothie tracking model precaches, avoiding duplicates
 	bool bNoLog = false;
-	for (int i = 0; i < gModelPrecacheList.size(); i++)
+	for (unsigned int i = 0; i < gModelPrecacheList.size(); i++)
 	{
 		msstring msPrecacheModelName = pszModelname;
 		if (strcmp(msPrecacheModelName.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
@@ -790,12 +790,12 @@ void CSVGlobals::WriteScriptLog()
 	scriptout << "Scripts loaded for " << STRING(gpGlobals->mapname) << std::endl;
 
 	int Total = 0;
-	for (int i = 0; i < SCRIPT_TYPES; i++)
+	for (unsigned int i = 0; i < SCRIPT_TYPES; i++)
 		Total += ScriptList[i].size();
 
 	scriptout << "Total: " << Total << std::endl;
 
-	for (int i = 0; i < SCRIPT_TYPES; i++)
+	for (unsigned int i = 0; i < SCRIPT_TYPES; i++)
 	{
 		scriptout << std::endl;
 
@@ -811,7 +811,7 @@ void CSVGlobals::WriteScriptLog()
 		scriptout << "------------" << std::endl;
 		scriptout << "Total: " << ScriptList[i].size() << std::endl;
 
-		for (int s = 0; s < ScriptList[i].size(); s++)
+		for (unsigned int s = 0; s < ScriptList[i].size(); s++)
 		{
 			CSVGlobals::scriptlistitem_t &ScriptListItem = ScriptList[i][s];
 			if (ScriptListItem.Included)

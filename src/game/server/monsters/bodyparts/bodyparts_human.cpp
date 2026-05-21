@@ -12,7 +12,7 @@ CHumanBodypart *CHumanBodypart::Duplicate()
 
 void CHumanBody::Initialize(CBaseEntity *pOwner, void *pvData)
 {
-	for (int i = 0; i < HUMAN_BODYPARTS; i++)
+	for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++)
 	{
 		CHumanBodypart& HumanBodypart = *(CHumanBodypart*)GetClassPtr((CHumanBodypart*)NULL);
 
@@ -27,7 +27,7 @@ void CHumanBody::Initialize(CBaseEntity *pOwner, void *pvData)
 CBaseBody *CHumanBody::Duplicate()
 {
 	CHumanBody *NewBody = new CHumanBody;
-	for (int i = 0; i < Bodyparts.size(); i++)
+	for (unsigned int i = 0; i < Bodyparts.size(); i++)
 		NewBody->Bodyparts.add(Bodyparts[i]->Duplicate());
 
 	return NewBody;

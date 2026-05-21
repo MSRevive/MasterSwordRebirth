@@ -7,6 +7,11 @@
 #include "mslogger.h"
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
+#ifndef EFFECTS_H
+#include "effects.h"
+#endif // !EFFECTS_H
+
+
 class CCycler : public CBaseMonster
 {
 public:
@@ -19,7 +24,7 @@ public:
 	void Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value);
 
 	// Don't treat as a live target
-	virtual BOOL IsAlive(void) { return FALSE; }
+	virtual BOOL IsAlive(void) { return false; }
 
 	virtual int Save(CSave &save);
 	virtual int Restore(CRestore &restore);
@@ -122,7 +127,7 @@ void CCycler::Think(void)
 		// hack to avoid reloading model every frame
 		pev->animtime = gpGlobals->time;
 		pev->framerate = 1.0;
-		m_fSequenceFinished = FALSE;
+		m_fSequenceFinished = false;
 		m_flLastEventCheck = gpGlobals->time;
 		pev->frame = 0;
 		if (!m_animate)
@@ -274,13 +279,13 @@ public:
 		if (FStrEq(pkvd->szKeyName, "prefix"))
 		{
 			thoth_event_prefix = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "nevents")) 
 		{
 			//Thothie - AUG2007a - adding option to only spawn monster if # players present
 			thoth_nevents = (atoi(pkvd->szValue));
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 }*/
@@ -334,8 +339,7 @@ LINK_ENTITY_TO_CLASS(env_model, CStaticModel);
 
 // MP3 Playback
 
-#define SF_LOOP 1
-#define SF_REMOVE_ON_FIRE 2
+
 
 class CTargetMP3Audio : public CPointEntity
 {
@@ -355,7 +359,7 @@ void CTargetMP3Audio ::Spawn(void)
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NONE;
 
-	m_bPlaying = FALSE; // start out not playing
+	m_bPlaying = false; // start out not playing
 }
 
 void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
@@ -367,10 +371,10 @@ void CTargetMP3Audio::Use(CBaseEntity *pActivator, CBaseEntity *pCaller,
 		return;
 
 	if (!m_bPlaying) // if we're not playing, start playing!
-		m_bPlaying = TRUE;
+		m_bPlaying = true;
 	else
 	{ // if we're already playing, stop the mp3
-		m_bPlaying = FALSE;
+		m_bPlaying = false;
 		CLIENT_COMMAND(pActivator->edict(), "mp3 stop\n");
 		return;
 	}
@@ -432,12 +436,12 @@ public:
 		if (FStrEq(pkvd->szKeyName, "npcname"))
 		{
 			ms_npcname = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "sayasnpc"))
 		{
 			ms_sayasnpc = (atoi(pkvd->szValue) == 1) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 	}
 };
@@ -547,22 +551,22 @@ public:
 		if (FStrEq(pkvd->szKeyName, "midle"))
 		{
 			mt_idle = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "mcombat"))
 		{
 			mt_combat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playall"))
 		{
 			mt_global = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "playnow"))
 		{
 			mt_playnow = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -624,12 +628,12 @@ public:
 		if (keyName == "song")
 		{
 			m_sSong = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (keyName.find(".mp3") != std::string::npos) //Legacy way of playing mp3s
 		{
 			m_sSong = pkvd->szKeyName;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -706,8 +710,9 @@ struct monster_data_t
 		livesleft,
 		hpreq_min,	//Thothie FEB2011_22 - allow min;max hpreq definition
 		hpreq_max,	//Thothie FEB2011_22 - allow min;max hpreq definition
-		nplayers,	//Thothie AUG2007a - req# players for monster to spawn
-		m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
+		nplayers;	//Thothie AUG2007a - req# players for monster to spawn
+		
+	unsigned int m_nRndMobs; //NOV2014_20 - Thothie msmonster_random
 
 	Vector origin, angles;
 	bool spawned,
@@ -724,7 +729,7 @@ class CAreaMonsterSpawn : public CAreaInvisible
 {
 public:
 	monster_data_t mdSpawnMonster[32];
-	int iMonstersToSpawn;
+	unsigned int iMonstersToSpawn;
 	int iPlayerReq;			//Thothie AUG2007a - adding optional player req
 	int iHPReq_min;			//Thothie AUG2007a - adding optional total HP on server req
 	int iHPReq_max;			//Thothie FEB2011_22 - adding min;max option for reqhp
@@ -771,7 +776,7 @@ public:
 		if (resetwhen == 1 && didfirstspawn) //>= just to deal with the stump below
 		{
 			//cycle through my m obs, see if any are out of lives, if so, reset their lives
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				if (mdSpawnMonster[i].livesleft == 0 && !mdSpawnMonster[i].spawned)
 				{
@@ -785,7 +790,7 @@ public:
 		if (resetwhen == 2 && didfirstspawn)
 		{
 			//trigger a new wave
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				mdSpawnMonster[i].spawned = false;
@@ -797,7 +802,7 @@ public:
 		if (resetwhen && !didfirstspawn)
 		{
 			didfirstspawn = true;
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				RespawnMonster(&mdSpawnMonster[i]);
@@ -810,7 +815,7 @@ public:
 		if (!resetwhen)
 		{
 			didfirstspawn = true;
-			for (int i = 0; i < iMonstersToSpawn; i++)
+			for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			{
 				mdSpawnMonster[i].livesleft = mdSpawnMonster[i].lives;
 				RespawnMonster(&mdSpawnMonster[i]);
@@ -831,7 +836,7 @@ public:
 			m_SpawnLoc = (spawnloc_e)atoi(pkvd->szValue);
 			if (m_SpawnLoc < SPAWNLOC_FIXED || m_SpawnLoc > SPAWNLOC_RANDOM)
 				m_SpawnLoc = SPAWNLOC_FIXED;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 		{
@@ -853,7 +858,7 @@ public:
 			m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
 			//Thothie - store original spawnstart state
 			bSpawnImmediately = (atoi(pkvd->szValue)) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		//NOV2014_20 seeing if we can change how ms_monsterspawn handles mob respawning
 		//- the fact that ms_monster and ms_monsterspawn seem to kinda be the same entity is making this confusing though
@@ -861,24 +866,24 @@ public:
 		{
 			//0=all mobs depleated, 1=any mob depleated, 2=whenever called
 			resetwhen = atoi(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "fireallperish"))
 		{
 			m_sTargetAllPerish = pev->target = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "params"))
 		{
 			//Thothie OCT2015_28 - pass additional parameters via monsterspawner
 			sAddParams = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "nplayers"))
 		{
 			//Thothie AUG2007a - player req for monster spawns
 			iPlayerReq = (atoi(pkvd->szValue));
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "reqhp"))
 		{
@@ -902,7 +907,7 @@ public:
 				//if ( iHPReq_min == 0 ) iHPReq_min = 1; //OCT2015_28 disabled in case all players flagged AFK
 			}
 			if (reqhp_stringlist.size() > 2 && reqhp_stringlist[1].contains("avg")) hpreq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -940,8 +945,8 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonsterData->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
-			for (int i = 0; i < pMonsterData->m_nRndMobs; i++)
+			unsigned int idx = RANDOM_LONG(0, float(pMonsterData->m_nRndMobs) - 1);
+			for (unsigned int i = 0; i < pMonsterData->m_nRndMobs; i++)
 			{
 				MS_DEBUG("DEBUG: respawn randommob list #%i / %i as %s", pMonsterData->m_nRndMobs, pMonsterData->random_monsterdata[i].m_ScriptName.c_str() ? pMonsterData->random_monsterdata[i].m_ScriptName.c_str() : "???");
 			}
@@ -1014,9 +1019,9 @@ public:
 		//NOV2014_20 - Thothie msmonster_random [begin]
 		if (pMonster->m_nRndMobs > 0)
 		{
-			int idx = RANDOM_LONG(0, float(pMonster->m_nRndMobs) - 1);
+			unsigned int idx = RANDOM_LONG(0, float(pMonster->m_nRndMobs) - 1);
 			mdSpawnMonster[iMonstersToSpawn].m_nRndMobs = pMonster->m_nRndMobs;
-			for (int i = 0; i < pMonster->m_nRndMobs; i++)
+			for (unsigned int i = 0; i < pMonster->m_nRndMobs; i++)
 			{
 				// logfile << UTIL_VarArgs("DEBUG: spawn adding randommob #%i / %i as %s\n", i, pMonster->m_nRndMobs, pMonster->random_monsterdata[i].m_ScriptName ? pMonster->random_monsterdata[i].m_ScriptName.c_str() : "???");
 				mdSpawnMonster[iMonstersToSpawn].random_monsterdata.add(pMonster->random_monsterdata[i]); //read em in
@@ -1116,7 +1121,7 @@ public:
 		if (!pMonster)
 			return;
 
-		for (int i = 0; i < iMonstersToSpawn; i++)
+		for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 		{
 			if (mdSpawnMonster[i].lPrivData == (long)pMonster)
 			{
@@ -1130,7 +1135,7 @@ public:
 	{
 		if ( SpawnLimitReached() ) return; //Thothie OCT2016_18 spawnlimiter
 		
-		int i = 0, iDeadMonsters = 0;
+		unsigned int i = 0, iDeadMonsters = 0;
 		CMSMonster *pMonster;
 		for (i = 0; i < iMonstersToSpawn; i++)
 		{
@@ -1316,7 +1321,7 @@ public:
 		if (!pMonster)
 			return NULL;
 
-		for (int i = 0; i < iMonstersToSpawn; i++)
+		for (unsigned int i = 0; i < iMonstersToSpawn; i++)
 			if (mdSpawnMonster[i].lTrigPrivData == (long)pMonster)
 			{
 				mdSpawnMonster[i].triggered = true;
@@ -1402,37 +1407,37 @@ public:
 		if (FStrEq(pkvd->szKeyName, "rallplayers"))
 		{
 			mtl_req_all_players = (strcmp(pkvd->szValue, "1") == 0);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "title"))
 		{
 			mtl_title = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
 		{
 			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "teleport"))
 		{
 			mtl_teledest = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "spawntotie"))
 		{
 			mtl_respawnat = pkvd->szValue;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "firetarget"))
 		{
 			mtl_target = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "touchtarget"))
 		{
 			mtl_touchtarget = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -1543,7 +1548,7 @@ public:
 								pevToucher->flags &= ~FL_ONGROUND;
 								UTIL_SetOrigin(pevToucher, tmp);
 								pevToucher->angles = pentTarget->v.angles;
-								pevToucher->fixangle = TRUE;
+								pevToucher->fixangle = true;
 								pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
 							}
 							else
@@ -1667,7 +1672,7 @@ public:
 			if (!UTIL_IsMasterTriggered(ms_master, pMchecker))
 			{
 				ALERT(at_console, "DEBUG: %s - master not unlocked.\n", "msarea_transition");
-				return FALSE;
+				return false;
 			}
 			else
 			{
@@ -1678,15 +1683,15 @@ public:
 		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
 		if (pGMScript && (strcmp(pGMScript->GetFirstScriptVar("GM_DISABLE_TRANSITIONS"), "1") == 0))
-			return FALSE;
+			return false;
 
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 
 		if (pPlayer->CurrentTransArea == this)
-			return FALSE;
+			return false;
 		pPlayer->CurrentTransArea = this;
 		if (pPlayer->m_MapStatus == FIRST_MAP)
 			pPlayer->m_MapStatus = OLD_MAP;
@@ -1706,8 +1711,6 @@ public:
 			}
 		}
 
-#define TRANS_AUTOSHOWBROWSER (1 << 0)
-#define TRANS_PLAYSOUND (1 << 1)
 
 		strncpy(pPlayer->m_OldTransition,  STRING(sName), sizeof(pPlayer->m_OldTransition) );
 		strncpy(pPlayer->m_NextMap,  STRING(sDestMap), sizeof(pPlayer->m_NextMap) );
@@ -1760,7 +1763,7 @@ public:
 		WRITE_STRING_LIMIT(STRING(sDestTrans), 32);
 		MESSAGE_END();
 
-		return TRUE;
+		return true;
 	}
 
 	// DeathNotice - Lets this transition area know that a client has left it;
@@ -1910,7 +1913,7 @@ public:
 
 				msstring dest_map = STRING(sDestMap);
 				if (IS_MAP_VALID(dest_map.c_str()))
-					pOtherPlayer->EnableControl(FALSE);
+					pOtherPlayer->EnableControl(false);
 				
 				if (as_enabled.value > 0)
 				{
@@ -1968,22 +1971,22 @@ public:
 		if (FStrEq(pkvd->szKeyName, "destname"))
 		{
 			sDestName = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "destmap"))
 		{
 			sDestMap = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "desttrans"))
 		{
 			sDestTrans = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else if (FStrEq(pkvd->szKeyName, "master"))
 		{
 			ms_master = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -2003,11 +2006,11 @@ public:
 	BOOL OnControls(entvars_t *pev)
 	{
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 		if (pPlayer->CurrentNoSaveArea == this)
-			return FALSE;
+			return false;
 		pPlayer->CurrentNoSaveArea = this;
 
 		//Let the client know they can no longer save
@@ -2016,7 +2019,7 @@ public:
 		WRITE_BYTE(0);
 		MESSAGE_END();
 
-		return TRUE;
+		return true;
 	}
 	// DeathNotice - Let the client save again
 	void DeathNotice(entvars_t *pev)
@@ -2052,15 +2055,15 @@ public:
 	BOOL OnControls(entvars_t *pev)
 	{
 		if (!CBaseEntity::Instance(pev)->IsPlayer())
-			return FALSE;
+			return false;
 
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance(pev);
 		if (pPlayer->CurrentTownArea == this)
-			return FALSE;
+			return false;
 
 		pPlayer->CurrentTownArea = this;
 
-		return TRUE;
+		return true;
 	}
 	// DeathNotice - Player left the area
 	void DeathNotice(entvars_t *pev)
@@ -2079,8 +2082,8 @@ public:
 	void *MSQuery(int iRequest)
 	{
 		if (m_fAllowPK)
-			return (void *)TRUE;
-		return (void *)FALSE;
+			return (void *)true;
+		return (void *)false;
 	}
 
 	void KeyValue(KeyValueData *pkvd)
@@ -2088,7 +2091,7 @@ public:
 		if (FStrEq(pkvd->szKeyName, "pkill"))
 		{
 			m_fAllowPK = atoi(pkvd->szValue) ? true : false;
-			pkvd->fHandled = TRUE;
+			pkvd->fHandled = true;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);

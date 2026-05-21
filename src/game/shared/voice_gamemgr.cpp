@@ -11,7 +11,6 @@
 #include "msdllheaders.h"
 #include "player.h"
 
-#define UPDATE_INTERVAL 0.3
 
 // These are stored off as CVoiceGameMgr is created and deleted.
 CPlayerBitVec g_PlayerModEnable; // Set to 1 for each player if the player wants to use voice in this mod.

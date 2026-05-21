@@ -360,34 +360,36 @@ namespace ASEntityBindings
     {
 #ifdef VALVE_DLL
         
-        if (index < 1 || index > gpGlobals->maxClients)
+        int idx = index;
+
+        if (idx < 1 || idx > gpGlobals->maxClients)
         {
-            MS_ANGEL_ERROR("PlayerByIndex: Invalid index %d", index);
+            MS_ANGEL_ERROR("PlayerByIndex: Invalid index %d", idx);
             return nullptr;
         }
         
         edict_t* pEdict = g_engfuncs.pfnPEntityOfEntIndex(index);
         if (!pEdict || pEdict->free)
         {
-            MS_ANGEL_DEBUG("PlayerByIndex: No valid edict at index %d", index);
+            MS_ANGEL_DEBUG("PlayerByIndex: No valid edict at index %d", idx);
             return nullptr;
         }
         
         CBaseEntity* pEntity = CBaseEntity::Instance(pEdict);
         if (!pEntity || !pEntity->IsPlayer())
         {
-            MS_ANGEL_DEBUG("PlayerByIndex: Entity at index %d is not a player", index);
+            MS_ANGEL_DEBUG("PlayerByIndex: Entity at index %d is not a player", idx);
             return nullptr;
         }
         
         CBasePlayer* pPlayer = static_cast<CBasePlayer*>(pEntity);
         if (!pPlayer->pev || !(pPlayer->pev->flags & FL_CLIENT))
         {
-            MS_ANGEL_DEBUG("PlayerByIndex: Player at index %d is not connected", index);
+            MS_ANGEL_DEBUG("PlayerByIndex: Player at index %d is not connected", idx);
             return nullptr;
         }
         
-        MS_ANGEL_DEBUG("PlayerByIndex: Found connected player at index %d: %s", index, STRING(pPlayer->pev->netname));
+        MS_ANGEL_DEBUG("PlayerByIndex: Found connected player at index %d: %s", idx, STRING(pPlayer->pev->netname));
         return pPlayer;
 #else
         // Client-side: Can't access other players
@@ -750,7 +752,7 @@ namespace ASEntityBindings
         }
         
         // Check inventory full
-        if (pPlayer->NumItems() >= NUM_MAX_ITEMS)
+        if (pPlayer->NumItems() >= MAX_NUM_ITEMS)
         {
             pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Cannot use menus while inventory is full.");
             MS_ANGEL_DEBUG("OpenVoteMenu: Player inventory full");
@@ -1477,7 +1479,7 @@ namespace ASEntityBindings
                     return array;  // Return empty array
                 }
                 // Iterate through all item slots
-                for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+                for (unsigned int i = 0; i < MAX_ITEM_TYPES; i++) {
                     CBasePlayerItem* pItem = player->m_rgpPlayerItems[i];
                     // Walk the linked list of items in this slot
                     while (pItem != nullptr) {
@@ -1494,7 +1496,7 @@ namespace ASEntityBindings
                     return false;
                 }
                 // Search through all item slots
-                for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+                for (unsigned int i = 0; i < MAX_ITEM_TYPES; i++) {
                     CBasePlayerItem* pItem = player->m_rgpPlayerItems[i];
                     // Walk the linked list of items in this slot
                     while (pItem != nullptr) {

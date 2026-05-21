@@ -39,20 +39,27 @@ class CHudMisc;
 
 ///////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\//
 
-#define RGB_YELLOWISH 0x00FFA000 //255,160,0
-#define RGB_REDISH 0x00FF1010	 //255,160,0
-#define RGB_GREENISH 0x0000A000	 //0,160,0
+enum {
+	RGB_YELLOWISH = 0x00FFA000,		//255,160,0
+	RGB_REDISH = 0x00FF1010,		//255,160,0
+	RGB_GREENISH = 0x0000A000		//0,160,0
+};
 
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
 
-#define DHN_DRAWZERO 1
-#define DHN_2DIGITS 2
-#define DHN_3DIGITS 4
-#define MIN_ALPHA 100
+enum {
+	DHN_DRAWZERO = 1,
+	DHN_2DIGITS = 2,
+	DHN_3DIGITS = 4
+};
 
-#define HUDELEM_ACTIVE 1
+constexpr int MIN_ALPHA = 100;
+
+enum {
+	HUDELEM_ACTIVE = 1
+};
 
 enum
 {
@@ -73,12 +80,13 @@ typedef struct
 
 typedef struct cvar_s cvar_t;
 
-#define HUD_ACTIVE 1
-#define HUD_INTERMISSION 2
+enum {
+	HUD_ACTIVE = 1,
+	HUD_INTERMISSION = 2
+};
 
-#define MAX_PLAYER_NAME_LENGTH 32
-
-#define MAX_MOTD_LENGTH 1024
+constexpr int MAX_PLAYER_NAME_LENGTH = 32;
+constexpr int MAX_MOTD_LENGTH = 1024;
 
 //					Master Sword
 //-----------------------------------------------------
@@ -99,7 +107,7 @@ typedef int BOOL;
 #endif
 
 //Moved here from CHudStatusIcons
-#define MAX_SPRITE_NAME_LENGTH 24
+constexpr int MAX_SPRITE_NAME_LENGTH = 24;
 
 typedef struct
 {
@@ -150,7 +158,7 @@ private:
 	float m_fFade;
 };
 
-#define FADE_TIME 100
+constexpr int FADE_TIME = 100;
 
 //
 //-----------------------------------------------------
@@ -210,7 +218,7 @@ protected:
 	char m_szStatusBar[MAX_STATUSBAR_LINES][MAX_STATUSTEXT_LENGTH];	 // the constructed bar that is drawn
 	int m_iStatusValues[MAX_STATUSBAR_VALUES];						 // an array of values for use in the status bar
 
-	int m_bReparseString; // set to TRUE whenever the m_szStatusBar needs to be recalculated
+	int m_bReparseString; // set to true whenever the m_szStatusBar needs to be recalculated
 };
 
 extern int g_IsSpectator[MAX_PLAYERS + 1];
@@ -255,7 +263,7 @@ private:
 //
 //-----------------------------------------------------
 //
-const int maxHUDMessages = 16;
+constexpr int maxHUDMessages = 16;
 struct message_parms_t
 {
 	client_textmessage_t *pMessage;
@@ -447,7 +455,7 @@ public:
 	void ReloadClient();
 	int UpdateClientData(client_data_t *cdata, float time);
 
-	CHud() = default;
+	 CHud() = default;
 	~CHud() = default; // destructor, frees allocated memory
 
 	// user messages

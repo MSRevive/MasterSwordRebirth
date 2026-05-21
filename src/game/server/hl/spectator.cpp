@@ -74,7 +74,7 @@ void CBaseSpectator::SpectatorImpulseCommand(void)
 		// Start at the current goal, skip the world, and stop if we looped
 		//  back around
 
-		bFound = FALSE;
+		bFound = false;
 		while (1)
 		{
 			pCurrentGoal = FIND_ENTITY_BY_CLASSNAME(pCurrentGoal, "info_player_deathmatch");
@@ -87,7 +87,7 @@ void CBaseSpectator::SpectatorImpulseCommand(void)
 			// Found a non-world entity, set success, otherwise, look for the next one.
 			if (!FNullEnt(pCurrentGoal))
 			{
-				bFound = TRUE;
+				bFound = true;
 				break;
 			}
 		}
@@ -98,7 +98,7 @@ void CBaseSpectator::SpectatorImpulseCommand(void)
 		pGoal = pCurrentGoal;
 		UTIL_SetOrigin(pev, pGoal->v.origin);
 		pev->angles = pGoal->v.angles;
-		pev->fixangle = FALSE;
+		pev->fixangle = false;
 		break;
 	default:
 		ALERT(at_console, "Unknown spectator impulse\n");

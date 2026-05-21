@@ -47,11 +47,15 @@
 // Helper function to get player by index - implemented differently on server vs client
 static CBasePlayer* GetPlayerByIndexHelper(int index)
 {
+
+
 #ifndef VALVE_DLL
     return nullptr; // Client doesn't have access to other players
 #else
+
+    int idx = index;
     // Server-side implementation
-    if (index < 1 || index > gpGlobals->maxClients) {
+    if (idx < 1 || idx > gpGlobals->maxClients) {
         return nullptr;
     }
     
@@ -469,19 +473,22 @@ namespace ASBuiltinFunctions
             MS_ANGEL_DEBUG("GetPlayerByIndex called on client (index: %d)", index);
             return nullptr;
         #else
+
+            int idx = index;
+
             // Server-side: Real player lookup
-            if (index < 1 || index > gpGlobals->maxClients) {
-                MS_ANGEL_DEBUG("GetPlayerByIndex: Invalid index %d (max: %d)", index, gpGlobals->maxClients);
+            if (idx < 1 || idx > gpGlobals->maxClients) {
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Invalid index %d (max: %d)", idx, gpGlobals->maxClients);
                 return nullptr;
             }
             
             CBasePlayer* pPlayer = GetPlayerByIndexHelper(index);
             if (pPlayer && pPlayer->edict() && !pPlayer->edict()->free) {
-                MS_ANGEL_DEBUG("GetPlayerByIndex: Found player %d (%s)", index, STRING(pPlayer->edict()->v.netname));
+                MS_ANGEL_DEBUG("GetPlayerByIndex: Found player %d (%s)", idx, STRING(pPlayer->edict()->v.netname));
                 return pPlayer;
             }
             
-            MS_ANGEL_DEBUG("GetPlayerByIndex: No valid player at index %d", index);
+            MS_ANGEL_DEBUG("GetPlayerByIndex: No valid player at index %d", idx);
             return nullptr;
         #endif
     }
@@ -891,7 +898,7 @@ namespace ASBuiltinFunctions
         if (spawnpoints.size() > 0)
         {
             // Pick a random spawn point
-            int loc = RANDOM_LONG(0, spawnpoints.size() - 1);
+            int loc = RANDOM_LONG((unsigned int)0, spawnpoints.size() - 1);
             pPlayer->pev->origin = spawnpoints[loc]->pev->origin;
             
             MS_ANGEL_INFO("MovePlayerToRandomSpawn: Moved player %s to random spawn (found %d nearby spawns)", 
@@ -1169,8 +1176,8 @@ void CallAngelScriptEventHandler(const char* eventName, msstringlist* params)
             }
         }
         
-        int paramCount = handler->GetParamCount();
-        for (int i = 0; i < paramCount && i < (int)stringParams.size(); i++) {
+        unsigned int paramCount = handler->GetParamCount();
+        for (unsigned int i = 0; i < paramCount && i < (int)stringParams.size(); i++) {
             // Check if parameter is by reference
             int typeId;
             asDWORD flags;

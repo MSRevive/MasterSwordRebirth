@@ -29,12 +29,12 @@
 
 extern float *GetClientColor( int clientIndex );
 
-#define MAX_LINES	5
-#define MAX_CHARS_PER_LINE	256  /* it can be less than this, depending on char size */
+constexpr int MAX_LINES = 5;
+constexpr int MAX_CHARS_PER_LINE = 256;  /* it can be less than this, depending on char size */
 
 // allow 20 pixels on either side of the text
-#define MAX_LINE_WIDTH  ( ScreenWidth - 40 )
-#define LINE_START  10
+const int MAX_LINE_WIDTH = (ScreenWidth() - 40);
+constexpr int LINE_START = 10;
 static float SCROLL_SPEED = 5;
 
 static char g_szLineBuffer[ MAX_LINES + 1 ][ MAX_CHARS_PER_LINE ];
@@ -42,7 +42,7 @@ static float *g_pflNameColors[ MAX_LINES + 1 ];
 static int g_iNameLengths[ MAX_LINES + 1 ];
 static float flScrollTime = 0;  // the time at which the lines next scroll up
 
-#define SAYTEXT_START_Y  ( ScreenHeight - YRES(160) )
+const int SAYTEXT_START_Y = (ScreenHeight() - YRES(160));
 static int Y_START = 0; //varies
 static int line_height = 0;
 
@@ -99,7 +99,7 @@ int CHudSayText :: Draw( float flTime )
 {
 	int y = Y_START;
 
-	if ( ( gViewPort && gViewPort->AllowedToPrintText() == FALSE) || !m_HUD_saytext->value )
+	if ( ( gViewPort && gViewPort->AllowedToPrintText() == false) || !m_HUD_saytext->value )
 		return 1;
 
 	// make sure the scrolltime is within reasonable bounds,  to guard against the clock being reset
@@ -184,7 +184,7 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
 	ConsolePrint( pszBuf );
-	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
+	if ( gViewPort && gViewPort->AllowedToPrintText() == false )
 	{
 		// Print it straight to the console
 		return;
@@ -225,7 +225,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		}
 	}*/
 
-	strncpy( g_szLineBuffer[i], pszBuf, V_max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
+	strncpy( g_szLineBuffer[i], pszBuf, V_max(iBufSize -1, MAX_CHARS_PER_LINE - 1) );
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
@@ -239,10 +239,10 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound( "misc/talk.wav", 1 );
 
-	//if ( ScreenHeight >= 480 )
+	//if ( ScreenHeight() >= 480 )
 		Y_START = SAYTEXT_START_Y;
 	//else
-	//	Y_START = ScreenHeight - 45;
+	//	Y_START = ScreenHeight() - 45;
 	Y_START -= (line_height * (MAX_LINES+1));
 
 }

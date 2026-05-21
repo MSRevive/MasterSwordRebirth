@@ -76,7 +76,7 @@ void CStoragePanel::AddInventoryItems()
 {
 	//Find the storage on the player
 	storage_t *pStorage = NULL;
-	for (int s = 0; s < player.m_Storages.size(); s++)
+	for (unsigned int s = 0; s < player.m_Storages.size(); s++)
 		if (player.m_Storages[s].Name == player.m_CurrentStorage.StorageName)
 		{
 			pStorage = &player.m_Storages[s];
@@ -100,7 +100,7 @@ void CStoragePanel::AddInventoryItems()
 
 	//Add the storage items
 	storage_t &Storage = *pStorage;
-	for (int i = 0; i < Storage.Items.size(); i++)
+	for (unsigned int i = 0; i < Storage.Items.size(); i++)
 	{
 		containeritem_t vNewItem = containeritem_t(Storage.Items[i]);
 		pGearItemButton->m_ItemContainer->AddItem(vNewItem);
@@ -166,7 +166,7 @@ bool CStoragePanel::GearItemClicked(ulong ID)
 
 	bool leftAnItemOff = false;
 
-	for (int i = 0; i < m_SelectedItems.size(); i++)
+	for (unsigned int i = 0; i < m_SelectedItems.size(); i++)
 	{
 		if (checkValid(m_SelectedItems[i])) //Check it against the bank mask (MiB Feb2008a)
 		{
@@ -246,10 +246,10 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 
 	int Valuetotal = 0;
 
-	for (int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
+	for (unsigned int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[g];
-		for (int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
+		for (unsigned int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[i];
 			if (!ItemButton.m_Selected)
@@ -282,7 +282,7 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 	if( m_SelectedItems.size() > 0 )
 	{
 		CommandString = "trade sell";
-		 for (int i = 0; i < m_SelectedItems.size(); i++) 
+		 for (unsigned int i = 0; i < m_SelectedItems.size(); i++) 
 		{
 			CommandString += " ";
 			CommandString += (int)m_SelectedItems[i].ID;
@@ -320,7 +320,7 @@ void Storage_ItemMsg()
 	msstring StorageName = READ_STRING();
 	storage_t *pStorage = NULL;
 
-	for (int s = 0; s < player.m_Storages.size(); s++)
+	for (unsigned int s = 0; s < player.m_Storages.size(); s++)
 		if (player.m_Storages[s].Name == StorageName)
 		{
 			pStorage = &player.m_Storages[s];

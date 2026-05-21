@@ -30,7 +30,7 @@ BitmapTGA *MSBitmap::GetTGA(const char *pszImageName)
 	if( !pszImageName )
 		return NULL;
 
-	for (int i = 0; i < g_Bitmaps.size(); i++) 
+	for (unsigned int i = 0; i < g_Bitmaps.size(); i++) 
 	{
 		if( g_Bitmaps[i].m_TGAorSprite && !strcmp(g_Bitmaps[i].sImageName, pszImageName) )
 			return g_Bitmaps[i].m_TGA; //Return existing TGA
@@ -55,7 +55,7 @@ HLSPRITE MSBitmap::GetSprite(const char *pszImageName)
 	if( !pszImageName )
 		return NULL;
 
-	 for (int i = 0; i < g_Bitmaps.size(); i++) 
+	 for (unsigned int i = 0; i < g_Bitmaps.size(); i++) 
 		if( !g_Bitmaps[i].m_TGAorSprite && !strcmp(g_Bitmaps[i].sImageName, pszImageName) )
 			return g_Bitmaps[i].m_Sprite;						//Return existing Sprite
 
@@ -82,7 +82,7 @@ HLSPRITE MSBitmap::LoadSprite(const char *pszImageName)
 void MSBitmap::ReloadSprites()
 {
 	//Reload sprites after a video or level change
-	 for (int i = 0; i < g_Bitmaps.size(); i++) 
+	 for (unsigned int i = 0; i < g_Bitmaps.size(); i++) 
 		if( !g_Bitmaps[i].m_TGAorSprite )
 			g_Bitmaps[i].m_Sprite = LoadSprite( g_Bitmaps[i].sImageName );
 }
@@ -363,7 +363,7 @@ VGUI_ItemButton::VGUI_ItemButton( int x, int y, VGUI_ItemCallbackPanel *pCallbac
 	m_Image.setParent( this );
 
 	//Set the label
-	 for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
+	 for (unsigned int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		m_Labels[i] = new MSLabel( this, "Item", 0, 0, 1, 1, MSLabel::a_center );
 
 	m_Description = new TextPanel( "", 0, 0, 1, 1 );
@@ -385,7 +385,7 @@ VGUI_ItemButton::VGUI_ItemButton( int x, int y, VGUI_ItemCallbackPanel *pCallbac
 	m_Button->removeInputSignal( m_Signal );
 	removeChild( m_Button );
 
-	 for (int i = 0; i < ITEMBTN_LABELS; i++) 
+	 for (unsigned int i = 0; i < ITEMBTN_LABELS; i++) 
 	{
 		removeChild( Labels[i] );
 		delete Labels[i];
@@ -435,7 +435,7 @@ void VGUI_ItemButton::Update( )
 		int lblx, lbly;
 		int w, h;
 
-		 for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
+		 for (unsigned int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		{
 			switch( i )
 			{
@@ -567,7 +567,7 @@ void VGUI_ItemButton::paint( )
 	}
 
 	m_Image.SetFGColorRGB( ImageColor );
-	for (int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
+	for (unsigned int i = 0; i < ITEMBTN_LABELS_MAX; i++) 
 		m_Labels[i]->SetFGColorRGB( LabelColor );
 	m_Description->SetFGColorRGB( LabelColor );
 }
@@ -654,7 +654,7 @@ VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 	VGUI_ItemButton &NewItemButton = *m_ItemButtons[m_ItemButtonTotal];
 	NewItemButton.SetItem(Item);
 
-	int iAlphaLoc = m_ItemButtonTotal;
+	unsigned int iAlphaLoc = m_ItemButtonTotal;
 
 	if (m_ItemButtonTotal > 0)
 	{
@@ -672,7 +672,7 @@ VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 		}
 		iAlphaLoc = lo;
 
-		for (int i = m_ItemButtonTotal; i > iAlphaLoc; --i)
+		for (unsigned int i = m_ItemButtonTotal; i > iAlphaLoc; --i)
 			m_AlphabetizedItemButtons[i] = m_AlphabetizedItemButtons[i - 1];
 	}
 
@@ -684,7 +684,7 @@ VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 	const int invType = atoi(gEngfuncs.pfnGetCvarString("ms_invtype"));
 	if (IsAlphabetical())
 	{
-		for (int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
+		for (unsigned int i = iAlphaLoc; i < m_ItemButtonTotal; ++i)
 			UpdatePosition(i, invType);
 	}
 	else
@@ -700,7 +700,7 @@ void VGUI_Container::Update( )
 {
 	bool bIsAlpha = IsAlphabetical();
 	const int invType = atoi(gEngfuncs.pfnGetCvarString("ms_invtype"));
-	for (int i = 0; i < m_ItemButtonTotal; i++) 
+	for (unsigned int i = 0; i < m_ItemButtonTotal; i++) 
 	{
 		// MiB FEB2019_24 [ALPHABETICAL_INVENTORY]
 		if ( bIsAlpha )
@@ -749,7 +749,7 @@ void VGUI_Container::UpdatePosition(int idx, int invType)
 void VGUI_Container::PurgeButtons( )
 {
 	//Reset the old buttons
-	 for (int i = 0; i < m_ItemButtonTotal; i++) 
+	 for (unsigned int i = 0; i < m_ItemButtonTotal; i++) 
 		m_ItemButtons[i]->Reset( );
 
 	m_ItemButtonTotal = 0;

@@ -33,7 +33,7 @@ bool CStore ::AddItem(const char *pszItemName, int iQuantity, int iCost, float f
 
 storeitem_t *CStore ::GetItem(const char *pszItemName)
 {
-	for (int i = 0; i < Items.size(); i++)
+	for (unsigned int i = 0; i < Items.size(); i++)
 		if (FStrEq(Items[i].Name, pszItemName))
 			return &Items[i];
 
@@ -50,7 +50,7 @@ storeitem_t *CStore ::GetItem(int idx)
 
 void CStore::RemoveItem(const char* Name)
 {
-	for (int i = 0; i < Items.size(); i++)
+	for (unsigned int i = 0; i < Items.size(); i++)
 		if (FStrEq(Items[i].Name, Name))
 		{
 			Items.erase(i--);
@@ -66,7 +66,7 @@ void CStore::RemoveAllItems()
 void CStore ::Deactivate()
 {
 	RemoveAllItems();
-	for (int i = 0; i < m_gStores.size(); i++)
+	for (unsigned int i = 0; i < m_gStores.size(); i++)
 		if (m_gStores[i] == this)
 		{
 			m_gStores.erase(i);
@@ -93,7 +93,7 @@ void CStore ::Offer(edict_t *pePlayer, int iBuyFlags, CBaseMonster *pVendor)
 	WRITE_BYTE(Items.size());
 	MESSAGE_END();
 
-	for (int i = 0; i < Items.size(); i++)
+	for (unsigned int i = 0; i < Items.size(); i++)
 	{
 		//Send all store items.
 

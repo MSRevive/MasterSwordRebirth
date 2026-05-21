@@ -133,8 +133,8 @@ public:
 		//thothie messes JAN2010_29 - sloppy but works
 		//moved to side that calls this
 		/*
-		float fimgsize_w = ScreenWidth * (w*0.01); 
-		float fimgsize_h = ScreenHeight * (h*0.01);
+		float fimgsize_w = ScreenWidth() * (w*0.01); 
+		float fimgsize_h = ScreenHeight() * (h*0.01);
 		int imgsize_w = (int)fimgsize_w;
 		int imgsize_h = (int)fimgsize_h;
 		*/
@@ -186,7 +186,7 @@ public:
 	CImageDelayed m_FN;
 	bool m_bFN;
 
-	VGUI_Status(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
+	VGUI_Status(Panel *pParent) : Panel(0, 0, ScreenWidth(), ScreenHeight())
 	{
 		StatusIcons = this;
 
@@ -259,7 +259,7 @@ static void SetFN(bool Up)
 static void AddStatus(const char* Icon, const char* Name, float Dur, bool bSprite = false)
 {
 	// MiB FEB2019_22 - When sent a duplicate name, reset the duration
-	for (int i = 0; i < StatusIcons->m_Status.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Status.size(); i++)
 	{
 		VGUI_StatusIcon* pIcon = StatusIcons->m_Status[i];
 		if (pIcon == NULL) continue;
@@ -276,7 +276,7 @@ static void AddImg(const char *Img, const char *Name,
 				   int x, int y, int w, int h, float Dur = -1.0)
 {
 	bool found = false;
-	for (int i = 0; i < StatusIcons->m_Img.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Img.size(); i++)
 		//Check for ID conflictions
 		if (!strcmp(Name, StatusIcons->m_Img[i]->m_Name))
 		{
@@ -287,13 +287,13 @@ static void AddImg(const char *Img, const char *Name,
 	if (!found)
 	{
 		//Thothie JAN2010_29 - convert x/y/h/w coords to % of screen
-		float fimg_x = ScreenWidth * (x * 0.01);
-		float fimg_y = ScreenHeight * (y * 0.01);
+		float fimg_x = ScreenWidth() * (x * 0.01);
+		float fimg_y = ScreenHeight() * (y * 0.01);
 		int img_x = (int)fimg_x;
 		int img_y = (int)fimg_y;
 
-		float fimg_w = ScreenWidth * (w * 0.01);
-		float fimg_h = ScreenHeight * (h * 0.01);
+		float fimg_w = ScreenWidth() * (w * 0.01);
+		float fimg_h = ScreenHeight() * (h * 0.01);
 		int img_w = (int)fimg_w;
 		int img_h = (int)fimg_h;
 
@@ -304,7 +304,7 @@ static void AddImg(const char *Img, const char *Name,
 
 void KillStatus(const char *Name)
 {
-	for (int i = 0; i < StatusIcons->m_Status.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Status.size(); i++)
 	{
 		if (!strcmp(StatusIcons->m_Status[i]->m_Name, Name))
 		{
@@ -316,7 +316,7 @@ void KillStatus(const char *Name)
 }
 void KillImg(const char *Name)
 {
-	for (int i = 0; i < StatusIcons->m_Img.size(); i++)
+	for (unsigned int i = 0; i < StatusIcons->m_Img.size(); i++)
 	{
 		if (!strcmp(StatusIcons->m_Img[i]->m_Name, Name))
 		{

@@ -1,3 +1,3 @@
 // YOU NEED THIS (MODEL_HUMAN_REF) for animations even though it's the
 // exact same as male1...
-#define MODEL_HUMAN_REF "models/human/reference.mdl"
+constexpr const char* MODEL_HUMAN_REF = "models/human/reference.mdl";

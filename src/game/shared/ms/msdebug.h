@@ -21,11 +21,14 @@ struct sharedtrace_t
 	Vector DeltaVelocity; // Change in player's velocity caused by impact. (client only)
 	int Hitgroup;
 };
-#define PM_NORMAL 0x00000000
-#define PM_STUDIO_IGNORE 0x00000001 // Skip studio models
-#define PM_STUDIO_BOX 0x00000002	// Use boxes for non-complex studio models (even in traceline)
-#define PM_GLASS_IGNORE 0x00000004	// Ignore entities with non-normal rendermode
-#define PM_WORLD_ONLY 0x00000008	// Only trace against the world
+
+enum pm_type_e {
+	PM_NORMAL = 0x00000000,
+	PM_STUDIO_IGNORE = 0x00000001,	// Skip studio models
+	PM_STUDIO_BOX = 0x00000002,		// Use boxes for non-complex studio models (even in traceline)
+	PM_GLASS_IGNORE = 0x00000004,	// Ignore entities with non-normal rendermode
+	PM_WORLD_ONLY = 0x00000008		// Only trace against the world
+};
 #endif
 
 //Engine functions shared between the client and server

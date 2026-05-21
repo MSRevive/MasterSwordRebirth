@@ -70,7 +70,7 @@ public:
 	// Functions to verify the single/multiplayer status of a game
 	virtual BOOL IsMultiplayer(void) = 0;								 // is this a multiplayer game? (either coop or deathmatch)
 	virtual BOOL IsDeathmatch(void) = 0;								 //is this a deathmatch game?
-	virtual BOOL IsTeamplay(void) { return FALSE; };					 // is this deathmatch game being played with team rules?
+	virtual BOOL IsTeamplay(void) { return false; };					 // is this deathmatch game being played with team rules?
 	virtual BOOL IsCoOp(void) = 0;										 // is this a coop game?
 	virtual const char *GetGameDescription(void) { return "Half-Life"; } // this is the game name that gets seen in the server browser
 
@@ -82,8 +82,8 @@ public:
 
 	// Client damage rules
 	virtual float FlPlayerFallDamage(CBasePlayer *pPlayer) = 0;										  // this client just hit the ground after a fall. How much damage?
-	virtual BOOL FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker) { return TRUE; }; // can this player take damage from this attacker?
-	virtual BOOL ShouldAutoAim(CBasePlayer *pPlayer, edict_t *target) { return TRUE; }
+	virtual BOOL FPlayerCanTakeDamage(CBasePlayer *pPlayer, CBaseEntity *pAttacker) { return true; }; // can this player take damage from this attacker?
+	virtual BOOL ShouldAutoAim(CBasePlayer *pPlayer, edict_t *target) { return true; }
 
 	// Client spawn/respawn control
 	virtual void PlayerSpawn(CBasePlayer *pPlayer) = 0;		   // called by CBasePlayer::Spawn just before releasing player into the game
@@ -92,8 +92,8 @@ public:
 	virtual float FlPlayerSpawnTime(CBasePlayer *pPlayer) = 0; // When in the future will this player be able to spawn?
 	virtual edict_t *GetPlayerSpawnSpot(CBasePlayer *pPlayer); // Place this player on their spawnspot and face them the proper direction.
 
-	virtual BOOL AllowAutoTargetCrosshair(void) { return TRUE; };
-	virtual BOOL ClientCommand(CBasePlayer *pPlayer, const char *pcmd) { return FALSE; }; // handles the user commands;  returns TRUE if command handled properly
+	virtual BOOL AllowAutoTargetCrosshair(void) { return true; };
+	virtual BOOL ClientCommand(CBasePlayer *pPlayer, const char *pcmd) { return false; }; // handles the user commands;  returns true if command handled properly
 	virtual void ClientUserInfoChanged(CBasePlayer *pPlayer, char *infobuffer) {}		  // the player has changed userinfo;  can change it now
 
 	// Client kills/scoring
@@ -144,13 +144,13 @@ public:
 	virtual int PlayerRelationship(CBaseEntity *pPlayer, CBaseEntity *pTarget) = 0; // What is the player's relationship with this entity?
 	virtual int GetTeamIndex(const char *pTeamName) { return -1; }
 	virtual const char *GetIndexedTeamName(int teamIndex) { return ""; }
-	virtual BOOL IsValidTeam(const char *pTeamName) { return TRUE; }
+	virtual BOOL IsValidTeam(const char *pTeamName) { return true; }
 	virtual void ChangePlayerTeam(CBasePlayer *pPlayer, const char *pTeamName, BOOL bKill, BOOL bGib) {}
 	virtual const char *SetDefaultPlayerTeam(CBasePlayer *pPlayer) { return ""; }
 
 	// Sounds
-	virtual BOOL PlayTextureSounds(void) { return TRUE; }
-	virtual BOOL PlayFootstepSounds(CBasePlayer *pl, float fvol) { return TRUE; }
+	virtual BOOL PlayTextureSounds(void) { return true; }
+	virtual BOOL PlayFootstepSounds(CBasePlayer *pl, float fvol) { return true; }
 
 	// Monsters
 	virtual BOOL FAllowMonsters(void) = 0; //are monsters allowed
@@ -173,7 +173,7 @@ public:
 	// GR_Think
 	virtual void Think(void);
 	virtual BOOL IsAllowedToSpawn(CBaseEntity *pEntity);
-	virtual BOOL FAllowFlashlight(void) { return TRUE; };
+	virtual BOOL FAllowFlashlight(void) { return true; };
 
 	virtual BOOL FShouldSwitchWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pWeapon);
 	virtual BOOL GetNextBestWeapon(CBasePlayer *pPlayer, CBasePlayerItem *pCurrentWeapon);

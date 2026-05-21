@@ -231,7 +231,7 @@ jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &
 
 bool MSChar_Interface::HasVisited(const char* MapName, msstringlist &VisitedMaps)
 {
-	for (int m = 0; m < VisitedMaps.size(); m++)
+	for (unsigned int m = 0; m < VisitedMaps.size(); m++)
 		if (VisitedMaps[m] == MSGlobals::MapName)
 			return true;
 	return false;
@@ -268,7 +268,7 @@ bool MSChar_Interface::HasVisited(const char* MapName, msstringlist &VisitedMaps
 	{
 		gFile.RWShort( pItem->Container_ItemCount( ) ); //[SHORT] Container Item Total
 
-		 for (int i = 0; i < pItem->Container_ItemCount(); i++) 
+		 for (unsigned int i = 0; i < pItem->Container_ItemCount(); i++) 
 			WriteItem( gFile, pItem->Container_GetItem( i ) );
 	}
 }*/
@@ -303,9 +303,9 @@ void WriteItem(CPlayer_DataBuffer &gFile, genericitem_full_t &Item)
 	//Writing contained items should be the *LAST* thing you do
 	if (FBitSet(Item.Properties, ITEM_CONTAINER))
 	{
-		gFile.WriteShort(Item.ContainerItems.size()); //[SHORT] Container Item Total
+		gFile.WriteShort(static_cast<short>(Item.ContainerItems.size())); //[SHORT] Container Item Total
 
-		for (int i = 0; i < Item.ContainerItems.size(); i++)
+		for (unsigned int i = 0; i < Item.ContainerItems.size(); i++)
 			WriteItem(gFile, Item.ContainerItems[i]);
 	}
 }

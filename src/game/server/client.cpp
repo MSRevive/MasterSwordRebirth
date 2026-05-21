@@ -50,7 +50,7 @@
 extern void PlayerPrecache();
 
 // Temp
-#define MAX_MONSTERS 5
+constexpr int MAX_MONSTERS = 5;
 int g_SummonedMonsters = 0;
 
 extern DLL_GLOBAL unsigned long g_ulModelIndexPlayer;
@@ -186,6 +186,7 @@ void ClientDisconnect(edict_t *pEntity)
 		
 		// Try to get Steam ID from client info
 		int iPlayerIndex = ENTINDEX(pEntity) - 1;
+
 		if (iPlayerIndex >= 0 && iPlayerIndex < gpGlobals->maxClients)
 		{
 			clientaddr_t &ClientInfo = g_NewClients[iPlayerIndex];
@@ -350,16 +351,16 @@ void Host_Say(edict_t *pEntity, int teamonly)
 	}
 
 	// make sure the text has content
-	char *pc = NULL;
-	for (pc = p; pc != NULL && *pc != 0; pc++)
+	char *pc = nullptr;
+	for (pc = p; pc != nullptr && *pc != 0; pc++)
 	{
 		if (isprint(*pc) && !isspace(*pc))
 		{
-			pc = NULL; // we've found an alphanumeric character,  so text is valid
+			pc = nullptr; // we've found an alphanumeric character,  so text is valid
 			break;
 		}
 	}
-	if (pc != NULL)
+	if (pc != nullptr)
 		return; // no character found, so say nothing
 
 	// turn on color set 2  (color on,  no sound)
@@ -382,8 +383,8 @@ void Host_Say(edict_t *pEntity, int teamonly)
 	// This may return the world in single player if the client types something between levels or during spawn
 	// so check it, or it will infinite loop
 
-	client = NULL;
-	while (((client = (CBasePlayer *)UTIL_FindEntityByClassname(client, "player")) != NULL) && (!FNullEnt(client->edict())))
+	client = nullptr;
+	while (((client = (CBasePlayer *)UTIL_FindEntityByClassname(client, "player")) != nullptr) && (!FNullEnt(client->edict())))
 	{
 		if (!client->pev)
 			continue;
@@ -401,14 +402,14 @@ void Host_Say(edict_t *pEntity, int teamonly)
 		if (teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE)
 			continue;
 
-		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, client->pev);
+		MESSAGE_BEGIN(MSG_ONE, gmsgSayText, nullptr, client->pev);
 		WRITE_BYTE(ENTINDEX(pEntity));
 		WRITE_STRING(text);
 		MESSAGE_END();
 	}
 
 	// print to the sending client
-	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, NULL, &pEntity->v);
+	MESSAGE_BEGIN(MSG_ONE, gmsgSayText, nullptr, &pEntity->v);
 	WRITE_BYTE(ENTINDEX(pEntity));
 	WRITE_STRING(text);
 	MESSAGE_END();
@@ -514,8 +515,8 @@ void ClientCommand2(edict_t *pEntity)
 			msstring Text = msstring(Args).find_str(" "); //skip the first parameter
 			Text = Text.substr(1);
 
-			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+			CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(nullptr, "netname", msstring("-") + "game_master");
+			IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : nullptr);
 			if (pGMScript)
 			{
 				msstringlist Parameters;
@@ -653,7 +654,7 @@ void ClientCommand2(edict_t *pEntity)
 		if (CMD_ARGC() >= 3)
 		{
 			CBaseEntity *pEntity = StringToEnt(CMD_ARGV(1));
-			IScripted *pScript = NULL;
+			IScripted *pScript = nullptr;
 			if (pEntity && (pScript = pEntity->GetScripted()))
 			{
 				static msstringlist Params;
@@ -757,7 +758,7 @@ void ClientCommand2(edict_t *pEntity)
 
 					//Validate default weapon spawn
 					bool validItem = false;
-					for (int i = 0; i < MSGlobals::DefaultWeapons.size(); i++)
+					for (unsigned int i = 0; i < MSGlobals::DefaultWeapons.size(); i++)
 					{
 						if (MSGlobals::DefaultWeapons[i] == NewChar.Weapon)
 						{
@@ -813,11 +814,11 @@ void ClientCommand2(edict_t *pEntity)
 
 	//Stealing disabled
 	//else if (FStrEq(pcmd, "steal"))
-	//	pPlayer->StealAnyItems( NULL );
+	//	pPlayer->StealAnyItems( nullptr );
 
 	else if (FStrEq(pcmd, "getmenuoptions"))
 	{
-		CMSMonster *pMonster = NULL;
+		CMSMonster *pMonster = nullptr;
 
 		if (CMD_ARGC() >= 2)
 		{
@@ -971,7 +972,7 @@ void ClientCommand2(edict_t *pEntity)
 						for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
 						{
 							bool Duplicate = false;
-							for (int i = 0; i < pStorage->Items.size(); i++)
+							for (unsigned int i = 0; i < pStorage->Items.size(); i++)
 								if (pStorage->Items[i].ID == ID)
 								{
 									Duplicate = true;
@@ -996,7 +997,7 @@ void ClientCommand2(edict_t *pEntity)
 						return;
 
 					int ItemID = atoi(CMD_ARGV(2));
-					genericitem_t *pStorageItem = NULL;
+					genericitem_t *pStorageItem = nullptr;
 					int StorageItemIdx = 0;
 					for (unsigned int i = 0; i < pStorage->Items.size(); i++)
 						if (pStorage->Items[i].ID == ItemID)
@@ -1114,7 +1115,7 @@ void ClientCommand2(edict_t *pEntity)
 		//syntax: "drop <ID>"
 		if (bCanUseInventory)
 		{
-			CGenericItem *pItem = NULL;
+			CGenericItem *pItem = nullptr;
 			if (CMD_ARGC() > 1)
 				pItem = MSUtil_GetItemByID(atol(CMD_ARGV(1)), pPlayer);
 			else
@@ -1191,7 +1192,7 @@ void ClientCommand2(edict_t *pEntity)
 			if( pItem->GiveTo( pPlayer, true, false ) )
 			{
 
-				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_PACK], NULL, pPlayer->pev );
+				MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_PACK], nullptr, pPlayer->pev );
 					WRITE_BYTE( 1 );
 					WRITE_LONG( pItem->m_iId );
 					WRITE_BYTE( iHand + 1 );
@@ -1388,7 +1389,7 @@ void ClientCommand2(edict_t *pEntity)
 		else if (FStrEq(CMD_ARGV(1), "open"))
 		{
 			//Thothie MAR2011_18 - moved item stacker here to prevent overflow
-			for (int i = 0; i < pPlayer->Gear.size(); i++)
+			for (unsigned int i = 0; i < pPlayer->Gear.size(); i++)
 			{
 				CGenericItem *pItem = pPlayer->Gear[i];
 				if (pItem)
@@ -1454,7 +1455,7 @@ void ClientCommand2(edict_t *pEntity)
 						pAddToHand->iQuantity = vNewStackAmount;
 						pItem->iQuantity -= vNewStackAmount;
 
-						MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
+						MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], nullptr, pPlayer->pev);
 							WRITE_BYTE(1);
 							SendGenericItem(pPlayer, pItem, false);
 						MESSAGE_END();
@@ -1513,7 +1514,7 @@ void ClientCommand2(edict_t *pEntity)
 		//#else
 		/*if( IsGM(GETPLAYERWONID(pPlayer->edict())) )
 					pPlayer->m_fIsElite = !pPlayer->m_fIsElite;
-				else return FALSE;*/
+				else return false;*/
 		//	pPlayer->m_fIsElite = true;
 		//#endif
 
@@ -1523,7 +1524,7 @@ void ClientCommand2(edict_t *pEntity)
 				pPlayer->SendInfoMsg("You are now Elite\n");
 			else
 				pPlayer->SendInfoMsg("You are now Normal\n");
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], nullptr, pPlayer->pev);
 			WRITE_BYTE(7);
 			WRITE_BYTE(pPlayer->m_fIsElite);
 			MESSAGE_END();
@@ -1609,7 +1610,7 @@ void ClientCommand2(edict_t *pEntity)
 						if (iProp > -1)
 						{
 							int value = atoi(CMD_ARGV(2));
-							pStat->m_SubStats[iProp].Value = min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iProp].Value = min(value, STAT_PROP_MAX_VALUE);
 						}
 					}
 				}
@@ -1621,7 +1622,7 @@ void ClientCommand2(edict_t *pEntity)
 						int iSubStat = atoi(CMD_ARGV(2));
 						int value = atoi(CMD_ARGV(3));
 						if (iSubStat < (signed)pStat->m_SubStats.size())
-							pStat->m_SubStats[iSubStat].Value = min(value, STATPROP_MAX_VALUE);
+							pStat->m_SubStats[iSubStat].Value = min(value, STAT_PROP_MAX_VALUE);
 					}
 				}
 			}
@@ -1728,14 +1729,14 @@ void ClientCommand2(edict_t *pEntity)
 					ClearBits(pPlayer->m_afPhysicsFlags, PFLAG_OBSERVER);
 					ClearBits(pPlayer->pev->flags, FL_NOTARGET);
 					//pPlayer->SetSpeed( 0 );
-					MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, NULL, pPlayer->pev);
+					MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, nullptr, pPlayer->pev);
 					WRITE_BYTE(0);
 					MESSAGE_END();
 				}
 				break;
 			case 1:
-				//pPlayer->RemoveAllItems( FALSE, TRUE );
-				MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, NULL, pPlayer->pev);
+				//pPlayer->RemoveAllItems( false, true );
+				MESSAGE_BEGIN(MSG_ONE, gmsgHideWeapon, nullptr, pPlayer->pev);
 				WRITE_BYTE(HIDEHUD_ALL);
 				MESSAGE_END();
 				//--- NO BREAK ---
@@ -1791,7 +1792,7 @@ void ClientUserInfoChanged(edict_t *pEntity, char *infobuffer)
 	{
 		char text[256];
 		 _snprintf(text, sizeof(text),  "* %s prefers the name %s\n",  STRING(pEntity->v.netname),  g_engfuncs.pfnInfoKeyValue( infobuffer,  "name" ) );
-		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
+		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, nullptr );
 			WRITE_BYTE( ENTINDEX(pEntity) );
 			WRITE_STRING( text );
 		MESSAGE_END();
@@ -1924,7 +1925,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	// If not found via global, search by netname
 	if (!pGameMasterEnt)
 	{
-		pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+		pGameMasterEnt = UTIL_FindEntityByString(nullptr, "netname", msstring("-") + "game_master");
 		if (pGameMasterEnt)
 		{
 			MS_INFO("Game master found via search at index %d", pGameMasterEnt->entindex());
@@ -1950,7 +1951,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 				MS_INFO("ServerActivate event fired successfully");
 				
 				// After ServerActivate, try to find the game_master again
-				pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+				pGameMasterEnt = UTIL_FindEntityByString(nullptr, "netname", msstring("-") + "game_master");
 				if (pGameMasterEnt)
 				{
 					MS_INFO("Game master created by AngelScript at index %d", pGameMasterEnt->entindex());
@@ -1974,7 +1975,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	}
 	else
 	{
-		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(nullptr, "netname", msstring("-") + "game_master");
 		if (!pGameMasterEnt)
 		{
 			MS_INFO("Creating legacy game master");
@@ -2200,7 +2201,7 @@ const char *GetGameDescription()
 #else
 	char build[8] = {__DATE__[0], __DATE__[1], __DATE__[2], __DATE__[7], __DATE__[8], __DATE__[9], __DATE__[10]};
 	static char gameDesc[64];
-	sprintf(gameDesc, "MS:R - %sa", strupr(build));
+	sprintf(gameDesc, "MS:R - %sa", _strupr(build));
 #endif
 
 	return gameDesc;
@@ -2327,8 +2328,8 @@ void SetupVisibility(edict_t *pViewEntity, edict_t *pClient, unsigned char **pvs
 
 	if (pClient->v.flags & FL_PROXY)
 	{
-		*pvs = NULL; // the spectator proxy sees
-		*pas = NULL; // and hears everything
+		*pvs = nullptr; // the spectator proxy sees
+		*pas = nullptr; // and hears everything
 		return;
 	}
 
@@ -2594,7 +2595,7 @@ int AddToFullPack(struct entity_state_s *state, int e, edict_t *ent, edict_t *ho
 }
 
 // defaults for clientinfo messages
-#define DEFAULT_VIEWHEIGHT 28
+constexpr int DEFAULT_VIEWHEIGHT = 28;
 
 /*
 ===================
@@ -2603,7 +2604,7 @@ CreateBaseline
 Creates baselines used for network encoding, especially for player data since players are not spawned until connect time.
 ===================
 */
-void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, vec3_t player_mins, vec3_t player_maxs)
+void CreateBaseline(int player, int eindex, struct entity_state_s *baseline, struct edict_s *entity, int playermodelindex, Vector player_mins, Vector player_maxs)
 {
 	baseline->origin = entity->v.origin;
 	baseline->angles = entity->v.angles;
@@ -2851,15 +2852,17 @@ void Player_Encode(struct delta_s *pFields, const unsigned char *from, const uns
 	}
 }
 
-#define CUSTOMFIELD_ORIGIN0 0
-#define CUSTOMFIELD_ORIGIN1 1
-#define CUSTOMFIELD_ORIGIN2 2
-#define CUSTOMFIELD_ANGLES0 3
-#define CUSTOMFIELD_ANGLES1 4
-#define CUSTOMFIELD_ANGLES2 5
-#define CUSTOMFIELD_SKIN 6
-#define CUSTOMFIELD_SEQUENCE 7
-#define CUSTOMFIELD_ANIMTIME 8
+enum {
+	CUSTOMFIELD_ORIGIN0 = 0,
+	CUSTOMFIELD_ORIGIN1 = 1,
+	CUSTOMFIELD_ORIGIN2 = 2,
+	CUSTOMFIELD_ANGLES0 = 3,
+	CUSTOMFIELD_ANGLES1 = 4,
+	CUSTOMFIELD_ANGLES2 = 5,
+	CUSTOMFIELD_SKIN = 6,
+	CUSTOMFIELD_SEQUENCE = 7,
+	CUSTOMFIELD_ANIMTIME = 8
+};
 
 entity_field_alias_t custom_entity_field_alias[] =
 	{

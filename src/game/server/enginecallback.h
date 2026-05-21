@@ -22,7 +22,7 @@ extern enginefuncs_t g_engfuncs;
 
 extern unsigned int g_iNumBytesWritten;
 extern int g_iUserMessageType;
-#define MAX_USERMESSAGE_SIZE 192
+inline constexpr int MAX_USERMESSAGE_SIZE = 192;
 
 // The actual engine callbacks
 #define GETPLAYERUSERID (*g_engfuncs.pfnGetPlayerUserId)
@@ -41,7 +41,12 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define GET_SPAWN_PARMS (*g_engfuncs.pfnGetSpawnParms)
 #define SAVE_SPAWN_PARMS (*g_engfuncs.pfnSaveSpawnParms)
 #define VEC_TO_YAW (*g_engfuncs.pfnVecToYaw)
-#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
+//#define VEC_TO_ANGLES (*g_engfuncs.pfnVecToAngles)
+
+inline void VEC_TO_ANGLES(const float* rgflVectorIn, float* rgflVectorOut ) {
+	g_engfuncs.pfnVecToAngles(rgflVectorIn, rgflVectorOut);
+}
+
 #define MOVE_TO_ORIGIN (*g_engfuncs.pfnMoveToOrigin)
 #define oldCHANGE_YAW (*g_engfuncs.pfnChangeYaw)
 #define CHANGE_PITCH (*g_engfuncs.pfnChangePitch)
@@ -72,9 +77,41 @@ void SET_MODEL( edict_t *e, const char *szModel );
 #define CRC32_PROCESS_BUFFER (*g_engfuncs.pfnCRC32_ProcessBuffer)
 #define CRC32_PROCESS_BYTE (*g_engfuncs.pfnCRC32_ProcessByte)
 #define CRC32_FINAL (*g_engfuncs.pfnCRC32_Final)
-#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
-#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
-#define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
+//#define RANDOM_LONG (*g_engfuncs.pfnRandomLong)
+//#define RANDOM_FLOAT (*g_engfuncs.pfnRandomFloat)
+//#define GETPLAYERAUTHID (*g_engfuncs.pfnGetPlayerAuthId)
+
+template <typename Type1, typename Type2>
+int32 RANDOM_LONG(const Type1 &lLow, const Type2 &lHigh) {
+
+	if (lLow > lHigh) {
+		return g_engfuncs.pfnRandomLong(static_cast<int32>(lHigh), static_cast<int32>(lLow));
+	}
+
+	return g_engfuncs.pfnRandomLong(static_cast<int32>(lLow), static_cast<int32>(lHigh));
+
+
+}
+
+
+template <typename Type1, typename Type2>
+float RANDOM_FLOAT(const Type1 &flLow, const Type2 &flHigh) {
+
+	if (flLow > flHigh) {
+		return g_engfuncs.pfnRandomFloat( static_cast<float>(flHigh), static_cast<float>(flLow) );
+	}
+	
+	return g_engfuncs.pfnRandomFloat(static_cast<float>(flLow), static_cast<float>(flHigh));
+
+}
+
+
+inline const char* GETPLAYERAUTHID(edict_t* e) {
+	return g_engfuncs.pfnGetPlayerAuthId(e);
+}
+
+
+//undoing this would just invite more macros, will keep this and any others that user variadic args / fmt
 #define ALERT (*g_engfuncs.pfnAlertMessage)
 
 //MIB JUN2010_17 - enable total disable of debug alert messages
@@ -160,10 +197,10 @@ inline void WRITE_STRING(const char* sz)
 }
 
 #ifdef VALVE_DLL
-#define WRITE_STRING_MAX 180 // Upper limit for a usermessage is around 192 bytes, keep this in mind!
+constexpr unsigned int WRITE_STRING_MAX = 180; // Upper limit for a usermessage is around 192 bytes, keep this in mind!
 extern char g_pTempStringLimit[WRITE_STRING_MAX];
 // Use this to ensure that we only write this many bytes, ensure null terminated string, prevent overflows.
-#define WRITE_STRING_LIMIT(src, len) memset(g_pTempStringLimit, 0, WRITE_STRING_MAX); strncpy(g_pTempStringLimit, src, WRITE_STRING_MAX); g_pTempStringLimit[V_min(WRITE_STRING_MAX-1, len)] = 0; WRITE_STRING(g_pTempStringLimit)
+#define WRITE_STRING_LIMIT(src, len) memset(g_pTempStringLimit, 0, WRITE_STRING_MAX); strncpy(g_pTempStringLimit, src, WRITE_STRING_MAX); g_pTempStringLimit[V_min((unsigned int)WRITE_STRING_MAX-1, (unsigned int)len)] = 0; WRITE_STRING(g_pTempStringLimit)
 #endif
 
 #define CVAR_REGISTER (*g_engfuncs.pfnCVarRegister)
@@ -188,7 +225,12 @@ inline void *GET_PRIVATE(edict_t *pent)
 int ALLOC_STRING(const char *szValue); //Master Sword - Keep track of all string allocations on server
 void ClearStringPool();
 #else
-#define ALLOC_STRING (*g_engfuncs.pfnAllocString)
+
+inline unsigned int ALLOC_STRING(const char* szValue) {
+	return g_engfuncs.pfnAllocString(szValue);
+}
+
+//#define ALLOC_STRING (*g_engfuncs.pfnAllocString)
 #endif
 
 #define FIND_ENTITY_BY_STRING (*g_engfuncs.pfnFindEntityByString)

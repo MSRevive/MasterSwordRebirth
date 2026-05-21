@@ -56,7 +56,7 @@ int CHudStatusBar ::VidInit(void)
 void CHudStatusBar ::Reset(void)
 {
 	m_iFlags &= ~HUD_ACTIVE; // start out inactive
-	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+	for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 		m_szStatusText[i][0] = 0;
 	memset(m_iStatusValues, 0, sizeof m_iStatusValues);
 
@@ -166,22 +166,22 @@ int CHudStatusBar ::Draw(float fTime)
 {
 	if (m_bReparseString)
 	{
-		for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+		for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 			ParseStatusString(i);
-		m_bReparseString = FALSE;
+		m_bReparseString = false;
 	}
 
 	// Draw the status bar lines
-	for (int i = 0; i < MAX_STATUSBAR_LINES; i++)
+	for (unsigned int i = 0; i < MAX_STATUSBAR_LINES; i++)
 	{
 		int TextHeight, TextWidth;
 		GetConsoleStringSize(m_szStatusBar[i], &TextWidth, &TextHeight);
 
 		int Y_START;
-		if (ScreenHeight >= 480)
-			Y_START = ScreenHeight - 55;
+		if (ScreenHeight() >= 480)
+			Y_START = ScreenHeight() - 55;
 		else
-			Y_START = ScreenHeight - 45;
+			Y_START = ScreenHeight() - 45;
 
 		int x = 5;
 		int y = Y_START - (TextHeight * i); // draw along bottom of screen
@@ -189,8 +189,8 @@ int CHudStatusBar ::Draw(float fTime)
 		// let user set status ID bar centering
 		if ((i == STATUSBAR_ID_LINE) && CVAR_GET_FLOAT("hud_centerid"))
 		{
-			x = V_max(0, V_max(2, (ScreenWidth - TextWidth)) / 2);
-			y = (ScreenHeight / 2) + (TextHeight * CVAR_GET_FLOAT("hud_centerid"));
+			x = V_max(0, V_max(2, (ScreenWidth() - TextWidth)) / 2);
+			y = (ScreenHeight() / 2) + (TextHeight * CVAR_GET_FLOAT("hud_centerid"));
 		}
 
 		DrawConsoleString(x, y, m_szStatusBar[i]);
@@ -228,7 +228,7 @@ int CHudStatusBar ::MsgFunc_StatusText(const char *pszName, int iSize, void *pbu
 	else
 		m_iFlags |= HUD_ACTIVE; // we have status text, so turn on the status bar
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	return 1;
 }
@@ -247,7 +247,7 @@ int CHudStatusBar ::MsgFunc_StatusValue(const char *pszName, int iSize, void *pb
 
 	m_iStatusValues[index] = READ_SHORT();
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	return 1;
 }

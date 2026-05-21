@@ -46,7 +46,7 @@ public:
 
 #define QUICKSLOT_H YRES(14)
 
-	VGUI_QuickSlot(Panel *pParent) : Panel(XRES(170), ScreenHeight - QUICKSLOT_H, ScreenWidth, QUICKSLOT_H)
+	VGUI_QuickSlot(Panel *pParent) : Panel(XRES(170), ScreenHeight() - QUICKSLOT_H, ScreenWidth(), QUICKSLOT_H)
 	{
 		setParent(pParent);
 		SetBGColorRGB(Color_Transparent);

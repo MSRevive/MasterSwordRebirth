@@ -49,7 +49,7 @@ int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 		NewAction.Name = READ_STRING();
 		NewAction.ID = ID;
 
-		for (int i = 0; i < PlayerActions.size(); i++)
+		for (unsigned int i = 0; i < PlayerActions.size(); i++)
 			if (PlayerActions[i].ID == NewAction.ID)
 			{
 				PlayerActions[i] = NewAction;
@@ -60,7 +60,7 @@ int CHudAction::MsgFunc_Action(const char *pszName, int iSize, void *pbuf)
 	}
 	else //Remove
 	{
-		for (int i = 0; i < PlayerActions.size(); i++)
+		for (unsigned int i = 0; i < PlayerActions.size(); i++)
 			if (PlayerActions[i].ID == ID)
 			{
 				PlayerActions.erase(i);
@@ -90,7 +90,7 @@ void CHudAction::UserCmd_Action(void)
 
 	int iBitsValid = 0;
 	msstring MenuText(msstring(Localized("#ACTION_QUERY")) + "\n\n");
-	for (int i = 0; i < PlayerActions.size(); i++)
+	for (unsigned int i = 0; i < PlayerActions.size(); i++)
 	{
 		//Print("DEBUG: UserCmd_Action: loop: %i %s %s\n",i,PlayerActions[i].Name.c_str(),PlayerActions[i].ID.c_str());
 		MenuText += (i + 1);

@@ -16,8 +16,7 @@
 //  parsemsg.h
 //
 
-#define READ_BOOL() ( READ_BYTE() == 1 )		// MIB FEB2019_23 [LOCAL_PANEL_IMAGE]
-
+bool READ_BOOL(void);// MIB FEB2019_23 [LOCAL_PANEL_IMAGE]
 void BEGIN_READ(void *buf, int size);
 int READ_CHAR(void);
 int READ_BYTE(void);

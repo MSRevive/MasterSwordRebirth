@@ -96,8 +96,10 @@ struct attackdata_t
 	msstring sProjectile; //Name of the next projectile item to be fired
 };
 
-#define GET_CHARGE_FROM_TIME(a) (a + V_max(a - 1, 0) * .5)
 
+inline float GET_CHARGE_FROM_TIME(float flTime) {
+	return flTime + V_max(flTime - 1.0f, 0.0f) * 0.5;
+}
 // Global GenericItem
 class CGenericItem;
 class CScript;
@@ -131,7 +133,7 @@ public:
 	static CGenericItem *NewGenericItem(CGenericItem *pGlobalItem);										 //Copy a global item to a usable item
 	static CGenericItem *NewGenericItem(int idx);														 //[PackSwap]
 	static void AddGlobalItem(GenItem_t &NewGlobalItem);												 //Add a new global item
-	static int ItemCount();																				 //Number of global items
+	static unsigned int ItemCount();																	 //Number of global items
 	static GenItem_t *Item(int idx);																	 //Retreive item
 	static void DeleteItem(CGenericItem *pItem);														 //Delete one item by pointer
 	static void DeleteItem(int idx);																	 //Delete one item by index
@@ -168,8 +170,10 @@ CGenericItem *MSUtil_GetItemByID(ulong m_iId, CMSMonster *pOwner); //Retreives a
 #endif
 
 //Various properties
-#define GI_JUSTSPAWNED (1 << 0)
-#define GI_INPACK (1 << 1)
+enum  generic_item_properties_e {
+	GI_JUSTSPAWNED = (1 << 0),
+	GI_INPACK = (1 << 1)
+};
 
 struct drinkdata_t {
 	int Type, Intensity, IdleAnim;
@@ -224,7 +228,8 @@ public:
 	struct armordata_t *ArmorData = nullptr;
 	struct projectiledata_t *ProjectileData = nullptr;
 	struct spelldata_t *SpellData = nullptr;
-
+	const char* CONTAINER_ITEM_ACCEPT = "reg.container.accept_mask";
+	const char* CONTAINER_ITEM_REJECT = "reg.container.reject_mask";
 	int m_Location,																	 //Location of the item on the monster (Hands, back, etc)
 		m_Hand;																		 //The hand I'm in... if I'm in a hand
 	float m_TimeExpire;																 //Time the item should be deleted
@@ -247,7 +252,7 @@ public:
 	float flItemWeight; // TODO: This is for storing a item's weight on the actual item instead of the entity.
 
 	//Groupables
-	int iQuantity, iMaxGroupable, m_MaxGroupable; //MiB FEB2010_13 - Stackable Stacks added m_MaxGroupable
+	unsigned int iQuantity, iMaxGroupable, m_MaxGroupable; //MiB FEB2010_13 - Stackable Stacks added m_MaxGroupable
 
 	//Wearbles
 	mslist<wearpos_t> m_WearPositions; //Where the item goes when worn. Can use up multiple locations
@@ -269,13 +274,13 @@ public:
 	virtual void StrikeLand();
 	virtual void StrikeHold();
 	virtual void ChargeThrowProj();
-	virtual bool UseAmmo(int iAmt);
+	virtual bool UseAmmo(unsigned int iAmt);
 	virtual int ActivateButton();
 	virtual bool Attack_IsCharging();
 	virtual bool Attack_CanAttack();
 	virtual float Attack_Charge();
 	virtual float GetHighestAttackCharge();
-
+	
 	float m_TimeChargeStart; //Time I started charging for a special attack.  0 - not charging
 	float m_LastChargedAmt;	 //Last amount charged up
 	damage_t *m_CurrentDamage;
@@ -301,7 +306,7 @@ public:
 	void Container_StackItems(); //FEB2011_16 Thothie
 	void Container_SendItem(CGenericItem *pItem, bool fAddItem);
 	//int Container_Type( );
-	int Container_ItemCount();
+	unsigned int Container_ItemCount();
 	float Container_Weight();
 	bool Container_IsOpen();
 	float Volume();
@@ -422,6 +427,7 @@ public:
 	void FallThink();
 	void Think(void);
 	void SUB_Remove(void);
+	void ReadStat(const char* Name, int& StatVar, int& PropVar);
 
 	//IScripted
 	void Script_Setup();																				  //Ties m_pScriptActions and m_pScriptConditions to

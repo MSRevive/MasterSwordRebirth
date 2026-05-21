@@ -126,7 +126,7 @@ msstring msstring::thru_char(const char* a, size_t start) const
 msstring msstring::skip(const char* a) const
 {
 	size_t my_sz = len();
-	for (int i = 0; i < my_sz; i++)
+	for (unsigned int i = 0; i < my_sz; i++)
 	{
 		char datachar[2] = {data[i], 0};
 		if (!strstr(a, datachar))
@@ -138,7 +138,7 @@ msstring msstring::tolower(void) const
 {
 	size_t my_sz = len();
 	msstring ret;
-	for (int i = 0; i < my_sz; i++)
+	for (unsigned int i = 0; i < my_sz; i++)
 	{
 		char ch = data[i];
 		ret += ::tolower(ch);

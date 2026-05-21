@@ -27,7 +27,12 @@ extern "C" char *strlwr(char *str);
 
 #include "strhelper.h"
 
-#define clrmem(a) memset(&a, 0, sizeof(a));
+//#define clrmem(a) memset(&a, 0, sizeof(a));
+
+template <typename Type>
+inline void clrmem(Type& type) {
+	memset(&type, 0, sizeof(type));
+};
 
 //Deuplicated from msdebug.h
 #ifdef DEV_BUILD
@@ -155,9 +160,9 @@ private:
 
 //mstring - A fast string with features... no dynamic allocation
 //-Dogg
-#define MSSTRING_SIZE 256
-#define MSSTRING_MAXLEN (MSSTRING_SIZE-1)
-#define msstring_error ((size_t)-1)
+constexpr int MSSTRING_SIZE = 256;
+constexpr int MSSTRING_MAXLEN = (MSSTRING_SIZE - 1);
+constexpr int msstring_error = ((size_t)-1);
 
 class msstring
 {

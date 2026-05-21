@@ -2,13 +2,13 @@
 #include "weapons/weapons.h"
 
 //Shorten things up a lot
-#define m_Activity m_pOwner->m_Activity
-#define m_fSequenceFinished m_pOwner->m_fSequenceFinished
-#define LookupSequence m_pOwner->LookupSequence
+
+//#define LookupSequence m_pOwner->LookupSequence
 
 #undef Wielded
-#undef CHWielded
-#define CHWielded ((m_pPlayer->Hand[m_pPlayer->iCurrentHand]) ? m_pPlayer->Hand[m_pPlayer->iCurrentHand]->Wielded() : (m_pPlayer->PlayerHands ? m_pPlayer->PlayerHands->Wielded() : FALSE))
+
+
+//#define CHWielded ((m_pPlayer->Hand[m_pPlayer->iCurrentHand]) ? m_pPlayer->Hand[m_pPlayer->iCurrentHand]->Wielded() : (m_pPlayer->PlayerHands ? m_pPlayer->PlayerHands->Wielded() : false))
 
 CAnimation *CAnimation::ChangeTo(MONSTER_ANIM NewAnim)
 {
@@ -33,7 +33,7 @@ bool CAnimation ::SetAnim(const char* pszSequence)
 	if (!pszSequence || !pszSequence[0])
 		return false;
 
-	int animDesired = LookupSequence(pszSequence);
+	int animDesired = m_pOwner->LookupSequence(pszSequence);
 
 	if (animDesired <= -1)
 	{
@@ -52,7 +52,7 @@ bool CAnimation ::SetAnim(const char* pszSequence)
 }
 bool CAnimation ::SetGaitAnim(const char* pszSequence)
 {
-	int animDesired = LookupSequence(pszSequence);
+	int animDesired = m_pOwner->LookupSequence(pszSequence);
 	if (animDesired <= -1)
 	{
 		m_pOwner->pev->gaitsequence = 0;
@@ -86,41 +86,41 @@ void CAnimation ::GaitAnimate()
 		if (speed == 0)
 		{
 			if (bCustomLegs)
-				NewGait = LookupSequence(UTIL_VarArgs("crouchidle_", m_szAnimLegs));
+				NewGait = m_pOwner->LookupSequence(UTIL_VarArgs("crouchidle_", m_szAnimLegs));
 
 			if (NewGait < 0)
-				NewGait = LookupSequence("crouchidle");
+				NewGait = m_pOwner->LookupSequence("crouchidle");
 		}
 		else
 		{
 			if (bCustomLegs)
-				NewGait = LookupSequence(UTIL_VarArgs("crouchmove_", m_szAnimLegs));
+				NewGait = m_pOwner->LookupSequence(UTIL_VarArgs("crouchmove_", m_szAnimLegs));
 
 			if (NewGait < 0)
-				NewGait = LookupSequence("crouch");
+				NewGait = m_pOwner->LookupSequence("crouch");
 		}
 	}
-	else if (speed > m_pOwner->WalkSpeed(FALSE) + 1)
+	else if (speed > m_pOwner->WalkSpeed(false) + 1)
 	{
 		if (bCustomLegs)
-			NewGait = LookupSequence(UTIL_VarArgs("run_%s", m_szAnimLegs));
+			NewGait = m_pOwner->LookupSequence(UTIL_VarArgs("run_%s", m_szAnimLegs));
 		if (NewGait < 0)
-			NewGait = LookupSequence("run");
+			NewGait = m_pOwner->LookupSequence("run");
 	}
 	else if (speed > 0)
 	{
 		if (bCustomLegs)
-			NewGait = LookupSequence(UTIL_VarArgs("walk_%s", m_szAnimLegs));
+			NewGait = m_pOwner->LookupSequence(UTIL_VarArgs("walk_%s", m_szAnimLegs));
 		if (NewGait < 0)
-			NewGait = LookupSequence("walk");
+			NewGait = m_pOwner->LookupSequence("walk");
 	}
 	else
 	{
 		if (bCustomLegs)
-			NewGait = LookupSequence(UTIL_VarArgs("stand_%s", m_szAnimLegs));
+			NewGait = m_pOwner->LookupSequence(UTIL_VarArgs("stand_%s", m_szAnimLegs));
 		//		if( bCustomLegs ) NewGait = 0;
 		if (NewGait < 0)
-			NewGait = LookupSequence("stand");
+			NewGait = m_pOwner->LookupSequence("stand");
 		//else NewGait = 0;
 	}
 
@@ -157,7 +157,7 @@ void CWalkAnim ::Animate()
 		LegsAnimName = pPlayer->m_szAnimLegs;
 	}
 
-	int animDesired = LookupSequence(TorsoAnimName);
+	int animDesired = m_pOwner->LookupSequence(TorsoAnimName);
 
 	if (animDesired != m_pOwner->pev->sequence) //Continue playing the same uninterrupted animation until told otherwise
 		SetAnim(TorsoAnimName);
@@ -167,18 +167,18 @@ void CWalkAnim ::Animate()
 }
 
 CAnimHold gAnimHold; //Never submits to MONSTER_ANIM_WALK
-					 //Submits to anything else if ReleaseAnim == TRUE
+					 //Submits to anything else if ReleaseAnim == true
 					 //Only uses gait if specified with flags
 void CAnimHold ::Initialize(void *vData)
 {
-	ReleaseAnim = TRUE;
+	ReleaseAnim = true;
 	UseGait = false; //defaults
 	int Flags = (int)vData;
 	if (Flags & (1 << 0))
-		ReleaseAnim = FALSE; //Release to any anim besides walk
+		ReleaseAnim = false; //Release to any anim besides walk
 	if (Flags & (1 << 1))
-		UseGait = TRUE; //Use gait
-	IsNewAnim = TRUE;
+		UseGait = true; //Use gait
+	IsNewAnim = true;
 }
 bool CAnimHold ::CanChangeTo(MONSTER_ANIM NewAnim, void *vData)
 {
@@ -218,7 +218,7 @@ void CAnimOnce ::Initialize(void *vData)
 }
 bool CAnimOnce ::CanChangeTo(MONSTER_ANIM NewAnim, void *vData)
 {
-	return m_fSequenceFinished ? true : false;
+	return m_pOwner->m_fSequenceFinished ? true : false;
 }
 void CAnimOnce ::Animate()
 {
@@ -243,13 +243,13 @@ void CAnimOnce ::Animate()
 
 /*					//stays in the last pose
 void CAnimAct :: Initialize( void *vData ) {
-	if( vData ) ReleaseAnim = FALSE;
-	else ReleaseAnim = TRUE;
-	IsNewAnim = TRUE;
+	if( vData ) ReleaseAnim = false;
+	else ReleaseAnim = true;
+	IsNewAnim = true;
 }
 bool CAnimAct :: CanChangeTo( MONSTER_ANIM NewAnim, void *vData ) {
-	if( m_fSequenceFinished && ReleaseAnim ) return TRUE;
-	return FALSE;
+	if( m_fSequenceFinished && ReleaseAnim ) return true;
+	return false;
 }
 void CAnimAct :: Animate( ) {
 	if( !IsNewAnim ) return;

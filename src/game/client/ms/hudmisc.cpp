@@ -113,7 +113,7 @@ int CHudMisc::Draw(float flTime)
 	}
 
 	SPR_Set(gHUD.GetSprite(SpriteIndex), 255, 255, 255 );
-	SPR_DrawAdditive( 0, ScreenWidth - 70, ScreenHeight - 70, &gHUD.GetSpriteRect(SpriteIndex));*/
+	SPR_DrawAdditive( 0, ScreenWidth() - 70, ScreenHeight() - 70, &gHUD.GetSpriteRect(SpriteIndex));*/
 
 	return 1;
 }
@@ -199,17 +199,17 @@ void CHudMisc ::UserCmd_RemovePack(void)
 	int test = *(int *)&m_RemoveList;
 	int test2 = m_RemoveList.size();
 
-	 strncpy(MenuText,  "Remove item:\n\n", sizeof(MenuText) );
+	 strncpy(MenuText, "Remove item:\n\n", sizeof(MenuText) );
 
 	m_RemoveList.clear();
-	for (int i = 0; i < player.Gear.size(); i++)
+	for (unsigned int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem *pGearItem = player.Gear[i];
 		if (!FBitSet(pGearItem->MSProperties(), ITEM_WEARABLE) || pGearItem->m_Location == ITEMPOS_HANDS)
 			continue;
 
 		msstring ItemName;
-		ItemName += SPEECH_GetItemName(pGearItem);
+		ItemName += SPEECH::ItemName(pGearItem);
 
 		msstring SendString;
 		int Size = m_RemoveList.size();
@@ -315,12 +315,12 @@ void CHudMisc ::UserCmd_Offer(void)
 	}
 
 	int r = 0;
-	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
+	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
 	{
 		if (!player.Hand(i))
 			continue;
 
-		const char *arg = UTIL_VarArgs("%i. %s hand: %s\n", r + 2, SPEECH_IntToHand(i, true), SPEECH::ItemName(player.Hand(i), true));
+		const char *arg = UTIL_VarArgs("%i. %s hand: %s\n", r + 2, SPEECH::HandName(i, true), SPEECH::ItemName(player.Hand(i), true));
 		strncat(MenuText, arg, strlen(arg));
 		m_OfferInfo.OfferItem[r] = i;
 		iBitsValid |= (1 << (++r)); //Starts at 1
