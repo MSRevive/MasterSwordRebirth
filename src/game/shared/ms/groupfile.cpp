@@ -223,7 +223,7 @@ bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long
 		if (pBuffer)
 		{
 			cFile.Seek(Entry.FileOffset, FILESYSTEM_SEEK_HEAD);
-			byte* _pBuffer = msnew byte[Entry.FileSize];
+			byte* _pBuffer = new byte[Entry.FileSize];
 			bool bSuccess = false;
 
 			unsigned long BytesRead = cFile.Read(_pBuffer, Entry.FileSize);
