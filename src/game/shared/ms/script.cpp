@@ -5106,46 +5106,69 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 	SCRIPT_EVENT* CurrentEvent = NULL;
 	scriptcmd_list* CurrentCmds = NULL;
 	std::vector<scriptcmd_list*> ParentCmds;
-	ParentCmds.reserve(256);
 
 	size_t lineNum = 1;
+	std::string sData(pszScriptData);
+	std::istringstream ss(sData);
 
-	const char* pCur = pszScriptData;
-	std::string result;
-	result.reserve(256);
-
-	while (*pCur)
+	std::string line;
+	while (getline(ss, line))
 	{
-		const char* pLineStart = pCur;
-		while (*pCur && *pCur != '\n')
-			pCur++;
+		line.erase(0, line.find_first_not_of(" \t\v"));
 
-		const char* pTrimmed = pLineStart;
-		while (pTrimmed < pCur && (*pTrimmed == ' ' || *pTrimmed == '\t' || *pTrimmed == '\v'))
-			pTrimmed++;
-
-		result.clear(); // doesn't deallocate — reuses buffer
-		for (const char* p = pTrimmed; p < pCur; p++)
+		std::string result = "";
+		int lineSize = line.length();
+		for (int i = 0; i < lineSize; i++)
 		{
-			const char ch = *p;
+			const char ch = line[i];
+			const char nextch = line[i + 1]; //get next ch.
+
+			//remove comments.
+			if (ch == '/' && nextch == '/')
+				break;
+
+			//just remove return carriages here instead of doing erase.
 			if (ch == '\r')
 				break;
-			if (ch == '/' && (p + 1) < pCur && *(p + 1) == '/')
-				break;
+
 			result += ch;
 		}
 
 		if (result.find_first_not_of(" \r\t") != std::string::npos)
 		{
-			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
-		}
+			//remove extra spaces
+			//credit to https://stackoverflow.com/questions/35301432/remove-extra-white-spaces-in-c
+			// result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
+			// 	return isSpace(a) && isSpace(b);
+			// }), std::end(result));
 
-		if (*pCur == '\n')
-			pCur++;
+			//we use the new parse line function that isn't really new.
+			//NewParseLine(result, lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+			//Log("Line: %s", result.c_str());
+		}
 
 		lineNum++;
 	}
 
+	//  Uncomment to print out all this function gathered from the script file
+	//#ifndef VALVE_DLL
+		/*SCRIPT_EVENT *pEvent = seFirstEvent;
+		CHAR *pszPtr;
+		ALERT( at_console, "\nScript: %s\n", pScriptedEnt->pev?STRING(pScriptedEnt->pev->classname):"new script" );
+		while( pEvent ) {
+			pszPtr = pEvent->Action;
+			if( pEvent->Name ) ALERT( at_console, "Event: %s\n", STRING(pEvent->Name) );
+			else ALERT( at_console, "Event: Unnamed\n" );
+			for( unsigned int i = 0; i < strlen(pszPtr); i++ ) {
+				if( pszPtr[i] == '\r' ) ALERT( at_console, "R" );
+				else if( pszPtr[i] == '\n' ) ALERT( at_console, "N" );
+				else ALERT( at_console, "%c", pszPtr[i] );
+			}
+			ALERT( at_console, "\n" );
+			pEvent = pEvent->NextEvent;
+		}*/
+		//#endif
 	return true;
 }
 
