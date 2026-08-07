@@ -1,28 +1,22 @@
-/***
-*
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
-*	
-*	This product contains software technology licensed from Id 
-*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
-*	All Rights Reserved.
-*
-*   This source code contains proprietary and confidential information of
-*   Valve LLC and its suppliers.  Access to this code is restricted to
-*   persons who have executed a written SDK license with Valve.  Any access,
-*   use or distribution of this code by or to any unlicensed person is illegal.
-*
-****/
-//=========================================================
-// entities.cpp - Extra entity stuff.
-//=========================================================
+//=============================================================================
+//
+// ms.dll - Master Sword server .dll/.so
+//
+// https://msrebirth.net/
+//
+// Author: Tom 'tschumann' Schumann
+// Notes: load entities from .ent file
+//
+//=============================================================================
 
 #include	"extdll.h"
 #include	"util.h"
+#include	"iscript.h"
 #include	"cbase.h"
 #include	"entities.h"
 
 extern char *COM_Parse (char *data);
-extern char com_token[];
+char com_token[1500];
 
 CEntity	WorldEntity;
 
@@ -47,10 +41,9 @@ void CEntity::FixKeyName( char *key )
 }
 
 //=========================================================
-// CGraph - FLoadGraph - attempts to load a node graph from disk.
-// if the current level is maps/snar.bsp, maps/graphs/snar.nod
-// will be loaded. If file cannot be loaded, the node tree
-// will be created and saved to disk.
+// CEntity - FLoadEntity - attempts to load an entity file from disk.
+// if the current level is maps/snar.bsp, maps/graphs/snar.ent
+// will be loaded.
 //=========================================================
 int CEntity::FLoadEntity ( char *szMapName )
 {
@@ -183,7 +176,6 @@ fail:
 int CEntity::CheckENTFile ( char *szMapName )
 {
 	int 		retValue;
-
 	char		szEntityFilename[MAX_PATH];
 	
 
@@ -197,11 +189,12 @@ int CEntity::CheckENTFile ( char *szMapName )
 
 	if( !aMemFile )
 	{
-		ALERT ( at_aiconsole, ".ENT File not found\n\n" );
+		ALERT ( at_aiconsole, ".ent File not found\n\n" );
 		retValue = FALSE;
 	}
 	else
 	{
+		ENGINE_FORCE_UNMODIFIED( force_exactfile, NULL, NULL, szEntityFilename );
 		retValue = TRUE;
 	}
 
