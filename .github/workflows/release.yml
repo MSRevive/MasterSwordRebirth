@@ -36,12 +36,6 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
 
-      - name: Setup MSVC CLI for Windows
-        if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x86
-
       - name: Build on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
