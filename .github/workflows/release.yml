@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@latest
         with:
           submodules: recursive
 
@@ -45,8 +45,8 @@ jobs:
       - name: Build on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -A Win32
-          msbuild ${{github.workspace}}/build/msr.sln /p:Configuration=${{env.BUILD_TYPE}} /p:Platform=win32
+          cmake -S . -B ${{github.workspace}}/build -A Win32
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
 
       - name: Upload Linux artifact
         if: startsWith(matrix.os, 'ubuntu')
