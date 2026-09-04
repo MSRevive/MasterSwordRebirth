@@ -30,9 +30,9 @@ void CreateCharacterRequest::OnResponse(int iRespCode)
 		CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
 	};
 
-	if (iRespCode != 200)
+	if (iRespCode >= 400)
 	{
-		FNShared::Print("Unable to create character for SteamID %llu!", m_iSteamID64);
+		FNShared::Print("Unable to create character for SteamID %llu! HTTP code %d", m_iSteamID64, iRespCode);
 		MarkNotFound();
 		return;
 	}

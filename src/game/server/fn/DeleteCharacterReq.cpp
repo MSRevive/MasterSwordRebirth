@@ -23,7 +23,7 @@ void DeleteCharacterRequest::OnResponse(int iRespCode)
 
 	charinfo_t& CharInfo = pPlayer->m_CharInfo[m_iSlot];
 
-	if (iRespCode != 200)
+	if (iRespCode >= 400)
 	{
 		FNShared::Print("Unable to delete character for SteamID %llu!", m_iSteamID64);
 
