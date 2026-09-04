@@ -3,7 +3,7 @@
 cmake_minimum_required( VERSION 3.24 )
 
 if (WIN32)
-	set(CMAKE_GENERATOR_PLATFORM win32)
+	set(CMAKE_GENERATOR_PLATFORM Win32)
 endif(WIN32)
 
 if (MSVC)
