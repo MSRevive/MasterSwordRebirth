@@ -45,7 +45,7 @@ jobs:
       - name: Build on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          cmake -S . -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -A Win32
+          cmake -S . -B ${{github.workspace}}/build -G Ninja -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
           cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
 
       - name: Upload Linux artifact
