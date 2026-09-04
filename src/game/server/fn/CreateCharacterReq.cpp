@@ -22,22 +22,47 @@ void CreateCharacterRequest::OnResponse(int iRespCode)
 
 	charinfo_t& CharInfo = pPlayer->m_CharInfo[m_iSlot];
 
-	if (iRespCode != 200)
+	auto MarkNotFound = [&CharInfo, this]()
 	{
-		FNShared::Print("Unable to create character for SteamID %llu!", m_iSteamID64);
-
 		CharInfo.Index = m_iSlot;
 		CharInfo.Location = LOC_CENTRAL;
 		CharInfo.Status = CDS_NOTFOUND;
 		CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
+	};
+
+	if (iRespCode >= 400)
+	{
+		FNShared::Print("Unable to create character for SteamID %llu! HTTP code %d", m_iSteamID64, iRespCode);
+		MarkNotFound();
 		return;
 	}
-	
+
 	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
-	const int flags = doc["data"]["flags"].GetInt();
+
+	if (!doc.HasMember("data") || !doc["data"].IsObject())
+	{
+		FNShared::Print("Malformed create response for SteamID %llu!", m_iSteamID64);
+		MarkNotFound();
+		return;
+	}
+
+	const rapidjson::Value& payload = doc["data"];
+
+	if (!payload.HasMember("flags") || !payload["flags"].IsInt() ||
+	    !payload.HasMember("id")    || !payload["id"].IsString())
+	{
+		FNShared::Print("Incomplete create response for SteamID %llu!", m_iSteamID64);
+		MarkNotFound();
+		return;
+	}
+
+	const int flags = payload["flags"].GetInt();
 
 	CharInfo.AssignChar(m_iSlot, LOC_CENTRAL, (char*)m_sRequestBody, m_iRequestBodySize, pPlayer);
-	strncpy(CharInfo.Guid, doc["data"]["id"].GetString(), MSSTRING_SIZE);
+
+	strncpy(CharInfo.Guid, payload["id"].GetString(), MSSTRING_SIZE - 1);
+	CharInfo.Guid[MSSTRING_SIZE - 1] = '\0';
+
 	CharInfo.Flags = flags;
 	CharInfo.Status = CDS_LOADED;
 	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!

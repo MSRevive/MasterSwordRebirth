@@ -57,6 +57,16 @@ static bool SendBlockingRequest(HTTPRequest* req)
 	return req->AsyncSendRequest();
 }
 
+static bool QueueSlotRequest(HTTPRequest* pReq, charinfo_t& CharInfo, decltype(charinfo_t::Status) prevStatus)
+{
+	if (g_FNRequestManager.QueueRequest(pReq))
+		return true;
+
+	CharInfo.Status = prevStatus;
+	CharInfo.m_CachedStatus = CDS_UNLOADED; // force an update!
+	return false;
+}
+
 // Send validation requests to the FN backend.
 bool FNShared::Validate(void)
 {
@@ -73,12 +83,15 @@ bool FNShared::ValidateFN(void)
 {
 	if (IsEnabled() == false)
 		return true;
-	
+
 	std::unique_ptr<HTTPRequest> pReq(new ValidateConRequest("/api/v2/internal/ping"));
 	const auto req = pReq.get();
 	if (SendBlockingRequest(req))
 	{
 		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
+		if (!doc.HasMember("data") || !doc["data"].IsBool())
+			return false;
+
 		return doc["data"].GetBool();
 	}
 
@@ -89,7 +102,7 @@ bool FNShared::ValidateMap(void)
 {
 	if (IsEnabled() == false)
 		return true;
-	
+
 	char mapFile[MAX_PATH];
 	_snprintf(mapFile, sizeof(mapFile), "%s/maps/%s.bsp", MSGlobals::AbsGamePath.c_str(), MSGlobals::MapName.c_str());
 	unsigned int mapFileHash = GetFileCheckSum(mapFile);
@@ -99,6 +112,9 @@ bool FNShared::ValidateMap(void)
 	if (SendBlockingRequest(req))
 	{
 		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
+		if (!doc.HasMember("data") || !doc["data"].IsBool())
+			return false;
+
 		return doc["data"].GetBool();
 	}
 
@@ -119,6 +135,9 @@ bool FNShared::ValidateSC(void)
 	if (SendBlockingRequest(req))
 	{
 		JSONDocument doc = HTTPRequest::ParseJSON(req->m_sResponseBody.c_str());
+		if (!doc.HasMember("data") || !doc["data"].IsBool())
+			return false;
+
 		return doc["data"].GetBool();
 	}
 
@@ -151,66 +170,121 @@ void FNShared::LoadCharacter(CBasePlayer* pPlayer)
 
 	for (unsigned int i = 0; i < MAX_CHARSLOTS; i++)
 	{
-		if (pPlayer->m_CharInfo[i].Status == CDS_LOADING)
+		charinfo_t& CharInfo = pPlayer->m_CharInfo[i];
+
+		if (CharInfo.Status == CDS_LOADING)
 			continue;
 
-		pPlayer->m_CharInfo[i].m_CachedStatus = CDS_UNLOADED;
-		pPlayer->m_CharInfo[i].Status = CDS_LOADING;
+		const auto prevStatus = CharInfo.Status;
 
-		g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, i, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)));
+		CharInfo.m_CachedStatus = CDS_UNLOADED;
+		CharInfo.Status = CDS_LOADING;
+
+		if (!QueueSlotRequest(new LoadCharacterRequest(pPlayer->steamID64, i,
+				UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, i)),
+				CharInfo, prevStatus))
+		{
+			FNShared::Print("Failed to queue character load for %llu slot %u!", pPlayer->steamID64, i);
+
+			// The only failure mode today is a manager that isn't loaded, so the
+			// remaining slots would fail identically. Remove this break if
+			// QueueRequest ever grows per-request failure modes.
+			break;
+		}
 	}
 }
 
 // Load a specific character!
 void FNShared::LoadCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot) || (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot))
 		return;
 
-	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
-	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 
-	g_FNRequestManager.QueueRequest(new LoadCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)));
+	if (CharInfo.Status == CDS_LOADING)
+		return;
+
+	const auto prevStatus = CharInfo.Status;
+
+	CharInfo.m_CachedStatus = CDS_UNLOADED;
+	CharInfo.Status = CDS_LOADING;
+
+	if (!QueueSlotRequest(new LoadCharacterRequest(pPlayer->steamID64, slot,
+			UTIL_VarArgs("/api/v2/internal/character/%llu/%i", pPlayer->steamID64, slot)),
+			CharInfo, prevStatus))
+	{
+		FNShared::Print("Failed to queue character load for %llu slot %i!", pPlayer->steamID64, slot);
+	}
 }
 
 // Create or Update FN character!
 void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const char* data, size_t size, bool bIsUpdate)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (data == NULL) || (size <= 0) || !IsSlotValid(slot))
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || (data == NULL) || (size == 0) || !IsSlotValid(slot))
 		return; // Quick validation - steamId is vital.
 
 	if (bIsUpdate && (pPlayer->m_CharacterState == CHARSTATE_UNLOADED))
 		return; // You cannot update your char (save) if there is no char loaded.
 
-	if (!bIsUpdate && (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
+
+	if (!bIsUpdate && (CharInfo.Status == CDS_LOADING))
 		return; // Busy, wait for callback!
 
 	char pchApiUrl[REQUEST_URL_SIZE];
 
 	if (bIsUpdate)
 	{
-		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid);
-		
-		FNShared::Print("Send update request for %s", std::to_string(pPlayer->steamID64).c_str());
-		g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
+		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", CharInfo.Guid);
+
+		FNShared::Print("Send update request for %llu", pPlayer->steamID64);
+
+		if (!g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(
+				pPlayer->steamID64, slot, pchApiUrl, data, size)))
+		{
+			FNShared::Print("Failed to queue save for %llu slot %i!", pPlayer->steamID64, slot);
+		}
 	}
 	else
 	{
 		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/");
-		pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
-		pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
-		
-		g_FNRequestManager.QueueRequest(new CreateCharacterRequest(pPlayer->steamID64, slot, pchApiUrl, data, size));
+
+		const auto prevStatus = CharInfo.Status;
+
+		CharInfo.m_CachedStatus = CDS_UNLOADED;
+		CharInfo.Status = CDS_LOADING;
+
+		if (!QueueSlotRequest(new CreateCharacterRequest(
+				pPlayer->steamID64, slot, pchApiUrl, data, size), CharInfo, prevStatus))
+		{
+			FNShared::Print("Failed to queue character creation for %llu slot %i!", pPlayer->steamID64, slot);
+		}
 	}
 }
 
 void FNShared::DeleteCharacter(CBasePlayer* pPlayer, int slot)
 {
-	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot) || (pPlayer->m_CharInfo[slot].Status == CDS_LOADING))
+	if ((pPlayer == NULL) || (pPlayer->steamID64 == 0ULL) || !IsSlotValid(slot))
 		return;
 
-	pPlayer->m_CharInfo[slot].m_CachedStatus = CDS_UNLOADED;
-	pPlayer->m_CharInfo[slot].Status = CDS_LOADING;
+	charinfo_t& CharInfo = pPlayer->m_CharInfo[slot];
 
-	g_FNRequestManager.QueueRequest(new DeleteCharacterRequest(pPlayer->steamID64, slot, UTIL_VarArgs("/api/v2/internal/character/%s", pPlayer->m_CharInfo[slot].Guid)));
+	if (CharInfo.Status == CDS_LOADING)
+		return;
+
+	const auto prevStatus = CharInfo.Status;
+
+	char pchApiUrl[REQUEST_URL_SIZE];
+	_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", CharInfo.Guid);
+
+	CharInfo.m_CachedStatus = CDS_UNLOADED;
+	CharInfo.Status = CDS_LOADING;
+
+	if (!QueueSlotRequest(new DeleteCharacterRequest(
+			pPlayer->steamID64, slot, pchApiUrl, static_cast<int>(prevStatus)),
+			CharInfo, prevStatus))
+	{
+		FNShared::Print("Failed to queue character deletion for %llu slot %i!", pPlayer->steamID64, slot);
+	}
 }

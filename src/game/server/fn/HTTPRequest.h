@@ -52,6 +52,8 @@ public:
 
 	void OnMultiComplete(CURLcode result);
 
+	void AbortTransfer(CURLM* pMulti);
+
 	int m_iRequestState;
 	bool m_bNoCallback = false;
 	std::string m_sResponseBody;
@@ -84,6 +86,7 @@ private:
 
 private:
 	HTTPRequest(const HTTPRequest&); // No copy-constructor pls.
+	HTTPRequest& operator=(const HTTPRequest&);
 };
 
 #endif // HTTP_BASE_REQUEST_H

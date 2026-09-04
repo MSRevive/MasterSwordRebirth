@@ -19,7 +19,6 @@
 #include "msdllheaders.h"
 #include "global.h"
 #include "player.h"
-#include "FNSharedDefs.h"
 
 static char g_szBaseUrl[REQUEST_URL_SIZE];
 
@@ -57,6 +56,7 @@ void HTTPRequest::Cleanup()
 {
 	delete[] m_sRequestBody;
 	m_sRequestBody = nullptr;
+	m_iRequestBodySize = 0;
 	m_sRequestBuffer.clear();
 
 	m_sResponseBody.clear();
@@ -66,7 +66,7 @@ void HTTPRequest::Cleanup()
 		curl_slist_free_all(m_pHeaderList);
 		m_pHeaderList = nullptr;
 	}
-	
+
 	// just incase it's not cleaned up already.
 	if (m_Handle)
 	{
@@ -86,7 +86,7 @@ void HTTPRequest::SetupRequest()
 		case HTTPRequest::GET:
 			break;
 		case HTTPRequest::POST:
-			curl_easy_setopt(m_Handle, CURLOPT_POST, 1);
+			curl_easy_setopt(m_Handle, CURLOPT_POST, 1L);
 			break;
 		case HTTPRequest::DEL:
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "DELETE");
@@ -95,7 +95,7 @@ void HTTPRequest::SetupRequest()
 			curl_easy_setopt(m_Handle, CURLOPT_CUSTOMREQUEST, "PUT");
 			break;
 	}
-	
+
 	curl_easy_setopt(m_Handle, CURLOPT_URL, m_sPchAPIUrl);
 	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYPEER, 0L);
 	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYHOST, 0L);
@@ -122,10 +122,10 @@ void HTTPRequest::SetupRequest()
 		writer.String(steamID64String);
 
 		writer.Key("slot");
-		writer.Int(m_iSlot);
+		writer.Int(static_cast<int>(m_iSlot));
 
 		writer.Key("size");
-		writer.Int(m_iRequestBodySize);
+		writer.Int(static_cast<int>(m_iRequestBodySize));
 
 		writer.Key("data");
 		writer.String(base64_encode(reinterpret_cast<byte*>(m_sRequestBody), m_iRequestBodySize).c_str());
@@ -134,7 +134,7 @@ void HTTPRequest::SetupRequest()
 
 		std::string buffer = s.GetString();
 		m_sRequestBuffer = buffer; //we have to make a copy of the data because it will go out of scope otherwise.
-		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDSIZE, m_sRequestBuffer.size());
+		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDSIZE, static_cast<long>(m_sRequestBuffer.size()));
 		curl_easy_setopt(m_Handle, CURLOPT_POSTFIELDS, m_sRequestBuffer.c_str());
 	}
 }
@@ -142,21 +142,34 @@ void HTTPRequest::SetupRequest()
 // This is a blocking call.
 bool HTTPRequest::SendRequest()
 {
-	if (m_Handle) 
+	if (m_Handle)
 		return false;
-		
+
 	m_iRequestState = RequestState::EXECUTED;
 	m_Handle = curl_easy_init();
+	if (!m_Handle)
+		return false;
+
 	SetupRequest();
-	
+
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
 	CURLcode curlResult = curl_easy_perform(m_Handle);
+
 	bool result = false;
 	if (curlResult == CURLE_OK)
+	{
+		// FIX: CURLINFO_RESPONSE_CODE writes a `long`, not an `int`.
+		long lHttpCode = 0;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
+		ResponseCallback(static_cast<int>(lHttpCode));
 		result = true;
+	}
 	else
+	{
+		ResponseCallback(0);
 		result = false;
+	}
 
 	curl_easy_cleanup(m_Handle);
 	m_Handle = nullptr;
@@ -171,6 +184,9 @@ bool HTTPRequest::AsyncSendRequest()
 		return false;
 
 	m_Handle = curl_easy_init();
+	if (!m_Handle)
+		return false;
+
 	SetupRequest();
 
 	std::future<bool> future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
@@ -178,15 +194,22 @@ bool HTTPRequest::AsyncSendRequest()
 	bool result = false;
 	if (future.get() == true)
 	{
-		int httpCode = 200;
-		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode);
+		long lHttpCode = 0;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
+		ResponseCallback(static_cast<int>(lHttpCode));
 		result = true;
-	}else{
+	}
+	else
+	{
 		ResponseCallback(0);
 		result = false;
 	}
-	
+
+	// The handle was created here, so clean it up here rather than leaving it
+	// dangling for the destructor.
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
+
 	return result;
 }
 
@@ -216,9 +239,10 @@ void HTTPRequest::OnMultiComplete(CURLcode result)
 {
 	if (result == CURLE_OK)
 	{
-		int httpCode = 200;
-		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &httpCode);
-		ResponseCallback(httpCode);
+		// FIX: same `long` vs `int` issue as above.
+		long lHttpCode = 0;
+		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
+		ResponseCallback(static_cast<int>(lHttpCode));
 	}
 	else
 	{
@@ -229,19 +253,33 @@ void HTTPRequest::OnMultiComplete(CURLcode result)
 	m_Handle = nullptr;
 }
 
+void HTTPRequest::AbortTransfer(CURLM* pMulti)
+{
+	if (!m_Handle)
+	{
+		m_iRequestState = RequestState::FINISHED;
+		return;
+	}
+
+	if (pMulti)
+		curl_multi_remove_handle(pMulti, m_Handle);
+
+	curl_easy_cleanup(m_Handle);
+	m_Handle = nullptr;
+	m_iRequestState = RequestState::FINISHED;
+}
+
 bool HTTPRequest::PerformRequest()
 {
-	if (!m_Handle) 
+	if (!m_Handle)
 		return false;
 
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
 	CURLcode result = curl_easy_perform(m_Handle);
 	m_iRequestState = RequestState::EXECUTED;
-	if (result == CURLE_OK)
-		return true;
-	else
-		return false;
+
+	return (result == CURLE_OK);
 }
 
 size_t HTTPRequest::WriteCallbackDispatcher(void* buf, size_t sz, size_t n, void* curlGet)
@@ -262,10 +300,12 @@ void HTTPRequest::ResponseCallback(int httpCode)
 		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
-	
+
 	if (httpCode == 0)
 	{
 		FNShared::Print("Request Failed. %s, '%s'", GetName(), g_szBaseUrl);
+
+		OnResponse(0);
 		m_iRequestState = RequestState::FINISHED;
 		return;
 	}
@@ -301,8 +341,8 @@ void HTTPRequest::ResponseCallback(int httpCode)
 		return;
 	}
 
-	OnResponse();
-	
+	OnResponse(httpCode);
+
 	m_iRequestState = RequestState::FINISHED;
 }
 

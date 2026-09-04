@@ -15,18 +15,19 @@ ValidateScriptsRequest::ValidateScriptsRequest(const char* url) :
 
 void ValidateScriptsRequest::OnResponse(int iRespCode)
 {
-	if (iRespCode == 200)
+	if (iRespCode != 200)
+		return;
+
+	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
+
+	if (!doc.HasMember("data") || !doc["data"].IsBool())
 	{
-		// MSGlobals::CentralEnabled = false;
-		// FNShared::Print("FuzzNet has been disabled!\n");
+		FNShared::Print("Malformed script validation response!");
 		return;
 	}
 
-	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
-	if (!doc["data"].GetBool())
-	{
+	if (doc["data"].GetBool())
+		FNShared::Print("Scripts verified for FN.");
+	else
 		FNShared::Print("Script file not verified for FN!");
-	}
-
-	FNShared::Print("Scripts verified for FN.");
 }

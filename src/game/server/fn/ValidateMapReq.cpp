@@ -23,10 +23,15 @@ void ValidateMapRequest::OnResponse(int iRespCode)
 	}
 
 	JSONDocument doc = ParseJSON(m_sResponseBody.c_str());
-	if (!doc["data"].GetBool())
+
+	if (!doc.HasMember("data") || !doc["data"].IsBool())
 	{
-		FNShared::Print("Map '%s' is not verified for FN!", MSGlobals::MapName.c_str());
+		FNShared::Print("Malformed map validation response for '%s'!", MSGlobals::MapName.c_str());
+		return;
 	}
 
-	FNShared::Print("Map '%s' verified for FN.", MSGlobals::MapName.c_str());
+	if (doc["data"].GetBool())
+		FNShared::Print("Map '%s' verified for FN.", MSGlobals::MapName.c_str());
+	else
+		FNShared::Print("Map '%s' is not verified for FN!", MSGlobals::MapName.c_str());
 }
