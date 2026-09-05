@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-2022]
 
     steps:
       - name: Checkout
@@ -49,5 +49,5 @@ jobs:
       - name: Build on Windows
         if: startsWith(matrix.os, 'windows')
         run: |
-          cmake -S . -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -A Win32
-          msbuild ${{github.workspace}}/build/msr.sln /p:Configuration=Release /p:Platform=win32
+          cmake -S . -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -A Win32
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
