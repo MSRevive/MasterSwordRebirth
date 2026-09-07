@@ -238,8 +238,6 @@ void FNShared::CreateOrUpdateCharacter(CBasePlayer* pPlayer, int slot, const cha
 	{
 		_snprintf(pchApiUrl, REQUEST_URL_SIZE, "/api/v2/internal/character/%s", CharInfo.Guid);
 
-		FNShared::Print("Send update request for %llu", pPlayer->steamID64);
-
 		if (!g_FNRequestManager.QueueRequest(new UpdateCharacterRequest(
 				pPlayer->steamID64, slot, pchApiUrl, data, size)))
 		{
