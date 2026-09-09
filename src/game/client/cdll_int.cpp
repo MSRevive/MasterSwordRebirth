@@ -25,6 +25,7 @@
 #include "vgui_schememanager.h"
 #include "clientlibrary.h"
 #include "movement/pm_shared.h"
+#include "exports.h"
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -527,3 +528,67 @@ void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
 // 		g_pParticleMan->SetUp(&gEngfuncs);
 // 	}
 // }
+
+extern "C" DLLEXPORT void* ClientFactory()
+{
+	return NULL;
+}
+
+cldll_func_dst_t* g_pcldstAddrs;
+
+extern "C" void CL_DLLEXPORT F(void* pv)
+{
+	cldll_func_t* pcldll_func = (cldll_func_t*)pv;
+
+	// Hack!
+	g_pcldstAddrs = ((cldll_func_dst_t*)pcldll_func->pHudVidInitFunc);
+
+	cldll_func_t cldll_func =
+	{
+	Initialize,
+	HUD_Init,
+	HUD_VidInit,
+	HUD_Redraw,
+	HUD_UpdateClientData,
+	HUD_Reset,
+	HUD_PlayerMove,
+	HUD_PlayerMoveInit,
+	HUD_PlayerMoveTexture,
+	IN_ActivateMouse,
+	IN_DeactivateMouse,
+	IN_MouseEvent,
+	IN_ClearStates,
+	IN_Accumulate,
+	CL_CreateMove,
+	CL_IsThirdPerson,
+	CL_CameraOffset,
+	KB_Find,
+	CAM_Think,
+	V_CalcRefdef,
+	HUD_AddEntity,
+	HUD_CreateEntities,
+	HUD_DrawNormalTriangles,
+	HUD_DrawTransparentTriangles,
+	HUD_StudioEvent,
+	HUD_PostRunCmd,
+	HUD_Shutdown,
+	HUD_TxferLocalOverrides,
+	HUD_ProcessPlayerState,
+	HUD_TxferPredictionData,
+	Demo_ReadBuffer,
+	HUD_ConnectionlessPacket,
+	HUD_GetHullBounds,
+	HUD_Frame,
+	HUD_Key_Event,
+	HUD_TempEntUpdate,
+	HUD_GetUserEntity,
+	HUD_VoiceStatus,
+	HUD_DirectorMessage,
+	HUD_GetStudioModelInterface,
+	HUD_ChatInputPosition,
+	HUD_GetPlayerTeam,
+	ClientFactory,
+	};
+
+	*pcldll_func = cldll_func;
+}
