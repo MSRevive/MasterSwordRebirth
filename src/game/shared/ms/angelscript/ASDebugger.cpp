@@ -210,9 +210,9 @@ std::vector<ASVariableInfo> ASDebugger::GetLocalVariables(asIScriptContext* pCon
     }
     
     // Get local variable count from context
-    unsigned int varCount = pContext->GetVarCount();
+    int varCount = pContext->GetVarCount();
     
-    for (unsigned int i = 0; i < varCount; i++)
+    for (int i = 0; i < varCount; i++)
     {
         ASVariableInfo varInfo;
         
@@ -304,8 +304,8 @@ ASVariableInfo ASDebugger::GetVariableInfo(const std::string& varName, asIScript
     }
     
     // Try to find in local variables first
-    unsigned int varCount = pContext->GetVarCount();
-    for (unsigned int i = 0; i < varCount; i++)
+    int varCount = pContext->GetVarCount();
+    for (int i = 0; i < varCount; i++)
     {
         const char* localVarName = nullptr;
         int typeId = 0;
@@ -377,9 +377,9 @@ std::vector<ASCallFrame> ASDebugger::GetCallStack(asIScriptContext* pContext)
         return callStack;
     }
     
-    unsigned int stackSize = pContext->GetCallstackSize();
+    int stackSize = pContext->GetCallstackSize();
     
-    for (unsigned int i = 0; i < stackSize; i++)
+    for (int i = 0; i < stackSize; i++)
     {
         ASCallFrame frame;
         

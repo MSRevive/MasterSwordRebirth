@@ -21,7 +21,7 @@
 //=========================================================
 CPlane ::CPlane(void)
 {
-	m_fInitialized = false;
+	m_fInitialized = FALSE;
 }
 
 //=========================================================
@@ -32,7 +32,7 @@ void CPlane ::InitializePlane(const Vector &vecNormal, const Vector &vecPoint)
 {
 	m_vecNormal = vecNormal;
 	m_flDist = DotProduct(m_vecNormal, vecPoint);
-	m_fInitialized = true;
+	m_fInitialized = TRUE;
 }
 
 //=========================================================
@@ -45,15 +45,15 @@ BOOL CPlane ::PointInFront(const Vector &vecPoint)
 
 	if (!m_fInitialized)
 	{
-		return false;
+		return FALSE;
 	}
 
 	flFace = DotProduct(m_vecNormal, vecPoint) - m_flDist;
 
 	if (flFace >= 0)
 	{
-		return true;
+		return TRUE;
 	}
 
-	return false;
+	return FALSE;
 }

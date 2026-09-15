@@ -18,7 +18,7 @@ class CBaseEntity;
 // Global game_master entity handle
 extern CBaseEntity* g_pGameMasterEntity;
 
-constexpr int SCRIPT_TYPES = 4;
+#define SCRIPT_TYPES 4
 
 class CSVGlobals
 {
@@ -35,10 +35,10 @@ public:
 	static mslist<scriptlistitem_t> ScriptList[SCRIPT_TYPES];
 };
 
-constexpr const char* SPAWN_GENERIC = "ms_player_spawn";
-constexpr const char* SPAWN_BEGIN = "ms_player_begin";
-constexpr const char* SPAWN_SPECTATE = "ms_player_spec";
-constexpr const char* OLD_GENERIC_SPAWN = "info_player_start";
+#define SPAWN_GENERIC "ms_player_spawn"
+#define SPAWN_BEGIN "ms_player_begin"
+#define SPAWN_SPECTATE "ms_player_spec"
+#define OLD_GENERIC_SPAWN "info_player_start"
 
 #ifdef CVARDEF_H
 extern cvar_s ms_joinreset;

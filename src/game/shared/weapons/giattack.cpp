@@ -24,29 +24,17 @@
 #include "soundent.h"
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
-
-
-#include "iscript.h"
-
 //extern iBeam;
-class IScripted;
-
 bool GetString(char *Return, size_t size, const char *sentence, int start, const char *endchars);
-
-
-
-void CGenericItem::ReadStat(const char* Name, int& StatVar, int& PropVar) {
-	const char* Temp = IScripted::GetFirstScriptVar(Name);
-	if (Temp != Name)
-	{
-		StatVar = 0, PropVar = -1;
-		GetStatIndices(Temp, StatVar, PropVar);
+#define ReadStat(Name, StatVar, PropVar)            \
+	{                                               \
+		Temp = GetFirstScriptVar(Name);             \
+		if (Temp != Name)                           \
+		{                                           \
+			StatVar = 0, PropVar = -1;              \
+			GetStatIndices(Temp, StatVar, PropVar); \
+		}                                           \
 	}
-
-};
 
 bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 {
@@ -65,7 +53,7 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	int iThisCmd = 0;
 
 	//Count the number of keys required
-	for (unsigned int i = 0; i < pAttData->ComboKeys.size(); i++)
+	for (int i = 0; i < pAttData->ComboKeys.size(); i++)
 	{
 		if (pAttData->ComboKeys[i].c_str()[0] == '~')
 			iThisCmd += 2;
@@ -101,7 +89,7 @@ bool CGenericItem::CheckKeys(attackdata_t *pAttData)
 	int LastCmdIdx = 0;
 	iLen = 0;
 	bool fFirstKey = true;
-	for (unsigned int i = 0; i < pAttData->ComboKeys.size(); i++)
+	for (int i = 0; i < pAttData->ComboKeys.size(); i++)
 	{
 		msstring &FullCmdString = pAttData->ComboKeys[i];
 
@@ -275,7 +263,7 @@ bool CGenericItem::StartAttack(int ForceAttackNum)
 	else if (!CurrentAttack)
 	{
 		//bool thoth_unskill_base = false;
-		for (unsigned int a = 0; a < m_Attacks.size(); a++)
+		for (int a = 0; a < m_Attacks.size(); a++)
 		{
 			attackdata_t &AttData = m_Attacks[a];
 
@@ -516,9 +504,9 @@ void CGenericItem::RegisterAttack()
 		attData.StatPower = Stat;
 		attData.StatProf = Stat;
 		attData.StatExp = Stat;
-		attData.PropBalance = STAT_PROP_BALANCE;
-		attData.PropPower = STAT_PROP_POWER;
-		attData.PropProf = STAT_PROP_BALANCE;
+		attData.PropBalance = STATPROP_BALANCE;
+		attData.PropPower = STATPROP_POWER;
+		attData.PropProf = STATPROP_BALANCE;
 		attData.PropExp = -1;	//Random
 	}*/
 
@@ -613,7 +601,7 @@ float CGenericItem::GetHighestAttackCharge()
 {
 	float HighestCharge = 0;
 
-	for (unsigned int i = 0; i < m_Attacks.size(); i++)
+	for (int i = 0; i < m_Attacks.size(); i++)
 	{
 		attackdata_t &Attack = m_Attacks[i];
 
@@ -765,7 +753,7 @@ void CGenericItem::StrikeLand()
 	long randomMulti = RANDOM_LONG(0, CurrentAttack->flDamageRange);
 	float flDamage = CurrentAttack->flDamage + randomMulti; //fine even if 0.
 
-	flDamageFraction = CurrentAttackBalance / MAX_STAT_PROPVALUE;
+	flDamageFraction = CurrentAttackBalance / STATPROP_MAX_VALUE;
 	flDamageFraction = V_max(flDamageFraction, 0);
 
 	std::string szDamage = std::to_string(flDamage);
@@ -776,7 +764,7 @@ void CGenericItem::StrikeLand()
 	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Balance: %s : Fraction : %s", szBalance.c_str(), szFraction.c_str());
 
 	//fraction based on balance. Power stat for weapon -> 45? Multiplier is 0.45
-	flDamageFraction = CurrentAttackPower / MAX_STAT_PROPVALUE;
+	flDamageFraction = CurrentAttackPower / STATPROP_MAX_VALUE;
 	flDamageFraction = V_max(flDamageFraction, 0.001f); //why is this 0.001f?
 
 	std::string szPower = std::to_string(CurrentAttackPower);
@@ -784,15 +772,14 @@ void CGenericItem::StrikeLand()
 
 	//UTIL_ClientPrintAll(HUD_PRINTCONSOLE, "Power: %s : Fraction: %s", szPower.c_str(), szFraction.c_str());	
 
-	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STAT_PROP_POWER ) / STAT_PROP_MAX_VALUE,0);
-	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STAT_PROP_POWER ) );
+	//	flDmgFraction = max(mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) / STATPROP_MAX_VALUE,0);
+	//	ALERT( at_console, "Use stat: %i  Value: %i %i %i\n", GetStatByName( (char*)STRING(CurrentAttack->sAttackStat) ), mSStat( CurrentAttack->sAttackStat, STATPROP_SPEED ), mSStat( CurrentAttack->sAttackStat, STATPROP_BALANCE ), mSStat( CurrentAttack->sAttackStat, STATPROP_POWER ) );
 	// 	
 
 	flDamage *= flDamageFraction;
 	if (bUnderleveled)
 		flDamage *= 0.5; //this might be working
 
-	//SetDebugProgress(ItemThinkProgress, "CGenericItem::StrikeLand - Call DoDamage");
 	int bitsDamage = DMG_CLUB;
 	if (!m_pPlayer)
 		bitsDamage |= DMG_SIMPLEBBOX;
@@ -868,7 +855,7 @@ void CGenericItem::StrikeHold()
 }
 
 //Uses ammo.  Projectiles or MP
-bool CGenericItem::UseAmmo(unsigned int iAmt)
+bool CGenericItem::UseAmmo(int iAmt)
 {
 	if (!m_pOwner || !CurrentAttack)
 		return false;
@@ -1053,7 +1040,7 @@ void CGenericItem::ChargeThrowProj()
 		flTimeHeldAdjusted = CurrentAttack->tMaxHold ? (flTimeHeldAdjusted / CurrentAttack->tMaxHold) : 0; //[0.0 to 1.0]
 
 		//Shoot more accurately for higher skill
-		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / MAX_STAT_PROPVALUE;
+		float flAccFraction = m_pOwner->GetSkillStat(CurrentAttack->StatBalance, CurrentAttack->PropBalance) / STATPROP_MAX_VALUE;
 		flAccFraction = 1 - V_min(V_max(flAccFraction, 0.0f), 1.0f);
 
 		//Shoot more accurately for drawing the bow back longer
@@ -1230,8 +1217,8 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	//BeamEffect( vecSrc, vecEnd, iBeam, 0, 0, 100, 10, 0, 255, 255, 255, 255, 20 );
 
 	//bActualHit: Did the combination of luck&skill produce a hit?
-	//bool fDidHit = false, fHitWorld = true, bActualHit = false,
-	//	fReportHit = false, fDodged = false;
+	//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
+	//	fReportHit = FALSE, fDodged = FALSE;
 
 	bool fReportHit = false;
 	Damage.AttackHit = false;
@@ -1242,7 +1229,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 	if( Damage.outTraceResult.flFraction < 1.0 )
 	{
 		// hit
-		//fDidHit = true;
+		//fDidHit = TRUE;
 
 		pEntity = CBaseEntity::Instance(Damage.outTraceResult.pHit);
 
@@ -1298,12 +1285,12 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 //									AttackStat = GetStatByName( STRING(pItem->CurrentAttack->sAttackStat) );
 //									//I missed the monster, so learn about accuracy
 //									if( !bActualHit )
-//										pPlayer->LearnSkill( AttackStat, STAT_PROP_BALANCE, pMonster->m_SkillLevel );
+//										pPlayer->LearnSkill( AttackStat, STATPROP_BALANCE, pMonster->m_SkillLevel );
 //									//I hit the monster, so learn about damage
 //									else
-//										pPlayer->LearnSkill( AttackStat, STAT_PROP_POWER, pMonster->m_SkillLevel );
+//										pPlayer->LearnSkill( AttackStat, STATPROP_POWER, pMonster->m_SkillLevel );
 //									//Always learn about proficiency
-//									pPlayer->LearnSkill( AttackStat, STAT_PROP_SKILL, pMonster->m_SkillLevel * max(pItem->CurrentAttack->iPriority,0.5) );
+//									pPlayer->LearnSkill( AttackStat, STATPROP_SKILL, pMonster->m_SkillLevel * max(pItem->CurrentAttack->iPriority,0.5) );
 //
 //								}
 //							}
@@ -1353,7 +1340,7 @@ void CGenericItem::OwnerTakeDamage(damage_t &Damage)
 						//Each script either sets a ratio of damage to be dealt or cancels the damage
 						msstringlist DamageRatios;
 						TokenizeString( pAttMonster->m_ReturnData, DamageRatios );
-						 for (unsigned int i = 0; i < DamageRatios.size(); i++)
+						 for (int i = 0; i < DamageRatios.size(); i++)
 						{
 							if( DamageRatios[i] == "canceldamage" )
 							{
@@ -1513,7 +1500,7 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 		CBaseEntity *pTarget = NULL, *pClosestHit = NULL;
 		while ((pTarget = UTIL_FindEntityInSphere(pTarget, Damage.vecSrc, Damage.flRange)) != NULL)
 		{
-			if (static_cast<int>(pTarget->pev->takedamage) == DAMAGE_NO || //Don't hurt world objects, godmode entities, or the entity I originally struck
+			if (pTarget->pev->takedamage == DAMAGE_NO || //Don't hurt world objects, godmode entities, or the entity I originally struck
 				FBitSet(pTarget->pev->flags, FL_GODMODE) ||
 				!pTarget->IsAlive() ||
 				pTarget == Damage.pInflictor ||
@@ -1567,7 +1554,7 @@ void DoDamage(damage_t &Damage, hitent_list &Hits)
 	{
 		if (Hits.size())
 		{
-			for (unsigned int h = 0; h < Hits.size(); h++)
+			for (int h = 0; h < Hits.size(); h++)
 			{
 				//Thothie FEB2009 - critical crash fix - make sure attacker is alive when passing damage
 				//- if he damages multiple targets while dead, it causes crash
@@ -1640,8 +1627,8 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 		}
 
 		//bActualHit: Did the combination of luck&skill produce a hit?
-		//bool fDidHit = false, fHitWorld = true, bActualHit = false,
-		//	fReportHit = false, fDodged = false;
+		//bool fDidHit = FALSE, fHitWorld = TRUE, bActualHit = FALSE,
+		//	fReportHit = FALSE, fDodged = FALSE;
 
 		bool fReportHit = false;
 		Damage.AttackHit = true;
@@ -1733,7 +1720,7 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 						//Each script either sets a ratio of damage to be dealt or cancels the damage
 						msstringlist DamageRatios;
 						TokenizeString(pAttMonster->m_ReturnData, DamageRatios);
-						for (unsigned int i = 0; i < DamageRatios.size(); i++)
+						for (int i = 0; i < DamageRatios.size(); i++)
 						{
 							if (DamageRatios[i] == "canceldamage")
 							{
@@ -1852,7 +1839,7 @@ CBaseEntity* DoDamage(damage_t &Damage, CBaseEntity *pTarget)
 				float tdm_modifier;
 				if (pVictim)
 				{
-					for (unsigned int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
+					for (int i = 0; i < pVictim->m.TakeDamageModifiers.size(); i++)
 					{
 						CMSMonster::takedamagemodifier_t &TDM = pVictim->m.TakeDamageModifiers[i];
 						msstring tdm_damage_type = TDM.DamageType;

@@ -27,7 +27,7 @@
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
 
-constexpr int MOUSE_BUTTON_COUNT = 5;
+#define MOUSE_BUTTON_COUNT 5
 
 // Set this to 1 to show mouse cursor.  Experimental
 int g_iVisibleMouse = 0;
@@ -95,18 +95,15 @@ static bool g_ReceivedFirstMouseActivate = false;
 
 // joystick defines and variables
 // where should defines be moved?
-
-enum {
-	JOY_ABSOLUTE_AXIS = 0x00000000,	// control like a joystick
-	JOY_RELATIVE_AXIS = 0x00000010,	// control like a mouse, spinner, trackball
-	JOY_MAX_AXES = 6,				// X, Y, Z, R, U, V
-	JOY_AXIS_X = 0,
-	JOY_AXIS_Y = 1,
-	JOY_AXIS_Z = 2,
-	JOY_AXIS_R = 3,
-	JOY_AXIS_U = 4,
-	JOY_AXIS_V = 5
-};
+#define JOY_ABSOLUTE_AXIS 0x00000000 // control like a joystick
+#define JOY_RELATIVE_AXIS 0x00000010 // control like a mouse, spinner, trackball
+#define JOY_MAX_AXES 6				 // X, Y, Z, R, U, V
+#define JOY_AXIS_X 0
+#define JOY_AXIS_Y 1
+#define JOY_AXIS_Z 2
+#define JOY_AXIS_R 3
+#define JOY_AXIS_U 4
+#define JOY_AXIS_V 5
 
 enum _ControlList
 {
@@ -168,7 +165,7 @@ Force_CenterView_f
 */
 void Force_CenterView_f(void)
 {
-	Vector viewangles;
+	vec3_t viewangles;
 
 	if (!iMouseInUse)
 	{
@@ -190,7 +187,7 @@ long ThreadInterlockedExchange(long *pDest, long value)
 
 DWORD WINAPI MousePos_ThreadFunction(LPVOID p)
 {
-	s_hMouseDoneQuitEvent = CreateEvent(NULL, false, false, NULL);
+	s_hMouseDoneQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	while (1)
 	{
@@ -320,7 +317,6 @@ void IN_Shutdown(void)
 
 	if (s_hMouseThread)
 	{
-
 		TerminateThread(s_hMouseThread, 0);
 		CloseHandle(s_hMouseThread);
 		s_hMouseThread = (HANDLE)0;
@@ -467,7 +463,7 @@ IN_MouseMove
 void IN_MouseMove(float frametime, usercmd_t *cmd)
 {
 	int mx, my;
-	Vector viewangles;
+	vec3_t viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 
@@ -659,11 +655,10 @@ void IN_StartupJoystick(void)
 	// assume no joystick
 	joy_avail = 0;
 
-	unsigned int nJoysticks = SDL_NumJoysticks();
-
+	int nJoysticks = SDL_NumJoysticks();
 	if (nJoysticks > 0)
 	{
-		for (unsigned int i = 0; i < nJoysticks; i++)
+		for (int i = 0; i < nJoysticks; i++)
 		{
 			if (SDL_IsGameController(i))
 			{
@@ -862,7 +857,7 @@ void IN_JoyMove(float frametime, usercmd_t *cmd)
 	float speed, aspeed;
 	float fAxisValue, fTemp;
 	int i;
-	Vector viewangles;
+	vec3_t viewangles;
 
 	gEngfuncs.GetViewAngles((float *)viewangles);
 
@@ -1096,7 +1091,7 @@ void IN_Init(void)
 	{
 		s_mouseDeltaX = s_mouseDeltaY = 0;
 
-		s_hMouseQuitEvent = CreateEvent(NULL, false, false, NULL);
+		s_hMouseQuitEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if (s_hMouseQuitEvent)
 		{
 			s_hMouseThread = CreateThread(NULL, 0, MousePos_ThreadFunction, NULL, 0, &s_hMouseThreadId);

@@ -115,7 +115,7 @@ public:
 	ActionSignal *Weapon_MainActionSig[WEAPONPANEL_MAINBTNMAX];
 	Label *Weapon_BtnLabel[WEAPONPANEL_MAINBTNMAX];
 
-	unsigned int iButtons;
+	int iButtons;
 	bool fClosingMenu;
 
 	CRenderChar m_CharEnts[3];
@@ -125,7 +125,7 @@ public:
 	CNewCharacterPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall);
 	~CNewCharacterPanel();
 
-	virtual bool SlotInput(unsigned int iSlot);
+	virtual bool SlotInput(int iSlot);
 	virtual void Open(void);
 	virtual void Close(void);
 	virtual void Update(void);

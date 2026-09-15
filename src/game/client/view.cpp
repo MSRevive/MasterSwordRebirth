@@ -72,7 +72,7 @@ extern "C"
 
 float Distance(Vector a, Vector b)
 {
-	Vector d;
+	vec3_t d;
 	VectorSubtract(b, a, d);
 	return Length(d);
 }
@@ -97,12 +97,10 @@ extern cvar_t *chase_active;
 extern cvar_t *scr_ofsx, *scr_ofsy, *scr_ofsz;
 extern cvar_t *cl_vsmoothing;
 
-enum {
-	CAM_MODE_RELAX = 1,
-	CAM_MODE_FOCUS = 2
-};
+#define CAM_MODE_RELAX 1
+#define CAM_MODE_FOCUS 2
 
-Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
+vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 Vector g_ViewForward, g_ViewRight, g_ViewUp;
 float v_frametime, v_lastDistance;
 float v_cameraRelaxAngle = 5.0f;
@@ -111,7 +109,7 @@ int v_cameraMode = CAM_MODE_FOCUS;
 qboolean v_resetCamera = 1;
 float v_ViewDist = 4096;
 
-Vector ev_punchangle;
+vec3_t ev_punchangle;
 
 cvar_t *scr_ofsx;
 cvar_t *scr_ofsy;
@@ -202,7 +200,7 @@ float V_CalcBob(struct ref_params_s *pparams)
 	static float bob;
 	float cycle;
 	static float lasttime;
-	Vector vel;
+	vec3_t vel;
 
 	if (pparams->onground == -1 ||
 		pparams->time == lasttime)
@@ -244,12 +242,12 @@ V_CalcRoll
 Used by view and sv_user
 ===============
 */
-float V_CalcRoll(Vector angles, Vector velocity, float rollangle, float rollspeed)
+float V_CalcRoll(vec3_t angles, vec3_t velocity, float rollangle, float rollspeed)
 {
 	float sign;
 	float side;
 	float value;
-	Vector forward, right, up;
+	vec3_t forward, right, up;
 
 	AngleVectors(angles, &forward, &right, &up);
 
@@ -491,8 +489,8 @@ void V_CalcIntermissionRefdef(struct ref_params_s *pparams)
 	v_angles = pparams->viewangles;
 }
 
-constexpr unsigned int ORIGIN_BACKUP = 64;
-constexpr unsigned int ORIGIN_MASK = (ORIGIN_BACKUP - 1);
+#define ORIGIN_BACKUP 64
+#define ORIGIN_MASK (ORIGIN_BACKUP - 1)
 
 typedef struct
 {
@@ -515,15 +513,15 @@ V_CalcRefdef
 void V_CalcNormalRefdef(struct ref_params_s *pparams)
 {
 	cl_entity_t *ent;
-	unsigned int i;
-	Vector angles;
+	int i;
+	vec3_t angles;
 	float bob, waterOffset;
 	static viewinterp_t ViewInterp;
 
 	static float oldz = 0;
 	static float lasttime;
 
-	Vector camAngles, camForward, camRight, camUp;
+	vec3_t camAngles, camForward, camRight, camUp;
 	cl_entity_t *pwater;
 
 	V_DriftPitch(pparams);
@@ -568,13 +566,13 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 	if (pparams->waterlevel >= 2)
 	{
 		int i, contents, waterDist, waterEntity;
-		Vector point;
+		vec3_t point;
 		waterDist = cl_waterdist->value;
 
 		if (pparams->hardware)
 		{
 			waterEntity = gEngfuncs.PM_WaterEntity(pparams->simorg);
-			if (waterEntity >= 0 && (unsigned int)waterEntity < pparams->max_entities)
+			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
 			{
 				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
 				if (pwater && (pwater->model != NULL))
@@ -642,7 +640,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 	// Treating cam_ofs[2] as the distance
 	if (MSCLGlobals::CamThirdPerson)
 	{
-		Vector ofs;
+		vec3_t ofs;
 
 		ofs[0] = ofs[1] = ofs[2] = 0.0;
 
@@ -750,7 +748,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 
 	{
 		static float lastorg[3];
-		Vector delta;
+		vec3_t delta;
 
 		VectorSubtract(pparams->simorg, lastorg, delta);
 
@@ -789,10 +787,10 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 		if (i < ORIGIN_MASK && ViewInterp.OriginTime[foundidx & ORIGIN_MASK] != 0.0)
 		{
 			// Interpolate
-			Vector delta;
+			vec3_t delta;
 			double frac;
 			double dt;
-			Vector neworg;
+			vec3_t neworg;
 
 			dt = ViewInterp.OriginTime[(foundidx + 1) & ORIGIN_MASK] - ViewInterp.OriginTime[foundidx & ORIGIN_MASK];
 			if (dt > 0.0)
@@ -892,7 +890,7 @@ void V_SmoothInterpolateAngles(float *startAngle, float *endAngle, float *finalA
 	NormalizeAngles(startAngle);
 	NormalizeAngles(endAngle);
 
-	for (unsigned int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		d = endAngle[i] - startAngle[i];
 
@@ -944,9 +942,9 @@ void V_SmoothInterpolateAngles(float *startAngle, float *endAngle, float *finalA
 // Get the origin of the Observer based around the target's position and angles
 void V_GetChaseOrigin(float *angles, float *origin, float distance, float *returnvec)
 {
-	Vector vecEnd;
-	Vector forward;
-	Vector vecStart;
+	vec3_t vecEnd;
+	vec3_t forward;
+	vec3_t vecStart;
 	pmtrace_t *trace = NULL;
 	int maxLoops = 8;
 
@@ -1121,7 +1119,7 @@ float MaxAngleBetweenAngles(float *a1, float *a2)
 	NormalizeAngles(a1);
 	NormalizeAngles(a2);
 
-	for (unsigned int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		d = a2[i] - a1[i];
 		if (d > 180)
@@ -1369,8 +1367,8 @@ void V_GetInEyePos(int target, float *origin, float *angles)
 
 void V_GetMapFreePosition(float *cl_angles, float *origin, float *angles)
 {
-	Vector forward;
-	Vector zScaledTarget;
+	vec3_t forward;
+	vec3_t zScaledTarget;
 
 	VectorCopy(cl_angles, angles);
 
@@ -1390,7 +1388,7 @@ void V_GetMapFreePosition(float *cl_angles, float *origin, float *angles)
 
 void V_GetMapChasePosition(int target, float *cl_angles, float *origin, float *angles)
 {
-	Vector forward;
+	vec3_t forward;
 
 	if (target)
 	{
@@ -1483,7 +1481,7 @@ V_CalcSpectatorRefdef
 */
 void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 {
-	static Vector velocity(0.0f, 0.0f, 0.0f);
+	static vec3_t velocity(0.0f, 0.0f, 0.0f);
 
 	static int lastWeaponModelIndex = 0;
 	static int lastViewModelIndex = 0;
@@ -1500,14 +1498,14 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 	VectorCopy(pparams->viewangles, v_angles);
 	VectorCopy(pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || (int)gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
 
 		if (timeDiff > 0)
 		{
-			Vector distance;
+			vec3_t distance;
 			VectorSubtract(ent->prevstate.origin, ent->curstate.origin, distance);
 			VectorScale(distance, 1 / timeDiff, distance);
 
@@ -1650,8 +1648,8 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 
 	// write back new values into pparams
 	VectorCopy(v_cl_angles, pparams->cl_viewangles);
-	VectorCopy(v_angles, pparams->viewangles);
-	VectorCopy(v_origin, pparams->vieworg);
+	VectorCopy(v_angles, pparams->viewangles)
+		VectorCopy(v_origin, pparams->vieworg);
 }
 extern float newfov;
 void V_CalcMirrorRefdef(struct ref_params_s *pparams)
@@ -1822,11 +1820,11 @@ float CalcFov(float fov_x, float width, float height)
 	if (fov_x < 1 || fov_x > 179)
 		fov_x = 90; // error, set to 90
 
-	x = width / tan(fov_x / 360 * PI);
+	x = width / tan(fov_x / 360 * M_PI);
 
 	a = atan(height / x);
 
-	a = a * 360 / PI;
+	a = a * 360 / M_PI;
 
 	return a;
 }
@@ -1840,16 +1838,16 @@ void V_Move(int mx, int my)
 	float dx, dy;
 	float c_x, c_y;
 	float dX, dY;
-	Vector forward, up, right;
-	Vector newangles;
+	vec3_t forward, up, right;
+	vec3_t newangles;
 
-	Vector farpoint;
+	vec3_t farpoint;
 	pmtrace_t tr;
 
-	fov = CalcFov(in_fov, (float)ScreenWidth(), (float)ScreenHeight());
+	fov = CalcFov(in_fov, (float)ScreenWidth, (float)ScreenHeight);
 
-	c_x = (float)ScreenWidth() / 2.0;
-	c_y = (float)ScreenHeight() / 2.0;
+	c_x = (float)ScreenWidth / 2.0;
+	c_y = (float)ScreenHeight / 2.0;
 
 	dx = (float)mx - c_x;
 	dy = (float)my - c_y;

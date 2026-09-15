@@ -17,7 +17,7 @@ public:
 
 	static CStore *GetStoreByName(const char* Name)
 	{
-		for (unsigned int i = 0; i < m_gStores.size(); i++)
+		for (int i = 0; i < m_gStores.size(); i++)
 			if (FStrEq(m_gStores[i]->m_Name, Name))
 				return m_gStores[i];
 		return NULL;

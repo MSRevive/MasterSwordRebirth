@@ -52,20 +52,18 @@ extern "C"
 	void EV_TrainPitchAdjust(struct event_args_s *args);
 }
 
-
-
-constexpr Vector VECTOR_CONE_1DEGREES = Vector(0.00873, 0.00873, 0.00873);
-constexpr Vector VECTOR_CONE_2DEGREES = Vector(0.01745, 0.01745, 0.01745);
-constexpr Vector VECTOR_CONE_3DEGREES = Vector(0.02618, 0.02618, 0.02618);
-constexpr Vector VECTOR_CONE_4DEGREES = Vector(0.03490, 0.03490, 0.03490);
-constexpr Vector VECTOR_CONE_5DEGREES = Vector(0.04362, 0.04362, 0.04362);
-constexpr Vector VECTOR_CONE_6DEGREES = Vector(0.05234, 0.05234, 0.05234);
-constexpr Vector VECTOR_CONE_7DEGREES = Vector(0.06105, 0.06105, 0.06105);
-constexpr Vector VECTOR_CONE_8DEGREES = Vector(0.06976, 0.06976, 0.06976);
-constexpr Vector VECTOR_CONE_9DEGREES = Vector(0.07846, 0.07846, 0.07846);
-constexpr Vector VECTOR_CONE_10DEGREES = Vector(0.08716, 0.08716, 0.08716);
-constexpr Vector VECTOR_CONE_15DEGREES = Vector(0.13053, 0.13053, 0.13053);
-constexpr Vector VECTOR_CONE_20DEGREES = Vector(0.17365, 0.17365, 0.17365);
+#define VECTOR_CONE_1DEGREES Vector(0.00873, 0.00873, 0.00873)
+#define VECTOR_CONE_2DEGREES Vector(0.01745, 0.01745, 0.01745)
+#define VECTOR_CONE_3DEGREES Vector(0.02618, 0.02618, 0.02618)
+#define VECTOR_CONE_4DEGREES Vector(0.03490, 0.03490, 0.03490)
+#define VECTOR_CONE_5DEGREES Vector(0.04362, 0.04362, 0.04362)
+#define VECTOR_CONE_6DEGREES Vector(0.05234, 0.05234, 0.05234)
+#define VECTOR_CONE_7DEGREES Vector(0.06105, 0.06105, 0.06105)
+#define VECTOR_CONE_8DEGREES Vector(0.06976, 0.06976, 0.06976)
+#define VECTOR_CONE_9DEGREES Vector(0.07846, 0.07846, 0.07846)
+#define VECTOR_CONE_10DEGREES Vector(0.08716, 0.08716, 0.08716)
+#define VECTOR_CONE_15DEGREES Vector(0.13053, 0.13053, 0.13053)
+#define VECTOR_CONE_20DEGREES Vector(0.17365, 0.17365, 0.17365)
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
@@ -117,7 +115,7 @@ float EV_HLDM_PlayTextureSound(int idx, pmtrace_t *ptr, float *vecSrc, float *ve
 
 			// '}}'
 			strncpy(szbuffer,  pTextureName, sizeof(szbuffer));
-			szbuffer[MAX_CBTEXTURENAME - 1] = 0;
+			szbuffer[CBTEXTURENAMEMAX - 1] = 0;
 
 			// get texture type
 			chTextureType = PM_FindTextureType(szbuffer);
@@ -327,11 +325,11 @@ int EV_HLDM_CheckTracer(int idx, float *vecSrc, float *end, float *forward, floa
 
 	if (iTracerFreq != 0 && ((*tracerCount)++ % iTracerFreq) == 0)
 	{
-		Vector vecTracerSrc;
+		vec3_t vecTracerSrc;
 
 		if (player)
 		{
-			Vector offset(0, 0, -4);
+			vec3_t offset(0, 0, -4);
 
 			// adjust tracer position for player
 			for (i = 0; i < 3; i++)
@@ -369,12 +367,12 @@ FireBullets
 Go to the trouble of combining multiple pellets into a single damage call.
 ================
 */
-void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount)
+void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int cShots, float *vecSrc, float *vecDirShooting, float *vecSpread, float flDistance, int iBulletType, int iTracerFreq, int *tracerCount)
 {
 	int i;
 	pmtrace_t tr;
 	int iShot;
-	Vector vecRight, vecUp;
+	vec3_t vecRight, vecUp;
 	int tracer;
 
 	VectorCopy(right, vecRight);
@@ -382,10 +380,10 @@ void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int c
 
 	for (iShot = 1; iShot <= cShots; iShot++)
 	{
-		Vector vecDir, vecEnd;
+		vec3_t vecDir, vecEnd;
 
 		// get circular gaussian spread
-		Vector spread;
+		vec3_t spread;
 		do
 		{
 			spread[0] = gEngfuncs.pfnRandomFloat(-0.5, 0.5) + gEngfuncs.pfnRandomFloat(-0.5, 0.5);
@@ -455,18 +453,18 @@ void EV_HLDM_FireBullets(int idx, float *forward, float *right, float *up, int c
 void EV_FireGlock1(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 	int empty;
 
 	int i;
-	Vector ShellVelocity;
-	Vector ShellOrigin;
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
-	Vector vecSpread;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t vecSpread;
+	vec3_t up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -511,17 +509,17 @@ void EV_FireGlock1(event_args_t *args)
 void EV_FireGlock2(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 
 	int i;
-	Vector ShellVelocity;
-	Vector ShellOrigin;
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
-	Vector vecSpread;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t vecSpread;
+	vec3_t up, right, forward;
 	float flSpread = 0.1;
 
 	idx = args->entindex;
@@ -566,17 +564,17 @@ void EV_FireGlock2(event_args_t *args)
 void EV_FireShotGunDouble(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 
 	int i, j;
-	Vector ShellVelocity;
-	Vector ShellOrigin;
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
-	Vector vecSpread;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t vecSpread;
+	vec3_t up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -632,17 +630,17 @@ void EV_FireShotGunDouble(event_args_t *args)
 void EV_FireShotGunSingle(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 
 	int i;
-	Vector ShellVelocity;
-	Vector ShellOrigin;
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
-	Vector vecSpread;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t vecSpread;
+	vec3_t up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -695,15 +693,15 @@ void EV_FireShotGunSingle(event_args_t *args)
 void EV_FireMP5(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 
-	Vector ShellVelocity;
-	Vector ShellOrigin;
+	vec3_t ShellVelocity;
+	vec3_t ShellOrigin;
 	int shell;
-	Vector vecSrc, vecAiming;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -757,12 +755,12 @@ void EV_FireMP5(event_args_t *args)
 void EV_FirePython(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 
-	Vector vecSrc, vecAiming;
-	Vector up, right, forward;
+	vec3_t vecSrc, vecAiming;
+	vec3_t up, right, forward;
 	float flSpread = 0.01;
 
 	idx = args->entindex;
@@ -804,16 +802,14 @@ void EV_FirePython(event_args_t *args)
 	}
 }
 
-enum {
-	SND_CHANGE_PITCH = (1 << 7) // duplicated in protocol.h change sound pitch
-};
+#define SND_CHANGE_PITCH (1 << 7) // duplicated in protocol.h change sound pitch
 
 void EV_SpinGauss(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 	int iSoundState = 0;
 
 	int pitch;
@@ -834,16 +830,16 @@ void EV_SpinGauss(event_args_t *args)
 void EV_FireGauss(event_args_t *args)
 {
 	int idx;
-	Vector origin;
-	Vector angles;
-	Vector velocity;
+	vec3_t origin;
+	vec3_t angles;
+	vec3_t velocity;
 	float flDamage = args->fparam1;
 	int primaryfire = args->bparam1;
 
 	int m_fPrimaryFire = args->bparam1;
 	int m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
-	Vector vecSrc;
-	Vector vecDest;
+	vec3_t vecSrc;
+	vec3_t vecDest;
 	edict_t *pentIgnore;
 	pmtrace_t tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -853,7 +849,7 @@ void EV_FireGauss(event_args_t *args)
 	int nMaxHits = 10;
 	physent_t *pEntity;
 	int m_iBeam, m_iGlow, m_iBalls;
-	Vector up, right, forward;
+	vec3_t up, right, forward;
 
 	idx = args->entindex;
 	VectorCopy(args->origin, origin);
@@ -960,7 +956,7 @@ void EV_FireGauss(event_args_t *args)
 			{
 				// ALERT( at_console, "reflect %f\n", n );
 				// reflect
-				Vector r;
+				vec3_t r;
 
 				VectorMA(forward, 2.0 * n, tr.plane.normal, r);
 
@@ -974,7 +970,7 @@ void EV_FireGauss(event_args_t *args)
 				gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage * n / 255.0, flDamage * n * 0.5 * 0.1, FTENT_FADEOUT);
 
 				{
-					Vector fwd;
+					vec3_t fwd;
 					VectorAdd(tr.endpos, tr.plane.normal, fwd);
 					gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, (int)(n * flDamage * 0.3), 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 													  255, 200);
@@ -1005,7 +1001,7 @@ void EV_FireGauss(event_args_t *args)
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				if (!m_fPrimaryFire)
 				{
-					Vector start;
+					vec3_t start;
 
 					VectorMA(tr.endpos, 8.0, forward, start);
 
@@ -1020,7 +1016,7 @@ void EV_FireGauss(event_args_t *args)
 
 					if (!beam_tr.allsolid)
 					{
-						Vector delta;
+						vec3_t delta;
 						float n;
 
 						// trace backwards to find exit point
@@ -1039,7 +1035,7 @@ void EV_FireGauss(event_args_t *args)
 
 							// absorption balls
 							{
-								Vector fwd;
+								vec3_t fwd;
 								VectorSubtract(tr.endpos, forward, fwd);
 								gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 3, 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 																  255, 100);
@@ -1054,7 +1050,7 @@ void EV_FireGauss(event_args_t *args)
 
 							// balls
 							{
-								Vector fwd;
+								vec3_t fwd;
 								VectorSubtract(beam_tr.endpos, forward, fwd);
 								gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, beam_tr.endpos, fwd, m_iBalls, (int)(flDamage * 0.3), 0.1, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 200,
 																  255, 40);
@@ -1079,7 +1075,7 @@ void EV_FireGauss(event_args_t *args)
 						gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, Vector(0,0,0), 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT);
 
 						{
-							Vector fwd;
+							vec3_t fwd;
 							VectorAdd(tr.endpos, tr.plane.normal, fwd);
 							gEngfuncs.pEfxAPI->R_Sprite_Trail(TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 8, 0.6, gEngfuncs.pfnRandomFloat(10, 20) / 100.0, 100,
 															  255, 200);
@@ -1106,7 +1102,7 @@ void EV_TrainPitchAdjust(event_args_t *args)
 	int stop;
 	int idx = args->entindex;
 
-	Vector origin;
+	vec3_t origin;
 	VectorCopy(args->origin, origin);
 
 	us_params = (unsigned short)args->iparam1;

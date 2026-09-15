@@ -25,7 +25,6 @@
 
 extern void SetMovedir(entvars_t *ev);
 
-//overloaded varables with generic names
 #define noiseMoving noise1
 #define noiseArrived noise2
 
@@ -90,6 +89,10 @@ TYPEDESCRIPTION CBaseDoor::m_SaveData[] =
 
 IMPLEMENT_SAVERESTORE(CBaseDoor, CBaseToggle);
 
+#define DOOR_SENTENCEWAIT 6
+#define DOOR_SOUNDWAIT 3
+#define BUTTON_SOUNDWAIT 0.5
+
 // play door or button locked or unlocked sounds.
 // pass in pointer to valid locksound struct.
 // if flocked is true, play 'door is locked' sound,
@@ -135,7 +138,7 @@ void PlayLockSounds(entvars_t *pev, locksound_t *pls, int flocked, int fbutton)
 			int iprev = pls->iLockedSentence;
 
 			pls->iLockedSentence = SENTENCEG_PlaySequentialSz(ENT(pev), STRING(pls->sLockedSentence),
-															  0.85, ATTN_NORM, 0, 100, pls->iLockedSentence, false);
+															  0.85, ATTN_NORM, 0, 100, pls->iLockedSentence, FALSE);
 			pls->iUnlockedSentence = 0;
 
 			// make sure we don't keep calling last sentence in list
@@ -171,7 +174,7 @@ void PlayLockSounds(entvars_t *pev, locksound_t *pls, int flocked, int fbutton)
 			int iprev = pls->iUnlockedSentence;
 
 			pls->iUnlockedSentence = SENTENCEG_PlaySequentialSz(ENT(pev), STRING(pls->sUnlockedSentence),
-																0.85, ATTN_NORM, 0, 100, pls->iUnlockedSentence, false);
+																0.85, ATTN_NORM, 0, 100, pls->iUnlockedSentence, FALSE);
 			pls->iLockedSentence = 0;
 
 			// make sure we don't keep calling last sentence in list
@@ -191,47 +194,47 @@ void CBaseDoor::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "skin")) //skin is used for content type
 	{
 		pev->skin = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
 	{
 		m_bStopSnd = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "healthvalue"))
 	{
 		m_bHealthValue = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_sound"))
 	{
 		m_bLockedSound = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "locked_sentence"))
 	{
 		m_bLockedSentence = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlocked_sound"))
 	{
 		m_bUnlockedSound = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "unlocked_sentence"))
 	{
 		m_bUnlockedSentence = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
 	{
 		pev->scale = atof(pkvd->szValue) * (1.0 / 8.0);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -522,7 +525,7 @@ void CBaseDoor::DoorTouch(CBaseEntity *pOther)
 	// play 'locked' sound
 
 	if (m_sMaster && !UTIL_IsMasterTriggered(m_sMaster, pOther))
-		PlayLockSounds(pev, &m_ls, true, false);
+		PlayLockSounds(pev, &m_ls, TRUE, FALSE);
 
 	// If door is somebody's target, then touching does nothing.
 	// You have to activate the owner (e.g. button).
@@ -530,7 +533,7 @@ void CBaseDoor::DoorTouch(CBaseEntity *pOther)
 	if (!FStringNull(pev->targetname))
 	{
 		// play locked sound
-		PlayLockSounds(pev, &m_ls, true, false);
+		PlayLockSounds(pev, &m_ls, TRUE, FALSE);
 		return;
 	}
 
@@ -574,7 +577,7 @@ int CBaseDoor::DoorActivate()
 		}
 
 		// play door unlock sounds
-		PlayLockSounds(pev, &m_ls, false, false);
+		PlayLockSounds(pev, &m_ls, FALSE, FALSE);
 
 		DoorGoUp();
 	}
@@ -1019,17 +1022,17 @@ void CMomentaryDoor::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "movesnd"))
 	{
 		m_bMoveSnd = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "stopsnd"))
 	{
 		//		m_bStopSnd = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "healthvalue"))
 	{
 		//		m_bHealthValue = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);

@@ -17,6 +17,7 @@
 //
 
 // this is the max number of items in each bucket
+#define MAX_WEAPON_POSITIONS MAX_WEAPON_SLOTS
 
 class WeaponsResource
 {
@@ -64,7 +65,7 @@ public:
 
 	void DropAllWeapons(void)
 	{
-		for (unsigned int i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < MAX_WEAPONS; i++)
 		{
 			if (rgWeapons[i].iId)
 				DropWeapon(&rgWeapons[i]);
@@ -93,7 +94,7 @@ public:
 
 extern WeaponsResource gWR;
 
-constexpr int MAX_HISTORY = 12;
+#define MAX_HISTORY 12
 enum
 {
 	HISTSLOT_EMPTY,

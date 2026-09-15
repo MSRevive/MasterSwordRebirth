@@ -526,10 +526,9 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
     }
 
     // Count registered types
-    unsigned int typeCount = pEngine->GetObjectTypeCount();
+    int typeCount = pEngine->GetObjectTypeCount();
     MS_ANGEL_INFO("Registered Object Types: %d", typeCount);
-    unsigned int MaxTypesShown = 10;
-    for (unsigned int i = 0; i < typeCount && i < MaxTypesShown; i++) // Show first 10 types
+    for (int i = 0; i < typeCount && i < 10; i++) // Show first 10 types
     {
         asITypeInfo* pType = pEngine->GetObjectTypeByIndex(i);
         if (pType)
@@ -541,16 +540,16 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
         }
     }
     if (typeCount > 10)
-        MS_ANGEL_INFO("   ... and %d more types", typeCount - MaxTypesShown);
+        MS_ANGEL_INFO("   ... and %d more types", typeCount - 10);
     
     // Count global functions
-    unsigned int globalFuncCount = pEngine->GetGlobalFunctionCount();
+    int globalFuncCount = pEngine->GetGlobalFunctionCount();
     MS_ANGEL_INFO("Registered Global Functions: %d", globalFuncCount);
     
     // Count by category
     int stringFuncs = 0, mathFuncs = 0, gameFuncs = 0, vectorFuncs = 0, otherFuncs = 0;
     
-    for (unsigned int i = 0; i < globalFuncCount; i++)
+    for (int i = 0; i < globalFuncCount; i++)
     {
         asIScriptFunction* pFunc = pEngine->GetGlobalFunctionByIndex(i);
         if (pFunc)
@@ -584,12 +583,11 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
         MS_ANGEL_INFO("   - Other: %d functions", otherFuncs);
     
     // Count global properties
-   unsigned int globalPropCount = pEngine->GetGlobalPropertyCount();
+    int globalPropCount = pEngine->GetGlobalPropertyCount();
     if (globalPropCount > 0)
     {
         MS_ANGEL_INFO("Registered Global Properties: %d", globalPropCount);
-        unsigned int MaxPropShown = 5;
-        for (unsigned int i = 0; i < globalPropCount && i < MaxPropShown; i++)
+        for (int i = 0; i < globalPropCount && i < 5; i++)
         {
             const char* name;
             const char* nameSpace;
@@ -601,7 +599,7 @@ void ASBindings::LogRegistrationInfo(asIScriptEngine* pEngine)
             }
         }
         if (globalPropCount > 5)
-            MS_ANGEL_INFO("   ... and %d more properties", globalPropCount - MaxPropShown);
+            MS_ANGEL_INFO("   ... and %d more properties", globalPropCount - 5);
     }
     
     // Memory usage estimate

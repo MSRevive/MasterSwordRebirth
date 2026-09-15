@@ -202,7 +202,7 @@ public:
 		//m_pScrollPanel->setBorder( new LineBorder( Color(255,255,255,0) ) );
 
 		int yPos = PLAYERBTN_START_Y;
-		for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+		for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 		{
 			ListButton *pButton = m_pListButton[i] = new ListButton(this, i, PLAYERBTN_X, yPos, PLAYERBTN_SIZE_X, PLAYERBTN_SIZE_Y);
 			pButton->setFont(pSchemes->getFont(hClassWindowText));
@@ -225,7 +225,7 @@ public:
 	{
 		m_Target = -1;
 		setVisible(true);
-		for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+		for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 		{
 			m_pListButton[i]->setArmed(false);
 			m_pListButton[i]->SetBGColorRGB(Color_Transparent);
@@ -251,7 +251,7 @@ public:
 	virtual void ButtonClicked(int idx)
 	{
 		m_Target = idx;
-		for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+		for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 			m_pListButton[i]->SetBgColor(Color_Transparent);
 		m_pListButton[m_Target]->SetBgColor(Color_BG_NameHightlight);
 		m_pBegin->setEnabled(true);
@@ -290,7 +290,7 @@ public:
 
 		if (m_VoteType == "kick")
 		{
-			for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+			for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 				if (g_PlayerInfoList[i].name &&
 					i != MSCLGlobals::GetLocalPlayerIndex())
 				{
@@ -303,10 +303,10 @@ public:
 		}
 		else if (m_VoteType == "advtime")
 		{
-			for (unsigned int i = 0; i < 3; i++)
+			for (int i = 0; i < 3; i++)
 			{
 				m_pListButton[i]->setParent(m_pScrollPanel->getClient());
-				m_pListButton[i]->setText(Localized(msstring("#VOTE_ADVTIME_OPT") + (int)i));
+				m_pListButton[i]->setText(Localized(msstring("#VOTE_ADVTIME_OPT") + i));
 				UsedBtns++;
 			}
 		}
@@ -329,7 +329,7 @@ public:
 	virtual void ButtonClicked(int idx)
 	{
 		m_Target = idx;
-		for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+		for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 			m_pListButton[i]->SetBgColor(Color_Transparent);
 		m_pListButton[m_Target]->SetBgColor(Color_BG_NameHightlight);
 		m_pBegin->setEnabled(true);
@@ -435,7 +435,7 @@ public:
 	void Update()
 	{
 		int r = 0;
-		for (unsigned int i = 0; i < MAX_VOTE_PLAYERS; i++)
+		for (int i = 0; i < MAX_VOTE_PLAYERS; i++)
 			if (g_PlayerExtraInfo[i].teamname[0] /*&&
 				i != GetLocalPlayerIndex()*/
 			)

@@ -124,7 +124,7 @@ void MSGlobals::NewMap()
 	}
 	
 #if SPAWN_GLOBAL_ITEMS
-	for(unsigned int i = 0; i < CGenericItemMgr::ItemCount(); i++)
+	for(int i = 0; i < CGenericItemMgr::ItemCount(); i++)
 	{
 		GenItem_t * pGenItem = CGenericItemMgr::Item(i);
 		if (pGenItem) // Paranoid
@@ -221,8 +221,8 @@ void MSGlobals::DLLAttach(HINSTANCE hinstDLL)
 	size_t nullterm = 8;
 #endif
 
-	unsigned int len = DllFileName.len();
-	for (unsigned int i = 0; i < len; i++)
+	int len = DllFileName.len();
+	for (int i = 0; i < len; i++)
 	{
 		if (DllFileName.c_str()[len - 1 - i] == '\\' || DllFileName.c_str()[len - 1 - i] == '/')
 		{
@@ -302,7 +302,7 @@ genericitem_full_t::genericitem_full_t(CGenericItem *pItem) : genericitem_t(pIte
 	Spell_TimePrepare = pItem->Spell_TimePrepare;
 	Spell_CastSuccess = pItem->Spell_CastSuccess;
 	if (FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
-		for (unsigned int i = 0; i < pItem->Container_ItemCount(); i++)
+		for (int i = 0; i < pItem->Container_ItemCount(); i++)
 			ContainerItems.add(pItem->Container_GetItem(i));
 }
 genericitem_full_t::operator class CGenericItem *()
@@ -316,7 +316,7 @@ genericitem_full_t::operator class CGenericItem *()
 	pItem->Spell_CastSuccess = Spell_CastSuccess ? true : false;
 	pItem->m_Hand = Hand;
 	if (FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
-		for (unsigned int i = 0; i < ContainerItems.size(); i++)
+		for (int i = 0; i < ContainerItems.size(); i++)
 			pItem->Container_AddItem(ContainerItems[i]);
 
 	return pItem;
@@ -345,7 +345,7 @@ const char *g_EntTypeByName[ENT_TYPE_TOTAL] =
 };
 int EntityNameToType(const char *pszName)
 {
-	for (unsigned int i = 0; i < ENT_TYPE_TOTAL; i++)
+	for (int i = 0; i < ENT_TYPE_TOTAL; i++)
 		if (!_stricmp(pszName, g_EntTypeByName[i]))
 			return i;
 	return -1;
@@ -513,10 +513,10 @@ void CScriptedEnt::KeyValue(KeyValueData *pkvd)
 	{
 		Script_Add(pkvd->szValue, this);
 		RunScriptEvents(); //For precachefile
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
-		pkvd->fHandled = false;
+		pkvd->fHandled = FALSE;
 }
 
 void CScriptedEnt::Deactivate()
@@ -789,7 +789,7 @@ bool FindSkyHeight(Vector Origin, float &SkyHeight)
 		//Find the beginning or end of the sky.  If the traceline didn't work, trace up. If it did, trace down
 		int CheckStep = Direction ? CHECKSTEP : -CHECKSTEP;
 
-		for (unsigned int i = 0; i < 64; i++)
+		for (int i = 0; i < 64; i++)
 		{
 			int Contents = EngineFunc::Shared_PointContents(CurrentOrigin);
 			if ((Direction && Contents == CONTENTS_SKY) ||

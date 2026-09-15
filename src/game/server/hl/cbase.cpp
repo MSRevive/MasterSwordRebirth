@@ -109,11 +109,11 @@ extern "C" {
 	{
 		if (!pFunctionTable || interfaceVersion != INTERFACE_VERSION)
 		{
-			return false;
+			return FALSE;
 		}
 
 		memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
-		return true;
+		return TRUE;
 	}
 
 	int GetEntityAPI2(DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
@@ -122,11 +122,11 @@ extern "C" {
 		{
 			// Tell engine what version we had, so it can figure out who is out of date.
 			*interfaceVersion = INTERFACE_VERSION;
-			return false;
+			return FALSE;
 		}
 
 		memcpy(pFunctionTable, &gFunctionTable, sizeof(DLL_FUNCTIONS));
-		return true;
+		return TRUE;
 	}
 
 	int GetNewDLLFunctions(NEW_DLL_FUNCTIONS* pFunctionTable, int* interfaceVersion)
@@ -134,11 +134,11 @@ extern "C" {
 		if (!pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION)
 		{
 			*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
-			return false;
+			return FALSE;
 		}
 
 		memcpy(pFunctionTable, &gNewDLLFunctions, sizeof(gNewDLLFunctions));
-		return true;
+		return TRUE;
 	}
 }
 
@@ -228,7 +228,7 @@ void DispatchKeyValue(edict_t *pentKeyvalue, KeyValueData *pkvd)
 
 // HACKHACK -- this is a hack to keep the node graph entity from "touching" things (like triggers)
 // while it builds the graph
-BOOL gTouchDisabled = false;
+BOOL gTouchDisabled = FALSE;
 
 void DispatchTouch(edict_t *pentTouched, edict_t *pentOther)
 {
@@ -761,32 +761,32 @@ BOOL CBaseEntity ::IsInWorld(void)
 {
 	// position
 	if (pev->origin.x >= 4096)
-		return false;
+		return FALSE;
 	if (pev->origin.y >= 4096)
-		return false;
+		return FALSE;
 	if (pev->origin.z >= 4096)
-		return false;
+		return FALSE;
 	if (pev->origin.x <= -4096)
-		return false;
+		return FALSE;
 	if (pev->origin.y <= -4096)
-		return false;
+		return FALSE;
 	if (pev->origin.z <= -4096)
-		return false;
+		return FALSE;
 	// speed
 	if (pev->velocity.x >= 2000)
-		return false;
+		return FALSE;
 	if (pev->velocity.y >= 2000)
-		return false;
+		return FALSE;
 	if (pev->velocity.z >= 2000)
-		return false;
+		return FALSE;
 	if (pev->velocity.x <= -2000)
-		return false;
+		return FALSE;
 	if (pev->velocity.y <= -2000)
-		return false;
+		return FALSE;
 	if (pev->velocity.z <= -2000)
-		return false;
+		return FALSE;
 
-	return true;
+	return TRUE;
 }
 
 int CBaseEntity::ShouldToggle(USE_TYPE useType, BOOL currentState)

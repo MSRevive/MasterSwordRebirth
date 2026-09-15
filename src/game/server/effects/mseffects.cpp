@@ -5,9 +5,6 @@
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 //#include "monsters/bodyparts/bodyparts.h"
 
-#include "player.h"
-
-
 void UTIL_ScreenFadeBuild(ScreenFade &fade, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags);
 void UTIL_ScreenFadeWrite(const ScreenFade &fade, CBaseEntity *pEntity);
 
@@ -117,7 +114,7 @@ void CTorchLight ::Create(float flDuration, edict_t *peOwner)
 }
 void CTorchLight ::Spawn()
 {
-	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
+	for (int i = 0; i < TORCH_LIGHTS; i++)
 	{
 		pLight[i] = GetClassPtr((CBaseEntity *)NULL);
 		SET_MODEL(pLight[i]->edict(), "models/null.mdl");
@@ -147,13 +144,13 @@ void CTorchLight ::Think()
 
 	if (FBitSet(pTorchTouse->pev->effects, EF_NODRAW) ||
 		pTorchTouse->pev->waterlevel > 2)
-		for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
+		for (int i = 0; i < TORCH_LIGHTS; i++)
 			SetBits(pLight[i]->pev->effects, EF_NODRAW);
 	else
-		for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
+		for (int i = 0; i < TORCH_LIGHTS; i++)
 			ClearBits(pLight[i]->pev->effects, EF_NODRAW);
 
-	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
+	for (int i = 0; i < TORCH_LIGHTS; i++)
 	{
 		if (pLight[i])
 		{
@@ -169,12 +166,13 @@ void CTorchLight ::Think()
 }
 void CTorchLight ::SUB_Remove()
 {
-	for (unsigned int i = 0; i < TORCH_LIGHTS; i++)
+	for (int i = 0; i < TORCH_LIGHTS; i++)
 		pLight[i]->SUB_Remove();
 	CBaseEntity ::SUB_Remove();
 }
 LINK_ENTITY_TO_CLASS(ms_torchlight, CTorchLight);
 
+#include "player.h"
 
 class CChangePlayerSpeed : public CBaseDelay
 {
@@ -233,7 +231,7 @@ void CChangePlayerSpeed ::Spawn(void)
 void CChangePlayerSpeed ::Think(void)
 {
 
-	for (unsigned int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		playerinfo_t *pInfo = &m_PlayerInfo[i];
 		if (!pInfo->pePlayer)
@@ -269,7 +267,7 @@ void CChangePlayerSpeed ::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 		return;
 
 	playerinfo_t *pInfo = NULL;
-	for (unsigned int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		if (!m_PlayerInfo[i].pePlayer)
 		{
@@ -295,7 +293,7 @@ void CChangePlayerSpeed ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "duration"))
 	{
 		m_Duration = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -308,7 +306,7 @@ CEntGlow *CEntGlow::Create(CBaseEntity *pTarget, Vector Color, float Amount, flo
 	pGlowEnt->m_Target = pTarget;
 	pGlowEnt->m_Color = Color;
 	pGlowEnt->m_Amount = Amount;
-	pGlowEnt->m_CurrentAmount = pGlowEnt->m_Amount;
+	pGlowEnt->m_CurentAmount = pGlowEnt->m_Amount;
 	pGlowEnt->m_Duration = Duration;
 	pGlowEnt->m_FadeDuration = FadeDuration;
 	pGlowEnt->m_StartTime = gpGlobals->time;
@@ -342,7 +340,7 @@ void CEntGlow::SetGlow(bool On)
 		{
 			pEntity->pev->renderfx = kRenderFxGlowShell;
 			pEntity->pev->rendercolor = m_Color;
-			pEntity->pev->renderamt = m_CurrentAmount;
+			pEntity->pev->renderamt = m_CurentAmount;
 		}
 	}
 	else
@@ -383,7 +381,7 @@ void CEntGlow::Think()
 		if (FadeAmt > 1)
 			FadeAmt = 1;
 
-		m_CurrentAmount = m_Amount * (1 - FadeAmt);
+		m_CurentAmount = m_Amount * (1 - FadeAmt);
 		SetGlow(true);
 		pev->nextthink = gpGlobals->time; //MiB
 	}
@@ -447,12 +445,12 @@ class CMSChangeLevel : public CBaseEntity
 		if (FStrEq(pkvd->szKeyName, "destmap"))
 		{
 			sDestMap = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = true;
+			pkvd->fHandled = TRUE;
 		}
 		else if (FStrEq(pkvd->szKeyName, "desttrans"))
 		{
 			sDestTrans = ALLOC_STRING(pkvd->szValue);
-			pkvd->fHandled = true;
+			pkvd->fHandled = TRUE;
 		}
 		else
 			CBaseEntity::KeyValue(pkvd);
@@ -460,24 +458,12 @@ class CMSChangeLevel : public CBaseEntity
 };
 LINK_ENTITY_TO_CLASS(mstrig_changelevel, CMSChangeLevel);
 
-
-bool REQPARAMS(msstring& ScriptFileName, msstringlist& Params, unsigned int count) {
-
-	if (Params.size() < count) {
-		ALERT(at_console, "Script: %s, effect '%s' missing parameters!\n", ScriptFileName.c_str(), Params[0].c_str());
-		return false;
+#define REQPARAMS(a)                                                                                                 \
+	if (Params.size() < a)                                                                                           \
+	{                                                                                                                \
+		ALERT(at_console, "Script: %s, effect '%s' missing parameters!\n", m.ScriptFile.c_str(), Params[0].c_str()); \
+		return;                                                                                                      \
 	}
-	else return true;
-}
-
-//#define REQPARAMS(a)                                                                                                 
-//	if (Params.size() < a)                                                                                           
-//	{                                                                                                                
-//		ALERT(at_console, "Script: %s, effect '%s' missing parameters!\n", m.ScriptFile.c_str(), Params[0].c_str()); 
-//		return;                                                                                                      
-//	}
-//
-
 
 void CScript::ScriptedEffect(msstringlist &Params)
 {
@@ -514,11 +500,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 
 	if (Params[0] == "beam")
 	{
-		
-		if (!REQPARAMS(m.ScriptFile, Params, 4)) {
-			return;
-		}
-
+		REQPARAMS(4);
 		int Type = 0;
 		if (Params[1] == "end")
 			Type = 0;
@@ -738,23 +720,17 @@ void CScript::ScriptedEffect(msstringlist &Params)
 		if (Params[1] == "gibs")
 		{
 			Type = 0;
-			if (!REQPARAMS(m.ScriptFile, Params, 9)) {
-				return;
-			}
+			REQPARAMS(9);
 		}
 		else if (Params[1] == "spray")
 		{
 			Type = 1;
-			if (!REQPARAMS(m.ScriptFile, Params, 8)) {
-				return;
-			}
+			REQPARAMS(8);
 		}
 		else if (Params[1] == "trail")
 		{
 			Type = 2;
-			if (!REQPARAMS(m.ScriptFile, Params, 10)) {
-				return;
-			}
+			REQPARAMS(10);
 		}
 
 		const char* ModelName = GetFullResourceName(Params[2]);
@@ -874,9 +850,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 	}
 	else if (Params[0] == "screenshake")
 	{
-		if (!REQPARAMS(m.ScriptFile, Params, 6)) {
-			return;
-		}
+		REQPARAMS(6);
 
 		Vector Origin = StringToVec(Params[1]);
 		float Amplitude = atof(Params[2]);
@@ -890,9 +864,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 	{
 		//Thothie APR2016_08 - allow screen shake vs. single client
 		//effect screenshake_one <target> <amp> <freq> <dur>
-		if (!REQPARAMS(m.ScriptFile, Params, 5)) {
-			return;
-		}
+		REQPARAMS(5);
 		CBaseEntity* pEntity = (m.pScriptedEnt ? m.pScriptedEnt->RetrieveEntity(Params[1]) : NULL);
 		if (pEntity && pEntity->IsPlayer())
 		{
@@ -937,9 +909,7 @@ void CScript::ScriptedEffect(msstringlist &Params)
 	}
 	else if (Params[0] == "glow")
 	{
-		if (!REQPARAMS(m.ScriptFile, Params, 6)) {
-			return;
-		}
+		REQPARAMS(6);
 
 		CBaseEntity *pTarget = m.pScriptedEnt->RetrieveEntity(Params[1]);
 		if (!pTarget)

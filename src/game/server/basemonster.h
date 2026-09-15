@@ -235,7 +235,7 @@ public:
 
 	BOOL FindLateralCover(const Vector &vecThreat, const Vector &vecViewOffset);
 	virtual BOOL FindCover(Vector vecThreat, Vector vecViewOffset, float flMinDist, float flMaxDist);
-	virtual BOOL FValidateCover(const Vector &vecCoverLocation) { return true; };
+	virtual BOOL FValidateCover(const Vector &vecCoverLocation) { return TRUE; };
 	virtual float CoverRadius(void) { return 784; } // Default cover radius
 
 	virtual BOOL FCanCheckAttacks(void);
@@ -247,14 +247,14 @@ public:
 	inline BOOL HasConditions(int iConditions)
 	{
 		if (m_afConditions & iConditions)
-			return true;
-		return false;
+			return TRUE;
+		return FALSE;
 	}
 	inline BOOL HasAllConditions(int iConditions)
 	{
 		if ((m_afConditions & iConditions) == iConditions)
-			return true;
-		return false;
+			return TRUE;
+		return FALSE;
 	}
 
 	virtual BOOL FValidateHintType(short sHint);
@@ -340,14 +340,14 @@ public:
 	inline BOOL HasMemory(int iMemory)
 	{
 		if (m_afMemory & iMemory)
-			return true;
-		return false;
+			return TRUE;
+		return FALSE;
 	}
 	inline BOOL HasAllMemories(int iMemory)
 	{
 		if ((m_afMemory & iMemory) == iMemory)
-			return true;
-		return false;
+			return TRUE;
+		return FALSE;
 	}
 
 	BOOL ExitScriptedSequence();

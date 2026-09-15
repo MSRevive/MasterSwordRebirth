@@ -26,7 +26,7 @@
 #include "clglobal.h"
 #include "sharedutil.h"
 
-constexpr unsigned int MAX_LOGO_FRAMES = 56;
+#define MAX_LOGO_FRAMES 56
 
 int grgLogoFrame[MAX_LOGO_FRAMES] =
 	{

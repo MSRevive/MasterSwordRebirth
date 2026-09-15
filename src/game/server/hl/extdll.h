@@ -25,6 +25,8 @@
 #ifdef _WIN32
 #include "PlatformWin.h"
 #else // _WIN32
+#define FALSE 0
+#define TRUE 1
 
 typedef unsigned int uint;
 typedef int BOOL;
@@ -45,7 +47,7 @@ typedef int BOOL;
 #include "math.h"
 
 // Vector class
-#include "hl/vector.h"
+#include "../../shared/hl/vector.h"
 
 // Shared engine/DLL constants
 #include "const.h"

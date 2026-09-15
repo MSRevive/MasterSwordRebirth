@@ -27,9 +27,12 @@
 #include "gamerules.h"
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript map transitions
 
-#ifndef EFFECTS_H
-#include "effects.h"
-#endif // !EFFECTS_H
+#define SF_TRIGGER_PUSH_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_HURT_TARGETONCE 1	   // Only fire hurt target once
+#define SF_TRIGGER_HURT_START_OFF 2		   //spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_HURT_NO_CLIENTS 8	   //spawnflag that makes trigger_push spawn turned OFF
+#define SF_TRIGGER_HURT_CLIENTONLYFIRE 16  // trigger hurt will only fire its target if it is hurting a client
+#define SF_TRIGGER_HURT_CLIENTONLYTOUCH 32 // only clients may touch this trigger.
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
@@ -84,7 +87,7 @@ void CFrictionModifier ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "modifier"))
 	{
 		m_frictionFraction = atof(pkvd->szValue) / 100.0;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);
@@ -93,6 +96,7 @@ void CFrictionModifier ::KeyValue(KeyValueData *pkvd)
 // This trigger will fire when the level spawns (or respawns if not fire once)
 // It will check a global state before firing.  It supports delay and killtargets
 
+#define SF_AUTO_FIREONCE 0x0001
 
 class CAutoTrigger : public CBaseDelay
 {
@@ -127,7 +131,7 @@ void CAutoTrigger::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "globalstate"))
 	{
 		m_globalstate = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
 	{
@@ -144,7 +148,7 @@ void CAutoTrigger::KeyValue(KeyValueData *pkvd)
 			triggerType = USE_ON;
 			break;
 		}
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -169,6 +173,8 @@ void CAutoTrigger::Think(void)
 			UTIL_Remove(this);
 	}
 }
+
+#define SF_RELAY_FIREONCE 0x0001
 
 class CTriggerRelay : public CBaseDelay
 {
@@ -205,12 +211,12 @@ void CTriggerRelay::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "scriptevent"))
 	{
 		m_scriptevent = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		ms_master = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
 	{
@@ -227,7 +233,7 @@ void CTriggerRelay::KeyValue(KeyValueData *pkvd)
 			triggerType = USE_ON;
 			break;
 		}
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "random"))
 	{
@@ -276,6 +282,8 @@ void CTriggerRelay::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 // FLAG:		THREAD (create clones when triggered)
 // FLAG:		CLONE (this is a clone for a threaded execution)
 
+#define SF_MULTIMAN_CLONE 0x80000000
+#define SF_MULTIMAN_THREAD 0x00000001
 
 class CMultiManager : public CBaseToggle
 {
@@ -300,19 +308,19 @@ public:
 
 	static TYPEDESCRIPTION m_SaveData[];
 
-	unsigned int m_cTargets;							  // the total number of targets in this manager's fire list.
-	unsigned int m_index;							  // Current target
+	int m_cTargets;							  // the total number of targets in this manager's fire list.
+	int m_index;							  // Current target
 	float m_startTime;						  // Time we started firing
 	int m_iTargetName[MAX_MULTI_TARGETS];	  // list if indexes into global string array
 	float m_flTargetDelay[MAX_MULTI_TARGETS]; // delay (in seconds) from time of manager fire to target fire
 private:
-	inline BOOL IsClone(void) { return (pev->spawnflags & SF_MULTIMAN_CLONE) ? true : false; }
+	inline BOOL IsClone(void) { return (pev->spawnflags & SF_MULTIMAN_CLONE) ? TRUE : FALSE; }
 	inline BOOL ShouldClone(void)
 	{
 		if (IsClone())
-			return false;
+			return FALSE;
 
-		return (pev->spawnflags & SF_MULTIMAN_THREAD) ? true : false;
+		return (pev->spawnflags & SF_MULTIMAN_THREAD) ? TRUE : FALSE;
 	}
 
 	CMultiManager *Clone(void);
@@ -342,12 +350,12 @@ void CMultiManager ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "random"))
 	{
 		fFireRandom = atoi(pkvd->szValue) ? true : false;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else // add this field to the target list
 	{
@@ -360,7 +368,7 @@ void CMultiManager ::KeyValue(KeyValueData *pkvd)
 			m_iTargetName[m_cTargets] = ALLOC_STRING(tmp);
 			m_flTargetDelay[m_cTargets] = atof(pkvd->szValue);
 			m_cTargets++;
-			pkvd->fHandled = true;
+			pkvd->fHandled = TRUE;
 		}
 	}
 }
@@ -378,7 +386,7 @@ void CMultiManager ::Spawn(void)
 	while (swapped)
 	{
 		swapped = 0;
-		for (unsigned int i = 1; i < m_cTargets; i++)
+		for (int i = 1; i < m_cTargets; i++)
 		{
 			if (m_flTargetDelay[i] < m_flTargetDelay[i - 1])
 			{
@@ -397,11 +405,11 @@ void CMultiManager ::Spawn(void)
 
 BOOL CMultiManager::HasTarget(string_t targetname)
 {
-	for (unsigned int i = 0; i < m_cTargets; i++)
+	for (int i = 0; i < m_cTargets; i++)
 		if (FStrEq(STRING(targetname), STRING(m_iTargetName[i])))
-			return true;
+			return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 // Designers were using this to fire targets that may or may not exist --
@@ -477,7 +485,7 @@ void CMultiManager ::ManagerUse(CBaseEntity *pActivator, CBaseEntity *pCaller, U
 	float flNextThink = gpGlobals->time;
 	if (fFireRandom)
 	{
-		m_index = RANDOM_LONG((unsigned int)0, m_cTargets - 1);
+		m_index = RANDOM_LONG(0, m_cTargets - 1);
 		flNextThink = gpGlobals->time + m_flTargetDelay[m_index];
 	}
 
@@ -506,7 +514,10 @@ void CMultiManager ::ManagerReport(void)
 //
 
 // Flags to indicate masking off various render parameters that are normally copied to the targets
-
+#define SF_RENDER_MASKFX (1 << 0)
+#define SF_RENDER_MASKAMT (1 << 1)
+#define SF_RENDER_MASKMODE (1 << 2)
+#define SF_RENDER_MASKCOLOR (1 << 3)
 
 class CRenderFxManager : public CBaseEntity
 {
@@ -621,7 +632,7 @@ void CBaseTrigger ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "scriptevent"))
 	{
 		m_scriptevent = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	//Thothie NOV2014_19 - applying MiB's individualized triggers
@@ -630,7 +641,7 @@ void CBaseTrigger ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "indivcooldown"))
 	{
 		trig_individualized = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	//Thothie NOV2014_19 - fix for trigger_once
@@ -640,50 +651,50 @@ void CBaseTrigger ::KeyValue(KeyValueData *pkvd)
 	{
 		//Print("DEBUG: eventallinbounds\n");
 		trig_eventallinbounds = (atoi(pkvd->szValue) == 1) ? true : false;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	//Thothie AUG2011_17 - trigger require total hp
 	if (FStrEq(pkvd->szKeyName, "reqhp"))
 	{
 		m_reqhp = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	//Thothie AUG2011_17 - trigger require average hp
 	if (FStrEq(pkvd->szKeyName, "reqavghp"))
 	{
 		m_reqavghp = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	//Thothie AUG2011_17 - trigger require #players
 	if (FStrEq(pkvd->szKeyName, "reqplayers"))
 	{
 		m_players = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	if (FStrEq(pkvd->szKeyName, "reqelsetarget"))
 	{
 		m_else_target = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 
 	if (FStrEq(pkvd->szKeyName, "damage"))
 	{
 		pev->dmg = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "count"))
 	{
 		m_cTriggersLeft = (int)atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damagetype"))
 	{
 		m_bitsDamageInflict = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseToggle::KeyValue(pkvd);
@@ -855,7 +866,7 @@ void CTargetCDAudio ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "radius"))
 	{
 		pev->scale = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -1526,7 +1537,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 		if (myclass.starts_with("trigger_once") && trig_eventallinbounds)
 		{
 			CBaseEntity *pList[255];
-			unsigned int tcount;
+			int tcount;
 			//can't remember how to build flags off hand, so h4x...
 			if (!(pev->spawnflags & SF_TRIGGER_NOCLIENTS) && !(pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_CLIENT);
@@ -1534,7 +1545,7 @@ void CBaseTrigger ::ActivateMultiTrigger(CBaseEntity *pActivator)
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_CLIENT | FL_MONSTER);
 			else if ((pev->spawnflags & SF_TRIGGER_NOCLIENTS) && (pev->spawnflags & SF_TRIGGER_ALLOWMONSTERS))
 				tcount = UTIL_EntitiesInBox(pList, 255, pev->absmin, pev->absmax, FL_MONSTER);
-			for (unsigned int i = 0; i < tcount; i++)
+			for (int i = 0; i < tcount; i++)
 			{
 				//Print("DEBUG: trigger_once running %s on %s\n", m_scriptevent.c_str(), pList[i]->m_DisplayName.c_str());
 				if (pList[i] != pActivator)
@@ -1696,7 +1707,7 @@ void CFireAndDie::Think(void)
 	UTIL_Remove(this);
 }
 
-
+#define SF_CHANGELEVEL_USEONLY 0x0002
 class CChangeLevel : public CBaseTrigger
 {
 public:
@@ -1747,24 +1758,24 @@ void CChangeLevel ::KeyValue(KeyValueData *pkvd)
 		if (strlen(pkvd->szValue) >= cchMapNameMost)
 			ALERT(at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue);
 		 strncpy(m_szMapName,  pkvd->szValue, sizeof(m_szMapName) );
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "landmark"))
 	{
 		if (strlen(pkvd->szValue) >= cchMapNameMost)
 			ALERT(at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue);
 		 strncpy(m_szLandmarkName,  pkvd->szValue, sizeof(m_szLandmarkName) );
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "changetarget"))
 	{
 		m_changeTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "changedelay"))
 	{
 		m_changeTargetDelay = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseTrigger::KeyValue(pkvd);
@@ -1989,7 +2000,7 @@ int CChangeLevel::InTransitionVolume(CBaseEntity *pEntity, char *pVolumeName)
 }
 
 // We can only ever move 512 entities across a transition
-constexpr int MAX_ENTITY = 512;
+#define MAX_ENTITY 512
 
 // This has grown into a complicated beast
 // Can we make this more elegant?
@@ -2118,7 +2129,7 @@ void NextLevel(void)
 		pChange = GetClassPtr((CChangeLevel *)VARS(pent));
 
 	 strncpy(st_szNextMap,  pChange->m_szMapName, sizeof(st_szNextMap) );
-	g_fGameOver = true;
+	g_fGameOver = TRUE;
 
 	if (pChange->pev->nextthink < gpGlobals->time)
 	{
@@ -2479,7 +2490,7 @@ void CBaseTrigger ::TeleportTouch(CBaseEntity *pOther)
 		pevToucher->v_angle = pentTarget->v.angles;
 	}
 
-	pevToucher->fixangle = true;
+	pevToucher->fixangle = TRUE;
 	pevToucher->velocity = pevToucher->basevelocity = g_vecZero;
 }
 
@@ -2534,6 +2545,7 @@ void CTriggerSave::SaveTouch(CBaseEntity *pOther)
 	SERVER_COMMAND("autosave\n");
 }
 
+#define SF_ENDSECTION_USEONLY 0x0001
 
 class CTriggerEndSection : public CBaseTrigger
 {
@@ -2598,7 +2610,7 @@ void CTriggerEndSection ::KeyValue(KeyValueData *pkvd)
 		//		m_iszSectionName = ALLOC_STRING( pkvd->szValue );
 		// Store this in message so we don't have to write save/restore for this ent
 		pev->message = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseTrigger::KeyValue(pkvd);
@@ -2658,7 +2670,7 @@ void CTriggerChangeTarget::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "m_iszNewTarget"))
 	{
 		m_iszNewTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -2683,6 +2695,11 @@ void CTriggerChangeTarget::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	}
 }
 
+#define SF_CAMERA_PLAYER_POSITION 1
+#define SF_CAMERA_PLAYER_TARGET 2
+#define SF_CAMERA_PLAYER_TAKECONTROL 4
+#define SF_CAMERA_PLAYER_ALL 8
+
 class CTriggerCamera : public CBaseDelay
 {
 public:
@@ -2698,7 +2715,7 @@ public:
 	static TYPEDESCRIPTION m_SaveData[];
 
 	EHANDLE m_hPlayer[MAXPLAYERS];
-	unsigned int m_iNumPlayers;
+	int m_iNumPlayers;
 
 	EHANDLE m_hTarget;
 	CBaseEntity *m_pentPath;
@@ -2754,22 +2771,22 @@ void CTriggerCamera ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "moveto"))
 	{
 		m_sPath = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "acceleration"))
 	{
 		m_acceleration = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "deceleration"))
 	{
 		m_deceleration = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -2850,9 +2867,9 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 
 	if (FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)) //Freeze player(s)?
 	{
-		for (unsigned int i = 0; i < m_iNumPlayers; i++)
+		for (int i = 0; i < m_iNumPlayers; i++)
 		{
-			((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(false);
+			((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(FALSE);
 		}
 	}
 
@@ -2871,7 +2888,7 @@ void CTriggerCamera::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	}
 
 	
-	for (unsigned int i = 0; i < m_iNumPlayers; i++)
+	for (int i = 0; i < m_iNumPlayers; i++)
 	{
 		SET_VIEW(m_hPlayer[i]->edict(), edict());
 
@@ -2890,7 +2907,7 @@ void CTriggerCamera::FollowTarget()
 {
 	if (m_hTarget == NULL || m_flReturnTime < gpGlobals->time) //Attempt to restore player view
 	{
-		for (unsigned int i = 0; i < m_iNumPlayers; i++) 
+		for (int i = 0; i < m_iNumPlayers; i++) 
 		{
 			if (m_hPlayer == NULL)
 				continue;
@@ -2898,7 +2915,7 @@ void CTriggerCamera::FollowTarget()
 			if (m_hPlayer[i]->IsAlive())
 			{
 				SET_VIEW(m_hPlayer[i]->edict(), m_hPlayer[i]->edict());
-				((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(true);
+				((CBasePlayer*)((CBaseEntity*)m_hPlayer[i]))->EnableControl(TRUE);
 			}
 		}
 

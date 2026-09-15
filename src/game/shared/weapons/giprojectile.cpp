@@ -16,6 +16,10 @@
 #include "stats/stats.h"
 #include "stats/statdefs.h"
 
+#define TypeCheck        \
+	if (!ProjectileData) \
+	return
+
 void CGenericItem::RegisterProjectile()
 {
 	if (ProjectileData)
@@ -36,9 +40,7 @@ void CGenericItem::RegisterProjectile()
 }
 void CGenericItem::TossProjectile(CBaseEntity *pTossDevice, Vector &vOrigin, Vector &vVelocity, float flDamage, int iStat, int iProp)
 {
-	if (!ProjectileData) {
-		return;
-	}
+	TypeCheck;
 	if (!pTossDevice)
 		return;
 
@@ -116,9 +118,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 {
 	//if ( ProjectileData->IgnoreNPC ) return;
 
-	if (!ProjectileData) {
-		return;
-	}
+	TypeCheck;
 
 	if (pev->owner == pOther->edict() || pOther->MSMoveType == MOVETYPE_ARROW || !FBitSet(MSProperties(), ITEM_PROJECTILE))
 		return;
@@ -150,7 +150,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 		if (pOwner->IsPlayer())
 		{
 			CMSMonster *pMonsterOwner = (CMSMonster *)pOwner;
-			dmgMultiplier = pMonsterOwner->GetSkillStat(ProjectileData->StatPower, ProjectileData->PropPower) / MAX_STAT_PROPVALUE;
+			dmgMultiplier = pMonsterOwner->GetSkillStat(ProjectileData->StatPower, ProjectileData->PropPower) / STATPROP_MAX_VALUE;
 			dmgMultiplier = V_max(dmgMultiplier, 0.001f);
 		}
 
@@ -242,9 +242,7 @@ void CGenericItem::ProjectileTouch(CBaseEntity *pOther)
 
 void CGenericItem::Projectile_Move()
 {
-	if (!ProjectileData) {
-		return;
-	}
+	TypeCheck;
 
 	if (MSMoveType == MOVETYPE_ARROW)
 	{
@@ -293,7 +291,7 @@ void CGenericItem::Projectile_CheckHit(void)
 		CBaseEntity *pEntity = MSInstance(tr.pHit);
 		if (pEntity)
 		{
-			/*if( pEntity->MSProperties() == ITEM_MS_SHIELD ) 
+			/*if( pEntity->MSProperties() == MS_SHIELD ) 
 			{
 				CGenericItem *pShield = (CGenericItem *)CBaseEntity::Instance(pEntity->pev->owner);
 				CBasePlayer *pPlayer = pShield->m_pPlayer->IsPlayer() ? pShield->m_pPlayer : NULL;

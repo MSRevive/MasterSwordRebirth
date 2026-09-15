@@ -35,7 +35,7 @@ extern int gmsgMOTD;
 //=========================================================
 BOOL CGameRules::CanHaveAmmo(CBasePlayer *pPlayer, const char *pszAmmoName, int iMaxCarry)
 {
-	return false;
+	return FALSE;
 }
 
 //=========================================================
@@ -51,7 +51,7 @@ edict_t *CGameRules ::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 {
 	// only living players can have items
 	if ( pPlayer->pev->deadflag != DEAD_NO )
-		return false;
+		return FALSE;
 
 	if ( pWeapon->pszAmmo1() )
 	{
@@ -61,7 +61,7 @@ edict_t *CGameRules ::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 			// have the gun if we aren't already carrying one of this type
 			if ( pPlayer->HasPlayerItem( pWeapon ) )
 			{
-				return false;
+				return FALSE;
 			}
 		}
 	}
@@ -70,12 +70,12 @@ edict_t *CGameRules ::GetPlayerSpawnSpot(CBasePlayer *pPlayer)
 		// weapon doesn't use ammo, don't take another if you already have it.
 		if ( pPlayer->HasPlayerItem( pWeapon ) )
 		{
-			return false;
+			return FALSE;
 		}
 	}
 
 	// note: will fall through to here if GetItemInfo doesn't fill the struct!
-	return true;
+	return TRUE;
 }*/
 
 //=========================================================

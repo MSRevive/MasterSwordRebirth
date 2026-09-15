@@ -8,8 +8,6 @@
 #include "buildcontrol.h"
 #include "monsters/msmonster.h"
 
-
-
 // Char Files
 enum chardatastatus_e
 {
@@ -54,7 +52,7 @@ enum charClientType
 struct charinfo_base_t
 {
 	int Index; // Keep track of index, because the characters might not be loaded in order	
-	unsigned int DataLen;
+	int DataLen;
 	char* Data;
 
 	charinfo_base_t()
@@ -65,13 +63,11 @@ struct charinfo_base_t
 	}
 };
 
-enum gear_flag_location_e {
-	GEARFL_COVER_HEAD = (1 << 0),
-	GEARFL_COVER_TORSO = (1 << 1),
-	GEARFL_COVER_ARMS = (1 << 2),
-	GEARFL_COVER_LEGS = (1 << 3),
-	GEARFL_WEARING = (1 << 4)
-};
+#define GEARFL_COVER_HEAD (1 << 0)
+#define GEARFL_COVER_TORSO (1 << 1)
+#define GEARFL_COVER_ARMS (1 << 2)
+#define GEARFL_COVER_LEGS (1 << 3)
+#define GEARFL_WEARING (1 << 4)
 
 struct gearinfo_t
 {
@@ -113,30 +109,29 @@ struct charsendinfo_t : charinfo_base_t
 
 struct natstat_t
 {
-	short Value[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
 };
 struct skillstat_t
 {
-	short Value[STAT_PROP_TOTAL];
-	ulong Exp[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
+	ulong Exp[STATPROP_TOTAL];
 };
 struct spellskillstat_t
 {
-	short Value[STAT_PROP_TOTAL];
-	long Exp[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
+	long Exp[STATPROP_TOTAL];
 };
 
-enum savechar_version_e {
-	SAVECHAR_VERSION_MSC = 11, // Legacy MS: Classic
-	SAVECHAR_VERSION_MSR = 12, // MS Rebirth and up.
-	SAVECHAR_VERSION = SAVECHAR_VERSION_MSR
-};
+#define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
+#define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
+
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
 
 //The types of headers.  Each time the save file is revised, a new header is added.
 //The old headers are kept so the game knows when it is encountering an old save file
 //and can call the legacy code for converison to the new format.
 
-enum char_data_type_e
+enum
 {
 	CHARDATA_HEADER1 = 0,
 	CHARDATA_MAPSVISITED1,
@@ -185,7 +180,7 @@ const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer = NULL);	 //Cli
 bool IsValidCharVersion(int Version);										 //Client & Server
 savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps); //Client & Server
 
-constexpr unsigned int MAX_CHARSLOTS = 3; //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
+#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
 
 struct charslot_t
 {
@@ -199,12 +194,9 @@ struct charslot_t
 class ChooseChar_Interface
 {
 public:
-	static unsigned int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
+	static int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
 	static bool CentralServer;
 	static void UpdateCharScreen();
 	static void UpdateCharScreenUpload();
 };
-
-
-
 #endif //MSCHARACTER_H

@@ -11,8 +11,6 @@
 
 #include "voice_common.h"
 
-constexpr float UPDATE_INTERVAL = 0.3;
-
 class CGameRules;
 class CBasePlayer;
 

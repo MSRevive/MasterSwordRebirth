@@ -530,7 +530,7 @@ void ASEngineEventManager::FirePlayerSayTextEvent(const char* szPlayerName, cons
 //==========================================================================
 bool ASEngineEventManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
 {
-    if (!pFunction || (unsigned int)paramIndex >= (unsigned int)pFunction->GetParamCount())
+    if (!pFunction || paramIndex >= pFunction->GetParamCount())
         return false;
         
     int typeId;

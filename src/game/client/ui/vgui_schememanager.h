@@ -1,7 +1,7 @@
 #include <VGUI_Font.h>
 
 // handle to an individual scheme
-typedef unsigned int SchemeHandle_t;
+typedef int SchemeHandle_t;
 
 // Register console variables, etc..
 void Scheme_Init();
@@ -33,7 +33,7 @@ public:
 private:
 	class CScheme;
 	CScheme *m_pSchemeList;
-	unsigned int m_iNumSchemes;
+	int m_iNumSchemes;
 
 	// Resolution we were initted at.
 	int m_xRes;

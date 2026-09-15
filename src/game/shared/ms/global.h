@@ -1,7 +1,3 @@
-
-
-#ifndef GLOBAL_H
-#define GLOBAL_H
 #include "votedefs.h"
 
 //The client calls this once, on DLL load
@@ -97,9 +93,3 @@ enum MusicType {
 	MUSIC_STOP_COMBAT,//For scripts, stops combat music
 	MUSIC_STOP //For map triggers, stops combat & area music
 };
-
-inline bool PlayerVotedYes(int idx) {
-	return MSGlobals::CurrentVote.VoteTally & (1 << (idx - 1));
-};
-
-#endif

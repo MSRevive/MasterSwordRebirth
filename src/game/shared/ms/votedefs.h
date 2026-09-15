@@ -1,7 +1,6 @@
-
-
 #ifndef VOTE_H
 #define VOTE_H
+
 
 struct vote_t
 {
@@ -19,6 +18,6 @@ struct vote_t
 	static msstringlist VotesTypesAllowed; //The vote types that are allowed
 };
 
-
+#define PlayerVotedYes(idx) (MSGlobals::CurrentVote.VoteTally & (1 << (idx - 1)))
 
 #endif //VOTE_H

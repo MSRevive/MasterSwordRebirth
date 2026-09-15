@@ -19,24 +19,16 @@
 #include "scriptevent.h"
 #endif
 
-enum script_conditions_e {
-	SF_SCRIPT_WAITTILLSEEN = 1,
-	SF_SCRIPT_EXITAGITATED = 2,
-	SF_SCRIPT_REPEATABLE = 4,
-	SF_SCRIPT_LEAVECORPSE = 8,
-	//SF_SCRIPT_INTERPOLATE = 16, // don't use, old bug
-	SF_SCRIPT_NOINTERRUPT = 32,
-	SF_SCRIPT_OVERRIDESTATE = 64,
-	SF_SCRIPT_NOSCRIPTMOVEMENT = 128,
-	SCRIPT_BREAK_CONDITIONS = (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE)
-};
+#define SF_SCRIPT_WAITTILLSEEN 1
+#define SF_SCRIPT_EXITAGITATED 2
+#define SF_SCRIPT_REPEATABLE 4
+#define SF_SCRIPT_LEAVECORPSE 8
+//#define SF_SCRIPT_INTERPOLATE		16 // don't use, old bug
+#define SF_SCRIPT_NOINTERRUPT 32
+#define SF_SCRIPT_OVERRIDESTATE 64
+#define SF_SCRIPT_NOSCRIPTMOVEMENT 128
 
-enum sf_sentence_e {
-	SF_SENTENCE_ONCE = 0x0001,
-	SF_SENTENCE_FOLLOWERS = 0x0002, // only say if following player
-	SF_SENTENCE_INTERRUPT = 0x0004, // force talking except when dead
-	SF_SENTENCE_CONCURRENT = 0x0008 // allow other people to keep talking
-};
+#define SCRIPT_BREAK_CONDITIONS (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE)
 
 enum SS_INTERRUPT
 {
@@ -48,11 +40,8 @@ enum SS_INTERRUPT
 // when a monster finishes an AI scripted sequence, we can choose
 // a schedule to place them in. These defines are the aliases to
 // resolve worldcraft input to real schedules (sjb)
-
-enum script_finishedsched_e {
-	SCRIPT_FINISHSCHED_DEFAULT = 0,
-	SCRIPT_FINISHSCHED_AMBUSH = 1
-};
+#define SCRIPT_FINISHSCHED_DEFAULT 0
+#define SCRIPT_FINISHSCHED_AMBUSH 1
 
 class CCineMonster : public CBaseMonster
 {

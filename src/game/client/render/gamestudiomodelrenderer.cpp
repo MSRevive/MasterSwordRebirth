@@ -75,7 +75,7 @@ R_StudioDrawModel
 int R_StudioDrawModel(int flags)
 {
 	//return g_StudioRenderer.StudioDrawModel( flags );
-	return CModelMgr::MSStudioDrawModel(flags, nullptr);
+	return CModelMgr::MSStudioDrawModel(flags, NULL);
 }
 
 extern cl_entity_t *DrawEnt;
@@ -91,7 +91,7 @@ int CModelMgr::MSStudioDrawModel(int flags, entity_state_t *pplayer)
 	{
 		OldEntity = *CurrentEnt;
 		*CurrentEnt = *DrawEnt;
-		DrawEnt = nullptr;
+		DrawEnt = NULL;
 		Replaced = true;
 	}
 

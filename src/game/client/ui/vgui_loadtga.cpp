@@ -64,7 +64,7 @@ public:
 
 	void readUChar(uchar* buf, int count, bool& success) override
 	{
-		for (unsigned int i = 0; i < (unsigned int)count; i++)
+		for (int i = 0; i < count; i++)
 			buf[i] = readUChar(success);
 	}
 

@@ -27,17 +27,17 @@
 extern CGraph WorldGraph;
 
 //=========================================================
-// FHaveSchedule - Returns true if monster's m_pSchedule
+// FHaveSchedule - Returns TRUE if monster's m_pSchedule
 // is anything other than NULL.
 //=========================================================
 BOOL CBaseMonster ::FHaveSchedule(void)
 {
 	if (m_pSchedule == NULL)
 	{
-		return false;
+		return FALSE;
 	}
 
-	return true;
+	return TRUE;
 }
 
 //=========================================================
@@ -52,7 +52,7 @@ void CBaseMonster ::ClearSchedule(void)
 }
 
 //=========================================================
-// FScheduleDone - Returns true if the caller is on the
+// FScheduleDone - Returns TRUE if the caller is on the
 // last task in the schedule
 //=========================================================
 BOOL CBaseMonster ::FScheduleDone(void)
@@ -61,10 +61,10 @@ BOOL CBaseMonster ::FScheduleDone(void)
 
 	if (m_iScheduleIndex == m_pSchedule->cTasks)
 	{
-		return true;
+		return TRUE;
 	}
 
-	return false;
+	return FALSE;
 }
 
 //=========================================================
@@ -164,7 +164,7 @@ int CBaseMonster ::IScheduleFlags(void)
 }
 
 //=========================================================
-// FScheduleValid - returns true as long as the current
+// FScheduleValid - returns TRUE as long as the current
 // schedule is still the proper schedule to be executing,
 // taking into account all conditions
 //=========================================================
@@ -173,7 +173,7 @@ BOOL CBaseMonster ::FScheduleValid(void)
 	if (m_pSchedule == NULL)
 	{
 		// schedule is empty, and therefore not valid.
-		return false;
+		return FALSE;
 	}
 
 	if (HasConditions(m_pSchedule->iInterruptMask | bits_COND_SCHEDULE_DONE | bits_COND_TASK_FAILED))
@@ -191,10 +191,10 @@ BOOL CBaseMonster ::FScheduleValid(void)
 #endif // DEBUG
 
 		// some condition has interrupted the schedule, or the schedule is done
-		return false;
+		return FALSE;
 	}
 
-	return true;
+	return TRUE;
 }
 
 //=========================================================
@@ -524,7 +524,7 @@ void CBaseMonster ::RunTask(Task_t *pTask)
 		if (m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime)
 		{
 			TaskComplete();
-			m_pCine->StartSequence((CBaseMonster *)this, m_pCine->m_iszPlay, true);
+			m_pCine->StartSequence((CBaseMonster *)this, m_pCine->m_iszPlay, TRUE);
 			if (m_fSequenceFinished)
 				ClearSchedule();
 			pev->framerate = 1.0;
@@ -1254,7 +1254,7 @@ void CBaseMonster ::StartTask(Task_t *pTask)
 	{
 		if (m_pCine->m_iszIdle)
 		{
-			m_pCine->StartSequence((CBaseMonster *)this, m_pCine->m_iszIdle, false);
+			m_pCine->StartSequence((CBaseMonster *)this, m_pCine->m_iszIdle, FALSE);
 			if (FStrEq(STRING(m_pCine->m_iszIdle), STRING(m_pCine->m_iszPlay)))
 			{
 				pev->framerate = 0;

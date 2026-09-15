@@ -102,7 +102,7 @@ BODY QUE
 ==============================================================================
 */
 
-
+#define SF_DECAL_NOTINDEATHMATCH 2048
 
 class CDecal : public CBaseEntity
 {
@@ -372,7 +372,7 @@ void RestoreGlobalState(SAVERESTOREDATA *pSaveData)
 void ResetGlobalState(void)
 {
 	gGlobalState.ClearStates();
-	gInitHUD = true; // Init the HUD on a new game / load game
+	gInitHUD = TRUE; // Init the HUD on a new game / load game
 }
 // this moved here from world.cpp, to allow classes to be derived from it
 //=======================
@@ -399,6 +399,9 @@ public:
 
 LINK_ENTITY_TO_CLASS(worldspawn, CWorld);
 
+#define SF_WORLD_DARK 0x0001	  // Fade from black at startup
+#define SF_WORLD_TITLE 0x0002	  // Display game title at startup
+#define SF_WORLD_FORCETEAM 0x0004 // Force teams
 
 extern DLL_GLOBAL BOOL g_fGameOver;
 
@@ -406,7 +409,7 @@ void CWorld ::Spawn(void)
 {	
 	MS_INFO("World Spawn...");
 
-	g_fGameOver = false;
+	g_fGameOver = FALSE;
 	CScriptedEnt::Spawn();
 	Precache();
 
@@ -549,7 +552,7 @@ void CWorld ::Precache(void)
 	// 63 testing
 	LIGHT_STYLE(63, "a");
 
-	for (unsigned int i = 0; i < std::size(gDecals); i++)
+	for (int i = 0; i < std::size(gDecals); i++)
 		gDecals[i].index = DECAL_INDEX(gDecals[i].name);
 
 	// init the WorldGraph.
@@ -598,9 +601,9 @@ void CWorld ::Precache(void)
 		CVAR_SET_FLOAT("v_dark", 0.0);
 
 	if (pev->spawnflags & SF_WORLD_TITLE)
-		gDisplayTitle = true; // display the game title if this key is set
+		gDisplayTitle = TRUE; // display the game title if this key is set
 	else
-		gDisplayTitle = false;
+		gDisplayTitle = FALSE;
 
 	g_fInPrecache = false;
 }
@@ -614,7 +617,7 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 	{
 		// Sent over net now.
 		CVAR_SET_STRING("sv_skyname", pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 
 		//AUG2013_28 Thothie - fixing sticky music
 		//NOV2014_09 Thothie - can't do this here, skyname doesn't always come before music defs
@@ -623,32 +626,32 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{
 		//gpGlobals->cdAudioTrack = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "WaveHeight"))
 	{
 		// Sent over net now.
 		pev->scale = atof(pkvd->szValue) * (1.0 / 8.0);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 		CVAR_SET_FLOAT("sv_wateramp", pev->scale);
 	}
 	else if (FStrEq(pkvd->szKeyName, "MaxRange"))
 	{
 		pev->speed = atof(pkvd->szValue);
 		MSGlobals::maxviewdistance = atof(pkvd->szValue); //Thothie JAN2010_23
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "chaptertitle"))
 	{
 		pev->netname = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "startdark"))
 	{
 		// UNDONE: This is a gross hack!!! The CVAR is NOT sent over the client/sever link
 		// but it will work for single player
 		int flag = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 		if (flag)
 			pev->spawnflags |= SF_WORLD_DARK;
 	}
@@ -657,19 +660,19 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 		// Single player only.  Clear save directory if set
 		if (atoi(pkvd->szValue))
 			CVAR_SET_FLOAT("sv_newunit", 1);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "gametitle"))
 	{
 		if (atoi(pkvd->szValue))
 			pev->spawnflags |= SF_WORLD_TITLE;
 
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	/*else if ( FStrEq(pkvd->szKeyName, "mapteams") )
 	{
 		pev->team = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}*/
 	else if (FStrEq(pkvd->szKeyName, "defaultteam"))
 	{
@@ -677,7 +680,7 @@ void CWorld ::KeyValue(KeyValueData *pkvd)
 		{
 			pev->spawnflags |= SF_WORLD_FORCETEAM;
 		}
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	//Master Sword: Game types
 	else if (FStrEq(pkvd->szKeyName, "gametype"))
