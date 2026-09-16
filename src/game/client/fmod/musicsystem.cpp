@@ -20,9 +20,16 @@ void CMusicSystem::Init()
 void CMusicSystem::Shutdown()
 {
 	if (m_pChannel)
+	{
 		m_pChannel->stop();
+		m_pChannel = nullptr;
+	}
 
-	m_pSound->release();
+	if (m_pSound)
+	{
+		m_pSound->release();
+		m_pSound = nullptr;
+	}
 }
 
 // Returns the name of the current ambient sound being played
@@ -122,6 +129,19 @@ bool CMusicSystem::PlayMusic(std::string pszSong, bool fadeIn)
 	m_CurSound = pszSong;
 	char songPath[256];
 	_snprintf(songPath, 256, "%s/music/%s", gEngfuncs.pfnGetGameDirectory(), pszSong.c_str());
+
+	// Free the previous stream so each track change doesn't leak a file handle and decoder
+	if (m_pChannel)
+	{
+		m_pChannel->stop();
+		m_pChannel = nullptr;
+	}
+	if (m_pSound)
+	{
+		m_pSound->release();
+		m_pSound = nullptr;
+	}
+
 	FMOD_RESULT	result = m_pSystem->createStream(songPath, FMOD_DEFAULT, 0, &m_pSound);
 
 	if (result != FMOD_OK)

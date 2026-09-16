@@ -363,17 +363,27 @@ void CHud::Init(void)
 
 void CHud::Shutdown()
 {
-	m_Music->Shutdown();
-	
+	if (m_Music)
+		m_Music->Shutdown();
+
 	delete m_Menu;
+	m_Menu = nullptr;
 	delete m_Fatigue;
+	m_Fatigue = nullptr;
 	delete m_Magic;
+	m_Magic = nullptr;
 	delete m_Music;
+	m_Music = nullptr;
 	delete m_Action;
+	m_Action = nullptr;
 	delete m_Health;
+	m_Health = nullptr;
 	delete m_HUDScript;
+	m_HUDScript = nullptr;
 	delete m_Misc;
+	m_Misc = nullptr;
 	delete m_HUDId;
+	m_HUDId = nullptr;
 }
 
 // GetSpriteIndex()

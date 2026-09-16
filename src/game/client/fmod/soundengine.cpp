@@ -21,6 +21,8 @@ bool CSoundEngine::InitFMOD(void)
 	if (result != FMOD_OK)
 	{
 		gEngfuncs.Con_Printf("FMOD ERROR: Failed to initialize properly!\n");
+		m_pSystem->release();
+		m_pSystem = nullptr;
 		return false;
 	}
 	else
@@ -32,7 +34,11 @@ bool CSoundEngine::InitFMOD(void)
 // Stops FMOD
 bool CSoundEngine::ExitFMOD(void)
 {
+	if (!m_pSystem)
+		return true;
+
 	FMOD_RESULT	result = m_pSystem->release();
+	m_pSystem = nullptr;
 
 	if (result != FMOD_OK)
 	{

@@ -35,7 +35,18 @@ ASCoroutine::ASCoroutine(int nId, asIScriptFunction* pFunction, const char* szFu
 ASCoroutine::~ASCoroutine()
 {
     Cancel();
-    
+
+    // Cancel skips completed coroutines, so return their context here
+    if (m_pContext)
+    {
+        CAngelScriptManager* pManager = CAngelScriptManager::Instance();
+        if (pManager)
+        {
+            pManager->ReleaseContext(m_pContext);
+        }
+        m_pContext = nullptr;
+    }
+
     if (m_pFunction)
     {
         m_pFunction->Release();

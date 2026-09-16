@@ -37,6 +37,7 @@ extern "C"
 #include "clientlibrary.h"
 #include "scriptmgr.h"
 #include "ms/clglobal.h"
+#include "ms/mslogger.h"
 #include <mathlib.h>
 
 extern "C"
@@ -1135,6 +1136,7 @@ void ShutdownInput(void)
 
 void DLLEXPORT HUD_Shutdown(void)
 {
+	MS_INFO("[HUD_Shutdown: Enter]");
 	ScriptMgr::GameShutdown();
 	gClient.Shutdown();
 	ShutdownInput();

@@ -17,7 +17,7 @@ public:
 	//FMOD::ChannelGroup *GetChannelGroup(eChannelGroupType channelgroupType) { return m_pChannelGroups[channelgroupType]; }
 
 private:
-	FMOD::System *m_pSystem;
+	FMOD::System *m_pSystem = nullptr;
 	const int m_NumChannels = 100;
 	//No longer needed just pass NULL channel since we are not doing any submixing
 	//FMOD::ChannelGroup* m_pChannelGroups[NUM_CHANNELGROUPS];

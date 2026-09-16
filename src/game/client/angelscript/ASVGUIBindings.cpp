@@ -69,13 +69,17 @@ namespace ASVGUIBindings
     {
         MS_ANGEL_INFO("[ASVGUIBindings] Cleaning up %d registered panels", g_PanelRegistry.size());
 
+        // Move the registry out first: ~VGUIPanel calls UnregisterPanel, which would
+        // erase from the map we're iterating and invalidate the iterator
+        std::map<VGUIPanel*, bool> panels;
+        panels.swap(g_PanelRegistry);
+
         // Delete all registered panels
-        for (auto it = g_PanelRegistry.begin(); it != g_PanelRegistry.end(); ++it)
+        for (auto& entry : panels)
         {
-            VGUIPanel* panel = it->first;
-            if (panel)
+            if (entry.first)
             {
-                delete panel;
+                delete entry.first;
             }
         }
 

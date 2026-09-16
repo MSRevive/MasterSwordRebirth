@@ -124,6 +124,13 @@ bool CAngelScriptManager::Initialize()
     if (m_bInitialized)
         return true;
         
+    // Set up memory allocation hooks - must happen before the engine is created
+    int r = asSetGlobalMemoryFunctions(ASMalloc, ASFree);
+    if (r < 0)
+    {
+        LogMessage("Failed to set AngelScript memory functions", 1);
+    }
+
     // Create the AngelScript engine
     m_pEngine = asCreateScriptEngine();
     if (!m_pEngine)
@@ -134,7 +141,7 @@ bool CAngelScriptManager::Initialize()
     
     
     // Set the message callback
-    int r = m_pEngine->SetMessageCallback(asFUNCTION(ASMessageCallback), 0, asCALL_CDECL);
+    r = m_pEngine->SetMessageCallback(asFUNCTION(ASMessageCallback), 0, asCALL_CDECL);
     if (r < 0)
     {
         LogMessage("Failed to set AngelScript message callback", 1);
@@ -167,13 +174,6 @@ bool CAngelScriptManager::Initialize()
     if (r < 0)
     {
         LogMessage("Failed to enable script section copying", 1);
-    }
-    
-    // Set up memory allocation hooks
-    r = asSetGlobalMemoryFunctions(ASMalloc, ASFree);
-    if (r < 0)
-    {
-        LogMessage("Failed to set AngelScript memory functions", 1);
     }
     
     // Initialize debugger if debug mode is enabled
@@ -250,7 +250,31 @@ void CAngelScriptManager::Destroy()
         pEventManager->Destroy();
         MS_ANGEL_INFO("AngelScript Event Manager destroyed");
     }
-    
+
+    // Shutdown coroutine manager before the context pool is released.
+    // ASCoroutine::Cancel hands its context back through ReleaseContext, so the
+    // pool must still be drained after this or those contexts (and their engine
+    // references) leak.
+    MS_ANGEL_INFO("Shutting down coroutine manager...");
+    ASCoroutineManager::Shutdown();
+
+    // Shutdown optimization systems - the object pool holds script object references
+    MS_ANGEL_INFO("Shutting down optimization systems...");
+    ShutdownOptimizationSystems();
+
+    // Shutdown debugger
+    if (m_pDebugger)
+    {
+        MS_ANGEL_INFO("Shutting down debugger...");
+        m_pDebugger->Shutdown();
+        delete m_pDebugger;
+        m_pDebugger = nullptr;
+        MS_ANGEL_INFO("Debugger shut down");
+    }
+
+    // Discard modules so their globals no longer keep script objects alive
+    ClearAllModules();
+
     // CRITICAL: Force garbage collection before releasing contexts and engine
     // This helps clean up circular references and global objects
     if (m_pEngine)
@@ -303,25 +327,7 @@ void CAngelScriptManager::Destroy()
     }
     m_ContextPool.clear();
     MS_ANGEL_INFO("Context pool cleared");
-    
-    // Shutdown debugger
-    if (m_pDebugger)
-    {
-        MS_ANGEL_INFO("Shutting down debugger...");
-        m_pDebugger->Shutdown();
-        delete m_pDebugger;
-        m_pDebugger = nullptr;
-        MS_ANGEL_INFO("Debugger shut down");
-    }
-    
-    // Shutdown optimization systems
-    MS_ANGEL_INFO("Shutting down optimization systems...");
-    ShutdownOptimizationSystems();
-    
-    // Shutdown coroutine manager
-    MS_ANGEL_INFO("Shutting down coroutine manager...");
-    ASCoroutineManager::Shutdown();
-    
+
     // Clean up the engine - this will trigger final GC
     if (m_pEngine)
     {

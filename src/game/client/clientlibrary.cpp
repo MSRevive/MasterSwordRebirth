@@ -9,6 +9,8 @@
 #include "fmod/soundengine.h"
 #include "mslogger.h"
 #include "ms/angelscript/CAngelScriptManager.h"
+#include "ms/angelscript/ASModuleSystem.h"
+#include "ms/angelscript/ASEngineEventManager.h"
 
 CSoundEngine gSoundEngine;
 CRichPresence gRichPresence;
@@ -100,18 +102,18 @@ void CClientLibrary::Shutdown()
 {
 	MS_INFO("[INIT: Shutdown]");
 	
-	// Shutdown AngelScript on client
-	if (CAngelScriptManager::Instance()->IsInitialized())
-	{
-		MS_INFO("Shutting down client-side AngelScript...");
-		CAngelScriptManager::Instance()->Destroy();
-		CAngelScriptManager::Shutdown();
-		MS_INFO("Client-side AngelScript shutdown complete");
-	}
-	
+	// Shutdown AngelScript on client. The module system unloads modules through the
+	// engine, so it goes first. Deleting the manager runs Destroy() if it was initialized.
+	MS_INFO("Shutting down client-side AngelScript...");
+	ASModuleSystem::Shutdown();
+	CAngelScriptManager::Shutdown();
+	ASEngineEventManager::Shutdown();
+	MS_INFO("Client-side AngelScript shutdown complete");
+
+	// Reverse of initialization order
 	gHUD.Shutdown();
-	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
+	FileSystem_Shutdown();
 	gRichPresence.Shutdown();
 }
 
