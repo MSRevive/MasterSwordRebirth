@@ -7239,7 +7239,9 @@ bool CScript::ScriptCmd_Velocity(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 			if (pEntity != NULL)
 			{
 				bool abort_push = false;
-				if ((pEntity != pCaller) && Params.size() >= 3 && (Params[2] != "override"))
+				//nopush bandaid fix by Dravus
+				bool bOverride = (Params.size() >= 3 && Params[2] == "override");
+				if ((pEntity != pCaller) && !bOverride)
 				{
 					CMSMonster* pMonster = (pEntity->IsMSMonster() ? (CMSMonster*)pEntity : NULL);
 					if (pMonster)
