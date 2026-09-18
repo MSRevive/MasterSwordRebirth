@@ -32,7 +32,19 @@ project(msr
 	VERSION 1.0.0
 	LANGUAGES CXX)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+if (MSVC)
+	# ReleaseD is Release with PDBs generated for the client and server
+	set(CMAKE_CONFIGURATION_TYPES "Debug;Release;ReleaseD" CACHE STRING "" FORCE)
+
+	# Start ReleaseD with the same base flags as Release
+	set(CMAKE_CXX_FLAGS_RELEASED "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+	set(CMAKE_SHARED_LINKER_FLAGS_RELEASED "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASED "${CMAKE_EXE_LINKER_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+	set(CMAKE_MODULE_LINKER_FLAGS_RELEASED "${CMAKE_MODULE_LINKER_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+	set(CMAKE_STATIC_LINKER_FLAGS_RELEASED "${CMAKE_STATIC_LINKER_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+else()
+	set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
+endif()
 
 # Disable the use of absolute paths in library paths even in development builds.
 set(CMAKE_SKIP_BUILD_RPATH ON)
@@ -132,8 +144,17 @@ function(set_common_properties TARGET_NAME)
 		$<$<PLATFORM_ID:Linux>:-static-libstdc++ -Wl,-Map,${TARGET_NAME}_map.txt>)
 endfunction(set_common_properties)
 
+# Generate PDB files for the ReleaseD configuration.
+# /OPT:REF and /OPT:ICF are re-enabled since /DEBUG turns them off by default.
+function(enable_released_pdb TARGET_NAME)
+	if (MSVC)
+		target_compile_options(${TARGET_NAME} PRIVATE $<$<CONFIG:ReleaseD>:/Zi>)
+		target_link_options(${TARGET_NAME} PRIVATE $<$<CONFIG:ReleaseD>:/DEBUG /OPT:REF /OPT:ICF>)
+	endif()
+endfunction(enable_released_pdb)
+
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
-add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
+add_compile_definitions($<$<CONFIG:Release,ReleaseD>:NDEBUG>)
 
 # Add Projects
 add_subdirectory(src/game/client)
@@ -146,15 +167,25 @@ if (MSVC)
 endif()
 
 if(MSVC)
-	set_target_properties(client PROPERTIES 
+	set_target_properties(client PROPERTIES
 		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release)
+		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release
+		RUNTIME_OUTPUT_DIRECTORY_RELEASED ${CMAKE_CURRENT_SOURCE_DIR}/bins/released)
 endif()
 
-set_target_properties(server PROPERTIES 
+set_target_properties(server PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release
+	RUNTIME_OUTPUT_DIRECTORY_RELEASED ${CMAKE_CURRENT_SOURCE_DIR}/bins/released)
+
+set_target_properties(scriptpack PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release)
 
-set_target_properties(scriptpack PROPERTIES 
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/bins/debug
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_CURRENT_SOURCE_DIR}/bins/release)
+# ReleaseD only applies to the client and server
+enable_released_pdb(client)
+enable_released_pdb(server)
+
+if(MSVC)
+	set_target_properties(scriptpack PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD_RELEASED ON)
+endif()

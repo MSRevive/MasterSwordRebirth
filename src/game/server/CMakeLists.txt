@@ -428,9 +428,11 @@ if(INSTALL_DIR)
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:server> "${INSTALL_DIR}/dlls/"
 		COMMENT "Copying server to ${INSTALL_DIR}/dlls")
 	
-	if(MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+	# Copy the PDB for configurations that generate one
+	if(MSVC)
 		add_custom_command(TARGET server POST_BUILD
-			COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_PDB_FILE:server> "${INSTALL_DIR}/dlls/")
+			COMMAND "$<$<CONFIG:Debug,ReleaseD>:${CMAKE_COMMAND};-E;copy;$<TARGET_PDB_FILE:server>;${INSTALL_DIR}/dlls/>"
+			COMMAND_EXPAND_LISTS)
 	endif()
 endif()
 
