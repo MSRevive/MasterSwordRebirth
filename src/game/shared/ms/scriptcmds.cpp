@@ -1540,6 +1540,10 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 					//$get(<target>,companions)
 					RETURN_INT( pPlayer->m_Companions.size() )
 				}
+				else if( Prop == "spellslearned") // return # of learned spells.
+				{
+					RETURN_INT( pPlayer->m_SpellList.size() )
+				}
 #endif
 				//Thothie JUL2010_29 - get keydown value
 				//$get(<player>,keydown,<attack1|attack2|use|jump|moveleft|moveright|back|forward>)
