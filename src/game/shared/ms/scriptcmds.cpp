@@ -1183,41 +1183,58 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 
 		if (Params.size() > 1) remove_on_find = true;
 
-		if (!pPlayer->m_ChosenArrow || pPlayer->m_ChosenArrow->iQuantity <= 0 || !msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
+		if (!pPlayer) return "proj_bolt_generic";
+
+		bool bChosenOK = false;
+
+		if (pPlayer->m_ChosenArrow && msstring(pPlayer->m_ChosenArrow->m_Name).starts_with("proj_bolt"))
 		{
-			//return "unset";
+			if (msstring(pPlayer->m_ChosenArrow->m_Name).ends_with("_generic"))
+				bChosenOK = true;
+			else if (pPlayer->m_ChosenArrow->iQuantity >= 1)
+				bChosenOK = true;
+		}
+
+		if (!bChosenOK)
+		{
 			CGenericItem *pProjInPack = NULL, *pPack = NULL;
 			pProjInPack = pPlayer->GetItem("bolt", &pPack);
 
-			if (pProjInPack)
-			{
-				if (FBitSet(pProjInPack->MSProperties(), ITEM_GROUPABLE))
-				{
-					if ((pProjInPack->iQuantity) && pProjInPack->iQuantity >= 1)
-					{
-						pPlayer->m_ChosenArrow = pProjInPack;
-					}
-				}
-			}
-			else
-			{
+			if (!pProjInPack)
 				return "proj_bolt_generic";
+
+			bool bGeneric = msstring(pProjInPack->m_Name).ends_with("_generic");
+
+			if (!bGeneric)
+			{
+				if (!FBitSet(pProjInPack->MSProperties(), ITEM_GROUPABLE))
+					return "proj_bolt_generic";
+
+				if (pProjInPack->iQuantity < 1)
+					return "proj_bolt_generic";
 			}
+
+			pPlayer->m_ChosenArrow = pProjInPack;
 		}
+
+		if (!pPlayer->m_ChosenArrow || !pPlayer->m_ChosenArrow->m_Scripts.size())
+			return "proj_bolt_generic";
 
 		msstring msScriptNameReturn = pPlayer->m_ChosenArrow->m_Scripts[0]->m.ScriptFile.c_str();
 		msScriptNameReturn = msScriptNameReturn.findchar_str("/", 0);
 		msScriptNameReturn = msScriptNameReturn.substr(msScriptNameReturn.len() - (msScriptNameReturn.len() - 1));
 
-		if (remove_on_find && pPlayer->m_ChosenArrow && !msstring(pPlayer->m_ChosenArrow->m_Name).ends_with("_generic"))
+		if (remove_on_find && !msstring(pPlayer->m_ChosenArrow->m_Name).ends_with("_generic"))
 		{
 			pPlayer->m_ChosenArrow->iQuantity -= 1;
 #ifdef VALVE_DLL
 			//Remove the item after it has been depleted
 			if( pPlayer->m_ChosenArrow->iQuantity <= 0 )
 			{
-				pPlayer->RemoveItem( pPlayer->m_ChosenArrow );
-				pPlayer->m_ChosenArrow->SUB_Remove( );
+				CGenericItem *pDepleted = pPlayer->m_ChosenArrow;
+				pPlayer->m_ChosenArrow = NULL;
+				pPlayer->RemoveItem( pDepleted );
+				pDepleted->SUB_Remove( );
 			}
 #endif
 		}
