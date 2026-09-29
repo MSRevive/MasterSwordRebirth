@@ -3205,6 +3205,7 @@ bool CScript::ScriptCmd_ErrorMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	if (Cmd.Name() == "errormessage")
 	{
 #ifndef VALVE_DLL
+		MS_ERROR("ERROR: Script Error Message: %s", sTemp.c_str());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Error", sTemp.c_str(), NULL);
 #endif
 		exit(-1);
@@ -3212,6 +3213,7 @@ bool CScript::ScriptCmd_ErrorMessage(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 	if (Cmd.Name() == "popup")
 	{
 #ifndef VALVE_DLL
+		MS_ERROR("ERROR: Script Error Message: %s", sTemp.c_str());
 		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Script Error", sTemp.c_str(), NULL);
 #endif
 	}

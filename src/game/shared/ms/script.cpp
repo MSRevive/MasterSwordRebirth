@@ -4935,6 +4935,7 @@ bool CScript::Spawn(msstring Filename, CBaseEntity* pScriptedEnt, IScripted* pSc
 			//SERVER_COMMAND( "exit\n" ); This crashes the game, currently
 //server side so we can retain ability to add server side only scripts
 #ifndef VALVE_DLL
+			MS_ERROR("ERROR: Script not found: %s", ScriptName.c_str());
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Map Script Error", msstring("Script not found: ") + ScriptName, NULL);
 #endif
 #endif
@@ -5272,8 +5273,10 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			if (!fSucces && !Casual)
 			{
 #ifndef VALVE_DLL
+				MS_ERROR("ERROR: Script not found: %s, included by %s", FileName.c_str(), m.ScriptFile.c_str());
 				SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Scripts Error", msstring("Script: ") + m.ScriptFile + " Tried to include non-existant script: " + FileName + "\r\n\r\nThis is a fatal error in the public build.", NULL);
 #endif
+				MS_ERROR("ERROR: Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, FileName.c_str());
 				ALERT(at_console, "Script: %s, Line: %i - %s \"%s\" failed!  Possible File Not Found.\n", m.ScriptFile.c_str(), LineNum, TestCommand, FileName.c_str());
 			}
 		}
