@@ -455,7 +455,7 @@ void CHud::Think(void)
 
 	// FULLBRIGHT START
 	void CacheFullbrightModels();
-	bool m_bCacheFullbrightModels = true;
+	m_bCacheFullbrightModels = true;
 	// FULLBRIGHT END
 
 	m_Music->Think();

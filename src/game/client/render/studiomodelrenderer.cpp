@@ -59,10 +59,6 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 extern vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
 
-cl_entity_t* DrawEnt = NULL;
-
-
-
 /////////////////////
 // Implementation of CStudioModelRenderer.h
 
@@ -1268,19 +1264,9 @@ StudioDrawModel
 */
 
 //#define rdrdbg(a) dbg(msstring(a) + " Entity #" + m_pCurrentEntity->curstate.number)
-#define rdrdbg( a )
 
 extern bool g_FirstRender;
 extern CGameStudioModelRenderer g_StudioRenderer;
-
-void RenderModel(cl_entity_t* pEntity)
-{
-	DrawEnt = pEntity;
-	if (DrawEnt->player)
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, (IEngineStudio.GetPlayerState(pEntity->index - 1)));
-	else
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, NULL);
-}
 
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
@@ -1296,13 +1282,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		g_FirstRender = false;
 	}
 
-	if (DrawEnt)
-	{
-		m_pCurrentEntity = DrawEnt;
-		DrawEnt = NULL;
-	}
-	else
-		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
+	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
