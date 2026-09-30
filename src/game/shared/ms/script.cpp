@@ -356,7 +356,7 @@ const char* CScript::GetConst(const char* Text)
 			return ReturnString;
 		}
 		else
-			MS_ERROR("%s: Script: %s, \"%s\" - Mismatched Parenthesis!", m.ScriptFile.c_str(), Text);
+			MS_ERROR("%s: Script: %s, - Mismatched Parenthesis!", m.ScriptFile.c_str());
 	}
 	else
 		for (unsigned int i = 0; i < m_Constants.size(); i++)
