@@ -2998,15 +2998,15 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 					FoundItems.clearitems();
 					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
 					{
+						if (FirstItem == 0)
+							FirstItem = pItem->m_iId;
+						else if (pItem->m_iId == FirstItem)
+							break;
+
 						if (pItem->ItemName == ItemName)
 							FoundItems.add(pItem);
 
 						LastItem = pItem->m_iId;
-
-						if (FirstItem == 0)
-							FirstItem = LastItem;
-						else if (LastItem == FirstItem)
-							break;
 					}
 
 					if ((signed)FoundItems.size() < Amount)
@@ -3156,15 +3156,15 @@ void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 					FoundItems.clearitems();
 					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
 					{
+						if (FirstItem == 0)
+							FirstItem = pItem->m_iId;
+						else if (pItem->m_iId == FirstItem)
+							break;
+
 						if (pItem->ItemName == ItemName)
 							FoundItems.add(pItem);
 
 						LastItem = pItem->m_iId;
-
-						if (FirstItem == 0)
-							FirstItem = LastItem;
-						else if (LastItem == FirstItem)
-							break;
 					}
 
 					if ((signed)FoundItems.size() < Amount)

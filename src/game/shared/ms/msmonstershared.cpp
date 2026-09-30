@@ -252,8 +252,9 @@ CGenericItem *CMSMonster::GetItemInInventory(uint StartID, bool WeaponOnly, bool
 		if (pPack->m_Location > ITEMPOS_HANDS && !CheckWorn)
 			continue;
 
-		if (!SearchName.len() || msstring(pPack->m_Name).starts_with(SearchName))
-			Items.add(pPack);
+		if (pPack->m_Location != ITEMPOS_HANDS || Hand(pPack->m_Hand) != pPack)
+			if (!SearchName.len() || msstring(pPack->m_Name).starts_with(SearchName))
+				Items.add(pPack);
 
 		if (!FBitSet(pPack->MSProperties(), ITEM_CONTAINER))
 			continue;
