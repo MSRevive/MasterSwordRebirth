@@ -189,6 +189,7 @@ public:
 	// FULLBRIGHT START
 	std::vector<std::string> m_szCheckedModels;
 	std::vector<std::string> m_szFullBrightModels;
+	bool m_bFullbrightPass = false; // StudioRenderModel uses fullbright lighting while set
 	// FULLBRIGHT END
 
 	// Software renderer scale factors

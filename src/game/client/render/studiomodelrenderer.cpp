@@ -1271,9 +1271,6 @@ extern CGameStudioModelRenderer g_StudioRenderer;
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
 {
-	alight_t lighting;
-	Vector dir;
-
 	//if( !FBitSet(flags, STUDIO_RENDER) ) return 1;
 
 	if (g_FirstRender && FBitSet(flags, STUDIO_RENDER))
@@ -1609,45 +1606,27 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 		if (flags & STUDIO_RENDER)
 		{
-			// get remap colors
-			m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
-			m_nBottomColor = ( m_pCurrentEntity->curstate.colormap & 0xFF00 ) >> 8;
-
-			IEngineStudio.StudioSetRemapColors( m_nTopColor, m_nBottomColor );
+			//MiB JUN2010_21 - Makes the viewmodels not stick into walls
+			bool IsHandModel = FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL);
+			float tmp[2];
+			if (IsHandModel)
+			{
+				glGetFloatv(GL_DEPTH_RANGE, tmp);
+				glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+			}
 
 			// FULLBRIGHT START
-			if (!StudioGetFullbright(m_pRenderModel))
-			{
-				lighting.plightvec = dir;
-				IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
-
-				IEngineStudio.StudioEntityLight(&lighting);
-
-				// model and frame independant
-				IEngineStudio.StudioSetupLighting(&lighting);
-
-				// get remap colors
-				//MiB JUN2010_21 - Makes the viewmodels not stick into walls
-				if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
-				{
-					float tmp[2];
-					glGetFloatv(GL_DEPTH_RANGE, tmp);
-					glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
-
-					StudioRenderModel();
-					glDepthRange(tmp[0], tmp[1]);
-				}
-				else
-				{
-					StudioRenderModel();
-				}
-			}
-			else
+			if (StudioGetFullbright(m_pRenderModel))
 			{
 				StudioRenderEntity(false);
 				StudioRenderEntity(true);
 			}
+			else
+				StudioRenderModel();
 			// FULLBRIGHT END
+
+			if (IsHandModel)
+				glDepthRange(tmp[0], tmp[1]);
 		}
 	}
 	
@@ -2207,7 +2186,9 @@ void CStudioModelRenderer::StudioRenderModel(void)
 	alight_t lighting;
 	vec3_t lightdir;
 
-	HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
+	// FULLBRIGHT - only run script effects once per frame, not again for the fullbright pass
+	if (!m_bFullbrightPass)
+		HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
 
 	lighting.plightvec = lightdir;
 	IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
@@ -2238,6 +2219,16 @@ void CStudioModelRenderer::StudioRenderModel(void)
 		lightdir = Vector(0, 0, -1);
 		lighting.shadelight = 100;
 	}
+
+	// FULLBRIGHT START
+	if (m_bFullbrightPass)
+	{
+		lighting.ambientlight = 128;
+		lighting.shadelight = 192;
+		lighting.color = Vector(255, 255, 255);
+		lightdir = Vector(0, 0, -1);
+	}
+	// FULLBRIGHT END
 
 	// model and frame independant
 	IEngineStudio.StudioSetupLighting(&lighting);
@@ -2569,33 +2560,17 @@ void CStudioModelRenderer::StudioRenderEntity(bool fullbright)
 		}
 	}
 
-	alight_t lighting;
-	Vector dir;
-	lighting.plightvec = dir;
+	// StudioRenderModel sets up its own lighting, so tell it which pass this is
+	m_bFullbrightPass = fullbright;
+	StudioRenderModel();
+	m_bFullbrightPass = false;
 
-	if (fullbright)
+	if (pHdr->textureindex > 0)
 	{
-		lighting.ambientlight = 128;
-		lighting.shadelight = 192;
-		lighting.color = {255, 255, 255};
-		// model and frame independant
-		IEngineStudio.StudioSetupLighting(&lighting);
-
-		StudioRenderModel();
-	}
-	else
-	{
-		IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
-		IEngineStudio.StudioEntityLight(&lighting);
-		// model and frame independant
-		IEngineStudio.StudioSetupLighting(&lighting);
-
-		StudioRenderModel();
-	}
-
-	for (int i = 0; i < pHdr->numtextures; i++)
-	{
-		memcpy(&pTexture[i], &savedtexture[i], sizeof(mstudiotexture_t));
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			memcpy(&pTexture[i], &savedtexture[i], sizeof(mstudiotexture_t));
+		}
 	}
 }
 

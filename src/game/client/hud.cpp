@@ -453,11 +453,6 @@ void CHud::Think(void)
 		m_iFOV = V_max(default_fov->value, 90);
 	}
 
-	// FULLBRIGHT START
-	void CacheFullbrightModels();
-	m_bCacheFullbrightModels = true;
-	// FULLBRIGHT END
-
 	m_Music->Think();
 }
 

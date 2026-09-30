@@ -56,9 +56,6 @@ extern float v_ViewDist;
 void VectorAngles(const float *forward, float *angles);
 void VGUIImages_NewLevel();
 
-void CacheFullbrightModels();
-extern bool m_bCacheFullbrightModels;
-
 CParticle::CParticle()
 {
 	m_Width = 0;
@@ -506,12 +503,6 @@ Render any triangles with transparent rendermode needs here
 //Draw Mirrors
 void DLLEXPORT HUD_DrawTransparentTriangles(void)
 {
-	if (m_bCacheFullbrightModels)
-	{
-		CacheFullbrightModels();
-		bool m_bCacheFullbrightModels = false;
-	}
-
 	CRender::PushHLStates();
 
 	RenderFog( false );
