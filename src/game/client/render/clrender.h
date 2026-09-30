@@ -305,7 +305,6 @@ public:
 
 	static void Cleanup();
 };
-void RenderModel(cl_entity_t *pEntity);
 
 #define SURF_PLANEBACK 2
 #define SURF_DRAWSKY 4

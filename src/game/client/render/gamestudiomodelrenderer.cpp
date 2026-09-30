@@ -60,10 +60,7 @@ R_StudioDrawPlayer
 */
 int R_StudioDrawPlayer(int flags, entity_state_t *pplayer)
 {
-
-	//return g_StudioRenderer.StudioDrawPlayer( flags, pplayer );
-
-	return CModelMgr::MSStudioDrawModel(flags, pplayer);
+	return g_StudioRenderer.StudioDrawPlayer(flags, pplayer);
 }
 
 /*
@@ -74,38 +71,7 @@ R_StudioDrawModel
 */
 int R_StudioDrawModel(int flags)
 {
-	//return g_StudioRenderer.StudioDrawModel( flags );
-	return CModelMgr::MSStudioDrawModel(flags, NULL);
-}
-
-extern cl_entity_t *DrawEnt;
-
-int CModelMgr::MSStudioDrawModel(int flags, entity_state_t *pplayer)
-{
-	cl_entity_t OldEntity;
-	bool Replaced = false;
-
-	//Override curent entity if specified by DrawEnt
-	cl_entity_t *CurrentEnt = IEngineStudio.GetCurrentEntity();
-	if (DrawEnt)
-	{
-		OldEntity = *CurrentEnt;
-		*CurrentEnt = *DrawEnt;
-		DrawEnt = NULL;
-		Replaced = true;
-	}
-
-	//Draw a player or regular model, as appropriate
-	int Return = CurrentEnt->player ? g_StudioRenderer.StudioDrawPlayer(flags, pplayer)
-									: g_StudioRenderer.StudioDrawModel(flags);
-
-	//Set current entity back to normal
-	if (Replaced)
-	{
-		*CurrentEnt = OldEntity;
-	}
-
-	return Return;
+	return g_StudioRenderer.StudioDrawModel(flags);
 }
 
 /*
@@ -152,3 +118,10 @@ extern "C" int DLLEXPORT HUD_GetStudioModelInterface(int version, struct r_studi
 	// Success
 	return 1;
 }
+
+// FULLBRIGHT START
+void CacheFullbrightModels()
+{
+	g_StudioRenderer.StudioCacheFullbrightNames();
+}
+// FULLBRIGHT END

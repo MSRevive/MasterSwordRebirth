@@ -875,10 +875,6 @@ void CMirror::RenderMirroredWorld(int RecurseCall)
 	//Render entities
 	//Warning: Drawing entites causes half-life to kill the culling order, so restore it afterwards
 
-	if (!Mirror.m_Texture->Mirror.NoEnts)
-		for (int i = 0; i < CMirrorMgr::m_FrameEnts.size(); i++)
-			RenderModel(CMirrorMgr::m_FrameEnts[i]);
-
 	gEngfuncs.pTriAPI->CullFace(TRI_NONE); //Warning: This must be reset after calling RenderModel.  HL changes the mode
 
 	//Reset states

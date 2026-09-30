@@ -37,6 +37,13 @@
 #include <GL/gl.h> // Header File For The OpenGL32 Library
 #include <mathlib.h>
 
+// FULLBRIGHT START
+#define GL_CLAMP_TO_EDGE 0x812F
+
+static GLuint g_iBlankTex = 0;
+
+// FULLBRIGHT END
+
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
 
@@ -52,8 +59,6 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 extern vec3_t v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
 
-cl_entity_t* DrawEnt = NULL;
-
 /////////////////////
 // Implementation of CStudioModelRenderer.h
 
@@ -65,6 +70,10 @@ Init
 */
 void CStudioModelRenderer::Init(void)
 {
+	// FULLBRIGHT START
+	StudioCacheFullbrightNames();
+	// FULLBRIGHT END
+
 	// Set up some variables shared with engine
 	m_pCvarHiModels = IEngineStudio.GetCvar("cl_himodels");
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
@@ -1255,19 +1264,9 @@ StudioDrawModel
 */
 
 //#define rdrdbg(a) dbg(msstring(a) + " Entity #" + m_pCurrentEntity->curstate.number)
-#define rdrdbg( a )
 
 extern bool g_FirstRender;
 extern CGameStudioModelRenderer g_StudioRenderer;
-
-void RenderModel(cl_entity_t* pEntity)
-{
-	DrawEnt = pEntity;
-	if (DrawEnt->player)
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, (IEngineStudio.GetPlayerState(pEntity->index - 1)));
-	else
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, NULL);
-}
 
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
@@ -1280,13 +1279,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		g_FirstRender = false;
 	}
 
-	if (DrawEnt)
-	{
-		m_pCurrentEntity = DrawEnt;
-		DrawEnt = NULL;
-	}
-	else
-		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
+	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
@@ -1614,17 +1607,26 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		if (flags & STUDIO_RENDER)
 		{
 			//MiB JUN2010_21 - Makes the viewmodels not stick into walls
-			if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
+			bool IsHandModel = FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL);
+			float tmp[2];
+			if (IsHandModel)
 			{
-				float tmp[2];
 				glGetFloatv(GL_DEPTH_RANGE, tmp);
 				glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+			}
 
-				StudioRenderModel();
-				glDepthRange(tmp[0], tmp[1]);
+			// FULLBRIGHT START
+			if (StudioGetFullbright(m_pRenderModel))
+			{
+				StudioRenderEntity(false);
+				StudioRenderEntity(true);
 			}
 			else
 				StudioRenderModel();
+			// FULLBRIGHT END
+
+			if (IsHandModel)
+				glDepthRange(tmp[0], tmp[1]);
 		}
 	}
 	
@@ -2184,7 +2186,9 @@ void CStudioModelRenderer::StudioRenderModel(void)
 	alight_t lighting;
 	vec3_t lightdir;
 
-	HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
+	// FULLBRIGHT - only run script effects once per frame, not again for the fullbright pass
+	if (!m_bFullbrightPass)
+		HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
 
 	lighting.plightvec = lightdir;
 	IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
@@ -2215,6 +2219,16 @@ void CStudioModelRenderer::StudioRenderModel(void)
 		lightdir = Vector(0, 0, -1);
 		lighting.shadelight = 100;
 	}
+
+	// FULLBRIGHT START
+	if (m_bFullbrightPass)
+	{
+		lighting.ambientlight = 128;
+		lighting.shadelight = 192;
+		lighting.color = Vector(255, 255, 255);
+		lightdir = Vector(0, 0, -1);
+	}
+	// FULLBRIGHT END
 
 	// model and frame independant
 	IEngineStudio.StudioSetupLighting(&lighting);
@@ -2445,6 +2459,160 @@ void CStudioModelRenderer::StudioRenderFinal(void)
 
 	StudioSetupRender(false);
 }
+
+// FULLBRIGHT START
+/*
+====================
+StudioGetFullbright
+
+returns true if model has a fullbright texture
+also caches the name if it isnt cached yet
+====================
+*/
+bool CStudioModelRenderer::StudioGetFullbright(model_s* pmodel)
+{
+	if (!pmodel || pmodel->type != mod_studio)
+		return false;
+
+	// check if this model is already been checked
+	for (size_t list = 0; list < m_szFullBrightModels.size(); list++)
+	{
+		if (!stricmp(pmodel->name, m_szFullBrightModels[list].c_str()))
+		{
+			return true;
+		}
+	}
+
+	// check if this model is already on our list
+	for (size_t list = 0; list < m_szCheckedModels.size(); list++)
+	{
+		if (!strcmp(pmodel->name, m_szCheckedModels[list].c_str()))
+		{
+			return false;
+		}
+	}
+
+	studiohdr_t* pHdr = (studiohdr_t*)IEngineStudio.Mod_Extradata(pmodel);
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)pmodel->cache.data + pHdr->textureindex);
+
+	if (strncmp((const char*)pHdr, "IDST", 4) && strncmp((const char*)pHdr, "IDSQ", 4))
+	{
+		m_szCheckedModels.push_back(pmodel->name);
+		return false;
+	}
+
+	bool foundfullbright = false;
+	if (pHdr->textureindex)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			if (pTexture[i].flags & STUDIO_NF_FULLBRIGHT)
+			{
+				foundfullbright = true;
+				break;
+			}
+		}
+		if (foundfullbright)
+		{
+			m_szFullBrightModels.push_back(pmodel->name);
+		}
+	}
+
+	m_szCheckedModels.push_back(pmodel->name);
+
+	return foundfullbright;
+}
+
+
+/*
+====================
+StudioRenderEntity
+
+if fullbright boolean is true, it renders only the fullbright texture
+if false, it renders all non-fullbright textures
+====================
+*/
+void CStudioModelRenderer::StudioRenderEntity(bool fullbright)
+{
+	studiohdr_t* pHdr = (studiohdr_t*)m_pStudioHeader;
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)m_pRenderModel->cache.data + pHdr->textureindex);
+
+	std::vector<mstudiotexture_t> savedtexture;
+
+	if (pHdr->textureindex > 0)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			savedtexture.push_back(pTexture[i]);
+			if ((pTexture[i].flags & STUDIO_NF_FULLBRIGHT) != 0)
+			{
+				if (!fullbright)
+				{
+					pTexture[i].index = g_iBlankTex;
+					pTexture[i].flags |= STUDIO_NF_ADDITIVE;
+				}
+			}
+			else if (fullbright)
+			{
+				pTexture[i].index = g_iBlankTex;
+				pTexture[i].flags |= STUDIO_NF_ADDITIVE;
+			}
+		}
+	}
+
+	// StudioRenderModel sets up its own lighting, so tell it which pass this is
+	m_bFullbrightPass = fullbright;
+	StudioRenderModel();
+	m_bFullbrightPass = false;
+
+	if (pHdr->textureindex > 0)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			memcpy(&pTexture[i], &savedtexture[i], sizeof(mstudiotexture_t));
+		}
+	}
+}
+
+void GenBlackTex()
+{
+	GLubyte pixels[3] = {0,0,0};
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &g_iBlankTex);
+	glBindTexture(GL_TEXTURE_2D, g_iBlankTex);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+/*
+====================
+StudioCacheFullbrightNames
+
+====================
+*/
+void CStudioModelRenderer::StudioCacheFullbrightNames()
+{
+	const char* gamedir = gEngfuncs.pfnGetGameDirectory();
+
+	if (g_iBlankTex == 0)
+		GenBlackTex();
+
+	// clear the cache
+	m_szFullBrightModels.clear();
+	m_szCheckedModels.clear();
+
+	for (int i = 0; i < 512; i++)
+	{
+		StudioGetFullbright(IEngineStudio.GetModelByIndex(i));
+	}
+}
+
+// FULLBRIGHT END
+
 /*
 ==================
 Dogg - FlipModel
