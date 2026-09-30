@@ -6459,6 +6459,25 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	//Send music data 
 
+	//Server saves player as dead on death+disconnect so Spawn() wouldn't trigger a refresh on gear due to them being read as dead to the server causing invisible armor/floating head, should be fixed now - Dravus 9/29/26
+	if (pev->deadflag > DEAD_NO)
+	{
+		for (unsigned int i = 0; i < Gear.size(); i++)
+		{
+			CGenericItem *cur_item = Gear[i];
+
+			if (cur_item->IsWorn())
+			{
+				static msstringlist Params;
+				Params.clearitems();
+				Params.add(m_Race);
+				Params.add((m_Gender == 0) ? "male" : "female");
+				Params.add("game_show");
+				cur_item->CallScriptEvent("game_show", &Params);
+			}
+		}
+	}
+
 	Spawn();
 
 	return true;
