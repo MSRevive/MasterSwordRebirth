@@ -1285,6 +1285,9 @@ void RenderModel(cl_entity_t* pEntity)
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
 {
+	alight_t lighting;
+	Vector dir;
+
 	//if( !FBitSet(flags, STUDIO_RENDER) ) return 1;
 
 	if (g_FirstRender && FBitSet(flags, STUDIO_RENDER))
@@ -1626,18 +1629,45 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 		if (flags & STUDIO_RENDER)
 		{
-			//MiB JUN2010_21 - Makes the viewmodels not stick into walls
-			if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
-			{
-				float tmp[2];
-				glGetFloatv(GL_DEPTH_RANGE, tmp);
-				glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+			// get remap colors
+			m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
+			m_nBottomColor = ( m_pCurrentEntity->curstate.colormap & 0xFF00 ) >> 8;
 
-				StudioRenderModel();
-				glDepthRange(tmp[0], tmp[1]);
+			IEngineStudio.StudioSetRemapColors( m_nTopColor, m_nBottomColor );
+
+			// FULLBRIGHT START
+			if (!StudioGetFullbright(m_pRenderModel))
+			{
+				lighting.plightvec = dir;
+				IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
+
+				IEngineStudio.StudioEntityLight(&lighting);
+
+				// model and frame independant
+				IEngineStudio.StudioSetupLighting(&lighting);
+
+				// get remap colors
+				//MiB JUN2010_21 - Makes the viewmodels not stick into walls
+				if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
+				{
+					float tmp[2];
+					glGetFloatv(GL_DEPTH_RANGE, tmp);
+					glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+
+					StudioRenderModel();
+					glDepthRange(tmp[0], tmp[1]);
+				}
+				else
+				{
+					StudioRenderModel();
+				}
 			}
 			else
-				StudioRenderModel();
+			{
+				StudioRenderEntity(false);
+				StudioRenderEntity(true);
+			}
+			// FULLBRIGHT END
 		}
 	}
 	
@@ -1878,10 +1908,8 @@ CRenderPlayer RenderPlayer;
 
 int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 {
-	// idk why this stuff was removed.
-	alight_t lighting;
-	Vector dir;
-
+	//	if( flags & STUDIO_RENDER )
+	//		dbgtxt( "" );
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
@@ -2020,7 +2048,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		StudioSetUpTransform(0);
 	}
 
-	if ((flags & STUDIO_EVENTS) != 0)
+	if (flags & STUDIO_RENDER)
 	{
 		// see if the bounding box lets us trivially reject, also sets
 		if (!IEngineStudio.StudioCheckBBox())
@@ -2041,7 +2069,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 
 	m_pPlayerInfo = NULL;
 
-	if ((flags & STUDIO_EVENTS) != 0)
+	if (flags & STUDIO_EVENTS)
 	{
 		StudioCalcAttachments();
 		IEngineStudio.StudioClientEvents();
@@ -2054,7 +2082,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 	}
 
-	if ((flags & STUDIO_EVENTS) != 0)
+	if (flags & STUDIO_RENDER)
 	{
 		//Master Sword: 'r_himodels' removed
 		/*if (m_pCvarHiModels->value && m_pRenderModel != m_pCurrentEntity->model  )
@@ -2111,39 +2139,19 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);*/
 
-		//m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
+		m_pPlayerInfo = IEngineStudio.PlayerInfo(m_nPlayerIndex);
 
 		// get remap colors
-		m_nTopColor = m_pCurrentEntity->curstate.colormap & 0xFF;
-		m_nBottomColor = (m_pCurrentEntity->curstate.colormap & 0xFF00) >> 8;
+		m_nTopColor = V_min(V_max(0, m_pPlayerInfo->topcolor), 360);
+		m_nBottomColor = V_min(V_max(0, m_pPlayerInfo->bottomcolor), 360);
 
 		IEngineStudio.StudioSetRemapColors(m_nTopColor, m_nBottomColor);
 
-		// FULLBRIGHT START
-		if (!StudioGetFullbright(m_pRenderModel))
-		{
-			lighting.plightvec = dir;
-			IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
-
-			IEngineStudio.StudioEntityLight(&lighting);
-
-			// model and frame independant
-			IEngineStudio.StudioSetupLighting(&lighting);
-
-			// get remap colors
-			StudioRenderModel();
-		}
-		else
-		{
-			StudioRenderEntity(false);
-			StudioRenderEntity(true);
-		}
-		// FULLBRIGHT END
-
 		//Master Sword - don't render the normal player model. -- UNDONE
 		//Instead, the bodypart attachmets are rendered -- UNDONE
+		StudioRenderModel();
 
-		//m_pPlayerInfo = NULL;
+		m_pPlayerInfo = NULL;
 
 		/*
 		Master Sword - don't render the weaponmodel
