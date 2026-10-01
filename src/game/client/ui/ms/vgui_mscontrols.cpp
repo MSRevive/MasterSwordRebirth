@@ -315,7 +315,7 @@ public:
 		{
 			if ( mpDoubleClickDetector->Click(this, code) && m_pItemButton->m_Selected)
 			{
-				mouseDoublePressed(code, panel);
+				m_pItemButton->Doubleclicked( );
 			}
 			else
 			{
@@ -329,7 +329,7 @@ public:
 	};
 	void cursorMoved(int x,int y,Panel* panel) {};
 	void mouseReleased(MouseCode code,Panel* panel) {};
-	void mouseDoublePressed( MouseCode code, Panel* panel ) { m_pItemButton->Doubleclicked( ); };
+	void mouseDoublePressed( MouseCode code, Panel* panel ) { mousePressed( code, panel ); };
 	void mouseWheeled(int delta,Panel* panel) {};
 	void keyPressed(KeyCode code,Panel* panel) {};
 	void keyTyped(KeyCode code,Panel* panel) {};

@@ -378,6 +378,12 @@ private:
 public:
 	VGUI_DoubleClickDetector()
 	{
+		ResetDoubleClick();
+	}
+
+	// Forget the last click so the next one can't be treated as the second half of a double-click
+	void ResetDoubleClick()
+	{
 		mLastClick = 0.0;
 		mpLastClicked = nullptr;
 		mLastMouseCode = MOUSE_LAST;
@@ -389,12 +395,11 @@ public:
 		float vCurTime = gEngfuncs.GetClientTime();
 		if (pClicked == mpLastClicked && mLastMouseCode == vMouseCode)
 		{
-			float vThreshhold = gEngfuncs.pfnGetCvarFloat("ms_doubleclicktime") + mLastClick;
-			if (vCurTime < vThreshhold)
+			// Client time resets on map change / reconnect, so a negative elapsed time is a fresh click
+			float vElapsed = vCurTime - mLastClick;
+			if (vElapsed >= 0.0f && vElapsed < gEngfuncs.pfnGetCvarFloat("ms_doubleclicktime"))
 			{
-				mLastClick = 0.0;
-				mpLastClicked = nullptr;
-				mLastMouseCode = MOUSE_LAST;
+				ResetDoubleClick();
 				return true;
 			}
 		}
@@ -702,6 +707,7 @@ public:
 	CMouseInputHandler(VGUI_DoubleClickDetector *pDoubleClickDetector = nullptr, void *pDoubleClickTarget = nullptr)
 	{
 		mpDoubleClickDetector = pDoubleClickDetector;
+		mpDoubleClickTarget = pDoubleClickTarget;
 	}
 
 	virtual void mouseWheeled(int vDelta, Panel *pPanel)

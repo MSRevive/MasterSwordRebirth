@@ -60,7 +60,7 @@ public:
 		{
 			if ( mpDoubleClickDetector->Click( this, code ) )
 			{
-				mouseDoublePressed( code, panel );
+				m_Callback->GearItemDoubleClicked( m_Idx );
 			}
 			else
 			{
@@ -74,7 +74,7 @@ public:
 	void mouseReleased(MouseCode code, Panel *panel) {};
 	void mouseDoublePressed(MouseCode code, Panel *panel)
 	{
-		m_Callback->GearItemDoubleClicked(m_Idx);
+		mousePressed(code, panel);
 	};
 	void cursorExited(Panel *panel) { mpHighlightCallback->mbMouseOver = false; };
 	void mouseWheeled(int delta, Panel *panel) {};
@@ -91,7 +91,7 @@ VGUI_Inv_GearItem::VGUI_Inv_GearItem(Panel *pContainerParent, VGUI_ItemCallbackP
 	m_ContainerParent = pContainerParent;
 
 	m_Name = new MSLabel(this, "", 0, 0, getWide(), getTall(), MSLabel::a_center);
-	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, m_Idx));
+	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, 0)); // Index is set in Update()
 	m_ItemContainer = new VGUI_Container(ITEM_CONTAINER_X, ITEM_CONTAINER_Y, ITEM_CONTAINER_SIZE_X, ITEM_CONTAINER_SIZE_Y, pItemCallbackPanel, pContainerParent);
 	mbMouseOver = false;
 }
@@ -210,6 +210,9 @@ void VGUI_InventoryPanel::Reset()
 	for (int i = 0; i < GearItemButtonTotal; i++)
 		GearItemButtons[i]->Reset();
 	GearItemButtonTotal = 0;
+
+	// Rows are about to be repopulated, possibly with different items
+	ResetDoubleClick();
 }
 
 void VGUI_InventoryPanel::Select(int Idx)
@@ -554,6 +557,10 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 
 void VGUI_ContainerPanel::Open(void)
 {
+	// Don't let a click from before the menu was opened count towards a double-click
+	ResetDoubleClick();
+	m_GearPanel->ResetDoubleClick();
+
 	// Update before opening
 	m_AllowUpdate = true;
 	Update();
@@ -565,6 +572,8 @@ void VGUI_ContainerPanel::Close(void)
 	player.BlockButton(IN_ATTACK);
 	m_pCancelButton->setArmed(false); //If the user presses cancel, the cancel button doesn't automaticaly get unarmed... so manually do it
 	m_ActButton->setArmed(false);
+	ResetDoubleClick();
+	m_GearPanel->ResetDoubleClick();
 	CMenuPanel::Close();
 	m_AllowUpdate = false;
 }
