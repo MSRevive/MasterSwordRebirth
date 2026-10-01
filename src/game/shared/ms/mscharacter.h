@@ -72,7 +72,7 @@ struct charinfo_base_t
 struct gearinfo_t
 {
 	byte Flags;
-	ushort Model, Body, Skin, Anim;
+	ushort Model = 0, Body = 0, Skin = 0, Anim = 0;
 };
 
 struct charinfo_t : charinfo_base_t

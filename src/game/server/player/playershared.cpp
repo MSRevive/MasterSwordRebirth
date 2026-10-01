@@ -1524,6 +1524,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 
 			Info.Body = pItem->pev->body;
 			Info.Model = pItem->pev->modelindex;
+			Info.Skin = pItem->pev->skin; //send the skin as well.
 			Info.Anim = pItem->pev->sequence;
 
 			GearInfo.add(Info);
