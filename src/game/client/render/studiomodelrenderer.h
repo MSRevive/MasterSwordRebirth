@@ -234,7 +234,6 @@ class CModelMgr
 {
 public:
 	static modelinfo_t m_ModelInfo[4096];
-	static int MSStudioDrawModel(int flags, entity_state_t *pplayer);
 };
 
 #endif // STUDIOMODELRENDERER_H
