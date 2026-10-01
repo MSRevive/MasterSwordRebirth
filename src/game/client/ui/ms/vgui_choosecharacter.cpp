@@ -1239,6 +1239,11 @@ void CRenderChar::Render( )
 			ItemEnt.curstate.body = GearInfo.Body;
 			ItemEnt.curstate.skin = GearInfo.Skin;
 			ItemEnt.PlayAnim( GearInfo.Anim );
+			
+			// set the body to 0 if it goes into negatives.
+			if (GearInfo.Body < 0) {
+				ItemEnt.curstate.body = 0;
+			}
 
 			for (int i = 0; i < HUMAN_BODYPARTS; i++)
 			{
