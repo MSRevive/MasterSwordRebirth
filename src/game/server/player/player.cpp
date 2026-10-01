@@ -6374,7 +6374,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//This is so the engine will run its name check routine and append (x) if people have the same names
 	//I need that check because if two people were to forecefully get assigned the same name (with g_engfuncs.pfnSetClientKeyValue),
 	//Then the whole server does the "5 minute delayed messages" bug
-	CLIENT_COMMAND(edict(), "name %s\n", Data.Name);
+	CLIENT_COMMAND(edict(), "name \"%s\"\n", Data.Name);
 	//g_engfuncs.pfnSetClientKeyValue( entindex(), g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "name", (char *)Data.Name );
 
 	m_OldGold = m_Gold = Data.Gold;
