@@ -5,8 +5,9 @@ class CCorpse : public CMSMonster
 public:
 	void CreateCorpse(CMSMonster* pSource, float LoseGoldPercent = 100.0);
 
-	//Pass pointer to player down if a player made the corpse
-	CBasePlayer* pPlayerSource;
+	//Handle to the player if a player made the corpse
+	//EHANDLE resolves to NULL once the player's edict is freed (e.g. disconnect), unlike a raw pointer
+	EHANDLE m_hPlayerSource;
 	//Overridden
 	int ObjectCaps(void) { return FCAP_DONT_SAVE; }
 	int MSProperties() { return MS_CORPSE; }

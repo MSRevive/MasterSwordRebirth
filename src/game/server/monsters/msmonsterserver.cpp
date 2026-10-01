@@ -1628,8 +1628,13 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 		// Corpses didn't have edicts so were never delivered messages
 		// attempt to fix by passing the pointer to the player's edict pointer down through the corpse and into this.
 		CCorpse* pCorpse = dynamic_cast<CCorpse*>(pEnt);
-		if (pCorpse && (pCorpse->pPlayerSource != NULL))
-			pEnt = pCorpse->pPlayerSource; // this var only exists if the corpse comes from a player 
+		if (pCorpse)
+		{
+			// only set if the corpse comes from a player, and NULL if that player has since disconnected
+			CBaseEntity* pSource = pCorpse->m_hPlayerSource;
+			if (pSource)
+				pEnt = pSource;
+		}
 
 		//skip players that have already been sent messages.
 		if (pEnt->IsPlayer() && !pTrackAlreadySent.insert(pEnt).second)
