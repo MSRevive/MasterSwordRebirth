@@ -1178,7 +1178,6 @@ void CRenderChar::Init( int Idx, msstring model )
 	m_Ent.curstate.scale = CHAR_SCALE;
 	m_Ent.curstate.framerate = 1.0f;
 	SetBits( m_Ent.curstate.effects, EF_NOINTERP );
-	SetBits( m_Ent.curstate.oldbuttons, MSRDR_NOREFLECT );
  	SetBits( m_Ent.curstate.colormap, MSRDR_ASPLAYER );
 	
 	m_Gender = GENDER_MALE;
@@ -1259,7 +1258,6 @@ void CRenderChar::Render( )
 
 
 			ItemEnt.curstate.colormap = ItemEnt.curstate.oldbuttons = 0;
-			SetBits( ItemEnt.curstate.oldbuttons, MSRDR_NOREFLECT );
 			SetBits( ItemEnt.curstate.colormap, MSRDR_LIGHT_NORMAL );
 
 			m_GearItems.push_back( pItem );

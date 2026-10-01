@@ -397,7 +397,7 @@ void V_CalcGunAngle(struct ref_params_s *pparams)
 	VectorCopy(viewent->angles, viewent->latched.prevangles);
 
 	//Master Sword - Setup the viewmodel for rendering
-	SetBits(viewent->curstate.oldbuttons, MSRDR_VIEWMODEL | MSRDR_NOREFLECT);
+	SetBits(viewent->curstate.oldbuttons, MSRDR_VIEWMODEL);
 
 	//Flip the view model based on the hand it's in
 	//if( player.ActiveItemHand() == LEFT_HAND ) SetBits( viewent->curstate.oldbuttons, MSRDR_FLIPPED );
@@ -1652,35 +1652,6 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 		VectorCopy(v_origin, pparams->vieworg);
 }
 extern float newfov;
-void V_CalcMirrorRefdef(struct ref_params_s *pparams)
-{
-	//float		old;
-
-	// ent is the player model ( visible when out of body )
-	//ent = gEngfuncs.GetLocalPlayer();
-
-	//VectorCopy ( pparams->simorg, pparams->vieworg );
-	//VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
-
-	// allways idle in intermission
-	//old = v_idlescale;
-	//v_idlescale = 1;
-
-	//V_AddIdle ( pparams );
-
-	/*if ( gEngfuncs.IsSpectateOnly() )
-	{
-		// in HLTV we must go to 'intermission' position by ourself
-		VectorCopy( gHUD.m_Spectator.m_cameraOrigin, pparams->vieworg );
-		VectorCopy( gHUD.m_Spectator.m_cameraAngles, pparams->viewangles );
-	}*/
-
-	//v_idlescale = old;
-
-	//v_cl_angles = pparams->cl_viewangles;
-	//v_origin = pparams->vieworg;
-	//v_angles = pparams->viewangles;
-}
 
 extern CRenderPlayerInset g_Inset;
 void RenderFog( bool bRender );
@@ -1691,9 +1662,13 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	ViewMgr.Origin = pparams->vieworg;
 	ViewMgr.Angles = pparams->viewangles;
 	ViewMgr.Params = pparams;
-	ViewMgr.Passes = pparams->nextView ? ViewMgr.Passes + 1 : 0;
 
-	CMirrorMgr::Render_SetupViewReflection();
+	//Single full-screen view pass
+	pparams->viewport[0] = 0;
+	pparams->viewport[1] = 0;
+	pparams->viewport[2] = ScreenWidth;
+	pparams->viewport[3] = ScreenHeight;
+	pparams->nextView = 0;
 
 	// intermission / finale rendering
 	if (pparams->intermission)
@@ -1704,12 +1679,10 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	{
 		V_CalcSpectatorRefdef(pparams);
 	}
-	else if (!ViewMgr.Passes)
+	else
 	{
 		V_CalcNormalRefdef(pparams);
 	}
-	else
-		V_CalcMirrorRefdef(pparams);
 
 	//Must recalculate this, for the extra stuff that gets rendered later.
 	//This new calculation takes view lowers/view rotations from falling into account

@@ -285,7 +285,7 @@ void CEnvMgr::Init()
 
 void CEnvMgr::InitNewLevel()
 {
-	CMirrorMgr::InitMirrors();
+	CRender::InitGL();
 	VGUIImages_NewLevel();
 	MS_INFO("[InitNewLevel Complete]");
 }
@@ -352,9 +352,8 @@ void CEnvMgr::ChangeTint(const Color4F &Color)
 //Draw transparent stuff
 void CEnvMgr::Think_DrawTransparentTriangles()
 {
-	bool HideTint = CMirrorMgr::m_CurrentMirror.Enabled //Hide while rendering in mirror
-					|| MSCLGlobals::CharPanelActive ||	//Hide while choosing character
-					!g_Tint.m_Color.a;					//Hide if alpha is zero
+	bool HideTint = MSCLGlobals::CharPanelActive ||	//Hide while choosing character
+					!g_Tint.m_Color.a;				//Hide if alpha is zero
 
 	if (!HideTint)
 	{
@@ -381,18 +380,9 @@ void ModifyLevel();
 void RenderFog( bool bRender );
 bool FindSkyHeight(Vector Origin, float &SkyHeight);
 bool UnderSky(Vector Origin); //Thothie AUG2010_03
-int OldVisFrame = -1;
-int OldContents = CONTENTS_EMPTY;
-//void Mirror_MirrorVisibleSurfaces( );
-//void Mirror_UnMirrorVisibleSurfaces( );
 
 int CRender::m_OldHLTexture[10] = {0};
 bool CRender::m_OldMultiTextureEnabled = false;
-float CRender::m_RT_SizeRatio = 1.0f;
-uint CRender::m_RT_Width = 256;
-uint CRender::m_RT_Height = 256;
-float CRender::m_RT_TexU = 1.0f;
-float CRender::m_RT_TexV = 1.0f;
 
 #define MS_GL_ATTRIBUTES GL_ALL_ATTRIB_BITS
 //#define MS_GL_ATTRIBUTES
@@ -467,29 +457,6 @@ void CRender::PopHLStates()
 void DLLEXPORT HUD_DrawNormalTriangles(void)
 {
 	RenderFog( true );
-	/*if( CMirrorMgr::m_CurrentMirror.Enabled 
-		&& OldVisFrame > -1 )
-	{
-		cl_entity_t *clWorldEnt = gEngfuncs.GetEntityByIndex( 0 );
-		if( clWorldEnt->model->nodes[0].visframe != 0 )
-		{
-			//The world was marked to be hidden for this mirror, but was drawn
-			//The player changed leafs, and thus the world visframe was updated and the world drawn
-
-			//The mirror will attempt to render *again* this frame. 
-			//This is done by adding a copy of the mirror to the end of the RdrMirrors list.  After the copy
-			//is done rendering, it is deleted
-			CMirror MirrorCopy;
-			CMirrorMgr::m_RdrMirrors.add( MirrorCopy );
-			CMirrorMgr::m_CurrentMirror.Mirror = &CMirrorMgr::m_RdrMirrors[CMirrorMgr::m_CurrentMirror.Index];	//The pointer changed, because I re-allocated
-			MirrorCopy = *CMirrorMgr::m_CurrentMirror.Mirror;
-			MirrorCopy.Frame_NoRender = false;
-			MirrorCopy.Frame_IsCopy = true;
-
-			//Don't render the current mirror this frame, since the world was drawn on top of it
-			CMirrorMgr::m_CurrentMirror.Mirror->Frame_NoRender = true;
-		}
-	}*/
 }
 
 /*
@@ -500,31 +467,20 @@ Render any triangles with transparent rendermode needs here
 =================
 */
 
-//Draw Mirrors
 void DLLEXPORT HUD_DrawTransparentTriangles(void)
 {
 	CRender::PushHLStates();
 
 	RenderFog( false );
-	CMirrorMgr::HUD_DrawTransparentTriangles();
 	CEnvMgr::Think_DrawTransparentTriangles();
 	gHUD.m_HUDScript->Effects_DrawTransPararentTriangles();
 
 	CRender::PopHLStates();
-
-	/*if( OldVisFrame > -1 )
-	{
-		cl_entity_t *clWorldEnt = gEngfuncs.GetEntityByIndex( 0 );
-		if( clWorldEnt->model->nodes[0].visframe == 0 )
-			clWorldEnt->model->nodes[0].visframe = OldVisFrame;
-	}*/
 }
 
 void CRender::Cleanup()
 {
-	CleanupWGL();
 	CEnvMgr::Cleanup();
-	CMirrorMgr::Cleanup();
 }
 
 void RenderFog( bool bRender )

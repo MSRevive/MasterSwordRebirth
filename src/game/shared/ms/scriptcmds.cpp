@@ -5059,38 +5059,10 @@ bool CScript::ScriptCmd_RegisterRace(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 
 //registertexture
 //- scope: shared
-//- registers reflective textures and their properties, usually in <mapname>/map_startup
+//- DEPRECATED: used to register reflective (mirror) textures. The mirror system was removed; this is now a no-op
+//  kept so existing <mapname>/map_startup scripts don't error
 bool CScript::ScriptCmd_RegisterTexture(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstringlist &Params)
 {
-#ifndef VALVE_DLL
-	mstexture_t NewTexture;
-	clrmem(NewTexture);
-
-	//Load settings
-	NewTexture.Name = SCRIPTVAR("reg.texture.name");
-
-	msstringlist ColorParts;
-	NewTexture.IsReflective = atoi(SCRIPTVAR("reg.texture.reflect")) ? true : false;
-	NewTexture.IsWater = atoi(SCRIPTVAR("reg.texture.water")) ? true : false;
-
-	//Reflection settings
-	NewTexture.Mirror.Blending = atoi(SCRIPTVAR("reg.texture.reflect.blend")) ? true : false;
-	TokenizeString(SCRIPTVAR("reg.texture.reflect.color"), ColorParts);
-	for(int i = 0; i < ColorParts.size(); i++)
-	{
-		if (i == 4) break;	//Too many elements specified - a color only has 4 elements
-		NewTexture.Mirror.Color[i] = atof(ColorParts[i]);
-	}
-	NewTexture.Mirror.Blending = atoi(SCRIPTVAR("reg.texture.reflect.blend")) ? true : false;
-	NewTexture.Mirror.Range = atof(SCRIPTVAR("reg.texture.reflect.range"));
-	if (VarExists("reg.texture.reflect.world"))	//Check var existence, because the default is "1"
-		NewTexture.Mirror.NoWorld = !atoi(SCRIPTVAR("reg.texture.reflect.world"));
-	if (VarExists("reg.texture.reflect.ents"))
-		NewTexture.Mirror.NoEnts = !atoi(SCRIPTVAR("reg.texture.reflect.ents"));
-
-	MSCLGlobals::Textures.add(NewTexture);
-#endif
-
 	return true;
 }
 

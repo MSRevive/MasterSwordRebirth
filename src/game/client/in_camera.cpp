@@ -667,8 +667,6 @@ int DLLEXPORT CL_IsThirdPerson(void)
 	//			   - Later, in StudioDrawPlayer() I check to make sure the proper thirdperson model is being drawn
 	//			   - Update: The above is UNDONE
 	//return 1;
-	//if( CMirrorMgr::m_CurrentMirror.Enabled )
-	//	return 1;
 	return MSCLGlobals::CamThirdPerson ? 1 : 0;
 }
 

@@ -116,7 +116,6 @@ CStudioModelRenderer::CStudioModelRenderer(void)
 	m_pSubModel = NULL;
 	m_pPlayerInfo = NULL;
 	m_pRenderModel = NULL;
-	//m_MirrorRender		= false;
 	/*AngleMatrix( g_vecZero, m_FlipMatrix );
 	float scalemat[ 3 ][ 4 ] =
 	{
@@ -1283,10 +1282,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
-	if (FBitSet(flags, STUDIO_RENDER))
-		if (!CMirrorMgr::Render_StudioModel(m_pCurrentEntity))
-			return 0; //Rendering inside of a mirror was canceled
-
 	//Default is to only render the one 'current' entity.  The view model overrides this and renders two
 	cl_entity_t* RenderEnts[MAX_PLAYER_HANDITEMS] = { m_pCurrentEntity, NULL, NULL };
 	int TotalModels = 1;
@@ -1301,9 +1296,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			//Check if some view model animation requested exclusive rendering (usually because it uses both hands)
 			if (ViewModel_ExclusiveViewHand >= 0 && ViewModel_ExclusiveViewHand != hand)
 				continue;
-
-			if (CMirrorMgr::m_CurrentMirror.Enabled)
-				return 0;
 
 			//Check if an item is hend in this hand
 			CGenericItem* pItem = player.Hand(hand);
@@ -1351,7 +1343,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			//[/Shuriken]
 
 			SetBits(RenderEnt.curstate.colormap, MSRDR_HANDMODEL);
-			SetBits(RenderEnt.curstate.oldbuttons, MSRDR_NOREFLECT);
 			RenderEnt.curstate.iuser2 = hand;
 			RenderEnt.curstate.modelindex = 0;
 			//RenderEnt.current_position = m_pCurrentEntity->current_position;
@@ -1538,9 +1529,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		if (FBitSet(Ent.curstate.playerclass, ENT_EFFECT_FOLLOW_ROTATE) && Ent.curstate.owner == gEngfuncs.GetLocalPlayer()->index)
 			SkipVisCheck = true;
 
-		if (CMirrorMgr::m_CurrentMirror.Enabled)
-			SkipVisCheck = true; //Skip vis on entites for mirror rendering
-
 		if (flags & STUDIO_RENDER)
 		{
 			// see if the bounding box lets us trivially reject, also sets
@@ -1558,15 +1546,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			}
 
 			if (!SkipVisCheck)
-			{
-				/*if( CMirrorMgr::m_CurrentMirror.Enabled )
-				{
-					Vector Bounds[2] = { m_pCurrentEntity->origin + m_pCurrentEntity->curstate.mins, m_pCurrentEntity->origin + m_pCurrentEntity->curstate.maxs };
-					Visible = CheckBBox( Bounds );					//Special vis check on mirrored entities
-				}
-				else*/
 				Visible = IEngineStudio.StudioCheckBBox() ? true : false;
-			}
 			if (RestoreOrigin)
 				m_pCurrentEntity->origin = m_pCurrentEntity->curstate.origin = OldOrigin;
 			if (!Visible)
@@ -1872,25 +1852,6 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
-	/*if( m_pCurrentEntity->player &&
-		m_pCurrentEntity->player == gEngfuncs.GetLocalPlayer()->index &&
-		!MSCLGlobals::CamThirdPerson &&
-		!CMirrorMgr::m_CurrentMirror.Enabled )
-	{
-		//Manually draw the Viewmodel.  The engine doesn't draw it because MS always reports thirdperson for mirrors
-		m_pPlayerInfo = NULL;
-		DrawEnt = IEngineStudio.GetViewEntity();
-		StudioDrawModel( flags );
-
-		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
-		SetBits( m_pCurrentEntity->curstate.oldbuttons, MSRDR_SKIP );
-		//return 0;
-	}*/
-
-	if (FBitSet(flags, STUDIO_RENDER))
-		if (!CMirrorMgr::Render_StudioModel(m_pCurrentEntity))
-			return 0; //Rendering inside of a mirror was cancelled
-
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
@@ -2188,7 +2149,7 @@ void CStudioModelRenderer::StudioRenderModel(void)
 
 	// FULLBRIGHT - only run script effects once per frame, not again for the fullbright pass
 	if (!m_bFullbrightPass)
-		HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
+		HUDScript->Effects_Render(*m_pCurrentEntity);
 
 	lighting.plightvec = lightdir;
 	IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
@@ -2363,15 +2324,6 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 
 			IEngineStudio.GL_SetRenderMode(rendermode);
 
-			/*if( CMirrorMgr::m_CurrentMirror.Enabled )
-			{
-				glColorMask( 1, 1, 1, 1 );
-				CMirror &Mirror = *CMirrorMgr::m_CurrentMirror.Mirror;
-				float Alpha = !Mirror.m_Texture->Mirror.NoWorld ? 1 : Mirror.m_Texture->Mirror.Color.a;
-				gEngfuncs.pTriAPI->Color4f( Mirror.m_Texture->Mirror.Color.r, Mirror.m_Texture->Mirror.Color.g, Mirror.m_Texture->Mirror.Color.b, Alpha );
-				//glEnable( GL_BLEND );
-			}*/
-
 			IEngineStudio.StudioDrawPoints();
 			IEngineStudio.GL_StudioDrawShadow();
 		}
@@ -2399,25 +2351,6 @@ StudioRenderFinal
 void CStudioModelRenderer::StudioSetupRender(bool Setup)
 {
 	m_DrawStyle = DRAW_DEFAULT;
-
-	if (CMirrorMgr::m_CurrentMirror.Enabled)
-	{
-		CMirror& Mirror = *CMirrorMgr::m_CurrentMirror.Mirror;
-
-		if (Setup)
-		{
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-
-			Mirror.ApplyTransformation();
-			m_DrawStyle = DRAW_BACKFACES;
-		}
-		else
-		{
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-		}
-	}
 
 	//Master Sword - Flip the model (left-right) the when neccesary
 	if (FBitSet(m_pCurrentEntity->curstate.oldbuttons, MSRDR_FLIPPED))

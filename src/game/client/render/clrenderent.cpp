@@ -410,7 +410,6 @@ void CRenderPlayerInset::Render()
 	else m_Ent.curstate.sequence = 2;								//Default Idle*/
 
 	SetBits(m_Ent.curstate.colormap, MSRDR_ASPLAYER | MSRDR_COPYPLAYER | MSRDR_GLOW_RED);
-	SetBits(m_Ent.curstate.oldbuttons, MSRDR_NOREFLECT);
 	CRenderPlayer::Render();
 
 	//Thothie JAN2010_12 - commenting this out to play nice with new ref model
@@ -432,7 +431,6 @@ void CRenderPlayerInset::RenderGearItem(CGenericItem &Item)
 
 	ItemEnt.curstate.scale = INSET_SCALE;
 
-	SetBits(ItemEnt.curstate.oldbuttons, MSRDR_NOREFLECT);
 	SetBits(ItemEnt.curstate.colormap, MSRDR_GLOW_RED);
 	if (Item.m_Location == ITEMPOS_HANDS && player.m_CurrentHand == Item.m_Hand)
 	{

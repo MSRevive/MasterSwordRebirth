@@ -246,7 +246,6 @@ set(Render
 	"render/clrender.cpp"
 	"render/clrender.h"
 	"render/clrenderent.cpp"
-	"render/clrendermirror.cpp"
 	"render/gamestudiomodelrenderer.cpp"
 	"render/gamestudiomodelrenderer.h"
 	"render/opengl/clopengl.cpp"

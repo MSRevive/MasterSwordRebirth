@@ -3,7 +3,6 @@
 #define MSRDR_VIEWMODEL (1 << 0) //Model is a view model (parent view model... never rendered fully)
 #define MSRDR_FLIPPED (1 << 1)	 //Model is flipped across the verical axis, changing it from the right to left hand
 #define MSRDR_SKIP (1 << 2)		 //Do all setup (for attachments later), but don't render
-#define MSRDR_NOREFLECT (1 << 3) //Don't render to mirrors
 #define MSRDR_FULLROT (1 << 4)	 //Use full rotation this frame (automatically unset in )
 
 //Separate flags from the above -- stored in curstate.colormap
@@ -101,16 +100,6 @@ class CRenderPlayerInset : public CRenderPlayer
 	cl_entity_t &GearItemEntity(CGenericItem &Item) { return Item.m_ClEntity[CGenericItem::ITEMENT_3DINSET]; }
 };
 
-//Mirrors
-
-struct surfaceinfo_t
-{
-	//Vector Bounds[2];
-	Vector Origin;
-	float Radius;
-	//struct mnode_s *ParentNode;					//Parent node or leaf
-};
-
 class Plane
 {
 public:
@@ -177,143 +166,6 @@ public:
 	}
 };
 
-class CSurface
-{
-public:
-	CSurface() { m_Surface = NULL; }
-	CSurface(msurface_t *Surface) { m_Surface = Surface; }
-	void Draw();
-	void DrawProjective();
-	void DrawNormal();
-
-	enum
-	{
-		TEXCOORD_2D,
-		TEXCOORD_3D
-	} m_ModeTexCoord;
-	msurface_t *m_Surface;
-
-	Vector m_Origin;
-	float m_Radius;
-	Vector Bounds[2];
-	Vector m_SurfaceNormal;
-};
-
-#define RDR_TEXTURE (1 << 0)
-#define RDR_PROJECTIVE (1 << 1)
-#define RDR_ALPHATEST (1 << 2)
-#define RDR_STENCIL (1 << 3)
-#define RDR_CLRSTENCIL (1 << 4)
-#define RDR_CHKSTENCIL (1 << 5)
-#define RDR_CLEARZ (1 << 6)
-#define RDR_CLRALPHA (1 << 7)
-
-class CMirror
-{
-public:
-	Vector Normal;
-	float Dist;
-
-	Vector2D TexSize;			   //Size of the buffer'd texture.  Must be 2^x to work on all cards
-	struct mstexture_t *m_Texture; //Custom Texture defined by script
-
-	cl_entity_t *Entity;
-	//mslist<struct msurface_s *> Surfaces;		//Mirror surfaces.  Draw reflected texture here
-	mslist<CSurface> m_Surfaces;	   //Mirror surfaces.  Draw reflected texture here
-	mslist<surfaceinfo_t> SurfaceInfo; //Mirror surfaces extra info
-	mslist<CMirror *> m_ChildMirrors;  //Child mirrors seen while rendering mirrored world
-	CMirror *m_Parent;				   //For when reflecting Mirror within mirror
-	//mslist<struct msurface_s> WorldSurfaces;	//Pre-mirrored world Surfaces.  Render these for an reflected world
-
-	//bool RenderThisFrame;						//Marked for rendering.  Not occluded
-	uint GLBufferTexture; //Texture that the mirrored world is stored onto
-	uint GLIgnoreTexture; //Ignore the original 'glass' texture.  Replace with our own
-	bool IsWater,
-		m_OnWorld; //Mirror is a part of the world. don't look for it each frame.  Keep it cached
-	int WaterRippleAmt;
-	float ChangeSpeed;
-	float TimeChangeSpeed;
-	float MirrorMatrix[4][4];		 //Current mirror matrix
-	float Frame_ReflectMatrix[4][4]; //Reflect matrix temporarily used whenever this is a child mirror
-	Plane Frame_Plane;				 //Mirror plane for whenever this is a child mirror
-	bool Frame_NoRender;
-	bool Frame_IsCopy;
-	int Frame_ChildLevel;
-	Plane Frame_ClipPlane;
-	bool UseRenderOrigin;
-	Vector m_CustomRenderOrigin;
-	bool Vis_Eye();		//Check if the camera is facing the mirror and not behind it
-	bool Vis_Surface(); //Check if the camera is close enough to the mirror
-	//Vector Bounds;
-
-	void RenderMirroredWorld(int RecurseCall = 0);
-	void EnableClippingPlane(bool);
-	void CreateMatrix();
-	void ApplyTransformation();
-	void BindTexture();							//Bind texture
-	void ReleaseTexture();						//Release offscreen texture
-	void SetCustomTextureSettings(bool Enable); //Change render settings, like blend, color, etc
-	void Draw(int Flags);
-	void SetStencil();
-	void SetupLighting();
-};
-
-struct mirrorprops_t
-{
-	int Index;		 //Mirror index
-	bool Enabled;	 //Enabled
-	CMirror *Mirror; //Mirror info
-};
-
-struct rendersurface_t
-{
-	CMirror *Mirror;
-	msurface_t *Surface;
-};
-
-class CMirrorMgr
-{
-public:
-	static mslist<uint> m_MirrorTextures;			 //List of mirror textures in level
-	static mslist<CMirror> m_Mirrors;				 //List of mirrors in the level
-	static mslist<CMirror *> m_RdrMirrors;			 //List of mirrors to render
-	static mslist<CMirror> m_WorldMirrors;			 //Static list of mirrors attached to the world.  Cached at startup.
-	static mirrorprops_t m_CurrentMirror;			 //Current mirror being rendered.  Enabled == false if none
-	static mslist<cl_entity_t *> m_BrushEnts;		 //List of brush entites found to be mirrored
-	static mslist<cl_entity_t *> m_FrameEnts;		 //List of entites found to be mirrored
-	static bool UseMirrors;							 //The system can support mirrors
-	static bool m_Initialized;						 //Mirrors have been found and marked
-	static struct mleaf_s *m_pStartLeaf;			 //The viewer's current leaf
-	static mslist<rendersurface_t> m_RenderSurfaces; //List of special surfaces
-	static mslist<rendersurface_t> m_WorldSurfaces;	 //List of special surfaces attached to world (cached for speed)
-
-	static Vector m_OldOrg, m_OldAng; //Keep copy of view parameters
-
-	static bool InitMirrors();
-	static bool Enabled();
-	static void MarkCustomTextures(); //Check all visible surfaces for custom textures
-	//static void MarkCustomTextures( cl_entity_t *pEntity, struct mnode_s *CurrNode );	//Traverse the main world entity for custom textures
-	//static void CheckSurface( cl_entity_t *pEntity, struct mnode_s *ParentNode, struct msurface_s *pSurface );
-
-	static void HUD_DrawTransparentTriangles();
-	static void Render_SetupViewReflection();
-	static bool Render_StudioModel(cl_entity_t *pEnt);
-
-	static void SetupMirrorView(int MirrorNum);
-	static void SetupNormalView();
-	static void SetupNextView();
-
-	static void Cleanup();
-};
-
-#define SURF_PLANEBACK 2
-#define SURF_DRAWSKY 4
-#define SURF_DRAWSPRITE 8
-#define SURF_DRAWTURB 0x10
-#define SURF_DRAWTILED 0x20
-#define SURF_DRAWBACKGROUND 0x40
-#define SURF_UNDERWATER 0x80
-
 #include <GL/gl.h>	  // Header File For The OpenGL32 Library
 #include <GL/glext.h>
 
@@ -330,7 +182,6 @@ extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
 struct viewmgr_t
 {
 	Vector Origin, Angles, LastOrigin, LastAngles;
-	int Passes;
 	ref_params_s *Params;
 };
 extern viewmgr_t ViewMgr;
@@ -356,28 +207,4 @@ public:
 	int m_SpriteFrame;
 };
 
-bool CheckBBox(Vector Bounds[2]);
-
-struct TraverseInfo_t
-{
-	cl_entity_t *pEntity;
-	struct mnode_s *pNode;
-	bool CheckFrustum;
-	bool CheckClipplane;
-	Plane ClipPlane;
-	void *Func;
-
-	Vector Origin;
-	int VisFrame;
-	int RecurseCall;
-	class CMirror *Mirror;
-	struct model_s *pModel;
-	int TraverseAmt;
-	float MoveMatrix[4][4];
-	float OrigProjectionMatrix[4][4];
-	float OrigModelViewMatrix[4][4];
-};
-typedef bool ParseSurfaceFunc(TraverseInfo_t &Info, struct msurface_s *pSurface);
 typedef void ParseAllSurfacesFunc(struct msurface_s *pSurface);
-
-bool ParseVisibleSurfaces(TraverseInfo_t &Info, struct mleaf_s *pStartLeaf);

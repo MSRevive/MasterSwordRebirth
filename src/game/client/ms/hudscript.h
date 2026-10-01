@@ -32,7 +32,7 @@ public:
 	void Effects_GetFade(screenfade_t &ScreenFade);
 	void Effects_UpdateTempEnt(const char* EventName, msstringlist *Parameters = NULL);
 	void Effects_PreRender();
-	void Effects_Render(cl_entity_t &Ent, bool InMirror);
+	void Effects_Render(cl_entity_t &Ent);
 	void Effects_DrawTransPararentTriangles();
 };
 #define HUDScript gHUD.m_HUDScript

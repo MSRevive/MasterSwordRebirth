@@ -286,15 +286,15 @@ void CHudScript::Effects_PreRender( )
 			m_Scripts[i]->RunScriptEventByName( "game_prerender" );
 }
 
-void CHudScript::Effects_Render( cl_entity_t &Ent, bool InMirror )
+void CHudScript::Effects_Render( cl_entity_t &Ent )
 {
-	 for (int i = 0; i < m_Scripts.size(); i++) 
+	 for (int i = 0; i < m_Scripts.size(); i++)
 		if( m_Scripts[i]->m.m_HandleRender )
 		{
 			static msstringlist Params;
 			Params.clearitems( );
 			Params.add( UTIL_VarArgs("%i",Ent.index) );				//Index of entity being rendered
-			Params.add( InMirror ? "1" : "0" );						//Rendering in a mirror
+			Params.add( "0" );										//Was "rendering in a mirror" - kept so script param indices don't shift
 			m_Scripts[i]->RunScriptEventByName( "game_render", &Params );
 		}
 }

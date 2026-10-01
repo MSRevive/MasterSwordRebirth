@@ -27,7 +27,6 @@ std::vector<std::string> MSCLGlobals::m_Strings;			   //All client-side globally
 mslist<CBaseEntity *> MSCLGlobals::m_ClEntites;				   //All client-side entities
 mslist<cl_entity_t> MSCLGlobals::m_ClModels;				   //Extra models to be updated/animated client-side
 cl_entity_t MSCLGlobals::CLViewEntities[MAX_PLAYER_HANDITEMS]; //All View entity models
-mslist<mstexture_t> MSCLGlobals::Textures;					   //Custom textures, to be rendered in a unique way (reflective, blended, etc)
 hudcharanims_t MSCLGlobals::DefaultHUDCharAnims;			   //Anims for the char select VGUI
 hudsounds_t MSCLGlobals::DefaultHUDSounds;					   //HUD sounds
 hudcoords_t MSCLGlobals::DefaultHUDCoords;					   //HUD placement coordinates
@@ -91,8 +90,6 @@ void MSCLGlobals::Initialize()
 	// CVAR_CREATE("ms_txthud_bgtrans", "0", FCVAR_ARCHIVE);				// Transparency of the background
 	// CVAR_CREATE("ms_txthud_width", "640", FCVAR_ARCHIVE);				// Width of console
 	// CVAR_CREATE(CVAR_HELPTIPS, "1", FCVAR_ARCHIVE /*|FCVAR_USERINFO*/); // Whether help tips are shown
-	// CVAR_CREATE("ms_reflect", "1", FCVAR_ARCHIVE);						// Allow reflective surfaces
-	// CVAR_CREATE("ms_reflect_dbg", "0", FCVAR_ARCHIVE);					// Debug reflective surfaces
 	// CVAR_CREATE("ms_bloom_darken", "-1", FCVAR_ARCHIVE);				// MiB DEC2010 - Darken bloom
 	// CVAR_CREATE("ms_bloom_level", "0", FCVAR_ARCHIVE);					// Thothie DEC2010_30 - Fix ms_bloom_level stickiness
 	// //CVAR_CREATE("ms_reconnect_delay", "5", FCVAR_ARCHIVE);				// Thothie AUG2017 - Make reconnect delay adjustable client side
