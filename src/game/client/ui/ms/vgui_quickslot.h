@@ -356,8 +356,40 @@ public:
 			if (!QuickSlot.Active)
 				return;
 
+			if (QuickSlot.Type == QS_ITEM)
+			{
+				CGenericItem *pItem = player.FindItem(QuickSlot.ID);
+				CGenericItem *pSpare = (pItem && pItem->m_Location == ITEMPOS_HANDS) ? FindSpare(pItem) : NULL;
+				if (pSpare)
+				{
+					quickslot_t SpareSlot = QuickSlot;
+					SpareSlot.ID = pSpare->m_iId;
+					ConfirmItem(SpareSlot);
+					return;
+				}
+			}
+
 			ConfirmItem(QuickSlot);
 		}
+	}
+
+	CGenericItem *FindSpare(CGenericItem *pItem)
+	{
+		for (unsigned int i = 0; i < player.Gear.size(); i++)
+		{
+			CGenericItem *pPack = player.Gear[i];
+			if (pPack->m_Location == ITEMPOS_HANDS)
+				continue;
+
+			for (unsigned int n = 0; n < pPack->Container_ItemCount(); n++)
+			{
+				CGenericItem *pCopy = pPack->Container_GetItem(n);
+				if (pCopy && pCopy != pItem && !strcmp(pCopy->m_Name, pItem->m_Name))
+					return pCopy;
+			}
+		}
+
+		return NULL;
 	}
 
 	void AssignSlot(int Slot)

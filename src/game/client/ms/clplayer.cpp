@@ -975,7 +975,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//setviewmodelprop edits APR2008a MIB
 	{
 		msstring Mode = READ_STRING();
-		int iHand = READ_SHORT();
+		ulong lID = READ_LONG();
 		int iParam1;
 		float fParam1;
 		msstring sParam1;
@@ -990,10 +990,10 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 				iParam1 = READ_BYTE();
 		}
 
-		CGenericItem* pItem = player.Hand(iHand);
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 		if (pItem)
 		{
-			if (Mode == "submodel")
+			if (Mode == "submodel" || Mode == "submodelbody")
 			{
 				pItem->m_ViewModelPart = iParam1;
 				pItem->m_ViewModelSubmodel = READ_BYTE();

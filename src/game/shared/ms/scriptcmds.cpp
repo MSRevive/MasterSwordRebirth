@@ -6689,7 +6689,7 @@ bool CScript::ScriptCmd_SetViewModelProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, 
 			MESSAGE_BEGIN( MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev );
 			WRITE_BYTE( 7 );
 			WRITE_STRING( Params[1].c_str() );
-			WRITE_SHORT( pItem->m_Hand );
+			WRITE_LONG( pItem->m_iId );
 
 			if( Params[1] == "model" )
 			{
