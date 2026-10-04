@@ -338,6 +338,16 @@ bool CBasePlayer::AddItem(CGenericItem* pItem, bool ToHand, bool CheckWeight, in
 	return false;
 }
 
+static bool IsHandSwapWeapon(CGenericItem* pItem)
+{
+	const char* pszWeapons[] = {"swords_", "axes_", "blunt_", "smallarms_", "polearms_", "bows_"};
+	for (unsigned int i = 0; i < sizeof(pszWeapons) / sizeof(pszWeapons[0]); i++)
+		if (!strncmp(pItem->m_Name, pszWeapons[i], strlen(pszWeapons[i])))
+			return true;
+
+	return false;
+}
+
 //Find a hand for an Item
 //Returns:
 //0 or 1 Item should be held in this hand
@@ -424,7 +434,16 @@ int CBasePlayer::NewItemHand(CGenericItem* pItem, bool CheckWeight, bool bVerbos
 				return !pItem->m_PrefHand; //Can hold item, but in the non-preferred hand
 			else
 			{
-				if (FreeHands) //Try to free the desired hand
+#ifdef VALVE_DLL
+				if (FreeHands && IsHandSwapWeapon(pItem))
+				{
+					for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
+						if (Hand(i) && Hand(i)->m_PrefHand != BOTH_HANDS && IsHandSwapWeapon(Hand(i)) && strcmp(Hand(i)->m_Name, pItem->m_Name))
+							Hand(i)->PutAway(false);
+					Success = !HoldingTwoHandedItem && (!Hand(LEFT_HAND) || !Hand(RIGHT_HAND));
+				}
+#endif
+				if (FreeHands && !Success) //Try to free the desired hand
 				{
 					int PrefHand = (pItem->m_PrefHand < ANY_HAND) ? pItem->m_PrefHand : m_PrefHand, OtherHand = !PrefHand;
 					if (!Hand(PrefHand) || Hand(PrefHand)->PutAway(false))
