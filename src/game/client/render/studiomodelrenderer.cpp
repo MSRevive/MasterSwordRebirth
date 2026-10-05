@@ -2410,7 +2410,7 @@ bool CStudioModelRenderer::StudioGetFullbright(model_s* pmodel)
 	// check if this model is already been checked
 	for (size_t list = 0; list < m_szFullBrightModels.size(); list++)
 	{
-		if (!stricmp(pmodel->name, m_szFullBrightModels[list].c_str()))
+		if (!_stricmp(pmodel->name, m_szFullBrightModels[list].c_str()))
 		{
 			return true;
 		}
