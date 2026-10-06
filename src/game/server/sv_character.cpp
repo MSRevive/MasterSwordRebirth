@@ -11,6 +11,8 @@
 #include "fn/FNSharedDefs.h"
 #include "mslogger.h"
 
+#include <msgpack.hpp>
+
 #ifndef _WIN32
 #include "sys/io.h"
 #endif
