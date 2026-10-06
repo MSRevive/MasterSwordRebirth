@@ -80,6 +80,7 @@ target_include_directories(client PRIVATE
 
 target_compile_definitions(client PRIVATE
 	ISCLIENT
+	AS_DISABLED
 	CLIENT_WEAPONS
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES

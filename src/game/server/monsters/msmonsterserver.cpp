@@ -24,7 +24,7 @@
 #include "saytext.h"
 #include "mslogger.h"
 #include "ms/angelscript/ASEngineEventManager.h"
-//this can be removed once AS is fully finished, it's for as_enabled check.
+//originally added for the as_enabled check, which is now the AS_DISABLED macro; this can be removed once AS is fully finished.
 #include "svglobals.h"
 
 #ifdef VALVE_DLL
@@ -2893,337 +2893,334 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
-	// quick and dirty fix to enable menu callbacks again for no AS.
-	if (as_enabled.value > 0)
+	// quick and dirty fix to enable menu callbacks again for no AS (AS_DISABLED).
+#ifndef AS_DISABLED
+	int playerIndex = pPlayer->entindex();
+	MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
+				pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
+	MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
+				m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
+	
+	pPlayer->InMenu = false;
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
+
+	MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
+
+	//Thothie JAN2008a - need a way of dealing with canceled menus
+	if (Option == -1)
 	{
-		int playerIndex = pPlayer->entindex();
-		MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
-					pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
-		MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
-					m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
-		
-		pPlayer->InMenu = false;
-		mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
-
-		MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
-
-		//Thothie JAN2008a - need a way of dealing with canceled menus
-		if (Option == -1)
-		{
-			MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
-			static msstringlist Params;
-			Params.clearitems();
-			Params.add(EntToString(pPlayer));
-			CallScriptEvent("game_menu_cancel", &Params);
-			
-			// Clear protection flag when menu is cancelled
-			m_MenuOptionsProtected[playerIndex] = false;
-			MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
-			
-			return;
-		}
-
-		if (Option < 0 || Option >= (signed)Menuoptions.size())
-		{
-			MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
-			
-			// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
-			// This allows AngelScript to handle expired votes gracefully
-			if (Menuoptions.size() == 0)
-			{
-				MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
-				
-				// Try to call the vote callback even with no options
-				// The AngelScript side will handle the expired vote appropriately
-				static msstringlist Params;
-				Params.clearitems();
-				
-				// Format player entity as "ent:index" for AngelScript compatibility
-				char entFormat[32];
-				_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
-				entFormat[sizeof(entFormat) - 1] = '\0';
-				
-				Params.add(entFormat);
-				Params.add(""); // Empty option data since menu is gone
-				
-				MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
-				CallScriptEvent("game_vote_menu_callback", &Params);
-			}
-			
-			// Clear protection flag when option is out of range (vote may have expired)
-			m_MenuOptionsProtected[playerIndex] = false;
-			MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
-			
-			return;
-		}
-
-		menuoption_t& MenuOption = Menuoptions[Option];
-		MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
-					MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
-
-		bool PlayerCanPay = true;
-
-		if (MenuOption.Type == MOT_SAY)
-		{
-			pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
-		}
-		else if (MenuOption.Type == MOT_PAYMENT)
-		{
-			static msstringlist Payments;
-			Payments.clearitems();
-
-			TokenizeString(MenuOption.Data, Payments);
-
-			int TotalGold = 0;
-			static mslist<CGenericItem*> TotalFoundItems;
-			TotalFoundItems.clearitems();
-
-			for (int i = 0; i < Payments.size(); i++)
-			{
-				msstring& Payment = Payments[i];
-				if (Payment.starts_with("gold"))
-					TotalGold += atoi(Payment.substr(5));
-				else
-				{
-					//Find x number of specified item
-					int Amount = 1;
-					if (Payment.contains(":"))
-					{
-						Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
-						if (!Amount)
-							Amount = 1;
-					}
-
-					msstring ItemName = Payment.thru_char(":");
-
-					ulong LastItem = 0;
-					ulong FirstItem = 0;
-					CGenericItem* pItem = NULL;
-					static mslist<CGenericItem*> FoundItems;
-					FoundItems.clearitems();
-					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
-					{
-						if (FirstItem == 0)
-							FirstItem = pItem->m_iId;
-						else if (pItem->m_iId == FirstItem)
-							break;
-
-						if (pItem->ItemName == ItemName)
-							FoundItems.add(pItem);
-
-						LastItem = pItem->m_iId;
-					}
-
-					if ((signed)FoundItems.size() < Amount)
-					{
-						msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
-
-						if (!MenuOption.SilentPayment)
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
-						PlayerCanPay = false;
-						break;
-					}
-
-					for (int x = 0; x < FoundItems.size(); x++)
-						TotalFoundItems.add(FoundItems[x]);
-				}
-			}
-
-			int PlayerGold = pPlayer->m_Gold;
-			if (PlayerGold < TotalGold)
-			{
-				if (!MenuOption.SilentPayment)
-					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
-				PlayerCanPay = false;
-			}
-
-			if (PlayerCanPay)
-			{
-				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
-					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
-				//pPlayer->RemoveItem( TotalFoundItems[i] );
-			}
-		}
-
-		//Handle callback
-		// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
-		msstring CallbackEvent = MenuOption.CB_Name;
-		msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
-		msstring OptionData = MenuOption.Data;
-		menuoptiontype_e OptionType = MenuOption.Type;
-		
-		MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
-		
-		static msstringlist Params;
-		Params.clearitems();
-		
-		// Format player entity as "ent:index" for AngelScript compatibility
-		char entFormat[32];
-		_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
-		entFormat[sizeof(entFormat) - 1] = '\0';
-		
-		msstring PlayerEntStr = entFormat;
-		MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), playerIndex);
-		
-		Params.add(PlayerEntStr);
-		Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
-
-		MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
-					Params[0].c_str(), OptionData.c_str());
-
-		if (OptionType == MOT_PAYMENT)
-		{
-			if (!PlayerCanPay)
-			{
-				MS_ANGEL_INFO("  Player can't pay, using failed callback");
-				CallbackEvent = CallbackFailedEvent;
-			}
-		}
-
-		if (CallbackEvent.len())
-		{
-			MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
-						CallbackEvent.c_str(), (int)Params.size());
-			CallScriptEvent(CallbackEvent, &Params);
-			MS_ANGEL_INFO("  Script event completed");
-		}
-		else
-		{
-			MS_ANGEL_WARN("  No callback event name specified for this menu option");
-		}
-		
-		MS_ANGEL_INFO("  Clearing menu options");
-		Menuoptions.clearitems();
-		
-		// Clear protection flag (used for vote menus)
-		m_MenuOptionsProtected[playerIndex] = false;
-		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
-	}
-	else
-	{
-		pPlayer->InMenu = false;
-		mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
-
-		//Thothie JAN2008a - need a way of dealing with canceled menus
-		if (Option == -1)
-		{
-			static msstringlist Params;
-			Params.clearitems();
-			Params.add(EntToString(pPlayer));
-			CallScriptEvent("game_menu_cancel", &Params);
-		}
-
-		if (Option < 0 || Option >= (signed)Menuoptions.size())
-			return;
-
-		menuoption_t& MenuOption = Menuoptions[Option];
-
-		bool PlayerCanPay = true;
-
-		if (MenuOption.Type == MOT_SAY)
-		{
-			pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
-		}
-		else if (MenuOption.Type == MOT_PAYMENT)
-		{
-			static msstringlist Payments;
-			Payments.clearitems();
-
-			TokenizeString(MenuOption.Data, Payments);
-
-			int TotalGold = 0;
-			static mslist<CGenericItem*> TotalFoundItems;
-			TotalFoundItems.clearitems();
-
-			for (int i = 0; i < Payments.size(); i++)
-			{
-				msstring& Payment = Payments[i];
-				if (Payment.starts_with("gold"))
-					TotalGold += atoi(Payment.substr(5));
-				else
-				{
-					//Find x number of specified item
-					int Amount = 1;
-					if (Payment.contains(":"))
-					{
-						Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
-						if (!Amount)
-							Amount = 1;
-					}
-
-					msstring ItemName = Payment.thru_char(":");
-
-					ulong LastItem = 0;
-					ulong FirstItem = 0;
-					CGenericItem* pItem = NULL;
-					static mslist<CGenericItem*> FoundItems;
-					FoundItems.clearitems();
-					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
-					{
-						if (FirstItem == 0)
-							FirstItem = pItem->m_iId;
-						else if (pItem->m_iId == FirstItem)
-							break;
-
-						if (pItem->ItemName == ItemName)
-							FoundItems.add(pItem);
-
-						LastItem = pItem->m_iId;
-					}
-
-					if ((signed)FoundItems.size() < Amount)
-					{
-						msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
-
-						if (!MenuOption.SilentPayment)
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
-						PlayerCanPay = false;
-						break;
-					}
-
-					for (int x = 0; x < FoundItems.size(); x++)
-						TotalFoundItems.add(FoundItems[x]);
-				}
-			}
-
-			int PlayerGold = pPlayer->m_Gold;
-			if (PlayerGold < TotalGold)
-			{
-				if (!MenuOption.SilentPayment)
-					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
-				PlayerCanPay = false;
-			}
-
-			if (PlayerCanPay)
-			{
-				pPlayer->m_Gold -= TotalGold;
-				for (int i = 0; i < TotalFoundItems.size(); i++)
-					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
-				//pPlayer->RemoveItem( TotalFoundItems[i] );
-			}
-		}
-
-		//Handle callback
+		MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
 		static msstringlist Params;
 		Params.clearitems();
 		Params.add(EntToString(pPlayer));
-		Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
-
-		msstring CallbackEvent = MenuOption.CB_Name;
-
-		if (MenuOption.Type == MOT_PAYMENT)
-		{
-			if (!PlayerCanPay)
-				CallbackEvent = MenuOption.CB_Failed_Name;
-		}
-
-		if (CallbackEvent.len())
-		{
-			CallScriptEvent(CallbackEvent, &Params);
-		}
-		Menuoptions.clearitems();
+		CallScriptEvent("game_menu_cancel", &Params);
+		
+		// Clear protection flag when menu is cancelled
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
+		
+		return;
 	}
+
+	if (Option < 0 || Option >= (signed)Menuoptions.size())
+	{
+		MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
+		
+		// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
+		// This allows AngelScript to handle expired votes gracefully
+		if (Menuoptions.size() == 0)
+		{
+			MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
+			
+			// Try to call the vote callback even with no options
+			// The AngelScript side will handle the expired vote appropriately
+			static msstringlist Params;
+			Params.clearitems();
+			
+			// Format player entity as "ent:index" for AngelScript compatibility
+			char entFormat[32];
+			_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
+			entFormat[sizeof(entFormat) - 1] = '\0';
+			
+			Params.add(entFormat);
+			Params.add(""); // Empty option data since menu is gone
+			
+			MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
+			CallScriptEvent("game_vote_menu_callback", &Params);
+		}
+		
+		// Clear protection flag when option is out of range (vote may have expired)
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
+		
+		return;
+	}
+
+	menuoption_t& MenuOption = Menuoptions[Option];
+	MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
+				MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
+
+	bool PlayerCanPay = true;
+
+	if (MenuOption.Type == MOT_SAY)
+	{
+		pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
+	}
+	else if (MenuOption.Type == MOT_PAYMENT)
+	{
+		static msstringlist Payments;
+		Payments.clearitems();
+
+		TokenizeString(MenuOption.Data, Payments);
+
+		int TotalGold = 0;
+		static mslist<CGenericItem*> TotalFoundItems;
+		TotalFoundItems.clearitems();
+
+		for (int i = 0; i < Payments.size(); i++)
+		{
+			msstring& Payment = Payments[i];
+			if (Payment.starts_with("gold"))
+				TotalGold += atoi(Payment.substr(5));
+			else
+			{
+				//Find x number of specified item
+				int Amount = 1;
+				if (Payment.contains(":"))
+				{
+					Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
+					if (!Amount)
+						Amount = 1;
+				}
+
+				msstring ItemName = Payment.thru_char(":");
+
+				ulong LastItem = 0;
+				ulong FirstItem = 0;
+				CGenericItem* pItem = NULL;
+				static mslist<CGenericItem*> FoundItems;
+				FoundItems.clearitems();
+				while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
+				{
+					if (FirstItem == 0)
+						FirstItem = pItem->m_iId;
+					else if (pItem->m_iId == FirstItem)
+						break;
+
+					if (pItem->ItemName == ItemName)
+						FoundItems.add(pItem);
+
+					LastItem = pItem->m_iId;
+				}
+
+				if ((signed)FoundItems.size() < Amount)
+				{
+					msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
+
+					if (!MenuOption.SilentPayment)
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
+					PlayerCanPay = false;
+					break;
+				}
+
+				for (int x = 0; x < FoundItems.size(); x++)
+					TotalFoundItems.add(FoundItems[x]);
+			}
+		}
+
+		int PlayerGold = pPlayer->m_Gold;
+		if (PlayerGold < TotalGold)
+		{
+			if (!MenuOption.SilentPayment)
+				pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
+			PlayerCanPay = false;
+		}
+
+		if (PlayerCanPay)
+		{
+			pPlayer->m_Gold -= TotalGold;
+			for (int i = 0; i < TotalFoundItems.size(); i++)
+				TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
+			//pPlayer->RemoveItem( TotalFoundItems[i] );
+		}
+	}
+
+	//Handle callback
+	// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
+	msstring CallbackEvent = MenuOption.CB_Name;
+	msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
+	msstring OptionData = MenuOption.Data;
+	menuoptiontype_e OptionType = MenuOption.Type;
+	
+	MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
+	
+	static msstringlist Params;
+	Params.clearitems();
+	
+	// Format player entity as "ent:index" for AngelScript compatibility
+	char entFormat[32];
+	_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
+	entFormat[sizeof(entFormat) - 1] = '\0';
+	
+	msstring PlayerEntStr = entFormat;
+	MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), playerIndex);
+	
+	Params.add(PlayerEntStr);
+	Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+
+	MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
+				Params[0].c_str(), OptionData.c_str());
+
+	if (OptionType == MOT_PAYMENT)
+	{
+		if (!PlayerCanPay)
+		{
+			MS_ANGEL_INFO("  Player can't pay, using failed callback");
+			CallbackEvent = CallbackFailedEvent;
+		}
+	}
+
+	if (CallbackEvent.len())
+	{
+		MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
+					CallbackEvent.c_str(), (int)Params.size());
+		CallScriptEvent(CallbackEvent, &Params);
+		MS_ANGEL_INFO("  Script event completed");
+	}
+	else
+	{
+		MS_ANGEL_WARN("  No callback event name specified for this menu option");
+	}
+	
+	MS_ANGEL_INFO("  Clearing menu options");
+	Menuoptions.clearitems();
+	
+	// Clear protection flag (used for vote menus)
+	m_MenuOptionsProtected[playerIndex] = false;
+	MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
+#else
+	pPlayer->InMenu = false;
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
+
+	//Thothie JAN2008a - need a way of dealing with canceled menus
+	if (Option == -1)
+	{
+		static msstringlist Params;
+		Params.clearitems();
+		Params.add(EntToString(pPlayer));
+		CallScriptEvent("game_menu_cancel", &Params);
+	}
+
+	if (Option < 0 || Option >= (signed)Menuoptions.size())
+		return;
+
+	menuoption_t& MenuOption = Menuoptions[Option];
+
+	bool PlayerCanPay = true;
+
+	if (MenuOption.Type == MOT_SAY)
+	{
+		pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
+	}
+	else if (MenuOption.Type == MOT_PAYMENT)
+	{
+		static msstringlist Payments;
+		Payments.clearitems();
+
+		TokenizeString(MenuOption.Data, Payments);
+
+		int TotalGold = 0;
+		static mslist<CGenericItem*> TotalFoundItems;
+		TotalFoundItems.clearitems();
+
+		for (int i = 0; i < Payments.size(); i++)
+		{
+			msstring& Payment = Payments[i];
+			if (Payment.starts_with("gold"))
+				TotalGold += atoi(Payment.substr(5));
+			else
+			{
+				//Find x number of specified item
+				int Amount = 1;
+				if (Payment.contains(":"))
+				{
+					Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
+					if (!Amount)
+						Amount = 1;
+				}
+
+				msstring ItemName = Payment.thru_char(":");
+
+				ulong LastItem = 0;
+				ulong FirstItem = 0;
+				CGenericItem* pItem = NULL;
+				static mslist<CGenericItem*> FoundItems;
+				FoundItems.clearitems();
+				while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
+				{
+					if (FirstItem == 0)
+						FirstItem = pItem->m_iId;
+					else if (pItem->m_iId == FirstItem)
+						break;
+
+					if (pItem->ItemName == ItemName)
+						FoundItems.add(pItem);
+
+					LastItem = pItem->m_iId;
+				}
+
+				if ((signed)FoundItems.size() < Amount)
+				{
+					msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
+
+					if (!MenuOption.SilentPayment)
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
+					PlayerCanPay = false;
+					break;
+				}
+
+				for (int x = 0; x < FoundItems.size(); x++)
+					TotalFoundItems.add(FoundItems[x]);
+			}
+		}
+
+		int PlayerGold = pPlayer->m_Gold;
+		if (PlayerGold < TotalGold)
+		{
+			if (!MenuOption.SilentPayment)
+				pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
+			PlayerCanPay = false;
+		}
+
+		if (PlayerCanPay)
+		{
+			pPlayer->m_Gold -= TotalGold;
+			for (int i = 0; i < TotalFoundItems.size(); i++)
+				TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
+			//pPlayer->RemoveItem( TotalFoundItems[i] );
+		}
+	}
+
+	//Handle callback
+	static msstringlist Params;
+	Params.clearitems();
+	Params.add(EntToString(pPlayer));
+	Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+
+	msstring CallbackEvent = MenuOption.CB_Name;
+
+	if (MenuOption.Type == MOT_PAYMENT)
+	{
+		if (!PlayerCanPay)
+			CallbackEvent = MenuOption.CB_Failed_Name;
+	}
+
+	if (CallbackEvent.len())
+	{
+		CallScriptEvent(CallbackEvent, &Params);
+	}
+	Menuoptions.clearitems();
+#endif
 }
 
 void AlignToNormal(/*In*/ Vector& vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector& vAngles)

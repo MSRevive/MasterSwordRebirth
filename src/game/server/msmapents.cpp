@@ -1724,32 +1724,29 @@ public:
 		//msstring Text = msstring("It appears that you wish to travel to ") + STRING(sDestName) + ".\nPress enter (accept), to continue.";
 		//pOtherPlayer->SendHUDMsg( "Travel", Text );
 		// Call AngelScript player function for transition entered
-		if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
 		{
-			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-			if (pASManager && pASManager->IsInitialized())
-			{
-				std::vector<std::string> params;
-				params.push_back(pPlayer->DisplayName());     // Player name
-				params.push_back(STRING(sDestName));          // Destination name
-				params.push_back(STRING(sDestMap));           // Destination map
-				params.push_back(STRING(sName));              // Local spawn point
-				params.push_back(STRING(sDestTrans));         // Destination spawn point
-				params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Steam ID
-				
-				// Call global AngelScript function
-				pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionEntered", params);
-			}
+			std::vector<std::string> params;
+			params.push_back(pPlayer->DisplayName());     // Player name
+			params.push_back(STRING(sDestName));          // Destination name
+			params.push_back(STRING(sDestMap));           // Destination map
+			params.push_back(STRING(sName));              // Local spawn point
+			params.push_back(STRING(sDestTrans));         // Destination spawn point
+			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Steam ID
+			
+			// Call global AngelScript function
+			pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionEntered", params);
 		}
-		else
-		{
-			msstringlist Parameters;
-			Parameters.add(STRING(sDestName));
-			Parameters.add(STRING(sDestMap));
-			Parameters.add(STRING(sName));
-			Parameters.add(STRING(sDestTrans));
-			pPlayer->CallScriptEvent("game_transition_entered", &Parameters);
-		}
+#else
+		msstringlist Parameters;
+		Parameters.add(STRING(sDestName));
+		Parameters.add(STRING(sDestMap));
+		Parameters.add(STRING(sName));
+		Parameters.add(STRING(sDestTrans));
+		pPlayer->CallScriptEvent("game_transition_entered", &Parameters);
+#endif
 		
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_CLDLLFUNC], NULL, pPlayer->pev);
 		WRITE_BYTE(3);
@@ -1802,30 +1799,27 @@ public:
 
 		bDidVote = false;
 		
-		if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+		// Call AngelScript player function for transition exited
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
 		{
-			// Call AngelScript player function for transition exited
-			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-			if (pASManager && pASManager->IsInitialized())
-			{
-				std::vector<std::string> params;
-				params.push_back(STRING(sDestName));
-				params.push_back(STRING(sDestMap));
-				params.push_back(STRING(sName));
-				params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Add player Steam ID
-				
-				// Call global AngelScript function
-				pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionExited", params);
-			}
+			std::vector<std::string> params;
+			params.push_back(STRING(sDestName));
+			params.push_back(STRING(sDestMap));
+			params.push_back(STRING(sName));
+			params.push_back(GETPLAYERAUTHID(pPlayer->edict())); // Add player Steam ID
+			
+			// Call global AngelScript function
+			pASManager->CallGlobalFunctionWithParams("OnPlayerTransitionExited", params);
 		}
-		else
-		{
-			msstringlist Parameters;
-			Parameters.add(STRING(sDestName));
-			Parameters.add(STRING(sDestMap));
-			Parameters.add(STRING(sName));
-			pPlayer->CallScriptEvent("game_transition_exited", &Parameters);
-		}
+#else
+		msstringlist Parameters;
+		Parameters.add(STRING(sDestName));
+		Parameters.add(STRING(sDestMap));
+		Parameters.add(STRING(sName));
+		pPlayer->CallScriptEvent("game_transition_exited", &Parameters);
+#endif
 		
 	}
 
@@ -1841,32 +1835,29 @@ public:
 
 		if (!bDidVote)
 		{
-			if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+			// Updated to use AngelScript instead of MSScript for map transitions
+			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+			if (pASManager && pASManager->IsInitialized())
 			{
-				// Updated to use AngelScript instead of MSScript for map transitions
-				CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-				if (pASManager && pASManager->IsInitialized())
-				{
-					std::vector<std::string> params;
-					params.push_back(STRING(sDestName));    // Map title
-					params.push_back(STRING(sDestMap));     // Destination BSP
-					params.push_back(STRING(sName));        // Local spawn point
-					params.push_back(STRING(sDestTrans));   // Destination spawn point
-					
-					// Call AngelScript GameMaster function
-					// This will be handled by MS::GameTransitionTriggered in GameMasterMapTransitions.as
-					pASManager->CallGlobalFunctionWithParams("GameTransitionTriggered", params);
-				}
+				std::vector<std::string> params;
+				params.push_back(STRING(sDestName));    // Map title
+				params.push_back(STRING(sDestMap));     // Destination BSP
+				params.push_back(STRING(sName));        // Local spawn point
+				params.push_back(STRING(sDestTrans));   // Destination spawn point
+				
+				// Call AngelScript GameMaster function
+				// This will be handled by MS::GameTransitionTriggered in GameMasterMapTransitions.as
+				pASManager->CallGlobalFunctionWithParams("GameTransitionTriggered", params);
 			}
-			else
-			{
-				msstringlist Parameters;
-				Parameters.add(STRING(sDestName));
-				Parameters.add(STRING(sDestMap));
-				Parameters.add(STRING(sName));
-				Parameters.add(STRING(sDestTrans));
-				pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
-			}
+#else
+			msstringlist Parameters;
+			Parameters.add(STRING(sDestName));
+			Parameters.add(STRING(sDestMap));
+			Parameters.add(STRING(sName));
+			Parameters.add(STRING(sDestTrans));
+			pGMScript->CallScriptEvent("game_transition_triggered", &Parameters);
+#endif
 			bDidVote = true;
 		}
 
@@ -1912,26 +1903,23 @@ public:
 				if (IS_MAP_VALID(dest_map.c_str()))
 					pOtherPlayer->EnableControl(FALSE);
 				
-				if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+				// Call AngelScript player function for map change
+				CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+				if (pASManager && pASManager->IsInitialized())
 				{
-					// Call AngelScript player function for map change
-					CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-					if (pASManager && pASManager->IsInitialized())
-					{
-						std::vector<std::string> params;
-						params.push_back(STRING(sDestMap));
-						params.push_back(GETPLAYERAUTHID(pOtherPlayer->edict())); // Add player Steam ID
-						
-						// Call global AngelScript function
-						pASManager->CallGlobalFunctionWithParams("OnPlayerMapChange", params);
-					}
+					std::vector<std::string> params;
+					params.push_back(STRING(sDestMap));
+					params.push_back(GETPLAYERAUTHID(pOtherPlayer->edict())); // Add player Steam ID
+					
+					// Call global AngelScript function
+					pASManager->CallGlobalFunctionWithParams("OnPlayerMapChange", params);
 				}
-				else
-				{
-					msstringlist Parameters;
-					Parameters.add(STRING(sDestMap));
-					pOtherPlayer->CallScriptEvent("game_map_change", &Parameters);
-				}
+#else
+				msstringlist Parameters;
+				Parameters.add(STRING(sDestMap));
+				pOtherPlayer->CallScriptEvent("game_map_change", &Parameters);
+#endif
 
 				//Save character
 				pOtherPlayer->SaveChar();

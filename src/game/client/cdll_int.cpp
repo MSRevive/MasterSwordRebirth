@@ -250,35 +250,34 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 		return 0;
 
 	// Initialize AngelScript on client if enabled
-	if (cl_as_enabled && cl_as_enabled->value > 0)
+#ifndef AS_DISABLED
+	MS_INFO("Initializing client-side AngelScript...");
+	if (!CAngelScriptManager::Instance()->Initialize())
 	{
-		MS_INFO("Initializing client-side AngelScript...");
-		if (!CAngelScriptManager::Instance()->Initialize())
+		MS_ERROR("Client-side AngelScript initialization FAILED!");
+		// Don't fail the entire client initialization, just disable AngelScript
+		if (cl_as_enabled)
+			cl_as_enabled->value = 0;
+	}
+	else
+	{
+		MS_INFO("Client-side AngelScript initialized successfully");
+		
+		// Load client-side AngelScript modules
+		if (CAngelScriptManager::Instance()->IsInitialized())
 		{
-			MS_ERROR("Client-side AngelScript initialization FAILED!");
-			// Don't fail the entire client initialization, just disable AngelScript
-			if (cl_as_enabled)
-				cl_as_enabled->value = 0;
-		}
-		else
-		{
-			MS_INFO("Client-side AngelScript initialized successfully");
+			MS_INFO("Loading client-side AngelScript modules...");
 			
-			// Load client-side AngelScript modules
-			if (CAngelScriptManager::Instance()->IsInitialized())
+			// Initialize the module system for client
+			ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+			if (pModuleSystem)
 			{
-				MS_INFO("Loading client-side AngelScript modules...");
-				
-				// Initialize the module system for client
-				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
-				if (pModuleSystem)
-				{
-					// Client modules will be loaded from scripts.pak with #pragma context client
-					MS_INFO("Client-side AngelScript module system ready");
-				}
+				// Client modules will be loaded from scripts.pak with #pragma context client
+				MS_INFO("Client-side AngelScript module system ready");
 			}
 		}
 	}
+#endif
 
 	MS_INFO("[DLLEXPORT Initialize: Complete]");
 
@@ -329,7 +328,8 @@ void DLLEXPORT HUD_Init(void)
 	Scheme_Init();
 	
 	// Load client-side AngelScript modules when connecting to server
-	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING ===");
 		MS_INFO("Build Context: CLIENT");
@@ -385,6 +385,7 @@ void DLLEXPORT HUD_Init(void)
 		
 		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING COMPLETE ===");
 	}
+#endif
 
 	MS_INFO("[HUD_Init: Complete]");
 }
@@ -403,10 +404,12 @@ int DLLEXPORT HUD_Redraw(float time, int intermission)
 	gHUD.Redraw(time, 0 != intermission);
 	
 	// Update AngelScript on client if enabled
-	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		CAngelScriptManager::Instance()->Think();
 	}
+#endif
 
 	return 1;
 }

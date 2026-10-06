@@ -230,7 +230,6 @@ void CChangePlayerSpeed ::Spawn(void)
 
 void CChangePlayerSpeed ::Think(void)
 {
-
 	for (int i = 0; i < 256; i++)
 	{
 		playerinfo_t *pInfo = &m_PlayerInfo[i];
@@ -422,7 +421,7 @@ class CMSChangeLevel : public CBaseEntity
 		//MAR2008a - Thothie - Let game master handle mstrig_changelevel level changes
 		//- original: CHANGE_LEVEL( (char *)STRING(sDestMap), NULL );
 		// Updated to use AngelScript instead of MSScript for map transitions
-		#ifdef VALVE_DLL
+#ifndef AS_DISABLED
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
@@ -438,7 +437,19 @@ class CMSChangeLevel : public CBaseEntity
 		{
 			ALERT(at_console, "Unable to execute changelevel - AngelScript not initialized!\n");
 		}
-		#endif
+#else
+		CBaseEntity *pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+		IScripted *pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+		if (pGMScript)
+		{
+			msstringlist Parameters;
+			Parameters.add(STRING(sDestMap));
+			Parameters.add(STRING(sDestTrans));
+			pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+		}
+		else
+			ALERT(at_console, "Unable to find game_master for level change!\n");
+#endif
 	}
 	void KeyValue(KeyValueData *pkvd)
 	{

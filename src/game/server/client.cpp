@@ -1936,43 +1936,41 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 	}
 	
 	CBaseEntity* pInitGameMaster = nullptr;
-	if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+	if (!pGameMasterEnt)
 	{
-		if (!pGameMasterEnt)
+		MS_INFO("Game master not found, firing AngelScript ServerActivate event to create it...");
+		
+		// Fire AngelScript ServerActivate event to allow scripts to initialize and spawn game_master
+		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+		if (pASManager && pASManager->IsInitialized())
 		{
-			MS_INFO("Game master not found, firing AngelScript ServerActivate event to create it...");
+			pASManager->CallGlobalFunctionWithParams("ServerActivate");
+			MS_INFO("ServerActivate event fired successfully");
 			
-			// Fire AngelScript ServerActivate event to allow scripts to initialize and spawn game_master
-			CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-			if (pASManager && pASManager->IsInitialized())
+			// After ServerActivate, try to find the game_master again
+			pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+			if (pGameMasterEnt)
 			{
-				pASManager->CallGlobalFunctionWithParams("ServerActivate");
-				MS_INFO("ServerActivate event fired successfully");
-				
-				// After ServerActivate, try to find the game_master again
-				pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-				if (pGameMasterEnt)
-				{
-					MS_INFO("Game master created by AngelScript at index %d", pGameMasterEnt->entindex());
-				}
-				else
-				{
-					MS_ERROR("AngelScript ServerActivate did not create game_master entity!");
-				}
+				MS_INFO("Game master created by AngelScript at index %d", pGameMasterEnt->entindex());
 			}
 			else
 			{
-				MS_ERROR("AngelScript manager not available for ServerActivate event - game_master not created!");
+				MS_ERROR("AngelScript ServerActivate did not create game_master entity!");
 			}
 		}
 		else
 		{
-			MS_INFO("Game master entity already exists at index %d with netname '%s'", 
-					pGameMasterEnt->entindex(), 
-					pGameMasterEnt->pev->netname ? STRING(pGameMasterEnt->pev->netname) : "(null)");
+			MS_ERROR("AngelScript manager not available for ServerActivate event - game_master not created!");
 		}
 	}
 	else
+	{
+		MS_INFO("Game master entity already exists at index %d with netname '%s'", 
+				pGameMasterEnt->entindex(), 
+				pGameMasterEnt->pev->netname ? STRING(pGameMasterEnt->pev->netname) : "(null)");
+	}
+#else
 	{
 		CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
 		if (!pGameMasterEnt)
@@ -1992,6 +1990,7 @@ void ServerActivate(edict_t *pEdictList, int edictCount, int clientMax)
 			}
 		}
 	}
+#endif
 
 	// Store the game_master entity in global handle for easy access
 	if (pGameMasterEnt)

@@ -58,6 +58,7 @@ target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	VALVE_DLL
 	CURL_STATICLIB
+	AS_DISABLED
 	HTTP_ONLY)
 
 # Check if spdlog is available

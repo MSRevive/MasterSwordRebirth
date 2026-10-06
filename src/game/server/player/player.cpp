@@ -2275,11 +2275,13 @@ pt_end:
 
 	CallScriptEvent("game_think");
 
+#ifndef AS_DISABLED
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
 		pASManager->CallGlobalFunctionWithParams("GameThink");
 	}
+#endif
 }
 
 // checks if the spot is clear of players
@@ -2766,7 +2768,8 @@ void CBasePlayer::Spawn(void)
 
 		// Call AngelScript event handler directly via ASManager
 		// Pass the player entity string as parameter
-#ifdef VALVE_DLL
+		
+#ifndef AS_DISABLED
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
@@ -6419,7 +6422,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	
 	// Call AngelScript to adjust JoinType based on transition data
 	// This ensures transitions take priority over start map status
-	#ifdef VALVE_DLL
+#ifndef AS_DISABLED
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
@@ -6427,7 +6430,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 		params.push_back(this->AuthID().c_str());
 		pASManager->CallGlobalFunctionWithParams("OnPlayerCharacterLoaded", params);
 	}
-	#endif
+#endif
 
 	//Create our Human body -- Must be done here
 	if (Body)

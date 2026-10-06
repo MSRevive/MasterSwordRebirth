@@ -154,6 +154,7 @@ void MSGlobals::NewMap()
 		
 		// Call AngelScript game_spawn function
 #ifdef VALVE_DLL
+#ifndef AS_DISABLED
 		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 		if (pASManager && pASManager->IsInitialized())
 		{
@@ -167,6 +168,7 @@ void MSGlobals::NewMap()
 				MS_WARN("AngelScript game_spawn failed or not found");
 			}
 		}
+#endif
 #endif
 	}
 }

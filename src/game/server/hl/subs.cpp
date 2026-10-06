@@ -26,8 +26,6 @@
 #include "doors.h"
 #include "ms/angelscript/CAngelScriptManager.h" // For AngelScript game triggers
 
-#define AS_DISABLED 1
-
 extern CGraph WorldGraph;
 
 extern BOOL FEntIsVisible(entvars_t *pev, entvars_t *pevTarget);
@@ -211,19 +209,9 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 
 	ALERT(at_aiconsole, "Firing: (%s)\n", targetName);
 
+	
+#ifndef AS_DISABLED
 	// Updated to use AngelScript instead of MSScript for game triggers
-#ifdef AS_DISABLED
-	//NOV2015_05 let GM capture triggers
-	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
-	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
-	if (pGMScript)
-	{
-		static msstringlist Params;
-		Params.clearitems();
-		Params.add(targetName);
-		pGMScript->CallScriptEvent("game_triggered", &Params);
-	}
-#else
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
@@ -233,6 +221,17 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 		// Call AngelScript GameMaster function
 		// This will be handled by MS::GameTriggered in GameMasterMapTransitions.as
 		pASManager->CallGlobalFunctionWithParams("GameTriggered", params);
+	}
+#else
+	//NOV2015_05 let GM capture triggers
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+	if (pGMScript)
+	{
+		static msstringlist Params;
+		Params.clearitems();
+		Params.add(targetName);
+		pGMScript->CallScriptEvent("game_triggered", &Params);
 	}
 #endif
 

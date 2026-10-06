@@ -1816,7 +1816,7 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	*/
 	//NOV2014_12 Thothie - wanted to axe this ent entirely, but just making MSC friendly instead.
 	// Updated to use AngelScript instead of MSScript for map transitions
-	#ifdef VALVE_DLL
+#ifndef AS_DISABLED
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
@@ -1832,7 +1832,17 @@ void CChangeLevel ::ExecuteChangeLevel(void)
 	{
 		ALERT(at_console, "Unable to execute changelevel - AngelScript not initialized!\n");
 	}
-	#endif
+#else
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+	if (pGMScript)
+	{
+		msstringlist Parameters;
+		Parameters.add(STRING(m_szMapName));
+		Parameters.add(STRING(m_szLandmarkName));
+		pGMScript->CallScriptEvent("gm_manual_map_change", &Parameters);
+	}
+#endif
 }
 
 FILE_GLOBAL char st_szNextMap[cchMapNameMost];
