@@ -16,7 +16,7 @@ class asIScriptEngine;
 
 // Include vector.h for Vector class
 typedef float vec_t;
-#include "hl/vector.h"
+#include "vector.h"
 
 // Type aliases for cleaner C++ code
 // Vector is aliased to Vector3 for AngelScript

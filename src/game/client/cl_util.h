@@ -154,11 +154,11 @@ inline void PlayHUDSound(const char *Sound, float vol) { PlaySound((char *)Sound
 
 void ScaleColors(int &r, int &g, int &b, int a);
 
-#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
+//#define DotProduct(x, y) ((x)[0] * (y)[0] + (x)[1] * (y)[1] + (x)[2] * (y)[2])
 
 // ugh, some bits of the client code expect a float[3] while others expect a Vector, and there's a macro that pretends they're the same
 // handle the extern with the correct types in the places where it's required
-// extern vec3_t vec3_origin;
+// extern Vector vec3_origin;
 
 // disable 'possible loss of data converting float to int' warning message
 #pragma warning(disable : 4244)

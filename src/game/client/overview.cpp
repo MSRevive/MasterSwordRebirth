@@ -110,7 +110,7 @@ int CHudOverview::Draw(float flTime)
 			gEngfuncs.pTriAPI->Color4f(r, g, bc, 1.0f);
 
 			// calculate rotational matrix
-			vec3_t a, b, angles;
+			Vector a, b, angles;
 			float rmatrix[3][4]; // transformation matrix
 			VectorCopy(pl->angles, angles);
 			angles[0] = 0.0f;

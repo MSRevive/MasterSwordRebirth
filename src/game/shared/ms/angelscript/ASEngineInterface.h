@@ -13,7 +13,7 @@
 
 // Forward declarations
 typedef float vec_t;
-#include "hl/vector.h"
+#include "vector.h"
 
 //==========================================================================
 // Core Engine Interface Template

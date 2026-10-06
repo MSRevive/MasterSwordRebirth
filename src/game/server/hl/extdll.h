@@ -47,7 +47,7 @@ typedef int BOOL;
 #include "math.h"
 
 // Vector class
-#include "../../shared/hl/vector.h"
+#include "vector.h"
 
 // Shared engine/DLL constants
 #include "const.h"

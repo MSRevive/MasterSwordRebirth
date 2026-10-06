@@ -20,6 +20,7 @@
 // Most came from server.h
 
 #include "Platform.h"
+#include "vector.h"
 
 // edict->flags
 #define FL_FLY (1 << 0)	 // Changes the SV_Movestep() behavior to not need to be on ground
@@ -760,7 +761,7 @@ typedef struct edict_s edict_t;
 
 typedef struct
 {
-	vec3_t normal;
+	Vector normal;
 	float dist;
 } plane_t;
 
@@ -770,7 +771,7 @@ typedef struct
 	qboolean startsolid; // if true, the initial point was in a solid area
 	qboolean inopen, inwater;
 	float fraction; // time completed, 1.0 = didn't hit anything
-	vec3_t endpos;	// final position
+	Vector endpos;	// final position
 	plane_t plane;	// surface normal at impact
 	edict_t *ent;	// entity the surface is on
 	int hitgroup;	// 0 == generic, non zero is specific body part
