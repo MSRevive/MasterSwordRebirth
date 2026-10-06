@@ -57,7 +57,6 @@ static cvar_s *g_pVarBorderless = nullptr;
 static int g_iBorderlessMode = 0;
 
 // AngelScript cvars (client-side)
-static cvar_s *cl_as_enabled = nullptr;
 static cvar_s *cl_as_debug_mode = nullptr;
 
 enum BORDERLESS_WINDOW_TYPES
@@ -243,7 +242,6 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
 	
 	// Register AngelScript cvars for client
-	cl_as_enabled = CVAR_CREATE("cl_as_enabled", "0", FCVAR_ARCHIVE);
 	cl_as_debug_mode = CVAR_CREATE("cl_as_debug_mode", "0", FCVAR_ARCHIVE);
 
 	if(!gClient.Initialize())
@@ -255,9 +253,6 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	if (!CAngelScriptManager::Instance()->Initialize())
 	{
 		MS_ERROR("Client-side AngelScript initialization FAILED!");
-		// Don't fail the entire client initialization, just disable AngelScript
-		if (cl_as_enabled)
-			cl_as_enabled->value = 0;
 	}
 	else
 	{

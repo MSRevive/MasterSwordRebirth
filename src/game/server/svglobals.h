@@ -56,7 +56,6 @@ extern cvar_t *g_stopspeed;
 extern cvar_t *g_waterfriction;
 
 //AngelScript CVARs
-extern cvar_t as_enabled;
 extern cvar_t as_memory_limit;
 extern cvar_t as_memory_debug;
 extern cvar_t as_gc_interval;

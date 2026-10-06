@@ -25,7 +25,6 @@
 #include "mslogger.h"
 #include "ms/angelscript/ASEngineEventManager.h"
 //originally added for the as_enabled check, which is now the AS_DISABLED macro; this can be removed once AS is fully finished.
-#include "svglobals.h"
 
 #ifdef VALVE_DLL
 
@@ -83,6 +82,7 @@ int CMSMonster::IRelationship(CBaseEntity* pTarget)
 
 	return (int)CRaceManager::Relationship(m_Race, pMonster->m_Race);
 }
+
 bool CMSMonster::CanDamage(CBaseEntity* pOther) //Can I damage this entity?
 {
 	return (CBaseEntity::CanDamage(pOther)) &&		   //The entity can take damage
