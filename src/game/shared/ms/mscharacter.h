@@ -19,8 +19,7 @@ enum chardatastatus_e
 
 enum charloc_e
 {
-	LOC_CLIENT,
-	LOC_SERVER,
+	LOC_SERVER = 1,
 	LOC_CENTRAL
 };
 
@@ -31,15 +30,6 @@ enum jointype_e
 	JN_STARTMAP,
 	JN_VISITED,
 	JN_ELITE
-};
-
-enum charsendstatus_e
-{
-	CSS_DORMANT,
-	CSS_SENDING,
-	CSS_RECEIVING,
-	CSS_SENT,
-	CSS_RECEIVED
 };
 
 enum charClientType
@@ -78,7 +68,6 @@ struct gearinfo_t
 struct charinfo_t : charinfo_base_t
 {
 	chardatastatus_e Status, m_CachedStatus;
-	charsendstatus_e m_SendStatus; //Client uses this to determine whether the char has been uploaded
 	jointype_e JoinType;
 	charloc_e Location;
 
@@ -95,16 +84,9 @@ struct charinfo_t : charinfo_base_t
 	~charinfo_t();
 
 	void Destroy();
+#ifdef VALVE_DLL
 	void AssignChar(int CharIndex, charloc_e Location, const char* Data, int DataLen, class CBasePlayer* pPlayer);
-};
-
-struct charsendinfo_t : charinfo_base_t
-{
-	charsendstatus_e Status; //Whether this character is being sent or receieving
-	float TimeDataLastSent;
-	uint DataSent;
-
-	charsendinfo_t() : charinfo_base_t() {}
+#endif
 };
 
 struct natstat_t
@@ -124,12 +106,12 @@ struct spellskillstat_t
 
 #define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
 #define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
+#define SAVECHAR_VERSION_MSGPACK 13 // msgpack format.  Further format versioning is done with CF_FORMAT, see mscharacterheader.h
 
-#define SAVECHAR_VERSION SAVECHAR_VERSION_MSR
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSGPACK
 
-//The types of headers.  Each time the save file is revised, a new header is added.
-//The old headers are kept so the game knows when it is encountering an old save file
-//and can call the legacy code for converison to the new format.
+//LEGACY: chunk types of the pre-msgpack save format.  Only used to read old save files.
+//New saves use the msgpack keys in mscharacterheader.h.
 
 enum
 {
@@ -151,36 +133,24 @@ class MSChar_Interface
 {
 public:
 	//static Vector LastGoodPos, LastGoodAng;
-	static void AutoSave(class CBasePlayer *pPlayer);								//Client & Server
-	static bool ReadCharData(void *pData, ulong Size, struct chardata_t *CharData); //Client & Server
-
 	static enum jointype_e CanJoinThisMap(savedata_t &Data, msstringlist &VisitedMaps);		//Client & Server
 	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, msstringlist &VisitedMaps); //Client & Server
 	static bool HasVisited(const char* MapName, msstringlist &VisitedMaps);				//Client & Server
 
-	static void PacketAcknowledged(int PacketIdx);			//Client & Server
-	static void Think_SendChar(class CBasePlayer *pPlayer); //Client & Server
-
 #ifdef VALVE_DLL
-		//Server
-	static void HL_SVNewIncomingChar(class CBasePlayer *pPlayer, int CharIdx, uint UUEncodeLen, uint DataLen);
-	static void HL_SVReadCharData(class CBasePlayer *pPlayer, const char *UUEncodedData); //Server
-	static void SaveChar(class CBasePlayer *pPlayer, savedata_t *pData = NULL);			  //Server
-#else
-		//Client
-	static void CLInit();
-	static void HL_CLNewIncomingChar(int CharIdx, uint DataLen);
-	static void HL_CLReadCharData();
+	//Server - characters are only ever stored on the server (or central server)
+	static void AutoSave(class CBasePlayer *pPlayer);
+	static bool ReadCharData(void *pData, ulong Size, struct chardata_t *CharData);
+	static void SaveChar(class CBasePlayer *pPlayer, savedata_t *pData = NULL);
 #endif
 };
 
-bool DeleteChar(int iCharacter);											 //Client version
-bool DeleteChar(CBasePlayer *pPlayer, int iCharacter);						 //Server version
-const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer = NULL);	 //Client & Server
-bool IsValidCharVersion(int Version);										 //Client & Server
-savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps); //Client & Server
+#ifdef VALVE_DLL
+bool DeleteChar(CBasePlayer *pPlayer, int iCharacter);
+const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer);
+#endif
 
-#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
+#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar" (clamped to 1..MAX_CHARSLOTS)
 
 struct charslot_t
 {
@@ -194,9 +164,8 @@ struct charslot_t
 class ChooseChar_Interface
 {
 public:
-	static int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
+	static int ServerCharNum; //Max number of characters the server will allow
 	static bool CentralServer;
 	static void UpdateCharScreen();
-	static void UpdateCharScreenUpload();
 };
 #endif //MSCHARACTER_H

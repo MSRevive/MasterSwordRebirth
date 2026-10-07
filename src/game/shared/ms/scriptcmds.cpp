@@ -5267,10 +5267,7 @@ for( int i = 1; i <= gpGlobals->maxClients; i++ )
 {
 CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
 if( pPlayer )
-{
 pPlayer->SaveChar( );
-if( !MSGlobals::ServerSideChar ) pPlayer->m_TimeCharLastSent = 0;
-}
 }
 #endif
 
@@ -5288,10 +5285,7 @@ bool CScript::ScriptCmd_SaveNow( SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstring
 CBaseEntity *pEntity = RetrieveEntity( Params[0] );
 CBasePlayer *pPlayer = pEntity->IsPlayer() ? (CBasePlayer *)pEntity : NULL;
 if( pPlayer )
-{
 pPlayer->SaveChar( );
-if( !MSGlobals::ServerSideChar ) pPlayer->m_TimeCharLastSent = 0;
-}
 else ERROR_MISSING_PARMS;
 #endif
 

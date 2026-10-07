@@ -366,14 +366,14 @@ struct chardata_t : savedata_t
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	mslist<quickslot_t> m_QuickSlots;	//All the quickslots (based on the item IDs of the last save)
 
-	bool ReadData(void *pData, ulong Size);
-
-	//The number on the end of these functions is the version number.
-	//Each time one is changed, a new function must be made with an increased version
-	//This allows me to keep the old code and old legacy player files
-
-	bool ReadHeader1(byte DataID, CPlayer_DataBuffer &m_File);
 #ifdef VALVE_DLL
+	//Save reading is server-only, see sv_character.cpp
+	bool ReadData(void *pData, ulong Size); //Reads both msgpack and legacy saves
+	bool ReadDataPack(const char *pData, size_t Size);
+
+	//LEGACY: readers for the pre-msgpack format.  Only used to load old saves.
+	bool ReadDataLegacy(void *pData, ulong Size);
+	bool ReadHeader1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File);
@@ -398,8 +398,6 @@ class CBasePlayer : public CMSMonster
 {
 public:
 	//Master Sword
-	charsendinfo_t m_CharSend; //Info about the char being transmitted (to server or to client)
-	float m_TimeCharLastSent;  //Time the server last sent the char down to client
 	charinfo_t m_CharInfo[MAX_CHARSLOTS];
 	bool m_fDropAllItems; //Drop items upon death?
 	int m_SayType;
@@ -637,8 +635,9 @@ public:
 	ulong GetPartyID();
 	bool IsLocalHost(); //This is a listen server and this is the host
 	msstring AuthID();
-	void SendChar(charinfo_base_t &CharBase);
-	void PreLoadChars(int CharIdx = -1); //Preload all my available characters (client or server)
+#ifdef VALVE_DLL
+	void PreLoadChars(int CharIdx = -1); //Preload all my available characters (from the server or central server)
+#endif
 	void QuickSlot_Create(int Slot, ulong ID, bool Verbose);
 	void QuickSlot_Use(int Slot);
 

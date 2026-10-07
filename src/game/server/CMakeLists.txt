@@ -194,7 +194,6 @@ set(MS
 	"../shared/movement/pm_shared.cpp"
 	"../shared/movement/pm_shared.h"
 	"../shared/ms/msmonstershared.cpp"
-	"../shared/ms/netcodeshared.cpp"
 	"../shared/stats/races.cpp"
 	"../shared/syntax/syntax.cpp"
 )

@@ -95,7 +95,6 @@ public:
 	Label *Choose_CharLabel[CHOOSEPANEL_MAINBTNS][2];
 	MSButton *Choose_DeleteChar[CHOOSEPANEL_MAINBTNS];
 	ActionSignal *Choose_DelActionSig[CHOOSEPANEL_MAINBTNS];
-	MSLabel *Choose_UploadStatus;
 
 	TextPanel *Gender_MainLabel;
 	Label *Gender_NameLabel;
@@ -133,7 +132,6 @@ public:
 	virtual bool KeyInput(int down, int keynum, const char *pszCurrentBinding);
 	virtual void Think(void);
 
-	void UpdateUpload();
 	void UpdateModels();
 	void Gender_SelectItem(int Btn);
 	void Gender_NameSelected();

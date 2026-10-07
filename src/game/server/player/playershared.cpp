@@ -1417,13 +1417,10 @@ msstring CBasePlayer::AuthID()
 #endif
 }
 
+#ifdef VALVE_DLL
 void CBasePlayer::PreLoadChars(int CharIdx)
 {
 	//Reload the Character list, for players entering server
-#ifdef VALVE_DLL
-	if (!MSGlobals::ServerSideChar)
-		return;
-
 	if (FNShared::IsEnabled())
 	{
 		// Send a request to retrieve the player's info from a central server.
@@ -1435,31 +1432,23 @@ void CBasePlayer::PreLoadChars(int CharIdx)
 	}
 	else
 	{
-		charloc_e Location = LOC_SERVER;
-#else
-	charloc_e Location = LOC_CLIENT;
-#endif
-
-	//Load all characters from file, locally
-
-	for (int i = 0; i < MAX_CHARSLOTS; i++)
-	{
-		charinfo_t& Char = m_CharInfo[i];
-		CPlayer_DataBuffer gFile;
-		const char* saveFileName = GetSaveFileName(i, this);
-		if (gFile.ReadFromFile(saveFileName, "rb", true))
-			Char.AssignChar(i, Location, reinterpret_cast<char*>(gFile.m_Buffer), gFile.GetFileSize(), this);
-		else
-			Char.Status = CDS_NOTFOUND;
+		//Load all characters from file, locally
+		for (int i = 0; i < MAX_CHARSLOTS; i++)
+		{
+			charinfo_t& Char = m_CharInfo[i];
+			CPlayer_DataBuffer gFile;
+			const char* saveFileName = GetSaveFileName(i, this);
+			if (gFile.ReadFromFile(saveFileName, "rb", true))
+				Char.AssignChar(i, LOC_SERVER, reinterpret_cast<char*>(gFile.m_Buffer), gFile.GetFileSize(), this);
+			else
+				Char.Status = CDS_NOTFOUND;
+		}
 	}
 
-#ifdef VALVE_DLL
+	//Start checking m_CharInfo for new char data
+	m_TimeSendCharInfo = gpGlobals->time;
 }
-
-//Start checking m_CharInfo for new char data
-m_TimeSendCharInfo = gpGlobals->time;
 #endif
-}
 
 void charinfo_t::Destroy()
 {
@@ -1469,6 +1458,7 @@ void charinfo_t::Destroy()
 	memset(this, 0, sizeof(*this));
 }
 
+#ifdef VALVE_DLL
 void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pData, int iDataLen, CBasePlayer* pPlayer)
 {
 	Destroy();
@@ -1556,6 +1546,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 	else
 		Status = CDS_NOTFOUND;
 }
+#endif
 
 charinfo_t::~charinfo_t()
 {

@@ -255,7 +255,6 @@ void MSWorldSpawn()
 	
 	MS_INFO("=== MSWorldSpawn: Map initialization complete ===");
 	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0 && !MSGlobals::CentralEnabled ? true : false;
-	//return MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar;
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
 	MSGlobals::PKAllowedinTown = ms_pklevel.value > 1 ? true : false;
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") ? true : false;
@@ -266,7 +265,6 @@ void MSWorldSpawn()
 	// engine bug maybe?
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") > 0.0f ? true : false;
 	MSGlobals::CanCreateCharOnMap = false;
-	MSGlobals::ServerSideChar = ms_serverchar.value > 0.0f ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
 	
 	//Force the client to use the same client lib as the server. - Solokiller
@@ -541,11 +539,7 @@ void MSGameEnd()
 		CBasePlayer *pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
 		if((pPlayer) && (pPlayer->m_CharacterState == CHARSTATE_LOADED))
-		{
 			pPlayer->SaveChar();
-			if(!MSGlobals::ServerSideChar) 
-				pPlayer->m_TimeCharLastSent = 0;
-		}
 	}
 	
 	//Thothie MAR2012_27 - clear duplicate precaches for next map

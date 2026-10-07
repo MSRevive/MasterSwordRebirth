@@ -116,34 +116,16 @@ public:
 		{
 		case STG_CHOOSECHAR:
 		{
-			//Load and send my save character
+			//Load my save character
 
-			if( MSGlobals::ServerSideChar
-				&& m_Option >= ChooseChar_Interface::ServerCharNum )
-					return;
+			if( m_Option >= ChooseChar_Interface::ServerCharNum )
+				return;
 
 			charinfo_t &Char = player.m_CharInfo[m_Value];
-			if( Char.Status != CDS_NOTFOUND )				
+			if( Char.Status != CDS_NOTFOUND )
 			{
-				if( Char.Location == LOC_CLIENT &&
-					Char.m_SendStatus != CSS_SENT )
-				{
-					//Local file
-
-					if( Char.m_SendStatus == CSS_DORMANT )
-					{
-						Char.m_SendStatus = CSS_SENDING;
-
-						player.SendChar( Char );
-					}
-
-					//RestoreAll( m_Value );
-				}
-				else
-				{
-					msstring CharCmd = msstring("char ") + m_Value + "\n";
-					ServerCmd( CharCmd );
-				}
+				msstring CharCmd = msstring("char ") + m_Value + "\n";
+				ServerCmd( CharCmd );
 				return;
 			}
 			else 
@@ -165,7 +147,6 @@ public:
 			m_NewChar.Name = m_pPanel->Gender_Name;
 			break;
 		case STG_CHOOSEWEAPON:
-			//if( MSGlobals::ServerSideChar )
 			{
 				//Create a new character, using the options the user specified.
 				msstring NewCharCmd = "char ";											//Command "char"
@@ -218,16 +199,7 @@ public:
 	virtual void actionPerformed( Panel* panel )
 	{
 		if( m_ConfirmState )
-		{
-			if( MSGlobals::ServerSideChar )
-				ServerCmd( msstring("char -1 ") + m_pPanel->m_DeleteChar );
-			else
-			{
-				DeleteChar( m_pPanel->m_DeleteChar );
-				player.m_CharInfo[m_pPanel->m_DeleteChar].Status = CDS_NOTFOUND;
-				m_pPanel->Update( );
-			}
-		}
+			ServerCmd( msstring("char -1 ") + m_pPanel->m_DeleteChar );
 		m_pPanel->m_ConfirmPanel->setVisible( false );
 	}
 };
@@ -480,8 +452,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 		Choose_DeleteChar[i]->setText( Localized("#CHOOSECHAR_DELETE") );	//For Font
 	}
 
-	Choose_UploadStatus = new MSLabel( m_ChoosePanel, "", XRES(0), m_ChoosePanel->getTall() - CHOOSE_MAINLBLSIZEY, CHOOSE_SIZEX, CHOOSE_MAINLBLSIZEY, MSLabel::a_center );
-	Choose_UploadStatus->SetFGColorRGB( Color_Text_White );
 
 	//Confirm character deletion Panel
 	#define CONFIRM_SIZEX XRES(120)
@@ -672,20 +642,12 @@ void CNewCharacterPanel::Update()
 	_snprintf(cTemp, sizeof(cTemp), Localized("#CHOOSECHAR_ENTERING"), cTemp2);		//Entering: <mapname>
 	Choose_MainLabel->setText( cTemp );
 
-	if( MSGlobals::ServerSideChar )
-	{
-		cTemp2[0] = 0;
-		if ((MSGlobals::IsLanGame) && (MSGlobals::ServerSideChar == false)) 
-			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
+	cTemp2[0] = 0;
+	if(ChooseChar_Interface::CentralServer)
+		_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
 
-		if(ChooseChar_Interface::CentralServer)
-			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
-
-		_snprintf(cTemp, sizeof(cTemp), "%s%s", Localized("#CHOOSECHAR_SERVER"), cTemp2);
-		Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
-	}
-	else
-		Choose_CharHandlingLabel->setText(Localized("#CHOOSECHAR_LOCAL"));		//Character are stored on the client
+	_snprintf(cTemp, sizeof(cTemp), "%s%s", Localized("#CHOOSECHAR_SERVER"), cTemp2);
+	Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
 
 	switch( m_Stage )
 	{
@@ -705,9 +667,7 @@ void CNewCharacterPanel::Update()
 
 				if( CharSlot.Status == CDS_NOTFOUND &&				//No char at this slot and
 					MSGlobals::CanCreateCharOnMap &&				//Map allows creating characters and
-					player.m_CharSend.Status == CSS_DORMANT &&		//Not currently uploading a character and
-					(!MSGlobals::ServerSideChar ||					//Characters are client side or
-					i < ChooseChar_Interface::ServerCharNum) )		//Server allows clients to create at least this many characters
+					i < ChooseChar_Interface::ServerCharNum )		//Server allows clients to create at least this many characters
 				{		
 					//Choose_MainBtn[i]->SetBGColorRGB( NewCharColor );
 					//Choose_MainBtn[i]->SetFGColorRGB( NewCharColor );
@@ -759,9 +719,6 @@ void CNewCharacterPanel::Update()
 
 				//Grey out the char if it can't join the map
 				bool GreyedOut = CharSlot.JoinType == JN_NOTALLOWED;
-				
-				//Grey out all chars while uploading a char
-				if( player.m_CharSend.Status != CSS_DORMANT ) GreyedOut = true;
 
 				msstring model = MODEL_HUMAN_REF;
 
@@ -1044,22 +1001,6 @@ void CNewCharacterPanel::Initialize( void )
 	m_pScrollPanel->setScrollValue( 0, 0 );
 }
 
-void CNewCharacterPanel::UpdateUpload( )
-{
-	if( player.m_CharSend.Status == CSS_SENDING )
-	{
-		Choose_UploadStatus->setVisible( true );
-		int Percent = ((float)player.m_CharSend.DataSent / player.m_CharSend.DataLen) * 100;
-		msstring Text = msstring("Uploading (") + Percent + "%)";
-		Choose_UploadStatus->setText( Text.c_str() );
-	}
-	else
-	{
-		Choose_UploadStatus->setVisible( false );
-	}
-
-}
-
 void ShowVGUIMenu( int iMenu );
 void __CmdFunc_PlayerChooseChar( )
 {
@@ -1074,9 +1015,7 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
-	//This info comes from the server, if characters are server-side
-	//If chars are client-side, then this message only comes with Status == CDS_LOADED after I've uploaded a char
-	//Read data for one character at a time
+	//This info comes from the server.  Read data for one character at a time
 
 	byte CharMsgType = READ_BYTE();
 	byte CharIndex = READ_BYTE();						//Which char the info describes
@@ -1127,12 +1066,6 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 				CharSlot.body = 40;
 				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.body = 80;
 			}
-
-			if (CharSlot.Location == LOC_CLIENT)
-			{
-				CharSlot.m_SendStatus = CSS_SENT;	//I just finished sending this char to the server
-				player.m_CharSend.Status = CSS_DORMANT;
-			}
 		}
 	}
 
@@ -1148,12 +1081,6 @@ void ChooseChar_Interface::UpdateCharScreen()
 	if (MSCLGlobals::CharPanelActive)
 		if (gViewPort && gViewPort->m_pCurrentMenu)
 			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
-}
-void ChooseChar_Interface::UpdateCharScreenUpload()
-{
-	if (MSCLGlobals::CharPanelActive)
-		if (gViewPort && gViewPort->m_pCurrentMenu)
-			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->UpdateUpload();
 }
 
 //CRenderChar
@@ -1359,10 +1286,7 @@ void CRenderChar::SetActive( bool Active )
 	}
 	else
 	{
-		if( player.m_CharSend.Index == m_Idx && player.m_CharSend.Status == CSS_SENDING )
-			m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Uploading.c_str() );
-		else
-			m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Inactive.c_str() );
+		m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Inactive.c_str() );
 		m_AnimState = RCS_INACTIVE;
 		SetBits( m_Ent.curstate.colormap, MSRDR_LIGHT_DIM );
 	}

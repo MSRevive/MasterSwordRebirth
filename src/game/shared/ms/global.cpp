@@ -40,7 +40,6 @@ bool MSGlobals::CentralEnabled = false; //Thothie attempting to fix FN upload sp
 bool MSGlobals::DevModeEnabled = false; //Thothie JUL2010_22 attempting to fix "Mapper Scripts.rtf"
 bool MSGlobals::IsLanGame = false;
 bool MSGlobals::CanCreateCharOnMap = false;
-bool MSGlobals::ServerSideChar = false;
 bool MSGlobals::InvertTownAreaPKFlag = false;
 bool MSGlobals::IsServer =
 #ifdef VALVE_DLL

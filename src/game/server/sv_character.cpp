@@ -144,7 +144,439 @@ void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 }
 
 //
-//  Read chunks from raw char data
+//  msgpack character format.  Field keys and versioning rules are in mscharacterheader.h
+//  A save is CHARPACK_MAGIC followed by one msgpack map.
+//
+
+#define CHARPACK_MAGIC "MSRC" //Legacy saves always start with 0 (CHARDATA_HEADER1), so this can't collide
+#define CHARPACK_MAGIC_LEN 4
+
+//Non-throwing readers.  A value of the wrong type reads as the default, so a malformed
+//or changed field can never take down the whole load.
+
+static long long PackReadInt(const msgpack::object &Obj, long long Default = 0)
+{
+	switch (Obj.type)
+	{
+	case msgpack::type::POSITIVE_INTEGER: return (long long)Obj.via.u64;
+	case msgpack::type::NEGATIVE_INTEGER: return Obj.via.i64;
+	case msgpack::type::FLOAT32:
+	case msgpack::type::FLOAT64: return (long long)Obj.via.f64;
+	case msgpack::type::BOOLEAN: return Obj.via.boolean ? 1 : 0;
+	default: return Default;
+	}
+}
+
+static float PackReadFloat(const msgpack::object &Obj, float Default = 0.0f)
+{
+	switch (Obj.type)
+	{
+	case msgpack::type::FLOAT32:
+	case msgpack::type::FLOAT64: return (float)Obj.via.f64;
+	case msgpack::type::POSITIVE_INTEGER: return (float)Obj.via.u64;
+	case msgpack::type::NEGATIVE_INTEGER: return (float)Obj.via.i64;
+	default: return Default;
+	}
+}
+
+//Copies a string into a fixed buffer, truncating if needed.  Always null-terminates.
+static void PackReadStr(const msgpack::object &Obj, char *pOut, size_t OutSize)
+{
+	if (!OutSize)
+		return;
+
+	size_t Len = 0;
+	if (Obj.type == msgpack::type::STR)
+	{
+		Len = Obj.via.str.size;
+		if (Len > OutSize - 1)
+			Len = OutSize - 1;
+		memcpy(pOut, Obj.via.str.ptr, Len);
+	}
+	pOut[Len] = 0;
+}
+
+static msstring PackReadMsStr(const msgpack::object &Obj)
+{
+	char cTemp[MSSTRING_SIZE];
+	PackReadStr(Obj, cTemp, sizeof(cTemp));
+	return msstring(cTemp);
+}
+
+//Returns the array/map, or an empty one if the object is some other type
+static msgpack::object_array PackArray(const msgpack::object &Obj)
+{
+	if (Obj.type == msgpack::type::ARRAY)
+		return Obj.via.array;
+
+	msgpack::object_array Empty;
+	Empty.size = 0;
+	Empty.ptr = NULL;
+	return Empty;
+}
+
+static msgpack::object_map PackMap(const msgpack::object &Obj)
+{
+	if (Obj.type == msgpack::type::MAP)
+		return Obj.via.map;
+
+	msgpack::object_map Empty;
+	Empty.size = 0;
+	Empty.ptr = NULL;
+	return Empty;
+}
+
+//
+//  Helpers shared by the msgpack and legacy readers
+//
+
+// MiB JUL2010_02 - Hacky, but if we add more stats and we load a character that doesn't have said stat in the file
+//		we set it to the default new stat value (level 0 in Prof and Balance, 1 in Power)
+static void InitUnsavedStats(statlist &Stats, int SavedStats)
+{
+	for (int i = SavedStats; i < Stats.size(); i++)
+	{
+		CStat &Stat = Stats[i];
+		Stat.m_SubStats[Stat.m_SubStats.size() - 1].Value = 1;
+	}
+}
+
+static void ApplyItemAlias(msstring &ItemName)
+{
+	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(ItemName);
+	if (iAlias != CGenericItemMgr::mItemAlias.end())
+		ItemName = iAlias->second;
+}
+
+//
+//  Read msgpack sections
+//
+
+static void ReadItemListPack(const msgpack::object &Obj, mslist<genericitem_full_t> &outItems);
+
+static bool ReadItemPack(const msgpack::object &Obj, genericitem_full_t &outItem)
+{
+	clrmem(outItem);
+
+	msgpack::object_map Fields = PackMap(Obj);
+	for (uint32_t f = 0; f < Fields.size; f++)
+	{
+		const msgpack::object &Value = Fields.ptr[f].val;
+		switch (PackReadInt(Fields.ptr[f].key, -1))
+		{
+		case CI_NAME: outItem.Name = PackReadMsStr(Value); break;
+		case CI_PROPERTIES: outItem.Properties = (ulong)PackReadInt(Value); break;
+		case CI_LOCATION: outItem.Location = (unsigned short)PackReadInt(Value); break;
+		case CI_HAND: outItem.Hand = (byte)PackReadInt(Value); break;
+		case CI_ID: outItem.ID = (ulong)PackReadInt(Value); break;
+		case CI_QUALITY: outItem.Quality = (unsigned short)PackReadInt(Value); break;
+		case CI_MAXQUALITY: outItem.MaxQuality = (unsigned short)PackReadInt(Value); break;
+		case CI_QUANTITY: outItem.Quantity = (unsigned short)PackReadInt(Value); break;
+		case CI_CONTENTS: ReadItemListPack(Value, outItem.ContainerItems); break;
+		}
+	}
+
+	if (!outItem.Name.len())
+		return false;
+
+	ApplyItemAlias(outItem.Name);
+	return true;
+}
+
+static void ReadItemListPack(const msgpack::object &Obj, mslist<genericitem_full_t> &outItems)
+{
+	msgpack::object_array Items = PackArray(Obj);
+	for (uint32_t i = 0; i < Items.size; i++)
+	{
+		genericitem_full_t Item;
+		if (!ReadItemPack(Items.ptr[i], Item))
+		{
+			MS_ERROR("ReadCharData: Bad item, skipping...");
+			continue;
+		}
+		outItems.add(Item);
+	}
+}
+
+static void ReadStringListPack(const msgpack::object &Obj, msstringlist &outList)
+{
+	msgpack::object_array Strings = PackArray(Obj);
+	outList.clear();
+	for (uint32_t i = 0; i < Strings.size; i++)
+		outList.add(PackReadMsStr(Strings.ptr[i]));
+}
+
+bool MSChar_Interface::ReadCharData(void *pData, ulong Size, chardata_t *CharData)
+{
+	return CharData->ReadData(pData, Size);
+}
+
+//Reads both msgpack and legacy saves
+bool chardata_t::ReadData(void *pData, ulong Size)
+{
+	if (Size >= CHARPACK_MAGIC_LEN && !memcmp(pData, CHARPACK_MAGIC, CHARPACK_MAGIC_LEN))
+		return ReadDataPack((const char *)pData + CHARPACK_MAGIC_LEN, Size - CHARPACK_MAGIC_LEN);
+
+	return ReadDataLegacy(pData, Size);
+}
+
+bool chardata_t::ReadDataPack(const char *pData, size_t Size)
+{
+	memset(static_cast<savedata_t *>(this), 0, sizeof(savedata_t));
+	Version = SAVECHAR_VERSION;
+	strncpy(Race, "Human", sizeof(Race)); // LEGACY
+
+	try
+	{
+		//Every element takes at least a byte, so no count can legitimately exceed Size.  Stops a corrupt
+		//save from requesting a huge allocation or nesting deep enough to blow the stack.
+		const msgpack::unpack_limit Limit(Size, Size, Size, Size, Size, 64);
+		msgpack::object_handle Handle = msgpack::unpack(pData, Size, MSGPACK_NULLPTR, MSGPACK_NULLPTR, Limit);
+		msgpack::object_map Root = PackMap(Handle.get());
+
+		//Check the format before reading anything
+		int Format = -1;
+		for (uint32_t i = 0; i < Root.size; i++)
+			if (PackReadInt(Root.ptr[i].key, -1) == CF_FORMAT)
+				Format = (int)PackReadInt(Root.ptr[i].val, -1);
+
+		if (Format < 1 || Format > CHARFMT_VERSION)
+		{
+			MS_ERROR("ReadCharData: unsupported character format %i (this build supports up to %i)", Format, CHARFMT_VERSION);
+			return false;
+		}
+
+		//Keys not handled here were written by a newer build, or are retired, and are skipped
+		for (uint32_t i = 0; i < Root.size; i++)
+		{
+			const msgpack::object &Value = Root.ptr[i].val;
+
+			switch (PackReadInt(Root.ptr[i].key, -1))
+			{
+			//Header
+			case CF_NAME: PackReadStr(Value, Name, sizeof(Name)); break;
+			case CF_MAPNAME: PackReadStr(Value, MapName, sizeof(MapName)); break;
+			case CF_NEXTMAP: PackReadStr(Value, NextMap, sizeof(NextMap)); break;
+			case CF_OLDTRANS: PackReadStr(Value, OldTrans, sizeof(OldTrans)); break;
+			case CF_NEWTRANS: PackReadStr(Value, NewTrans, sizeof(NewTrans)); break;
+			case CF_STEAMID: PackReadStr(Value, SteamID, sizeof(SteamID)); break;
+			case CF_PARTY: PackReadStr(Value, Party, sizeof(Party)); break;
+			case CF_PARTYID: PartyID = (ulong)PackReadInt(Value); break;
+			case CF_ISELITE: IsElite = (byte)PackReadInt(Value); break;
+			case CF_GOLD: Gold = (int)PackReadInt(Value); break;
+			case CF_MAXHP: MaxHP = (short)PackReadInt(Value); break;
+			case CF_MAXMP: MaxMP = (short)PackReadInt(Value); break;
+			case CF_HP: HP = (short)PackReadInt(Value); break;
+			case CF_MP: MP = (short)PackReadInt(Value); break;
+			case CF_GENDER: Gender = (byte)PackReadInt(Value); break;
+			case CF_PLAYERKILLS: PlayerKills = (short)PackReadInt(Value); break;
+			case CF_TIMEFORGETKILL: TimeWaitedToForgetKill = PackReadFloat(Value); break;
+			case CF_TIMEFORGETSTEAL: TimeWaitedToForgetSteal = PackReadFloat(Value); break;
+
+			//Sections
+			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
+			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
+			case CF_HELPTIPS: ReadStringListPack(Value, m_ViewedHelpTips); break;
+			case CF_ITEMS: ReadItemListPack(Value, m_Items); break;
+
+			case CF_SKILLS:
+			{
+				CStat::InitStatList(m_Stats);
+
+				msgpack::object_array Stats = PackArray(Value);
+				for (uint32_t s = 0; s < Stats.size; s++)
+				{
+					CStat *pStat = GetStat(s);
+					if (!pStat)
+						continue;
+
+					msgpack::object_array SubStats = PackArray(Stats.ptr[s]);
+					for (uint32_t r = 0; r < SubStats.size; r++)
+					{
+						CSubStat *pSubStat = pStat->GetSubStat(r);
+						if (!pSubStat)
+							continue;
+
+						msgpack::object_array SubStat = PackArray(SubStats.ptr[r]); //[value, exp]
+						if (SubStat.size > 0)
+							pSubStat->Value = (int)PackReadInt(SubStat.ptr[0]);
+						if (SubStat.size > 1)
+							pSubStat->Exp = (ulong)PackReadInt(SubStat.ptr[1]);
+					}
+				}
+
+				InitUnsavedStats(m_Stats, Stats.size);
+				break;
+			}
+
+			case CF_STORAGES:
+			{
+				msgpack::object_array Storages = PackArray(Value);
+				for (uint32_t s = 0; s < Storages.size; s++)
+				{
+					storage_t Storage;
+					msgpack::object_map Fields = PackMap(Storages.ptr[s]);
+					for (uint32_t f = 0; f < Fields.size; f++)
+					{
+						const msgpack::object &FieldValue = Fields.ptr[f].val;
+						switch (PackReadInt(Fields.ptr[f].key, -1))
+						{
+						case CS_NAME: Storage.Name = PackReadMsStr(FieldValue); break;
+						case CS_ITEMS: ReadItemListPack(FieldValue, Storage.Items); break;
+						}
+					}
+					m_Storages.add(Storage);
+				}
+				break;
+			}
+
+			case CF_COMPANIONS:
+			{
+				msgpack::object_array Companions = PackArray(Value);
+				for (uint32_t c = 0; c < Companions.size; c++)
+				{
+					companion_t &Companion = m_Companions.add(companion_t());
+					Companion.Active = false;
+
+					msgpack::object_map Fields = PackMap(Companions.ptr[c]);
+					for (uint32_t f = 0; f < Fields.size; f++)
+					{
+						const msgpack::object &FieldValue = Fields.ptr[f].val;
+						switch (PackReadInt(Fields.ptr[f].key, -1))
+						{
+						case CC_SCRIPT: Companion.ScriptName = PackReadMsStr(FieldValue); break;
+						case CC_VARS:
+						{
+							msgpack::object_array Vars = PackArray(FieldValue);
+							for (uint32_t v = 0; v < Vars.size; v++)
+							{
+								msgpack::object_array Var = PackArray(Vars.ptr[v]); //[name, value]
+								if (Var.size < 2)
+									continue;
+								Companion.SaveVarName.add(PackReadMsStr(Var.ptr[0]));
+								Companion.SaveVarValue.add(PackReadMsStr(Var.ptr[1]));
+							}
+							break;
+						}
+						}
+					}
+				}
+				break;
+			}
+
+			case CF_QUESTS:
+			{
+				msgpack::object_array Quests = PackArray(Value);
+				m_Quests.clear();
+				for (uint32_t q = 0; q < Quests.size; q++)
+				{
+					msgpack::object_array QuestData = PackArray(Quests.ptr[q]); //[name, data]
+					if (QuestData.size < 2)
+						continue;
+
+					quest_t Quest;
+					Quest.Name = PackReadMsStr(QuestData.ptr[0]);
+					Quest.Data = PackReadMsStr(QuestData.ptr[1]);
+					m_Quests.add(Quest);
+				}
+				break;
+			}
+
+			case CF_QUICKSLOTS:
+			{
+				msgpack::object_array QuickSlots = PackArray(Value);
+				m_QuickSlots.clear();
+				for (uint32_t q = 0; q < QuickSlots.size; q++)
+				{
+					quickslot_t QuickSlot;
+					msgpack::object_array SlotData = PackArray(QuickSlots.ptr[q]); //nil or [type, id]
+					if (SlotData.size >= 2)
+					{
+						QuickSlot.Active = true;
+						QuickSlot.Type = (quickslottype_e)PackReadInt(SlotData.ptr[0]);
+						QuickSlot.ID = (uint)PackReadInt(SlotData.ptr[1]);
+					}
+					else
+						QuickSlot.Active = false;
+
+					m_QuickSlots.add(QuickSlot);
+				}
+				break;
+			}
+			}
+		}
+	}
+	catch (const std::exception &e)
+	{
+		MS_ERROR("ReadCharData: corrupt character data (%s)", e.what());
+		return false;
+	}
+
+	return true;
+}
+
+//
+//  LEGACY: Read pre-msgpack saves
+//
+
+static bool IsValidCharVersion(int Version)
+{
+	return (Version == SAVECHAR_VERSION_MSC) || (Version == SAVECHAR_VERSION_MSR);
+}
+
+bool chardata_t::ReadDataLegacy(void *pData, ulong Size)
+{
+	bool ValidVersion = false;
+	memset(static_cast<savedata_t *>(this), 0, sizeof(savedata_t)); //Header fields added after the legacy format start at 0
+
+	CPlayer_DataBuffer m_File(Size);
+	m_File.Write(pData, Size);
+	byte DataID = CHARDATA_UNKNOWN;
+
+	do
+	{
+		m_File.ReadByte(DataID);
+		if (DataID >= CHARDATA_UNKNOWN)
+		{
+			ValidVersion = false;
+			break;
+		}
+
+		if (ReadHeader1(DataID, m_File))
+			ValidVersion = true;
+
+		ReadMaps1(DataID, m_File);
+		ReadSkills1(DataID, m_File);
+		ReadSpells1(DataID, m_File);
+		ReadItems1(DataID, m_File);
+		ReadStorageItems1(DataID, m_File);
+		ReadCompanions1(DataID, m_File);
+		ReadHelpTips1(DataID, m_File);
+		ReadQuests1(DataID, m_File);
+		ReadQuickSlots1(DataID, m_File);
+	} while (!m_File.Eof());
+
+	m_File.Close();
+
+	return ValidVersion;
+}
+
+bool chardata_t::ReadHeader1(byte DataID, CPlayer_DataBuffer &m_File)
+{
+	if (DataID == CHARDATA_HEADER1)
+	{
+		m_File.Read(static_cast<savedata_legacy_t *>(this), sizeof(savedata_legacy_t)); //[HEADER}
+
+		if (!IsValidCharVersion(Version))
+			return false;
+
+		return true;
+	}
+	return false;
+}
+
+//
+//  LEGACY: Read chunks from raw char data
 //
 
 static char cTemp[MSSTRING_SIZE];
@@ -217,14 +649,7 @@ void chardata_t::ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File)
 			}
 		}
 
-		// MiB JUL2010_02 - Hacky, but if we add more stats and we load a character that doesn't have said stat in the file
-		//		we set it to the default new stat value (level 0 in Prof and Balance, 1 in Power)
-		int StatsRemaining = (m_Stats.size() - Stats);
-		for (int i = 0; i < StatsRemaining; i++)
-		{
-			CStat& Stat = m_Stats[i + Stats];
-			Stat.m_SubStats[Stat.m_SubStats.size() - 1].Value = 1;
-		}
+		InitUnsavedStats(m_Stats, Stats);
 	}
 }
 
@@ -396,10 +821,8 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 	if (!cTemp || !cTemp[0])
 		return false;
 
-	outItem.Name = cTemp;	
-	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(outItem.Name);
-	if (iAlias != CGenericItemMgr::mItemAlias.end())	
-		outItem.Name = iAlias->second;	
+	outItem.Name = cTemp;
+	ApplyItemAlias(outItem.Name);
 
 	//It is now possible to read an item from file correctly, but not be able to spawn that item.
 	//Be sure that, even if the item can't be created, all of the item's data is read from file properly
@@ -474,16 +897,290 @@ bool chardata_t::ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_fu
 // Save Character
 // ==============
 
-void WriteItem(CPlayer_DataBuffer &gFile, genericitem_full_t &Item);
+struct charpack_t
+{
+	msgpack::sbuffer Buf;
+	msgpack::packer<msgpack::sbuffer> Pk;
+
+	charpack_t() : Pk(Buf) {}
+};
+
+static void PackStr(charpack_t &Out, const char *pszValue, size_t MaxLen = MSSTRING_SIZE)
+{
+	uint32_t Len = pszValue ? (uint32_t)strnlen(pszValue, MaxLen) : 0;
+	Out.Pk.pack_str(Len);
+	if (Len)
+		Out.Pk.pack_str_body(pszValue, Len);
+}
+
+static void PackStr(charpack_t &Out, msstring &Value)
+{
+	PackStr(Out, Value.c_str(), Value.len());
+}
+
+//A map or array whose size isn't known up front.  Reserves a 16-bit count and patches in the
+//real one when the scope ends, so fields can be added or written conditionally without
+//keeping a separate count in sync.  Nested scopes must end before their parent (just use C++ scoping).
+class CPackScope
+{
+public:
+	CPackScope(charpack_t &Out, bool IsMap) : m_Out(Out), m_Offset(Out.Buf.size()), m_Count(0)
+	{
+		const char Header[3] = {(char)(IsMap ? 0xde : 0xdc), 0, 0}; //map16 / array16
+		m_Out.Buf.write(Header, sizeof(Header));
+	}
+
+	~CPackScope()
+	{
+		if (m_Count > 0xFFFF)
+			MS_ERROR("SaveChar: too many entries (%u) in one map/array, save is corrupt!", m_Count);
+
+		//Buffer may have been reallocated since the header was written, so go through the offset
+		char *pHeader = m_Out.Buf.data() + m_Offset;
+		pHeader[1] = (char)((m_Count >> 8) & 0xFF);
+		pHeader[2] = (char)(m_Count & 0xFF);
+	}
+
+	//Map: write a key and value
+	template <typename T>
+	void Field(int FieldKey, const T &Value)
+	{
+		m_Out.Pk.pack(FieldKey);
+		m_Out.Pk.pack(Value);
+		m_Count++;
+	}
+
+	void FieldStr(int FieldKey, const char *pszValue, size_t MaxLen)
+	{
+		m_Out.Pk.pack(FieldKey);
+		PackStr(m_Out, pszValue, MaxLen);
+		m_Count++;
+	}
+
+	void FieldStr(int FieldKey, msstring &Value)
+	{
+		m_Out.Pk.pack(FieldKey);
+		PackStr(m_Out, Value);
+		m_Count++;
+	}
+
+	//Map: write a key, the caller packs exactly one value (or nested scope) after it
+	void Key(int FieldKey)
+	{
+		m_Out.Pk.pack(FieldKey);
+		m_Count++;
+	}
+
+	//Array: the caller packed one element
+	void Added() { m_Count++; }
+
+private:
+	charpack_t &m_Out;
+	size_t m_Offset;
+	uint32_t m_Count;
+};
+
+//Returns false if the item isn't saved (spells)
+static bool PackItem(charpack_t &Out, genericitem_full_t &Item)
+{
+	if (FBitSet(Item.Properties, ITEM_SPELL))
+		return false;
+
+	CPackScope Fields(Out, true);
+	Fields.FieldStr(CI_NAME, Item.Name);
+	Fields.Field(CI_PROPERTIES, Item.Properties);
+	Fields.Field(CI_LOCATION, Item.Location);
+	Fields.Field(CI_HAND, Item.Hand);
+	Fields.Field(CI_ID, Item.ID); //Item ID at last save (used by quickslots to identify this item)
+
+	if (FBitSet(Item.Properties, ITEM_PERISHABLE) ||
+		FBitSet(Item.Properties, ITEM_DRINKABLE))
+	{
+		Fields.Field(CI_QUALITY, Item.Quality);
+		Fields.Field(CI_MAXQUALITY, Item.MaxQuality);
+	}
+
+	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
+		Fields.Field(CI_QUANTITY, Item.Quantity);
+
+	if (FBitSet(Item.Properties, ITEM_CONTAINER))
+	{
+		Fields.Key(CI_CONTENTS);
+		CPackScope Contents(Out, false);
+		for (int i = 0; i < Item.ContainerItems.size(); i++)
+			if (PackItem(Out, Item.ContainerItems[i]))
+				Contents.Added();
+	}
+
+	return true;
+}
+
+static CScript *GetCompanionScript(companion_t &Companion)
+{
+	CBaseEntity *pEntity = Companion.Entity.Entity();
+	if (!pEntity)
+		return NULL;
+	IScripted *pScripted = pEntity->GetScripted();
+	if (!pScripted || !pScripted->m_Scripts.size())
+		return NULL;
+	return pScripted->m_Scripts[0];
+}
+
+//Packs the whole character into Out.Buf.  Keys and versioning rules: mscharacterheader.h
+static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
+{
+	Out.Buf.clear(); //Keeps its allocation
+	Out.Buf.write(CHARPACK_MAGIC, CHARPACK_MAGIC_LEN);
+
+	CPackScope Root(Out, true);
+
+	//Header
+	Root.Field(CF_FORMAT, CHARFMT_VERSION);
+	Root.FieldStr(CF_NAME, Data.Name, sizeof(Data.Name));
+	Root.FieldStr(CF_MAPNAME, Data.MapName, sizeof(Data.MapName));
+	Root.FieldStr(CF_NEXTMAP, Data.NextMap, sizeof(Data.NextMap));
+	Root.FieldStr(CF_OLDTRANS, Data.OldTrans, sizeof(Data.OldTrans));
+	Root.FieldStr(CF_NEWTRANS, Data.NewTrans, sizeof(Data.NewTrans));
+	Root.FieldStr(CF_STEAMID, Data.SteamID, sizeof(Data.SteamID));
+	Root.FieldStr(CF_PARTY, Data.Party, sizeof(Data.Party));
+	Root.Field(CF_PARTYID, Data.PartyID);
+	Root.Field(CF_ISELITE, Data.IsElite);
+	Root.Field(CF_GOLD, Data.Gold);
+	Root.Field(CF_MAXHP, Data.MaxHP);
+	Root.Field(CF_MAXMP, Data.MaxMP);
+	Root.Field(CF_HP, Data.HP);
+	Root.Field(CF_MP, Data.MP);
+	Root.Field(CF_GENDER, Data.Gender);
+	Root.Field(CF_PLAYERKILLS, Data.PlayerKills);
+	Root.Field(CF_TIMEFORGETKILL, Data.TimeWaitedToForgetKill);
+	Root.Field(CF_TIMEFORGETSTEAL, Data.TimeWaitedToForgetSteal);
+
+	//Maps visited
+	Root.Key(CF_VISITEDMAPS);
+	Out.Pk.pack_array(pPlayer->m_Maps.size());
+	for (int m = 0; m < pPlayer->m_Maps.size(); m++)
+		PackStr(Out, pPlayer->m_Maps[m]);
+
+	//Skills
+	Root.Key(CF_SKILLS);
+	statlist &StatList = pPlayer->m_Stats;
+	Out.Pk.pack_array(StatList.size());
+	for (int i = 0; i < StatList.size(); i++)
+	{
+		CStat &Stat = StatList[i];
+		Out.Pk.pack_array(Stat.m_SubStats.size());
+		for (int r = 0; r < Stat.m_SubStats.size(); r++)
+		{
+			CSubStat &SubStat = Stat.m_SubStats[r];
+			Out.Pk.pack_array(2);
+			Out.Pk.pack(SubStat.Value);
+			Out.Pk.pack(SubStat.Exp);
+		}
+	}
+
+	//Magic spells
+	Root.Key(CF_SPELLS);
+	spellgroup_v &SpellList = pPlayer->m_SpellList;
+	Out.Pk.pack_array(SpellList.size());
+	for (int s = 0; s < SpellList.size(); s++)
+		PackStr(Out, SpellList[s]);
+
+	//Items
+	Root.Key(CF_ITEMS);
+	{
+		CPackScope Items(Out, false);
+		for (int i = 0; i < pPlayer->Gear.size(); i++)
+		{
+			if (pPlayer->Gear[i] == pPlayer->PlayerHands) //Skip player hands
+				continue;
+
+			genericitem_full_t Item = genericitem_full_t(pPlayer->Gear[i]);
+			if (PackItem(Out, Item))
+				Items.Added();
+		}
+	}
+
+	//Storage items
+	Root.Key(CF_STORAGES);
+	Out.Pk.pack_array(pPlayer->m_Storages.size());
+	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
+	{
+		storage_t &Storage = pPlayer->m_Storages[s];
+
+		CPackScope StorageFields(Out, true);
+		StorageFields.FieldStr(CS_NAME, Storage.Name);
+		StorageFields.Key(CS_ITEMS);
+		CPackScope Items(Out, false);
+		for (int i = 0; i < Storage.Items.size(); i++)
+			if (PackItem(Out, Storage.Items[i]))
+				Items.Added();
+	}
+
+	//Companions - save any variables that start with "companion.save."
+	Root.Key(CF_COMPANIONS);
+	Out.Pk.pack_array(pPlayer->m_Companions.size());
+	for (int c = 0; c < pPlayer->m_Companions.size(); c++)
+	{
+		companion_t &Companion = pPlayer->m_Companions[c];
+
+		CPackScope CompanionFields(Out, true);
+		CompanionFields.FieldStr(CC_SCRIPT, Companion.ScriptName);
+		CompanionFields.Key(CC_VARS);
+		CPackScope Vars(Out, false);
+
+		CScript *Script = GetCompanionScript(Companion);
+		if (!Script)
+			continue;
+
+		for (int v = 0; v < Script->m_Variables.size(); v++)
+		{
+			scriptvar_t &Var = Script->m_Variables[v];
+			if (!Var.Name.starts_with("companion.save."))
+				continue;
+
+			Out.Pk.pack_array(2);
+			PackStr(Out, Var.Name);
+			PackStr(Out, Var.Value);
+			Vars.Added();
+		}
+	}
+
+	//Help tips
+	Root.Key(CF_HELPTIPS);
+	Out.Pk.pack_array(pPlayer->m_ViewedHelpTips.size());
+	for (int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
+		PackStr(Out, pPlayer->m_ViewedHelpTips[t]);
+
+	//Quests
+	Root.Key(CF_QUESTS);
+	Out.Pk.pack_array(pPlayer->m_Quests.size());
+	for (int q = 0; q < pPlayer->m_Quests.size(); q++)
+	{
+		Out.Pk.pack_array(2);
+		PackStr(Out, pPlayer->m_Quests[q].Name);
+		PackStr(Out, pPlayer->m_Quests[q].Data);
+	}
+
+	//Quickslots
+	Root.Key(CF_QUICKSLOTS);
+	Out.Pk.pack_array(MAX_QUICKSLOTS);
+	for (int q = 0; q < MAX_QUICKSLOTS; q++)
+	{
+		quickslot_t &QuickSlot = pPlayer->m_QuickSlots[q];
+		if (QuickSlot.Active)
+		{
+			Out.Pk.pack_array(2);
+			Out.Pk.pack((int)QuickSlot.Type);
+			Out.Pk.pack(QuickSlot.ID);
+		}
+		else
+			Out.Pk.pack_nil();
+	}
+}
 
 //If pData != NULL, then this is a new char
 void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 {
-	//#ifndef VALVE_DLL
-	//	if( MSGlobals::ServerSideChar )
-	//		return;
-	//#endif
-
 	//Can I save right now?
 	if (pPlayer->m_CharacterState == CHARSTATE_UNLOADED /*||	//Can't save if no character is created
 		MSGlobals::GameType != GAMETYPE_ADVENTURE*/
@@ -512,8 +1209,6 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	//#endif
 
 	//if( fVerbose ) Print( "Saving to file: %s\n", pszFileName );
-
-	CPlayer_DataBuffer gFile(1 << 16);
 
 	//Initialize
 	savedata_t Data;
@@ -573,160 +1268,32 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		//#endif
 	}
 
-	gFile.WriteByte(CHARDATA_HEADER1);
-	gFile.Write(&Data, sizeof(savedata_t)); //[VAR] Player Info
-
-	//Save Maps Visited
-	//Must come just after writing savedata_t Data
-	gFile.WriteByte(CHARDATA_MAPSVISITED1); //[BYTE - CHUNK - MAPS VISITED]
-	gFile.WriteInt(pPlayer->m_Maps.size()); //[INT]
-	for (int m = 0; m < pPlayer->m_Maps.size(); m++)
-		gFile.WriteString(pPlayer->m_Maps[m]); //[STRING]
-
-	//Save skills
-	gFile.WriteByte(CHARDATA_SKILLS1); //[BYTE - CHUNK - STATS]
-	statlist &StatList = pPlayer->m_Stats;
-	gFile.WriteByte(StatList.size()); //[BYTE]
-	for (int i = 0; i < StatList.size(); i++)
-	{
-		CStat &Stat = StatList[i];
-		gFile.WriteByte(Stat.m_SubStats.size()); //[BYTE]
-		for (int r = 0; r < Stat.m_SubStats.size(); r++)
-		{
-			CSubStat &SubStat = Stat.m_SubStats[r];
-			gFile.WriteShort(SubStat.Value); //[SHORT]
-			gFile.WriteInt(SubStat.Exp);	 //[INT]
-		}
-	}
-
-	//Save magic spells
-	spellgroup_v &SpellList = pPlayer->m_SpellList;
-	gFile.WriteByte(CHARDATA_SPELLS1); //[BYTE - CHUNK - SPELLS]
-	gFile.WriteByte(SpellList.size()); //[BYTE]
-
-	for (int s = 0; s < SpellList.size(); s++)
-		gFile.WriteString(SpellList[s]); //[X STRINGS]
-
-	//Save Items
-	gFile.WriteByte(CHARDATA_ITEMS2); //[BYTE - CHUNK - ITEMS]
-
-	static mslist<CGenericItem *> WriteList;
-	WriteList.clearitems();
-
-	for (int i = 0; i < pPlayer->Gear.size(); i++)
-		if (pPlayer->Gear[i] != pPlayer->PlayerHands) //Skip player hands
-			WriteList.add(pPlayer->Gear[i]);
-
-	gFile.WriteByte(WriteList.size()); //[BYTE]
-
-	for (int i = 0; i < WriteList.size(); i++)
-	{
-		genericitem_full_t charItem = genericitem_full_t(WriteList[i]);
-		WriteItem(gFile, charItem); //[X ITEMS]
-	}
-
-	//Save storage items
-	gFile.WriteByte(CHARDATA_STORAGE1);			  //[BYTE - CHUNK - STORAGE ITEMS]
-	gFile.WriteShort(pPlayer->m_Storages.size()); //[SHORT]
-
-	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
-	{
-		storage_t &Storage = pPlayer->m_Storages[s];
-
-		gFile.WriteString(Storage.Name);		//[STRING]
-		gFile.WriteShort(Storage.Items.size()); //[SHORT]
-		for (int i = 0; i < Storage.Items.size(); i++)
-			WriteItem(gFile, Storage.Items[i]); //[X ITEMS]
-	}
-
-	//Save Companions
-	gFile.WriteByte(CHARDATA_COMPANIONS1);			//[BYTE - CHUNK - COMPANIONS]
-	gFile.WriteShort(pPlayer->m_Companions.size()); //[SHORT]
-	static msstringlist SaveVarName, SaveVarValue;
-	SaveVarName.clearitems();
-	SaveVarValue.clearitems();
-
+	//Let companions update their saved vars.  Done before packing so no script runs mid-pack.
 	for (int c = 0; c < pPlayer->m_Companions.size(); c++)
 	{
-		companion_t &Companion = pPlayer->m_Companions[c];
-		gFile.WriteString(Companion.ScriptName); //[STRING]
-
-		//Save any variables that start with "companion.save."
-		CBaseEntity *pEntity = Companion.Entity.Entity();
-		if (!pEntity)
-			continue;
-		IScripted *pScripted = pEntity->GetScripted();
-		if (!pScripted || !pScripted->m_Scripts.size())
-			continue;
-
-		pScripted->CallScriptEvent("game_companion_save");
-
-		CScript *Script = pScripted->m_Scripts[0];
-		for (int v = 0; v < Script->m_Variables.size(); v++)
-			if (Script->m_Variables[v].Name.starts_with("companion.save."))
-			{
-				SaveVarName.add(Script->m_Variables[v].Name);
-				SaveVarValue.add(Script->m_Variables[v].Value);
-			}
-
-		gFile.WriteShort(SaveVarName.size()); //[SHORT]
-		for (int var = 0; var < SaveVarName.size(); var++)
-		{
-			gFile.WriteString(SaveVarName[var]);  //[STRING]
-			gFile.WriteString(SaveVarValue[var]); //[STRING]
-		}
-		SaveVarName.clearitems(); //Reset these for the next companion
-		SaveVarValue.clearitems();
+		CBaseEntity *pEntity = pPlayer->m_Companions[c].Entity.Entity();
+		IScripted *pScripted = pEntity ? pEntity->GetScripted() : NULL;
+		if (pScripted && pScripted->m_Scripts.size())
+			pScripted->CallScriptEvent("game_companion_save");
 	}
 
-	//Save Help tips
-	gFile.WriteByte(CHARDATA_HELPTIPS1);				//[BYTE - CHUNK - HELPTIPS]
-	gFile.WriteShort(pPlayer->m_ViewedHelpTips.size()); //[SHORT]
-	for (int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
-		gFile.WriteString(pPlayer->m_ViewedHelpTips[t]); //[STRING]
+	//The pack buffer is reused between saves, so steady-state saves don't allocate.
+	//Everything below copies the data before returning.
+	static charpack_t s_CharPack;
+	PackChar(s_CharPack, pPlayer, Data);
 
-	//Save Quests
-	gFile.WriteByte(CHARDATA_QUESTS1);		  //[BYTE - CHUNK - QUESTS]
-	gFile.WriteInt(pPlayer->m_Quests.size()); //[INT]
-	for (int q = 0; q < pPlayer->m_Quests.size(); q++)
-	{
-		gFile.WriteString(pPlayer->m_Quests[q].Name); //[STRING]
-		gFile.WriteString(pPlayer->m_Quests[q].Data); //[STRING]
-	}
+	const char *pPackData = s_CharPack.Buf.data();
+	const size_t PackSize = s_CharPack.Buf.size();
 
-	//Save Quickslots
-	gFile.WriteByte(CHARDATA_QUICKSLOTS1); //[BYTE - CHUNK - QUICKSLOTS]
-	gFile.WriteByte(MAX_QUICKSLOTS);	   //[INT]
-	for (int q = 0; q < MAX_QUICKSLOTS; q++)
-	{
-		quickslot_t &QuickSlot = pPlayer->m_QuickSlots[q];
-		if (QuickSlot.Active)
-		{
-			gFile.WriteByte(((byte)QuickSlot.Type) + 1); //[BYTE]
-			gFile.WriteInt(QuickSlot.ID);				 //[INT]
-		}
-		else
-			gFile.WriteByte(0); //[BYTE]
-	}
-	//-------------
-
-	gFile.m_BufferSize = gFile.GetWritePtr();
-	
 	if (FNShared::IsEnabled())
 	{
 		// If Central Server is enabled, save to the Central Server instead of locally
-		FNShared::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, (char*)gFile.m_Buffer, gFile.GetFileSize(), (pData == NULL));
-		gFile.Close();
-		return;
-	}
-	else if (!MSGlobals::ServerSideChar)
-	{
-		charinfo_t &CharInfo = pPlayer->m_CharInfo[pPlayer->m_CharacterNum];
-		CharInfo.AssignChar(pPlayer->m_CharacterNum, LOC_CLIENT, (char*)gFile.m_Buffer, gFile.GetFileSize(), pPlayer);
-		gFile.Close();
+		FNShared::CreateOrUpdateCharacter(pPlayer, pPlayer->m_CharacterNum, pPackData, PackSize, (pData == NULL));
 		return;
 	}
 
+	CPlayer_DataBuffer gFile;
+	gFile.SetBuffer((byte *)pPackData, PackSize);
 	gFile.WriteToFile(pszFileName, "wb", true);
 	gFile.Close();
 }

@@ -354,8 +354,6 @@ void MSCLGlobals::SpawnIntoServer()
 
 	CreateStoreMenus();
 
-	MSChar_Interface::CLInit();
-
 	ShowVGUIMenu(MENU_NEWCHARACTER);
 
 	MS_INFO("DONE");

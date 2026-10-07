@@ -1717,9 +1717,6 @@ public:
 		//Save character
 		pPlayer->SaveChar();
 
-		if (!MSGlobals::ServerSideChar)
-			pPlayer->m_TimeCharLastSent = 0; //Ensure char is sent down to the client immediately
-
 		//Thothie JUN2007 - tired of this not displaying, letting scripts handle it
 		//msstring Text = msstring("It appears that you wish to travel to ") + STRING(sDestName) + ".\nPress enter (accept), to continue.";
 		//pOtherPlayer->SendHUDMsg( "Travel", Text );
@@ -1935,9 +1932,6 @@ public:
 
 				//Save character
 				pOtherPlayer->SaveChar();
-
-				if (!MSGlobals::ServerSideChar)
-					pOtherPlayer->m_TimeCharLastSent = 0;
 			}
 
 			//JAN2008a Give AMX a chance to change map first (has its own delay)
