@@ -2053,6 +2053,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 		
 		// Fire PlayerSayText event for ALL chat messages to AngelScript
 		// This allows AngelScript to process regular chat, commands, and vote requests
+#ifndef AS_DISABLED
 		ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
 		if( pEventManager && pPlayer )
 		{
@@ -2113,6 +2114,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 			// Block the normal chat message since this is a command
 			return TRUE;
 		}
+#endif
 		
 		// Let normal chat messages continue through default handling
 		return FALSE;

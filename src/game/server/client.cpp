@@ -525,6 +525,7 @@ void ClientCommand2(edict_t *pEntity)
 				pGMScript->CallScriptEvent("game_playerspeak", &Parameters);
 			}
 			
+#ifndef AS_DISABLED
 			// Fire the PlayerSayText event to AngelScript
 			ASEngineEventManager* pEventManager = ASEngineEventManager::Instance();
 			if( pEventManager && pPlayer )
@@ -533,6 +534,7 @@ void ClientCommand2(edict_t *pEntity)
 				const char* pszSteamID = GETPLAYERAUTHID( pPlayer->edict() );
 				pEventManager->FirePlayerSayTextEvent(pszPlayerName, pszSteamID, Text.c_str());
 			}
+#endif
 
 			pPlayer->Speak(Text, static_cast<speech_type>(SayType));
 		}
