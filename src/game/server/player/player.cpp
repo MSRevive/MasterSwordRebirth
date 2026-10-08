@@ -6442,8 +6442,8 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	MESSAGE_END();
 
 	//Read Magic spells
-	for (int s = 0; s < Data.m_Spells.size(); s++)
-		LearnSpell(Data.m_Spells[s]);
+	for (const std::string &Spell : Data.m_Spells)
+		LearnSpell(Spell.c_str());
 
 	mslist<CGenericItem *> Items; //Keep track of ALL items, for quickslot assignment later
 
@@ -6597,7 +6597,7 @@ void CBasePlayer::Think_SendCharData()
 	if (m_CharacterState == CHARSTATE_LOADED || gpGlobals->time < m_TimeSendCharInfo || !m_fGameHUDInitialized)
 		return;
 
-	msstringlist VisitedMaps;
+	std::vector<std::string> VisitedMaps;
 
 	for (int i = 0; i < MAX_CHARSLOTS; i++)
 	{

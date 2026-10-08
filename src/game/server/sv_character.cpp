@@ -298,12 +298,17 @@ static void ReadItemListPack(const msgpack::object &Obj, mslist<genericitem_full
 	}
 }
 
-static void ReadStringListPack(const msgpack::object &Obj, msstringlist &outList)
+static void ReadStringListPack(const msgpack::object &Obj, std::vector<std::string> &outList)
 {
 	msgpack::object_array Strings = PackArray(Obj);
 	outList.clear();
+	outList.reserve(Strings.size);
+	char cTemp[MSSTRING_SIZE];
 	for (uint32_t i = 0; i < Strings.size; i++)
-		outList.add(PackReadMsStr(Strings.ptr[i]));
+	{
+		PackReadStr(Strings.ptr[i], cTemp, sizeof(cTemp));
+		outList.emplace_back(cTemp);
+	}
 }
 
 bool MSChar_Interface::ReadCharData(void *pData, ulong Size, chardata_t *CharData)
@@ -588,10 +593,12 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 		int Maps = 0;
 		m_File.ReadInt(Maps); //[INT]
 		m_VisitedMaps.clear();
+		if (Maps > 0)
+			m_VisitedMaps.reserve(Maps);
 		for (int m = 0; m < Maps; m++)
 		{
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
-			m_VisitedMaps.add(cTemp);
+			m_VisitedMaps.emplace_back(cTemp);
 		}
 	}
 }
@@ -658,10 +665,11 @@ void chardata_t::ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File)
 		//Read Magic spells
 		byte Spells = 0;
 		m_File.ReadByte(Spells); //[BYTE]
+		m_Spells.reserve(Spells);
 		for (int s = 0; s < Spells; s++)
 		{
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
-			m_Spells.add(cTemp);
+			m_Spells.emplace_back(cTemp);
 		}
 	}
 }
@@ -1051,8 +1059,8 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	//Maps visited
 	Root.Key(CF_VISITEDMAPS);
 	Out.Pk.pack_array(pPlayer->m_Maps.size());
-	for (int m = 0; m < pPlayer->m_Maps.size(); m++)
-		PackStr(Out, pPlayer->m_Maps[m]);
+	for (const std::string &Map : pPlayer->m_Maps)
+		PackStr(Out, Map.c_str(), MSSTRING_MAXLEN);
 
 	//Skills
 	Root.Key(CF_SKILLS);
@@ -1186,7 +1194,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 
 	//Add this map to the list of maps visited
 	if (!HasVisited(MSGlobals::MapName, pPlayer->m_Maps))
-		pPlayer->m_Maps.add(MSGlobals::MapName);
+		pPlayer->m_Maps.emplace_back(MSGlobals::MapName.c_str());
 
 	const char *pszFileName;
 	//#ifdef VALVE_DLL

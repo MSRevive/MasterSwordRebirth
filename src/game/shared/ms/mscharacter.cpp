@@ -60,7 +60,7 @@ const char *GetSaveFileName(int iCharacter, const char *AuthID)
 }
 #endif
 
-jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, msstringlist &VisitedMaps)
+jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps)
 {
 	//phase this function out.  Use the one below
 	jointype_e JoinType = JN_NOTALLOWED;
@@ -90,7 +90,7 @@ jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, msstringlist &Visi
 
 	return JoinType;
 }
-jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &VisitedMaps)
+jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps)
 {
 	jointype_e JoinType = JN_NOTALLOWED;
 	if (MSGlobals::CanCreateCharOnMap)
@@ -109,10 +109,10 @@ jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, msstringlist &
 	return JoinType;
 }
 
-bool MSChar_Interface::HasVisited(const char* MapName, msstringlist &VisitedMaps)
+bool MSChar_Interface::HasVisited(const char* MapName, const std::vector<std::string> &VisitedMaps)
 {
-	for (int m = 0; m < VisitedMaps.size(); m++)
-		if (VisitedMaps[m] == MSGlobals::MapName)
+	for (const std::string &Map : VisitedMaps)
+		if (Map == MapName)
 			return true;
 	return false;
 }

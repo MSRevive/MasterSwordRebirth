@@ -1,6 +1,9 @@
 #ifndef MSCHARACTER_H
 #define MSCHARACTER_H
 
+#include <string>
+#include <vector>
+
 #include "msfileio.h"
 #include "stats/statdefs.h"
 #include "gamerules/teams.h"
@@ -133,9 +136,9 @@ class MSChar_Interface
 {
 public:
 	//static Vector LastGoodPos, LastGoodAng;
-	static enum jointype_e CanJoinThisMap(savedata_t &Data, msstringlist &VisitedMaps);		//Client & Server
-	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, msstringlist &VisitedMaps); //Client & Server
-	static bool HasVisited(const char* MapName, msstringlist &VisitedMaps);				//Client & Server
+	static enum jointype_e CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps);		//Client & Server
+	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps); //Client & Server
+	static bool HasVisited(const char* MapName, const std::vector<std::string> &VisitedMaps);				//Client & Server
 
 #ifdef VALVE_DLL
 	//Server - characters are only ever stored on the server (or central server)

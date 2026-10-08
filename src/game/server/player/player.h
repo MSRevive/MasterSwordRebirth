@@ -357,9 +357,9 @@ struct wearpos_t
 
 struct chardata_t : savedata_t
 {
-	msstringlist m_VisitedMaps;			//All the maps I've visited
+	std::vector<std::string> m_VisitedMaps; //All the maps I've visited
 	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
-	msstringlist m_Spells;				//All known spells
+	std::vector<std::string> m_Spells;	//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
 	mslist<storage_t> m_Storages;		//Storage places where I have items
 	mslist<companion_t> m_Companions;	//Companions
@@ -441,7 +441,7 @@ public:
 	int m_JoinType;							  //How I joined the server
 	mslist<companion_t> m_Companions;		  //
 	mslist<quest_t> m_Quests;				  //All the quests I've completed
-	msstringlist m_Maps;					  //All the maps I've visited
+	std::vector<std::string> m_Maps;		  //All the maps I've visited
 	mslist<wearpos_t> m_WearPositions;		  //All available positions to wear something
 	bool m_ClientAttack;					  //Attack queued
 	int m_ClientAttackHand;					  //Current hand the player is attacking with
