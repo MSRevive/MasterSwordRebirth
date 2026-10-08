@@ -7,9 +7,12 @@
 #include "msfileio.h"
 #include "stats/statdefs.h"
 #include "gamerules/teams.h"
-#include "mscharacterheader.h"
 #include "buildcontrol.h"
 #include "monsters/msmonster.h"
+
+#ifdef VALVE_DLL
+#include "character/mscharacterheader.h"
+#endif
 
 // Char Files
 enum chardatastatus_e
@@ -96,11 +99,13 @@ struct natstat_t
 {
 	short Value[STATPROP_TOTAL];
 };
+
 struct skillstat_t
 {
 	short Value[STATPROP_TOTAL];
 	ulong Exp[STATPROP_TOTAL];
 };
+
 struct spellskillstat_t
 {
 	short Value[STATPROP_TOTAL];
@@ -132,29 +137,27 @@ enum
 	CHARDATA_UNKNOWN, //If >= CHARDATA_UNKNOWN, then skip it?
 };
 
+#ifdef VALVE_DLL
 class MSChar_Interface
 {
 public:
-	//static Vector LastGoodPos, LastGoodAng;
-	static enum jointype_e CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps);		//Client & Server
-	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps); //Client & Server
-	static bool HasVisited(const char* MapName, const std::vector<std::string> &VisitedMaps);				//Client & Server
-
-#ifdef VALVE_DLL
 	//Server - characters are only ever stored on the server (or central server)
 	static void AutoSave(class CBasePlayer *pPlayer);
 	static bool ReadCharData(void *pData, ulong Size, struct chardata_t *CharData);
 	static void SaveChar(class CBasePlayer *pPlayer, savedata_t *pData = NULL);
-#endif
+
+	static enum jointype_e CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps);
+	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps);
+	static bool HasVisited(const char* MapName, const std::vector<std::string> &VisitedMaps);
 };
 
-#ifdef VALVE_DLL
 bool DeleteChar(CBasePlayer *pPlayer, int iCharacter);
 const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer);
 #endif
 
 #define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar" (clamped to 1..MAX_CHARSLOTS)
 
+#ifdef VALVE_DLL
 struct charslot_t
 {
 	bool Active, //Whether this character exists and is loaded
@@ -163,6 +166,7 @@ struct charslot_t
 
 	savedata_t Data; //Character's data.  For server-side characters, only a few fields here are valid
 };
+#endif
 
 class ChooseChar_Interface
 {

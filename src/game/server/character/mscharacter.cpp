@@ -4,30 +4,15 @@
 
 #include "inc_weapondefs.h"
 #include "stats/stats.h"
-#ifdef VALVE_DLL
 #include "global.h"
 #include "fn/FNSharedDefs.h"
-#else
-#include "inc_huditem.h"
-#include "ms/clglobal.h"
-#include "vgui_scorepanel.h"
-#endif
 #include "mscharacter.h"
 #include "magic.h"
 #include "script.h"
 
-#ifndef _WIN32
-#include "sys/io.h"
-#include <sys/stat.h>
-#include <sys/types.h>
-#else
-#include <direct.h> //for mkdir()
-#endif
-
 //Vector	MSChar_Interface::LastGoodPos,
 //		MSChar_Interface::LastGoodAng;
 
-#ifdef VALVE_DLL
 void ReplaceChar(char *pString, char org, char dest);
 
 const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer)
@@ -58,7 +43,6 @@ const char *GetSaveFileName(int iCharacter, const char *AuthID)
 
 	return cFileName;
 }
-#endif
 
 jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps)
 {
@@ -90,6 +74,7 @@ jointype_e MSChar_Interface::CanJoinThisMap(savedata_t &Data, const std::vector<
 
 	return JoinType;
 }
+
 jointype_e MSChar_Interface::CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps)
 {
 	jointype_e JoinType = JN_NOTALLOWED;

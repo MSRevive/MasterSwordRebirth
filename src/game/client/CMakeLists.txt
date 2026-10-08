@@ -275,7 +275,6 @@ set(Shared
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/mslogger.cpp"
 	"../shared/ms/mslogger.h"
-	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"
 	"../shared/ms/msfileio.cpp"
 	"../shared/ms/msmonstershared.cpp"

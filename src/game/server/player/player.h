@@ -355,6 +355,7 @@ struct wearpos_t
 	};
 };
 
+#ifdef VALVE_DLL
 struct chardata_t : savedata_t
 {
 	std::vector<std::string> m_VisitedMaps; //All the maps I've visited
@@ -366,7 +367,6 @@ struct chardata_t : savedata_t
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
 
-#ifdef VALVE_DLL
 	//Save reading is server-only, see sv_character.cpp
 	bool ReadData(void *pData, ulong Size); //Reads both msgpack and legacy saves
 	bool ReadDataPack(const char *pData, size_t Size);
@@ -384,7 +384,6 @@ struct chardata_t : savedata_t
 	void SkipHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File);
-#endif
 
 	CStat* GetStat(int index)
 	{
@@ -393,6 +392,7 @@ struct chardata_t : savedata_t
 		return &m_Stats[index];
 	}
 };
+#endif
 
 class CBasePlayer : public CMSMonster
 {
