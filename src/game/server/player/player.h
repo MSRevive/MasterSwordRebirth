@@ -21,13 +21,14 @@
 #include "pm_materials.h"
 #include "mscharacter.h"
 #include "iscript.h"
+#include "fixed_vector.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
 #define NUM_MAX_ITEMS 100 //Thothie APR2011_28
 
 // was 1500, but there shouldn't be any issues with increasing.
-#define NUM_MAX_STACK 1500 //stack is stored as either a unsigned short, so that's the actual max it can be.
+#define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 
 enum sbar_data
 {
@@ -363,7 +364,7 @@ struct chardata_t : savedata_t
 	mslist<storage_t> m_Storages;		//Storage places where I have items
 	mslist<companion_t> m_Companions;	//Companions
 	mslist<quest_t> m_Quests;			//All the quests I've completed
-	mslist<quickslot_t> m_QuickSlots;	//All the quickslots (based on the item IDs of the last save)
+	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
 
 #ifdef VALVE_DLL
 	//Save reading is server-only, see sv_character.cpp

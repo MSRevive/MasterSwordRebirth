@@ -497,7 +497,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 					else
 						QuickSlot.Active = false;
 
-					m_QuickSlots.add(QuickSlot);
+					m_QuickSlots.push_back(QuickSlot); //Drops anything past MAX_QUICKSLOTS
 				}
 				break;
 			}
@@ -801,7 +801,7 @@ void chardata_t::ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File)
 				QuickSlot.Active = false;
 			}
 
-			m_QuickSlots.add(QuickSlot);
+			m_QuickSlots.push_back(QuickSlot); //Drops anything past MAX_QUICKSLOTS, but still reads it so the next chunk lines up
 		}
 	}
 }
