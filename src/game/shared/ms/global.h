@@ -34,7 +34,6 @@ public:
 		CentralEnabled,						 //Thothie attempting to fix FN upload sploit
 		DevModeEnabled,						 //MiB JUL2010_13 - Making it so dev-mode makes it so you can't save.
 		CanCreateCharOnMap,					 //Can create character on this map
-		ServerSideChar,						 //Whether characters are saved/loaded server-side
 		InvertTownAreaPKFlag,				 //Town areas work opposite - PK is only allowed _in_ the townarea
 		IsServer,							 //This is the server (not client)
 		InPrecache;							 //Dll is loading and precaching (The client doesn't precache, but this prevents spawn from being called on items)

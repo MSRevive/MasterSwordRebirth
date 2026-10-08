@@ -775,28 +775,6 @@ void ClientCommand2(edict_t *pEntity)
 		else
 			ClientPrint(pPlayer->pev, at_console, "*** Can't Access Character Menu - Character Loaded or Loading ***\n");
 	}
-	else if (FStrEq(pcmd, "ul") && CMD_ARGC() >= 2)
-	{
-		if (!MSGlobals::ServerSideChar)
-			return;
-
-		if (MSGlobals::CentralEnabled)
-			return;
-
-		char Buffer[256];
-		strncpy(Buffer, CMD_ARGV(1), 3);
-		Buffer[3] = 0;
-
-		if (!strcmp(Buffer, "new") && strlen(CMD_ARGV(1)) == 3 && CMD_ARGC() == 5)
-		{
-			MSChar_Interface::HL_SVNewIncomingChar(pPlayer, atoi(CMD_ARGV(2)), atoi(CMD_ARGV(3)), atoi(CMD_ARGV(4)));
-		}
-		else if (CMD_ARGC() == 2)
-		{
-			MSChar_Interface::HL_SVReadCharData(pPlayer, CMD_ARGV(1));
-		}
-	}
-
 	else if (FStrEq(pcmd, "+special"))
 		pPlayer->pbs.MoreBTNSDown |= BTN_SPECIAL;
 	else if (FStrEq(pcmd, "-special"))
@@ -1150,7 +1128,6 @@ void ClientCommand2(edict_t *pEntity)
 		//Thothie JUL2007a - anti item dup
 		//Player is reconnecting, alert scripts
 		//syntax: "drop <ID>"
-		pPlayer->m_TimeCharLastSent = 0; //Thothie SEP2011_07 - force save (attempt)
 		msstringlist Parameters;
 		Parameters.add(EntToString(pPlayer));
 		MSGlobals::GameScript->CallScriptEvent("game_playerleave", &Parameters);

@@ -279,7 +279,6 @@ set(Shared
 	"../shared/ms/msdebug.h"
 	"../shared/ms/msfileio.cpp"
 	"../shared/ms/msmonstershared.cpp"
-	"../shared/ms/netcodeshared.cpp"
 	"../shared/ms/script.cpp"
 	"../shared/ms/script.h"
 	"../shared/ms/scriptcmds.cpp"

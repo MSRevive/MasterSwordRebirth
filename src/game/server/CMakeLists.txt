@@ -44,6 +44,7 @@ target_include_directories(server PRIVATE
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
 	${BASEDIR}/thirdparty/spdlog/include
+	${BASEDIR}/thirdparty/msgpack/include
 	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
@@ -64,6 +65,12 @@ target_compile_definitions(server PRIVATE
 # Check if spdlog is available
 if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
 	target_compile_definitions(server PRIVATE HAS_SPDLOG)
+endif()
+
+# Check if msgpack is available
+if(EXISTS "${BASEDIR}/thirdparty/msgpack/include/msgpack.hpp")
+	target_compile_definitions(server PRIVATE MSGPACK_DISABLE_BOOST)
+	target_compile_definitions(server PRIVATE MSGPACK_NO_BOOST)
 endif()
 
 if (UNIX)
@@ -188,7 +195,6 @@ set(MS
 	"../shared/movement/pm_shared.cpp"
 	"../shared/movement/pm_shared.h"
 	"../shared/ms/msmonstershared.cpp"
-	"../shared/ms/netcodeshared.cpp"
 	"../shared/stats/races.cpp"
 	"../shared/syntax/syntax.cpp"
 )

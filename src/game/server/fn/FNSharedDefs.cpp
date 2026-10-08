@@ -45,7 +45,7 @@ bool FNShared::IsSlotValid(int slot)
 
 bool FNShared::IsEnabled(void)
 {
-	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar);
+	return (MSGlobals::CentralEnabled && !MSGlobals::IsLanGame);
 }
 
 static bool SendBlockingRequest(HTTPRequest* req)

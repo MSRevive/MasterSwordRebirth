@@ -1393,12 +1393,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	}
 	break;
 
-	case 11: //Recieve char data
-	{
-		MSChar_Interface::HL_CLReadCharData();
-	}
-	break;
-
 	case 12: //Item gain/lose quality
 	{
 		CGenericItem* pItem = MSUtil_GetItemByID(READ_LONG());
@@ -1440,14 +1434,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	case 17: //Client-side script
 	{
 		gHUD.m_HUDScript->MsgFunc_ClientScript(pszName, iSize, pbuf);
-	}
-	break;
-
-	case 18: //Start receiving char from server
-	{
-		int CharIdx = READ_BYTE();
-		uint Size = READ_LONG();
-		MSChar_Interface::HL_CLNewIncomingChar(CharIdx, Size);
 	}
 	break;
 

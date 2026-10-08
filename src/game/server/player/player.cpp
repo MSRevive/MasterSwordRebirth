@@ -1503,8 +1503,6 @@ void CBasePlayer::PreThink(void)
 
 	MSChar_Interface::AutoSave(this); //Autosave character
 
-	MSChar_Interface::Think_SendChar(this); //Send client-side char down to client
-
 	int buttonsChanged = (m_afButtonLast ^ pev->button); // These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
@@ -2829,7 +2827,7 @@ void CBasePlayer::Spawn(void)
 			msstring InfoString;
 			const char* PKString = NULL;
 			const char* SaveString = NULL;
-			const char* CharString = NULL;
+			const char* CharString = "Characters are stored on the server";
 			if (MSGlobals::PKAllowedinTown)
 				PKString = "Player killing is allowed outside of town";
 			else if (MSGlobals::PKAllowed)
@@ -2839,9 +2837,6 @@ void CBasePlayer::Spawn(void)
 
 			if (MSGlobals::GameType != GAMETYPE_ADVENTURE)
 				SaveString = "Challenge mode: Your character will not be saved!";
-
-			if (MSGlobals::ServerSideChar != false)
-				CharString = "Characters are stored on the server";
 
 			InfoString = PKString;
 			if (SaveString)
@@ -3664,8 +3659,7 @@ void CBasePlayer::UpdateClientData(void)
 				Flags |= (1 << 2); //Can create chars on this map?
 			if (MSGlobals::GameType == GAMETYPE_ADVENTURE)
 				Flags |= (1 << 3); //Saving character allowed?
-			if (MSGlobals::ServerSideChar)
-				Flags |= (1 << 4); //Server-side characters?
+			//(1 << 4) used to be "server-side characters", now always the case
 			if (GetOtherPlayerTransition(this))
 				Flags |= (1 << 5); //Other players are on and eligible to join?
 			WRITE_BYTE(Flags);
@@ -3677,8 +3671,8 @@ void CBasePlayer::UpdateClientData(void)
 				SetBits(VotesAllowed, (1 << 0));
 			if (msallowtimevote.value)
 				SetBits(VotesAllowed, (1 << 1));
-			WRITE_BYTE(VotesAllowed);			  //Type of votes allowed
-			WRITE_BYTE((int)ms_serverchar.value); //Number of characters allowed
+			WRITE_BYTE(VotesAllowed); //Type of votes allowed
+			WRITE_BYTE(V_max(1, V_min((int)ms_serverchar.value, MAX_CHARSLOTS))); //Number of characters allowed
 			MESSAGE_END();
 
 			if (MSGlobals::CanCreateCharOnMap)
