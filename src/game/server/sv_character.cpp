@@ -371,7 +371,6 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_GENDER: Gender = (byte)PackReadInt(Value); break;
 			case CF_PLAYERKILLS: PlayerKills = (short)PackReadInt(Value); break;
 			case CF_TIMEFORGETKILL: TimeWaitedToForgetKill = PackReadFloat(Value); break;
-			case CF_TIMEFORGETSTEAL: TimeWaitedToForgetSteal = PackReadFloat(Value); break;
 
 			//Sections
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
@@ -1053,7 +1052,6 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	Root.Field(CF_GENDER, Data.Gender);
 	Root.Field(CF_PLAYERKILLS, Data.PlayerKills);
 	Root.Field(CF_TIMEFORGETKILL, Data.TimeWaitedToForgetKill);
-	Root.Field(CF_TIMEFORGETSTEAL, Data.TimeWaitedToForgetSteal);
 
 	//Maps visited
 	Root.Key(CF_VISITEDMAPS);

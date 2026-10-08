@@ -81,7 +81,6 @@ enum charfield_e
 	CF_GENDER = 15,			//int
 	CF_PLAYERKILLS = 16,	//int
 	CF_TIMEFORGETKILL = 17,	//float
-	CF_TIMEFORGETSTEAL = 18,//float
 
 	CF_VISITEDMAPS = 32,	//[str, ...]
 	CF_SKILLS = 33,			//[ stat: [ substat: [value, exp], ... ], ... ]
