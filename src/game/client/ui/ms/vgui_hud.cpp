@@ -118,6 +118,7 @@ public:
 
 	void AddInfoWin(const char* Title, const char* Text);
 	void AddHelpWin(const char* Title, const char* Text);
+	void AddTutorialWin(const char* Title, const char* Text);
 	void Cleanup();
 	void UpdateInfoWindows(std::vector<CInfoWindow*>& Windows);
 	void RemoveInfoWindow(std::vector<CInfoWindow*>& Windows, int idx);
@@ -276,8 +277,30 @@ void CHUDPanel::AddInfoWin(const char* Title, const char* Text)
 }
 
 // Create new Help window
-
 void CHUDPanel::AddHelpWin(const char* Title, const char* Text)
+{
+	//Replaces '|' with '\n'
+	int size = strlen(Text);
+	for (int i = 0; i < size; i++)
+	{
+		if (Text[i] == '|')
+			((char*)Text)[i] = '\n';
+	}
+
+	//CInfoWindow &NewInfoWin = *new CInfoWindow( Title, Text, INFOWIN_HELP_DISPLAY_X, INFOWIN_HELP_DISPLAY_Y, this );
+	CInfoWindow& NewInfoWin = *new CInfoWindow(Title, Text, INFOWIN_HELP_DISPLAY_X, YRES(10), this); //MAR2008a - moving helptip window not to overlap eventhud
+
+	NewInfoWin.Resize();
+	//NewInfoWin.setPos( XRES(640) - NewInfoWin.getWide()- XRES(60), INFOWIN_HELP_DISPLAY_Y );
+	NewInfoWin.setPos(XRES(640) - NewInfoWin.getWide() - XRES(60), YRES(10)); //MAR2008a - moving helptip window not to overlap eventhud
+	NewInfoWin.Title->setFgColor(0, 150, 200, 0);
+	NewInfoWin.m_TimeDisplayed = gpGlobals->time;
+	NewInfoWin.m_Duration = INFOWIN_DURATION + (strlen(Text) / 60.0f);
+	NewInfoWin.setVisible(false);
+	m_HelpWindows.push_back(&NewInfoWin);
+}
+
+void CHUDPanel::AddTutorialWin(const char* Title, const char* Text)
 {
 	if (!EngineFunc::CVAR_GetFloat("ms_help"))
 		return;
@@ -433,59 +456,88 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 
 	msstring sText;
 	byte Type = READ_BYTE();
-	if (!Type)
-	{
-		//Display info window
-		msstring sTitle = READ_STRING();
-		sText = Localized(READ_STRING());
+	switch(Type) {
+		case 0:
+		{
+			//Display info window
+			msstring sTitle = READ_STRING();
+			sText = Localized(READ_STRING());
 
-		HUD_ShowInfoWin(sTitle, sText);
-	}
-	else if (Type == 1)
-	{
-		//Print to Event console
-		ulong lColor = READ_LONG();
-		Color color(((uchar*)&lColor)[0], ((uchar*)&lColor)[1], ((uchar*)&lColor)[2], ((uchar*)&lColor)[3]);
-		sText = READ_STRING();
+			HUD_ShowInfoWin(sTitle, sText);
+			break;
+		}
+		case 1:
+		{
+			//Print to Event console
+			ulong lColor = READ_LONG();
+			Color color(((uchar*)&lColor)[0], ((uchar*)&lColor)[1], ((uchar*)&lColor)[2], ((uchar*)&lColor)[3]);
+			sText = READ_STRING();
 
-		HUD_PrintEvent(color, sText);
-	}
-	else if (Type == 2)
-	{
-		//Help window part
-		int idx = READ_BYTE();
-		if (!idx)
-			HelpParts.clear();
-		HelpParts.add(READ_STRING());
-	}
-	else if (Type == 3)
-	{
-		//Print to help window
-		msstring sTitle = READ_STRING();
+			HUD_PrintEvent(color, sText);
+			break;
+		}
+		case 2:
+		{
+			//Help window part
+			int idx = READ_BYTE();
+			if (!idx)
+				HelpParts.clear();
+			HelpParts.add(READ_STRING());
+			break;
+		}
+		case 3:
+		{
+			//Print to help window
+			msstring sTitle = READ_STRING();
 
-		std::string buffer = "";
-		for (int i = 0; i < HelpParts.size(); i++)
-			buffer += static_cast<const char*>(HelpParts[i]);
+			std::string buffer = "";
+			for (int i = 0; i < HelpParts.size(); i++)
+				buffer += static_cast<const char*>(HelpParts[i]);
 
-		HUD_ShowHelpWin(sTitle, buffer.c_str());
-	}
-	else if (Type == 4)
-	{
-		//Print to saytext console
-		saytext_e TextType = (saytext_e)READ_BYTE();
-		sText = READ_STRING();
-		Color color(255, 255, 255, 0);
-		if (TextType == SAYTEXT_GLOBAL)
-			color = Color(255, 255, 255, 0);
-		else if (TextType == SAYTEXT_LOCAL)
-			color = Color(255, 178, 0, 0);
-		else if (TextType == SAYTEXT_PARTY)
-			color = Color(60, 200, 20, 0);
-		else if (TextType == SAYTEXT_NPC)
-			color = Color(255, 178, 0, 0);
+			HUD_ShowHelpWin(sTitle, buffer.c_str());
+			break;
+		}
+		case 4:
+		{
+			//Print to saytext console
+			saytext_e TextType = (saytext_e)READ_BYTE();
+			sText = READ_STRING();
+			Color color(255, 255, 255, 0);
+			if (TextType == SAYTEXT_GLOBAL)
+				color = Color(255, 255, 255, 0);
+			else if (TextType == SAYTEXT_LOCAL)
+				color = Color(255, 178, 0, 0);
+			else if (TextType == SAYTEXT_PARTY)
+				color = Color(60, 200, 20, 0);
+			else if (TextType == SAYTEXT_NPC)
+				color = Color(255, 178, 0, 0);
 
-		HUD_SayTextEvent(color, sText);
+			HUD_SayTextEvent(color, sText);
+			break;
+		}
+		case 5:
+		{
+			//Help window part
+			int idx = READ_BYTE();
+			if (!idx)
+				HelpParts.clear();
+			HelpParts.add(READ_STRING());
+			break;
+		}
+		case 6:
+		{
+			//Print to help window
+			msstring sTitle = READ_STRING();
+
+			std::string buffer = "";
+			for (int i = 0; i < HelpParts.size(); i++)
+				buffer += static_cast<const char*>(HelpParts[i]);
+
+			HUD_ShowTutorialWin(sTitle, buffer.c_str());
+			break;
+		}
 	}
+	
 	return 0;
 }
 
@@ -563,6 +615,14 @@ void HUD_ShowHelpWin(const char* Title, const char* Text)
 		return;
 
 	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddHelpWin(Title, Text);
+}
+
+void HUD_ShowTutorialWin(const char* Title, const char* Text)
+{
+	if (!gViewPort || !gViewPort->m_pHUDPanel || !ShowHUD())
+		return;
+
+	((CHUDPanel*)gViewPort->m_pHUDPanel)->AddTutorialWin(Title, Text);
 }
 
 void HUD_StepInput(hudscroll_e ScrollCmd)

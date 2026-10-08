@@ -11,6 +11,7 @@ void VGUI_ShowMenuInteract();
 
 void HUD_ShowInfoWin(const char* Title, const char* Text);
 void HUD_ShowHelpWin(const char* Title, const char* Text);
+void HUD_ShowTutorialWin(const char* Title, const char* Text);
 void HUD_PrintEvent(vgui::Color color, const char* Text);
 void HUD_SayTextEvent(vgui::Color color, const char* Text);
 #ifdef TEAMFORTRESSVIEWPORT_H

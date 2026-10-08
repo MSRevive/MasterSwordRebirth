@@ -1127,40 +1127,67 @@ void CBasePlayer::SendHelpMsg(const char* Tipname, const char* Title, const char
 	if (mstipname.contains("generic"))
 		generic_tip = true;
 
-	//Thothie - MAY2007a - Centralize Help Tips scriptside
+	#define MAX_PARTLEN 189 //192 - (byte: null terminator) - (byte: msg id) - (byte: part index) = 189
+	// consider non generic tips tutorial tips.
 	if (!generic_tip)
 	{
 		msstringlist Parameters;
 		Parameters.add(Title);
 		Parameters.add(Tipname);
 		CallScriptEvent("game_helptip", &Parameters);
-	}
 
 #ifdef VALVE_DLL
-	//Send the help msg in parts.  First send all the parts.  Then send a message that shows the parts, all put together
-	//This gets around the 192 message size limit in HL
-#define MAX_PARTLEN 189 //192 - (byte: null terminator) - (byte: msg id) - (byte: part index) = 189
-	int iParts = (strlen(Text) / MAX_PARTLEN) + 1;
-	msstringlist Parts;
-	for (int p = 0; p < iParts; p++)
-	{
-		char cTemp[MAX_PARTLEN + 1];
-		strncpy(cTemp, &Text[p * MAX_PARTLEN], MAX_PARTLEN);
-		cTemp[MAX_PARTLEN] = 0;
-		Parts.add(cTemp);
+		//Send the help msg in parts.  First send all the parts.  Then send a message that shows the parts, all put together
+		//This gets around the 192 message size limit in HL
+		int iParts = (strlen(Text) / MAX_PARTLEN) + 1;
+		msstringlist Parts;
+		for (int p = 0; p < iParts; p++)
+		{
+			char cTemp[MAX_PARTLEN + 1];
+			strncpy(cTemp, &Text[p * MAX_PARTLEN], MAX_PARTLEN);
+			cTemp[MAX_PARTLEN] = 0;
+			Parts.add(cTemp);
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
+			WRITE_BYTE(5);		 //This is a HelpMsg part
+			WRITE_BYTE(p);		 //Part Index
+			WRITE_STRING(cTemp); //Part Text
+			MESSAGE_END();
+		}
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
-		WRITE_BYTE(2);		 //This is a HelpMsg part
-		WRITE_BYTE(p);		 //Part Index
-		WRITE_STRING(cTemp); //Part Text
+		WRITE_BYTE(6);		 //This is an HelpMsg
+		WRITE_STRING_LIMIT(Title, WRITE_STRING_MAX); //Title
 		MESSAGE_END();
-	}
-	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
-	WRITE_BYTE(3);		 //This is an HelpMsg
-	WRITE_STRING_LIMIT(Title, WRITE_STRING_MAX); //Title
-	MESSAGE_END();
 #else
-	HUD_ShowHelpWin(Title, Text);
+		HUD_ShowTutorialWin(Title, Text);
 #endif
+	}
+	else
+	{
+#ifdef VALVE_DLL
+		//Send the help msg in parts.  First send all the parts.  Then send a message that shows the parts, all put together
+		//This gets around the 192 message size limit in HL
+		int iParts = (strlen(Text) / MAX_PARTLEN) + 1;
+		msstringlist Parts;
+		for (int p = 0; p < iParts; p++)
+		{
+			char cTemp[MAX_PARTLEN + 1];
+			strncpy(cTemp, &Text[p * MAX_PARTLEN], MAX_PARTLEN);
+			cTemp[MAX_PARTLEN] = 0;
+			Parts.add(cTemp);
+			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
+			WRITE_BYTE(2);		 //This is a HelpMsg part
+			WRITE_BYTE(p);		 //Part Index
+			WRITE_STRING(cTemp); //Part Text
+			MESSAGE_END();
+		}
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_HUDMSG], NULL, pev);
+		WRITE_BYTE(3);		 //This is an HelpMsg
+		WRITE_STRING_LIMIT(Title, WRITE_STRING_MAX); //Title
+		MESSAGE_END();
+#else
+		HUD_ShowHelpWin(Title, Text);
+#endif
+	}
 }
 
 static COLOR HUDEventColor[] =
