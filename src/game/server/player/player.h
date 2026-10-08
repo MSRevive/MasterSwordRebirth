@@ -362,7 +362,6 @@ struct chardata_t : savedata_t
 	mslist<genericitem_full_t> m_Items; //All carried items
 	mslist<storage_t> m_Storages;		//Storage places where I have items
 	mslist<companion_t> m_Companions;	//Companions
-	msstringlist m_ViewedHelpTips;		//List of all help tips the player has already viewed
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	mslist<quickslot_t> m_QuickSlots;	//All the quickslots (based on the item IDs of the last save)
 
@@ -381,7 +380,7 @@ struct chardata_t : savedata_t
 	bool ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_full_t &outItem);
 	void ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File);
-	void ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
+	void SkipHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File);
 #endif
@@ -440,7 +439,6 @@ public:
 	bool m_CanJoin;							  //Whether I have any characters on this server that can join the game
 	int m_JoinType;							  //How I joined the server
 	mslist<companion_t> m_Companions;		  //
-	msstringlist m_ViewedHelpTips;			  //List of all help tips the player has already viewed
 	mslist<quest_t> m_Quests;				  //All the quests I've completed
 	msstringlist m_Maps;					  //All the maps I've visited
 	mslist<wearpos_t> m_WearPositions;		  //All available positions to wear something

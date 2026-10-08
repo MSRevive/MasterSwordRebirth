@@ -1127,10 +1127,6 @@ void CBasePlayer::SendHelpMsg(const char* Tipname, const char* Title, const char
 	if (mstipname.contains("generic"))
 		generic_tip = true;
 
-	for (int i = 0; i < m_ViewedHelpTips.size(); i++)
-		if (m_ViewedHelpTips[i] == Tipname && !generic_tip)
-			return;
-
 	//Thothie - MAY2007a - Centralize Help Tips scriptside
 	if (!generic_tip)
 	{
@@ -1165,10 +1161,6 @@ void CBasePlayer::SendHelpMsg(const char* Tipname, const char* Title, const char
 #else
 	HUD_ShowHelpWin(Title, Text);
 #endif
-
-	//MAR2008a - allow use of helptip repeatedly for multi-line function
-	if (!generic_tip)
-		m_ViewedHelpTips.add(Tipname); //MAR2008a - Thothie - allow sending of repeatable help tips to make use of the multi-line function
 }
 
 static COLOR HUDEventColor[] =
@@ -1301,7 +1293,6 @@ void CBasePlayer::Deactivate()
 
 	m_EntInfo.clear();
 	m_Storages.clear();
-	m_ViewedHelpTips.clear();
 	m_Quests.clear();
 	m_Maps.clear();
 	m_WearPositions.clear();

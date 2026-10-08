@@ -6505,9 +6505,6 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 		pScripted->CallScriptEvent("game_companion_restore");
 	}
 
-	//Read Help tips
-	m_ViewedHelpTips = Data.m_ViewedHelpTips;
-
 	//Read Quests
 	m_Quests = Data.m_Quests;
 

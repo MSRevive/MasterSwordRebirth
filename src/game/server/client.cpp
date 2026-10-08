@@ -1025,11 +1025,6 @@ void ClientCommand2(edict_t *pEntity)
 			}
 		}
 	}
-	else if (FStrEq(pcmd, "reset_tips"))
-	{
-		pPlayer->m_ViewedHelpTips.clear();
-		pPlayer->SendInfoMsg("Tips reset.");
-	}
 	else if (FStrEq(pcmd, "reset_quests"))
 	{
 		//Thothie JAN2010_09 spolitable

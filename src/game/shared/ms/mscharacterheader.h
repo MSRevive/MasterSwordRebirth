@@ -88,9 +88,8 @@ enum charfield_e
 	CF_ITEMS = 35,			//[item, ...]
 	CF_STORAGES = 36,		//[storage, ...]
 	CF_COMPANIONS = 37,		//[companion, ...]
-	CF_HELPTIPS = 38,		//[str, ...]
-	CF_QUESTS = 39,			//[ [name, data], ... ]
-	CF_QUICKSLOTS = 40,		//[ nil | [type, id], ... ]
+	CF_QUESTS = 38,			//[ [name, data], ... ]
+	CF_QUICKSLOTS = 39,		//[ nil | [type, id], ... ]
 };
 
 //Item keys

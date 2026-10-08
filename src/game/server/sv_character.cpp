@@ -375,7 +375,6 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			//Sections
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
 			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
-			case CF_HELPTIPS: ReadStringListPack(Value, m_ViewedHelpTips); break;
 			case CF_ITEMS: ReadItemListPack(Value, m_Items); break;
 
 			case CF_SKILLS:
@@ -550,7 +549,7 @@ bool chardata_t::ReadDataLegacy(void *pData, ulong Size)
 		ReadItems1(DataID, m_File);
 		ReadStorageItems1(DataID, m_File);
 		ReadCompanions1(DataID, m_File);
-		ReadHelpTips1(DataID, m_File);
+		SkipHelpTips1(DataID, m_File);
 		ReadQuests1(DataID, m_File);
 		ReadQuickSlots1(DataID, m_File);
 	} while (!m_File.Eof());
@@ -742,19 +741,15 @@ void chardata_t::ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 }
 
-void chardata_t::ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
+void chardata_t::SkipHelpTips1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	if (DataID == CHARDATA_HELPTIPS1)
 	{
-		//Read Help tips
+		//Help tips are no longer saved, but the chunk still has to be read past
 		short HelpTips = 0;
 		m_File.ReadShort(HelpTips); //[SHORT]
-		m_ViewedHelpTips.clear();
 		for (int t = 0; t < HelpTips; t++)
-		{
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
-			m_ViewedHelpTips.add(cTemp);
-		}
 	}
 }
 
@@ -1142,12 +1137,6 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 			Vars.Added();
 		}
 	}
-
-	//Help tips
-	Root.Key(CF_HELPTIPS);
-	Out.Pk.pack_array(pPlayer->m_ViewedHelpTips.size());
-	for (int t = 0; t < pPlayer->m_ViewedHelpTips.size(); t++)
-		PackStr(Out, pPlayer->m_ViewedHelpTips[t]);
 
 	//Quests
 	Root.Key(CF_QUESTS);
