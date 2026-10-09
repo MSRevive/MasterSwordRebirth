@@ -6622,7 +6622,7 @@ void CBasePlayer::Think_SendCharData()
 			WRITE_STRING_LIMIT(CharInfo.OldTrans, 32); //Last trans char hit
 			WRITE_STRING_LIMIT(CharInfo.NextMap, 32);	 //New map char wants to enter
 			WRITE_STRING_LIMIT(CharInfo.NewTrans, 32); //New trans at new map
-			WRITE_SHORT(CharInfo.body);		 //MIB JAN2010_27 - Char Selection Fix - Body the model should use
+			WRITE_SHORT(CharInfo.Body);		 //MIB JAN2010_27 - Char Selection Fix - Body the model should use
 
 			// jointype_e JoinType = MSChar_Interface::CanJoinThisMap( CharInfo, VisitedMaps );
 

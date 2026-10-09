@@ -1054,17 +1054,17 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 			CharSlot.OldTrans = READ_STRING();
 			CharSlot.NextMap = READ_STRING();
 			CharSlot.NewTrans = READ_STRING();
-			CharSlot.body = READ_SHORT(); //MiB JAN2010_27 - Char Selection Fix
+			CharSlot.Body = READ_SHORT(); //MiB JAN2010_27 - Char Selection Fix
 			//CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
 			byte CharFlags = READ_BYTE();
 			CharSlot.IsElite = FBitSet(CharFlags, (1 << 0));
 			CharSlot.Gender = FBitSet(CharFlags, (1 << 1)) ? GENDER_FEMALE : GENDER_MALE;
 			CharSlot.JoinType = FBitSet(CharFlags, (1 << 2)) ? JN_TRAVEL : JN_NOTALLOWED;
 			//Thothie FEB2011_02 - invisible new character fix (default based on gender)
-			if (CharSlot.body == 0)
+			if (CharSlot.Body == 0)
 			{
-				CharSlot.body = 40;
-				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.body = 80;
+				CharSlot.Body = 40;
+				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.Body = 80;
 			}
 		}
 	}
@@ -1232,7 +1232,7 @@ void CRenderChar::Render( )
 	//Thothie FEB2011_02 - fixing gender bender
 	if ( m_Stage != STG_CHOOSEGENDER)
 	{
-		m_Ent.curstate.body = player.m_CharInfo[m_Idx].body;
+		m_Ent.curstate.body = player.m_CharInfo[m_Idx].Body;
 	}
 	else
 	{

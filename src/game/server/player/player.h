@@ -432,7 +432,6 @@ public:
 	bool m_fIsElite;
 	struct itemtrans_t *m_ItemTrans;
 	float m_TimeTillSuicide;
-	//float				LastPush; //Thothie SEP2011_16 - last time a player was affected by a push brush (failed: wont transfer between maps version and script version of CBasePlayer)
 	float m_TimeCanVote;
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;

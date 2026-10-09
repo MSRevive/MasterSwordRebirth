@@ -6101,7 +6101,6 @@ bool CScript::ScriptCmd_SetModelBody(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 {
 	//MiB JAN2010_27 - Char Selection Fix
 #ifdef VALVE_DLL
-
 	//Old way. Consolidated it and made some changes to make it easier for what comes after
 	/*		if( Params.size() == 2 )
 		SetBodygroup( GET_MODEL_PTR( ENT(m.pScriptedEnt->pev) ), m.pScriptedEnt->pev, atoi(Params[0]), atoi(Params[1]) );
@@ -6139,24 +6138,7 @@ bool CScript::ScriptCmd_SetModelBody(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msst
 			// from screwing up char select screen on reconnect
 			if ( pPlayer->pev->deadflag == DEAD_NO )
 			{
-				bool found = false;
-				for(int i = 0; i < pPlayer->m_Quests.size(); i++)
-				{
-					if ( pPlayer->m_Quests[i].Name == "BODY" )
-					{
-						pPlayer->m_Quests[i].Data = pPlayer->pev->body;
-						found = true;
-						break;
-					}
-				}
-
-				if ( !found )
-				{
-					quest_t q;
-					q.Name = "BODY";
-					q.Data = pPlayer->pev->body;
-					pPlayer->m_Quests.add( q );
-				}
+				pPlayer->m_CharInfo[pPlayer->m_CharacterNum].Body = pPlayer->pev->body;
 			}
 		}
 	}

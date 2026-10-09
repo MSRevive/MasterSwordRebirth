@@ -78,7 +78,7 @@ struct charinfo_t : charinfo_base_t
 	charloc_e Location;
 
 	//Char current Game Status, loaded from file header or sent from server
-	int body; //MiB FEB2010a (JAN2010_27) - For sending what 'body' the char-selection model should use.
+	int Body; //MiB FEB2010a (JAN2010_27) - For sending what 'body' the char-selection model should use.
 	bool IsElite;
 	enum gender_e Gender;
 	msstring Name, MapName, OldTrans, NextMap, NewTrans;

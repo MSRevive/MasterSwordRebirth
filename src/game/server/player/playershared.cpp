@@ -1501,17 +1501,7 @@ void charinfo_t::AssignChar(int CharIndex, charloc_e eLocation, const char* pDat
 		OldTrans = CharData.OldTrans;
 		NextMap = CharData.NextMap;
 		NewTrans = CharData.NewTrans;
-
-		//MiB JAN2010_27 - Char Selection Fix
-		//Find last body used
-		for (int i = 0; i < CharData.m_Quests.size(); i++)
-		{
-			if (CharData.m_Quests[i].Name == "BODY")
-			{
-				body = atoi(CharData.m_Quests[i].Data.c_str());
-				break;
-			}
-		}
+		Body = CharData.Body;
 
 		for (int i = 0; i < CharData.m_Items.size(); i++) //Determine what model/body my gear is using
 		{
