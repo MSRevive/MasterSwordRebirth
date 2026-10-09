@@ -37,10 +37,10 @@ struct savedata_legacy_t
 #include <poppack.h>
 #endif
 
-//In-memory character header.  New header fields go here (and get a charfield_e key).
+//In-memory character header. New header fields go here (and get a charfield_e key).
 struct savedata_t : savedata_legacy_t
 {
-	char PartyName[13]; //Full party name (MAX_TEAMNAME_LEN + 1).  Use this instead of Party, which only fits 11 chars
+
 };
 
 //
