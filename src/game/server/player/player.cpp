@@ -6399,7 +6399,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	strncpy(m_cEnterMap, Data.MapName, sizeof(m_cEnterMap) );
 
-	SetTeam(CTeam::CreateTeam(Data.Party, Data.PartyID));
+	SetTeam(CTeam::CreateTeam(Data.PartyName, Data.PartyID));
 	m_Gender = static_cast<gender_e>(Data.Gender);
 	m_fIsElite = Data.IsElite ? true : false;
 	m_PlayersKilled = Data.PlayerKills;

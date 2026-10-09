@@ -1823,9 +1823,7 @@ void ServerDeactivate(void)
 	g_pGameMasterEntity = nullptr;
 	MS_INFO("Game_master entity handle cleared (will be recreated in ServerActivate)");
 
-	if (g_pGameRules)
-		g_pGameRules->EndMultiplayerGame();
-
+	//MSGameEnd calls EndMultiplayerGame after saving characters, so the save still sees each player's party
 	MSGameEnd();
 	
 	MS_INFO("=== ServerDeactivate: Cleanup complete ===");

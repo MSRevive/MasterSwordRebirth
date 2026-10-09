@@ -7,27 +7,44 @@
 extern int gmsgTeamInfo;
 mslist<CTeam *> CTeam::Teams;
 
+//Never returns 0, so an ID of 0 always means "no party"
+static ulong NewTeamID()
+{
+	ulong ID;
+	do
+		ID = (ulong)RANDOM_LONG(1, LONG_MAX);
+	while (CTeam::GetTeam(ID));
+
+	return ID;
+}
+
+//Pass ID 0 to create a brand new party.  Pass a saved ID to restore a party: all members with
+//that ID end up in the same team, no matter who loads first.
 CTeam *CTeam::CreateTeam(const char *pszName, ulong ID)
 {
 	if (!pszName || !pszName[0])
 		return NULL;
 
-	CTeam *pNewTeam = GetTeam(ID);
+	//Team exists (another member already restored it), use it
+	if (ID)
+	{
+		CTeam *pTeam = GetTeam(ID);
+		if (pTeam)
+			return pTeam;
+	}
 
-	//Team exists, use it
-	if (pNewTeam)
-		return pNewTeam;
+	//A different party already uses this name.  Don't merge into a stranger's party
+	if (GetTeam(pszName))
+		return NULL;
 
 	//Create new team
-	CTeam* NewTeam = msnew CTeam;
-    char pszTeamName[MAX_TEAMNAME_LEN + 1];
+	CTeam *pNewTeam = msnew CTeam;
+	strncpy((char *)pNewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
+	pNewTeam->m_ID = (int)(ID ? ID : NewTeamID());
 
-	strncpy((char*)NewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
-	NewTeam->m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
+	Teams.add(pNewTeam);
 
-	Teams.add(NewTeam);
-
-	return NewTeam;
+	return pNewTeam;
 }
 
 CTeam *CTeam::GetTeam(const char *pszName)
@@ -132,7 +149,8 @@ BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 CTeam::~CTeam()
 {
 	ValidateUnits();
-	for (int i = 0; i < MemberList.size(); i++)
+	//Backwards, because SetTeam(NULL) erases the member from MemberList
+	for (int i = (int)MemberList.size() - 1; i >= 0; i--)
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(MemberList[i].idx);
 		if (!pPlayer || (ulong)pPlayer != MemberList[i].ID)

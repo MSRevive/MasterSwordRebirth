@@ -538,7 +538,11 @@ void MSGameEnd()
 		if((pPlayer) && (pPlayer->m_CharacterState == CHARSTATE_LOADED))
 			pPlayer->SaveChar();
 	}
-	
+
+	//Delete teams only after the save above, since deleting a team removes its members from it
+	if (g_pGameRules)
+		g_pGameRules->EndMultiplayerGame();
+
 	//Thothie MAR2012_27 - clear duplicate precaches for next map
 	gSoundPrecacheList.clearitems();
 	gModelPrecacheList.clearitems();

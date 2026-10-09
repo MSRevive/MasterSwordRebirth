@@ -1678,7 +1678,7 @@ BOOL CHalfLifeMultiplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd
 				}
 			}
 			else {
-				pTeam = CTeam::CreateTeam( Name, RANDOM_LONG(0, LONG_MAX) );
+				pTeam = CTeam::CreateTeam( Name, 0 ); //0 = assign a new unique ID
 				//pPlayer->SendInfoMsg( "You are now the leader of %s\n", Name );
 				msstring CreateMsg = msstring("You are now the leader of ") + pTeam->m_TeamName;
 				pPlayer->SendHUDMsg( "Party", CreateMsg );
@@ -2166,8 +2166,8 @@ void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, const char
 void CHalfLifeMultiplay::EndMultiplayerGame( void )
 {
 	//Delete all the teams
-	 for (int i = 0; i < CTeam::Teams.size(); i++) 
-		delete CTeam::Teams[0];
+	for (int i = 0; i < CTeam::Teams.size(); i++)
+		delete CTeam::Teams[i];
 	CTeam::Teams.clear();
 	
 	m_CurrentVote.fActive = false;

@@ -365,7 +365,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_OLDTRANS: PackReadStr(Value, OldTrans, sizeof(OldTrans)); break;
 			case CF_NEWTRANS: PackReadStr(Value, NewTrans, sizeof(NewTrans)); break;
 			case CF_STEAMID: PackReadStr(Value, SteamID, sizeof(SteamID)); break;
-			case CF_PARTY: PackReadStr(Value, Party, sizeof(Party)); break;
+			case CF_PARTY: PackReadStr(Value, PartyName, sizeof(PartyName)); break;
 			case CF_PARTYID: PartyID = (ulong)PackReadInt(Value); break;
 			case CF_ISELITE: IsElite = (byte)PackReadInt(Value); break;
 			case CF_GOLD: Gold = (int)PackReadInt(Value); break;
@@ -569,6 +569,7 @@ bool chardata_t::ReadHeader1(byte DataID, CPlayer_DataBuffer &m_File)
 	if (DataID == CHARDATA_HEADER1)
 	{
 		m_File.Read(static_cast<savedata_legacy_t *>(this), sizeof(savedata_legacy_t)); //[HEADER}
+		strncpy(PartyName, Party, sizeof(Party)); //Party may not be null-terminated.  PartyName is zeroed and one char longer
 
 		if (!IsValidCharVersion(Version))
 			return false;
@@ -1044,7 +1045,7 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	Root.FieldStr(CF_OLDTRANS, Data.OldTrans, sizeof(Data.OldTrans));
 	Root.FieldStr(CF_NEWTRANS, Data.NewTrans, sizeof(Data.NewTrans));
 	Root.FieldStr(CF_STEAMID, Data.SteamID, sizeof(Data.SteamID));
-	Root.FieldStr(CF_PARTY, Data.Party, sizeof(Data.Party));
+	Root.FieldStr(CF_PARTY, Data.PartyName, sizeof(Data.PartyName));
 	Root.Field(CF_PARTYID, Data.PartyID);
 	Root.Field(CF_ISELITE, Data.IsElite);
 	Root.Field(CF_GOLD, Data.Gold);
@@ -1219,7 +1220,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 	{
 		strncpy(Data.Name, pPlayer->m_DisplayName, sizeof(Data.Name)); // Store actual character name (DisplayName() is servername, and will have a (#) at the end if there are duplicates on the server)
 		strncpy(Data.Race, "Human", sizeof(Data.Race)); // LEGACY
-		strncpy(Data.Party, pPlayer->GetPartyName(), sizeof(Data.Party));
+		strncpy(Data.PartyName, pPlayer->GetPartyName(), sizeof(Data.PartyName) - 1);
 		Data.PartyID = pPlayer->GetPartyID();
 
 		strncpy(Data.MapName, MSGlobals::MapName, sizeof(Data.MapName));
