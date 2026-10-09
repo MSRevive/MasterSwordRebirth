@@ -101,7 +101,10 @@ struct quickslot_t //Quickslots for items, spells
 	quickslottype_e Type;
 	uint ID;
 };
-#define MAX_QUICKSLOTS 36 //MiB MAR2012 - Increase quickslots
+
+// The actual max is 31 because of the way quickslots are sent to via client.
+// So we just decrease back down to 24 for now since multiples of 12.
+#define MAX_QUICKSLOTS 24 //MiB MAR2012 - Increase quickslots
 
 #include "sharedmenu.h"
 
