@@ -28,6 +28,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <com_model.h>
+#include <mathlib.h>
 
 #include <string.h>
 #include "vgui_int.h"
@@ -48,6 +50,12 @@ CClientLibrary gClient;
 TeamFortressViewport *gViewPort = nullptr;
 extern CHud gHUD;
 extern float g_fMenuLastClosed;
+
+#include "particleman/IParticleMan_Active.h"
+#include "particleman/CBaseParticle.h"
+IParticleMan* g_pParticleMan = nullptr;
+void CL_LoadParticleMan();
+void CL_UnloadParticleMan();
 
 void InitInput(void);
 void EV_HookEvents(void);
@@ -239,6 +247,7 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
 	EV_HookEvents();
+	CL_LoadParticleMan();
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
 	
 	// Register AngelScript cvars for client
@@ -294,6 +303,9 @@ int DLLEXPORT HUD_VidInit(void)
 	gClient.VideoInit();
 
 	VGui_Startup();
+
+	if (g_pParticleMan)
+		g_pParticleMan->ResetParticles();
 
 	MS_INFO("[HUD_VidInit: Complete]");
 
@@ -508,20 +520,69 @@ void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
 	}
 }
 
-// void CL_UnloadParticleMan()
-// {
-// 	g_pParticleMan = nullptr;
-// }
+//Taken from https://github.com/FreeSlave/halflife-featureful 
+//so i can test that the particleman system is working.
+void TestParticlesCmd()
+{
+	static model_t* texture = 0;
 
-// void CL_LoadParticleMan()
-// {
-// 	//Now implemented in the client library.
-// 	auto particleManFactory = Sys_GetFactoryThis();
+	if ( g_pParticleMan )
+	{
+		const float clTime = gEngfuncs.GetClientTime();
 
-// 	g_pParticleMan = (IParticleMan*)particleManFactory(PARTICLEMAN_INTERFACE, nullptr);
+		if (texture == 0)
+		{
+			texture = (model_t*)gEngfuncs.GetSpritePointer(SPR_Load("sprites/steam1.spr"));
+		}
 
-// 	if (g_pParticleMan)
-// 	{
-// 		g_pParticleMan->SetUp(&gEngfuncs);
-// 	}
-// }
+		if (!texture)
+			return;
+
+		cl_entity_t* player = gEngfuncs.GetLocalPlayer();
+		Vector origin = player->origin;
+		Vector forward;
+		AngleVectors(player->angles, &forward, NULL, NULL);
+
+		for (int i = 0; i < 10; ++i)
+		{
+			Vector shift = forward * 64.0f + forward * 8.0f * i + Vector( 0.0f, 0.0f, i * 8.0f );
+
+			CBaseParticle *particle = g_pParticleMan->CreateParticle(origin + shift, Vector(0.0f, 0.0f, 0.0f), texture, 32.0f, 255.0f, "particle");
+
+			particle->SetLightFlag(LIGHT_NONE);
+			particle->SetCullFlag(CULL_PVS);
+			particle->SetRenderFlag(RENDER_FACEPLAYER);
+			particle->SetCollisionFlags(TRI_COLLIDEWORLD);
+			particle->m_iRendermode = kRenderTransAlpha;
+			particle->m_vColor = Vector(255, 255, 255);
+			particle->m_iFramerate = 10;
+			particle->m_iNumFrames = texture->numframes;
+			particle->m_flGravity = 0.01f;
+			particle->m_vVelocity = shift.Normalize() * 2;
+
+			particle->m_flDieTime = clTime + 5 + i;
+		}
+	}
+}
+
+void CL_UnloadParticleMan()
+{
+	if (g_pParticleMan)
+	{
+		delete g_pParticleMan;
+		g_pParticleMan = nullptr;
+	}
+}
+
+void CL_LoadParticleMan()
+{
+	//Now implemented in the client library.
+	g_pParticleMan = new IParticleMan_Active();
+
+	if (g_pParticleMan)
+	{
+		g_pParticleMan->SetUp(&gEngfuncs);
+
+		//gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
+	}
+}

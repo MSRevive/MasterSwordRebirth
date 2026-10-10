@@ -30,6 +30,9 @@
 #include "script.h"
 #include <mathlib.h>
 
+#include "particleman/particleman.h"
+extern IParticleMan* g_pParticleMan;
+
 #undef DLLEXPORT //Master Sword
 #define DLLEXPORT EXPORT
 #define MAX_TEMPENT_EXTRA 4096
@@ -1896,6 +1899,12 @@ void DLLEXPORT HUD_TempEntUpdate(
 	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
 	float freq, CommonGravity, gravitySlow, life, fastFreq;
+
+	Vector vAngles;
+	gEngfuncs.GetViewAngles((float*)vAngles);
+
+	if ( g_pParticleMan )
+		 g_pParticleMan->SetVariables(cl_gravity, vAngles);
 
 	// Nothing to simulate
 	if (!*ppTempEntActive)

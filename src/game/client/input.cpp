@@ -1134,11 +1134,14 @@ void ShutdownInput(void)
 	KB_Shutdown();
 }
 
+void CL_UnloadParticleMan();
+
 void DLLEXPORT HUD_Shutdown(void)
 {
 	MS_INFO("[HUD_Shutdown: Enter]");
 	ScriptMgr::GameShutdown();
 	gClient.Shutdown();
+	CL_UnloadParticleMan();
 	ShutdownInput();
 
 #ifndef _WIN32
