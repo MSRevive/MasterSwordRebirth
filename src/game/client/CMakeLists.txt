@@ -172,6 +172,8 @@ set(HL1
 	"util.cpp"
 	"view.cpp"
 	"cl_util.h"
+	"tri.cpp"
+	"tri.h"
 	"../shared/movement/pm_math.cpp"
 	"../shared/voice_banmgr.cpp"
 	"../shared/voice_status.cpp"
@@ -208,7 +210,6 @@ source_group("MS" FILES ${MS})
 
 set(MS_Headers
 	"inc_huditem.h"
-	"ms/clenv.h"
 	"ms/clglobal.h"
 	"ms/health.h"
 	"ms/hudid.h"
@@ -249,12 +250,12 @@ set(Render
 	"render/clrenderent.cpp"
 	"render/gamestudiomodelrenderer.cpp"
 	"render/gamestudiomodelrenderer.h"
-	"render/opengl/clopengl.cpp"
-	"render/opengl/clopengl.h"
 	"render/studio_util.cpp"
 	"render/studio_util.h"
 	"render/studiomodelrenderer.cpp"
 	"render/studiomodelrenderer.h"
+	"render/clenv.cpp"
+	"render/clenv.h"
 	"../../../thirdparty/tartan/textureloader.cpp"
 	"../../../thirdparty/tartan/tgaloader.cpp"
 	"../../../thirdparty/gl/glext.h"
@@ -479,6 +480,7 @@ set(VGUI_MS
 	"ui/ms/vgui_vote.h"
 	"ui/ms/vgui_moveitempanel.cpp"
 	"ui/ms/vgui_moveitempanel.h"
+	"ui/ms/vgui_image3d.cpp"
 )
 source_group("VGUI\\ms" FILES ${VGUI_MS})
 

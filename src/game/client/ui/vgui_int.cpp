@@ -18,7 +18,7 @@
 #include "in_defs.h"
 #include "vgui_teamfortressviewport.h"
 #include "vgui_controlconfigpanel.h"
-#include "clenv.h"
+#include "render/clenv.h"
 #include "mslogger.h"
 
 namespace
@@ -82,9 +82,6 @@ void *VGui_GetPanel()
 
 void VGui_Startup()
 {
-	if (!CRender::CheckOpenGL()) //This exits if not in OpenGL mode
-		return;
-
 	Panel *root = (Panel *)VGui_GetPanel();
 	root->setBgColor(128, 128, 0, 0);
 	//root->setNonPainted(false);

@@ -1,7 +1,6 @@
-//The client-side enviroment
-//
+#pragma once
 
-//Used by various source files
+struct loadtex_t;
 
 class CEnvMgr
 {
@@ -10,6 +9,7 @@ public:
 	static void InitNewLevel();
 	static void Think_DrawTransparentTriangles();
 	static void RenderSky();
+	static void RenderFog(bool bRender);
 	static void Cleanup();
 
 	static void ChangeSkyTexture(const char* NewTexture);
@@ -28,19 +28,16 @@ public:
 		int Type;
 	};
 	static fog_t m_Fog;
-};
 
-//Mastersword Special rendering
-class CRender
-{
-public:
+	//OpenGL
 	static void PushHLStates();
 	static void PopHLStates();
+	static bool LoadGLTexture(const char *FileName, unsigned int &TextureID);
+	static bool LoadGLTexture(const char *FileName, loadtex_t &LoadTex);
+	static void DeleteGLTextures();
 
-	static void Cleanup();
-
-	static bool InitGL();	   //Load GL extension functions.  Called each level load
-	static bool CheckOpenGL(); //MS only works in openGL
+private:
+	static void InitGL();
 
 	static int m_OldHLTexture[10];
 	static bool m_OldMultiTextureEnabled;

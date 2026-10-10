@@ -23,7 +23,7 @@
 #include "string.h"
 #include "mscharacter.h"
 #include "clglobal.h"
-#include "clenv.h"
+#include "render/clenv.h"
 #include "vgui_choosecharacter.h"
 #include "monsters/msmonster.h"
 #include "mslogger.h"

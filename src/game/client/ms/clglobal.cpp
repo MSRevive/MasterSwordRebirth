@@ -3,7 +3,7 @@
 #include "com_weapons.h"
 #include "msdllheaders.h"
 #include "clglobal.h"
-#include "clenv.h"
+#include "render/clenv.h"
 #include "mscharacter.h"
 #include "vgui_menudefsshared.h"
 #include "player/player.h"
@@ -43,6 +43,7 @@ void MSCLGlobals::AddEnt(CBaseEntity *pEntity)
 
 	m_ClEntites.add(pEntity);
 }
+
 void MSCLGlobals::RemoveEnt(CBaseEntity *pEntity, bool fDelete)
 {
 	for (int e = 0; e < m_ClEntites.size(); e++)
@@ -339,6 +340,7 @@ void MSCLGlobals::SetupGlobalEngFuncRedirects(void)
 	g_engfuncs.pfnRandomFloat = gEngfuncs.pfnRandomFloat;
 	g_engfuncs.pfnRandomLong = gEngfuncs.pfnRandomLong;
 }
+
 //I've recieved all script files, I can now spawn
 void CreateStoreMenus();
 void ShowVGUIMenu(int iMenu);
@@ -372,7 +374,7 @@ void MSCLGlobals::Cleanup()
 	RemoveAllEntities();
 
 	//Remove Environment Special Effects
-	CRender::Cleanup();
+	CEnvMgr::Cleanup();
 }
 
 void DLLAttach(HINSTANCE hinstDLL)

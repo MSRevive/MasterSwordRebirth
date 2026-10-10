@@ -169,14 +169,6 @@ public:
 #include <GL/gl.h>	  // Header File For The OpenGL32 Library
 #include <GL/glext.h>
 
-#ifdef _WIN32
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-#else // _WIN32
-#define glMultiTexCoord2fARB glMultiTexCoord2f
-#define glActiveTextureARB glActiveTexture
-#endif
-
 #include "ref_params.h"
 
 struct viewmgr_t

@@ -21,5 +21,3 @@ namespace Tartan
 }
 
 void GetCompatibleTextureSize(uint SizeW, uint SizeH, uint &outNewSizeW, uint &outNewSizeH, float &outTexCoordU, float &outTexCoordV);
-bool LoadGLTexture(const char *FileName, uint &TextureID);
-bool LoadGLTexture(const char *FileName, loadtex_t &LoadTga);
