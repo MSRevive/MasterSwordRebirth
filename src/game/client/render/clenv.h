@@ -1,6 +1,7 @@
 #pragma once
 
 struct loadtex_t;
+struct cl_entity_s;
 
 class CEnvMgr
 {
@@ -28,6 +29,8 @@ public:
 		int Type;
 	};
 	static fog_t m_Fog;
+	static float GetFogFactor(const Vector &Origin); //1 = clear, 0 = fully fogged
+	static bool ApplyFogFade(cl_entity_s *pEnt);
 
 	//OpenGL
 	static void PushHLStates();

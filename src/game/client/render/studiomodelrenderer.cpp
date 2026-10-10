@@ -2482,13 +2482,13 @@ void CStudioModelRenderer::StudioRenderEntity(bool fullbright)
 				if (!fullbright)
 				{
 					pTexture[i].index = g_iBlankTex;
-					pTexture[i].flags |= STUDIO_NF_ADDITIVE;
+					pTexture[i].flags |= STUDIO_NF_ADDITIVE | STUDIO_NF_MASKED;
 				}
 			}
 			else if (fullbright)
 			{
 				pTexture[i].index = g_iBlankTex;
-				pTexture[i].flags |= STUDIO_NF_ADDITIVE;
+				pTexture[i].flags |= STUDIO_NF_ADDITIVE | STUDIO_NF_MASKED;
 			}
 		}
 	}
@@ -2509,13 +2509,13 @@ void CStudioModelRenderer::StudioRenderEntity(bool fullbright)
 
 void GenBlackTex()
 {
-	GLubyte pixels[3] = {0,0,0};
+	GLubyte pixels[4] = {0,0,0,0};
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glGenTextures(1, &g_iBlankTex);
 	glBindTexture(GL_TEXTURE_2D, g_iBlankTex);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

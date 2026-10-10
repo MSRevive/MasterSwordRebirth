@@ -26,6 +26,7 @@
 #include "inc_weapondefs.h"
 #include "ms/hudscript.h"
 #include "ms/clglobal.h"
+#include "render/clenv.h"
 #include "script.h"
 #include <mathlib.h>
 
@@ -112,6 +113,10 @@ int DLLEXPORT HUD_AddEntity(int type, struct cl_entity_s *ent, const char *model
 			ent->index == g_iUser2)
 			return 0; // don't draw the player we are following in eye
 	}
+
+	//fade out what the fog doesn't work on.
+	if (type == ET_NORMAL && !CEnvMgr::ApplyFogFade(ent))
+		return 0;
 
 	return 1;
 }

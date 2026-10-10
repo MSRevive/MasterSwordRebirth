@@ -127,6 +127,15 @@ public:
 CSkyBox g_CustomSkyBox;
 CParticle g_Tint;
 
+//The renderamt the server sent for an entity, and what ApplyFogFade replaced it with
+#define FOGFADE_MAX_ENTS 4096
+struct fogfade_t
+{
+	int ModelIndex;
+	int Original, Written;
+};
+static fogfade_t g_FogFade[FOGFADE_MAX_ENTS];
+
 void CEnvMgr::Init()
 {
 	m_MaxViewDistance = EngineFunc::CVAR_GetFloat("sv_zmax");
@@ -137,6 +146,7 @@ void CEnvMgr::Init()
 void CEnvMgr::InitNewLevel()
 {
 	InitGL();
+	memset(g_FogFade, 0, sizeof(g_FogFade));
 	VGUIImages_NewLevel();
 	MS_INFO("[InitNewLevel Complete]");
 }
@@ -239,6 +249,61 @@ void CEnvMgr::RenderFog( bool bRender )
 
 	// Required for transparent crap, else they refuse to apply fog. Thank you engine.
 	gEngfuncs.pTriAPI->Fog( bRender ? CEnvMgr::m_Fog.Color : Vector( 0, 0, 0 ), CEnvMgr::m_Fog.Start, CEnvMgr::m_Fog.End, CEnvMgr::m_Fog.Enabled );
+}
+
+//How much of something at Origin is left after fog. Same math OpenGL uses for each fog type
+float CEnvMgr::GetFogFactor(const Vector &Origin)
+{
+	if (!m_Fog.Enabled)
+		return 1.0f;
+
+	float Dist = (Origin - ViewMgr.Origin).Length();
+	float Factor = 1.0f;
+
+	if (m_Fog.Type == GL_EXP)
+		Factor = exp(-m_Fog.Density * Dist);
+	else if (m_Fog.Type == GL_EXP2)
+		Factor = exp(-(m_Fog.Density * Dist) * (m_Fog.Density * Dist));
+	else if (m_Fog.End != m_Fog.Start) //GL_LINEAR
+		Factor = (m_Fog.End - Dist) / (m_Fog.End - m_Fog.Start);
+
+	if (Factor < 0.0f)
+		return 0.0f;
+	if (Factor > 1.0f)
+		return 1.0f;
+	return Factor;
+}
+
+//The engine never fogs sprites or additive/glow entities, so fade them out by distance instead
+bool CEnvMgr::ApplyFogFade(cl_entity_s *pEnt)
+{
+	cl_entity_t &Ent = *pEnt;
+
+	if (!Ent.model || Ent.curstate.rendermode == kRenderNormal)
+		return true;
+
+	if (Ent.model->type != mod_sprite &&
+		Ent.curstate.rendermode != kRenderTransAdd &&
+		Ent.curstate.rendermode != kRenderGlow)
+		return true;
+
+	if (Ent.index < 0 || Ent.index >= FOGFADE_MAX_ENTS)
+		return true;
+
+	//curstate is only refreshed when a server update arrives, so scale from the saved value
+	//or the fade would compound every frame
+	fogfade_t &Fade = g_FogFade[Ent.index];
+	if (Fade.ModelIndex != Ent.curstate.modelindex || Fade.Written != Ent.curstate.renderamt)
+	{
+		//The server changed it, or this is a different entity
+		Fade.ModelIndex = Ent.curstate.modelindex;
+		Fade.Original = Ent.curstate.renderamt;
+	}
+
+	Fade.Written = (int)(Fade.Original * GetFogFactor(Ent.origin));
+	Ent.curstate.renderamt = Fade.Written;
+
+	return Fade.Written > 0 || Fade.Original <= 0;
 }
 
 //MS OGL extention stuff
