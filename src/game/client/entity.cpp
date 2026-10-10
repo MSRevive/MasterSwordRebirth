@@ -8,6 +8,8 @@
 // Client side entity management functions
 
 #include <memory.h>
+#include <algorithm>
+#include <vector>
 
 #include "hud.h"
 #include "cl_util.h"
@@ -79,6 +81,69 @@ struct tempentextra_t
 
 static tempentextra_t g_TempEntExtra[MAX_TEMPENT_EXTRA]; //Extra info about tempents
 extern bool g_TempEntNewLevel;
+
+class CScriptParticle : public CBaseParticle
+{
+public:
+	TEMPENTITY m_Temp;
+
+	void Think(float time) override {} //Simulated in HUD_TempEntUpdate instead
+	void Die() override;
+	void SyncFromTemp();
+};
+
+static std::vector<CScriptParticle *> g_ScriptParticles;
+cvar_t *ms_particle_tempents = NULL;
+
+//ParticleMan calls this right before it deletes the particle
+void CScriptParticle::Die()
+{
+	auto it = std::find(g_ScriptParticles.begin(), g_ScriptParticles.end(), this);
+	if (it != g_ScriptParticles.end())
+		g_ScriptParticles.erase(it);
+
+	if (m_Temp.entity.curstate.weaponanim)
+		g_TempEntExtra[m_Temp.entity.curstate.weaponanim].Active = false;
+}
+
+//Copy what the simulation and the scripts did to m_Temp over to what ParticleMan draws
+void CScriptParticle::SyncFromTemp()
+{
+	cl_entity_t &Ent = m_Temp.entity;
+
+	m_vOrigin = Ent.origin;
+
+	//The engine draws a sprite with a body at that attachment of the entity in skin ("follow" sets this up)
+	if (Ent.curstate.body >= 1 && Ent.curstate.body <= 4 && Ent.curstate.skin)
+	{
+		cl_entity_t *pParent = gEngfuncs.GetEntityByIndex(Ent.curstate.skin);
+		if (pParent)
+			m_vOrigin = pParent->attachment[Ent.curstate.body - 1];
+	}
+
+	if (Ent.model && Ent.model->type == mod_sprite)
+	{
+		float Width = Ent.model->maxs.x - Ent.model->mins.x;
+		float Height = Ent.model->maxs.z - Ent.model->mins.z;
+		float Scale = Ent.curstate.scale ? Ent.curstate.scale : 1.0f; //The engine draws scale 0 as 1
+
+		m_pTexture = Ent.model;
+		m_iNumFrames = Ent.model->numframes;
+		m_flSize = Width * Scale;
+		m_flStretchY = Width > 0 ? Height / Width : 1.0f;
+	}
+
+	m_iFrame = (int)Ent.curstate.frame;
+	m_iRendermode = Ent.curstate.rendermode;
+	m_flBrightness = Ent.curstate.rendermode == kRenderNormal ? 255 : Ent.curstate.renderamt;
+
+	//The engine draws a sprite with no rendercolor as white
+	color24 &Color = Ent.curstate.rendercolor;
+	if (!Color.r && !Color.g && !Color.b)
+		m_vColor = Vector(255, 255, 255);
+	else
+		m_vColor = Vector(Color.r, Color.g, Color.b);
+}
 
 /*
 ========================
@@ -928,6 +993,38 @@ int CL_LoadModel(const char* RelativePathname, model_s **ppModel = NULL)
 	return modelindex;
 }
 
+static CScriptParticle *ScriptParticle_Create(const Vector &Origin, model_s *Model)
+{
+	if (!g_pParticleMan || !ms_particle_tempents || !ms_particle_tempents->value)
+		return NULL;
+	if (!Model || Model->type != mod_sprite)
+		return NULL;
+
+	CScriptParticle *pParticle = new CScriptParticle();
+	pParticle->InitializeSprite(Origin, Vector(0, 0, 0), Model, 1, 255);
+	pParticle->SetLightFlag(LIGHT_NONE);
+	pParticle->SetCullFlag(CULL_PVS);
+	pParticle->SetRenderFlag(RENDER_FACEPLAYER);
+
+	TEMPENTITY &Temp = pParticle->m_Temp;
+	clrmem(Temp);
+	Temp.flags = FTENT_CLIENTCUSTOM | FTENT_NOMODEL; //NOMODEL keeps the simulation from adding it as an engine entity
+	Temp.callback = TempEntCallback;
+	Temp.die = gEngfuncs.GetClientTime();
+	Temp.frameMax = Model->numframes > 1 ? Model->numframes - 1 : 0;
+	Temp.fadeSpeed = 0.5;
+	Temp.bounceFactor = 1;
+	Temp.entity.model = Model;
+	Temp.entity.origin = Origin;
+	Temp.entity.curstate.rendercolor.r = 255;
+	Temp.entity.curstate.rendercolor.g = 255;
+	Temp.entity.curstate.rendercolor.b = 255;
+	Temp.entity.curstate.renderamt = 255;
+
+	g_ScriptParticles.push_back(pParticle);
+	return pParticle;
+}
+
 void CScript::CLScriptedEffect(msstringlist &Params)
 {
 	if (!Params.size())
@@ -949,7 +1046,9 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 			model_s *Model = gEngfuncs.CL_LoadModel(FullName, &index);
 			Vector Origin = StringToVec(Params[3]);
 
-			TEMPENTITY *p = gEngfuncs.pEfxAPI->CL_TentEntAllocCustom(Origin, Model, 0, TempEntCallback);
+			//Sprites are drawn by ParticleMan, everything else is an engine tempent
+			CScriptParticle *pParticle = IsSprite ? ScriptParticle_Create(Origin, Model) : NULL;
+			TEMPENTITY *p = pParticle ? &pParticle->m_Temp : gEngfuncs.pEfxAPI->CL_TentEntAllocCustom(Origin, Model, 0, TempEntCallback);
 			if (!p)
 				return;
 
@@ -1006,6 +1105,9 @@ void CScript::CLScriptedEffect(msstringlist &Params)
 					g_CurrentTempEnt = NULL;
 				}
 			}
+
+			if (pParticle)
+				pParticle->SyncFromTemp();
 		}
 
 		else if (Params[1] == "set_current_prop")
@@ -1885,6 +1987,418 @@ Simulation and cleanup of temporary entities
 =================
 */
 int g_TempEntCount = 0;
+
+//Simulates one tempent for this frame.  Returns false once it's finished and should be removed
+//Used for the engine's tempents and for the script sprites that ParticleMan draws
+static bool TempEnt_Simulate(
+	TEMPENTITY *pTemp,
+	double frametime,	// Simulation time
+	double client_time, // Absolute time on client
+	double cl_gravity,	// True gravity on client
+	int gTempEntFrame,
+	int (*Callback_AddVisibleEntity)(cl_entity_t *pEntity),
+	void (*Callback_TempEntPlaySound)(TEMPENTITY *pTemp, float damp))
+{
+	int i;
+	int active = 1;
+	float fastFreq = client_time * 5.5;
+	float gravity = -frametime * cl_gravity;
+	float gravitySlow = gravity * 0.5;
+	if (FBitSet(pTemp->entity.curstate.iuser4, MSTEMPENT_GRAVITY)) // Script altered this tempent's gravity
+		gravity *= pTemp->entity.curstate.gravity;
+
+	float life = pTemp->die - client_time;
+
+	try
+	{
+		if (life < 0)
+		{
+			if (pTemp->flags & FTENT_FADEOUT)
+			{
+				if (pTemp->entity.curstate.rendermode == kRenderNormal)
+					pTemp->entity.curstate.rendermode = kRenderTransTexture;
+				pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt * (1 + life * pTemp->fadeSpeed);
+				if (pTemp->entity.curstate.renderamt <= 0)
+					active = 0;
+			}
+			else
+				active = 0;
+		}
+
+		if (pTemp->entity.curstate.weaponanim)
+		{
+			tempentextra_t &TempEntExtra = g_TempEntExtra[pTemp->entity.curstate.weaponanim];
+			if (TempEntExtra.DieWithEntActive)
+			{
+				pTemp->die = gEngfuncs.GetClientTime() + 10;
+				cl_entity_t *pOtherEnt = gEngfuncs.GetEntityByIndex(TempEntExtra.DieWithEnt);
+				if (!pOtherEnt || !pOtherEnt->Exists())
+				{
+					active = 0;
+					TempEntExtra.DieWithEntActive = false;
+				}
+			}
+		}
+
+		if (active)
+		{
+			//Save old origin
+			VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
+
+			//if Following, origin always equals attachment point
+			if (FBitSet(pTemp->entity.curstate.iuser4, MSTEMPENT_FOLLOWENT))
+			{
+				cl_entity_t *pOtherEnt = gEngfuncs.GetEntityByIndex(pTemp->entity.curstate.aiment);
+				if (pOtherEnt)
+					pTemp->entity.origin = pOtherEnt->origin;
+			}
+
+			//Handle timer callback
+			//=====================
+			if (pTemp->entity.curstate.weaponanim)
+			{
+				tempentextra_t &TempExtra = g_TempEntExtra[pTemp->entity.curstate.weaponanim];
+				if (TempExtra.CBTimer_Enabled)
+					if (client_time >= TempExtra.CBTimer_TimeCallback)
+					{
+						TempExtra.CBTimer_Enabled = false;
+
+						g_CurrentTempEnt = pTemp;
+						HUDScript->Effects_UpdateTempEnt(TempExtra.CBTimer_CallbackEvent);
+						g_CurrentTempEnt = NULL;
+					}
+
+				//Handle Fade
+				//===========
+				if (TempExtra.Fadeout)
+				{
+					float Elapsed = client_time - TempExtra.FadeStart;
+					float Ratio = Elapsed / (TempExtra.FadeDuration ? TempExtra.FadeDuration : 1);
+					if (pTemp->entity.curstate.rendermode == kRenderNormal)
+						pTemp->entity.curstate.rendermode = kRenderTransTexture;
+					pTemp->entity.curstate.renderamt = 255 * (1 - Ratio);
+				}
+
+				//Check water touch
+				if (TempExtra.CBWater_Enabled)
+					if (EngineFunc::Shared_PointContents(Vector(pTemp->entity.origin.x, pTemp->entity.origin.y, pTemp->entity.origin.z + pTemp->entity.curstate.mins.z)) == CONTENTS_WATER)
+					{
+						TempExtra.CBWater_Enabled = false;
+						g_CurrentTempEnt = pTemp;
+						HUDScript->Effects_UpdateTempEnt(TempExtra.CBWater_CallbackEvent);
+						g_CurrentTempEnt = NULL;
+					}
+			}
+
+			if (pTemp->flags & FTENT_SPARKSHOWER)
+			{
+				// Adjust speed if it's time
+				// Scale is next think time
+				if (client_time > pTemp->entity.baseline.scale)
+				{
+					// Show Sparks
+					gEngfuncs.pEfxAPI->R_SparkEffect(pTemp->entity.origin, 8, -200, 200);
+
+					// Reduce life
+					pTemp->entity.baseline.framerate -= 0.1;
+
+					if (pTemp->entity.baseline.framerate <= 0.0)
+					{
+						pTemp->die = client_time;
+					}
+					else
+					{
+						// So it will die no matter what
+						pTemp->die = client_time + 0.5;
+
+						// Next think
+						pTemp->entity.baseline.scale = client_time + 0.1;
+					}
+				}
+			}
+			else if (pTemp->flags & FTENT_PLYRATTACHMENT)
+			{
+				cl_entity_t *pClient;
+
+				pClient = gEngfuncs.GetEntityByIndex(pTemp->clientIndex);
+
+				VectorAdd(pClient->origin, pTemp->tentOffset, pTemp->entity.origin);
+			}
+			else if (pTemp->flags & FTENT_SINEWAVE)
+			{
+				pTemp->x += pTemp->entity.baseline.origin[0] * frametime;
+				pTemp->y += pTemp->entity.baseline.origin[1] * frametime;
+
+				pTemp->entity.origin[0] = pTemp->x + sin(pTemp->entity.baseline.origin[2] + client_time * pTemp->entity.prevstate.frame) * (10 * pTemp->entity.curstate.framerate);
+				pTemp->entity.origin[1] = pTemp->y + sin(pTemp->entity.baseline.origin[2] + fastFreq + 0.7) * (8 * pTemp->entity.curstate.framerate);
+				pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
+			}
+			else if (pTemp->flags & FTENT_SPIRAL)
+			{
+				float s, c;
+				s = sin(pTemp->entity.baseline.origin[2] + fastFreq);
+				c = cos(pTemp->entity.baseline.origin[2] + fastFreq);
+
+				pTemp->entity.origin[0] += pTemp->entity.baseline.origin[0] * frametime + 8 * sin(client_time * 20 + (int)pTemp);
+				pTemp->entity.origin[1] += pTemp->entity.baseline.origin[1] * frametime + 4 * sin(client_time * 30 + (int)pTemp);
+				pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
+			}
+
+			else
+			{
+				for (i = 0; i < 3; i++)
+					pTemp->entity.origin[i] += pTemp->entity.baseline.origin[i] * frametime;
+			}
+
+			if (pTemp->flags & FTENT_SPRANIMATE)
+			{
+				pTemp->entity.curstate.frame += frametime * pTemp->entity.curstate.framerate;
+				if (pTemp->entity.curstate.frame >= pTemp->frameMax)
+				{
+					pTemp->entity.curstate.frame = pTemp->entity.curstate.frame - (int)(pTemp->entity.curstate.frame);
+
+					if (!(pTemp->flags & FTENT_SPRANIMATELOOP))
+					{
+						// this animating sprite isn't set to loop, so destroy it.
+						pTemp->die = client_time;
+						return true;
+					}
+				}
+			}
+			else if (pTemp->flags & FTENT_SPRCYCLE)
+			{
+				pTemp->entity.curstate.frame += frametime * 10;
+				if (pTemp->entity.curstate.frame >= pTemp->frameMax)
+				{
+					pTemp->entity.curstate.frame = pTemp->entity.curstate.frame - (int)(pTemp->entity.curstate.frame);
+				}
+			}
+// Experiment
+#if 0
+		if ( pTemp->flags & FTENT_SCALE )
+			pTemp->entity.curstate.framerate += 20.0 * (frametime / pTemp->entity.curstate.framerate);
+#endif
+
+			if (pTemp->flags & FTENT_ROTATE)
+			{
+				pTemp->entity.angles[0] += pTemp->entity.baseline.angles[0] * frametime;
+				pTemp->entity.angles[1] += pTemp->entity.baseline.angles[1] * frametime;
+				pTemp->entity.angles[2] += pTemp->entity.baseline.angles[2] * frametime;
+
+				VectorCopy(pTemp->entity.angles, pTemp->entity.latched.prevangles);
+			}
+
+			if (pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD))
+			{
+				Vector traceNormal;
+				float traceFraction = 1;
+
+				if (pTemp->flags & FTENT_COLLIDEALL)
+				{
+					pmtrace_t pmtrace;
+					physent_t *pe;
+
+					gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
+
+					if (pmtrace.fraction != 1)
+					{
+						pe = gEngfuncs.pEventAPI->EV_GetPhysent(pmtrace.ent);
+						//AUG2013_25 - seeing if we can make cl projectile skip its owner
+						bool skip_ent = false;
+						if (pTemp->flags & (FTENT_SKIPENT))
+						{
+							int iSkipent = pTemp->entity.curstate.iuser1;
+							if (iSkipent && pe->info == iSkipent)
+								skip_ent = true;
+						}
+						if (!skip_ent)
+						{
+							if (!pmtrace.ent || (pe->info != pTemp->clientIndex))
+							{
+								traceFraction = pmtrace.fraction;
+								VectorCopy(pmtrace.plane.normal, traceNormal);
+
+								if (pTemp->hitcallback)
+								{
+									pmtrace.ent = pe->info; //AUG2013_24 Thothie - make collide callback return model (bit of a hack to store the info here, but works.)
+									(*pTemp->hitcallback)(pTemp, &pmtrace);
+								}
+							}
+						}
+					}
+				}
+				else if (pTemp->flags & FTENT_COLLIDEWORLD)
+				{
+					pmtrace_t pmtrace;
+
+					gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+
+					gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
+
+					if (pmtrace.fraction != 1)
+					{
+						traceFraction = pmtrace.fraction;
+						VectorCopy(pmtrace.plane.normal, traceNormal);
+
+						if (pTemp->flags & FTENT_SPARKSHOWER)
+						{
+							// Chop spark speeds a bit more
+							//
+							VectorScale(pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin);
+
+							if (Length(pTemp->entity.baseline.origin) < 10)
+							{
+								pTemp->entity.baseline.framerate = 0.0;
+							}
+						}
+
+						if (pTemp->hitcallback)
+						{
+							(*pTemp->hitcallback)(pTemp, &pmtrace);
+						}
+					}
+				}
+
+				if (traceFraction != 1) // Decent collision now, and damping works
+				{
+					float proj, damp;
+
+					// Place at contact point
+					VectorMA(pTemp->entity.prevstate.origin, traceFraction * frametime, pTemp->entity.baseline.origin, pTemp->entity.origin);
+					// Damp velocity
+					damp = pTemp->bounceFactor;
+					if (pTemp->flags & (FTENT_GRAVITY | FTENT_SLOWGRAVITY))
+					{
+						damp *= 0.5;
+						if (traceNormal[2] > 0.9) // Hit floor?
+						{
+							if (pTemp->entity.baseline.origin[2] <= 0 && pTemp->entity.baseline.origin[2] >= gravity * 3)
+							{
+								damp = 0; // Stop
+								pTemp->flags &= ~(FTENT_ROTATE | FTENT_GRAVITY | FTENT_SLOWGRAVITY | FTENT_COLLIDEWORLD | FTENT_SMOKETRAIL);
+								pTemp->entity.angles[0] = 0;
+								pTemp->entity.angles[2] = 0;
+							}
+						}
+					}
+
+					if (pTemp->hitSound)
+					{
+						Callback_TempEntPlaySound(pTemp, damp);
+					}
+
+					if (pTemp->flags & FTENT_COLLIDEKILL)
+					{
+						// die on impact
+						pTemp->flags &= ~FTENT_FADEOUT;
+						pTemp->die = client_time;
+					}
+					else
+					{
+						// Reflect velocity
+						if (damp != 0)
+						{
+							proj = DotProduct(pTemp->entity.baseline.origin, traceNormal);
+							VectorMA(pTemp->entity.baseline.origin, -proj * 2, traceNormal, pTemp->entity.baseline.origin);
+							// Reflect rotation (fake)
+
+							pTemp->entity.angles[1] = -pTemp->entity.angles[1];
+						}
+
+						if (damp != 1)
+						{
+
+							VectorScale(pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin);
+							VectorScale(pTemp->entity.angles, 0.9, pTemp->entity.angles);
+						}
+					}
+				}
+			}
+
+			if ((pTemp->flags & FTENT_FLICKER) && gTempEntFrame == pTemp->entity.curstate.effects)
+			{
+				dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
+				VectorCopy(pTemp->entity.origin, dl->origin);
+				dl->radius = 60;
+				dl->color.r = 255;
+				dl->color.g = 120;
+				dl->color.b = 0;
+				dl->die = client_time + 0.01;
+			}
+
+			if (pTemp->flags & FTENT_SMOKETRAIL)
+			{
+				gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
+			}
+
+			if (pTemp->flags & FTENT_GRAVITY)
+				pTemp->entity.baseline.origin[2] += gravity;
+			else if (pTemp->flags & FTENT_SLOWGRAVITY)
+				pTemp->entity.baseline.origin[2] += gravitySlow;
+
+			if (pTemp->flags & FTENT_CLIENTCUSTOM)
+			{
+				if (pTemp->callback)
+				{
+					(*pTemp->callback)(pTemp, frametime, client_time);
+				}
+			}
+
+			// Cull to PVS (not frustum cull, just PVS)
+			if (!(pTemp->flags & FTENT_NOMODEL))
+			{
+				if (!Callback_AddVisibleEntity(&pTemp->entity))
+				{
+					if (!(pTemp->flags & FTENT_PERSIST))
+					{
+						pTemp->die = client_time;		// If we can't draw it this frame, just dump it.
+						pTemp->flags &= ~FTENT_FADEOUT; // Don't fade out, just die
+					}
+				}
+			}
+		}
+		pTemp->entity.baseline.vuser1 = pTemp->entity.baseline.origin;
+	}
+	catch (...)
+	{
+	}
+
+	return active != 0;
+}
+
+//Script sprites that ParticleMan draws.  They're simulated here, alongside the engine's tempents, so
+//their script callbacks and collision traces run at the same point in the frame as they always have
+static void ScriptParticles_Simulate(
+	double frametime,
+	double client_time,
+	double cl_gravity,
+	int gTempEntFrame,
+	int (*Callback_AddVisibleEntity)(cl_entity_t *pEntity),
+	void (*Callback_TempEntPlaySound)(TEMPENTITY *pTemp, float damp))
+{
+	//Any that get created by a callback in here start simulating next frame
+	const size_t Count = g_ScriptParticles.size();
+	for (size_t i = 0; i < Count; i++)
+	{
+		CScriptParticle &Particle = *g_ScriptParticles[i];
+		if (Particle.m_flDieTime)
+			continue; //Already dead, waiting on ParticleMan to delete it
+
+		bool Active = TempEnt_Simulate(&Particle.m_Temp, frametime, client_time, cl_gravity, gTempEntFrame, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
+
+		//The engine dumps a tempent that it can't draw this frame.  Do the same
+		if (!Particle.GetParticlePVS() && !FBitSet(Particle.m_Temp.flags, FTENT_PERSIST))
+			Active = false;
+
+		if (Active)
+			Particle.SyncFromTemp();
+		else
+			Particle.m_flDieTime = gEngfuncs.GetClientTime();
+	}
+}
+
 void DLLEXPORT HUD_TempEntUpdate(
 	double frametime,			  // Simulation time
 	double client_time,			  // Absolute time on client
@@ -1896,9 +2410,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 {
 
 	static int gTempEntFrame = 0;
-	int i;
 	TEMPENTITY *pTemp, *pnext, *pprev;
-	float freq, CommonGravity, gravitySlow, life, fastFreq;
 
 	Vector vAngles;
 	gEngfuncs.GetViewAngles((float*)vAngles);
@@ -1907,7 +2419,7 @@ void DLLEXPORT HUD_TempEntUpdate(
 		 g_pParticleMan->SetVariables(cl_gravity, vAngles);
 
 	// Nothing to simulate
-	if (!*ppTempEntActive)
+	if (!*ppTempEntActive && g_ScriptParticles.empty())
 	{
 		if (g_TempEntNewLevel)
 		{
@@ -1934,6 +2446,10 @@ void DLLEXPORT HUD_TempEntUpdate(
 	// !!!BUGBUG	-- This needs to be time based
 	gTempEntFrame = (gTempEntFrame + 1) & 31;
 
+	//Done before reading the active list, because the script callbacks in here can add tempents to it
+	if (frametime > 0)
+		ScriptParticles_Simulate(frametime, client_time, cl_gravity, gTempEntFrame, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
+
 	pTemp = *ppTempEntActive;
 
 	// !!! Don't simulate while paused....  This is sort of a hack, revisit.
@@ -1951,397 +2467,29 @@ void DLLEXPORT HUD_TempEntUpdate(
 	}
 
 	pprev = NULL;
-	freq = client_time * 0.01;
-	fastFreq = client_time * 5.5;
-	CommonGravity = -frametime * cl_gravity;
-	gravitySlow = CommonGravity * 0.5;
 
 	g_TempEntCount = 0;
 	while (pTemp)
 	{
 		g_TempEntCount++;
-		int active;
-		float gravity = CommonGravity;
-		if (FBitSet(pTemp->entity.curstate.iuser4, MSTEMPENT_GRAVITY)) // Script altered this tempent's gravity
-			gravity *= pTemp->entity.curstate.gravity;
-
-		active = 1;
-		life = pTemp->die - client_time;
-
 		pnext = pTemp->next;
 
-		try
+		if (TempEnt_Simulate(pTemp, frametime, client_time, cl_gravity, gTempEntFrame, Callback_AddVisibleEntity, Callback_TempEntPlaySound))
+			pprev = pTemp;
+		else // Kill it
 		{
-			if (life < 0)
-			{
-				if (pTemp->flags & FTENT_FADEOUT)
-				{
-					if (pTemp->entity.curstate.rendermode == kRenderNormal)
-						pTemp->entity.curstate.rendermode = kRenderTransTexture;
-					pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt * (1 + life * pTemp->fadeSpeed);
-					if (pTemp->entity.curstate.renderamt <= 0)
-						active = 0;
-				}
-				else
-					active = 0;
-			}
+			pTemp->next = *ppTempEntFree;
+			*ppTempEntFree = pTemp;
+			if (!pprev) // Deleting at head of list
+				*ppTempEntActive = pnext;
+			else
+				pprev->next = pnext;
 
 			if (pTemp->entity.curstate.weaponanim)
 			{
 				tempentextra_t &TempEntExtra = g_TempEntExtra[pTemp->entity.curstate.weaponanim];
-				if (TempEntExtra.DieWithEntActive)
-				{
-					pTemp->die = gEngfuncs.GetClientTime() + 10;
-					cl_entity_t *pOtherEnt = gEngfuncs.GetEntityByIndex(TempEntExtra.DieWithEnt);
-					if (!pOtherEnt || !pOtherEnt->Exists())
-					{
-						active = 0;
-						TempEntExtra.DieWithEntActive = false;
-					}
-				}
+				TempEntExtra.Active = false;
 			}
-
-			if (!active) // Kill it
-			{
-				pTemp->next = *ppTempEntFree;
-				*ppTempEntFree = pTemp;
-				if (!pprev) // Deleting at head of list
-					*ppTempEntActive = pnext;
-				else
-					pprev->next = pnext;
-
-				if (pTemp->entity.curstate.weaponanim)
-				{
-					tempentextra_t &TempEntExtra = g_TempEntExtra[pTemp->entity.curstate.weaponanim];
-					TempEntExtra.Active = false;
-				}
-			}
-			else
-			{
-				pprev = pTemp;
-
-				//Save old origin
-				VectorCopy(pTemp->entity.origin, pTemp->entity.prevstate.origin);
-
-				//if Following, origin always equals attachment point
-				if (FBitSet(pTemp->entity.curstate.iuser4, MSTEMPENT_FOLLOWENT))
-				{
-					cl_entity_t *pOtherEnt = gEngfuncs.GetEntityByIndex(pTemp->entity.curstate.aiment);
-					if (pOtherEnt)
-						pTemp->entity.origin = pOtherEnt->origin;
-				}
-
-				//Handle timer callback
-				//=====================
-				if (pTemp->entity.curstate.weaponanim)
-				{
-					tempentextra_t &TempExtra = g_TempEntExtra[pTemp->entity.curstate.weaponanim];
-					if (TempExtra.CBTimer_Enabled)
-						if (client_time >= TempExtra.CBTimer_TimeCallback)
-						{
-							TempExtra.CBTimer_Enabled = false;
-
-							g_CurrentTempEnt = pTemp;
-							HUDScript->Effects_UpdateTempEnt(TempExtra.CBTimer_CallbackEvent);
-							g_CurrentTempEnt = NULL;
-						}
-
-					//Handle Fade
-					//===========
-					if (TempExtra.Fadeout)
-					{
-						float Elapsed = client_time - TempExtra.FadeStart;
-						float Ratio = Elapsed / (TempExtra.FadeDuration ? TempExtra.FadeDuration : 1);
-						if (pTemp->entity.curstate.rendermode == kRenderNormal)
-							pTemp->entity.curstate.rendermode = kRenderTransTexture;
-						pTemp->entity.curstate.renderamt = 255 * (1 - Ratio);
-					}
-
-					//Check water touch
-					if (TempExtra.CBWater_Enabled)
-						if (EngineFunc::Shared_PointContents(Vector(pTemp->entity.origin.x, pTemp->entity.origin.y, pTemp->entity.origin.z + pTemp->entity.curstate.mins.z)) == CONTENTS_WATER)
-						{
-							TempExtra.CBWater_Enabled = false;
-							g_CurrentTempEnt = pTemp;
-							HUDScript->Effects_UpdateTempEnt(TempExtra.CBWater_CallbackEvent);
-							g_CurrentTempEnt = NULL;
-						}
-				}
-
-				if (pTemp->flags & FTENT_SPARKSHOWER)
-				{
-					// Adjust speed if it's time
-					// Scale is next think time
-					if (client_time > pTemp->entity.baseline.scale)
-					{
-						// Show Sparks
-						gEngfuncs.pEfxAPI->R_SparkEffect(pTemp->entity.origin, 8, -200, 200);
-
-						// Reduce life
-						pTemp->entity.baseline.framerate -= 0.1;
-
-						if (pTemp->entity.baseline.framerate <= 0.0)
-						{
-							pTemp->die = client_time;
-						}
-						else
-						{
-							// So it will die no matter what
-							pTemp->die = client_time + 0.5;
-
-							// Next think
-							pTemp->entity.baseline.scale = client_time + 0.1;
-						}
-					}
-				}
-				else if (pTemp->flags & FTENT_PLYRATTACHMENT)
-				{
-					cl_entity_t *pClient;
-
-					pClient = gEngfuncs.GetEntityByIndex(pTemp->clientIndex);
-
-					VectorAdd(pClient->origin, pTemp->tentOffset, pTemp->entity.origin);
-				}
-				else if (pTemp->flags & FTENT_SINEWAVE)
-				{
-					pTemp->x += pTemp->entity.baseline.origin[0] * frametime;
-					pTemp->y += pTemp->entity.baseline.origin[1] * frametime;
-
-					pTemp->entity.origin[0] = pTemp->x + sin(pTemp->entity.baseline.origin[2] + client_time * pTemp->entity.prevstate.frame) * (10 * pTemp->entity.curstate.framerate);
-					pTemp->entity.origin[1] = pTemp->y + sin(pTemp->entity.baseline.origin[2] + fastFreq + 0.7) * (8 * pTemp->entity.curstate.framerate);
-					pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
-				}
-				else if (pTemp->flags & FTENT_SPIRAL)
-				{
-					float s, c;
-					s = sin(pTemp->entity.baseline.origin[2] + fastFreq);
-					c = cos(pTemp->entity.baseline.origin[2] + fastFreq);
-
-					pTemp->entity.origin[0] += pTemp->entity.baseline.origin[0] * frametime + 8 * sin(client_time * 20 + (int)pTemp);
-					pTemp->entity.origin[1] += pTemp->entity.baseline.origin[1] * frametime + 4 * sin(client_time * 30 + (int)pTemp);
-					pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
-				}
-
-				else
-				{
-					for (i = 0; i < 3; i++)
-						pTemp->entity.origin[i] += pTemp->entity.baseline.origin[i] * frametime;
-				}
-
-				if (pTemp->flags & FTENT_SPRANIMATE)
-				{
-					pTemp->entity.curstate.frame += frametime * pTemp->entity.curstate.framerate;
-					if (pTemp->entity.curstate.frame >= pTemp->frameMax)
-					{
-						pTemp->entity.curstate.frame = pTemp->entity.curstate.frame - (int)(pTemp->entity.curstate.frame);
-
-						if (!(pTemp->flags & FTENT_SPRANIMATELOOP))
-						{
-							// this animating sprite isn't set to loop, so destroy it.
-							pTemp->die = client_time;
-							pTemp = pnext;
-							continue;
-						}
-					}
-				}
-				else if (pTemp->flags & FTENT_SPRCYCLE)
-				{
-					pTemp->entity.curstate.frame += frametime * 10;
-					if (pTemp->entity.curstate.frame >= pTemp->frameMax)
-					{
-						pTemp->entity.curstate.frame = pTemp->entity.curstate.frame - (int)(pTemp->entity.curstate.frame);
-					}
-				}
-// Experiment
-#if 0
-			if ( pTemp->flags & FTENT_SCALE )
-				pTemp->entity.curstate.framerate += 20.0 * (frametime / pTemp->entity.curstate.framerate);
-#endif
-
-				if (pTemp->flags & FTENT_ROTATE)
-				{
-					pTemp->entity.angles[0] += pTemp->entity.baseline.angles[0] * frametime;
-					pTemp->entity.angles[1] += pTemp->entity.baseline.angles[1] * frametime;
-					pTemp->entity.angles[2] += pTemp->entity.baseline.angles[2] * frametime;
-
-					VectorCopy(pTemp->entity.angles, pTemp->entity.latched.prevangles);
-				}
-
-				if (pTemp->flags & (FTENT_COLLIDEALL | FTENT_COLLIDEWORLD))
-				{
-					Vector traceNormal;
-					float traceFraction = 1;
-
-					if (pTemp->flags & FTENT_COLLIDEALL)
-					{
-						pmtrace_t pmtrace;
-						physent_t *pe;
-
-						gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-
-						gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace);
-
-						if (pmtrace.fraction != 1)
-						{
-							pe = gEngfuncs.pEventAPI->EV_GetPhysent(pmtrace.ent);
-							//AUG2013_25 - seeing if we can make cl projectile skip its owner
-							bool skip_ent = false;
-							if (pTemp->flags & (FTENT_SKIPENT))
-							{
-								int iSkipent = pTemp->entity.curstate.iuser1;
-								if (iSkipent && pe->info == iSkipent)
-									skip_ent = true;
-							}
-							if (!skip_ent)
-							{
-								if (!pmtrace.ent || (pe->info != pTemp->clientIndex))
-								{
-									traceFraction = pmtrace.fraction;
-									VectorCopy(pmtrace.plane.normal, traceNormal);
-
-									if (pTemp->hitcallback)
-									{
-										pmtrace.ent = pe->info; //AUG2013_24 Thothie - make collide callback return model (bit of a hack to store the info here, but works.)
-										(*pTemp->hitcallback)(pTemp, &pmtrace);
-									}
-								}
-							}
-						}
-					}
-					else if (pTemp->flags & FTENT_COLLIDEWORLD)
-					{
-						pmtrace_t pmtrace;
-
-						gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-
-						gEngfuncs.pEventAPI->EV_PlayerTrace(pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX | PM_WORLD_ONLY, -1, &pmtrace);
-
-						if (pmtrace.fraction != 1)
-						{
-							traceFraction = pmtrace.fraction;
-							VectorCopy(pmtrace.plane.normal, traceNormal);
-
-							if (pTemp->flags & FTENT_SPARKSHOWER)
-							{
-								// Chop spark speeds a bit more
-								//
-								VectorScale(pTemp->entity.baseline.origin, 0.6, pTemp->entity.baseline.origin);
-
-								if (Length(pTemp->entity.baseline.origin) < 10)
-								{
-									pTemp->entity.baseline.framerate = 0.0;
-								}
-							}
-
-							if (pTemp->hitcallback)
-							{
-								(*pTemp->hitcallback)(pTemp, &pmtrace);
-							}
-						}
-					}
-
-					if (traceFraction != 1) // Decent collision now, and damping works
-					{
-						float proj, damp;
-
-						// Place at contact point
-						VectorMA(pTemp->entity.prevstate.origin, traceFraction * frametime, pTemp->entity.baseline.origin, pTemp->entity.origin);
-						// Damp velocity
-						damp = pTemp->bounceFactor;
-						if (pTemp->flags & (FTENT_GRAVITY | FTENT_SLOWGRAVITY))
-						{
-							damp *= 0.5;
-							if (traceNormal[2] > 0.9) // Hit floor?
-							{
-								if (pTemp->entity.baseline.origin[2] <= 0 && pTemp->entity.baseline.origin[2] >= gravity * 3)
-								{
-									damp = 0; // Stop
-									pTemp->flags &= ~(FTENT_ROTATE | FTENT_GRAVITY | FTENT_SLOWGRAVITY | FTENT_COLLIDEWORLD | FTENT_SMOKETRAIL);
-									pTemp->entity.angles[0] = 0;
-									pTemp->entity.angles[2] = 0;
-								}
-							}
-						}
-
-						if (pTemp->hitSound)
-						{
-							Callback_TempEntPlaySound(pTemp, damp);
-						}
-
-						if (pTemp->flags & FTENT_COLLIDEKILL)
-						{
-							// die on impact
-							pTemp->flags &= ~FTENT_FADEOUT;
-							pTemp->die = client_time;
-						}
-						else
-						{
-							// Reflect velocity
-							if (damp != 0)
-							{
-								proj = DotProduct(pTemp->entity.baseline.origin, traceNormal);
-								VectorMA(pTemp->entity.baseline.origin, -proj * 2, traceNormal, pTemp->entity.baseline.origin);
-								// Reflect rotation (fake)
-
-								pTemp->entity.angles[1] = -pTemp->entity.angles[1];
-							}
-
-							if (damp != 1)
-							{
-
-								VectorScale(pTemp->entity.baseline.origin, damp, pTemp->entity.baseline.origin);
-								VectorScale(pTemp->entity.angles, 0.9, pTemp->entity.angles);
-							}
-						}
-					}
-				}
-
-				if ((pTemp->flags & FTENT_FLICKER) && gTempEntFrame == pTemp->entity.curstate.effects)
-				{
-					dlight_t *dl = gEngfuncs.pEfxAPI->CL_AllocDlight(0);
-					VectorCopy(pTemp->entity.origin, dl->origin);
-					dl->radius = 60;
-					dl->color.r = 255;
-					dl->color.g = 120;
-					dl->color.b = 0;
-					dl->die = client_time + 0.01;
-				}
-
-				if (pTemp->flags & FTENT_SMOKETRAIL)
-				{
-					gEngfuncs.pEfxAPI->R_RocketTrail(pTemp->entity.prevstate.origin, pTemp->entity.origin, 1);
-				}
-
-				if (pTemp->flags & FTENT_GRAVITY)
-					pTemp->entity.baseline.origin[2] += gravity;
-				else if (pTemp->flags & FTENT_SLOWGRAVITY)
-					pTemp->entity.baseline.origin[2] += gravitySlow;
-
-				if (pTemp->flags & FTENT_CLIENTCUSTOM)
-				{
-					if (pTemp->callback)
-					{
-						(*pTemp->callback)(pTemp, frametime, client_time);
-					}
-				}
-
-				// Cull to PVS (not frustum cull, just PVS)
-				if (!(pTemp->flags & FTENT_NOMODEL))
-				{
-					if (!Callback_AddVisibleEntity(&pTemp->entity))
-					{
-						if (!(pTemp->flags & FTENT_PERSIST))
-						{
-							pTemp->die = client_time;		// If we can't draw it this frame, just dump it.
-							pTemp->flags &= ~FTENT_FADEOUT; // Don't fade out, just die
-						}
-					}
-				}
-			}
-			pTemp->entity.baseline.vuser1 = pTemp->entity.baseline.origin;
-		}
-		catch (...)
-		{
 		}
 
 		pTemp = pnext;

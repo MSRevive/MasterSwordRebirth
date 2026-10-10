@@ -206,8 +206,7 @@ void CBaseParticle::Draw()
 	const Vector width = right * radius * m_flStretchX;
 	const Vector height = up * radius * m_flStretchY;
 
-	//TODO: shouldn't this be accounting for stretch Y?
-	const Vector lowLeft = m_vOrigin - (width * 0.5) - (up * radius * 0.5);
+	const Vector lowLeft = m_vOrigin - (width * 0.5) - (height * 0.5);
 
 	const Vector lowRight = lowLeft + width;
 	const Vector topLeft = lowLeft + height;

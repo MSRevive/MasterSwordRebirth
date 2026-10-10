@@ -54,6 +54,7 @@ extern float g_fMenuLastClosed;
 #include "particleman/IParticleMan_Active.h"
 #include "particleman/CBaseParticle.h"
 IParticleMan* g_pParticleMan = nullptr;
+extern cvar_t *ms_particle_tempents;
 void CL_LoadParticleMan();
 void CL_UnloadParticleMan();
 
@@ -583,6 +584,11 @@ void CL_LoadParticleMan()
 	if (g_pParticleMan)
 	{
 		g_pParticleMan->SetUp(&gEngfuncs);
+
+		//1 - Draw tempent sprites with ParticleMan
+		//0 - Draw with engine
+		//only effects the particles created by the scripts.
+		ms_particle_tempents = CVAR_CREATE("ms_particle_tempents", "1", 0);
 
 		//gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
 	}
