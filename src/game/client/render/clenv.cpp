@@ -309,6 +309,15 @@ bool CEnvMgr::ApplyFogFade(cl_entity_s *pEnt)
 //MS OGL extention stuff
 void CEnvMgr::InitGL()
 {
+	const char *VendorString = (const char *)glGetString(GL_VENDOR);
+	const char *CardString = (const char *)glGetString(GL_RENDERER);
+	const char *VersionString = (const char *)glGetString(GL_VERSION);
+	const char *ExtensionsString = (const char *)glGetString(GL_EXTENSIONS);
+	MS_RENDER_INFO("Video Card Vendor: %s", VendorString);
+	MS_RENDER_INFO("Video Card: %s", CardString);
+	MS_RENDER_INFO("OpenGL Version: %s", VersionString);
+	MS_RENDER_INFO("OpenGL Extensions: %s", ExtensionsString);
+
 #ifdef _WIN32
 	glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC)SDL_GL_GetProcAddress("glActiveTextureARB");
 #endif
