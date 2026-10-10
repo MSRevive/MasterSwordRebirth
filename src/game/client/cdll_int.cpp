@@ -304,6 +304,7 @@ int DLLEXPORT HUD_VidInit(void)
 
 	VGui_Startup();
 
+	//we place this here because this gets called every map change.
 	if (g_pParticleMan)
 		g_pParticleMan->ResetParticles();
 
