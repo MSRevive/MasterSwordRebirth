@@ -2119,6 +2119,7 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 		{
 			CGenericItem *pItem = (CGenericItem *) pEntity;
 			int attackNum = atoi(Params[1]);
+			if (attackNum < 0 || attackNum >= (int)pItem->m_Attacks.size()) return true;
 			attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 			msstring &PropName = Params[2];
 			msstring &PropValue = Params[3];
@@ -2168,7 +2169,7 @@ bool CScript::ScriptCmd_AttackProp(SCRIPT_EVENT &Event, scriptcmd_t &Cmd, msstri
 
 			if( !SETAPROP ) {} //Do whatever ya'd like for when someone puts in a bad command
 
-			if( SETAPROP && pItem->Owner()->IsPlayer() )
+			if( SETAPROP && pItem->Owner() && pItem->Owner()->IsPlayer() )
 			{
 				CBasePlayer *pPlayer = (CBasePlayer *)pItem->Owner();
 

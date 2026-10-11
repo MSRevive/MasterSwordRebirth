@@ -892,10 +892,14 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		int attackNum = READ_BYTE();
-		attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 
 		msstring PropName = READ_STRING();
 		msstring PropValue = READ_STRING();
+
+		if (!pItem || attackNum >= (int)pItem->m_Attacks.size())
+			break;
+
+		attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 
 		int Int = atoi(PropValue);
 		float Float = atof(PropValue);

@@ -1368,13 +1368,13 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			cl_entity_s* view = gEngfuncs.GetViewModel();
 			view->model = NULL; //MiB JUN2010_21 - Disable the HL viewmodel. We use our own.
 
+			RenderEnt.curstate.body = 0; //view model is reused, doesn't carry the last model's sub over - Dravus
 			RenderEnt.SetBody(pItem->m_ViewModelPart, pItem->m_ViewModelSubmodel); //Set the specified submodel on the item
 
 			//MiB Apr 2008a NOTE:
 			//These ifs may need to be removed. Skins and other things CAN be 0.
 			//Untested right now.
-			if (pItem->m_Skin > 0)
-				RenderEnt.curstate.skin = pItem->m_Skin;
+			RenderEnt.curstate.skin = pItem->m_Skin; //skin 0 is valid, but > 0 left the last items sub model on. Ex: Fire Tomahawk would look like the last toma used sub model. - Dravus
 			if (pItem->m_RenderMode > 0)
 				RenderEnt.curstate.rendermode = pItem->m_RenderMode;
 			if (pItem->m_RenderFx > 0)
