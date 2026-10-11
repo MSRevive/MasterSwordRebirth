@@ -6,6 +6,7 @@
 
 #define FLASK_W YRES(64 * 0.625) //I want 64x104 in 1024x768 res, and smaller in lower res
 #define FLASK_H YRES(104 * 0.625)
+#define STONE_PX(x) YRES((x) * 0.625) //A pixel of the 192x192 hud_stone sprite, at the same scale as the flasks
 
 namespace RetroHUD 
 {
@@ -97,7 +98,9 @@ namespace RetroHUD
 	class VGUI_Health : public Panel, public IHUD
 	{
 	private:
-		int FLASK_SPACER = 0;
+		int HUD_X = 0;
+		int HUD_Y = 0;
+		int HUD_SIZE = 0;
 
 		int FLASK_START_X = 0;
 		int FLASK_START_Y = 0;
@@ -109,9 +112,11 @@ namespace RetroHUD
 		int STAMINA_SIZE_Y = 0;
 		int STAMINA_LBL_SIZE_Y = 0;
 
+		int WEIGHT_Y = 0;
 		int WEIGHT_SIZE_Y = 0;
 		int WEIGHT_LBL_SIZE_Y = 0;
 
+		int CHARGE_Y = 0;
 		int CHARGE_W = 0;
 		int CHARGE_H = 0;
 		int CHARGE_SPACER_W = 0;
@@ -138,21 +143,28 @@ namespace RetroHUD
 	public:
 		VGUI_Health(Panel *pParent) : Panel(0, 0, ScreenWidth, ScreenHeight)
 		{
-			FLASK_SPACER = XRES(10);
+			//Everything is positioned in hud_stone sprite pixels, so it lines up with the background at any resolution
+			HUD_SIZE = STONE_PX(192);
+			HUD_X = XRES(30) - STONE_PX(24);
+			HUD_Y = ScreenHeight - HUD_SIZE;
 
-			FLASK_START_X = XRES(30);
-			FLASK_START_Y = YRES(480) - YRES(30) - FLASK_H;
-			MANA_FLASK_X = FLASK_START_X + FLASK_W + FLASK_SPACER;
+			//Flasks stand on the ledge, above the bar slot
+			FLASK_START_X = HUD_X + STONE_PX(24);
+			FLASK_START_Y = HUD_Y + STONE_PX(41);
+			MANA_FLASK_X = HUD_X + STONE_PX(104);
 
+			//The bar slot is 144x35 at (24, 152) in the sprite. Stamina takes the top 19 rows, weight the bottom 16
 			STAMINA_X = FLASK_START_X;
-			STAMINA_Y = YRES(453);
-			STAMINA_SIZE_X = FLASK_W + FLASK_SPACER + FLASK_W;
-			STAMINA_SIZE_Y = YRES(12);
+			STAMINA_Y = HUD_Y + STONE_PX(152);
+			WEIGHT_Y = HUD_Y + STONE_PX(171);
+			STAMINA_SIZE_X = (HUD_X + STONE_PX(168)) - STAMINA_X;
+			STAMINA_SIZE_Y = WEIGHT_Y - STAMINA_Y;
 			STAMINA_LBL_SIZE_Y = YRES(10);
 
-			WEIGHT_SIZE_Y = YRES(10);
+			WEIGHT_SIZE_Y = (HUD_Y + STONE_PX(187)) - WEIGHT_Y;
 			WEIGHT_LBL_SIZE_Y = WEIGHT_SIZE_Y;
 
+			CHARGE_Y = YRES(453);
 			CHARGE_W = XRES(30);
 			CHARGE_H = YRES(6);
 			CHARGE_SPACER_W = XRES(2);
@@ -161,11 +173,9 @@ namespace RetroHUD
 			SetBGColorRGB(Color_Transparent);
 
 			m_HUDImage.setParent(this);
-			// TODO: make the new hud image scale with the resolution.
-			// m_HUDImage.LoadImg("hud_main3", true, false);
-			// m_HUDImage.setFgColor(255, 255, 255, 255);
-			// m_HUDImage.setSize(256, 256);
-			// m_HUDImage.setPos(0, ScreenHeight - 256);
+			m_HUDImage.LoadImg("hud/hud_stone", false, false);
+			m_HUDImage.setSize(HUD_SIZE, HUD_SIZE);
+			m_HUDImage.setPos(HUD_X, HUD_Y);
 
 			//Health and mana flasks
 			m_Flask[0] = new VGUI_Flask(this, 0, FLASK_START_X, FLASK_START_Y);
@@ -182,7 +192,7 @@ namespace RetroHUD
 
 			COLOR WeightColor(250, 150, 0, 100);
 
-			m_pWeight = new CStatusBar(this, STAMINA_X, STAMINA_Y + STAMINA_SIZE_Y, STAMINA_SIZE_X, WEIGHT_SIZE_Y);
+			m_pWeight = new CStatusBar(this, STAMINA_X, WEIGHT_Y, STAMINA_SIZE_X, WEIGHT_SIZE_Y);
 			m_pWeight->m_fBorder = false;
 			m_pWeight->SetFGColorRGB(WeightColor);
 
@@ -195,11 +205,11 @@ namespace RetroHUD
 			{
 				int Multiplier = (i == 0) ? -1 : 1;
 				float OffsetW = CHARGE_SPACER_W + (i == 0) ? CHARGE_W : 0;
-				m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H);
+				m_Charge[i] = new CStatusBar(this, XRES(320) + OffsetW * Multiplier, CHARGE_Y, CHARGE_W, CHARGE_H);
 				m_Charge[i]->SetBGColorRGB(COLOR(128, 128, 128, 100));
 				//m_Charge[i]->m_fBorder = false;
 				m_Charge[i]->setVisible(false);
-				m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, STAMINA_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);
+				m_ChargeLbl[i] = new MSLabel(this, "0/0", XRES(320) + OffsetW * Multiplier, CHARGE_Y, CHARGE_W, CHARGE_H, MSLabel::a_center);
 				m_ChargeLbl[i]->setVisible(false);
 			}
 		}
