@@ -58,9 +58,12 @@ void DLLEXPORT HUD_DrawTransparentTriangles()
 {
 	//	RecClDrawTransparentTriangles();
 
+	//Before the push, so the black fog is still set after PopHLStates, for the particles and for
+	//what the engine draws after this (beams).  Additive quads show up in the fog color otherwise
+	CEnvMgr::RenderFog(false);
+
 	CEnvMgr::PushHLStates();
 
-	CEnvMgr::RenderFog(false);
 	CEnvMgr::Think_DrawTransparentTriangles();
 	gHUD.m_HUDScript->Effects_DrawTransPararentTriangles();
 
