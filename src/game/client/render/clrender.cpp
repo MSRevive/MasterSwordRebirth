@@ -23,7 +23,7 @@
 #include "ref_params.h"
 #include "mslogger.h"
 
-CParticle::CParticle()
+CSpriteQuad::CSpriteQuad()
 {
 	m_Width = 0;
 	m_Origin = g_vecZero;
@@ -46,12 +46,12 @@ CParticle::CParticle()
 	m_TexCoords[3] = Vector2D(0, 0);
 }
 
-void CParticle::SetAngles(Vector Angles)
+void CSpriteQuad::SetAngles(Vector Angles)
 {
 	EngineFunc::MakeVectors(Angles, &m_DirForward, &m_DirRight, &m_DirUp);
 }
 
-void CParticle::BillBoard()
+void CSpriteQuad::BillBoard()
 {
 	//Make this face the player
 	m_DirForward = ViewMgr.Params->forward;
@@ -59,7 +59,7 @@ void CParticle::BillBoard()
 	m_DirUp = ViewMgr.Params->up;
 }
 
-bool CParticle::LoadTexture(const char* Name)
+bool CSpriteQuad::LoadTexture(const char* Name)
 {
 	HLSPRITE Sprite = MSBitmap::GetSprite(Name);
 	if (!Sprite)
@@ -72,7 +72,7 @@ bool CParticle::LoadTexture(const char* Name)
 	return true;
 }
 
-void CParticle::Render()
+void CSpriteQuad::Render()
 {
 	//return;
 	Vector &vForward = m_DirForward, &vRight = m_DirRight, &vUp = m_DirUp;

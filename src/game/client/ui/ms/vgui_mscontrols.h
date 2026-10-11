@@ -353,7 +353,7 @@ public:
 class VGUI_Image3D : public CImageDelayed
 {
 public:
-	class CParticle *m_Particle;
+	class CSpriteQuad *m_Particle;
 	VGUI_Image3D( ) : CImageDelayed( ) { init( ); }
 	VGUI_Image3D( const char *pszImageName, bool TGAorSprite, bool Delayed, int x = 0, int y = 0, int wide = 10, int tall = 10 );
 	~VGUI_Image3D( );

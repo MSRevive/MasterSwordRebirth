@@ -33,7 +33,7 @@ void VGUIImages_NewLevel();
 
 struct skyface_t
 {
-	CParticle Face;
+	CSpriteQuad Face;
 
 	//Vector Offset;
 };
@@ -70,7 +70,7 @@ public:
 		{
 			Faces.add(skyface_t());
 
-			CParticle &Face = Faces[i].Face;
+			CSpriteQuad &Face = Faces[i].Face;
 			Face.m_Color = Color4F(1, 1, 1, 1);
 			Face.m_Brightness = 1.0f;
 		}
@@ -81,7 +81,7 @@ public:
 	{
 		for (int i = 0; i < Faces.size(); i++)
 		{
-			CParticle &Face = Faces[i].Face;
+			CSpriteQuad &Face = Faces[i].Face;
 			Face.SetAngles(g_SkyBoxInfo[i].Dir);
 			if (g_SkyBoxInfo[i].Rotate)
 			{
@@ -115,7 +115,7 @@ public:
 
 		for (int i = 0; i < Faces.size(); i++)
 		{
-			CParticle &Face = Faces[i].Face;
+			CSpriteQuad &Face = Faces[i].Face;
 			Face.m_Width = v_ViewDist - 1;
 
 			Face.m_Origin = ViewMgr.Origin - Face.m_DirForward * Face.m_Width / 2.0f;
@@ -126,7 +126,7 @@ public:
 };
 
 CSkyBox g_CustomSkyBox;
-CParticle g_Tint;
+CSpriteQuad g_Tint;
 
 //The renderamt the server sent for an entity, and what ApplyFogFade replaced it with
 #define FOGFADE_MAX_ENTS 4096

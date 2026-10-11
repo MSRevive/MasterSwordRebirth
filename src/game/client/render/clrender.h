@@ -179,10 +179,10 @@ struct viewmgr_t
 };
 extern viewmgr_t ViewMgr;
 
-class CParticle
+class CSpriteQuad
 {
 public:
-	CParticle();
+	CSpriteQuad();
 	void SetAngles(Vector Angles);
 	void BillBoard();
 	bool LoadTexture(const char* Name);

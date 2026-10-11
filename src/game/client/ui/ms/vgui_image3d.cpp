@@ -15,7 +15,7 @@ VGUI_Image3D::VGUI_Image3D(const char *pszImageName, bool TGAorSprite, bool Dela
 }
 void VGUI_Image3D::init()
 {
-	m_Particle = new CParticle();
+	m_Particle = new CSpriteQuad();
 	m_Particle->m_ContinuedParticle = false;
 	m_Particle->m_DoubleSided = true;
 	m_Particle->m_Color = Color4F(1, 1, 1, 1);
