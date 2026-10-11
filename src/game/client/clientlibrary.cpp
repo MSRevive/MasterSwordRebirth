@@ -9,6 +9,8 @@
 #include "fmod/soundengine.h"
 #include "mslogger.h"
 #include "ms/angelscript/CAngelScriptManager.h"
+#include "ms/angelscript/ASModuleSystem.h"
+#include "ms/angelscript/ASEngineEventManager.h"
 
 CSoundEngine gSoundEngine;
 CRichPresence gRichPresence;
@@ -48,8 +50,6 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_developer", "0", FCVAR_CLIENTDLL);					// Thothie MAR2007b - Hides client side developer messages when set to 0
 
 	CVAR_CREATE("ms_help", "1", FCVAR_ARCHIVE); // Whether help tips are shown
-	CVAR_CREATE("ms_reflect", "1", FCVAR_ARCHIVE);						// Allow reflective surfaces
-	CVAR_CREATE("ms_reflect_dbg", "0", FCVAR_ARCHIVE);					// Debug reflective surfaces
 	//CVAR_CREATE("ms_reconnect_delay", "5", FCVAR_ARCHIVE);				// Thothie AUG2017 - Make reconnect delay adjustable client side
 	CVAR_CREATE("ms_quickslot_timeout", "2.5", FCVAR_ARCHIVE);		// Timeout for the quickslots
 	CVAR_CREATE("ms_autocharge", "1", FCVAR_ARCHIVE);					// MiB MAR2012_05 - Let's you auto-charge your attack
@@ -100,18 +100,18 @@ void CClientLibrary::Shutdown()
 {
 	MS_INFO("[INIT: Shutdown]");
 	
-	// Shutdown AngelScript on client
-	if (CAngelScriptManager::Instance()->IsInitialized())
-	{
-		MS_INFO("Shutting down client-side AngelScript...");
-		CAngelScriptManager::Instance()->Destroy();
-		CAngelScriptManager::Shutdown();
-		MS_INFO("Client-side AngelScript shutdown complete");
-	}
-	
+	// Shutdown AngelScript on client. The module system unloads modules through the
+	// engine, so it goes first. Deleting the manager runs Destroy() if it was initialized.
+	MS_INFO("Shutting down client-side AngelScript...");
+	ASModuleSystem::Shutdown();
+	CAngelScriptManager::Shutdown();
+	ASEngineEventManager::Shutdown();
+	MS_INFO("Client-side AngelScript shutdown complete");
+
+	// Reverse of initialization order
 	gHUD.Shutdown();
-	FileSystem_Shutdown();
 	gSoundEngine.ExitFMOD();
+	FileSystem_Shutdown();
 	gRichPresence.Shutdown();
 }
 

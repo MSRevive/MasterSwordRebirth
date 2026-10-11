@@ -166,7 +166,7 @@ char *ConvertCRtoNL(char *str)
 // the next (optional) one to four strings are parameters for that string (which can also be message names if they begin with '#')
 int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 {
-	constexpr unsigned int MSG_BUF_SIZE = 128;
+	#define MSG_BUF_SIZE 128
 	BEGIN_READ(pbuf, iSize);
 
 	int msg_dest = READ_BYTE();
@@ -190,7 +190,7 @@ int CHudTextMessage::MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf)
 	StripEndNewlineFromString(sstr4);
 	char* psz = szBuf[5];
 
-	if (gViewPort && gViewPort->AllowedToPrintText() == false)
+	if (gViewPort && gViewPort->AllowedToPrintText() == FALSE)
 		return 1;
 
 	switch (msg_dest)

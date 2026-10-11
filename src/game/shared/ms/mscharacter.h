@@ -1,14 +1,18 @@
 #ifndef MSCHARACTER_H
 #define MSCHARACTER_H
 
+#include <string>
+#include <vector>
+
 #include "msfileio.h"
 #include "stats/statdefs.h"
 #include "gamerules/teams.h"
-#include "mscharacterheader.h"
 #include "buildcontrol.h"
 #include "monsters/msmonster.h"
 
-
+#ifdef VALVE_DLL
+#include "character/mscharacterheader.h"
+#endif
 
 // Char Files
 enum chardatastatus_e
@@ -21,8 +25,7 @@ enum chardatastatus_e
 
 enum charloc_e
 {
-	LOC_CLIENT,
-	LOC_SERVER,
+	LOC_SERVER = 1,
 	LOC_CENTRAL
 };
 
@@ -35,15 +38,6 @@ enum jointype_e
 	JN_ELITE
 };
 
-enum charsendstatus_e
-{
-	CSS_DORMANT,
-	CSS_SENDING,
-	CSS_RECEIVING,
-	CSS_SENT,
-	CSS_RECEIVED
-};
-
 enum charClientType
 {
 	CHAR_TYPE_BASE = 0,
@@ -54,7 +48,7 @@ enum charClientType
 struct charinfo_base_t
 {
 	int Index; // Keep track of index, because the characters might not be loaded in order	
-	unsigned int DataLen;
+	int DataLen;
 	char* Data;
 
 	charinfo_base_t()
@@ -65,29 +59,26 @@ struct charinfo_base_t
 	}
 };
 
-enum gear_flag_location_e {
-	GEARFL_COVER_HEAD = (1 << 0),
-	GEARFL_COVER_TORSO = (1 << 1),
-	GEARFL_COVER_ARMS = (1 << 2),
-	GEARFL_COVER_LEGS = (1 << 3),
-	GEARFL_WEARING = (1 << 4)
-};
+#define GEARFL_COVER_HEAD (1 << 0)
+#define GEARFL_COVER_TORSO (1 << 1)
+#define GEARFL_COVER_ARMS (1 << 2)
+#define GEARFL_COVER_LEGS (1 << 3)
+#define GEARFL_WEARING (1 << 4)
 
 struct gearinfo_t
 {
 	byte Flags;
-	ushort Model, Body, Skin, Anim;
+	ushort Model = 0, Body = 0, Skin = 0, Anim = 0;
 };
 
 struct charinfo_t : charinfo_base_t
 {
 	chardatastatus_e Status, m_CachedStatus;
-	charsendstatus_e m_SendStatus; //Client uses this to determine whether the char has been uploaded
 	jointype_e JoinType;
 	charloc_e Location;
 
 	//Char current Game Status, loaded from file header or sent from server
-	int body; //MiB FEB2010a (JAN2010_27) - For sending what 'body' the char-selection model should use.
+	int Body; //MiB FEB2010a (JAN2010_27) - For sending what 'body' the char-selection model should use.
 	bool IsElite;
 	enum gender_e Gender;
 	msstring Name, MapName, OldTrans, NextMap, NewTrans;
@@ -99,44 +90,38 @@ struct charinfo_t : charinfo_base_t
 	~charinfo_t();
 
 	void Destroy();
+#ifdef VALVE_DLL
 	void AssignChar(int CharIndex, charloc_e Location, const char* Data, int DataLen, class CBasePlayer* pPlayer);
-};
-
-struct charsendinfo_t : charinfo_base_t
-{
-	charsendstatus_e Status; //Whether this character is being sent or receieving
-	float TimeDataLastSent;
-	uint DataSent;
-
-	charsendinfo_t() : charinfo_base_t() {}
+#endif
 };
 
 struct natstat_t
 {
-	short Value[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
 };
+
 struct skillstat_t
 {
-	short Value[STAT_PROP_TOTAL];
-	ulong Exp[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
+	ulong Exp[STATPROP_TOTAL];
 };
+
 struct spellskillstat_t
 {
-	short Value[STAT_PROP_TOTAL];
-	long Exp[STAT_PROP_TOTAL];
+	short Value[STATPROP_TOTAL];
+	long Exp[STATPROP_TOTAL];
 };
 
-enum savechar_version_e {
-	SAVECHAR_VERSION_MSC = 11, // Legacy MS: Classic
-	SAVECHAR_VERSION_MSR = 12, // MS Rebirth and up.
-	SAVECHAR_VERSION = SAVECHAR_VERSION_MSR
-};
+#define SAVECHAR_VERSION_MSC 11 // Legacy MS: Classic
+#define SAVECHAR_VERSION_MSR 12 // MS Rebirth and up.
+#define SAVECHAR_VERSION_MSGPACK 13 // msgpack format.  Further format versioning is done with CF_FORMAT, see mscharacterheader.h
 
-//The types of headers.  Each time the save file is revised, a new header is added.
-//The old headers are kept so the game knows when it is encountering an old save file
-//and can call the legacy code for converison to the new format.
+#define SAVECHAR_VERSION SAVECHAR_VERSION_MSGPACK
 
-enum char_data_type_e
+//LEGACY: chunk types of the pre-msgpack save format.  Only used to read old save files.
+//New saves use the msgpack keys in mscharacterheader.h.
+
+enum
 {
 	CHARDATA_HEADER1 = 0,
 	CHARDATA_MAPSVISITED1,
@@ -145,48 +130,34 @@ enum char_data_type_e
 	CHARDATA_ITEMS1,
 	CHARDATA_STORAGE1,
 	CHARDATA_COMPANIONS1,
-	CHARDATA_HELPTIPS1,
+	CHARDATA_HELPTIPS1, //LEGACY: skipped on read
 	CHARDATA_QUESTS1,
 	CHARDATA_QUICKSLOTS1,
 	CHARDATA_ITEMS2,
 	CHARDATA_UNKNOWN, //If >= CHARDATA_UNKNOWN, then skip it?
 };
 
+#ifdef VALVE_DLL
 class MSChar_Interface
 {
 public:
-	//static Vector LastGoodPos, LastGoodAng;
-	static void AutoSave(class CBasePlayer *pPlayer);								//Client & Server
-	static bool ReadCharData(void *pData, ulong Size, struct chardata_t *CharData); //Client & Server
+	//Server - characters are only ever stored on the server (or central server)
+	static void AutoSave(class CBasePlayer *pPlayer);
+	static bool ReadCharData(void *pData, ulong Size, struct chardata_t *CharData);
+	static void SaveChar(class CBasePlayer *pPlayer, savedata_t *pData = NULL);
 
-	static enum jointype_e CanJoinThisMap(savedata_t &Data, msstringlist &VisitedMaps);		//Client & Server
-	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, msstringlist &VisitedMaps); //Client & Server
-	static bool HasVisited(const char* MapName, msstringlist &VisitedMaps);				//Client & Server
-
-	static void PacketAcknowledged(int PacketIdx);			//Client & Server
-	static void Think_SendChar(class CBasePlayer *pPlayer); //Client & Server
-
-#ifdef VALVE_DLL
-		//Server
-	static void HL_SVNewIncomingChar(class CBasePlayer *pPlayer, int CharIdx, uint UUEncodeLen, uint DataLen);
-	static void HL_SVReadCharData(class CBasePlayer *pPlayer, const char *UUEncodedData); //Server
-	static void SaveChar(class CBasePlayer *pPlayer, savedata_t *pData = NULL);			  //Server
-#else
-		//Client
-	static void CLInit();
-	static void HL_CLNewIncomingChar(int CharIdx, uint DataLen);
-	static void HL_CLReadCharData();
-#endif
+	static enum jointype_e CanJoinThisMap(savedata_t &Data, const std::vector<std::string> &VisitedMaps);
+	static enum jointype_e CanJoinThisMap(charinfo_t &CharData, const std::vector<std::string> &VisitedMaps);
+	static bool HasVisited(const char* MapName, const std::vector<std::string> &VisitedMaps);
 };
 
-bool DeleteChar(int iCharacter);											 //Client version
-bool DeleteChar(CBasePlayer *pPlayer, int iCharacter);						 //Server version
-const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer = NULL);	 //Client & Server
-bool IsValidCharVersion(int Version);										 //Client & Server
-savedata_t *GetCharInfo(const char *pszFileName, msstringlist &VisitedMaps); //Client & Server
+bool DeleteChar(CBasePlayer *pPlayer, int iCharacter);
+const char *GetSaveFileName(int iCharacter, CBasePlayer *pPlayer);
+#endif
 
-constexpr unsigned int MAX_CHARSLOTS = 3; //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar"
+#define MAX_CHARSLOTS 3 //Max number of characters one person can have. This is the max the game supports.  A server operator can set less for his server via CVAR "ms_serverchar" (clamped to 1..MAX_CHARSLOTS)
 
+#ifdef VALVE_DLL
 struct charslot_t
 {
 	bool Active, //Whether this character exists and is loaded
@@ -195,16 +166,13 @@ struct charslot_t
 
 	savedata_t Data; //Character's data.  For server-side characters, only a few fields here are valid
 };
+#endif
 
 class ChooseChar_Interface
 {
 public:
-	static unsigned int ServerCharNum; //Max number of characters the server will allow (if server-side characters)
+	static int ServerCharNum; //Max number of characters the server will allow
 	static bool CentralServer;
 	static void UpdateCharScreen();
-	static void UpdateCharScreenUpload();
 };
-
-
-
 #endif //MSCHARACTER_H

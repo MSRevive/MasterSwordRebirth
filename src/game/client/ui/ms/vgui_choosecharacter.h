@@ -95,7 +95,6 @@ public:
 	Label *Choose_CharLabel[CHOOSEPANEL_MAINBTNS][2];
 	MSButton *Choose_DeleteChar[CHOOSEPANEL_MAINBTNS];
 	ActionSignal *Choose_DelActionSig[CHOOSEPANEL_MAINBTNS];
-	MSLabel *Choose_UploadStatus;
 
 	TextPanel *Gender_MainLabel;
 	Label *Gender_NameLabel;
@@ -115,7 +114,7 @@ public:
 	ActionSignal *Weapon_MainActionSig[WEAPONPANEL_MAINBTNMAX];
 	Label *Weapon_BtnLabel[WEAPONPANEL_MAINBTNMAX];
 
-	unsigned int iButtons;
+	int iButtons;
 	bool fClosingMenu;
 
 	CRenderChar m_CharEnts[3];
@@ -125,7 +124,7 @@ public:
 	CNewCharacterPanel(int iTrans, int iRemoveMe, int x, int y, int wide, int tall);
 	~CNewCharacterPanel();
 
-	virtual bool SlotInput(unsigned int iSlot);
+	virtual bool SlotInput(int iSlot);
 	virtual void Open(void);
 	virtual void Close(void);
 	virtual void Update(void);
@@ -133,7 +132,6 @@ public:
 	virtual bool KeyInput(int down, int keynum, const char *pszCurrentBinding);
 	virtual void Think(void);
 
-	void UpdateUpload();
 	void UpdateModels();
 	void Gender_SelectItem(int Btn);
 	void Gender_NameSelected();

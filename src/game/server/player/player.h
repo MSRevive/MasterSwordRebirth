@@ -20,60 +20,15 @@
 #include "monsters/bodyparts/bodyparts_human.h"
 #include "pm_materials.h"
 #include "mscharacter.h"
+#include "iscript.h"
+#include "fixed_vector.h"
 
-#include "global.h"
-
-#include "sharedmenu.h"
-
-
-
-constexpr const char* VAR_NPC_ANIM_TORSO = "game.monster.torso_anim";
-constexpr const char* VAR_NPC_ANIM_LEGS = "game.monster.legs_anim";
-constexpr const char* PLAYER_SCRIPT = "player/player";
-constexpr unsigned int SBAR_STRING_SIZE = 128;
+#define MAX_ID_RANGE 2048
+#define SBAR_STRING_SIZE 128
+#define NUM_MAX_ITEMS 100 //Thothie APR2011_28
 
 // was 1500, but there shouldn't be any issues with increasing.
-constexpr unsigned int MAX_NUM_STACK = 9999; //stack is stored as either a unsigned short, so that's the actual max it can be.
-constexpr unsigned int MAX_ID_RANGE = 2048;
-constexpr unsigned int MAX_NUM_ITEMS = 100; //Thothie APR2011_28
-constexpr unsigned int MAX_GET_ITEMS = 9;
-constexpr unsigned int MAX_QUICKSLOTS = 36; //MiB MAR2012 - Increase quickslots
-constexpr unsigned int MAX_PLAYER_HANDS = 2;
-constexpr unsigned int MAX_PLAYER_HANDITEMS = 3;
-constexpr unsigned int MAX_KEYHISTORY = 10;
-
-constexpr float PLAYER_FATAL_FALL_SPEED = 1024;															  // approx 60 feet
-constexpr float PLAYER_MAX_SAFE_FALL_SPEED = 580;														  // approx 20 feet
-constexpr float PLAYER_DAMAGE_FOR_FALL_SPEED = 100.0f / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED); // damage per unit per second.
-constexpr float PLAYER_MIN_BOUNCE_SPEED = 200;
-constexpr float PLAYER_FALL_PUNCH_THRESHHOLD = 350.0f;// won't punch player's screen/make scrape noise unless player falling at least this fast.
-constexpr float PLAYER_WALLJUMP_SPEED = 300; // how fast we can spring off walls
-constexpr float PLAYER_LONGJUMP_SPEED = 350; // how fast we longjump
-constexpr float PLAYER_SEARCH_RADIUS = 64;
-constexpr float PLAYER_PICKUPITEM_DISTANCE = 68.0; //Search and pickup dist might have to be different
-constexpr float PLAYER_BASE_SPEED = 160;
-constexpr float PLAYER_WALKSPEED_MAX_WEIGHT_SLOWDOWN = 70;
-constexpr float PLAYER_WALKSPEED_MAX_DEX = 75.0f;
-
-constexpr float CLIMB_SHAKE_FREQUENCY = 22; // how many frames in between screen shakes when climbing
-constexpr float CLIMB_SPEED_DEC = 15;		 // climbing deceleration rate
-constexpr float CLIMB_PUNCH_X = -7;		 // how far to 'punch' client X axis when climbing
-constexpr float CLIMB_PUNCH_Z = 7;		 // how far to 'punch' client Z axis when climbing
-constexpr float CLIMB_MAX_SPEED = 200;
-
-constexpr float CHAT_INTERVAL = 1.0f;
-constexpr float TIME_TO_DUCK = 0.4;
-constexpr float PM_DEAD_VIEWHEIGHT = -8;
-
-constexpr double AUTOAIM_2DEGREES = 0.0348994967025;
-constexpr double AUTOAIM_5DEGREES = 0.08715574274766;
-constexpr double AUTOAIM_8DEGREES = 0.1391731009601;
-constexpr double AUTOAIM_10DEGREES = 0.1736481776669;
-
-enum player_stuck_move {
-	STUCK_MOVEUP = 1,
-	STUCK_MOVEDOWN = -1
-};
+#define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 
 enum sbar_data
 {
@@ -83,18 +38,7 @@ enum sbar_data
 	SBAR_END,
 };
 
-enum transtype_e
-{
-	TRANS_GETGROUND,
-	TRANS_STEAL,
-	TRANS_STEALITEM,
-	TRANS_STEALPACKITEM,
-	TRANS_GIVE,
-	TRANS_AUTOSHOWBROWSER = (1 << 0),
-	TRANS_PLAYSOUND = (1 << 1),
-
-};
-
+#define CHAT_INTERVAL 1.0f
 //Master Sword
 
 class CStat;
@@ -103,21 +47,6 @@ class CCorpse;
 class CTeam;
 struct TCallbackMenu;
 class CGenericItem;
-
-enum {
-	PLAYER_MOVE_RUNNING = (1 << 0),
-	PLAYER_MOVE_ATTACKING = (1 << 1),
-	PLAYER_MOVE_JUMPING = (1 << 2),
-	PLAYER_MOVE_SWIMMING = (1 << 3),//Set by script.. really just an indicator for the client that it should rotate the model by pitch
-	PLAYER_MOVE_NORUN = (1 << 3),
-	PLAYER_MOVE_NOJUMP = (1 << 4),
-	PLAYER_MOVE_NODUCK = (1 << 5),
-	PLAYER_MOVE_NOATTACK = (1 << 6),
-	PLAYER_MOVE_NOMOVE = (1 << 7),
-	PLAYER_MOVE_SITTING = (1 << 8), //JAN2010_09 Thothie - Attempting to allow inventory access while sittin again
-	PLAYER_MOVE_STOPRUN = (1 << 9)
-};
-
 
 enum EMapStatus
 {
@@ -173,6 +102,12 @@ struct quickslot_t //Quickslots for items, spells
 	uint ID;
 };
 
+// The actual max is 31 because of the way quickslots are sent to via client.
+// So we just decrease back down to 24 for now since multiples of 12.
+#define MAX_QUICKSLOTS 24 //MiB MAR2012 - Increase quickslots
+
+#include "sharedmenu.h"
+
 void SendViewAnim(CBasePlayer *pPlayer, int iAnim, int body = 0);
 //void SetViewModel( const char *pszViewModel );
 void InitializeBodyPart(CBaseEntity *pOwner, CBaseEntity *pBodyPart, const char *ModelName);
@@ -183,31 +118,45 @@ void MSGSend_PlayerInfo(CBasePlayer *pSendToPlayer, CBasePlayer *pPlayer);
 //macros (just to shorten things up a bit)
 #define CREATE_ENT(item) (CBaseEntity *)GET_PRIVATE(CREATE_NAMED_ENTITY(MAKE_STRING(item)));
 
+#define VAR_NPC_ANIM_TORSO "game.monster.torso_anim"
+#define VAR_NPC_ANIM_LEGS "game.monster.legs_anim"
+
+#define PLAYER_SCRIPT "player/player"
 //#define mCH m_pOwner->iCurrentHand
 
-/*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
-#define Wielded( iHand ) ((Hand[iHand])?true:(PlayerHands?PlayerHands->Wielded:false))
-//#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:false))
+/*//#define Wielded( iHand ) ((Hand[iHand])?Hand[iHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
+#define Wielded( iHand ) ((Hand[iHand])?TRUE:(PlayerHands?PlayerHands->Wielded:FALSE))
+//#define CHWielded ((Hand[iCurrentHand])?Hand[iCurrentHand]->Wielded:(PlayerHands?PlayerHands->Wielded:FALSE))
 #define CHWielded Wielded(iCurrentHand)*/
 
+#define CH Hand[iCurrentHand]
+#define MAX_PLAYER_HANDS 2
+#define MAX_PLAYER_HANDITEMS 3
+#define MAX_KEYHISTORY 10
 
-enum ms_flag_e {
-	MSGFLAG_SPAWN = (1 << 0)
-};
+#define mSStat m_pOwner->GetSkillStat
+#define mNStat m_pOwner->GetNatStat
+
+#define MSGFLAG_SPAWN (1 << 0)
 
 //-----------------
+
+#define PLAYER_FATAL_FALL_SPEED 1024															  // approx 60 feet
+#define PLAYER_MAX_SAFE_FALL_SPEED 580															  // approx 20 feet
+#define DAMAGE_FOR_FALL_SPEED (float)100 / (PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED) // damage per unit per second.
+#define PLAYER_MIN_BOUNCE_SPEED 200
+#define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
+
 //
 // Player PHYSICS FLAGS bits
 //
-enum player_flag_e {
-	PFLAG_ONLADDER = (1 << 0),
-	PFLAG_ONSWING = (1 << 0),
-	PFLAG_ONTRAIN = (1 << 1),
-	PFLAG_ONBARNACLE = (1 << 2),
-	PFLAG_DUCKING = (1 << 3),	// In the process of ducking, but totally squatted yet
-	PFLAG_USING = (1 << 4),	// Using a continuous entity
-	PFLAG_OBSERVER = (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
-};
+#define PFLAG_ONLADDER (1 << 0)
+#define PFLAG_ONSWING (1 << 0)
+#define PFLAG_ONTRAIN (1 << 1)
+#define PFLAG_ONBARNACLE (1 << 2)
+#define PFLAG_DUCKING (1 << 3)	// In the process of ducking, but totally squatted yet
+#define PFLAG_USING (1 << 4)	// Using a continuous entity
+#define PFLAG_OBSERVER (1 << 5) // player is locked in stationary cam mode. Spectators can move, observers can't.
 
 //
 // generic player
@@ -217,8 +166,8 @@ enum player_flag_e {
 //-----------------------------------------------------
 /*#define CSUITPLAYLIST	4		// max of 4 suit sentences queued up at any time
 
-#define SUIT_GROUP			true
-#define	SUIT_SENTENCE		false
+#define SUIT_GROUP			TRUE
+#define	SUIT_SENTENCE		FALSE
 
 #define	SUIT_REPEAT_OK		0
 #define SUIT_NEXT_IN_30SEC	30
@@ -409,26 +358,25 @@ struct wearpos_t
 	};
 };
 
+#ifdef VALVE_DLL
 struct chardata_t : savedata_t
 {
-	msstringlist m_VisitedMaps;			//All the maps I've visited
+	std::vector<std::string> m_VisitedMaps; //All the maps I've visited
 	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
-	msstringlist m_Spells;				//All known spells
+	std::vector<std::string> m_Spells;	//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
 	mslist<storage_t> m_Storages;		//Storage places where I have items
 	mslist<companion_t> m_Companions;	//Companions
-	msstringlist m_ViewedHelpTips;		//List of all help tips the player has already viewed
 	mslist<quest_t> m_Quests;			//All the quests I've completed
-	mslist<quickslot_t> m_QuickSlots;	//All the quickslots (based on the item IDs of the last save)
+	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
 
-	bool ReadData(void *pData, ulong Size);
+	//Save reading is server-only, see sv_character.cpp
+	bool ReadData(void *pData, ulong Size); //Reads both msgpack and legacy saves
+	bool ReadDataPack(const char *pData, size_t Size);
 
-	//The number on the end of these functions is the version number.
-	//Each time one is changed, a new function must be made with an increased version
-	//This allows me to keep the old code and old legacy player files
-
+	//LEGACY: readers for the pre-msgpack format.  Only used to load old saves.
+	bool ReadDataLegacy(void *pData, ulong Size);
 	bool ReadHeader1(byte DataID, CPlayer_DataBuffer &m_File);
-#ifdef VALVE_DLL
 	void ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadSkills1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File);
@@ -436,25 +384,23 @@ struct chardata_t : savedata_t
 	bool ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_full_t &outItem);
 	void ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File);
-	void ReadHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
+	void SkipHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuickSlots1(byte DataID, CPlayer_DataBuffer &m_File);
-#endif
 
 	CStat* GetStat(int index)
 	{
-		if ((index < 0) || ((unsigned)index > m_Stats.size() - 1))
+		if ((index < 0) || (index >= m_Stats.size()))
 			return NULL;
 		return &m_Stats[index];
 	}
 };
+#endif
 
 class CBasePlayer : public CMSMonster
 {
 public:
 	//Master Sword
-	charsendinfo_t m_CharSend; //Info about the char being transmitted (to server or to client)
-	float m_TimeCharLastSent;  //Time the server last sent the char down to client
 	charinfo_t m_CharInfo[MAX_CHARSLOTS];
 	bool m_fDropAllItems; //Drop items upon death?
 	int m_SayType;
@@ -486,7 +432,6 @@ public:
 	bool m_fIsElite;
 	struct itemtrans_t *m_ItemTrans;
 	float m_TimeTillSuicide;
-	//float				LastPush; //Thothie SEP2011_16 - last time a player was affected by a push brush (failed: wont transfer between maps version and script version of CBasePlayer)
 	float m_TimeCanVote;
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
@@ -497,9 +442,8 @@ public:
 	bool m_CanJoin;							  //Whether I have any characters on this server that can join the game
 	int m_JoinType;							  //How I joined the server
 	mslist<companion_t> m_Companions;		  //
-	msstringlist m_ViewedHelpTips;			  //List of all help tips the player has already viewed
 	mslist<quest_t> m_Quests;				  //All the quests I've completed
-	msstringlist m_Maps;					  //All the maps I've visited
+	std::vector<std::string> m_Maps;		  //All the maps I've visited
 	mslist<wearpos_t> m_WearPositions;		  //All available positions to wear something
 	bool m_ClientAttack;					  //Attack queued
 	int m_ClientAttackHand;					  //Current hand the player is attacking with
@@ -627,7 +571,7 @@ public:
 	//	void				UpdateFatigue( );
 	//	void				UpdateMana( );
 	//bool				SwapHands( bool bVerbose = true );
-	void ShowMenu(const char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = false);
+	void ShowMenu(const char *pszText, int bitsValidSlots, int nDisplayTime = 0, BOOL fNeedMore = FALSE);
 	int GiveGold(int iAmount, bool bVerbose = true);
 	//float				TraceAttack( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType, int iAccuracyRoll);
 	void AttackSound();
@@ -640,7 +584,7 @@ public:
 	void PlayerAction(const char* Action);
 	bool PrepareSpell(const char *pszName);
 	void TakeDamageEffect(CBaseEntity *pInflicter, CBaseEntity *pAttacker, float flDamage, int bitsDamageType);
-	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = false);
+	void CinematicCamera(BOOL OnorOff, Vector vecPosition = g_vecZero, Vector vecViewAngle = g_vecZero, BOOL bCreateClone = FALSE);
 	CBaseEntity *GiveNamedItem(const char *szName);
 
 	CGenericItem *ActiveItem();
@@ -692,8 +636,9 @@ public:
 	ulong GetPartyID();
 	bool IsLocalHost(); //This is a listen server and this is the host
 	msstring AuthID();
-	void SendChar(charinfo_base_t &CharBase);
-	void PreLoadChars(int CharIdx = -1); //Preload all my available characters (client or server)
+#ifdef VALVE_DLL
+	void PreLoadChars(int CharIdx = -1); //Preload all my available characters (from the server or central server)
+#endif
 	void QuickSlot_Create(int Slot, ulong ID, bool Verbose);
 	void QuickSlot_Use(int Slot);
 
@@ -766,7 +711,7 @@ public:
 	float m_flgeigerDelay; // delay per update of range msg to client
 	int m_igeigerRangePrev;
 	int m_iStepLeft;						// alternate left/right foot stepping sound
-	char m_szTextureName[MAX_CBTEXTURENAME]; // current texture name we're standing on
+	char m_szTextureName[CBTEXTURENAMEMAX]; // current texture name we're standing on
 	char m_chTextureType;					// current texture type
 
 	int m_idrowndmg;	  // track drowning damage taken
@@ -777,7 +722,7 @@ public:
 	BOOL m_fInitHUD;	 // True when deferred HUD restart msg needs to be sent
 	BOOL m_fGameHUDInitialized;
 	int m_iTrain;	// Train control position
-	BOOL m_fWeapon; // Set this to false to force a reset of the current weapon HUD info
+	BOOL m_fWeapon; // Set this to FALSE to force a reset of the current weapon HUD info
 
 	EHANDLE m_pTank;   // the tank which the player is currently controlling,  NULL if no tank
 	float m_fDeadTime; // the time at which the player died  (used in PlayerDeathThink())
@@ -826,11 +771,11 @@ public:
 	virtual void StartSneaking(void) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking(void) { m_tSneaking = gpGlobals->time + 30; }
 	virtual BOOL IsSneaking(void) { return m_tSneaking <= gpGlobals->time; }
-	virtual BOOL ShouldFadeOnDeath(void) { return false; }
-	virtual BOOL IsPlayer(void) { return true; } // Spectators should return false for this, they aren't "players" as far as game logic is concerned
+	virtual BOOL ShouldFadeOnDeath(void) { return FALSE; }
+	virtual BOOL IsPlayer(void) { return TRUE; } // Spectators should return FALSE for this, they aren't "players" as far as game logic is concerned
 
-	virtual BOOL IsNetClient(void) { return true; } // Bots should return false for this, they can't receive NET messages
-													// Spectators should return true for this
+	virtual BOOL IsNetClient(void) { return TRUE; } // Bots should return FALSE for this, they can't receive NET messages
+													// Spectators should return TRUE for this
 	virtual const char *TeamID(void);
 
 	virtual int Save(CSave &save);
@@ -926,89 +871,14 @@ extern CBasePlayer player;
 extern int playerBodyArray[16];
 #endif
 
+#define AUTOAIM_2DEGREES 0.0348994967025
+#define AUTOAIM_5DEGREES 0.08715574274766
+#define AUTOAIM_8DEGREES 0.1391731009601
+#define AUTOAIM_10DEGREES 0.1736481776669
+
 extern int gmsgHudText;
 extern BOOL gInitHUD;
 
 const char *GetOtherPlayerTransition(CBasePlayer *pPlayer);
-
-class CRevertSaved : public CPointEntity
-{
-public:
-	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void EXPORT MessageThink(void);
-	void EXPORT LoadThink(void);
-	void KeyValue(KeyValueData* pkvd);
-
-	virtual int Save(CSave& save);
-	virtual int Restore(CRestore& restore);
-	static TYPEDESCRIPTION m_SaveData[];
-
-	inline float Duration(void) { return pev->dmg_take; }
-	inline float HoldTime(void) { return pev->dmg_save; }
-	inline float MessageTime(void) { return m_messageTime; }
-	inline float LoadTime(void) { return m_loadTime; }
-
-	inline void SetDuration(float duration) { pev->dmg_take = duration; }
-	inline void SetHoldTime(float hold) { pev->dmg_save = hold; }
-	inline void SetMessageTime(float time) { m_messageTime = time; }
-	inline void SetLoadTime(float time) { m_loadTime = time; }
-
-private:
-	float m_messageTime;
-	float m_loadTime;
-};
-
-
-class CSpawnPointBegin : public CPointEntity
-{
-
-	//Map must have a ms_player_begin in order for people to create characters there!
-	void Spawn()
-	{
-		MSGlobals::CanCreateCharOnMap = true;
-		CPointEntity::Spawn();
-	}
-};
-
-//==============================================
-// !!!UNDONE:ultra temporary SprayCan entity to apply
-// decal frame at a time. For PreAlpha CD
-//==============================================
-
-class CSprayCan : public CBaseEntity
-{
-public:
-	void Spawn(entvars_t* pevOwner);
-	void Think(void);
-
-	virtual int ObjectCaps(void) { return FCAP_DONT_SAVE; }
-};
-
-class CInfoIntermission : public CPointEntity
-{
-	void Spawn(void);
-	void Think(void);
-};
-
-struct itemdesc_t
-{
-	unsigned int iEntIndex;
-	CBaseEntity* pItem;
-	itemtype_e ItemType;
-	void* pvExtra;
-	CBasePlayerItem* pGroupList[256];
-	int GroupListEntidx[256];
-	unsigned int iGroupedItems, iGroupedItemTotal;
-};
-
-struct itemtrans_t
-{
-	transtype_e TransType;
-	unsigned int ItemTotal;
-	itemdesc_t ItemList[MAX_GET_ITEMS];
-	void* pvExtra;
-};
-
-
 
 #endif // PLAYER_H

@@ -24,8 +24,7 @@
 #include "saytext.h"
 #include "mslogger.h"
 #include "ms/angelscript/ASEngineEventManager.h"
-//this can be removed once AS is fully finished, it's for as_enabled check.
-#include "svglobals.h"
+//originally added for the as_enabled check, which is now the AS_DISABLED macro; this can be removed once AS is fully finished.
 
 #ifdef VALVE_DLL
 
@@ -83,6 +82,7 @@ int CMSMonster::IRelationship(CBaseEntity* pTarget)
 
 	return (int)CRaceManager::Relationship(m_Race, pMonster->m_Race);
 }
+
 bool CMSMonster::CanDamage(CBaseEntity* pOther) //Can I damage this entity?
 {
 	return (CBaseEntity::CanDamage(pOther)) &&		   //The entity can take damage
@@ -136,7 +136,7 @@ void CMSMonster::Spawn()
 	m_OldGold = 0;
 
 	// Initialize menu protection flags to false for all players
-	for (unsigned int i = 0; i < MAXPLAYERS; i++)
+	for (int i = 0; i < MAXPLAYERS; i++)
 	{
 		m_MenuOptionsProtected[i] = false;
 	}
@@ -150,7 +150,7 @@ void CMSMonster::Spawn()
 	{
 		//precache all random mob scripts
 		msstring orig_scriptName = m_ScriptName;
-		for (unsigned int i = 0; i < m_nRndMobs; i++)
+		for (int i = 0; i < m_nRndMobs; i++)
 		{
 			MS_DEBUG("DEBUG: msmonster_random precache #%i / %i as %s", i, m_nRndMobs, random_monsterdata[i].m_ScriptName.c_str());
 			CScript TempScript;
@@ -300,32 +300,32 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 	if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "perishtarget"))
 	{
 		m_iszPerishTarget = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnarea"))
 	{
 		m_iszMonsterSpawnArea = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delaylow"))
 	{
 		m_SpawnDelayLow = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "delayhigh"))
 	{
 		m_SpawnDelayHigh = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "lives"))
 	{
 		m_Lives = atoi(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnchance"))
 	{
@@ -339,18 +339,18 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 
 		if (!m_SpawnChance)
 			m_SpawnChance = -1;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 	{
 		m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "nplayers"))
 	{
 		//Thothie - AUG2007a - adding option to only spawn monster if # players present
 		m_ReqPlayers = (atoi(pkvd->szValue));
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "reqhp"))
 	{
@@ -375,19 +375,19 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		if (reqhp_stringlist.size() >= 2 && reqhp_stringlist[1].contains("avg"))
 			m_HPReq_useavg = true; //Thothie OCT2015_28 - allow use average when calculating HP req, if token 2-3 is "avg"
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "title"))
 	{
 		//Thothie - AUG2007b - adding option to change monster name
 		m_title = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "params"))
 	{
 		//Thothie - DEC2007b - adding option to send params to script
 		m_addparams = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "hpmulti"))
 	{
@@ -396,7 +396,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flHealthMulti > 1)
 		{
 			m_HPMulti = flHealthMulti;
-			pkvd->fHandled = true;
+			pkvd->fHandled = TRUE;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "dmgmulti"))
@@ -406,14 +406,14 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (flDamageMulti > 1)
 		{
 			m_DMGMulti = flDamageMulti;
-			pkvd->fHandled = true;
+			pkvd->fHandled = TRUE;
 		}
 	}
 	else if (FStrEq(pkvd->szKeyName, "scriptfile") ||
 		(FStrEq(pkvd->szKeyName, "defscriptfile") && !m_ScriptName))
 	{
 		m_ScriptName = pkvd->szValue;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [begin]
 	else if (randomdata.starts_with("random_")) //optimize this - dis is stupid lazy
@@ -430,7 +430,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		if (random_monsterdata.size() == 0)
 		{
 			//random_monster_t tmp;
-			for (unsigned int i = 0; i < 32; i++)
+			for (int i = 0; i < 32; i++)
 			{
 				random_monsterdata.add_blank();
 			};
@@ -493,7 +493,7 @@ void CMSMonster::KeyValue(KeyValueData* pkvd)
 		}
 		//Gotta use the logfile here, dernitall
 		MS_DEBUG("DEBUG: msmonster_random added rndproperty #%i / tot %i - %s %s", idx, m_nRndMobs, rndproperty.c_str(), pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	//NOV2014_20 - Thothie msmonster_random [end]
 	else
@@ -829,7 +829,7 @@ bool CMSMonster::MoveExecute(moveexec_t& MoveExec)
 
 	return fSuccess;
 }
-BOOL CMSMonster::CanSetVelocity() { return true; }
+BOOL CMSMonster::CanSetVelocity() { return TRUE; }
 
 void CMSMonster::Float()
 {
@@ -1262,7 +1262,7 @@ void CMSMonster::AvoidFrontObject(float MoveAmt)
 
 			Vector vAng, vAvoidDir, SideAng[2];
 			float Dist[2];
-			for (unsigned int i = 0; i < 2; i++) //Try each side
+			for (int i = 0; i < 2; i++) //Try each side
 			{
 				//Finds the forward vector of the avoidance direction
 				vAng.y = UTIL_AngleMod(m_LastYaw + ang * -Side[i]);
@@ -1402,19 +1402,19 @@ void CMSMonster::Act()
 
 				if( m_fSequenceFinished ) {
 					//m_Hand->CurrentAttack->tStart = -65534;
-					//m_Hand->CurrentAttack->fCanCancel = true;
+					//m_Hand->CurrentAttack->fCanCancel = TRUE;
 					StopWalking( );
 					CurrentHand->CancelAttack( );
 					return;
 				}
-				else CurrentHand->CurrentAttack->fCanCancel = false;
+				else CurrentHand->CurrentAttack->fCanCancel = FALSE;
 
 				if( LastEvent.event == 600 ) //call attack this frame
 				{
 					CurrentHand->CurrentAttack->fAttackThisFrame = true;
 					pev->iuser4 = -1;
 				}
-				else CurrentHand->CurrentAttack->fAttackThisFrame = false; //basically never
+				else CurrentHand->CurrentAttack->fAttackThisFrame = FALSE; //basically never
 			}
 
 			//m_Hand->AttackButtonDown( );
@@ -1613,13 +1613,13 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 
 	CBaseEntity* pList[255], * pEnt = NULL;
 	// Fill pList with a all the monsters and players on the level including players that have died.
-	unsigned int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
+	int count = UTIL_EntitiesInBox(pList, 255, Vector(-6000, -6000, -6000), Vector(6000, 6000, 6000), FL_MONSTER | FL_CLIENT | FL_SPECTATOR);
 
 	// Keep track of players that have already received a message;
 	std::set<CBaseEntity*> pTrackAlreadySent = {};
 
 	// Now try to speak to each one
-	for (unsigned int i = 0; i < count; i++)
+	for (int i = 0; i < count; i++)
 	{
 		pEnt = pList[i];
 		if (pEnt == NULL)
@@ -1628,8 +1628,13 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 		// Corpses didn't have edicts so were never delivered messages
 		// attempt to fix by passing the pointer to the player's edict pointer down through the corpse and into this.
 		CCorpse* pCorpse = dynamic_cast<CCorpse*>(pEnt);
-		if (pCorpse && (pCorpse->pPlayerSource != NULL))
-			pEnt = pCorpse->pPlayerSource; // this var only exists if the corpse comes from a player 
+		if (pCorpse)
+		{
+			// only set if the corpse comes from a player, and NULL if that player has since disconnected
+			CBaseEntity* pSource = pCorpse->m_hPlayerSource;
+			if (pSource)
+				pEnt = pSource;
+		}
 
 		//skip players that have already been sent messages.
 		if (pEnt->IsPlayer() && !pTrackAlreadySent.insert(pEnt).second)
@@ -1727,18 +1732,18 @@ void CMSMonster::HearPhrase(CMSMonster* pSpeaker, const char* phrase)
 	listenphrase_t* BestPhrase = NULL;
 	float BestMatchedRatio = 0;
 
-	for (unsigned int i = 0; i < m_Phrases.size(); i++)
+	for (int i = 0; i < m_Phrases.size(); i++)
 	{
 		listenphrase_t& Phrase = m_Phrases[i];
-		for (unsigned int p = 0; p < Phrase.Phrases.size(); p++)
+		for (int p = 0; p < Phrase.Phrases.size(); p++)
 		{
 			const char* CheckPhrase = Phrase.Phrases[p];
 			const char* SubPhrase = NULL;
 			if (SubPhrase = strstr(cTemp1, CheckPhrase))
 			{
 				int Matched = 0;
-				unsigned int len = strlen(CheckPhrase);
-				for (unsigned int x = 0; x < len; x++)
+				int len = strlen(CheckPhrase);
+				for (int x = 0; x < len; x++)
 					if (SubPhrase[x] == CheckPhrase[x])
 						Matched++;
 
@@ -2129,7 +2134,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//- maybe internalize Parry for monsters?
 			//- Thothie note of FEB2008a
 
-			int ParryValue = GetSkillStat("parry", STAT_PROP_SKILL);
+			int ParryValue = GetSkillStat("parry", STATPROP_SKILL);
 
 			if (ParryValue > 60)
 				ParryValue = 60; //Thothie JAN2010_22 - cap out parry (shhh)
@@ -2198,14 +2203,14 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 				//Learn parry skill from  a successful parry
 				if( !pAttacker->IsPlayer() )  //Can't learn from being attacked by players
 					if ( GetSkillStat( SKILL_PARRY, 0 ) < CHAR_LEVEL_CAP )
-						LearnSkill ( SKILL_PARRY, STAT_PROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
+						LearnSkill ( SKILL_PARRY, STATPROP_SKILL, max( 0 , pMonster->m_SkillLevel * 2 ) );
 				//MiB Jul2008a (JAN2010_15) - Parry was capped at 40. What say we stop exp gain?
 
 					/*if (pMonster->m_SkillLevel * 2 > 0)
-						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, pMonster->m_SkillLevel * 2 );
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, pMonster->m_SkillLevel * 2 );
 					else
-						LearnSkill (SKILL_PARRY, STAT_PROP_SKILL, 0 );
-					//LearnSkill( SKILL_PARRY, STAT_PROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
+						LearnSkill (SKILL_PARRY, STATPROP_SKILL, 0 );
+					//LearnSkill( SKILL_PARRY, STATPROP_SKILL, max(pAttacker->m_SkillLevel * 2,0) );*/
 			}
 		}
 
@@ -2213,7 +2218,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 		//Damage Modifiers ( takedmg xxx )
 		Damage.flDamage *= m.GenericTDM;
 		if (Damage.sDamageType)
-			for (unsigned int i = 0; i < m.TakeDamageModifiers.size(); i++)
+			for (int i = 0; i < m.TakeDamageModifiers.size(); i++)
 			{
 				takedamagemodifier_t& TDM = m.TakeDamageModifiers[i];
 				//msstring thoth_my_dmgtype = TDM.DamageType;
@@ -2260,7 +2265,7 @@ float CMSMonster::TraceAttack(damage_t& Damage)
 			//Each script sets a ratio of damage you should take.  Factor each one into the damage
 			msstringlist DamageRatios;
 			TokenizeString(m_ReturnData, DamageRatios);
-			for (unsigned int i = 0; i < DamageRatios.size(); i++)
+			for (int i = 0; i < DamageRatios.size(); i++)
 				Damage.flDamage *= atof(DamageRatios[i]); //Script can reject the damage with "returndata"
 		}
 
@@ -2384,7 +2389,7 @@ void CMSMonster::CounterEffect(CBaseEntity* pInflictor, int iEffect, void* pExtr
 
 void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 {
-	BOOL DeleteMe = true;
+	BOOL DeleteMe = TRUE;
 
 	//NOV2014_21 Thothie - script side XP management option [begin]
 	bool xp_dump = (strcmp(GetFirstScriptVar("NPC_DUMP_XP"), "1") == 0);	 //dump hits to array
@@ -2408,7 +2413,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 		IScripted* pScripted = (pTarget ? pTarget->GetScripted() : NULL);
 		if (pScripted)
 		{
-			for (unsigned int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
+			for (int i = 0; i < pScripted->m_Scripts.size(); i++) // Check each 
 			{
 				if (pScripted->m_Scripts[i]->VarExists("game.effect.id")) //This is an effect 
 				{
@@ -2434,7 +2439,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			float mult = V_min(1, m_MaxHP / m_PlayerDamage[i - 1].dmgInTotal);
 			for (int n = SKILL_FIRSTSKILL; n < SKILL_MAX_ATTACK; n++)
 			{
-				for (int r = 0; r < STAT_PROP_ALL_TOTAL; r++)
+				for (int r = 0; r < STATPROP_ALL_TOTAL; r++)
 				{
 					float dmg = m_PlayerDamage[i - 1].dmg[n][r];
 					if (dmg > 0)
@@ -2528,7 +2533,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			//			ALERT( at_console, "m_flFrameRate: %f\n", m_flFrameRate );
 			//pev->nextthink = gpGlobals->time + ((256 / m_flFrameRate) * pev->framerate);
 			pev->health = pev->max_health / 2; //Thothie - Dunno what this is about
-			DeleteMe = false;				   //live until the body's dead
+			DeleteMe = FALSE;				   //live until the body's dead
 
 			if (FStrEq(STRING(pev->classname), "msmonster_summoned"))
 				g_SummonedMonsters--;
@@ -2579,7 +2584,7 @@ void CMSMonster::Killed(entvars_t* pevAttacker, int iGib)
 			m_SkillLevel = 0; //Thothie APR2011_06 - attempt to make sure monster does not give additional skill post mortem
 		}
 		else
-			DeleteMe = true; // Gibbed, destroy this entity
+			DeleteMe = TRUE; // Gibbed, destroy this entity
 	}
 	if (DeleteMe)
 	{
@@ -2707,7 +2712,7 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 
 		//Look through the other SubStats for one that's not at the cap, yet.
 		//Not random, but good enough.
-		for (unsigned int i = 0; i < 1; i++)
+		for (int i = 0; i < 1; i++)
 		{
 			iStatType = (iStatType + 1) % 3;
 			CSubStat& SubStat = pStat->m_SubStats[iStatType];
@@ -2760,8 +2765,8 @@ std::tuple<bool, int> CMSMonster::LearnSkill(int iStat, int iStatType, int Enemy
 		return std::make_tuple(false, iExpRemaining);
 
 	SubStat.Value += 1;
-	if (SubStat.Value > MAX_STAT_PROPVALUE)
-		SubStat.Value = MAX_STAT_PROPVALUE;
+	if (SubStat.Value > STATPROP_MAX_VALUE)
+		SubStat.Value = STATPROP_MAX_VALUE;
 	SubStat.Exp = 0;
 
 	//Thothie - why's this here twice? I dont see where oldval could change.
@@ -2795,7 +2800,7 @@ void CMSMonster::SetSpeed()
 	float SpeedPercent = 100.0f;
 	m_Framerate_Modifier = 1.0;
 
-	for (unsigned int i = 0; i < m_Scripts.size(); i++)
+	for (int i = 0; i < m_Scripts.size(); i++)
 	{
 		if (!m_Scripts[i]->VarExists("game.effect.id"))
 			continue;
@@ -2819,7 +2824,7 @@ void CMSMonster::SetSpeed()
 	//Can't move while a spell is preparing
 	//Thothie/Orochi APR2011_04 - undone
 	/*
-	 for (unsigned int i = 0; i < MAX_NPC_HANDS; i++)
+	 for (int i = 0; i < MAX_NPC_HANDS; i++)
 		if( Hand(i) && !Hand(i)->Spell_CanAttack() )
 			SpeedPercent = 0;  //Percentage of normal speed
 	*/
@@ -2869,7 +2874,7 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 
 	m_MenuCurrentOptions = NULL;
 
-	for (unsigned int i = 0; i < Menuoptions.size(); i++)
+	for (int i = 0; i < Menuoptions.size(); i++)
 	{
 		menuoption_t& MenuOption = Menuoptions[i];
 		if (MenuOption.Access != MOA_ALL)
@@ -2888,337 +2893,334 @@ void CMSMonster::OpenMenu(CBasePlayer* pPlayer)
 }
 void CMSMonster::UseMenuOption(CBasePlayer* pPlayer, int Option)
 {
-	// quick and dirty fix to enable menu callbacks again for no AS.
-	if (as_enabled.value > 0)
+	// quick and dirty fix to enable menu callbacks again for no AS (AS_DISABLED).
+#ifndef AS_DISABLED
+	int playerIndex = pPlayer->entindex();
+	MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
+				pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
+	MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
+				m_MenuOptionsProtected[playerIndex] ? "TRUE" : "FALSE", entindex());
+	
+	pPlayer->InMenu = false;
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
+
+	MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
+
+	//Thothie JAN2008a - need a way of dealing with canceled menus
+	if (Option == -1)
 	{
-		int playerIndex = pPlayer->entindex();
-		MS_ANGEL_INFO("UseMenuOption called for player %s (idx:%d), option %d", 
-					pPlayer ? pPlayer->DisplayName() : "NULL", playerIndex, Option);
-		MS_ANGEL_INFO("  Protection flag: %s, Entity: %d", 
-					m_MenuOptionsProtected[playerIndex] ? "true" : "false", entindex());
-		
-		pPlayer->InMenu = false;
-		mslist<menuoption_t>& Menuoptions = m_MenuOptions[playerIndex];
-
-		MS_ANGEL_INFO("  Menu has %d options for this player", Menuoptions.size());
-
-		//Thothie JAN2008a - need a way of dealing with canceled menus
-		if (Option == -1)
-		{
-			MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
-			static msstringlist Params;
-			Params.clearitems();
-			Params.add(EntToString(pPlayer));
-			CallScriptEvent("game_menu_cancel", &Params);
-			
-			// Clear protection flag when menu is cancelled
-			m_MenuOptionsProtected[playerIndex] = false;
-			MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
-			
-			return;
-		}
-
-		if (Option < 0 || Option >= (signed)Menuoptions.size())
-		{
-			MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
-			
-			// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
-			// This allows AngelScript to handle expired votes gracefully
-			if (Menuoptions.size() == 0)
-			{
-				MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
-				
-				// Try to call the vote callback even with no options
-				// The AngelScript side will handle the expired vote appropriately
-				static msstringlist Params;
-				Params.clearitems();
-				
-				// Format player entity as "ent:index" for AngelScript compatibility
-				char entFormat[32];
-				_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
-				entFormat[sizeof(entFormat) - 1] = '\0';
-				
-				Params.add(entFormat);
-				Params.add(""); // Empty option data since menu is gone
-				
-				MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
-				CallScriptEvent("game_vote_menu_callback", &Params);
-			}
-			
-			// Clear protection flag when option is out of range (vote may have expired)
-			m_MenuOptionsProtected[playerIndex] = false;
-			MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
-			
-			return;
-		}
-
-		menuoption_t& MenuOption = Menuoptions[Option];
-		MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
-					MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
-
-		bool PlayerCanPay = true;
-
-		if (MenuOption.Type == MOT_SAY)
-		{
-			pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
-		}
-		else if (MenuOption.Type == MOT_PAYMENT)
-		{
-			static msstringlist Payments;
-			Payments.clearitems();
-
-			TokenizeString(MenuOption.Data, Payments);
-
-			int TotalGold = 0;
-			static mslist<CGenericItem*> TotalFoundItems;
-			TotalFoundItems.clearitems();
-
-			for (unsigned int i = 0; i < Payments.size(); i++)
-			{
-				msstring& Payment = Payments[i];
-				if (Payment.starts_with("gold"))
-					TotalGold += atoi(Payment.substr(5));
-				else
-				{
-					//Find x number of specified item
-					int Amount = 1;
-					if (Payment.contains(":"))
-					{
-						Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
-						if (!Amount)
-							Amount = 1;
-					}
-
-					msstring ItemName = Payment.thru_char(":");
-
-					ulong LastItem = 0;
-					ulong FirstItem = 0;
-					CGenericItem* pItem = NULL;
-					static mslist<CGenericItem*> FoundItems;
-					FoundItems.clearitems();
-					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
-					{
-						if (pItem->ItemName == ItemName)
-							FoundItems.add(pItem);
-
-						LastItem = pItem->m_iId;
-
-						if (FirstItem == 0)
-							FirstItem = LastItem;
-						else if (LastItem == FirstItem)
-							break;
-					}
-
-					if ((signed)FoundItems.size() < Amount)
-					{
-						msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
-
-						if (!MenuOption.SilentPayment)
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
-						PlayerCanPay = false;
-						break;
-					}
-
-					for (unsigned int x = 0; x < FoundItems.size(); x++)
-						TotalFoundItems.add(FoundItems[x]);
-				}
-			}
-
-			int PlayerGold = pPlayer->m_Gold;
-			if (PlayerGold < TotalGold)
-			{
-				if (!MenuOption.SilentPayment)
-					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
-				PlayerCanPay = false;
-			}
-
-			if (PlayerCanPay)
-			{
-				pPlayer->m_Gold -= TotalGold;
-				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
-					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
-				//pPlayer->RemoveItem( TotalFoundItems[i] );
-			}
-		}
-
-		//Handle callback
-		// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
-		msstring CallbackEvent = MenuOption.CB_Name;
-		msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
-		msstring OptionData = MenuOption.Data;
-		menuoptiontype_e OptionType = MenuOption.Type;
-		
-		MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
-		
-		static msstringlist Params;
-		Params.clearitems();
-		
-		// Format player entity as "ent:index" for AngelScript compatibility
-		char entFormat[32];
-		_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
-		entFormat[sizeof(entFormat) - 1] = '\0';
-		
-		msstring PlayerEntStr = entFormat;
-		MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), playerIndex);
-		
-		Params.add(PlayerEntStr);
-		Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
-
-		MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
-					Params[0].c_str(), OptionData.c_str());
-
-		if (OptionType == MOT_PAYMENT)
-		{
-			if (!PlayerCanPay)
-			{
-				MS_ANGEL_INFO("  Player can't pay, using failed callback");
-				CallbackEvent = CallbackFailedEvent;
-			}
-		}
-
-		if (CallbackEvent.len())
-		{
-			MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
-						CallbackEvent.c_str(), (int)Params.size());
-			CallScriptEvent(CallbackEvent, &Params);
-			MS_ANGEL_INFO("  Script event completed");
-		}
-		else
-		{
-			MS_ANGEL_WARN("  No callback event name specified for this menu option");
-		}
-		
-		MS_ANGEL_INFO("  Clearing menu options");
-		Menuoptions.clearitems();
-		
-		// Clear protection flag (used for vote menus)
-		m_MenuOptionsProtected[playerIndex] = false;
-		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
-	}
-	else
-	{
-		pPlayer->InMenu = false;
-		mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
-
-		//Thothie JAN2008a - need a way of dealing with canceled menus
-		if (Option == -1)
-		{
-			static msstringlist Params;
-			Params.clearitems();
-			Params.add(EntToString(pPlayer));
-			CallScriptEvent("game_menu_cancel", &Params);
-		}
-
-		if (Option < 0 || Option >= (signed)Menuoptions.size())
-			return;
-
-		menuoption_t& MenuOption = Menuoptions[Option];
-
-		bool PlayerCanPay = true;
-
-		if (MenuOption.Type == MOT_SAY)
-		{
-			pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
-		}
-		else if (MenuOption.Type == MOT_PAYMENT)
-		{
-			static msstringlist Payments;
-			Payments.clearitems();
-
-			TokenizeString(MenuOption.Data, Payments);
-
-			int TotalGold = 0;
-			static mslist<CGenericItem*> TotalFoundItems;
-			TotalFoundItems.clearitems();
-
-			for (unsigned int i = 0; i < Payments.size(); i++)
-			{
-				msstring& Payment = Payments[i];
-				if (Payment.starts_with("gold"))
-					TotalGold += atoi(Payment.substr(5));
-				else
-				{
-					//Find x number of specified item
-					int Amount = 1;
-					if (Payment.contains(":"))
-					{
-						Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
-						if (!Amount)
-							Amount = 1;
-					}
-
-					msstring ItemName = Payment.thru_char(":");
-
-					ulong LastItem = 0;
-					ulong FirstItem = 0;
-					CGenericItem* pItem = NULL;
-					static mslist<CGenericItem*> FoundItems;
-					FoundItems.clearitems();
-					while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
-					{
-						if (pItem->ItemName == ItemName)
-							FoundItems.add(pItem);
-
-						LastItem = pItem->m_iId;
-
-						if (FirstItem == 0)
-							FirstItem = LastItem;
-						else if (LastItem == FirstItem)
-							break;
-					}
-
-					if ((signed)FoundItems.size() < Amount)
-					{
-						msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
-
-						if (!MenuOption.SilentPayment)
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
-						PlayerCanPay = false;
-						break;
-					}
-
-					for (unsigned int x = 0; x < FoundItems.size(); x++)
-						TotalFoundItems.add(FoundItems[x]);
-				}
-			}
-
-			int PlayerGold = pPlayer->m_Gold;
-			if (PlayerGold < TotalGold)
-			{
-				if (!MenuOption.SilentPayment)
-					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
-				PlayerCanPay = false;
-			}
-
-			if (PlayerCanPay)
-			{
-				pPlayer->m_Gold -= TotalGold;
-				for (unsigned int i = 0; i < TotalFoundItems.size(); i++)
-					TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
-				//pPlayer->RemoveItem( TotalFoundItems[i] );
-			}
-		}
-
-		//Handle callback
+		MS_ANGEL_INFO("  Option is -1 (cancel), calling game_menu_cancel");
 		static msstringlist Params;
 		Params.clearitems();
 		Params.add(EntToString(pPlayer));
-		Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
-
-		msstring CallbackEvent = MenuOption.CB_Name;
-
-		if (MenuOption.Type == MOT_PAYMENT)
-		{
-			if (!PlayerCanPay)
-				CallbackEvent = MenuOption.CB_Failed_Name;
-		}
-
-		if (CallbackEvent.len())
-		{
-			CallScriptEvent(CallbackEvent, &Params);
-		}
-		Menuoptions.clearitems();
+		CallScriptEvent("game_menu_cancel", &Params);
+		
+		// Clear protection flag when menu is cancelled
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (menu cancelled) ***", playerIndex);
+		
+		return;
 	}
+
+	if (Option < 0 || Option >= (signed)Menuoptions.size())
+	{
+		MS_ANGEL_ERROR("  Option %d is out of range (0-%d)", Option, Menuoptions.size() - 1);
+		
+		// For vote menus (MOT_CALLBACK with game_vote_menu_callback), still call the callback
+		// This allows AngelScript to handle expired votes gracefully
+		if (Menuoptions.size() == 0)
+		{
+			MS_ANGEL_INFO("  Menu has no options - checking if this might be an expired vote menu");
+			
+			// Try to call the vote callback even with no options
+			// The AngelScript side will handle the expired vote appropriately
+			static msstringlist Params;
+			Params.clearitems();
+			
+			// Format player entity as "ent:index" for AngelScript compatibility
+			char entFormat[32];
+			_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
+			entFormat[sizeof(entFormat) - 1] = '\0';
+			
+			Params.add(entFormat);
+			Params.add(""); // Empty option data since menu is gone
+			
+			MS_ANGEL_INFO("  Calling game_vote_menu_callback for expired menu");
+			CallScriptEvent("game_vote_menu_callback", &Params);
+		}
+		
+		// Clear protection flag when option is out of range (vote may have expired)
+		m_MenuOptionsProtected[playerIndex] = false;
+		MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (option out of range) ***", playerIndex);
+		
+		return;
+	}
+
+	menuoption_t& MenuOption = Menuoptions[Option];
+	MS_ANGEL_INFO("  Menu option: Type=%d, Data='%s', CB_Name='%s'", 
+				MenuOption.Type, MenuOption.Data.c_str(), MenuOption.CB_Name.c_str());
+
+	bool PlayerCanPay = true;
+
+	if (MenuOption.Type == MOT_SAY)
+	{
+		pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
+	}
+	else if (MenuOption.Type == MOT_PAYMENT)
+	{
+		static msstringlist Payments;
+		Payments.clearitems();
+
+		TokenizeString(MenuOption.Data, Payments);
+
+		int TotalGold = 0;
+		static mslist<CGenericItem*> TotalFoundItems;
+		TotalFoundItems.clearitems();
+
+		for (int i = 0; i < Payments.size(); i++)
+		{
+			msstring& Payment = Payments[i];
+			if (Payment.starts_with("gold"))
+				TotalGold += atoi(Payment.substr(5));
+			else
+			{
+				//Find x number of specified item
+				int Amount = 1;
+				if (Payment.contains(":"))
+				{
+					Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
+					if (!Amount)
+						Amount = 1;
+				}
+
+				msstring ItemName = Payment.thru_char(":");
+
+				ulong LastItem = 0;
+				ulong FirstItem = 0;
+				CGenericItem* pItem = NULL;
+				static mslist<CGenericItem*> FoundItems;
+				FoundItems.clearitems();
+				while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
+				{
+					if (FirstItem == 0)
+						FirstItem = pItem->m_iId;
+					else if (pItem->m_iId == FirstItem)
+						break;
+
+					if (pItem->ItemName == ItemName)
+						FoundItems.add(pItem);
+
+					LastItem = pItem->m_iId;
+				}
+
+				if ((signed)FoundItems.size() < Amount)
+				{
+					msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
+
+					if (!MenuOption.SilentPayment)
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
+					PlayerCanPay = false;
+					break;
+				}
+
+				for (int x = 0; x < FoundItems.size(); x++)
+					TotalFoundItems.add(FoundItems[x]);
+			}
+		}
+
+		int PlayerGold = pPlayer->m_Gold;
+		if (PlayerGold < TotalGold)
+		{
+			if (!MenuOption.SilentPayment)
+				pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
+			PlayerCanPay = false;
+		}
+
+		if (PlayerCanPay)
+		{
+			pPlayer->m_Gold -= TotalGold;
+			for (int i = 0; i < TotalFoundItems.size(); i++)
+				TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
+			//pPlayer->RemoveItem( TotalFoundItems[i] );
+		}
+	}
+
+	//Handle callback
+	// IMPORTANT: Copy callback name FIRST before any operations that might modify MenuOption
+	msstring CallbackEvent = MenuOption.CB_Name;
+	msstring CallbackFailedEvent = MenuOption.CB_Failed_Name;
+	msstring OptionData = MenuOption.Data;
+	menuoptiontype_e OptionType = MenuOption.Type;
+	
+	MS_ANGEL_INFO("  Callback event: '%s', Type: %d", CallbackEvent.c_str(), OptionType);
+	
+	static msstringlist Params;
+	Params.clearitems();
+	
+	// Format player entity as "ent:index" for AngelScript compatibility
+	char entFormat[32];
+	_snprintf(entFormat, sizeof(entFormat) - 1, "ent:%d", playerIndex);
+	entFormat[sizeof(entFormat) - 1] = '\0';
+	
+	msstring PlayerEntStr = entFormat;
+	MS_ANGEL_INFO("  Entity format: '%s' (index=%d)", PlayerEntStr.c_str(), playerIndex);
+	
+	Params.add(PlayerEntStr);
+	Params.add(OptionData); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+
+	MS_ANGEL_INFO("  Preparing callback with params: player='%s', data='%s'", 
+				Params[0].c_str(), OptionData.c_str());
+
+	if (OptionType == MOT_PAYMENT)
+	{
+		if (!PlayerCanPay)
+		{
+			MS_ANGEL_INFO("  Player can't pay, using failed callback");
+			CallbackEvent = CallbackFailedEvent;
+		}
+	}
+
+	if (CallbackEvent.len())
+	{
+		MS_ANGEL_INFO("  Calling script event: '%s' with %d parameters", 
+					CallbackEvent.c_str(), (int)Params.size());
+		CallScriptEvent(CallbackEvent, &Params);
+		MS_ANGEL_INFO("  Script event completed");
+	}
+	else
+	{
+		MS_ANGEL_WARN("  No callback event name specified for this menu option");
+	}
+	
+	MS_ANGEL_INFO("  Clearing menu options");
+	Menuoptions.clearitems();
+	
+	// Clear protection flag (used for vote menus)
+	m_MenuOptionsProtected[playerIndex] = false;
+	MS_ANGEL_INFO("*** VOTE MENU PROTECTION: CLEARED for player %d (normal menu completion) ***", playerIndex);
+#else
+	pPlayer->InMenu = false;
+	mslist<menuoption_t>& Menuoptions = m_MenuOptions[pPlayer->entindex()];
+
+	//Thothie JAN2008a - need a way of dealing with canceled menus
+	if (Option == -1)
+	{
+		static msstringlist Params;
+		Params.clearitems();
+		Params.add(EntToString(pPlayer));
+		CallScriptEvent("game_menu_cancel", &Params);
+	}
+
+	if (Option < 0 || Option >= (signed)Menuoptions.size())
+		return;
+
+	menuoption_t& MenuOption = Menuoptions[Option];
+
+	bool PlayerCanPay = true;
+
+	if (MenuOption.Type == MOT_SAY)
+	{
+		pPlayer->Speak(MenuOption.Data, SPEECH_LOCAL);
+	}
+	else if (MenuOption.Type == MOT_PAYMENT)
+	{
+		static msstringlist Payments;
+		Payments.clearitems();
+
+		TokenizeString(MenuOption.Data, Payments);
+
+		int TotalGold = 0;
+		static mslist<CGenericItem*> TotalFoundItems;
+		TotalFoundItems.clearitems();
+
+		for (int i = 0; i < Payments.size(); i++)
+		{
+			msstring& Payment = Payments[i];
+			if (Payment.starts_with("gold"))
+				TotalGold += atoi(Payment.substr(5));
+			else
+			{
+				//Find x number of specified item
+				int Amount = 1;
+				if (Payment.contains(":"))
+				{
+					Amount = atoi(Payment.substr(Payment.findchar(":") + 1));
+					if (!Amount)
+						Amount = 1;
+				}
+
+				msstring ItemName = Payment.thru_char(":");
+
+				ulong LastItem = 0;
+				ulong FirstItem = 0;
+				CGenericItem* pItem = NULL;
+				static mslist<CGenericItem*> FoundItems;
+				FoundItems.clearitems();
+				while ((pItem = pPlayer->GetItemInInventory(LastItem, false, true, true)) && ((signed)FoundItems.size() < Amount))
+				{
+					if (FirstItem == 0)
+						FirstItem = pItem->m_iId;
+					else if (pItem->m_iId == FirstItem)
+						break;
+
+					if (pItem->ItemName == ItemName)
+						FoundItems.add(pItem);
+
+					LastItem = pItem->m_iId;
+				}
+
+				if ((signed)FoundItems.size() < Amount)
+				{
+					msstring ItemDispName = CGenericItemMgr::GetItemDisplayName(ItemName, false, true, Amount);
+
+					if (!MenuOption.SilentPayment)
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + ItemDispName);
+					PlayerCanPay = false;
+					break;
+				}
+
+				for (int x = 0; x < FoundItems.size(); x++)
+					TotalFoundItems.add(FoundItems[x]);
+			}
+		}
+
+		int PlayerGold = pPlayer->m_Gold;
+		if (PlayerGold < TotalGold)
+		{
+			if (!MenuOption.SilentPayment)
+				pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the payment of ") + TotalGold + " Gold");
+			PlayerCanPay = false;
+		}
+
+		if (PlayerCanPay)
+		{
+			pPlayer->m_Gold -= TotalGold;
+			for (int i = 0; i < TotalFoundItems.size(); i++)
+				TotalFoundItems[i]->SUB_Remove(); //MIB JUN2010_14 (original line commented below)
+			//pPlayer->RemoveItem( TotalFoundItems[i] );
+		}
+	}
+
+	//Handle callback
+	static msstringlist Params;
+	Params.clearitems();
+	Params.add(EntToString(pPlayer));
+	Params.add(MenuOption.Data); //Thothie - reg.mitem.data function wasn't returning as PARAM2 in type callback as described by docs, so I tried this, seems to work
+
+	msstring CallbackEvent = MenuOption.CB_Name;
+
+	if (MenuOption.Type == MOT_PAYMENT)
+	{
+		if (!PlayerCanPay)
+			CallbackEvent = MenuOption.CB_Failed_Name;
+	}
+
+	if (CallbackEvent.len())
+	{
+		CallScriptEvent(CallbackEvent, &Params);
+	}
+	Menuoptions.clearitems();
+#endif
 }
 
 void AlignToNormal(/*In*/ Vector& vNormal, /*In - yaw must be set | Out - Sets pitch and roll*/ Vector& vAngles)

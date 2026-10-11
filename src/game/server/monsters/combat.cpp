@@ -34,11 +34,9 @@ extern DLL_GLOBAL int g_iSkillLevel;
 extern Vector VecBModelOrigin(entvars_t *pevBModel);
 extern entvars_t *g_pevLastInflictor;
 
-enum gib_count_e {
-	GERMAN_GIB_COUNT = 4,
-	HUMAN_GIB_COUNT = 6,
-	ALIEN_GIB_COUNT = 4
-};
+#define GERMAN_GIB_COUNT 4
+#define HUMAN_GIB_COUNT 6
+#define ALIEN_GIB_COUNT 4
 
 // HACKHACK -- The gib velocity equations don't work
 void CGib ::LimitVelocity(void)
@@ -257,9 +255,9 @@ BOOL CBaseMonster ::HasHumanGibs(void)
 		myClass == CLASS_HUMAN_PASSIVE ||
 		myClass == CLASS_PLAYER)
 
-		return true;
+		return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 BOOL CBaseMonster ::HasAlienGibs(void)
@@ -273,9 +271,9 @@ BOOL CBaseMonster ::HasAlienGibs(void)
 		myClass == CLASS_ALIEN_PREDATOR ||
 		myClass == CLASS_ALIEN_PREY)
 
-		return true;
+		return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 void CBaseMonster::FadeMonster(void)
@@ -296,7 +294,7 @@ void CBaseMonster::FadeMonster(void)
 void CBaseMonster ::GibMonster(void)
 {
 	TraceResult tr;
-	BOOL gibbed = false;
+	BOOL gibbed = FALSE;
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "common/bodysplat.wav", 1, ATTN_NORM);
 
@@ -310,7 +308,7 @@ void CBaseMonster ::GibMonster(void)
 			CGib::SpawnHeadGib(pev);
 			CGib::SpawnRandomGibs(pev, 4, 1); // throw some human gibs.
 		}
-		gibbed = true;
+		gibbed = TRUE;
 	}
 	else if (HasAlienGibs())
 	{
@@ -318,7 +316,7 @@ void CBaseMonster ::GibMonster(void)
 		{
 			CGib::SpawnRandomGibs(pev, 4, 0); // Throw alien gibs
 		}
-		gibbed = true;
+		gibbed = TRUE;
 	}
 
 	if (!IsPlayer())
@@ -359,7 +357,7 @@ Activity CBaseMonster ::GetDeathActivity(void)
 
 	vecSrc = Center();
 
-	fTriedDirection = false;
+	fTriedDirection = FALSE;
 	deathActivity = ACT_DIESIMPLE; // in case we can't find any special deaths to do.
 
 	UTIL_MakeVectors(pev->angles);
@@ -378,7 +376,7 @@ Activity CBaseMonster ::GetDeathActivity(void)
 
 	case HITGROUP_GENERIC:
 		// try to pick a death based on attack direction
-		fTriedDirection = true;
+		fTriedDirection = TRUE;
 
 		if (flDot > 0.3)
 		{
@@ -392,7 +390,7 @@ Activity CBaseMonster ::GetDeathActivity(void)
 
 	default:
 		// try to pick a death based on attack direction
-		fTriedDirection = true;
+		fTriedDirection = TRUE;
 
 		if (flDot > 0.3)
 		{
@@ -469,7 +467,7 @@ Activity CBaseMonster ::GetSmallFlinchActivity(void)
 	BOOL fTriedDirection;
 	float flDot;
 
-	fTriedDirection = false;
+	fTriedDirection = FALSE;
 	UTIL_MakeVectors(pev->angles);
 	flDot = DotProduct(gpGlobals->v_forward, g_vecAttackDir * -1);
 
@@ -529,24 +527,24 @@ void CBaseMonster::BecomeDead(void)
 BOOL CBaseMonster::ShouldGibMonster(int iGib)
 {
 	if ((iGib == GIB_NORMAL && pev->health < GIB_HEALTH_VALUE) || (iGib == GIB_ALWAYS))
-		return true;
+		return TRUE;
 
-	return false;
+	return FALSE;
 }
 
 void CBaseMonster::CallGibMonster(void)
 {
-	BOOL fade = false;
+	BOOL fade = FALSE;
 
 	if (HasHumanGibs())
 	{
 		if (CVAR_GET_FLOAT("violence_hgibs") == 0)
-			fade = true;
+			fade = TRUE;
 	}
 	else if (HasAlienGibs())
 	{
 		if (CVAR_GET_FLOAT("violence_agibs") == 0)
-			fade = true;
+			fade = TRUE;
 	}
 
 	pev->takedamage = DAMAGE_NO;
@@ -582,7 +580,7 @@ Killed
 */
 void CBaseMonster ::Killed(entvars_t *pevAttacker, int iGib)
 {
-	BOOL fDone = false;
+	BOOL fDone = FALSE;
 
 	if (HasMemory(bits_MEMORY_KILLED))
 	{
@@ -1048,7 +1046,7 @@ void RadiusDamage(Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker
 	// iterate on all entities in the vicinity.
 	while ((pEntity = UTIL_FindEntityInSphere(pEntity, vecSrc, flRadius)) != NULL)
 	{
-		if (static_cast<int>(pEntity->pev->takedamage) != DAMAGE_NO)
+		if (pEntity->pev->takedamage != DAMAGE_NO)
 		{
 			// UNDONE: this should check a damage mask, not an ignore
 			if (iClassIgnore != CLASS_NONE && pEntity->Classify() == iClassIgnore)
@@ -1167,11 +1165,11 @@ bool CBaseEntity ::FInViewCone(CBaseEntity *pEntity, float m_flFieldOfView)
 
 	if (flDot > m_flFieldOfView)
 	{
-		return true;
+		return TRUE;
 	}
 	else
 	{
-		return false;
+		return FALSE;
 	}
 }
 
@@ -1222,14 +1220,14 @@ BOOL CBaseEntity ::FMVisible(CBaseEntity *pEntity)
 	Vector vecTargetOrigin;
 
 	if (FBitSet(pEntity->pev->flags, FL_NOTARGET))
-		return false;
+		return FALSE;
 
 	// don't look through water
 	// Thothie APR2011_29 - WTF not? This is causing issues with players in water
 	/*
 	if ((pev->waterlevel != 3 && pEntity->pev->waterlevel == 3) 
 		|| (pev->waterlevel == 3 && pEntity->pev->waterlevel == 0))
-		return false;
+		return FALSE;
 	*/
 
 	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'
@@ -1240,13 +1238,13 @@ BOOL CBaseEntity ::FMVisible(CBaseEntity *pEntity)
 	if (tr.flFraction != 1.0)
 	{
 		if (tr.pHit == pEntity->edict())
-			return true; //hit my target
+			return TRUE; //hit my target
 
-		return false; // Line of sight is not established
+		return FALSE; // Line of sight is not established
 	}
 	else
 	{
-		return true; // line of sight is valid.
+		return TRUE; // line of sight is valid.
 	}
 }
 
@@ -1265,11 +1263,11 @@ BOOL CBaseEntity ::FMVisible(const Vector &vecOrigin)
 
 	if (tr.flFraction != 1.0)
 	{
-		return false; // Line of sight is not established
+		return FALSE; // Line of sight is not established
 	}
 	else
 	{
-		return true; // line of sight is valid.
+		return TRUE; // line of sight is valid.
 	}
 }
 //=========================================================
@@ -1283,12 +1281,12 @@ BOOL CBaseEntity ::FVisible(CBaseEntity *pEntity)
 	Vector vecTargetOrigin;
 
 	if (FBitSet(pEntity->pev->flags, FL_NOTARGET))
-		return false;
+		return FALSE;
 
 	// don't look through water
 	//if ((pev->waterlevel != 3 && pEntity->pev->waterlevel == 3)
 	//	|| (pev->waterlevel == 3 && pEntity->pev->waterlevel == 0))
-	//	return false;
+	//	return FALSE;
 
 	vecLookerOrigin = pev->origin + pev->view_ofs; //look through the caller's 'eyes'
 	vecTargetOrigin = pEntity->EyePosition();
@@ -1297,11 +1295,11 @@ BOOL CBaseEntity ::FVisible(CBaseEntity *pEntity)
 
 	if (tr.flFraction != 1.0)
 	{
-		return false; // Line of sight is not established
+		return FALSE; // Line of sight is not established
 	}
 	else
 	{
-		return true; // line of sight is valid.
+		return TRUE; // line of sight is valid.
 	}
 }
 
@@ -1320,11 +1318,11 @@ BOOL CBaseEntity ::FVisible(const Vector &vecOrigin)
 
 	if (tr.flFraction != 1.0)
 	{
-		return false; // Line of sight is not established
+		return FALSE; // Line of sight is not established
 	}
 	else
 	{
-		return true; // line of sight is valid.
+		return TRUE; // line of sight is valid.
 	}
 }
 

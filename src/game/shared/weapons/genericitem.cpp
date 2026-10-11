@@ -63,7 +63,7 @@ CGenericItem* GetGenericItemByName(const char* pItemName, bool bCallSpawnIfNeede
 
 CGenericItem* CGenericItemMgr::GetGlobalGenericItemByName(const char* pszItemName, bool bCallSpawnIfNeeded)
 {
-	for (unsigned int i = 0; i < m_Items.size(); i++)
+	for (int i = 0; i < m_Items.size(); i++)
 	{
 		GenItem_t& GlobalItem = m_Items[i];
 		if (FStrEq(GlobalItem.Name.c_str(), pszItemName))
@@ -134,7 +134,7 @@ CGenericItem* CGenericItemMgr::GetGlobalGenericItemByName(const char* pszItemNam
 //CGenericItem *GetGenericItemByID( int ID ) { return CGenericItemMgr::GetGlobalGenericItemByID( ID ); }
 /*CGenericItem *CGenericItemMgr::GetGlobalGenericItemByID( int Type )
 	{
-		 for (unsigned int i = 0; i < m_Items.size(); i++)
+		 for (int i = 0; i < m_Items.size(); i++)
 		{
 			GenItem_t &GlobalItem = m_Items[i];
 			if( GlobalItem.pItem->iWeaponType == Type )
@@ -229,7 +229,7 @@ void CGenericItemMgr::AddGlobalItem(GenItem_t& NewGlobalItem) {
 	m_Items.add(NewGlobalItem);
 }
 
-unsigned int CGenericItemMgr::ItemCount() {
+int CGenericItemMgr::ItemCount() {
 	return m_Items.size();
 }
 
@@ -240,7 +240,7 @@ GenItem_t* CGenericItemMgr::Item(int idx) {
 // MiB MAR2012_10 - Get item_name's index in the global array
 int CGenericItemMgr::LookUpItemIdx(msstring item_name)
 {
-	for (unsigned int i = 0; i < m_Items.size(); i++)
+	for (int i = 0; i < m_Items.size(); i++)
 	{
 		if (item_name == m_Items[i].Name)
 			return i;
@@ -260,7 +260,7 @@ mslist<GenItem_t> CGenericItemMgr::m_Items;
 
 void CGenericItemMgr::DeleteItem(CGenericItem* pItem)
 {
-	for (unsigned int i = 0; i < ItemCount(); i++)
+	for (int i = 0; i < ItemCount(); i++)
 		if (m_Items[i].pItem == pItem)
 			DeleteItem(i);
 }
@@ -275,8 +275,8 @@ void CGenericItemMgr::DeleteItem(int idx)
 
 void CGenericItemMgr::DeleteItems()
 {
-	unsigned int ItemCount = m_Items.size(); //Save because this will be changing
-	for (unsigned int i = 0; i < ItemCount; i++)
+	int ItemCount = m_Items.size(); //Save because this will be changing
+	for (int i = 0; i < ItemCount; i++)
 		DeleteItem(0); //Keep deleting the first item
 
 	m_Items.clear();
@@ -598,7 +598,7 @@ float CGenericItem::Weight()
 	float MyVolume = CBaseEntity::m_Weight;
 	if (FBitSet(MSProperties(), ITEM_CONTAINER))
 		MyVolume += Container_Weight();
-	else if (FBitSet(MSProperties(), ITEM_GROUPABLE))
+	else if FBitSet(MSProperties(), ITEM_GROUPABLE)
 		MyVolume *= iQuantity;
 	return MyVolume;
 }
@@ -1011,10 +1011,10 @@ bool CGenericItem::CanWearItem()
 	CGenericItem* pItemConflict = NULL;
 	if (m_pPlayer)
 	{
-		for (unsigned int iloc = 0; iloc < m_WearPositions.size(); iloc++)
+		for (int iloc = 0; iloc < m_WearPositions.size(); iloc++)
 		{
 			wearpos_t* pPlayerPos = NULL;
-			for (unsigned int ploc = 0; ploc < m_pPlayer->m_WearPositions.size(); ploc++)
+			for (int ploc = 0; ploc < m_pPlayer->m_WearPositions.size(); ploc++)
 			{
 				const char* PlayerPosName = m_pPlayer->m_WearPositions[ploc].Name;
 				if (m_WearPositions[iloc].Name != m_pPlayer->m_WearPositions[ploc].Name)
@@ -1027,7 +1027,7 @@ bool CGenericItem::CanWearItem()
 			if (!pPlayerPos)
 			{
 				if (Verbose)
-					m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
+					m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
 				return false; //Couldn't find position on player (the position's name isn't defined)
 			}
 
@@ -1035,7 +1035,7 @@ bool CGenericItem::CanWearItem()
 			CGenericItem* pItemConflict = NULL;
 
 			int iSlots = 0;
-			for (unsigned int i = 0; i < m_pOwner->Gear.size(); i++)
+			for (int i = 0; i < m_pOwner->Gear.size(); i++)
 			{
 				CGenericItem* pItemWorn = m_pOwner->Gear[i];
 
@@ -1044,7 +1044,7 @@ bool CGenericItem::CanWearItem()
 					!pItemWorn->IsWorn())
 					continue;
 
-				for (unsigned int iwloc = 0; iwloc < pItemWorn->m_WearPositions.size(); iwloc++)
+				for (int iwloc = 0; iwloc < pItemWorn->m_WearPositions.size(); iwloc++)
 				{
 					if (pItemWorn->m_WearPositions[iwloc].Name != PlayerPos.Name)
 						continue;
@@ -1063,14 +1063,14 @@ bool CGenericItem::CanWearItem()
 				{
 					if (PlayerPos.MaxAmt == 0)
 					{
-						m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
+						m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
 					}
 					else if (PlayerPos.MaxAmt == 1)
 					{
 						if (pItemConflict)
-							m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str()); //Thothie DEC2007a - was "You've are already wearing a %s\n", SPEECH::ItemName(pItemConflict)
+							m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str()); //Thothie DEC2007a - was "You've are already wearing a %s\n", SPEECH_GetItemName(pItemConflict)
 						else
-							m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH::ItemName(this));
+							m_pPlayer->SendInfoMsg("You can't wear %s\n", SPEECH_GetItemName(this));
 					}
 					else
 						m_pPlayer->SendInfoMsg("You have no more %s slots\n", PlayerPos.Name.c_str());
@@ -1140,12 +1140,12 @@ CGenericItem* CGenericItem::FindPackForItem(CBasePlayer* pPlayer, bool fVerbose)
 	if (!fSuccess)
 	{
 		//Last resort, try to put in any pack
-		for (unsigned int i = 0; i < pPlayer->Gear.size(); i++)
+		for (int i = 0; i < pPlayer->Gear.size(); i++)
 		{
 			CGenericItem* pNextPack = pPlayer->Gear[i];
 
 			if (FBitSet(pNextPack->MSProperties(), ITEM_CONTAINER) &&
-				//pPlayer->PutInPack( this, pNextPack, false ) )
+				//pPlayer->PutInPack( this, pNextPack, FALSE ) )
 				CanPutInPack(pNextPack))
 			{
 				pPack = pNextPack;
@@ -1186,7 +1186,7 @@ bool CGenericItem::PutInAnyPack(CBasePlayer* pPlayer, bool fVerbose)
 				pOldPlayer->m_ClientHandID[LastHand] = (pOldPlayer->Hand[LastHand] ? pOldPlayer->Hand[LastHand]->m_iId : 0);
 				pOldPlayer->m_ClientCurrentHand = pOldPlayer->iCurrentHand;
 			}
-			return true;
+			return TRUE;
 		}
 	#endif*/
 	return PutInPack(pPack);
@@ -1498,7 +1498,7 @@ void CGenericItem::RemoveFromOwner()
 		ClearBits(pev->flags, FL_SKIPLOCALHOST); // Start sending the entity to the owner again
 
 	m_Location = ITEMPOS_HANDS;
-	Wielded = false;
+	Wielded = FALSE;
 
 	if (m_pPlayer)
 		m_pPlayer->m_TimeResetLegs = 0;
@@ -1590,12 +1590,11 @@ void CGenericItem::Script_Setup()
 
 bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scriptcmd_t& Cmd, msstringlist& Params)
 {
-
 	//Parse one command
 	msstring sTemp;
 
 	msstring DebugString = msstring("Action:");
-	for (unsigned int i = 0; i < Cmd.m_Params.size(); i++)
+	for (int i = 0; i < Cmd.m_Params.size(); i++)
 	{
 		DebugString += " ";
 		DebugString += Cmd.m_Params[i];
@@ -1755,12 +1754,12 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 				msstringlist Positions;
 				TokenizeString(WearPos, Positions, ";|");
 
-				for (unsigned int i1 = 0; i1 < Positions.size(); i1++)
+				for (int i1 = 0; i1 < Positions.size(); i1++)
 				{
 					msstring& PosName = Positions[i1];
 
 					bool Exists = false;
-					for (unsigned int i2 = 0; i2 < m_WearPositions.size(); i2++)
+					for (int i2 = 0; i2 < m_WearPositions.size(); i2++)
 					{
 						if (PosName != m_WearPositions[i2].Name)
 							continue;
@@ -1834,7 +1833,7 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	{
 		if (Params.size() >= 1)
 		{
-			for (unsigned int i = 0; i < Params.size(); i++)
+			for (int i = 0; i < Params.size(); i++)
 			{
 				if (i)
 					sTemp += " ";
@@ -2032,14 +2031,14 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 			if (m_pPlayer)
 			{
 				byte ReqHands = atoi(Params[0]), UsedHands = 0;
-				for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
+				for (int i = 0; i < MAX_PLAYER_HANDS; i++)
 					if (m_pPlayer->Hand(i) && m_pPlayer->Hand(i) != this)
 						UsedHands++;
 
 				if (MAX_PLAYER_HANDS - (UsedHands + ReqHands) >= 0)
-					Wielded = true;
+					Wielded = TRUE;
 				else
-					Wielded = false;
+					Wielded = FALSE;
 			}
 		}
 		else
@@ -2129,18 +2128,18 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 
 	//This is handled here for the client-side entities.  This returns false and handles it again in CScript for the server side
 	//******************************* SETMODEL ****************************
+#define m_ClEntNormal m_ClEntity[ITEMENT_NORMAL]
 	else if (Cmd.Name() == "setmodel")
 	{
-		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 1)
 		{
 			if (Params[0] == "none")
-				m_ClEntNormal->model = NULL;
+				m_ClEntNormal.model = NULL;
 			else
 			{
 				sTemp = "models/";
 				sTemp += Params[0];
-				m_ClEntNormal->model = IEngineStudio.Mod_ForName(sTemp, 0);
+				m_ClEntNormal.model = IEngineStudio.Mod_ForName(sTemp, 0);
 			}
 		}
 		return false;
@@ -2148,13 +2147,12 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	//****************************** SETMODELBODY ************************
 	else if (Cmd.Name() == "setmodelbody")
 	{
-		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 2)
-			if (m_ClEntNormal->model)
+			if (m_ClEntNormal.model)
 			{
 				int iGroup = atoi(Params[0]);
 				int iValue = atoi(Params[1]);
-				m_ClEntNormal->SetBody(iGroup, iValue);
+				m_ClEntNormal.SetBody(iGroup, iValue);
 			}
 		return false;
 	}
@@ -2162,9 +2160,8 @@ bool CGenericItem::Script_ExecuteCmd(CScript* Script, SCRIPT_EVENT& Event, scrip
 	//****************************** SETMODELSKIN ************************
 	else if (Cmd.Name() == "setmodelskin")
 	{
-		cl_entity_t* m_ClEntNormal = &m_ClEntity[ITEMENT_NORMAL];
 		if (Params.size() >= 1)
-			m_ClEntNormal->curstate.skin = atoi(Params[0]);
+			m_ClEntNormal.curstate.skin = atoi(Params[0]);
 		return false;
 	}
 	else if (Cmd.Name() == "setviewmodelskin")
@@ -2192,14 +2189,14 @@ CGenericItem* FindParryWeapon(CMSMonster* pMonster, /*out*/ int& iPlayerHand, /*
 	iHand[0] = pMonster->m_CurrentHand;
 	iHand[1] = !iHand[0];
 
-	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
+	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
 	{
 		int CheckHand = iHand[i];
 		pHandItem = pMonster->Hand(CheckHand);
 		if (!pHandItem)
 			continue;
 
-		for (unsigned int a = 0; a < pHandItem->m_Attacks.size(); a++)
+		for (int a = 0; a < pHandItem->m_Attacks.size(); a++)
 		{
 			attackdata_t& Attack = pHandItem->m_Attacks[a];
 			if (Attack.StatExp == SKILL_PARRY)
@@ -2339,7 +2336,7 @@ CGenericItem* MSUtil_GetItemByID(ulong m_iId, CMSMonster* pOwner)
 #include "../parsemsg.h"
 CGenericItem* MSUtil_GetItemByID(ulong lID)
 {
-	for (unsigned int e = 0; e < MSCLGlobals::m_ClEntites.size(); e++)
+	for (int e = 0; e < MSCLGlobals::m_ClEntites.size(); e++)
 	{
 		CBaseEntity* pEntity = MSCLGlobals::m_ClEntites[e];
 		if (!FBitSet(pEntity->MSProperties(), ITEM_GENERIC))

@@ -97,10 +97,8 @@ extern cvar_t *chase_active;
 extern cvar_t *scr_ofsx, *scr_ofsy, *scr_ofsz;
 extern cvar_t *cl_vsmoothing;
 
-enum {
-	CAM_MODE_RELAX = 1,
-	CAM_MODE_FOCUS = 2
-};
+#define CAM_MODE_RELAX 1
+#define CAM_MODE_FOCUS 2
 
 Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 Vector g_ViewForward, g_ViewRight, g_ViewUp;
@@ -399,7 +397,7 @@ void V_CalcGunAngle(struct ref_params_s *pparams)
 	VectorCopy(viewent->angles, viewent->latched.prevangles);
 
 	//Master Sword - Setup the viewmodel for rendering
-	SetBits(viewent->curstate.oldbuttons, MSRDR_VIEWMODEL | MSRDR_NOREFLECT);
+	SetBits(viewent->curstate.oldbuttons, MSRDR_VIEWMODEL);
 
 	//Flip the view model based on the hand it's in
 	//if( player.ActiveItemHand() == LEFT_HAND ) SetBits( viewent->curstate.oldbuttons, MSRDR_FLIPPED );
@@ -491,8 +489,8 @@ void V_CalcIntermissionRefdef(struct ref_params_s *pparams)
 	v_angles = pparams->viewangles;
 }
 
-constexpr unsigned int ORIGIN_BACKUP = 64;
-constexpr unsigned int ORIGIN_MASK = (ORIGIN_BACKUP - 1);
+#define ORIGIN_BACKUP 64
+#define ORIGIN_MASK (ORIGIN_BACKUP - 1)
 
 typedef struct
 {
@@ -515,7 +513,7 @@ V_CalcRefdef
 void V_CalcNormalRefdef(struct ref_params_s *pparams)
 {
 	cl_entity_t *ent;
-	unsigned int i;
+	int i;
 	Vector angles;
 	float bob, waterOffset;
 	static viewinterp_t ViewInterp;
@@ -574,7 +572,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 		if (pparams->hardware)
 		{
 			waterEntity = gEngfuncs.PM_WaterEntity(pparams->simorg);
-			if (waterEntity >= 0 && (unsigned int)waterEntity < pparams->max_entities)
+			if (waterEntity >= 0 && waterEntity < pparams->max_entities)
 			{
 				pwater = gEngfuncs.GetEntityByIndex(waterEntity);
 				if (pwater && (pwater->model != NULL))
@@ -892,7 +890,7 @@ void V_SmoothInterpolateAngles(float *startAngle, float *endAngle, float *finalA
 	NormalizeAngles(startAngle);
 	NormalizeAngles(endAngle);
 
-	for (unsigned int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		d = endAngle[i] - startAngle[i];
 
@@ -1121,7 +1119,7 @@ float MaxAngleBetweenAngles(float *a1, float *a2)
 	NormalizeAngles(a1);
 	NormalizeAngles(a2);
 
-	for (unsigned int i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		d = a2[i] - a1[i];
 		if (d > 180)
@@ -1500,7 +1498,7 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 	VectorCopy(pparams->viewangles, v_angles);
 	VectorCopy(pparams->vieworg, v_origin);
 
-	if ((g_iUser1 == OBS_IN_EYE || (int)gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
+	if ((g_iUser1 == OBS_IN_EYE || gHUD.m_Spectator.m_pip->value == INSET_IN_EYE) && ent)
 	{
 		// calculate player velocity
 		float timeDiff = ent->curstate.msg_time - ent->prevstate.msg_time;
@@ -1654,48 +1652,21 @@ void V_CalcSpectatorRefdef(struct ref_params_s *pparams)
 	VectorCopy(v_origin, pparams->vieworg);
 }
 extern float newfov;
-void V_CalcMirrorRefdef(struct ref_params_s *pparams)
-{
-	//float		old;
-
-	// ent is the player model ( visible when out of body )
-	//ent = gEngfuncs.GetLocalPlayer();
-
-	//VectorCopy ( pparams->simorg, pparams->vieworg );
-	//VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
-
-	// allways idle in intermission
-	//old = v_idlescale;
-	//v_idlescale = 1;
-
-	//V_AddIdle ( pparams );
-
-	/*if ( gEngfuncs.IsSpectateOnly() )
-	{
-		// in HLTV we must go to 'intermission' position by ourself
-		VectorCopy( gHUD.m_Spectator.m_cameraOrigin, pparams->vieworg );
-		VectorCopy( gHUD.m_Spectator.m_cameraAngles, pparams->viewangles );
-	}*/
-
-	//v_idlescale = old;
-
-	//v_cl_angles = pparams->cl_viewangles;
-	//v_origin = pparams->vieworg;
-	//v_angles = pparams->viewangles;
-}
 
 extern CRenderPlayerInset g_Inset;
-void RenderFog( bool bRender );
-void ModifyLevel(ref_params_s &Params);
 
 void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 {
 	ViewMgr.Origin = pparams->vieworg;
 	ViewMgr.Angles = pparams->viewangles;
 	ViewMgr.Params = pparams;
-	ViewMgr.Passes = pparams->nextView ? ViewMgr.Passes + 1 : 0;
 
-	CMirrorMgr::Render_SetupViewReflection();
+	//Single full-screen view pass
+	pparams->viewport[0] = 0;
+	pparams->viewport[1] = 0;
+	pparams->viewport[2] = ScreenWidth;
+	pparams->viewport[3] = ScreenHeight;
+	pparams->nextView = 0;
 
 	// intermission / finale rendering
 	if (pparams->intermission)
@@ -1706,12 +1677,10 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	{
 		V_CalcSpectatorRefdef(pparams);
 	}
-	else if (!ViewMgr.Passes)
+	else
 	{
 		V_CalcNormalRefdef(pparams);
 	}
-	else
-		V_CalcMirrorRefdef(pparams);
 
 	//Must recalculate this, for the extra stuff that gets rendered later.
 	//This new calculation takes view lowers/view rotations from falling into account
@@ -1747,7 +1716,7 @@ void DLLEXPORT V_CalcRefdef(struct ref_params_s *pparams)
 	pparams->movevars->skyvec_y = 0;
 	pparams->movevars->skyvec_z = -1;*/
 
-	RenderFog( true );
+	CEnvMgr::RenderFog( true );
 
 	v_ViewDist = pparams->movevars->zmax;
 	ViewMgr.LastAngles = ViewMgr.Angles;
@@ -1822,11 +1791,11 @@ float CalcFov(float fov_x, float width, float height)
 	if (fov_x < 1 || fov_x > 179)
 		fov_x = 90; // error, set to 90
 
-	x = width / tan(fov_x / 360 * PI);
+	x = width / tan(fov_x / 360 * M_PI);
 
 	a = atan(height / x);
 
-	a = a * 360 / PI;
+	a = a * 360 / M_PI;
 
 	return a;
 }
@@ -1846,10 +1815,10 @@ void V_Move(int mx, int my)
 	Vector farpoint;
 	pmtrace_t tr;
 
-	fov = CalcFov(in_fov, (float)ScreenWidth(), (float)ScreenHeight());
+	fov = CalcFov(in_fov, (float)ScreenWidth, (float)ScreenHeight);
 
-	c_x = (float)ScreenWidth() / 2.0;
-	c_y = (float)ScreenHeight() / 2.0;
+	c_x = (float)ScreenWidth / 2.0;
+	c_y = (float)ScreenHeight / 2.0;
 
 	dx = (float)mx - c_x;
 	dy = (float)my - c_y;

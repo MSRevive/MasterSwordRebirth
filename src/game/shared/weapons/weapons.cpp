@@ -48,7 +48,7 @@
 extern CGraph WorldGraph;
 extern int gEvilImpulse101;
 
-constexpr unsigned int NOT_USED = 255;
+#define NOT_USED 255
 
 //DLL_GLOBAL	short	g_sModelIndexLaser;// holds the index for the laser beam
 //DLL_GLOBAL  const char *g_pModelNameLaser = "sprites/laserbeam.spr";
@@ -74,7 +74,7 @@ MULTIDAMAGE gMultiDamage;
 //=========================================================
 int MaxAmmoCarry(int iszName)
 {
-	for (unsigned int i = 0; i < MAX_WEAPONS; i++)
+	for (int i = 0; i < MAX_WEAPONS; i++)
 	{
 		if (CBasePlayerItem::ItemInfoArray[i].pszAmmo1 && !strcmp(STRING(iszName), CBasePlayerItem::ItemInfoArray[i].pszAmmo1))
 			return CBasePlayerItem::ItemInfoArray[i].iMaxAmmo1;
@@ -505,7 +505,7 @@ CBaseEntity *CBasePlayerItem::Respawn(void)
 */
 bool CBasePlayerItem::GiveTo(CMSMonster *pReciever, bool fSound)
 {
-	return true;
+	return TRUE;
 }
 bool CBasePlayerItem::Deploy(void)
 {
@@ -522,11 +522,11 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	if ( 1 )
 #endif*/
 	{
-		return (attack_time <= curtime) ? true : false;
+		return (attack_time <= curtime) ? TRUE : FALSE;
 	}
 	else
 	{
-		return (attack_time <= 0.0) ? true : false;
+		return (attack_time <= 0.0) ? TRUE : FALSE;
 	}
 }
 void CBasePlayerItem::ItemPostFrame(void)
@@ -562,7 +562,7 @@ bool CBasePlayerWeapon::ShouldIdle(void)
 		m_flNextPrimaryAttack < gpGlobals->time)
 		return true;
 	else
-		return false;
+		return FALSE;
 }
 
 /*void CBasePlayerItem::DestroyItem( void )
@@ -634,7 +634,7 @@ int CBasePlayerWeapon::AddDuplicate(CBasePlayerItem *pOriginal)
 
 int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 {
-	/*	BOOL bSend = false;
+	/*	BOOL bSend = FALSE;
 	int state = 0;
 	if ( pPlayer->m_pActiveItem == this )
 	{
@@ -647,7 +647,7 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 	// Forcing send of all data!
 	if ( !pPlayer->m_fWeapon )
 	{
-		bSend = true;
+		bSend = TRUE;
 	}
 	
 	// This is the current or last weapon, so the state will need to be updated
@@ -656,7 +656,7 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 	{
 		if ( pPlayer->m_pActiveItem != pPlayer->m_pClientActiveItem )
 		{
-			bSend = true;
+			bSend = TRUE;
 		}
 	}
 
@@ -665,7 +665,7 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 		 state != m_iClientWeaponState || 
 		 pPlayer->m_iFOV != pPlayer->m_iClientFOV )
 	{
-		bSend = true;
+		bSend = TRUE;
 	}
 
 	if ( bSend )
@@ -678,7 +678,7 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer *pPlayer)
 
 		m_iClientClip = m_iClip;
 		m_iClientWeaponState = state;
-		pPlayer->m_fWeapon = true;
+		pPlayer->m_fWeapon = TRUE;
 	}
 
 	if ( m_pNext )
@@ -739,11 +739,11 @@ BOOL CBasePlayerWeapon ::IsUseable(void)
 		if (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] <= 0 && iMaxAmmo1() != -1)
 		{
 			// clip is empty (or nonexistant) and the player has no more ammo of this type.
-			return false;
+			return FALSE;
 		}
 	}
 
-	return true;
+	return TRUE;
 }
 
 bool CBasePlayerWeapon ::CanDeploy(void)
@@ -754,7 +754,7 @@ bool CBasePlayerWeapon ::CanDeploy(void)
 BOOL CBasePlayerWeapon ::DefaultDeploy(char *szViewModel, char *szWeaponModel, int iAnim, char *szAnimExt, int skiplocal /* = 0 */)
 {
 	/*	if (!CanDeploy( ))
-		return false;
+		return FALSE;
 
 	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel); //player's WEAPON view model
 	m_pPlayer->pev->weaponmodel = MAKE_STRING(szWeaponModel);
@@ -764,7 +764,7 @@ BOOL CBasePlayerWeapon ::DefaultDeploy(char *szViewModel, char *szWeaponModel, i
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 	IdleTime = gpGlobals->time + 1.0;
 */
-	return true;
+	return TRUE;
 }
 
 BOOL CBasePlayerWeapon ::PlayEmptySound(void)
@@ -781,7 +781,7 @@ void CBasePlayerWeapon ::ResetEmptySound(void)
 //=========================================================
 void CBasePlayerWeapon::Holster(int skiplocal /* = 0 */)
 {
-	m_fInReload = false; // cancel any reload in progress.
+	m_fInReload = FALSE; // cancel any reload in progress.
 	m_pPlayer->pev->viewmodel = 0;
 	m_pPlayer->pev->weaponmodel = 0;
 }

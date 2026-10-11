@@ -48,15 +48,14 @@
 #include "fmod/soundengine.h"
 #include "mslogger.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
-
-
 //-----------------
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 extern cvar_t *sensitivity;
 cvar_t *cl_lw = NULL;
+
+// FULLBRIGHT START
+extern bool m_bCacheFullbrightModels;
+// FULLBRIGHT END
 
 void ShutdownInput(void);
 
@@ -241,7 +240,10 @@ int __MsgFunc_ViewModel(const char *pszName, int iSize, void *pbuf)
 	return 1;
 }
 
-	
+#define SetMSHUD(ptr, type) \
+	ptr = new (type);       \
+	strncpy(ptr->Name,  #type, 32 )
+	 
 // This is called every time the DLL is loaded
 void CHud::Init(void)
 {
@@ -249,15 +251,15 @@ void CHud::Init(void)
 	//ClientCmd( "r_shadows 1" );
 	ClientCmd("cl_himodels 0");
 
-	m_Menu = new(CHudMenu);
-	m_Fatigue = new(CHudFatigue);
-	m_Magic	= new(CHudMagic);
-	m_Music = new(CHudMusic);
-	m_Action = new(CHudAction);
-	m_Health = new(CHudHealth);
-	m_HUDScript	= new(CHudScript);
-	m_Misc = new(CHudMisc);
-	m_HUDId = new(CHudID);
+	SetMSHUD(m_Menu, CHudMenu);
+	SetMSHUD(m_Fatigue, CHudFatigue);
+	SetMSHUD(m_Magic, CHudMagic);
+	SetMSHUD(m_Music, CHudMusic);
+	SetMSHUD(m_Action, CHudAction);
+	SetMSHUD(m_Health, CHudHealth);
+	SetMSHUD(m_HUDScript, CHudScript);
+	SetMSHUD(m_Misc, CHudMisc);
+	SetMSHUD(m_HUDId, CHudID);
 
 	//MS commands and messages
 	//HOOK_COMMAND( "use", PlayerUseItem );
@@ -365,17 +367,27 @@ void CHud::Init(void)
 
 void CHud::Shutdown()
 {
-	m_Music->Shutdown();
-	
+	if (m_Music)
+		m_Music->Shutdown();
+
 	delete m_Menu;
+	m_Menu = nullptr;
 	delete m_Fatigue;
+	m_Fatigue = nullptr;
 	delete m_Magic;
+	m_Magic = nullptr;
 	delete m_Music;
+	m_Music = nullptr;
 	delete m_Action;
+	m_Action = nullptr;
 	delete m_Health;
+	m_Health = nullptr;
 	delete m_HUDScript;
+	m_HUDScript = nullptr;
 	delete m_Misc;
+	m_Misc = nullptr;
 	delete m_HUDId;
+	m_HUDId = nullptr;
 }
 
 // GetSpriteIndex()
@@ -385,124 +397,13 @@ void CHud::Shutdown()
 int CHud::GetSpriteIndex(const char *SpriteName)
 {
 	// look through the loaded sprite name list for SpriteName
-	for (unsigned int i = 0; i < m_Sprites.size() - 1; ++i)
+	for (int i = 0; i < m_Sprites.size() - 1; ++i)
 	{
 		if (m_Sprites[i].Name == SpriteName)
 			return static_cast<int>(i);
 	}
 
 	return -1; // invalid sprite
-}
-
-// Redraw
-// step through the local data,  placing the appropriate graphics & text as appropriate
-// returns 1 if they've changed, 0 otherwise
-int CHud::Redraw(float flTime, int intermission)
-{
-	//Print( "Time: %f\n", flTime );
-	m_fOldTime = m_flTime; // save time of previous redraw
-	m_flTime = flTime;
-	m_flTimeDelta = (double)m_flTime - m_fOldTime;
-	static float m_flShotTime = 0;
-
-	// Clock was reset, reset delta
-	if (m_flTimeDelta < 0)
-	{
-		m_flTimeDelta = 0;
-	}
-
-	// Bring up the scoreboard during intermission
-	if (gViewPort)
-	{
-		if (m_iIntermission && !intermission)
-		{
-			// Have to do this here so the scoreboard goes away
-			m_iIntermission = intermission;
-			gViewPort->HideCommandMenu();
-			gViewPort->HideScoreBoard();
-		}
-		else if (!m_iIntermission && intermission)
-		{
-			gViewPort->HideCommandMenu();
-			gViewPort->ShowScoreBoard();
-
-			// Take a screenshot if the client's got the cvar set
-			//if ( CVAR_GET_FLOAT( "hud_takesshots" ) != 0 )
-			//	m_flShotTime = flTime + 1.0;	// Take a screenshot in a second
-		}
-	}
-
-	if (m_flShotTime && m_flShotTime < flTime)
-	{
-		gEngfuncs.pfnClientCmd("snapshot\n");
-		m_flShotTime = 0;
-	}
-
-	m_iIntermission = intermission;
-
-	// if no redrawing is necessary
-	// return 0;
-
-	for (auto hudElement : m_HudList)
-	{
-		if (!intermission)
-		{
-			if ((hudElement->m_iFlags & HUD_ACTIVE) != 0 && (m_iHideHUDDisplay & HIDEHUD_ALL) == 0)
-				hudElement->Draw(flTime);
-		}
-		else
-		{ // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-			if ((hudElement->m_iFlags & HUD_INTERMISSION) != 0)
-				hudElement->Draw(flTime);
-		}
-	}
-
-	// are we in demo mode? do we need to draw the logo in the top corner?
-	// if (m_iLogo)
-	// {
-	// 	int x, y, i;
-
-	// 	if (m_hsprLogo == 0)
-	// 		m_hsprLogo = LoadSprite("sprites/%d_logo.spr");
-
-	// 	SPR_Set(m_hsprLogo, 250, 250, 250);
-
-	// 	x = SPR_Width(m_hsprLogo, 0);
-	// 	x = ScreenWidth() - x;
-	// 	y = SPR_Height(m_hsprLogo, 0) / 2;
-
-	// 	// Draw the logo at 20 fps
-	// 	int iFrame = (int)(flTime * 20) % MAX_LOGO_FRAMES;
-	// 	i = grgLogoFrame[iFrame] - 1;
-
-	// 	SPR_DrawAdditive(i, x, y, NULL);
-	// }
-
-	/*
-	if ( g_iVisibleMouse )
-	{
-		void IN_GetMousePos( int *mx, int *my );
-		int mx, my;
-
-		IN_GetMousePos( &mx, &my );
-		
-		if (m_hsprCursor == 0)
-		{
-			char sz[256];
-			 strncpy(sz,  "sprites/cursor.spr", sizeof(sz) );
-			m_hsprCursor = SPR_Load( sz );
-		}
-
-		SPR_Set(m_hsprCursor, 250, 250, 250 );
-		
-		// Draw the logo at 20 fps
-		SPR_DrawAdditive( 0, mx, my, NULL );
-	}
-	*/
-
-	//m_Music->Redraw(flTime, intermission);
-
-	return 1;
 }
 
 extern int g_iVisibleMouse;
@@ -568,7 +469,7 @@ void CHud::VidInit(void)
 	m_hsprLogo = 0;
 	m_hsprCursor = 0;
 
-	if (ScreenWidth() < 640)
+	if (ScreenWidth < 640)
 		m_iRes = 320;
 	else
 		m_iRes = 640;
@@ -637,6 +538,10 @@ void CHud::VidInit(void)
 	//Reload the Master Sword global sprite/TGA list
 	//(only sprites are reloaded, not TGAs)
 	MSBitmap::ReloadSprites();
+
+	// FULLBRIGHT START
+	m_bCacheFullbrightModels = true;
+	// FULLBRIGHT END
 }
 
 //this should get called whenever the client changes levels or servers.

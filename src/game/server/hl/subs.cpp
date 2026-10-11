@@ -71,7 +71,7 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		pev->netname = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CPointEntity::KeyValue(pkvd);
@@ -80,6 +80,7 @@ void CBaseDMStart::KeyValue(KeyValueData *pkvd)
 BOOL CBaseDMStart::IsTriggered(CBaseEntity *pEntity)
 {
 	BOOL master = UTIL_IsMasterTriggered(pev->netname, pEntity);
+
 	return master;
 }
 
@@ -101,7 +102,7 @@ void CBaseEntity::UpdateOnRemove(void)
 		{
 			// this entity was a LinkEnt in the world node graph, so we must remove it from
 			// the graph since we are removing it from the world.
-			for (unsigned int i = 0; i < WorldGraph.m_cLinks; i++)
+			for (int i = 0; i < WorldGraph.m_cLinks; i++)
 			{
 				if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev)
 				{
@@ -160,12 +161,12 @@ void CBaseDelay ::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "delay"))
 	{
 		m_flDelay = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "killtarget"))
 	{
 		m_iszKillTarget = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 	{
@@ -208,20 +209,31 @@ void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* p
 
 	ALERT(at_aiconsole, "Firing: (%s)\n", targetName);
 
-	//NOV2015_05 let GM capture triggers
+	
+#ifndef AS_DISABLED
 	// Updated to use AngelScript instead of MSScript for game triggers
-	#ifdef VALVE_DLL
 	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
 	if (pASManager && pASManager->IsInitialized())
 	{
 		std::vector<std::string> params;
 		params.push_back(targetName);
-		
+
 		// Call AngelScript GameMaster function
 		// This will be handled by MS::GameTriggered in GameMasterMapTransitions.as
 		pASManager->CallGlobalFunctionWithParams("GameTriggered", params);
 	}
-	#endif
+#else
+	//NOV2015_05 let GM capture triggers
+	CBaseEntity* pGameMasterEnt = UTIL_FindEntityByString(NULL, "netname", msstring("-") + "game_master");
+	IScripted* pGMScript = (pGameMasterEnt ? pGameMasterEnt->GetScripted() : NULL);
+	if (pGMScript)
+	{
+		static msstringlist Params;
+		Params.clearitems();
+		Params.add(targetName);
+		pGMScript->CallScriptEvent("game_triggered", &Params);
+	}
+#endif
 
 	edict_t* pentTarget = NULL;
 	for (;;)
@@ -394,22 +406,22 @@ void CBaseToggle::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "lip"))
 	{
 		m_flLip = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "wait"))
 	{
 		m_flWait = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "master"))
 	{
 		m_sMaster = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "distance"))
 	{
 		m_flMoveDistance = atof(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseDelay::KeyValue(pkvd);
@@ -468,9 +480,9 @@ void CBaseToggle ::LinearMoveDone(void)
 BOOL CBaseToggle ::IsLockedByMaster(void)
 {
 	if (m_sMaster && !UTIL_IsMasterTriggered(m_sMaster, m_hActivator))
-		return true;
+		return TRUE;
 	else
-		return false;
+		return FALSE;
 }
 
 /*
@@ -559,7 +571,7 @@ float CBaseToggle ::AxisDelta(int flags, const Vector &angle1, const Vector &ang
 =============
 FEntIsVisible
 
-returns true if the passed entity is visible to caller, even if not infront ()
+returns TRUE if the passed entity is visible to caller, even if not infront ()
 =============
 */
 BOOL FEntIsVisible(
@@ -573,10 +585,10 @@ BOOL FEntIsVisible(
 	UTIL_TraceLine(vecSpot1, vecSpot2, ignore_monsters, ENT(pev), &tr);
 
 	if (tr.fInOpen && tr.fInWater)
-		return false; // sight line crossed contents
+		return FALSE; // sight line crossed contents
 
 	if (tr.flFraction == 1)
-		return true;
+		return TRUE;
 
-	return false;
+	return FALSE;
 }

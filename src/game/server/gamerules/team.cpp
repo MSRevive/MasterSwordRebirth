@@ -7,33 +7,51 @@
 extern int gmsgTeamInfo;
 mslist<CTeam *> CTeam::Teams;
 
+//Never returns 0, so an ID of 0 always means "no party"
+static ulong NewTeamID()
+{
+	ulong ID;
+	do
+		ID = (ulong)RANDOM_LONG(1, LONG_MAX);
+	while (CTeam::GetTeam(ID));
+
+	return ID;
+}
+
+//Pass ID 0 to create a brand new party.  Pass a saved ID to restore a party: all members with
+//that ID end up in the same team, no matter who loads first.
 CTeam *CTeam::CreateTeam(const char *pszName, ulong ID)
 {
 	if (!pszName || !pszName[0])
 		return NULL;
 
-	CTeam *pNewTeam = GetTeam(ID);
+	//Team exists (another member already restored it), use it
+	if (ID)
+	{
+		CTeam *pTeam = GetTeam(ID);
+		if (pTeam)
+			return pTeam;
+	}
 
-	//Team exists, use it
-	if (pNewTeam)
-		return pNewTeam;
+	//A different party already uses this name.  Don't merge into a stranger's party
+	if (GetTeam(pszName))
+		return NULL;
 
 	//Create new team
-	CTeam* NewTeam = msnew CTeam;
+	CTeam *pNewTeam = msnew CTeam;
+	strncpy((char *)pNewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
+	pNewTeam->m_ID = (int)(ID ? ID : NewTeamID());
 
-	strncpy((char*)NewTeam->m_TeamName, pszName, MAX_TEAMNAME_LEN);
-	NewTeam->m_ID = RANDOM_LONG(0, LONG_MAX); //Assign Unique ID
+	Teams.add(pNewTeam);
 
-	Teams.add(NewTeam);
-
-	return NewTeam;
+	return pNewTeam;
 }
 
 CTeam *CTeam::GetTeam(const char *pszName)
 {
 	if (!pszName || !pszName[0])
 		return NULL;
-	for (unsigned int i = 0; i < Teams.size(); i++)
+	for (int i = 0; i < Teams.size(); i++)
 		if (FStrEq(Teams[i]->TeamName(), pszName))
 			return Teams[i];
 
@@ -41,7 +59,7 @@ CTeam *CTeam::GetTeam(const char *pszName)
 }
 CTeam *CTeam::GetTeam(ulong ID)
 {
-	for (unsigned int i = 0; i < Teams.size(); i++)
+	for (int i = 0; i < Teams.size(); i++)
 		if (Teams[i]->m_ID == ID)
 			return Teams[i];
 
@@ -50,7 +68,7 @@ CTeam *CTeam::GetTeam(ulong ID)
 
 void CTeam ::ValidateUnits()
 {
-	for (unsigned int i = 0; i < MemberList.size(); i++)
+	for (int i = 0; i < MemberList.size(); i++)
 	{
 		teamunit_t &Unit = MemberList[i];
 		if ((ulong)UTIL_PlayerByIndex(Unit.idx) != Unit.ID)
@@ -98,7 +116,7 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 	if (!pPlayer || !ExistsInList(pPlayer))
 		return;
 
-	for (unsigned int i = 0; i < MemberList.size(); i++)
+	for (int i = 0; i < MemberList.size(); i++)
 		if (GetPlayer(i) == pPlayer)
 		{
 			MemberList.erase(i);
@@ -121,17 +139,18 @@ void CTeam ::RemoveFromTeam(CBasePlayer *pPlayer)
 BOOL CTeam ::ExistsInList(CBasePlayer *pPlayer)
 {
 	if (!pPlayer)
-		return false;
+		return FALSE;
 	ValidateUnits();
-	for (unsigned int i = 0; i < MemberList.size(); i++)
+	for (int i = 0; i < MemberList.size(); i++)
 		if (MemberList[i].idx == pPlayer->entindex() && MemberList[i].ID == (ulong)pPlayer)
-			return true;
-	return false;
+			return TRUE;
+	return FALSE;
 }
 CTeam::~CTeam()
 {
 	ValidateUnits();
-	for (unsigned int i = 0; i < MemberList.size(); i++)
+	//Backwards, because SetTeam(NULL) erases the member from MemberList
+	for (int i = (int)MemberList.size() - 1; i >= 0; i--)
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex(MemberList[i].idx);
 		if (!pPlayer || (ulong)pPlayer != MemberList[i].ID)
@@ -160,15 +179,15 @@ void CTeam ::SetSolidMembers(BOOL fSolid)
 BOOL SameTeam(CBaseEntity *pObject1, CBaseEntity *pObject2)
 {
 	//Original:
-	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return false;
-	if( pObject1->TeamID() == pObject2->TeamID() ) return true;
-	return false;*/
+	/*if( !pObject1->TeamID()[0] || !pObject2->TeamID()[0] ) return FALSE;
+	if( pObject1->TeamID() == pObject2->TeamID() ) return TRUE;
+	return FALSE;*/
 
 	if (!pObject1->TeamID()[0] || !pObject2->TeamID()[0])
-		return false;
+		return FALSE;
 	if (strcmp(pObject1->TeamID(), pObject2->TeamID()) == 0)
-		return true; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
-	return false;
+		return TRUE; //MiB AUG2007a: Comparing with == is bad. Bad, Dogg. Bad.
+	return FALSE;
 }
 /*int CBaseEntity::TeamID( void ) { return m_pTeam ? m_pTeam->TeamID() : -1; }
 void CBaseEntity::SetTeam( CTeam *pTeam ) {

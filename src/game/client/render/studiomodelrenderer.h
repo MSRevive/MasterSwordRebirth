@@ -110,6 +110,13 @@ public:
 	//Setup the renderer just before rendering the model
 	void StudioSetupRender(bool Setup);
 
+	// FULLBRIGHT START
+	bool StudioGetFullbright(model_s* pmodel);
+
+	void StudioRenderEntity(bool fullbright = false);
+	void StudioCacheFullbrightNames();
+	// FULLBRIGHT END
+
 	enum
 	{
 		DRAW_DEFAULT,
@@ -179,6 +186,12 @@ public:
 	float m_rgCachedBoneTransform[MAXSTUDIOBONES][3][4];
 	float m_rgCachedLightTransform[MAXSTUDIOBONES][3][4];
 
+	// FULLBRIGHT START
+	std::vector<std::string> m_szCheckedModels;
+	std::vector<std::string> m_szFullBrightModels;
+	bool m_bFullbrightPass = false; // StudioRenderModel uses fullbright lighting while set
+	// FULLBRIGHT END
+
 	// Software renderer scale factors
 	float m_fSoftwareXScale, m_fSoftwareYScale;
 
@@ -221,7 +234,6 @@ class CModelMgr
 {
 public:
 	static modelinfo_t m_ModelInfo[4096];
-	static int MSStudioDrawModel(int flags, entity_state_t *pplayer);
 };
 
 #endif // STUDIOMODELRENDERER_H

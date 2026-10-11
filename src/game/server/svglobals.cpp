@@ -77,7 +77,6 @@ cvar_t ms_debug_mem = {"ms_debug_mem", "0", 0};
 //cvar_t ms_crashcfg = {"ms_crashcfg", "crashed", FCVAR_SERVER};
 
 //AngelScript CVARs
-cvar_t as_enabled = {const_cast<char*>("as_enabled"), "0", FCVAR_SERVER};
 cvar_t as_memory_limit = {const_cast<char*>("as_memory_limit"), "1073741824", FCVAR_SERVER}; // 1GB
 cvar_t as_memory_debug = {const_cast<char*>("as_memory_debug"), "0", FCVAR_SERVER};
 cvar_t as_gc_interval = {const_cast<char*>("as_gc_interval"), "60", FCVAR_SERVER};
@@ -132,7 +131,6 @@ bool MSGlobalInit() //Called upon DLL Initialization
 	CVAR_REGISTER(&ms_fake_players); //DEC2013_07 Thothie - fake players cvar
 
 	//AngelScript CVARs
-	CVAR_REGISTER(&as_enabled);
 	CVAR_REGISTER(&as_memory_limit);
 	CVAR_REGISTER(&as_memory_debug);
 	CVAR_REGISTER(&as_gc_interval);
@@ -147,30 +145,27 @@ bool MSGlobalInit() //Called upon DLL Initialization
 #endif
 
 	// Initialize AngelScript if enabled
-	if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+	if (!CAngelScriptManager::Instance()->Initialize())
 	{
-		if (!CAngelScriptManager::Instance()->Initialize())
+		g_engfuncs.pfnServerPrint("\nAngelScript initialization FAILED!");
+	}
+	else
+	{
+		// Configure memory limit
+		CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
+		// AngelScript initialization is now logged through MSLogger
+		
+		// Load AngelScript modules from scripts.pak
+		if (CAngelScriptManager::Instance()->IsInitialized())
 		{
-			g_engfuncs.pfnServerPrint("\nAngelScript initialization FAILED!");
-			// Don't fail the entire initialization, just disable AngelScript
-			CVAR_SET_FLOAT("as_enabled", 0);
-		}
-		else
-		{
-			// Configure memory limit
-			CAngelScriptManager::Instance()->SetMemoryLimit((size_t)as_memory_limit.value);
-			// AngelScript initialization is now logged through MSLogger
+			g_engfuncs.pfnServerPrint("Loading AngelScript modules...\n");
 			
-			// Load AngelScript modules from scripts.pak
-			if (CAngelScriptManager::Instance()->IsInitialized())
-			{
-				g_engfuncs.pfnServerPrint("Loading AngelScript modules...\n");
-				
-				// The module discovery system below will handle loading all modules
-				g_engfuncs.pfnServerPrint("AngelScript core initialized - proceeding to module discovery...\n");
-			}
+			// The module discovery system below will handle loading all modules
+			g_engfuncs.pfnServerPrint("AngelScript core initialized - proceeding to module discovery...\n");
 		}
 	}
+#endif
 
 	SERVER_COMMAND("exec msstartup.cfg\n");
 
@@ -200,62 +195,60 @@ void MSWorldSpawn()
 	// CRITICAL: Reload AngelScript modules after level change
 	// All modules were cleared in ServerDeactivate via PrepareForLevelChange()
 	// We need to reload them now for the new map
-	if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+	CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
+	if (pASManager && pASManager->IsInitialized())
 	{
-		CAngelScriptManager* pASManager = CAngelScriptManager::Instance();
-		if (pASManager && pASManager->IsInitialized())
+		MS_INFO("MSWorldSpawn: Reloading AngelScript modules for new map...");
+		
+		// Open the scripts.pak file for reading AngelScript modules
+		if (!g_ScriptPack.Open("scripts.pak"))
 		{
-			MS_INFO("MSWorldSpawn: Reloading AngelScript modules for new map...");
-			
-			// Open the scripts.pak file for reading AngelScript modules
-			if (!g_ScriptPack.Open("scripts.pak"))
+			MS_ERROR("MSWorldSpawn: Failed to open scripts.pak for module reloading");
+		}
+		else
+		{
+			ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+			if (pModuleSystem)
 			{
-				MS_ERROR("MSWorldSpawn: Failed to open scripts.pak for module reloading");
-			}
-			else
-			{
-				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
-				if (pModuleSystem)
+				// Check if auto-discovery is enabled
+				if (as_auto_discovery.value > 0)
 				{
-					// Check if auto-discovery is enabled
-					if (as_auto_discovery.value > 0)
+					MS_INFO("MSWorldSpawn: Using automatic module discovery...");
+					
+					// Discover modules with 'module ModuleName {' syntax
+					if (pModuleSystem->DiscoverModulesInPak(&g_ScriptPack))
 					{
-						MS_INFO("MSWorldSpawn: Using automatic module discovery...");
-						
-						// Discover modules with 'module ModuleName {' syntax
-						if (pModuleSystem->DiscoverModulesInPak(&g_ScriptPack))
+						// Load all discovered modules
+						if (pModuleSystem->LoadDiscoveredModules(&g_ScriptPack))
 						{
-							// Load all discovered modules
-							if (pModuleSystem->LoadDiscoveredModules(&g_ScriptPack))
-							{
-								MS_INFO("MSWorldSpawn: AngelScript modules reloaded successfully!");
-							}
-							else
-							{
-								MS_ERROR("MSWorldSpawn: Some AngelScript modules failed to reload");
-							}
+							MS_INFO("MSWorldSpawn: AngelScript modules reloaded successfully!");
 						}
 						else
 						{
-							MS_ERROR("MSWorldSpawn: No modules discovered during reload");
+							MS_ERROR("MSWorldSpawn: Some AngelScript modules failed to reload");
 						}
 					}
 					else
 					{
-						MS_INFO("MSWorldSpawn: Module auto-discovery disabled, skipping reload");
+						MS_ERROR("MSWorldSpawn: No modules discovered during reload");
 					}
 				}
 				else
 				{
-					MS_ERROR("MSWorldSpawn: ASModuleSystem not available for reload");
+					MS_INFO("MSWorldSpawn: Module auto-discovery disabled, skipping reload");
 				}
+			}
+			else
+			{
+				MS_ERROR("MSWorldSpawn: ASModuleSystem not available for reload");
 			}
 		}
 	}
+#endif
 	
 	MS_INFO("=== MSWorldSpawn: Map initialization complete ===");
 	MSGlobals::DevModeEnabled = ms_dev_mode.value > 0 && !MSGlobals::CentralEnabled ? true : false;
-	//return MSGlobals::CentralEnabled && !MSGlobals::IsLanGame && MSGlobals::ServerSideChar;
 	//MSGlobals::FXLimit = CVAR_GET_FLOAT("ms_fxlimit");
 	MSGlobals::PKAllowedinTown = ms_pklevel.value > 1 ? true : false;
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") ? true : false;
@@ -266,7 +259,6 @@ void MSWorldSpawn()
 	// engine bug maybe?
 	MSGlobals::IsLanGame = CVAR_GET_FLOAT("sv_lan") > 0.0f ? true : false;
 	MSGlobals::CanCreateCharOnMap = false;
-	MSGlobals::ServerSideChar = ms_serverchar.value > 0.0f ? true : false;
 	MSGlobals::MapName = STRING(gpGlobals->mapname);
 	
 	//Force the client to use the same client lib as the server. - Solokiller
@@ -356,28 +348,28 @@ void MSWorldSpawn()
 	WriteCrashCfg();
 
 	// Re-initialize AngelScript system if it was destroyed by previous map end
-	if (as_enabled.value > 0)
+#ifndef AS_DISABLED
+	if (!CAngelScriptManager::Instance()->IsInitialized())
 	{
-		if (!CAngelScriptManager::Instance()->IsInitialized())
+		g_engfuncs.pfnServerPrint("Re-initializing AngelScript Manager after map change...\n");
+		MS_INFO("Re-initializing AngelScript Manager after map change...");
+		
+		if (!CAngelScriptManager::Instance()->Initialize())
 		{
-			g_engfuncs.pfnServerPrint("Re-initializing AngelScript Manager after map change...\n");
-			MS_INFO("Re-initializing AngelScript Manager after map change...");
-			
-			if (!CAngelScriptManager::Instance()->Initialize())
-			{
-				g_engfuncs.pfnServerPrint("ERROR: Failed to re-initialize AngelScript Manager!\n");
-				MS_ERROR("Failed to re-initialize AngelScript Manager!");
-			}
-			else
-			{
-				g_engfuncs.pfnServerPrint("AngelScript Manager re-initialized successfully\n");
-				MS_INFO("AngelScript Manager re-initialized successfully");
-			}
+			g_engfuncs.pfnServerPrint("ERROR: Failed to re-initialize AngelScript Manager!\n");
+			MS_ERROR("Failed to re-initialize AngelScript Manager!");
+		}
+		else
+		{
+			g_engfuncs.pfnServerPrint("AngelScript Manager re-initialized successfully\n");
+			MS_INFO("AngelScript Manager re-initialized successfully");
 		}
 	}
+#endif
 
 	// Initialize AngelScript Module System
-	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		g_engfuncs.pfnServerPrint("Initializing AngelScript Module System...\n");
 		MS_INFO("Initializing AngelScript Module System...");
@@ -439,7 +431,7 @@ void MSWorldSpawn()
 					};
 					
 					bool bSuccess = true;
-					for (unsigned int i = 0; i < 7; i++)
+					for (int i = 0; i < 7; i++)
 					{
 						unsigned long fileSize;
 						if (!g_ScriptPack.ReadEntry(legacyModules[i], NULL, fileSize))
@@ -499,6 +491,7 @@ void MSWorldSpawn()
 			}
 		}
 	}
+#endif
 }
 
 //Called every frame
@@ -512,10 +505,12 @@ void MSGameThink()
 
 	// AngelScript maintenance - only run when server is fully active
 	// This prevents script execution during level changes when entity references are invalid
-	if (g_serveractive && as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (g_serveractive && CAngelScriptManager::Instance()->IsInitialized())
 	{
 		CAngelScriptManager::Instance()->Think();
 	}
+#endif
 
 	// if(!gFNInitialized && FNShared::IsEnabled())
 	// {
@@ -526,7 +521,7 @@ void MSGameThink()
 
 //Called when the map changes or server is shutdown from ServerDeactivate
 //Note that ClientDisconnect is called after this, and the player is deallocated again!
-constexpr int WORLD_MAX = 6000;
+#define WORLD_MAX 6000
 void MSGameEnd()
 {
 	if(MSGlobals::GameScript)
@@ -541,13 +536,13 @@ void MSGameEnd()
 		CBasePlayer *pPlayer = static_cast<CBasePlayer*>(UTIL_PlayerByIndex(i));
 
 		if((pPlayer) && (pPlayer->m_CharacterState == CHARSTATE_LOADED))
-		{
 			pPlayer->SaveChar();
-			if(!MSGlobals::ServerSideChar) 
-				pPlayer->m_TimeCharLastSent = 0;
-		}
 	}
-	
+
+	//Delete teams only after the save above, since deleting a team removes its members from it
+	if (g_pGameRules)
+		g_pGameRules->EndMultiplayerGame();
+
 	//Thothie MAR2012_27 - clear duplicate precaches for next map
 	gSoundPrecacheList.clearitems();
 	gModelPrecacheList.clearitems();
@@ -609,11 +604,13 @@ void MSGameEnd()
 	gFNInitialized = false;
 
 	// Shutdown AngelScript GameMaster
-	if (as_enabled.value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		// General AngelScript cleanup
 		CAngelScriptManager::Instance()->Destroy();
 	}
+#endif
 	
 	//Clear the string pool now, after any references to its strings have been released.
 	//Note: any attempts to access allocated strings between now and the next map start will fail and probably cause crashes.
@@ -639,7 +636,7 @@ const char *EngineFunc::GetGameDir()
 void WRITE_FLOAT(float Float)
 {
 	byte *pData = (byte *)&Float;
-	for (unsigned int i = 0; i < sizeof(float); i++)
+	for (int i = 0; i < sizeof(float); i++)
 		WRITE_BYTE(pData[i]);
 }
 
@@ -647,7 +644,7 @@ int PRECACHE_SOUND(const char *pszSound)
 {
 	//Thothie tracking model precaches, avoiding duplicates
 	bool bNoLog = false;
-	for (unsigned int i = 0; i < gSoundPrecacheList.size(); i++)
+	for (int i = 0; i < gSoundPrecacheList.size(); i++)
 	{
 		msstring msPrecacheSoundName = pszSound;
 		if (strcmp(msPrecacheSoundName.c_str(), gSoundPrecacheList[i].PrecacheName.c_str()) == 0)
@@ -692,7 +689,7 @@ int PRECACHE_MODEL(const char *pszModelname)
 {
 	//Thothie tracking model precaches, avoiding duplicates
 	bool bNoLog = false;
-	for (unsigned int i = 0; i < gModelPrecacheList.size(); i++)
+	for (int i = 0; i < gModelPrecacheList.size(); i++)
 	{
 		msstring msPrecacheModelName = pszModelname;
 		if (strcmp(msPrecacheModelName.c_str(), gModelPrecacheList[i].PrecacheName.c_str()) == 0)
@@ -790,12 +787,12 @@ void CSVGlobals::WriteScriptLog()
 	scriptout << "Scripts loaded for " << STRING(gpGlobals->mapname) << std::endl;
 
 	int Total = 0;
-	for (unsigned int i = 0; i < SCRIPT_TYPES; i++)
+	for (int i = 0; i < SCRIPT_TYPES; i++)
 		Total += ScriptList[i].size();
 
 	scriptout << "Total: " << Total << std::endl;
 
-	for (unsigned int i = 0; i < SCRIPT_TYPES; i++)
+	for (int i = 0; i < SCRIPT_TYPES; i++)
 	{
 		scriptout << std::endl;
 
@@ -811,7 +808,7 @@ void CSVGlobals::WriteScriptLog()
 		scriptout << "------------" << std::endl;
 		scriptout << "Total: " << ScriptList[i].size() << std::endl;
 
-		for (unsigned int s = 0; s < ScriptList[i].size(); s++)
+		for (int s = 0; s < ScriptList[i].size(); s++)
 		{
 			CSVGlobals::scriptlistitem_t &ScriptListItem = ScriptList[i][s];
 			if (ScriptListItem.Included)

@@ -33,16 +33,16 @@ extern cl_enginefunc_t gEngfuncs;
 
 //-------------------------------------------------- Constants
 
-constexpr float CAM_DIST_DELTA = 1.0;
-constexpr float CAM_ANGLE_DELTA = 2.5;
-constexpr float CAM_ANGLE_SPEED = 2.5;
-constexpr float CAM_MIN_DIST = 30.0;
-constexpr float CAM_ANGLE_MOVE = .5;
-constexpr float MAX_ANGLE_DIFF = 10.0;
-constexpr float PITCH_MAX = 90.0;
-constexpr float PITCH_MIN = 0;
-constexpr float YAW_MAX = 135.0;
-constexpr float YAW_MIN = -135.0;
+#define CAM_DIST_DELTA 1.0
+#define CAM_ANGLE_DELTA 2.5
+#define CAM_ANGLE_SPEED 2.5
+#define CAM_MIN_DIST 30.0
+#define CAM_ANGLE_MOVE .5
+#define MAX_ANGLE_DIFF 10.0
+#define PITCH_MAX 90.0
+#define PITCH_MIN 0
+#define YAW_MAX 135.0
+#define YAW_MIN -135.0
 
 enum ECAM_Command
 {
@@ -148,9 +148,9 @@ float MoveToward(float cur, float goal, float maxspeed)
 
 /*typedef struct
 {
-	Vector 		boxmins, boxmaxs;// enclose the test object along entire move
+	Vector		boxmins, boxmaxs;// enclose the test object along entire move
 	float		*mins, *maxs;	// size of the moving object
-	Vector 		mins2, maxs2;	// size when clipping against mosnters
+	Vector		mins2, maxs2;	// size when clipping against mosnters
 	float		*start, *end;
 	trace_t		trace;
 	int			type;
@@ -667,8 +667,6 @@ int DLLEXPORT CL_IsThirdPerson(void)
 	//			   - Later, in StudioDrawPlayer() I check to make sure the proper thirdperson model is being drawn
 	//			   - Update: The above is UNDONE
 	//return 1;
-	//if( CMirrorMgr::m_CurrentMirror.Enabled )
-	//	return 1;
 	return MSCLGlobals::CamThirdPerson ? 1 : 0;
 }
 

@@ -57,7 +57,7 @@ BOOL WINAPI DllMain(
 	else if (fdwReason == DLL_PROCESS_DETACH)
 		MSGlobals::DLLDetach();
 
-	return true;
+	return TRUE;
 }
 #endif
 

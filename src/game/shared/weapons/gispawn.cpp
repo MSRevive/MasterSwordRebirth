@@ -88,17 +88,17 @@ void CBaseGISpawn::KeyValue(KeyValueData *pkvd)
 	if (FStrEq(pkvd->szKeyName, "scriptfile"))
 	{
 		sScriptFile = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "container"))
 	{
 		 strncpy(cContainer,  pkvd->szValue, sizeof(cContainer) );
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "spawnstart"))
 	{
 		m_fSpawnOnTrigger = (atoi(pkvd->szValue)) ? true : false;
-		pkvd->fHandled = true;
+		pkvd->fHandled = TRUE;
 	}
 	else
 		CBaseEntity::KeyValue(pkvd);

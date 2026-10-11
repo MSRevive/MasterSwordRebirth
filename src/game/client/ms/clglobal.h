@@ -9,23 +9,6 @@ inline CBaseEntity *PrivData(entvars_t *pev) { return (CBaseEntity *)pev->pConta
 //Client-side Globals
 //===================
 
-struct mstexture_t
-{
-	msstring Name;
-	bool IsReflective, //Reflect world
-		IsWater;	   //Do splashes, refractions
-	//Color4F Color;
-	//bool Blending;								//Blend surface texture -- UNDONE - map does this
-	struct mirrorsettings_t
-	{
-		Color4F Color;
-		bool Blending; //Blend reflection with the original surface texture
-		float Range;   //Only reflects when eye is within this range
-		bool NoWorld;  //Don't reflect the world
-		bool NoEnts;   //Don't reflect studio ents
-	} Mirror;
-};
-
 struct hudcharanims_t
 {
 	msstring Idle_NoWeapon,
@@ -57,7 +40,6 @@ public:
 	static bool CreatingCharacter;			   //In the process of creating a character?
 	static bool CamThirdPerson;				   //Camera is in thirdperson?
 	static bool OtherPlayers;				   //Other players who can legally play this map are on the server
-	static mslist<mstexture_t> Textures;	   //Custom textures, to be rendered in a unique way (reflective, blended, etc)
 	static hudcharanims_t DefaultHUDCharAnims; //Anims for the char select VGUI
 	static hudsounds_t DefaultHUDSounds;	   //HUD sounds
 	static hudcoords_t DefaultHUDCoords;	   //HUD placement coordinates

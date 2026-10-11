@@ -1,4 +1,4 @@
-enum vgui_menu_defs_e
+enum
 { // VGUI Menu definitions
 	MENU_DEFAULT = 1,
 	MENU_INTRO,

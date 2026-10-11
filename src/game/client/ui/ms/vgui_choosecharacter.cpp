@@ -73,7 +73,7 @@
 #include "mslogger.h"
 
 extern engine_studio_api_t IEngineStudio;
-unsigned int			ChooseChar_Interface::ServerCharNum = 0;
+int			ChooseChar_Interface::ServerCharNum = 0;
 bool		ChooseChar_Interface::CentralServer;
 
 const char *GenderPanel_MainBtnText[] =
@@ -96,7 +96,7 @@ class CAction_SelectOption : public ActionSignal
 {
 //protected:
 	CNewCharacterPanel *m_pPanel;
-	unsigned int m_Option, m_Value;
+	int m_Option, m_Value;
 	static createchar_t m_NewChar;
 public:
 	CAction_SelectOption( CNewCharacterPanel *pPanel, int iOption, int iValue )
@@ -116,34 +116,16 @@ public:
 		{
 		case STG_CHOOSECHAR:
 		{
-			//Load and send my save character
+			//Load my save character
 
-			if( MSGlobals::ServerSideChar
-				&& m_Option >= ChooseChar_Interface::ServerCharNum )
-					return;
+			if( m_Option >= ChooseChar_Interface::ServerCharNum )
+				return;
 
 			charinfo_t &Char = player.m_CharInfo[m_Value];
-			if( Char.Status != CDS_NOTFOUND )				
+			if( Char.Status != CDS_NOTFOUND )
 			{
-				if( Char.Location == LOC_CLIENT &&
-					Char.m_SendStatus != CSS_SENT )
-				{
-					//Local file
-
-					if( Char.m_SendStatus == CSS_DORMANT )
-					{
-						Char.m_SendStatus = CSS_SENDING;
-
-						player.SendChar( Char );
-					}
-
-					//RestoreAll( m_Value );
-				}
-				else
-				{
-					msstring CharCmd = msstring("char ") + (int)m_Value + "\n";
-					ServerCmd( CharCmd );
-				}
+				msstring CharCmd = msstring("char ") + m_Value + "\n";
+				ServerCmd( CharCmd );
 				return;
 			}
 			else 
@@ -165,7 +147,6 @@ public:
 			m_NewChar.Name = m_pPanel->Gender_Name;
 			break;
 		case STG_CHOOSEWEAPON:
-			//if( MSGlobals::ServerSideChar )
 			{
 				//Create a new character, using the options the user specified.
 				msstring NewCharCmd = "char ";											//Command "char"
@@ -218,16 +199,7 @@ public:
 	virtual void actionPerformed( Panel* panel )
 	{
 		if( m_ConfirmState )
-		{
-			if( MSGlobals::ServerSideChar )
-				ServerCmd( msstring("char -1 ") + m_pPanel->m_DeleteChar );
-			else
-			{
-				DeleteChar( m_pPanel->m_DeleteChar );
-				player.m_CharInfo[m_pPanel->m_DeleteChar].Status = CDS_NOTFOUND;
-				m_pPanel->Update( );
-			}
-		}
+			ServerCmd( msstring("char -1 ") + m_pPanel->m_DeleteChar );
 		m_pPanel->m_ConfirmPanel->setVisible( false );
 	}
 };
@@ -400,9 +372,9 @@ int GetCenteredItemX( int WorkSpaceSizeX, int ItemSizeX, int Items, int SpaceBew
 // Creation
 CMenuPanel *CreateNewCharacterPanel( )
 {
-	return new CNewCharacterPanel( 1, true, 0, 0, ScreenWidth(), ScreenHeight());
+	return new CNewCharacterPanel( 1, true, 0, 0, ScreenWidth, ScreenHeight);
 }
-CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, true, x, y, wide, tall )
+CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y, int wide,int tall ) : CMenuPanel( 0, TRUE, x, y, wide, tall )
 {
 	SetBits( m_Flags, MENUFLAG_TRAPNUMINPUT );
 
@@ -480,8 +452,6 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 		Choose_DeleteChar[i]->setText( Localized("#CHOOSECHAR_DELETE") );	//For Font
 	}
 
-	Choose_UploadStatus = new MSLabel( m_ChoosePanel, "", XRES(0), m_ChoosePanel->getTall() - CHOOSE_MAINLBLSIZEY, CHOOSE_SIZEX, CHOOSE_MAINLBLSIZEY, MSLabel::a_center );
-	Choose_UploadStatus->SetFGColorRGB( Color_Text_White );
 
 	//Confirm character deletion Panel
 	#define CONFIRM_SIZEX XRES(120)
@@ -558,7 +528,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 	Gender_GenderLabel->addInputSignal( new GenderInput_ChangeName( this, 1 ) );
 
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), CHOOSE_BTNWIDTH, 2, XRES(32) );
-	for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = CHOOSE_BTNY + CHOOSE_CHARHANDLING_H;
 		//int ix = StartX + i * CHOOSE_BTNWIDTH + i * CHOOSE_BTNSPACERX, iy = GENDER_BTNY;
@@ -585,7 +555,7 @@ CNewCharacterPanel::CNewCharacterPanel( int iTrans, int iRemoveMe, int x, int y,
 
 	StartX = GetCenteredItemX( m_ChoosePanel->getWide(), WEAPON_BTN_SIZEX, 3, CHOOSE_BTNSPACERX );
 	int WeaponPanelSizeY = m_WeaponPanel->getTall( );
-	for (unsigned int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
+	for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
 	{
 		if( i >= WEAPONPANEL_MAINBTNMAX )
 			break;							//Max of 9 starting weapon choices
@@ -672,20 +642,12 @@ void CNewCharacterPanel::Update()
 	_snprintf(cTemp, sizeof(cTemp), Localized("#CHOOSECHAR_ENTERING"), cTemp2);		//Entering: <mapname>
 	Choose_MainLabel->setText( cTemp );
 
-	if( MSGlobals::ServerSideChar )
-	{
-		cTemp2[0] = 0;
-		if ((MSGlobals::IsLanGame) && (MSGlobals::ServerSideChar == false)) 
-			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_LAN"));
+	cTemp2[0] = 0;
+	if(ChooseChar_Interface::CentralServer)
+		_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
 
-		if(ChooseChar_Interface::CentralServer)
-			_snprintf(cTemp2, sizeof(cTemp2), "\n%s", Localized("#CHOOSECHAR_CENTRALNETWORK"));
-
-		_snprintf(cTemp, sizeof(cTemp), "%s%s", Localized("#CHOOSECHAR_SERVER"), cTemp2);
-		Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
-	}
-	else
-		Choose_CharHandlingLabel->setText(Localized("#CHOOSECHAR_LOCAL"));		//Character are stored on the client
+	_snprintf(cTemp, sizeof(cTemp), "%s%s", Localized("#CHOOSECHAR_SERVER"), cTemp2);
+	Choose_CharHandlingLabel->setText( cTemp );								//Character are stored on the server
 
 	switch( m_Stage )
 	{
@@ -693,7 +655,7 @@ void CNewCharacterPanel::Update()
 		m_ChoosePanel->setVisible( true );
 		iButtons = CHOOSEPANEL_MAINBTNS;
 
-		for (unsigned int i = 0; i < iButtons; i++) 
+		for (int i = 0; i < iButtons; i++) 
 		{
 			//Only certain fields can be assumed valid in this savedata
 			//If client-side characters - all savedata_t info is valid;
@@ -705,9 +667,7 @@ void CNewCharacterPanel::Update()
 
 				if( CharSlot.Status == CDS_NOTFOUND &&				//No char at this slot and
 					MSGlobals::CanCreateCharOnMap &&				//Map allows creating characters and
-					player.m_CharSend.Status == CSS_DORMANT &&		//Not currently uploading a character and
-					(!MSGlobals::ServerSideChar ||					//Characters are client side or
-					i < ChooseChar_Interface::ServerCharNum) )		//Server allows clients to create at least this many characters
+					i < ChooseChar_Interface::ServerCharNum )		//Server allows clients to create at least this many characters
 				{		
 					//Choose_MainBtn[i]->SetBGColorRGB( NewCharColor );
 					//Choose_MainBtn[i]->SetFGColorRGB( NewCharColor );
@@ -759,9 +719,6 @@ void CNewCharacterPanel::Update()
 
 				//Grey out the char if it can't join the map
 				bool GreyedOut = CharSlot.JoinType == JN_NOTALLOWED;
-				
-				//Grey out all chars while uploading a char
-				if( player.m_CharSend.Status != CSS_DORMANT ) GreyedOut = true;
 
 				msstring model = MODEL_HUMAN_REF;
 
@@ -812,7 +769,7 @@ void CNewCharacterPanel::Update()
 		iButtons = GENDERPANEL_MAINBTNS;
 		break;
 	case STG_CHOOSEWEAPON:
-		 for (unsigned int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
+		 for (int i = 0; i < WEAPONPANEL_MAINBTNS; i++) 
 			Weapon_MainBtnImg[i]->LoadImg( );
 		m_WeaponPanel->setVisible( true );
 		m_BackBtn->setVisible( true );
@@ -849,7 +806,7 @@ void CNewCharacterPanel::Gender_SelectItem( int Btn )
 	Gender_CharEnts[0].m_Gender = GENDER_MALE; //Thothie FEB2011_02 gender bender fixes
 	Gender_CharEnts[1].m_Gender = GENDER_FEMALE; //Thothie FEB2011_02 gender bender fixes
 
-	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		Gender_CharEnts[i].SetActive( Btn == 1 ? true : false );
 		Gender_MainBtn[i]->setEnabled( Btn == 1 ? true : false );
@@ -905,13 +862,13 @@ void CNewCharacterPanel::Close( void )
 		return;
 	}*/
 
-	 for (unsigned int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
+	 for (int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = m_CharEnts[i];
 		CharEnt.UnRegister( );
 	}
 
-	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = Gender_CharEnts[i];
 		CharEnt.UnRegister( );
@@ -958,7 +915,7 @@ void CNewCharacterPanel::Close( void )
 	//gViewPort->HideTopMenu( );
 
 	//Remove from menu list
-	 for (unsigned int i = 0; i < gViewPort->m_Menus.size(); i++) 
+	 for (int i = 0; i < gViewPort->m_Menus.size(); i++) 
 		if( gViewPort->m_Menus[i] == this ) 
 			{ gViewPort->m_Menus.erase( i ); break; }
 
@@ -966,7 +923,7 @@ void CNewCharacterPanel::Close( void )
 }
 //======================================
 // Key inputs for the Class Menu
-bool CNewCharacterPanel::SlotInput( unsigned int iSlot )
+bool CNewCharacterPanel::SlotInput( int iSlot )
 {
 	//Convert iSlot to be zero-based
 	iSlot--;
@@ -1013,7 +970,7 @@ void CNewCharacterPanel::Open( void )
 
 	CMenuPanel::Open();
 
-	 for (unsigned int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
+	 for (int i = 0; i < CHOOSEPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = m_CharEnts[i];
 		CharEnt.m_Stage = STG_CHOOSECHAR;
@@ -1021,7 +978,7 @@ void CNewCharacterPanel::Open( void )
 		CharEnt.Init( i );
 	}
 
-	 for (unsigned int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
+	 for (int i = 0; i < GENDERPANEL_MAINBTNS; i++) 
 	{
 		CRenderChar &CharEnt = Gender_CharEnts[i];
 		CharEnt.m_Stage = STG_CHOOSEGENDER;
@@ -1044,22 +1001,6 @@ void CNewCharacterPanel::Initialize( void )
 	m_pScrollPanel->setScrollValue( 0, 0 );
 }
 
-void CNewCharacterPanel::UpdateUpload( )
-{
-	if( player.m_CharSend.Status == CSS_SENDING )
-	{
-		Choose_UploadStatus->setVisible( true );
-		int Percent = ((float)player.m_CharSend.DataSent / player.m_CharSend.DataLen) * 100;
-		msstring Text = msstring("Uploading (") + Percent + "%)";
-		Choose_UploadStatus->setText( Text.c_str() );
-	}
-	else
-	{
-		Choose_UploadStatus->setVisible( false );
-	}
-
-}
-
 void ShowVGUIMenu( int iMenu );
 void __CmdFunc_PlayerChooseChar( )
 {
@@ -1074,9 +1015,7 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 	BEGIN_READ(pbuf, iSize);
 
 	//Put my character header info into a global structure, so the choose character panel knows what's what.
-	//This info comes from the server, if characters are server-side
-	//If chars are client-side, then this message only comes with Status == CDS_LOADED after I've uploaded a char
-	//Read data for one character at a time
+	//This info comes from the server.  Read data for one character at a time
 
 	byte CharMsgType = READ_BYTE();
 	byte CharIndex = READ_BYTE();						//Which char the info describes
@@ -1088,8 +1027,8 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 
 	if (CharMsgType == CHAR_TYPE_ITEMS)
 	{
-		unsigned int GearItems = READ_BYTE();
-		for (unsigned int i = 0; i < GearItems; i++)
+		int GearItems = READ_BYTE();
+		for (int i = 0; i < GearItems; i++)
 		{
 			gearinfo_t GearInfo;
 			GearInfo.Flags = READ_BYTE();
@@ -1115,23 +1054,17 @@ int __MsgFunc_CharInfo(const char* pszName, int iSize, void* pbuf)
 			CharSlot.OldTrans = READ_STRING();
 			CharSlot.NextMap = READ_STRING();
 			CharSlot.NewTrans = READ_STRING();
-			CharSlot.body = READ_SHORT(); //MiB JAN2010_27 - Char Selection Fix
+			CharSlot.Body = READ_SHORT(); //MiB JAN2010_27 - Char Selection Fix
 			//CharSlot.Race = READ_STRING( ); // MIB FEB2015_21 [RACE_MENU] - Read the character's race
 			byte CharFlags = READ_BYTE();
 			CharSlot.IsElite = FBitSet(CharFlags, (1 << 0));
 			CharSlot.Gender = FBitSet(CharFlags, (1 << 1)) ? GENDER_FEMALE : GENDER_MALE;
 			CharSlot.JoinType = FBitSet(CharFlags, (1 << 2)) ? JN_TRAVEL : JN_NOTALLOWED;
 			//Thothie FEB2011_02 - invisible new character fix (default based on gender)
-			if (CharSlot.body == 0)
+			if (CharSlot.Body == 0)
 			{
-				CharSlot.body = 40;
-				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.body = 80;
-			}
-
-			if (CharSlot.Location == LOC_CLIENT)
-			{
-				CharSlot.m_SendStatus = CSS_SENT;	//I just finished sending this char to the server
-				player.m_CharSend.Status = CSS_DORMANT;
+				CharSlot.Body = 40;
+				if (CharSlot.Gender == GENDER_FEMALE) CharSlot.Body = 80;
 			}
 		}
 	}
@@ -1148,12 +1081,6 @@ void ChooseChar_Interface::UpdateCharScreen()
 	if (MSCLGlobals::CharPanelActive)
 		if (gViewPort && gViewPort->m_pCurrentMenu)
 			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->Update();
-}
-void ChooseChar_Interface::UpdateCharScreenUpload()
-{
-	if (MSCLGlobals::CharPanelActive)
-		if (gViewPort && gViewPort->m_pCurrentMenu)
-			((CNewCharacterPanel*)gViewPort->m_pCurrentMenu)->UpdateUpload();
 }
 
 //CRenderChar
@@ -1178,12 +1105,11 @@ void CRenderChar::Init( int Idx, msstring model )
 	m_Ent.curstate.scale = CHAR_SCALE;
 	m_Ent.curstate.framerate = 1.0f;
 	SetBits( m_Ent.curstate.effects, EF_NOINTERP );
-	SetBits( m_Ent.curstate.oldbuttons, MSRDR_NOREFLECT );
  	SetBits( m_Ent.curstate.colormap, MSRDR_ASPLAYER );
 	
 	m_Gender = GENDER_MALE;
 
-	for (unsigned int i = 0; i < 4; i++) 
+	for (int i = 0; i < 4; i++) 
 		m_Ent.latched.prevcontroller[i] = m_Ent.curstate.controller[i] = 127;
 		
  	m_Ent.curstate.gaitsequence = 0;
@@ -1225,7 +1151,7 @@ void CRenderChar::Render( )
 		m_Gear.clear();
 		uint BodyParts[HUMAN_BODYPARTS] = { 0 };
 		
-		for (unsigned int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
+		for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 		{
 			gearinfo_t &GearInfo = player.m_CharInfo[m_Idx].GearInfo[i];
 			CGenericItem pItem = CGenericItem();
@@ -1240,8 +1166,13 @@ void CRenderChar::Render( )
 			ItemEnt.curstate.body = GearInfo.Body;
 			ItemEnt.curstate.skin = GearInfo.Skin;
 			ItemEnt.PlayAnim( GearInfo.Anim );
+			
+			// set the body to 0 if it goes into negatives.
+			if (GearInfo.Body < 0) {
+				ItemEnt.curstate.body = 0;
+			}
 
-			for (unsigned int i = 0; i < HUMAN_BODYPARTS; i++)
+			for (int i = 0; i < HUMAN_BODYPARTS; i++)
 			{
 				if( FBitSet( GearInfo.Flags, (1<<i) ) )
 					BodyParts[i] = 1;
@@ -1259,7 +1190,6 @@ void CRenderChar::Render( )
 
 
 			ItemEnt.curstate.colormap = ItemEnt.curstate.oldbuttons = 0;
-			SetBits( ItemEnt.curstate.oldbuttons, MSRDR_NOREFLECT );
 			SetBits( ItemEnt.curstate.colormap, MSRDR_LIGHT_NORMAL );
 
 			m_GearItems.push_back( pItem );
@@ -1269,7 +1199,7 @@ void CRenderChar::Render( )
 			pItem.Deactivate();
 
 		}
-		for (unsigned int i = 0; i < m_GearItems.size(); i++) 
+		for (int i = 0; i < m_GearItems.size(); i++) 
 			m_Gear.push_back( &m_GearItems[i] );
 	}
 
@@ -1302,7 +1232,7 @@ void CRenderChar::Render( )
 	//Thothie FEB2011_02 - fixing gender bender
 	if ( m_Stage != STG_CHOOSEGENDER)
 	{
-		m_Ent.curstate.body = player.m_CharInfo[m_Idx].body;
+		m_Ent.curstate.body = player.m_CharInfo[m_Idx].Body;
 	}
 	else
 	{
@@ -1333,7 +1263,7 @@ void CRenderChar::PlayAttnAnim( )
 	m_ItemInHand = false;
 
 	if( m_Stage == STG_CHOOSECHAR )
-		 for (unsigned int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
+		 for (int i = 0; i < player.m_CharInfo[m_Idx].GearInfo.size(); i++) 
 			if( !FBitSet( player.m_CharInfo[m_Idx].GearInfo[i].Flags,GEARFL_WEARING ) ) { m_ItemInHand = true; break; }
 
 
@@ -1356,10 +1286,7 @@ void CRenderChar::SetActive( bool Active )
 	}
 	else
 	{
-		if( player.m_CharSend.Index == m_Idx && player.m_CharSend.Status == CSS_SENDING )
-			m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Uploading.c_str() );
-		else
-			m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Inactive.c_str() );
+		m_Ent.PlayAnim( MSCLGlobals::DefaultHUDCharAnims.Inactive.c_str() );
 		m_AnimState = RCS_INACTIVE;
 		SetBits( m_Ent.curstate.colormap, MSRDR_LIGHT_DIM );
 	}

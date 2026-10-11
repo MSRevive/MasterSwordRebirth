@@ -24,13 +24,13 @@
 
 #include <string.h>
 
-//#pragma warning(disable : 4244)
-//#pragma warning(disable : 4305)
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4305)
 
 extern playermove_t* pmove;
 
 // Expand debugging BBOX particle hulls by this many units.
-
+#define BOX_GAP 0.0f
 
 static int PM_boxpnt[6][4] =
 	{
@@ -45,8 +45,8 @@ static int PM_boxpnt[6][4] =
 void PM_ShowClipBox()
 {
 #if defined(_DEBUG)
-	Vector  org;
-	Vector  offset = {0, 0, 0};
+	Vector org;
+	Vector offset = {0, 0, 0};
 
 	if (0 == pmove->runfuncs)
 		return;
@@ -97,13 +97,13 @@ PM_ParticleLine(Vector start, Vector end, int color, float life)
 
 ================
 */
-void PM_ParticleLine(Vector  start, Vector  end, int pcolor, float life, float vert)
+void PM_ParticleLine(Vector start, Vector end, int pcolor, float life, float vert)
 {
 	float linestep = 2.0f;
 	float curdist;
 	float len;
-	Vector  curpos;
-	Vector  diff;
+	Vector curpos;
+	Vector diff;
 	int i;
 	// Determine distance;
 
@@ -128,7 +128,7 @@ PM_DrawRectangle(Vector tl, Vector br)
 
 ================
 */
-void PM_DrawRectangle(Vector  tl, Vector  bl, Vector  tr, Vector  br, int pcolor, float life)
+void PM_DrawRectangle(Vector tl, Vector bl, Vector tr, Vector br, int pcolor, float life)
 {
 	PM_ParticleLine(tl, bl, pcolor, life, 0);
 	PM_ParticleLine(bl, br, pcolor, life, 0);
@@ -145,12 +145,12 @@ PM_DrawPhysEntBBox(int num)
 void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 {
 	physent_t* pe;
-	Vector  org;
+	Vector org;
 	int j;
-	Vector  tmp;
-	Vector  p[8];
+	Vector tmp;
+	Vector p[8];
 	float gap = BOX_GAP;
-	Vector  modelmins, modelmaxs;
+	Vector modelmins, modelmaxs;
 
 	if (num >= pmove->numphysent ||
 		num <= 0)
@@ -175,7 +175,7 @@ void PM_DrawPhysEntBBox(int num, int pcolor, float life)
 		// If the bbox should be rotated, do that
 		if (pe->angles != g_vecZero)
 		{
-			Vector  forward, right, up;
+			Vector forward, right, up;
 
 			AngleVectorsTranspose(pe->angles, &forward, &right, &up);
 			for (j = 0; j < 8; j++)
@@ -231,12 +231,12 @@ PM_DrawBBox(Vector mins, Vector maxs, Vector origin, int pcolor, float life)
 
 ================
 */
-void PM_DrawBBox(Vector  mins, Vector  maxs, Vector  origin, int pcolor, float life)
+void PM_DrawBBox(Vector mins, Vector maxs, Vector origin, int pcolor, float life)
 {
 	int j;
 
-	Vector  tmp;
-	Vector  p[8];
+	Vector tmp;
+	Vector p[8];
 	float gap = BOX_GAP;
 
 	for (j = 0; j < 8; j++)
@@ -272,10 +272,10 @@ Tries to shoot a ray out by about 128 units.
 */
 void PM_ViewEntity()
 {
-	Vector  forward, right, up;
+	Vector forward, right, up;
 	float raydist = 256.0f;
-	Vector  origin;
-	Vector  end;
+	Vector origin;
+	Vector end;
 	int i;
 	pmtrace_t trace;
 	int pcolor = 77;

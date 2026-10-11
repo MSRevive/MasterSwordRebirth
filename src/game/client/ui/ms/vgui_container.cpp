@@ -60,7 +60,7 @@ public:
 		{
 			if ( mpDoubleClickDetector->Click( this, code ) )
 			{
-				mouseDoublePressed( code, panel );
+				m_Callback->GearItemDoubleClicked( m_Idx );
 			}
 			else
 			{
@@ -74,7 +74,7 @@ public:
 	void mouseReleased(MouseCode code, Panel *panel) {};
 	void mouseDoublePressed(MouseCode code, Panel *panel)
 	{
-		m_Callback->GearItemDoubleClicked(m_Idx);
+		mousePressed(code, panel);
 	};
 	void cursorExited(Panel *panel) { mpHighlightCallback->mbMouseOver = false; };
 	void mouseWheeled(int delta, Panel *panel) {};
@@ -91,7 +91,7 @@ VGUI_Inv_GearItem::VGUI_Inv_GearItem(Panel *pContainerParent, VGUI_ItemCallbackP
 	m_ContainerParent = pContainerParent;
 
 	m_Name = new MSLabel(this, "", 0, 0, getWide(), getTall(), MSLabel::a_center);
-	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, m_Idx));
+	m_Name->addInputSignal(m_pSignal = new CHandler_GearButton(pGearCallback, pGearCallback, this, 0)); // Index is set in Update()
 	m_ItemContainer = new VGUI_Container(ITEM_CONTAINER_X, ITEM_CONTAINER_Y, ITEM_CONTAINER_SIZE_X, ITEM_CONTAINER_SIZE_Y, pItemCallbackPanel, pContainerParent);
 	mbMouseOver = false;
 }
@@ -207,17 +207,20 @@ VGUI_Inv_GearItem *VGUI_InventoryPanel::AddGearItem(gearitem_t &GearItem)
 void VGUI_InventoryPanel::Reset()
 {
 	//Delete the old
-	for (unsigned int i = 0; i < GearItemButtonTotal; i++)
+	for (int i = 0; i < GearItemButtonTotal; i++)
 		GearItemButtons[i]->Reset();
 	GearItemButtonTotal = 0;
+
+	// Rows are about to be repopulated, possibly with different items
+	ResetDoubleClick();
 }
 
-void VGUI_InventoryPanel::Select(unsigned int Idx)
+void VGUI_InventoryPanel::Select(int Idx)
 {
 	if (Idx < 0 || Idx >= GearItemButtonTotal)
 		return;
 
-	for (unsigned int i = 0; i < GearItemButtonTotal; i++)
+	for (int i = 0; i < GearItemButtonTotal; i++)
 		GearItemButtons[i]->DeSelect();
 
 	m_Selected = Idx;
@@ -246,7 +249,7 @@ CTFScrollPanel* VGUI_InventoryPanel::GetScrollForStepInput()
 {
 	if ( mbScrollHighlighted ) return m_Scroll;
 
-	for (unsigned int i = 0; i < GearItemButtons.size(); i++)
+	for (int i = 0; i < GearItemButtons.size(); i++)
 	{
 		if (GearItemButtons[i]->IsMouseOver())
 		{
@@ -343,7 +346,7 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 }
 
 // Creation
-VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, false, 0, 0, ScreenWidth(), ScreenHeight()), VGUI_ItemCallbackPanel()
+VGUI_ContainerPanel::VGUI_ContainerPanel() : CMenuPanel(100, FALSE, 0, 0, ScreenWidth, ScreenHeight), VGUI_ItemCallbackPanel()
 {
 	COLOR Color_TitleText = COLOR(255, 100, 100, 0),
 		  Color_SubtitleText = COLOR(160, 160, 160, 0),
@@ -412,7 +415,7 @@ void VGUI_ContainerPanel::Update()
 void VGUI_ContainerPanel::AddInventoryItems()
 {
 	gearitem_t GearItem;
-	const unsigned int gearSize = player.Gear.size();
+	const int gearSize = player.Gear.size();
 	std::vector<CGenericItem*> sortedItems;
 	std::vector<CGenericItem*> sortedOther;
 	sortedItems.reserve(gearSize);
@@ -422,7 +425,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 	GearItem.ID = 0;
 	GearItem.IsContainer = true;
 	VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
-	for (unsigned int i = 0; i < MAX_PLAYER_HANDS; i++)
+	for (int i = 0; i < MAX_PLAYER_HANDS; i++)
 	{
 		if (player.Hand(i))
 		{
@@ -431,7 +434,7 @@ void VGUI_ContainerPanel::AddInventoryItems()
 		}
 	}
 
-	for (unsigned int i = 0; i < gearSize; i++)
+	for (int i = 0; i < gearSize; i++)
 	{
 		CGenericItem *pGearItem = player.Gear[i];
 		const auto props = pGearItem->MSProperties(); // cache property lookup
@@ -530,7 +533,7 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 	pAlphaCheckBox->SetHandler(new AlphabetizeCheckBoxHandler(pCallback));
 	addChild(pAlphaCheckBox);
 
-	for (unsigned int i = 0; i < INVTYPE_BUTTONS_TOTAL; i++)
+	for (int i = 0; i < INVTYPE_BUTTONS_TOTAL; i++)
 	{
 		int x = 0, y;
 
@@ -554,6 +557,10 @@ VGUI_InvTypePanel::VGUI_InvTypePanel(Panel *pParent, VGUI_Container *pCallback) 
 
 void VGUI_ContainerPanel::Open(void)
 {
+	// Don't let a click from before the menu was opened count towards a double-click
+	ResetDoubleClick();
+	m_GearPanel->ResetDoubleClick();
+
 	// Update before opening
 	m_AllowUpdate = true;
 	Update();
@@ -565,11 +572,13 @@ void VGUI_ContainerPanel::Close(void)
 	player.BlockButton(IN_ATTACK);
 	m_pCancelButton->setArmed(false); //If the user presses cancel, the cancel button doesn't automaticaly get unarmed... so manually do it
 	m_ActButton->setArmed(false);
+	ResetDoubleClick();
+	m_GearPanel->ResetDoubleClick();
 	CMenuPanel::Close();
 	m_AllowUpdate = false;
 }
 
-bool VGUI_ContainerPanel::SlotInput(unsigned int iSlot)
+bool VGUI_ContainerPanel::SlotInput(int iSlot)
 {
 	iSlot--;
 
@@ -601,10 +610,10 @@ void VGUI_ContainerPanel::ItemHighlighted(void *pData)
 
 bool VGUI_ContainerPanel::HasSelectedItems()
 {
-	for(unsigned int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
+	for(int i = 0; i < m_GearPanel->GearItemButtonTotal; i++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[i];
-		for(unsigned int g = 0; g < GearItem.m_ItemContainer->m_ItemButtonTotal; g++)
+		for(int g = 0; g < GearItem.m_ItemContainer->m_ItemButtonTotal; g++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[g];
 			if(ItemButton.m_Selected) 
@@ -619,10 +628,10 @@ void VGUI_ContainerPanel::GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedIt
 {
 	SelectedItems.clear();
 
-	for (unsigned int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
+	for (int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
 	{
 		VGUI_Inv_GearItem &GearItem = *m_GearPanel->GearItemButtons[g];
-		for (unsigned int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
+		for (int i = 0; i < GearItem.m_ItemContainer->m_ItemButtonTotal; i++)
 		{
 			VGUI_ItemButton &ItemButton = *GearItem.m_ItemContainer->m_ItemButtons[i];
 			if (!ItemButton.m_Selected)
@@ -636,6 +645,6 @@ void VGUI_ContainerPanel::UnSelectAllItems()
 {
 	mslist<VGUI_ItemButton *> SelectedItems;
 	GetSelectedItems(SelectedItems);
-	for (unsigned int i = 0; i < SelectedItems.size(); i++)
+	for (int i = 0; i < SelectedItems.size(); i++)
 		SelectedItems[i]->Select(false);
 }

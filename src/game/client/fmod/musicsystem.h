@@ -40,8 +40,8 @@ private:
 	float m_fFadeDelay = 0.0;
 	float m_fVolume = 0.0;
 
-	FMOD::System* m_pSystem;
-	FMOD::Sound* m_pSound;
-	FMOD::Channel* m_pChannel = 0;
-	FMOD::ChannelGroup* m_pChannelGroup;
+	FMOD::System* m_pSystem = nullptr;
+	FMOD::Sound* m_pSound = nullptr;
+	FMOD::Channel* m_pChannel = nullptr;
+	FMOD::ChannelGroup* m_pChannelGroup = nullptr;
 };

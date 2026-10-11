@@ -509,7 +509,7 @@ physent_t* MSUTIL_EntityByIndex(int playerindex)
 		}
 	}
 	gEngfuncs.pEventAPI->EV_PopPMStates();
-	return nullptr;
+	return NULL;
 }
 /*
 =====================
@@ -595,8 +595,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	static int PreserveMask = PLAYER_MOVE_RUNNING | PLAYER_MOVE_ATTACKING; //These are client-side bits to be saved
 	int PreserveBits = (player.m_StatusFlags & PreserveMask);			   //Save the client-side bits
 
-	ClearBits(from->client.iuser3, PreserveMask); //clear flags execpt client side ones
-	player.m_StatusFlags = from->client.iuser3;  //Copy all the flags except the client-side ones
+	player.m_StatusFlags = ClearBits(from->client.iuser3, PreserveMask); //Copy all the flags except the client-side ones
 	SetBits(player.m_StatusFlags, PreserveBits);						 //Copy the client-side bits back over
 
 	to->playerstate.iuser3 = from->playerstate.iuser3;
@@ -666,7 +665,7 @@ void HUD_WeaponsPostThink(local_state_s* from, local_state_s* to, usercmd_t* cmd
 	player.m_afButtonLast = KeyHistory[0].Buttons; //player.pev->button;
 
 	// Wipe it so we can't use it after this frame
-	g_finalstate = nullptr;
+	g_finalstate = NULL;
 }
 /*
 =====================
@@ -731,7 +730,7 @@ void ShowWeaponDesc(CGenericItem* pItem)
 	msg.fadein = 2.0;
 	msg.holdtime = 5.0;
 	msg.fadeout = 3.0;
-	msg.pName = nullptr;
+	msg.pName = NULL;
 	msg.pMessage = cDescString;
 	gHUD.m_Message.MessageAdd(msg);
 }
@@ -893,10 +892,14 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		int attackNum = READ_BYTE();
-		attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 
 		msstring PropName = READ_STRING();
 		msstring PropValue = READ_STRING();
+
+		if (!pItem || attackNum >= (int)pItem->m_Attacks.size())
+			break;
+
+		attackdata_t* AttData = &pItem->m_Attacks[attackNum];
 
 		int Int = atoi(PropValue);
 		float Float = atof(PropValue);
@@ -975,7 +978,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		//setviewmodelprop edits APR2008a MIB
 	{
 		msstring Mode = READ_STRING();
-		int iHand = READ_SHORT();
+		ulong lID = READ_LONG();
 		int iParam1;
 		float fParam1;
 		msstring sParam1;
@@ -990,10 +993,10 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 				iParam1 = READ_BYTE();
 		}
 
-		CGenericItem* pItem = player.Hand(iHand);
+		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 		if (pItem)
 		{
-			if (Mode == "submodel")
+			if (Mode == "submodel" || Mode == "submodelbody")
 			{
 				pItem->m_ViewModelPart = iParam1;
 				pItem->m_ViewModelSubmodel = READ_BYTE();
@@ -1029,11 +1032,11 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 		CGenericItem* pItem = MSUtil_GetItemByID(lID);
 
 		msstring Event = READ_STRING();
-		unsigned int numParams = READ_BYTE();
+		int numParams = READ_BYTE();
 
 		msstringlist Params;
 		Params.clear();
-		for (unsigned int i = 0; i < numParams; i++)
+		for (int i = 0; i < numParams; i++)
 			Params.add(READ_STRING());
 
 		if (pItem)
@@ -1094,7 +1097,7 @@ int __MsgFunc_SetProp(const char* pszName, int iSize, void* pbuf)
 			//Memory dellocation errors when using '.erase()', so I'm now using this loop
 			int idx = READ_BYTE();
 			msstringlist newSpells;
-			for (unsigned int i = 0; i < player.m_SpellList.size(); i++)
+			for (int i = 0; i < player.m_SpellList.size(); i++)
 				if (i != idx)
 					newSpells.add(player.m_SpellList[i]); //Add all spells to the new list except the one to erase
 			player.m_SpellList = newSpells;				  //Overwrite the player spells with the new list
@@ -1127,8 +1130,8 @@ void Player_ToggleInventory()
 		return;
 	}
 
-	CGenericItem* pWearable = nullptr; //Fallback, in case a pack isn't found
-	for (unsigned int i = 0; i < player.Gear.size(); i++)
+	CGenericItem* pWearable = NULL; //Fallback, in case a pack isn't found
+	for (int i = 0; i < player.Gear.size(); i++)
 	{
 		CGenericItem* pPack = player.Gear[i];
 		if (FBitSet(pPack->MSProperties(), ITEM_CONTAINER) && pPack->m_Location > ITEMPOS_HANDS)
@@ -1232,7 +1235,7 @@ void __CmdFunc_DynamicNPC(void)
 	}
 
 	int iBitsValid = 0;
-	for (unsigned int i = 0; i < NPCList.size(); i++)
+	for (int i = 0; i < NPCList.size(); i++)
 	{
 		const char* arg = UTIL_VarArgs("%i. %s\n", i + 1, NPCList[i].c_str());
 		strncat(MenuText, arg, strlen(arg));
@@ -1300,7 +1303,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	case 1: //Killed
 		if (player.m_CharacterState == CHARSTATE_UNLOADED)
 			break;
-		player.Killed(nullptr, NULL);
+		player.Killed(NULL, NULL);
 		break;
 
 	case 2: //[OPEN]
@@ -1381,7 +1384,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 			//Set up a variable to switch back
 			if (g_SwitchToHand == -1)
 				g_SwitchToHand = player.m_CurrentHand;
-			if (player.SwitchHands(iHand, false))
+			if (player.SwitchHands(iHand, FALSE))
 				player.BlockButton(IN_ATTACK);
 			else
 				g_SwitchToHand = -1;
@@ -1391,12 +1394,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 		pItem->StartAttack(iAttackNum);
 		if (pItem->CurrentAttack)
 			pItem->CurrentAttack->tProjMinHold = 0.50;
-	}
-	break;
-
-	case 11: //Recieve char data
-	{
-		MSChar_Interface::HL_CLReadCharData();
 	}
 	break;
 
@@ -1444,14 +1441,6 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 	}
 	break;
 
-	case 18: //Start receiving char from server
-	{
-		int CharIdx = READ_BYTE();
-		uint Size = READ_LONG();
-		MSChar_Interface::HL_CLNewIncomingChar(CharIdx, Size);
-	}
-	break;
-
 	case 20: //New quickslot was assigned
 	{
 		int Flags = READ_BYTE();
@@ -1477,7 +1466,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 				msg.fadein = 0.01;
 				msg.holdtime = 3.0;
 				msg.fadeout = 1.0;
-				msg.pName = nullptr;
+				msg.pName = NULL;
 				msg.fxtime = 4.0;
 
 				static char msgtext[256];
@@ -1500,7 +1489,7 @@ int __MsgFunc_CLDllFunc(const char* pszName, int iSize, void* pbuf)
 
 	case 21: //Retrieve all quickslots (Sent at spawn)
 	{
-		for (unsigned int i = 0; i < MAX_QUICKSLOTS; i++)
+		for (int i = 0; i < MAX_QUICKSLOTS; i++)
 		{
 			quickslot_t& QuickSlot = player.m_QuickSlots[i];
 			QuickSlot.Active = READ_BYTE() ? true : false;

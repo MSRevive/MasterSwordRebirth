@@ -80,6 +80,7 @@ target_include_directories(client PRIVATE
 
 target_compile_definitions(client PRIVATE
 	ISCLIENT
+	AS_DISABLED
 	CLIENT_WEAPONS
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
@@ -171,6 +172,8 @@ set(HL1
 	"util.cpp"
 	"view.cpp"
 	"cl_util.h"
+	"tri.cpp"
+	"tri.h"
 	"../shared/movement/pm_math.cpp"
 	"../shared/voice_banmgr.cpp"
 	"../shared/voice_status.cpp"
@@ -207,7 +210,6 @@ source_group("MS" FILES ${MS})
 
 set(MS_Headers
 	"inc_huditem.h"
-	"ms/clenv.h"
 	"ms/clglobal.h"
 	"ms/health.h"
 	"ms/hudid.h"
@@ -246,15 +248,24 @@ set(Render
 	"render/clrender.cpp"
 	"render/clrender.h"
 	"render/clrenderent.cpp"
-	"render/clrendermirror.cpp"
 	"render/gamestudiomodelrenderer.cpp"
 	"render/gamestudiomodelrenderer.h"
-	"render/opengl/clopengl.cpp"
-	"render/opengl/clopengl.h"
 	"render/studio_util.cpp"
 	"render/studio_util.h"
 	"render/studiomodelrenderer.cpp"
 	"render/studiomodelrenderer.h"
+	"render/clenv.cpp"
+	"render/clenv.h"
+	"particleman/CMiniMem.cpp"
+	"particleman/CMiniMem.h"
+	"particleman/CBaseParticle.cpp"
+	"particleman/CBaseParticle.h"
+	"particleman/CFrustum.cpp"
+	"particleman/CFrustum.h"
+	"particleman/IParticleMan_Active.cpp"
+	"particleman/IParticleMan_Active.h"
+	"particleman/particleman_internal.h"
+	"particleman/particleman.h"
 	"../../../thirdparty/tartan/textureloader.cpp"
 	"../../../thirdparty/tartan/tgaloader.cpp"
 	"../../../thirdparty/gl/glext.h"
@@ -275,11 +286,9 @@ set(Shared
 	"../shared/ms/groupfile.cpp"
 	"../shared/ms/mslogger.cpp"
 	"../shared/ms/mslogger.h"
-	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"
 	"../shared/ms/msfileio.cpp"
 	"../shared/ms/msmonstershared.cpp"
-	"../shared/ms/netcodeshared.cpp"
 	"../shared/ms/script.cpp"
 	"../shared/ms/script.h"
 	"../shared/ms/scriptcmds.cpp"
@@ -481,6 +490,7 @@ set(VGUI_MS
 	"ui/ms/vgui_vote.h"
 	"ui/ms/vgui_moveitempanel.cpp"
 	"ui/ms/vgui_moveitempanel.h"
+	"ui/ms/vgui_image3d.cpp"
 )
 source_group("VGUI\\ms" FILES ${VGUI_MS})
 

@@ -15,7 +15,7 @@
 #include "discord/discord_rpc.h"
 #include <time.h>
 
-constexpr float DISCORD_RPC_UPDATE_TIME = 35.0; // sec
+#define DISCORD_RPC_UPDATE_TIME 35.0 // sec
 
 void CRichPresence::Init(void)
 {
@@ -57,7 +57,7 @@ void CRichPresence::Update(void)
 	{
 		for (int i = 1; i < MAX_PLAYERS; i++)
 		{
-			if (g_PlayerInfoList[i].name == nullptr)
+			if (g_PlayerInfoList[i].name == NULL)
 				continue;
 
 			if (g_PlayerInfoList[i].thisplayer)

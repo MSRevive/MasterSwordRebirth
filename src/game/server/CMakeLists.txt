@@ -44,6 +44,7 @@ target_include_directories(server PRIVATE
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
 	${BASEDIR}/thirdparty/spdlog/include
+	${BASEDIR}/thirdparty/msgpack/include
 	${BASEDIR}/lib/include
 	${CMAKE_CURRENT_SOURCE_DIR}
 	effects
@@ -58,11 +59,18 @@ target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	VALVE_DLL
 	CURL_STATICLIB
+	AS_DISABLED
 	HTTP_ONLY)
 
 # Check if spdlog is available
 if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
 	target_compile_definitions(server PRIVATE HAS_SPDLOG)
+endif()
+
+# Check if msgpack is available
+if(EXISTS "${BASEDIR}/thirdparty/msgpack/include/msgpack.hpp")
+	target_compile_definitions(server PRIVATE MSGPACK_DISABLE_BOOST)
+	target_compile_definitions(server PRIVATE MSGPACK_NO_BOOST)
 endif()
 
 if (UNIX)
@@ -181,13 +189,14 @@ set(MS
 	"player/playerstats.cpp"
 	"shield.cpp"
 	"store.cpp"
-	"sv_character.cpp"
 	"svglobals.cpp"
+	"character/mscharacter.cpp"
+	"character/sv_character.cpp"
+	"character/mscharacterheader.h"
 	#"SteamServerHelper.cpp"
 	"../shared/movement/pm_shared.cpp"
 	"../shared/movement/pm_shared.h"
 	"../shared/ms/msmonstershared.cpp"
-	"../shared/ms/netcodeshared.cpp"
 	"../shared/stats/races.cpp"
 	"../shared/syntax/syntax.cpp"
 )
@@ -213,7 +222,6 @@ set(MS_Headers
 	#"SteamServerHelper.h"
 	"../shared/ms/groupfile.h"
 	"../shared/ms/mscharacter.h"
-	"../shared/ms/mscharacterheader.h"
 	"../shared/ms/titles.h"
 	"../shared/ms/votedefs.h"
 	"../shared/stats/races.h"
@@ -261,7 +269,6 @@ set(Shared
 	"../shared/ms/mslogger.cpp"
 	"../shared/ms/mslogger.h"
 	"../shared/ms/magic.h"
-	"../shared/ms/mscharacter.cpp"
 	"../shared/ms/msdebug.h"
 	"../shared/ms/msfileio.cpp"
 	"../shared/ms/msfileio.h"

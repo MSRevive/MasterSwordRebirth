@@ -28,6 +28,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#include <com_model.h>
+#include <mathlib.h>
 
 #include <string.h>
 #include "vgui_int.h"
@@ -49,6 +51,13 @@ TeamFortressViewport *gViewPort = nullptr;
 extern CHud gHUD;
 extern float g_fMenuLastClosed;
 
+#include "particleman/IParticleMan_Active.h"
+#include "particleman/CBaseParticle.h"
+IParticleMan* g_pParticleMan = nullptr;
+extern cvar_t *ms_particle_tempents;
+void CL_LoadParticleMan();
+void CL_UnloadParticleMan();
+
 void InitInput(void);
 void EV_HookEvents(void);
 void IN_Commands(void);
@@ -57,7 +66,6 @@ static cvar_s *g_pVarBorderless = nullptr;
 static int g_iBorderlessMode = 0;
 
 // AngelScript cvars (client-side)
-static cvar_s *cl_as_enabled = nullptr;
 static cvar_s *cl_as_debug_mode = nullptr;
 
 enum BORDERLESS_WINDOW_TYPES
@@ -240,45 +248,41 @@ int DLLEXPORT Initialize(cl_enginefunc_t *pEnginefuncs, int iVersion)
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
 	EV_HookEvents();
+	CL_LoadParticleMan();
 	g_pVarBorderless = CVAR_CREATE("ms_borderless", "0", FCVAR_ARCHIVE);
 	
 	// Register AngelScript cvars for client
-	cl_as_enabled = CVAR_CREATE("cl_as_enabled", "0", FCVAR_ARCHIVE);
 	cl_as_debug_mode = CVAR_CREATE("cl_as_debug_mode", "0", FCVAR_ARCHIVE);
 
 	if(!gClient.Initialize())
 		return 0;
 
 	// Initialize AngelScript on client if enabled
-	if (cl_as_enabled && cl_as_enabled->value > 0)
+#ifndef AS_DISABLED
+	MS_INFO("Initializing client-side AngelScript...");
+	if (!CAngelScriptManager::Instance()->Initialize())
 	{
-		MS_INFO("Initializing client-side AngelScript...");
-		if (!CAngelScriptManager::Instance()->Initialize())
+		MS_ERROR("Client-side AngelScript initialization FAILED!");
+	}
+	else
+	{
+		MS_INFO("Client-side AngelScript initialized successfully");
+		
+		// Load client-side AngelScript modules
+		if (CAngelScriptManager::Instance()->IsInitialized())
 		{
-			MS_ERROR("Client-side AngelScript initialization FAILED!");
-			// Don't fail the entire client initialization, just disable AngelScript
-			if (cl_as_enabled)
-				cl_as_enabled->value = 0;
-		}
-		else
-		{
-			MS_INFO("Client-side AngelScript initialized successfully");
+			MS_INFO("Loading client-side AngelScript modules...");
 			
-			// Load client-side AngelScript modules
-			if (CAngelScriptManager::Instance()->IsInitialized())
+			// Initialize the module system for client
+			ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
+			if (pModuleSystem)
 			{
-				MS_INFO("Loading client-side AngelScript modules...");
-				
-				// Initialize the module system for client
-				ASModuleSystem* pModuleSystem = ASModuleSystem::Instance();
-				if (pModuleSystem)
-				{
-					// Client modules will be loaded from scripts.pak with #pragma context client
-					MS_INFO("Client-side AngelScript module system ready");
-				}
+				// Client modules will be loaded from scripts.pak with #pragma context client
+				MS_INFO("Client-side AngelScript module system ready");
 			}
 		}
 	}
+#endif
 
 	MS_INFO("[DLLEXPORT Initialize: Complete]");
 
@@ -300,6 +304,10 @@ int DLLEXPORT HUD_VidInit(void)
 	gClient.VideoInit();
 
 	VGui_Startup();
+
+	//we place this here because this gets called every map change.
+	if (g_pParticleMan)
+		g_pParticleMan->ResetParticles();
 
 	MS_INFO("[HUD_VidInit: Complete]");
 
@@ -329,7 +337,8 @@ void DLLEXPORT HUD_Init(void)
 	Scheme_Init();
 	
 	// Load client-side AngelScript modules when connecting to server
-	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING ===");
 		MS_INFO("Build Context: CLIENT");
@@ -385,6 +394,7 @@ void DLLEXPORT HUD_Init(void)
 		
 		MS_INFO("=== CLIENT-SIDE ANGELSCRIPT MODULE LOADING COMPLETE ===");
 	}
+#endif
 
 	MS_INFO("[HUD_Init: Complete]");
 }
@@ -403,10 +413,12 @@ int DLLEXPORT HUD_Redraw(float time, int intermission)
 	gHUD.Redraw(time, 0 != intermission);
 	
 	// Update AngelScript on client if enabled
-	if (cl_as_enabled && cl_as_enabled->value > 0 && CAngelScriptManager::Instance()->IsInitialized())
+#ifndef AS_DISABLED
+	if (CAngelScriptManager::Instance()->IsInitialized())
 	{
 		CAngelScriptManager::Instance()->Think();
 	}
+#endif
 
 	return 1;
 }
@@ -499,7 +511,7 @@ void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
 {
 	if (g_iUser1 != 0 || gEngfuncs.IsSpectateOnly())
 	{
-		if ((int)gHUD.m_Spectator.m_pip->value == INSET_OFF)
+		if (gHUD.m_Spectator.m_pip->value == INSET_OFF)
 		{
 			*y = YRES(64);
 		}
@@ -510,20 +522,74 @@ void DLLEXPORT HUD_ChatInputPosition(int* x, int* y)
 	}
 }
 
-// void CL_UnloadParticleMan()
-// {
-// 	g_pParticleMan = nullptr;
-// }
+//Taken from https://github.com/FreeSlave/halflife-featureful 
+//so i can test that the particleman system is working.
+void TestParticlesCmd()
+{
+	static model_t* texture = 0;
 
-// void CL_LoadParticleMan()
-// {
-// 	//Now implemented in the client library.
-// 	auto particleManFactory = Sys_GetFactoryThis();
+	if ( g_pParticleMan )
+	{
+		const float clTime = gEngfuncs.GetClientTime();
 
-// 	g_pParticleMan = (IParticleMan*)particleManFactory(PARTICLEMAN_INTERFACE, nullptr);
+		if (texture == 0)
+		{
+			texture = (model_t*)gEngfuncs.GetSpritePointer(SPR_Load("sprites/steam1.spr"));
+		}
 
-// 	if (g_pParticleMan)
-// 	{
-// 		g_pParticleMan->SetUp(&gEngfuncs);
-// 	}
-// }
+		if (!texture)
+			return;
+
+		cl_entity_t* player = gEngfuncs.GetLocalPlayer();
+		Vector origin = player->origin;
+		Vector forward;
+		AngleVectors(player->angles, &forward, NULL, NULL);
+
+		for (int i = 0; i < 10; ++i)
+		{
+			Vector shift = forward * 64.0f + forward * 8.0f * i + Vector( 0.0f, 0.0f, i * 8.0f );
+
+			CBaseParticle *particle = g_pParticleMan->CreateParticle(origin + shift, Vector(0.0f, 0.0f, 0.0f), texture, 32.0f, 255.0f, "particle");
+
+			particle->SetLightFlag(LIGHT_NONE);
+			particle->SetCullFlag(CULL_PVS);
+			particle->SetRenderFlag(RENDER_FACEPLAYER);
+			particle->SetCollisionFlags(TRI_COLLIDEWORLD);
+			particle->m_iRendermode = kRenderTransAlpha;
+			particle->m_vColor = Vector(255, 255, 255);
+			particle->m_iFramerate = 10;
+			particle->m_iNumFrames = texture->numframes;
+			particle->m_flGravity = 0.01f;
+			particle->m_vVelocity = shift.Normalize() * 2;
+
+			particle->m_flDieTime = clTime + 5 + i;
+		}
+	}
+}
+
+void CL_UnloadParticleMan()
+{
+	if (g_pParticleMan)
+	{
+		delete g_pParticleMan;
+		g_pParticleMan = nullptr;
+	}
+}
+
+void CL_LoadParticleMan()
+{
+	//Now implemented in the client library.
+	g_pParticleMan = new IParticleMan_Active();
+
+	if (g_pParticleMan)
+	{
+		g_pParticleMan->SetUp(&gEngfuncs);
+
+		//1 - Draw tempent sprites with ParticleMan
+		//0 - Draw with engine
+		//only effects the particles created by the scripts.
+		ms_particle_tempents = CVAR_CREATE("ms_particle_tempents", "1", 0);
+
+		//gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
+	}
+}

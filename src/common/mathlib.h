@@ -17,7 +17,7 @@
 #pragma once
 
 #include <cmath>
-#include "hl/vector.h"
+#include "vector.h"
 
 typedef float vec_t;
 typedef vec_t vec4_t[4]; // x,y,z,w

@@ -37,6 +37,7 @@ extern "C"
 #include "clientlibrary.h"
 #include "scriptmgr.h"
 #include "ms/clglobal.h"
+#include "ms/mslogger.h"
 #include <mathlib.h>
 
 extern "C"
@@ -140,7 +141,7 @@ typedef struct kblist_s
 	char name[32];
 } kblist_t;
 
-kblist_t *g_kbkeys = nullptr;
+kblist_t *g_kbkeys = NULL;
 
 /*
 ============
@@ -163,7 +164,7 @@ int KB_ConvertString(char *in, char **ppout)
 	if (!ppout)
 		return 0;
 
-	*ppout = nullptr;
+	*ppout = NULL;
 	p = in;
 	pOut = sz;
 	while (*p)
@@ -178,7 +179,7 @@ int KB_ConvertString(char *in, char **ppout)
 
 			*pEnd = '\0';
 
-			pBinding = nullptr;
+			pBinding = NULL;
 			if (strlen(binding + 1) > 0)
 			{
 				// See if there is a binding for binding?
@@ -240,7 +241,7 @@ struct kbutton_s DLLEXPORT *KB_Find(const char *name)
 		p = p->next;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 /*
@@ -279,7 +280,7 @@ Add kbutton_t definitions that the engine can query if needed
 */
 void KB_Init(void)
 {
-	g_kbkeys = nullptr;
+	g_kbkeys = NULL;
 
 	KB_Add("in_graph", &in_graph);
 	KB_Add("in_mlook", &in_mlook);
@@ -303,7 +304,7 @@ void KB_Shutdown(void)
 		free(p);
 		p = n;
 	}
-	g_kbkeys = nullptr;
+	g_kbkeys = NULL;
 }
 
 /*
@@ -442,11 +443,7 @@ void IN_ForwardUp(void)
 	gHUD.m_Spectator.HandleButtonsUp(IN_FORWARD);
 }
 
-//#define GAME_LEAP(dir) ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, player.Stamina))
-
-inline void GAME_LEAP(const char * dir, float& stamina){
-	ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, stamina));
-}
+#define GAME_LEAP(dir) ServerCmd(UTIL_VarArgs("game_leap %s %f", dir, player.Stamina))
 
 void IN_BackDown(void)
 {
@@ -456,7 +453,7 @@ void IN_BackDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveBackUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("back", player.Stamina);
+		GAME_LEAP("back");
 }
 
 void IN_BackUp(void)
@@ -479,7 +476,7 @@ void IN_MoveleftDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveLeftUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("left", player.Stamina);
+		GAME_LEAP("left");
 }
 
 void IN_MoveleftUp(void)
@@ -497,7 +494,7 @@ void IN_MoverightDown(void)
 	float cvar_flDtapDelay = CVAR_GET_FLOAT("ms_doubletap_delay");
 
 	if ((!strcmp(CVAR_GET_STRING("ms_doubletapdodge"), "1") && lastMoveRightUp + cvar_flDtapDelay > gpGlobals->time))
-		GAME_LEAP("right", player.Stamina);
+		GAME_LEAP("right");
 }
 
 void IN_MoverightUp(void)
@@ -1137,10 +1134,14 @@ void ShutdownInput(void)
 	KB_Shutdown();
 }
 
+void CL_UnloadParticleMan();
+
 void DLLEXPORT HUD_Shutdown(void)
 {
+	MS_INFO("[HUD_Shutdown: Enter]");
 	ScriptMgr::GameShutdown();
 	gClient.Shutdown();
+	CL_UnloadParticleMan();
 	ShutdownInput();
 
 #ifndef _WIN32

@@ -13,7 +13,7 @@
 // Include vector.h directly to avoid mathlib.h macro conflicts
 // We need the vec_t typedef but not the DotProduct macro
 typedef float vec_t;
-#include "hl/vector.h"
+#include "vector.h"
 
 // Static instance
 ASEngineEventManager* ASEngineEventManager::s_pInstance = nullptr;
@@ -530,7 +530,7 @@ void ASEngineEventManager::FirePlayerSayTextEvent(const char* szPlayerName, cons
 //==========================================================================
 bool ASEngineEventManager::IsParameterByReference(asIScriptFunction* pFunction, int paramIndex)
 {
-    if (!pFunction || (unsigned int)paramIndex >= (unsigned int)pFunction->GetParamCount())
+    if (!pFunction || paramIndex >= pFunction->GetParamCount())
         return false;
         
     int typeId;

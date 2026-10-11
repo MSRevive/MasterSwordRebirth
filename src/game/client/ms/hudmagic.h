@@ -18,6 +18,5 @@ public:
 	void InitHUDData(void);
 
 	int SpellMenuIndex[256];
-	char Name[32] = "CHudMagic";
 };
 #endif //HUD_MAGIC_H

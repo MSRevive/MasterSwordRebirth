@@ -1,7 +1,7 @@
 #ifndef TEAM_H
 #define TEAM_H
 
-constexpr int MAX_TEAMNAME_LEN = 12;
+#define MAX_TEAMNAME_LEN 12
 
 #ifdef VALVE_DLL
 #ifdef CBASE_H

@@ -21,9 +21,6 @@
 */
 
 #define VALVE_DLL 1
-#ifndef M_PI
-#define M_PI 3.14159265358979323846 // matches value in gcc v2 math.h
-#endif
 
 #include "msdllheaders.h"
 #include "animation.h"
@@ -67,7 +64,7 @@ float CBaseAnimating ::StudioFrameAdvance(float flInterval)
 			pev->frame -= (int)(pev->frame / 256.0) * 256.0;
 		else
 			pev->frame = (pev->frame < 0.0) ? 0 : 255;
-		m_fSequenceFinished = true; // just in case it wasn't caught in GetEvents
+		m_fSequenceFinished = TRUE; // just in case it wasn't caught in GetEvents
 	}
 
 	return flInterval;
@@ -116,7 +113,7 @@ void CBaseAnimating ::ResetSequenceInfo()
 	m_fSequenceLoops = ((GetSequenceFlags() & STUDIO_LOOPING) != 0);
 	pev->animtime = gpGlobals->time;
 	pev->framerate = 1.0;
-	m_fSequenceFinished = false;
+	m_fSequenceFinished = FALSE;
 	m_flLastEventCheck = gpGlobals->time;
 }
 
@@ -157,9 +154,9 @@ void CBaseAnimating ::DispatchAnimEvents(float flInterval)
 	float flEnd = pev->frame + flInterval * m_flFrameRate * pev->framerate;
 	m_flLastEventCheck = pev->animtime + flInterval;
 
-	m_fSequenceFinished = false;
+	m_fSequenceFinished = FALSE;
 	if (flEnd >= 256 || flEnd <= 0.0)
-		m_fSequenceFinished = true;
+		m_fSequenceFinished = TRUE;
 
 	int index = 0;
 
@@ -282,7 +279,7 @@ void CBaseAnimating ::SetSequenceBox(void)
 		Vector rmax(-9999, -9999, -9999);
 		Vector base, transformed;
 
-		for (unsigned int i = 0; i <= 1; i++)
+		for (int i = 0; i <= 1; i++)
 		{
 			base.x = bounds[i].x;
 			for (int j = 0; j <= 1; j++)

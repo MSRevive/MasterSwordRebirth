@@ -37,6 +37,13 @@
 #include <GL/gl.h> // Header File For The OpenGL32 Library
 #include <mathlib.h>
 
+// FULLBRIGHT START
+#define GL_CLAMP_TO_EDGE 0x812F
+
+static GLuint g_iBlankTex = 0;
+
+// FULLBRIGHT END
+
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
 
@@ -49,10 +56,48 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 {
 	ViewModel_ExclusiveViewHand = fVisible ? ActiveEntity->curstate.iuser2 : -1;
 }
+
+//The engine draws additive textures without writing depth, and only when the entity is kRenderNormal.
+//A normal entity is drawn before the transparent ones, so those (alpha tested brushes mostly) paint over
+//the additive parts of a view model.  To get around it the hand model is queued as transparent, which
+//makes the engine draw it last, and is set back to normal right before it's rendered
+static int ViewModel_SavedRenderAmt[MAX_PLAYER_HANDITEMS];
+
+static bool StudioHasAdditiveTexture(studiohdr_t* pStudioHeader)
+{
+	if (!pStudioHeader || !pStudioHeader->textureindex)
+		return false;
+
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)pStudioHeader + pStudioHeader->textureindex);
+	for (int i = 0; i < pStudioHeader->numtextures; i++)
+		if (FBitSet(pTexture[i].flags, STUDIO_NF_ADDITIVE))
+			return true;
+
+	return false;
+}
+
+static void ViewModel_QueueDrawLate(cl_entity_t& Ent)
+{
+	ViewModel_SavedRenderAmt[Ent.curstate.iuser2] = Ent.curstate.renderamt;
+	Ent.curstate.rendermode = kRenderTransTexture;
+	Ent.curstate.renderamt = 255; //The engine skips transparent models that have no renderamt
+	SetBits(Ent.curstate.colormap, MSRDR_DRAWLATE);
+}
+
+//Returns true if the model was queued
+static bool ViewModel_UndoDrawLate(cl_entity_t& Ent)
+{
+	if (!FBitSet(Ent.curstate.colormap, MSRDR_DRAWLATE))
+		return false;
+
+	ClearBits(Ent.curstate.colormap, MSRDR_DRAWLATE);
+	Ent.curstate.rendermode = kRenderNormal;
+	Ent.curstate.renderamt = ViewModel_SavedRenderAmt[Ent.curstate.iuser2];
+	return true;
+}
+
 extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
-
-cl_entity_t* DrawEnt = nullptr;
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -65,6 +110,10 @@ Init
 */
 void CStudioModelRenderer::Init(void)
 {
+	// FULLBRIGHT START
+	StudioCacheFullbrightNames();
+	// FULLBRIGHT END
+
 	// Set up some variables shared with engine
 	m_pCvarHiModels = IEngineStudio.GetCvar("cl_himodels");
 	m_pCvarDeveloper = IEngineStudio.GetCvar("developer");
@@ -89,25 +138,24 @@ CStudioModelRenderer
 */
 CStudioModelRenderer::CStudioModelRenderer(void)
 {
-	m_fDoInterp			= 1;
-	m_fGaitEstimation	= 1;
-	m_pCurrentEntity	= nullptr;
-	m_pCvarHiModels		= nullptr;
-	m_pCvarDeveloper	= nullptr;
-	m_pCvarDrawEntities = nullptr;
-	m_pChromeSprite		= nullptr;
-	m_pStudioModelCount = nullptr;
-	m_pModelsDrawn		= nullptr;
-	m_protationmatrix	= nullptr;
-	m_paliastransform	= nullptr;
-	m_pbonetransform	= nullptr;
-	m_plighttransform	= nullptr;
-	m_pStudioHeader		= nullptr;
-	m_pBodyPart			= nullptr;
-	m_pSubModel			= nullptr;
-	m_pPlayerInfo		= nullptr;
-	m_pRenderModel		= nullptr;
-	//m_MirrorRender		= false;
+	m_fDoInterp = 1;
+	m_fGaitEstimation = 1;
+	m_pCurrentEntity = NULL;
+	m_pCvarHiModels = NULL;
+	m_pCvarDeveloper = NULL;
+	m_pCvarDrawEntities = NULL;
+	m_pChromeSprite = NULL;
+	m_pStudioModelCount = NULL;
+	m_pModelsDrawn = NULL;
+	m_protationmatrix = NULL;
+	m_paliastransform = NULL;
+	m_pbonetransform = NULL;
+	m_plighttransform = NULL;
+	m_pStudioHeader = NULL;
+	m_pBodyPart = NULL;
+	m_pSubModel = NULL;
+	m_pPlayerInfo = NULL;
+	m_pRenderModel = NULL;
 	/*AngleMatrix( g_vecZero, m_FlipMatrix );
 	float scalemat[ 3 ][ 4 ] =
 	{
@@ -280,13 +328,13 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion(int frame, float s, mstudiobo
 					if( pbone->parent == -1 )
 					{
 						animrot += orig1;
-						animrot -= PI/2;
+						animrot -= M_PI/2;
 					}
 					animrot *= -1;
 
 					if( pbone->parent == -1 )
 					{
-						animrot += PI/2;
+						animrot += M_PI/2;
 						animrot -= (-orig1);
 					}
 
@@ -317,8 +365,8 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion(int frame, float s, mstudiobo
 		/*if( FBitSet(m_pCurrentEntity->curstate.oldbuttons,MSRDR_FLIPPED) )
 			if( pbone->parent != -1 )
 			{
-				if( angle[0] > PI ) angle[0] -= PI*2;
-				if( angle[0] < -PI ) angle[0] += PI*2;
+				if( angle[0] > M_PI ) angle[0] -= M_PI*2;
+				if( angle[0] < -M_PI ) angle[0] += M_PI*2;
 				 for (int j = 0; j < 2; j++)
 					if( panim->offset[j+1+3] == 0 )
 					{
@@ -928,7 +976,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	static vec4_t q4[MAXSTUDIOBONES];
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
-	if (Ent.curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
+	if (Ent.curstate.sequence >= m_pStudioHeader->numseq)
 	{
 		Ent.curstate.sequence = 0;
 	}
@@ -977,14 +1025,14 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	if (m_fDoInterp &&
 		Ent.latched.sequencetime &&
 		(Ent.latched.sequencetime + 0.2 > m_clTime) &&
-		(Ent.latched.prevsequence < (float)m_pStudioHeader->numseq))
+		(Ent.latched.prevsequence < m_pStudioHeader->numseq))
 	{
 		// blend from last sequence
 		static float pos1b[MAXSTUDIOBONES][3];
 		static vec4_t q1b[MAXSTUDIOBONES];
 		float s;
 
-		if (Ent.latched.prevsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
+		if (Ent.latched.prevsequence >= m_pStudioHeader->numseq)
 			Ent.latched.prevsequence = 0;
 
 		pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + Ent.latched.prevsequence;
@@ -1028,7 +1076,7 @@ void CStudioModelRenderer::StudioSetupBones(void)
 	pbones = (mstudiobone_t*)((byte*)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 	// bounds checking
-	if (m_pPlayerInfo && (m_pPlayerInfo->gaitsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq)))
+	if (m_pPlayerInfo && (m_pPlayerInfo->gaitsequence >= m_pStudioHeader->numseq))
 		m_pPlayerInfo->gaitsequence = 0;
 
 	// calc gait animation
@@ -1137,7 +1185,7 @@ void CStudioModelRenderer::StudioMergeBones(model_t* m_pSubModel)
 	float bonematrix[3][4];
 	static vec4_t q[MAXSTUDIOBONES];
 
-	if (Ent.curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
+	if (Ent.curstate.sequence >= m_pStudioHeader->numseq)
 	{
 		Ent.curstate.sequence = 0;
 	}
@@ -1255,19 +1303,9 @@ StudioDrawModel
 */
 
 //#define rdrdbg(a) dbg(msstring(a) + " Entity #" + m_pCurrentEntity->curstate.number)
-#define rdrdbg( a )
 
 extern bool g_FirstRender;
 extern CGameStudioModelRenderer g_StudioRenderer;
-
-void RenderModel(cl_entity_t* pEntity)
-{
-	DrawEnt = pEntity;
-	if (DrawEnt->player)
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, (IEngineStudio.GetPlayerState(pEntity->index - 1)));
-	else
-		CModelMgr::MSStudioDrawModel(STUDIO_RENDER, NULL);
-}
 
 //MIB APR2008a - massive changes
 int CStudioModelRenderer::StudioDrawModel(int flags)
@@ -1280,19 +1318,9 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		g_FirstRender = false;
 	}
 
-	if (DrawEnt)
-	{
-		m_pCurrentEntity = DrawEnt;
-		DrawEnt = NULL;
-	}
-	else
-		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
+	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 
 	cl_entity_t& Ent = *m_pCurrentEntity;
-
-	if (FBitSet(flags, STUDIO_RENDER))
-		if (!CMirrorMgr::Render_StudioModel(m_pCurrentEntity))
-			return 0; //Rendering inside of a mirror was canceled
 
 	//Default is to only render the one 'current' entity.  The view model overrides this and renders two
 	cl_entity_t* RenderEnts[MAX_PLAYER_HANDITEMS] = { m_pCurrentEntity, NULL, NULL };
@@ -1308,9 +1336,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			//Check if some view model animation requested exclusive rendering (usually because it uses both hands)
 			if (ViewModel_ExclusiveViewHand >= 0 && ViewModel_ExclusiveViewHand != hand)
 				continue;
-
-			if (CMirrorMgr::m_CurrentMirror.Enabled)
-				return 0;
 
 			//Check if an item is hend in this hand
 			CGenericItem* pItem = player.Hand(hand);
@@ -1329,6 +1354,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 			//Try to create an entity for this viewmodel (only lasts this frame)
 			cl_entity_t& RenderEnt = MSCLGlobals::CLViewEntities[hand];
+			ViewModel_UndoDrawLate(RenderEnt); //In case it was queued last frame but never got drawn
 			int Ent = gEngfuncs.CL_CreateVisibleEntity(ET_NORMAL, &RenderEnt);
 			if (!Ent)
 				continue;
@@ -1340,15 +1366,15 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			studiohdr_t* pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(RenderEnt.model);
 
 			cl_entity_s* view = gEngfuncs.GetViewModel();
-			view->model = nullptr; //MiB JUN2010_21 - Disable the HL viewmodel. We use our own.
+			view->model = NULL; //MiB JUN2010_21 - Disable the HL viewmodel. We use our own.
 
+			RenderEnt.curstate.body = 0; //view model is reused, doesn't carry the last model's sub over - Dravus
 			RenderEnt.SetBody(pItem->m_ViewModelPart, pItem->m_ViewModelSubmodel); //Set the specified submodel on the item
 
 			//MiB Apr 2008a NOTE:
 			//These ifs may need to be removed. Skins and other things CAN be 0.
 			//Untested right now.
-			if (pItem->m_Skin > 0)
-				RenderEnt.curstate.skin = pItem->m_Skin;
+			RenderEnt.curstate.skin = pItem->m_Skin; //skin 0 is valid, but > 0 left the last items sub model on. Ex: Fire Tomahawk would look like the last toma used sub model. - Dravus
 			if (pItem->m_RenderMode > 0)
 				RenderEnt.curstate.rendermode = pItem->m_RenderMode;
 			if (pItem->m_RenderFx > 0)
@@ -1358,8 +1384,11 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			//[/Shuriken]
 
 			SetBits(RenderEnt.curstate.colormap, MSRDR_HANDMODEL);
-			SetBits(RenderEnt.curstate.oldbuttons, MSRDR_NOREFLECT);
 			RenderEnt.curstate.iuser2 = hand;
+
+			if (RenderEnt.curstate.rendermode == kRenderNormal && StudioHasAdditiveTexture(pStudioHeader))
+				ViewModel_QueueDrawLate(RenderEnt);
+
 			RenderEnt.curstate.modelindex = 0;
 			//RenderEnt.current_position = m_pCurrentEntity->current_position;
 			RenderEnt.origin = m_pCurrentEntity->origin;
@@ -1522,7 +1551,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 			m_pPlayerInfo = IEngineStudio.PlayerInfo(ZeroBasedPlayerIdx);
 			m_pPlayerInfo->prevgaitorigin = PrevOrigin;
-			m_pPlayerInfo = nullptr;
+			m_pPlayerInfo = NULL;
 
 			m_pCurrentEntity->curstate.number = oldnum;
 			m_pCurrentEntity->index = oldidx;
@@ -1545,9 +1574,6 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 		if (FBitSet(Ent.curstate.playerclass, ENT_EFFECT_FOLLOW_ROTATE) && Ent.curstate.owner == gEngfuncs.GetLocalPlayer()->index)
 			SkipVisCheck = true;
 
-		if (CMirrorMgr::m_CurrentMirror.Enabled)
-			SkipVisCheck = true; //Skip vis on entites for mirror rendering
-
 		if (flags & STUDIO_RENDER)
 		{
 			// see if the bounding box lets us trivially reject, also sets
@@ -1565,15 +1591,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			}
 
 			if (!SkipVisCheck)
-			{
-				/*if( CMirrorMgr::m_CurrentMirror.Enabled )
-				{
-					Vector Bounds[2] = { m_pCurrentEntity->origin + m_pCurrentEntity->curstate.mins, m_pCurrentEntity->origin + m_pCurrentEntity->curstate.maxs };
-					Visible = CheckBBox( Bounds );					//Special vis check on mirrored entities
-				}
-				else*/
 				Visible = IEngineStudio.StudioCheckBBox() ? true : false;
-			}
 			if (RestoreOrigin)
 				m_pCurrentEntity->origin = m_pCurrentEntity->curstate.origin = OldOrigin;
 			if (!Visible)
@@ -1607,24 +1625,40 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 				cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
 
 				if (ent)
-					memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector ) * 4);
+					memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 			}
 		}
 
 		if (flags & STUDIO_RENDER)
 		{
 			//MiB JUN2010_21 - Makes the viewmodels not stick into walls
-			if (FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL))
+			bool IsHandModel = FBitSet(m_pCurrentEntity->curstate.colormap, MSRDR_HANDMODEL);
+			float tmp[2];
+			if (IsHandModel)
 			{
-				float tmp[2];
 				glGetFloatv(GL_DEPTH_RANGE, tmp);
 				glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+			}
 
-				StudioRenderModel();
-				glDepthRange(tmp[0], tmp[1]);
+			//Start from what the engine has set when it draws normal entities, whatever the last transparent one left
+			if (ViewModel_UndoDrawLate(*m_pCurrentEntity))
+			{
+				glDisable(GL_BLEND);
+				glDepthMask(GL_TRUE);
+			}
+
+			// FULLBRIGHT START
+			if (StudioGetFullbright(m_pRenderModel))
+			{
+				StudioRenderEntity(false);
+				StudioRenderEntity(true);
 			}
 			else
 				StudioRenderModel();
+			// FULLBRIGHT END
+
+			if (IsHandModel)
+				glDepthRange(tmp[0], tmp[1]);
 		}
 	}
 	
@@ -1732,13 +1766,13 @@ StudioProcessGait
 */
 void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 {
-	mstudioseqdesc_t* pseqdesc = nullptr;
+	mstudioseqdesc_t* pseqdesc = NULL;
 	//float frametime;
 	int iBlend = 0;
 	float flYaw = 0; // view direction relative to movement
 	float frametime = 0;
 
-	if (m_pCurrentEntity->curstate.sequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
+	if (m_pCurrentEntity->curstate.sequence >= m_pStudioHeader->numseq)
 		m_pCurrentEntity->curstate.sequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
@@ -1817,7 +1851,7 @@ void CStudioModelRenderer::StudioProcessGait(entity_state_t* pplayer)
 		m_pCurrentEntity->latched.prevcontroller[3] = m_pCurrentEntity->curstate.controller[3];
 	}
 
-	if (pplayer->gaitsequence >= static_cast<unsigned int>(m_pStudioHeader->numseq))
+	if (pplayer->gaitsequence >= m_pStudioHeader->numseq)
 		pplayer->gaitsequence = 0;
 
 	pseqdesc = (mstudioseqdesc_t*)((byte*)m_pStudioHeader + m_pStudioHeader->seqindex) + pplayer->gaitsequence;
@@ -1870,25 +1904,6 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 	cl_entity_t& Ent = *m_pCurrentEntity;
 
-	/*if( m_pCurrentEntity->player &&
-		m_pCurrentEntity->player == gEngfuncs.GetLocalPlayer()->index &&
-		!MSCLGlobals::CamThirdPerson &&
-		!CMirrorMgr::m_CurrentMirror.Enabled )
-	{
-		//Manually draw the Viewmodel.  The engine doesn't draw it because MS always reports thirdperson for mirrors
-		m_pPlayerInfo = NULL;
-		DrawEnt = IEngineStudio.GetViewEntity();
-		StudioDrawModel( flags );
-
-		m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
-		SetBits( m_pCurrentEntity->curstate.oldbuttons, MSRDR_SKIP );
-		//return 0;
-	}*/
-
-	if (FBitSet(flags, STUDIO_RENDER))
-		if (!CMirrorMgr::Render_StudioModel(m_pCurrentEntity))
-			return 0; //Rendering inside of a mirror was cancelled
-
 	IEngineStudio.GetTimes(&m_nFrameCount, &m_clTime, &m_clOldTime);
 	IEngineStudio.GetViewInfo(m_vRenderOrigin, m_vUp, m_vRight, m_vNormal);
 	IEngineStudio.GetAliasScale(&m_fSoftwareXScale, &m_fSoftwareYScale);
@@ -1913,7 +1928,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		return 0;
 
 	m_pRenderModel = IEngineStudio.SetupPlayerModel(m_nPlayerIndex);
-	if (m_pRenderModel == nullptr)
+	if (m_pRenderModel == NULL)
 		return 0;
 
 	m_pStudioHeader = (studiohdr_t*)IEngineStudio.Mod_Extradata(m_pRenderModel);
@@ -1944,7 +1959,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		}
 		else
 		{
-			modelinfo_t* pModelInfo = nullptr;
+			modelinfo_t* pModelInfo = NULL;
 			if (Ent.HasExtra())
 				pModelInfo = &CModelMgr::m_ModelInfo[Ent.index];
 
@@ -2035,7 +2050,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		{
 			cl_entity_t* ent = gEngfuncs.GetEntityByIndex(m_pCurrentEntity->index);
 
-			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector ) * 4);
+			memcpy(ent->attachment, m_pCurrentEntity->attachment, sizeof(Vector) * 4);
 		}
 	}
 
@@ -2108,7 +2123,7 @@ int CStudioModelRenderer::StudioDrawPlayer(int flags, entity_state_t* pplayer)
 		//Instead, the bodypart attachmets are rendered -- UNDONE
 		StudioRenderModel();
 
-		m_pPlayerInfo = nullptr;
+		m_pPlayerInfo = NULL;
 
 		/*
 		Master Sword - don't render the weaponmodel
@@ -2184,7 +2199,9 @@ void CStudioModelRenderer::StudioRenderModel(void)
 	alight_t lighting;
 	Vector lightdir;
 
-	gHUD.m_HUDScript->Effects_Render(*m_pCurrentEntity, CMirrorMgr::m_CurrentMirror.Enabled);
+	// FULLBRIGHT - only run script effects once per frame, not again for the fullbright pass
+	if (!m_bFullbrightPass)
+		HUDScript->Effects_Render(*m_pCurrentEntity);
 
 	lighting.plightvec = lightdir;
 	IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting);
@@ -2215,6 +2232,16 @@ void CStudioModelRenderer::StudioRenderModel(void)
 		lightdir = Vector(0, 0, -1);
 		lighting.shadelight = 100;
 	}
+
+	// FULLBRIGHT START
+	if (m_bFullbrightPass)
+	{
+		lighting.ambientlight = 128;
+		lighting.shadelight = 192;
+		lighting.color = Vector(255, 255, 255);
+		lightdir = Vector(0, 0, -1);
+	}
+	// FULLBRIGHT END
 
 	// model and frame independant
 	IEngineStudio.StudioSetupLighting(&lighting);
@@ -2349,15 +2376,6 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware(void)
 
 			IEngineStudio.GL_SetRenderMode(rendermode);
 
-			/*if( CMirrorMgr::m_CurrentMirror.Enabled )
-			{
-				glColorMask( 1, 1, 1, 1 );
-				CMirror &Mirror = *CMirrorMgr::m_CurrentMirror.Mirror;
-				float Alpha = !Mirror.m_Texture->Mirror.NoWorld ? 1 : Mirror.m_Texture->Mirror.Color.a;
-				gEngfuncs.pTriAPI->Color4f( Mirror.m_Texture->Mirror.Color.r, Mirror.m_Texture->Mirror.Color.g, Mirror.m_Texture->Mirror.Color.b, Alpha );
-				//glEnable( GL_BLEND );
-			}*/
-
 			IEngineStudio.StudioDrawPoints();
 			IEngineStudio.GL_StudioDrawShadow();
 		}
@@ -2385,25 +2403,6 @@ StudioRenderFinal
 void CStudioModelRenderer::StudioSetupRender(bool Setup)
 {
 	m_DrawStyle = DRAW_DEFAULT;
-
-	if (CMirrorMgr::m_CurrentMirror.Enabled)
-	{
-		CMirror& Mirror = *CMirrorMgr::m_CurrentMirror.Mirror;
-
-		if (Setup)
-		{
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-
-			Mirror.ApplyTransformation();
-			m_DrawStyle = DRAW_BACKFACES;
-		}
-		else
-		{
-			glMatrixMode(GL_MODELVIEW);
-			glPopMatrix();
-		}
-	}
 
 	//Master Sword - Flip the model (left-right) the when neccesary
 	if (FBitSet(m_pCurrentEntity->curstate.oldbuttons, MSRDR_FLIPPED))
@@ -2445,6 +2444,160 @@ void CStudioModelRenderer::StudioRenderFinal(void)
 
 	StudioSetupRender(false);
 }
+
+// FULLBRIGHT START
+/*
+====================
+StudioGetFullbright
+
+returns true if model has a fullbright texture
+also caches the name if it isnt cached yet
+====================
+*/
+bool CStudioModelRenderer::StudioGetFullbright(model_s* pmodel)
+{
+	if (!pmodel || pmodel->type != mod_studio)
+		return false;
+
+	// check if this model is already been checked
+	for (size_t list = 0; list < m_szFullBrightModels.size(); list++)
+	{
+		if (!_stricmp(pmodel->name, m_szFullBrightModels[list].c_str()))
+		{
+			return true;
+		}
+	}
+
+	// check if this model is already on our list
+	for (size_t list = 0; list < m_szCheckedModels.size(); list++)
+	{
+		if (!strcmp(pmodel->name, m_szCheckedModels[list].c_str()))
+		{
+			return false;
+		}
+	}
+
+	studiohdr_t* pHdr = (studiohdr_t*)IEngineStudio.Mod_Extradata(pmodel);
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)pmodel->cache.data + pHdr->textureindex);
+
+	if (strncmp((const char*)pHdr, "IDST", 4) && strncmp((const char*)pHdr, "IDSQ", 4))
+	{
+		m_szCheckedModels.push_back(pmodel->name);
+		return false;
+	}
+
+	bool foundfullbright = false;
+	if (pHdr->textureindex)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			if (pTexture[i].flags & STUDIO_NF_FULLBRIGHT)
+			{
+				foundfullbright = true;
+				break;
+			}
+		}
+		if (foundfullbright)
+		{
+			m_szFullBrightModels.push_back(pmodel->name);
+		}
+	}
+
+	m_szCheckedModels.push_back(pmodel->name);
+
+	return foundfullbright;
+}
+
+
+/*
+====================
+StudioRenderEntity
+
+if fullbright boolean is true, it renders only the fullbright texture
+if false, it renders all non-fullbright textures
+====================
+*/
+void CStudioModelRenderer::StudioRenderEntity(bool fullbright)
+{
+	studiohdr_t* pHdr = (studiohdr_t*)m_pStudioHeader;
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)m_pRenderModel->cache.data + pHdr->textureindex);
+
+	std::vector<mstudiotexture_t> savedtexture;
+
+	if (pHdr->textureindex > 0)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			savedtexture.push_back(pTexture[i]);
+			if ((pTexture[i].flags & STUDIO_NF_FULLBRIGHT) != 0)
+			{
+				if (!fullbright)
+				{
+					pTexture[i].index = g_iBlankTex;
+					pTexture[i].flags |= STUDIO_NF_ADDITIVE | STUDIO_NF_MASKED;
+				}
+			}
+			else if (fullbright)
+			{
+				pTexture[i].index = g_iBlankTex;
+				pTexture[i].flags |= STUDIO_NF_ADDITIVE | STUDIO_NF_MASKED;
+			}
+		}
+	}
+
+	// StudioRenderModel sets up its own lighting, so tell it which pass this is
+	m_bFullbrightPass = fullbright;
+	StudioRenderModel();
+	m_bFullbrightPass = false;
+
+	if (pHdr->textureindex > 0)
+	{
+		for (int i = 0; i < pHdr->numtextures; i++)
+		{
+			memcpy(&pTexture[i], &savedtexture[i], sizeof(mstudiotexture_t));
+		}
+	}
+}
+
+void GenBlackTex()
+{
+	GLubyte pixels[4] = {0,0,0,0};
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glGenTextures(1, &g_iBlankTex);
+	glBindTexture(GL_TEXTURE_2D, g_iBlankTex);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+}
+
+/*
+====================
+StudioCacheFullbrightNames
+
+====================
+*/
+void CStudioModelRenderer::StudioCacheFullbrightNames()
+{
+	const char* gamedir = gEngfuncs.pfnGetGameDirectory();
+
+	if (g_iBlankTex == 0)
+		GenBlackTex();
+
+	// clear the cache
+	m_szFullBrightModels.clear();
+	m_szCheckedModels.clear();
+
+	for (int i = 0; i < 512; i++)
+	{
+		StudioGetFullbright(IEngineStudio.GetModelByIndex(i));
+	}
+}
+
+// FULLBRIGHT END
+
 /*
 ==================
 Dogg - FlipModel

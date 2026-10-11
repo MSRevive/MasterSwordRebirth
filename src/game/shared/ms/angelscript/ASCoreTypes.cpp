@@ -16,7 +16,7 @@
 // Include vector.h directly to avoid mathlib.h macro conflicts
 // We need the vec_t typedef but not the DotProduct macro
 typedef float vec_t;
-#include "hl/vector.h"
+#include "vector.h"
 
 // Include MSLogger for consistent logging
 #include "mslogger.h"

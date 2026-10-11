@@ -19,6 +19,6 @@
 #pragma once
 #endif
 
-constexpr int MAX_PHYSINFO_STRING = 256;
+#define MAX_PHYSINFO_STRING 256
 
 #endif // PM_INFOH
