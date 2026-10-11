@@ -35,6 +35,7 @@ public:
 	//OpenGL
 	static void PushHLStates();
 	static void PopHLStates();
+	static void RenderParticles();
 	static bool LoadGLTexture(const char *FileName, unsigned int &TextureID);
 	static bool LoadGLTexture(const char *FileName, loadtex_t &LoadTex);
 	static void DeleteGLTextures();

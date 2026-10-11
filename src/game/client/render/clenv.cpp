@@ -10,6 +10,7 @@
 #include "triangleapi.h"
 #include "com_model.h"
 #include "mslogger.h"
+#include "particleman/particleman.h"
 #include <SDL2/SDL_video.h>
 
 #define MS_GL_ATTRIBUTES GL_ALL_ATTRIB_BITS
@@ -389,6 +390,22 @@ void CEnvMgr::PopHLStates()
 	//glTexEnvfv( GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, color );
 
 	//----------------------------------------
+}
+
+void CEnvMgr::RenderParticles()
+{
+	if (!g_pParticleMan)
+		return;
+
+	glPushAttrib(MS_GL_ATTRIBUTES);
+
+	g_pParticleMan->Update();
+
+	//The engine remembers the last texture it bound and won't bind it again, so that one has to stay bound
+	int LastTexture = 0;
+	glGetIntegerv(0x8069, &LastTexture); //GL_TEXTURE_2D_BINDING = 0x8069
+	glPopAttrib();
+	glBindTexture(GL_TEXTURE_2D, LastTexture);
 }
 
 struct gltexture_t : loadtex_t

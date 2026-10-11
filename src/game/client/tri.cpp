@@ -22,9 +22,6 @@
 #include "triangleapi.h"
 #include "Exports.h"
 
-#include "particleman/particleman.h"
-extern IParticleMan* g_pParticleMan;
-
 //Half-life callback
 #define DLLEXPORT EXPORT
 extern "C"
@@ -69,6 +66,5 @@ void DLLEXPORT HUD_DrawTransparentTriangles()
 
 	CEnvMgr::PopHLStates();
 
-	if (g_pParticleMan)
-		g_pParticleMan->Update();
+	CEnvMgr::RenderParticles();
 }
