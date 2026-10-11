@@ -56,6 +56,46 @@ void ViewModel_InactiveModelVisible(bool fVisible, const cl_entity_s* ActiveEnti
 {
 	ViewModel_ExclusiveViewHand = fVisible ? ActiveEntity->curstate.iuser2 : -1;
 }
+
+//The engine draws additive textures without writing depth, and only when the entity is kRenderNormal.
+//A normal entity is drawn before the transparent ones, so those (alpha tested brushes mostly) paint over
+//the additive parts of a view model.  To get around it the hand model is queued as transparent, which
+//makes the engine draw it last, and is set back to normal right before it's rendered
+static int ViewModel_SavedRenderAmt[MAX_PLAYER_HANDITEMS];
+
+static bool StudioHasAdditiveTexture(studiohdr_t* pStudioHeader)
+{
+	if (!pStudioHeader || !pStudioHeader->textureindex)
+		return false;
+
+	mstudiotexture_t* pTexture = (mstudiotexture_t*)((byte*)pStudioHeader + pStudioHeader->textureindex);
+	for (int i = 0; i < pStudioHeader->numtextures; i++)
+		if (FBitSet(pTexture[i].flags, STUDIO_NF_ADDITIVE))
+			return true;
+
+	return false;
+}
+
+static void ViewModel_QueueDrawLate(cl_entity_t& Ent)
+{
+	ViewModel_SavedRenderAmt[Ent.curstate.iuser2] = Ent.curstate.renderamt;
+	Ent.curstate.rendermode = kRenderTransTexture;
+	Ent.curstate.renderamt = 255; //The engine skips transparent models that have no renderamt
+	SetBits(Ent.curstate.colormap, MSRDR_DRAWLATE);
+}
+
+//Returns true if the model was queued
+static bool ViewModel_UndoDrawLate(cl_entity_t& Ent)
+{
+	if (!FBitSet(Ent.curstate.colormap, MSRDR_DRAWLATE))
+		return false;
+
+	ClearBits(Ent.curstate.colormap, MSRDR_DRAWLATE);
+	Ent.curstate.rendermode = kRenderNormal;
+	Ent.curstate.renderamt = ViewModel_SavedRenderAmt[Ent.curstate.iuser2];
+	return true;
+}
+
 extern Vector v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
 //CStudioModelRenderer *g_StudioRender = NULL;
 
@@ -1314,6 +1354,7 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 			//Try to create an entity for this viewmodel (only lasts this frame)
 			cl_entity_t& RenderEnt = MSCLGlobals::CLViewEntities[hand];
+			ViewModel_UndoDrawLate(RenderEnt); //In case it was queued last frame but never got drawn
 			int Ent = gEngfuncs.CL_CreateVisibleEntity(ET_NORMAL, &RenderEnt);
 			if (!Ent)
 				continue;
@@ -1344,6 +1385,10 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 
 			SetBits(RenderEnt.curstate.colormap, MSRDR_HANDMODEL);
 			RenderEnt.curstate.iuser2 = hand;
+
+			if (RenderEnt.curstate.rendermode == kRenderNormal && StudioHasAdditiveTexture(pStudioHeader))
+				ViewModel_QueueDrawLate(RenderEnt);
+
 			RenderEnt.curstate.modelindex = 0;
 			//RenderEnt.current_position = m_pCurrentEntity->current_position;
 			RenderEnt.origin = m_pCurrentEntity->origin;
@@ -1593,6 +1638,13 @@ int CStudioModelRenderer::StudioDrawModel(int flags)
 			{
 				glGetFloatv(GL_DEPTH_RANGE, tmp);
 				glDepthRange(tmp[0], tmp[0] + 0.3 * (tmp[1] - tmp[0]));
+			}
+
+			//Start from what the engine has set when it draws normal entities, whatever the last transparent one left
+			if (ViewModel_UndoDrawLate(*m_pCurrentEntity))
+			{
+				glDisable(GL_BLEND);
+				glDepthMask(GL_TRUE);
 			}
 
 			// FULLBRIGHT START

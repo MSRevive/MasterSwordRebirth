@@ -16,6 +16,7 @@
 #define MSRDR_ASPLAYER (1 << 7)		//Render as player
 #define MSRDR_COPYPLAYER (1 << 8)	//Copy the local player's anims
 #define MSRDR_HANDMODEL (1 << 9)	//This is one of the two hand models (coming off the viewmodel)
+#define MSRDR_DRAWLATE (1 << 10)	//Hand model was queued as transparent so it gets drawn late.  It's really kRenderNormal
 
 //mouth.sndavg
 #define MSRDR_HASEXTRA (1 << 0) //The extra info is initialied
