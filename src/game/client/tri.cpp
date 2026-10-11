@@ -20,7 +20,6 @@
 #include "entity_state.h"
 #include "cl_entity.h"
 #include "triangleapi.h"
-#include "Exports.h"
 
 //Half-life callback
 #define DLLEXPORT EXPORT
