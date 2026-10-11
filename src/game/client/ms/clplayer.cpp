@@ -1199,6 +1199,7 @@ void __CmdFunc_BindTeleport(void)
 	}
 #endif
 }
+
 void DynamicNPC_SelectMenuItem(int idx, TCallbackMenu* pcbMenu)
 {
 	msstringlist NPCList;
@@ -1207,6 +1208,7 @@ void DynamicNPC_SelectMenuItem(int idx, TCallbackMenu* pcbMenu)
 		return;
 	gEngfuncs.pfnClientCmd(UTIL_VarArgs("npc %s\n", NPCList[idx].c_str()));
 }
+
 void __CmdFunc_DynamicNPC(void)
 {
 	//byte *pMem = player.m_Gold.DataLoc_Get( );
@@ -1244,6 +1246,7 @@ void __CmdFunc_DynamicNPC(void)
 
 	gHUD.m_Menu->ShowMenu(iBitsValid, MenuText, DynamicNPC_SelectMenuItem, MENU_DYNAMICNPC);
 }
+
 void __CmdFunc_DebugPrint(void)
 {
 	Print("Pos: %.2f %.2f %.2f\n", player.pev->origin.x, player.pev->origin.y, player.pev->origin.z);
@@ -1251,6 +1254,7 @@ void __CmdFunc_DebugPrint(void)
 	Print("Scripts attached to player (client): %i\n", gHUD.m_HUDScript->m_Scripts.size());
 	Print("TempEnts: %i\n", g_TempEntCount);
 }
+
 bool ShowHUD()
 {
 	bool ShowHUD = true;
@@ -1265,6 +1269,7 @@ bool ShowHUD()
 
 	return ShowHUD;
 }
+
 bool ShowHealth() { return player.m_CharacterState == CHARSTATE_LOADED ? ShowHUD() : false; }
 bool ShowChat() { return ShowHUD(); } //Always show chat
 

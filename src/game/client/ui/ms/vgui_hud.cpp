@@ -464,8 +464,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 			sText = Localized(READ_STRING());
 
 			HUD_ShowInfoWin(sTitle, sText);
-			break;
 		}
+		break;
+		
 		case 1:
 		{
 			//Print to Event console
@@ -474,8 +475,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 			sText = READ_STRING();
 
 			HUD_PrintEvent(color, sText);
-			break;
 		}
+		break;
+
 		case 2:
 		{
 			//Help window part
@@ -483,8 +485,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 			if (!idx)
 				HelpParts.clear();
 			HelpParts.add(READ_STRING());
-			break;
 		}
+		break;
+
 		case 3:
 		{
 			//Print to help window
@@ -495,8 +498,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 				buffer += static_cast<const char*>(HelpParts[i]);
 
 			HUD_ShowHelpWin(sTitle, buffer.c_str());
-			break;
 		}
+		break;
+
 		case 4:
 		{
 			//Print to saytext console
@@ -513,8 +517,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 				color = Color(255, 178, 0, 0);
 
 			HUD_SayTextEvent(color, sText);
-			break;
 		}
+		break;
+
 		case 5:
 		{
 			//Help window part
@@ -522,8 +527,9 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 			if (!idx)
 				HelpParts.clear();
 			HelpParts.add(READ_STRING());
-			break;
 		}
+		break;
+
 		case 6:
 		{
 			//Print to help window
@@ -534,7 +540,6 @@ int __MsgFunc_HUDInfoMsg(const char* pszName, int iSize, void* pbuf)
 				buffer += static_cast<const char*>(HelpParts[i]);
 
 			HUD_ShowTutorialWin(sTitle, buffer.c_str());
-			break;
 		}
 	}
 	
