@@ -315,7 +315,7 @@ void Storage_ItemMsg()
 			continue;
 
 		Item.Name = CGenericItemMgr::Item(idx)->Name;
-		player.m_Storage.add(Item);
+		player.m_Storage.push_back(Item);
 	}
 
 	Storage_Update();
@@ -327,7 +327,7 @@ void Storage_ItemRemoveMsg()
 	for (int i = 0; i < player.m_Storage.size(); i++)
 		if (player.m_Storage[i].ID == ID)
 		{
-			player.m_Storage.erase(i);
+			player.m_Storage.erase(player.m_Storage.begin() + i);
 			break;
 		}
 

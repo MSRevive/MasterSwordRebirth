@@ -6942,15 +6942,15 @@ void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
 
 void CBasePlayer::Storage_CombineSwigs()
 {
-	mslist<storageitem_t> Potions;
+	std::vector<storageitem_t> Potions;
 	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
 	{
 		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
 		if (!pGlobalItem || !Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
 			continue;
 
-		Potions.add(m_Storage[i]);
-		m_Storage.erase(i);
+		Potions.push_back(m_Storage[i]);
+		m_Storage.erase(m_Storage.begin() + i);
 	}
 
 	for (int i = 0; i < Potions.size(); i++)
@@ -7027,7 +7027,7 @@ void CBasePlayer::Storage_NewItem(storageitem_t &Item)
 		break;
 	}
 
-	m_Storage.add(Item); //Storage_UpdateClient sends it
+	m_Storage.push_back(Item); //Storage_UpdateClient sends it
 }
 
 void CBasePlayer::Storage_SendItemUpdate(int Idx)
@@ -7063,7 +7063,7 @@ void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 		m_CurrentStorage.ClientItems--;
 	}
 
-	m_Storage.erase(Idx);
+	m_Storage.erase(m_Storage.begin() + Idx);
 }
 
 void CBasePlayer::Storage_RemoveSwigs(int Idx, int Amt)

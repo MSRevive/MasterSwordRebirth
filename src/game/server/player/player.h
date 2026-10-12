@@ -375,7 +375,7 @@ struct chardata_t : savedata_t
 	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
 	std::vector<std::string> m_Spells;	//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
-	mslist<storageitem_t> m_Storage;	//All items in storage
+	std::vector<storageitem_t> m_Storage;	//All items in storage
 	mslist<companion_t> m_Companions;	//Companions
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
@@ -445,7 +445,7 @@ public:
 	float m_TimeCanVote;
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
-	mslist<storageitem_t> m_Storage;	  //Items I have in storage
+	std::vector<storageitem_t> m_Storage;	  //Items I have in storage
 	int m_StorageMax;					  //How many items my storage holds.  0 until it's set, which gives STORAGE_DEFAULT_ITEMS
 	storageaccess_t m_CurrentStorage;	  //Set while I have my storage open
 	bool m_Initialized;				  //Whether stats were created, script loaded, etc
