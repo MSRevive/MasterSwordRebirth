@@ -29,8 +29,8 @@
 
 // was 1500, but there shouldn't be any issues with increasing.
 #define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
-#define STORAGE_MAX_ITEMS 100 //Max entries in a player's storage.  Stacked items share an entry
-#define STORAGE_MAX_TRANSFER 20 //Max items moved into or out of storage at once.  Each one sends the client messages, and too many overflow it
+#define STORAGE_MAX_ITEMS 300
+#define STORAGE_MAX_TRANSFER 20
 
 enum sbar_data
 {
@@ -316,7 +316,7 @@ struct storageitem_t
 {
 	ulong ID;				 //Unique within the storage.  Not saved
 	msstring Name;			 //Item script name
-	unsigned short Quantity; //How many.  For a groupable item, the size of the stack
+	unsigned short Quantity; //For a groupable item, the size of the stack.  Otherwise 1
 	unsigned short Quality, MaxQuality;
 };
 struct storageaccess_t
@@ -550,7 +550,7 @@ public:
 	void Storage_Moved(const char* pszItemName, bool In);
 	void Storage_SendMoved();
 	bool Storage_AddItem(CGenericItem *pItem);
-	bool Storage_AddItem(storageitem_t &Item);
+	bool Storage_AddItem(storageitem_t &Item, bool Groupable);
 	int Storage_AddItems(const char* pszItemName, int Quantity, int Quality);
 	void Storage_RemoveItem(int Idx, int Amt);
 	void Storage_SendItemUpdate(int Idx);

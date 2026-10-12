@@ -6827,13 +6827,15 @@ static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 }
 bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 {
+	bool Groupable = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
+
 	storageitem_t Item;
 	Item.Name = pItem->ItemName;
-	Item.Quantity = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? V_max(pItem->iQuantity, 1) : 1;
+	Item.Quantity = Groupable ? V_max(pItem->iQuantity, 1) : 1;
 	Item.Quality = pItem->Quality;
 	Item.MaxQuality = pItem->MaxQuality;
 
-	return Storage_AddItem(Item);
+	return Storage_AddItem(Item, Groupable);
 }
 int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Quality)
 {
@@ -6841,18 +6843,19 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 	if (!pGlobalItem || !Storage_CanStoreItem(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
 		return 0;
 
+	bool Groupable = FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
+
 	int Added = 0;
 	while (Added < Quantity)
 	{
-		//One stack at a time, so that a large amount gets split over several items in storage
 		storageitem_t Item;
 		Item.Name = pGlobalItem->ItemName;
-		Item.Quantity = V_min(Quantity - Added, NUM_MAX_STACK);
+		Item.Quantity = Groupable ? V_min(Quantity - Added, NUM_MAX_STACK) : 1;
 		Item.Quality = Quality >= 0 ? Quality : pGlobalItem->Quality;
 		Item.MaxQuality = pGlobalItem->MaxQuality;
 
 		int Amt = Item.Quantity; //Storage_AddItem changes the quantity
-		if (!Storage_AddItem(Item))
+		if (!Storage_AddItem(Item, Groupable))
 			break;
 
 		Added += Amt;
@@ -6860,12 +6863,16 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 
 	return Added;
 }
-bool CBasePlayer::Storage_AddItem(storageitem_t &Item)
+bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
 {
+	//Only groupable items stack.  Anything else always becomes a new item in storage.
 	//A full storage can still take an item that stacks completely onto the items already there.
 	//Check before changing anything, so that a stack is never left half stored
 	if ((int)m_Storage.size() >= STORAGE_MAX_ITEMS)
 	{
+		if (!Groupable)
+			return false;
+
 		int Room = 0;
 		for (int i = 0; i < m_Storage.size(); i++)
 			Room += Storage_StackRoom(m_Storage[i], Item);
@@ -6874,7 +6881,7 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item)
 			return false;
 	}
 
-	for (int i = 0; i < m_Storage.size() && Item.Quantity; i++)
+	for (int i = 0; Groupable && i < m_Storage.size() && Item.Quantity; i++)
 	{
 		int Amt = V_min((int)Item.Quantity, Storage_StackRoom(m_Storage[i], Item));
 		if (Amt <= 0)
