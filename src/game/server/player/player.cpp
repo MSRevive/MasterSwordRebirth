@@ -6713,6 +6713,7 @@ void CBasePlayer::Storage_End()
 		return;
 
 	m_CurrentStorage.Active = false;
+	m_CurrentStorage.ClientItems = 0; //The client forgets my storage items when it closes
 
 	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
 	IScripted *pScripted = pTeller ? pTeller->GetScripted() : NULL;
@@ -6782,14 +6783,41 @@ static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 }
 bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 {
-	//Adds an item to my storage, stacking it with identical items.
-	//Returns false if the storage is full
 	storageitem_t Item;
 	Item.Name = pItem->ItemName;
 	Item.Quantity = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? V_max(pItem->iQuantity, 1) : 1;
 	Item.Quality = pItem->Quality;
 	Item.MaxQuality = pItem->MaxQuality;
 
+	return Storage_AddItem(Item);
+}
+int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Quality)
+{
+	CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(pszItemName, true);
+	if (!pGlobalItem || !Storage_CanStoreItem(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
+		return 0;
+
+	int Added = 0;
+	while (Added < Quantity)
+	{
+		//One stack at a time, so that a large amount gets split over several items in storage
+		storageitem_t Item;
+		Item.Name = pGlobalItem->ItemName;
+		Item.Quantity = V_min(Quantity - Added, NUM_MAX_STACK);
+		Item.Quality = Quality >= 0 ? Quality : pGlobalItem->Quality;
+		Item.MaxQuality = pGlobalItem->MaxQuality;
+
+		int Amt = Item.Quantity; //Storage_AddItem changes the quantity
+		if (!Storage_AddItem(Item))
+			break;
+
+		Added += Amt;
+	}
+
+	return Added;
+}
+bool CBasePlayer::Storage_AddItem(storageitem_t &Item)
+{
 	//A full storage can still take an item that stacks completely onto the items already there.
 	//Check before changing anything, so that a stack is never left half stored
 	if ((int)m_Storage.size() >= STORAGE_MAX_ITEMS)

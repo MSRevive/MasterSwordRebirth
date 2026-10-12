@@ -542,6 +542,8 @@ public:
 	void Storage_CheckTeller();
 	void Storage_UpdateClient();
 	bool Storage_AddItem(CGenericItem *pItem);
+	bool Storage_AddItem(storageitem_t &Item);
+	int Storage_AddItems(const char* pszItemName, int Quantity, int Quality);
 	void Storage_RemoveItem(int Idx, int Amt);
 	void Storage_SendItemUpdate(int Idx);
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);

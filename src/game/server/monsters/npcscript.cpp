@@ -1406,6 +1406,16 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 				CallScriptEvent(Callback + "_success", &Parameters);
 			}
 		}
+		//add target itemname quantity quality
+		else if (Params.size() >= 3 && Params[0] == "add")
+		{
+			int Added = 0;
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
+			if (pTarget && pTarget->IsPlayer())
+				Added = ((CBasePlayer *)pTarget)->Storage_AddItems(Params[2], Params.size() >= 4 ? atoi(Params[3]) : 1, Params.size() >= 5 ? atoi(Params[4]) : -1);
+
+			Event.SetVar("game.ret.storage.added", UTIL_VarArgs("%i", Added));
+		}
 		else
 			ERROR_MISSING_PARMS;
 	}
