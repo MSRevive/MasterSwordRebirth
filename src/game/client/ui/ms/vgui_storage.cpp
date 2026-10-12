@@ -193,6 +193,13 @@ void CStoragePanel::ItemDoubleclicked(ulong ID)
 	gEngfuncs.pfnClientCmd(Command);
 }
 
+bool CStoragePanel::ItemClicked(void *pData)
+{
+	//Only so many items can be moved at once, so don't let more than that be selected
+	VGUI_ItemButton &ItemButton = *(VGUI_ItemButton *)pData;
+	return !ItemButton.m_Selected && (int)m_SelectedItems.size() >= STORAGE_MAX_TRANSFER;
+}
+
 //MiB FEB2008a
 bool CStoragePanel::checkValid(containeritem_t &item)
 {
@@ -230,10 +237,16 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 
 	if (m_SelectedItems.size())
 	{
+		msstring Text;
 		if (m_LastGearItem == 1)
-			m_SaleLabel->setText(msstring("Removing ") + (int)m_SelectedItems.size() + " items from storage");
+			Text = msstring("Removing ") + (int)m_SelectedItems.size() + " items from storage";
 		else
-			m_SaleLabel->setText(msstring("Moving ") + (int)m_SelectedItems.size() + " items into storage");
+			Text = msstring("Moving ") + (int)m_SelectedItems.size() + " items into storage";
+
+		if ((int)m_SelectedItems.size() >= STORAGE_MAX_TRANSFER)
+			Text += " (max)";
+
+		m_SaleLabel->setText(Text);
 		m_SaleLabel->setVisible(true);
 	}
 	else

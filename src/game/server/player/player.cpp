@@ -6746,8 +6746,52 @@ void CBasePlayer::Storage_CheckTeller()
 
 	Storage_Close();
 }
+bool CBasePlayer::Storage_CountTransfer()
+{
+	//Counts an item I'm trying to move into or out of storage.
+	//Returns false once STORAGE_MAX_TRANSFER have been moved this frame
+	if (m_CurrentStorage.TransferTime != gpGlobals->time)
+	{
+		m_CurrentStorage.TransferTime = gpGlobals->time;
+		m_CurrentStorage.Transfers = 0;
+	}
+
+	return ++m_CurrentStorage.Transfers <= STORAGE_MAX_TRANSFER;
+}
+void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
+{
+	//An item was moved into or out of my storage.  Storage_SendMoved tells me about it
+	if (In)
+	{
+		m_CurrentStorage.MovedIn++;
+		m_CurrentStorage.MovedInName = pszItemName;
+	}
+	else
+	{
+		m_CurrentStorage.MovedOut++;
+		m_CurrentStorage.MovedOutName = pszItemName;
+	}
+}
+void CBasePlayer::Storage_SendMoved()
+{
+	//One message for all of the items moved this frame, instead of one for each item
+	if (m_CurrentStorage.MovedIn == 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + m_CurrentStorage.MovedInName + " in storage");
+	else if (m_CurrentStorage.MovedIn > 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + m_CurrentStorage.MovedIn + " items in storage");
+
+	if (m_CurrentStorage.MovedOut == 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + m_CurrentStorage.MovedOutName + " from storage");
+	else if (m_CurrentStorage.MovedOut > 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + m_CurrentStorage.MovedOut + " items from storage");
+
+	m_CurrentStorage.MovedIn = m_CurrentStorage.MovedOut = 0;
+}
 void CBasePlayer::Storage_UpdateClient()
 {
+	//Done even when the storage isn't open.  Taking an item into my hands closes it
+	Storage_SendMoved();
+
 	//Send the storage items that the client doesn't know about yet.
 	//One message per frame, so that a large storage doesn't overflow the client
 	if (!m_CurrentStorage.Active)

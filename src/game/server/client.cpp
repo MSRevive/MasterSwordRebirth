@@ -938,6 +938,10 @@ void ClientCommand2(edict_t *pEntity)
 
 		if (pPlayer->m_CurrentStorage.Active)
 		{
+			//The storage panel doesn't let more than this be moved at once
+			if (!pPlayer->Storage_CountTransfer())
+				return;
+
 			if (!_stricmp(CMD_ARGV(1), "add"))
 			{
 				CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
@@ -948,7 +952,7 @@ void ClientCommand2(edict_t *pEntity)
 					if (pPlayer->Storage_AddItem(pItem))
 					{
 						pPlayer->RemoveItem(pItem);
-						pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + SPEECH::ItemName(pItem) + " in storage");
+						pPlayer->Storage_Moved(SPEECH::ItemName(pItem), true);
 						pItem->SUB_Remove();
 					}
 					else
@@ -1003,7 +1007,7 @@ void ClientCommand2(edict_t *pEntity)
 
 						if (Success)
 						{
-							pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
+							pPlayer->Storage_Moved(SPEECH::ItemName(pItem), false);
 							pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
 							if (ToHands)
 								pPlayer->Storage_Close(); //Like the inventory, taking an item into my hands closes the storage

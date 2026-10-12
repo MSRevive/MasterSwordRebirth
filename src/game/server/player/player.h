@@ -30,6 +30,7 @@
 // was 1500, but there shouldn't be any issues with increasing.
 #define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 #define STORAGE_MAX_ITEMS 100 //Max entries in a player's storage.  Stacked items share an entry
+#define STORAGE_MAX_TRANSFER 20 //Max items moved into or out of storage at once.  Each one sends the client messages, and too many overflow it
 
 enum sbar_data
 {
@@ -325,6 +326,10 @@ struct storageaccess_t
 	entityinfo_t Teller; //The entity that opened my storage.  I must stay near it to keep using it
 	msstring Callback;	 //Prefix of the script events called on the teller
 	int ClientItems;	 //Number of items in my storage that the client knows about
+	float TransferTime;	 //The frame that Transfers was counted in
+	int Transfers;		 //Number of items I tried to move into or out of storage that frame
+	int MovedIn, MovedOut;				//Items moved into and out of storage that I haven't been told about yet
+	msstring MovedInName, MovedOutName; //The last item moved each way
 };
 
 //Companion
@@ -541,6 +546,9 @@ public:
 	void Storage_Close();
 	void Storage_CheckTeller();
 	void Storage_UpdateClient();
+	bool Storage_CountTransfer();
+	void Storage_Moved(const char* pszItemName, bool In);
+	void Storage_SendMoved();
 	bool Storage_AddItem(CGenericItem *pItem);
 	bool Storage_AddItem(storageitem_t &Item);
 	int Storage_AddItems(const char* pszItemName, int Quantity, int Quality);
