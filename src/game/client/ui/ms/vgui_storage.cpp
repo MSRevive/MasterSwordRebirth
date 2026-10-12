@@ -106,6 +106,7 @@ void CStoragePanel::AddInventoryItems()
 
 	return;
 }
+
 void CStoragePanel::Update()
 {
 	if (!player.m_CurrentStorage.Active)
@@ -117,7 +118,7 @@ void CStoragePanel::Update()
 
 	CStorePanel::Update();
 
-	m_pTitle->setText(player.m_CurrentStorage.DisplayName);
+	m_pTitle->setText(player.m_CurrentStorage.DisplayName + " (" + (int)player.m_Storage.size() + "/" + STORAGE_MAX_ITEMS + ")");
 }
 
 void CStoragePanel::GearItemSelected(ulong ID)
