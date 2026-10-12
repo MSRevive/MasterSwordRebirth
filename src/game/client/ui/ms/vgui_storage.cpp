@@ -118,7 +118,7 @@ void CStoragePanel::Update()
 
 	CStorePanel::Update();
 
-	m_pTitle->setText(player.m_CurrentStorage.DisplayName + " (" + (int)player.m_Storage.size() + "/" + STORAGE_MAX_ITEMS + ")");
+	m_pTitle->setText(player.m_CurrentStorage.DisplayName + " (" + player.Storage_ItemCount() + "/" + STORAGE_MAX_ITEMS + ")");
 }
 
 void CStoragePanel::GearItemSelected(ulong ID)

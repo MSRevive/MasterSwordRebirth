@@ -316,7 +316,7 @@ struct storageitem_t
 {
 	ulong ID;				 //Unique within the storage.  Not saved
 	msstring Name;			 //Item script name
-	unsigned short Quantity; //For a groupable item, the size of the stack.  Otherwise 1
+	unsigned short Quantity; //How many are in the stack
 	unsigned short Quality, MaxQuality;
 };
 struct storageaccess_t
@@ -648,6 +648,7 @@ public:
 	void SetKeys();
 	void BlockButton(int Button);
 	static bool Storage_CanStoreItem(const char* pszItemName, int Properties); //Whether this kind of item is allowed in storage
+	int Storage_ItemCount();												   //How much of STORAGE_MAX_ITEMS is used
 	void InitialSpawn(void);
 	bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event);
 	const char *GetPartyName();

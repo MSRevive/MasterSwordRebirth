@@ -6845,12 +6845,16 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 
 	bool Groupable = FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
 
+	//Only add as many as there's room for, instead of none at all
+	if (!Groupable)
+		Quantity = V_min(Quantity, STORAGE_MAX_ITEMS - Storage_ItemCount());
+
 	int Added = 0;
 	while (Added < Quantity)
 	{
 		storageitem_t Item;
 		Item.Name = pGlobalItem->ItemName;
-		Item.Quantity = Groupable ? V_min(Quantity - Added, NUM_MAX_STACK) : 1;
+		Item.Quantity = V_min(Quantity - Added, NUM_MAX_STACK);
 		Item.Quality = Quality >= 0 ? Quality : pGlobalItem->Quality;
 		Item.MaxQuality = pGlobalItem->MaxQuality;
 
@@ -6865,14 +6869,18 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 }
 bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
 {
-	//Only groupable items stack.  Anything else always becomes a new item in storage.
-	//A full storage can still take an item that stacks completely onto the items already there.
+	//Identical items stack, but only a stack of groupable items counts once towards the max.
+	//Anything else counts for each item in the stack, so it needs room even when it stacks.
 	//Check before changing anything, so that a stack is never left half stored
-	if ((int)m_Storage.size() >= STORAGE_MAX_ITEMS)
+	int Count = Storage_ItemCount();
+	if (!Groupable)
 	{
-		if (!Groupable)
+		if (Count + (int)Item.Quantity > STORAGE_MAX_ITEMS)
 			return false;
-
+	}
+	else if (Count >= STORAGE_MAX_ITEMS)
+	{
+		//A full storage can still take a groupable item that stacks completely onto the items already there
 		int Room = 0;
 		for (int i = 0; i < m_Storage.size(); i++)
 			Room += Storage_StackRoom(m_Storage[i], Item);
@@ -6881,7 +6889,7 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
 			return false;
 	}
 
-	for (int i = 0; Groupable && i < m_Storage.size() && Item.Quantity; i++)
+	for (int i = 0; i < m_Storage.size() && Item.Quantity; i++)
 	{
 		int Amt = V_min((int)Item.Quantity, Storage_StackRoom(m_Storage[i], Item));
 		if (Amt <= 0)

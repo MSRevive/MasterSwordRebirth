@@ -1408,6 +1408,22 @@ bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 	return true;
 }
 
+int CBasePlayer::Storage_ItemCount()
+{
+	//How much of STORAGE_MAX_ITEMS is used.  A stack of groupable items only counts once
+	int Count = 0;
+	for (int i = 0; i < m_Storage.size(); i++)
+	{
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		if (pGlobalItem && FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE))
+			Count++;
+		else
+			Count += m_Storage[i].Quantity;
+	}
+
+	return Count;
+}
+
 bool CBasePlayer::Script_SetupEvent(CScript* Script, SCRIPT_EVENT& Event)
 {
 	//SetScriptVar( "game.monster.current_anim.uselegs", strlen(m_szAnimLegs) > 0 );
