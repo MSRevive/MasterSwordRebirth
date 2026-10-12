@@ -641,6 +641,23 @@ VGUI_Container::~VGUI_Container( )
 	delete m_pScrollPanel;*/
 }
 
+// Gets the item actual name instead of amount for sorting
+static const char *AlphaSortName(const char *pszName)
+{
+	const char *pszSort = pszName;
+	while (*pszSort >= '0' && *pszSort <= '9')
+		pszSort++;
+
+	// Only a number followed by a space is a quantity
+	if (pszSort == pszName || *pszSort != ' ')
+		return pszName;
+
+	while (*pszSort == ' ')
+		pszSort++;
+
+	return *pszSort ? pszSort : pszName;
+}
+
 VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 {
 	if (m_ItemButtonTotal >= m_InitializedItemButtons)
@@ -659,13 +676,15 @@ VGUI_ItemButton *VGUI_Container::AddItem(containeritem_t &Item)
 	if (m_ItemButtonTotal > 0)
 	{
 		msstring sNewItemName = Item.getFullName();
+		const char *pszNewSortName = AlphaSortName(sNewItemName.c_str());
 
 		// Binary search to find the insertion point
 		int lo = 0, hi = m_ItemButtonTotal - 1;
 		while (lo <= hi)
 		{
 			int mid = lo + (hi - lo) / 2;
-			if (_stricmp(m_AlphabetizedItemButtons[mid]->m_Data.getFullName().c_str(), sNewItemName) <= 0)
+			if (_stricmp(AlphaSortName(m_AlphabetizedItemButtons[mid]->m_Data.getFullName().c_str()), pszNewSortName) <= 0)
+			//if (_stricmp(m_AlphabetizedItemButtons[mid]->m_Data.getFullName().c_str(), sNewItemName) <= 0)
 				lo = mid + 1;
 			else
 				hi = mid - 1;
