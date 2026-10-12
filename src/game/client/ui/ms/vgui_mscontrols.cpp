@@ -299,12 +299,14 @@ class CHandler_ItemButton : public InputSignal
 private:
 	VGUI_ItemButton *m_pItemButton;
 	VGUI_DoubleClickDetector *mpDoubleClickDetector;
+	ulong mLastClickedID;
 
 public:
 	CHandler_ItemButton(VGUI_ItemButton *pItemButton, VGUI_DoubleClickDetector* pDoubleClickDetector)
 	{
 		m_pItemButton = pItemButton;
 		mpDoubleClickDetector = pDoubleClickDetector;
+		mLastClickedID = 0;
 	}
 		
 	void cursorEntered(Panel *panel) { m_pItemButton->Highlight(true); }
@@ -313,7 +315,11 @@ public:
 	{ 
 		if (code == MOUSE_LEFT)
 		{
-			if ( mpDoubleClickDetector->Click(this, code) && m_pItemButton->m_Selected)
+			ulong vID = m_pItemButton->m_Data.ID;
+			bool bDoubleClicked = mpDoubleClickDetector->Click(this, code) && vID == mLastClickedID;
+			mLastClickedID = vID;
+
+			if ( bDoubleClicked )
 			{
 				m_pItemButton->Doubleclicked( );
 			}
