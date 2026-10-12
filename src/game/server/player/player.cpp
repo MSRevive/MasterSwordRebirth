@@ -6475,6 +6475,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	//Read storage items
 	m_Storage = Data.m_Storage; //Sent to the client when the storage is opened
+	Storage_CombineSwigs();
 
 	//Read Companions
 
@@ -6835,7 +6836,7 @@ bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 	Item.Quality = pItem->Quality;
 	Item.MaxQuality = pItem->MaxQuality;
 
-	return Storage_AddItem(Item, Groupable);
+	return Storage_AddItem(Item, pItem->MSProperties());
 }
 int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Quality)
 {
@@ -6843,10 +6844,19 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 	if (!pGlobalItem || !Storage_CanStoreItem(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
 		return 0;
 
-	bool Groupable = FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
+	int Properties = pGlobalItem->MSProperties();
+	if (Quality < 0)
+		Quality = pGlobalItem->Quality;
 
 	//Only add as many as there's room for, instead of none at all
-	if (!Groupable)
+	if (Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), Properties))
+	{
+		if (Quality <= 0)
+			return 0;
+
+		Quantity = V_min(Quantity, Storage_SwigRoom(pGlobalItem->ItemName.c_str()) / Quality);
+	}
+	else if (!FBitSet(Properties, ITEM_GROUPABLE))
 		Quantity = V_min(Quantity, STORAGE_MAX_ITEMS - Storage_ItemCount());
 
 	int Added = 0;
@@ -6855,11 +6865,11 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 		storageitem_t Item;
 		Item.Name = pGlobalItem->ItemName;
 		Item.Quantity = V_min(Quantity - Added, NUM_MAX_STACK);
-		Item.Quality = Quality >= 0 ? Quality : pGlobalItem->Quality;
+		Item.Quality = Quality;
 		Item.MaxQuality = pGlobalItem->MaxQuality;
 
 		int Amt = Item.Quantity; //Storage_AddItem changes the quantity
-		if (!Storage_AddItem(Item, Groupable))
+		if (!Storage_AddItem(Item, Properties))
 			break;
 
 		Added += Amt;
@@ -6867,8 +6877,78 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 
 	return Added;
 }
-bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
+int CBasePlayer::Storage_SwigRoom(const char* pszItemName)
 {
+	//How many more swigs of a mana potion fit in my storage.
+	//The ones already in storage get filled first, and then each new one holds up to STORAGE_MAX_SWIGS
+	int Room = V_max(STORAGE_MAX_ITEMS - Storage_ItemCount(), 0) * STORAGE_MAX_SWIGS;
+	for (int i = 0; i < m_Storage.size(); i++)
+		if (m_Storage[i].Name == pszItemName)
+			Room += V_max(STORAGE_MAX_SWIGS - (int)m_Storage[i].Quality, 0);
+
+	return Room;
+}
+void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
+{
+	//Adds the swigs of a mana potion to my storage.  Doesn't check for room, Storage_SwigRoom does
+	for (int i = 0; i < m_Storage.size() && Swigs > 0; i++)
+	{
+		if (m_Storage[i].Name != pszItemName)
+			continue;
+
+		int Amt = V_min(Swigs, STORAGE_MAX_SWIGS - (int)m_Storage[i].Quality);
+		if (Amt <= 0)
+			continue;
+
+		m_Storage[i].Quality += Amt;
+		Swigs -= Amt;
+		Storage_SendItemUpdate(i);
+	}
+
+	while (Swigs > 0)
+	{
+		storageitem_t Item;
+		Item.Name = pszItemName;
+		Item.Quantity = 1;
+		Item.Quality = V_min(Swigs, STORAGE_MAX_SWIGS);
+		Item.MaxQuality = 0;
+
+		Swigs -= Item.Quality;
+		Storage_NewItem(Item);
+	}
+}
+void CBasePlayer::Storage_CombineSwigs()
+{
+	//Storage saved before mana potions were kept by their swigs has them stacked like any other item.
+	//Take them all out and put their swigs back in.  Nothing is lost, even if it goes over STORAGE_MAX_ITEMS
+	mslist<storageitem_t> Potions;
+	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
+	{
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		if (!pGlobalItem || !Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
+			continue;
+
+		Potions.add(m_Storage[i]);
+		m_Storage.erase(i);
+	}
+
+	for (int i = 0; i < Potions.size(); i++)
+		Storage_PutSwigs(Potions[i].Name, (int)Potions[i].Quantity * (int)Potions[i].Quality);
+}
+bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
+{
+	if (Storage_CombinesSwigs(Item.Name.c_str(), Properties))
+	{
+		int Swigs = (int)Item.Quantity * (int)Item.Quality;
+		if (Swigs > Storage_SwigRoom(Item.Name))
+			return false;
+
+		Storage_PutSwigs(Item.Name, Swigs);
+		return true;
+	}
+
+	bool Groupable = FBitSet(Properties, ITEM_GROUPABLE) ? true : false;
+
 	//Identical items stack, but only a stack of groupable items counts once towards the max.
 	//Anything else counts for each item in the stack, so it needs room even when it stacks.
 	//Check before changing anything, so that a stack is never left half stored
@@ -6900,10 +6980,15 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
 		Storage_SendItemUpdate(i);
 	}
 
-	if (!Item.Quantity)
-		return true;
+	//What's left becomes a new item in storage
+	if (Item.Quantity)
+		Storage_NewItem(Item);
 
-	//What's left becomes a new item in storage.  Determine a unique ID for it
+	return true;
+}
+void CBasePlayer::Storage_NewItem(storageitem_t &Item)
+{
+	//Determine a unique ID for it
 	for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
 	{
 		bool Duplicate = false;
@@ -6920,12 +7005,11 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, bool Groupable)
 	}
 
 	m_Storage.add(Item); //Storage_UpdateClient sends it
-	return true;
 }
 void CBasePlayer::Storage_SendItemUpdate(int Idx)
 {
-	//The quantity of an item in my storage changed.
-	//Items past ClientItems haven't been sent yet, so they get sent with the new quantity
+	//The quantity or quality of an item in my storage changed.
+	//Items past ClientItems haven't been sent yet, so they get sent with the new amounts
 	if (Idx >= m_CurrentStorage.ClientItems)
 		return;
 
@@ -6933,6 +7017,7 @@ void CBasePlayer::Storage_SendItemUpdate(int Idx)
 	WRITE_BYTE(4); //update storage item
 	WRITE_LONG(m_Storage[Idx].ID);
 	WRITE_SHORT(m_Storage[Idx].Quantity);
+	WRITE_SHORT(m_Storage[Idx].Quality);
 	MESSAGE_END();
 }
 void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
@@ -6957,6 +7042,18 @@ void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 	}
 
 	m_Storage.erase(Idx);
+}
+void CBasePlayer::Storage_RemoveSwigs(int Idx, int Amt)
+{
+	//Takes Amt swigs out of a mana potion in my storage.  It stays in storage until its swigs run out
+	if (m_Storage[Idx].Quality > Amt)
+	{
+		m_Storage[Idx].Quality -= Amt;
+		Storage_SendItemUpdate(Idx);
+		return;
+	}
+
+	Storage_RemoveItem(Idx, m_Storage[Idx].Quantity);
 }
 
 void CBasePlayer::SaveChar()

@@ -95,6 +95,10 @@ void CStoragePanel::AddInventoryItems()
 		vNewItem.ID = Item.ID;
 		vNewItem.Quantity = Item.Quantity;
 		vNewItem.Quality = Item.Quality;
+		if (CBasePlayer::Storage_CombinesSwigs(Item.Name.c_str(), vNewItem.Properties))
+			vNewItem.MaxQuality = STORAGE_MAX_SWIGS; //Shown as how full it is, instead of against one potion
+		else if (Item.MaxQuality)
+			vNewItem.MaxQuality = Item.MaxQuality;
 		if (Item.Quantity > 1)
 			vNewItem.setFullName(msstring() + (int)Item.Quantity + " " + pGlobalItem->DisplayName() + "s"); //Named the way SPEECH::ItemName does
 
@@ -333,15 +337,17 @@ void Storage_ItemRemoveMsg()
 	Storage_Update();
 }
 
-//The quantity of an item in my storage changed
+//The quantity or quality of an item in my storage changed
 void Storage_ItemUpdateMsg()
 {
 	ulong ID = READ_LONG();
 	int Quantity = READ_SHORT();
+	int Quality = READ_SHORT();
 	for (int i = 0; i < player.m_Storage.size(); i++)
 		if (player.m_Storage[i].ID == ID)
 		{
 			player.m_Storage[i].Quantity = Quantity;
+			player.m_Storage[i].Quality = Quality;
 			break;
 		}
 

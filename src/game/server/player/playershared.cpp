@@ -1408,6 +1408,11 @@ bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 	return true;
 }
 
+bool CBasePlayer::Storage_CombinesSwigs(const char* pszItemName, int Properties)
+{
+	return FBitSet(Properties, ITEM_DRINKABLE) && !strncmp(pszItemName, "mana_", 5);
+}
+
 int CBasePlayer::Storage_ItemCount()
 {
 	//How much of STORAGE_MAX_ITEMS is used.  A stack of groupable items only counts once

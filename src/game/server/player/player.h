@@ -31,6 +31,7 @@
 #define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 #define STORAGE_MAX_ITEMS 300
 #define STORAGE_MAX_TRANSFER 20
+#define STORAGE_MAX_SWIGS 30
 
 enum sbar_data
 {
@@ -550,10 +551,15 @@ public:
 	void Storage_Moved(const char* pszItemName, bool In);
 	void Storage_SendMoved();
 	bool Storage_AddItem(CGenericItem *pItem);
-	bool Storage_AddItem(storageitem_t &Item, bool Groupable);
+	bool Storage_AddItem(storageitem_t &Item, int Properties);
 	int Storage_AddItems(const char* pszItemName, int Quantity, int Quality);
+	void Storage_NewItem(storageitem_t &Item);
 	void Storage_RemoveItem(int Idx, int Amt);
 	void Storage_SendItemUpdate(int Idx);
+	int Storage_SwigRoom(const char* pszItemName);
+	void Storage_PutSwigs(const char* pszItemName, int Swigs);
+	void Storage_RemoveSwigs(int Idx, int Amt);
+	void Storage_CombineSwigs();
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, const char* Name, const char* Data);
@@ -648,6 +654,7 @@ public:
 	void SetKeys();
 	void BlockButton(int Button);
 	static bool Storage_CanStoreItem(const char* pszItemName, int Properties); //Whether this kind of item is allowed in storage
+	static bool Storage_CombinesSwigs(const char* pszItemName, int Properties); //Whether this kind of item is kept in storage by its swigs
 	int Storage_ItemCount();												   //How much of STORAGE_MAX_ITEMS is used
 	void InitialSpawn(void);
 	bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event);

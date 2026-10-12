@@ -987,8 +987,21 @@ void ClientCommand2(edict_t *pEntity)
 							Amt = pStorageItem->Quantity;
 							pItem->iQuantity = Amt;
 						}
-						pItem->Quality = pStorageItem->Quality;
-						pItem->MaxQuality = pStorageItem->MaxQuality;
+
+						//A mana potion comes out full, or with whatever swigs are left in storage
+						bool Swigs = CBasePlayer::Storage_CombinesSwigs(pStorageItem->Name.c_str(), pItem->MSProperties());
+						int SwigAmt = pStorageItem->Quality;
+						if (Swigs)
+						{
+							if (pItem->Quality > 0)
+								SwigAmt = V_min(SwigAmt, (int)pItem->Quality);
+							pItem->Quality = SwigAmt;
+						}
+						else
+						{
+							pItem->Quality = pStorageItem->Quality;
+							pItem->MaxQuality = pStorageItem->MaxQuality;
+						}
 
 						int ContainerID = atol(CMD_ARGV(3));
 						bool ToHands = !_stricmp(CMD_ARGV(3), "hands"); //Sent when an item in storage is double clicked
@@ -1008,7 +1021,10 @@ void ClientCommand2(edict_t *pEntity)
 						if (Success)
 						{
 							pPlayer->Storage_Moved(SPEECH::ItemName(pItem), false);
-							pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
+							if (Swigs)
+								pPlayer->Storage_RemoveSwigs(StorageItemIdx, SwigAmt);
+							else
+								pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
 							if (ToHands)
 								pPlayer->Storage_Close(); //Like the inventory, taking an item into my hands closes the storage
 						}
