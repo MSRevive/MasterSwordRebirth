@@ -308,8 +308,15 @@ struct genericitem_full_t : genericitem_t
 	byte Hand;
 	float Spell_TimePrepare;
 	byte Spell_CastSuccess;
-	unsigned short Count; //Storage only: identical items stacked in this entry.  Groupable items stack by Quantity instead
 	mslist<genericitem_full_t> ContainerItems;
+};
+//An item in storage.  Only what's needed to create the item again is kept
+struct storageitem_t
+{
+	ulong ID;				 //Unique within the storage.  Not saved
+	msstring Name;			 //Item script name
+	unsigned short Quantity; //How many.  For a groupable item, the size of the stack
+	unsigned short Quality, MaxQuality;
 };
 struct storageaccess_t
 {
@@ -360,7 +367,7 @@ struct chardata_t : savedata_t
 	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
 	std::vector<std::string> m_Spells;	//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
-	mslist<genericitem_full_t> m_Storage; //All items in storage
+	mslist<storageitem_t> m_Storage;	//All items in storage
 	mslist<companion_t> m_Companions;	//Companions
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
@@ -430,7 +437,7 @@ public:
 	float m_TimeCanVote;
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
-	mslist<genericitem_full_t> m_Storage; //Items I have in storage
+	mslist<storageitem_t> m_Storage;	  //Items I have in storage
 	storageaccess_t m_CurrentStorage;	  //Set while I have my storage open
 	bool m_Initialized;				  //Whether stats were created, script loaded, etc
 	float m_TimeNextSave;
@@ -532,8 +539,8 @@ public:
 	void Storage_Close();
 	void Storage_CheckTeller();
 	void Storage_UpdateClient();
-	bool Storage_AddItem(genericitem_full_t &Item);
-	void Storage_RemoveItem(int Idx);
+	bool Storage_AddItem(CGenericItem *pItem);
+	void Storage_RemoveItem(int Idx, int Amt);
 	void Storage_SendItemUpdate(int Idx);
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);

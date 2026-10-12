@@ -6682,7 +6682,7 @@ bool CBasePlayer::IsInAttackStance()
 	return false;
 }
 #define STORAGE_TELLER_RANGE 128 //Same range as CMSMonster::Trade
-#define STORAGE_ITEMS_PER_MSG 7	 //2 + (7 * 25 bytes max per item) = 177, which fits in MAX_USERMESSAGE_SIZE
+#define STORAGE_ITEMS_PER_MSG 13 //2 + (13 * 14 bytes per item) = 184, which fits in MAX_USERMESSAGE_SIZE
 
 void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller)
 {
@@ -6738,35 +6738,34 @@ void CBasePlayer::Storage_UpdateClient()
 	WRITE_BYTE(Count);
 	for (int i = 0; i < Count; i++)
 	{
-		genericitem_full_t &Item = m_Storage[m_CurrentStorage.ClientItems + i];
-		SendGenericItem(this, Item, false);
-		WRITE_SHORT(Item.Count);
+		storageitem_t &Item = m_Storage[m_CurrentStorage.ClientItems + i];
+		WRITE_LONG(Item.ID);
+		WRITE_LONG(CGenericItemMgr::LookUpItemIdx(Item.Name));
+		WRITE_SHORT(Item.Quantity);
+		WRITE_SHORT(Item.Quality);
+		WRITE_SHORT(Item.MaxQuality);
 	}
 	MESSAGE_END();
 
 	m_CurrentStorage.ClientItems += Count;
 }
-//How many more of Item can stack onto Cur, an item already in storage.  0 if they aren't identical.
-//Groupable items stack by quantity, like they do in a pack.  Everything else stacks by count.
-//Containers don't stack, because of the items inside them
-static int Storage_StackRoom(genericitem_full_t &Cur, genericitem_full_t &Item)
+//How many more of Item can stack onto Cur, an item already in storage.  0 if they aren't identical
+static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 {
-	if (FBitSet(Item.Properties, ITEM_CONTAINER) || Cur.Name != Item.Name || Cur.Properties != Item.Properties)
+	if (Cur.Name != Item.Name || Cur.Quality != Item.Quality || Cur.MaxQuality != Item.MaxQuality)
 		return 0;
 
-	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
-		return V_max(NUM_MAX_STACK - (int)Cur.Quantity, 0);
-
-	if (Cur.Quality != Item.Quality || Cur.MaxQuality != Item.MaxQuality)
-		return 0;
-
-	return V_max(NUM_MAX_STACK - (int)Cur.Count, 0);
+	return V_max(NUM_MAX_STACK - (int)Cur.Quantity, 0);
 }
-bool CBasePlayer::Storage_AddItem(genericitem_full_t &Item)
+bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 {
 	//Adds an item to my storage, stacking it with identical items.
 	//Returns false if the storage is full
-	bool Groupable = FBitSet(Item.Properties, ITEM_GROUPABLE) ? true : false;
+	storageitem_t Item;
+	Item.Name = pItem->ItemName;
+	Item.Quantity = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? V_max(pItem->iQuantity, 1) : 1;
+	Item.Quality = pItem->Quality;
+	Item.MaxQuality = pItem->MaxQuality;
 
 	//A full storage can still take an item that stacks completely onto the items already there.
 	//Check before changing anything, so that a stack is never left half stored
@@ -6776,38 +6775,25 @@ bool CBasePlayer::Storage_AddItem(genericitem_full_t &Item)
 		for (int i = 0; i < m_Storage.size(); i++)
 			Room += Storage_StackRoom(m_Storage[i], Item);
 
-		if (Room < (Groupable ? (int)Item.Quantity : 1))
+		if (Room < (int)Item.Quantity)
 			return false;
 	}
 
-	for (int i = 0; i < m_Storage.size(); i++)
+	for (int i = 0; i < m_Storage.size() && Item.Quantity; i++)
 	{
-		genericitem_full_t &Cur = m_Storage[i];
-		int Room = Storage_StackRoom(Cur, Item);
-		if (Room <= 0)
+		int Amt = V_min((int)Item.Quantity, Storage_StackRoom(m_Storage[i], Item));
+		if (Amt <= 0)
 			continue;
 
-		if (Groupable)
-		{
-			int Amt = V_min((int)Item.Quantity, Room);
-			if (Amt <= 0)
-				continue;
-
-			Cur.Quantity += Amt;
-			Item.Quantity -= Amt;
-			Storage_SendItemUpdate(i);
-			if (!Item.Quantity)
-				return true;
-		}
-		else
-		{
-			Cur.Count++;
-			Storage_SendItemUpdate(i);
-			return true;
-		}
+		m_Storage[i].Quantity += Amt;
+		Item.Quantity -= Amt;
+		Storage_SendItemUpdate(i);
 	}
 
-	//Determine a unique ID for the item in storage
+	if (!Item.Quantity)
+		return true;
+
+	//What's left becomes a new item in storage.  Determine a unique ID for it
 	for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
 	{
 		bool Duplicate = false;
@@ -6823,14 +6809,13 @@ bool CBasePlayer::Storage_AddItem(genericitem_full_t &Item)
 		break;
 	}
 
-	Item.Count = 1;
 	m_Storage.add(Item); //Storage_UpdateClient sends it
 	return true;
 }
 void CBasePlayer::Storage_SendItemUpdate(int Idx)
 {
-	//The amount of an item in my storage changed.
-	//Items past ClientItems haven't been sent yet, so they get sent with the new amount
+	//The quantity of an item in my storage changed.
+	//Items past ClientItems haven't been sent yet, so they get sent with the new quantity
 	if (Idx >= m_CurrentStorage.ClientItems)
 		return;
 
@@ -6838,15 +6823,14 @@ void CBasePlayer::Storage_SendItemUpdate(int Idx)
 	WRITE_BYTE(4); //update storage item
 	WRITE_LONG(m_Storage[Idx].ID);
 	WRITE_SHORT(m_Storage[Idx].Quantity);
-	WRITE_SHORT(m_Storage[Idx].Count);
 	MESSAGE_END();
 }
-void CBasePlayer::Storage_RemoveItem(int Idx)
+void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 {
-	//Removes one item from my storage.  If it was stacked by count, the rest of the stack stays
-	if (m_Storage[Idx].Count > 1)
+	//Takes Amt of an item out of my storage.  The item stays in storage until its quantity runs out
+	if (m_Storage[Idx].Quantity > Amt)
 	{
-		m_Storage[Idx].Count--;
+		m_Storage[Idx].Quantity -= Amt;
 		Storage_SendItemUpdate(Idx);
 		return;
 	}

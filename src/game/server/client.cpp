@@ -945,8 +945,7 @@ void ClientCommand2(edict_t *pEntity)
 					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't put ") + SPEECH::ItemName(pItem) + " in storage");
 				else if (pItem)
 				{
-					genericitem_full_t Item(pItem);
-					if (pPlayer->Storage_AddItem(Item))
+					if (pPlayer->Storage_AddItem(pItem))
 					{
 						pPlayer->RemoveItem(pItem);
 						pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + SPEECH::ItemName(pItem) + " in storage");
@@ -962,7 +961,7 @@ void ClientCommand2(edict_t *pEntity)
 					return;
 
 				int ItemID = atoi(CMD_ARGV(2));
-				genericitem_full_t *pStorageItem = NULL;
+				storageitem_t *pStorageItem = NULL;
 				int StorageItemIdx = 0;
 				for (unsigned int i = 0; i < pPlayer->m_Storage.size(); i++)
 					if (pPlayer->m_Storage[i].ID == ItemID)
@@ -974,18 +973,18 @@ void ClientCommand2(edict_t *pEntity)
 
 				if (pStorageItem)
 				{
-					//Create it as a new item, without the location and hand it had when it was stored
-					CGenericItem *pItem = pStorageItem->genericitem_t::operator CGenericItem *();
+					CGenericItem *pItem = NewGenericItem(pStorageItem->Name);
 					if (pItem)
 					{
-						//If it's a container, put back the items that were inside it
-						if (FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
-							for (int i = 0; i < pStorageItem->ContainerItems.size(); i++)
-							{
-								CGenericItem *pContainedItem = pStorageItem->ContainerItems[i];
-								if (pContainedItem && !pItem->Container_AddItem(pContainedItem))
-									pContainedItem->SUB_Remove();
-							}
+						//A groupable item comes out as the whole stack.  Anything else comes out one at a time
+						int Amt = 1;
+						if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE))
+						{
+							Amt = pStorageItem->Quantity;
+							pItem->iQuantity = Amt;
+						}
+						pItem->Quality = pStorageItem->Quality;
+						pItem->MaxQuality = pStorageItem->MaxQuality;
 
 						int ContainerID = atol(CMD_ARGV(3));
 						bool Success = false;
@@ -1002,7 +1001,7 @@ void ClientCommand2(edict_t *pEntity)
 						if (Success)
 						{
 							pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
-							pPlayer->Storage_RemoveItem(StorageItemIdx);
+							pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
 						}
 						else
 							pItem->SUB_Remove();

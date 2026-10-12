@@ -257,7 +257,6 @@ static void ReadItemListPack(const msgpack::object &Obj, mslist<genericitem_full
 static bool ReadItemPack(const msgpack::object &Obj, genericitem_full_t &outItem)
 {
 	clrmem(outItem);
-	outItem.Count = 1;
 
 	msgpack::object_map Fields = PackMap(Obj);
 	for (uint32_t f = 0; f < Fields.size; f++)
@@ -274,7 +273,6 @@ static bool ReadItemPack(const msgpack::object &Obj, genericitem_full_t &outItem
 		case CI_MAXQUALITY: outItem.MaxQuality = (unsigned short)PackReadInt(Value); break;
 		case CI_QUANTITY: outItem.Quantity = (unsigned short)PackReadInt(Value); break;
 		case CI_CONTENTS: ReadItemListPack(Value, outItem.ContainerItems); break;
-		case CI_COUNT: outItem.Count = (unsigned short)PackReadInt(Value); break;
 		}
 	}
 
@@ -384,7 +382,6 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
 			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
 			case CF_ITEMS: ReadItemListPack(Value, m_Items); break;
-			case CF_STORAGE: ReadItemListPack(Value, m_Storage); break;
 
 			case CF_SKILLS:
 			{
@@ -416,23 +413,36 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 				break;
 			}
 
-			case CF_STORAGES:
+			case CF_STORAGE:
 			{
-				//RETIRED: storage used to be split into named storages.  Move all of their items into the one storage
-				msgpack::object_array Storages = PackArray(Value);
-				for (uint32_t s = 0; s < Storages.size; s++)
+				msgpack::object_array Items = PackArray(Value);
+				for (uint32_t i = 0; i < Items.size; i++)
 				{
-					mslist<genericitem_full_t> Items;
-					msgpack::object_map Fields = PackMap(Storages.ptr[s]);
-					for (uint32_t f = 0; f < Fields.size; f++)
-						if (PackReadInt(Fields.ptr[f].key, -1) == CS_ITEMS)
-							ReadItemListPack(Fields.ptr[f].val, Items);
+					storageitem_t Item;
+					Item.Quantity = Item.Quality = Item.MaxQuality = 0;
 
-					for (int i = 0; i < Items.size(); i++)
+					msgpack::object_map Fields = PackMap(Items.ptr[i]);
+					for (uint32_t f = 0; f < Fields.size; f++)
 					{
-						Items[i].ID = m_Storage.size(); //The IDs were only unique within each named storage
-						m_Storage.add(Items[i]);
+						const msgpack::object &FieldValue = Fields.ptr[f].val;
+						switch (PackReadInt(Fields.ptr[f].key, -1))
+						{
+						case CSI_NAME: Item.Name = PackReadMsStr(FieldValue); break;
+						case CSI_QUANTITY: Item.Quantity = (unsigned short)PackReadInt(FieldValue); break;
+						case CSI_QUALITY: Item.Quality = (unsigned short)PackReadInt(FieldValue); break;
+						case CSI_MAXQUALITY: Item.MaxQuality = (unsigned short)PackReadInt(FieldValue); break;
+						}
 					}
+
+					if (!Item.Name.len() || !Item.Quantity)
+					{
+						MS_ERROR("ReadCharData: Bad storage item, skipping...");
+						continue;
+					}
+
+					ApplyItemAlias(Item.Name);
+					Item.ID = m_Storage.size(); //IDs aren't saved.  They only have to be unique
+					m_Storage.add(Item);
 				}
 				break;
 			}
@@ -1003,9 +1013,6 @@ static bool PackItem(charpack_t &Out, genericitem_full_t &Item)
 	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
 		Fields.Field(CI_QUANTITY, Item.Quantity);
 
-	if (Item.Count > 1)
-		Fields.Field(CI_COUNT, Item.Count);
-
 	if (FBitSet(Item.Properties, ITEM_CONTAINER))
 	{
 		Fields.Key(CI_CONTENTS);
@@ -1105,11 +1112,16 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 
 	//Storage items
 	Root.Key(CF_STORAGE);
+	Out.Pk.pack_array(pPlayer->m_Storage.size());
+	for (int i = 0; i < pPlayer->m_Storage.size(); i++)
 	{
-		CPackScope Items(Out, false);
-		for (int i = 0; i < pPlayer->m_Storage.size(); i++)
-			if (PackItem(Out, pPlayer->m_Storage[i]))
-				Items.Added();
+		storageitem_t &Item = pPlayer->m_Storage[i];
+
+		CPackScope Fields(Out, true);
+		Fields.FieldStr(CSI_NAME, Item.Name);
+		Fields.Field(CSI_QUANTITY, Item.Quantity);
+		Fields.Field(CSI_QUALITY, Item.Quality);
+		Fields.Field(CSI_MAXQUALITY, Item.MaxQuality);
 	}
 
 	//Companions - save any variables that start with "companion.save."

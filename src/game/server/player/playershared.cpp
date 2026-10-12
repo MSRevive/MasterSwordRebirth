@@ -1395,8 +1395,8 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 
 bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 {
-	//Spells aren't saved with the character
-	if (FBitSet(Properties, ITEM_SPELL))
+	//Spells aren't saved with the character, and storage doesn't keep what's inside a container
+	if (FBitSet(Properties, ITEM_SPELL | ITEM_CONTAINER))
 		return false;
 
 	//MiB FEB2008a - the bank mask

@@ -84,19 +84,19 @@ void CStoragePanel::AddInventoryItems()
 	//Add the storage items
 	for (int i = 0; i < player.m_Storage.size(); i++)
 	{
-		genericitem_full_t &Item = player.m_Storage[i];
-		containeritem_t vNewItem = containeritem_t(Item);
+		storageitem_t &Item = player.m_Storage[i];
 
-		//Groupable items are stacked by quantity, everything else by count
-		int Amt = FBitSet(Item.Properties, ITEM_GROUPABLE) ? Item.Quantity : Item.Count;
-		vNewItem.Quantity = Amt;
-		if (Amt > 1)
-		{
-			//The item's name comes from the global item, which doesn't know the amount.  Name it the way SPEECH::ItemName does
-			CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(Item.Name, true);
-			if (pGlobalItem)
-				vNewItem.setFullName(msstring() + Amt + " " + pGlobalItem->DisplayName() + "s");
-		}
+		//Storage only knows the item's name, so the rest comes from the global item
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(Item.Name, true);
+		if (!pGlobalItem)
+			continue;
+
+		containeritem_t vNewItem = containeritem_t(pGlobalItem);
+		vNewItem.ID = Item.ID;
+		vNewItem.Quantity = Item.Quantity;
+		vNewItem.Quality = Item.Quality;
+		if (Item.Quantity > 1)
+			vNewItem.setFullName(msstring() + (int)Item.Quantity + " " + pGlobalItem->DisplayName() + "s"); //Named the way SPEECH::ItemName does
 
 		pGearItemButton->m_ItemContainer->AddItem(vNewItem);
 	}
@@ -274,11 +274,19 @@ void Storage_ItemMsg()
 	int Count = READ_BYTE();
 	for (int i = 0; i < Count; i++)
 	{
-		genericitem_full_t Item;
-		bool Valid = ReadGenericItem(Item);
-		Item.Count = READ_SHORT(); //Always read, so the next item can still be read
-		if (Valid)
-			player.m_Storage.add(Item);
+		storageitem_t Item;
+		Item.ID = READ_LONG();
+		int idx = READ_LONG();
+		Item.Quantity = READ_SHORT();
+		Item.Quality = READ_SHORT();
+		Item.MaxQuality = READ_SHORT();
+
+		//Everything is read before the item is checked, so the next item can still be read
+		if (idx < 0 || idx >= CGenericItemMgr::ItemCount())
+			continue;
+
+		Item.Name = CGenericItemMgr::Item(idx)->Name;
+		player.m_Storage.add(Item);
 	}
 
 	Storage_Update();
@@ -298,17 +306,15 @@ void Storage_ItemRemoveMsg()
 	Storage_Update();
 }
 
-//The amount of an item in my storage changed
+//The quantity of an item in my storage changed
 void Storage_ItemUpdateMsg()
 {
 	ulong ID = READ_LONG();
 	int Quantity = READ_SHORT();
-	int Count = READ_SHORT();
 	for (int i = 0; i < player.m_Storage.size(); i++)
 		if (player.m_Storage[i].ID == ID)
 		{
 			player.m_Storage[i].Quantity = Quantity;
-			player.m_Storage[i].Count = Count;
 			break;
 		}
 

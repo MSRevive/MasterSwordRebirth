@@ -2246,13 +2246,11 @@ CGenericItem* MSUtil_GetItemByID(ulong m_iId)
 }
 void SendGenericItem(CBasePlayer* pPlayer, CGenericItem* pItem, bool fNewMessage)
 {
-	genericitem_full_t Item(pItem);
-	SendGenericItem(pPlayer, Item, fNewMessage);
-}
+	//genericitem_full_t newItem = const_cast<genericitem_full_t>(*pItem);
+	//SendGenericItem(pPlayer, pItem, fNewMessage);
 
-//Writes at most 23 bytes per item.  Storage batches these, so update STORAGE_ITEMS_PER_MSG if this grows
-void SendGenericItem(CBasePlayer* pPlayer, genericitem_full_t& Item, bool fNewMessage)
-{
+	// {
+	genericitem_full_t Item(pItem);
 	if (fNewMessage)
 	{
 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
@@ -2286,6 +2284,43 @@ void SendGenericItem(CBasePlayer* pPlayer, genericitem_full_t& Item, bool fNewMe
 	if (fNewMessage)
 		MESSAGE_END();
 }
+
+//MIB MAR2012 anti-overlow (see previous archives for original)
+// void SendGenericItem(CBasePlayer* pPlayer, genericitem_full_t Item, bool fNewMessage)
+// {
+// 	if (fNewMessage)
+// 	{
+// 		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
+// 		WRITE_BYTE(0);
+// 	}
+// 	WRITE_LONG(Item.ID);
+// 	//WRITE_STRING( Item.Name );
+// 	int iList = -1;
+// 	WRITE_LONG(CGenericItemMgr::LookUpItemIdx(Item.Name)); // MiB MAR2012_10 - Item index rather than script name
+// 	WRITE_SHORT(Item.Location);
+// 	WRITE_BYTE(Item.Hand);
+// 	WRITE_SHORT(Item.Properties);
+// 	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
+// 	{
+// 		WRITE_SHORT(Item.Quantity);
+// 	}
+// 	if (FBitSet(Item.Properties, ITEM_DRINKABLE))
+// 	{
+// 		WRITE_BYTE(Item.Quality);
+// 	}
+// 	if (FBitSet(Item.Properties, ITEM_PERISHABLE))
+// 	{
+// 		WRITE_SHORT(Item.Quality);
+// 		WRITE_SHORT(Item.MaxQuality);
+// 	}
+// 	if (FBitSet(Item.Properties, ITEM_SPELL))
+// 	{
+// 		WRITE_COORD(Item.Spell_TimePrepare);
+// 		WRITE_BYTE(Item.Spell_CastSuccess);
+// 	}
+// 	if (fNewMessage)
+// 		MESSAGE_END();
+// }
 #endif
 
 CGenericItem* MSUtil_GetItemByID(ulong m_iId, CMSMonster* pOwner)
@@ -2355,48 +2390,6 @@ CGenericItem* ReadGenericItem(bool fAllowCreateNew)
 		  << MSString(pItem->DisplayName) << " (" << pItem->m_iId
 		 << ")\r\n";*/
 	return pItem;
-}
-bool ReadGenericItem(genericitem_full_t& outItem)
-{
-	//Always read every field, even for a bad item, so the next item in the same message can still be read
-	outItem.ID = READ_LONG();
-	int idx = READ_LONG();
-	outItem.Location = READ_SHORT();
-	outItem.Hand = READ_BYTE();
-	outItem.Properties = (unsigned short)READ_SHORT();
-	outItem.Quantity = 1;
-	outItem.Quality = outItem.MaxQuality = 0;
-	outItem.Weight = 0;
-	outItem.Spell_TimePrepare = 0;
-	outItem.Spell_CastSuccess = 0;
-	outItem.Count = 1;
-	if (FBitSet(outItem.Properties, ITEM_GROUPABLE))
-	{
-		outItem.Quantity = READ_SHORT();
-	}
-	if (FBitSet(outItem.Properties, ITEM_DRINKABLE))
-	{
-		outItem.Quality = READ_BYTE();
-	}
-	if (FBitSet(outItem.Properties, ITEM_PERISHABLE))
-	{
-		outItem.Quality = READ_SHORT();
-		outItem.MaxQuality = READ_SHORT();
-	}
-	if (FBitSet(outItem.Properties, ITEM_SPELL))
-	{
-		outItem.Spell_TimePrepare = READ_COORD();
-		outItem.Spell_CastSuccess = READ_BYTE();
-	}
-
-	if (idx < 0 || idx >= CGenericItemMgr::ItemCount())
-	{
-		MS_ERROR("ReadGenericItem: Bad item index %i  ID: %i", idx, (int)outItem.ID);
-		return false;
-	}
-
-	outItem.Name = CGenericItemMgr::Item(idx)->Name;
-	return true;
 }
 #endif
 
