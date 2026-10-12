@@ -1319,7 +1319,7 @@ void CBasePlayer::Deactivate()
 		m_CharInfo[i].Destroy();
 
 	m_EntInfo.clear();
-	m_Storages.clear();
+	m_Storage.clear();
 	m_Quests.clear();
 	m_Maps.clear();
 	m_WearPositions.clear();
@@ -1393,21 +1393,19 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 #endif
 }
 
-storage_t* CBasePlayer::Storage_GetStorage(const char* pszStorageName)
+bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 {
-	for (int s = 0; s < m_Storages.size(); s++)
-		if (m_Storages[s].Name == pszStorageName)
-			return &m_Storages[s];
+	//Spells aren't saved with the character
+	if (FBitSet(Properties, ITEM_SPELL))
+		return false;
 
-	return NULL;
-}
-storage_t* CBasePlayer::Storage_CreateAccount(storage_t& Storage)
-{
-	storage_t* pExistingStorage = Storage_GetStorage(Storage.Name);
-	if (pExistingStorage)
-		return pExistingStorage;
+	//MiB FEB2008a - the bank mask
+	const char* pszBlocked[] = {"pack_", "sheath_", "mana_", "health_", "proj_"};
+	for (unsigned int i = 0; i < sizeof(pszBlocked) / sizeof(pszBlocked[0]); i++)
+		if (!strncmp(pszItemName, pszBlocked[i], strlen(pszBlocked[i])))
+			return false;
 
-	return &m_Storages.add(Storage);
+	return true;
 }
 
 bool CBasePlayer::Script_SetupEvent(CScript* Script, SCRIPT_EVENT& Event)

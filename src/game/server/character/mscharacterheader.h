@@ -88,10 +88,11 @@ enum charfield_e
 	CF_SKILLS = 33,			//[ stat: [ substat: [value, exp], ... ], ... ]
 	CF_SPELLS = 34,			//[str, ...]
 	CF_ITEMS = 35,			//[item, ...]
-	CF_STORAGES = 36,		//[storage, ...]
+	CF_STORAGES = 36,		//RETIRED - [storage, ...] named storages.  Still read, to move their items into CF_STORAGE
 	CF_COMPANIONS = 37,		//[companion, ...]
 	CF_QUESTS = 38,			//[ [name, data], ... ]
 	CF_QUICKSLOTS = 39,		//[ nil | [type, id], ... ]
+	CF_STORAGE = 40,		//[item, ...] - items in storage
 };
 
 //Item keys
@@ -106,12 +107,13 @@ enum charitemfield_e
 	CI_MAXQUALITY = 6,	//int - perishable/drinkable only
 	CI_QUANTITY = 7,	//int - groupable only
 	CI_CONTENTS = 8,	//[item, ...] - containers only
+	CI_COUNT = 9,		//int - storage only: identical items stacked in this entry (absent = 1)
 };
 
-//Storage keys
+//Storage keys - only used to read the retired CF_STORAGES
 enum charstoragefield_e
 {
-	CS_NAME = 0,	//str
+	CS_NAME = 0,	//str - no longer read
 	CS_ITEMS = 1,	//[item, ...]
 };
 

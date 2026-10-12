@@ -74,23 +74,6 @@ CStoragePanel::CStoragePanel(Panel *pParent) : CStorePanel()
 //Update
 void CStoragePanel::AddInventoryItems()
 {
-	//Find the storage on the player
-	storage_t *pStorage = NULL;
-	for (int s = 0; s < player.m_Storages.size(); s++)
-		if (player.m_Storages[s].Name == player.m_CurrentStorage.StorageName)
-		{
-			pStorage = &player.m_Storages[s];
-			break;
-		}
-
-	if (!pStorage)
-	{
-		//If the storage doesn't exist, create it real quick.  This should never happen.
-		storage_t Storage;
-		Storage.Name = player.m_CurrentStorage.StorageName;
-		pStorage = player.Storage_CreateAccount(Storage);
-	}
-
 	//Add the 'storage' container
 	gearitem_t GearItem;
 	GearItem.Name = "Storage";
@@ -99,10 +82,22 @@ void CStoragePanel::AddInventoryItems()
 	VGUI_Inv_GearItem *pGearItemButton = m_GearPanel->AddGearItem(GearItem);
 
 	//Add the storage items
-	storage_t &Storage = *pStorage;
-	for (int i = 0; i < Storage.Items.size(); i++)
+	for (int i = 0; i < player.m_Storage.size(); i++)
 	{
-		containeritem_t vNewItem = containeritem_t(Storage.Items[i]);
+		genericitem_full_t &Item = player.m_Storage[i];
+		containeritem_t vNewItem = containeritem_t(Item);
+
+		//Groupable items are stacked by quantity, everything else by count
+		int Amt = FBitSet(Item.Properties, ITEM_GROUPABLE) ? Item.Quantity : Item.Count;
+		vNewItem.Quantity = Amt;
+		if (Amt > 1)
+		{
+			//The item's name comes from the global item, which doesn't know the amount.  Name it the way SPEECH::ItemName does
+			CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(Item.Name, true);
+			if (pGlobalItem)
+				vNewItem.setFullName(msstring() + Amt + " " + pGlobalItem->DisplayName() + "s");
+		}
+
 		pGearItemButton->m_ItemContainer->AddItem(vNewItem);
 	}
 
@@ -168,7 +163,7 @@ bool CStoragePanel::GearItemClicked(ulong ID)
 
 	for (int i = 0; i < m_SelectedItems.size(); i++)
 	{
-		if (checkValid(m_SelectedItems[i])) //Check it against the bank mask (MiB Feb2008a)
+		if (!AddOrRemove || checkValid(m_SelectedItems[i])) //Check it against the bank mask (MiB Feb2008a)
 		{
 			//Send the command
 			if (AddOrRemove)
@@ -188,52 +183,15 @@ bool CStoragePanel::GearItemClicked(ulong ID)
 //MiB FEB2008a
 bool CStoragePanel::checkValid(containeritem_t &item)
 {
-	msstring name = item.Name;
-	if (name.starts_with("pack_"))
-		return false;
-	if (name.starts_with("sheath_"))
-		return false;
-	if (name.starts_with("mana_"))
-		return false;
-	if (name.starts_with("health_"))
-		return false;
-	if (name.starts_with("proj_"))
-		return false;
-
-	return true;
+	//The server checks this too
+	return CBasePlayer::Storage_CanStoreItem(item.Name.c_str(), item.Properties);
 }
 
-//Item selected
-int CStoragePanel::ItemRetrievalCost(containeritem_t &Item)
-{
-	return int(Item.Value * player.m_CurrentStorage.flFeeRatio);
-}
 void CStoragePanel::ItemHighlighted(void *pData)
 {
 	CStorePanel::ItemHighlighted(pData);
 
-	if (m_LastGearItem != 1)
-	{
-		m_InfoPanel->m_SaleText->setVisible(false);
-		m_InfoPanel->setVisible(true);
-		return;
-	}
-
-	VGUI_ItemButton &ItemButton = *(VGUI_ItemButton *)pData;
-	if (ItemButton.m_Highlighted)
-	{
-		int Value = ItemRetrievalCost(ItemButton.m_Data);
-		if (Value)
-		{
-			char cTemp[256];
-			 _snprintf(cTemp, sizeof(cTemp),  Localized("#STORAGE_ITEM_COST"),  Value );
-			m_InfoPanel->m_SaleText->setText(cTemp);
-		}
-		else
-			m_InfoPanel->m_SaleText->setText(Localized("#STORAGE_ITEM_FREE"));
-		m_InfoPanel->m_SaleText->setVisible(true);
-	}
-	m_InfoPanel->m_Scroll->validate();
+	m_InfoPanel->m_SaleText->setVisible(false);
 	m_InfoPanel->setVisible(true);
 }
 
@@ -243,8 +201,6 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 	m_SelectedItems.clear();
 
 	m_SaleLabel->setVisible(true);
-
-	int Valuetotal = 0;
 
 	for (int g = 0; g < m_GearPanel->GearItemButtonTotal; g++)
 	{
@@ -256,16 +212,13 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 				continue;
 
 			m_SelectedItems.add(ItemButton.m_Data);
-
-			if (m_LastGearItem == 1)
-				Valuetotal += ItemRetrievalCost(ItemButton.m_Data);
 		}
 	}
 
 	if (m_SelectedItems.size())
 	{
 		if (m_LastGearItem == 1)
-			m_SaleLabel->setText(msstring("Removing ") + (int)m_SelectedItems.size() + " items from storage for " + Valuetotal + " gold");
+			m_SaleLabel->setText(msstring("Removing ") + (int)m_SelectedItems.size() + " items from storage");
 		else
 			m_SaleLabel->setText(msstring("Moving ") + (int)m_SelectedItems.size() + " items into storage");
 		m_SaleLabel->setVisible(true);
@@ -311,48 +264,60 @@ void Storage_Update()
 //Item msg
 void Storage_ItemReset()
 {
-	player.m_Storages.clear();
+	player.m_Storage.clear();
 	Storage_Update();
 }
 
+//Items were added to my storage
 void Storage_ItemMsg()
 {
-	msstring StorageName = READ_STRING();
-	storage_t *pStorage = NULL;
+	int Count = READ_BYTE();
+	for (int i = 0; i < Count; i++)
+	{
+		genericitem_full_t Item;
+		bool Valid = ReadGenericItem(Item);
+		Item.Count = READ_SHORT(); //Always read, so the next item can still be read
+		if (Valid)
+			player.m_Storage.add(Item);
+	}
 
-	for (int s = 0; s < player.m_Storages.size(); s++)
-		if (player.m_Storages[s].Name == StorageName)
+	Storage_Update();
+}
+
+//An item was removed from my storage
+void Storage_ItemRemoveMsg()
+{
+	ulong ID = READ_LONG();
+	for (int i = 0; i < player.m_Storage.size(); i++)
+		if (player.m_Storage[i].ID == ID)
 		{
-			pStorage = &player.m_Storages[s];
+			player.m_Storage.erase(i);
 			break;
 		}
 
-	if (!pStorage)
-	{
-		storage_t Storage;
-		Storage.Name = StorageName;
-		pStorage = player.Storage_CreateAccount(Storage);
-	}
+	Storage_Update();
+}
 
-	bool AddItem = READ_BYTE() ? true : false;
-
-	if (AddItem)
-	{
-		CGenericItem *pItem = ReadGenericItem(true);
-		if (pItem)
-			pStorage->Items.add(genericitem_full_t(pItem));
-
-		pItem->SUB_Remove();
-	}
+//The amount of an item in my storage changed
+void Storage_ItemUpdateMsg()
+{
+	ulong ID = READ_LONG();
+	int Quantity = READ_SHORT();
+	int Count = READ_SHORT();
+	for (int i = 0; i < player.m_Storage.size(); i++)
+		if (player.m_Storage[i].ID == ID)
+		{
+			player.m_Storage[i].Quantity = Quantity;
+			player.m_Storage[i].Count = Count;
+			break;
+		}
 
 	Storage_Update();
 }
 
-void Storage_Show(const char* DisplayName, const char* StorageName, float flFeeRatio)
+void Storage_Show(const char* DisplayName)
 {
 	player.m_CurrentStorage.Active = true;
 	player.m_CurrentStorage.DisplayName = DisplayName;
-	player.m_CurrentStorage.StorageName = StorageName;
-	player.m_CurrentStorage.flFeeRatio = flFeeRatio;
 	ShowVGUIMenu(MENU_STORAGE);
 }

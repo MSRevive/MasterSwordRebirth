@@ -938,90 +938,74 @@ void ClientCommand2(edict_t *pEntity)
 
 		if (pPlayer->m_CurrentStorage.Active)
 		{
-			storage_t *pStorage = pPlayer->Storage_GetStorage(pPlayer->m_CurrentStorage.StorageName);
-			if (pStorage)
+			if (!_stricmp(CMD_ARGV(1), "add"))
 			{
-				if (!_stricmp(CMD_ARGV(1), "add"))
+				CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
+				if (pItem && (pItem == pPlayer->PlayerHands || !CBasePlayer::Storage_CanStoreItem(pItem->ItemName.c_str(), pItem->MSProperties())))
+					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't put ") + SPEECH::ItemName(pItem) + " in storage");
+				else if (pItem)
 				{
-					CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
-					if (pItem)
+					genericitem_full_t Item(pItem);
+					if (pPlayer->Storage_AddItem(Item))
 					{
-						//Determine a unique ID for the item in storage
-						genericitem_full_t Item(pItem);
-						for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
-						{
-							bool Duplicate = false;
-							for (int i = 0; i < pStorage->Items.size(); i++)
-								if (pStorage->Items[i].ID == ID)
-								{
-									Duplicate = true;
-									break;
-								}
-							if (Duplicate)
-								continue;
-							Item.ID = ID;
-							break;
-						}
-
-						pStorage->Items.add(Item);
-						pPlayer->Storage_Send();
 						pPlayer->RemoveItem(pItem);
 						pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + SPEECH::ItemName(pItem) + " in storage");
 						pItem->SUB_Remove();
 					}
+					else
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Your storage is full");
 				}
-				else if (!_stricmp(CMD_ARGV(1), "remove"))
-				{
-					if (CMD_ARGC() < 4)
-						return;
+			}
+			else if (!_stricmp(CMD_ARGV(1), "remove"))
+			{
+				if (CMD_ARGC() < 4)
+					return;
 
-					int ItemID = atoi(CMD_ARGV(2));
-					genericitem_t *pStorageItem = NULL;
-					int StorageItemIdx = 0;
-					for (unsigned int i = 0; i < pStorage->Items.size(); i++)
-						if (pStorage->Items[i].ID == ItemID)
+				int ItemID = atoi(CMD_ARGV(2));
+				genericitem_full_t *pStorageItem = NULL;
+				int StorageItemIdx = 0;
+				for (unsigned int i = 0; i < pPlayer->m_Storage.size(); i++)
+					if (pPlayer->m_Storage[i].ID == ItemID)
+					{
+						pStorageItem = &pPlayer->m_Storage[i];
+						StorageItemIdx = i;
+						break;
+					}
+
+				if (pStorageItem)
+				{
+					//Create it as a new item, without the location and hand it had when it was stored
+					CGenericItem *pItem = pStorageItem->genericitem_t::operator CGenericItem *();
+					if (pItem)
+					{
+						//If it's a container, put back the items that were inside it
+						if (FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
+							for (int i = 0; i < pStorageItem->ContainerItems.size(); i++)
+							{
+								CGenericItem *pContainedItem = pStorageItem->ContainerItems[i];
+								if (pContainedItem && !pItem->Container_AddItem(pContainedItem))
+									pContainedItem->SUB_Remove();
+							}
+
+						int ContainerID = atol(CMD_ARGV(3));
+						bool Success = false;
+
+						if (!ContainerID)
+							Success = pItem->GiveTo(pPlayer, true, true);
+						else
 						{
-							pStorageItem = &pStorage->Items[i];
-							StorageItemIdx = i;
-							break;
+							CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, pPlayer);
+							if (pContainer)
+								Success = pPlayer->PutInPack(pItem, pContainer);
 						}
 
-					if (pStorageItem)
-					{
-						CGenericItem *pItem = *pStorageItem;
-						int Cost = int(pItem->m_Value * pPlayer->m_CurrentStorage.flFeeRatio);
-
-						if (!Cost || pPlayer->m_Gold > Cost) //If no retrieval fee or I have enough to pay it...
+						if (Success)
 						{
-							int ContainerID = atol(CMD_ARGV(3));
-							bool Success = false;
-
-							if (!ContainerID)
-								Success = pItem->GiveTo(pPlayer, true, true);
-							else
-							{
-								CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, pPlayer);
-								if (pContainer)
-									Success = pPlayer->PutInPack(pItem, pContainer);
-							}
-
-							if (Success)
-							{
-								pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
-								if (Cost)
-									pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("Retrieval fee: ") + Cost + " Gold");
-								else
-									pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("Retrieval fee: None"));
-
-								pPlayer->GiveGold(-Cost, false);
-								pStorage->Items.erase(StorageItemIdx);
-								pPlayer->Storage_Send();
-							}
-							else
-								pItem->SUB_Remove();
+							pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
+							pPlayer->Storage_RemoveItem(StorageItemIdx);
 						}
 						else
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the retrieval fee of ") + Cost + " Gold");
+							pItem->SUB_Remove();
 					}
 				}
 			}

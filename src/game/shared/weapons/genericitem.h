@@ -431,11 +431,13 @@ public:
 	bool bDropAttempted = false;
 	int iDropTickCounter = 0;
 };
+struct genericitem_full_t;
 #ifdef VALVE_DLL
 void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage);
-//void SendGenericItem(CBasePlayer *pPlayer, CGenericItem *pItem, bool fNewMessage);
+void SendGenericItem(CBasePlayer *pPlayer, genericitem_full_t &Item, bool fNewMessage); //Sends an item that only exists as data (storage)
 #else
 CGenericItem *ReadGenericItem(bool fAllowCreateNew);
+bool ReadGenericItem(genericitem_full_t &outItem); //Reads an item as data, without creating it (storage)
 #endif
 
 void BeamEffect(Vector vStart, Vector vEnd, int sprite, int startframe,

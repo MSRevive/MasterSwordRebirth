@@ -257,6 +257,7 @@ static void ReadItemListPack(const msgpack::object &Obj, mslist<genericitem_full
 static bool ReadItemPack(const msgpack::object &Obj, genericitem_full_t &outItem)
 {
 	clrmem(outItem);
+	outItem.Count = 1;
 
 	msgpack::object_map Fields = PackMap(Obj);
 	for (uint32_t f = 0; f < Fields.size; f++)
@@ -273,6 +274,7 @@ static bool ReadItemPack(const msgpack::object &Obj, genericitem_full_t &outItem
 		case CI_MAXQUALITY: outItem.MaxQuality = (unsigned short)PackReadInt(Value); break;
 		case CI_QUANTITY: outItem.Quantity = (unsigned short)PackReadInt(Value); break;
 		case CI_CONTENTS: ReadItemListPack(Value, outItem.ContainerItems); break;
+		case CI_COUNT: outItem.Count = (unsigned short)PackReadInt(Value); break;
 		}
 	}
 
@@ -382,6 +384,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
 			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
 			case CF_ITEMS: ReadItemListPack(Value, m_Items); break;
+			case CF_STORAGE: ReadItemListPack(Value, m_Storage); break;
 
 			case CF_SKILLS:
 			{
@@ -415,21 +418,21 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 
 			case CF_STORAGES:
 			{
+				//RETIRED: storage used to be split into named storages.  Move all of their items into the one storage
 				msgpack::object_array Storages = PackArray(Value);
 				for (uint32_t s = 0; s < Storages.size; s++)
 				{
-					storage_t Storage;
+					mslist<genericitem_full_t> Items;
 					msgpack::object_map Fields = PackMap(Storages.ptr[s]);
 					for (uint32_t f = 0; f < Fields.size; f++)
+						if (PackReadInt(Fields.ptr[f].key, -1) == CS_ITEMS)
+							ReadItemListPack(Fields.ptr[f].val, Items);
+
+					for (int i = 0; i < Items.size(); i++)
 					{
-						const msgpack::object &FieldValue = Fields.ptr[f].val;
-						switch (PackReadInt(Fields.ptr[f].key, -1))
-						{
-						case CS_NAME: Storage.Name = PackReadMsStr(FieldValue); break;
-						case CS_ITEMS: ReadItemListPack(FieldValue, Storage.Items); break;
-						}
+						Items[i].ID = m_Storage.size(); //The IDs were only unique within each named storage
+						m_Storage.add(Items[i]);
 					}
-					m_Storages.add(Storage);
 				}
 				break;
 			}
@@ -553,7 +556,7 @@ bool chardata_t::ReadDataLegacy(void *pData, ulong Size)
 		ReadSkills1(DataID, m_File);
 		ReadSpells1(DataID, m_File);
 		ReadItems1(DataID, m_File);
-		ReadStorageItems1(DataID, m_File);
+		SkipStorageItems1(DataID, m_File);
 		ReadCompanions1(DataID, m_File);
 		SkipHelpTips1(DataID, m_File);
 		ReadQuests1(DataID, m_File);
@@ -693,31 +696,25 @@ void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 }
 
-void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
+void chardata_t::SkipStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	if (DataID == CHARDATA_STORAGE1)
 	{
-		//Read storage items
+		//Storage from legacy saves is no longer loaded, but the chunk still has to be read past
 
 		short Storages = 0;
 		m_File.ReadShort(Storages); //[SHORT]
 		for (int i = 0; i < Storages; i++)
 		{
-			storage_t Storage;
-			m_File.ReadString(Storage.Name, MSSTRING_SIZE); //[X STRINGS]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[X STRINGS]
 
 			short Items = 0;
 			m_File.ReadShort(Items); //[X SHORTS]
 			for (int i = 0; i < Items; i++)
 			{
 				genericitem_full_t Item;
-				if (!ReadItem1(DataID, m_File, Item)) //[Y ITEMS]
-					continue;
-
-				Storage.Items.add(Item);
+				ReadItem1(DataID, m_File, Item); //[Y ITEMS]
 			}
-
-			m_Storages.add(Storage);
 		}
 	}
 }
@@ -1006,6 +1003,9 @@ static bool PackItem(charpack_t &Out, genericitem_full_t &Item)
 	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
 		Fields.Field(CI_QUANTITY, Item.Quantity);
 
+	if (Item.Count > 1)
+		Fields.Field(CI_COUNT, Item.Count);
+
 	if (FBitSet(Item.Properties, ITEM_CONTAINER))
 	{
 		Fields.Key(CI_CONTENTS);
@@ -1104,18 +1104,11 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	}
 
 	//Storage items
-	Root.Key(CF_STORAGES);
-	Out.Pk.pack_array(pPlayer->m_Storages.size());
-	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
+	Root.Key(CF_STORAGE);
 	{
-		storage_t &Storage = pPlayer->m_Storages[s];
-
-		CPackScope StorageFields(Out, true);
-		StorageFields.FieldStr(CS_NAME, Storage.Name);
-		StorageFields.Key(CS_ITEMS);
 		CPackScope Items(Out, false);
-		for (int i = 0; i < Storage.Items.size(); i++)
-			if (PackItem(Out, Storage.Items[i]))
+		for (int i = 0; i < pPlayer->m_Storage.size(); i++)
+			if (PackItem(Out, pPlayer->m_Storage[i]))
 				Items.Added();
 	}
 

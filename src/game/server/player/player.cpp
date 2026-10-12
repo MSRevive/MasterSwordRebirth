@@ -1519,6 +1519,7 @@ void CBasePlayer::PreThink(void)
 		return; // intermission or finale
 
 	Trade(); //Trade - Do this early on
+	Storage_CheckTeller();
 
 	ItemPreFrame();
 	WaterMove();
@@ -3814,6 +3815,9 @@ void CBasePlayer::UpdateClientData(void)
 
 	if (bShouldSaveChar)
 		SaveChar();
+
+	//Send new storage items
+	Storage_UpdateClient();
 
 	//Active Hand
 	if (m_CurrentHand != m_ClientCurrentHand)
@@ -6470,8 +6474,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	}
 
 	//Read storage items
-	m_Storages = Data.m_Storages;
-	Storage_Send(); //Send all the items in storage
+	m_Storage = Data.m_Storage; //Sent to the client when the storage is opened
 
 	//Read Companions
 
@@ -6678,55 +6681,188 @@ bool CBasePlayer::IsInAttackStance()
 
 	return false;
 }
-void CBasePlayer::Storage_Open(const char* pszDisplayName, const char* pszStorageName, float flFeeRatio, entityinfo_t &Entity)
+#define STORAGE_TELLER_RANGE 128 //Same range as CMSMonster::Trade
+#define STORAGE_ITEMS_PER_MSG 7	 //2 + (7 * 25 bytes max per item) = 177, which fits in MAX_USERMESSAGE_SIZE
+
+void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller)
 {
 	m_CurrentStorage.Active = true;
-	m_CurrentStorage.StorageName = pszStorageName;
 	m_CurrentStorage.DisplayName = pszDisplayName;
-	m_CurrentStorage.flFeeRatio = flFeeRatio;
-	m_CurrentStorage.ReqTeller = Entity.pvPrivData ? true : false;
-	if (m_CurrentStorage.ReqTeller)
-		m_CurrentStorage.Teller = Entity;
+	m_CurrentStorage.Teller = pTeller;
+	m_CurrentStorage.ClientItems = 0;
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pev);
 	WRITE_BYTE(5);
 	WRITE_STRING_LIMIT(m_CurrentStorage.DisplayName, 90);
-	WRITE_STRING_LIMIT(m_CurrentStorage.StorageName, 90);
-	WRITE_FLOAT(m_CurrentStorage.flFeeRatio);
 	MESSAGE_END();
-}
-void CBasePlayer::Storage_Send()
-{
+
+	//The client only knows my storage items while it has the storage open.  Storage_UpdateClient sends them
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 	WRITE_BYTE(1); //reset storage items
 	MESSAGE_END();
+}
+void CBasePlayer::Storage_Close()
+{
+	m_CurrentStorage.Active = false;
 
-	//Send all storage items.
-	for (int s = 0; s < m_Storages.size(); s++)
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_VGUIMENU], NULL, pev);
+	WRITE_BYTE(0);
+	MESSAGE_END();
+}
+void CBasePlayer::Storage_CheckTeller()
+{
+	//I have to stay near the entity that opened my storage
+	if (!m_CurrentStorage.Active)
+		return;
+
+	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
+	if (pTeller && pTeller->pev->deadflag == DEAD_NO &&
+		(pTeller->Center() - Center()).Length() <= STORAGE_TELLER_RANGE)
+		return;
+
+	Storage_Close();
+}
+void CBasePlayer::Storage_UpdateClient()
+{
+	//Send the storage items that the client doesn't know about yet.
+	//One message per frame, so that a large storage doesn't overflow the client
+	if (!m_CurrentStorage.Active)
+		return;
+
+	int Count = V_min((int)m_Storage.size() - m_CurrentStorage.ClientItems, STORAGE_ITEMS_PER_MSG);
+	if (Count <= 0)
+		return;
+
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(2); //add storage items
+	WRITE_BYTE(Count);
+	for (int i = 0; i < Count; i++)
 	{
-		if (!m_Storages[s].Items.size())
+		genericitem_full_t &Item = m_Storage[m_CurrentStorage.ClientItems + i];
+		SendGenericItem(this, Item, false);
+		WRITE_SHORT(Item.Count);
+	}
+	MESSAGE_END();
+
+	m_CurrentStorage.ClientItems += Count;
+}
+//How many more of Item can stack onto Cur, an item already in storage.  0 if they aren't identical.
+//Groupable items stack by quantity, like they do in a pack.  Everything else stacks by count.
+//Containers don't stack, because of the items inside them
+static int Storage_StackRoom(genericitem_full_t &Cur, genericitem_full_t &Item)
+{
+	if (FBitSet(Item.Properties, ITEM_CONTAINER) || Cur.Name != Item.Name || Cur.Properties != Item.Properties)
+		return 0;
+
+	if (FBitSet(Item.Properties, ITEM_GROUPABLE))
+		return V_max(NUM_MAX_STACK - (int)Cur.Quantity, 0);
+
+	if (Cur.Quality != Item.Quality || Cur.MaxQuality != Item.MaxQuality)
+		return 0;
+
+	return V_max(NUM_MAX_STACK - (int)Cur.Count, 0);
+}
+bool CBasePlayer::Storage_AddItem(genericitem_full_t &Item)
+{
+	//Adds an item to my storage, stacking it with identical items.
+	//Returns false if the storage is full
+	bool Groupable = FBitSet(Item.Properties, ITEM_GROUPABLE) ? true : false;
+
+	//A full storage can still take an item that stacks completely onto the items already there.
+	//Check before changing anything, so that a stack is never left half stored
+	if ((int)m_Storage.size() >= STORAGE_MAX_ITEMS)
+	{
+		int Room = 0;
+		for (int i = 0; i < m_Storage.size(); i++)
+			Room += Storage_StackRoom(m_Storage[i], Item);
+
+		if (Room < (Groupable ? (int)Item.Quantity : 1))
+			return false;
+	}
+
+	for (int i = 0; i < m_Storage.size(); i++)
+	{
+		genericitem_full_t &Cur = m_Storage[i];
+		int Room = Storage_StackRoom(Cur, Item);
+		if (Room <= 0)
+			continue;
+
+		if (Groupable)
 		{
-			//If the storage has no items, just send the storage name, indicating no items
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
-			WRITE_BYTE(2); //storage item
-			WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
-			WRITE_BYTE(0); //No items
-			MESSAGE_END();
+			int Amt = V_min((int)Item.Quantity, Room);
+			if (Amt <= 0)
+				continue;
+
+			Cur.Quantity += Amt;
+			Item.Quantity -= Amt;
+			Storage_SendItemUpdate(i);
+			if (!Item.Quantity)
+				return true;
 		}
 		else
 		{
-			//If the storage has items, send a full message
-			for (int i = 0; i < m_Storages[s].Items.size(); i++)
-			{
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
-				WRITE_BYTE(2); //storage item
-				WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
-				WRITE_BYTE(1); //Add this item to the storage
-				SendGenericItem(this, m_Storages[s].Items[i], false);
-				MESSAGE_END();
-			}
+			Cur.Count++;
+			Storage_SendItemUpdate(i);
+			return true;
 		}
 	}
+
+	//Determine a unique ID for the item in storage
+	for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
+	{
+		bool Duplicate = false;
+		for (int i = 0; i < m_Storage.size(); i++)
+			if (m_Storage[i].ID == ID)
+			{
+				Duplicate = true;
+				break;
+			}
+		if (Duplicate)
+			continue;
+		Item.ID = ID;
+		break;
+	}
+
+	Item.Count = 1;
+	m_Storage.add(Item); //Storage_UpdateClient sends it
+	return true;
+}
+void CBasePlayer::Storage_SendItemUpdate(int Idx)
+{
+	//The amount of an item in my storage changed.
+	//Items past ClientItems haven't been sent yet, so they get sent with the new amount
+	if (Idx >= m_CurrentStorage.ClientItems)
+		return;
+
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(4); //update storage item
+	WRITE_LONG(m_Storage[Idx].ID);
+	WRITE_SHORT(m_Storage[Idx].Quantity);
+	WRITE_SHORT(m_Storage[Idx].Count);
+	MESSAGE_END();
+}
+void CBasePlayer::Storage_RemoveItem(int Idx)
+{
+	//Removes one item from my storage.  If it was stacked by count, the rest of the stack stays
+	if (m_Storage[Idx].Count > 1)
+	{
+		m_Storage[Idx].Count--;
+		Storage_SendItemUpdate(Idx);
+		return;
+	}
+
+	//Items past ClientItems haven't been sent yet, so the client has nothing to remove
+	if (Idx < m_CurrentStorage.ClientItems)
+	{
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+		WRITE_BYTE(3); //remove storage item
+		WRITE_LONG(m_Storage[Idx].ID);
+		MESSAGE_END();
+
+		m_CurrentStorage.ClientItems--;
+	}
+
+	m_Storage.erase(Idx);
 }
 
 void CBasePlayer::SaveChar()

@@ -303,6 +303,7 @@ genericitem_full_t::genericitem_full_t(CGenericItem *pItem) : genericitem_t(pIte
 	Location = pItem->m_Location;
 	Spell_TimePrepare = pItem->Spell_TimePrepare;
 	Spell_CastSuccess = pItem->Spell_CastSuccess;
+	Count = 1;
 	if (FBitSet(pItem->MSProperties(), ITEM_CONTAINER))
 		for (int i = 0; i < pItem->Container_ItemCount(); i++)
 			ContainerItems.add(pItem->Container_GetItem(i));

@@ -1388,61 +1388,17 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	//************************** STORAGE *******************************
 	else if (Cmd.Name() == "storage")
 	{
-		if (Params.size() >= 3)
+		//trade target displayname cb_prefix
+		//Opens the target player's storage.  The player has to stay near me to keep using it
+		if (Params.size() >= 3 && Params[0] == "trade")
 		{
-			const char* StorageName = Params[1];
-			CBaseEntity *pTarget = RetrieveEntity(Params[2]);
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
 			if (pTarget && pTarget->IsPlayer())
 			{
-				CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+				msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_storage_trade";
 
-				//openaccount storagename target cb_prefix
-				if (Params[0] == "openaccount")
-				{
-					msstring Callback = Params.size() >= 4 ? Params[3].str() : "game_openaccount";
-
-					if (pPlayer->Storage_GetStorage(StorageName))
-						CallScriptEvent(Callback + "_exists");
-					else
-					{
-						storage_t Storage;
-						Storage.Name = StorageName;
-
-						if (pPlayer->Storage_CreateAccount(Storage))
-							CallScriptEvent(Callback + "_success");
-						else
-							CallScriptEvent(Callback + "_failed");
-					}
-				}
-				//checkaccount storagename target cb_prefix
-				else if (Params[0] == "checkaccount")
-				{
-					msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_checkaccount";
-
-					if (pPlayer->Storage_GetStorage(StorageName))
-						CallScriptEvent(Callback + "_success");
-					else
-						CallScriptEvent(Callback + "_failed");
-				}
-				//trade storagename target feeratio displayname cb_prefix
-				else if (Params[0] == "trade")
-				{
-					if (Params.size() >= 5)
-					{
-						msstring Callback = Params.size() >= 6 ? Params[5].c_str() : "game_storage_trade";
-
-						if (pPlayer->Storage_GetStorage(StorageName))
-						{
-							entityinfo_t newEnt = entityinfo_t(this);
-							pPlayer->Storage_Open(Params[4], StorageName, atof(Params[3]), newEnt);
-							CallScriptEvent(Callback + "_success");
-						}
-						else
-							CallScriptEvent(Callback + "_noaccount");
-					}
-					else
-						ERROR_MISSING_PARMS;
-				}
+				((CBasePlayer *)pTarget)->Storage_Open(Params[2], this);
+				CallScriptEvent(Callback + "_success");
 			}
 		}
 		else

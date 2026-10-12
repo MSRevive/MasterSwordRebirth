@@ -12,7 +12,6 @@ public:
 	void AddInventoryItems();
 	void Update();
 	void Close();
-	int ItemRetrievalCost(containeritem_t &Item);
 
 	//Item callbacks
 	void ItemSelectChanged(ulong ID, bool fSelected);
