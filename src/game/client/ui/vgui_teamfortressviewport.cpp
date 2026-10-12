@@ -1526,7 +1526,7 @@ CMenuPanel *TeamFortressViewport::ShowStoreMenu(int iStoreType)
 		return NULL;
 
 	//Special circumstance: inventory items for packs not being held (STORE_INV)
-	if (CStorePanel::iStoreBuyFlags & STORE_INV)
+	if (iStoreType != MENU_STORAGE && (CStorePanel::iStoreBuyFlags & STORE_INV))
 		iStoreType = MENU_STOREBUY;
 
 	switch (iStoreType)
