@@ -18,6 +18,7 @@ public:
 	void ItemHighlighted(void *pData);
 	void GearItemSelected(ulong ID);
 	bool GearItemClicked(ulong ID);
+	void ItemDoubleclicked(ulong ID);
 	bool checkValid(containeritem_t &Item); //MiB Feb2008a
 
 	static const char* Text_Subtitle_Storage;

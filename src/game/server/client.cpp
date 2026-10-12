@@ -987,9 +987,12 @@ void ClientCommand2(edict_t *pEntity)
 						pItem->MaxQuality = pStorageItem->MaxQuality;
 
 						int ContainerID = atol(CMD_ARGV(3));
+						bool ToHands = !_stricmp(CMD_ARGV(3), "hands"); //Sent when an item in storage is double clicked
 						bool Success = false;
 
-						if (!ContainerID)
+						if (ToHands)
+							Success = pItem->GiveTo(pPlayer, false, true, true); //Only into my hands.  What I'm holding is put away to make room
+						else if (!ContainerID)
 							Success = pItem->GiveTo(pPlayer, true, true);
 						else
 						{
@@ -1002,6 +1005,8 @@ void ClientCommand2(edict_t *pEntity)
 						{
 							pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
 							pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
+							if (ToHands)
+								pPlayer->Storage_Close(); //Like the inventory, taking an item into my hands closes the storage
 						}
 						else
 							pItem->SUB_Remove();

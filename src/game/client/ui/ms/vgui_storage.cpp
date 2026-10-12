@@ -180,6 +180,19 @@ bool CStoragePanel::GearItemClicked(ulong ID)
 	return true;
 }
 
+void CStoragePanel::ItemDoubleclicked(ulong ID)
+{
+	//Double clicking an item in storage takes it out and puts it in my hands
+	if (m_LastGearItem != 1)
+		return;
+
+	UnSelectAllItems();
+	m_InfoPanel->setVisible(false);
+
+	msstring Command = msstring("storage remove ") + (int)ID + " hands\n";
+	gEngfuncs.pfnClientCmd(Command);
+}
+
 //MiB FEB2008a
 bool CStoragePanel::checkValid(containeritem_t &item)
 {
