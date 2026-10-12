@@ -931,7 +931,7 @@ void ClientCommand2(edict_t *pEntity)
 			return;
 
 		if (!_stricmp(CMD_ARGV(1), "stop"))
-			pPlayer->m_CurrentStorage.Active = false;
+			pPlayer->Storage_End();
 
 		if (CMD_ARGC() < 3)
 			return;

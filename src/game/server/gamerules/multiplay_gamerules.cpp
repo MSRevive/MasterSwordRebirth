@@ -437,6 +437,7 @@ void CHalfLifeMultiplay::ClientDisconnected( edict_t *pClient )
 	if( pPlayer && pPlayer->IsPlayer() )
 	{
 		pPlayer->SaveChar(); // Save data on disconnect! TODO: should this count for non-FN as well?
+		pPlayer->Storage_End(); // Tell the entity that opened this player's storage that they're done with it
 
 		FireTargets( "game_playerleave", pPlayer, pPlayer, USE_TOGGLE, 0 );
 

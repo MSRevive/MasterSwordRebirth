@@ -1390,6 +1390,7 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	{
 		//trade target displayname cb_prefix
 		//Opens the target player's storage.  The player has to stay near me to keep using it
+		//Calls cb_prefix_success now, and cb_prefix_done when the player is finished.  Both get the player as PARAM1
 		if (Params.size() >= 3 && Params[0] == "trade")
 		{
 			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
@@ -1397,8 +1398,12 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 			{
 				msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_storage_trade";
 
-				((CBasePlayer *)pTarget)->Storage_Open(Params[2], this);
-				CallScriptEvent(Callback + "_success");
+				((CBasePlayer *)pTarget)->Storage_Open(Params[2], this, Callback);
+
+				static msstringlist Parameters;
+				Parameters.clearitems();
+				Parameters.add(EntToString(pTarget));
+				CallScriptEvent(Callback + "_success", &Parameters);
 			}
 		}
 		else

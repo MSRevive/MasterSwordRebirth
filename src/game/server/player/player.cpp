@@ -6684,11 +6684,16 @@ bool CBasePlayer::IsInAttackStance()
 #define STORAGE_TELLER_RANGE 128 //Same range as CMSMonster::Trade
 #define STORAGE_ITEMS_PER_MSG 13 //2 + (13 * 14 bytes per item) = 184, which fits in MAX_USERMESSAGE_SIZE
 
-void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller)
+void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller, const char* pszCallback)
 {
+	//Copied first, because ending the last use of my storage runs a script event
+	msstring DisplayName = pszDisplayName, Callback = pszCallback;
+	Storage_End(); //In case I still have it open through another entity
+
 	m_CurrentStorage.Active = true;
-	m_CurrentStorage.DisplayName = pszDisplayName;
+	m_CurrentStorage.DisplayName = DisplayName;
 	m_CurrentStorage.Teller = pTeller;
+	m_CurrentStorage.Callback = Callback;
 	m_CurrentStorage.ClientItems = 0;
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pev);
@@ -6701,9 +6706,27 @@ void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller)
 	WRITE_BYTE(1); //reset storage items
 	MESSAGE_END();
 }
+void CBasePlayer::Storage_End()
+{
+	//I'm done using my storage.  Tell the entity that opened it
+	if (!m_CurrentStorage.Active)
+		return;
+
+	m_CurrentStorage.Active = false;
+
+	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
+	IScripted *pScripted = pTeller ? pTeller->GetScripted() : NULL;
+	if (pScripted)
+	{
+		msstringlist Parameters;
+		Parameters.add(EntToString(this));
+		pScripted->CallScriptEvent(m_CurrentStorage.Callback + "_done", &Parameters);
+	}
+}
 void CBasePlayer::Storage_Close()
 {
-	m_CurrentStorage.Active = false;
+	//Makes the client close the storage too
+	Storage_End();
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_VGUIMENU], NULL, pev);
 	WRITE_BYTE(0);

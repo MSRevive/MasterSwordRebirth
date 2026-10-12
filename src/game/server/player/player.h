@@ -323,6 +323,7 @@ struct storageaccess_t
 	bool Active;
 	msstring DisplayName;
 	entityinfo_t Teller; //The entity that opened my storage.  I must stay near it to keep using it
+	msstring Callback;	 //Prefix of the script events called on the teller
 	int ClientItems;	 //Number of items in my storage that the client knows about
 };
 
@@ -535,7 +536,8 @@ public:
 	bool IsInAttackStance();
 	const char *DisplayName();
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
-	void Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller);
+	void Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller, const char* pszCallback);
+	void Storage_End();
 	void Storage_Close();
 	void Storage_CheckTeller();
 	void Storage_UpdateClient();
