@@ -41,6 +41,7 @@ struct savedata_legacy_t
 struct savedata_t : savedata_legacy_t
 {
 	short Body = 0;
+	short StorageMax = 0;
 };
 
 //
@@ -92,6 +93,7 @@ enum charfield_e
 	CF_QUESTS = 37,			//[ [name, data], ... ]
 	CF_QUICKSLOTS = 38,		//[ nil | [type, id], ... ]
 	CF_STORAGE = 39,		//[storageitem, ...]
+	CF_STORAGEMAX = 40,		//int
 };
 
 //Item keys

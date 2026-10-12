@@ -377,6 +377,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_PLAYERKILLS: PlayerKills = (short)PackReadInt(Value); break;
 			case CF_TIMEFORGETKILL: TimeWaitedToForgetKill = PackReadFloat(Value); break;
 			case CF_BODY: Body = (short)PackReadInt(Value); break;
+			case CF_STORAGEMAX: StorageMax = (int)PackReadInt(Value); break;
 
 			//Sections
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
@@ -1064,6 +1065,7 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	Root.Field(CF_PLAYERKILLS, Data.PlayerKills);
 	Root.Field(CF_TIMEFORGETKILL, Data.TimeWaitedToForgetKill);
 	Root.Field(CF_BODY, Data.Body);
+	Root.Field(CF_STORAGEMAX, Data.StorageMax);
 
 	//Maps visited
 	Root.Key(CF_VISITEDMAPS);
@@ -1264,6 +1266,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		Data.PlayerKills = pPlayer->m_PlayersKilled;
 		Data.TimeWaitedToForgetKill = pPlayer->m_TimeWaitedToForgetKill;
 		Data.Body = pPlayer->m_CharInfo[pPlayer->m_CharacterNum].Body;
+		Data.StorageMax = pPlayer->m_StorageMax;
 		//#ifdef VALVE_DLL
 		strncpy(Data.SteamID, GETPLAYERAUTHID(pPlayer->edict()), 32);
 		//#else

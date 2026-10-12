@@ -30,6 +30,7 @@
 // was 1500, but there shouldn't be any issues with increasing.
 #define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
 #define STORAGE_MAX_ITEMS 300
+#define STORAGE_DEFAULT_ITEMS 100
 #define STORAGE_MAX_TRANSFER 20
 #define STORAGE_MAX_SWIGS 30
 
@@ -445,6 +446,7 @@ public:
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
 	mslist<storageitem_t> m_Storage;	  //Items I have in storage
+	int m_StorageMax;					  //How many items my storage holds.  0 until it's set, which gives STORAGE_DEFAULT_ITEMS
 	storageaccess_t m_CurrentStorage;	  //Set while I have my storage open
 	bool m_Initialized;				  //Whether stats were created, script loaded, etc
 	float m_TimeNextSave;
@@ -560,6 +562,8 @@ public:
 	void Storage_PutSwigs(const char* pszItemName, int Swigs);
 	void Storage_RemoveSwigs(int Idx, int Amt);
 	void Storage_CombineSwigs();
+	void Storage_SetMax(int Max);
+	void Storage_SendMax();
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, const char* Name, const char* Data);
@@ -655,7 +659,8 @@ public:
 	void BlockButton(int Button);
 	static bool Storage_CanStoreItem(const char* pszItemName, int Properties); //Whether this kind of item is allowed in storage
 	static bool Storage_CombinesSwigs(const char* pszItemName, int Properties); //Whether this kind of item is kept in storage by its swigs
-	int Storage_ItemCount();												   //How much of STORAGE_MAX_ITEMS is used
+	int Storage_ItemCount();												   //How much of Storage_MaxItems is used
+	int Storage_MaxItems();													   //How many items my storage holds
 	void InitialSpawn(void);
 	bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event);
 	const char *GetPartyName();

@@ -6475,6 +6475,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 
 	//Read storage items
 	m_Storage = Data.m_Storage; //Sent to the client when the storage is opened
+	m_StorageMax = Data.StorageMax;
 	Storage_CombineSwigs();
 
 	//Read Companions
@@ -6702,19 +6703,34 @@ void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller,
 	WRITE_STRING_LIMIT(m_CurrentStorage.DisplayName, 90);
 	MESSAGE_END();
 
-	//The client only knows my storage items while it has the storage open.  Storage_UpdateClient sends them
+	//The client only knows my storage items while it has the storage open.
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 	WRITE_BYTE(1); //reset storage items
+	MESSAGE_END();
+
+	Storage_SendMax();
+}
+void CBasePlayer::Storage_SetMax(int Max)
+{
+	m_StorageMax = V_max(V_min(Max, STORAGE_MAX_ITEMS), 1);
+
+	if (m_CurrentStorage.Active)
+		Storage_SendMax();
+}
+void CBasePlayer::Storage_SendMax()
+{
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(5); //storage max
+	WRITE_SHORT(Storage_MaxItems());
 	MESSAGE_END();
 }
 void CBasePlayer::Storage_End()
 {
-	//I'm done using my storage.  Tell the entity that opened it
 	if (!m_CurrentStorage.Active)
 		return;
 
 	m_CurrentStorage.Active = false;
-	m_CurrentStorage.ClientItems = 0; //The client forgets my storage items when it closes
+	m_CurrentStorage.ClientItems = 0;
 
 	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
 	IScripted *pScripted = pTeller ? pTeller->GetScripted() : NULL;
@@ -6727,7 +6743,6 @@ void CBasePlayer::Storage_End()
 }
 void CBasePlayer::Storage_Close()
 {
-	//Makes the client close the storage too
 	Storage_End();
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_VGUIMENU], NULL, pev);
@@ -6736,7 +6751,6 @@ void CBasePlayer::Storage_Close()
 }
 void CBasePlayer::Storage_CheckTeller()
 {
-	//I have to stay near the entity that opened my storage
 	if (!m_CurrentStorage.Active)
 		return;
 
@@ -6749,8 +6763,6 @@ void CBasePlayer::Storage_CheckTeller()
 }
 bool CBasePlayer::Storage_CountTransfer()
 {
-	//Counts an item I'm trying to move into or out of storage.
-	//Returns false once STORAGE_MAX_TRANSFER have been moved this frame
 	if (m_CurrentStorage.TransferTime != gpGlobals->time)
 	{
 		m_CurrentStorage.TransferTime = gpGlobals->time;
@@ -6761,7 +6773,6 @@ bool CBasePlayer::Storage_CountTransfer()
 }
 void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
 {
-	//An item was moved into or out of my storage.  Storage_SendMoved tells me about it
 	if (In)
 	{
 		m_CurrentStorage.MovedIn++;
@@ -6775,7 +6786,6 @@ void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
 }
 void CBasePlayer::Storage_SendMoved()
 {
-	//One message for all of the items moved this frame, instead of one for each item
 	if (m_CurrentStorage.MovedIn == 1)
 		SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + m_CurrentStorage.MovedInName + " in storage");
 	else if (m_CurrentStorage.MovedIn > 1)
@@ -6790,7 +6800,6 @@ void CBasePlayer::Storage_SendMoved()
 }
 void CBasePlayer::Storage_UpdateClient()
 {
-	//Done even when the storage isn't open.  Taking an item into my hands closes it
 	Storage_SendMoved();
 
 	//Send the storage items that the client doesn't know about yet.
@@ -6818,7 +6827,7 @@ void CBasePlayer::Storage_UpdateClient()
 
 	m_CurrentStorage.ClientItems += Count;
 }
-//How many more of Item can stack onto Cur, an item already in storage.  0 if they aren't identical
+//How many more of Item can stack onto Cur, an item already in storage. 0 if they aren't identical
 static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 {
 	if (Cur.Name != Item.Name || Cur.Quality != Item.Quality || Cur.MaxQuality != Item.MaxQuality)
@@ -6848,7 +6857,6 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 	if (Quality < 0)
 		Quality = pGlobalItem->Quality;
 
-	//Only add as many as there's room for, instead of none at all
 	if (Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), Properties))
 	{
 		if (Quality <= 0)
@@ -6857,7 +6865,7 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 		Quantity = V_min(Quantity, Storage_SwigRoom(pGlobalItem->ItemName.c_str()) / Quality);
 	}
 	else if (!FBitSet(Properties, ITEM_GROUPABLE))
-		Quantity = V_min(Quantity, STORAGE_MAX_ITEMS - Storage_ItemCount());
+		Quantity = V_min(Quantity, Storage_MaxItems() - Storage_ItemCount());
 
 	int Added = 0;
 	while (Added < Quantity)
@@ -6881,7 +6889,7 @@ int CBasePlayer::Storage_SwigRoom(const char* pszItemName)
 {
 	//How many more swigs of a mana potion fit in my storage.
 	//The ones already in storage get filled first, and then each new one holds up to STORAGE_MAX_SWIGS
-	int Room = V_max(STORAGE_MAX_ITEMS - Storage_ItemCount(), 0) * STORAGE_MAX_SWIGS;
+	int Room = V_max(Storage_MaxItems() - Storage_ItemCount(), 0) * STORAGE_MAX_SWIGS;
 	for (int i = 0; i < m_Storage.size(); i++)
 		if (m_Storage[i].Name == pszItemName)
 			Room += V_max(STORAGE_MAX_SWIGS - (int)m_Storage[i].Quality, 0);
@@ -6919,8 +6927,6 @@ void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
 }
 void CBasePlayer::Storage_CombineSwigs()
 {
-	//Storage saved before mana potions were kept by their swigs has them stacked like any other item.
-	//Take them all out and put their swigs back in.  Nothing is lost, even if it goes over STORAGE_MAX_ITEMS
 	mslist<storageitem_t> Potions;
 	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
 	{
@@ -6952,13 +6958,13 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
 	//Identical items stack, but only a stack of groupable items counts once towards the max.
 	//Anything else counts for each item in the stack, so it needs room even when it stacks.
 	//Check before changing anything, so that a stack is never left half stored
-	int Count = Storage_ItemCount();
+	int Count = Storage_ItemCount(), Max = Storage_MaxItems();
 	if (!Groupable)
 	{
-		if (Count + (int)Item.Quantity > STORAGE_MAX_ITEMS)
+		if (Count + (int)Item.Quantity > Max)
 			return false;
 	}
-	else if (Count >= STORAGE_MAX_ITEMS)
+	else if (Count >= Max)
 	{
 		//A full storage can still take a groupable item that stacks completely onto the items already there
 		int Room = 0;
@@ -7008,8 +7014,6 @@ void CBasePlayer::Storage_NewItem(storageitem_t &Item)
 }
 void CBasePlayer::Storage_SendItemUpdate(int Idx)
 {
-	//The quantity or quality of an item in my storage changed.
-	//Items past ClientItems haven't been sent yet, so they get sent with the new amounts
 	if (Idx >= m_CurrentStorage.ClientItems)
 		return;
 
@@ -7022,7 +7026,6 @@ void CBasePlayer::Storage_SendItemUpdate(int Idx)
 }
 void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 {
-	//Takes Amt of an item out of my storage.  The item stays in storage until its quantity runs out
 	if (m_Storage[Idx].Quantity > Amt)
 	{
 		m_Storage[Idx].Quantity -= Amt;
@@ -7045,7 +7048,7 @@ void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 }
 void CBasePlayer::Storage_RemoveSwigs(int Idx, int Amt)
 {
-	//Takes Amt swigs out of a mana potion in my storage.  It stays in storage until its swigs run out
+	//Takes Amt swigs out of a mana potion in my storage. It stays in storage until its swigs run out
 	if (m_Storage[Idx].Quality > Amt)
 	{
 		m_Storage[Idx].Quality -= Amt;

@@ -1416,6 +1416,14 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 
 			Event.SetVar("game.ret.storage.added", UTIL_VarArgs("%i", Added));
 		}
+		//setmax target amount
+		//Sets how many items the target player's storage holds, up to STORAGE_MAX_ITEMS. $get(target,storagemax) returns it
+		else if (Params.size() >= 3 && Params[0] == "setmax")
+		{
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
+			if (pTarget && pTarget->IsPlayer())
+				((CBasePlayer *)pTarget)->Storage_SetMax(atoi(Params[2]));
+		}
 		else
 			ERROR_MISSING_PARMS;
 	}

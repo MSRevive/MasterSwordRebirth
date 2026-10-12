@@ -1415,7 +1415,7 @@ bool CBasePlayer::Storage_CombinesSwigs(const char* pszItemName, int Properties)
 
 int CBasePlayer::Storage_ItemCount()
 {
-	//How much of STORAGE_MAX_ITEMS is used.  A stack of groupable items only counts once
+	//How much of Storage_MaxItems is used.  A stack of groupable items only counts once
 	int Count = 0;
 	for (int i = 0; i < m_Storage.size(); i++)
 	{
@@ -1427,6 +1427,13 @@ int CBasePlayer::Storage_ItemCount()
 	}
 
 	return Count;
+}
+
+int CBasePlayer::Storage_MaxItems()
+{
+	//Each player has their own max, but it's never more than STORAGE_MAX_ITEMS
+	int Max = m_StorageMax > 0 ? m_StorageMax : STORAGE_DEFAULT_ITEMS;
+	return V_min(Max, STORAGE_MAX_ITEMS);
 }
 
 bool CBasePlayer::Script_SetupEvent(CScript* Script, SCRIPT_EVENT& Event)

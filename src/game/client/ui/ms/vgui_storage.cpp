@@ -122,7 +122,7 @@ void CStoragePanel::Update()
 
 	CStorePanel::Update();
 
-	m_pTitle->setText(player.m_CurrentStorage.DisplayName + " (" + player.Storage_ItemCount() + "/" + STORAGE_MAX_ITEMS + ")");
+	m_pTitle->setText(player.m_CurrentStorage.DisplayName + " (" + player.Storage_ItemCount() + "/" + player.Storage_MaxItems() + ")");
 }
 
 void CStoragePanel::GearItemSelected(ulong ID)
@@ -299,7 +299,6 @@ void Storage_ItemReset()
 	Storage_Update();
 }
 
-//Items were added to my storage
 void Storage_ItemMsg()
 {
 	int Count = READ_BYTE();
@@ -312,7 +311,6 @@ void Storage_ItemMsg()
 		Item.Quality = READ_SHORT();
 		Item.MaxQuality = READ_SHORT();
 
-		//Everything is read before the item is checked, so the next item can still be read
 		if (idx < 0 || idx >= CGenericItemMgr::ItemCount())
 			continue;
 
@@ -323,7 +321,6 @@ void Storage_ItemMsg()
 	Storage_Update();
 }
 
-//An item was removed from my storage
 void Storage_ItemRemoveMsg()
 {
 	ulong ID = READ_LONG();
@@ -337,7 +334,6 @@ void Storage_ItemRemoveMsg()
 	Storage_Update();
 }
 
-//The quantity or quality of an item in my storage changed
 void Storage_ItemUpdateMsg()
 {
 	ulong ID = READ_LONG();
@@ -350,6 +346,13 @@ void Storage_ItemUpdateMsg()
 			player.m_Storage[i].Quality = Quality;
 			break;
 		}
+
+	Storage_Update();
+}
+
+void Storage_MaxMsg()
+{
+	player.m_StorageMax = READ_SHORT();
 
 	Storage_Update();
 }
