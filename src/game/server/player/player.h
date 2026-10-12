@@ -29,6 +29,10 @@
 
 // was 1500, but there shouldn't be any issues with increasing.
 #define NUM_MAX_STACK 2500 //stack is stored as either a unsigned short, so that's the actual max it can be.
+#define STORAGE_MAX_ITEMS 300
+#define STORAGE_DEFAULT_ITEMS 100
+#define STORAGE_MAX_TRANSFER 20
+#define STORAGE_MAX_SWIGS 30
 
 enum sbar_data
 {
@@ -309,19 +313,25 @@ struct genericitem_full_t : genericitem_t
 	byte Spell_CastSuccess;
 	mslist<genericitem_full_t> ContainerItems;
 };
-struct storage_t
+//An item in storage.  Only what's needed to create the item again is kept
+struct storageitem_t
 {
-	msstring Name;
-	mslist<genericitem_full_t> Items;
+	ulong ID;				 //Unique within the storage.  Not saved
+	msstring Name;			 //Item script name
+	unsigned short Quantity; //How many are in the stack
+	unsigned short Quality, MaxQuality;
 };
 struct storageaccess_t
 {
 	bool Active;
-	bool ReqTeller; //Whether we should keep checking to see if the player is out of range of the teller or if the teller has died
 	msstring DisplayName;
-	msstring StorageName;
-	float flFeeRatio;
-	entityinfo_t Teller;
+	entityinfo_t Teller; //The entity that opened my storage.  I must stay near it to keep using it
+	msstring Callback;	 //Prefix of the script events called on the teller
+	int ClientItems;	 //Number of items in my storage that the client knows about
+	float TransferTime;	 //The frame that Transfers was counted in
+	int Transfers;		 //Number of items I tried to move into or out of storage that frame
+	int MovedIn, MovedOut;				//Items moved into and out of storage that I haven't been told about yet
+	msstring MovedInName, MovedOutName; //The last item moved each way
 };
 
 //Companion
@@ -365,7 +375,7 @@ struct chardata_t : savedata_t
 	statlist m_Stats;					//All stats.  Natural stats and Skill-based stats
 	std::vector<std::string> m_Spells;	//All known spells
 	mslist<genericitem_full_t> m_Items; //All carried items
-	mslist<storage_t> m_Storages;		//Storage places where I have items
+	std::vector<storageitem_t> m_Storage;	//All items in storage
 	mslist<companion_t> m_Companions;	//Companions
 	mslist<quest_t> m_Quests;			//All the quests I've completed
 	fixed_vector<quickslot_t, MAX_QUICKSLOTS> m_QuickSlots; //All the quickslots (based on the item IDs of the last save).  Extras in a save are dropped
@@ -382,7 +392,7 @@ struct chardata_t : savedata_t
 	void ReadSpells1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadItems1(byte DataID, CPlayer_DataBuffer &m_File);
 	bool ReadItem1(byte DataID, CPlayer_DataBuffer &Data, genericitem_full_t &outItem);
-	void ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File);
+	void SkipStorageItems1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadCompanions1(byte DataID, CPlayer_DataBuffer &m_File);
 	void SkipHelpTips1(byte DataID, CPlayer_DataBuffer &m_File);
 	void ReadQuests1(byte DataID, CPlayer_DataBuffer &m_File);
@@ -435,8 +445,9 @@ public:
 	float m_TimeCanVote;
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
-	mslist<storage_t> m_Storages;	  //Storage places where I have items
-	storageaccess_t m_CurrentStorage; //Currently accessing this storage
+	std::vector<storageitem_t> m_Storage;	  //Items I have in storage
+	int m_StorageMax;					  //How many items my storage holds.  0 until it's set, which gives STORAGE_DEFAULT_ITEMS
+	storageaccess_t m_CurrentStorage;	  //Set while I have my storage open
 	bool m_Initialized;				  //Whether stats were created, script loaded, etc
 	float m_TimeNextSave;
 	bool m_CanJoin;							  //Whether I have any characters on this server that can join the game
@@ -533,8 +544,26 @@ public:
 	bool IsInAttackStance();
 	const char *DisplayName();
 	bool CanDamage(CBaseEntity *pOther); //Can I damage this entity?
-	void Storage_Open(const char* pszDisplayName, const char* pszStorageName, float flFeeRatio, entityinfo_t &Entity);
-	void Storage_Send();
+	void Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller, const char* pszCallback);
+	void Storage_End();
+	void Storage_Close();
+	void Storage_CheckTeller();
+	void Storage_UpdateClient();
+	bool Storage_CountTransfer();
+	void Storage_Moved(const char* pszItemName, bool In);
+	void Storage_SendMoved();
+	bool Storage_AddItem(CGenericItem *pItem);
+	bool Storage_AddItem(storageitem_t &Item, int Properties);
+	int Storage_AddItems(const char* pszItemName, int Quantity, int Quality);
+	void Storage_NewItem(storageitem_t &Item);
+	void Storage_RemoveItem(int Idx, int Amt);
+	void Storage_SendItemUpdate(int Idx);
+	int Storage_SwigRoom(const char* pszItemName);
+	void Storage_PutSwigs(const char* pszItemName, int Swigs);
+	void Storage_RemoveSwigs(int Idx, int Amt);
+	void Storage_CombineSwigs();
+	void Storage_SetMax(int Max);
+	void Storage_SendMax();
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
 	bool LearnSkill(int iStat, int EnemySkillLevel);
 	void SetQuest(bool SetData, const char* Name, const char* Data);
@@ -628,8 +657,10 @@ public:
 	const char *GetFullTitle(); //Calculate title with skill Ex. "23 berserker"
 	void SetKeys();
 	void BlockButton(int Button);
-	storage_t *Storage_CreateAccount(storage_t &Storage);
-	storage_t *Storage_GetStorage(const char* pszStorageName);
+	static bool Storage_CanStoreItem(const char* pszItemName, int Properties); //Whether this kind of item is allowed in storage
+	static bool Storage_CombinesSwigs(const char* pszItemName, int Properties); //Whether this kind of item is kept in storage by its swigs
+	int Storage_ItemCount();												   //How much of Storage_MaxItems is used
+	int Storage_MaxItems();													   //How many items my storage holds
 	void InitialSpawn(void);
 	bool Script_SetupEvent(CScript *Script, SCRIPT_EVENT &Event);
 	const char *GetPartyName();

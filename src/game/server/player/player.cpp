@@ -1519,6 +1519,7 @@ void CBasePlayer::PreThink(void)
 		return; // intermission or finale
 
 	Trade(); //Trade - Do this early on
+	Storage_CheckTeller();
 
 	ItemPreFrame();
 	WaterMove();
@@ -3814,6 +3815,9 @@ void CBasePlayer::UpdateClientData(void)
 
 	if (bShouldSaveChar)
 		SaveChar();
+
+	//Send new storage items
+	Storage_UpdateClient();
 
 	//Active Hand
 	if (m_CurrentHand != m_ClientCurrentHand)
@@ -6470,8 +6474,9 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	}
 
 	//Read storage items
-	m_Storages = Data.m_Storages;
-	Storage_Send(); //Send all the items in storage
+	m_Storage = Data.m_Storage; //Sent to the client when the storage is opened
+	m_StorageMax = Data.StorageMax;
+	Storage_CombineSwigs();
 
 	//Read Companions
 
@@ -6678,55 +6683,400 @@ bool CBasePlayer::IsInAttackStance()
 
 	return false;
 }
-void CBasePlayer::Storage_Open(const char* pszDisplayName, const char* pszStorageName, float flFeeRatio, entityinfo_t &Entity)
+
+#define STORAGE_TELLER_RANGE 128 //Same range as CMSMonster::Trade
+#define STORAGE_ITEMS_PER_MSG 13 //2 + (13 * 14 bytes per item) = 184, which fits in MAX_USERMESSAGE_SIZE
+void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller, const char* pszCallback)
 {
+	//Copied first, because ending the last use of my storage runs a script event
+	msstring DisplayName = pszDisplayName, Callback = pszCallback;
+	Storage_End(); //In case I still have it open through another entity
+
 	m_CurrentStorage.Active = true;
-	m_CurrentStorage.StorageName = pszStorageName;
-	m_CurrentStorage.DisplayName = pszDisplayName;
-	m_CurrentStorage.flFeeRatio = flFeeRatio;
-	m_CurrentStorage.ReqTeller = Entity.pvPrivData ? true : false;
-	if (m_CurrentStorage.ReqTeller)
-		m_CurrentStorage.Teller = Entity;
+	m_CurrentStorage.DisplayName = DisplayName;
+	m_CurrentStorage.Teller = pTeller;
+	m_CurrentStorage.Callback = Callback;
+	m_CurrentStorage.ClientItems = 0;
 
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pev);
 	WRITE_BYTE(5);
 	WRITE_STRING_LIMIT(m_CurrentStorage.DisplayName, 90);
-	WRITE_STRING_LIMIT(m_CurrentStorage.StorageName, 90);
-	WRITE_FLOAT(m_CurrentStorage.flFeeRatio);
 	MESSAGE_END();
-}
-void CBasePlayer::Storage_Send()
-{
+
+	//The client only knows my storage items while it has the storage open.
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
 	WRITE_BYTE(1); //reset storage items
 	MESSAGE_END();
 
-	//Send all storage items.
-	for (int s = 0; s < m_Storages.size(); s++)
+	Storage_SendMax();
+}
+
+void CBasePlayer::Storage_SetMax(int Max)
+{
+	m_StorageMax = V_max(V_min(Max, STORAGE_MAX_ITEMS), 1);
+
+	if (m_CurrentStorage.Active)
+		Storage_SendMax();
+}
+
+void CBasePlayer::Storage_SendMax()
+{
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(5); //storage max
+	WRITE_SHORT(Storage_MaxItems());
+	MESSAGE_END();
+}
+
+void CBasePlayer::Storage_End()
+{
+	if (!m_CurrentStorage.Active)
+		return;
+
+	m_CurrentStorage.Active = false;
+	m_CurrentStorage.ClientItems = 0;
+
+	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
+	IScripted *pScripted = pTeller ? pTeller->GetScripted() : NULL;
+	if (pScripted)
 	{
-		if (!m_Storages[s].Items.size())
-		{
-			//If the storage has no items, just send the storage name, indicating no items
-			MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
-			WRITE_BYTE(2); //storage item
-			WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
-			WRITE_BYTE(0); //No items
-			MESSAGE_END();
-		}
-		else
-		{
-			//If the storage has items, send a full message
-			for (int i = 0; i < m_Storages[s].Items.size(); i++)
-			{
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
-				WRITE_BYTE(2); //storage item
-				WRITE_STRING_LIMIT(m_Storages[s].Name, WRITE_STRING_MAX);
-				WRITE_BYTE(1); //Add this item to the storage
-				SendGenericItem(this, m_Storages[s].Items[i], false);
-				MESSAGE_END();
-			}
-		}
+		msstringlist Parameters;
+		Parameters.add(EntToString(this));
+		pScripted->CallScriptEvent(m_CurrentStorage.Callback + "_done", &Parameters);
 	}
+}
+
+void CBasePlayer::Storage_Close()
+{
+	Storage_End();
+
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_VGUIMENU], NULL, pev);
+	WRITE_BYTE(0);
+	MESSAGE_END();
+}
+
+void CBasePlayer::Storage_CheckTeller()
+{
+	if (!m_CurrentStorage.Active)
+		return;
+
+	CBaseEntity *pTeller = m_CurrentStorage.Teller.Entity();
+	if (pTeller && pTeller->pev->deadflag == DEAD_NO &&
+		(pTeller->Center() - Center()).Length() <= STORAGE_TELLER_RANGE)
+		return;
+
+	Storage_Close();
+}
+
+bool CBasePlayer::Storage_CountTransfer()
+{
+	if (m_CurrentStorage.TransferTime != gpGlobals->time)
+	{
+		m_CurrentStorage.TransferTime = gpGlobals->time;
+		m_CurrentStorage.Transfers = 0;
+	}
+
+	return ++m_CurrentStorage.Transfers <= STORAGE_MAX_TRANSFER;
+}
+
+void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
+{
+	if (In)
+	{
+		m_CurrentStorage.MovedIn++;
+		m_CurrentStorage.MovedInName = pszItemName;
+	}
+	else
+	{
+		m_CurrentStorage.MovedOut++;
+		m_CurrentStorage.MovedOutName = pszItemName;
+	}
+}
+
+void CBasePlayer::Storage_SendMoved()
+{
+	if (m_CurrentStorage.MovedIn == 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + m_CurrentStorage.MovedInName + " in storage");
+	else if (m_CurrentStorage.MovedIn > 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + m_CurrentStorage.MovedIn + " items in storage");
+
+	if (m_CurrentStorage.MovedOut == 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + m_CurrentStorage.MovedOutName + " from storage");
+	else if (m_CurrentStorage.MovedOut > 1)
+		SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + m_CurrentStorage.MovedOut + " items from storage");
+
+	m_CurrentStorage.MovedIn = m_CurrentStorage.MovedOut = 0;
+}
+
+void CBasePlayer::Storage_UpdateClient()
+{
+	Storage_SendMoved();
+
+	//Send the storage items that the client doesn't know about yet.
+	//One message per frame, so that a large storage doesn't overflow the client
+	if (!m_CurrentStorage.Active)
+		return;
+
+	int Count = V_min((int)m_Storage.size() - m_CurrentStorage.ClientItems, STORAGE_ITEMS_PER_MSG);
+	if (Count <= 0)
+		return;
+
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(2); //add storage items
+	WRITE_BYTE(Count);
+	for (int i = 0; i < Count; i++)
+	{
+		storageitem_t &Item = m_Storage[m_CurrentStorage.ClientItems + i];
+		WRITE_LONG(Item.ID);
+		WRITE_LONG(CGenericItemMgr::LookUpItemIdx(Item.Name));
+		WRITE_SHORT(Item.Quantity);
+		WRITE_SHORT(Item.Quality);
+		WRITE_SHORT(Item.MaxQuality);
+	}
+	MESSAGE_END();
+
+	m_CurrentStorage.ClientItems += Count;
+}
+
+//How many more of Item can stack onto Cur, an item already in storage. 0 if they aren't identical
+static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
+{
+	if (Cur.Name != Item.Name || Cur.Quality != Item.Quality || Cur.MaxQuality != Item.MaxQuality)
+		return 0;
+
+	return V_max(NUM_MAX_STACK - (int)Cur.Quantity, 0);
+}
+
+bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
+{
+	bool Groupable = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
+
+	storageitem_t Item;
+	Item.Name = pItem->ItemName;
+	Item.Quantity = Groupable ? V_max(pItem->iQuantity, 1) : 1;
+	Item.Quality = pItem->Quality;
+	Item.MaxQuality = pItem->MaxQuality;
+
+	return Storage_AddItem(Item, pItem->MSProperties());
+}
+
+int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Quality)
+{
+	CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(pszItemName, true);
+	if (!pGlobalItem || !Storage_CanStoreItem(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
+		return 0;
+
+	int Properties = pGlobalItem->MSProperties();
+	if (Quality < 0)
+		Quality = pGlobalItem->Quality;
+
+	if (Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), Properties))
+	{
+		if (Quality <= 0)
+			return 0;
+
+		Quantity = V_min(Quantity, Storage_SwigRoom(pGlobalItem->ItemName.c_str()) / Quality);
+	}
+	else if (!FBitSet(Properties, ITEM_GROUPABLE))
+		Quantity = V_min(Quantity, Storage_MaxItems() - Storage_ItemCount());
+
+	int Added = 0;
+	while (Added < Quantity)
+	{
+		storageitem_t Item;
+		Item.Name = pGlobalItem->ItemName;
+		Item.Quantity = V_min(Quantity - Added, NUM_MAX_STACK);
+		Item.Quality = Quality;
+		Item.MaxQuality = pGlobalItem->MaxQuality;
+
+		int Amt = Item.Quantity; //Storage_AddItem changes the quantity
+		if (!Storage_AddItem(Item, Properties))
+			break;
+
+		Added += Amt;
+	}
+
+	return Added;
+}
+
+int CBasePlayer::Storage_SwigRoom(const char* pszItemName)
+{
+	//How many more swigs of a mana potion fit in my storage.
+	//The ones already in storage get filled first, and then each new one holds up to STORAGE_MAX_SWIGS
+	int Room = V_max(Storage_MaxItems() - Storage_ItemCount(), 0) * STORAGE_MAX_SWIGS;
+	for (int i = 0; i < m_Storage.size(); i++)
+		if (m_Storage[i].Name == pszItemName)
+			Room += V_max(STORAGE_MAX_SWIGS - (int)m_Storage[i].Quality, 0);
+
+	return Room;
+}
+
+void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
+{
+	//Adds the swigs of a mana potion to my storage.  Doesn't check for room, Storage_SwigRoom does
+	for (int i = 0; i < m_Storage.size() && Swigs > 0; i++)
+	{
+		if (m_Storage[i].Name != pszItemName)
+			continue;
+
+		int Amt = V_min(Swigs, STORAGE_MAX_SWIGS - (int)m_Storage[i].Quality);
+		if (Amt <= 0)
+			continue;
+
+		m_Storage[i].Quality += Amt;
+		Swigs -= Amt;
+		Storage_SendItemUpdate(i);
+	}
+
+	while (Swigs > 0)
+	{
+		storageitem_t Item;
+		Item.Name = pszItemName;
+		Item.Quantity = 1;
+		Item.Quality = V_min(Swigs, STORAGE_MAX_SWIGS);
+		Item.MaxQuality = 0;
+
+		Swigs -= Item.Quality;
+		Storage_NewItem(Item);
+	}
+}
+
+void CBasePlayer::Storage_CombineSwigs()
+{
+	std::vector<storageitem_t> Potions;
+	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
+	{
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		if (!pGlobalItem || !Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
+			continue;
+
+		Potions.push_back(m_Storage[i]);
+		m_Storage.erase(m_Storage.begin() + i);
+	}
+
+	for (int i = 0; i < Potions.size(); i++)
+		Storage_PutSwigs(Potions[i].Name, (int)Potions[i].Quantity * (int)Potions[i].Quality);
+}
+
+bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
+{
+	if (Storage_CombinesSwigs(Item.Name.c_str(), Properties))
+	{
+		int Swigs = (int)Item.Quantity * (int)Item.Quality;
+		if (Swigs > Storage_SwigRoom(Item.Name))
+			return false;
+
+		Storage_PutSwigs(Item.Name, Swigs);
+		return true;
+	}
+
+	bool Groupable = FBitSet(Properties, ITEM_GROUPABLE) ? true : false;
+
+	//Identical items stack, but only a stack of groupable items counts once towards the max.
+	//Anything else counts for each item in the stack, so it needs room even when it stacks.
+	//Check before changing anything, so that a stack is never left half stored
+	int Count = Storage_ItemCount(), Max = Storage_MaxItems();
+	if (!Groupable)
+	{
+		if (Count + (int)Item.Quantity > Max)
+			return false;
+	}
+	else if (Count >= Max)
+	{
+		//A full storage can still take a groupable item that stacks completely onto the items already there
+		int Room = 0;
+		for (int i = 0; i < m_Storage.size(); i++)
+			Room += Storage_StackRoom(m_Storage[i], Item);
+
+		if (Room < (int)Item.Quantity)
+			return false;
+	}
+
+	for (int i = 0; i < m_Storage.size() && Item.Quantity; i++)
+	{
+		int Amt = V_min((int)Item.Quantity, Storage_StackRoom(m_Storage[i], Item));
+		if (Amt <= 0)
+			continue;
+
+		m_Storage[i].Quantity += Amt;
+		Item.Quantity -= Amt;
+		Storage_SendItemUpdate(i);
+	}
+
+	//What's left becomes a new item in storage
+	if (Item.Quantity)
+		Storage_NewItem(Item);
+
+	return true;
+}
+
+void CBasePlayer::Storage_NewItem(storageitem_t &Item)
+{
+	//Determine a unique ID for it
+	for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
+	{
+		bool Duplicate = false;
+		for (int i = 0; i < m_Storage.size(); i++)
+			if (m_Storage[i].ID == ID)
+			{
+				Duplicate = true;
+				break;
+			}
+		if (Duplicate)
+			continue;
+		Item.ID = ID;
+		break;
+	}
+
+	m_Storage.push_back(Item); //Storage_UpdateClient sends it
+}
+
+void CBasePlayer::Storage_SendItemUpdate(int Idx)
+{
+	if (Idx >= m_CurrentStorage.ClientItems)
+		return;
+
+	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+	WRITE_BYTE(4); //update storage item
+	WRITE_LONG(m_Storage[Idx].ID);
+	WRITE_SHORT(m_Storage[Idx].Quantity);
+	WRITE_SHORT(m_Storage[Idx].Quality);
+	MESSAGE_END();
+}
+
+void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
+{
+	if (m_Storage[Idx].Quantity > Amt)
+	{
+		m_Storage[Idx].Quantity -= Amt;
+		Storage_SendItemUpdate(Idx);
+		return;
+	}
+
+	//Items past ClientItems haven't been sent yet, so the client has nothing to remove
+	if (Idx < m_CurrentStorage.ClientItems)
+	{
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
+		WRITE_BYTE(3); //remove storage item
+		WRITE_LONG(m_Storage[Idx].ID);
+		MESSAGE_END();
+
+		m_CurrentStorage.ClientItems--;
+	}
+
+	m_Storage.erase(m_Storage.begin() + Idx);
+}
+
+void CBasePlayer::Storage_RemoveSwigs(int Idx, int Amt)
+{
+	//Takes Amt swigs out of a mana potion in my storage. It stays in storage until its swigs run out
+	if (m_Storage[Idx].Quality > Amt)
+	{
+		m_Storage[Idx].Quality -= Amt;
+		Storage_SendItemUpdate(Idx);
+		return;
+	}
+
+	Storage_RemoveItem(Idx, m_Storage[Idx].Quantity);
 }
 
 void CBasePlayer::SaveChar()

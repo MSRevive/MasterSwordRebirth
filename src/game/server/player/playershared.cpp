@@ -1319,7 +1319,7 @@ void CBasePlayer::Deactivate()
 		m_CharInfo[i].Destroy();
 
 	m_EntInfo.clear();
-	m_Storages.clear();
+	m_Storage.clear();
 	m_Quests.clear();
 	m_Maps.clear();
 	m_WearPositions.clear();
@@ -1393,21 +1393,46 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 #endif
 }
 
-storage_t* CBasePlayer::Storage_GetStorage(const char* pszStorageName)
+bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 {
-	for (int s = 0; s < m_Storages.size(); s++)
-		if (m_Storages[s].Name == pszStorageName)
-			return &m_Storages[s];
+	//Spells aren't saved with the character, and storage doesn't keep what's inside a container
+	if (FBitSet(Properties, ITEM_SPELL | ITEM_CONTAINER))
+		return false;
 
-	return NULL;
+	//MiB FEB2008a - the bank mask
+	const char* pszBlocked[] = {"pack_", "sheath_"};
+	for (unsigned int i = 0; i < sizeof(pszBlocked) / sizeof(pszBlocked[0]); i++)
+		if (!strncmp(pszItemName, pszBlocked[i], strlen(pszBlocked[i])))
+			return false;
+
+	return true;
 }
-storage_t* CBasePlayer::Storage_CreateAccount(storage_t& Storage)
-{
-	storage_t* pExistingStorage = Storage_GetStorage(Storage.Name);
-	if (pExistingStorage)
-		return pExistingStorage;
 
-	return &m_Storages.add(Storage);
+bool CBasePlayer::Storage_CombinesSwigs(const char* pszItemName, int Properties)
+{
+	return FBitSet(Properties, ITEM_DRINKABLE) && !strncmp(pszItemName, "mana_", 5);
+}
+
+int CBasePlayer::Storage_ItemCount()
+{
+	//How much of Storage_MaxItems is used. A stack of groupable items only counts once
+	int Count = 0;
+	for (int i = 0; i < m_Storage.size(); i++)
+	{
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		if (pGlobalItem && FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE))
+			Count++;
+		else
+			Count += m_Storage[i].Quantity;
+	}
+
+	return Count;
+}
+
+int CBasePlayer::Storage_MaxItems()
+{
+	int Max = m_StorageMax > 0 ? m_StorageMax : STORAGE_DEFAULT_ITEMS;
+	return V_min(Max, STORAGE_MAX_ITEMS);
 }
 
 bool CBasePlayer::Script_SetupEvent(CScript* Script, SCRIPT_EVENT& Event)

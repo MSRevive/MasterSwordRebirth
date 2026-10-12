@@ -1388,62 +1388,41 @@ bool CMSMonster::Script_ExecuteCmd(CScript *Script, SCRIPT_EVENT &Event, scriptc
 	//************************** STORAGE *******************************
 	else if (Cmd.Name() == "storage")
 	{
-		if (Params.size() >= 3)
+		//trade target displayname cb_prefix
+		//Opens the target player's storage.  The player has to stay near me to keep using it
+		//Calls cb_prefix_success now, and cb_prefix_done when the player is finished.  Both get the player as PARAM1
+		if (Params.size() >= 3 && Params[0] == "trade")
 		{
-			const char* StorageName = Params[1];
-			CBaseEntity *pTarget = RetrieveEntity(Params[2]);
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
 			if (pTarget && pTarget->IsPlayer())
 			{
-				CBasePlayer *pPlayer = (CBasePlayer *)pTarget;
+				msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_storage_trade";
 
-				//openaccount storagename target cb_prefix
-				if (Params[0] == "openaccount")
-				{
-					msstring Callback = Params.size() >= 4 ? Params[3].str() : "game_openaccount";
+				((CBasePlayer *)pTarget)->Storage_Open(Params[2], this, Callback);
 
-					if (pPlayer->Storage_GetStorage(StorageName))
-						CallScriptEvent(Callback + "_exists");
-					else
-					{
-						storage_t Storage;
-						Storage.Name = StorageName;
-
-						if (pPlayer->Storage_CreateAccount(Storage))
-							CallScriptEvent(Callback + "_success");
-						else
-							CallScriptEvent(Callback + "_failed");
-					}
-				}
-				//checkaccount storagename target cb_prefix
-				else if (Params[0] == "checkaccount")
-				{
-					msstring Callback = Params.size() >= 4 ? Params[3].c_str() : "game_checkaccount";
-
-					if (pPlayer->Storage_GetStorage(StorageName))
-						CallScriptEvent(Callback + "_success");
-					else
-						CallScriptEvent(Callback + "_failed");
-				}
-				//trade storagename target feeratio displayname cb_prefix
-				else if (Params[0] == "trade")
-				{
-					if (Params.size() >= 5)
-					{
-						msstring Callback = Params.size() >= 6 ? Params[5].c_str() : "game_storage_trade";
-
-						if (pPlayer->Storage_GetStorage(StorageName))
-						{
-							entityinfo_t newEnt = entityinfo_t(this);
-							pPlayer->Storage_Open(Params[4], StorageName, atof(Params[3]), newEnt);
-							CallScriptEvent(Callback + "_success");
-						}
-						else
-							CallScriptEvent(Callback + "_noaccount");
-					}
-					else
-						ERROR_MISSING_PARMS;
-				}
+				static msstringlist Parameters;
+				Parameters.clearitems();
+				Parameters.add(EntToString(pTarget));
+				CallScriptEvent(Callback + "_success", &Parameters);
 			}
+		}
+		//add target itemname quantity quality
+		else if (Params.size() >= 3 && Params[0] == "add")
+		{
+			int Added = 0;
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
+			if (pTarget && pTarget->IsPlayer())
+				Added = ((CBasePlayer *)pTarget)->Storage_AddItems(Params[2], Params.size() >= 4 ? atoi(Params[3]) : 1, Params.size() >= 5 ? atoi(Params[4]) : -1);
+
+			Event.SetVar("game.ret.storage.added", UTIL_VarArgs("%i", Added));
+		}
+		//setmax target amount
+		//Sets how many items the target player's storage holds, up to STORAGE_MAX_ITEMS. $get(target,storagemax) returns it
+		else if (Params.size() >= 3 && Params[0] == "setmax")
+		{
+			CBaseEntity *pTarget = RetrieveEntity(Params[1]);
+			if (pTarget && pTarget->IsPlayer())
+				((CBasePlayer *)pTarget)->Storage_SetMax(atoi(Params[2]));
 		}
 		else
 			ERROR_MISSING_PARMS;

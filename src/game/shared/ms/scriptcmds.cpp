@@ -1280,6 +1280,12 @@ const char* CBaseEntity::GetProp(CBaseEntity *pTarget, msstring &FullParams, mss
 		msstring msPlayerGoldCount = STRING(iPlayerGoldCount);
 		return msPlayerGoldCount;
 	}
+	else if (Prop == "storagemax")
+	{
+		//How many items the player's storage holds
+		if (pTarget->IsPlayer()) RETURN_INT(((CBasePlayer *)pTarget)->Storage_MaxItems())
+		return "0";
+	}
 	else if (Prop == "isbot")
 	{
 		//Thothie JUN2007a - check if bot

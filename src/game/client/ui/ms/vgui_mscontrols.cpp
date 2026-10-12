@@ -275,6 +275,14 @@ void containeritem_t::init( CGenericItem *pItem )
 	Properties = pItem->MSProperties( );
 	Quantity = FBitSet( Properties, ITEM_GROUPABLE ) ? pItem->iQuantity : 1;
 	Quality = pItem->Quality;
+	MaxQuality = pItem->MaxQuality;
+	if( !MaxQuality && FBitSet( Properties, ITEM_DRINKABLE ) )
+	{
+		//Drinkables don't have a max quality.  A new one is full
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName( pItem->ItemName, true );
+		if( pGlobalItem )
+			MaxQuality = pGlobalItem->Quality;
+	}
 	Value = pItem->m_Value;
 	Desc = pItem->DisplayDesc;
 	bForceFull = false;

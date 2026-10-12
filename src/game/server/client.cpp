@@ -931,97 +931,105 @@ void ClientCommand2(edict_t *pEntity)
 			return;
 
 		if (!_stricmp(CMD_ARGV(1), "stop"))
-			pPlayer->m_CurrentStorage.Active = false;
+			pPlayer->Storage_End();
 
 		if (CMD_ARGC() < 3)
 			return;
 
 		if (pPlayer->m_CurrentStorage.Active)
 		{
-			storage_t *pStorage = pPlayer->Storage_GetStorage(pPlayer->m_CurrentStorage.StorageName);
-			if (pStorage)
-			{
-				if (!_stricmp(CMD_ARGV(1), "add"))
-				{
-					CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
-					if (pItem)
-					{
-						//Determine a unique ID for the item in storage
-						genericitem_full_t Item(pItem);
-						for (unsigned int ID = 0; ID < SHRT_MAX; ID++)
-						{
-							bool Duplicate = false;
-							for (int i = 0; i < pStorage->Items.size(); i++)
-								if (pStorage->Items[i].ID == ID)
-								{
-									Duplicate = true;
-									break;
-								}
-							if (Duplicate)
-								continue;
-							Item.ID = ID;
-							break;
-						}
+			//The storage panel doesn't let more than this be moved at once
+			if (!pPlayer->Storage_CountTransfer())
+				return;
 
-						pStorage->Items.add(Item);
-						pPlayer->Storage_Send();
+			if (!_stricmp(CMD_ARGV(1), "add"))
+			{
+				CGenericItem *pItem = MSUtil_GetItemByID(atol(CMD_ARGV(2)), pPlayer);
+				if (pItem && (pItem == pPlayer->PlayerHands || !CBasePlayer::Storage_CanStoreItem(pItem->ItemName.c_str(), pItem->MSProperties())))
+					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't put ") + SPEECH::ItemName(pItem) + " in storage");
+				else if (pItem)
+				{
+					if (pPlayer->Storage_AddItem(pItem))
+					{
 						pPlayer->RemoveItem(pItem);
-						pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You put ") + SPEECH::ItemName(pItem) + " in storage");
+						pPlayer->Storage_Moved(SPEECH::ItemName(pItem), true);
 						pItem->SUB_Remove();
 					}
+					else
+						pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Your storage is full");
 				}
-				else if (!_stricmp(CMD_ARGV(1), "remove"))
-				{
-					if (CMD_ARGC() < 4)
-						return;
+			}
+			else if (!_stricmp(CMD_ARGV(1), "remove"))
+			{
+				if (CMD_ARGC() < 4)
+					return;
 
-					int ItemID = atoi(CMD_ARGV(2));
-					genericitem_t *pStorageItem = NULL;
-					int StorageItemIdx = 0;
-					for (unsigned int i = 0; i < pStorage->Items.size(); i++)
-						if (pStorage->Items[i].ID == ItemID)
+				int ItemID = atoi(CMD_ARGV(2));
+				storageitem_t *pStorageItem = NULL;
+				int StorageItemIdx = 0;
+				for (unsigned int i = 0; i < pPlayer->m_Storage.size(); i++)
+					if (pPlayer->m_Storage[i].ID == ItemID)
+					{
+						pStorageItem = &pPlayer->m_Storage[i];
+						StorageItemIdx = i;
+						break;
+					}
+
+				if (pStorageItem)
+				{
+					CGenericItem *pItem = NewGenericItem(pStorageItem->Name);
+					if (pItem)
+					{
+						//A groupable item comes out as the whole stack.  Anything else comes out one at a time
+						int Amt = 1;
+						if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE))
 						{
-							pStorageItem = &pStorage->Items[i];
-							StorageItemIdx = i;
-							break;
+							Amt = pStorageItem->Quantity;
+							pItem->iQuantity = Amt;
 						}
 
-					if (pStorageItem)
-					{
-						CGenericItem *pItem = *pStorageItem;
-						int Cost = int(pItem->m_Value * pPlayer->m_CurrentStorage.flFeeRatio);
-
-						if (!Cost || pPlayer->m_Gold > Cost) //If no retrieval fee or I have enough to pay it...
+						//A mana potion comes out full, or with whatever swigs are left in storage
+						bool Swigs = CBasePlayer::Storage_CombinesSwigs(pStorageItem->Name.c_str(), pItem->MSProperties());
+						int SwigAmt = pStorageItem->Quality;
+						if (Swigs)
 						{
-							int ContainerID = atol(CMD_ARGV(3));
-							bool Success = false;
-
-							if (!ContainerID)
-								Success = pItem->GiveTo(pPlayer, true, true);
-							else
-							{
-								CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, pPlayer);
-								if (pContainer)
-									Success = pPlayer->PutInPack(pItem, pContainer);
-							}
-
-							if (Success)
-							{
-								pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("You take ") + SPEECH::ItemName(pItem) + " from storage");
-								if (Cost)
-									pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("Retrieval fee: ") + Cost + " Gold");
-								else
-									pPlayer->SendEventMsg(HUDEVENT_NORMAL, msstring("Retrieval fee: None"));
-
-								pPlayer->GiveGold(-Cost, false);
-								pStorage->Items.erase(StorageItemIdx);
-								pPlayer->Storage_Send();
-							}
-							else
-								pItem->SUB_Remove();
+							if (pItem->Quality > 0)
+								SwigAmt = V_min(SwigAmt, (int)pItem->Quality);
+							pItem->Quality = SwigAmt;
 						}
 						else
-							pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't afford the retrieval fee of ") + Cost + " Gold");
+						{
+							pItem->Quality = pStorageItem->Quality;
+							pItem->MaxQuality = pStorageItem->MaxQuality;
+						}
+
+						int ContainerID = atol(CMD_ARGV(3));
+						bool ToHands = !_stricmp(CMD_ARGV(3), "hands"); //Sent when an item in storage is double clicked
+						bool Success = false;
+
+						if (ToHands)
+							Success = pItem->GiveTo(pPlayer, false, true, true); //Only into my hands.  What I'm holding is put away to make room
+						else if (!ContainerID)
+							Success = pItem->GiveTo(pPlayer, true, true);
+						else
+						{
+							CGenericItem *pContainer = MSUtil_GetItemByID(ContainerID, pPlayer);
+							if (pContainer)
+								Success = pPlayer->PutInPack(pItem, pContainer);
+						}
+
+						if (Success)
+						{
+							pPlayer->Storage_Moved(SPEECH::ItemName(pItem), false);
+							if (Swigs)
+								pPlayer->Storage_RemoveSwigs(StorageItemIdx, SwigAmt);
+							else
+								pPlayer->Storage_RemoveItem(StorageItemIdx, Amt);
+							if (ToHands)
+								pPlayer->Storage_Close(); //Like the inventory, taking an item into my hands closes the storage
+						}
+						else
+							pItem->SUB_Remove();
 					}
 				}
 			}

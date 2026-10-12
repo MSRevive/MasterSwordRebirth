@@ -41,6 +41,7 @@ struct savedata_legacy_t
 struct savedata_t : savedata_legacy_t
 {
 	short Body = 0;
+	short StorageMax = 0;
 };
 
 //
@@ -88,10 +89,11 @@ enum charfield_e
 	CF_SKILLS = 33,			//[ stat: [ substat: [value, exp], ... ], ... ]
 	CF_SPELLS = 34,			//[str, ...]
 	CF_ITEMS = 35,			//[item, ...]
-	CF_STORAGES = 36,		//[storage, ...]
-	CF_COMPANIONS = 37,		//[companion, ...]
-	CF_QUESTS = 38,			//[ [name, data], ... ]
-	CF_QUICKSLOTS = 39,		//[ nil | [type, id], ... ]
+	CF_COMPANIONS = 36,		//[companion, ...]
+	CF_QUESTS = 37,			//[ [name, data], ... ]
+	CF_QUICKSLOTS = 38,		//[ nil | [type, id], ... ]
+	CF_STORAGE = 39,		//[storageitem, ...]
+	CF_STORAGEMAX = 40,		//int
 };
 
 //Item keys
@@ -108,11 +110,13 @@ enum charitemfield_e
 	CI_CONTENTS = 8,	//[item, ...] - containers only
 };
 
-//Storage keys
-enum charstoragefield_e
+//Storage item keys
+enum charstorageitemfield_e
 {
-	CS_NAME = 0,	//str
-	CS_ITEMS = 1,	//[item, ...]
+	CSI_NAME = 0,		//str - item script name
+	CSI_QUANTITY = 1,	//int - how many.  For a groupable item, the size of the stack
+	CSI_QUALITY = 2,	//int
+	CSI_MAXQUALITY = 3,	//int
 };
 
 //Companion keys

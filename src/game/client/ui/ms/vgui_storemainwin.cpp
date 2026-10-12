@@ -95,6 +95,9 @@ void MsgFunc_Store()
 void Update_StoreBuy();
 void Storage_ItemReset();
 void Storage_ItemMsg();
+void Storage_ItemRemoveMsg();
+void Storage_ItemUpdateMsg();
+void Storage_MaxMsg();
 
 int __MsgFunc_StoreItem(const char *pszName, int iSize, void *pbuf)
 {
@@ -142,6 +145,15 @@ int __MsgFunc_StoreItem(const char *pszName, int iSize, void *pbuf)
 		break;
 	case 2:
 		Storage_ItemMsg();
+		break;
+	case 3:
+		Storage_ItemRemoveMsg();
+		break;
+	case 4:
+		Storage_ItemUpdateMsg();
+		break;
+	case 5:
+		Storage_MaxMsg();
 		break;
 	}
 	return 0;

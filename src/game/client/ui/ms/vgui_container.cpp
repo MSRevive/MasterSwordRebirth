@@ -336,8 +336,9 @@ void VGUI_ItemInfoPanel::Update(containeritem_t &Item)
 	m_Name->setText(Item.getFullName());
 
 	m_Quantity->setText(Localized("#ITEMINFO_QUANTITY"), Item.Quantity);
-	m_Quality->setText(Localized("#ITEMINFO_QUALITY"), Item.Quality);
-	m_Quality->setVisible(false);
+	//Only items with a quality have a max quality
+	m_Quality->setText("Quality: %i/%i", (int)Item.Quality, (int)Item.MaxQuality);
+	m_Quality->setVisible(Item.MaxQuality > 0);
 
 	char weight[50];
 	_snprintf(weight, sizeof(weight), "Weight: %.2f", Item.Weight);

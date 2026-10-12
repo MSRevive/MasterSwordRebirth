@@ -56,7 +56,7 @@ int playerBodyArray[16]; //MiB MAR2010_12 Armor Fix FINAL
 
 //Master Sword player functionality
 void ShowWeaponDesc(CGenericItem* pItem);
-void Storage_Show(const char* DisplayName, const char* StorageName, float flFeeRatio);
+void Storage_Show(const char* DisplayName);
 void UpdateActiveMenus();
 
 /*
@@ -877,9 +877,7 @@ int __MsgFunc_Item(const char* pszName, int iSize, void* pbuf)
 	case 5:
 	{
 		msstring DisplayName = READ_STRING();
-		msstring StorageName = READ_STRING();
-		float flFeeRatio = READ_FLOAT();
-		Storage_Show(DisplayName, StorageName, flFeeRatio);
+		Storage_Show(DisplayName);
 		bDoInvUpdate = true;
 	}
 	break;

@@ -377,6 +377,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_PLAYERKILLS: PlayerKills = (short)PackReadInt(Value); break;
 			case CF_TIMEFORGETKILL: TimeWaitedToForgetKill = PackReadFloat(Value); break;
 			case CF_BODY: Body = (short)PackReadInt(Value); break;
+			case CF_STORAGEMAX: StorageMax = (int)PackReadInt(Value); break;
 
 			//Sections
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
@@ -413,23 +414,36 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 				break;
 			}
 
-			case CF_STORAGES:
+			case CF_STORAGE:
 			{
-				msgpack::object_array Storages = PackArray(Value);
-				for (uint32_t s = 0; s < Storages.size; s++)
+				msgpack::object_array Items = PackArray(Value);
+				for (uint32_t i = 0; i < Items.size; i++)
 				{
-					storage_t Storage;
-					msgpack::object_map Fields = PackMap(Storages.ptr[s]);
+					storageitem_t Item;
+					Item.Quantity = Item.Quality = Item.MaxQuality = 0;
+
+					msgpack::object_map Fields = PackMap(Items.ptr[i]);
 					for (uint32_t f = 0; f < Fields.size; f++)
 					{
 						const msgpack::object &FieldValue = Fields.ptr[f].val;
 						switch (PackReadInt(Fields.ptr[f].key, -1))
 						{
-						case CS_NAME: Storage.Name = PackReadMsStr(FieldValue); break;
-						case CS_ITEMS: ReadItemListPack(FieldValue, Storage.Items); break;
+						case CSI_NAME: Item.Name = PackReadMsStr(FieldValue); break;
+						case CSI_QUANTITY: Item.Quantity = (unsigned short)PackReadInt(FieldValue); break;
+						case CSI_QUALITY: Item.Quality = (unsigned short)PackReadInt(FieldValue); break;
+						case CSI_MAXQUALITY: Item.MaxQuality = (unsigned short)PackReadInt(FieldValue); break;
 						}
 					}
-					m_Storages.add(Storage);
+
+					if (!Item.Name.len() || !Item.Quantity)
+					{
+						MS_ERROR("ReadCharData: Bad storage item, skipping...");
+						continue;
+					}
+
+					ApplyItemAlias(Item.Name);
+					Item.ID = m_Storage.size(); //IDs aren't saved.  They only have to be unique
+					m_Storage.push_back(Item);
 				}
 				break;
 			}
@@ -553,7 +567,7 @@ bool chardata_t::ReadDataLegacy(void *pData, ulong Size)
 		ReadSkills1(DataID, m_File);
 		ReadSpells1(DataID, m_File);
 		ReadItems1(DataID, m_File);
-		ReadStorageItems1(DataID, m_File);
+		SkipStorageItems1(DataID, m_File);
 		ReadCompanions1(DataID, m_File);
 		SkipHelpTips1(DataID, m_File);
 		ReadQuests1(DataID, m_File);
@@ -693,31 +707,25 @@ void chardata_t::ReadItems1(byte DataID, CPlayer_DataBuffer &m_File)
 	}
 }
 
-void chardata_t::ReadStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
+void chardata_t::SkipStorageItems1(byte DataID, CPlayer_DataBuffer &m_File)
 {
 	if (DataID == CHARDATA_STORAGE1)
 	{
-		//Read storage items
+		//Storage from legacy saves is no longer loaded, but the chunk still has to be read past
 
 		short Storages = 0;
 		m_File.ReadShort(Storages); //[SHORT]
 		for (int i = 0; i < Storages; i++)
 		{
-			storage_t Storage;
-			m_File.ReadString(Storage.Name, MSSTRING_SIZE); //[X STRINGS]
+			m_File.ReadString(cTemp, MSSTRING_SIZE); //[X STRINGS]
 
 			short Items = 0;
 			m_File.ReadShort(Items); //[X SHORTS]
 			for (int i = 0; i < Items; i++)
 			{
 				genericitem_full_t Item;
-				if (!ReadItem1(DataID, m_File, Item)) //[Y ITEMS]
-					continue;
-
-				Storage.Items.add(Item);
+				ReadItem1(DataID, m_File, Item); //[Y ITEMS]
 			}
-
-			m_Storages.add(Storage);
 		}
 	}
 }
@@ -1057,6 +1065,7 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	Root.Field(CF_PLAYERKILLS, Data.PlayerKills);
 	Root.Field(CF_TIMEFORGETKILL, Data.TimeWaitedToForgetKill);
 	Root.Field(CF_BODY, Data.Body);
+	Root.Field(CF_STORAGEMAX, Data.StorageMax);
 
 	//Maps visited
 	Root.Key(CF_VISITEDMAPS);
@@ -1104,19 +1113,17 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 	}
 
 	//Storage items
-	Root.Key(CF_STORAGES);
-	Out.Pk.pack_array(pPlayer->m_Storages.size());
-	for (int s = 0; s < pPlayer->m_Storages.size(); s++)
+	Root.Key(CF_STORAGE);
+	Out.Pk.pack_array(pPlayer->m_Storage.size());
+	for (int i = 0; i < pPlayer->m_Storage.size(); i++)
 	{
-		storage_t &Storage = pPlayer->m_Storages[s];
+		storageitem_t &Item = pPlayer->m_Storage[i];
 
-		CPackScope StorageFields(Out, true);
-		StorageFields.FieldStr(CS_NAME, Storage.Name);
-		StorageFields.Key(CS_ITEMS);
-		CPackScope Items(Out, false);
-		for (int i = 0; i < Storage.Items.size(); i++)
-			if (PackItem(Out, Storage.Items[i]))
-				Items.Added();
+		CPackScope Fields(Out, true);
+		Fields.FieldStr(CSI_NAME, Item.Name);
+		Fields.Field(CSI_QUANTITY, Item.Quantity);
+		Fields.Field(CSI_QUALITY, Item.Quality);
+		Fields.Field(CSI_MAXQUALITY, Item.MaxQuality);
 	}
 
 	//Companions - save any variables that start with "companion.save."
@@ -1259,6 +1266,7 @@ void MSChar_Interface::SaveChar(CBasePlayer *pPlayer, savedata_t *pData)
 		Data.PlayerKills = pPlayer->m_PlayersKilled;
 		Data.TimeWaitedToForgetKill = pPlayer->m_TimeWaitedToForgetKill;
 		Data.Body = pPlayer->m_CharInfo[pPlayer->m_CharacterNum].Body;
+		Data.StorageMax = pPlayer->m_StorageMax;
 		//#ifdef VALVE_DLL
 		strncpy(Data.SteamID, GETPLAYERAUTHID(pPlayer->edict()), 32);
 		//#else
