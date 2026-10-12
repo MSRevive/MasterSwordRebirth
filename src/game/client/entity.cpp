@@ -29,6 +29,9 @@
 #include "ms/hudscript.h"
 #include "ms/clglobal.h"
 #include "render/clenv.h"
+#include "render/clrender.h"
+#include "render/sprite.h"
+#include "triangleapi.h"
 #include "script.h"
 #include <mathlib.h>
 
@@ -88,14 +91,16 @@ public:
 	TEMPENTITY m_Temp;
 
 	void Think(float time) override {} //Simulated in HUD_TempEntUpdate instead
+	bool CheckVisibility() override { return GetParticlePVS(); } //Set in HUD_TempEntUpdate too
+	void Draw() override;
 	void Die() override;
 	void SyncFromTemp();
+	Vector GetDrawOrigin();
 };
 
 static std::vector<CScriptParticle *> g_ScriptParticles;
 cvar_t *ms_particle_tempents = NULL;
 
-//ParticleMan calls this right before it deletes the particle
 void CScriptParticle::Die()
 {
 	auto it = std::find(g_ScriptParticles.begin(), g_ScriptParticles.end(), this);
@@ -106,43 +111,199 @@ void CScriptParticle::Die()
 		g_TempEntExtra[m_Temp.entity.curstate.weaponanim].Active = false;
 }
 
-//Copy what the simulation and the scripts did to m_Temp over to what ParticleMan draws
-void CScriptParticle::SyncFromTemp()
+Vector CScriptParticle::GetDrawOrigin()
 {
 	cl_entity_t &Ent = m_Temp.entity;
 
-	m_vOrigin = Ent.origin;
-
-	//The engine draws a sprite with a body at that attachment of the entity in skin ("follow" sets this up)
 	if (Ent.curstate.body >= 1 && Ent.curstate.body <= 4 && Ent.curstate.skin)
 	{
 		cl_entity_t *pParent = gEngfuncs.GetEntityByIndex(Ent.curstate.skin);
 		if (pParent)
-			m_vOrigin = pParent->attachment[Ent.curstate.body - 1];
+			return pParent->attachment[Ent.curstate.body - 1];
 	}
 
-	if (Ent.model && Ent.model->type == mod_sprite)
+	return Ent.origin;
+}
+
+void CScriptParticle::SyncFromTemp()
+{
+	m_vOrigin = GetDrawOrigin();
+}
+
+static mspriteframe_t *Sprite_GetFrame(msprite_t *pSprite, int Frame)
+{
+	mspriteframedesc_t &Desc = pSprite->frames[Frame];
+	if (Desc.type == SPR_SINGLE)
+		return Desc.frameptr;
+
+	return ((mspritegroup_t *)Desc.frameptr)->frames[0];
+}
+
+static bool Sprite_GetAxes(cl_entity_t &Ent, int Type, const Vector &Origin, Vector &Right, Vector &Up)
+{
+	Vector ViewForward, ViewRight, ViewUp;
+	gEngfuncs.pfnAngleVectors(ViewMgr.Params->viewangles, ViewForward, ViewRight, ViewUp);
+
+	if (Type == SPR_VP_PARALLEL && Ent.angles.z)
+		Type = SPR_VP_PARALLEL_ORIENTED;
+
+	switch (Type)
 	{
-		float Width = Ent.model->maxs.x - Ent.model->mins.x;
-		float Height = Ent.model->maxs.z - Ent.model->mins.z;
-		float Scale = Ent.curstate.scale ? Ent.curstate.scale : 1.0f; //The engine draws scale 0 as 1
+	case SPR_FACING_UPRIGHT:
+	case SPR_VP_PARALLEL_UPRIGHT:
+	{
+		Vector Dir = ViewForward;
+		if (Type == SPR_FACING_UPRIGHT)
+			Dir = (Origin - ViewMgr.Params->vieworg).Normalize();
+		if (Dir.z > 0.999848f || Dir.z < -0.999848f)
+			return false;
 
-		m_pTexture = Ent.model;
-		m_iNumFrames = Ent.model->numframes;
-		m_flSize = Width * Scale;
-		m_flStretchY = Width > 0 ? Height / Width : 1.0f;
+		Up = Vector(0, 0, 1);
+		Right = Vector(Dir.y, -Dir.x, 0).Normalize();
+		break;
+	}
+	case SPR_ORIENTED:
+	{
+		Vector Forward;
+		gEngfuncs.pfnAngleVectors(Ent.angles, Forward, Right, Up);
+		break;
+	}
+	case SPR_VP_PARALLEL_ORIENTED:
+	{
+		float Angle = Ent.angles.z * (M_PI / 180.0f);
+		float sr = sin(Angle), cr = cos(Angle);
+		Right = ViewRight * cr + ViewUp * sr;
+		Up = ViewRight * -sr + ViewUp * cr;
+		break;
+	}
+	default:
+		Right = ViewRight;
+		Up = ViewUp;
+		break;
 	}
 
-	m_iFrame = (int)Ent.curstate.frame;
-	m_iRendermode = Ent.curstate.rendermode;
-	m_flBrightness = Ent.curstate.rendermode == kRenderNormal ? 255 : Ent.curstate.renderamt;
+	return true;
+}
+
+static float Sprite_GlowBlend(const Vector &Origin, float &Scale)
+{
+	Vector Start = ViewMgr.Params->vieworg, End = Origin;
+	float Dist = (End - Start).Length();
+
+	pmtrace_t Trace;
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(Start, End, PM_GLASS_IGNORE | PM_STUDIO_IGNORE, -1, &Trace);
+	if ((1.0f - Trace.fraction) * Dist > 8)
+		return 0;
+
+	float Brightness = 19000.0f / (Dist * Dist);
+	if (Brightness < 0.05f)
+		Brightness = 0.05f;
+	else if (Brightness > 1.0f)
+		Brightness = 1.0f;
+
+	Scale = Dist * (1.0f / 200.0f);
+	return Brightness;
+}
+
+void CScriptParticle::Draw()
+{
+	cl_entity_t &Ent = m_Temp.entity;
+
+	if (m_flDieTime || !ViewMgr.Params)
+		return;
+	if (!Ent.model || Ent.model->type != mod_sprite)
+		return;
+
+	msprite_t *pSprite = (msprite_t *)Ent.model->cache.data;
+	if (!pSprite)
+		return;
+
+	int Frame = (int)Ent.curstate.frame;
+	if (Frame < 0 || Frame >= pSprite->numframes)
+		Frame = 0;
+
+	mspriteframe_t *pFrame = Sprite_GetFrame(pSprite, Frame);
+	if (!pFrame)
+		return;
+
+	Vector Origin = GetDrawOrigin();
+	int RenderMode = Ent.curstate.rendermode;
+	bool Additive = RenderMode == kRenderTransAdd || RenderMode == kRenderGlow;
+	float Scale = Ent.curstate.scale > 0 ? Ent.curstate.scale : 1.0f;
+	float Blend = RenderMode == kRenderNormal ? 1.0f : Ent.curstate.renderamt / 255.0f;
+
+	if (RenderMode == kRenderGlow)
+		Blend *= Sprite_GlowBlend(Origin, Scale);
+	else if (!Additive)
+		Blend *= CEnvMgr::GetFogFactor(Origin);
+
+	if (Blend <= 0)
+		return;
+	if (Blend > 1.0f)
+		Blend = 1.0f;
+
+	Vector Right, Up;
+	if (!Sprite_GetAxes(Ent, pSprite->type, Origin, Right, Up))
+		return;
 
 	//The engine draws a sprite with no rendercolor as white
-	color24 &Color = Ent.curstate.rendercolor;
-	if (!Color.r && !Color.g && !Color.b)
-		m_vColor = Vector(255, 255, 255);
+	color24 &RenderColor = Ent.curstate.rendercolor;
+	Vector Color(1, 1, 1);
+	if (RenderColor.r || RenderColor.g || RenderColor.b)
+		Color = Vector(RenderColor.r, RenderColor.g, RenderColor.b) * (1.0f / 255.0f);
+
+	if (!gEngfuncs.pTriAPI->SpriteTexture(Ent.model, Frame))
+		return;
+
+	glEnable(GL_BLEND);
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0);
+
+	if (Additive)
+	{
+		glBlendFunc(GL_ONE, GL_ONE);
+		glDepthMask(GL_FALSE);
+		if (RenderMode == kRenderGlow)
+			glDisable(GL_DEPTH_TEST);
+		glColor4f(Color.x * Blend, Color.y * Blend, Color.z * Blend, 1.0f);
+	}
 	else
-		m_vColor = Vector(Color.r, Color.g, Color.b);
+	{
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthMask(RenderMode == kRenderTransAlpha ? GL_FALSE : GL_TRUE);
+		glDisable(GL_FOG);
+		glColor4f(Color.x, Color.y, Color.z, Blend);
+	}
+
+	Vector Top = Origin + Up * (pFrame->up * Scale);
+	Vector Bottom = Origin + Up * (pFrame->down * Scale);
+	Vector Left = Right * (pFrame->left * Scale);
+	Vector Side = Right * (pFrame->right * Scale);
+	Vector TopLeft = Top + Left, LowLeft = Bottom + Left, LowRight = Bottom + Side, TopRight = Top + Side;
+
+	glBegin(GL_QUADS);
+	glTexCoord2f(0, 0);
+	glVertex3fv(TopLeft);
+	glTexCoord2f(0, 1);
+	glVertex3fv(LowLeft);
+	glTexCoord2f(1, 1);
+	glVertex3fv(LowRight);
+	glTexCoord2f(1, 0);
+	glVertex3fv(TopRight);
+	glEnd();
+
+	//Back to what the other particles expect
+	glDisable(GL_ALPHA_TEST);
+	glDepthMask(GL_TRUE);
+	if (RenderMode == kRenderGlow)
+		glEnable(GL_DEPTH_TEST);
+	if (!Additive && CEnvMgr::m_Fog.Enabled)
+		glEnable(GL_FOG);
+	gEngfuncs.pTriAPI->RenderMode(kRenderNormal);
+	gEngfuncs.pTriAPI->CullFace(TRI_FRONT);
 }
 
 /*
@@ -1002,9 +1163,7 @@ static CScriptParticle *ScriptParticle_Create(const Vector &Origin, model_s *Mod
 
 	CScriptParticle *pParticle = new CScriptParticle();
 	pParticle->InitializeSprite(Origin, Vector(0, 0, 0), Model, 1, 255);
-	pParticle->SetLightFlag(LIGHT_NONE);
 	pParticle->SetCullFlag(CULL_PVS);
-	pParticle->SetRenderFlag(RENDER_FACEPLAYER);
 
 	TEMPENTITY &Temp = pParticle->m_Temp;
 	clrmem(Temp);
@@ -2368,6 +2527,16 @@ static bool TempEnt_Simulate(
 	return active != 0;
 }
 
+//The same test the engine runs on a tempent before it draws it
+static bool ScriptParticle_InPVS(cl_entity_t &Ent)
+{
+	if (!Ent.model)
+		return false;
+
+	Vector Mins = Ent.origin + Ent.model->mins, Maxs = Ent.origin + Ent.model->maxs;
+	return gEngfuncs.pTriAPI->BoxInPVS(Mins, Maxs) != 0;
+}
+
 //Script sprites that ParticleMan draws.  They're simulated here, alongside the engine's tempents, so
 //their script callbacks and collision traces run at the same point in the frame as they always have
 static void ScriptParticles_Simulate(
@@ -2389,7 +2558,9 @@ static void ScriptParticles_Simulate(
 		bool Active = TempEnt_Simulate(&Particle.m_Temp, frametime, client_time, cl_gravity, gTempEntFrame, Callback_AddVisibleEntity, Callback_TempEntPlaySound);
 
 		//The engine dumps a tempent that it can't draw this frame.  Do the same
-		if (!Particle.GetParticlePVS() && !FBitSet(Particle.m_Temp.flags, FTENT_PERSIST))
+		bool InPVS = ScriptParticle_InPVS(Particle.m_Temp.entity);
+		Particle.SetParticlePVS(InPVS);
+		if (!InPVS && !FBitSet(Particle.m_Temp.flags, FTENT_PERSIST))
 			Active = false;
 
 		if (Active)

@@ -256,6 +256,7 @@ set(Render
 	"render/studiomodelrenderer.h"
 	"render/clenv.cpp"
 	"render/clenv.h"
+	"render/sprite.h"
 	"particleman/CMiniMem.cpp"
 	"particleman/CMiniMem.h"
 	"particleman/CBaseParticle.cpp"
