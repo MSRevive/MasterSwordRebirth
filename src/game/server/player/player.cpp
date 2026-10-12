@@ -6683,9 +6683,9 @@ bool CBasePlayer::IsInAttackStance()
 
 	return false;
 }
+
 #define STORAGE_TELLER_RANGE 128 //Same range as CMSMonster::Trade
 #define STORAGE_ITEMS_PER_MSG 13 //2 + (13 * 14 bytes per item) = 184, which fits in MAX_USERMESSAGE_SIZE
-
 void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller, const char* pszCallback)
 {
 	//Copied first, because ending the last use of my storage runs a script event
@@ -6710,6 +6710,7 @@ void CBasePlayer::Storage_Open(const char* pszDisplayName, CBaseEntity *pTeller,
 
 	Storage_SendMax();
 }
+
 void CBasePlayer::Storage_SetMax(int Max)
 {
 	m_StorageMax = V_max(V_min(Max, STORAGE_MAX_ITEMS), 1);
@@ -6717,6 +6718,7 @@ void CBasePlayer::Storage_SetMax(int Max)
 	if (m_CurrentStorage.Active)
 		Storage_SendMax();
 }
+
 void CBasePlayer::Storage_SendMax()
 {
 	MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_STOREITEM], NULL, pev);
@@ -6724,6 +6726,7 @@ void CBasePlayer::Storage_SendMax()
 	WRITE_SHORT(Storage_MaxItems());
 	MESSAGE_END();
 }
+
 void CBasePlayer::Storage_End()
 {
 	if (!m_CurrentStorage.Active)
@@ -6741,6 +6744,7 @@ void CBasePlayer::Storage_End()
 		pScripted->CallScriptEvent(m_CurrentStorage.Callback + "_done", &Parameters);
 	}
 }
+
 void CBasePlayer::Storage_Close()
 {
 	Storage_End();
@@ -6749,6 +6753,7 @@ void CBasePlayer::Storage_Close()
 	WRITE_BYTE(0);
 	MESSAGE_END();
 }
+
 void CBasePlayer::Storage_CheckTeller()
 {
 	if (!m_CurrentStorage.Active)
@@ -6761,6 +6766,7 @@ void CBasePlayer::Storage_CheckTeller()
 
 	Storage_Close();
 }
+
 bool CBasePlayer::Storage_CountTransfer()
 {
 	if (m_CurrentStorage.TransferTime != gpGlobals->time)
@@ -6771,6 +6777,7 @@ bool CBasePlayer::Storage_CountTransfer()
 
 	return ++m_CurrentStorage.Transfers <= STORAGE_MAX_TRANSFER;
 }
+
 void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
 {
 	if (In)
@@ -6784,6 +6791,7 @@ void CBasePlayer::Storage_Moved(const char* pszItemName, bool In)
 		m_CurrentStorage.MovedOutName = pszItemName;
 	}
 }
+
 void CBasePlayer::Storage_SendMoved()
 {
 	if (m_CurrentStorage.MovedIn == 1)
@@ -6798,6 +6806,7 @@ void CBasePlayer::Storage_SendMoved()
 
 	m_CurrentStorage.MovedIn = m_CurrentStorage.MovedOut = 0;
 }
+
 void CBasePlayer::Storage_UpdateClient()
 {
 	Storage_SendMoved();
@@ -6827,6 +6836,7 @@ void CBasePlayer::Storage_UpdateClient()
 
 	m_CurrentStorage.ClientItems += Count;
 }
+
 //How many more of Item can stack onto Cur, an item already in storage. 0 if they aren't identical
 static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 {
@@ -6835,6 +6845,7 @@ static int Storage_StackRoom(storageitem_t &Cur, storageitem_t &Item)
 
 	return V_max(NUM_MAX_STACK - (int)Cur.Quantity, 0);
 }
+
 bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 {
 	bool Groupable = FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) ? true : false;
@@ -6847,6 +6858,7 @@ bool CBasePlayer::Storage_AddItem(CGenericItem *pItem)
 
 	return Storage_AddItem(Item, pItem->MSProperties());
 }
+
 int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Quality)
 {
 	CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(pszItemName, true);
@@ -6885,6 +6897,7 @@ int CBasePlayer::Storage_AddItems(const char* pszItemName, int Quantity, int Qua
 
 	return Added;
 }
+
 int CBasePlayer::Storage_SwigRoom(const char* pszItemName)
 {
 	//How many more swigs of a mana potion fit in my storage.
@@ -6896,6 +6909,7 @@ int CBasePlayer::Storage_SwigRoom(const char* pszItemName)
 
 	return Room;
 }
+
 void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
 {
 	//Adds the swigs of a mana potion to my storage.  Doesn't check for room, Storage_SwigRoom does
@@ -6925,6 +6939,7 @@ void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
 		Storage_NewItem(Item);
 	}
 }
+
 void CBasePlayer::Storage_CombineSwigs()
 {
 	mslist<storageitem_t> Potions;
@@ -6941,6 +6956,7 @@ void CBasePlayer::Storage_CombineSwigs()
 	for (int i = 0; i < Potions.size(); i++)
 		Storage_PutSwigs(Potions[i].Name, (int)Potions[i].Quantity * (int)Potions[i].Quality);
 }
+
 bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
 {
 	if (Storage_CombinesSwigs(Item.Name.c_str(), Properties))
@@ -6992,6 +7008,7 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
 
 	return true;
 }
+
 void CBasePlayer::Storage_NewItem(storageitem_t &Item)
 {
 	//Determine a unique ID for it
@@ -7012,6 +7029,7 @@ void CBasePlayer::Storage_NewItem(storageitem_t &Item)
 
 	m_Storage.add(Item); //Storage_UpdateClient sends it
 }
+
 void CBasePlayer::Storage_SendItemUpdate(int Idx)
 {
 	if (Idx >= m_CurrentStorage.ClientItems)
@@ -7024,6 +7042,7 @@ void CBasePlayer::Storage_SendItemUpdate(int Idx)
 	WRITE_SHORT(m_Storage[Idx].Quality);
 	MESSAGE_END();
 }
+
 void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 {
 	if (m_Storage[Idx].Quantity > Amt)
@@ -7046,6 +7065,7 @@ void CBasePlayer::Storage_RemoveItem(int Idx, int Amt)
 
 	m_Storage.erase(Idx);
 }
+
 void CBasePlayer::Storage_RemoveSwigs(int Idx, int Amt)
 {
 	//Takes Amt swigs out of a mana potion in my storage. It stays in storage until its swigs run out
