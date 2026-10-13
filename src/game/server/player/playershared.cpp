@@ -1413,7 +1413,7 @@ bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 
 bool CBasePlayer::Storage_CombinesSwigs(const char* pszItemName, int Properties)
 {
-	return FBitSet(Properties, ITEM_DRINKABLE) && !strncmp(pszItemName, "mana_", 5);
+	return FBitSet(Properties, ITEM_DRINKABLE) && (!strncmp(pszItemName, "mana_", 5) || !strncmp(pszItemName, "drink_", 6));
 }
 
 int CBasePlayer::Storage_ItemCount()
