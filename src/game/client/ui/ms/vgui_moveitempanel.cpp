@@ -5,7 +5,7 @@
 #include "vgui_moveitempanel.h"
 #include "vgui_containerlist.h"
 
-VGUI_MoveItemPanel::VGUI_MoveItemPanel(CContainerPanel *pParent) : CTransparentPanel(80, 0, 0, 0, 0)
+VGUI_MoveItemPanel::VGUI_MoveItemPanel(VGUI_ContainerPanel *pParent, const char *pszDest) : CTransparentPanel(80, 0, 0, 0, 0)
 {
 	vgui::Font *pFont = g_FontSml;
 	int vButtonHeight = g_FontSml->getTall();
@@ -24,7 +24,7 @@ VGUI_MoveItemPanel::VGUI_MoveItemPanel(CContainerPanel *pParent) : CTransparentP
 		else
 		{
 			vNumMove = gMoveNumbers[i];
-			vsText = msstring("Move ") + vNumMove + " To Hands";
+			vsText = msstring("Move ") + vNumMove + " To " + pszDest;
 		}
 
 		int vButtonW;

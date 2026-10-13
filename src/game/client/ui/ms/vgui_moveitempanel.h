@@ -7,15 +7,17 @@
 static const int gNumMoveNumbers = 5;
 static const int gMoveNumbers[ gNumMoveNumbers ] = { 5, 10, 25, 50, 100 };
 
+class VGUI_ContainerPanel;
+
 class VGUI_MoveItemPanel : public CTransparentPanel
 {
 private:
 	mslist<MSButton*> mButtons;
-	CContainerPanel *mpParent;
+	VGUI_ContainerPanel *mpParent;
 	VGUI_ItemButton *mpCurrentItemButton;
 
 public:
-	VGUI_MoveItemPanel(CContainerPanel *pParent);
+	VGUI_MoveItemPanel(VGUI_ContainerPanel *pParent, const char *pszDest = "Hands");
 	void ShowForButton(VGUI_ItemButton *pButton);
 	void Move(int vNumMove);
 	virtual void setVisible(bool bVisible);

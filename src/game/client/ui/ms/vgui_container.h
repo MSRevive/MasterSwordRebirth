@@ -113,6 +113,7 @@ public:
 	virtual void GetSelectedItems(mslist<VGUI_ItemButton *> &SelectedItems); //in, out
 	virtual void UnSelectAllItems();
 	virtual void AddInventoryItems();
+	virtual void MoveItem(VGUI_ItemButton *pButton, int vNumMove) {}
 
 	virtual void Open(void);
 	virtual void Close(void);

@@ -62,6 +62,9 @@ CStoragePanel::CStoragePanel(Panel *pParent) : CStorePanel()
 {
 	setParent(pParent);
 
+	addChild(mpTakePanel = new VGUI_MoveItemPanel(this));
+	addChild(mpStorePanel = new VGUI_MoveItemPanel(this, "Storage"));
+
 	m_pSubtitle->setText(Localized(Text_Subtitle_Storage));
 
 	m_ActButton->setVisible(false);
@@ -116,6 +119,7 @@ void CStoragePanel::Update()
 	if (!player.m_CurrentStorage.Active)
 		return;
 
+	HideMovePanels(); //The item buttons are about to be reused for other items
 	m_LastGearItem = -1;
 	m_SelectedItems.clear();
 	m_SaleLabel->setVisible(false);
@@ -127,6 +131,8 @@ void CStoragePanel::Update()
 
 void CStoragePanel::GearItemSelected(ulong ID)
 {
+	HideMovePanels();
+
 	if (m_LastGearItem == ID)
 		return;
 
@@ -200,9 +206,68 @@ void CStoragePanel::ItemDoubleclicked(ulong ID)
 
 bool CStoragePanel::ItemClicked(void *pData)
 {
+	HideMovePanels();
+
 	//Only so many items can be moved at once, so don't let more than that be selected
 	VGUI_ItemButton &ItemButton = *(VGUI_ItemButton *)pData;
 	return !ItemButton.m_Selected && (int)m_SelectedItems.size() >= STORAGE_MAX_TRANSFER;
+}
+
+void CStoragePanel::ItemRightClicked(void *pData)
+{
+	VGUI_ItemButton *pButton = (VGUI_ItemButton *)pData;
+	containeritem_t &Item = pButton->m_Data;
+
+	if (m_SelectedItems.size() > 1 || (m_SelectedItems.size() == 1 && m_SelectedItems[0].ID != Item.ID))
+		return;
+
+	if (!FBitSet(Item.Properties, ITEM_GROUPABLE) || Item.Quantity < gMoveNumbers[0])
+		return;
+
+	bool InStorage = m_LastGearItem == 1;
+	if (!InStorage && !checkValid(Item))
+		return;
+
+	HideMovePanels();
+
+	//Remove then add so it's on top
+	VGUI_MoveItemPanel *pMovePanel = InStorage ? mpTakePanel : mpStorePanel;
+	removeChild(pMovePanel);
+	addChild(pMovePanel);
+
+	pMovePanel->ShowForButton(pButton);
+}
+
+void CStoragePanel::MoveItem(VGUI_ItemButton *pButton, int vNumMove)
+{
+	if (!vNumMove)
+		return;
+
+	msstring Command;
+	if (m_LastGearItem == 1)
+		Command = msstring("storage split ") + (int)pButton->m_Data.ID + " " + vNumMove + "\n";
+	else
+		Command = msstring("storage add ") + (int)pButton->m_Data.ID + " " + vNumMove + "\n";
+
+	gEngfuncs.pfnClientCmd(Command);
+}
+
+void CStoragePanel::InvTypeChanged(int vInvType)
+{
+	VGUI_ItemCallbackPanel::InvTypeChanged(vInvType);
+	HideMovePanels();
+}
+
+void CStoragePanel::AlphabeticChanged(bool bAlphabetic)
+{
+	VGUI_ItemCallbackPanel::AlphabeticChanged(bAlphabetic);
+	HideMovePanels();
+}
+
+void CStoragePanel::HideMovePanels()
+{
+	mpTakePanel->setVisible(false);
+	mpStorePanel->setVisible(false);
 }
 
 //MiB FEB2008a
@@ -280,6 +345,7 @@ void CStoragePanel::ItemSelectChanged(ulong ID, bool fSelected)
 void CStoragePanel::Close()
 {
 	player.m_CurrentStorage.Active = false;
+	HideMovePanels();
 	ClientCmd("storage stop");
 	VGUI_ContainerPanel::Close(); //Skip CStorePanel::Close()
 }

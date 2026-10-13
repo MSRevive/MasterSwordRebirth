@@ -949,7 +949,47 @@ void ClientCommand2(edict_t *pEntity)
 					pPlayer->SendEventMsg(HUDEVENT_UNABLE, msstring("You can't put ") + SPEECH::ItemName(pItem) + " in storage");
 				else if (pItem)
 				{
-					if (pPlayer->Storage_AddItem(pItem))
+					//The right click menu sends an amount, to store part of a stack
+					int Whole = pItem->iQuantity, Amt = Whole;
+					if (CMD_ARGC() > 3)
+					{
+						Amt = atoi(CMD_ARGV(3));
+						if (!FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) || Amt <= 0 || Amt > Whole)
+							return;
+					}
+
+					if (Amt < Whole)
+					{
+						storageitem_t Item;
+						Item.Name = pItem->ItemName;
+						Item.Quantity = Amt;
+						Item.Quality = pItem->Quality;
+						Item.MaxQuality = pItem->MaxQuality;
+
+						pItem->iQuantity = Amt;
+						msstring Name = SPEECH::ItemName(pItem);
+
+						//Sent before the storage changes, so the client knows what's left when it redraws the storage
+						pItem->iQuantity = Whole - Amt;
+						MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
+							WRITE_BYTE(1);
+							SendGenericItem(pPlayer, pItem, false);
+						MESSAGE_END();
+
+						if (pPlayer->Storage_AddItem(Item, pItem->MSProperties()))
+							pPlayer->Storage_Moved(Name.c_str(), true);
+						else
+						{
+							pItem->iQuantity = Whole;
+							MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ITEM], NULL, pPlayer->pev);
+								WRITE_BYTE(1);
+								SendGenericItem(pPlayer, pItem, false);
+							MESSAGE_END();
+
+							pPlayer->SendEventMsg(HUDEVENT_UNABLE, "Your storage is full");
+						}
+					}
+					else if (pPlayer->Storage_AddItem(pItem))
 					{
 						pPlayer->RemoveItem(pItem);
 						pPlayer->Storage_Moved(SPEECH::ItemName(pItem), true);
@@ -1031,6 +1071,49 @@ void ClientCommand2(edict_t *pEntity)
 						else
 							pItem->SUB_Remove();
 					}
+				}
+			}
+			else if (!_stricmp(CMD_ARGV(1), "split"))
+			{
+				//Sent by the right click menu, to take part of a stack into my hands
+				if (CMD_ARGC() < 4)
+					return;
+
+				int ItemID = atoi(CMD_ARGV(2)), Amt = atoi(CMD_ARGV(3));
+				for (unsigned int i = 0; i < pPlayer->m_Storage.size(); i++)
+				{
+					storageitem_t &StorageItem = pPlayer->m_Storage[i];
+					if (StorageItem.ID != ItemID)
+						continue;
+
+					if (Amt <= 0 || Amt > (int)StorageItem.Quantity)
+						break;
+
+					CGenericItem *pItem = NewGenericItem(StorageItem.Name.c_str());
+					if (!pItem)
+						break;
+
+					msstring Name;
+					bool Success = false;
+					if (FBitSet(pItem->MSProperties(), ITEM_GROUPABLE) && !CBasePlayer::Storage_CombinesSwigs(StorageItem.Name.c_str(), pItem->MSProperties()))
+					{
+						pItem->iQuantity = Amt;
+						pItem->Quality = StorageItem.Quality;
+						pItem->MaxQuality = StorageItem.MaxQuality;
+
+						Name = SPEECH::ItemName(pItem);
+						Success = pItem->GiveTo(pPlayer, true, true, true);
+					}
+
+					if (Success)
+					{
+						pPlayer->Storage_Moved(Name.c_str(), false);
+						pPlayer->Storage_RemoveItem(i, Amt);
+					}
+					else
+						pItem->SUB_Remove();
+
+					break;
 				}
 			}
 		}
