@@ -1395,6 +1395,9 @@ void CBasePlayer::LearnSpell(const char* pszSpellScript, bool fVerbose)
 
 bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 {
+	if (strlen(pszItemName) >= STORAGE_NAME_SIZE)
+		return false;
+
 	//Spells aren't saved with the character, and storage doesn't keep what's inside a container
 	if (FBitSet(Properties, ITEM_SPELL | ITEM_CONTAINER))
 		return false;
@@ -1419,7 +1422,7 @@ int CBasePlayer::Storage_ItemCount()
 	int Count = 0;
 	for (int i = 0; i < m_Storage.size(); i++)
 	{
-		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name.c_str(), true);
 		if (pGlobalItem && FBitSet(pGlobalItem->MSProperties(), ITEM_GROUPABLE))
 			Count++;
 		else

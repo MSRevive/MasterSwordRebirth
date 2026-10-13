@@ -22,6 +22,7 @@
 #include "mscharacter.h"
 #include "iscript.h"
 #include "fixed_vector.h"
+#include "fixed_string.h"
 
 #define MAX_ID_RANGE 2048
 #define SBAR_STRING_SIZE 128
@@ -33,6 +34,7 @@
 #define STORAGE_DEFAULT_ITEMS 100
 #define STORAGE_MAX_TRANSFER 20
 #define STORAGE_MAX_SWIGS 30
+#define STORAGE_NAME_SIZE 64
 
 enum sbar_data
 {
@@ -313,14 +315,17 @@ struct genericitem_full_t : genericitem_t
 	byte Spell_CastSuccess;
 	mslist<genericitem_full_t> ContainerItems;
 };
-//An item in storage.  Only what's needed to create the item again is kept
+
+//Storage Item
 struct storageitem_t
 {
 	ulong ID;				 //Unique within the storage.  Not saved
-	msstring Name;			 //Item script name
+	fixed_string<STORAGE_NAME_SIZE> Name; //Item script name
 	unsigned short Quantity; //How many are in the stack
 	unsigned short Quality, MaxQuality;
 };
+
+//Storage object.
 struct storageaccess_t
 {
 	bool Active;
@@ -340,8 +345,7 @@ struct companion_t
 	bool Active;
 	entityinfo_t Entity;
 	msstring ScriptName;
-	msstringlist SaveVarName,
-		SaveVarValue;
+	msstringlist SaveVarName, SaveVarValue;
 };
 
 //Quests

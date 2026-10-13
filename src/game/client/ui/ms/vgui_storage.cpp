@@ -87,7 +87,7 @@ void CStoragePanel::AddInventoryItems()
 		storageitem_t &Item = player.m_Storage[i];
 
 		//Storage only knows the item's name, so the rest comes from the global item
-		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(Item.Name, true);
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(Item.Name.c_str(), true);
 		if (!pGlobalItem)
 			continue;
 

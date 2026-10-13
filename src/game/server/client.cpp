@@ -977,7 +977,7 @@ void ClientCommand2(edict_t *pEntity)
 
 				if (pStorageItem)
 				{
-					CGenericItem *pItem = NewGenericItem(pStorageItem->Name);
+					CGenericItem *pItem = NewGenericItem(pStorageItem->Name.c_str());
 					if (pItem)
 					{
 						//A groupable item comes out as the whole stack.  Anything else comes out one at a time

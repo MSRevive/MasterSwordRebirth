@@ -37,11 +37,8 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 	Data.Gender = CharData.Gender;
 	Data.Gold = MSGlobals::DefaultGold;
 
-#ifndef VALVE_DLL
-	MSCLGlobals::RemoveAllEntities();
-#else
 	RemoveAllItems(false, true);
-#endif
+
 	//Give 1 skill to each stat
 	for (int i = 0; i < m_Stats.size(); i++)
 	{
@@ -107,22 +104,18 @@ void CBasePlayer::CreateChar(createchar_t &CharData)
 	//Clean up
 	RemoveAllItems(false, true);
 
-#ifdef VALVE_DLL
 	//Update player's character list, so the new char is sent down to client
 	if (!FNShared::IsEnabled())
 		PreLoadChars();
-#endif
 }
 
 bool DeleteChar(CBasePlayer *pPlayer, int iCharacter)
 {
-#ifdef VALVE_DLL
 	if (FNShared::IsEnabled())
 	{
 		FNShared::DeleteCharacter(pPlayer, iCharacter);
 		return true;
 	}
-#endif
 
 	const char *pszCharFileName = GetSaveFileName(iCharacter, pPlayer);
 	int ret = remove(pszCharFileName);	  //Delete savefile
@@ -358,7 +351,6 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 
 			switch (PackReadInt(Root.ptr[i].key, -1))
 			{
-			//Header
 			case CF_NAME: PackReadStr(Value, Name, sizeof(Name)); break;
 			case CF_MAPNAME: PackReadStr(Value, MapName, sizeof(MapName)); break;
 			case CF_NEXTMAP: PackReadStr(Value, NextMap, sizeof(NextMap)); break;
@@ -379,7 +371,6 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_BODY: Body = (short)PackReadInt(Value); break;
 			case CF_STORAGEMAX: StorageMax = (int)PackReadInt(Value); break;
 
-			//Sections
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
 			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
 			case CF_ITEMS: ReadItemListPack(Value, m_Items); break;
@@ -421,6 +412,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 				{
 					storageitem_t Item;
 					Item.Quantity = Item.Quality = Item.MaxQuality = 0;
+					msstring Name;
 
 					msgpack::object_map Fields = PackMap(Items.ptr[i]);
 					for (uint32_t f = 0; f < Fields.size; f++)
@@ -428,20 +420,21 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 						const msgpack::object &FieldValue = Fields.ptr[f].val;
 						switch (PackReadInt(Fields.ptr[f].key, -1))
 						{
-						case CSI_NAME: Item.Name = PackReadMsStr(FieldValue); break;
+						case CSI_NAME: Name = PackReadMsStr(FieldValue); break;
 						case CSI_QUANTITY: Item.Quantity = (unsigned short)PackReadInt(FieldValue); break;
 						case CSI_QUALITY: Item.Quality = (unsigned short)PackReadInt(FieldValue); break;
 						case CSI_MAXQUALITY: Item.MaxQuality = (unsigned short)PackReadInt(FieldValue); break;
 						}
 					}
 
-					if (!Item.Name.len() || !Item.Quantity)
+					ApplyItemAlias(Name);
+					if (!Name.len() || Name.len() >= STORAGE_NAME_SIZE || !Item.Quantity)
 					{
 						MS_ERROR("ReadCharData: Bad storage item, skipping...");
 						continue;
 					}
 
-					ApplyItemAlias(Item.Name);
+					Item.Name = Name;
 					Item.ID = m_Storage.size(); //IDs aren't saved.  They only have to be unique
 					m_Storage.push_back(Item);
 				}
@@ -608,8 +601,10 @@ void chardata_t::ReadMaps1(byte DataID, CPlayer_DataBuffer &m_File)
 		int Maps = 0;
 		m_File.ReadInt(Maps); //[INT]
 		m_VisitedMaps.clear();
+		
 		if (Maps > 0)
 			m_VisitedMaps.reserve(Maps);
+
 		for (int m = 0; m < Maps; m++)
 		{
 			m_File.ReadString(cTemp, MSSTRING_SIZE); //[STRING]
@@ -1120,7 +1115,7 @@ static void PackChar(charpack_t &Out, CBasePlayer *pPlayer, savedata_t &Data)
 		storageitem_t &Item = pPlayer->m_Storage[i];
 
 		CPackScope Fields(Out, true);
-		Fields.FieldStr(CSI_NAME, Item.Name);
+		Fields.FieldStr(CSI_NAME, Item.Name.c_str(), Item.Name.size());
 		Fields.Field(CSI_QUANTITY, Item.Quantity);
 		Fields.Field(CSI_QUALITY, Item.Quality);
 		Fields.Field(CSI_MAXQUALITY, Item.MaxQuality);

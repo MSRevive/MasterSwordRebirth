@@ -6827,7 +6827,7 @@ void CBasePlayer::Storage_UpdateClient()
 	{
 		storageitem_t &Item = m_Storage[m_CurrentStorage.ClientItems + i];
 		WRITE_LONG(Item.ID);
-		WRITE_LONG(CGenericItemMgr::LookUpItemIdx(Item.Name));
+		WRITE_LONG(CGenericItemMgr::LookUpItemIdx(Item.Name.c_str()));
 		WRITE_SHORT(Item.Quantity);
 		WRITE_SHORT(Item.Quality);
 		WRITE_SHORT(Item.MaxQuality);
@@ -6945,7 +6945,7 @@ void CBasePlayer::Storage_CombineSwigs()
 	std::vector<storageitem_t> Potions;
 	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
 	{
-		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name, true);
+		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name.c_str(), true);
 		if (!pGlobalItem || !Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
 			continue;
 
@@ -6954,7 +6954,7 @@ void CBasePlayer::Storage_CombineSwigs()
 	}
 
 	for (int i = 0; i < Potions.size(); i++)
-		Storage_PutSwigs(Potions[i].Name, (int)Potions[i].Quantity * (int)Potions[i].Quality);
+		Storage_PutSwigs(Potions[i].Name.c_str(), (int)Potions[i].Quantity * (int)Potions[i].Quality);
 }
 
 bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
@@ -6962,10 +6962,10 @@ bool CBasePlayer::Storage_AddItem(storageitem_t &Item, int Properties)
 	if (Storage_CombinesSwigs(Item.Name.c_str(), Properties))
 	{
 		int Swigs = (int)Item.Quantity * (int)Item.Quality;
-		if (Swigs > Storage_SwigRoom(Item.Name))
+		if (Swigs > Storage_SwigRoom(Item.Name.c_str()))
 			return false;
 
-		Storage_PutSwigs(Item.Name, Swigs);
+		Storage_PutSwigs(Item.Name.c_str(), Swigs);
 		return true;
 	}
 
