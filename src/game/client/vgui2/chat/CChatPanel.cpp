@@ -14,6 +14,23 @@
 #include "CChatPanel.h"
 #include "ms_vgui2.h"
 
+// Chat layout. Positions and sizes are in 640x480 units and scale with the screen like XRES/YRES.
+// The history's upper limits are the ms_txthud_width and ms_txthud_size cvars.
+#define CHAT_HISTORY_X			10	// Left edge
+#define CHAT_HISTORY_BOTTOM_Y	180	// Bottom edge, the box grows upwards from here
+#define CHAT_HISTORY_MIN_WIDTH	150	// Narrowest the box gets, it widens to fit its text
+#define CHAT_HISTORY_MIN_LINES	1	// Shortest the box gets, in text lines
+
+#define CHAT_INPUT_X			10	// Left edge
+#define CHAT_INPUT_Y			300	// Top edge
+#define CHAT_INPUT_WIDTH		300
+#define CHAT_INPUT_HEIGHT		16	// Raised to fit the font if it is taller
+
+// Padding, in pixels
+#define CHAT_HISTORY_PADDING_X	6
+#define CHAT_HISTORY_PADDING_Y	4
+#define CHAT_INPUT_PADDING		4
+
 namespace
 {
 	// The server relays chat in a 192 byte user message, so this stays small
@@ -21,23 +38,12 @@ namespace
 	const int MAX_CHAT_CHARS = 120;
 	const int MAX_HISTORY_CHARS = 127 * 100;
 	const int MAX_HISTORY_LINES = 32;
-	const int HISTORY_PADDING = 4;
-	const int INPUT_PADDING = 4;
 	const float FADE_LENGTH = 1.0f;
 	const float DEFAULT_DECAY_TIME = 10.0f;
 	const double KEY_BLOCK_AFTER_CLOSE = 0.05;
 
 	// Enable if the engine won't route keys to a keyboard-only popup
 	const bool INPUT_USES_MOUSE = false;
-
-	vgui2::HFont GetChatFont(vgui2::IScheme *pScheme)
-	{
-		vgui2::HFont hFont = pScheme->GetFont("ChatFont", false);
-		if (hFont == vgui2::INVALID_FONT)
-			hFont = pScheme->GetFont("Default", false);
-
-		return hFont;
-	}
 
 	void SanitizeChat(char *pszText)
 	{
@@ -72,6 +78,20 @@ namespace
 
 		return iValue > iMax ? iMax : iValue;
 	}
+
+	int ScaleX(float flValue)
+	{
+		int wide, tall;
+		vgui2::surface()->GetScreenSize(wide, tall);
+		return (int)(flValue * wide / 640.0f + 0.5f);
+	}
+
+	int ScaleY(float flValue)
+	{
+		int wide, tall;
+		vgui2::surface()->GetScreenSize(wide, tall);
+		return (int)(flValue * tall / 480.0f + 0.5f);
+	}
 }
 
 CChatEntry::CChatEntry(vgui2::Panel *pParent, const char *pszName) : BaseClass(pParent, pszName)
@@ -84,9 +104,10 @@ CChatEntry::CChatEntry(vgui2::Panel *pParent, const char *pszName) : BaseClass(p
 void CChatEntry::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
+	m_hFont = pScheme->GetFont("Default", false);
 
 	// The game's TrackerScheme has none of the TextEntry keys, which leaves everything white
-	SetFont(GetChatFont(pScheme));
+	SetFont(m_hFont);
 	SetBgColor(Color(0, 0, 0, 0));
 	SetFgColor(Color(255, 255, 255, 255));
 	SetBorder(nullptr);
@@ -111,8 +132,9 @@ CChatPrompt::CChatPrompt(vgui2::Panel *pParent, const char *pszName) : BaseClass
 void CChatPrompt::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
+	m_hFont = pScheme->GetFont("Default", false);
 
-	SetFont(GetChatFont(pScheme));
+	SetFont(m_hFont);
 	SetFgColor(Color(255, 255, 255, 255));
 }
 
@@ -137,8 +159,9 @@ void CChatInput::SetPrompt(const char *pszPrompt)
 void CChatInput::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
+	m_hFont = pScheme->GetFont("Default", false);
 
-	m_iFontTall = vgui2::surface()->GetFontTall(GetChatFont(pScheme));
+	m_iFontTall = vgui2::surface()->GetFontTall(m_hFont);
 
 	SetBgColor(Color(0, 0, 0, 128));
 	SetPaintBackgroundEnabled(true);
@@ -152,8 +175,8 @@ void CChatInput::PerformLayout()
 	GetSize(wide, tall);
 	m_pPrompt->GetContentSize(promptWide, promptTall);
 
-	m_pPrompt->SetBounds(INPUT_PADDING, 0, promptWide, tall);
-	m_pEntry->SetBounds(promptWide + INPUT_PADDING * 2, 0, wide - promptWide - INPUT_PADDING * 3, tall);
+	m_pPrompt->SetBounds(CHAT_INPUT_PADDING, 0, promptWide, tall);
+	m_pEntry->SetBounds(promptWide + CHAT_INPUT_PADDING * 2, 0, wide - promptWide - CHAT_INPUT_PADDING * 3, tall);
 }
 
 void CChatInput::OnChatSend()
@@ -180,11 +203,16 @@ CChatHistory::CChatHistory(vgui2::Panel *pParent) : BaseClass(pParent, "MSChatHi
 void CChatHistory::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
+	m_hFont = pScheme->GetFont("Default", false);
 
-	vgui2::HFont hFont = GetChatFont(pScheme);
-	SetFont(hFont);
+	SetFont(m_hFont);
 	SetBgColor(Color(0, 0, 20, 127));
-	m_iFontTall = vgui2::surface()->GetFontTall(hFont);
+	m_iFontTall = vgui2::surface()->GetFontTall(m_hFont);
+}
+
+int CChatHistory::GetScrollBarWide()
+{
+	return _vertScrollBar->IsVisible() ? _vertScrollBar->GetWide() : 0;
 }
 
 // RichText only scrolls while its scrollbar is shown
@@ -236,14 +264,37 @@ void CChat::Think()
 void CChat::LayoutHistory()
 {
 	MSVGUI2::IHost *pHost = MSVGUI2::GetHost();
-	MSVGUI2::ChatLayout Layout;
-	pHost->GetChatLayout(Layout);
+	double flNow = vgui2::system()->GetCurrentTime();
+
+	int iTextWide = 0;
+	for (const Line_t &Line : m_Lines)
+	{
+		if ((m_bHeld || flNow < Line.flExpire) && Line.iWide > iTextWide)
+			iTextWide = Line.iWide;
+	}
+
+	int iScreenWide, iScreenTall;
+	vgui2::surface()->GetScreenSize(iScreenWide, iScreenTall);
+
+	// As wide as the widest line showing, between the minimum and ms_txthud_width
+	int iX = ScaleX(CHAT_HISTORY_X);
+	float flMaxWide = pHost->GetCvarFloat("ms_txthud_width");
+	int iMaxWide = flMaxWide > 0.0f ? ScaleX(flMaxWide) : iScreenWide;
+	if (iMaxWide > iScreenWide - iX)
+		iMaxWide = iScreenWide - iX;
+
+	int iMinWide = ScaleX(CHAT_HISTORY_MIN_WIDTH);
+	if (iMinWide > iMaxWide)
+		iMinWide = iMaxWide;
+
+	int iWide = Clamp(iTextWide + CHAT_HISTORY_PADDING_X * 2 + m_pHistory->GetScrollBarWide(), iMinWide, iMaxWide);
 
 	// Grows upwards from its bottom edge like the old console did
 	int iMaxLines = Clamp((int)pHost->GetCvarFloat("ms_txthud_size"), 1, MAX_HISTORY_LINES);
-	int iLines = Clamp(m_pHistory->GetNumLines(), 1, iMaxLines);
-	int iTall = iLines * (m_pHistory->GetFontTall() + 1) + HISTORY_PADDING;
-	m_pHistory->SetBounds(Layout.HistoryX, Layout.HistoryBottomY - iTall, Layout.HistoryWidth, iTall);
+	int iMinLines = Clamp(CHAT_HISTORY_MIN_LINES, 1, iMaxLines);
+	int iLines = Clamp(m_pHistory->GetNumLines(), iMinLines, iMaxLines);
+	int iTall = iLines * (m_pHistory->GetFontTall() + 1) + CHAT_HISTORY_PADDING_Y;
+	m_pHistory->SetBounds(iX, ScaleY(CHAT_HISTORY_BOTTOM_Y) - iTall, iWide, iTall);
 
 	float flTrans = pHost->GetCvarFloat("ms_txthud_bgtrans");
 	if (flTrans < -1.0f)
@@ -275,27 +326,30 @@ void CChat::ReleaseHistory(float flSustain)
 	m_pHistory->GotoTextEnd();
 	m_pHistory->ResetAllFades(false, true, flSustain);
 	m_bHeld = false;
+
+	if (flSustain > 0.0f)
+	{
+		double flExpire = vgui2::system()->GetCurrentTime() + flSustain + FADE_LENGTH;
+		for (Line_t &Line : m_Lines)
+			Line.flExpire = flExpire;
+	}
 }
 
 void CChat::Open(int iType, const char *pszPrompt)
 {
-	MSVGUI2::IHost *pHost = MSVGUI2::GetHost();
-	if (!pHost)
+	if (!MSVGUI2::GetHost())
 		return;
 
-	MSVGUI2::ChatLayout Layout;
-	pHost->GetChatLayout(Layout);
-
-	int iTall = Layout.InputHeight;
-	if (iTall < m_pInput->GetFontTall() + INPUT_PADDING * 2)
-		iTall = m_pInput->GetFontTall() + INPUT_PADDING * 2;
+	int iTall = ScaleY(CHAT_INPUT_HEIGHT);
+	if (iTall < m_pInput->GetFontTall() + CHAT_INPUT_PADDING * 2)
+		iTall = m_pInput->GetFontTall() + CHAT_INPUT_PADDING * 2;
 
 	m_iType = iType;
 	m_bOpen = true;
 
 	m_pInput->SetPrompt(pszPrompt);
 	m_pInput->GetEntry()->SetText("");
-	m_pInput->SetBounds(Layout.InputX, Layout.InputY, Layout.InputWidth, iTall);
+	m_pInput->SetBounds(ScaleX(CHAT_INPUT_X), ScaleY(CHAT_INPUT_Y), ScaleX(CHAT_INPUT_WIDTH), iTall);
 	m_pInput->SetVisible(true);
 	m_pInput->SetKeyBoardInputEnabled(true);
 	m_pInput->SetMouseInputEnabled(INPUT_USES_MOUSE);
@@ -374,16 +428,24 @@ void CChat::Print(int r, int g, int b, const char *pszUtf8)
 		m_pHistory->InsertString("\n");
 
 	float flDecay = GetDecayTime();
+	double flExpire = vgui2::system()->GetCurrentTime() + flDecay + FADE_LENGTH;
 
 	m_pHistory->InsertColorChange(Color(r, g, b, 255));
 	m_pHistory->InsertString(wszText);
 	m_pHistory->InsertFade(flDecay, FADE_LENGTH);
 
+	int iWide = 0, iTall = 0;
+	vgui2::surface()->GetTextSize(m_pHistory->GetFont(), wszText, iWide, iTall);
+
+	if ((int)m_Lines.size() >= MAX_HISTORY_LINES)
+		m_Lines.erase(m_Lines.begin());
+	m_Lines.push_back({ iWide, flExpire });
+
 	if (m_bOpen)
 		HoldHistory();
 
 	m_bHasText = true;
-	m_flHideTime = vgui2::system()->GetCurrentTime() + flDecay + FADE_LENGTH;
+	m_flHideTime = flExpire;
 }
 
 void CChat::Scroll(bool bDown)

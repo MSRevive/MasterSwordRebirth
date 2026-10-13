@@ -5,19 +5,12 @@
 
 namespace MSVGUI2
 {
-	struct ChatLayout
-	{
-		int HistoryX, HistoryBottomY, HistoryWidth;
-		int InputX, InputY, InputWidth, InputHeight;
-	};
-
 	class IHost
 	{
 	public:
 		virtual void SendChat(int Type, const char *Utf8Text) = 0;
 		virtual float GetCvarFloat(const char *Name) = 0;
 		virtual bool ShowHUD() = 0;
-		virtual void GetChatLayout(ChatLayout &Layout) = 0;
 	};
 
 	void SetHost(IHost *pHost);

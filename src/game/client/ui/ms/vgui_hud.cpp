@@ -71,7 +71,7 @@
 //#include "vgui_MainMenu.h"
 
 #include "vgui_infowin.h"
-#include "vgui_startsaytext.h"
+#include "saytext.h"
 #include "vgui_eventconsole.h"
 #include "vgui_id.h"
 #include "vgui_health.h"
@@ -86,7 +86,6 @@
 enum
 {
 	CON_EVENT,
-	CON_SAYTEXT,
 };
 
 class CVGUI2Host : public MSVGUI2::IHost
@@ -106,19 +105,6 @@ public:
 	{
 		return ::ShowHUD();
 	}
-
-	void GetChatLayout(MSVGUI2::ChatLayout& Layout) override
-	{
-		float Width = CVAR_GET_FLOAT("ms_txthud_width");
-
-		Layout.HistoryX = XRES(10);
-		Layout.HistoryBottomY = YRES(180);
-		Layout.HistoryWidth = XRES(Width > 0 ? Width : 300);
-		Layout.InputX = XRES(100);
-		Layout.InputY = YRES(300);
-		Layout.InputWidth = XRES(300);
-		Layout.InputHeight = YRES(16);
-	}
 };
 
 static CVGUI2Host g_VGUI2Host;
@@ -126,9 +112,6 @@ static CVGUI2Host g_VGUI2Host;
 class CHUDPanel : public VGUI_MainPanel
 {
 public:
-	//Start Say Text Panel --------------
-	VGUI_SendTextPanel* m_StartSayText;
-
 	//ID Panel --------------------------
 	VGUI_ID* m_ID;
 	//-----------------------------------
@@ -172,7 +155,7 @@ private:
 	RetroHUD::VGUI_Health* m_RetroHealth;
 	PrimaryHUD::VGUI_Health* m_Health;
 	VGUI_Status* m_Status; //Drigien MAY2008
-	VGUI_EventConsole* m_ActiveConsole;
+	bool m_ScrollChat = false; // PGUP/PGDN scrolls the chat instead of the event console
 
 	const int INFOWIN_HELP_DISPLAY_X = XRES(640) - XRES(260);
 	const int INFOWIN_HELP_DISPLAY_Y = YRES(300);
@@ -180,9 +163,6 @@ private:
 	const int EVENTCON_X = XRES(640) - EVENTCON_SIZE_X - XRES(20);
 	const int EVENTCON_Y = (YRES(480) - YRES(10));
 	const int EVENTCON_SIZE_Y = 0;
-	const int SAYTEXTCON_X = XRES(10);
-	const int SAYTEXTCON_Y = YRES(180);
-	const int SAYTEXTCON_SIZE_X = XRES(300);
 };
 
 VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); }
@@ -222,18 +202,7 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 	Prefs.BGTrans = "ms_evthud_bgtrans";
 	Prefs.Width = NULL;
 
-	m_Consoles.push_back(m_ActiveConsole = new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
-
-	Prefs.VisLines = "ms_txthud_size";
-	Prefs.MaxLines = "ms_txthud_history";
-	Prefs.DecayTime = "ms_txthud_decaytime";
-	Prefs.BGTrans = "ms_txthud_bgtrans";
-	Prefs.Width = "ms_txthud_width";
-
-	m_Consoles.push_back(new VGUI_EventConsole(this, SAYTEXTCON_X, SAYTEXTCON_Y, SAYTEXTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs, true, g_FontID));
-
-	//Start Say text panel
-	m_StartSayText = new VGUI_SendTextPanel(this, XRES(100), YRES(300), XRES(640) - XRES(100), YRES(16));
+	m_Consoles.push_back(new VGUI_EventConsole(this, EVENTCON_X, EVENTCON_Y, EVENTCON_SIZE_X, EVENTCON_SIZE_Y, Prefs));
 
 	//Debug Text
 	m_DebugText = new MSLabel(this, "", 0, YRES(16));
@@ -245,7 +214,6 @@ CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, Scre
 CHUDPanel::~CHUDPanel() 
 {
 	delete m_ID;
-	delete m_StartSayText;
 	delete m_DebugText;
 
 	for(int i = 0; i < m_HUDElements.size(); i++)
@@ -275,7 +243,6 @@ CHUDPanel::~CHUDPanel()
 void CHUDPanel::Cleanup()
 {
 	delete m_ID;
-	delete m_StartSayText;
 	delete m_DebugText;
 
 	for(int i = 0; i < m_HUDElements.size(); i++)
@@ -417,9 +384,6 @@ void CHUDPanel::Think()
 		d += i;
 		m_Consoles[i]->Update();
 	}
-
-	//Update Start Say Text
-	m_StartSayText->Update();
 }
 
 void CHUDPanel::UpdateInfoWindows(std::vector<CInfoWindow*>& Windows)
@@ -472,30 +436,19 @@ void CHUDPanel::StepInput(hudscroll_e ScrollCmd)
 
 	if (ScrollCmd == HUDSCROLL_SELECT)
 	{
-		if (m_ActiveConsole == m_Consoles[0])
-			m_ActiveConsole = m_Consoles[1];
-		else if (m_ActiveConsole == m_Consoles[1])
-			m_ActiveConsole = m_Consoles[0];
+		m_ScrollChat = !m_ScrollChat;
 		Down = true;
 	}
 
-	if (m_ActiveConsole == m_Consoles[CON_SAYTEXT])
+	if (m_ScrollChat)
 		MSVGUI2::Chat_Scroll(Down);
 	else
-		m_ActiveConsole->StepInput(Down);
+		m_Consoles[CON_EVENT]->StepInput(Down);
 }
 
 bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)
 {
-	if (MSVGUI2::Chat_BlocksKeys())
-		return true;
-
-	if (m_StartSayText->isVisible())
-	{
-		m_StartSayText->KeyInput(down, keynum, pszCurrentBinding);
-		return true;
-	}
-	return false;
+	return MSVGUI2::Chat_BlocksKeys();
 }
 
 msstringlist HelpParts;

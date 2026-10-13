@@ -479,7 +479,6 @@ set(VGUI_MS
 	"ui/ms/vgui_quickslot.h"
 	"ui/ms/vgui_spawn.cpp"
 	"ui/ms/vgui_spawn.h"
-	"ui/ms/vgui_startsaytext.h"
 	"ui/ms/vgui_stats.cpp"
 	"ui/ms/vgui_stats.h"
 	"ui/ms/vgui_storage.cpp"

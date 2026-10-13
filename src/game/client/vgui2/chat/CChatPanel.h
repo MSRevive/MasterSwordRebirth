@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/RichText.h>
@@ -19,6 +21,9 @@ public:
 protected:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
 	void OnKeyCodeTyped(vgui2::KeyCode code) override;
+
+private:
+	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 };
 
 class CChatPrompt : public vgui2::Label
@@ -30,6 +35,9 @@ public:
 
 protected:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
+
+private:
+	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 };
 
 // EditablePanel, not Panel: it is what hands key focus to the entry
@@ -55,6 +63,7 @@ private:
 	CChat *m_pChat;
 	CChatPrompt *m_pPrompt;
 	CChatEntry *m_pEntry;
+	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 	int m_iFontTall = 0;
 };
 
@@ -66,12 +75,15 @@ public:
 	CChatHistory(vgui2::Panel *pParent);
 
 	void Scroll(bool bDown);
+	int GetScrollBarWide();
 	int GetFontTall() { return m_iFontTall; }
+	vgui2::HFont GetFont() { return m_hFont; }
 
 protected:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
 
 private:
+	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 	int m_iFontTall = 0;
 };
 
@@ -95,6 +107,13 @@ public:
 	void Scroll(bool bDown);
 
 private:
+	// Width of a printed message and when it stops showing, to size the history to its text
+	struct Line_t
+	{
+		int iWide;
+		double flExpire;
+	};
+
 	float GetDecayTime();
 	void LayoutHistory();
 	void HoldHistory();
@@ -102,6 +121,8 @@ private:
 
 	CChatInput *m_pInput;
 	CChatHistory *m_pHistory;
+	std::vector<Line_t> m_Lines;
+	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 
 	int m_iType = 0;
 	bool m_bOpen = false;
