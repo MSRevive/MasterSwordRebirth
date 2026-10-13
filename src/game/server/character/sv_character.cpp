@@ -427,15 +427,18 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 						}
 					}
 
-					ApplyItemAlias(Name);
-					if (!Name.len() || Name.len() >= STORAGE_NAME_SIZE || !Item.Quantity)
+					//Reads empty data first so skip that
+					if (!Name.len())
+						continue;
+
+					if (Name.len() >= STORAGE_NAME_SIZE || !Item.Quantity)
 					{
-						MS_ERROR("ReadCharData: Bad storage item, skipping...");
+						MS_ERROR("ReadCharData: Bad storage item, skipping...(%s)", Name);
 						continue;
 					}
 
 					Item.Name = Name;
-					Item.ID = m_Storage.size(); //IDs aren't saved.  They only have to be unique
+					Item.ID = m_Storage.size(); //IDs aren't saved. They only have to be unique
 					m_Storage.push_back(Item);
 				}
 				break;

@@ -34,7 +34,7 @@
 #define STORAGE_DEFAULT_ITEMS 100
 #define STORAGE_MAX_TRANSFER 20
 #define STORAGE_MAX_SWIGS 30
-#define STORAGE_NAME_SIZE 64
+#define STORAGE_NAME_SIZE 65 //this allows scriptname of 64 bytes.
 
 enum sbar_data
 {
