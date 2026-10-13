@@ -1567,7 +1567,8 @@ void CMSMonster::Speak(char* pszSentence, speech_type SpeechType)
 	char* pc = NULL;
 	for (pc = pszSentence; pc != NULL && *pc != 0; pc++)
 	{
-		if (isprint(*pc) && !isspace(*pc))
+		unsigned char c = (unsigned char)*pc;
+		if (c >= 0x80 || (isprint(c) && !isspace(c)))
 		{
 			pc = NULL; // we've found an alphanumeric character,  so text is valid
 			break;

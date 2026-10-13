@@ -80,6 +80,7 @@
 #include "vgui_quickslot.h"
 
 #include "vgui_status.h" //Drigien MAY2008
+#include "vgui2/ms_vgui2.h"
 //------------
 
 enum
@@ -87,6 +88,40 @@ enum
 	CON_EVENT,
 	CON_SAYTEXT,
 };
+
+class CVGUI2Host : public MSVGUI2::IHost
+{
+public:
+	void SendChat(int Type, const char* Utf8Text) override
+	{
+		ServerCmd(UTIL_VarArgs("say_text %i %s", Type, Utf8Text));
+	}
+
+	float GetCvarFloat(const char* Name) override
+	{
+		return CVAR_GET_FLOAT(Name);
+	}
+
+	bool ShowHUD() override
+	{
+		return ::ShowHUD();
+	}
+
+	void GetChatLayout(MSVGUI2::ChatLayout& Layout) override
+	{
+		float Width = CVAR_GET_FLOAT("ms_txthud_width");
+
+		Layout.HistoryX = XRES(10);
+		Layout.HistoryBottomY = YRES(180);
+		Layout.HistoryWidth = XRES(Width > 0 ? Width : 300);
+		Layout.InputX = XRES(100);
+		Layout.InputY = YRES(300);
+		Layout.InputWidth = XRES(300);
+		Layout.InputHeight = YRES(16);
+	}
+};
+
+static CVGUI2Host g_VGUI2Host;
 
 class CHUDPanel : public VGUI_MainPanel
 {
@@ -155,6 +190,7 @@ VGUI_MainPanel* CreateHUDPanel(Panel* pParent) { return new CHUDPanel(pParent); 
 CHUDPanel::CHUDPanel(Panel* pParent) : VGUI_MainPanel(0, 0, 0, ScreenWidth, ScreenHeight)
 {
 	setParent(pParent);
+	MSVGUI2::SetHost(&g_VGUI2Host);
 
 	m_HUDElements.push_back(m_RetroHealth = new RetroHUD::VGUI_Health(this));
 	m_HUDElements.push_back(m_Health = new PrimaryHUD::VGUI_Health(this));
@@ -335,7 +371,12 @@ void CHUDPanel::PrintEvent(Color color, const char* Text)
 // Write to the Event Console
 void CHUDPanel::PrintSayText(Color color, const char* Text)
 {
-	m_Consoles[CON_SAYTEXT]->Print(color, Text);
+	size_t Len = strlen(Text);
+	ConsolePrint(Text);
+	if (!Len || Text[Len - 1] != '\n')
+		ConsolePrint("\n");
+
+	MSVGUI2::Chat_Print(color[0], color[1], color[2], Text);
 }
 
 // VGUI HUD Creation
@@ -427,20 +468,28 @@ void CHUDPanel::Initialize(void)
 //-----------------------------------------------------------------------------
 void CHUDPanel::StepInput(hudscroll_e ScrollCmd)
 {
+	bool Down = (ScrollCmd == HUDSCROLL_DOWN);
+
 	if (ScrollCmd == HUDSCROLL_SELECT)
 	{
 		if (m_ActiveConsole == m_Consoles[0])
 			m_ActiveConsole = m_Consoles[1];
 		else if (m_ActiveConsole == m_Consoles[1])
 			m_ActiveConsole = m_Consoles[0];
-		m_ActiveConsole->StepInput(true);
+		Down = true;
 	}
+
+	if (m_ActiveConsole == m_Consoles[CON_SAYTEXT])
+		MSVGUI2::Chat_Scroll(Down);
 	else
-		m_ActiveConsole->StepInput(ScrollCmd == HUDSCROLL_DOWN);
+		m_ActiveConsole->StepInput(Down);
 }
 
 bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)
 {
+	if (MSVGUI2::Chat_BlocksKeys())
+		return true;
+
 	if (m_StartSayText->isVisible())
 	{
 		m_StartSayText->KeyInput(down, keynum, pszCurrentBinding);
@@ -662,14 +711,19 @@ void HUD_StartSayText(int Type)
 {
 	if (!gViewPort || !gViewPort->m_pHUDPanel)
 		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->Open(Type);
+
+	const char* Prompt = "Shout:";
+	if (Type == SAYTEXT_LOCAL)
+		Prompt = "Say:";
+	else if (Type == SAYTEXT_PARTY)
+		Prompt = "Party:";
+
+	MSVGUI2::Chat_Open(Type, Prompt);
 }
 
 void HUD_CancelSayText()
 {
-	if (!gViewPort || !gViewPort->m_pHUDPanel)
-		return;
-	((CHUDPanel*)gViewPort->m_pHUDPanel)->m_StartSayText->setVisible(false);
+	MSVGUI2::Chat_Close();
 }
 
 void HUD_DrawID(entinfo_t* pEntinfo)

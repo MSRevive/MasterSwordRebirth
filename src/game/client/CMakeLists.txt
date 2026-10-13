@@ -35,6 +35,8 @@ add_library(client SHARED)
 
 set_common_properties(client)
 
+add_subdirectory(vgui2)
+
 if (MSVC)
 	target_link_options(client PRIVATE /SAFESEH:NO)
 else()
@@ -49,6 +51,7 @@ target_link_libraries(client PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
 	$<$<PLATFORM_ID:Windows>:vgui>
 	$<$<PLATFORM_ID:Windows>:gdi32>
+	client_vgui2
 	SDL2
 	fmod
 	discord

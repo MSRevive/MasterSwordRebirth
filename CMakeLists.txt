@@ -1,6 +1,6 @@
 # Based off Solokiller's Half Life Unified SDK, modified for MSR
 # https://github.com/twhl-community/halflife-unified-sdk
-cmake_minimum_required( VERSION 3.24 )
+cmake_minimum_required( VERSION 3.25 )
 
 if (WIN32)
 	set(CMAKE_GENERATOR_PLATFORM Win32)
@@ -134,6 +134,15 @@ endfunction(set_common_properties)
 
 add_compile_definitions($<$<CONFIG:Debug>:DEBUG> $<$<CONFIG:Debug>:_DEBUG>)
 add_compile_definitions($<$<CONFIG:Release>:NDEBUG>)
+
+# Source SDK (VGUI2), only linked by client_vgui2
+set(SOURCE_SDK_NO_STEAM ON)
+add_subdirectory(source_sdk)
+
+foreach(SDK_TARGET tier1 tier2 vgui_controls)
+	set_target_properties(${SDK_TARGET} PROPERTIES CXX_STANDARD 17 POSITION_INDEPENDENT_CODE ON)
+	target_compile_options(${SDK_TARGET} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fno-gnu-unique>)
+endforeach()
 
 # Add Projects
 add_subdirectory(src/game/client)

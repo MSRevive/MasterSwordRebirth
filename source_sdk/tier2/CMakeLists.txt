@@ -5,9 +5,16 @@ set( TIER2_HEADER_FILES
 
 set( TIER2_SOURCE_FILES
 	KeyValuesCompat.cpp
-	steam_api.cpp
 	tier2.cpp
 )
+
+# MSR: steam_api.cpp needs tier1's interface.cpp, which clashes with the client's own
+if( NOT SOURCE_SDK_NO_STEAM )
+	set( TIER2_SOURCE_FILES
+		${TIER2_SOURCE_FILES}
+		steam_api.cpp
+	)
+endif()
 
 add_library( tier2 STATIC
 	${TIER2_HEADER_FILES}

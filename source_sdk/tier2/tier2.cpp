@@ -31,7 +31,9 @@ vgui2::ISchemeManager *g_pVGuiSchemeManager;
 vgui2::ISystem *g_pVGuiSystem;
 
 static bool s_bConnected = false;
+#ifndef NO_STEAM
 void SteamAPI_InitForGoldSrc();
+#endif
 
 void ConnectTier2Libraries(CreateInterfaceFn *pFactoryList, int nFactoryCount)
 {
@@ -46,7 +48,9 @@ void ConnectTier2Libraries(CreateInterfaceFn *pFactoryList, int nFactoryCount)
 		Assert(false);
 	}
 
+#ifndef NO_STEAM
 	SteamAPI_InitForGoldSrc();
+#endif
 
 	for (int i = 0; i < nFactoryCount; ++i)
 	{
