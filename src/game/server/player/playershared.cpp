@@ -1403,7 +1403,7 @@ bool CBasePlayer::Storage_CanStoreItem(const char* pszItemName, int Properties)
 		return false;
 
 	//MiB FEB2008a - the bank mask
-	const char* pszBlocked[] = {"pack_", "sheath_"};
+	const char* pszBlocked[] = {"pack_", "sheath_", "item_tk_"};
 	for (unsigned int i = 0; i < sizeof(pszBlocked) / sizeof(pszBlocked[0]); i++)
 		if (!strncmp(pszItemName, pszBlocked[i], strlen(pszBlocked[i])))
 			return false;
