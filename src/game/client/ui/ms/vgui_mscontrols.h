@@ -593,6 +593,7 @@ public:
 		m_Message = ""; m_VisibleMsg = "";
 		setParent( Parent );
 		m_StartWidth = w;
+		m_Active = false;
 
 		//m_MessageLabel = new MSLabel( this, "", TEXT_START, 0, getWide() - TEXT_START - XRES(3), h, MSLabel::a_west );
 		m_MessageLabel = new MSLabel( this, "", 0, 0, getWide() - XRES(3), h, MSLabel::a_west );
@@ -611,11 +612,9 @@ public:
 		UpdateText( );
 	}
 
-	void SetActive( bool Active )
-	{
-		m_Active = Active;
-		m_Line->setVisible( m_Active );
-	}
+	void SetActive( bool Active );
+
+	void FlushTextInput( );
 
 	void AddLetter(const char* Letter )
 	{
@@ -659,7 +658,9 @@ public:
 
 	void Update( )
 	{
-		for (int i = 0; i < m_FadeLabels.size(); i++) 
+		FlushTextInput( );
+
+		for (int i = 0; i < m_FadeLabels.size(); i++)
 		{
 			VGUI_FadeText *pFadeText = m_FadeLabels[i];
 			pFadeText->Update( );
@@ -677,6 +678,10 @@ public:
 
 	void KeyInput( int down, int keynum, const char *pszCurrentBinding );
 };
+
+void VGUI_TextInput( const char *pszText );
+
+void VGUI_TextInputClear( );
 
 // MiB APR2019_24 - Adding a bunch of simple input signal handlers so we don't have to override every single signal every time
 class CCursorMovementHandler

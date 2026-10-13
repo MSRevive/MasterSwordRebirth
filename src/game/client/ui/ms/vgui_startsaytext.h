@@ -51,6 +51,7 @@ public:
 	{
 		if (keynum == '\r')
 		{
+			m_TextPanel->FlushTextInput();
 			setVisible(false);
 			ServerCmd(UTIL_VarArgs("say_text %i %s", m_Type, m_TextPanel->m_Message.c_str()));
 			return;

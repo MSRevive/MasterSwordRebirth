@@ -26,6 +26,9 @@
 
 #include <SDL2/SDL_mouse.h>
 #include <SDL2/SDL_gamecontroller.h>
+#include <SDL2/SDL_events.h>
+
+void VGUI_TextInput(const char *pszText);
 
 #define MOUSE_BUTTON_COUNT 5
 
@@ -298,6 +301,15 @@ void IN_StartupMouse(void)
 	mouse_buttons = MOUSE_BUTTON_COUNT;
 }
 
+// Typed text comes from SDL so it follows the user's keyboard layout
+static int SDLCALL IN_TextInputWatch(void *userdata, SDL_Event *event)
+{
+	if (event->type == SDL_TEXTINPUT)
+		VGUI_TextInput(event->text.text);
+
+	return 1;
+}
+
 /*
 ===========
 IN_Shutdown
@@ -307,6 +319,7 @@ void IN_Shutdown(void)
 {
 	g_ReceivedFirstMouseActivate = false;
 	IN_DeactivateMouse();
+	SDL_DelEventWatch(IN_TextInputWatch, NULL);
 
 #ifdef _WIN32
 	if (s_hMouseQuitEvent)
@@ -1104,4 +1117,6 @@ void IN_Init(void)
 
 	IN_StartupMouse();
 	IN_StartupJoystick();
+
+	SDL_AddEventWatch(IN_TextInputWatch, NULL);
 }

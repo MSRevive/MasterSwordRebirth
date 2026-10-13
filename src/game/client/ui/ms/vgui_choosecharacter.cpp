@@ -832,6 +832,7 @@ bool CNewCharacterPanel::KeyInput( int down, int keynum, const char *pszCurrentB
 	case STG_CHOOSEGENDER:
 		if( keynum == '\r' )
 		{
+			Gender_NameTextPanel->FlushTextInput( );
 			Gender_NameSelected( );
 		}
 		else

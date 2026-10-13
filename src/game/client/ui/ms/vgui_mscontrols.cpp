@@ -5,6 +5,7 @@
 #include "vgui_mscontrols.h"
 #include "clglobal.h"
 #include "vgui_loadtga.h"
+#include <SDL2/SDL_keyboard.h>
 
 /*
 	Checkbox
@@ -794,10 +795,16 @@ void VGUI_Container::PurgeButtons( )
 
 //VGUI_TextPanel
 
+// Text typed since the last key event, filled by the SDL text input watch
+static char g_TextInput[64];
+static int g_TextInputLen = 0;
+
 void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBinding )
 {
 	if( !m_Active )
 		return;
+
+	FlushTextInput( );
 
 	if( !down )
 	{
@@ -820,25 +827,52 @@ void VGUI_TextPanel::KeyInput( int down, int keynum, const char *pszCurrentBindi
 	{
 		return;
 	}
+}
 
-// TODO!!!
-#ifdef _WIN32
-	byte State[256];
-	BOOL Success = GetKeyboardState( State );
-	if( !Success ) return;
+void VGUI_TextPanel::SetActive( bool Active )
+{
+	m_Active = Active;
+	m_Line->setVisible( m_Active );
 
-	unsigned short Char;
-	int Result = ToAscii( VkKeyScan(keynum), keynum, State, &Char, 0 );
-	if( Result != 1 ) return;
+	if( m_Active && !SDL_IsTextInputActive() )
+		SDL_StartTextInput( );
+}
 
-	if ( Char == 37 || Char == 92 ) return; //AUG2013_18 - sanitize inputs
+void VGUI_TextPanel::FlushTextInput( )
+{
+	if( !m_Active || !isVisibleUp() )
+		return;
 
-	if( (signed)m_Message.len() >= m_MaxLetters ) return;
+	for (int i = 0; i < g_TextInputLen; i++)
+	{
+		if( (signed)m_Message.len() >= m_MaxLetters ) break;
 
-	//char Temp[2] = { m_Caps ? toupper(Char) : Char, '\0' };
-	char Temp[2] = { Char & 0xFF, '\0' };
-	AddLetter( Temp );
-#endif
+		char Temp[2] = { g_TextInput[i], '\0' };
+		AddLetter( Temp );
+	}
+
+	g_TextInputLen = 0;
+}
+
+void VGUI_TextInput( const char *pszText )
+{
+	if( gEngfuncs.Con_IsVisible() )
+		return;
+
+	for( ; *pszText; pszText++ )
+	{
+		unsigned char Char = *pszText;
+		if( Char < 32 || Char > 126 ) continue;
+		if( Char == 37 || Char == 92 ) continue; //AUG2013_18 - sanitize inputs
+		if( g_TextInputLen >= (int)sizeof(g_TextInput) ) break;
+
+		g_TextInput[g_TextInputLen++] = Char;
+	}
+}
+
+void VGUI_TextInputClear( )
+{
+	g_TextInputLen = 0;
 }
 
 // MiB FEB2019_24 [ALPHABETICAL_INVENTORY]

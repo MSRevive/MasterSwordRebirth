@@ -58,6 +58,7 @@ extern CClientLibrary gClient;
 void IN_Init(void);
 void IN_Move(float frametime, usercmd_t *cmd);
 void IN_Shutdown(void);
+void VGUI_TextInputClear();
 void V_Init(void);
 void VectorAngles(const float *forward, float *angles);
 int CL_ButtonBits(int);
@@ -389,10 +390,14 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event(int down, int keynum, const char *pszCurrentBinding)
 {
+	int iAllow = 1;
 	if (gViewPort)
-		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
+		iAllow = gViewPort->KeyInput(down, keynum, pszCurrentBinding);
 
-	return 1;
+	// Typed text that no text box took with this key is not meant for one
+	VGUI_TextInputClear();
+
+	return iAllow;
 }
 
 void IN_BreakDown(void) { KeyDown(&in_break); };
