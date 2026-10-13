@@ -76,7 +76,7 @@ public:
 typedef mslist<CStat> statlist;
 
 //A caching structure for CStat.  Allows you to do numerous lookups without calling
-//Value() each time.  Used in TitleManager::GetPlayerTitle()
+//Value() each time. Used in TitleManager::GetPlayerTitle()
 struct skillcache_t
 {
 	int Skill;

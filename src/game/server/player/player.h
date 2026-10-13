@@ -450,7 +450,7 @@ public:
 	bool m_fClientInitiated; //Client sent this command to the server.  Make sure to cache any item changes so they don't get sent back to client
 	bool m_fInTownArea;
 	std::vector<storageitem_t> m_Storage;	  //Items I have in storage
-	int m_StorageMax;					  //How many items my storage holds.  0 until it's set, which gives STORAGE_DEFAULT_ITEMS
+	short m_StorageMax;					  //How many items my storage holds.  0 until it's set, which gives STORAGE_DEFAULT_ITEMS
 	storageaccess_t m_CurrentStorage;	  //Set while I have my storage open
 	bool m_Initialized;				  //Whether stats were created, script loaded, etc
 	float m_TimeNextSave;

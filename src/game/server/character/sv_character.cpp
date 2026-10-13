@@ -369,7 +369,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 			case CF_PLAYERKILLS: PlayerKills = (short)PackReadInt(Value); break;
 			case CF_TIMEFORGETKILL: TimeWaitedToForgetKill = PackReadFloat(Value); break;
 			case CF_BODY: Body = (short)PackReadInt(Value); break;
-			case CF_STORAGEMAX: StorageMax = (int)PackReadInt(Value); break;
+			case CF_STORAGEMAX: StorageMax = (short)PackReadInt(Value); break;
 
 			case CF_VISITEDMAPS: ReadStringListPack(Value, m_VisitedMaps); break;
 			case CF_SPELLS: ReadStringListPack(Value, m_Spells); break;
