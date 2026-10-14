@@ -6490,7 +6490,7 @@ bool CBasePlayer::RestoreAllServer(void *pData, ulong Size)
 	//Read storage items
 	m_Storage = Data.m_Storage; //Sent to the client when the storage is opened
 	m_StorageMax = Data.StorageMax;
-	Storage_CombineSwigs();
+	Storage_Validate();
 
 	//Read Companions
 
@@ -6954,13 +6954,24 @@ void CBasePlayer::Storage_PutSwigs(const char* pszItemName, int Swigs)
 	}
 }
 
-void CBasePlayer::Storage_CombineSwigs()
+void CBasePlayer::Storage_Validate()
 {
 	std::vector<storageitem_t> Potions;
 	for (int i = (int)m_Storage.size() - 1; i >= 0; i--)
 	{
 		CGenericItem *pGlobalItem = CGenericItemMgr::GetGlobalGenericItemByName(m_Storage[i].Name.c_str(), true);
-		if (!pGlobalItem || !Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
+		if (!pGlobalItem)
+		{
+			//Item no longer exists. Skipped if the item list failed to load, so storage isn't wiped
+			if (CGenericItemMgr::ItemCount())
+			{
+				MS_INFO("Storage: removing missing item %s x%i", m_Storage[i].Name.c_str(), (int)m_Storage[i].Quantity);
+				m_Storage.erase(m_Storage.begin() + i);
+			}
+			continue;
+		}
+
+		if (!Storage_CombinesSwigs(pGlobalItem->ItemName.c_str(), pGlobalItem->MSProperties()))
 			continue;
 
 		Potions.push_back(m_Storage[i]);

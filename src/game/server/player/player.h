@@ -565,7 +565,7 @@ public:
 	int Storage_SwigRoom(const char* pszItemName);
 	void Storage_PutSwigs(const char* pszItemName, int Swigs);
 	void Storage_RemoveSwigs(int Idx, int Amt);
-	void Storage_CombineSwigs();
+	void Storage_Validate();
 	void Storage_SetMax(int Max);
 	void Storage_SendMax();
 	std::tuple<bool, int> LearnSkill(int iStat, int iStatType, int EnemySkillLevel);
