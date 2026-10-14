@@ -4582,8 +4582,124 @@ void CInfoIntermission::Think(void)
 
 LINK_ENTITY_TO_CLASS(info_intermission, CInfoIntermission);
 
+//Sends HUD entity info (name/type) for this entity, if the client doesn't already have it
+bool CBasePlayer::SendEntInfo(CBaseEntity *pSightEnt)
+{
+	if (!pSightEnt ||
+		pSightEnt == this ||
+		pSightEnt->pev->movetype == MOVETYPE_FOLLOW)
+		return false;
+	if (!pSightEnt->IsPlayer() &&
+		!pSightEnt->MyMonsterPointer())
+		return false;
+
+	if (pSightEnt->IsMSItem() /*&& pSightEnt->MSMoveType != MOVETYPE_ARROW */)
+		return false;
+
+	entinfo_t EntData;
+	EntData.entindex = ENTINDEX(pSightEnt->edict());
+	EntData.Name = pSightEnt->DisplayName();
+	EntData.Type = ENT_NEUTRAL;
+	if (pSightEnt->IsMSMonster())
+	{
+		if (EntData.Type == ENT_NEUTRAL)
+		{
+			int iRelationship = IRelationship(pSightEnt);
+			switch(iRelationship)
+			{
+			case RELATIONSHIP_AL: //friendly
+				EntData.Type = ENT_FRIENDLY;
+				break;
+			case RELATIONSHIP_HT: //hostile
+				EntData.Type = ENT_HOSTILE;
+				break;
+			case RELATIONSHIP_DL: //dislike
+				EntData.Type = ENT_HOSTILE;
+				break;
+			case RELATIONSHIP_WA: //wary
+				EntData.Type = ENT_WARY;
+				break;
+			case RELATIONSHIP_NM: //nemesis
+				EntData.Type = ENT_DEADLY;
+				break;
+			case RELATIONSHIP_NO: //not NPC
+				EntData.Type = ENT_NOTNPC;
+				break;
+			}
+
+			//Thothie DEC2012_12 - boss hud ID
+			IScripted *pScripted = pSightEnt->GetScripted();
+			if (atoi(pScripted->GetFirstScriptVar("NPC_IS_BOSS")) > 0)
+				EntData.Type = ENT_BOSS;
+		}
+	}
+
+	entinfo_t *pSlot = NULL;
+	for (int e = 0; e < m_EntInfo.size(); e++) // Find the slot for this entity
+		if (m_EntInfo[e].entindex == EntData.entindex)
+		{
+			pSlot = &m_EntInfo[e];
+			break;
+		}
+
+	if (!pSlot)	//Slot not found
+	{
+		if (m_EntInfo.size() < 1024) //Create a new slot
+			pSlot = &m_EntInfo.add(entinfo_t());
+		else //Too many entities - overwrite the furthest one away
+		{
+			int iFarthestDist = -1, iFarthestEnt = 0;
+			for (int e = 0; e < m_EntInfo.size(); e++)
+			{
+				CBaseEntity* pEntity = MSInstance(INDEXENT(m_EntInfo[e].entindex));
+				if (!pEntity)
+					continue;
+				if ((pEntity->pev->origin - pev->origin).Length() > iFarthestDist)
+				{
+					iFarthestDist = (pEntity->pev->origin - pev->origin).Length();
+					iFarthestEnt = e;
+				}
+			}
+			pSlot = &m_EntInfo[iFarthestEnt];
+		}
+	}
+
+	if (pSlot &&
+		(pSlot->entindex != EntData.entindex ||
+		 pSlot->Name != EntData.Name ||
+		 pSlot->Type != EntData.Type))
+	{
+		//ALERT( at_console, "(Send) %s\n", EntData.Name );
+		*pSlot = EntData;
+		MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ENTINFO], NULL, pev);
+		WRITE_SHORT(EntData.entindex);
+		WRITE_STRING_LIMIT(EntData.Name, WRITE_STRING_MAX);
+		WRITE_BYTE(EntData.Type);
+		MESSAGE_END();
+		return true;
+	}
+
+	return false;
+}
+
 void CBasePlayer::UpdateMiscPositions(void)
 {
+	//Send the entity under the crosshair right away, ahead of the throttled scan below
+	if (gpGlobals->time > TimeUpdateIDTarget)
+	{
+		TimeUpdateIDTarget = gpGlobals->time + 0.5;
+
+		Vector vForward;
+		UTIL_MakeVectorsPrivate(pev->v_angle + pev->punchangle, vForward, NULL, NULL);
+		Vector vEndPos = EyePosition() + vForward * 1024;
+
+		TraceResult tr;
+		gpGlobals->trace_flags |= FTRACE_SIMPLEBOX;
+		UTIL_TraceLine(EyePosition(), vEndPos, dont_ignore_monsters, edict(), &tr);
+		if (tr.flFraction < 1.0)
+			SendEntInfo(MSInstance(tr.pHit));
+	}
+
 	if (gpGlobals->time > TimeUpdateIDInfo)
 	{
 		TimeUpdateIDInfo = gpGlobals->time + 1.0; //0.4
@@ -4623,110 +4739,8 @@ void CBasePlayer::UpdateMiscPositions(void)
 		int count = UTIL_EntitiesInBox(g_pEntitiesInBox, MAX_ENTITIES_TO_SEARCH, vMinBounds, vMaxBounds, 0);
 		for (int i = 0; i < count && EntriesSent < 2; i++) //only send 2 at a time now
 		{
-			CBaseEntity *pSightEnt = g_pEntitiesInBox[i];
-
-			if (!pSightEnt ||
-				pSightEnt == this ||
-				pSightEnt->pev->movetype == MOVETYPE_FOLLOW)
-				continue;
-			if (!pSightEnt->IsPlayer() &&
-				!pSightEnt->MyMonsterPointer())
-				continue;
-
-			if (pSightEnt->IsMSItem() /*&& pSightEnt->MSMoveType != MOVETYPE_ARROW */)
-				continue;
-
-			entinfo_t EntData;
-			EntData.entindex = ENTINDEX(pSightEnt->edict());
-			EntData.Name = pSightEnt->DisplayName();
-			EntData.Type = ENT_NEUTRAL;
-			if (pSightEnt->IsMSMonster())
-			{
-				if (pSightEnt->IsPlayer())
-				{
-					CBasePlayer *pTestPlayer = (CBasePlayer *)pSightEnt;
-					if (pTestPlayer->m_TimeWaitedToForgetSteal)
-					{
-						EntData.Name += " [THIEF]";
-						EntData.Type = ENT_HOSTILE;
-					}
-				}
-				if (EntData.Type == ENT_NEUTRAL)
-				{
-					int iRelationship = IRelationship(pSightEnt);
-					switch(iRelationship)
-					{
-					case RELATIONSHIP_AL: //friendly
-						EntData.Type = ENT_FRIENDLY;
-						break;
-					case RELATIONSHIP_HT: //hostile
-						EntData.Type = ENT_HOSTILE;
-						break;
-					case RELATIONSHIP_DL: //dislike
-						EntData.Type = ENT_HOSTILE;
-						break;
-					case RELATIONSHIP_WA: //wary
-						EntData.Type = ENT_WARY;
-						break;
-					case RELATIONSHIP_NM: //nemesis
-						EntData.Type = ENT_DEADLY;
-						break;
-					case RELATIONSHIP_NO: //not NPC
-						EntData.Type = ENT_NOTNPC;
-						break;
-					}
-
-					//Thothie DEC2012_12 - boss hud ID
-					IScripted *pScripted = pSightEnt->GetScripted();
-					if (atoi(pScripted->GetFirstScriptVar("NPC_IS_BOSS")) > 0)
-						EntData.Type = ENT_BOSS;
-				}
-			}
-
-			entinfo_t *pSlot = NULL;
-			for (int e = 0; e < m_EntInfo.size(); e++) // Find the slot for this entity
-				if (m_EntInfo[e].entindex == EntData.entindex)
-				{
-					pSlot = &m_EntInfo[e];
-					break;
-				}
-
-			if (!pSlot)	//Slot not found
-			{
-				if (m_EntInfo.size() < 1024) //Create a new slot
-					pSlot = &m_EntInfo.add(entinfo_t());
-				else //Too many entities - overwrite the furthest one away
-				{
-					int iFarthestDist = -1, iFarthestEnt = 0;
-					for (int e = 0; e < m_EntInfo.size(); e++)
-					{
-						CBaseEntity* pEntity = MSInstance(INDEXENT(m_EntInfo[e].entindex));
-						if (!pEntity)
-							continue;
-						if ((pEntity->pev->origin - pev->origin).Length() > iFarthestDist)
-						{
-							iFarthestDist = (pEntity->pev->origin - pev->origin).Length();
-							iFarthestEnt = e;
-						}
-					}
-					pSlot = &m_EntInfo[iFarthestEnt];
-				}
-			}
-
-			if (pSlot &&
-				(pSlot->entindex != EntData.entindex ||
-				 pSlot->Name != EntData.Name ||
-				 pSlot->Type != EntData.Type))
-			{
-				//ALERT( at_console, "(Send) %s\n", EntData.Name );
-				*pSlot = EntData;
-				MESSAGE_BEGIN(MSG_ONE, g_netmsg[NETMSG_ENTINFO], NULL, pev);
-				WRITE_SHORT(EntData.entindex);
-				WRITE_STRING_LIMIT(EntData.Name, WRITE_STRING_MAX);
-				WRITE_BYTE(EntData.Type);
-				MESSAGE_END();
+			if (SendEntInfo(g_pEntitiesInBox[i]))
 				EntriesSent++;
-			}
 		}
 	}
 

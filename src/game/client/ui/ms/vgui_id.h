@@ -8,7 +8,8 @@ class VGUI_ID : public Panel
 public:
 	COLOR cHPColor = COLOR(0, 0, 0, 0);;
 	VGUI_FadeText* m_Label[3];
-	entinfo_t* m_LastID;
+	entinfo_t m_LastInfo; //Copy, player.m_EntInfo reallocates whenever an entry is added
+	bool m_HasID;
 	cl_entity_s* m_pClientEnt;
 	int iCurrentAlpha = 0;
 	int iCurrentWidth = 200;
@@ -33,18 +34,20 @@ public:
 		}
 		m_Label[0]->SetFGColorRGB(Color_Text_White);
 
-		m_LastID = NULL;
+		m_LastInfo.entindex = 0;
+		m_LastInfo.Type = ENT_NEUTRAL;
+		m_HasID = false;
 		m_pClientEnt = NULL;
 	}
 
 	void SetStatus(void)
 	{
-		if (m_LastID == NULL)
+		if (!m_HasID)
 			return;
 
 		static char pchNameString[MSSTRING_SIZE];
 		static char pchHealthString[MSSTRING_SIZE];
-		_snprintf(pchNameString, MSSTRING_SIZE, "%s", m_LastID->Name.c_str());
+		_snprintf(pchNameString, MSSTRING_SIZE, "%s", m_LastInfo.Name.c_str());
 
 		if (m_pClientEnt == NULL)
 		{
@@ -60,7 +63,7 @@ public:
 			return;
 		}
 
-		_snprintf(pchNameString, MSSTRING_SIZE, "%s", m_LastID->Name.c_str());
+		_snprintf(pchNameString, MSSTRING_SIZE, "%s", m_LastInfo.Name.c_str());
 		m_Label[0]->setText(pchNameString);
 
 		//move hp text to new line and make it colorful
@@ -97,9 +100,16 @@ public:
 
 	void Update(entinfo_t* pEntInfo)
 	{
+		bool NewTarget = (pEntInfo != NULL) != m_HasID ||
+						 (pEntInfo && pEntInfo->entindex != m_LastInfo.entindex);
+		bool TypeChanged = pEntInfo && pEntInfo->Type != m_LastInfo.Type;
+
+		if (pEntInfo)
+			m_LastInfo = *pEntInfo;
+
 		SetStatus();
 
-		if (pEntInfo == m_LastID)
+		if (!NewTarget && !TypeChanged)
 			return;
 
 		if (pEntInfo)
@@ -150,8 +160,11 @@ public:
 
 			m_Label[1]->setText(String);
 			m_Label[1]->SetFGColorRGB(DifficultyColor);
-			m_Label[0]->StartFade(false);
-			m_Label[1]->StartFade(false);
+			if (NewTarget)
+			{
+				m_Label[0]->StartFade(false);
+				m_Label[1]->StartFade(false);
+			}
 		}
 		else
 		{
@@ -164,7 +177,7 @@ public:
 			}
 		}
 
-		m_LastID = pEntInfo;
+		m_HasID = pEntInfo != NULL;
 		m_pClientEnt = (pEntInfo ? gEngfuncs.GetEntityByIndex(pEntInfo->entindex) : NULL);
 		SetStatus();
 		for (int i = 0; i < 3; i++)
@@ -204,7 +217,7 @@ public:
 
 		std::string sCVARHUDIDBackground = CVAR_GET_STRING("msui_id_background");
 
-		if (sCVARHUDIDBackground == "1" && m_LastID != NULL) {
+		if (sCVARHUDIDBackground == "1" && m_HasID) {
 			FadeInTo(100);
 		}
 		else {
@@ -247,7 +260,7 @@ public:
 	}
 	void NewLevel()
 	{
-		m_LastID = NULL;
+		m_HasID = false;
 		for (int i = 0; i < 3; i++)
 		{
 			m_Label[i]->m_StartTime = -1000; //Ensure ID doesn't show up after a level change

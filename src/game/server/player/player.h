@@ -422,7 +422,7 @@ public:
 	CGenericItem *PlayerHands;	 //Special item - Player hands
 	CGenericItem *m_ChosenArrow; //MiB JUN2010 - Arrow selection
 	byte m_PrefHand;			 //O = left 1 = right
-	float TimeUpdateIDInfo, CheckAreaTime, ForWardPressedTime;
+	float TimeUpdateIDInfo, TimeUpdateIDTarget, CheckAreaTime, ForWardPressedTime;
 	//RoundTime: Time to wear/use/wield/cast/etc.
 	//FatigueTime: Time to decrease the amount of iFatigue.
 	CBaseEntity *CurrentTransArea;
@@ -594,6 +594,7 @@ public:
 	void SetTeam(CTeam *pNewTeam);
 	void UpdateSpeed();
 	void UpdateMiscPositions();
+	bool SendEntInfo(CBaseEntity *pEnt);
 	void GetAnyItems();
 	void StealAnyItems(CBaseEntity *pVictim);
 	void OfferItem(offerinfo_t &OfferInfo);

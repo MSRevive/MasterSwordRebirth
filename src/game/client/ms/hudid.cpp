@@ -124,12 +124,8 @@ void CHudID::SearchThink()
 	//Think() is called while changing levels, so this code is now called from Draw()
 	//instead of Think();
 
-	pActiveInfo = gHUD.m_HUDId->GetEntInFrontOfMe(4096);
-	//if( pActiveInfo )
-	//{
-	//	Alpha = 255;
+	pActiveInfo = gHUD.m_HUDId->GetEntInFrontOfMe(1024);
 	pDrawInfo = pActiveInfo;
-	//}
 }
 
 // Message handler for EntInfo message
@@ -177,21 +173,30 @@ entinfo_t *CHudID::GetEntInFrontOfMe(float Range)
 
 	gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, false);
 
-	physent_t *pPhyplayer = gEngfuncs.pEventAPI->EV_GetPhysent(clplayer->index);
-	if (!pPhyplayer)
-		return NULL;
+	// Store off the old count
+	gEngfuncs.pEventAPI->EV_PushPMStates();
 
 	// Now add in all of the players.
 	gEngfuncs.pEventAPI->EV_SetSolidPlayers(clplayer->index - 1);
 
 	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
-	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, pPhyplayer->info, &tr);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr);
 
+	//Must be read before the pop, players added above are dropped from the physent list after it
+	int HitIdx = 0;
 	if (tr.fraction < 1.0 && tr.ent)
 	{
 		physent_t *pe = gEngfuncs.pEventAPI->EV_GetPhysent(tr.ent);
+		if (pe)
+			HitIdx = pe->info;
+	}
+
+	gEngfuncs.pEventAPI->EV_PopPMStates();
+
+	if (HitIdx)
+	{
 		for (int i = 0; i < player.m_EntInfo.size(); i++)
-			if (player.m_EntInfo[i].entindex == pe->info)
+			if (player.m_EntInfo[i].entindex == HitIdx)
 				return &player.m_EntInfo[i];
 	}
 
