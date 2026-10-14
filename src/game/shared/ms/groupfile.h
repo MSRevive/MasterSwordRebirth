@@ -26,6 +26,8 @@ struct pakDirectory_t
 
 #ifndef NOT_HLDLL
 #include "filesystem_shared.h"
+#include <string>
+#include <unordered_map>
 
 /**
 *	@brief Class to read the group file in the game
@@ -83,8 +85,11 @@ public:
 	int EnumerateAngelScriptFiles(std::vector<std::string>& outFiles) const;
 
 private:
+	const pakDirectory_t* FindEntry(const char* pszName) const;
+
 	CFile cFile;
 	std::vector<pakDirectory_t> m_EntryList;
+	std::unordered_map<std::string, size_t> m_EntryIndex; // Lowercased filename -> m_EntryList index
 	std::string m_Filename; // Store filename for refresh functionality
 };
 extern CGameGroupFile g_ScriptPack;

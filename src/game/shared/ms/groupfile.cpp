@@ -34,6 +34,15 @@ void operator delete(void* ptr, const char* pszSourceFile, int LineNum);
 #ifndef NOT_HLDLL
 #include "filesystem_shared.h"
 
+static void LowerAscii(std::string& Str)
+{
+	for (char& c : Str)
+	{
+		if (c >= 'A' && c <= 'Z')
+			c += 'a' - 'A';
+	}
+}
+
 CGameGroupFile::CGameGroupFile() : cFile()
 {
 }
@@ -126,6 +135,7 @@ bool CGameGroupFile::Open(const char* pszFilename)
 			printf("CGameGroupFile::Open: ERROR - Failed to read directory entry %d\n", i);
 			cFile.Close();
 			m_EntryList.clear();
+			m_EntryIndex.clear();
 			return false;
 		}
 
@@ -133,6 +143,16 @@ bool CGameGroupFile::Open(const char* pszFilename)
 		Entry.cFilename[sizeof(Entry.cFilename) - 1] = '\0';
 
 		m_EntryList.push_back(Entry);
+	}
+
+	// emplace keeps the first entry for a duplicate name, same as the old linear search
+	m_EntryIndex.clear();
+	m_EntryIndex.reserve(m_EntryList.size());
+	for (size_t i = 0; i < m_EntryList.size(); i++)
+	{
+		std::string Key = m_EntryList[i].cFilename;
+		LowerAscii(Key);
+		m_EntryIndex.emplace(std::move(Key), i);
 	}
 
 	//Seek to head so we're not left dangling someplace where it might cause problems
@@ -146,6 +166,7 @@ void CGameGroupFile::Close()
 {
 	cFile.Close();
 	m_EntryList.clear();
+	m_EntryIndex.clear();
 	m_Filename.clear();
 }
 
@@ -193,59 +214,37 @@ bool CGameGroupFile::Refresh(const char* pszFilename)
 	return result;
 }
 
+const pakDirectory_t* CGameGroupFile::FindEntry(const char* pszName) const
+{
+	std::string Key = pszName;
+	for (char& c : Key)
+	{
+		if (c == '\\')
+			c = '/';
+	}
+	LowerAscii(Key);
+
+	auto it = m_EntryIndex.find(Key);
+	return it != m_EntryIndex.end() ? &m_EntryList[it->second] : nullptr;
+}
+
 bool CGameGroupFile::ReadEntry(const char* pszName, byte* pBuffer, unsigned long& DataSize)
 {
-	msstring EntryName = pszName;
-	ReplaceChar(EntryName, '\\', '/');
+	const pakDirectory_t* pEntry = FindEntry(pszName);
+	if (!pEntry)
+		return false;
 
-	for (int i = 0; i < m_EntryList.size(); i++)
-	{
-		pakDirectory_t Entry = m_EntryList[i];
-		
-		// Try case-sensitive match first (faster)
-		if (strcmp(Entry.cFilename, EntryName) == 0)
-		{
-			// Exact match found, continue to read
-		}
-		// Try case-insensitive match as fallback (for Windows compatibility)
-		else
-		{
-#ifdef _WIN32
-			if (_stricmp(Entry.cFilename, EntryName) != 0)
-				continue;
-#else
-			if (strcasecmp(Entry.cFilename, EntryName) != 0)
-				continue;
-#endif
-		}
-
-		DataSize = Entry.FileSize;
-		if (pBuffer)
-		{
-			cFile.Seek(Entry.FileOffset, FILESYSTEM_SEEK_HEAD);
-			byte* _pBuffer = new byte[Entry.FileSize];
-			bool bSuccess = false;
-
-			unsigned long BytesRead = cFile.Read(_pBuffer, Entry.FileSize);
-			if (BytesRead == Entry.FileSize)
-			{
-				memcpy(pBuffer, _pBuffer, BytesRead);
-				DataSize = BytesRead;
-				bSuccess = true;
-			}
-
-			delete[] _pBuffer;
-
-			//Seek to head so we're not left dangling someplace where it might cause problems
-			cFile.Seek(0, FILESYSTEM_SEEK_HEAD);
-
-			return bSuccess;
-		}
-
+	DataSize = pEntry->FileSize;
+	if (!pBuffer)
 		return true;
-	}
 
-	return false;
+	cFile.Seek(pEntry->FileOffset, FILESYSTEM_SEEK_HEAD);
+	unsigned long BytesRead = cFile.Read(pBuffer, pEntry->FileSize);
+
+	//Seek to head so we're not left dangling someplace where it might cause problems
+	cFile.Seek(0, FILESYSTEM_SEEK_HEAD);
+
+	return BytesRead == pEntry->FileSize;
 }
 
 const pakDirectory_t* CGameGroupFile::GetEntry(size_t index) const
