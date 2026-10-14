@@ -303,7 +303,7 @@ const char* CGenericItemMgr::GetItemDisplayName(const char* ItemName, bool Capit
 //GenericItemPrecache
 //Cache all items from file into memory
 scriptcmdname_list CGenericItemMgr::m_ScriptCommands;
-std::map<msstring, msstring> CGenericItemMgr::mItemAlias;
+std::map<std::string, std::string> CGenericItemMgr::mItemAlias;
 
 void CGenericItemMgr::GenericItemPrecache(void)
 {
@@ -383,7 +383,7 @@ void CGenericItemMgr::GenericItemPrecache(void)
 		ulong FileSize;
 		if (g_ScriptPack.ReadEntry(FILE_ITEMLIST, NULL, FileSize))
 		{
-			pStringPtr = msnew(byte[FileSize + 1]);
+			pStringPtr = new(byte[FileSize + 1]);
 			g_ScriptPack.ReadEntry(FILE_ITEMLIST, (byte*)pStringPtr, FileSize);
 			pStringPtr[FileSize] = 0;
 			//Set global variable: scripts loaded from library
@@ -430,11 +430,14 @@ void CGenericItemMgr::GenericItemPrecache(void)
 
 		if (cString == strstr(cString, "#swap "))
 		{
-			msstring vsLine = msstring(&cString[6]);
-			int vSpacePos = vsLine.find(" ");
-			msstring vsSrcName = vsLine.substr(0, vSpacePos);
-			msstring vsDestName = vsLine.substr(vSpacePos + 1);
-			CGenericItemMgr::mItemAlias[vsSrcName] = vsDestName;
+			std::string vsLine = &cString[6];
+			int vSpacePos = vsLine.find(" ", 0);
+			if (vSpacePos != std::string::npos)
+			{
+				std::string vsSrcName = vsLine.substr(0, vSpacePos);
+				std::string vsDestName = vsLine.substr(vSpacePos + 1);
+				CGenericItemMgr::mItemAlias[vsSrcName] = vsDestName;
+			}
 			continue;
 		}
 

@@ -202,7 +202,7 @@ static msgpack::object_array PackArray(const msgpack::object &Obj)
 	if (Obj.type == msgpack::type::ARRAY)
 		return Obj.via.array;
 
-	msgpack::object_array Empty;
+	msgpack::object_array Empty{};
 	Empty.size = 0;
 	Empty.ptr = NULL;
 	return Empty;
@@ -213,7 +213,7 @@ static msgpack::object_map PackMap(const msgpack::object &Obj)
 	if (Obj.type == msgpack::type::MAP)
 		return Obj.via.map;
 
-	msgpack::object_map Empty;
+	msgpack::object_map Empty{};
 	Empty.size = 0;
 	Empty.ptr = NULL;
 	return Empty;
@@ -236,9 +236,9 @@ static void InitUnsavedStats(statlist &Stats, int SavedStats)
 
 static void ApplyItemAlias(msstring &ItemName)
 {
-	msstringstringhash::iterator iAlias = CGenericItemMgr::mItemAlias.find(ItemName);
+	auto iAlias = CGenericItemMgr::mItemAlias.find(ItemName.c_str());
 	if (iAlias != CGenericItemMgr::mItemAlias.end())
-		ItemName = iAlias->second;
+		ItemName = msstring(iAlias->second.c_str());
 }
 
 //
@@ -430,7 +430,9 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 					//Reads empty data first so skip that
 					if (!Name.len())
 						continue;
-
+					
+					// We restrict item script names to 64 characters, to save on memory (until msscript is gone).
+					// This can be changed later if we end up with script names longer than that.
 					if (Name.len() >= STORAGE_NAME_SIZE || !Item.Quantity)
 					{
 						MS_ERROR("ReadCharData: Bad storage item, skipping...(%s)", Name);
