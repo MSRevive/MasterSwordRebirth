@@ -5080,7 +5080,8 @@ void CScript::CallLogged(const char* title, std::clock_t start)
 	return params;
 }
 
-bool CScript::ParseScriptFile(const char* pszScriptData)
+//Parses in place: each line is terminated by writing a null into pszScriptData
+bool CScript::ParseScriptFile(char* pszScriptData)
 {
 	if (!m.ScriptFile.len() || !pszScriptData)
 		return false;
@@ -5094,67 +5095,37 @@ bool CScript::ParseScriptFile(const char* pszScriptData)
 	std::vector<scriptcmd_list*> ParentCmds;
 
 	size_t lineNum = 1;
-	std::string sData(pszScriptData);
-	std::istringstream ss(sData);
-
-	std::string line;
-	while (getline(ss, line))
+	char* p = pszScriptData;
+	while (*p)
 	{
-		line.erase(0, line.find_first_not_of(" \t\v"));
+		while (*p == ' ' || *p == '\t' || *p == '\v')
+			p++;
 
-		std::string result = "";
-		int lineSize = line.length();
-		for (int i = 0; i < lineSize; i++)
+		char* start = p;
+		char* end = NULL;
+		while (*p && *p != '\n')
 		{
-			const char ch = line[i];
-			const char nextch = line[i + 1]; //get next ch.
-
-			//remove comments.
-			if (ch == '/' && nextch == '/')
-				break;
-
-			//just remove return carriages here instead of doing erase.
-			if (ch == '\r')
-				break;
-
-			result += ch;
+			if (!end && (*p == '\r' || (*p == '/' && p[1] == '/')))
+				end = p;
+			p++;
 		}
 
-		if (result.find_first_not_of(" \r\t") != std::string::npos)
-		{
-			//remove extra spaces
-			//credit to https://stackoverflow.com/questions/35301432/remove-extra-white-spaces-in-c
-			// result.erase(std::unique(std::begin(result), std::end(result), [](unsigned char a, unsigned char b){
-			// 	return isSpace(a) && isSpace(b);
-			// }), std::end(result));
+		if (!end)
+			end = p;
 
-			//we use the new parse line function that isn't really new.
-			//NewParseLine(result, lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
-			ParseLine(result.c_str(), lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
-			//Log("Line: %s", result.c_str());
-		}
+		const bool lastLine = !*p;
+		*end = 0;
 
+		if (end != start)
+			ParseLine(start, lineNum, &CurrentEvent, &CurrentCmds, ParentCmds);
+
+		if (lastLine)
+			break;
+
+		p++;
 		lineNum++;
 	}
 
-	//  Uncomment to print out all this function gathered from the script file
-	//#ifndef VALVE_DLL
-		/*SCRIPT_EVENT *pEvent = seFirstEvent;
-		CHAR *pszPtr;
-		ALERT( at_console, "\nScript: %s\n", pScriptedEnt->pev?STRING(pScriptedEnt->pev->classname):"new script" );
-		while( pEvent ) {
-			pszPtr = pEvent->Action;
-			if( pEvent->Name ) ALERT( at_console, "Event: %s\n", STRING(pEvent->Name) );
-			else ALERT( at_console, "Event: Unnamed\n" );
-			for( unsigned int i = 0; i < strlen(pszPtr); i++ ) {
-				if( pszPtr[i] == '\r' ) ALERT( at_console, "R" );
-				else if( pszPtr[i] == '\n' ) ALERT( at_console, "N" );
-				else ALERT( at_console, "%c", pszPtr[i] );
-			}
-			ALERT( at_console, "\n" );
-			pEvent = pEvent->NextEvent;
-		}*/
-		//#endif
 	return true;
 }
 
@@ -5324,7 +5295,7 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 			ParentCmds.pop_back();
 		}
 	}
-	else if (!_stricmp(msstring(TestCommand).substr(0, 2), "if"))
+	else if (!_strnicmp(TestCommand, "if", 2))
 	{
 		if (!strstr(TestCommand, "(") && *CmdLineTmp != '(')
 			KeepCmd = true;
@@ -5630,7 +5601,6 @@ int CScript::ParseLine(const char* pszCommandLine, int LineNum, SCRIPT_EVENT** p
 		goto DontKeepCommand;
 
 	{
-		scriptcmdname_t Command(TestCommand);
 		msfunchash_t::iterator iFunc = m_GlobalCmdHash.find(msstring(TestCommand));
 		bool fFoundCmd = iFunc != m_GlobalCmdHash.end();
 

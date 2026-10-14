@@ -90,7 +90,7 @@ public:
 	void RunScriptEvents( bool fOnlyRunNamedEvents = false );	//Runs all events
 	void RunScriptEventByName(const char* pszEventName, msstringlist *Parameters = NULL );	//Run one named event
 	void CallLogged(const char* title, std::clock_t start);
-	bool ParseScriptFile( const char *pszScriptData );
+	bool ParseScriptFile( char *pszScriptData );
 	LegacyScriptEvent *EventByName( const char *pszEventName );
 	const char* GetConst(const char* pszText );
 	scriptvar_t *FindVar( const char *pszName );
