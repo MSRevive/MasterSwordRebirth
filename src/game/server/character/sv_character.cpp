@@ -437,6 +437,7 @@ bool chardata_t::ReadDataPack(const char *pData, size_t Size)
 						continue;
 					}
 
+					ApplyItemAlias(Name);
 					Item.Name = Name;
 					Item.ID = m_Storage.size(); //IDs aren't saved. They only have to be unique
 					m_Storage.push_back(Item);
