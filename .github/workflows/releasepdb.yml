@@ -1,0 +1,68 @@
+name: Compile Release PDB
+
+on:
+  workflow_dispatch:
+
+env:
+  BUILD_TYPE: ReleaseDB
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2022]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: 3.28.3
+      
+      - name: Get Linux Packages
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo apt update
+          sudo apt install -y libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config gcc-multilib g++-multilib
+
+      - name: Build on Linux
+        if: startsWith(matrix.os, 'ubuntu')
+        run: ${{github.workspace}}/build-linux.sh -p ${{github.workspace}} -t ${{env.BUILD_TYPE}}
+
+      - name: Setup 32-bit MSVC Environment
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Build on Windows
+        if: startsWith(matrix.os, 'windows')
+        run: |
+          cmake -S . -B ${{github.workspace}}/build -G "Visual Studio 17 2022" -A Win32
+          cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel
+
+      - name: Upload Linux artifact
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-x86
+          path: |
+            ${{github.workspace}}/build/src/game/client/client.so
+            ${{github.workspace}}/build/src/game/server/ms.so
+
+      - name: Upload Windows artifact
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-artifact@v4
+        with:
+          name: win32
+          path: |
+            ${{github.workspace}}/bins/release/*.dll
+            ${{github.workspace}}/bins/release/*.pdb
+            ${{github.workspace}}/build/src/game/tools/scriptpack/Release/scriptpack.exe
