@@ -50,15 +50,48 @@ public:
 		const char* Width;
 	};
 
+	int GetPrefMaxLines( ) const
+	{
+		return V_max(1, V_min((int)EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES));
+	}
+
 	int LogicalToPhysical( int logical ) const
 	{
-		int MaxLines = V_min((int)EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
-		return (m_Head + logical) % MaxLines;
+		return (m_Head + logical) % m_Capacity;
 	}
 
 	EventConsoleText* GetLine( int logical ) const
 	{
 		return m_Line[ LogicalToPhysical(logical) ];
+	}
+
+	// Re-linearize the ring buffer when the history cvar changes, keeping the newest lines
+	void SetCapacity( int NewCap )
+	{
+		EventConsoleText *Ordered[EVENTCON_MAXLINES];
+		for (int i = 0; i < m_Capacity; i++)
+			Ordered[i] = GetLine(i);
+		for (int i = m_Capacity; i < EVENTCON_MAXLINES; i++)
+			Ordered[i] = m_Line[i];
+
+		int Kept = V_min(m_TotalLines, NewCap);
+		int Dropped = m_TotalLines - Kept;
+		int n = 0;
+		for (int i = Dropped; i < m_TotalLines; i++)
+			m_Line[n++] = Ordered[i];
+		for (int i = 0; i < Dropped; i++)
+			m_Line[n++] = Ordered[i];
+		for (int i = m_TotalLines; i < EVENTCON_MAXLINES; i++)
+			m_Line[n++] = Ordered[i];
+
+		for (int i = Kept; i < EVENTCON_MAXLINES; i++)
+			m_Line[i]->setParent( NULL );
+
+		m_Head = 0;
+		m_Capacity = NewCap;
+		m_TotalLines = Kept;
+		m_VisibleLines = V_min(m_VisibleLines, Kept);
+		m_ActiveLine = V_max(V_min(m_ActiveLine - Dropped, Kept - 1), V_max(m_VisibleLines - 1, 0));
 	}
 
 	VGUI_EventConsole( Panel *pParent, int x, int y, int w, int h, prefs_t &Prefs, bool DynamicWidth = false, Font *TextFont = NULL ) : Panel( x, y, w, h )
@@ -77,6 +110,7 @@ public:
 		m_BGTrans = gEngfuncs.pfnGetCvarPointer( Prefs.BGTrans );
 		m_Width = Prefs.Width ? gEngfuncs.pfnGetCvarPointer( Prefs.Width ) : NULL;
 		m_DynamicWidth = DynamicWidth;
+		m_Capacity = GetPrefMaxLines();
 
 		setSize( GetWidth(), EVENTCON_LINE_SIZE_Y * m_VisibleLines );
 
@@ -89,7 +123,7 @@ public:
 		m_ScrollBarWidth = m_ScrollPanel->getVerticalScrollBar()->getWide();
 		int ScrollClientWidth = m_ScrollPanel->getWide() - m_ScrollBarWidth;
 
-		for (int i = 0; i < EVENTCON_PREF_MAXLINES; i++) 
+		for (int i = 0; i < EVENTCON_MAXLINES; i++)
 		{
 			m_Line[i] = new EventConsoleText( 0, 0, ScrollClientWidth, EVENTCON_LINE_SIZE_Y, NULL );
 			if( TextFont ) 
@@ -109,11 +143,13 @@ public:
 		if (!Text || !Text[0])
 			return;
 
-		int MaxLines = V_min(EVENTCON_PREF_MAXLINES, EVENTCON_MAXLINES);
+		int PrefMaxLines = GetPrefMaxLines();
+		if( PrefMaxLines != m_Capacity )
+			SetCapacity( PrefMaxLines );
 
-		if( m_TotalLines >= MaxLines )
+		if( m_TotalLines >= m_Capacity )
 		{
-			m_Head = (m_Head + 1) % MaxLines;
+			m_Head = (m_Head + 1) % m_Capacity;
 		}
 		else
 		{
@@ -132,9 +168,12 @@ public:
 		for( int i = 0; i < m_TotalLines; i++ )
 		{
 			EventConsoleText *line = GetLine(i);
-			line->setParent( m_ScrollPanel->getClient() );
-			line->setPos( 0, EVENTCON_LINE_SIZE_Y * i );
-			line->setSize( line->getWide(), EVENTCON_LINE_SIZE_Y );
+			if (line != nullptr)
+			{
+				line->setParent( m_ScrollPanel->getClient() );
+				line->setPos( 0, EVENTCON_LINE_SIZE_Y * i );
+				line->setSize( line->getWide(), EVENTCON_LINE_SIZE_Y );
+			}
 		}
 
 		EventConsoleText &NewLine = *GetLine(iNewLine);
@@ -147,7 +186,7 @@ public:
 		
 		const char* ThisLineText = Text;
 		msstring NextLineText;
-		char ctemp[512] = "";
+		char ctemp[256] = "";
 
 		int w, h;
 		int MaxWidth = NewLine.getWide();
@@ -337,6 +376,7 @@ public:
 	CTFScrollPanel *m_ScrollPanel;
 	EventConsoleText *m_Line[EVENTCON_MAXLINES];
 	int m_Head;	// index of the oldest (logical 0) line
+	int m_Capacity;	// ring buffer size, from the history cvar
 	int m_VisibleLines,
 		m_TotalLines,
 		m_ActiveLine,
