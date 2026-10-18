@@ -515,7 +515,7 @@ if(INSTALL_DIR)
 	# Copy the PDB for configurations that generate one
 	if(MSVC)
 		add_custom_command(TARGET client POST_BUILD
-			COMMAND "$<$<CONFIG:Debug,ReleaseD>:${CMAKE_COMMAND};-E;copy;$<TARGET_PDB_FILE:client>;${INSTALL_DIR}/cl_dlls/>"
+			COMMAND "$<$<CONFIG:Debug,ReleaseDB>:${CMAKE_COMMAND};-E;copy;$<TARGET_PDB_FILE:client>;${INSTALL_DIR}/cl_dlls/>"
 			COMMAND_EXPAND_LISTS)
 	endif()
 endif()
