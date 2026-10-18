@@ -2406,6 +2406,7 @@ spawnspot_e GetRandomSpawnSpot(const char* Name, const char* TransitionName, CBa
 	*pFoundSpot = pSpot;
 	return SS_FOUND; //Spot found
 }
+
 //Thothie NOV2014_09 - IsActive() - centralizing AFK checking
 bool CBasePlayer::IsActive()
 {
@@ -2545,7 +2546,7 @@ CBaseEntity *CBasePlayer::FindSpawnSpot()
 		if (fKickPlayer)
 		{
 			msstring PlayerName = DisplayName();
-			ALERT(at_logged, "Kicking %s:  %s's char is on map: %s Trans: %s\n", PlayerName.c_str(), PlayerName.c_str(), m_cEnterMap, TransitionText.c_str());
+			ALERT(at_logged, "Kicking %s: %s's char is on map: %s Trans: %s\n", PlayerName.c_str(), PlayerName.c_str(), m_cEnterMap, TransitionText.c_str());
 			char cKickString[256];
 			_snprintf(cKickString, sizeof(cKickString),
 				"Disconnected.\n*** Your character is not on this map. ***\n*** Your character is on the map: %s ***\n", m_cEnterMap);
