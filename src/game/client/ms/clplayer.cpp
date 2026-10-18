@@ -201,22 +201,6 @@ void CBasePlayer::DoSprint()
 	if (pev->deadflag != DEAD_NO)
 		return;
 
-	//serial duckers aren't allowed to sprint
-	if (FBitSet(player.pev->flags, FL_DUCKING))
-		return;
-
-	//NORUN flagged
-	if (FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN))
-		return;
-
-	//can't sprint while attacking
-	if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING))
-		return;
-
-	//can't sprint if you're sitting.
-	if (FBitSet(m_StatusFlags, PLAYER_MOVE_SITTING))
-		return;
-
 	//sprint cooldown.
 	// if (!FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING) && (m_SprintDelay > gpGlobals->time)) 
 	// {
@@ -233,7 +217,13 @@ void CBasePlayer::DoSprint()
 	//grab cvar to turn off or on spring log message levels
 	float flSprintText = CVAR_GET_FLOAT("ms_sprint_verbose");
 
-	if (FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
+	//can't start sprinting while ducking, attacking, sitting or NORUN flagged
+	bool bCanStartSprint = !FBitSet(player.pev->flags, FL_DUCKING) &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN) &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) &&
+		!FBitSet(m_StatusFlags, PLAYER_MOVE_SITTING);
+
+	if (bCanStartSprint && FBitSet(pbs.ButtonsDown, IN_FORWARD) && !FBitSet(m_StatusFlags, PLAYER_MOVE_RUNNING))
 	{
 		if (FBitSet(pbs.ButtonsDown, IN_RUN))
 		{
@@ -279,6 +269,7 @@ void CBasePlayer::DoSprint()
 		//sprint interrupted
 		if (FBitSet(m_StatusFlags, PLAYER_MOVE_ATTACKING) ||
 			FBitSet(m_StatusFlags, PLAYER_MOVE_NORUN) ||
+			FBitSet(m_StatusFlags, PLAYER_MOVE_SITTING) ||
 			FBitSet(player.pev->flags, FL_DUCKING) ||
 			(player.pev->velocity.Length2D() < fLastSpeed - 50))
 		{
