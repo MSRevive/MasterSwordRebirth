@@ -163,7 +163,10 @@ void MSLogger::Initialize(const char* gameDir, bool isServer) {
 #else
         spdlog::set_level(spdlog::level::info);
 #endif
-        
+
+        // Flush from a background thread so logs survive a main-thread hang.
+        spdlog::flush_every(std::chrono::seconds(1));
+
     } catch (const std::exception& ex) {
         printf("MSLogger initialization failed: %s\n", ex.what());
         // Fall back to console logging
