@@ -100,6 +100,8 @@ void HTTPRequest::SetupRequest()
 	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYPEER, 0L);
 	curl_easy_setopt(m_Handle, CURLOPT_SSL_VERIFYHOST, 0L);
 	curl_easy_setopt(m_Handle, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(m_Handle, CURLOPT_CONNECTTIMEOUT_MS, REQUEST_CONNECT_TIMEOUT_MS);
+	curl_easy_setopt(m_Handle, CURLOPT_TIMEOUT_MS, REQUEST_TIMEOUT_MS);
 	curl_easy_setopt(m_Handle, CURLOPT_USERAGENT, "MSR Game Server");
 
 	if (m_pShareHandle)

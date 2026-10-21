@@ -312,7 +312,7 @@ void MSWorldSpawn()
 		
 		// here we try to connect to FN and retry 5 times if it fails.
 		bool fail = true;
-		for (int retry = 0; retry < 5; retry++)
+		for (int retry = 0; retry < 3; retry++)
 		{
 			if (FNShared::ValidateFN())
 			{

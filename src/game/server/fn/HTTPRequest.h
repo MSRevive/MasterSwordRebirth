@@ -14,6 +14,8 @@
 #include <Platform.h>
 
 #define REQUEST_URL_SIZE 512
+#define REQUEST_CONNECT_TIMEOUT_MS 5000L
+#define REQUEST_TIMEOUT_MS 10000L
 #define HTTP_CONTENT_TYPE "application/json"
 #define ID64 unsigned long long
 
