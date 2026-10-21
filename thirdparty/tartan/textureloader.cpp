@@ -5,8 +5,8 @@
 // or FITNESS FOR A PARTICULAR PURPOSE.
 //
 
-#include "stream_safe.h"
 #include <string.h>
+#include <iostream>
 
 #include "texturestruct.h"
 #include "tgaloader.h"

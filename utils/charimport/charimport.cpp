@@ -5,7 +5,6 @@
 
 #include "windows.h"
 #include "stdio.h"
-#include "stream_safe.h"
 #include <conio.h>
 #include "groupfile.h"
 #include "msfileio.h"
