@@ -270,8 +270,8 @@ class CBaseIntHandle
 {
 public:
 	
-	inline bool			operator==( const CBaseIntHandle &other )	{ return m_Handle == other.m_Handle; }
-	inline bool			operator!=( const CBaseIntHandle &other )	{ return m_Handle != other.m_Handle; }
+	inline bool			operator==( const CBaseIntHandle &other ) const	{ return m_Handle == other.m_Handle; }
+	inline bool			operator!=( const CBaseIntHandle &other ) const	{ return m_Handle != other.m_Handle; }
 
 	// Only the code that doles out these handles should use these functions.
 	// Everyone else should treat them as a transparent type.

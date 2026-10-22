@@ -433,7 +433,7 @@ private:
 		if ( threadId != m_ownerID && ThreadInterlockedCompareExchange( (volatile long *)&m_ownerID, (long)threadId, 0 ) != 0 )
 			return false;
 
-		m_depth++;
+		m_depth = m_depth + 1;
 		return true;
 	}
 
@@ -484,7 +484,7 @@ public:
 		if ( m_ownerID != ThreadGetCurrentId() )
 			DebuggerBreak();
 #endif
-		m_depth--;
+		m_depth = m_depth - 1;
 		if ( !m_depth )
 			m_ownerID = 0;
 	}
