@@ -241,7 +241,6 @@ void HTTPRequest::OnMultiComplete(CURLcode result)
 {
 	if (result == CURLE_OK)
 	{
-		// FIX: same `long` vs `int` issue as above.
 		long lHttpCode = 0;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
 		ResponseCallback(static_cast<int>(lHttpCode));
@@ -291,7 +290,7 @@ CURLcode HTTPRequest::PerformWithRetry()
 	for (int attempt = 1; (result == CURLE_OPERATION_TIMEDOUT) && (attempt <= REQUEST_MAX_RETRIES); attempt++)
 	{
 		m_sResponseBody.clear();
-		FNShared::Print("Request timed out, retrying (%d/%d). %s", attempt, REQUEST_MAX_RETRIES, GetName());
+		FNShared::Error("Request timed out, retrying (%d/%d). %s", attempt, REQUEST_MAX_RETRIES, GetName());
 		result = curl_easy_perform(m_Handle);
 	}
 
@@ -319,7 +318,7 @@ void HTTPRequest::ResponseCallback(int httpCode, CURLcode curlResult)
 
 	if (httpCode == 0)
 	{
-		FNShared::Print("Request Failed. %s, '%s' CURL error %d: %s", GetName(), g_szBaseUrl, static_cast<int>(curlResult), curl_easy_strerror(curlResult));
+		FNShared::Error("Request Failed. %s, '%s' CURL error %d: %s", GetName(), g_szBaseUrl, static_cast<int>(curlResult), curl_easy_strerror(curlResult));
 
 		OnResponse(0);
 		m_iRequestState = RequestState::FINISHED;
@@ -330,13 +329,13 @@ void HTTPRequest::ResponseCallback(int httpCode, CURLcode curlResult)
 	{
 		if (httpCode == 401)
 		{
-			FNShared::Print("FN Authorization failed! %s", GetName());
+			FNShared::Error("FN Authorization failed! %s", GetName());
 			OnResponse(httpCode);
 			m_iRequestState = RequestState::FINISHED;
 			return;
 		}
 
-		FNShared::Print("FN Server Error. %s Code: %d", GetName(), httpCode);
+		FNShared::Error("FN Server Error. %s Code: %d", GetName(), httpCode);
 		OnResponse(httpCode);
 		m_iRequestState = RequestState::FINISHED;
 		return;
@@ -351,7 +350,7 @@ void HTTPRequest::ResponseCallback(int httpCode, CURLcode curlResult)
 
 	if (m_sResponseBody.empty())
 	{
-		FNShared::Print("The data hasn't been received. HTTP code: %d", httpCode);
+		FNShared::Error("The data hasn't been received. HTTP code: %d", httpCode);
 		OnResponse(httpCode);
 		m_iRequestState = RequestState::FINISHED;
 		return;

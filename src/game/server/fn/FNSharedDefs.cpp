@@ -38,6 +38,18 @@ void FNShared::Print(const char* fmt, ...)
 	MS_INFO("[FuzzNet] %s", string);
 }
 
+void FNShared::Error(const char* fmt, ...)
+{
+	static char string[STRING_BUFFER];
+
+	va_list argptr;
+	va_start(argptr, fmt);
+	vsnprintf(string, sizeof(string), fmt, argptr);
+	va_end(argptr);
+
+	MS_ERROR("[FuzzNet] %s", string);
+}
+
 bool FNShared::IsSlotValid(int slot)
 {
 	return ((slot >= 0) && (slot < MAX_CHARSLOTS));
