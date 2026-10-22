@@ -15,7 +15,8 @@
 
 #define REQUEST_URL_SIZE 512
 #define REQUEST_CONNECT_TIMEOUT_MS 5000L
-#define REQUEST_TIMEOUT_MS 10000L
+#define REQUEST_TIMEOUT_MS 5000L
+#define REQUEST_MAX_RETRIES 2
 #define HTTP_CONTENT_TYPE "application/json"
 #define ID64 unsigned long long
 
@@ -79,6 +80,7 @@ private:
 
 	void SetupRequest();
 	bool PerformRequest();
+	CURLcode PerformWithRetry();
 
 	HTTPMethod m_eHTTPMethod;
 	CURL* m_Handle;

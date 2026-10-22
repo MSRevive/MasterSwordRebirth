@@ -156,12 +156,11 @@ bool HTTPRequest::SendRequest()
 
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
-	CURLcode curlResult = curl_easy_perform(m_Handle);
+	CURLcode curlResult = PerformWithRetry();
 
 	bool result = false;
 	if (curlResult == CURLE_OK)
 	{
-		// FIX: CURLINFO_RESPONSE_CODE writes a `long`, not an `int`.
 		long lHttpCode = 0;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
 		ResponseCallback(static_cast<int>(lHttpCode));
@@ -278,10 +277,24 @@ bool HTTPRequest::PerformRequest()
 
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
-	CURLcode result = curl_easy_perform(m_Handle);
+	CURLcode result = PerformWithRetry();
 	m_iRequestState = RequestState::EXECUTED;
 
 	return (result == CURLE_OK);
+}
+
+CURLcode HTTPRequest::PerformWithRetry()
+{
+	CURLcode result = curl_easy_perform(m_Handle);
+
+	for (int attempt = 1; (result == CURLE_OPERATION_TIMEDOUT) && (attempt <= REQUEST_MAX_RETRIES); attempt++)
+	{
+		m_sResponseBody.clear();
+		FNShared::Print("Request timed out, retrying (%d/%d). %s", attempt, REQUEST_MAX_RETRIES, GetName());
+		result = curl_easy_perform(m_Handle);
+	}
+
+	return result;
 }
 
 size_t HTTPRequest::WriteCallbackDispatcher(void* buf, size_t sz, size_t n, void* curlGet)
