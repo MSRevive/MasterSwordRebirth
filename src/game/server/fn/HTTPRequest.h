@@ -75,11 +75,11 @@ private:
 	static size_t WriteCallbackDispatcher(void* buf, size_t sz, size_t n, void* curlGet);
 	size_t WriteCallback(void* ptr, size_t size, size_t nmemb);
 
-	void ResponseCallback(int httpCode);
+	void ResponseCallback(int httpCode, CURLcode curlResult = CURLE_OK);
 	void Cleanup();
 
 	void SetupRequest();
-	bool PerformRequest();
+	CURLcode PerformRequest();
 	CURLcode PerformWithRetry();
 
 	HTTPMethod m_eHTTPMethod;

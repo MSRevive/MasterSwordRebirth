@@ -168,7 +168,7 @@ bool HTTPRequest::SendRequest()
 	}
 	else
 	{
-		ResponseCallback(0);
+		ResponseCallback(0, curlResult);
 		result = false;
 	}
 
@@ -190,10 +190,11 @@ bool HTTPRequest::AsyncSendRequest()
 
 	SetupRequest();
 
-	std::future<bool> future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
+	std::future<CURLcode> future = std::async(std::launch::async, &HTTPRequest::PerformRequest, this);
+	CURLcode curlResult = future.get();
 
 	bool result = false;
-	if (future.get() == true)
+	if (curlResult == CURLE_OK)
 	{
 		long lHttpCode = 0;
 		curl_easy_getinfo(m_Handle, CURLINFO_RESPONSE_CODE, &lHttpCode);
@@ -202,7 +203,7 @@ bool HTTPRequest::AsyncSendRequest()
 	}
 	else
 	{
-		ResponseCallback(0);
+		ResponseCallback(0, curlResult);
 		result = false;
 	}
 
@@ -247,7 +248,7 @@ void HTTPRequest::OnMultiComplete(CURLcode result)
 	}
 	else
 	{
-		ResponseCallback(0);
+		ResponseCallback(0, result);
 	}
 
 	curl_easy_cleanup(m_Handle);
@@ -270,17 +271,17 @@ void HTTPRequest::AbortTransfer(CURLM* pMulti)
 	m_iRequestState = RequestState::FINISHED;
 }
 
-bool HTTPRequest::PerformRequest()
+CURLcode HTTPRequest::PerformRequest()
 {
 	if (!m_Handle)
-		return false;
+		return CURLE_FAILED_INIT;
 
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEFUNCTION, HTTPRequest::WriteCallbackDispatcher);
 	curl_easy_setopt(m_Handle, CURLOPT_WRITEDATA, this);
 	CURLcode result = PerformWithRetry();
 	m_iRequestState = RequestState::EXECUTED;
 
-	return (result == CURLE_OK);
+	return result;
 }
 
 CURLcode HTTPRequest::PerformWithRetry()
@@ -308,7 +309,7 @@ size_t HTTPRequest::WriteCallback(void* ptr, size_t size, size_t nmemb)
 	return size * nmemb;
 }
 
-void HTTPRequest::ResponseCallback(int httpCode)
+void HTTPRequest::ResponseCallback(int httpCode, CURLcode curlResult)
 {
 	if (m_bNoCallback)
 	{
@@ -318,7 +319,7 @@ void HTTPRequest::ResponseCallback(int httpCode)
 
 	if (httpCode == 0)
 	{
-		FNShared::Print("Request Failed. %s, '%s'", GetName(), g_szBaseUrl);
+		FNShared::Print("Request Failed. %s, '%s' CURL error %d: %s", GetName(), g_szBaseUrl, static_cast<int>(curlResult), curl_easy_strerror(curlResult));
 
 		OnResponse(0);
 		m_iRequestState = RequestState::FINISHED;
