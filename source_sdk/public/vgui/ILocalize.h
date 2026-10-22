@@ -13,8 +13,8 @@
 #endif
 
 #include <vgui/VGUI2.h>
-#include "interface.h"
-#include <KeyValues.h>
+#include "tier1/interface.h"
+#include <tier1/KeyValues.h>
 
 // unicode character type
 // for more unicode manipulation functions #include <wchar.h>

@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <strtools.h>
+#include <tier1/strtools.h>
 
 //
 // Max size (in bytes of UTF-8 data, not in characters) of server fields, including null terminator.

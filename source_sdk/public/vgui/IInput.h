@@ -13,7 +13,7 @@
 #endif
 
 #include <vgui/VGUI2.h>
-#include "interface.h"
+#include "tier1/interface.h"
 
 #include <vgui/MouseCode.h>
 #include <vgui/KeyCode.h>

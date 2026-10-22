@@ -19,7 +19,7 @@
 #if !defined( _X360 )
 #include <xmmintrin.h>	// For SSE
 #endif
-#include "basetypes.h"	// For vec_t, put this somewhere else?
+#include "tier0/basetypes.h"	// For vec_t, put this somewhere else?
 #include "tier0/dbg.h"
 #include "mathlib/math_pfns.h"
 

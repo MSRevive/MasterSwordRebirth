@@ -14,7 +14,7 @@
 
 #include <vgui/VGUI2.h>
 #include <vgui_controls/Controls.h>
-#include <utlvector.h>
+#include <tier1/utlvector.h>
 
 namespace vgui2
 {

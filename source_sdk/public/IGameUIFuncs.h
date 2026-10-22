@@ -1,7 +1,7 @@
 #ifndef ENGINE_IGAMEUIFUNCS_H
 #define ENGINE_IGAMEUIFUNCS_H
 
-#include "interface.h"
+#include "tier1/interface.h"
 
 #include "vgui/IInput.h"
 

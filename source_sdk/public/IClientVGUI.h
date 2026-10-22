@@ -1,7 +1,7 @@
 #ifndef ENGINE_ICLIENTVGUI_H
 #define ENGINE_ICLIENTVGUI_H
 
-#include "interface.h"
+#include "tier1/interface.h"
 
 #include <vgui/VGUI2.h>
 

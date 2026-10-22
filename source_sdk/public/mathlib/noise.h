@@ -8,7 +8,7 @@
 #define NOISE_H
 
 #include <math.h>
-#include "basetypes.h"
+#include "tier0/basetypes.h"
 #include "mathlib/vector.h"
 #include "tier0/dbg.h"
 

@@ -1,6 +1,6 @@
 #ifndef IGAMEUI_GS_H
 #define IGAMEUI_GS_H
-#include <interface.h>
+#include <tier1/interface.h>
 
 struct cl_enginefunc_t;
 
