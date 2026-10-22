@@ -37,8 +37,8 @@ public:
 	vec_t x, y;
 
 	// Construction/destruction
-	Vector2D(void);
-	Vector2D(vec_t X, vec_t Y);
+	constexpr Vector2D(void) : x(0.0f), y(0.0f) {}
+	constexpr Vector2D(vec_t X, vec_t Y) : x(X), y(Y) {}
 	Vector2D(const float *pFloat);
 
 	// Initialization
@@ -89,6 +89,16 @@ public:
 	// Normalize in place and return the old length.
 	vec_t	NormalizeInPlace();
 
+	// Half-Life compatibility
+	Vector2D Normalize() const
+	{
+		vec_t flLen = Length();
+		if (flLen == 0)
+			return Vector2D(0, 0);
+		flLen = 1 / flLen;
+		return Vector2D(x * flLen, y * flLen);
+	}
+
 	// Compare length.
 	bool	IsLengthGreaterThan( float val ) const;
 	bool	IsLengthLessThan( float val ) const;
@@ -110,13 +120,7 @@ public:
 	// Dot product.
 	vec_t	Dot(const Vector2D& vOther) const;			
 
-	// assignment
-	Vector2D& operator=(const Vector2D &vOther);
-
 #ifndef VECTOR_NO_SLOW_OPERATIONS
-	// copy constructors
-	Vector2D(const Vector2D &vOther);
-
 	// arithmetic operations
 	Vector2D	operator-(void) const;
 				
@@ -196,20 +200,6 @@ void Vector2DLerp(const Vector2D& src1, const Vector2D& src2, vec_t t, Vector2D&
 // constructors
 //-----------------------------------------------------------------------------
 
-inline Vector2D::Vector2D(void)									
-{ 
-#ifdef _DEBUG
-	// Initialize to NAN to catch errors
-	x = y = VEC_T_NAN;
-#endif
-}
-
-inline Vector2D::Vector2D(vec_t X, vec_t Y)						
-{ 
-	x = X; y = Y;
-	MathlibAssert( IsValid() );
-}
-
 inline Vector2D::Vector2D(const float *pFloat)					
 {
 	MathlibAssert( pFloat );
@@ -217,16 +207,6 @@ inline Vector2D::Vector2D(const float *pFloat)
 	MathlibAssert( IsValid() );
 }
 
-
-//-----------------------------------------------------------------------------
-// copy constructor
-//-----------------------------------------------------------------------------
-
-inline Vector2D::Vector2D(const Vector2D &vOther)					
-{ 
-	MathlibAssert( vOther.IsValid() );
-	x = vOther.x; y = vOther.y;
-}
 
 //-----------------------------------------------------------------------------
 // initialization
@@ -247,17 +227,6 @@ inline void Vector2D::Random( float minVal, float maxVal )
 inline void Vector2DClear( Vector2D& a )
 {
 	a.x = a.y = 0.0f;
-}
-
-//-----------------------------------------------------------------------------
-// assignment
-//-----------------------------------------------------------------------------
-
-inline Vector2D& Vector2D::operator=(const Vector2D &vOther)	
-{
-	MathlibAssert( vOther.IsValid() );
-	x=vOther.x; y=vOther.y;
-	return *this; 
 }
 
 //-----------------------------------------------------------------------------
@@ -466,7 +435,13 @@ inline void Vector2DLerp(const Vector2D& src1, const Vector2D& src2, vec_t t, Ve
 inline vec_t DotProduct2D(const Vector2D& a, const Vector2D& b) 
 { 
 	MathlibAssert( a.IsValid() && b.IsValid() );
-	return( a.x*b.x + a.y*b.y ); 
+	return( a.x*b.x + a.y*b.y );
+}
+
+// Half-Life compatibility
+inline vec_t DotProduct(const Vector2D& a, const Vector2D& b)
+{
+	return DotProduct2D(a, b);
 }
 
 // for backwards compatability

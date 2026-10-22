@@ -57,8 +57,6 @@
 #endif
 #endif
 
-#define VecToString(v)	(static_cast<const char *>(CFmtStr("(%f, %f, %f)", (v).x, (v).y, (v).z))) // ** Note: this generates a temporary, don't hold reference!
-
 class VectorByValue;
 
 //=========================================================
@@ -71,8 +69,8 @@ public:
 	vec_t x, y, z;
 
 	// Construction/destruction:
-	Vector(void); 
-	Vector(vec_t X, vec_t Y, vec_t Z);
+	constexpr Vector(void) : x(0.0f), y(0.0f), z(0.0f) {}
+	constexpr Vector(vec_t X, vec_t Y, vec_t Z) : x(X), y(Y), z(Z) {}
 	explicit Vector(vec_t XYZ); ///< broadcast initialize
 
 #ifdef MATHLIB_VECTOR_NONTRIVIAL
@@ -86,12 +84,7 @@ public:
 	}
 #endif
 
-	inline Vector(float rgfl[3])
-	{
-		x = rgfl[0];
-		y = rgfl[1];
-		z = rgfl[2];
-	}
+	constexpr Vector(const float rgfl[3]) : x(rgfl[0]), y(rgfl[1]), z(rgfl[2]) {}
 
 	// Initialization
 	void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f);
@@ -192,12 +185,20 @@ public:
 	// Dot product.
 	vec_t	Dot(const Vector& vOther) const;			
 
-	// assignment
-	Vector& operator=(const Vector &vOther);
-
 	// 2d
-	vec_t	Length2D(void) const;					
-	vec_t	Length2DSqr(void) const;					
+	vec_t	Length2D(void) const;
+	vec_t	Length2DSqr(void) const;
+
+	// Half-Life compatibility
+	Vector Normalize() const
+	{
+		vec_t flLen = Length();
+		if (flLen == 0)
+			return Vector(0, 0, 1);
+		flLen = 1 / flLen;
+		return Vector(x * flLen, y * flLen, z * flLen);
+	}
+	Vector2D Make2D() const { return Vector2D(x, y); }
 
 	operator VectorByValue &()				{ return *((VectorByValue *)(this)); }
 	operator const VectorByValue &() const	{ return *((const VectorByValue *)(this)); }
@@ -527,22 +528,6 @@ float RandomVectorInUnitCircle( Vector2D *pVector );
 //-----------------------------------------------------------------------------
 // constructors
 //-----------------------------------------------------------------------------
-inline Vector::Vector(void)									
-{ 
-#ifdef _DEBUG
-#ifdef VECTOR_PARANOIA
-	// Initialize to NAN to catch errors
-	x = y = z = VEC_T_NAN;
-#endif
-#endif
-}
-
-inline Vector::Vector(vec_t X, vec_t Y, vec_t Z)						
-{ 
-	x = X; y = Y; z = Z;
-	CHECK_VALID(*this);
-}
-
 inline Vector::Vector(vec_t XYZ)						
 { 
 	x = y = z = XYZ;
@@ -595,17 +580,6 @@ inline void Vector::Zero()
 inline void VectorClear( Vector& a )
 {
 	a.x = a.y = a.z = 0.0f;
-}
-
-//-----------------------------------------------------------------------------
-// assignment
-//-----------------------------------------------------------------------------
-
-inline Vector& Vector::operator=(const Vector &vOther)	
-{
-	CHECK_VALID(vOther);
-	x=vOther.x; y=vOther.y; z=vOther.z; 
-	return *this; 
 }
 
 
@@ -2234,25 +2208,20 @@ inline void _SSE_RSqrtInline( float a, float* out )
 #endif
 
 // FIXME: Change this back to a #define once we get rid of the vec_t version
+// Half-Life compatibility: exact sqrt, zero-length vectors are left untouched and return 0
 FORCEINLINE float VectorNormalize( Vector& vec )
 {
-#if !defined(DEBUG) || defined(MATHLIB_HEADER_ONLY) // stop crashing my edit-and-continue!
-	#if defined(__i386__) || defined(_M_IX86)
-		#define DO_SSE_OPTIMIZATION
-	#endif
-#endif
+	float length = sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
 
-#if defined( DO_SSE_OPTIMIZATION )
-	float sqrlen = vec.LengthSqr() + 1.0e-10f, invlen;
-	_SSE_RSqrtInline(sqrlen, &invlen);
-	vec.x *= invlen;
-	vec.y *= invlen;
-	vec.z *= invlen;
-	return sqrlen * invlen;
-#else
-	extern float (FASTCALL *pfVectorNormalize)(Vector& v);
-	return (*pfVectorNormalize)(vec);
-#endif
+	if (0 != length)
+	{
+		float ilength = 1 / length;
+		vec.x *= ilength;
+		vec.y *= ilength;
+		vec.z *= ilength;
+	}
+
+	return length;
 }
 
 // FIXME: Obsolete version of VectorNormalize, once we remove all the friggin float*s
