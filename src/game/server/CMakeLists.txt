@@ -111,11 +111,6 @@ set(Engine
 )
 source_group("Engine" FILES ${Engine})
 
-set(SDK
-	"../../public/FileSystem.h"
-)
-source_group("SDK" FILES ${SDK})
-
 set(HL1
 	"basemonster.h"
 	"bmodels.cpp"
@@ -419,7 +414,6 @@ source_group("ThirdParty\\AngelScript" FILES ${ThirdParty_AngelScript})
 set(ALL_FILES
 	${Common}
 	${Engine}
-	${SDK}
 	${HL1}
 	${MS}
 	${MS_Headers}

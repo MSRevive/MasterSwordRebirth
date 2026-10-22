@@ -302,7 +302,7 @@ public:
 	*	@param ... Arguments.
 	*	@return If the operation succeeded, returns the number of characters that were written. Otherwise, returns a negative number.
 	*/
-	virtual int				FPrintf( FileHandle_t file, char *pFormat, ... ) = 0;
+	virtual int				FPrintf( FileHandle_t file, const char *pFormat, ... ) = 0;
 
 	// direct filesystem buffer access
 

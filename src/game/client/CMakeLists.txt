@@ -134,7 +134,6 @@ set(SDK
 	"exports.h"
 	"../../public/archtypes.h"
 	"../../public/cl_dll/IGameClientExports.h"
-	"../../public/FileSystem.h"
 	"../../public/keydefs.h"
 	"../../public/steam/steamtypes.h"
 )
