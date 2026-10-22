@@ -8,7 +8,8 @@ set_common_properties(scriptpack)
 target_compile_definitions(scriptpack PRIVATE
 	SCRIPTPACK_TOOL
 	CLIENT_DLL
-	_MSR_UTILS)
+	_MSR_UTILS
+	${SOURCE_SDK_DEFINES})
 
 target_include_directories(scriptpack PRIVATE
 	${BASEDIR}/src/common
@@ -22,7 +23,9 @@ target_include_directories(scriptpack PRIVATE
 	${BASEDIR}/thirdparty
 	${BASEDIR}/thirdparty/angelscript/include
 	${CMAKE_CURRENT_SOURCE_DIR}
-	cxxopts)
+	cxxopts
+	${BASEDIR}/source_sdk/common
+	${BASEDIR}/source_sdk/public)
 
 ################################################################################
 # Source groups

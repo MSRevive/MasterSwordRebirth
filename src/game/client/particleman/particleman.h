@@ -2,7 +2,7 @@
 #ifndef PARTICLEMAN_H
 #define PARTICLEMAN_H
 
-#include "interface.h"
+#include "tier1/interface.h"
 #include "CBaseParticle.h"
 
 class IParticleMan

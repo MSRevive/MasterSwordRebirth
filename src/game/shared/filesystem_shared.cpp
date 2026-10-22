@@ -9,7 +9,7 @@
 #include <limits>
 
 #include "filesystem_shared.h"
-#include "interface.h"
+#include "tier1/interface.h"
 
 CSysModule* g_pFileSystemModule = nullptr;
 IFileSystem* g_pFileSystem = nullptr;

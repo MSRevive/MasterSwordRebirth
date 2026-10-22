@@ -164,7 +164,7 @@ inline float FloatMakeNegative( vec_t f )
 extern "C" 
 {
 #endif
-	double __cdecl fabs(double);
+	double (__cdecl fabs)(double);
 #ifdef __cplusplus
 }
 #endif

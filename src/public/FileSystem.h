@@ -12,7 +12,7 @@
 #endif
 
 #include "archtypes.h"     // DAL
-#include "interface.h"
+#include "tier1/interface.h"
 
 //-----------------------------------------------------------------------------
 // Forward declarations

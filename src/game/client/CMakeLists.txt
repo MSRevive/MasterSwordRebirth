@@ -56,7 +56,9 @@ target_link_libraries(client PRIVATE
 	fmod
 	discord
 	steam_api
+	tier1
 	tier0
+	vstdlib
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
@@ -133,8 +135,6 @@ set(SDK
 	"../../public/archtypes.h"
 	"../../public/cl_dll/IGameClientExports.h"
 	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
 	"../../public/keydefs.h"
 	"../../public/steam/steamtypes.h"
 )

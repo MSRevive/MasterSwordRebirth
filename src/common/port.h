@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
-typedef short int WORD;
+typedef unsigned short WORD;
 typedef unsigned int DWORD;
 typedef int32 LONG;
 //typedef uint32 ULONG;

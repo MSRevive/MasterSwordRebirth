@@ -28,7 +28,9 @@ target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Normaliz>
 	${ZLIB_LIBRARIES}
 	libcurl
-	tier0)
+	tier1
+	tier0
+	vstdlib)
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -111,8 +113,6 @@ source_group("Engine" FILES ${Engine})
 
 set(SDK
 	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
 )
 source_group("SDK" FILES ${SDK})
 

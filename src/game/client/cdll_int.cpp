@@ -33,7 +33,7 @@
 
 #include <string.h>
 #include "vgui_int.h"
-#include "interface.h"
+#include "tier1/interface.h"
 #include "voice_status.h"
 #include "ms/clglobal.h"
 #include "mslogger.h"
@@ -596,9 +596,9 @@ void CL_LoadParticleMan()
 	}
 }
 
-static IBaseInterface* CreateClientVGUI()
+static void* CreateClientVGUI()
 {
-	return (IBaseInterface*)MSVGUI2::GetClientVGUIInterface();
+	return MSVGUI2::GetClientVGUIInterface();
 }
 
 static InterfaceReg g_ClientVGUIReg(CreateClientVGUI, "VClientVGUI001");
