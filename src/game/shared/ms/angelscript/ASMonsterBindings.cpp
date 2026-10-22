@@ -21,7 +21,7 @@
 
 // Include vector.h directly for Vector type
 typedef float vec_t;
-#include "vector.h"
+#include "mathlib/vector.h"
 
 // Include MSLogger with proper path
 #include "mslogger.h"

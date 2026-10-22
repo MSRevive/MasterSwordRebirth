@@ -27,13 +27,7 @@
 
 #pragma warning(disable : 4244)
 
-int nanmask = 255 << 23;
-
-float anglemod(float a)
-{
-	a = static_cast<float>(360.0f / 65536) * (static_cast<int>(a * static_cast<float>(65536 / 360.0f)) & 65535);
-	return a;
-}
+const int nanmask = 255 << 23;
 
 void AngleVectors(const Vector& angles, Vector* forward, Vector* right, Vector* up)
 {
@@ -250,22 +244,15 @@ void VectorTransform(const float* in1, float in2[3][4], float* out)
 	out[2] = DotProduct(*reinterpret_cast<const Vector*>(in1), *reinterpret_cast<const Vector*>(in2[2])) + in2[2][3];
 }
 
-bool VectorCompare(const float* v1, const float* v2)
+int VectorCompare(const float* v1, const float* v2)
 {
 	int i;
 
 	for (i = 0; i < 3; i++)
 		if (v1[i] != v2[i])
-			return false;
+			return 0;
 
-	return true;
-}
-
-void VectorMA(const float* veca, float scale, const float* vecb, float* vecc)
-{
-	vecc[0] = veca[0] + scale * vecb[0];
-	vecc[1] = veca[1] + scale * vecb[1];
-	vecc[2] = veca[2] + scale * vecb[2];
+	return 1;
 }
 
 void CrossProduct(const float* v1, const float* v2, float* cross)
@@ -290,26 +277,8 @@ float Length(const float* v)
 float Distance(const float* v1, const float* v2)
 {
 	Vector d;
-	VectorSubtract(v2, v1, d);
+	VectorSubtract(Vector(v2), Vector(v1), d);
 	return Length(d);
-}
-
-float VectorNormalize(float* v)
-{
-	float length, ilength;
-
-	length = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-	length = sqrt(length); // FIXME
-
-	if (0 != length)
-	{
-		ilength = 1 / length;
-		v[0] *= ilength;
-		v[1] *= ilength;
-		v[2] *= ilength;
-	}
-
-	return length;
 }
 
 void VectorInverse(float* v)
@@ -317,13 +286,6 @@ void VectorInverse(float* v)
 	v[0] = -v[0];
 	v[1] = -v[1];
 	v[2] = -v[2];
-}
-
-void VectorScale(const float* in, float scale, float* out)
-{
-	out[0] = in[0] * scale;
-	out[1] = in[1] * scale;
-	out[2] = in[2] * scale;
 }
 
 int Q_log2(int val)

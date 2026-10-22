@@ -543,7 +543,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 	// refresh position
 	VectorCopy(pparams->simorg, pparams->vieworg);
 	pparams->vieworg[2] += (bob);
-	VectorAdd(pparams->vieworg, pparams->viewheight, pparams->vieworg);
+	VectorAdd(pparams->vieworg, Vector(pparams->viewheight), pparams->vieworg);
 
 	VectorCopy(pparams->cl_viewangles, pparams->viewangles);
 
@@ -669,7 +669,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 	// Use predicted origin as view origin.
 	VectorCopy(pparams->simorg, view->origin);
 	view->origin[2] += (waterOffset);
-	VectorAdd(view->origin, pparams->viewheight, view->origin);
+	VectorAdd(view->origin, Vector(pparams->viewheight), view->origin);
 
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake(view->origin, view->angles, 0.9);
@@ -750,7 +750,7 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 		static float lastorg[3];
 		Vector delta;
 
-		VectorSubtract(pparams->simorg, lastorg, delta);
+		VectorSubtract(Vector(pparams->simorg), Vector(lastorg), delta);
 
 		if (Length(delta) != 0.0)
 		{
@@ -797,13 +797,13 @@ void V_CalcNormalRefdef(struct ref_params_s *pparams)
 			{
 				frac = (t - ViewInterp.OriginTime[foundidx & ORIGIN_MASK]) / dt;
 				frac = V_min(1.0, frac);
-				VectorSubtract(ViewInterp.Origins[(foundidx + 1) & ORIGIN_MASK], ViewInterp.Origins[foundidx & ORIGIN_MASK], delta);
-				VectorMA(ViewInterp.Origins[foundidx & ORIGIN_MASK], frac, delta, neworg);
+				VectorSubtract(Vector(ViewInterp.Origins[(foundidx + 1) & ORIGIN_MASK]), Vector(ViewInterp.Origins[foundidx & ORIGIN_MASK]), delta);
+				VectorMA(Vector(ViewInterp.Origins[foundidx & ORIGIN_MASK]), frac, delta, neworg);
 
 				// Dont interpolate large changes
 				if (Length(delta) < 64)
 				{
-					VectorSubtract(neworg, pparams->simorg, delta);
+					VectorSubtract(neworg, Vector(pparams->simorg), delta);
 
 					VectorAdd(pparams->simorg, delta, pparams->simorg);
 					VectorAdd(pparams->vieworg, delta, pparams->vieworg);

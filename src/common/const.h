@@ -20,7 +20,7 @@
 // Most came from server.h
 
 #include "Platform.h"
-#include "vector.h"
+#include "mathlib/vector.h"
 
 // edict->flags
 #define FL_FLY (1 << 0)	 // Changes the SV_Movestep() behavior to not need to be on ground

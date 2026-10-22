@@ -634,7 +634,7 @@ void EngineFunc::Shared_TraceLine(const Vector &vecStart, const Vector &vecEnd, 
 	if (CLIgnoreFlags == 32)
 	{
 		pmtrace_t pmtr;
-		gEngfuncs.pEventAPI->EV_PlayerTrace((float *)&vecStart[0], (float *)&vecEnd[0], PM_WORLD_ONLY, -1, &pmtr);
+		gEngfuncs.pEventAPI->EV_PlayerTrace((float *)vecStart.Base(), (float *)vecEnd.Base(), PM_WORLD_ONLY, -1, &pmtr);
 		Tr.Allsolid = pmtr.allsolid ? true : false;
 		Tr.EndPos = pmtr.endpos;
 		Tr.Fraction = pmtr.fraction;
@@ -648,7 +648,7 @@ void EngineFunc::Shared_TraceLine(const Vector &vecStart, const Vector &vecEnd, 
 	}
 	else
 	{
-		pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)&vecStart[0], (float *)&vecEnd[0], CLFlags, 2, CLIgnoreFlags);
+		pmtrace_s &pmtr = *gEngfuncs.PM_TraceLine((float *)vecStart.Base(), (float *)vecEnd.Base(), CLFlags, 2, CLIgnoreFlags);
 		Tr.Allsolid = pmtr.allsolid ? true : false;
 		Tr.EndPos = pmtr.endpos;
 		Tr.Fraction = pmtr.fraction;
@@ -669,7 +669,7 @@ int EngineFunc::Shared_PointContents(const Vector &Origin)
 #ifdef VALVE_DLL
 	return UTIL_PointContents(Origin);
 #else
-	return gEngfuncs.PM_PointContents((float *)&Origin[0], NULL);
+	return gEngfuncs.PM_PointContents((float *)Origin.Base(), NULL);
 #endif
 }
 
