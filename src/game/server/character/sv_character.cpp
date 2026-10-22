@@ -133,7 +133,7 @@ void MSChar_Interface::AutoSave(CBasePlayer* pPlayer)
 	if (gpGlobals->time <= pPlayer->m_TimeNextSave) return;
 
 	SaveChar(pPlayer, NULL); // Don't auto save too often when using FN.
-	pPlayer->m_TimeNextSave = gpGlobals->time + RANDOM_FLOAT(5.0f, 10.0f);
+	pPlayer->m_TimeNextSave = gpGlobals->time + RANDOM_FLOAT(10.0f, 15.0f);
 }
 
 //
