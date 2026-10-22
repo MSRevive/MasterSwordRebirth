@@ -27,7 +27,8 @@ target_link_libraries(server PRIVATE
 	$<$<PLATFORM_ID:Windows>:Crypt32>
 	$<$<PLATFORM_ID:Windows>:Normaliz>
 	${ZLIB_LIBRARIES}
-	libcurl)
+	libcurl
+	tier0)
 
 # Include directories
 target_include_directories(server PRIVATE 
@@ -53,14 +54,17 @@ target_include_directories(server PRIVATE
 	monsters
 	player
 	fn
-	${ZLIB_INCLUDE_DIRS})
+	${ZLIB_INCLUDE_DIRS}
+	${BASEDIR}/source_sdk/common
+	${BASEDIR}/source_sdk/public)
 
 target_compile_definitions(server PRIVATE
 	VERSION_SAFE_STEAM_API_INTERFACES
 	VALVE_DLL
 	CURL_STATICLIB
 	AS_DISABLED
-	HTTP_ONLY)
+	HTTP_ONLY
+	${SOURCE_SDK_DEFINES})
 
 # Check if spdlog is available
 if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")

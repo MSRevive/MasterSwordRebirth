@@ -56,6 +56,7 @@ target_link_libraries(client PRIVATE
 	fmod
 	discord
 	steam_api
+	tier0
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
@@ -79,7 +80,9 @@ target_include_directories(client PRIVATE
 	ms
 	ui
 	ui/ms
-	${OPENGL_INCLUDE_DIR})
+	${OPENGL_INCLUDE_DIR}
+	${BASEDIR}/source_sdk/common
+	${BASEDIR}/source_sdk/public)
 
 target_compile_definitions(client PRIVATE
 	ISCLIENT
@@ -87,7 +90,8 @@ target_compile_definitions(client PRIVATE
 	CLIENT_WEAPONS
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
-	USE_BREAKPAD_HANDLER)
+	USE_BREAKPAD_HANDLER
+	${SOURCE_SDK_DEFINES})
 
 # Check if spdlog is available
 if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
