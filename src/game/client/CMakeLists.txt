@@ -35,8 +35,6 @@ add_library(client SHARED)
 
 set_common_properties(client)
 
-add_subdirectory(vgui2)
-
 if (MSVC)
 	target_link_options(client PRIVATE /SAFESEH:NO)
 else()
@@ -51,14 +49,11 @@ target_link_libraries(client PRIVATE
 	$<$<PLATFORM_ID:Windows>:wsock32>
 	$<$<PLATFORM_ID:Windows>:vgui>
 	$<$<PLATFORM_ID:Windows>:gdi32>
-	client_vgui2
 	SDL2
 	fmod
 	discord
 	steam_api
-	tier1
-	tier0
-	vstdlib
+	${SOURCE_SDK_LIBS}
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
@@ -500,6 +495,19 @@ set(VGUI_MS
 )
 source_group("VGUI\\ms" FILES ${VGUI_MS})
 
+set(VGUI2
+	"vgui2/CClientVGUI.cpp"
+	"vgui2/CClientVGUI.h"
+	"vgui2/CClientViewport.cpp"
+	"vgui2/CClientViewport.h"
+	"vgui2/IViewportPanel.h"
+	"vgui2/ms_vgui2.cpp"
+	"vgui2/ms_vgui2.h"
+	"vgui2/chat/CChatPanel.cpp"
+	"vgui2/chat/CChatPanel.h"
+)
+source_group("VGUI2" FILES ${VGUI2})
+
 set(ALL_FILES
 	${Common}
 	${Engine}
@@ -519,6 +527,7 @@ set(ALL_FILES
 	${ThirdParty_AngelScript}
 	${VGUI}
 	${VGUI_MS}
+	${VGUI2}
 )
 
 target_sources(client PRIVATE ${ALL_FILES})

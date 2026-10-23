@@ -1,7 +1,6 @@
 #pragma once
 
 // The only VGUI2 header the rest of the client includes.
-// Plain types only: Source SDK headers must not leak out of client_vgui2.
 
 namespace MSVGUI2
 {

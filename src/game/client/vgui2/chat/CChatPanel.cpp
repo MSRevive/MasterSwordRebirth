@@ -12,7 +12,7 @@
 #include <vgui_controls/ScrollBar.h>
 
 #include "CChatPanel.h"
-#include "ms_vgui2.h"
+#include "vgui2/ms_vgui2.h"
 
 // Chat layout. Positions and sizes are in 640x480 units and scale with the screen like XRES/YRES.
 // The history's upper limits are the ms_txthud_width and ms_txthud_size cvars.

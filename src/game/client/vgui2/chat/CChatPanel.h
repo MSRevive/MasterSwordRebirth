@@ -7,7 +7,7 @@
 #include <vgui_controls/RichText.h>
 #include <vgui_controls/TextEntry.h>
 
-#include "IViewportPanel.h"
+#include "vgui2/IViewportPanel.h"
 
 class CChat;
 
