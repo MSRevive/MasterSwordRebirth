@@ -71,11 +71,9 @@ void CClientLibrary::HUDInit()
 	CVAR_CREATE("ms_evthud_history", "10", FCVAR_ARCHIVE);				// Max number of text lines to keep in the Event Console history
 	CVAR_CREATE("ms_evthud_size", "5", FCVAR_ARCHIVE);					// Max number of text lines shown at once
 	CVAR_CREATE("ms_evthud_bgtrans", "0", FCVAR_CLIENTDLL);				// Transparency of the background
-	CVAR_CREATE("ms_txthud_decaytime", "9", FCVAR_ARCHIVE);				// Time each line in the Event Console lasts before it shrinks
-	CVAR_CREATE("ms_txthud_history", "50", FCVAR_ARCHIVE);				// Max number of text lines to keep in the Event Console history
-	CVAR_CREATE("ms_txthud_size", "8", FCVAR_ARCHIVE);					// Max number of text lines shown at once
-	CVAR_CREATE("ms_txthud_bgtrans", "0", FCVAR_ARCHIVE);				// Transparency of the background
-	CVAR_CREATE("ms_txthud_width", "640", FCVAR_ARCHIVE);				// Width of console
+	CVAR_CREATE("ms_chat_decaytime", "10.0", FCVAR_ARCHIVE);				// Time each line in the Event Console lasts before it shrinks
+	CVAR_CREATE("ms_chat_width", "280", FCVAR_ARCHIVE);				// Width of console
+	CVAR_CREATE("ms_chat_ypos", "350", FCVAR_ARCHIVE);				// Width of console
 	CVAR_CREATE("ms_hidehud", "0", FCVAR_ARCHIVE);						// Hides the HUD and viewmodel completely
 	CVAR_CREATE("ms_lildude", "1", FCVAR_ARCHIVE);						// Thothie MAR2007a - Hides the 3d Guy if set 0
 	CVAR_CREATE("ms_invtype", "1", FCVAR_ARCHIVE);						// MiB FEB2012_12 - Inventory types (added post-doc by Thothie)

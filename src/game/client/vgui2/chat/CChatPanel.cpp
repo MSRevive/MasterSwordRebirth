@@ -21,8 +21,9 @@
 #include "CChatPanel.h"
 #include "vgui2/ms_vgui2.h"
 
-// Its fonts and colors win, the font and color macros below only fill in for keys it doesn't have
-#define CHAT_SCHEME_FILE			"resource/ms/ChatScheme.res"
+// CVARS
+// ms_txthud_decaytime
+// ms_txthud_width
 
 // Chat box. Positions and sizes are in 640x480 units and scale with the screen like XRES/YRES.
 #define CHAT_BOX_X					10
@@ -37,9 +38,11 @@
 #define CHAT_PROMPT_GAP				2	// Between the prompt and the entry
 #define CHAT_PROMPT_INSET			2
 #define CHAT_SCROLLBAR_WIDTH		17
+#define CHAT_TEXT_INSET				3	// Left of the history text
+#define CHAT_LINE_GAP				1	// Between history lines
 
-#define CHAT_FONT_NAME				"Sitka"
-#define CHAT_FONT_TALL				20
+#define CHAT_FONT_NAME				"Arial"
+#define CHAT_FONT_TALL				18
 #define CHAT_FONT_WEIGHT			800
 #define CHAT_FONT_FLAGS				vgui2::ISurface::FONTFLAG_DROPSHADOW
 
@@ -64,7 +67,6 @@ namespace
 	const int MAX_CHAT_BYTES = 120;
 	const int MAX_CHAT_CHARS = 120;
 	const int MAX_HISTORY_CHARS = 127 * 100;
-	const float DEFAULT_DECAY_TIME = 10.0f;
 	const double KEY_BLOCK_AFTER_CLOSE = 0.05;
 
 	// Enable if the engine won't route keys to a keyboard-only popup
@@ -113,10 +115,10 @@ namespace
 	// Without the file, the panels keep the client scheme
 	vgui2::HScheme LoadChatScheme()
 	{
-		if (!g_pFullFileSystem || !g_pFullFileSystem->FileExists(CHAT_SCHEME_FILE))
+		if (!g_pFullFileSystem || !g_pFullFileSystem->FileExists("resource/ms/ChatScheme.res"))
 			return 0;
 
-		return vgui2::scheme()->LoadSchemeFromFile(CHAT_SCHEME_FILE, "ChatScheme");
+		return vgui2::scheme()->LoadSchemeFromFile("resource/ms/ChatScheme.res", "ChatScheme");
 	}
 
 	// The scheme's ChatFont, else CHAT_FONT_NAME, else the scheme's Default
@@ -164,7 +166,6 @@ void CChatEntry::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	m_hFont = GetChatFont(pScheme);
 
-	// Without ChatScheme.res the game's schemes have none of these keys, which leaves everything white
 	SetFont(m_hFont);
 	SetBgColor(pScheme->GetColor("TextEntry.BgColor", Color(CHAT_FIELD_BG_COLOR)));
 	SetFgColor(pScheme->GetColor("Chat.TypingText", Color(CHAT_TEXT_COLOR)));
@@ -178,8 +179,6 @@ void CChatEntry::OnKeyCodeTyped(vgui2::KeyCode code)
 		PostMessage(GetParent(), new KeyValues("ChatSend"));
 	else if (code == vgui2::KEY_ESCAPE)
 		PostMessage(GetParent(), new KeyValues("ChatCancel"));
-	else if (code == vgui2::KEY_PAGEUP || code == vgui2::KEY_PAGEDOWN)
-		PostMessage(GetParent(), new KeyValues("ChatScroll", "down", code == vgui2::KEY_PAGEDOWN));
 	else if (code != vgui2::KEY_TAB)
 		BaseClass::OnKeyCodeTyped(code);
 }
@@ -225,6 +224,14 @@ void CChatInput::SetFieldAlpha(int iAlpha)
 	m_pEntry->SetAlpha(iAlpha);
 }
 
+// The children don't pick it up from this panel
+void CChatInput::SetChatScheme(vgui2::HScheme hScheme)
+{
+	SetScheme(hScheme);
+	m_pPrompt->SetScheme(hScheme);
+	m_pEntry->SetScheme(hScheme);
+}
+
 void CChatInput::ApplySchemeSettings(vgui2::IScheme *pScheme)
 {
 	BaseClass::ApplySchemeSettings(pScheme);
@@ -264,6 +271,7 @@ void CChatInput::OnChatScroll(int down)
 CChatHistory::CChatHistory(vgui2::Panel *pParent) : BaseClass(pParent, "MSChatHistory")
 {
 	SetMaximumCharCount(MAX_HISTORY_CHARS);
+	SetDrawOffsets(CHAT_TEXT_INSET, CHAT_LINE_GAP);
 	SetVerticalScrollbar(false);
 	SetPanelInteractive(false);
 	SetKeyBoardInputEnabled(false);
@@ -281,6 +289,11 @@ void CChatHistory::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 	m_OpenBgColor = pScheme->GetColor("ChatBgColor", Color(CHAT_BG_COLOR));
 	SetBgColor(Color(m_OpenBgColor.r(), m_OpenBgColor.g(), m_OpenBgColor.b(), 0));
+}
+
+int CChatHistory::GetLinePitch()
+{
+	return m_iFontTall + CHAT_LINE_GAP;
 }
 
 // Styled here, the scrollbar's own scheme pass would undo it in ApplySchemeSettings.
@@ -330,7 +343,7 @@ CChat::CChat(vgui2::Panel *pParent)
 	vgui2::HScheme hScheme = LoadChatScheme();
 
 	m_pHistory->SetScheme(hScheme);
-	m_pInput->SetScheme(hScheme);
+	m_pInput->SetChatScheme(hScheme);
 
 	m_pHistory->MakeReadyForUse();
 	m_pInput->MakeReadyForUse();
@@ -381,7 +394,8 @@ void CChat::Think()
 	m_pHistory->SetVisible(bShow);
 }
 
-// History fills the box down to the input line, which sits at the bottom
+// History fills the box down to the input line, which sits at the bottom.
+// It is cut to whole lines from the top, RichText leaves any remainder blank below the newest line.
 void CChat::Layout()
 {
 	int iLineTall = m_pHistory->GetFontTall() + 2;
@@ -392,9 +406,11 @@ void CChat::Layout()
 	int iBottom = ScaleY(CHAT_BOX_BOTTOM_Y);
 
 	int iInputY = iBottom - (int)(iLineTall * (1.0f + CHAT_INPUT_MARGIN_BOTTOM));
-	int iHistoryTall = iInputY - (int)(iLineTall * CHAT_INPUT_MARGIN_TOP) - iY;
+	int iHistoryBottom = iInputY - (int)(iLineTall * CHAT_INPUT_MARGIN_TOP);
+	int iPitch = m_pHistory->GetLinePitch();
+	int iHistoryTall = iPitch > 0 ? (iHistoryBottom - iY) / iPitch * iPitch : iHistoryBottom - iY;
 
-	m_pHistory->SetBounds(iX, iY, iWide, iHistoryTall);
+	m_pHistory->SetBounds(iX, iHistoryBottom - iHistoryTall, iWide, iHistoryTall);
 	m_pInput->SetBounds(iX, iInputY, iWide, iLineTall);
 }
 
@@ -422,7 +438,7 @@ void CChat::UpdateFade()
 float CChat::GetDecayTime()
 {
 	MSVGUI2::IHost *pHost = MSVGUI2::GetHost();
-	float flDecay = pHost ? pHost->GetCvarFloat("ms_txthud_decaytime") : DEFAULT_DECAY_TIME;
+	float flDecay = pHost->GetCvarFloat("ms_chat_decaytime");
 
 	return flDecay < 1.0f ? 1.0f : flDecay;
 }

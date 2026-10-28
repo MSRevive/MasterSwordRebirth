@@ -48,6 +48,7 @@ public:
 
 	void SetPrompt(const char *pszPrompt);
 	void SetFieldAlpha(int iAlpha);
+	void SetChatScheme(vgui2::HScheme hScheme);
 	CChatEntry *GetEntry() { return m_pEntry; }
 
 protected:
@@ -74,6 +75,7 @@ public:
 	void ShowScrollBar();
 	void Scroll(bool bDown);
 	int GetFontTall() { return m_iFontTall; }
+	int GetLinePitch();
 	vgui2::HFont GetFont() { return m_hFont; }
 	Color GetOpenBgColor() { return m_OpenBgColor; }
 
