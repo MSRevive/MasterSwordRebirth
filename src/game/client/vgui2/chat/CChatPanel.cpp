@@ -119,17 +119,6 @@ namespace
 		return vgui2::scheme()->LoadSchemeFromFile(CHAT_SCHEME_FILE, "ChatScheme");
 	}
 
-	// Panels keep the default scheme they were created with instead of asking their parent
-	void SetSchemeRecursive(vgui2::Panel *pPanel, vgui2::HScheme hScheme)
-	{
-		pPanel->SetScheme(hScheme);
-		for (int i = 0; i < pPanel->GetChildCount(); i++)
-		{
-			if (vgui2::Panel *pChild = pPanel->GetChild(i))
-				SetSchemeRecursive(pChild, hScheme);
-		}
-	}
-
 	// The scheme's ChatFont, else CHAT_FONT_NAME, else the scheme's Default
 	vgui2::HFont GetChatFont(vgui2::IScheme *pScheme)
 	{
@@ -338,12 +327,10 @@ CChat::CChat(vgui2::Panel *pParent)
 {
 	m_pHistory = new CChatHistory(pParent);
 	m_pInput = new CChatInput(pParent, this);
+	vgui2::HScheme hScheme = LoadChatScheme();
 
-	if (vgui2::HScheme hScheme = LoadChatScheme())
-	{
-		SetSchemeRecursive(m_pHistory, hScheme);
-		SetSchemeRecursive(m_pInput, hScheme);
-	}
+	m_pHistory->SetScheme(hScheme);
+	m_pInput->SetScheme(hScheme);
 
 	m_pHistory->MakeReadyForUse();
 	m_pInput->MakeReadyForUse();
