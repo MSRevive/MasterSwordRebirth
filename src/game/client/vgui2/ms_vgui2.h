@@ -24,5 +24,4 @@ namespace MSVGUI2
 	bool Chat_IsOpen();
 	bool Chat_BlocksKeys();
 	void Chat_Print(int r, int g, int b, const char *Utf8Text);
-	void Chat_Scroll(bool Down);
 }

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include <SDL2/SDL_events.h>
@@ -5,7 +6,9 @@
 #include <tier0/dbg.h>
 #include <tier1/strtools.h>
 #include <tier1/KeyValues.h>
+#include <tier2/tier2.h>
 
+#include <FileSystem.h>
 #include <vgui/IScheme.h>
 #include <vgui/ISurface.h>
 #include <vgui/ISystem.h>
@@ -17,6 +20,9 @@
 
 #include "CChatPanel.h"
 #include "vgui2/ms_vgui2.h"
+
+// Its fonts and colors win, the font and color macros below only fill in for keys it doesn't have
+#define CHAT_SCHEME_FILE			"resource/ms/ChatScheme.res"
 
 // Chat box. Positions and sizes are in 640x480 units and scale with the screen like XRES/YRES.
 #define CHAT_BOX_X					10
@@ -38,15 +44,15 @@
 #define CHAT_FONT_FLAGS				vgui2::ISurface::FONTFLAG_DROPSHADOW
 
 // Colors are r, g, b(, a)
-#define CHAT_BG_COLOR				0, 0, 0		// History background, only shown while open
-#define CHAT_BG_ALPHA				128
-#define CHAT_FIELD_BG_COLOR			0, 0, 0, 128	// Prompt and entry background
-#define CHAT_PROMPT_COLOR			216, 216, 216, 255
-#define CHAT_TEXT_COLOR				255, 255, 255, 255
-#define CHAT_INPUT_ALPHA			128			// Prompt and entry opacity while open
-#define CHAT_SCROLLBAR_FG_COLOR		0, 0, 0, 128
-#define CHAT_SCROLLBAR_BG_COLOR		0, 0, 0, 0
-#define CHAT_SCROLLBAR_TRACK_COLOR	0, 0, 0, 128
+// #define CHAT_BG_COLOR				0, 0, 0		// History background, only shown while open
+// #define CHAT_BG_ALPHA				128
+// #define CHAT_FIELD_BG_COLOR			0, 0, 0, 128	// Prompt and entry background
+// #define CHAT_PROMPT_COLOR			216, 216, 216, 255
+// #define CHAT_TEXT_COLOR				255, 255, 255, 255
+// #define CHAT_INPUT_ALPHA			128			// Prompt and entry opacity while open
+// #define CHAT_SCROLLBAR_FG_COLOR		0, 0, 0, 128
+// #define CHAT_SCROLLBAR_BG_COLOR		0, 0, 0, 0
+// #define CHAT_SCROLLBAR_TRACK_COLOR	0, 0, 0, 128
 
 // In seconds
 #define CHAT_FADE_TIME				0.25f	// Background fade on open and close
@@ -104,9 +110,33 @@ namespace
 		return (int)(flValue * tall / 480.0f + 0.5f);
 	}
 
-	// Falls back to the scheme's font if the system doesn't have CHAT_FONT_NAME
+	// Without the file, the panels keep the client scheme
+	vgui2::HScheme LoadChatScheme()
+	{
+		if (!g_pFullFileSystem || !g_pFullFileSystem->FileExists(CHAT_SCHEME_FILE))
+			return 0;
+
+		return vgui2::scheme()->LoadSchemeFromFile(CHAT_SCHEME_FILE, "ChatScheme");
+	}
+
+	// Panels keep the default scheme they were created with instead of asking their parent
+	void SetSchemeRecursive(vgui2::Panel *pPanel, vgui2::HScheme hScheme)
+	{
+		pPanel->SetScheme(hScheme);
+		for (int i = 0; i < pPanel->GetChildCount(); i++)
+		{
+			if (vgui2::Panel *pChild = pPanel->GetChild(i))
+				SetSchemeRecursive(pChild, hScheme);
+		}
+	}
+
+	// The scheme's ChatFont, else CHAT_FONT_NAME, else the scheme's Default
 	vgui2::HFont GetChatFont(vgui2::IScheme *pScheme)
 	{
+		vgui2::HFont hSchemeFont = pScheme->GetFont("ChatFont", false);
+		if (hSchemeFont != vgui2::INVALID_FONT)
+			return hSchemeFont;
+
 		static vgui2::HFont s_hFont = vgui2::INVALID_FONT;
 		static bool s_bCreated = false;
 
@@ -145,10 +175,10 @@ void CChatEntry::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	BaseClass::ApplySchemeSettings(pScheme);
 	m_hFont = GetChatFont(pScheme);
 
-	// The game's TrackerScheme has none of the TextEntry keys, which leaves everything white
+	// Without ChatScheme.res the game's schemes have none of these keys, which leaves everything white
 	SetFont(m_hFont);
-	SetBgColor(Color(CHAT_FIELD_BG_COLOR));
-	SetFgColor(Color(CHAT_TEXT_COLOR));
+	SetBgColor(pScheme->GetColor("TextEntry.BgColor"));
+	SetFgColor(pScheme->GetColor("Chat.TypingText"));
 	SetBorder(nullptr);
 }
 
@@ -176,8 +206,8 @@ void CChatPrompt::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	m_hFont = GetChatFont(pScheme);
 
 	SetFont(m_hFont);
-	SetBgColor(Color(CHAT_FIELD_BG_COLOR));
-	SetFgColor(Color(CHAT_PROMPT_COLOR));
+	SetBgColor(pScheme->GetColor("Label.BgColor"));
+	SetFgColor(pScheme->GetColor("Label.TextColor"));
 	SetContentAlignment(vgui2::Label::a_west);
 	SetTextInset(CHAT_PROMPT_INSET, 0);
 }
@@ -258,29 +288,39 @@ void CChatHistory::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	m_hFont = GetChatFont(pScheme);
 
 	SetFont(m_hFont);
-	SetBgColor(Color(CHAT_BG_COLOR, 0));
 	m_iFontTall = vgui2::surface()->GetFontTall(m_hFont);
+
+	m_OpenBgColor = pScheme->GetColor("ChatBgColor");
+	SetBgColor(Color(m_OpenBgColor.r(), m_OpenBgColor.g(), m_OpenBgColor.b(), 0));
 }
 
 // Styled here, the scrollbar's own scheme pass would undo it in ApplySchemeSettings.
-// The game's schemes have no ScrollBar.Wide, which leaves it 0 wide.
+// Without ChatScheme.res the game's schemes have no ScrollBar.Wide, which leaves it 0 wide.
 void CChatHistory::ShowScrollBar()
 {
-	_vertScrollBar->SetWide(CHAT_SCROLLBAR_WIDTH);
+	vgui2::IScheme *pScheme = vgui2::scheme()->GetIScheme(GetScheme());
+
+	const char *pszWide = pScheme->GetResourceString("ScrollBar.Wide");
+	int iWide = pszWide ? atoi(pszWide) : 0;
+	_vertScrollBar->SetWide(iWide > 0 ? iWide : CHAT_SCROLLBAR_WIDTH);
 	SetVerticalScrollbar(true);
 
-	Color fg(CHAT_SCROLLBAR_FG_COLOR);
-	Color bg(CHAT_SCROLLBAR_BG_COLOR);
+	Color fg = pScheme->GetColor("ScrollBarButton.FgColor");
+	Color bg = pScheme->GetColor("ScrollBarButton.BgColor");
+	Color armedFg = pScheme->GetColor("ScrollBarButton.ArmedFgColor", fg);
+	Color armedBg = pScheme->GetColor("ScrollBarButton.ArmedBgColor", bg);
+	Color depressedFg = pScheme->GetColor("ScrollBarButton.DepressedFgColor", fg);
+	Color depressedBg = pScheme->GetColor("ScrollBarButton.DepressedBgColor", bg);
 	for (int i = 0; i < 2; i++)
 	{
 		vgui2::Button *pButton = _vertScrollBar->GetButton(i);
 		pButton->SetDefaultColor(fg, bg);
-		pButton->SetArmedColor(fg, bg);
-		pButton->SetDepressedColor(fg, bg);
+		pButton->SetArmedColor(armedFg, armedBg);
+		pButton->SetDepressedColor(depressedFg, depressedBg);
 	}
 
-	_vertScrollBar->GetSlider()->SetFgColor(bg);
-	_vertScrollBar->GetSlider()->SetBgColor(Color(CHAT_SCROLLBAR_TRACK_COLOR));
+	_vertScrollBar->GetSlider()->SetFgColor(pScheme->GetColor("ScrollBarSlider.FgColor"));
+	_vertScrollBar->GetSlider()->SetBgColor(pScheme->GetColor("ScrollBarSlider.BgColor"));
 
 	InvalidateLayout(true);
 }
@@ -298,6 +338,12 @@ CChat::CChat(vgui2::Panel *pParent)
 {
 	m_pHistory = new CChatHistory(pParent);
 	m_pInput = new CChatInput(pParent, this);
+
+	if (vgui2::HScheme hScheme = LoadChatScheme())
+	{
+		SetSchemeRecursive(m_pHistory, hScheme);
+		SetSchemeRecursive(m_pInput, hScheme);
+	}
 
 	m_pHistory->MakeReadyForUse();
 	m_pInput->MakeReadyForUse();
@@ -373,15 +419,16 @@ void CChat::UpdateFade()
 	else if (flFrac > 1.0f)
 		flFrac = 1.0f;
 
-	int iFade = (int)(CHAT_BG_ALPHA * flFrac);
+	Color bg = m_pHistory->GetOpenBgColor();
+	int iFade = (int)(bg.a() * flFrac);
 	if (m_bOpen)
 	{
-		m_pHistory->SetBgColor(Color(CHAT_BG_COLOR, CHAT_BG_ALPHA - iFade));
+		m_pHistory->SetBgColor(Color(bg.r(), bg.g(), bg.b(), bg.a() - iFade));
 		m_pInput->SetFieldAlpha(CHAT_INPUT_ALPHA - iFade);
 	}
 	else
 	{
-		m_pHistory->SetBgColor(Color(CHAT_BG_COLOR, iFade));
+		m_pHistory->SetBgColor(Color(bg.r(), bg.g(), bg.b(), iFade));
 	}
 }
 
@@ -419,7 +466,7 @@ void CChat::Open(int iType, const char *pszPrompt)
 
 	m_pInput->SetPrompt(pszPrompt);
 	m_pInput->GetEntry()->SetText("");
-	m_pInput->SetFieldAlpha(CHAT_INPUT_ALPHA - CHAT_BG_ALPHA);
+	m_pInput->SetFieldAlpha(CHAT_INPUT_ALPHA - m_pHistory->GetOpenBgColor().a());
 	Layout();
 	m_pInput->SetVisible(true);
 	m_pInput->SetKeyBoardInputEnabled(true);
@@ -516,12 +563,9 @@ void CChat::Print(int r, int g, int b, const char *pszUtf8)
 
 void CChat::Scroll(bool bDown)
 {
-	if (!m_bHasText)
+	if (!m_bOpen || !m_bHasText)
 		return;
 
 	HoldHistory();
 	m_pHistory->Scroll(bDown);
-
-	if (!m_bOpen)
-		m_flHideTime = vgui2::system()->GetCurrentTime() + GetDecayTime() + CHAT_LINE_FADE_TIME;
 }

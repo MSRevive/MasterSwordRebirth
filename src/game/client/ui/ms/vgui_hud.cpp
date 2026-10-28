@@ -155,7 +155,6 @@ private:
 	RetroHUD::VGUI_Health* m_RetroHealth;
 	PrimaryHUD::VGUI_Health* m_Health;
 	VGUI_Status* m_Status; //Drigien MAY2008
-	bool m_ScrollChat = true; // PGUP/PGDN scrolls the chat, "hudscroll select" toggles to the event console
 
 	const int INFOWIN_HELP_DISPLAY_X = XRES(640) - XRES(260);
 	const int INFOWIN_HELP_DISPLAY_Y = YRES(300);
@@ -432,18 +431,10 @@ void CHUDPanel::Initialize(void)
 //-----------------------------------------------------------------------------
 void CHUDPanel::StepInput(hudscroll_e ScrollCmd)
 {
-	bool Down = (ScrollCmd == HUDSCROLL_DOWN);
-
 	if (ScrollCmd == HUDSCROLL_SELECT)
-	{
-		m_ScrollChat = !m_ScrollChat;
-		Down = true;
-	}
+		return;
 
-	if (m_ScrollChat)
-		MSVGUI2::Chat_Scroll(Down);
-	else
-		m_Consoles[CON_EVENT]->StepInput(Down);
+	m_Consoles[CON_EVENT]->StepInput(ScrollCmd == HUDSCROLL_DOWN);
 }
 
 bool CHUDPanel::KeyInput(int down, int keynum, const char* pszCurrentBinding)

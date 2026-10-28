@@ -65,9 +65,3 @@ void MSVGUI2::Chat_Print(int r, int g, int b, const char *Utf8Text)
 	if (CChat *pChat = GetChat())
 		pChat->Print(r, g, b, Utf8Text);
 }
-
-void MSVGUI2::Chat_Scroll(bool Down)
-{
-	if (CChat *pChat = GetChat())
-		pChat->Scroll(Down);
-}

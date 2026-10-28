@@ -75,6 +75,7 @@ public:
 	void Scroll(bool bDown);
 	int GetFontTall() { return m_iFontTall; }
 	vgui2::HFont GetFont() { return m_hFont; }
+	Color GetOpenBgColor() { return m_OpenBgColor; }
 
 protected:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
@@ -82,6 +83,7 @@ protected:
 private:
 	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 	int m_iFontTall = 0;
+	Color m_OpenBgColor;
 };
 
 // Chat input line and history. Not a panel itself, it owns the two that are.
