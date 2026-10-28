@@ -438,7 +438,7 @@ void CChat::ReleaseHistory(float flSustain)
 {
 	m_pHistory->SetVerticalScrollbar(false);
 	m_pHistory->GotoTextEnd();
-	m_pHistory->ResetAllFades(false, true, flSustain);
+	m_pHistory->ResetAllFades(false, false, flSustain);
 	m_bHeld = false;
 }
 

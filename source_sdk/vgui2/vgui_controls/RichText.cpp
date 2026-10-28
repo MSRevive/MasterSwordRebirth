@@ -1135,7 +1135,7 @@ void RichText::ResetAllFades( bool bHold, bool bOnlyExpired, float flNewSustain 
 
 	if ( m_bResetFades == false )
 	{
-		for (int i = 1; i < m_FormatStream.Count(); i++)
+		for (int i = 0; i < m_FormatStream.Count(); i++)
 		{
 			if ( bOnlyExpired == true )
 			{
