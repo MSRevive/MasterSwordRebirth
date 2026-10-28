@@ -29,6 +29,9 @@ void MSVGUI2::VidInit()
 // leaked on purpose, their destructors would call into it.
 void MSVGUI2::Shutdown()
 {
+	if (CChat *pChat = GetChat())
+		pChat->Shutdown();
+
 	g_pViewport = nullptr;
 	s_pHost = nullptr;
 }

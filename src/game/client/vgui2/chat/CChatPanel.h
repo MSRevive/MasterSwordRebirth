@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include <vgui_controls/EditablePanel.h>
 #include <vgui_controls/Label.h>
 #include <vgui_controls/RichText.h>
@@ -49,8 +47,8 @@ public:
 	CChatInput(vgui2::Panel *pParent, CChat *pChat);
 
 	void SetPrompt(const char *pszPrompt);
+	void SetFieldAlpha(int iAlpha);
 	CChatEntry *GetEntry() { return m_pEntry; }
-	int GetFontTall() { return m_iFontTall; }
 
 protected:
 	void ApplySchemeSettings(vgui2::IScheme *pScheme) override;
@@ -58,13 +56,12 @@ protected:
 
 	MESSAGE_FUNC(OnChatSend, "ChatSend");
 	MESSAGE_FUNC(OnChatCancel, "ChatCancel");
+	MESSAGE_FUNC_INT(OnChatScroll, "ChatScroll", down);
 
 private:
 	CChat *m_pChat;
 	CChatPrompt *m_pPrompt;
 	CChatEntry *m_pEntry;
-	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
-	int m_iFontTall = 0;
 };
 
 class CChatHistory : public vgui2::RichText
@@ -74,8 +71,8 @@ class CChatHistory : public vgui2::RichText
 public:
 	CChatHistory(vgui2::Panel *pParent);
 
+	void ShowScrollBar();
 	void Scroll(bool bDown);
-	int GetScrollBarWide();
 	int GetFontTall() { return m_iFontTall; }
 	vgui2::HFont GetFont() { return m_hFont; }
 
@@ -98,6 +95,8 @@ public:
 	void Think() override;
 	void OnHideClientUI() override;
 
+	void Shutdown();
+	void QueueWheel(int iSteps);
 	void Open(int iType, const char *pszPrompt);
 	void Close();
 	void Send();
@@ -107,27 +106,22 @@ public:
 	void Scroll(bool bDown);
 
 private:
-	// Width of a printed message and when it stops showing, to size the history to its text
-	struct Line_t
-	{
-		int iWide;
-		double flExpire;
-	};
-
 	float GetDecayTime();
-	void LayoutHistory();
+	void Layout();
+	void UpdateFade();
 	void HoldHistory();
 	void ReleaseHistory(float flSustain);
 
 	CChatInput *m_pInput;
 	CChatHistory *m_pHistory;
-	std::vector<Line_t> m_Lines;
 	vgui2::HFont m_hFont = vgui2::INVALID_FONT;
 
 	int m_iType = 0;
+	int m_iWheelSteps = 0;
 	bool m_bOpen = false;
 	bool m_bHasText = false;
 	bool m_bHeld = false;
 	double m_flCloseTime = -1.0;
 	double m_flHideTime = 0.0;
+	double m_flFadeTime = 0.0;
 };

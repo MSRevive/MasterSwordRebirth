@@ -155,7 +155,7 @@ private:
 	RetroHUD::VGUI_Health* m_RetroHealth;
 	PrimaryHUD::VGUI_Health* m_Health;
 	VGUI_Status* m_Status; //Drigien MAY2008
-	bool m_ScrollChat = false; // PGUP/PGDN scrolls the chat instead of the event console
+	bool m_ScrollChat = true; // PGUP/PGDN scrolls the chat, "hudscroll select" toggles to the event console
 
 	const int INFOWIN_HELP_DISPLAY_X = XRES(640) - XRES(260);
 	const int INFOWIN_HELP_DISPLAY_Y = YRES(300);
@@ -665,7 +665,7 @@ void HUD_StartSayText(int Type)
 	if (!gViewPort || !gViewPort->m_pHUDPanel)
 		return;
 
-	const char* Prompt = "Shout:";
+	const char* Prompt = "Global:";
 	if (Type == SAYTEXT_LOCAL)
 		Prompt = "Say:";
 	else if (Type == SAYTEXT_PARTY)
