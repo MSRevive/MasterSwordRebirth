@@ -14,8 +14,6 @@
 #include "CClientViewport.h"
 #include "ms_vgui2.h"
 
-#define CLIENT_SCHEME_FILE "resource/ClientScheme.res"
-
 static vgui2::HScheme s_hClientScheme = 0;
 
 namespace vgui2
@@ -68,8 +66,8 @@ void CClientVGUI::Initialize(CreateInterfaceFn* factories, int count)
 	}
 
 	// Without the file, panels use the engine's default scheme
-	if (g_pFullFileSystem && g_pFullFileSystem->FileExists(CLIENT_SCHEME_FILE))
-		s_hClientScheme = g_pVGuiSchemeManager->LoadSchemeFromFile(CLIENT_SCHEME_FILE, "ClientScheme");
+	if (g_pFullFileSystem && g_pFullFileSystem->FileExists("resource/TrackerScheme.res"))
+		s_hClientScheme = g_pVGuiSchemeManager->LoadSchemeFromFile("resource/TrackerScheme.res", "TrackerScheme");
 
 	m_bInitialized = true;
 }
