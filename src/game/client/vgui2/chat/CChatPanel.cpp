@@ -44,15 +44,15 @@
 #define CHAT_FONT_FLAGS				vgui2::ISurface::FONTFLAG_DROPSHADOW
 
 // Colors are r, g, b(, a)
-// #define CHAT_BG_COLOR				0, 0, 0		// History background, only shown while open
-// #define CHAT_BG_ALPHA				128
-// #define CHAT_FIELD_BG_COLOR			0, 0, 0, 128	// Prompt and entry background
-// #define CHAT_PROMPT_COLOR			216, 216, 216, 255
-// #define CHAT_TEXT_COLOR				255, 255, 255, 255
-// #define CHAT_INPUT_ALPHA			128			// Prompt and entry opacity while open
-// #define CHAT_SCROLLBAR_FG_COLOR		0, 0, 0, 128
-// #define CHAT_SCROLLBAR_BG_COLOR		0, 0, 0, 0
-// #define CHAT_SCROLLBAR_TRACK_COLOR	0, 0, 0, 128
+ #define CHAT_BG_COLOR				0, 0, 0		// History background, only shown while open
+ #define CHAT_BG_ALPHA				128
+ #define CHAT_FIELD_BG_COLOR			0, 0, 0, 128	// Prompt and entry background
+ #define CHAT_PROMPT_COLOR			216, 216, 216, 255
+ #define CHAT_TEXT_COLOR				255, 255, 255, 255
+ #define CHAT_INPUT_ALPHA			128			// Prompt and entry opacity while open
+ #define CHAT_SCROLLBAR_FG_COLOR		0, 0, 0, 128
+ #define CHAT_SCROLLBAR_BG_COLOR		0, 0, 0, 0
+ #define CHAT_SCROLLBAR_TRACK_COLOR	0, 0, 0, 128
 
 // In seconds
 #define CHAT_FADE_TIME				0.25f	// Background fade on open and close
@@ -177,8 +177,8 @@ void CChatEntry::ApplySchemeSettings(vgui2::IScheme *pScheme)
 
 	// Without ChatScheme.res the game's schemes have none of these keys, which leaves everything white
 	SetFont(m_hFont);
-	SetBgColor(pScheme->GetColor("TextEntry.BgColor"));
-	SetFgColor(pScheme->GetColor("Chat.TypingText"));
+	SetBgColor(pScheme->GetColor("TextEntry.BgColor", Color(CHAT_FIELD_BG_COLOR)));
+	SetFgColor(pScheme->GetColor("Chat.TypingText", Color(CHAT_TEXT_COLOR)));
 	SetBorder(nullptr);
 }
 
@@ -206,8 +206,8 @@ void CChatPrompt::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	m_hFont = GetChatFont(pScheme);
 
 	SetFont(m_hFont);
-	SetBgColor(pScheme->GetColor("Label.BgColor"));
-	SetFgColor(pScheme->GetColor("Label.TextColor"));
+	SetBgColor(pScheme->GetColor("Label.BgColor", Color(CHAT_FIELD_BG_COLOR)));
+	SetFgColor(pScheme->GetColor("Label.TextColor", Color(CHAT_TEXT_COLOR)));
 	SetContentAlignment(vgui2::Label::a_west);
 	SetTextInset(CHAT_PROMPT_INSET, 0);
 }
@@ -290,7 +290,7 @@ void CChatHistory::ApplySchemeSettings(vgui2::IScheme *pScheme)
 	SetFont(m_hFont);
 	m_iFontTall = vgui2::surface()->GetFontTall(m_hFont);
 
-	m_OpenBgColor = pScheme->GetColor("ChatBgColor");
+	m_OpenBgColor = pScheme->GetColor("ChatBgColor", Color(CHAT_BG_COLOR));
 	SetBgColor(Color(m_OpenBgColor.r(), m_OpenBgColor.g(), m_OpenBgColor.b(), 0));
 }
 
@@ -305,8 +305,8 @@ void CChatHistory::ShowScrollBar()
 	_vertScrollBar->SetWide(iWide > 0 ? iWide : CHAT_SCROLLBAR_WIDTH);
 	SetVerticalScrollbar(true);
 
-	Color fg = pScheme->GetColor("ScrollBarButton.FgColor");
-	Color bg = pScheme->GetColor("ScrollBarButton.BgColor");
+	Color fg = pScheme->GetColor("ScrollBarButton.FgColor", Color(CHAT_SCROLLBAR_FG_COLOR));
+	Color bg = pScheme->GetColor("ScrollBarButton.BgColor", Color(CHAT_SCROLLBAR_BG_COLOR));
 	Color armedFg = pScheme->GetColor("ScrollBarButton.ArmedFgColor", fg);
 	Color armedBg = pScheme->GetColor("ScrollBarButton.ArmedBgColor", bg);
 	Color depressedFg = pScheme->GetColor("ScrollBarButton.DepressedFgColor", fg);
@@ -319,8 +319,8 @@ void CChatHistory::ShowScrollBar()
 		pButton->SetDepressedColor(depressedFg, depressedBg);
 	}
 
-	_vertScrollBar->GetSlider()->SetFgColor(pScheme->GetColor("ScrollBarSlider.FgColor"));
-	_vertScrollBar->GetSlider()->SetBgColor(pScheme->GetColor("ScrollBarSlider.BgColor"));
+	_vertScrollBar->GetSlider()->SetFgColor(pScheme->GetColor("ScrollBarSlider.FgColor", bg));
+	_vertScrollBar->GetSlider()->SetBgColor(pScheme->GetColor("ScrollBarSlider.BgColor", Color(CHAT_SCROLLBAR_TRACK_COLOR)));
 
 	InvalidateLayout(true);
 }
