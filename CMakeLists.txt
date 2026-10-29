@@ -141,7 +141,7 @@ add_subdirectory(source_sdk)
 
 foreach(SDK_TARGET tier1 tier2 vgui_controls)
 	set_target_properties(${SDK_TARGET} PROPERTIES CXX_STANDARD 17 POSITION_INDEPENDENT_CODE ON)
-	target_compile_options(${SDK_TARGET} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fno-gnu-unique>)
+	target_compile_options(${SDK_TARGET} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fno-gnu-unique -march=pentium-m -mfpmath=387>)
 endforeach()
 
 # Add Projects
