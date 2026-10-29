@@ -38,6 +38,7 @@ extern "C"
 #include "scriptmgr.h"
 #include "ms/clglobal.h"
 #include "ms/mslogger.h"
+#include "vgui2/ms_vgui2.h"
 #include <mathlib.h>
 
 extern "C"
@@ -1144,6 +1145,7 @@ void CL_UnloadParticleMan();
 void DLLEXPORT HUD_Shutdown(void)
 {
 	MS_INFO("[HUD_Shutdown: Enter]");
+	MSVGUI2::Shutdown();
 	ScriptMgr::GameShutdown();
 	gClient.Shutdown();
 	CL_UnloadParticleMan();

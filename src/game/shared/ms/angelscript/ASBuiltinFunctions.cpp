@@ -38,7 +38,7 @@
 #endif
 #include <cmath>
 #include <map>
-#include "vector.h"
+#include "mathlib/vector.h"
 #include "mslogger.h"
 #include "sharedutil.h"
 #include "ASEngineEventManager.h"

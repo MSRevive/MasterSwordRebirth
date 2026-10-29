@@ -53,6 +53,7 @@ target_link_libraries(client PRIVATE
 	fmod
 	discord
 	steam_api
+	${SOURCE_SDK_LIBS}
 	${OPENGL_LIBRARIES})
 
 target_include_directories(client PRIVATE
@@ -76,7 +77,9 @@ target_include_directories(client PRIVATE
 	ms
 	ui
 	ui/ms
-	${OPENGL_INCLUDE_DIR})
+	${OPENGL_INCLUDE_DIR}
+	${BASEDIR}/source_sdk/common
+	${BASEDIR}/source_sdk/public)
 
 target_compile_definitions(client PRIVATE
 	ISCLIENT
@@ -84,7 +87,8 @@ target_compile_definitions(client PRIVATE
 	CLIENT_WEAPONS
 	DISCORD_DYNAMIC_LIB
 	VERSION_SAFE_STEAM_API_INTERFACES
-	USE_BREAKPAD_HANDLER)
+	USE_BREAKPAD_HANDLER
+	${SOURCE_SDK_DEFINES})
 
 # Check if spdlog is available
 if(EXISTS "${BASEDIR}/thirdparty/spdlog/include/spdlog/spdlog.h")
@@ -125,9 +129,6 @@ set(SDK
 	"exports.h"
 	"../../public/archtypes.h"
 	"../../public/cl_dll/IGameClientExports.h"
-	"../../public/FileSystem.h"
-	"../../public/interface.cpp"
-	"../../public/interface.h"
 	"../../public/keydefs.h"
 	"../../public/steam/steamtypes.h"
 )
@@ -476,7 +477,6 @@ set(VGUI_MS
 	"ui/ms/vgui_quickslot.h"
 	"ui/ms/vgui_spawn.cpp"
 	"ui/ms/vgui_spawn.h"
-	"ui/ms/vgui_startsaytext.h"
 	"ui/ms/vgui_stats.cpp"
 	"ui/ms/vgui_stats.h"
 	"ui/ms/vgui_storage.cpp"
@@ -494,6 +494,19 @@ set(VGUI_MS
 	"ui/ms/vgui_image3d.cpp"
 )
 source_group("VGUI\\ms" FILES ${VGUI_MS})
+
+set(VGUI2
+	"vgui2/ClientVGUI.cpp"
+	"vgui2/ClientVGUI.h"
+	"vgui2/ClientViewport.cpp"
+	"vgui2/ClientViewport.h"
+	"vgui2/IViewportPanel.h"
+	"vgui2/ms_vgui2.cpp"
+	"vgui2/ms_vgui2.h"
+	"vgui2/ui/ChatPanel.cpp"
+	"vgui2/ui/ChatPanel.h"
+)
+source_group("VGUI2" FILES ${VGUI2})
 
 set(ALL_FILES
 	${Common}
@@ -514,6 +527,7 @@ set(ALL_FILES
 	${ThirdParty_AngelScript}
 	${VGUI}
 	${VGUI_MS}
+	${VGUI2}
 )
 
 target_sources(client PRIVATE ${ALL_FILES})

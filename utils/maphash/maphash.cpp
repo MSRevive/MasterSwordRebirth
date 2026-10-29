@@ -6,7 +6,6 @@
 #include <vector>
 #include <windows.h>
 
-#include "stream_safe.h"
 #include "crc/crchash.h"
 #include "rapidjson/document.h"
 #include "rapidjson/filewritestream.h"

@@ -26,17 +26,18 @@
 #include "clientlibrary.h"
 #include "movement/pm_shared.h"
 #ifdef _WIN32
-#include <windows.h>
+#include <PlatformWin.h>
 #endif
 #include <com_model.h>
 #include <mathlib.h>
 
 #include <string.h>
 #include "vgui_int.h"
-#include "interface.h"
+#include "tier1/interface.h"
 #include "voice_status.h"
 #include "ms/clglobal.h"
 #include "mslogger.h"
+#include "vgui2/ms_vgui2.h"
 
 // AngelScript includes
 #include "ms/angelscript/CAngelScriptManager.h"
@@ -304,6 +305,7 @@ int DLLEXPORT HUD_VidInit(void)
 	gClient.VideoInit();
 
 	VGui_Startup();
+	MSVGUI2::VidInit();
 
 	//we place this here because this gets called every map change.
 	if (g_pParticleMan)
@@ -593,3 +595,74 @@ void CL_LoadParticleMan()
 		//gEngfuncs.pfnAddCommand("test_particles", &TestParticlesCmd);
 	}
 }
+
+static void* CreateClientVGUI()
+{
+	return MSVGUI2::GetClientVGUIInterface();
+}
+
+static InterfaceReg g_ClientVGUIReg(CreateClientVGUI, "VClientVGUI001");
+
+extern "C" DLLEXPORT void* ClientFactory()
+{
+	return (void*)Sys_GetFactoryThis();
+}
+
+//cldll_func_dst_t* g_pcldstAddrs;
+//
+//extern "C" void CL_DLLEXPORT F(void* pv)
+//{
+//	cldll_func_t* pcldll_func = (cldll_func_t*)pv;
+//
+//	// Hack!
+//	g_pcldstAddrs = ((cldll_func_dst_t*)pcldll_func->pHudVidInitFunc);
+//
+//	cldll_func_t cldll_func =
+//	{
+//		Initialize,
+//		HUD_Init,
+//		HUD_VidInit,
+//		HUD_Redraw,
+//		HUD_UpdateClientData,
+//		HUD_Reset,
+//		HUD_PlayerMove,
+//		HUD_PlayerMoveInit,
+//		HUD_PlayerMoveTexture,
+//		IN_ActivateMouse,
+//		IN_DeactivateMouse,
+//		IN_MouseEvent,
+//		IN_ClearStates,
+//		IN_Accumulate,
+//		CL_CreateMove,
+//		CL_IsThirdPerson,
+//		CL_CameraOffset,
+//		KB_Find,
+//		CAM_Think,
+//		V_CalcRefdef,
+//		HUD_AddEntity,
+//		HUD_CreateEntities,
+//		HUD_DrawNormalTriangles,
+//		HUD_DrawTransparentTriangles,
+//		HUD_StudioEvent,
+//		HUD_PostRunCmd,
+//		HUD_Shutdown,
+//		HUD_TxferLocalOverrides,
+//		HUD_ProcessPlayerState,
+//		HUD_TxferPredictionData,
+//		Demo_ReadBuffer,
+//		HUD_ConnectionlessPacket,
+//		HUD_GetHullBounds,
+//		HUD_Frame,
+//		HUD_Key_Event,
+//		HUD_TempEntUpdate,
+//		HUD_GetUserEntity,
+//		HUD_VoiceStatus,
+//		HUD_DirectorMessage,
+//		HUD_GetStudioModelInterface,
+//		HUD_ChatInputPosition,
+//		HUD_GetPlayerTeam,
+//		ClientFactory,
+//	};
+//
+//	*pcldll_func = cldll_func;
+//}

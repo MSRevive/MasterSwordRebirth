@@ -38,7 +38,6 @@ set(ANGELSCRIPT_COMMON_SOURCES
     ../scriptmgr.cpp
     ../script.cpp
     ../findentities.cpp
-    ../../../../common/interface.cpp
 )
 
 # Platform-specific settings for original test
