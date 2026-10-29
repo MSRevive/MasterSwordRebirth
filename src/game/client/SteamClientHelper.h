@@ -1,9 +1,6 @@
 #ifndef MS_STEAM_CLIENT_HELPER_H
 #define MS_STEAM_CLIENT_HELPER_H
 
-#if !defined(_WIN32) && !defined(__cdecl)
-#define __cdecl
-#endif
 #include <steam/steam_api.h>
 
 class CSteamClientHelper

@@ -1,10 +1,6 @@
 #ifndef STACKSTRING_H
 #define STACKSTRING_H
 
-#ifndef _WIN32
-extern "C" char *strlwr(char *str);
-#endif
-
 #include <cstring>
 #include <string.h>
 #include <string>

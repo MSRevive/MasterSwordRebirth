@@ -49,10 +49,6 @@ void Print(const char *szFmt, ...);
 #define FloatToString( a ) UTIL_VarArgs( "%.2f", a )
 #define IntToString( a ) UTIL_VarArgs( "%i", a )
 
-#ifndef _WIN32
-	extern "C" char* strlwr( char* str );
-#endif
-
 #include "stackstring.h"
 #include "msdebug.h"
 

@@ -190,17 +190,6 @@ int numofdigits(int x)
 	return idigits;
 }
 
-#ifndef _WIN32
-extern "C" char *strlwr(char *str)
-{
-	char *orig = str;
-	// process the string
-	for (; *str != '\0'; str++)
-		*str = tolower(*str);
-	return orig;
-}
-#endif
-
 void ErrorPrint(msstring vsUnqeTag, int vFlags, const char *szFmt, ...)
 {
 	static char	string[1024];
