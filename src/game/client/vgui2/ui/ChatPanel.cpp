@@ -22,13 +22,12 @@
 #include "vgui2/ms_vgui2.h"
 
 // CVARS
-// ms_txthud_decaytime
-// ms_txthud_width
+// ms_chat_decaytime
+// ms_chat_width
+// ms_chat_ypos
 
 // Chat box. Positions and sizes are in 640x480 units and scale with the screen like XRES/YRES.
 #define CHAT_BOX_X					10
-#define CHAT_BOX_BOTTOM_Y			350	// Bottom edge, the box grows upwards from here like the old chat
-#define CHAT_BOX_WIDTH				280
 #define CHAT_BOX_HEIGHT				120
 #define CHAT_BOX_INSET				4
 #define CHAT_INPUT_MARGIN_TOP		0.5f	// In text lines, between the history and the input
@@ -399,11 +398,14 @@ void CChat::Think()
 void CChat::Layout()
 {
 	int iLineTall = m_pHistory->GetFontTall() + 2;
+	MSVGUI2::IHost *pHost = MSVGUI2::GetHost();
+	int iWidth = pHost->GetCvarFloat("ms_chat_width");
+	int iYPos = pHost->GetCvarFloat("ms_chat_ypos");
 
 	int iX = ScaleX(CHAT_BOX_X + CHAT_BOX_INSET);
-	int iY = ScaleY(CHAT_BOX_BOTTOM_Y - CHAT_BOX_HEIGHT + CHAT_BOX_INSET);
-	int iWide = ScaleX(CHAT_BOX_WIDTH - CHAT_BOX_INSET * 2);
-	int iBottom = ScaleY(CHAT_BOX_BOTTOM_Y);
+	int iY = ScaleY(iYPos - CHAT_BOX_HEIGHT + CHAT_BOX_INSET);
+	int iWide = ScaleX(iWidth - CHAT_BOX_INSET * 2);
+	int iBottom = ScaleY(iYPos);
 
 	int iInputY = iBottom - (int)(iLineTall * (1.0f + CHAT_INPUT_MARGIN_BOTTOM));
 	int iHistoryBottom = iInputY - (int)(iLineTall * CHAT_INPUT_MARGIN_TOP);
