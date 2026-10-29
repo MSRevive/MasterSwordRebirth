@@ -105,6 +105,11 @@ public:
 	{
 		return ::ShowHUD();
 	}
+
+	bool IsMenuOpen() override
+	{
+		return gViewPort && gViewPort->m_pCurrentMenu;
+	}
 };
 
 static CVGUI2Host g_VGUI2Host;

@@ -10,6 +10,7 @@ namespace MSVGUI2
 		virtual void SendChat(int Type, const char *Utf8Text) = 0;
 		virtual float GetCvarFloat(const char *Name) = 0;
 		virtual bool ShowHUD() = 0;
+		virtual bool IsMenuOpen() = 0;
 	};
 
 	void SetHost(IHost *pHost);

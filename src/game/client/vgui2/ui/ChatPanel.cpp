@@ -376,7 +376,8 @@ void CChat::Think()
 {
 	MSVGUI2::IHost *pHost = MSVGUI2::GetHost();
 	bool bExpired = !m_bOpen && vgui2::system()->GetCurrentTime() >= m_flHideTime;
-	bool bShow = pHost && pHost->ShowHUD() && (m_bOpen || (m_bHasText && !bExpired));
+	bool bMenu = pHost && pHost->IsMenuOpen();
+	bool bShow = pHost && pHost->ShowHUD() && (m_bOpen || (!bMenu && m_bHasText && !bExpired));
 
 	if (bExpired && m_bHeld)
 		ReleaseHistory(0.0f);
