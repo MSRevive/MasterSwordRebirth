@@ -11,6 +11,17 @@ CSteamClientHelper* steamhelper = &s_SteamHelper;
 
 static bool g_bTryLoadSteamAPI = false;
 
+// tier2/steam_api.cpp is not built (SOURCE_SDK_NO_STEAM)
+bool SteamAPI_IsAvailable()
+{
+	return true;
+}
+
+ISteamClient017* SteamClient017()
+{
+	return nullptr;
+}
+
 CSteamClientHelper::CSteamClientHelper() :
 	m_CallbackUserStatsReceived(this, &CSteamClientHelper::OnUserStatsReceived),
 	m_CallbackUserStatsStored(this, &CSteamClientHelper::OnUserStatsStored),

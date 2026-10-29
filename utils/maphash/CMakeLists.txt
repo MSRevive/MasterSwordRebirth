@@ -14,6 +14,7 @@ target_include_directories(maphash PRIVATE
 	${BASEDIR}/../src/game/shared/ms/crc
 	${BASEDIR}/../src/public
 	${BASEDIR}/../src/public/engine
+	${BASEDIR}/../source_sdk/public
 	${BASEDIR}/../thirdparty
 	${CMAKE_CURRENT_SOURCE_DIR})
 

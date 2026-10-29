@@ -16,19 +16,19 @@ target_include_directories(vgui INTERFACE ${BASEDIR}/lib/include/vgui)
 target_include_directories(SDL2 INTERFACE ${BASEDIR}/lib/include/SDL2)
 target_include_directories(fmod INTERFACE ${BASEDIR}/lib/include/fmod)
 target_include_directories(discord INTERFACE ${BASEDIR}/lib/include/discord)
-target_include_directories(steam_api INTERFACE ${BASEDIR}/src/public/steam)
+target_include_directories(steam_api INTERFACE ${BASEDIR}/source_sdk/public/steam)
 
 if (WIN32)
 	set_target_properties(vgui PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/vgui/vgui.lib")
 	set_target_properties(SDL2 PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/SDL2/SDL2.lib")
 	set_target_properties(fmod PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/fmod/fmod_vc.lib")
 	set_target_properties(discord PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/discord/discord-rpc.lib")
-	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/lib/steamapi/steam_api.lib")
+	set_target_properties(steam_api PROPERTIES IMPORTED_IMPLIB "${BASEDIR}/source_sdk/lib/public/steam_api.lib")
 else()
 	set_target_properties(SDL2 PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/SDL2/libSDL2.so")
 	set_target_properties(fmod PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/fmod/libfmod.so")
 	set_target_properties(discord PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/discord/libdiscord-rpc.a")
-	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/lib/steamapi/libsteam_api.so")
+	set_target_properties(steam_api PROPERTIES IMPORTED_LOCATION "${BASEDIR}/source_sdk/lib/public/libsteam_api.so")
 endif()
 
 add_library(client SHARED)
@@ -130,7 +130,7 @@ set(SDK
 	"../../public/archtypes.h"
 	"../../public/cl_dll/IGameClientExports.h"
 	"../../public/keydefs.h"
-	"../../public/steam/steamtypes.h"
+	"${BASEDIR}/source_sdk/public/steam/steamtypes.h"
 )
 source_group("SDK" FILES ${SDK})
 
