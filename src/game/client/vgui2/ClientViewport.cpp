@@ -3,8 +3,8 @@
 #include <vgui/IPanel.h>
 #include <vgui_controls/Controls.h>
 
-#include "CClientViewport.h"
-#include "chat/CChatPanel.h"
+#include "ClientViewport.h"
+#include "ui/ChatPanel.h"
 
 CClientViewport *g_pViewport = nullptr;
 

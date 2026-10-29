@@ -496,15 +496,15 @@ set(VGUI_MS
 source_group("VGUI\\ms" FILES ${VGUI_MS})
 
 set(VGUI2
-	"vgui2/CClientVGUI.cpp"
-	"vgui2/CClientVGUI.h"
-	"vgui2/CClientViewport.cpp"
-	"vgui2/CClientViewport.h"
+	"vgui2/ClientVGUI.cpp"
+	"vgui2/ClientVGUI.h"
+	"vgui2/ClientViewport.cpp"
+	"vgui2/ClientViewport.h"
 	"vgui2/IViewportPanel.h"
 	"vgui2/ms_vgui2.cpp"
 	"vgui2/ms_vgui2.h"
-	"vgui2/chat/CChatPanel.cpp"
-	"vgui2/chat/CChatPanel.h"
+	"vgui2/ui/ChatPanel.cpp"
+	"vgui2/ui/ChatPanel.h"
 )
 source_group("VGUI2" FILES ${VGUI2})
 

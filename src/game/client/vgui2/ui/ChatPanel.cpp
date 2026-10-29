@@ -18,7 +18,7 @@
 #include <vgui_controls/ScrollBar.h>
 #include <vgui_controls/ScrollBarSlider.h>
 
-#include "CChatPanel.h"
+#include "ChatPanel.h"
 #include "vgui2/ms_vgui2.h"
 
 // CVARS
@@ -59,7 +59,7 @@
 
 // In seconds
 #define CHAT_FADE_TIME				0.25f	// Background fade on open and close
-#define CHAT_LINE_FADE_TIME			2.5f	// Each line fades out over this after ms_txthud_decaytime
+#define CHAT_LINE_FADE_TIME			2.5f	// Each line fades out over this after
 
 namespace
 {

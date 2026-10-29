@@ -1,6 +1,6 @@
 #include "ms_vgui2.h"
-#include "CClientViewport.h"
-#include "chat/CChatPanel.h"
+#include "ClientViewport.h"
+#include "ui/ChatPanel.h"
 
 static MSVGUI2::IHost *s_pHost = nullptr;
 

@@ -10,8 +10,8 @@
 #include <vgui/IScheme.h>
 #include <vgui_controls/Controls.h>
 
-#include "CClientVGUI.h"
-#include "CClientViewport.h"
+#include "ClientVGUI.h"
+#include "ClientViewport.h"
 #include "ms_vgui2.h"
 
 static vgui2::HScheme s_hClientScheme = 0;
