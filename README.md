@@ -11,11 +11,11 @@ The continuation of Master Sword Continued, a total HL1 conversion mod.
 
 Currently the project relies on C++20.
 
-## Compiling For Linux
+### Compiling For Linux
 * `sudo dpkg --add-architecture i386`
 * `sudo add-apt-repository ppa:ubuntu-toolchain-r/test`
 * `sudo apt update`
-* `sudo apt install -y g++-11-multilib libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 gcc-multilib g++-multilib`
+* `sudo apt install -y libgcc-s1:i386 libstdc++6:i386 libgl1-mesa-dev:i386 pkg-config gcc-multilib g++-multilib`
 * `./build-linux.sh`
 
 ## Thanks
@@ -25,6 +25,7 @@ Currently the project relies on C++20.
 * https://github.com/tmp64/hl1_source_sdk - source_sdk
 * https://github.com/twhl-community/halflife-unified-sdk - Organization and CMake reference.
 
+* Solokiller for answering some questions and his contributions to MSC in the past.
 * All of our contributors for assets and everything else related to this project.
 
 ## Contributing
