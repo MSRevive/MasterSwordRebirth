@@ -18,5 +18,5 @@ while getopts "p:t:" opt; do
 	esac
 done
 
-cmake -S . -B $path/build -DCMAKE_BUILD_TYPE=$type -DCMAKE_TOOLCHAIN_FILE=$path/cmake/LinuxToolchain.cmake --fresh
-cmake -S utils -B $path/utils/build -DCMAKE_BUILD_TYPE=$type -DCMAKE_TOOLCHAIN_FILE=$path/cmake/LinuxToolchain.cmake --fresh
+cmake -S . -B $path/build -DCMAKE_BUILD_TYPE=$type --fresh
+cmake -S utils -B $path/utils/build -DCMAKE_BUILD_TYPE=$type --fresh
